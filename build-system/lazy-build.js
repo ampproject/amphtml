@@ -17,8 +17,8 @@ const {
   doBuildExtension,
   maybeInitializeExtensions,
 } = require('./tasks/extension-helpers');
-const {doBuildRuntimeTarget} = require('./tasks/helpers');
-const {runtimeBundles} = require('../bundles.config');
+const {doBuildJs} = require('./tasks/helpers');
+const {jsBundles} = require('../bundles.config');
 
 const extensions = {};
 maybeInitializeExtensions(extensions, /* includeLatest */ true);
@@ -38,14 +38,14 @@ exports.lazyBuildExtensions = function(req, res, next) {
   next();
 };
 
-exports.lazyBuildRuntimeTargets = function(req, res, next) {
-  const jsTargetUrlMatcher = /\/.*\/([^\/]*\.js)/;
-  const jsTargetMatch = req.url.match(jsTargetUrlMatcher);
-  if (jsTargetMatch && jsTargetMatch.length == 2) {
-    const jsTarget = jsTargetMatch[1];
-    if (runtimeBundles[jsTarget] && !runtimeBundles[jsTarget].watched) {
-      return doBuildRuntimeTarget(jsTarget, {watch: true}).then(() => {
-        runtimeBundles[jsTarget].watched = true;
+exports.lazyBuildJs = function(req, res, next) {
+  const jsUrlMatcher = /\/.*\/([^\/]*\.js)/;
+  const jsMatch = req.url.match(jsUrlMatcher);
+  if (jsMatch && jsMatch.length == 2) {
+    const jsBundle = jsMatch[1];
+    if (jsBundles[jsBundle] && !jsBundles[jsBundle].watched) {
+      return doBuildJs(jsBundle, {watch: true}).then(() => {
+        jsBundles[jsBundle].watched = true;
         next();
       });
     }

@@ -18,7 +18,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
-  compileUnminifiedRuntimeTargets,
+  compileAllUnminifiedJs,
   compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
@@ -61,7 +61,7 @@ async function build() {
 function printDefaultTaskHelp() {
   log(green('Running the default ') + cyan('gulp ') + green('task.'));
   const defaultTaskMessage =
-    green('⤷ Runtime targets and extensions will be ') +
+    green('⤷ JS and extensions will be ') +
     green(
       argv.lazy_build
         ? 'lazily built when requested from the server.'
@@ -72,7 +72,7 @@ function printDefaultTaskHelp() {
     const lazyBuildMessage =
       green('⤷ Use ') +
       cyan('--lazy_build ') +
-      green('to lazily build runtime targets and extensions ') +
+      green('to lazily build JS and extensions ') +
       green('when requested from the server.');
     log(lazyBuildMessage);
   }
@@ -100,7 +100,7 @@ async function performBuild(watch, defaultTask) {
     compileCoreRuntime(watch),
   ]);
   if (!defaultTask) {
-    await compileUnminifiedRuntimeTargets(watch);
+    await compileAllUnminifiedJs(watch);
     await buildExtensions({watch});
   }
   if (isTravisBuild()) {
@@ -117,14 +117,10 @@ async function defaultTask() {
   serve(argv.lazy_build);
   log(green('Started ') + cyan('gulp ') + green('server. '));
   if (argv.lazy_build) {
-    log(
-      green(
-        'Runtime targets and extensions will be lazily built when requested...'
-      )
-    );
+    log(green('JS and extensions will be lazily built when requested...'));
   } else {
-    log(green('Building runtime targets and extensions...'));
-    await compileUnminifiedRuntimeTargets(watch);
+    log(green('Building JS and extensions...'));
+    await compileAllUnminifiedJs(watch);
     await buildExtensions({watch: true});
   }
 }
@@ -157,7 +153,7 @@ watch.flags = {
 defaultTask.description = 'Runs "watch" and then "serve"';
 defaultTask.flags = {
   lazy_build:
-    '  Lazily builds runtime targets and extensions when they are requested from the server',
+    '  Lazily builds JS and extensions when they are requested from the server',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:

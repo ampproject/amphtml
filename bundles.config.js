@@ -33,9 +33,9 @@ const TYPES = (exports.TYPES = {
 });
 
 /**
- * Used to generate top-level runtime build targets
+ * Used to generate top-level JS build targets
  */
-exports.runtimeBundles = {
+exports.jsBundles = {
   'polyfills.js': {
     srcDir: './src/',
     srcFilename: 'polyfills.js',
@@ -1120,7 +1120,7 @@ exports.aliasBundles = [
 ];
 
 /**
- * Used to generate alternative runtime build targets
+ * Used to generate alternative JS build targets
  */
 exports.altMainBundles = [
   {

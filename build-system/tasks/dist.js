@@ -22,9 +22,9 @@ const gulp = require('gulp');
 const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
+  compileAllMinifiedJs,
   compileCoreRuntime,
   compileJs,
-  compileMinifiedRuntimeTargets,
   endBuildStep,
   hostname,
   mkdirSync,
@@ -142,7 +142,7 @@ async function dist() {
   }
 
   await Promise.all([
-    compileMinifiedRuntimeTargets(),
+    compileAllMinifiedJs(),
     bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true),
     buildExtensions({minify: true, watch: false}),
     buildExperiments({minify: true, watch: false}),

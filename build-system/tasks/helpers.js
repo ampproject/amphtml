@@ -32,7 +32,7 @@ const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const watchify = require('watchify');
 const wrappers = require('../compile-wrappers');
-const {altMainBundles, runtimeBundles} = require('../../bundles.config');
+const {altMainBundles, jsBundles} = require('../../bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../travis');
@@ -108,26 +108,26 @@ const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
- * Compile runtime targets in minified mode and drop them in dist/.
+ * Compile JS in minified mode and drop them in dist/.
  * @return {!Promise}
  */
-function compileMinifiedRuntimeTargets() {
+function compileAllMinifiedJs() {
   if (isTravisBuild()) {
-    log('Minifying multi-pass runtime targets with', cyan('closure-compiler'));
+    log('Minifying multi-pass JS with', cyan('closure-compiler'));
   }
-  return compileRuntimeTargets(/* watch */ false, /* minify */ true);
+  return compileAllJs(/* watch */ false, /* minify */ true);
 }
 
 /**
- * Compile runtime targets in unminified mode and drop them in dist/.
+ * Compile JS in unminified mode and drop them in dist/.
  * @param {boolean} watch
  * @return {!Promise}
  */
-function compileUnminifiedRuntimeTargets(watch) {
+function compileAllUnminifiedJs(watch) {
   if (isTravisBuild()) {
-    log('Compiling runtime with', cyan('browserify'));
+    log('Compiling JS with', cyan('browserify'));
   }
-  return compileRuntimeTargets(/* watch */ watch);
+  return compileAllJs(/* watch */ watch);
 }
 
 /**
@@ -135,8 +135,8 @@ function compileUnminifiedRuntimeTargets(watch) {
  * @param {?Object} extraOptions
  * @return {!Promise}
  */
-function doBuildRuntimeTarget(name, extraOptions) {
-  const target = runtimeBundles[name];
+function doBuildJs(name, extraOptions) {
+  const target = jsBundles[name];
   if (target) {
     return compileJs(
       target.srcDir,
@@ -145,11 +145,7 @@ function doBuildRuntimeTarget(name, extraOptions) {
       Object.assign({}, target.options, extraOptions)
     );
   } else {
-    return Promise.reject(
-      red('Error:'),
-      'Could not find runtime target',
-      cyan(name)
-    );
+    return Promise.reject(red('Error:'), 'Could not find', cyan(name));
   }
 }
 
@@ -198,26 +194,26 @@ function compileCoreRuntime(watch, minify) {
 
 /**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
- * targets and drop them in the dist folder
+ * and drop them in the dist folder
  * @param {boolean} watch
  * @param {boolean} minify
  * @return {!Promise}
  */
-function compileRuntimeTargets(watch, minify) {
+function compileAllJs(watch, minify) {
   return Promise.all([
-    minify ? Promise.resolve() : doBuildRuntimeTarget('polyfills.js', {watch}),
-    doBuildRuntimeTarget('alp.max.js', {watch, minify}),
-    doBuildRuntimeTarget('examiner.max.js', {watch, minify}),
-    doBuildRuntimeTarget('ww.max.js', {watch, minify}),
-    doBuildRuntimeTarget('integration.js', {watch, minify}),
-    doBuildRuntimeTarget('ampcontext-lib.js', {watch, minify}),
-    doBuildRuntimeTarget('iframe-transport-client-lib.js', {watch, minify}),
-    doBuildRuntimeTarget('recaptcha.js', {watch, minify}),
-    doBuildRuntimeTarget('amp-viewer-host.max.js', {watch, minify}),
-    doBuildRuntimeTarget('video-iframe-integration.js', {watch, minify}),
-    doBuildRuntimeTarget('amp-inabox-host.js', {watch, minify}),
-    doBuildRuntimeTarget('amp-shadow.js', {watch, minify}),
-    doBuildRuntimeTarget('amp-inabox.js', {watch, minify}),
+    minify ? Promise.resolve() : doBuildJs('polyfills.js', {watch}),
+    doBuildJs('alp.max.js', {watch, minify}),
+    doBuildJs('examiner.max.js', {watch, minify}),
+    doBuildJs('ww.max.js', {watch, minify}),
+    doBuildJs('integration.js', {watch, minify}),
+    doBuildJs('ampcontext-lib.js', {watch, minify}),
+    doBuildJs('iframe-transport-client-lib.js', {watch, minify}),
+    doBuildJs('recaptcha.js', {watch, minify}),
+    doBuildJs('amp-viewer-host.max.js', {watch, minify}),
+    doBuildJs('video-iframe-integration.js', {watch, minify}),
+    doBuildJs('amp-inabox-host.js', {watch, minify}),
+    doBuildJs('amp-shadow.js', {watch, minify}),
+    doBuildJs('amp-inabox.js', {watch, minify}),
   ]);
 }
 
@@ -674,13 +670,13 @@ module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
   BABELIFY_PLUGINS,
   bootstrapThirdPartyFrames,
-  compileMinifiedRuntimeTargets,
-  compileUnminifiedRuntimeTargets,
+  compileAllMinifiedJs,
+  compileAllUnminifiedJs,
   compileCoreRuntime,
   compileJs,
   compileTs,
   devDependencies,
-  doBuildRuntimeTarget,
+  doBuildJs,
   enableLocalTesting,
   endBuildStep,
   hostname,
