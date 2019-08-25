@@ -690,10 +690,7 @@ function cleanupWeakModuleFiles() {
 
 function compile(flagsArray) {
   if (isTravisBuild()) {
-    log(
-      'Minifying single-pass runtime targets with',
-      colors.cyan('closure-compiler')
-    );
+    log('Minifying single-pass JS with', colors.cyan('closure-compiler'));
   }
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
