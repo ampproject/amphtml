@@ -28,12 +28,10 @@ import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
-import {
-  installOwnersServiceForDoc,
-  installResourcesServiceForDoc,
-} from './resources-impl';
+import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installPlatformService} from './platform-impl';
+import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
 import {installTemplatesService} from './template-impl';
