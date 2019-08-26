@@ -131,11 +131,12 @@ function compileAllUnminifiedJs(watch) {
 }
 
 /**
+ * @param {!Object} jsBundles
  * @param {string} name
  * @param {?Object} extraOptions
  * @return {!Promise}
  */
-function doBuildJs(name, extraOptions) {
+function doBuildJs(jsBundles, name, extraOptions) {
   const target = jsBundles[name];
   if (target) {
     return compileJs(
@@ -201,19 +202,19 @@ function compileCoreRuntime(watch, minify) {
  */
 function compileAllJs(watch, minify) {
   return Promise.all([
-    minify ? Promise.resolve() : doBuildJs('polyfills.js', {watch}),
-    doBuildJs('alp.max.js', {watch, minify}),
-    doBuildJs('examiner.max.js', {watch, minify}),
-    doBuildJs('ww.max.js', {watch, minify}),
-    doBuildJs('integration.js', {watch, minify}),
-    doBuildJs('ampcontext-lib.js', {watch, minify}),
-    doBuildJs('iframe-transport-client-lib.js', {watch, minify}),
-    doBuildJs('recaptcha.js', {watch, minify}),
-    doBuildJs('amp-viewer-host.max.js', {watch, minify}),
-    doBuildJs('video-iframe-integration.js', {watch, minify}),
-    doBuildJs('amp-inabox-host.js', {watch, minify}),
-    doBuildJs('amp-shadow.js', {watch, minify}),
-    doBuildJs('amp-inabox.js', {watch, minify}),
+    minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
+    doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'examiner.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'ww.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'integration.js', {watch, minify}),
+    doBuildJs(jsBundles, 'ampcontext-lib.js', {watch, minify}),
+    doBuildJs(jsBundles, 'iframe-transport-client-lib.js', {watch, minify}),
+    doBuildJs(jsBundles, 'recaptcha.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-viewer-host.max.js', {watch, minify}),
+    doBuildJs(jsBundles, 'video-iframe-integration.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
   ]);
 }
 
