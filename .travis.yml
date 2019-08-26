@@ -34,7 +34,6 @@ addons:
       - expect
     casks:
       - google-cloud-sdk
-    update: true
   chrome: stable
   firefox: latest # for osx
   hosts:
@@ -96,6 +95,7 @@ jobs:
       name: 'End to End Tests - Safari'
       before_install: sudo safaridriver --enable
       os: osx
+      osx_image: xcode10.2
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js --browsers=safari
     - stage: experiment
