@@ -748,16 +748,16 @@
   </amp-ad>
 
   <h2>AppNexus with JSON based configuration multi ad</h2>
-  <amp-ad width="300" height="250"
-      type="appnexus"
-      data-target="apn_ad_1"
+  <amp-ad width="728" height="90" type="appnexus" data-target="apn_ad_2"
+      json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
+  </amp-ad>
+  <!-- There could be no creative rendered for this tag, this is to test the behaviour when there are no bids for a tag -->
+  <amp-ad width="300" height="250" type="appnexus" data-target="apn_ad_1"
       json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
   </amp-ad>
 
-  <amp-ad width="728" height="90"
-      type="appnexus"
-      data-target="apn_ad_2"
-      json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
+  <amp-ad width="728" height="90" type="appnexus" data-target="apn_ad_3"
+      json='{"adUnits": [{"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_3"}]}'>
   </amp-ad>
 
   <h2>AppVador</h2>
