@@ -150,7 +150,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
   it('should perform media operations when state becomes active', done => {
     sandbox
-      .stub(page.resources_, 'getResourceForElement')
+      .stub(page.owners_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
@@ -209,7 +209,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       let mediaPoolMock;
 
       sandbox
-        .stub(page.resources_, 'getResourceForElement')
+        .stub(page.owners_, 'getResourceForElement')
         .returns({isDisplayed: () => true});
 
       page.buildCallback();
@@ -276,7 +276,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
   it('should pause/rewind media when state becomes not active', done => {
     sandbox
-      .stub(page.resources_, 'getResourceForElement')
+      .stub(page.owners_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
 
     const videoEl = win.document.createElement('video');
@@ -321,7 +321,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
   it('should pause media when state becomes paused', done => {
     sandbox
-      .stub(page.resources_, 'getResourceForElement')
+      .stub(page.owners_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
@@ -457,7 +457,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
   it('should start tracking media performance when entering the page', () => {
     sandbox
-      .stub(page.resources_, 'getResourceForElement')
+      .stub(page.owners_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = true;
     const startMeasuringStub = sandbox.stub(
@@ -479,7 +479,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
   it('should stop tracking media performance when leaving the page', () => {
     sandbox
-      .stub(page.resources_, 'getResourceForElement')
+      .stub(page.owners_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = true;
     const stopMeasuringStub = sandbox.stub(
@@ -502,7 +502,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
   it('should not start tracking media performance if tracking is off', () => {
     sandbox
-      .stub(page.resources_, 'getResourceForElement')
+      .stub(page.owners_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = false;
     const startMeasuringStub = sandbox.stub(

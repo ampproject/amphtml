@@ -302,7 +302,7 @@ describe('Resources', () => {
       sandbox
         .stub(resources.viewer_, 'getVisibilityState')
         .returns(VisibilityState.PRERENDER);
-      resources.scheduleLayoutOrPreload_(resource, true);
+      resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(0);
     }
   );
@@ -325,7 +325,7 @@ describe('Resources', () => {
     sandbox
       .stub(resources.viewer_, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
-    resources.scheduleLayoutOrPreload_(resource, true);
+    resources.scheduleLayoutOrPreload(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
   });
@@ -348,7 +348,7 @@ describe('Resources', () => {
     sandbox
       .stub(resources.viewer_, 'getVisibilityState')
       .returns(VisibilityState.HIDDEN);
-    resources.scheduleLayoutOrPreload_(resource, true);
+    resources.scheduleLayoutOrPreload(resource, true);
     expect(resources.queue_.getSize()).to.equal(0);
   });
 
@@ -367,7 +367,7 @@ describe('Resources', () => {
         startLayout: () => {},
         applySizesAndMediaQuery: () => {},
       };
-      resources.scheduleLayoutOrPreload_(resource, true);
+      resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(0);
     }
   );
@@ -390,7 +390,7 @@ describe('Resources', () => {
         getTaskId: () => 'resource#L',
         applySizesAndMediaQuery: () => {},
       };
-      resources.scheduleLayoutOrPreload_(resource, true, 0, /* force */ true);
+      resources.scheduleLayoutOrPreload(resource, true, 0, /* force */ true);
       expect(resources.queue_.getSize()).to.equal(1);
       expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.true;
     }
@@ -414,7 +414,7 @@ describe('Resources', () => {
         getTaskId: () => 'resource#L',
         applySizesAndMediaQuery: () => {},
       };
-      resources.scheduleLayoutOrPreload_(resource, true);
+      resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
       expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
     }
@@ -438,7 +438,7 @@ describe('Resources', () => {
         getTaskId: () => 'resource#L',
         applySizesAndMediaQuery: () => {},
       };
-      resources.scheduleLayoutOrPreload_(resource, true);
+      resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(1);
       expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
     }
@@ -766,7 +766,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
-    resources.resources_ = [resource1, resource2];
+    resources.owners_ = [resource1, resource2];
     resources.vsync_ = {
       mutate: callback => callback(),
       measurePromise: callback => Promise.resolve(callback()),
@@ -993,7 +993,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   });
 
   it('should schedule resource for execution', () => {
-    resources.scheduleLayoutOrPreload_(resource1, true);
+    resources.scheduleLayoutOrPreload(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
 
@@ -1005,7 +1005,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   });
 
   it('should record layout schedule time on the resource element', () => {
-    resources.scheduleLayoutOrPreload_(resource1, true);
+    resources.scheduleLayoutOrPreload(resource1, true);
 
     resources.work_();
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
@@ -1013,7 +1013,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   });
 
   it('should not schedule resource execution outside viewport', () => {
-    resources.scheduleLayoutOrPreload_(resource1, true);
+    resources.scheduleLayoutOrPreload(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
 
@@ -1030,7 +1030,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   });
 
   it('should force schedule resource execution outside viewport', () => {
-    resources.scheduleLayoutOrPreload_(resource1, true, 0, /* force */ true);
+    resources.scheduleLayoutOrPreload(resource1, true, 0, /* force */ true);
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
 
@@ -1045,7 +1045,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   });
 
   it('should schedule resource prerender when doc in prerender mode', () => {
-    resources.scheduleLayoutOrPreload_(resource1, true);
+    resources.scheduleLayoutOrPreload(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
 
@@ -1066,7 +1066,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   });
 
   it('should not schedule resource prerender', () => {
-    resources.scheduleLayoutOrPreload_(resource1, true);
+    resources.scheduleLayoutOrPreload(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
 
@@ -1087,7 +1087,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   });
 
   it('should schedule resource execution when doc is hidden', () => {
-    resources.scheduleLayoutOrPreload_(resource1, true);
+    resources.scheduleLayoutOrPreload(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
 
@@ -1524,7 +1524,7 @@ describe('Resources changeSize', () => {
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
-    resources.resources_ = [resource1, resource2];
+    resources.owners_ = [resource1, resource2];
   });
 
   afterEach(() => {
@@ -2914,7 +2914,7 @@ describes.realWin('Resources mutateElement and collapse', {amp: true}, env => {
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
-    resources.resources_ = [resource1, resource2];
+    resources.owners_ = [resource1, resource2];
 
     resource1RequestMeasureStub = sandbox.stub(resource1, 'requestMeasure');
     resource2RequestMeasureStub = sandbox.stub(resource2, 'requestMeasure');

@@ -179,10 +179,7 @@ describes.realWin(
         sandbox.stub(resource, 'isDisplayed').returns(true);
         sandbox.stub(resource, 'isInViewport').returns(true);
         const measureStub = sandbox.stub(resource, 'measure');
-        const scheduleStub = sandbox.stub(
-          resources,
-          'scheduleLayoutOrPreload_'
-        );
+        const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload');
         owners.scheduleLayout(parentElement, element);
         expect(measureStub).to.be.calledOnce;
         expect(scheduleStub).to.be.calledOnce;
@@ -203,10 +200,7 @@ describes.realWin(
         const measureStub = sandbox.stub(resource, 'measure').callsFake(() => {
           resource.state_ = ResourceState.READY_FOR_LAYOUT;
         });
-        const scheduleStub = sandbox.stub(
-          resources,
-          'scheduleLayoutOrPreload_'
-        );
+        const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload');
         owners.scheduleLayout(parentElement, element);
         expect(measureStub).to.not.be.called;
         expect(scheduleStub).to.not.be.called;

@@ -24,6 +24,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   let win, doc;
   let vsync;
   let resources;
+  let owners;
   let requireLayoutSpy;
   let target1, target2;
   let warnStub;
@@ -59,6 +60,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       return Promise.resolve(callback());
     });
     resources = win.__AMP_SERVICES.resources.obj;
+    owners = win.__AMP_SERVICES.owners.obj;
     requireLayoutSpy = sandbox.spy(resources, 'requireLayout');
 
     target1 = doc.createElement('div');
@@ -82,7 +84,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       /* vsync */ null,
-      /* resources */ null
+      /* owners */ null
     );
     sandbox.stub(builder, 'requireLayout');
     const scanner = builder.createScanner_([]);
@@ -796,7 +798,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       vsync,
-      /* resources */ null
+      /* owners */ null
     );
     const cssContext = builder.css_;
     expect(cssContext.supports('supported: 0')).to.be.false;
@@ -975,7 +977,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       vsync,
-      /* resources */ null
+      /* owners */ null
     );
     sandbox.stub(builder, 'requireLayout');
     const spec = {target: target1, delay: 101, keyframes: {}};
@@ -1010,7 +1012,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       animation2.id = 'animation2';
       doc.body.appendChild(animation2);
 
-      builder = new Builder(win, doc, 'https://acme.org/', vsync, resources);
+      builder = new Builder(win, doc, 'https://acme.org/', vsync, owners);
       sandbox.stub(builder, 'requireLayout');
       scanner = builder.createScanner_([]);
     });
@@ -1255,7 +1257,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         doc,
         'https://acme.org/',
         /* vsync */ null,
-        /* resources */ null
+        /* owners */ null
       );
       css = builder.css_;
       parseSpy = sandbox.spy(css, 'resolveAsNode_');
@@ -1562,7 +1564,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         doc,
         'https://acme.org/',
         vsync,
-        resources
+        owners
       );
       return builder.createRunner(spec);
     }
