@@ -37,8 +37,8 @@ class InaboxViewer {
   }
 
   /** @override */
-  getParam() {
-    return null;
+  getParam(name) {
+    return this.ampdoc_.getParam(name);
   }
 
   /** @override */
