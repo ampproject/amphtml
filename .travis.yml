@@ -29,14 +29,7 @@ addons:
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
-  homebrew:
-    packages:
-      - expect
-    casks:
-      - google-cloud-sdk
-    update: true
   chrome: stable
-  firefox: latest # for osx
   hosts:
     - ads.localhost
     - iframe.localhost
@@ -90,8 +83,6 @@ jobs:
         - ps -ef
     - stage: test
       name: 'End to End Tests'
-      before_install: sudo safaridriver --enable
-      os: osx
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
     - stage: experiment
