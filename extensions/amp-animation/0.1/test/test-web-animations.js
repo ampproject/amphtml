@@ -1559,13 +1559,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     }
 
     function createRunner(spec) {
-      const builder = new Builder(
-        win,
-        doc,
-        'https://acme.org/',
-        vsync,
-        owners
-      );
+      const builder = new Builder(win, doc, 'https://acme.org/', vsync, owners);
       return builder.createRunner(spec);
     }
 
