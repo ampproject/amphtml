@@ -544,6 +544,7 @@ const forbiddenTerms = {
       '3p/integration.js',
       'ads/google/a4a/utils.js',
       'dist.3p/current/integration.js',
+      'src/inabox/inabox-viewer.js',
       'src/service/viewer-impl.js',
       'src/error.js',
       'src/window-interface.js',
