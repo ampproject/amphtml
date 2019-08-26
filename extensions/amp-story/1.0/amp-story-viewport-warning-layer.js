@@ -118,11 +118,6 @@ export class ViewportWarningLayer {
     }
 
     this.overlayEl_ = this.getViewportWarningOverlayTemplate_();
-
-    if (!this.overlayEl_) {
-      return;
-    }
-
     this.localizationService_ = Services.localizationService(this.win_);
 
     this.isBuilt_ = true;
@@ -238,7 +233,7 @@ export class ViewportWarningLayer {
 
   /**
    * Returns the overlay corresponding to the device currently used.
-   * @return {?Element} template
+   * @return {!Element} template
    * @private
    */
   getViewportWarningOverlayTemplate_() {
@@ -250,12 +245,8 @@ export class ViewportWarningLayer {
       return template;
     }
 
-    if (!isExperimentOn(this.win_, 'disable-amp-story-desktop')) {
-      iconEl.classList.add('i-amphtml-desktop-size-icon');
-      return template;
-    }
-
-    return null;
+    iconEl.classList.add('i-amphtml-desktop-size-icon');
+    return template;
   }
 
   /**
