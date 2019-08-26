@@ -29,7 +29,6 @@ describes.endtoend(
       'layers',
       'amp-lightbox-gallery-base-carousel',
     ],
-    browsers: ['chrome', 'firefox'],
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },

@@ -170,7 +170,7 @@ e2e.description = 'Runs e2e tests';
 e2e.flags = {
   'browsers':
     '  Run only the specified browser tests. Options are ' +
-    '`chrome`, `firefox`.',
+    '`chrome`, `firefox`, `safari`.',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',

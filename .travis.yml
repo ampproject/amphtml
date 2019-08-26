@@ -1,9 +1,9 @@
 language: node_js
 dist: xenial
 node_js:
-  - "lts/*"
+  - 'lts/*'
 python:
-  - "2.7"
+  - '2.7'
 notifications:
   email:
     recipients:
@@ -29,7 +29,14 @@ addons:
       - google-cloud-sdk
       - openssl
       - protobuf-compiler
+  homebrew:
+    packages:
+      - expect
+    casks:
+      - google-cloud-sdk
+    update: true
   chrome: stable
+  firefox: latest # for osx
   hosts:
     - ads.localhost
     - iframe.localhost
@@ -47,46 +54,46 @@ stages:
 jobs:
   include:
     - stage: build
-      name: "Build"
+      name: 'Build'
       script:
         - unbuffer node build-system/pr-check/build.js
     - stage: build
-      name: "Checks"
+      name: 'Checks'
       script:
         - unbuffer node build-system/pr-check/checks.js
     - stage: build
-      name: "Validator Tests"
+      name: 'Validator Tests'
       script:
         - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: "Dist, Bundle Size"
+      name: 'Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
     - stage: test
-      name: "Single Pass Tests"
+      name: 'Single Pass Tests'
       script:
         - unbuffer node build-system/pr-check/single-pass-tests.js
     - stage: test
-      name: "Visual Diff Tests"
+      name: 'Visual Diff Tests'
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
     - stage: test
-      name: "Local Tests"
+      name: 'Local Tests'
       script:
         - unbuffer node build-system/pr-check/local-tests.js
     - stage: test
-      name: "Remote (Sauce Labs) Tests"
+      name: 'Remote (Sauce Labs) Tests'
       script:
         - unbuffer node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
         - ps -ef
     - stage: test
-      name: "End to End Tests"
+      name: 'End to End Tests'
+      before_install: sudo safaridriver --enable
+      os: osx
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
-      after_script:
-        - ps -ef
     - stage: experiment
       name: "Experiment A Tests"
       script:
@@ -108,4 +115,5 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
+    - $HOME/Library/Caches/Homebrew
   yarn: true
