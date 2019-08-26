@@ -5,6 +5,7 @@
     "inabox-viewport-friendly",
     "inabox-no-chunking",
     "inabox-resources-lite",
+    "inabox-viewer-lite",
     "inabox-viewport-lite"
   ],
   "allow-url-opt-in": [
