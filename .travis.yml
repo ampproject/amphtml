@@ -110,9 +110,9 @@ jobs:
       name: "Experiment C Tests"
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
-  allow_failures:
-    - os: osx
-  fast_finish: true
+    allow_failures:
+      - os: osx
+    fast_finish: true
   cache:
   directories:
     - node_modules
