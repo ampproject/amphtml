@@ -69,25 +69,28 @@ describes.endtoend(
       await waitForCarouselImg(controller, SLIDE_COUNT - 1);
     });
 
-    it('should snap when scrolling', async function() {
-      this.timeout(testTimeout);
-      const el = await getScrollingElement(controller);
-      const firstSlide = await getSlide(controller, 0);
+    // TODO: unskip #24195
+    it.configure()
+      .skipSingle()
+      .run('should snap when scrolling', async function() {
+        this.timeout(testTimeout);
+        const el = await getScrollingElement(controller);
+        const firstSlide = await getSlide(controller, 0);
 
-      // Wait for the first two slides's imgs to load.
-      await waitForCarouselImg(controller, 0);
-      await waitForCarouselImg(controller, 1);
+        // Wait for the first two slides's imgs to load.
+        await waitForCarouselImg(controller, 0);
+        await waitForCarouselImg(controller, 1);
 
-      const slideWidth = await prop(firstSlide, 'offsetWidth');
-      const scrollLeft = await prop(el, 'scrollLeft');
-      const snappedScrollLeft = scrollLeft + slideWidth;
-      const requestedScrollLeft = snappedScrollLeft + 1;
+        const slideWidth = await prop(firstSlide, 'offsetWidth');
+        const scrollLeft = await prop(el, 'scrollLeft');
+        const snappedScrollLeft = scrollLeft + slideWidth;
+        const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scrollTo(el, {left: requestedScrollLeft});
-      // We should have snapped to the edge of the slide rather than the
-      // requested scroll position.
-      await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-    });
+        await controller.scrollTo(el, {left: requestedScrollLeft});
+        // We should have snapped to the edge of the slide rather than the
+        // requested scroll position.
+        await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
+      });
 
     it('should reset the window after scroll', async function() {
       this.timeout(testTimeout);
@@ -144,25 +147,28 @@ describes.endtoend(
       });
     });
 
+    // TODO: unskip #24195
     describe('looping', function() {
-      it('should show the last slide when looping', async function() {
-        this.timeout(testTimeout);
-        const el = await getScrollingElement(controller);
-        const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
+      it.configure()
+        .skipViewerDemo()
+        .run('should show the last slide when looping', async function() {
+          this.timeout(testTimeout);
+          const el = await getScrollingElement(controller);
+          const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
-        // Wait for the first and last slides to load.
-        await waitForCarouselImg(controller, 0);
-        await waitForCarouselImg(controller, SLIDE_COUNT - 1);
+          // Wait for the first and last slides to load.
+          await waitForCarouselImg(controller, 0);
+          await waitForCarouselImg(controller, SLIDE_COUNT - 1);
 
-        // Scroll to the previous slide by moving left by the last slide's width.
-        const slideWidth = await prop(lastSlide, 'offsetWidth');
-        const restingScrollLeft = await prop(el, 'scrollLeft');
-        const snappedScrollLeft = restingScrollLeft - slideWidth;
-        const requestedScrollLeft = snappedScrollLeft - 1;
-        await controller.scrollTo(el, {left: requestedScrollLeft});
+          // Scroll to the previous slide by moving left by the last slide's width.
+          const slideWidth = await prop(lastSlide, 'offsetWidth');
+          const restingScrollLeft = await prop(el, 'scrollLeft');
+          const snappedScrollLeft = restingScrollLeft - slideWidth;
+          const requestedScrollLeft = snappedScrollLeft - 1;
+          await controller.scrollTo(el, {left: requestedScrollLeft});
 
-        await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-      });
+          await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
+        });
 
       it('should show the first slide when looping', async function() {
         this.timeout(testTimeout);
