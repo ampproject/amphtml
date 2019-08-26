@@ -29,6 +29,7 @@ const {
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
+const {browsers} = require('minimist')(process.argv.slice(2));
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
@@ -39,11 +40,12 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
+  const browsersFlag = `${browsers ? '--browsers=' + browsers : ''}`;
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp e2e --nobuild --headless');
+    timedExecOrDie(`gulp e2e --nobuild --headless ${browsersFlag}`);
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -54,7 +56,7 @@ async function main() {
     ) {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp e2e --nobuild --headless');
+      timedExecOrDie(`gulp e2e --nobuild --headless ${browsersFlag}`);
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
