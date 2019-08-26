@@ -16,6 +16,9 @@
 
 import {collapseFrame, expandFrame} from './frame-overlay-helper';
 
+/** @const */
+const AMP_INABOX_FRAME_OVERLAY_MANAGER = 'ampInaboxFrameOverlayManager';
+
 /**
  * Inabox host manager for full overlay frames.
  */
@@ -99,4 +102,15 @@ export class FrameOverlayManager {
       }
     );
   }
+}
+
+/**
+ * Use an existing frame overlay manager within the window, if any.
+ * @param {!Window} win
+ * @return {!FrameOverlayManager}
+ */
+export function getFrameOverlayManager(win) {
+  win[AMP_INABOX_FRAME_OVERLAY_MANAGER] =
+    win[AMP_INABOX_FRAME_OVERLAY_MANAGER] || new FrameOverlayManager(win);
+  return win[AMP_INABOX_FRAME_OVERLAY_MANAGER];
 }
