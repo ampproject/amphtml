@@ -20,35 +20,42 @@ const {
 const {doBuildJs} = require('./tasks/helpers');
 const {jsBundles} = require('../bundles.config');
 
-const extensions = {};
-maybeInitializeExtensions(extensions, /* includeLatest */ true);
+const extensionBundles = {};
+maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
 
-exports.lazyBuildExtensions = function(req, res, next) {
-  const extensionUrlMatcher = /\/dist\/v0\/([^\/]*)\.max\.js/;
-  const extensionMatch = req.url.match(extensionUrlMatcher);
-  if (extensionMatch && extensionMatch.length == 2) {
-    const extension = extensionMatch[1];
-    if (extensions[extension] && !extensions[extension].watched) {
-      return doBuildExtension(extensions, extension, {watch: true}).then(() => {
-        extensions[extension].watched = true;
-        next();
-      });
+/**
+ * @param {string} url
+ * @param {string} matcher
+ * @param {!Object} bundles
+ * @param {function()} buildFunc
+ * @param {function()} next
+ */
+async function lazyBuild(url, matcher, bundles, buildFunc, next) {
+  const match = url.match(matcher);
+  if (match && match.length == 2) {
+    const bundle = match[1];
+    if (bundles[bundle] && !bundles[bundle].watched) {
+      if (bundles[bundle].pendingBuild) {
+        await bundles[bundle].pendingBuild;
+      } else {
+        bundles[bundle].pendingBuild = buildFunc(bundles, bundle, {
+          watch: true,
+        });
+        await bundles[bundle].pendingBuild;
+        bundles[bundle].pendingBuild = undefined;
+        bundles[bundle].watched = true;
+      }
     }
   }
   next();
+}
+
+exports.lazyBuildExtensions = async function(req, res, next) {
+  const matcher = /\/dist\/v0\/([^\/]*)\.max\.js/;
+  await lazyBuild(req.url, matcher, extensionBundles, doBuildExtension, next);
 };
 
-exports.lazyBuildJs = function(req, res, next) {
-  const jsUrlMatcher = /\/.*\/([^\/]*\.js)/;
-  const jsMatch = req.url.match(jsUrlMatcher);
-  if (jsMatch && jsMatch.length == 2) {
-    const jsBundle = jsMatch[1];
-    if (jsBundles[jsBundle] && !jsBundles[jsBundle].watched) {
-      return doBuildJs(jsBundle, {watch: true}).then(() => {
-        jsBundles[jsBundle].watched = true;
-        next();
-      });
-    }
-  }
-  next();
+exports.lazyBuildJs = async function(req, res, next) {
+  const matcher = /\/.*\/([^\/]*\.js)/;
+  await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
 };
