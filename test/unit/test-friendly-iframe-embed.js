@@ -107,6 +107,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     // Attributes set.
     expect(iframe.style.visibility).to.equal('hidden');
     expect(iframe.getAttribute('referrerpolicy')).to.equal('unsafe-url');
+    expect(iframe.getAttribute('marginheight')).to.equal('0');
+    expect(iframe.getAttribute('marginwidth')).to.equal('0');
 
     // Iframe has been appended to DOM.
     expect(iframe.parentElement).to.equal(document.body);

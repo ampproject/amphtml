@@ -159,6 +159,8 @@ export function installFriendlyIframeEmbed(
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
+  iframe.setAttribute('marginheight', '0');
+  iframe.setAttribute('marginwidth', '0');
 
   // Pre-load extensions.
   if (spec.extensionIds) {
