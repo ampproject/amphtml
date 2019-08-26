@@ -54,7 +54,8 @@ describes.integration(
   env => {
     let browser;
 
-    beforeEach(() => {
+    beforeEach(function() {
+      this.timeout(15000);
       browser = new BrowserController(env.win);
       return browser.waitForElementLayout('amp-analytics');
     });
