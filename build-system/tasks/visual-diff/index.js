@@ -778,11 +778,8 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
-  try {
-    await performVisualTests();
-  } finally {
-    return await cleanup_();
-  }
+  await performVisualTests();
+  return await cleanup_();
 }
 
 /**
