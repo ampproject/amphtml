@@ -157,7 +157,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         allowConsoleError(() => {
           expect(() => element.getAmpDoc()).to.throw(/no ampdoc yet/);
         });
-        expect(element.owners_).to.be.null;
+        expect(element.resources_).to.be.null;
         allowConsoleError(() => {
           expect(() => element.getResources()).to.throw(/no resources yet/);
         });
@@ -166,7 +166,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         container.appendChild(element);
         expect(element.ampdoc_).to.be.ok;
         expect(element.getAmpDoc()).to.be.ok;
-        expect(element.owners_).to.be.ok;
+        expect(element.resources_).to.be.ok;
         expect(element.getResources()).to.be.ok;
       });
 
@@ -1050,7 +1050,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         element.setAttribute('layout', 'fill');
         element.everAttached = true;
         element.ampdoc_ = env.ampdoc;
-        element.owners_ = resources;
+        element.resources_ = resources;
         resourcesMock
           .expects('upgraded')
           .withExactArgs(element)
@@ -1838,7 +1838,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         element.layoutWidth_ = 300;
         element.layout_ = Layout.FIXED;
         element.setAttribute('layout', 'fixed');
-        element.owners_ = resources;
+        element.resources_ = resources;
         vsync = Services.vsyncFor(win);
         sandbox.stub(vsync, 'run').callsFake(task => {
           if (task.measure) {
@@ -2192,7 +2192,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     element = new ElementClass();
     element.layoutWidth_ = 300;
     element.layout_ = Layout.FIXED;
-    element.owners_ = resources;
+    element.resources_ = resources;
     overflowElement = doc.createElement('div');
     overflowElement.setAttribute('overflow', '');
     element.appendChild(overflowElement);
