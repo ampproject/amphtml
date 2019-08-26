@@ -147,8 +147,8 @@ describes.endtoend(
       });
     });
 
-    // TODO: unskip #24195
     describe('looping', function() {
+      // TODO: unskip #24195
       it.configure()
         .skipViewerDemo()
         .run('should show the last slide when looping', async function() {
