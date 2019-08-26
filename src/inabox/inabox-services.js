@@ -23,10 +23,8 @@ import {installHistoryServiceForDoc} from '../service/history-impl';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxCidService} from './inabox-cid';
 import {installInaboxViewportService} from './inabox-viewport';
-import {
-  installOwnersServiceForDoc,
-  installResourcesServiceForDoc,
-} from '../service/resources-impl';
+import {installOwnersServiceForDoc} from '../service/owners-impl';
+import {installResourcesServiceForDoc} from '../service/resources-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
