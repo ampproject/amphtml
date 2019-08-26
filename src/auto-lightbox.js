@@ -27,6 +27,13 @@ export const AutoLightboxEvents = {
 };
 
 /**
+ * Installs the amp-auto-lightbox extension.
+ *
+ * This extension conditionally loads amp-lightbox-gallery for images and videos
+ * that fulfill a set criteria on certain documents.
+ *
+ * Further information on spec/auto-lightbox.md and the amp-auto-lightbox extension
+ * code.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installAutoLightboxExtension(ampdoc) {
