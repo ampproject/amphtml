@@ -24,7 +24,6 @@ import {
 } from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
 
