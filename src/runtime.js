@@ -76,10 +76,10 @@ const TAG = 'runtime';
  */
 function adoptShared(global, callback) {
   // Tests can adopt the same window twice. sigh.
-  if (global.AMP_TAG) {
+  if (global.__AMP_TAG) {
     return Promise.resolve();
   }
-  global.AMP_TAG = true;
+  global.__AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
   /** @const {!Array<function(!Object)|!ExtensionPayload>} */

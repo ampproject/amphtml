@@ -33,10 +33,10 @@ const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TEST_TIMEOUT = 20000;
+const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
-const defaultBrowsers = new Set(['chrome', 'firefox']);
+const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
@@ -79,6 +79,7 @@ let describesConfig = null;
 const capabilitiesKeys = {
   'chrome': 'chromeOptions',
   'firefox': 'moz:firefoxOptions',
+  'safari': 'safariOptions',
 };
 
 /**
@@ -88,7 +89,7 @@ const capabilitiesKeys = {
  */
 function configure(config) {
   if (describesConfig) {
-    throw new Error('describes.config should only be called once');
+    throw new Error('describes.configure should only be called once');
   }
 
   describesConfig = Object.assign({}, config);
@@ -130,9 +131,10 @@ async function createPuppeteer(opt_config = {}) {
  * @return {!SeleniumDriver}
  */
 async function createSelenium(browserName, opt_config = {}) {
-  // TODO(estherkim): implement sessions
-  // See https://w3c.github.io/webdriver/#sessions
   switch (browserName) {
+    case 'safari':
+      // Safari's only option is setTechnologyPreview
+      return createDriver(browserName, []);
     case 'firefox':
       return createDriver(browserName, getFirefoxArgs(opt_config));
     case 'chrome':
@@ -355,7 +357,7 @@ function describeEnv(factory) {
 
       const allowedBrowsers = browsers
         ? new Set(browsers.split(',').map(x => x.trim()))
-        : defaultBrowsers;
+        : supportedBrowsers;
 
       if (engine === 'puppeteer') {
         const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
@@ -366,6 +368,11 @@ function describeEnv(factory) {
           );
         }
         return result;
+      }
+
+      if (process.platform !== 'darwin' && allowedBrowsers.has('safari')) {
+        // silently skip safari tests
+        allowedBrowsers.delete('safari');
       }
 
       return allowedBrowsers;
@@ -476,12 +483,21 @@ class EndToEndFixture {
     } = this.spec;
     const {environment} = env;
 
-    await toggleExperiments(ampDriver, testUrl, experiments);
+    const url = new URL(testUrl);
+    if (experiments.length > 0) {
+      if (environment.includes('inabox')) {
+        // inabox experiments are toggled at server side using <meta> tag
+        url.searchParams.set('exp', experiments.join(','));
+      } else {
+        // AMP doc experiments are toggled via cookies
+        await toggleExperiments(ampDriver, url.href, experiments);
+      }
+    }
 
     const {width, height} = initialRect;
     await controller.setWindowRect({width, height});
 
-    await ampDriver.navigateToEnvironment(environment, testUrl);
+    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
@@ -522,10 +538,6 @@ async function getController(
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
-  if (!experiments.length) {
-    return;
-  }
-
   await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {

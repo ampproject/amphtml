@@ -63,6 +63,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      iframe.win.__AMP_SERVICES.documentInfo = null;
       installDocumentInfoServiceForDoc(iframe.ampdoc);
       resetScheduledElementForTesting(iframe.win, 'amp-analytics');
       resetScheduledElementForTesting(iframe.win, 'amp-experiment');
@@ -187,7 +188,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           array[15] = 15;
         },
       },
-      services: {
+      __AMP_SERVICES: {
         'viewport': {obj: {}},
         'cid': {
           promise: Promise.resolve({
@@ -209,6 +210,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+    win.__AMP_SERVICES.documentInfo = null;
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
@@ -921,7 +923,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 0', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
+    win.__AMP_SERVICES.viewer = {
       obj: {isVisible: () => true},
     };
     return Services.urlReplacementsForDoc(win.document.documentElement)
@@ -933,7 +935,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 1', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
+    win.__AMP_SERVICES.viewer = {
       obj: {isVisible: () => false},
     };
     return Services.urlReplacementsForDoc(win.document.documentElement)

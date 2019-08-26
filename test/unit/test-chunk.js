@@ -44,7 +44,7 @@ describe('chunk2', () => {
 
       // If there is a viewer, wait for it, so we run with it being
       // installed.
-      if (env.win.services.viewer) {
+      if (env.win.__AMP_SERVICES.viewer) {
         return Services.viewerPromiseForDoc(env.win.document).then(() => {
           // Make sure we make a chunk instance, so all runs
           // have a viewer.
@@ -96,7 +96,7 @@ describe('chunk2', () => {
     env => {
       beforeEach(() => {
         installDocService(env.win, /* isSingleDoc */ true);
-        expect(env.win.services.viewer).to.be.undefined;
+        expect(env.win.__AMP_SERVICES.viewer).to.be.undefined;
         env.win.document.hidden = false;
       });
 
@@ -128,7 +128,7 @@ describe('chunk2', () => {
     env => {
       beforeEach(() => {
         installDocService(env.win, /* isSingleDoc */ true);
-        expect(env.win.services.viewer).to.be.undefined;
+        expect(env.win.__AMP_SERVICES.viewer).to.be.undefined;
         env.win.document.hidden = true;
         env.win.requestIdleCallback = function() {
           throw new Error('Should not be called');
@@ -156,7 +156,7 @@ describe('chunk2', () => {
     },
     env => {
       beforeEach(() => {
-        expect(env.win.services.viewer).to.exist;
+        expect(env.win.__AMP_SERVICES.viewer).to.exist;
         env.win.document.hidden = false;
       });
 
@@ -167,6 +167,13 @@ describe('chunk2', () => {
             return true;
           });
         });
+
+        it('should execute a chunk with an ampdoc', done => {
+          startupChunk(env.ampdoc, unusedIdleDeadline => {
+            done();
+          });
+        });
+
         basicTests(env);
       });
 
@@ -358,7 +365,7 @@ describe('long tasks', () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
-      amp: true,
+      amp: false,
     },
     env => {
       let subscriptions;
@@ -386,6 +393,7 @@ describe('long tasks', () => {
         postMessageCalls = 0;
         subscriptions = {};
         clock = sandbox.useFakeTimers();
+        installDocService(env.win, /* isSingleDoc */ true);
         toggleExperiment(env.win, 'macro-after-long-task', true);
 
         env.win.addEventListener = function(type, handler) {
@@ -403,6 +411,9 @@ describe('long tasks', () => {
         };
 
         progress = '';
+        chunkInstanceForTesting(
+          env.win.document.documentElement
+        ).macroAfterLongTask_ = true;
       });
 
       it('should not run macro tasks with invisible bodys', done => {

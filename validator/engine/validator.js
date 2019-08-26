@@ -2009,7 +2009,7 @@ class CdataMatcher {
     }
 
     // Max CDATA Byte Length
-    if (cdataSpec.maxBytes !== -1 && adjustedCdataLength > cdataSpec.maxBytes) {
+    if (cdataSpec.maxBytes !== -2 && adjustedCdataLength > cdataSpec.maxBytes) {
       context.addError(
           amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
           context.getLineCol(),
@@ -5536,7 +5536,7 @@ class ParsedValidatorRules {
       if (!this.isCssLengthSpecCorrectHtmlFormat_(cssLengthSpec)) {
         continue;
       }
-      if (cssLengthSpec.maxBytes && bytesUsed > cssLengthSpec.maxBytes) {
+      if (cssLengthSpec.maxBytes !== -2 && bytesUsed > cssLengthSpec.maxBytes) {
         context.addError(
             amp.validator.ValidationError.Code
                 .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
@@ -5833,7 +5833,7 @@ amp.validator.ValidationHandler =
           this.context_.addInlineStyleByteSize(styleLen);
           for (const cssLengthSpec of this.context_.getRules()
                    .getCssLengthSpec()) {
-            if (cssLengthSpec.maxBytesPerInlineStyle !== undefined &&
+            if (cssLengthSpec.maxBytesPerInlineStyle !== -1 &&
                 styleLen > cssLengthSpec.maxBytesPerInlineStyle) {
               this.context_.addError(
                   amp.validator.ValidationError.Code.INLINE_STYLE_TOO_LONG,

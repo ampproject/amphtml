@@ -54,7 +54,7 @@ export function getA4AMetaTags(doc) {
 /**
  * Returns document from given iframe, or null if non FIE.
  * @param {HTMLIFrameElement} iframe
- * @return {Document}
+ * @return {!Document}
  */
 export function getFrameDoc(iframe) {
   return iframe.contentDocument || iframe.contentWindow.document;
