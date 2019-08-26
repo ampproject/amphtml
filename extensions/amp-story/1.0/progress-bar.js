@@ -189,7 +189,7 @@ export class ProgressBar {
     );
 
     Services.viewportForDoc(this.ampdoc_).onResize(
-      debounce(this.win_, () => this.onResize_(), 700)
+      debounce(this.win_, () => this.onResize_(), 900)
     );
 
     this.getRoot().classList.toggle(
@@ -368,7 +368,7 @@ export class ProgressBar {
    * @private
    */
   onResize_() {
-    if (this.segmentCount_ > MAX_SEGMENTS) {
+    if (this.getRoot().classList.contains('i-amphtml-progress-bar-overflow')) {
       this.render_(false /** shouldAnimate */);
     }
   }
