@@ -15,12 +15,30 @@
  */
 
 /* eslint-disable no-unused-vars */
+
+// TODO(powerivq)
+// Resource.setOwner, Resource.getOwner should be moved here.
+// ResourceState.NOT_BUILT might not be needed here.
+import {Resource, ResourceState} from './resource';
+import {Services} from '../services';
+import {devAssert} from '../log';
+import {isArray} from '../types';
+import {registerServiceBuilderForDoc} from '../service';
+
 /**
- * TODO(lannka): migrate all methods from OwnersDef to here.
- *
+ * @param {!Element|!Array<!Element>} elements
+ * @return {!Array<!Element>}
+ */
+function elements(elements) {
+  return /** @type {!Array<!Element>} */ (isArray(elements)
+    ? elements
+    : [elements]);
+}
+
+/**
  * @interface
  */
-export class Owners {
+export class OwnersDef {
   /**
    * Assigns an owner for the specified element. This means that the resources
    * within this element will be managed by the owner and not Resources manager.
@@ -90,4 +108,152 @@ export class Owners {
    */
   updateInViewport(parentElement, subElements, inLocalViewport) {}
 }
-/* eslint-enable no-unused-vars */
+
+/**
+ * @implements {OwnersDef}
+ * @visibleForTesting
+ */
+export class Owners {
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const @private {!./resources-impl.ResourcesDef} */
+    this.resources_ = Services.resourcesForDoc(ampdoc);
+  }
+
+  /** @override */
+  setOwner(element, owner) {
+    Resource.setOwner(element, owner);
+  }
+
+  /** @override */
+  schedulePreload(parentElement, subElements) {
+    this.scheduleLayoutOrPreloadForSubresources_(
+      this.resources_.getResourceForElement(parentElement),
+      /* layout */ false,
+      elements(subElements)
+    );
+  }
+
+  /** @override */
+  scheduleLayout(parentElement, subElements) {
+    this.scheduleLayoutOrPreloadForSubresources_(
+      this.resources_.getResourceForElement(parentElement),
+      /* layout */ true,
+      elements(subElements)
+    );
+  }
+
+  /** @override */
+  schedulePause(parentElement, subElements) {
+    const parentResource = this.resources_.getResourceForElement(parentElement);
+    subElements = elements(subElements);
+
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        resource.pause();
+      }
+    );
+  }
+
+  /** @override */
+  scheduleResume(parentElement, subElements) {
+    const parentResource = this.resources_.getResourceForElement(parentElement);
+    subElements = elements(subElements);
+
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        resource.resume();
+      }
+    );
+  }
+
+  /** @override */
+  scheduleUnlayout(parentElement, subElements) {
+    const parentResource = this.resources_.getResourceForElement(parentElement);
+    subElements = elements(subElements);
+
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        resource.unlayout();
+      }
+    );
+  }
+
+  /** @override */
+  updateInViewport(parentElement, subElements, inLocalViewport) {
+    this.updateInViewportForSubresources_(
+      this.resources_.getResourceForElement(parentElement),
+      elements(subElements),
+      inLocalViewport
+    );
+  }
+
+  /**
+   * Schedules layout or preload for the sub-resources of the specified
+   * resource.
+   * @param {!Resource} parentResource
+   * @param {boolean} layout
+   * @param {!Array<!Element>} subElements
+   * @private
+   */
+  scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        if (resource.getState() === ResourceState.NOT_BUILT) {
+          resource.whenBuilt().then(() => {
+            this.resources_.measureAndTryScheduleLayout(
+              resource,
+              !layout,
+              parentResource.getLayoutPriority()
+            );
+          });
+        } else {
+          this.resources_.measureAndTryScheduleLayout(
+            resource,
+            !layout,
+            parentResource.getLayoutPriority()
+          );
+        }
+      }
+    );
+  }
+
+  /**
+   * Updates inViewport state for the specified sub-resources of a resource.
+   * @param {!Resource} parentResource
+   * @param {!Array<!Element>} subElements
+   * @param {boolean} inLocalViewport
+   * @private
+   */
+  updateInViewportForSubresources_(
+    parentResource,
+    subElements,
+    inLocalViewport
+  ) {
+    const inViewport = parentResource.isInViewport() && inLocalViewport;
+    this.resources_.findResourcesInElements(
+      parentResource,
+      subElements,
+      resource => {
+        resource.setInViewport(inViewport);
+      }
+    );
+  }
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installOwnersServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'owners', Owners);
+}
