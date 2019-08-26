@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/** @const {string} */
-const SCRIPT_TAG_NAME = 'script';
-
-/** @const {string} */
-const SCRIPT_TYPE = 'application/json';
-
 /** @enum {string} */
 const LoadStateClass = {
   LOADING: 'loading',
@@ -29,40 +23,32 @@ const LoadStateClass = {
 
 /** @const {string} */
 const CSS = `
-  :host { all: initial; display: block; border-radius: 0; width: 405px; height: 720px; }
-  main { background: #202125; }
-  iframe { height: 100%; width: 100%; border: 0; opacity: 0; transition: opacity 500ms ease }
+  :host { all: initial; display: block; border-radius: 0 !important; width: 405px; height: 720px; overflow: auto; }
+  .story { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
+  main { display: flex; flex-direction: row; height: 100%; }
   .loaded iframe { opacity: 1; }
 `;
-
-/**
- * @typedef {{
- *   src: string
- * }}
- */
-let AmpStoryEntryDef;
-
-/**
- * @typedef {{
- *   stories: !Array<!AmpStoryEntryDef>
- * }}
- */
-let AmpStoryEmbedConfigDef;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
-export class AmpStoryEmbed extends HTMLElement {
-  /** @constructor */
-  constructor() {
-    super();
+export class AmpStoryEmbed {
+  /**
+   * @param {!Element} element
+   * @constructor
+   */
+  constructor(element) {
+    console.assert(element.childElementCount > 0, 'Missing configuration.');
+
+    /** @private {!Element} */
+    this.element_ = element;
 
     /** @private {!Document} */
-    this.doc_ = this.ownerDocument;
+    this.doc_ = element.ownerDocument;
 
-    /** @private {?AmpStoryEmbedConfigDef} */
-    this.config_;
+    /** @private {!Array<!HTMLAnchorElement>} */
+    this.stories_ = Array.prototype.slice.call(element.querySelectorAll('a'));
 
     /** @private {?Element} */
     this.rootEl_;
@@ -71,41 +57,18 @@ export class AmpStoryEmbed extends HTMLElement {
     this.iframeEl_;
   }
 
-  /** @override */
-  connectedCallback() {
-    this.parseConfig_();
+  /** @public */
+  build() {
     this.initializeShadowRoot_();
-    this.buildIframe_();
-  }
 
-  /** @private */
-  parseConfig_() {
-    console.assert(this.childElementCount > 0, 'Missing configuration.');
-
-    const scriptEl = this.children[0];
-    console.log(scriptEl);
-    console.assert(
-      this.childElementCount === 1 &&
-        scriptEl.tagName.toLowerCase() === SCRIPT_TAG_NAME &&
-        scriptEl.getAttribute('type').toLowerCase() === SCRIPT_TYPE,
-      'Must have one <script type="application/json"> configuration'
-    );
-
-    // Parse JSON
-    this.config_ = JSON.parse(scriptEl.textContent);
-    console.assert(
-      this.config_ && this.config_.stories && this.config_.stories.length > 0,
-      'Must specify at least one story in the configuration.'
-    );
-
-    this.currentStory_ = this.config_.stories[0];
-    console.assert(this.currentStory_.src, 'Story must have a src.');
+    // TODO: Build all child iframes.
+    this.buildIframe_(0);
   }
 
   /** @private */
   initializeShadowRoot_() {
     // Create shadow root
-    const shadowRoot = this.attachShadow({mode: 'open'});
+    const shadowRoot = this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
@@ -116,10 +79,16 @@ export class AmpStoryEmbed extends HTMLElement {
     shadowRoot.appendChild(this.rootEl_);
   }
 
-  /** @private */
-  buildIframe_() {
+  /**
+   * @param {number} index
+   * @private
+   */
+  buildIframe_(index) {
+    const story = this.stories_[index];
     this.iframeEl_ = this.doc_.createElement('iframe');
-    this.iframeEl_.setAttribute('src', this.config_.stories[0].src);
+    this.iframeEl_.setAttribute('src', story.href);
+    this.iframeEl_.style.backgroundImage = story.getAttribute('data-poster-portrait-src');
+    this.iframeEl_.classList.add('story');
     this.initializeLoadingListeners_();
     this.rootEl_.appendChild(this.iframeEl_);
   }
@@ -139,4 +108,9 @@ export class AmpStoryEmbed extends HTMLElement {
   }
 }
 
-customElements.define('amp-story-embed', AmpStoryEmbed);
+const embeds = document.getElementsByClassName('amp-story-embed');
+for (let i = 0; i < embeds.length; i++) {
+  const embed = embeds[i];
+  const embedImpl = new AmpStoryEmbed(embed);
+  embedImpl.build();
+}
