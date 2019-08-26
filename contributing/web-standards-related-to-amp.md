@@ -1,6 +1,6 @@
 # Overview of web standards and features related to AMP
 
-Date: 2018-02-28
+Date: 2018-08-26
 
 | Standard/feature | Relation | Status |
 | ---------------- |:--------:| ------:|
@@ -8,7 +8,8 @@ Date: 2018-02-28
 | [Portals](https://github.com/KenjiBaheux/portals/blob/master/explainer.md) | AMP Carousel like UI with navigation to publisher (alternative to iframe promotion) | Iterating on spec. Prototype implementation in Chromium |
 | [Performance Timeline](https://w3c.github.io/performance-timeline/) | Real world metric collection. This is the framework. New metrics may be needed. | Shipping in first browsers |
 | [Paint Timing 1](https://w3c.github.io/paint-timing/) | Initial paint related metrics (performance assessment | Shipping in first browsers |
-| Perf metric: (Initial) Layout stability | Metric for how often layout changes without user action based on elements resizing (such as when an unsized image loads or an iframe resizes) | Discussing feasibility with implementers |
+| Perf metric: (Initial) Layout stability | Metric for how often layout changes without user action based on elements resizing (such as when an unsized image loads or an iframe resizes) | Standard draft published. Implemented in Chromium |
+| Perf metric: Largest Contentful Pain | Better metric to reflect user perceived page load time | Standard draft published. Implemented in Chromium |
 | [Perf metric: Expected Queueing Time](https://docs.google.com/document/d/1Vgu7-R84Ym3lbfTRi98vpdspRr1UwORB4UV-p9K1FF0/edit#heading=h.qtmvlls54hz) | Metric for how long it takes for main thread to react to user action | Feasibility exploration |
 | Iframe performance isolation | Possible under current standards, but requires browsers to implement. Reduces need for embeds to behave well | Chrome has 2 efforts in progress (Site isolation, cooperative multitasking). Other browser plans unknown. |
 | [Feature Policy](https://wicg.github.io/feature-policy/) | Allows web pages to turn off legacy features or opt into new behavior. This is the framework. New policies may be needed | Shipping in first browsers |

@@ -3,9 +3,9 @@
     "amp-next-page",
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
-    "inabox-css-cleanup",
     "inabox-no-chunking",
-    "inabox-resources-lite"
+    "inabox-resources-lite",
+    "inabox-viewport-lite"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
@@ -26,6 +26,7 @@
   "amp-list-load-more": 1,
   "amp-list-viewport-resize": 1,
   "amp-playbuzz": 1,
+  "amp-sidebar-swipe-to-dismiss": 0.1,
   "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
   "ampdoc-closest": 1,

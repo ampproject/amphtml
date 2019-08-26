@@ -341,14 +341,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
-    id: 'inabox-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in inabox rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
-  },
-  {
     id: 'inabox-no-chunking',
     name: 'Experiment to disable startup chunking in inabox runtime',
     spec: 'https://github.com/ampproject/amphtml/issues/23573',
@@ -382,6 +374,12 @@ const EXPERIMENTS = [
       'If applicable, convert remaining micro tasks to the next macro ' +
       ' tasks if a previous micro task execution took too long',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
+  },
+  {
+    id: 'pausable-iframe',
+    name: 'Use iframe freezing instead of recreating iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24110',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
   },
 ];
 

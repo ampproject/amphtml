@@ -83,7 +83,7 @@ export class Performance {
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
-    /** @private {?./viewer-impl.Viewer} */
+    /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
     /** @private {?./resources-impl.ResourcesDef} */
@@ -588,9 +588,11 @@ export class Performance {
     const {documentElement} = this.win.document;
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
-    return this.resources_
-      .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
-      .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+    return this.resources_.whenFirstPass().then(() => {
+      return this.resources_
+        .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
+        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+    });
   }
 
   /**
