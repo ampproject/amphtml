@@ -119,12 +119,6 @@ export class ProgressBar {
      */
     this.firstExpandedSegmentIndex_ = 0;
 
-    /**
-     * Width of the progress bar in pixels.
-     * @private {number}
-     */
-    this.barWidthPx_ = 0;
-
     /** @private {!Element} */
     this.storyEl_ = storyEl;
   }
@@ -195,17 +189,13 @@ export class ProgressBar {
     );
 
     Services.viewportForDoc(this.ampdoc_).onResize(
-      debounce(this.win_, () => this.onResize_(), 300)
+      debounce(this.win_, () => this.onResize_(), 700)
     );
 
     this.getRoot().classList.toggle(
       'i-amphtml-progress-bar-overflow',
       this.segmentCount_ > MAX_SEGMENTS
     );
-
-    this.barWidthPx_ = this.storyEl_
-      .querySelector('amp-story-page')
-      ./*OK*/ getBoundingClientRect().width;
 
     this.isBuilt_ = true;
     return this.getRoot();
@@ -228,26 +218,27 @@ export class ProgressBar {
    * @private
    */
   render_(shouldAnimate = true) {
-    const segmentWidth = this.getSegmentWidth_();
-    let translateX =
-      -(this.firstExpandedSegmentIndex_ - this.getPrevEllipsisCount_()) *
-      (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
+    this.getSegmentWidth_().then(segmentWidth => {
+      let translateX =
+        -(this.firstExpandedSegmentIndex_ - this.getPrevEllipsisCount_()) *
+        (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
 
-    this.resources_.mutateElement(this.getRoot(), () => {
-      this.getRoot().classList.toggle(
-        'i-amphtml-animate-progress',
-        shouldAnimate
-      );
+      this.resources_.mutateElement(this.getRoot(), () => {
+        this.getRoot().classList.toggle(
+          'i-amphtml-animate-progress',
+          shouldAnimate
+        );
 
-      for (let index = 0; index < this.segmentCount_; index++) {
-        const width =
-          index >= this.firstExpandedSegmentIndex_ &&
-          index < this.firstExpandedSegmentIndex_ + MAX_SEGMENTS
-            ? segmentWidth
-            : ELLIPSE_WIDTH_PX;
-        this.transform_(this.segments_[index], translateX, width);
-        translateX += width + SEGMENTS_MARGIN_PX;
-      }
+        for (let index = 0; index < this.segmentCount_; index++) {
+          const width =
+            index >= this.firstExpandedSegmentIndex_ &&
+            index < this.firstExpandedSegmentIndex_ + MAX_SEGMENTS
+              ? segmentWidth
+              : ELLIPSE_WIDTH_PX;
+          this.transform_(this.segments_[index], translateX, width);
+          translateX += width + SEGMENTS_MARGIN_PX;
+        }
+      });
     });
   }
 
@@ -274,7 +265,7 @@ export class ProgressBar {
 
   /**
    * Gets the individual segment width.
-   * @return {number}
+   * @return {!Promise<number>}
    * @private
    */
   getSegmentWidth_() {
@@ -283,12 +274,25 @@ export class ProgressBar {
     const totalEllipsisWidth =
       (nextEllipsisCount + prevEllipsisCount) *
       (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
-    const totalSegmentsWidth = this.barWidthPx_ - totalEllipsisWidth;
+    return this.getBarWidth_().then(barWidth => {
+      const totalSegmentsWidth = barWidth - totalEllipsisWidth;
 
-    return (
-      totalSegmentsWidth / Math.min(this.segmentCount_, MAX_SEGMENTS) -
-      SEGMENTS_MARGIN_PX
-    );
+      return (
+        totalSegmentsWidth / Math.min(this.segmentCount_, MAX_SEGMENTS) -
+        SEGMENTS_MARGIN_PX
+      );
+    });
+  }
+
+  /**
+   * Gets width of the progress bar.
+   * @return {!Promise<number>}
+   * @private
+   */
+  getBarWidth_() {
+    return this.resources_.measureElement(() => {
+      return this.getRoot()./*OK*/ getBoundingClientRect().width;
+    });
   }
 
   /**
@@ -365,9 +369,6 @@ export class ProgressBar {
    */
   onResize_() {
     if (this.segmentCount_ > MAX_SEGMENTS) {
-      this.barWidthPx_ = this.storyEl_
-        .querySelector('amp-story-page')
-        ./*OK*/ getBoundingClientRect().width;
       this.render_(false /** shouldAnimate */);
     }
   }
@@ -467,7 +468,7 @@ export class ProgressBar {
 
     this.updateProgressByIndex_(segmentIndex, progress);
 
-    if (!this.activeSegmentIndex_ && this.segmentCount_ > MAX_SEGMENTS) {
+    if (!this.activeSegmentId_ && this.segmentCount_ > MAX_SEGMENTS) {
       this.getInitialFirstExpandedSegmentIndex_(segmentIndex);
       this.render_(false /** shouldAnimate */);
     }

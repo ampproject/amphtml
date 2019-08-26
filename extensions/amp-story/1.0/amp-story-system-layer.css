@@ -322,6 +322,7 @@
 .i-amphtml-progress-bar-overflow.i-amphtml-story-progress-bar {
   left: auto !important;
   right: auto !important;
+  width: 100% !important;
   margin: 4px 0 0 !important;
   padding: 0 !important;
 }
@@ -329,9 +330,7 @@
 .i-amphtml-story-desktop-panels .i-amphtml-story-progress-bar {
   position: relative !important;
   height: 3px !important;
-  width: 100vw !important;
-  max-width: calc(3/5 * 75vh) !important;
-  min-width: 320px !important;
+  width: calc(100vw / 3) !important;
   margin: 0 24px !important;
   overflow: hidden !important;
 }
