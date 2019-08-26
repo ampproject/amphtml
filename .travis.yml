@@ -89,11 +89,15 @@ jobs:
         - build-system/sauce_connect/stop_sauce_connect.sh
         - ps -ef
     - stage: test
-      name: 'End to End Tests'
+      name: 'End to End Tests - Chrome and Firefox'
+      script:
+        - unbuffer node build-system/pr-check/e2e-tests.js
+    - stage: test
+      name: 'End to End Tests - Safari'
       before_install: sudo safaridriver --enable
       os: osx
       script:
-        - unbuffer node build-system/pr-check/e2e-tests.js
+        - unbuffer node build-system/pr-check/e2e-tests.js --browsers=safari
     - stage: experiment
       name: "Experiment A Tests"
       script:
@@ -106,7 +110,10 @@ jobs:
       name: "Experiment C Tests"
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
-cache:
+  allow_failures:
+    - os: osx
+  fast_finish: true
+  cache:
   directories:
     - node_modules
     - build-system/tasks/e2e/node_modules
