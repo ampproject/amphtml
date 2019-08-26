@@ -98,10 +98,11 @@ function getMode_(win) {
     // Triggers validation or enable pub level logging. Validation can be
     // bypassed via #validate=0.
     // Note that AMP_DEV_MODE flag is used for testing purposes.
+    // Use Array.indexOf instead of Array.includes because of #24219
     development: !!(
-      ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].includes(
+      ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].indexOf(
         hashQuery['development']
-      ) || win.AMP_DEV_MODE
+      ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
