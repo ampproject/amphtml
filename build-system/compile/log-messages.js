@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 const fs = require('fs-extra');
-const {endBuildStep} = require('../tasks/helpers');
+const log = require('fancy-log');
+const {cyan} = require('colors');
 
 const pathPrefix = 'dist/log-messages';
 
@@ -43,11 +44,10 @@ async function formatExtractedMessages() {
   const items = await extractedItems();
   return Promise.all(
     Object.entries(formats).map(async ([path, format]) => {
-      const startTime = Date.now();
       const formatted = {};
       items.forEach(item => (formatted[item.id] = format(item)));
       await fs.outputJson(path, formatted);
-      endBuildStep('Formatted', path, startTime);
+      log('Formatted', cyan(path));
     })
   );
 }
