@@ -4,10 +4,8 @@ The standard AMP runtime finds elligible [`amp-img`](https://amp.dev/documentati
 elements and automatically makes them clickable in order to open an [`amp-lightbox-gallery`](https://amp.dev/documentation/components/amp-lightbox-gallery)
 for enhanced user experience that includes panning and pinch-to-zoom.
 
-Please note that this treatment is only applied on documents loaded from `http://*.cdn.ampproject.org`,
-effectively only for those that come from Google Search results. 
-
-Documents also need to contain either of the following:
+Documents that explicitly use `amp-lightbox-gallery` are excluded from this treatment.
+Otherwise, it's applied only on documents that contain either of the following:
 
 - an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag
 - or a `@type` field declared in [JSON+LD schema](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/discovery#use-schema.org-for-most-search-engines)
@@ -17,8 +15,6 @@ Documents also need to contain either of the following:
   - `BlogPosting`
   - `LiveBlogPosting`
   - `DiscussionForumPosting`
-  
-Documents that explicitly use `amp-lightbox-gallery` are excluded from this treatment.
 
 ## Excluded images
 
