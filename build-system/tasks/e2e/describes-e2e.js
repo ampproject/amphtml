@@ -248,9 +248,7 @@ const envPresets = {
     AmpdocEnvironment.SHADOW_DEMO,
   ],
   'amp4ads-preset': [
-    // TODO(lannka): unskip this test. It passes locally but fails on Travis:
-    // https://travis-ci.org/ampproject/amphtml/jobs/570977015
-    // AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_FIE,
     AmpdocEnvironment.A4A_INABOX,
     AmpdocEnvironment.A4A_INABOX_FRIENDLY,
     AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
@@ -478,12 +476,21 @@ class EndToEndFixture {
     } = this.spec;
     const {environment} = env;
 
-    await toggleExperiments(ampDriver, testUrl, experiments);
+    const url = new URL(testUrl);
+    if (experiments.length > 0) {
+      if (environment.includes('inabox')) {
+        // inabox experiments are toggled at server side using <meta> tag
+        url.searchParams.set('exp', experiments.join(','));
+      } else {
+        // AMP doc experiments are toggled via cookies
+        await toggleExperiments(ampDriver, url.href, experiments);
+      }
+    }
 
     const {width, height} = initialRect;
     await controller.setWindowRect({width, height});
 
-    await ampDriver.navigateToEnvironment(environment, testUrl);
+    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
@@ -524,10 +531,6 @@ async function getController(
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
-  if (!experiments.length) {
-    return;
-  }
-
   await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {

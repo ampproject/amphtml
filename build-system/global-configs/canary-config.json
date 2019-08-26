@@ -4,7 +4,8 @@
     "disable-amp-story-desktop",
     "inabox-viewport-friendly",
     "inabox-css-cleanup",
-    "inabox-no-chunking"
+    "inabox-no-chunking",
+    "inabox-viewport-lite"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
@@ -25,6 +26,7 @@
   "amp-list-load-more": 1,
   "amp-list-viewport-resize": 1,
   "amp-playbuzz": 1,
+  "amp-sidebar-swipe-to-dismiss": 0.1,
   "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
   "ampdoc-closest": 1,
@@ -39,8 +41,8 @@
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 1,
   "ios-scrollable-iframe": 0,
-  "layers": 1,
+  "macro-after-long-task": 1,
+  "new-loaders": 1,
   "pump-early-frame": 1,
-  "version-locking": 1,
-  "macro-after-long-task": 1
+  "version-locking": 1
 }

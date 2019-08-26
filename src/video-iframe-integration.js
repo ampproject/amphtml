@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* eslint-disable local/window-property-name */
 
 import {dict} from '../src/utils/object';
 import {getData, listen} from '../src/event-helper';
@@ -441,7 +442,7 @@ export function adopt(global) {
   global[__AMP__] = true;
 
   // Hacky way to make AMP errors (e.g. from listenFor) do *something*.
-  global.reportError = console.error.bind(console);
+  global.__AMP_REPORT_ERROR = console.error.bind(console);
 
   // Initialize one object per frame.
   const integration = new AmpVideoIntegration(global);

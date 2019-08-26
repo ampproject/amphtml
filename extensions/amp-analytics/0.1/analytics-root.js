@@ -130,7 +130,7 @@ export class AnalyticsRoot {
 
   /**
    * The viewer of analytics root
-   * @return {!../../../src/service/viewer-impl.Viewer}
+   * @return {!../../../src/service/viewer-interface.ViewerInterface}
    */
   getViewer() {
     return Services.viewerForDoc(this.ampdoc);
@@ -201,7 +201,7 @@ export class AnalyticsRoot {
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)|function(new:./events.AmpStoryEventTracker, !AnalyticsRoot)} klass
+   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {
