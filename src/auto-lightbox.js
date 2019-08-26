@@ -17,7 +17,6 @@
 import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
 import {dev} from './log';
-import {getMode} from './mode';
 import {isAmphtml} from './format';
 
 /** @const @enum {string} */
@@ -29,40 +28,11 @@ export const AutoLightboxEvents = {
 
 /**
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @return {boolean}
- */
-function isProxyOriginOrLocalDev(ampdoc) {
-  // Allow `localDev` in lieu of proxy origin for manual testing, except in
-  // tests where we need to actually perform the check.
-  const {win} = ampdoc;
-  if (getMode(win).localDev && !getMode(win).test) {
-    return true;
-  }
-
-  // An attached node is required for proxy origin check. If no elements are
-  // present, short-circuit.
-  if (!ampdoc.isSingleDoc()) {
-    return false;
-  }
-
-  const {documentElement} = ampdoc.getRootNode();
-  if (!documentElement) {
-    return false;
-  }
-
-  // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
-  // See git.io/fhQ0a (#20359) for details.
-  return Services.urlForDoc(documentElement).isProxyOrigin(win.location);
-}
-
-/**
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
-  // Only enabled on proxy origins for which the document is tagged as
-  // <html amp> or <html ⚡>.
-  if (!isAmphtml(win.document) || !isProxyOriginOrLocalDev(ampdoc)) {
+  // Only enabled on documents tagged as <html amp> or <html ⚡>.
+  if (!isAmphtml(win.document)) {
     return;
   }
   chunk(
