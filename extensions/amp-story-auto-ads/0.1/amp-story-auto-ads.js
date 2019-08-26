@@ -143,7 +143,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {!JsonObject} */
     this.config_ = dict();
 
-    /** @private {?Promise<./story-ad-analytics.StoryAdAnalytics>}*/
+    /** @private {?Promise} */
     this.analytics_ = null;
 
     /** @private {Object<string, number>} */

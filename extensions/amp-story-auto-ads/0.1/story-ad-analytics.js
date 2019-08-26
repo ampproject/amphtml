@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -65,7 +66,7 @@ export class StoryAdAnalytics {
   constructor(ampdoc) {
     /** @const @private {!Window} */
     this.win_ = ampdoc.win;
-    /** @const @private {!Object} */
+    /** @const @private {!Object<number, JsonObject>} */
     this.data_ = {};
   }
 
@@ -78,7 +79,7 @@ export class StoryAdAnalytics {
    */
   fireEvent(element, adIndex, eventType, vars) {
     this.ensurePageTrackingInitialized_(adIndex);
-    Object.assign(this.data_[adIndex], vars);
+    Object.assign(/** @type {!Object} */ (this.data_[adIndex]), vars);
     triggerAnalyticsEvent(
       element,
       eventType,
@@ -86,20 +87,7 @@ export class StoryAdAnalytics {
     );
   }
 
-  /**
-   * Creates a tracking object for each page if non-existant.
-   * @param {number} adIndex
-   */
-  ensurePageTrackingInitialized_(adIndex) {
-    if (!this.data_[adIndex]) {
-      this.data_[adIndex] = {
-        [AnalyticsVars.AD_INDEX]: adIndex,
-        [AnalyticsVars.AD_UNIQUE_ID]: getUniqueId(this.win_),
-      };
-    }
-  }
-
-  /**
+  /**`
    * Adds a variable for a specific ad that can be used in all subsequent triggers.
    * @param {number} adIndex
    * @param {string} varName
@@ -108,5 +96,18 @@ export class StoryAdAnalytics {
   setVar(adIndex, varName, value) {
     this.ensurePageTrackingInitialized_(adIndex);
     this.data_[adIndex][varName] = value;
+  }
+
+  /**
+   * Creates a tracking object for each page if non-existant.
+   * @param {number} adIndex
+   */
+  ensurePageTrackingInitialized_(adIndex) {
+    if (!this.data_[adIndex]) {
+      this.data_[adIndex] = dict({
+        [AnalyticsVars.AD_INDEX]: adIndex,
+        [AnalyticsVars.AD_UNIQUE_ID]: getUniqueId(this.win_),
+      });
+    }
   }
 }

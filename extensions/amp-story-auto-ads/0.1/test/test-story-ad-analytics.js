@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as analyticsSrc from '../../../../src/analytics';
+import * as analyticsApi from '../../../../src/analytics';
 import {
   AnalyticsEvents,
   AnalyticsVars,
@@ -32,7 +32,7 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     analytics = new StoryAdAnalytics(ampdoc);
-    triggerStub = sandbox.stub(analyticsSrc, 'triggerAnalyticsEvent');
+    triggerStub = sandbox.stub(analyticsApi, 'triggerAnalyticsEvent');
     const doc = win.document;
     ampStoryAutoAdsEl = doc.createElement('amp-story-auto-ads');
     doc.body.appendChild(ampStoryAutoAdsEl);
@@ -92,6 +92,45 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
           [AnalyticsVars.AD_UNIQUE_ID]: sinon.match.string,
         }
       );
+    });
+
+    it('persists unique id per creative across calls', () => {
+      analytics.fireEvent(
+        ampStoryAutoAdsEl,
+        1, // adIndex
+        AnalyticsEvents.AD_LOADED,
+        {
+          [AnalyticsVars.AD_LOADED]: Date.now(),
+        }
+      );
+
+      analytics.fireEvent(
+        ampStoryAutoAdsEl,
+        2, // Different adIndex
+        AnalyticsEvents.AD_LOADED,
+        {
+          [AnalyticsVars.AD_LOADED]: Date.now(),
+        }
+      );
+
+      analytics.fireEvent(
+        ampStoryAutoAdsEl,
+        1, // Same adIndex
+        AnalyticsEvents.AD_INSERTED,
+        {
+          [AnalyticsVars.AD_INSERTED]: Date.now(),
+        }
+      );
+
+      const {firstCall, secondCall, thirdCall} = triggerStub;
+      const firstCallId = firstCall.lastArg[AnalyticsVars.AD_UNIQUE_ID];
+      const secondCallId = secondCall.lastArg[AnalyticsVars.AD_UNIQUE_ID];
+      const thirdCallId = thirdCall.lastArg[AnalyticsVars.AD_UNIQUE_ID];
+
+      // Same adIndex should have same id.
+      expect(firstCallId).to.equal(thirdCallId);
+      // Different adIndex.
+      expect(secondCallId).not.to.equal(thirdCallId);
     });
   });
 
