@@ -438,6 +438,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Outbrain](../../ads/outbrain.md)
 - [Postquare](../../ads/postquare.md)
 - [PubExchange](../../ads/pubexchange.md)
+- [ReadMo](../../ads/readmo.md)
 - [Smi2](../../ads/smi2.md)
 - [SVK-Native](../../ads/svknative.md)
 - [Strossle](../../ads/strossle.md)
