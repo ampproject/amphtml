@@ -56,7 +56,7 @@ amp-sidebar[side][i-amphtml-sidebar-opened] {
   animation: none;
 }
 
-amp-sidebar[side] {
+amp-sidebar[side], .i-amphtml-sidebar-mask {
   /*
    * Note: This uses animations (instead of transitions) to make sure the
    * animation always plays correctly. Previously, the display was toggled in a
@@ -88,8 +88,17 @@ amp-sidebar[side] {
   height: 100vh !important;
   /* Prevent someone from making this a full-sceen image */
   background-image: none !important;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.5);
+  animation-name: i-amphtml-sidebar-mask-fade-out;
   z-index: 2147483646;
+}
+
+.i-amphtml-sidebar-mask[open] {
+  animation-name: i-amphtml-sidebar-mask-fade-in;
+}
+
+.i-amphtml-sidebar-mask[i-amphtml-sidebar-opened] {
+  animation: none;
 }
 
 @keyframes i-amphtml-sidebar-slide-in-left {
@@ -129,5 +138,25 @@ amp-sidebar[side] {
 
   to {
     transform: translateX(100%);
+  }
+}
+
+@keyframes i-amphtml-sidebar-mask-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes i-amphtml-sidebar-mask-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
   }
 }
