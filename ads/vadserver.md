@@ -35,5 +35,5 @@ Required parameters:
 - data-pid: pid for choosing ad publisher
 - data-sid: sid for choosing ad in itself
 
-For configuration details, and for modifying xtra settings, please contact https://wiki.lkqd.com/pages/viewpage.action?pageId=852444
+For configuration details, and/or modifying xtra settings, please contact https://wiki.lkqd.com/pages/viewpage.action?pageId=852444
 
