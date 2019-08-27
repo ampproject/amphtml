@@ -23,6 +23,8 @@ import {
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {CtaTypes, StoryAdLocalization} from './story-ad-localization';
+import {EventType, dispatch} from '../../amp-story/1.0/events';
+import {NavigationDirection} from '../../amp-story/1.0/amp-story-page';
 import {Services} from '../../../src/services';
 import {
   StateProperty,
@@ -168,6 +170,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {!./story-ad-localization.StoryAdLocalization} */
     this.localizationService_ = new StoryAdLocalization(this.win);
+
+    /** @private {boolean} */
+    this.hasForcedRender_ = false;
   }
 
   /** @override */
@@ -223,14 +228,33 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * Force this extension to behave as if ad is about to be shown.
-   * Used for testing but should be extended to force an ad to show in a real story.
-   * @param {string} pageBeforeAdId
+   * Force this extension to render all amp-story-auto-ads controlled UI and
+   * navigate to ad.
+   * @param {string=} pageBeforeAdId
    * @visibleForTesting
    */
   forceRender(pageBeforeAdId) {
+    const pageBeforeId =
+      pageBeforeAdId || this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
     this.isCurrentAdLoaded_ = true;
-    this.tryToPlaceAdAfterPage_(pageBeforeAdId);
+    // Setting distance manually to avoid flash of next page.
+    this.adPageEls_[this.adPageEls_.length - 1].setAttribute('distance', '1');
+    this.tryToPlaceAdAfterPage_(pageBeforeId);
+    // Once the ad is inserted into the story firing this event will
+    // navigate to the ad page.
+    const payload = dict({
+      'targetPageId': 'i-amphtml-ad-page-1',
+      'direction': NavigationDirection.NEXT,
+    });
+    const eventInit = {bubbles: true};
+    dispatch(
+      this.win,
+      this.lastCreatedAdElement_,
+      EventType.SWITCH_PAGE,
+      payload,
+      eventInit
+    );
+    this.hasForcedRender_ = true;
   }
 
   /**
@@ -431,6 +455,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           [AnalyticsVars.AD_LOADED]: Date.now(),
         });
         this.isCurrentAdLoaded_ = true;
+
+        // Development mode forces navigation to ad page for better dev-x.
+        // Only do this once to prevent an infinite view->request->navigate loop.
+        if (!this.hasForcedRender_) {
+          this.forceRender();
+        }
       });
 
     return ampStoryAdPage;
@@ -729,7 +759,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Place ad based on user config
    * @param {string} pageBeforeAdId
-   * @return {*} TODO(#23582): Specify return type
+   * @return {AD_STATE}
    * @private
    */
   tryToPlaceAdAfterPage_(pageBeforeAdId) {
