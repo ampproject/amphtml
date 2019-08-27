@@ -125,6 +125,10 @@ For the `<img>` tag in `HTML`, the `sizes` attribute is used in conjunction with
 
 See [Responsive images with srcset, sizes & heights](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/art_direction) for usage of `sizes` and `srcset`.
 
+**img-sizes**
+
+Like the `sizes` attribute, the value is applied to the underlying `<img>` as `sizes`. In contrast, this does not affect the width of the `<amp-img>` element and is only used to select one of the sources from the `srcset`.
+
 **alt**
 
 A string of alternate text, similar to the `alt` attribute on `img`.
