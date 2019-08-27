@@ -26,6 +26,7 @@ const isRunning = require('is-running');
 const log = require('fancy-log');
 const morgan = require('morgan');
 const webserver = require('gulp-webserver');
+const {lazyBuildExtensions, lazyBuildJs} = require('./lazy-build');
 
 const {
   SERVE_HOST: host,
@@ -38,6 +39,7 @@ const quiet = process.env.SERVE_QUIET == 'true';
 const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
 const noCachingExtensions =
   process.env.SERVE_EXTENSIONS_WITHOUT_CACHING == 'true';
+const lazyBuild = process.env.LAZY_BUILD == 'true';
 const header = require('connect-header');
 
 // Exit if the port is in use.
@@ -84,6 +86,11 @@ if (noCachingExtensions) {
     }
     next();
   });
+}
+
+if (lazyBuild) {
+  middleware.push(lazyBuildExtensions);
+  middleware.push(lazyBuildJs);
 }
 
 // Start gulp webserver

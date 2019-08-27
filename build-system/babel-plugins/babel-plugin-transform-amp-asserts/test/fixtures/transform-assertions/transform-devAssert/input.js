@@ -15,6 +15,4 @@
  */
 devAssert(1 + 1);
 devAssert(dev().assert(2 + 2));
-devAssert();
 let result = devAssert(dev(), 'hello', 'world');
-let result2 = devAssert();

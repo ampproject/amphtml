@@ -39,7 +39,6 @@ import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
-import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
@@ -132,8 +131,8 @@ export function createCustomElementClass(win, name) {
  * @return {function(new:HTMLElement)}
  */
 function createBaseCustomElementClass(win) {
-  if (win.BaseCustomElementClass) {
-    return win.BaseCustomElementClass;
+  if (win.__AMP_BASE_CE_CLASS) {
+    return win.__AMP_BASE_CE_CLASS;
   }
   const htmlElement =
     /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
@@ -193,12 +192,6 @@ function createBaseCustomElementClass(win) {
        * @private {?./service/resources-impl.ResourcesDef}
        */
       this.resources_ = null;
-
-      /**
-       * Layers can only be looked up when an element is attached.
-       * @private {?./service/layers-impl.LayoutLayers}
-       */
-      this.layers_ = null;
 
       /** @private {!Layout} */
       this.layout_ = Layout.NODISPLAY;
@@ -261,7 +254,8 @@ function createBaseCustomElementClass(win) {
 
       // `opt_implementationClass` is only used for tests.
       let Ctor =
-        win.ampExtendedElements && win.ampExtendedElements[this.elementName()];
+        win.__AMP_EXTENDED_ELEMENTS &&
+        win.__AMP_EXTENDED_ELEMENTS[this.elementName()];
       if (getMode().test && nonStructThis['implementationClassForTesting']) {
         Ctor = nonStructThis['implementationClassForTesting'];
       }
@@ -355,18 +349,6 @@ function createBaseCustomElementClass(win) {
       );
       return /** @typedef {!./service/resources-impl.ResourcesDef} */ this
         .resources_;
-    }
-
-    /**
-     * Returns LayoutLayers. Only available after attachment. It throws
-     * exception before the element is attached.
-     * @return {!./service/layers-impl.LayoutLayers}
-     * @final
-     * @package
-     */
-    getLayers() {
-      devAssert(this.layers_, 'no layers yet, since element is not attached');
-      return /** @typedef {!./service/layers-impl.LayoutLayers} */ this.layers_;
     }
 
     /**
@@ -853,13 +835,6 @@ function createBaseCustomElementClass(win) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
       }
-      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
-        if (!this.layers_) {
-          // Resources can now be initialized since the ampdoc is now available.
-          this.layers_ = Services.layersForDoc(this.ampdoc_);
-        }
-        this.getLayers().add(this);
-      }
       this.getResources().add(this);
 
       if (this.everAttached) {
@@ -999,9 +974,6 @@ function createBaseCustomElementClass(win) {
 
       this.isConnected_ = false;
       this.getResources().remove(this);
-      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
-        this.getLayers().remove(this);
-      }
       this.implementation_.detachedCallback();
     }
 
@@ -1891,8 +1863,8 @@ function createBaseCustomElementClass(win) {
       }
     }
   }
-  win.BaseCustomElementClass = BaseCustomElement;
-  return /** @type {function(new:HTMLElement)} */ (win.BaseCustomElementClass);
+  win.__AMP_BASE_CE_CLASS = BaseCustomElement;
+  return /** @type {function(new:HTMLElement)} */ (win.__AMP_BASE_CE_CLASS);
 }
 
 /**

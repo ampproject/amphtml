@@ -202,11 +202,11 @@ describe('service', () => {
 
     it('should set service builders to null after instantiation', () => {
       registerServiceBuilder(window, 'a', Class);
-      expect(window.services['a'].obj).to.be.null;
-      expect(window.services['a'].ctor).to.not.be.null;
+      expect(window.__AMP_SERVICES['a'].obj).to.be.null;
+      expect(window.__AMP_SERVICES['a'].ctor).to.not.be.null;
       getService(window, 'a');
-      expect(window.services['a'].obj).to.not.be.null;
-      expect(window.services['a'].ctor).to.be.null;
+      expect(window.__AMP_SERVICES['a'].obj).to.not.be.null;
+      expect(window.__AMP_SERVICES['a'].ctor).to.be.null;
     });
 
     it('should resolve service for a child window', () => {
@@ -282,8 +282,8 @@ describe('service', () => {
       expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
-      expect(windowApi.services['a']).to.exist;
-      expect(ampdoc.services).to.not.exist;
+      expect(windowApi.__AMP_SERVICES['a']).to.exist;
+      expect(ampdoc.__AMP_SERVICES).to.not.exist;
 
       registerServiceBuilderForDoc(node, 'b', factory);
       const b1 = getServiceForDoc(node, 'b');
@@ -292,8 +292,8 @@ describe('service', () => {
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
-      expect(windowApi.services['b']).to.exist;
-      expect(ampdoc.services).to.not.exist;
+      expect(windowApi.__AMP_SERVICES['b']).to.exist;
+      expect(ampdoc.__AMP_SERVICES).to.not.exist;
     });
 
     it('should make per ampdoc singletons via ampdoc', () => {
@@ -309,8 +309,8 @@ describe('service', () => {
       expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
-      expect(windowApi.services['a']).to.exist;
-      expect(ampdoc.services).to.not.exist;
+      expect(windowApi.__AMP_SERVICES['a']).to.exist;
+      expect(ampdoc.__AMP_SERVICES).to.not.exist;
     });
 
     it('should make per ampdoc singletons and store them in ampdoc', () => {
@@ -326,8 +326,8 @@ describe('service', () => {
       expect(a1).to.deep.equal({count: 1});
       expect(factory).to.be.calledOnce;
       expect(factory.args[0][0]).to.equal(ampdoc);
-      expect(windowApi.services['a']).to.not.exist;
-      expect(ampdoc.services['a']).to.exist;
+      expect(windowApi.__AMP_SERVICES['a']).to.not.exist;
+      expect(ampdoc.__AMP_SERVICES['a']).to.exist;
 
       registerServiceBuilderForDoc(node, 'b', factory);
       const b1 = getServiceForDoc(node, 'b');
@@ -337,8 +337,8 @@ describe('service', () => {
       expect(b1).to.not.equal(a1);
       expect(factory).to.have.callCount(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
-      expect(windowApi.services['b']).to.not.exist;
-      expect(ampdoc.services['b']).to.exist;
+      expect(windowApi.__AMP_SERVICES['b']).to.not.exist;
+      expect(ampdoc.__AMP_SERVICES['b']).to.exist;
     });
 
     it('should not instantiate service when registered', () => {
@@ -620,7 +620,8 @@ describe('service', () => {
         expect(fromGrandchildNode).to.not.equal(topService);
 
         // The service is NOT also registered on the embed window.
-        expect(childWin.services && childWin.services['c']).to.not.exist;
+        expect(childWin.__AMP_SERVICES && childWin.__AMP_SERVICES['c']).to.not
+          .exist;
       });
 
       it('should return overriden service', () => {
@@ -645,7 +646,7 @@ describe('service', () => {
         expect(fromGrandchildNode).to.be.null;
 
         // The service is also registered on the embed window.
-        expect(childWin.services['c']).to.exist;
+        expect(childWin.__AMP_SERVICES['c']).to.exist;
       });
     });
 

@@ -244,7 +244,8 @@ async function newPage(browser, viewport = null) {
     );
 
     if (
-      requestUrl.hostname == HOST ||
+      requestUrl.protocol === 'data:' ||
+      requestUrl.hostname === HOST ||
       requestUrl.hostname.endsWith(`.${HOST}`)
     ) {
       return interceptedRequest.continue();
@@ -777,11 +778,8 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
-  try {
-    await performVisualTests();
-  } finally {
-    return await cleanup_();
-  }
+  await performVisualTests();
+  return await cleanup_();
 }
 
 /**

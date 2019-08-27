@@ -49,10 +49,10 @@ let rtvVersion = '';
  */
 export function getMode(opt_win) {
   const win = opt_win || self;
-  if (win.AMP_MODE) {
-    return win.AMP_MODE;
+  if (win.__AMP_MODE) {
+    return win.__AMP_MODE;
   }
-  return (win.AMP_MODE = getMode_(win));
+  return (win.__AMP_MODE = getMode_(win));
 }
 
 /**
@@ -73,7 +73,7 @@ function getMode_(win) {
 
   const localDevEnabled = !!AMP_CONFIG.localDev;
   const runningTests =
-    !!AMP_CONFIG.test || (IS_DEV && !!(win.AMP_TEST || win.__karma__));
+    !!AMP_CONFIG.test || (IS_DEV && !!(win.__AMP_TEST || win.__karma__));
   const runningTestsOnIe = win.__karma__ && win.__karma__.config.amp.testOnIe;
   const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
@@ -98,10 +98,11 @@ function getMode_(win) {
     // Triggers validation or enable pub level logging. Validation can be
     // bypassed via #validate=0.
     // Note that AMP_DEV_MODE flag is used for testing purposes.
+    // Use Array.indexOf instead of Array.includes because of #24219
     development: !!(
-      ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].includes(
+      ['1', 'actions', 'amp', 'amp4ads', 'amp4email'].indexOf(
         hashQuery['development']
-      ) || win.AMP_DEV_MODE
+      ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
