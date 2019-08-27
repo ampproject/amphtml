@@ -27,7 +27,8 @@ import {registerElement} from '../src/service/custom-element-registry';
 const TAG = 'amp-img';
 
 /**
- * Attributes to propagate to internal image when changed externally.
+ * Attributes to propagate to internal image when changed externally. The
+ * `sizes` attribute is handled separately to prioritize `img-sizes`.
  * @type {!Array<string>}
  */
 const ATTRIBUTES_TO_PROPAGATE = [
@@ -39,7 +40,6 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'aria-labelledby',
   'srcset',
   'src',
-  'sizes',
 ];
 
 export class AmpImg extends BaseElement {
@@ -67,6 +67,30 @@ export class AmpImg extends BaseElement {
      * @private {number}
      * */
     this.sizesWidth_ = 0;
+  }
+
+  /**
+   * @return {?string} The sizes value to use for the img, preferring
+   *    `img-sizes` and falling back to `sizes`.
+   */
+  getSizesValueToUse_() {
+    return (
+      this.element.getAttribute('img-sizes') ||
+      this.element.getAttribute('sizes')
+    );
+  }
+
+  /**
+   * If present, propagates the `img-sizes` or `sizes` value to the internal
+   * img.
+   */
+  propagateSizes() {
+    const sizes = this.getSizesValueToUse_();
+    if (sizes === null) {
+      this.img_.removeAttribute('sizes', sizes);
+    } else {
+      this.img_.setAttribute('sizes', sizes);
+    }
   }
 
   /** @override */
@@ -97,6 +121,9 @@ export class AmpImg extends BaseElement {
         this.img_,
         /* opt_removeMissingAttrs */ true
       );
+      if (mutations['img-sizes'] || mutations['sizes']) {
+        this.propagateSizes();
+      }
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
   }
@@ -176,6 +203,7 @@ export class AmpImg extends BaseElement {
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    this.propagateSizes();
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.maybeGenerateSizes_();
     this.applyFillContent(this.img_, true);
@@ -194,7 +222,7 @@ export class AmpImg extends BaseElement {
       return;
     }
     // No need to generate sizes if already present.
-    const sizes = this.element.getAttribute('sizes');
+    const sizes = this.getSizesValueToUse_();
     if (sizes) {
       return;
     }

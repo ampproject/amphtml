@@ -188,6 +188,83 @@ describe('amp-img', () => {
     });
   });
 
+  it('should propagate srcset and img-sizes', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      srcset: SRCSET_STRING,
+      'img-sizes': '(max-width: 320px) 640px, 100vw',
+      width: 320,
+      height: 240,
+    });
+    const img = ampImg.querySelector('img');
+    expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
+    expect(img.getAttribute('sizes')).to.equal(
+      '(max-width: 320px) 640px, 100vw'
+    );
+  });
+
+  it('should prefer img-sizes to sizes', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      srcset: SRCSET_STRING,
+      sizes: '(max-width: 320px) 640px, 100vw',
+      'img-sizes': '640px',
+      width: 320,
+      height: 240,
+    });
+    const img = ampImg.querySelector('img');
+    expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
+    expect(img.getAttribute('sizes')).to.equal('640px');
+  });
+
+  it('should update sizes on mutation', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      srcset: SRCSET_STRING,
+      sizes: '640px',
+      width: 300,
+      height: 200,
+    });
+    const impl = ampImg.implementation_;
+
+    ampImg.setAttribute('sizes', '50vw');
+    impl.mutatedAttributesCallback({sizes: '50vw'});
+
+    expect(impl.img_.getAttribute('sizes')).to.equal('50vw');
+  });
+
+  it('should update sizes on img-sizes mutation', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      srcset: SRCSET_STRING,
+      'img-sizes': '640px',
+      width: 300,
+      height: 200,
+    });
+    const impl = ampImg.implementation_;
+
+    ampImg.setAttribute('img-sizes', '50vw');
+    impl.mutatedAttributesCallback({'img-sizes': '50vw'});
+
+    expect(impl.img_.getAttribute('sizes')).to.equal('50vw');
+  });
+
+  it('should ignore sizes mutations when img-sizes is used', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      srcset: SRCSET_STRING,
+      'img-sizes': '640px',
+      width: 300,
+      height: 200,
+    });
+    const impl = ampImg.implementation_;
+
+    ampImg.setAttribute('sizes', '50vw');
+    impl.mutatedAttributesCallback({sizes: '50vw'});
+
+    expect(impl.img_.getAttribute('sizes')).to.equal('640px');
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
@@ -528,6 +605,23 @@ describe('amp-img', () => {
           const img = impl.img_;
           expect(img.getAttribute('sizes')).to.equal('50vw');
         });
+    });
+
+    it('should not generate sizes for amp-imgs that already have img-sizes', async () => {
+      const ampImg = await getImg({
+        src: '/examples/img/sample.jpg',
+        srcset: SRCSET_STRING,
+        'img-sizes': '50vw',
+        width: 300,
+        height: 200,
+      });
+
+      const impl = ampImg.implementation_;
+      impl.buildCallback();
+      await impl.layoutCallback();
+
+      const img = impl.img_;
+      expect(img.getAttribute('sizes')).to.equal('50vw');
     });
 
     it('should not generate sizes for amp-imgs with layout intrinsic', () => {
