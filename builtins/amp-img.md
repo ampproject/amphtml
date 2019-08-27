@@ -127,7 +127,7 @@ See [Responsive images with srcset, sizes & heights](https://amp.dev/documentati
 
 **img-sizes**
 
-Like the `sizes` attribute, the value is applied to the underlying `<img>` as `sizes`. In contrast, this does not affect the width of the `<amp-img>` element and is only used to select one of the sources from the `srcset`.
+Like `sizes` above, sets the [`sizes`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-sizes) attribute on the underlying `img`. Unlike `sizes`, this does not change the width of the `amp-img` and is only used by the browser for picking which source to use from the `srcset`.
 
 **alt**
 

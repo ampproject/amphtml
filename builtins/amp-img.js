@@ -121,7 +121,7 @@ export class AmpImg extends BaseElement {
         this.img_,
         /* opt_removeMissingAttrs */ true
       );
-      if (mutations['img-sizes'] || mutations['sizes']) {
+      if (mutations['sizes']) {
         this.propagateSizes();
       }
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);

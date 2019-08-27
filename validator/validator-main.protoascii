@@ -5210,6 +5210,8 @@ tags: {  # <amp-img>
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
+  # Used to set sizes on the <img> without AMP's sizes behavior
+  attrs: { name: "img-sizes" }
   # <amp-bind>
   attrs: { name: "[alt]" }
   attrs: { name: "[attribution]" }

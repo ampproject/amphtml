@@ -233,22 +233,6 @@ describe('amp-img', () => {
     expect(impl.img_.getAttribute('sizes')).to.equal('50vw');
   });
 
-  it('should update sizes on img-sizes mutation', async () => {
-    const ampImg = await getImg({
-      src: '/examples/img/sample.jpg',
-      srcset: SRCSET_STRING,
-      'img-sizes': '640px',
-      width: 300,
-      height: 200,
-    });
-    const impl = ampImg.implementation_;
-
-    ampImg.setAttribute('img-sizes', '50vw');
-    impl.mutatedAttributesCallback({'img-sizes': '50vw'});
-
-    expect(impl.img_.getAttribute('sizes')).to.equal('50vw');
-  });
-
   it('should ignore sizes mutations when img-sizes is used', async () => {
     const ampImg = await getImg({
       src: '/examples/img/sample.jpg',
