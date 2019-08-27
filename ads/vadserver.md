@@ -22,7 +22,7 @@ limitations under the License.
 
 ```html
 <amp-ad width="0" height="0"
-  type="vidoomy"
+  type="vadserver"
   data-pid="430"
   data-sid="690712"
   data-xtra-lkqd-settings="{close: true}">
