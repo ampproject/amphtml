@@ -400,6 +400,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
+- [VAdServer](../../ads/vadserver.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
 - [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
