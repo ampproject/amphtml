@@ -515,7 +515,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const iframe = elementByTag(adPageElement, 'iframe');
     // No iframe for custom ad.
     if (iframe) {
-      const iframeDoc = getFrameDoc(iframe);
+      const iframeDoc = getFrameDoc(/** @type {!HTMLIFrameElement} */ iframe);
       ampAdExitOutlink = this.readAmpAdExit_(iframeDoc);
       a4aVars = this.extractA4AVars_(iframeDoc);
     }
