@@ -80,7 +80,8 @@ describe('AMPHTML ad on AMP Page', () => {
   );
 });
 
-const itIncludeIe = it.configure().enableIe();
+const itConfig = it.configure().enableIe();
+const itWithIe = itConfig.run.bind(itConfig);
 
 describe('AMPHTML ad on non-AMP page (inabox)', () => {
   describes.integration(
@@ -97,7 +98,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       `,
     },
     env => {
-      itIncludeIe.run('should layout amp-img, amp-pixel, amp-analytics', () => {
+      itWithIe('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponents();
       });
@@ -130,7 +131,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.iframe.style.height = '100vh';
       });
 
-      itIncludeIe.run('should layout amp-img, amp-pixel, amp-analytics', () => {
+      itWithIe('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
       });
@@ -169,7 +170,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.win.document.body.removeChild(iframe);
       });
 
-      itIncludeIe.run(
+      itWithIe(
         'should layout amp-img, amp-pixel, ' +
           'amp-analytics within friendly frame',
         () => {
@@ -178,7 +179,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         }
       );
 
-      itIncludeIe.run(
+      itWithIe(
         'should layout amp-img, amp-pixel, ' +
           'amp-analytics within safe frame',
         () => {
