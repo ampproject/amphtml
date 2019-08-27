@@ -103,6 +103,7 @@
       <option>shinystat</option>
       <option>simplereach</option>
       <option>snowplow</option>
+      <option>snowplow_v2</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
@@ -1307,6 +1308,99 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
 
+<!-- Snowplow v2 Analytics tracking -->
+<!-- reason behinf maxTimerLength": 4.99  is discussed here https://github.com/ampproject/amphtml/issues/16910 -->
+<amp-analytics type="snowplow_v2" id="snowplow_v2" data-credentials="include">
+<script type="application/json">
+  {
+    "vars": {
+      "collectorHost": "d3rkrsqld9gmqf.cloudfront.net",
+      "appId": "amp-examples",
+      "userId": "${cookie(_sp_uid)}",
+      "domainUserId": "${cookie(_sp_duid)}",
+      "sessionId": "${cookie(_sp_sid)}",
+      "spVisitIndex": "${cookie(_sp_vid)}",
+      "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0\",\"data\":[{\"schema\":\"iglu:com.google.analytics/cookies/jsonschema/1-0-0\",\"data\":{\"_ga\":\"${clientId(_ga)}\"}}]}"
+    },
+    "linkers": {
+      "enabled": true,
+      "proxyOnly": false,
+      "destinationDomains": ["localhost"]
+    },
+    "triggers": {
+      "defaultPageview": {
+        "on": "visible",
+        "request": "pageView"
+      },
+      "trackFirstPagePing": {
+        "on": "timer",
+        "request": "pagePing",
+        "timerSpec": {
+          "interval": 10,
+          "maxTimerLength": 9.99,
+          "immediate": false,
+          "startSpec": {
+            "on": "visible",
+            "selector": ":root"
+          },
+          "stopSpec": {
+            "on": "hidden",
+            "selector": ":root"
+          }
+        }
+      },
+      "trackPagePings": {
+        "on": "timer",
+        "request": "pagePing",
+        "timerSpec": {
+          "interval": 30,
+          "maxTimerLength": 1800,
+          "immediate": false,
+          "startSpec": {
+            "on": "visible",
+            "selector": ":root"
+          },
+          "stopSpec": {
+            "on": "hidden",
+            "selector": ":root"
+          }
+        }
+      },
+      "trackSelfDescribedEvent": {
+        "on": "click",
+        "selector": "a",
+        "request": "selfDescribedEvent",
+        "vars": {
+          "customEventSchemaVendor": "com.snowplowanalytics.snowplow",
+          "customEventSchemaName": "link_click",
+          "customEventSchemaVersion": "1-0-1",
+          "customEventSchemaData": "\"targetUrl\":\"${targetUrl}\",\"elementId\":\"TEST\",\"elementContent\":\"${elementContent}\""
+        }
+      },
+      "clickOnTest1Trigger": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "structEvent",
+        "vars": {
+          "structEventCategory": "examples",
+          "structEventAction": "clicked-test1"
+        }
+      },
+      "clickOnTopTrigger": {
+        "on": "click",
+        "selector": "#top",
+        "request": "structEvent",
+        "vars": {
+          "structEventCategory": "examples",
+          "structEventAction": "clicked-header"
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Snowplow Analytics example -->
+
 <!-- TEA Analytics Example
     Ensure you replace app_id with your appId.
     Ensure you replace channel with correct value.
@@ -1687,10 +1781,12 @@ For complete documentation and additional examples please see: https://marketing
 </div>
 
 <div class="logo"></div>
-<h1 id="top">AMP Analytics</h1>
 <span id="test1" class="box" data-vars-title="Example request with element level overrides">
   Click here to generate an event
 </span>
+<p>
+Example of <a id="ext" data-vars-target-url="../"  data-vars-element-id="home" data-vars-element-content="Internal Link" href="../">Internal Link</a>.
+</p>
 <p>
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in maximus orci. Maecenas id turpis vel ipsum vestibulum bibendum ut sit amet magna. Nullam hendrerit ex at est eleifend, nec dignissim nibh rutrum. Aliquam quis tellus et nibh faucibus laoreet in eget turpis. Nam quam nisl, porttitor vel ex eget, dapibus placerat dui. Mauris commodo pellentesque leo, eu tempus quam. In hac habitasse platea dictumst. Suspendisse non ante finibus, luctus augue non, luctus orci. Vestibulum ornare lacinia aliquam. In sollicitudin vehicula vulputate. Sed mi elit, commodo nec sapien nec, pretium bibendum leo. Donec id justo tortor. Ut in mauris dapibus, laoreet metus vitae, dictum nisi.
 </p>
