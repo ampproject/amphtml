@@ -222,10 +222,8 @@ function getExtensionsToBuild() {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
-
   extensionsToBuild = DEFAULT_EXTENSION_SET;
-
-  if (!!argv.extensions) {
+  if (argv.extensions) {
     if (argv.extensions === 'minimal_set') {
       argv.extensions = MINIMAL_EXTENSION_SET.join(',');
     } else if (argv.extensions === 'inabox') {
@@ -233,17 +231,18 @@ function getExtensionsToBuild() {
     }
     const explicitExtensions = argv.extensions.split(',');
     extensionsToBuild = dedupe(extensionsToBuild.concat(explicitExtensions));
-  } else if (!!argv.extensions_from) {
+  }
+  if (argv.extensions_from) {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
-  } else if (!argv.noextensions) {
+  }
+  if (!argv.noextensions && !argv.extensions && !argv.extensions_from) {
     const allExtensions = [];
     for (const extension in extensions) {
       allExtensions.push(extensions[extension].name);
     }
     extensionsToBuild = dedupe(extensionsToBuild.concat(allExtensions));
   }
-
   return extensionsToBuild;
 }
 
