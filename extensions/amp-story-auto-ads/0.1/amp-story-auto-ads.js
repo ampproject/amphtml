@@ -29,6 +29,7 @@ import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {
   createElementWithAttributes,
+  elementByTag,
   isJsonScriptTag,
   iterateCursor,
   openWindowDialog,
@@ -162,9 +163,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.lastCreatedAdElement_ = null;
-
-    /** @private */
-    this.lastCreatedAdImpl_ = null;
 
     /** @private {?Element}} */
     this.visibleAdBody_ = null;
@@ -441,15 +439,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.lastCreatedAdElement_ = ampAd;
     this.isCurrentAdLoaded_ = false;
 
-    // set up listener for ad-loaded event
+    // Set up listener for ad-loaded event.
     ampAd
-      .getImpl()
-      .then(adImpl => {
-        this.lastCreatedAdImpl_ = adImpl;
-        const signals = adImpl.signals();
-        // TODO(ccordry): Investigate using a better signal waiting for video loads.
-        return signals.whenSignal(CommonSignals.INI_LOAD);
-      })
+      .signals()
+      .whenSignal(CommonSignals.INI_LOAD)
       .then(() => {
         // Ensures the video-manager does not follow the autoplay attribute on
         // amp-video tags, which would play the ad in the background before it is
@@ -518,7 +511,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     let a4aVars = {};
     let ampAdExitOutlink = null;
 
-    const {iframe} = this.lastCreatedAdImpl_;
+    const iframe = elementByTag(adPageElement, 'iframe');
     // No iframe for custom ad.
     if (iframe) {
       const iframeDoc = getFrameDoc(iframe);
