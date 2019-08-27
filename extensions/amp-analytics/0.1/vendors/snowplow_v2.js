@@ -82,7 +82,7 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
       'uid=${userId}' +
       'vid=${vid}' +
       'sid=${sid}' +
-      'co=${customContexts}' +
+      'co=${customContexts}',
     'structEvent':
       '${basePrefix}&e=se' +
       '&se_ca=${structEventCategory}' +
