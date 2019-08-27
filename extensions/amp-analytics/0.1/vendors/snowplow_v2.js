@@ -62,8 +62,7 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
     'basePrefix': 'https://${collectorHost}/i?p=web',
   },
   'requests': {
-    'pageView':
-      '${basePrefix}&e=pv',
+    'pageView': '${basePrefix}&e=pv',
     'structEvent':
       '${basePrefix}&e=se' +
       '&se_ca=${structEventCategory}' +
