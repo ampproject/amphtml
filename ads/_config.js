@@ -1017,7 +1017,7 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'vadserver': { },
+  'vadserver': {},
 
   'valuecommerce': {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
