@@ -128,6 +128,7 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
   <li><code>&lt;amp-list></code></li>
   <li><code>&lt;amp-live-list></code></li>
   <li><code>&lt;amp-mathml></code></li>
+  <li><code>&lt;amp-megaphone></code></li>
   <li><code>&lt;amp-mowplayer></code></li>
   <li><code>&lt;amp-nexxtv-player></code></li>
   <li><code>&lt;amp-o2-player></code></li>
