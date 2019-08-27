@@ -442,6 +442,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // Set up listener for ad-loaded event.
     ampAd
       .signals()
+      // TODO(ccordry): Investigate using a better signal waiting for video loads.
       .whenSignal(CommonSignals.INI_LOAD)
       .then(() => {
         // Ensures the video-manager does not follow the autoplay attribute on
