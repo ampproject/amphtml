@@ -41,7 +41,6 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
     },
   },
   'vars': {
-    'aaVersion': 'amp_v2-0.1',
     'ampVistorId': 'CLIENT_ID(_sp_id)',
     'generatedSessionId': ['616d70',['a'].map(a=>{return Math.random()}).join().slice(2,4),'-',['a'].map(a=>{return Math.random()}).join().slice(2,6),'-4',['a'].map(a=>{return Math.random()}).join().slice(2,5),'-8',['a'].map(a=>{return Math.random()}).join().slice(2,5),'-',['a'].map(a=>{return Math.random()}).join().slice(2,14)].join(''),
     'linkerSessionId': '$IF(COOKIE(_sp_asid), COOKIE(_sp_asid), ${generatedSessionId})',
@@ -59,11 +58,31 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
         '}',
       '}',
     ].join(''),
-    'basePrefix': 'https://${collectorHost}/i?p=web',
   },
   'requests': {
+    'aaVersion': 'amp_v2-0.1',
+    'basePrefix': 'https://${collectorHost}/i?p=web',
     'pageView':
-      '${basePrefix}&e=pv',
+      '${basePrefix}&e=pv' +
+      'url=${canonicalUrl}' +
+      'page=${title}' +
+      'res=${screenWidth}x${screenHeight}' +
+      'stm=${timestamp}' +
+      'tz=${timezoneCode}' +
+      'aid=${appId}' +
+      'tv=${aaVersion}' +
+      'cd=${screenColorDepth}' +
+      'cs=${documentCharset}' +
+      'duid=${duid}' +
+      'lang=${browserLanguage}' +
+      'refr=${documentReferrer}' +
+      'vp=${viewportWidth}x${viewportHeight}' +
+      'ua=${userAgent}' +
+      'ds=${scrollWidth}x${scrollHeight}' +
+      'uid=${userId}' +
+      'vid=${vid}' +
+      'sid=${sid}' +
+      'co=${customContexts}' +
     'structEvent':
       '${basePrefix}&e=se' +
       '&se_ca=${structEventCategory}' +
@@ -78,27 +97,6 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
     'selfDescribedEvent':
       '${basePrefix}&e=ue' +
       '&ue_pr=${customEventTemplate}',
-  },
-  'extraUrlParams': {
-    'url': '${canonicalUrl}',
-    'page': '${title}',
-    'res': '${screenWidth}x${screenHeight}',
-    'stm': '${timestamp}',
-    'tz': '${timezoneCode}',
-    'aid': '${appId}',
-    'tv': '${aaVersion}',
-    'cd': '${screenColorDepth}',
-    'cs': '${documentCharset}',
-    'duid': '${duid}',
-    'lang': '${browserLanguage}',
-    'refr': '${documentReferrer}',
-    'vp': '${viewportWidth}x${viewportHeight}',
-    'ua': '${userAgent}',
-    'ds': '${scrollWidth}x${scrollHeight}',
-    'uid': '${userId}',
-    'vid': '${vid}',
-    'sid': '${sid}',
-    'co': '${customContexts}',
   },
   'transport': {
     'beacon': false,
