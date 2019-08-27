@@ -1842,10 +1842,7 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.VERTICAL;
     }
 
-    if (
-      !this.isDesktop_() ||
-      isExperimentOn(this.win, 'disable-amp-story-desktop')
-    ) {
+    if (!this.isDesktop_()) {
       return UIType.MOBILE;
     }
 
