@@ -22,7 +22,7 @@ import {validateData, writeScript} from '../3p/3p';
  */
 export function vadserver(global, data) {
   const mandatoryAttributes = ['pid', 'sid'];
-  const optionalAttributes = ['xtra-lkqd-settings'];
+  const optionalAttributes = ['xtraLkqdSettings'];
   validateData(data, mandatoryAttributes, optionalAttributes);
   global.vAdServerConfig = data;
   writeScript(global, 'https://vadserver.com/amp/lkqd-amp-ad.js');
