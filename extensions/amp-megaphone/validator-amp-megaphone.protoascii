@@ -76,7 +76,7 @@ tags: {  # <amp-megaphone> for episodes
   }
   attrs: {
     name: "data-start"
-    value_regex: "\d+(\.\d+)?"
+    value_regex: "\\d+(\\.\\d+)?"
   }
   attrs: {
     name: "data-tile"
