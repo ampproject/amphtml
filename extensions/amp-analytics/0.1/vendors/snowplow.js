@@ -21,7 +21,7 @@ const SNOWPLOW_CONFIG = jsonLiteral({
     'duid': 'CLIENT_ID(_sp_id)',
   },
   'requests': {
-    'aaVersion': 'amp-0.3',
+    'aaVersion': 'amp-0.2',
     'basePrefix':
       'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
       'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
