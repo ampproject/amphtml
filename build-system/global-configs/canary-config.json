@@ -1,7 +1,6 @@
 {
   "allow-doc-opt-in": [
     "amp-next-page",
-    "disable-amp-story-desktop",
     "inabox-viewport-friendly",
     "inabox-no-chunking",
     "inabox-viewport-lite",
