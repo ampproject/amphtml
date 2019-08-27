@@ -389,7 +389,6 @@
     "timer": "https://edge.simplereach.com/t?amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&channels=!categories&tags=!tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata&t=5000&e=5000"
   },
   "snowplow": {
-    "aaVersion": "amp-0.3",
     "pageView": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_code_&aid=!appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&vp=_viewport_width_x_viewport_height_&ds=_scroll_width_x_scroll_height_&e=pv",
     "structEvent": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_code_&aid=!appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&vp=_viewport_width_x_viewport_height_&ds=_scroll_width_x_scroll_height_&e=se&se_ca=!structEventCategory&se_ac=!structEventAction&se_la=!structEventLabel&se_pr=!structEventProperty&se_va=!structEventValue"
   },
