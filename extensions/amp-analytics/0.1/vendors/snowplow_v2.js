@@ -60,7 +60,7 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
     ].join(''),
   },
   'requests': {
-    'aaVersion': 'amp_v2-0.1',
+    'aaVersion': 'amp_v2-0.2',
     'basePrefix': 'https://${collectorHost}/i?p=web' +
       '&url=${canonicalUrl}' +
       '&page=${title}' +
