@@ -61,9 +61,7 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
   },
   'requests': {
     'aaVersion': 'amp_v2-0.1',
-    'basePrefix': 'https://${collectorHost}/i?p=web',
-    'pageView':
-      '${basePrefix}&e=pv' +
+    'basePrefix': 'https://${collectorHost}/i?p=web' +
       'url=${canonicalUrl}' +
       'page=${title}' +
       'res=${screenWidth}x${screenHeight}' +
@@ -83,6 +81,8 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
       'vid=${vid}' +
       'sid=${sid}' +
       'co=${customContexts}',
+    'pageView':
+      '${basePrefix}&e=pv',
     'structEvent':
       '${basePrefix}&e=se' +
       '&se_ca=${structEventCategory}' +
