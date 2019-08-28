@@ -176,26 +176,6 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 }
 
 
-/**
- * iOS-Embed Wrapper shadow root mode. The `body` children are distributed
- * inside a scrollable element inside the shadow root.
- */
-html.i-amphtml-ios-embed-sd {
-  overflow: hidden !important;
-  position: static !important;
-}
-
-html.i-amphtml-ios-embed-sd > body,
-html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  overflow: hidden !important;
-}
-
-
 .i-amphtml-scroll-disabled {
   overflow-x: hidden !important;
   overflow-y: hidden !important;
