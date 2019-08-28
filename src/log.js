@@ -227,7 +227,7 @@ export class Log {
       }
       const args = this.maybeExpandMessageArgs_(messages);
       if (getMode().localDev) {
-        args.unshift('[' + tag + ']');
+        args[0] = `[${tag}] ` + args[0];
       }
       fn.apply(this.win.console, args);
     }
