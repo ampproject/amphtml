@@ -33,12 +33,6 @@ const {
   toPromise,
 } = require('./helpers');
 const {
-  buildExtensions,
-  extensionAliasFilePath,
-  getExtensionsToBuild,
-  parseExtensionFlags,
-} = require('./extension-helpers');
-const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
 const {
@@ -47,6 +41,7 @@ const {
   stopNailgunServer,
 } = require('./nailgun');
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
@@ -161,7 +156,6 @@ async function dist() {
   }
 
   await stopNailgunServer(distNailgunPort);
-  await copyAliasExtensions();
   await formatExtractedMessages();
 
   if (argv.esm) {
@@ -282,29 +276,6 @@ function copyParsers() {
   return fs.copy('build/parsers', 'dist/v0').then(() => {
     endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
-}
-
-/**
- * Copy built extension to alias extension
- * @return {!Promise}
- */
-function copyAliasExtensions() {
-  if (argv.noextensions) {
-    return Promise.resolve();
-  }
-
-  const extensionsToBuild = getExtensionsToBuild();
-
-  for (const key in extensionAliasFilePath) {
-    if (extensionsToBuild.includes(extensionAliasFilePath[key].name)) {
-      fs.copySync(
-        'dist/v0/' + extensionAliasFilePath[key].file,
-        'dist/v0/' + key
-      );
-    }
-  }
-
-  return Promise.resolve();
 }
 
 /**
