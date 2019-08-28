@@ -441,7 +441,7 @@ function buildExtension(
   if (options.watch) {
     options.watch = false;
     watch(path + '/**/*', function() {
-      const complete = buildExtension(
+      const bundleComplete = buildExtension(
         name,
         version,
         latestVersion,
@@ -449,7 +449,7 @@ function buildExtension(
         Object.assign({}, options, {continueOnError: true})
       );
       if (options.onWatchBuild) {
-        options.onWatchBuild(complete);
+        options.onWatchBuild(bundleComplete);
       }
     });
   }

@@ -56,11 +56,10 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
 async function build(bundles, bundle, buildFunc) {
   bundles[bundle].pendingBuild = buildFunc(bundles, bundle, {
     watch: true,
-    onWatchBuild: bundlePromise => {
+    onWatchBuild: async bundlePromise => {
       bundles[bundle].pendingBuild = bundlePromise;
-      bundlePromise.then(() => {
-        bundles[bundle].pendingBuild = undefined;
-      });
+      await bundlePromise;
+      bundles[bundle].pendingBuild = undefined;
     },
   });
   await bundles[bundle].pendingBuild;
