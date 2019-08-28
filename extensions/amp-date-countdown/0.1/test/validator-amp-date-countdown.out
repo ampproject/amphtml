@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |    Licensed under the Apache License, Version 2.0 (the "License");
@@ -156,6 +156,12 @@ PASS
 |    </amp-date-countdown>
 |
 |    <amp-date-countdown timestamp-seconds="1521880470" offset-seconds="1521880470" when-ended="continue" locale='de' height="50" width="360" template="myTemplate">
+|    </amp-date-countdown>
+|
+|    <!-- Should error if the `template` referent is missing. -->
+|    <amp-date-countdown timestamp-ms="1521880470000" offset-seconds="1521880470" when-ended="stop" locale='zh-tw' height="50" width="360" template="notMyTemplate">
+>>   ^~~~~~~~~
+amp-date-countdown/0.1/test/validator-amp-date-countdown.html:161:2 Attribute 'template' in tag 'amp-date-countdown' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-date-countdown) [GENERIC]
 |    </amp-date-countdown>
 |  </body>
 |  </html>

@@ -173,7 +173,19 @@
     src="https://data.com/articles.json?ref=CANONICAL_URL"
     load-more="manual"
     load-more-bookmark="next">
-  <button></button>
-</amp-list>
+    <button></button>
+  </amp-list>
+  <!-- References to template elements -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    template="missing">
+    <div></div>
+  </amp-list>
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    template="found">
+    <div></div>
+  </amp-list>
+  <template id="found"></template>
 </body>
 </html>
