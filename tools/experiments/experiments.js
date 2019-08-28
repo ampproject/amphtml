@@ -37,7 +37,8 @@ const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
  * @typedef {{
  *   id: string,
  *   name: string,
- *   spec: string
+ *   spec: string,
+ *   cleanupIssue: string,
  * }}
  */
 let ExperimentDef;
@@ -244,12 +245,6 @@ const EXPERIMENTS = [
     name: 'Visual storytelling in AMP (v0.1)',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
-  },
-  {
-    id: 'disable-amp-story-desktop',
-    name: 'Disables responsive desktop experience for the amp-story component',
-    spec: 'https://github.com/ampproject/amphtml/issues/11714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
   {
     id: 'disable-amp-story-default-media',

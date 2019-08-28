@@ -392,7 +392,12 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     bundler = watchify(bundler);
-    bundler.on('update', () => performBundle(/* continueOnError */ true));
+    bundler.on('update', () => {
+      const bundleComplete = performBundle(/* continueOnError */ true);
+      if (options.onWatchBuild) {
+        options.onWatchBuild(bundleComplete);
+      }
+    });
   }
 
   /**

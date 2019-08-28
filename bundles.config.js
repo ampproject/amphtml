@@ -157,6 +157,16 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
+  'amp.js': {
+    srcDir: './src/',
+    srcFilename: 'amp.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      minifiedName: 'v0.js',
+      includePolyfills: true,
+    },
+  },
   'amp-shadow.js': {
     srcDir: './src/',
     srcFilename: 'amp-shadow.js',
@@ -302,6 +312,7 @@ exports.extensionBundles = [
     name: 'amp-addthis',
     version: '0.1',
     latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {
@@ -691,6 +702,12 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
+  },
+  {
+    name: 'amp-megaphone',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
   },
   {
     name: 'amp-mustache',
