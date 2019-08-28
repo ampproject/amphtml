@@ -37,7 +37,8 @@ const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
  * @typedef {{
  *   id: string,
  *   name: string,
- *   spec: string
+ *   spec: string,
+ *   cleanupIssue: string,
  * }}
  */
 let ExperimentDef;
@@ -246,12 +247,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'disable-amp-story-desktop',
-    name: 'Disables responsive desktop experience for the amp-story component',
-    spec: 'https://github.com/ampproject/amphtml/issues/11714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
-  },
-  {
     id: 'disable-amp-story-default-media',
     name: 'Removes default media for amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/14535',
@@ -380,6 +375,26 @@ const EXPERIMENTS = [
     name: 'Use iframe freezing instead of recreating iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/24110',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
+  },
+  {
+    id: 'adsense-ad-size-optimization',
+    name:
+      'Per publisher server side settings for changing the ad size ' +
+      'to responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/23568',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
+  },
+  {
+    id: 'fix-inconsistent-responsive-height-selection',
+    name: 'Fix inconsistent responsive height selection.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24166',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
+  },
+  {
+    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
+    name: 'Use amp-ad responsive to make amp auto ads responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24168',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
 ];
 
