@@ -20,10 +20,9 @@ const log = require('fancy-log');
 const watch = require('gulp-watch');
 const wrappers = require('../compile-wrappers');
 const {
-  aliasBundles,
+  extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
-  verifyExtensionAliasBundles,
 } = require('../../bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
 const {isTravisBuild} = require('../travis');
@@ -97,7 +96,6 @@ const ExtensionOption = {}; // eslint-disable-line no-unused-vars
 
 // All declared extensions.
 const extensions = {};
-const extensionAliasFilePath = {};
 
 // All extensions to build
 let extensionsToBuild = null;
@@ -162,53 +160,6 @@ function maybeInitializeExtensions(
         extensionsObject,
         includeLatest
       );
-    });
-  }
-
-  if (Object.keys(extensionAliasFilePath).length === 0) {
-    verifyExtensionAliasBundles();
-    aliasBundles.forEach(c => {
-      declareExtensionVersionAlias(
-        c.name,
-        c.version,
-        c.latestVersion,
-        c.options
-      );
-    });
-  }
-}
-
-/**
- * This function is used for declaring deprecated extensions. It simply places
- * the current version code in place of the latest versions. This has the
- * ability to break an extension version, so please be sure that this is the
- * correct one to use.
- * @param {string} name
- * @param {string} version E.g. 0.1
- * @param {string} latestVersion E.g. 0.1
- * @param {!ExtensionOption} options extension options object.
- */
-function declareExtensionVersionAlias(name, version, latestVersion, options) {
-  extensionAliasFilePath[name + '-' + version + '.js'] = {
-    'name': name,
-    'file': name + '-' + latestVersion + '.js',
-  };
-  extensionAliasFilePath[name + '-' + version + '.js.map'] = {
-    'name': name,
-    'file': name + '-' + latestVersion + '.js.map',
-  };
-  if (options.hasCss) {
-    extensionAliasFilePath[name + '-' + version + '.css'] = {
-      'name': name,
-      'file': name + '-' + latestVersion + '.css',
-    };
-  }
-  if (options.cssBinaries) {
-    options.cssBinaries.forEach(cssBinaryName => {
-      extensionAliasFilePath[cssBinaryName + '-' + version + '.css'] = {
-        'name': cssBinaryName,
-        'file': cssBinaryName + '-' + latestVersion + '.css',
-      };
     });
   }
 }
@@ -363,7 +314,7 @@ function dedupe(arr) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildExtensions(options) {
+async function buildExtensions(options) {
   maybeInitializeExtensions(extensions, /* includeLatest */ false);
   const extensionsToBuild = getExtensionsToBuild();
   const results = [];
@@ -375,7 +326,7 @@ function buildExtensions(options) {
       results.push(doBuildExtension(extensions, extension, options));
     }
   }
-  return Promise.all(results);
+  await Promise.all(results);
 }
 
 /**
@@ -385,11 +336,11 @@ function buildExtensions(options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function doBuildExtension(extensions, extension, options) {
+async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
   let o = Object.assign({}, options);
   o = Object.assign(o, e);
-  return buildExtension(
+  await buildExtension(
     e.name,
     e.version,
     e.latestVersion,
@@ -416,21 +367,21 @@ function doBuildExtension(extensions, extension, options) {
  * @param {string} latestVersion Latest version of the extension.
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
- * @param {!Array=} opt_extraGlobs
+ * @param {!Array=} extraGlobs
  * @return {!Promise}
  */
-function buildExtension(
+async function buildExtension(
   name,
   version,
   latestVersion,
   hasCss,
   options,
-  opt_extraGlobs
+  extraGlobs
 ) {
   options = options || {};
-  options.extraGlobs = opt_extraGlobs;
+  options.extraGlobs = extraGlobs;
   if (options.compileOnlyCss && !hasCss) {
-    return Promise.resolve();
+    return;
   }
   const path = 'extensions/' + name + '/' + version;
 
@@ -452,32 +403,22 @@ function buildExtension(
       }
     });
   }
-  const promises = [];
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    const buildCssPromise = buildExtensionCss(path, name, version, options);
+    await buildExtensionCss(path, name, version, options);
     if (options.compileOnlyCss) {
-      return buildCssPromise;
+      return;
     }
-
-    promises.push(buildCssPromise);
   }
-
-  return Promise.all(promises)
-    .then(() => {
-      if (argv.single_pass) {
-        return Promise.resolve();
-      } else {
-        return buildExtensionJs(path, name, version, latestVersion, options);
-      }
-    })
-    .then(() => {
-      // minify and copy vendor configs for amp-analytics component
-      if (name === 'amp-analytics') {
-        return vendorConfigs(options);
-      }
-    });
+  if (argv.single_pass) {
+    return;
+  } else {
+    await buildExtensionJs(path, name, version, latestVersion, options);
+  }
+  if (name === 'amp-analytics') {
+    await vendorConfigs(options);
+  }
 }
 
 /**
@@ -501,18 +442,29 @@ function buildExtensionCss(path, name, version, options) {
     fs.writeFileSync(jsName, jsCss, 'utf-8');
     fs.writeFileSync(cssName, css, 'utf-8');
   }
+  const aliasBundle = extensionAliasBundles[name];
+  const isAliased = aliasBundle && aliasBundle.version == version;
+
   const promises = [];
   const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css').then(
-    writeCssBinaries.bind(null, `${name}-${version}.css`)
+    mainCss => {
+      writeCssBinaries(`${name}-${version}.css`, mainCss);
+      if (isAliased) {
+        writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
+      }
+    }
   );
 
   if (Array.isArray(options.cssBinaries)) {
     promises.push.apply(
       promises,
       options.cssBinaries.map(function(name) {
-        return jsifyCssAsync(`${path}/${name}.css`).then(css =>
-          writeCssBinaries(`${name}-${version}.css`, css)
-        );
+        return jsifyCssAsync(`${path}/${name}.css`).then(css => {
+          writeCssBinaries(`${name}-${version}.css`, css);
+          if (isAliased) {
+            writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
+          }
+        });
       })
     );
   }
@@ -532,9 +484,9 @@ function buildExtensionCss(path, name, version, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-function buildExtensionJs(path, name, version, latestVersion, options) {
+async function buildExtensionJs(path, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
-  return compileJs(
+  await compileJs(
     path + '/',
     filename,
     './dist/v0',
@@ -551,24 +503,34 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
         ? ''
         : wrappers.extension(name, options.loadPriority),
     })
-  ).then(() => {
+  );
+
+  const aliasBundle = extensionAliasBundles[name];
+  const isAliased = aliasBundle && aliasBundle.version == version;
+  if (isAliased) {
+    const src = `${name}-${version}${options.minify ? '' : '.max'}.js`;
+    const dest = `${name}-${aliasBundle.aliasedVersion}${
+      options.minify ? '' : '.max'
+    }.js`;
+    fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
+    fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
+  }
+
+  if (name === 'amp-script') {
     // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to dist/ folder.
-    if (name === 'amp-script') {
-      const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
-      const file = `dist/v0/amp-script-worker-${version}`;
-      // The "js" output is minified and transpiled to ES5.
-      fs.copyFileSync(dir + 'worker.js', `${file}.js`);
-      // The "mjs" output is unminified ES6 and has debugging flags enabled.
-      fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
-    }
-  });
+    const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
+    const file = `dist/v0/amp-script-worker-${version}`;
+    // The "js" output is minified and transpiled to ES5.
+    fs.copyFileSync(dir + 'worker.js', `${file}.js`);
+    // The "mjs" output is unminified ES6 and has debugging flags enabled.
+    fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
+  }
 }
 
 module.exports = {
   buildExtensions,
   doBuildExtension,
   extensions,
-  extensionAliasFilePath,
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
