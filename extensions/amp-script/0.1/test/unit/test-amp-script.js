@@ -78,7 +78,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       'alert(1)'
     );
 
-    return script.layoutCallback().should.be.rejectedWith(/Content-Type/);
+    return script.layoutCallback().should.be.rejected;
   });
 
   it('should check sha384(author_js) for cross-origin src', async () => {
