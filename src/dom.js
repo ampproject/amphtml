@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {startsWith} from './string';
+import {includes, startsWith} from './string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -636,7 +636,7 @@ export function iterateCursor(iterable, cb) {
  * @param {string=} opt_features
  * @return {?Window}
  */
-export function openWindowDialog(win, url, target, opt_features) {
+export function openWindowDialog(win, url, target, opt_features = '') {
   // Try first with the specified target. If we're inside the WKWebView or
   // a similar environments, this method is expected to fail by default for
   // all targets except `_top`.
@@ -648,7 +648,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   }
 
   // Then try with `_top` target.
-  if (!res && target != '_top') {
+  if (!res && target != '_top' && !includes(opt_features, 'noopener')) {
     res = win.open(url, '_top');
   }
   return res;
