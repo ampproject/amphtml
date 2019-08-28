@@ -240,7 +240,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // Setting distance manually to avoid flash of next page.
     const lastPage = this.adPageEls_[this.adPageEls_.length - 1];
     lastPage.setAttribute('distance', '1');
-
     this.tryToPlaceAdAfterPage_(pageBeforeId);
     // Once the ad is inserted into the story firing this event will
     // navigate to the ad page.
