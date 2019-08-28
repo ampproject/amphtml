@@ -157,6 +157,16 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
+  'amp.js': {
+    srcDir: './src/',
+    srcFilename: 'amp.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      minifiedName: 'v0.js',
+      includePolyfills: true,
+    },
+  },
   'amp-shadow.js': {
     srcDir: './src/',
     srcFilename: 'amp-shadow.js',
