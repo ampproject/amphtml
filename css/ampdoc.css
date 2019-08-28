@@ -86,17 +86,6 @@ html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
   position: relative !important;
 }
 
-/**
- * iOS 13 with the natural viewport still applies elastic horizontal scrolling
- * with various side-effects. See b/140131460 for more details. That's why
- * `overflow-x: hidden` has to be applied (and by extension
- * `overflow-y: visible`).
- */
-html.i-amphtml-singledoc:not(.i-amphtml-inabox) > body {
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
-}
-
 
 /**
  * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
