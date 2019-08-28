@@ -194,6 +194,14 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
         'https://foo.com?bar=123&baz=456&camelCase=789'
       );
     });
+    it('should substitute macros', () => {
+      impl.buildCallback();
+      impl.baseRequestUrl_ = 'https://foo.com?location=CANONICAL_URL';
+      expect(impl.getRequestUrl()).to.equal(
+        'https://foo.com?location=' +
+          'http%3A%2F%2Flocalhost%3A9876%2Fcontext.html'
+      );
+    });
   });
 
   describe('mandatory fields', () => {
