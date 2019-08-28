@@ -120,7 +120,6 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       </iframe>
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
-      enableIe: true,
     },
     env => {
       beforeEach(() => {
@@ -148,7 +147,6 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       body: `
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
-      enableIe: true,
     },
     env => {
       let adContent;
