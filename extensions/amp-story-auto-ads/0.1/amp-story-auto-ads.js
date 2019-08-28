@@ -455,6 +455,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         // Only do this once to prevent an infinite view->request->navigate loop.
         if (
           this.element.hasAttribute('development') &&
+          this.config_['type'] === 'fake' &&
           !this.hasForcedRender_
         ) {
           this.forceRender();
