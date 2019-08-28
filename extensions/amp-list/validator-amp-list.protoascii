@@ -93,9 +93,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
   # <amp-bind>
   attrs: {
     name: "[is-layout-container]"
@@ -220,9 +221,10 @@ tags: {  # <amp-list>
     blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in src.
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

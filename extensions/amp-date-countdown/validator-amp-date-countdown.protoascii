@@ -64,9 +64,10 @@ tags: {  # <amp-date-countdown>
     name: "offset-seconds"
     value_regex: "-?\\d+"
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
   attrs: {
     name: "timeleft-ms"
     mandatory_oneof: "['end-date', 'timeleft-ms', 'timestamp-ms', 'timestamp-seconds']"

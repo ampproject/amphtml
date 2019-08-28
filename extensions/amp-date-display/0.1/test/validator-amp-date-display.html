@@ -100,6 +100,10 @@
   </amp-date-display>
   <template type="amp-mustache" id="myTemplate">{{iso}}</template>
 
+  <!-- invalid, with dangling reference to template -->
+  <amp-date-display datetime="now" display-in="utc" layout="fixed" width="360" height="20" template="notMyTemplate">
+  </amp-date-display>
+
   <!-- valid, within amp-list with script mustache -->
   <amp-list src="https://cors-test.appspot.com/test"
             single-item

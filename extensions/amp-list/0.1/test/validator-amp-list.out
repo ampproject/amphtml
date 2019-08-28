@@ -202,7 +202,25 @@ amp-list/0.1/test/validator-amp-list.html:170:4 The parent tag of tag 'amp-list-
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"
 |      load-more="manual"
 |      load-more-bookmark="next">
-|    <button></button>
-|  </amp-list>
+|      <button></button>
+|    </amp-list>
+|    <!-- References to template elements -->
+|    <amp-list width=10 height=10
+>>   ^~~~~~~~~
+amp-list/0.1/test/validator-amp-list.html:179:2 Attribute 'template' in tag 'amp-list' contains a value that does not match any other tags on the page. (see https://amp.dev/documentation/components/amp-list) [GENERIC]
+|      src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      template="missing">
+|      <div></div>
+|    </amp-list>
+|    <amp-list width=10 height=10
+|      src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      template="found">
+|      <div></div>
+|    </amp-list>
+|    <template id="found"></template>
+>>   ^~~~~~~~~
+amp-list/0.1/test/validator-amp-list.html:189:2 The mandatory attribute 'type' is missing in tag 'template'. (see https://amp.dev/documentation/components/amp-mustache) [DISALLOWED_HTML]
+>>   ^~~~~~~~~
+amp-list/0.1/test/validator-amp-list.html:189:2 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </body>
 |  </html>
