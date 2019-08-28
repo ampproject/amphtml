@@ -87,7 +87,7 @@ export class AmpImg extends BaseElement {
   propagateSizes() {
     const sizes = this.getSizesValueToUse_();
     if (sizes === null) {
-      this.img_.removeAttribute('sizes', sizes);
+      this.img_.removeAttribute('sizes');
     } else {
       this.img_.setAttribute('sizes', sizes);
     }
