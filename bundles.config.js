@@ -1124,17 +1124,14 @@ exports.extensionBundles = [
 ];
 
 /**
- * Used to generate extension alias build targets
+ * Used to alias a version of an extension to an older deprecated version.
  */
-exports.aliasBundles = [
-  {
-    name: 'amp-sticky-ad',
-    version: '0.1',
-    latestVersion: '1.0',
-    options: {hasCss: true},
-    type: 'ads',
+exports.extensionAliasBundles = {
+  'amp-sticky-ad': {
+    version: '1.0',
+    aliasedVersion: '0.1',
   },
-];
+};
 
 /**
  * Used to generate alternative JS build targets
@@ -1222,33 +1219,6 @@ exports.verifyExtensionBundles = function() {
       validTypes.some(validType => validType === bundle.type),
       'type',
       `is not one of ${validTypes.join(',')} in`,
-      bundle.name,
-      bundleString
-    );
-  });
-};
-
-exports.verifyExtensionAliasBundles = function() {
-  exports.aliasBundles.forEach(bundle => {
-    const bundleString = JSON.stringify(bundle, null, 2);
-    verifyBundle_(
-      'name' in bundle,
-      'name',
-      'is missing from',
-      '',
-      bundleString
-    );
-    verifyBundle_(
-      'version' in bundle,
-      'version',
-      'is missing from',
-      bundle.name,
-      bundleString
-    );
-    verifyBundle_(
-      'latestVersion' in bundle,
-      'latestVersion',
-      'is missing from',
       bundle.name,
       bundleString
     );
