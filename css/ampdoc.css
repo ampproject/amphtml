@@ -76,6 +76,11 @@ html.i-amphtml-fie > body {
   overflow: visible !important;
 }
 
+/**
+ * The `position: relative` is necessary to ensure that `paddingTop` can be
+ * applied to a document to offset the header height, and it doesn't missplace
+ * `position: absolute` elements.
+ */
 html.i-amphtml-singledoc:not(.i-amphtml-inabox) > body,
 html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
   position: relative !important;

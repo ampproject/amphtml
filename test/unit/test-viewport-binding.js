@@ -29,7 +29,6 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let binding;
   let win;
   let ampdoc;
-  let viewer;
   let child;
   let sandbox;
 
@@ -46,14 +45,12 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     child.style.height = '300px';
     win.document.body.appendChild(child);
 
-    viewer = {};
-
     installPlatformService(win);
     installVsyncService(win);
     installDocService(win, /* isSingleDoc */ true);
     installGlobalDocumentStateService(win);
     ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-    binding = new ViewportBindingNatural_(ampdoc, viewer);
+    binding = new ViewportBindingNatural_(ampdoc);
     binding.connect();
   });
 
@@ -64,7 +61,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 
   it('should configure body as relative', () => {
-    binding = new ViewportBindingNatural_(ampdoc, viewer);
+    binding = new ViewportBindingNatural_(ampdoc);
     expect(win.document.body.style.display).to.not.be.ok;
     const bodyStyles = win.getComputedStyle(win.document.body);
     expect(bodyStyles.position).to.equal('relative');
@@ -75,7 +72,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
   it('should override body overflow for iOS webview', () => {
     win.document.documentElement.classList.add('i-amphtml-webview');
-    binding = new ViewportBindingNatural_(ampdoc, viewer);
+    binding = new ViewportBindingNatural_(ampdoc);
     const bodyStyles = win.getComputedStyle(win.document.body);
     expect(bodyStyles.position).to.equal('relative');
     expect(bodyStyles.overflowX).to.equal('hidden');
@@ -222,6 +219,49 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     htmlCss = win.getComputedStyle(win.document.documentElement);
     expect(htmlCss.overflowX).to.equal('hidden');
     expect(htmlCss.overflowY).to.equal('auto');
+  });
+});
+
+describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
+  let binding;
+  let win;
+  let ampdoc;
+  let child;
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = env.sandbox;
+
+    env.iframe.style.width = '100px';
+    env.iframe.style.height = '200px';
+    win = env.win;
+    win.document.documentElement.classList.add('i-amphtml-singledoc');
+
+    child = win.document.createElement('div');
+    child.style.width = '200px';
+    child.style.height = '300px';
+    win.document.body.appendChild(child);
+
+    installPlatformService(win);
+    installVsyncService(win);
+    installDocService(win, /* isSingleDoc */ true);
+    installGlobalDocumentStateService(win);
+    ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+    sandbox.stub(Services.platformFor(win), 'isIos').returns(true);
+    binding = new ViewportBindingNatural_(ampdoc);
+    binding.connect();
+  });
+
+  it('should reset overscroll on X-axis', () => {
+    win.scrollTo(1, 0);
+    expect(win.pageXOffset).to.equal(1);
+    return new Promise(resolve => {
+      win.addEventListener('scroll', () => {
+        if (win.pageXOffset == 0) {
+          resolve();
+        }
+      });
+    });
   });
 });
 
