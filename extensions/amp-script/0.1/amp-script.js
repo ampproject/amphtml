@@ -118,7 +118,7 @@ export class AmpScript extends AMP.BaseElement {
     // The displayed name of the combined script in dev tools.
     this.debugId_ = this.element.hasAttribute('src')
       ? `amp-script[src="${this.element.getAttribute('src')}"].js`
-      : `amp-script[script=#${this.element.getAttribute('script')}].js`;
+      : `amp-script[script="${this.element.getAttribute('script')}"].js`;
 
     const authorScriptPromise = this.getAuthorScript_(this.debugId_);
     if (!authorScriptPromise) {
@@ -380,7 +380,7 @@ export class AmpScriptService {
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
         user().error(
           TAG,
-          'Script hash not found. %id must have "sha384-%s" in meta[name="amp-script-src"].' +
+          'Script hash not found. %s must have "sha384-%s" in meta[name="amp-script-src"].' +
             ' See https://amp.dev/documentation/components/amp-script/#security-features.',
           debugId,
           hash
