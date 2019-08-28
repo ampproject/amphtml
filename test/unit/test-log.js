@@ -112,10 +112,10 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(4);
-      expect(logSpy.args[0][0]).to.equal('fine');
-      expect(logSpy.args[1][0]).to.equal('info');
-      expect(logSpy.args[2][0]).to.equal('warn');
-      expect(logSpy.args[3][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] fine');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] info');
+      expect(logSpy.getCall(2)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(3)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -129,9 +129,9 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(3);
-      expect(logSpy.args[0][0]).to.equal('info');
-      expect(logSpy.args[1][0]).to.equal('warn');
-      expect(logSpy.args[2][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] info');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(2)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -145,8 +145,8 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(2);
-      expect(logSpy.args[0][0]).to.equal('warn');
-      expect(logSpy.args[1][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -160,7 +160,7 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.be.calledOnce;
-      expect(logSpy.args[0][0]).to.equal('error');
+      expect(logSpy).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 

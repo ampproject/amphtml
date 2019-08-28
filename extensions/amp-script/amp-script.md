@@ -74,18 +74,33 @@ An `amp-script` element can load a JavaScript file from a URL:
 ...or reference a local `script` element by `id`:
 
 ```html
-<!-- Reference a local script by id via the "script" attribute. -->
-<amp-script layout="container" script="hello-world">
+<!-- Local scripts require adding a "script hash" to the document head. -->
+<head>
+  <!-- ... -->
+  <meta
+    name="amp-script-src"
+    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG">
+</head>
+
+<!-- Reference a local script by [id] via the "script" attribute. -->
+<amp-script width=200 height=50 script="hello-world">
   <button>Hello amp-script!</button>
 </amp-script>
 
+<!-- Local scripts must also have [target="amp-script"]. -->
 <script id="hello-world" type="text/plain" target="amp-script">
   const btn = document.querySelector('button');
   btn.addEventListener('click', () => {
-    document.body.textContent += 'Hello World!';
+    document.body.textContent = 'Hello World!';
   });
 </script>
 ```
+
+{% call callout('Important', type='caution') %}
+`amp-script` elements that use local scripts or cross-origin `src` require adding a `<meta name="amp-script-src" content="sha384-HASH">` to the document head, where `HASH` is a base64-encoded SHA-384 of the script source (similar to CSP's [`script-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#Sources)).
+
+A console error will be generated with the expected `HASH` value for affected `amp-script` elements. You can copy/paste from the error to create the appropriate `<meta>` tag.
+{% endcall %}
 
 ### How does it work?
 
@@ -144,11 +159,11 @@ Since custom JS run in `amp-script` is not subject to normal [Content Security P
     content="sha384-abc123 sha384-def456">
 </head>
 <body>
-  <!-- Cross-origin src requires hash: sha384(example.js) == abc123 -->
+  <!-- Cross-origin [src] requires hash: sha384(example.js) == "abc123" -->
   <amp-script src="cross.origin/example.js" layout=container>
   </amp-script>
 
-  <!-- Local script requires hash: sha384(#myScript) == def456 -->
+  <!-- Local script requires hash: sha384(#myScript) == "def456" -->
   <amp-script script=myScript layout=container>
   </amp-script>
   <script type=text/plain target=amp-script id=myScript>
@@ -195,6 +210,18 @@ See the [API compatibility table](https://github.com/ampproject/worker-dom/blob/
 
 Our feature timelines are informed by your real-world use cases! Please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
 
-#### I'm getting a "size exceeded" error.
+#### I'm getting a "maximum total script size exceeded" runtime error.
 
-See [Size of JavaScript code](#size-of-javascript-code) above.
+`amp-script` limits the size of the JS source that may be used. See [Size of JavaScript code](#size-of-javascript-code) above.
+
+#### I'm getting a "script hash not found" runtime error.
+
+Local scripts and cross-origin `src` require adding a special `<meta>` tag to be used. See [Security features](#security-features) above.
+
+#### I'm getting a "custom JavaScript is not allowed" validation error.
+
+Currently, local scripts are not valid AMP. We're working on fixing this soon ([issue #24171](https://github.com/ampproject/amphtml/issues/24171)).
+
+#### I'm getting a "amp-script... was terminated due to illegal mutation" runtime error.
+
+To avoid unexpected content jumping, `amp-script` generally requires user gestures for DOM changes. See [User gestures](#user-gestures) above.

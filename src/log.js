@@ -226,8 +226,13 @@ export class Log {
         fn = this.win.console.warn || fn;
       }
       const args = this.maybeExpandMessageArgs_(messages);
-      if (getMode().localDev) {
-        args.unshift('[' + tag + ']');
+      // Prefix console message with "[tag]".
+      const prefix = `[${tag}]`;
+      if (typeof args[0] === 'string') {
+        // Prepend string to avoid breaking string substitutions e.g. %s.
+        args[0] = prefix + ' ' + args[0];
+      } else {
+        args.unshift(prefix);
       }
       fn.apply(this.win.console, args);
     }
