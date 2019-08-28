@@ -42,16 +42,16 @@ function createElement(location, el, attrs) {
   return newEl;
 }
 
-function getRequest(file, callback, componentContainer) {
-  const xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = () => xhr.readyState == 4 && xhr.status == 200 ? callback(JSON.parse(xhr.responseText), componentContainer) : null;
-  xhr.open('GET', file, true);
-  xhr.send();
-}
+// function getRequest(file, callback, componentContainer) {
+//   const xhr = new XMLHttpRequest();
+//   xhr.onreadystatechange = () => xhr.readyState == 4 && xhr.status == 200 ? callback(JSON.parse(xhr.responseText), componentContainer) : null;
+//   xhr.open('GET', file, true);
+//   xhr.send();
+// }
 
-function appendAds(ads, componentContainer) {
-  Object.entries(ads).forEach(ad => appendElement(componentContainer.querySelector(`#div-insticator-ad-${ad[0][ad[0].length -1]}`), createElement(componentContainer.ownerDocument, 'amp-ad', ad[1])));
-}
+// function appendAds(ads, componentContainer) {
+//   Object.entries(ads).forEach(ad => appendElement(componentContainer.querySelector(`#div-insticator-ad-${ad[0][ad[0].length -1]}`), createElement(componentContainer.ownerDocument, 'amp-ad', ad[1])));
+// }
 
 /*
  * @param {!Object} componentContainer
