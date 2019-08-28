@@ -49,5 +49,8 @@ export const CONTENTSQUARE_CONFIG = /** @type {!JsonObject} */ ({
     '_cs_id': {
       'value': 'CLIENT_ID(AMP_CID)',
     },
+    '_cs_s': {
+      'value': '1.1',
+    },
   },
 });
