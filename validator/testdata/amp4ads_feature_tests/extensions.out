@@ -122,21 +122,11 @@ amp4ads_feature_tests/extensions.html:85:2 Custom JavaScript is not allowed. (se
 amp4ads_feature_tests/extensions.html:87:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
 |    <script async custom-element="amp-megaphone"
-<<<<<<<
-=======
 >>   ^~~~~~~~~
 amp4ads_feature_tests/extensions.html:89:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-megaphone-0.1.js"></script>
 |    <script async custom-element="amp-o2-player"
->>>>>>>
 >>   ^~~~~~~~~
-<<<<<<<
-amp4ads_feature_tests/extensions.html:89:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
-|       src="https://cdn.ampproject.org/v0/amp-megaphone-0.1.js"></script>
-|    <script async custom-element="amp-o2-player"
->>   ^~~~~~~~~
-=======
->>>>>>>
 amp4ads_feature_tests/extensions.html:91:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js"></script>
 |    <script async custom-element="amp-pinterest"
@@ -197,8 +187,4 @@ amp4ads_feature_tests/extensions.html:123:19 The extension 'amp-animation' was f
 >>                    ^~~~~~~~~
 amp4ads_feature_tests/extensions.html:123:19 The extension 'amp-lightbox' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
 >>                    ^~~~~~~~~
-<<<<<<<
 amp4ads_feature_tests/extensions.html:123:19 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
-=======
-amp4ads_feature_tests/extensions.html:123:19 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
->>>>>>>
