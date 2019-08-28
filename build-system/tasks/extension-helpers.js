@@ -440,13 +440,16 @@ function buildExtension(
   if (options.watch) {
     options.watch = false;
     watch(path + '/**/*', function() {
-      buildExtension(
+      const bundleComplete = buildExtension(
         name,
         version,
         latestVersion,
         hasCss,
         Object.assign({}, options, {continueOnError: true})
       );
+      if (options.onWatchBuild) {
+        options.onWatchBuild(bundleComplete);
+      }
     });
   }
   const promises = [];
