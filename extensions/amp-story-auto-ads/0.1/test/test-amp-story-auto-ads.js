@@ -322,22 +322,15 @@ describes.realWin(
         });
       });
 
-      it('should fire "story-ad-load" upon ad load', function*() {
-        const signals = {whenSignal: () => Promise.resolve()};
-        const fakeImpl = {signals: () => signals};
-        const ad = win.document.createElement('amp-ad');
-        ad.getImpl = () => Promise.resolve(fakeImpl);
-        sandbox.stub(autoAds, 'createAdElement_').returns(ad);
-        autoAds.adPageEls_ = [ad];
-
-        const page = win.document.createElement('amp-story-page');
-        sandbox.stub(autoAds, 'createPageElement_').returns(page);
-        page.getImpl = () => Promise.resolve({delegateVideoAutoplay: () => {}});
-
+      it('should fire "story-ad-load" upon ad load', async () => {
         const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.createAdPage_();
-        yield macroTask();
-
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        const ampAd = doc.querySelector('amp-ad');
+        ampAd.signals().signal(CommonSignals.INI_LOAD);
+        await macroTask();
         expect(analyticsStub).to.be.called;
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-load', {
           'loadTime': sinon.match.number,
