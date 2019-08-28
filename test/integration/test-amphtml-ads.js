@@ -80,9 +80,6 @@ describe('AMPHTML ad on AMP Page', () => {
   );
 });
 
-const itConfig = it.configure().enableIe();
-const itWithIe = itConfig.run.bind(itConfig);
-
 describe('AMPHTML ad on non-AMP page (inabox)', () => {
   describes.integration(
     'ATF',
@@ -96,9 +93,10 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       </iframe>
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
+      enableIe: true,
     },
     env => {
-      itWithIe('should layout amp-img, amp-pixel, amp-analytics', () => {
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponents();
       });
@@ -122,6 +120,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       </iframe>
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
+      enableIe: true,
     },
     env => {
       beforeEach(() => {
@@ -131,7 +130,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.iframe.style.height = '100vh';
       });
 
-      itWithIe('should layout amp-img, amp-pixel, amp-analytics', () => {
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
       });
@@ -149,6 +148,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       body: `
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
+      enableIe: true,
     },
     env => {
       let adContent;
@@ -170,7 +170,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.win.document.body.removeChild(iframe);
       });
 
-      itWithIe(
+      it(
         'should layout amp-img, amp-pixel, ' +
           'amp-analytics within friendly frame',
         () => {
@@ -179,7 +179,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         }
       );
 
-      itWithIe(
+      it(
         'should layout amp-img, amp-pixel, ' +
           'amp-analytics within safe frame',
         () => {

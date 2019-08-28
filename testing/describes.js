@@ -347,8 +347,8 @@ function describeEnv(factory) {
       if (spec.retryOnSaucelabs) {
         d = d.retryOnSaucelabs(spec.retryOnSaucelabs);
       }
-      if (spec.ifIe) {
-        d = d.ifIe();
+      if (spec.enableIe) {
+        d = d.enableIe();
       }
       d.run(SUB, function() {
         if (spec.timeout) {
