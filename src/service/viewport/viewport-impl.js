@@ -19,7 +19,6 @@ import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingIosEmbedShadowRoot_} from './viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
@@ -1129,16 +1128,7 @@ function createViewport(ampdoc) {
     ampdoc.isSingleDoc() &&
     getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED
   ) {
-    if (
-      isExperimentOn(win, 'ios-embed-sd') &&
-      win.Element.prototype.attachShadow &&
-      // We need the native Shadow DOM support and jumping-fixed-element fix.
-      parseFloat(Services.platformFor(win).getIosVersionString()) >= 12.2
-    ) {
-      binding = new ViewportBindingIosEmbedShadowRoot_(win);
-    } else {
-      binding = new ViewportBindingIosEmbedWrapper_(win);
-    }
+    binding = new ViewportBindingIosEmbedWrapper_(win);
   } else {
     binding = new ViewportBindingNatural_(ampdoc);
   }
