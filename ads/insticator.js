@@ -15,7 +15,7 @@ const url = {
 // ------- HELPER FUNCTIONS ------- //
 function createInitialMarkup(embedId) {
   return `
-    <div id="insticator-container" >
+    <div id="insticator-container">
       <div id="div-insticator-ad-1"></div>
       <div id="insticator-embed" embed-id="${embedId}"></div>
       <div id="div-insticator-ad-2"></div>
@@ -42,6 +42,9 @@ function createElement(location, el, attrs) {
 */
 // ------- COMPONENT CREATOR ------- //
 function createComponent(componentContainer, siteId, embedId) {
+  // append component markup to the DOM
+  appendElement(componentContainer, createTemplate(createInitialMarkup(embedId)));
+
   // create virtual script tag elements
   const headerCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
   const bodyCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
@@ -65,14 +68,8 @@ export function insticator(global, data) {
   // validate passed data attributes
   validateData(data, ['siteId', 'embedId']);
 
-  // store component container
-  const componentContainer = global.document.getElementById('c');
-
-  // append component markup to the DOM
-  appendElement(componentContainer, createTemplate(createInitialMarkup(data.embedId)));
-
   // load insticator scripts that create an embed and ads
-  createComponent(componentContainer, data.siteId, data.embedId);
+  createComponent(global.document.getElementById('c'), data.siteId, data.embedId);
 
   // envoke AMP library (with new insticator embed)
   loadScript(global, url.lib);
