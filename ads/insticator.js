@@ -95,8 +95,8 @@ function createComponent(componentContainer) {
 export function insticator(global, data) {
   validateData(data, ['embedId']);
   const componentContainer = global.document.getElementById('c');
-  console.log(global);
-  console.log(global.document.referrer);
+  // console.log(global);
+  // console.log(global.document.referrer); // pass this to headerCode which will be passed to ads code
   componentContainer.setAttribute('data-embed-id', data.embedId);
   appendElement(componentContainer, createTemplate(createInitialMarkup('06538eab-6e13-4e71-8584-8501a8e85f7b')));
   createComponent(componentContainer);
