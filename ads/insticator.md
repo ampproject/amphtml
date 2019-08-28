@@ -16,7 +16,7 @@ limitations under the License.
 
 # Insticator
 
-## Example of Insticator's widget implementation
+## Example of Insticator's Embed implementation
 
 
 ```html
@@ -33,4 +33,5 @@ For details on the configuration semantics, please contact [Insticator](https://
 
 ### Required parameters
 
-- `data-embed-id`: Uniquie ID of your Insticator account 
+- `data-site-id`: ID for the site where your Insticator Embed lives
+- `data-embed-id`: Uniquie ID of your Insticator Embed
