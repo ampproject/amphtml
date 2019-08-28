@@ -28,10 +28,12 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
   'cookies': {
     'enabled': true,
     '_sp_lsid': {
-      'value': '$IF(LINKER_PARAM(linker,_sp_asid), LINKER_PARAM(linker,_sp_asid), QUERY_PARAM(_sp_asid))',
+      'value':
+        '$IF(LINKER_PARAM(linker,_sp_asid), LINKER_PARAM(linker,_sp_asid), QUERY_PARAM(_sp_asid))',
     },
     '_sp_lduid': {
-      'value': '$IF(LINKER_PARAM(linker,_sp_aduid), LINKER_PARAM(linker,_sp_aduid), QUERY_PARAM(_sp_aduid))',
+      'value':
+        '$IF(LINKER_PARAM(linker,_sp_aduid), LINKER_PARAM(linker,_sp_aduid), QUERY_PARAM(_sp_aduid))',
     },
     '_sp_asid': {
       'value': '$IF(COOKIE(_sp_asid), COOKIE(_sp_asid), COOKIE(_sp_lsid))',
@@ -42,42 +44,43 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
   },
   'vars': {
     'ampVistorId': 'CLIENT_ID(_sp_id)',
-    'generatedSessionId': ['616d70','$SUBSTR(RANDOM,2,2)','-','$SUBSTR(RANDOM,2,4)','-4','$SUBSTR(RANDOM,2,3)','-8','$SUBSTR(RANDOM,2,3)','-','$SUBSTR(RANDOM,2,12)'].join(''),
-    'linkerSessionId': '$IF(COOKIE(_sp_asid), COOKIE(_sp_asid), ${generatedSessionId})',
+    'generatedSessionId': [
+      '616d70',
+      '$SUBSTR(RANDOM,2,2)',
+      '-',
+      '$SUBSTR(RANDOM,2,4)',
+      '-4',
+      '$SUBSTR(RANDOM,2,3)',
+      '-8',
+      '$SUBSTR(RANDOM,2,3)',
+      '-',
+      '$SUBSTR(RANDOM,2,12)',
+    ].join(''),
+    'linkerSessionId':
+      '$IF(COOKIE(_sp_asid), COOKIE(_sp_asid), ${generatedSessionId})',
     'sid': '$IF(${sessionId}, ${sessionId}, ${linkerSessionId})',
     'vid': '$IF(${spVisitIndex}, ${spVisitIndex}, 0)',
     'duid': '$IF(${sessionId}, ${domainUserId}, ${ampVistorId})',
     'customEventTemplate': [
       '{',
-        '"schema":"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",',
-        '"data":{',
-          '"schema":"iglu:${customEventSchemaVendor}/${customEventSchemaName}/jsonschema/${customEventSchemaVersion}",',
-          '"data":{',
-            '${customEventSchemaData}',
-          '}',
-        '}',
+      '"schema":"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",',
+      '"data":{',
+      '"schema":"iglu:${customEventSchemaVendor}/${customEventSchemaName}/jsonschema/${customEventSchemaVersion}",',
+      '"data":{',
+      '${customEventSchemaData}',
+      '}',
+      '}',
       '}',
     ].join(''),
   },
   'requests': {
     'aaVersion': 'amp_v2-0.1',
     'basePrefix': 'https://${collectorHost}/i?p=web',
-    'pageView':
-      '${basePrefix}&e=pv',
+    'pageView': '${basePrefix}&e=pv',
     'structEvent':
-      '${basePrefix}&e=se' +
-      '&se_ca=${structEventCategory}' +
-      '&se_ac=${structEventAction}' +
-      '&se_la=${structEventLabel}' +
-      '&se_pr=${structEventProperty}' +
-      '&se_va=${structEventValue}',
-    'pagePing':
-      '${basePrefix}&e=pp' +
-      '&pp_mix=${scrollLeft}' +
-      '&pp_miy=${scrollTop}',
-    'selfDescribedEvent':
-      '${basePrefix}&e=ue' +
-      '&ue_pr=${customEventTemplate}',
+      '${basePrefix}&e=se&se_ca=${structEventCategory}&se_ac=${structEventAction}&se_la=${structEventLabel}&se_pr=${structEventProperty}&se_va=${structEventValue}',
+    'pagePing': '${basePrefix}&e=pp&pp_mix=${scrollLeft}&pp_miy=${scrollTop}',
+    'selfDescribedEvent': '${basePrefix}&e=ue&ue_pr=${customEventTemplate}',
   },
   'extraUrlParams': {
     'url': '${canonicalUrl}',
