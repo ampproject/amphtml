@@ -33,4 +33,5 @@ For details on the configuration semantics, please contact [Insticator](https://
 
 ### Required parameters
 
-- `data-embed-id`: Uniquie ID of your Insticator account 
+- `data-site-id`: ID for the site in which your Insticator Embed lives
+- `data-embed-id`: Uniquie ID of your Insticator Embed

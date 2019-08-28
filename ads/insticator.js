@@ -42,9 +42,6 @@ function createElement(location, el, attrs) {
 */
 // ------- COMPONENT CREATOR ------- //
 function createComponent(componentContainer, siteId, embedId) {
-  // append component markup to the DOM
-  appendElement(componentContainer, createTemplate(createInitialMarkup(embedId)));
-
   // create virtual script tag elements
   const headerCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
   const bodyCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
@@ -53,7 +50,8 @@ function createComponent(componentContainer, siteId, embedId) {
   headerCode.appendChild(document.createTextNode(`(function (a, c, s, u){'Insticator'in a || (a.Insticator={ad:{loadAd: function (b){Insticator.ad.q.push(b)}, q: []}, helper:{}, embed:{}, version: "4.0", q: [], load: function (t, o){Insticator.q.push({t: t, o: o})}}); var b=c.createElement(s); b.src=u; b.async=!0; var d=c.getElementsByTagName(s)[0]; d.parentNode.insertBefore(b, d)})(window, document, 'script', '${url.content}/ads-code/${siteId}.js');`));
   bodyCode.appendChild(document.createTextNode(`Insticator.ad.loadAd("div-insticator-ad-1");Insticator.ad.loadAd("div-insticator-ad-2");Insticator.load("em",{id : "${embedId}"});`));
   
-  // append scripts to DOM
+  // append component and script markup to the DOM
+  appendElement(componentContainer, createTemplate(createInitialMarkup(embedId)));
   appendElement(componentContainer, headerCode);
   appendElement(componentContainer, bodyCode);
 }
