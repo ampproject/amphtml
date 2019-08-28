@@ -98,8 +98,9 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
 before_cache:
-  # do not store cache for non-push builds
-  - if [[ $TRAVIS_EVENT_TYPE != push ]]; then exit $TRAVIS_TEST_RESULT ; fi
+  # do not store cache for pr builds
+  - exit $TRAVIS_TEST_RESULT
+    if: type = pull_request
 cache:
   directories:
     - node_modules
