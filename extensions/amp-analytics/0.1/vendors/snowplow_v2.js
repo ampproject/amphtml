@@ -42,7 +42,7 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
   },
   'vars': {
     'ampVistorId': 'CLIENT_ID(_sp_id)',
-    'generatedSessionId': ['616d70',['a'].map(a=>{return Math.random()}).join().slice(2,4),'-',['a'].map(a=>{return Math.random()}).join().slice(2,6),'-4',['a'].map(a=>{return Math.random()}).join().slice(2,5),'-8',['a'].map(a=>{return Math.random()}).join().slice(2,5),'-',['a'].map(a=>{return Math.random()}).join().slice(2,14)].join(''),
+    'generatedSessionId': ['616d70','$SUBSTR(RANDOM,2,2)','-','$SUBSTR(RANDOM,2,4)','-4','$SUBSTR(RANDOM,2,3)','-8','$SUBSTR(RANDOM,2,3)','-','$SUBSTR(RANDOM,2,12)'].join(''),
     'linkerSessionId': '$IF(COOKIE(_sp_asid), COOKIE(_sp_asid), ${generatedSessionId})',
     'sid': '$IF(${sessionId}, ${sessionId}, ${linkerSessionId})',
     'vid': '$IF(${spVisitIndex}, ${spVisitIndex}, 0)',
