@@ -98,6 +98,7 @@ exports.closureCompile = async function(
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
+  del.sync('build/parsers');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
@@ -120,14 +121,13 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/webcomponentsjs/',
     'node_modules/',
     'build/patched-module/',
-    // Generated code.
-    'extensions/amp-access/0.1/access-expr-impl.js',
   ];
   const baseExterns = [
     'build-system/amp.extern.js',
     'build-system/dompurify.extern.js',
     'build-system/event-timing.extern.js',
     'build-system/layout-jank.extern.js',
+    'build-system/layout-shift.extern.js',
     'build-system/performance-observer.extern.js',
     'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
@@ -159,12 +159,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   }
 
   return new Promise(function(resolve, reject) {
-    let entryModuleFilename;
-    if (entryModuleFilenames instanceof Array) {
-      entryModuleFilename = entryModuleFilenames[0];
-    } else {
-      entryModuleFilename = entryModuleFilenames;
-      entryModuleFilenames = [entryModuleFilename];
+    if (!(entryModuleFilenames instanceof Array)) {
+      entryModuleFilenames = [entryModuleFilenames];
     }
     const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
@@ -263,10 +259,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      /*
-       * Transpile from ES6 to ES5 if not running with `--esm`
-       * otherwise transpilation is done by Babel
-       */
+      // Transpile from ES6 to ES5 if not running with `--esm`
+      // otherwise transpilation is done by Babel
       language_in: 'ECMASCRIPT6',
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
@@ -286,7 +280,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
       // required.
-      only_closure_dependencies: true,
+      dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
       source_map_location_mapping: '|' + sourceMapBase,
@@ -331,13 +325,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       );
       compilerOptions.conformance_configs =
         'build-system/conformance-config.textproto';
-      // TODO(cvializ, #23417): Remove these after fixing React.Component type errors.
-      compilerOptions.hide_warnings_for.push(
-        'extensions/amp-date-picker/0.1/date-picker-common.js',
-        'extensions/amp-date-picker/0.1/react-utils.js',
-        'extensions/amp-date-picker/0.1/single-date-picker.js',
-        'extensions/amp-date-picker/0.1/wrappers/maximum-nights.js'
-      );
     } else {
       compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
       compilerOptions.jscomp_off.push('unknownDefines');

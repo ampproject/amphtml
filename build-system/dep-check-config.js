@@ -194,6 +194,9 @@ exports.rules = [
   },
 
   // Rules for extensions.
+  // Note: For the multipass build to correctly include depended on code, you
+  // need to add the depended on code to `CLOSURE_SRC_GLOBS` in
+  // build-system/sources.js.
   {
     // Extensions can't depend on other extensions.
     filesMatching: 'extensions/**/*.js',
@@ -241,10 +244,9 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
 
       // Facebook components
-      'extensions/amp-facebook/0.1/amp-facebook.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/facebook-loader.js',
-      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
+      'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
       // Amp geo in group enum
       'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -255,6 +257,8 @@ exports.rules = [
       'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      // TODO(#24080) Remove this when story ads have full ad network support.
+      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-ad-exit/0.1/config.js',
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
 
@@ -532,7 +536,7 @@ exports.rules = [
         'src/service/localization.js',
       'extensions/amp-story/1.0/_locales/zu.js->' +
         'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->' +
+      'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->' +
         'src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/_locales/af.js->' +
         'src/service/localization.js',

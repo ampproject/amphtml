@@ -25,7 +25,7 @@ import {
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {toggleExperiment} from '../../src/experiments';
 
-describe('chunk', () => {
+describe('chunk2', () => {
   beforeEach(() => {
     activateChunkingForTesting();
   });
@@ -44,7 +44,7 @@ describe('chunk', () => {
 
       // If there is a viewer, wait for it, so we run with it being
       // installed.
-      if (env.win.services.viewer) {
+      if (env.win.__AMP_SERVICES.viewer) {
         return Services.viewerPromiseForDoc(env.win.document).then(() => {
           // Make sure we make a chunk instance, so all runs
           // have a viewer.
@@ -96,11 +96,27 @@ describe('chunk', () => {
     env => {
       beforeEach(() => {
         installDocService(env.win, /* isSingleDoc */ true);
-        expect(env.win.services.viewer).to.be.undefined;
+        expect(env.win.__AMP_SERVICES.viewer).to.be.undefined;
         env.win.document.hidden = false;
       });
 
       basicTests(env);
+
+      it('should support nested micro tasks in chunks', done => {
+        let progress = '';
+        startupChunk(env.win.document, () => {
+          progress += '1';
+          Promise.resolve()
+            .then(() => (progress += 2))
+            .then(() => (progress += 3))
+            .then(() => (progress += 4))
+            .then(() => (progress += 5));
+        });
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('12345');
+          done();
+        });
+      });
     }
   );
 
@@ -112,7 +128,7 @@ describe('chunk', () => {
     env => {
       beforeEach(() => {
         installDocService(env.win, /* isSingleDoc */ true);
-        expect(env.win.services.viewer).to.be.undefined;
+        expect(env.win.__AMP_SERVICES.viewer).to.be.undefined;
         env.win.document.hidden = true;
         env.win.requestIdleCallback = function() {
           throw new Error('Should not be called');
@@ -140,17 +156,24 @@ describe('chunk', () => {
     },
     env => {
       beforeEach(() => {
-        expect(env.win.services.viewer).to.exist;
+        expect(env.win.__AMP_SERVICES.viewer).to.exist;
         env.win.document.hidden = false;
       });
 
       describe('visible', () => {
         beforeEach(() => {
-          const viewer = Services.viewerForDoc(env.win.document);
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+          const {ampdoc} = env;
+          env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return true;
           });
         });
+
+        it('should execute a chunk with an ampdoc', done => {
+          startupChunk(env.ampdoc, unusedIdleDeadline => {
+            done();
+          });
+        });
+
         basicTests(env);
       });
 
@@ -168,8 +191,8 @@ describe('chunk', () => {
 
           beforeEach(() => {
             fakeWin = env.win;
-            const viewer = Services.viewerForDoc(env.win.document);
-            env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+            const {ampdoc} = env;
+            env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
               return true;
             });
             window.addEventListener('unhandledrejection', onReject);
@@ -191,8 +214,8 @@ describe('chunk', () => {
 
       describe('invisible', () => {
         beforeEach(() => {
-          const viewer = Services.viewerForDoc(env.win.document);
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+          const {ampdoc} = env;
+          env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
           env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
@@ -211,8 +234,8 @@ describe('chunk', () => {
       describe('invisible but deactivated', () => {
         beforeEach(() => {
           deactivateChunking();
-          const viewer = Services.viewerForDoc(env.win.document);
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+          const {ampdoc} = env;
+          env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
           env.win.requestIdleCallback = () => {
@@ -226,8 +249,8 @@ describe('chunk', () => {
 
       describe('invisible via document.hidden', () => {
         beforeEach(() => {
-          const viewer = Services.viewerForDoc(env.win.document);
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+          const {ampdoc} = env;
+          env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
           env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
@@ -246,15 +269,15 @@ describe('chunk', () => {
       describe('invisible to visible', () => {
         beforeEach(() => {
           env.win.location.resetHref('test#visibilityState=hidden');
-          const viewer = Services.viewerForDoc(env.win.document);
+          const {ampdoc} = env;
           let visible = false;
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+          env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return visible;
           });
           env.win.requestIdleCallback = () => {
             // Don't call the callback, but transition to visible
             visible = true;
-            viewer.onVisibilityChange_();
+            ampdoc.visibilityStateHandlers_.fire();
           };
         });
 
@@ -264,15 +287,15 @@ describe('chunk', () => {
       describe('invisible to visible', () => {
         beforeEach(() => {
           env.win.location.resetHref('test#visibilityState=prerender');
-          const viewer = Services.viewerForDoc(env.win.document);
+          const {ampdoc} = env;
           let visible = false;
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+          env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return visible;
           });
           env.win.requestIdleCallback = () => {
             // Don't call the callback, but transition to visible
             visible = true;
-            viewer.onVisibilityChange_();
+            ampdoc.visibilityStateHandlers_.fire();
           };
         });
 
@@ -282,16 +305,16 @@ describe('chunk', () => {
       describe('invisible to visible after a while', () => {
         beforeEach(() => {
           env.win.location.resetHref('test#visibilityState=hidden');
-          const viewer = Services.viewerForDoc(env.win.document);
+          const {ampdoc} = env;
           let visible = false;
-          env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+          env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return visible;
           });
           env.win.requestIdleCallback = () => {
             // Don't call the callback, but transition to visible
             setTimeout(() => {
               visible = true;
-              viewer.onVisibilityChange_();
+              ampdoc.visibilityStateHandlers_.fire();
             }, 10);
           };
         });
@@ -325,8 +348,8 @@ describe('chunk', () => {
       beforeEach(() => {
         env.win.requestIdleCallback = null;
         expect(env.win.requestIdleCallback).to.be.null;
-        const viewer = Services.viewerForDoc(env.win.document);
-        env.sandbox.stub(viewer, 'isVisible').callsFake(() => {
+        const {ampdoc} = env;
+        env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
           return false;
         });
         env.sandbox.defineProperty(env.win.document, 'hidden', {
@@ -342,13 +365,13 @@ describe('long tasks', () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
-      amp: true,
+      amp: false,
     },
     env => {
       let subscriptions;
-      let sandbox;
       let clock;
       let progress;
+      let postMessageCalls;
 
       function complete(str, long) {
         return function(unusedIdleDeadline) {
@@ -367,9 +390,10 @@ describe('long tasks', () => {
       }
 
       beforeEach(() => {
+        postMessageCalls = 0;
         subscriptions = {};
-        sandbox = sinon.sandbox;
         clock = sandbox.useFakeTimers();
+        installDocService(env.win, /* isSingleDoc */ true);
         toggleExperiment(env.win, 'macro-after-long-task', true);
 
         env.win.addEventListener = function(type, handler) {
@@ -382,13 +406,14 @@ describe('long tasks', () => {
 
         env.win.postMessage = function(key) {
           expect(key).to.equal('amp-macro-task');
+          postMessageCalls++;
+          runSubs();
         };
 
         progress = '';
-      });
-
-      afterEach(() => {
-        sandbox.restore();
+        chunkInstanceForTesting(
+          env.win.document.documentElement
+        ).macroAfterLongTask_ = true;
       });
 
       it('should not run macro tasks with invisible bodys', done => {
@@ -402,25 +427,59 @@ describe('long tasks', () => {
       });
 
       it('should execute chunks after long task in a macro task', done => {
-        startupChunk(env.win.document, complete('before', true));
+        startupChunk(env.win.document, complete('1', true));
+        startupChunk(env.win.document, complete('2', false));
         startupChunk(
           env.win.document,
-          complete('init', false),
+          function() {
+            complete('3', false)();
+            expect(progress).to.equal('123');
+            expect(postMessageCalls).to.equal(0);
+          },
           /* make body visible */ true
         );
-
-        startupChunk(env.win.document, complete('a', false));
-        startupChunk(env.win.document, complete('b', false));
         startupChunk(env.win.document, () => {
-          expect(progress).to.equal('beforeinitab');
-          complete('c', true)();
-          runSubs();
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('123');
+          complete('4', false)();
         });
         startupChunk(env.win.document, () => {
-          expect(progress).to.equal('beforeinitabc');
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('1234');
+        });
+        startupChunk(env.win.document, complete('5', true));
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(2);
+          expect(progress).to.equal('12345');
           done();
         });
       });
+
+      // Skipping Firefox due to issues with the promise ordering in
+      // the async-await polyfill that this test relies on.
+      it.configure()
+        .skipFirefox()
+        .run('should not issue a macro task after having been idle', done => {
+          (async function() {
+            startupChunk(
+              env.win.document,
+              complete('1', false),
+              /* make body visible */ true
+            );
+            // Unwind the promise queue so that subsequent invocations
+            // are scheduled into an empty task queue.
+            for (let i = 0; i < 100; i++) {
+              await Promise.resolve();
+            }
+            expect(progress).to.equal('1');
+            complete('2', true)();
+            startupChunk(env.win.document, () => {
+              expect(postMessageCalls).to.equal(0);
+              expect(progress).to.equal('12');
+              done();
+            });
+          })();
+        });
     }
   );
 });

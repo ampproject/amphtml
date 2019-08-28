@@ -45,6 +45,10 @@ const targetMatchers = [
     targets: ['BABEL_PLUGIN', 'RUNTIME'], // Test the runtime for babel plugin changes.
     func: file => {
       return (
+        file == 'build-system/internal-version.js' ||
+        file == 'build-system/log-module-metadata.js' ||
+        file == 'build-system/static-template-metadata.js' ||
+        file == 'build-system/compile/log-messages.js' ||
         file == 'build-system/tasks/babel-plugin-tests.js' ||
         file.startsWith('build-system/babel-plugins/')
       );
@@ -120,7 +124,7 @@ const targetMatchers = [
     },
   },
   {
-    targets: ['VALIDATOR', 'RUNTIME'], // Test the runtime for validator changes.
+    targets: ['VALIDATOR'],
     func: file => {
       if (file.startsWith('validator/webui/')) {
         return false;

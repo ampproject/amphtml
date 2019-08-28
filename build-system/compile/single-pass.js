@@ -60,7 +60,7 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
-const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
+const SPLIT_MARKER = `/** SPLIT_SINGLE_PASS */`;
 
 // Used to store transforms and compile v0.js
 const transformDir = tempy.directory();
@@ -113,7 +113,7 @@ exports.getFlags = function(config) {
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
     language_out: config.language_out || 'ES5',
-    module_output_path_prefix: config.writeTo || 'out/',
+    chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
     process_common_js_modules: true,
     externs: config.externs,
@@ -210,7 +210,7 @@ exports.getBundleFlags = function(g) {
         name,
       };
     }
-    // And now build --module $name:$numberOfJsFiles:$bundleDeps
+    // And now build --chunk $name:$numberOfJsFiles:$bundleDeps
     let cmd = name + ':' + bundle.modules.length;
     const bundleDeps = [];
     if (!isMain) {
@@ -229,7 +229,7 @@ exports.getBundleFlags = function(g) {
         }
       }
     }
-    flagsArray.push('--module', cmd);
+    flagsArray.push('--chunk', cmd);
     if (bundleKeys.length > 1) {
       function massageWrapper(w) {
         return w.replace('<%= contents %>', '%s');
@@ -244,7 +244,7 @@ exports.getBundleFlags = function(g) {
         const configEntry = getExtensionBundleConfig(originalName);
         const marker = configEntry ? SPLIT_MARKER : '';
         flagsArray.push(
-          '--module_wrapper',
+          '--chunk_wrapper',
           name +
             ':' +
             massageWrapper(
@@ -690,10 +690,7 @@ function cleanupWeakModuleFiles() {
 
 function compile(flagsArray) {
   if (isTravisBuild()) {
-    log(
-      'Minifying single-pass runtime targets with',
-      colors.cyan('closure-compiler')
-    );
+    log('Minifying single-pass JS with', colors.cyan('closure-compiler'));
   }
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {

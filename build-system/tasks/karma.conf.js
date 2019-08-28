@@ -15,10 +15,7 @@
  */
 'use strict';
 
-const {
-  BABELIFY_GLOBAL_TRANSFORM,
-  BABELIFY_REPLACE_PLUGIN,
-} = require('./helpers');
+const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
 const {gitCommitterEmail} = require('../git');
 const {isTravisBuild, travisJobNumber} = require('../travis');
 
@@ -42,7 +39,7 @@ const SAUCE_TIMEOUT_CONFIG = {
 const BABELIFY_CONFIG = Object.assign(
   {},
   BABELIFY_GLOBAL_TRANSFORM,
-  BABELIFY_REPLACE_PLUGIN,
+  BABELIFY_PLUGINS,
   {
     sourceMapsAbsolute: true,
   }
@@ -302,13 +299,13 @@ module.exports = {
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
 
-  // AMP tests on Sauce take ~9 minutes, so don't fail if the browser doesn't
-  // communicate with the proxy for up to 10 minutes.
+  // AMP tests on Sauce can take upto 12-13 minutes, so don't fail if the
+  // browser doesn't communicate with the proxy for up to 15 minutes.
   // TODO(rsimha): Reduce this number once keepalives are implemented by
   // karma-sauce-launcher.
   // See https://github.com/karma-runner/karma-sauce-launcher/pull/161.
-  browserDisconnectTimeout: 10 * 60 * 1000,
-  browserNoActivityTimeout: 10 * 60 * 1000,
+  browserDisconnectTimeout: 15 * 60 * 1000,
+  browserNoActivityTimeout: 15 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isTravisBuild() ? 2 : 0,

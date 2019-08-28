@@ -37,6 +37,7 @@ import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
   makeBodyVisible,
@@ -45,6 +46,7 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
+import {preconnectToOrigin} from './preconnect';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -128,9 +130,10 @@ if (shouldMainBootstrapRun) {
           function final() {
             installPullToRefreshBlocker(self);
             installAutoLightboxExtension(ampdoc);
-
+            installStandaloneExtension(ampdoc);
             maybeValidate(self);
             makeBodyVisible(self.document);
+            preconnectToOrigin(self.document);
           },
           /* makes the body visible */ true
         );

@@ -1295,7 +1295,8 @@ let DescendantConstraints;
  *             lastChildErrorLineCol: LineCol,
  *             cdataMatcher: ?CdataMatcher,
  *             childTagMatcher: ?ChildTagMatcher,
- *             referencePointMatcher: ?ReferencePointMatcher }}
+ *             referencePointMatcher: ?ReferencePointMatcher,
+ *             devMode: boolean }}
  */
 let TagStackEntry;
 
@@ -1351,6 +1352,7 @@ class TagStack {
       cdataMatcher: null,
       childTagMatcher: null,
       referencePointMatcher: null,
+      devMode: false,
     };
   }
 
@@ -1398,6 +1400,7 @@ class TagStack {
    * @private
    */
   updateStackEntryFromTagResult_(result, parsedRules, lineCol) {
+    if (result.devModeSuppress) this.setDevMode();
     if (result.bestMatchTagSpec === null) {return;}
     const parsedTagSpec = result.bestMatchTagSpec;
 
@@ -1515,6 +1518,13 @@ class TagStack {
   }
 
   /**
+   * Records that tag currently on the stack is using data-ampdevmode.
+   */
+  setDevMode() {
+    this.back_().devMode = true;
+  }
+
+  /**
    * @return {?ReferencePointMatcher}
    */
   parentReferencePointMatcher() {
@@ -1560,6 +1570,14 @@ class TagStack {
    */
   parentChildCount() {
     return this.parentStackEntry_().numChildren;
+  }
+
+  /**
+   * True if the current stack leaf has dev mode set.
+   * @return {boolean}
+   */
+  isDevMode() {
+    return this.parentStackEntry_().devMode;
   }
 
   /**
@@ -1991,7 +2009,7 @@ class CdataMatcher {
     }
 
     // Max CDATA Byte Length
-    if (cdataSpec.maxBytes !== -1 && adjustedCdataLength > cdataSpec.maxBytes) {
+    if (cdataSpec.maxBytes !== -2 && adjustedCdataLength > cdataSpec.maxBytes) {
       context.addError(
           amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
           context.getLineCol(),
@@ -2720,6 +2738,14 @@ class Context {
    */
   isTransformed() {
     return this.typeIdentifiers_.includes('transformed');
+  }
+
+  /**
+   * Returns true iff "data-ampdevmode" is a type identifier in this document.
+   * @return {boolean}
+   */
+  isDevMode() {
+    return this.typeIdentifiers_.includes('data-ampdevmode');
   }
 
   /**
@@ -4225,6 +4251,25 @@ function validateAttrDeclaration(
 }
 
 /**
+ * Returns true if errors reported on this tag should be suppressed, due to
+ * data-ampdevmode annotations.
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+ * @param {!Context} context
+ * @return {boolean}
+ */
+function ShouldSuppressDevModeErrors(encounteredTag, context) {
+  if (!context.isDevMode()) return false;
+  // Cannot suppress errors on HTML tag. The "data-ampdevmode" here is a
+  // type identifier. Suppressing errors here would suppress all errors since
+  // HTML is the root of the document.
+  if (encounteredTag.upperName() === 'HTML') return false;
+  for (const attr of encounteredTag.attrs()) {
+    if (attr.name === 'data-ampdevmode') return true;
+  }
+  return context.getTagStack().isDevMode();
+}
+
+/**
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
@@ -4934,6 +4979,7 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['amp4email'] = 0;
     this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
+    this.typeIdentifiers_['data-ampdevmode'] = 0;
 
     /**
      * @type {function(!amp.validator.TagSpec) : boolean}
@@ -5144,7 +5190,8 @@ class ParsedValidatorRules {
           // The type identifier "actions" and "transformed" are not considered
           // mandatory unlike other type identifiers.
           if (typeIdentifier !== 'actions' &&
-              typeIdentifier !== 'transformed') {
+              typeIdentifier !== 'transformed' &&
+              typeIdentifier !== 'data-ampdevmode') {
             hasMandatoryTypeIdentifier = true;
           }
           // The type identifier "transformed" has restrictions on it's value.
@@ -5161,6 +5208,15 @@ class ParsedValidatorRules {
                   'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
                   validationResult);
             }
+          }
+          if (typeIdentifier === 'data-ampdevmode') {
+            // https://github.com/ampproject/amphtml/issues/20974
+            // We always emit an error for this type identifier, but it
+            // suppresses other errors later in the document.
+            context.addError(
+                amp.validator.ValidationError.Code.DEV_MODE_ONLY,
+                context.getLineCol(), /*params=*/[], /*url*/ '',
+                validationResult);
           }
         } else {
           context.addError(
@@ -5192,22 +5248,23 @@ class ParsedValidatorRules {
     switch (this.htmlFormat_) {
       case 'AMP':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'transformed'], context,
-            validationResult);
+            htmlTag.attrs(), ['⚡', 'amp', 'transformed', 'data-ampdevmode'],
+            context, validationResult);
         break;
       case 'AMP4ADS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4ads', 'amp4ads'], context, validationResult);
+            htmlTag.attrs(), ['⚡4ads', 'amp4ads', 'data-ampdevmode'], context,
+            validationResult);
         break;
       case 'AMP4EMAIL':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4email', 'amp4email'], context,
-            validationResult);
+            htmlTag.attrs(), ['⚡4email', 'amp4email', 'data-ampdevmode'],
+            context, validationResult);
         break;
       case 'ACTIONS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'actions'], context,
-            validationResult);
+            htmlTag.attrs(), ['⚡', 'amp', 'actions', 'data-ampdevmode'],
+            context,  validationResult);
         if (validationResult.typeIdentifier.indexOf('actions') === -1) {
           context.addError(
               amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
@@ -5479,7 +5536,7 @@ class ParsedValidatorRules {
       if (!this.isCssLengthSpecCorrectHtmlFormat_(cssLengthSpec)) {
         continue;
       }
-      if (cssLengthSpec.maxBytes && bytesUsed > cssLengthSpec.maxBytes) {
+      if (cssLengthSpec.maxBytes !== -2 && bytesUsed > cssLengthSpec.maxBytes) {
         context.addError(
             amp.validator.ValidationError.Code
                 .STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
@@ -5776,7 +5833,7 @@ amp.validator.ValidationHandler =
           this.context_.addInlineStyleByteSize(styleLen);
           for (const cssLengthSpec of this.context_.getRules()
                    .getCssLengthSpec()) {
-            if (cssLengthSpec.maxBytesPerInlineStyle !== undefined &&
+            if (cssLengthSpec.maxBytesPerInlineStyle !== -1 &&
                 styleLen > cssLengthSpec.maxBytesPerInlineStyle) {
               this.context_.addError(
                   amp.validator.ValidationError.Code.INLINE_STYLE_TOO_LONG,
@@ -5796,6 +5853,7 @@ amp.validator.ValidationHandler =
         let resultForReferencePoint = {
           bestMatchTagSpec: null,
           validationResult: new amp.validator.ValidationResult(),
+          devModeSuppress: false,
         };
         resultForReferencePoint.validationResult.status =
         amp.validator.ValidationResult.Status.UNKNOWN;
@@ -5812,12 +5870,15 @@ amp.validator.ValidationHandler =
         const resultForTag = validateTag(
             encounteredTag, resultForReferencePoint.bestMatchTagSpec,
             this.context_);
+        resultForTag.devModeSuppress =
+            ShouldSuppressDevModeErrors(encounteredTag, this.context_);
         // Only merge in the reference point errors into the final result if the
         // tag otherwise passes one of the TagSpecs. Otherwise, we end up with
         // unnecessarily verbose errors.
         if (referencePointMatcher !== null &&
             resultForTag.validationResult.status ===
-                amp.validator.ValidationResult.Status.PASS) {
+                amp.validator.ValidationResult.Status.PASS &&
+            !resultForTag.devModeSuppress) {
           this.validationResult_.mergeFrom(
               resultForReferencePoint.validationResult);
         }
@@ -5827,7 +5888,8 @@ amp.validator.ValidationHandler =
             resultForReferencePoint.bestMatchTagSpec,
             resultForTag.bestMatchTagSpec,
             this.context_, resultForTag.validationResult);
-        this.validationResult_.mergeFrom(resultForTag.validationResult);
+        if (!resultForTag.devModeSuppress)
+          this.validationResult_.mergeFrom(resultForTag.validationResult);
 
         this.context_.updateFromTagResults(
             encounteredTag, resultForReferencePoint, resultForTag);

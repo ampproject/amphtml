@@ -24,6 +24,8 @@ limitations under the License.
 
 # <a name="`amp-story`"></a> `amp-story`
 
+The `amp-story` extension provides a format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -46,149 +48,7 @@ limitations under the License.
   </tr>
 </table>
 
-{% call callout('Important', type='caution') %}
-This component is under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
-{% endcall %}
-
 [TOC]
-
-## Version notes
-
-| Version | Description                                                            |
-| ------- | ---------------------------------------------------------------------- |
-| 1.0     | Current version, since 2018-07-16.                                     |
-| 0.1     | Initial implementation.  Deprecated, and will be removed on 2019-03-19 |
-
-## Migrating from 0.1 to 1.0
-
-As of 2018-07-16, version 0.1 is considered deprecated, and will be removed on 2019-03-19.  This may cause minor breaking changes, as your stories will automatically be upgraded to use version 1.0.  We recommend manually migrating your pages to version 1.0 before this date to ensure functionality and proper design.
-
-### New bookend capabilities
-
-We've added new capabilities to the amp-stories bookend, enabling richer component support and visual layouts. Some of the changes include:
-
-* Share providers are sorted according to the JSON configuration.
-* New bookend components:
-  * Call to action links
-  * Text box
-  * Portrait and landscape cards
-
-To use these new capabilities, add an `<amp-story-bookend>` tag as the last child of your `<amp-story>` with the required attributes like so:
-
-```html
-<amp-story standalone>
-  <amp-story-page id="cover">
-    ...
-  </amp-story-page>
-  <!-- `src` and `layout=nodisplay` are required. -->
-  <amp-story-bookend src="bookendv1.json" layout="nodisplay">
-  </amp-story-bookend>
-<amp-story>
-```
-
-Learn more about the new components and how to specify them in the JSON configuration in the [amp-story-bookend](#bookend-amp-story-bookend) section.
-
-### New metadata requirements
-
-We've added new metadata attributes to the `<amp-story>` element. These metadata attributes will be used for displaying a preview of the story across the AMP stories ecosystem. For example, these attributes can be used to render an engaging preview link in the bookend of a related story. Providing these attributes will also help ensure your story is future-proof for rich, embedded experiences in AMP stories surfaces to come.
-
-```html
-<!-- `title`, `publisher`, `publisher-logo-src` and `poster-portrait-src` will soon be required. -->
-<amp-story standalone title="My Story"
-    publisher="The AMP Team"
-    publisher-logo-src="https://example.com/logo/1x1.png"
-    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg">
-
-<!-- `poster-square-src` and `poster-landscape-src` are optional, but strongly recommended. -->
-<amp-story standalone title="My Story"
-    publisher="The AMP Team"
-    publisher-logo-src="https://example.com/logo/1x1.png"
-    poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
-    poster-square-src="https://example.com/my-story/poster/1x1.jpg"
-    poster-landscape-src="https://example.com/my-story/poster/4x3.jpg">
-```
-
-Note that these metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
-
-The new attributes:
-
-| ATTRIBUTE | DESCRIPTION |
-| -- | -- |
-| `title` [required] | The title of the story. |
-| `publisher` [required] | The name of the story's publisher. |
-| `publisher-logo-src` [required] | The publisher's logo in square format (1x1 aspect ratio). |
-| `poster-portrait-src` [required] | The story poster in portrait format (3x4 aspect ratio). |
-| `poster-square-src` | The story poster in square format (1x1 aspect ratio). |
-| `poster-landscape-src` | The story poster in landscape format (4x3 aspect ratio). |
-
-#### `publisher-logo-src` guidelines
-
-The following guidelines apply to the image for the publisher logo:
-
-- The file should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
-- Avoid animated images, such as animated gifs.
-- The graphic part of the logo should be legible on the background color.
-
-<table>
-  <tr>
-    <td>
-      <amp-img alt="Logo with blue text on white background"
-          layout="fixed"
-          width="107" height="112"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
-        <noscript>
-          <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
-        </noscript>
-      </amp-img>
-      Preferred
-    </td>
-    <td>
-      <amp-img alt="Logo with white text on blue background"
-          layout="fixed"
-          width="107" height="101"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
-        <noscript>
-          <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
-        </noscript>
-      </amp-img>
-      Preferred
-    </td>
-    <td>
-      <amp-img alt="Logo with blue text on blue background"
-          layout="fixed"
-          width="103" height="102"
-          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
-        <noscript>
-          <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
-        </noscript>
-      </amp-img>
-      Avoid this
-    </td>
-  </tr>
-</table>
-
-- The logo shape should be a square, not a rectangle.
-- The background color should not be transparent.
-- Use one logo per brand that is consistent across AMP stories.
-- The logo should be at least 96x96 pixels.
-
-#### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
-
-The following guidelines apply to the image for the story poster image(s):
-
-- The poster image should be representative of the entire AMP story.
-- The poster image should be visible to the user when the user begins the AMP story.  However, the image file URL used in the metadata does not have to match exactly the URL used on the first page of the story.  The URL used in the metadata can include sizing, cropping, or minor styling changes for the preview purpose.
-- The poster image should be a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
-- The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
-- If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
-- Each poster image should meet the recommended minimium size:
-  - Portrait: 696px x 928px
-  - Landscape: 928px x 696px
-  - Square: 928px x 928px
-
-## Overview
-
-The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -197,6 +57,17 @@ The `amp-story` extension provides a new format for displaying visual content th
   </noscript>
   </amp-anim>
 </figure>
+
+## Version notes
+
+| Version | Description                                                            |
+| ------- | ---------------------------------------------------------------------- |
+| 1.0     | Current version, since 2018-07-16.                                     |
+| 0.1     | Initial implementation.  This is no longer valid AMP, and will be deleted on 2019-10-01.   |
+
+### Migrating from 0.1 to 1.0
+
+As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2019-10-01.  This may cause minor breaking changes, as your stories will automatically be upgraded to use version 1.0.  We recommend manually migrating your pages to version 1.0 before this date to ensure functionality and proper design.
 
 ## AMP story format
 
@@ -228,7 +99,7 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   </head>
   <body>
-    <amp-story standalone>
+    <amp-story standalone title="Hello Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg">
       <amp-story-page id="my-first-page">
         <amp-story-grid-layer template="fill">
           <amp-img src="https://example.ampproject.org/helloworld/bg1.jpg"
@@ -350,9 +221,75 @@ Disables the [Live story](#Live-story) functionality.
 
 Used with the live-story attribute. Time interval (in milliseconds) between checks for new content. If no `data-poll-interval` is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.
 
-### Posters
+### Metadata guidelines
 
-A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
+Metadata attributes display a preview of the story across the AMP stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rick, embedded experience AMP stories surfaces to come.
+
+These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
+
+#### `publisher-logo-src` guidelines
+
+These guidelines apply to the publisher logo image:
+
+- Provide a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- Avoid animated images, such as animated gifs.
+- Image logo should be legible on the background color.
+
+<table>
+  <tr>
+    <td>
+      <amp-img alt="Logo with blue text on white background"
+          layout="fixed"
+          width="107" height="112"
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-1.png" >
+        <noscript>
+          <img alt="Logo with blue text on white background" src="img/publisher-logo-1.png" />
+        </noscript>
+      </amp-img>
+      Preferred
+    </td>
+    <td>
+      <amp-img alt="Logo with white text on blue background"
+          layout="fixed"
+          width="107" height="101"
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-2.png" >
+        <noscript>
+          <img alt="Logo with white text on blue background" src="img/publisher-logo-2.png" />
+        </noscript>
+      </amp-img>
+      Preferred
+    </td>
+    <td>
+      <amp-img alt="Logo with blue text on blue background"
+          layout="fixed"
+          width="103" height="102"
+          src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/publisher-logo-3.png" >
+        <noscript>
+          <img alt="Logo with blue text on blue background" src="img/publisher-logo-3.png" />
+        </noscript>
+      </amp-img>
+      Avoid this
+    </td>
+  </tr>
+</table>
+
+- Logos should be at least 96x96 pixels and a perfect square.
+- The background should not be transparent.
+- Use one logo per brand that is consistent across AMP stories.
+
+#### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
+
+These guidelines apply to the story poster image(s):
+
+- The poster image should be representative of the entire AMP story.
+- The poster image should be visible to the user when the AMP story begins. To accommodate sizing, cropping or minor styling changes or preview purposes, the image file URL used in the metadata does not need to be an exact match to the URL on the first page of the story.
+- Provide a raster file, such as `.jpg`, `.png`, or `.gif`.  Avoid vector files, such as `.svg` or `.eps`.
+- The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
+- If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
+- Each poster image should meet the recommended minimium size:
+  - Portrait: 696px x 928px
+  - Landscape: 928px x 696px
+  - Square: 928px x 928px
 
 ### Landscape orientation and full bleed desktop experience opt in
 
@@ -1061,6 +998,7 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
     <li><code>&lt;amp-list></code></li>
     <li><code>&lt;amp-live-list></code></li>
     <li><code>&lt;amp-mathml></code></li>
+    <li><code>&lt;amp-megaphone></code></li>
     <li><code>&lt;amp-mowplayer></code></li>
     <li><code>&lt;amp-nexxtv-player></code></li>
     <li><code>&lt;amp-o2-player></code></li>

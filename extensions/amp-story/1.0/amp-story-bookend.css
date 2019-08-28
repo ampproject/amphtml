@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+@import './amp-story-shadow-reset.css';
 @import './amp-story-share.css';
 
 .i-amphtml-story-bookend {
   display: flex !important;
+  font-family: 'Roboto', sans-serif !important;
   flex-direction: column !important;
   background: #202125 !important;
   border-radius: 8px 8px 0 0 !important;

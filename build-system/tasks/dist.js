@@ -21,6 +21,18 @@ const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const {
+  bootstrapThirdPartyFrames,
+  compileAllMinifiedJs,
+  compileCoreRuntime,
+  compileJs,
+  endBuildStep,
+  hostname,
+  mkdirSync,
+  printConfigHelp,
+  printNobuildHelp,
+  toPromise,
+} = require('./helpers');
+const {
   buildExtensions,
   extensionAliasFilePath,
   getExtensionsToBuild,
@@ -34,24 +46,10 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {
-  WEB_PUSH_PUBLISHER_FILES,
-  WEB_PUSH_PUBLISHER_VERSIONS,
-  buildAlp,
-  buildExaminer,
-  buildWebWorker,
-  compileJs,
-  compileAllMinifiedTargets,
-  endBuildStep,
-  hostname,
-  mkdirSync,
-  printConfigHelp,
-  printNobuildHelp,
-  toPromise,
-} = require('./helpers');
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
+const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {isTravisBuild} = require('../travis');
@@ -63,6 +61,13 @@ const argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
+
+const WEB_PUSH_PUBLISHER_FILES = [
+  'amp-web-push-helper-frame',
+  'amp-web-push-permission-dialog',
+];
+
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 
 function transferSrcsToTempDir() {
   log(
@@ -124,25 +129,21 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
-  await compileCss(/* watch */ undefined, /* opt_compileAll */ true);
+  await compileCss();
+  await compileJison();
   await startNailgunServer(distNailgunPort, /* detached */ false);
 
   // Single pass has its own tmp directory processing. Only do this for
   // multipass.
-  // We need to execute this after `compileCss` so that we can copy that
+  // We need to execute this after `compileCss` and `compileJison` so that we can copy that
   // over to the tmp directory.
   if (!argv.single_pass) {
     transferSrcsToTempDir();
   }
 
   await Promise.all([
-    compileAllMinifiedTargets(),
-    // NOTE: When adding a line here,
-    // consider whether you need to include polyfills
-    // and whether you need to init logging (initLogConstructor).
-    buildAlp({minify: true, watch: false}),
-    buildExaminer({minify: true, watch: false}),
-    buildWebWorker({minify: true, watch: false}),
+    compileAllMinifiedJs(),
+    bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true),
     buildExtensions({minify: true, watch: false}),
     buildExperiments({minify: true, watch: false}),
     buildLoginDone('0.1', {minify: true, watch: false}),
@@ -150,7 +151,9 @@ async function dist() {
       postBuildWebPushPublisherFilesVersion
     ),
     copyCss(),
+    copyParsers(),
   ]);
+  await compileCoreRuntime(/* watch */ false, /* minify */ true);
 
   if (isTravisBuild()) {
     // New line after all the compilation progress dots on Travis.
@@ -266,7 +269,18 @@ function copyCss() {
       .src('build/css/amp-*.css', {base: 'build/css/'})
       .pipe(gulp.dest('dist/v0'))
   ).then(() => {
-    endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
+    endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
+  });
+}
+
+/**
+ * Copies parsers from the build folder to the dist folder
+ * @return {!Promise}
+ */
+function copyParsers() {
+  const startTime = Date.now();
+  return fs.copy('build/parsers', 'dist/v0').then(() => {
+    endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
 }
 
@@ -282,16 +296,12 @@ function copyAliasExtensions() {
   const extensionsToBuild = getExtensionsToBuild();
 
   for (const key in extensionAliasFilePath) {
-    if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1
-    ) {
-      continue;
+    if (extensionsToBuild.includes(extensionAliasFilePath[key].name)) {
+      fs.copySync(
+        'dist/v0/' + extensionAliasFilePath[key].file,
+        'dist/v0/' + key
+      );
     }
-    fs.copySync(
-      'dist/v0/' + extensionAliasFilePath[key]['file'],
-      'dist/v0/' + key
-    );
   }
 
   return Promise.resolve();
@@ -460,4 +470,6 @@ dist.flags = {
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
+  disable_nailgun:
+    "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };

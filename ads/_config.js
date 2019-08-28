@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {jsonConfiguration} from '../src/json';
+
 /**
  * @typedef {{
  *   prefetch: (string|undefined),
@@ -61,9 +63,9 @@ let AdNetworkConfigDef;
  *   fullWidthHeightRatio: number
  * }
  *
- * @const {!Object<string, !AdNetworkConfigDef>}}
+ * @const {!Object<string, !JsonObject>}
  */
-export const adConfig = {
+const adConfig = jsonConfiguration({
   '_ping_': {
     renderStartImplemented: true,
     clientIdScope: '_PING_',
@@ -827,6 +829,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'readmo': {
+    renderStartImplemented: true,
+  },
+
   'realclick': {
     renderStartImplemented: true,
   },
@@ -1079,6 +1085,10 @@ export const adConfig = {
     preconnect: 'https://yads.yahoo.co.jp',
   },
 
+  'yahoonativeads': {
+    renderStartImplemented: true,
+  },
+
   'yandex': {
     prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
     renderStartImplemented: true,
@@ -1137,4 +1147,6 @@ export const adConfig = {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
     renderStartImplemented: true,
   },
-};
+});
+
+export {adConfig};

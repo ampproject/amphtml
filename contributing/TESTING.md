@@ -69,7 +69,8 @@ Command                                                                 | Descri
 `gulp build --fortesting`                                               | Builds the AMP library and sets the `test` field in `AMP_CONFIG` to `true`.
 `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.
 `gulp clean`                                                            | Removes build output.
-`gulp css`                                                              | Recompiles css to build directory and builds the embedded css into js files for the AMP library.
+`gulp css`                                                              | Recompiles css to the build directory and builds the embedded css into js files for the AMP library.
+`gulp compile-jison`                                                    | Compiles jison parsers for extensions to build directory.
 `gulp watch`                                                            | Watches for changes in files, re-builds.
 `gulp watch --extensions=amp-foo,amp-bar`                               | Watches for changes in files, re-builds only the listed extensions.
 `gulp watch --extensions=minimal_set`                                   | Watches for changes in files, re-builds only the extensions needed to load `article.amp.html`.
@@ -191,8 +192,6 @@ Additionally, the following query parameters can be provided:
 
 If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope for testing local and production AMP documents with the local JS version.
 
-Make sure to run gulp with `--with_inabox` flag.
-
 The following forms are supported:
 
 - local document: http://localhost:8000/inabox/examples/animations.amp.html
@@ -214,7 +213,7 @@ We use [Sauce Labs](https://saucelabs.com) to perform cross-browser testing (tha
 
 To run the tests on Sauce Labs:
 
-* Create a Sauce Labs account.  If you are only going to use your account for open source projects like this one you can sign up for a free [Open Sauce](https://saucelabs.com/opensauce/) account.  (If you create an account through the normal account creation mechanism you'll be signing up for a free trial that expires; you can contact Sauce Labs customer service to switch your account to Open Sauce if you did this accidentally.)
+* Create a Sauce Labs account.  If you are only going to use your account for open source projects like this one you can sign up for a free [Open Sauce](https://saucelabs.com/solutions/open-source) account.  (If you create an account through the normal account creation mechanism you'll be signing up for a free trial that expires; you can contact Sauce Labs customer service to switch your account to Open Sauce if you did this accidentally.)
 * Set the `SAUCE_USERNAME` and `SAUCE_ACCESS_KEY` environment variables.  On Linux add this to your `.bashrc`:
 
    ```

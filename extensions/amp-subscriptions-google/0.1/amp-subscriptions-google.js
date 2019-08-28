@@ -414,7 +414,7 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @private
    */
   resolveGoogleViewer_(viewer) {
@@ -531,6 +531,11 @@ class AmpFetcher {
         prerenderSafe: true,
       })
       .then(response => response.json());
+  }
+
+  /** @override */
+  fetch(input, opt_init) {
+    return this.xhr_.fetch(input, opt_init); //needed to kepp closure happy
   }
 }
 

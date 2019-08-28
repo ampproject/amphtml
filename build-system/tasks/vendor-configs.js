@@ -14,42 +14,39 @@
  * limitations under the License.
  */
 
+const minimist = require('minimist');
+const argv = minimist(process.argv.slice(2));
+const deglob = require('globs-to-files');
 const gulp = require('gulp');
 const gulpif = require('gulp-if');
 const gulpWatch = require('gulp-watch');
 const jsonlint = require('gulp-jsonlint');
 const jsonminify = require('gulp-jsonminify');
 const rename = require('gulp-rename');
-const {endBuildStep, printNobuildHelp, toPromise} = require('./helpers');
+const {endBuildStep, toPromise} = require('./helpers');
 
 /**
  * Entry point for 'gulp vendor-configs'
- * @return {!Promise}
- */
-async function vendorConfigs() {
-  printNobuildHelp();
-  return compileVendorConfigs();
-}
-
-/**
  * Compile all the vendor configs and drop in the dist folder
  * @param {Object=} opt_options
  * @return {!Promise}
  */
-function compileVendorConfigs(opt_options) {
+async function vendorConfigs(opt_options) {
   const options = opt_options || {};
 
-  const srcPath = [
-    'extensions/amp-analytics/0.1/vendors/*.json',
-    '!extensions/amp-analytics/0.1/vendors/_fake_.json', // ignore test json
-  ];
+  const srcPath = ['extensions/amp-analytics/0.1/vendors/*.json'];
   const destPath = 'dist/v0/analytics-vendors/';
+
+  // ignore test json if not fortesting
+  if (!argv.fortesting) {
+    srcPath.push('!extensions/amp-analytics/0.1/vendors/_fake_.json');
+  }
 
   if (options.watch) {
     // Do not set watchers again when we get called by the watcher.
     const copyOptions = {...options, watch: false, calledByWatcher: true};
     gulpWatch(srcPath, function() {
-      compileVendorConfigs(copyOptions);
+      vendorConfigs(copyOptions);
     });
   }
 
@@ -75,17 +72,18 @@ function compileVendorConfigs(opt_options) {
       )
       .pipe(gulp.dest(destPath))
   ).then(() => {
-    endBuildStep(
-      'Compiled all analytics vendor configs into ',
-      destPath,
-      startTime
-    );
+    if (deglob.sync(srcPath).length > 0) {
+      endBuildStep(
+        'Compiled all analytics vendor configs into',
+        destPath,
+        startTime
+      );
+    }
   });
 }
 
 module.exports = {
   vendorConfigs,
-  compileVendorConfigs,
 };
 
 vendorConfigs.description = 'Compile analytics vendor configs to dist';

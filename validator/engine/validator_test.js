@@ -1468,8 +1468,8 @@ describe('ValidatorRulesMakeSense', () => {
     if (tagSpec.cdata !== null) {
       let usefulCdataSpec = false;
       // max_bytes
-      it('max_bytes are greater than or equal to -1', () => {
-        expect(tagSpec.cdata.maxBytes).toBeGreaterThan(-2);
+      it('max_bytes are greater than or equal to -2', () => {
+        expect(tagSpec.cdata.maxBytes).toBeGreaterThan(-3);
       });
       if (tagSpec.cdata.maxBytes >= 0) {
         usefulCdataSpec = true;
@@ -1539,6 +1539,7 @@ describe('ValidatorRulesMakeSense', () => {
               (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
               tagSpec.cdata.cdataRegex !== null ||
               tagSpec.cdata.mandatoryCdata !== null ||
+              tagSpec.cdata.maxBytes === -1 ||
               tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
         });

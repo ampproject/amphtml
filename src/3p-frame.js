@@ -236,7 +236,7 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
  * @param {*} win
  */
 export function resetBootstrapBaseUrlForTesting(win) {
-  win.defaultBootstrapSubDomain = undefined;
+  win.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN = undefined;
 }
 
 /**
@@ -251,11 +251,12 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
     return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename);
   }
   // Ensure same sub-domain is used despite potentially different file.
-  parentWindow.defaultBootstrapSubDomain =
-    parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
+  parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN =
+    parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN ||
+    getSubDomain(parentWindow);
   return (
     'https://' +
-    parentWindow.defaultBootstrapSubDomain +
+    parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN +
     `.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
     `${srcFileBasename}.html`
   );

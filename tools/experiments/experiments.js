@@ -37,7 +37,8 @@ const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
  * @typedef {{
  *   id: string,
  *   name: string,
- *   spec: string
+ *   spec: string,
+ *   cleanupIssue: string,
  * }}
  */
 let ExperimentDef;
@@ -246,12 +247,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'disable-amp-story-desktop',
-    name: 'Disables responsive desktop experience for the amp-story component',
-    spec: 'https://github.com/ampproject/amphtml/issues/11714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
-  },
-  {
     id: 'disable-amp-story-default-media',
     name: 'Removes default media for amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/14535',
@@ -279,12 +274,6 @@ const EXPERIMENTS = [
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
-  },
-  {
-    id: 'layers',
-    name: 'Enables the new Layers position/measurement system',
-    spec: 'https://github.com/ampproject/amphtml/issues/3434',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
   },
   {
     id: 'blurry-placeholder',
@@ -325,11 +314,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
   },
   {
-    id: 'amp-script',
-    name: 'Enables <amp-script>.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
@@ -348,14 +332,6 @@ const EXPERIMENTS = [
     name:
       'Experiment to prevent regression after a major CSS clean up' +
       ' for AMPHTML Ads in FIE rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
-  },
-  {
-    id: 'inabox-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in inabox rendering mode',
     spec: 'https://github.com/ampproject/amphtml/issues/22418',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
@@ -393,6 +369,12 @@ const EXPERIMENTS = [
       'If applicable, convert remaining micro tasks to the next macro ' +
       ' tasks if a previous micro task execution took too long',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
+  },
+  {
+    id: 'pausable-iframe',
+    name: 'Use iframe freezing instead of recreating iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24110',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
   },
 ];
 

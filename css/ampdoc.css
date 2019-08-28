@@ -54,16 +54,6 @@ body {
 }
 
 /**
- * We intentionally break with HTML5's default [hidden] styling to apply
- * !important.
- */
-[hidden] {
-  /* This must be !important, else the toggle helper system would break down
-     due to specificity */
-  display: none !important;
-}
-
-/**
  * The enables passive touch handlers, e.g. for document swipe, since they
  * no will longer need to try to cancel vertical scrolls during swipes.
  * This is only done in the embedded mode because (a) the document swipe
@@ -367,28 +357,4 @@ amp-autocomplete > input,
  */
 [amp-fx^="fly-in"] {
   visibility: hidden;
-}
-
-/**
- * amp-addthis
- */
-
-/**
- * Make amp-addthis tool floating if user give data-widget-type
- */
-@media only screen and (max-width: 979px) {
-  amp-addthis[data-widget-type="floating"] {
-    position: fixed !important;
-    width: 100% !important;
-    height: 50px;
-    bottom: 0;
-  }
-}
-@media only screen and (min-width: 979px) {
-  amp-addthis[data-widget-type="floating"] {
-    position: fixed !important;
-    width: 70px !important;
-    height: 320px!important;
-    top: 200px;
-  }
 }

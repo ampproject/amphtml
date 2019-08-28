@@ -2,8 +2,8 @@
 $category@: dynamic-content
 formats:
   - websites
-  - email
   - ads
+  - email
 teaser:
   text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
 ---
@@ -487,6 +487,11 @@ Only binding to the following components and attributes are allowed:
     <td><code>&lt;amp-state&gt;</code></td>
     <td><code>[src]</code></td>
     <td>Fetches JSON from the new URL and merges it into the existing state. <em>Note the following update will ignore <code>&lt;amp-state&gt;</code> elements to prevent cycles.</em></td>
+  </tr>
+  <tr>
+    <td><code>&lt;amp-twitter&gt;</code></td>
+    <td><code>[data-tweetid]</code></td>
+    <td>Changes the displayed Tweet.</td>
   </tr>
   <tr>
     <td><code>&lt;amp-video&gt;</code></td>

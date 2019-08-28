@@ -150,7 +150,9 @@ export class AmpSelector extends AMP.BaseElement {
             'be less than the length of options in the <amp-selector>'
         );
         if (args && args['index'] !== undefined) {
-          this.toggle_(args['index'], args['value']);
+          return this.toggle_(args['index'], args['value']);
+        } else {
+          return Promise.reject("'index' must be specified");
         }
       },
       ActionTrust.LOW
@@ -398,6 +400,7 @@ export class AmpSelector extends AMP.BaseElement {
    * Handles toggle action.
    * @param {number} index
    * @param {boolean=} opt_value
+   * @return {!Promise}
    * @private
    */
   toggle_(index, opt_value) {
@@ -411,21 +414,23 @@ export class AmpSelector extends AMP.BaseElement {
     const selectedIndex = this.elements_.indexOf(this.selectedElements_[0]);
 
     if (indexFinalStatus === indexCurrentStatus) {
-      return;
+      return Promise.resolve();
     }
 
     // There is a change of the `selected` attribute for the element
-    if (selectedIndex !== index) {
-      this.setSelection_(el);
-      const selectedEl = this.elements_[selectedIndex];
-      if (selectedEl) {
-        this.clearSelection_(selectedEl);
+    return this.mutateElement(() => {
+      if (selectedIndex !== index) {
+        this.setSelection_(el);
+        const selectedEl = this.elements_[selectedIndex];
+        if (selectedEl) {
+          this.clearSelection_(selectedEl);
+        }
+      } else {
+        this.clearSelection_(el);
       }
-    } else {
-      this.clearSelection_(el);
-    }
 
-    this.fireSelectEvent_(el);
+      this.fireSelectEvent_(el);
+    });
   }
 
   /**
@@ -492,7 +497,9 @@ export class AmpSelector extends AMP.BaseElement {
       case Keys.LEFT_ARROW: /* fallthrough */
       case Keys.UP_ARROW: /* fallthrough */
       case Keys.RIGHT_ARROW: /* fallthrough */
-      case Keys.DOWN_ARROW:
+      case Keys.DOWN_ARROW: /* fallthrough */
+      case Keys.HOME: /* fallthrough */
+      case Keys.END:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           return this.navigationKeyDownHandler_(event);
         }
@@ -532,6 +539,14 @@ export class AmpSelector extends AMP.BaseElement {
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
+      case Keys.HOME:
+        // Home looks for first nonhidden element, in 'next' direction.
+        dir = 1;
+        break;
+      case Keys.END:
+        // End looks for last nonhidden element, in 'previous' direction.
+        dir = -1;
+        break;
       default:
         return Promise.resolve();
     }
@@ -542,6 +557,17 @@ export class AmpSelector extends AMP.BaseElement {
 
     return this.getElementsSizes_().then(sizes => {
       const originalIndex = this.focusedIndex_;
+
+      // For Home/End keys, start at end/beginning respectively and wrap around
+      switch (event.key) {
+        case Keys.HOME:
+          this.focusedIndex_ = this.elements_.length - 1;
+          break;
+        case Keys.END:
+          this.focusedIndex_ = 0;
+          break;
+      }
+
       do {
         // Change the focus to the next element in the specified direction.
         // The selection should loop around if the user attempts to go one

@@ -722,7 +722,7 @@ describes.realWin(
       it(
         'should trigger `toggle` action even when no `value` argument is' +
           ' provided to the function',
-        () => {
+        async () => {
           const ampSelector = getSelector({
             config: {
               count: 5,
@@ -737,8 +737,9 @@ describes.realWin(
 
           // Test the case where the element to be `selected` and the currently
           // selected element are different
+
           let args = {'index': 2};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -749,11 +750,12 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are the same
           args = {'index': 2};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
           });
+
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
         }
       );
@@ -761,7 +763,7 @@ describes.realWin(
       it(
         'should trigger `toggle` action even with specified `value`' +
           ' argument',
-        () => {
+        async () => {
           const ampSelector = getSelector({
             config: {
               count: 5,
@@ -777,7 +779,7 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are different
           let args = {'index': 2, 'value': true};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -788,7 +790,7 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are the same
           args = {'index': 2, 'value': true};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -798,7 +800,7 @@ describes.realWin(
           // Test the case where the element to be removed as `selected` and
           // the currently selected element are the same
           args = {'index': 2, 'value': false};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -811,7 +813,7 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
           args = {'index': 2, 'value': false};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -845,7 +847,7 @@ describes.realWin(
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
       });
 
-      it('should trigger "select" event when an item is toggled', () => {
+      it('should trigger "select" event when an item is toggled', async () => {
         const ampSelector = getSelector({
           config: {
             count: 5,
@@ -858,7 +860,7 @@ describes.realWin(
 
         const triggerSpy = sandbox.spy(impl.action_, 'trigger');
         const args = {'index': 3, 'value': true};
-        impl.executeAction({
+        await impl.executeAction({
           method: 'toggle',
           args,
           satisfiesTrust: () => true,
@@ -1159,6 +1161,57 @@ describes.realWin(
                 expect(ampSelector.children[1].tabIndex).to.equal(-1);
                 expect(ampSelector.children[2].tabIndex).to.equal(-1);
               });
+          }
+        );
+
+        it(
+          'should update focus when the user presses the home key when ' +
+            'keyboard-select-mode is enabled',
+          () => {
+            const ampSelector = getSelector({
+              attributes: {
+                'keyboard-select-mode': 'focus',
+              },
+              config: {
+                count: 3,
+              },
+            });
+            ampSelector.children[2].setAttribute('selected', '');
+            ampSelector.children[0].setAttribute('hidden', '');
+            ampSelector.build();
+            expect(ampSelector.children[0].tabIndex).to.equal(-1);
+            expect(ampSelector.children[1].tabIndex).to.equal(-1);
+            expect(ampSelector.children[2].tabIndex).to.equal(0);
+            return keyPress(ampSelector, Keys.HOME).then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            });
+          }
+        );
+
+        it(
+          'should update focus when the user presses the end key when ' +
+            'keyboard-select-mode is enabled',
+          () => {
+            const ampSelector = getSelector({
+              attributes: {
+                'keyboard-select-mode': 'focus',
+              },
+              config: {
+                count: 3,
+              },
+            });
+            ampSelector.children[2].setAttribute('hidden', '');
+            ampSelector.build();
+            expect(ampSelector.children[0].tabIndex).to.equal(0);
+            expect(ampSelector.children[1].tabIndex).to.equal(-1);
+            expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            return keyPress(ampSelector, Keys.END).then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            });
           }
         );
 

@@ -31,34 +31,42 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getIns(imgurId) {
-      const ins = doc.createElement('amp-imgur');
-      ins.setAttribute('data-imgur-id', imgurId);
-      ins.setAttribute('width', '1');
-      ins.setAttribute('height', '1');
-      ins.setAttribute('layout', 'responsive');
-      doc.body.appendChild(ins);
-      return ins
+    function getImgur(imgurId) {
+      const imgur = doc.createElement('amp-imgur');
+      imgur.setAttribute('data-imgur-id', imgurId);
+      imgur.setAttribute('width', '1');
+      imgur.setAttribute('height', '1');
+      imgur.setAttribute('layout', 'responsive');
+      doc.body.appendChild(imgur);
+      return imgur
         .build()
-        .then(() => ins.layoutCallback())
-        .then(() => ins);
+        .then(() => imgur.layoutCallback())
+        .then(() => imgur);
     }
 
-    function testIframe(iframe) {
+    function testIframe(iframe, id) {
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal('https://imgur.com/2CnX7/embed?pub=true');
+      expect(iframe.src).to.equal(
+        'https://imgur.com/' + id + '/embed?pub=true'
+      );
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     }
 
     it('renders', () => {
-      return getIns('2CnX7').then(ins => {
-        testIframe(ins.querySelector('iframe'));
+      return getImgur('2CnX7').then(imgur => {
+        testIframe(imgur.querySelector('iframe'), '2CnX7');
+      });
+    });
+
+    it('renders a/ type urls', () => {
+      return getImgur('a/ZF7NS3V').then(imgur => {
+        testIframe(imgur.querySelector('iframe'), 'a/ZF7NS3V');
       });
     });
 
     it('resizes with JSON String message', () => {
-      return getIns('2CnX7').then(ins => {
-        const impl = ins.implementation_;
+      return getImgur('2CnX7').then(imgur => {
+        const impl = imgur.implementation_;
         const changeHeightSpy = sandbox.spy(impl, 'attemptChangeHeight');
         expect(changeHeightSpy).not.to.have.been.called;
         const event = {
@@ -73,8 +81,8 @@ describes.realWin(
     });
 
     it('resizes with JSON Object message', () => {
-      return getIns('2CnX7').then(ins => {
-        const impl = ins.implementation_;
+      return getImgur('2CnX7').then(imgur => {
+        const impl = imgur.implementation_;
         const changeHeightSpy = sandbox.spy(impl, 'attemptChangeHeight');
         expect(changeHeightSpy).not.to.have.been.called;
         const event = {
