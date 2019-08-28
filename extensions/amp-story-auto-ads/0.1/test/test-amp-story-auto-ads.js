@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as analytics from '../../../../src/analytics';
 import {
   Action,
   UIType,
@@ -401,57 +400,6 @@ describes.realWin(
         expect(analyticsStub).to.be.called;
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-exit', {
           'exitTime': sinon.match.number,
-        });
-      });
-    });
-
-    describe('analyticsEvent_', () => {
-      let triggerStub;
-
-      beforeEach(() => {
-        triggerStub = sandbox.stub(analytics, 'triggerAnalyticsEvent');
-        autoAds.analyticsData_ = {1: {}};
-      });
-
-      it('should trigger the appropriate event', () => {
-        const vars = {
-          adIndex: 1,
-          foo: 1,
-        };
-
-        autoAds.analyticsEvent_('my-event', vars);
-        expect(triggerStub).calledWith(
-          sinon.match.any,
-          'my-event',
-          sinon.match(vars)
-        );
-      });
-
-      it('should aggregate data from previous events', () => {
-        autoAds.analyticsEvent_('event-1', {adIndex: 1, foo: 1});
-        autoAds.analyticsEvent_('event-2', {adIndex: 1, bar: 2});
-        autoAds.analyticsEvent_('event-3', {adIndex: 1, baz: 3});
-        expect(triggerStub).calledThrice;
-        expect(triggerStub).calledWith(
-          sinon.match.any,
-          'event-3',
-          sinon.match({
-            adIndex: 1,
-            foo: 1,
-            bar: 2,
-            baz: 3,
-          })
-        );
-      });
-    });
-
-    describe('analyticsEventWithCurrentAd_', () => {
-      it('should add the current ad index and call #analyticsEvent_', () => {
-        const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.analyticsEventWithCurrentAd_('cool-event', {foo: 1});
-        expect(analyticsStub).to.be.called;
-        expect(analyticsStub).to.have.been.calledWithMatch('cool-event', {
-          foo: 1,
         });
       });
     });
