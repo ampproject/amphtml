@@ -26,7 +26,7 @@ const isRunning = require('is-running');
 const log = require('fancy-log');
 const morgan = require('morgan');
 const webserver = require('gulp-webserver');
-const {lazyBuildExtensions, lazyBuildJs} = require('./lazy-build');
+const {autoReload, lazyBuildExtensions, lazyBuildJs} = require('./lazy-build');
 
 const {
   SERVE_HOST: host,
@@ -91,6 +91,7 @@ if (noCachingExtensions) {
 if (lazyBuild) {
   middleware.push(lazyBuildExtensions);
   middleware.push(lazyBuildJs);
+  middleware.push(autoReload);
 }
 
 // Start gulp webserver

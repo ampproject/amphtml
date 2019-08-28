@@ -39,6 +39,8 @@ const {
 } = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
+const {triggerReload} = require('./lazy-build');
+const watch = require('gulp-watch');
 
 const upload = multer();
 
@@ -841,10 +843,20 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
  */
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
+const htmlWatchers = {};
 app.get(
   ['/examples/*.html', '/test/manual/*.html', '/test/fixtures/e2e/*/*.html'],
   (req, res, next) => {
     const filePath = req.path;
+    console.info('HTML', filePath);
+    if (!htmlWatchers[filePath]) {
+      htmlWatchers[filePath] = true;
+      console.log('HTML watch', '.' + filePath);
+      watch('.' + filePath, () => {
+        console.log('HTML updated', filePath, triggerReload);
+        triggerReload();
+      });
+    }
     const mode = pc.env.SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);

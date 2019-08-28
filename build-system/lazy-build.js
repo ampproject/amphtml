@@ -23,6 +23,17 @@ const {jsBundles} = require('../bundles.config');
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
 
+let reloadPromise;
+let reloadResolver;
+function triggerReload() {
+  if (reloadResolver) {
+    reloadResolver();
+  }
+  reloadPromise = new Promise(r => (reloadResolver = r));
+}
+exports.triggerReload = triggerReload;
+triggerReload();
+
 /**
  * @param {string} url
  * @param {string} matcher
@@ -57,6 +68,7 @@ async function build(bundles, bundle, buildFunc) {
   bundles[bundle].pendingBuild = buildFunc(bundles, bundle, {
     watch: true,
     onWatchBuild: async bundlePromise => {
+      triggerReload();
       bundles[bundle].pendingBuild = bundlePromise;
       await bundlePromise;
       bundles[bundle].pendingBuild = undefined;
@@ -67,6 +79,12 @@ async function build(bundles, bundle, buildFunc) {
   bundles[bundle].watched = true;
 }
 
+function reloadTimeout() {
+  return new Promise(resolve => {
+    setTimeout(() => resolve('timeout'), 60 * 1000);
+  });
+}
+
 exports.lazyBuildExtensions = async function(req, res, next) {
   const matcher = /\/dist\/v0\/([^\/]*)\.max\.js/;
   await lazyBuild(req.url, matcher, extensionBundles, doBuildExtension, next);
@@ -75,4 +93,25 @@ exports.lazyBuildExtensions = async function(req, res, next) {
 exports.lazyBuildJs = async function(req, res, next) {
   const matcher = /\/.*\/([^\/]*\.js)/;
   await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
+};
+
+exports.autoReload = async function(req, res, next) {
+  if (!req.url.startsWith('/_/autoreload')) {
+    next();
+    return;
+  }
+  const result = await Promise.race([reloadPromise, reloadTimeout()]);
+  if (result == 'timeout') {
+    res.send(`(function() {
+      var existing = document.querySelector('[src="/_/autoreload"]');
+      if (existing) {
+        existing.parentElement.removeChild(existing);
+      }
+      var s = document.createElement('script');
+      s.src = '/_/autoreload';
+      document.head.appendChild(s);
+    })()`);
+  } else {
+    res.send(`location.reload()`);
+  }
 };
