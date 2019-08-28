@@ -428,7 +428,7 @@ async function buildExtension(
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildExtensionCss(path, name, version, options) {
+function buildExtensionCss(path, name, version, options) {
   /**
    * Writes CSS binaries
    *
@@ -442,22 +442,34 @@ async function buildExtensionCss(path, name, version, options) {
     fs.writeFileSync(jsName, jsCss, 'utf-8');
     fs.writeFileSync(cssName, css, 'utf-8');
   }
-  const mainCss = await jsifyCssAsync(path + '/' + name + '.css');
-  writeCssBinaries(`${name}-${version}.css`, mainCss);
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
-  if (isAliased) {
-    writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
-  }
-  if (Array.isArray(options.cssBinaries)) {
-    options.cssBinaries.map(async function(name) {
-      const css = await jsifyCssAsync(`${path}/${name}.css`);
-      writeCssBinaries(`${name}-${version}.css`, css);
+
+  const promises = [];
+  const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css').then(
+    mainCss => {
+      writeCssBinaries(`${name}-${version}.css`, mainCss);
       if (isAliased) {
-        writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
+        writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
       }
-    });
+    }
+  );
+
+  if (Array.isArray(options.cssBinaries)) {
+    promises.push.apply(
+      promises,
+      options.cssBinaries.map(function(name) {
+        return jsifyCssAsync(`${path}/${name}.css`).then(css => {
+          writeCssBinaries(`${name}-${version}.css`, css);
+          if (isAliased) {
+            writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
+          }
+        });
+      })
+    );
   }
+  promises.push(mainCssBinary);
+  return Promise.all(promises);
 }
 
 /**
