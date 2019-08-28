@@ -222,7 +222,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   });
 });
 
-describes.realWin.only('ViewportBindingNatural on iOS', {ampCss: true}, env => {
+describes.realWin('ViewportBindingNatural on iOS', {ampCss: true}, env => {
   let binding;
   let win;
   let ampdoc;
