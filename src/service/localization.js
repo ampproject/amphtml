@@ -125,12 +125,13 @@ export class LocalizationService {
    * @return {!LocalizationService} For chaining.
    */
   registerLocalizedStringBundle(languageCode, localizedStringBundle) {
-    if (!this.localizedStringBundles_[languageCode]) {
-      this.localizedStringBundles_[languageCode] = {};
+    const normalizedLangCode = languageCode.toLowerCase();
+    if (!this.localizedStringBundles_[normalizedLangCode]) {
+      this.localizedStringBundles_[normalizedLangCode] = {};
     }
 
     Object.assign(
-      this.localizedStringBundles_[languageCode],
+      this.localizedStringBundles_[normalizedLangCode],
       localizedStringBundle
     );
     return this;
