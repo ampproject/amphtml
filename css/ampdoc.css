@@ -78,6 +78,8 @@ html.i-amphtml-fie > body {
 
 html.i-amphtml-singledoc:not(.i-amphtml-inabox) > body,
 html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
   position: relative !important;
 }
 
