@@ -376,7 +376,8 @@ export class AmpScriptService {
     return this.crypto_.sha384Base64(bytes).then(hash => {
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
         throw user().createError(
-          '[%s] Script hash not found. %id must have "sha384-%s" in meta[name="amp-script-src"]. See https://amp.dev/documentation/components/amp-script/#security-features.',
+          '[%s] Script hash not found. %id must have "sha384-%s" in meta[name="amp-script-src"].' +
+            ' See https://amp.dev/documentation/components/amp-script/#security-features.',
           TAG,
           debugId,
           hash
