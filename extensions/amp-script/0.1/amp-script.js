@@ -116,8 +116,7 @@ export class AmpScript extends AMP.BaseElement {
     this.userActivation_ = new UserActivationTracker(this.element);
 
     // The displayed name of the combined script in dev tools.
-    this.debugId_ = 'amp-script[unknown]';
-    this.source_ = this.element.hasAttribute('src')
+    this.debugId_ = this.element.hasAttribute('src')
       ? `amp-script[src="${this.element.getAttribute('src')}"].js`
       : `amp-script[script=#${this.element.getAttribute('script')}].js`;
 
