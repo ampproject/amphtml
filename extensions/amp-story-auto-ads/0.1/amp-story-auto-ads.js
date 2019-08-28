@@ -238,7 +238,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       pageBeforeAdId || this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
     this.isCurrentAdLoaded_ = true;
     // Setting distance manually to avoid flash of next page.
-    this.adPageEls_[this.adPageEls_.length - 1].setAttribute('distance', '1');
+    const lastPage = this.adPageEls_[this.adPageEls_.length - 1];
+    lastPage.setAttribute('distance', '1');
+
     this.tryToPlaceAdAfterPage_(pageBeforeId);
     // Once the ad is inserted into the story firing this event will
     // navigate to the ad page.
@@ -247,13 +249,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       'direction': NavigationDirection.NEXT,
     });
     const eventInit = {bubbles: true};
-    dispatch(
-      this.win,
-      this.lastCreatedAdElement_,
-      EventType.SWITCH_PAGE,
-      payload,
-      eventInit
-    );
+    dispatch(this.win, lastPage, EventType.SWITCH_PAGE, payload, eventInit);
     this.hasForcedRender_ = true;
   }
 
@@ -458,7 +454,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
         // Development mode forces navigation to ad page for better dev-x.
         // Only do this once to prevent an infinite view->request->navigate loop.
-        if (!this.hasForcedRender_) {
+        if (
+          this.element.hasAttribute('development') &&
+          !this.hasForcedRender_
+        ) {
           this.forceRender();
         }
       });
