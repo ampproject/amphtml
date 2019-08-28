@@ -26,6 +26,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
+import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
@@ -123,7 +124,7 @@ export class AmpScript extends AMP.BaseElement {
     const authorScriptPromise = this.getAuthorScript_(this.debugId_);
     if (!authorScriptPromise) {
       user().error(TAG, '"src" or "script" attribute is required.');
-      return Promise.reject();
+      return Promise.reject(cancellation());
     }
 
     const workerAndAuthorScripts = Promise.all([
