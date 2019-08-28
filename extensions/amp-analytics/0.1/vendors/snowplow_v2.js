@@ -27,6 +27,7 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
   },
   'cookies': {
     'enabled': true,
+    'cookieMaxAge': 30*60,
     '_sp_lsid': {
       'value':
         '$IF(LINKER_PARAM(linker,_sp_asid), LINKER_PARAM(linker,_sp_asid), QUERY_PARAM(_sp_asid))',
