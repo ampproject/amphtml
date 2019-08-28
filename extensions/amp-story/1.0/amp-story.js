@@ -1365,7 +1365,9 @@ export class AmpStory extends AMP.BaseElement {
 
     const currentAdvancement = {
       timestamp: Date.now(),
-      mode: this.storeService_.get(StateProperty.ADVANCEMENT_MODE),
+      mode: /** @type {!AdvancementMode} */ (this.storeService_.get(
+        StateProperty.ADVANCEMENT_MODE
+      )),
     };
 
     if (previousAdvancement) {
