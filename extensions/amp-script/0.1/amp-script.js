@@ -122,11 +122,8 @@ export class AmpScript extends AMP.BaseElement {
 
     const authorScriptPromise = this.getAuthorScript_(this.debugId_);
     if (!authorScriptPromise) {
-      const error = user().createError(
-        '[%s] "src" or "script" attribute is required.',
-        TAG
-      );
-      return Promise.reject(error);
+      user().error(TAG, '"src" or "script" attribute is required.');
+      return Promise.reject();
     }
 
     const workerAndAuthorScripts = Promise.all([
