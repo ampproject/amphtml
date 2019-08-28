@@ -453,7 +453,7 @@ describe('Resources', () => {
     sandbox.stub(resource, 'isDisplayed').returns(true);
     const measureStub = sandbox.stub(resource, 'measure');
     const scheduleStub = sandbox
-      .stub(resources, 'scheduleLayoutOrPreload_')
+      .stub(resources, 'scheduleLayoutOrPreload')
       .callsFake(() => resource.loadPromiseResolve_());
     const promise = resources.requireLayout(resource.element);
     resource.build();
@@ -471,7 +471,7 @@ describe('Resources', () => {
     const resource = new Resource(1, element, resources);
     resource.layoutScheduled();
     const measureSpy = sandbox.spy(resource, 'measure');
-    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
+    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload');
     const promise = resources.requireLayout(resource.element);
     resource.build();
     resource.loadPromiseResolve_();
@@ -489,7 +489,7 @@ describe('Resources', () => {
     const resource = new Resource(1, element, resources);
     sandbox.stub(resource, 'isDisplayed').returns(false);
     const measureStub = sandbox.stub(resource, 'measure');
-    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
+    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload');
     const promise = resources.requireLayout(resource.element);
     resource.build();
     return Promise.all([promise, resource.whenBuilt()]).then(() => {
@@ -506,7 +506,7 @@ describe('Resources', () => {
     const resource = new Resource(1, element, resources);
     resource.layoutComplete_(true);
     const measureSpy = sandbox.spy(resource, 'measure');
-    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload_');
+    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload');
     const promise = resources.requireLayout(resource.element);
     resource.build();
     return promise.then(() => {
@@ -1116,7 +1116,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
       .returns(VisibilityState.VISIBLE);
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
     const setInViewport = sandbox.spy(resource1, 'setInViewport');
-    const schedule = sandbox.spy(resources, 'scheduleLayoutOrPreload_');
+    const schedule = sandbox.spy(resources, 'scheduleLayoutOrPreload');
 
     resources.discoverWork_();
 

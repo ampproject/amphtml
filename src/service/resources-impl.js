@@ -270,6 +270,7 @@ export class ResourcesDef extends MutatorsDef {
    * @param {boolean} layout
    * @param {number=} opt_parentPriority
    * @param {boolean=} opt_forceOutsideViewport
+   * @package
    */
   scheduleLayoutOrPreload(
     resource,
@@ -2101,14 +2102,7 @@ export class Resources {
     return true;
   }
 
-  /**
-   * Schedules layout or preload for the specified resource.
-   * @param {!Resource} resource
-   * @param {boolean} layout
-   * @param {number=} opt_parentPriority
-   * @param {boolean=} opt_forceOutsideViewport
-   * @package
-   */
+  /** @override */
   scheduleLayoutOrPreload(
     resource,
     layout,

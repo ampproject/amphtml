@@ -611,12 +611,8 @@ const forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
-  '\\.findResourcesInElements\\(': {
+  '\\.scheduleLayoutOrPreload\\(': {
     message: 'findResourcesInElements is a restricted API.',
-    whitelist: ['src/service/owners-impl.js'],
-  },
-  '\\.measureAndTryScheduleLayout\\(': {
-    message: 'measureAndTryScheduleLayout is a restricted API.',
     whitelist: ['src/service/owners-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {

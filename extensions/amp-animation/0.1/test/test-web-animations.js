@@ -15,6 +15,7 @@
  */
 import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
+import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
@@ -55,13 +56,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
     warnStub = sandbox.stub(user(), 'warn');
 
-    vsync = win.__AMP_SERVICES.vsync.obj;
+    vsync = Services.vsyncFor(win);
     sandbox.stub(vsync, 'measurePromise').callsFake(callback => {
       return Promise.resolve(callback());
     });
-    resources = win.__AMP_SERVICES.resources.obj;
-    owners = win.__AMP_SERVICES.owners.obj;
-    requireLayoutSpy = sandbox.spy(resources, 'requireLayout');
+    resources = Services.resourcesForDoc(env.ampdoc);
+    owners = Services.ownersForDoc(env.ampdoc);
+    requireLayoutSpy = sandbox.spy(owners, 'requireLayout');
 
     target1 = doc.createElement('div');
     target1.id = 'target1';
