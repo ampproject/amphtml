@@ -94,11 +94,14 @@ async function performBuild(watch, defaultTask) {
   if (!argv.lazy_build) {
     parseExtensionFlags();
   }
-  await Promise.all([compileCss(watch), compileJison()]);
   await Promise.all([
+    compileCss(watch),
+    compileJison(),
     bootstrapThirdPartyFrames(watch),
-    compileCoreRuntime(watch),
   ]);
+  if (!argv.lazy_build) {
+    await compileCoreRuntime(watch);
+  }
   if (!defaultTask) {
     await compileAllUnminifiedJs(watch);
     await buildExtensions({watch});
