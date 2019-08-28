@@ -86,6 +86,9 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {?AmpScriptService} */
     this.service_ = null;
+
+    /** @private {string} */
+    this.debugId_ = 'amp-script[unknown].js';
   }
 
   /** @override */
@@ -113,11 +116,12 @@ export class AmpScript extends AMP.BaseElement {
     this.userActivation_ = new UserActivationTracker(this.element);
 
     // The displayed name of the combined script in dev tools.
-    const sourceURL = this.element.hasAttribute('src')
+    this.debugId_ = 'amp-script[unknown]';
+    this.source_ = this.element.hasAttribute('src')
       ? `amp-script[src="${this.element.getAttribute('src')}"].js`
       : `amp-script[script=#${this.element.getAttribute('script')}].js`;
 
-    const authorScriptPromise = this.getAuthorScript_(sourceURL);
+    const authorScriptPromise = this.getAuthorScript_(this.debugId_);
     if (!authorScriptPromise) {
       const error = user().createError(
         '[%s] "src" or "script" attribute is required.',
@@ -136,9 +140,10 @@ export class AmpScript extends AMP.BaseElement {
       if (this.service_.sizeLimitExceeded(authorScript.length)) {
         user().error(
           TAG,
-          'Maximum total script size exceeded ' +
-            `(${MAX_TOTAL_SCRIPT_SIZE}). Disabled:`,
-          this.element
+          'Maximum total script size exceeded (%s). %s is disabled. ' +
+            'See https://amp.dev/documentation/components/amp-script/#size-of-javascript-code.',
+          MAX_TOTAL_SCRIPT_SIZE,
+          this.debugId_
         );
         this.element.classList.add('i-amphtml-broken');
         return [];
@@ -151,7 +156,7 @@ export class AmpScript extends AMP.BaseElement {
 
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const config = {
-      authorURL: sourceURL,
+      authorURL: this.debugId_,
       mutationPump: this.mutationPump_.bind(this),
       longTask: promise => {
         this.userActivation_.expandLongTask(promise);
@@ -318,7 +323,11 @@ export class AmpScript extends AMP.BaseElement {
     // TODO(dvoytenko): a better UI to indicate the broken state.
     this.element.classList.remove('i-amphtml-hydrated');
     this.element.classList.add('i-amphtml-broken');
-    user().error(TAG, '"amp-script" is terminated due to unallowed mutation.');
+    user().error(
+      TAG,
+      '%s was terminated due to illegal mutation.',
+      this.debugId_
+    );
   }
 }
 
@@ -367,7 +376,7 @@ export class AmpScriptService {
     return this.crypto_.sha384Base64(bytes).then(hash => {
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
         throw user().createError(
-          '[%s] %id must have "sha384-%s" in meta[name="amp-script-src"].',
+          '[%s] Script hash not found. %id must have "sha384-%s" in meta[name="amp-script-src"]. See https://amp.dev/documentation/components/amp-script/#security-features.',
           TAG,
           debugId,
           hash
