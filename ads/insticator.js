@@ -12,13 +12,14 @@ const url = {
   lib: 'https://testthisshit.online/amp-embed-lib/insticator.js'
 };
 
+
 // ------- HELPER FUNCTIONS ------- //
-function createInitialMarkup() {
+function createInitialMarkup(embedId) {
+  //<iframe id="insticator-iframe" scrolling="no" frameborder="0" allowtransparency="true"></iframe>
   return `
-    <div id="insticator-container">
+    <div id="insticator-container" >
       <div id="div-insticator-ad-1"></div>
-      <div id="insticator-embed">
-        <iframe id="insticator-iframe" scrolling="no" frameborder="0" allowtransparency="true"></iframe>
+      <div id="insticator-embed" embed-id="${embedId}">
       </div>
       <div id="div-insticator-ad-2"></div>
     </div>
@@ -59,22 +60,32 @@ function createComponent(componentContainer) {
   // get data attribute from the amp-insticator tag
   const embedId = componentContainer.getAttribute('data-embed-id');
 
-  // store DOM elements
+  // store DOM elements from initial markup creation
   const insticatorContainer = componentContainer.querySelector('#insticator-container');
-  const embedIframe = componentContainer.querySelector('#insticator-iframe');
-  const embedApp = createElement(componentContainer.ownerDocument, 'div', {
-    id: 'app'
-  });
-  const embedScript = createElement(componentContainer.ownerDocument, 'script', {
-    type: 'text/javascript',
-    src: `${url.embed}/embed-code/${embedId}.js`
-  });
+  // const embedIframe = componentContainer.querySelector('#insticator-iframe');
 
-  // append content to iframe
-  appendElement(embedIframe.contentWindow.document.body, embedApp);
-  appendElement(embedIframe.contentWindow.document.head, embedScript);
-  // append ads
-  getRequest(`${url.ads}/test/ad_settings/${embedId}.js`, (ads, componentContainer) => appendAds(ads, componentContainer), componentContainer);
+  // create new elements and store them as well
+  const embedApp = createElement(componentContainer.ownerDocument, 'div', { id: 'app' });
+  // const embedScript = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript', src: `${url.embed}/embed-code/${embedId}.js` });
+
+  // // append content to iframe
+  // appendElement(embedIframe.contentWindow.document.body, embedApp);
+  // appendElement(embedIframe.contentWindow.document.head, embedScript);
+
+  // // append ads
+  // getRequest(`${url.ads}/test/ad_settings/${embedId}.js`, (ads, componentContainer) => appendAds(ads, componentContainer), componentContainer);
+
+  // +++++++++++++++++++++++++++++++++++++
+  // header and body code OLD SOLUTION
+  const headerCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
+  const bodyCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
+  
+  headerCode.appendChild(document.createTextNode(`(function (a, c, s, u){'Insticator'in a || (a.Insticator={ad:{loadAd: function (b){Insticator.ad.q.push(b)}, q: []}, helper:{}, embed:{}, version: "4.0", q: [], load: function (t, o){Insticator.q.push({t: t, o: o})}}); var b=c.createElement(s); b.src=u; b.async=!0; var d=c.getElementsByTagName(s)[0]; d.parentNode.insertBefore(b, d)})(window, document, 'script', '//d3lcz8vpax4lo2.cloudfront.net/ads-code/ca9a3b5a-e0ae-409f-b332-306d751fa9c9.js');`));
+  bodyCode.appendChild(document.createTextNode(`Insticator.ad.loadAd("div-insticator-ad-1");Insticator.ad.loadAd("div-insticator-ad-2");Insticator.load("em",{id : "06538eab-6e13-4e71-8584-8501a8e85f7b"});`));
+  
+  appendElement(componentContainer, headerCode);
+  appendElement(componentContainer, bodyCode);
+  // +++++++++++++++++++++++++++++++++++++
 }
 
 /*
@@ -84,8 +95,10 @@ function createComponent(componentContainer) {
 export function insticator(global, data) {
   validateData(data, ['embedId']);
   const componentContainer = global.document.getElementById('c');
+  console.log(global);
+  console.log(global.document.referrer);
   componentContainer.setAttribute('data-embed-id', data.embedId);
-  appendElement(componentContainer, createTemplate(createInitialMarkup()));
+  appendElement(componentContainer, createTemplate(createInitialMarkup('06538eab-6e13-4e71-8584-8501a8e85f7b')));
   createComponent(componentContainer);
   loadScript(global, url.lib);
 }
