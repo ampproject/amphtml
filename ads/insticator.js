@@ -42,12 +42,16 @@ function createElement(location, el, attrs) {
 */
 // ------- COMPONENT CREATOR ------- //
 function createComponent(componentContainer, siteId, embedId) {
+  // API available to embed
+  // https://github.com/ampproject/amphtml/blob/master/ads/README.md#available-information-to-the-ad
+  // console.log(window)
+
   // create virtual script tag elements
   const headerCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
   const bodyCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
 
   // populate script tag elements with standard insticator embed code
-  headerCode.appendChild(document.createTextNode(`(function (a, c, s, u){'Insticator'in a || (a.Insticator={ad:{loadAd: function (b){Insticator.ad.q.push(b)}, q: []}, helper:{}, embed:{}, version: "4.0", q: [], load: function (t, o){Insticator.q.push({t: t, o: o})}}); var b=c.createElement(s); b.src=u; b.async=!0; var d=c.getElementsByTagName(s)[0]; d.parentNode.insertBefore(b, d)})(window, document, 'script', '${url.content}/ads-code/${siteId}.js');`));
+  headerCode.appendChild(document.createTextNode(`(function (a, c, s, u){'Insticator'in a || (a.Insticator={ad:{loadAd: function (b){Insticator.ad.q.push(b)}, q: []}, helper:{}, embed:{}, version: "4.0", q: [], load: function (t, o){Insticator.q.push({t: t, o: o})}}); var b=c.createElement(s); b.src=u; b.async=!0; var d=c.getElementsByTagName(s)[0]; d.parentNode.insertBefore(b, d)})(window, document, 'script', '${url.content}/ads-code/${siteId}.js', '${window.context.location.origin}');`)); // now passing top level domain (window.context.location.origin) information to our code, so we can pass to providers (since they probably cannot read it properly from here)
   bodyCode.appendChild(document.createTextNode(`Insticator.ad.loadAd("div-insticator-ad-1");Insticator.ad.loadAd("div-insticator-ad-2");Insticator.load("em",{id : "${embedId}"});`));
   
   // append component and script markup to the DOM
