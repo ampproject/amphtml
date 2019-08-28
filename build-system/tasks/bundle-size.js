@@ -32,7 +32,11 @@ const {
 const {getStdout} = require('../exec');
 const {gitCommitHash, gitTravisMasterBaseline} = require('../git');
 
-const runtimeFile = './dist/v0.js';
+const CORE_RUNTIME_FILE = './dist/v0.js';
+
+const INABOX_RUNTIME_FILE = './dist/amp4ads-v0.js';
+const INABOX_RUNTIME_GOLDEN_SIZE = 70; // In kilobytes
+const INABOX_RUNTIME_VARIANCE = 2.5; // In kilobytes
 
 const buildArtifactsRepoOptions = {
   owner: 'ampproject',
@@ -46,9 +50,10 @@ const {red, cyan, yellow} = colors;
 /**
  * Get the gzipped bundle size of the current build.
  *
+ * @param {string} runtimeFile file name to check for the size.
  * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
-function getGzippedBundleSize() {
+function getGzippedBundleSize(runtimeFile) {
   const cmd = `npx bundlesize -f "${runtimeFile}"`;
   log('Running', cyan(cmd) + '...');
   const output = getStdout(cmd).trim();
@@ -56,7 +61,13 @@ function getGzippedBundleSize() {
   const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
   if (bundleSizeOutputMatches) {
     const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
-    log('Bundle size', cyan('(gzipped)'), 'is', cyan(`${bundleSize}KB`));
+    log(
+      'Bundle size',
+      cyan(runtimeFile),
+      cyan('(gzipped)'),
+      'is',
+      cyan(`${bundleSize}KB`)
+    );
     return bundleSize;
   }
   throw Error('could not infer bundle size from output.');
@@ -65,13 +76,20 @@ function getGzippedBundleSize() {
 /**
  * Get the brotli bundle size of the current build.
  *
+ * @param {string} runtimeFile file name to check for the size.
  * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
-function getBrotliBundleSize() {
+function getBrotliBundleSize(runtimeFile) {
   const bundleSize = parseFloat(
     (brotliSize.fileSync(runtimeFile) / 1024).toFixed(2)
   );
-  log('Bundle size', cyan('(brotli)'), 'is', cyan(`${bundleSize}KB`));
+  log(
+    'Bundle size',
+    cyan(runtimeFile),
+    cyan('(brotli)'),
+    'is',
+    cyan(`${bundleSize}KB`)
+  );
   return bundleSize;
 }
 
@@ -121,7 +139,7 @@ async function storeBundleSize() {
     ['gzip', '', getGzippedBundleSize],
     ['brotli', '.br', getBrotliBundleSize],
   ]) {
-    const bundleSize = `${getBundleSize()}KB`;
+    const bundleSize = `${getBundleSize(CORE_RUNTIME_FILE)}KB`;
     const bundleSizeFile = `${gitCommitHash()}${extension}`;
     const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
       path: path.join('bundle-size', bundleSizeFile),
@@ -211,8 +229,8 @@ async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
     // TODO(#21275): remove gzipped reporting within ~1 month.
-    const gzippedBundleSize = getGzippedBundleSize();
-    const brotliBundleSize = getBrotliBundleSize();
+    const gzippedBundleSize = getGzippedBundleSize(CORE_RUNTIME_FILE);
+    const brotliBundleSize = getBrotliBundleSize(CORE_RUNTIME_FILE);
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
@@ -251,7 +269,33 @@ async function reportBundleSize() {
   }
 }
 
+/**
+ * Check for the size of the inabox bundle.
+ */
+async function checkInaboxBundleSize() {
+  const brotliBundleSize = getBrotliBundleSize(INABOX_RUNTIME_FILE);
+  if (brotliBundleSize > INABOX_RUNTIME_GOLDEN_SIZE + INABOX_RUNTIME_VARIANCE) {
+    log(
+      red('Inabox bundle size has exceeded the threshold,'),
+      red('please add @ampproject/wg-ads and someone would take a look.')
+    );
+    process.exitCode = 1;
+  }
+  if (brotliBundleSize < INABOX_RUNTIME_GOLDEN_SIZE - INABOX_RUNTIME_VARIANCE) {
+    log(
+      red('Inabox bundle size is now smaller than the threshold.'),
+      red('If you have trimmed the code, congratulations!'),
+      red('Please update the constant'),
+      cyan('INABOX_RUNTIME_GOLDEN_SIZE'),
+      red('at build-system/tasks/bundle-size.js with the new bundle size,'),
+      red('and update your PR.')
+    );
+    process.exitCode = 1;
+  }
+}
+
 async function bundleSize() {
+  await checkInaboxBundleSize();
   if (argv.on_skipped_build) {
     return await skipBundleSize();
   } else if (argv.on_push_build) {
