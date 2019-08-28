@@ -22,7 +22,8 @@ limitations under the License.
 ```html
 <amp-embed 
     type="insticator"
-    data-embed-id="ACCOUNT-ID">
+    data-site-id="SITE-ID"
+    data-embed-id="EMBED-ID">
 </amp-embed>
 ```
 
