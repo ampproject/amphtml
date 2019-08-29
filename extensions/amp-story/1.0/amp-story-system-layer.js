@@ -235,7 +235,7 @@ export class SystemLayer {
     this.buttonsContainer_ = null;
 
     /** @private @const {!ProgressBar} */
-    this.progressBar_ = ProgressBar.create(win);
+    this.progressBar_ = ProgressBar.create(win, this.parentEl_);
 
     /** @private {!DevelopmentModeLog} */
     this.developerLog_ = DevelopmentModeLog.create(win);
@@ -258,8 +258,9 @@ export class SystemLayer {
 
   /**
    * @return {!Element}
+   * @param {string} initialPageId
    */
-  build() {
+  build(initialPageId) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -278,7 +279,7 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(),
+      this.progressBar_.build(initialPageId),
       this.systemLayerEl_.firstChild
     );
 
