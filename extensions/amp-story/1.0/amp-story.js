@@ -1038,7 +1038,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const pages = this.element.querySelectorAll('amp-story-page');
+    const pages = Array.prototype.slice.call(
+      this.element.querySelectorAll('amp-story-page')
+    );
     const isActualPage = pageId =>
       findIndex(pages, page => page.id === pageId) >= 0;
 
