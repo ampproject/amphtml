@@ -76,7 +76,10 @@ describes.realWin(
       sandbox.stub(resource, 'measure').callsFake(() => {
         resource.state_ = ResourceState.READY_FOR_LAYOUT;
       });
-      resource.isDisplayed = () => true;
+      resource.isDisplayedForTesting = true;
+      sandbox
+        .stub(resource, 'isDisplayed')
+        .returns(resource.isDisplayedForTesting);
       resource.isInViewport = () => true;
       return element;
     }
