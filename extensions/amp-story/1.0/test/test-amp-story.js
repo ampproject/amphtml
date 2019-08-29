@@ -104,6 +104,7 @@ describes.realWin(
       replaceStateStub = sandbox.stub(win.history, 'replaceState');
       // Required by the bookend code.
       win.document.title = 'Story';
+      env.ampdoc.defaultView = env.win;
 
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox
