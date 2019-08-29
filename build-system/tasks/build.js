@@ -19,7 +19,6 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllUnminifiedJs,
-  compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
 } = require('./helpers');
@@ -99,9 +98,6 @@ async function performBuild(watch, defaultTask) {
     compileJison(),
     bootstrapThirdPartyFrames(watch),
   ]);
-  if (!argv.lazy_build) {
-    await compileCoreRuntime(watch);
-  }
   if (!defaultTask) {
     await compileAllUnminifiedJs(watch);
     await buildExtensions({watch});

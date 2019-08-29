@@ -174,26 +174,6 @@ function bootstrapThirdPartyFrames(watch, minify) {
 }
 
 /**
- * Compiles the core runtime binary
- * @param {boolean} watch
- * @param {boolean} minify
- * @return {!Promise}
- */
-function compileCoreRuntime(watch, minify) {
-  return compileJs('./src/', 'amp.js', './dist', {
-    toName: 'amp.js',
-    minifiedName: 'v0.js',
-    includePolyfills: true,
-    watch,
-    minify,
-    wrapper: wrappers.mainBinary,
-    singlePassCompilation: argv.single_pass,
-    esmPassCompilation: argv.esm,
-    includeOnlyESMLevelPolyfills: argv.esm,
-  });
-}
-
-/**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  * @param {boolean} watch
@@ -203,6 +183,14 @@ function compileCoreRuntime(watch, minify) {
 function compileAllJs(watch, minify) {
   return Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
+    doBuildJs(jsBundles, 'amp.js', {
+      watch,
+      minify,
+      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
+      includeOnlyESMLevelPolyfills: argv.esm,
+    }),
     doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'examiner.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'ww.max.js', {watch, minify}),
@@ -678,7 +666,6 @@ module.exports = {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
   compileAllUnminifiedJs,
-  compileCoreRuntime,
   compileJs,
   compileTs,
   devDependencies,
