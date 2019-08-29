@@ -258,8 +258,9 @@ export class SystemLayer {
 
   /**
    * @return {!Element}
+   * @param {string} initialPageId
    */
-  build() {
+  build(initialPageId) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -278,7 +279,7 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(),
+      this.progressBar_.build(initialPageId),
       this.systemLayerEl_.firstChild
     );
 

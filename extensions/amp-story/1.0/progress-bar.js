@@ -112,6 +112,9 @@ export class ProgressBar {
     /** @private {!Array<!Element>} */
     this.segments_ = [];
 
+    /** @private {!Promise} */
+    this.segmentsAddedPromise_ = Promise.resolve();
+
     /**
      * First expanded segment after ellipsis (if any) for stories with segments
      * > MAX_SEGMENTS.
@@ -134,10 +137,10 @@ export class ProgressBar {
 
   /**
    * Builds the progress bar.
-   *
+   * @param {string} initialSegmentId
    * @return {!Element}
    */
-  build() {
+  build(initialSegmentId) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -155,11 +158,16 @@ export class ProgressBar {
           this.clear_();
         }
 
-        pageIds.forEach(id => {
-          if (!(id in this.segmentIdMap_)) {
-            this.addSegment_(id);
+        this.segmentsAddedPromise_ = this.resources_.mutateElement(
+          this.getRoot(),
+          () => {
+            pageIds.forEach(id => {
+              if (!(id in this.segmentIdMap_)) {
+                this.addSegment_(id);
+              }
+            });
           }
-        });
+        );
 
         if (this.isBuilt_) {
           this.updateProgress(
@@ -192,10 +200,19 @@ export class ProgressBar {
       debounce(this.win_, () => this.onResize_(), 900)
     );
 
-    this.getRoot().classList.toggle(
-      'i-amphtml-progress-bar-overflow',
-      this.segmentCount_ > MAX_SEGMENTS
-    );
+    this.segmentsAddedPromise_.then(() => {
+      if (this.segmentCount_ > MAX_SEGMENTS) {
+        this.getInitialFirstExpandedSegmentIndex_(
+          this.segmentIdMap_[initialSegmentId]
+        );
+
+        this.render_(false /** shouldAnimate */);
+      }
+      this.getRoot().classList.toggle(
+        'i-amphtml-progress-bar-overflow',
+        this.segmentCount_ > MAX_SEGMENTS
+      );
+    });
 
     this.isBuilt_ = true;
     return this.getRoot();
@@ -467,11 +484,6 @@ export class ProgressBar {
     const segmentIndex = this.segmentIdMap_[segmentId];
 
     this.updateProgressByIndex_(segmentIndex, progress);
-
-    if (!this.activeSegmentId_ && this.segmentCount_ > MAX_SEGMENTS) {
-      this.getInitialFirstExpandedSegmentIndex_(segmentIndex);
-      this.render_(false /** shouldAnimate */);
-    }
 
     // If updating progress for a new segment, update all the other progress
     // bar segments.

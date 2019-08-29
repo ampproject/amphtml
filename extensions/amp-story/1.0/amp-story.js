@@ -601,9 +601,10 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds the system layer DOM.
+   * @param {string} initialPageId
    * @private
    */
-  buildSystemLayer_() {
+  buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
 
     let pageIds;
@@ -614,7 +615,7 @@ export class AmpStory extends AMP.BaseElement {
       pageIds = Array.prototype.map.call(pages, el => el.id);
     }
     this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
-    this.element.appendChild(this.systemLayer_.build());
+    this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
 
   /** @private */
@@ -919,8 +920,9 @@ export class AmpStory extends AMP.BaseElement {
       this.element.querySelector('amp-story-page'),
       'Story must have at least one page.'
     );
+    const initialPageId = this.getInitialPageId_(firstPageEl);
 
-    this.buildSystemLayer_();
+    this.buildSystemLayer_(initialPageId);
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -951,12 +953,7 @@ export class AmpStory extends AMP.BaseElement {
           });
         }
       })
-      .then(() =>
-        this.switchTo_(
-          this.getInitialPageId_(firstPageEl),
-          NavigationDirection.NEXT
-        )
-      )
+      .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
       .then(() => this.updateViewportSizeStyles_())
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
@@ -1041,8 +1038,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const isActualPage = pageId =>
-      findIndex(this.pages_, page => page.element.id === pageId) >= 0;
     const historyPage = /** @type {string} */ (getHistoryState(
       this.win,
       HistoryState.PAGE_ID
@@ -1050,12 +1045,12 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
-      if (maybePageId && isActualPage(maybePageId)) {
+      if (maybePageId) {
         return maybePageId;
       }
     }
 
-    if (historyPage && isActualPage(historyPage)) {
+    if (historyPage) {
       return historyPage;
     }
 

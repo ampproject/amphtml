@@ -320,8 +320,6 @@
 }
 
 .i-amphtml-progress-bar-overflow.i-amphtml-story-progress-bar {
-  left: auto !important;
-  right: auto !important;
   width: 100% !important;
   margin: 4px 0 0 !important;
   padding: 0 !important;
@@ -337,6 +335,10 @@
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
   height: 3px !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-progress-bar {
+  border-radius: 100px !important;
 }
 
 .i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
