@@ -170,11 +170,13 @@ export class ProgressBar {
         );
 
         if (this.isBuilt_) {
-          this.updateProgress(
-            this.activeSegmentId_,
-            this.activeSegmentProgress_,
-            true /** updateAllSegments */
-          );
+          this.segmentsAddedPromise_.then(() => {
+            this.updateProgress(
+              this.activeSegmentId_,
+              this.activeSegmentProgress_,
+              true /** updateAllSegments */
+            );
+          });
         }
       },
       true /** callToInitialize */
