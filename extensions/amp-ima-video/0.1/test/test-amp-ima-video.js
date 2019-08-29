@@ -1224,7 +1224,7 @@ describes.realWin(
         }
       );
 
-      it(`throttles ${hoverEvent} (hover) for showing controls`, function() {
+      it(`throttles ${hoverEvent} (hover) for showing controls`, async function() {
         const div = doc.createElement('div');
         div.setAttribute('id', 'c');
         doc.body.appendChild(div);
@@ -1269,28 +1269,23 @@ describes.realWin(
           imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
         ).to.eql('none');
 
-        return timer
-          .promise(100)
-          .then(() => {
-            videoPlayerElement.dispatchEvent(interactEvent);
+        await timer.promise(100);
+        videoPlayerElement.dispatchEvent(interactEvent);
 
-            expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-              .false;
-            expect(
-              imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-            ).to.eql('none');
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .false;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('none');
 
-            return timer.promise(950);
-          })
-          .then(() => {
-            videoPlayerElement.dispatchEvent(interactEvent);
+        await timer.promise(950);
+        videoPlayerElement.dispatchEvent(interactEvent);
 
-            expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-              .true;
-            expect(
-              imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-            ).to.eql('flex');
-          });
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .true;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('flex');
       });
     });
 
