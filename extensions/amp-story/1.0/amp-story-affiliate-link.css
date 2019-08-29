@@ -80,7 +80,7 @@ amp-story-page[active] [affiliate-link-icon][expanded], amp-story-page[active] [
   visibility: hidden !important;
   text-align: center !important;
   text-overflow: ellipsis !important;
-  overflow: hidden;  
+  overflow: hidden !important;
   white-space: nowrap !important;
   max-width: 70px !important;
   width: 70px !important;
