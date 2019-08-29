@@ -22,7 +22,7 @@ const through = require('through2');
 /**
  * We can replace full-text of standard licenses with a pre-approved shorten
  * version.
- * @return {!Pumpify}
+ * @return {!Stream}
  */
 exports.checkForUnknownDeps = function() {
   const regex = /[\w$]+?\$\$module\$[\w$]+/;
