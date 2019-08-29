@@ -131,7 +131,7 @@ exports.jsBundles = {
       incudePolyfills: true,
       extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
       compilationLevel: 'WHITESPACE_ONLY',
-      shouldCheckUnknownDeps: false,
+      skipUnknownDepsCheck: true,
     },
   },
   'video-iframe-integration.js': {

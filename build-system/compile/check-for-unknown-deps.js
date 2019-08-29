@@ -20,8 +20,10 @@ const log = require('fancy-log');
 const through = require('through2');
 
 /**
- * We can replace full-text of standard licenses with a pre-approved shorten
- * version.
+ * Searches for the identifier "$$module$", which Closure uses to uniquely
+ * reference module imports. If any are found, that means Closure couldn't
+ * import the module correctly.
+ *
  * @return {!Stream}
  */
 exports.checkForUnknownDeps = function() {
@@ -29,7 +31,7 @@ exports.checkForUnknownDeps = function() {
 
   return through.obj(function(file, encoding, cb) {
     const contents = file.contents.toString();
-    if (!contents.includes('$$module')) {
+    if (!contents.includes('$$module$')) {
       // Fast check, since regexes can backtrack like crazy.
       return cb(null, file);
     }

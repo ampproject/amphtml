@@ -388,7 +388,7 @@ function compile(
         .pipe(rename(outputFilename))
         .pipe(
           gulpIf(
-            !argv.pseudo_names && options.shouldCheckUnknownDeps !== false,
+            !argv.pseudo_names && !options.skipUnknownDepsCheck,
             checkForUnknownDeps()
           )
         )
