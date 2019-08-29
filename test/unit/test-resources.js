@@ -48,24 +48,6 @@ describe('Resources', () => {
     resources.pass_.cancel();
   });
 
-  function createAmpElement() {
-    const element = document.createElement('div');
-    element.classList.add('i-amphtml-element');
-    const signals = new Signals();
-    element.signals = () => signals;
-    element.whenBuilt = () => Promise.resolve();
-    element.isBuilt = () => true;
-    element.build = () => Promise.resolve();
-    element.isUpgraded = () => true;
-    element.updateLayoutBox = () => {};
-    element.getPlaceholder = () => null;
-    element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
-    element.getLayout = () => 'fixed';
-    document.body.appendChild(element);
-    return element;
-  }
-
   it('should calculate correct calcTaskScore', () => {
     const viewportRect = layoutRectLtwh(0, 100, 300, 400);
     sandbox.stub(resources.viewport_, 'getRect').callsFake(() => viewportRect);
@@ -444,77 +426,6 @@ describe('Resources', () => {
     }
   );
 
-  it('should require layout for non-scheduled element', () => {
-    const element = createAmpElement();
-    sandbox
-      .stub(element, 'getBoundingClientRect')
-      .callsFake(() => layoutRectLtwh(0, 0, 100, 100));
-    const resource = new Resource(1, element, resources);
-    sandbox.stub(resource, 'isDisplayed').returns(true);
-    const measureStub = sandbox.stub(resource, 'measure');
-    const scheduleStub = sandbox
-      .stub(resources, 'scheduleLayoutOrPreload')
-      .callsFake(() => resource.loadPromiseResolve_());
-    const promise = resources.requireLayout(resource.element);
-    resource.build();
-    return Promise.all([promise, resource.whenBuilt()]).then(() => {
-      expect(scheduleStub).to.be.calledOnce;
-      expect(measureStub).to.be.calledOnce;
-    });
-  });
-
-  it('should require layout for scheduled element', () => {
-    const element = createAmpElement();
-    sandbox
-      .stub(element, 'getBoundingClientRect')
-      .callsFake(() => layoutRectLtwh(0, 0, 100, 100));
-    const resource = new Resource(1, element, resources);
-    resource.layoutScheduled();
-    const measureSpy = sandbox.spy(resource, 'measure');
-    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload');
-    const promise = resources.requireLayout(resource.element);
-    resource.build();
-    resource.loadPromiseResolve_();
-    return Promise.all([promise, element.whenBuilt()]).then(() => {
-      expect(scheduleStub).to.not.be.called;
-      expect(measureSpy).to.not.be.called;
-    });
-  });
-
-  it('should not require layout for undisplayed element', () => {
-    const element = createAmpElement();
-    sandbox
-      .stub(element, 'getBoundingClientRect')
-      .callsFake(() => layoutRectLtwh(0, 0, 0, 0));
-    const resource = new Resource(1, element, resources);
-    sandbox.stub(resource, 'isDisplayed').returns(false);
-    const measureStub = sandbox.stub(resource, 'measure');
-    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload');
-    const promise = resources.requireLayout(resource.element);
-    resource.build();
-    return Promise.all([promise, resource.whenBuilt()]).then(() => {
-      expect(scheduleStub).to.not.be.called;
-      expect(measureStub).to.be.calledOnce;
-    });
-  });
-
-  it('should not require layout for already completed element', () => {
-    const element = createAmpElement();
-    sandbox
-      .stub(element, 'getBoundingClientRect')
-      .callsFake(() => layoutRectLtwh(0, 0, 0, 0));
-    const resource = new Resource(1, element, resources);
-    resource.layoutComplete_(true);
-    const measureSpy = sandbox.spy(resource, 'measure');
-    const scheduleStub = sandbox.stub(resources, 'scheduleLayoutOrPreload');
-    const promise = resources.requireLayout(resource.element);
-    resource.build();
-    return promise.then(() => {
-      expect(scheduleStub).to.not.be.called;
-      expect(measureSpy).to.not.be.called;
-    });
-  });
-
   it('should update priority and schedule pass', () => {
     const element = document.createElement('div');
     element.isBuilt = () => true;
@@ -766,7 +677,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
-    resources.owners_ = [resource1, resource2];
+    resources.resources_ = [resource1, resource2];
     resources.vsync_ = {
       mutate: callback => callback(),
       measurePromise: callback => Promise.resolve(callback()),
