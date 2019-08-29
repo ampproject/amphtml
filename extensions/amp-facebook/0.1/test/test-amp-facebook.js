@@ -41,7 +41,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getAmpFacebook(href, opt_embedAs, opt_locale) {
+    async function getAmpFacebook(href, opt_embedAs, opt_locale) {
       const ampFB = doc.createElement('amp-facebook');
       ampFB.setAttribute('data-href', href);
       ampFB.setAttribute('width', '111');
@@ -55,62 +55,53 @@ describes.realWin(
         ampFB.setAttribute('data-locale', 'en_US');
       }
       doc.body.appendChild(ampFB);
-      return ampFB
-        .build()
-        .then(() => {
-          return ampFB.layoutCallback();
-        })
-        .then(() => ampFB);
+      await ampFB.build();
+      await ampFB.layoutCallback();
+      return ampFB;
     }
 
-    it('renders iframe in amp-facebook', () => {
-      return getAmpFacebook(fbPostHref).then(ampFB => {
-        const iframe = ampFB.firstChild;
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+    it('renders iframe in amp-facebook', async () => {
+      const ampFB = await getAmpFacebook(fbPostHref);
+      const iframe = ampFB.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
-    it('ensures iframe is not sandboxed in amp-facebook', () => {
+    it('ensures iframe is not sandboxed in amp-facebook', async () => {
       // We sandbox all 3P iframes however facebook embeds completely break in
       // sandbox mode since they need access to document.domain, so we
       // exclude facebook.
-      return getAmpFacebook(fbPostHref).then(ampFB => {
-        const iframe = ampFB.firstChild;
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.hasAttribute('sandbox')).to.be.false;
-      });
+      const ampFB = await getAmpFacebook(fbPostHref);
+      const iframe = ampFB.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.hasAttribute('sandbox')).to.be.false;
     });
 
-    it('renders iframe in amp-facebook with video', () => {
-      return getAmpFacebook(fbVideoHref, 'video').then(ampFB => {
-        const iframe = ampFB.firstChild;
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+    it('renders iframe in amp-facebook with video', async () => {
+      const ampFB = await getAmpFacebook(fbVideoHref, 'video');
+      const iframe = ampFB.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
-    it('renders amp-facebook with detected locale', () => {
-      return getAmpFacebook(fbVideoHref, 'post').then(ampFB => {
-        expect(ampFB).not.to.be.undefined;
-        expect(ampFB.getAttribute('data-locale')).to.equal('en_US');
-      });
+    it('renders amp-facebook with detected locale', async () => {
+      const ampFB = await getAmpFacebook(fbVideoHref, 'post');
+      expect(ampFB).not.to.be.undefined;
+      expect(ampFB.getAttribute('data-locale')).to.equal('en_US');
     });
 
-    it('renders amp-facebook with specified locale', () => {
-      return getAmpFacebook(fbVideoHref, 'post', 'fr_FR').then(ampFB => {
-        expect(ampFB).not.to.be.undefined;
-        expect(ampFB.getAttribute('data-locale')).to.equal('fr_FR');
-      });
+    it('renders amp-facebook with specified locale', async () => {
+      const ampFB = await getAmpFacebook(fbVideoHref, 'post', 'fr_FR');
+      expect(ampFB).not.to.be.undefined;
+      expect(ampFB.getAttribute('data-locale')).to.equal('fr_FR');
     });
 
-    it('adds loading element correctly', () => {
-      return getAmpFacebook(fbVideoHref, 'post').then(ampFB => {
-        expect(ampFB.implementation_.toggleLoadingCounter_).to.equal(1);
-      });
+    it('adds loading element correctly', async () => {
+      const ampFB = await getAmpFacebook(fbVideoHref, 'post');
+      expect(ampFB.implementation_.toggleLoadingCounter_).to.equal(1);
     });
 
     it('adds fb-post element correctly', () => {
@@ -236,16 +227,15 @@ describes.realWin(
       }
     );
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getAmpFacebook(fbPostHref).then(ampFB => {
-        const iframe = ampFB.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        const obj = ampFB.implementation_;
-        obj.unlayoutCallback();
-        expect(ampFB.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
-        expect(obj.unlayoutOnPause()).to.be.true;
-      });
+    it('removes iframe after unlayoutCallback', async () => {
+      const ampFB = await getAmpFacebook(fbPostHref);
+      const iframe = ampFB.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = ampFB.implementation_;
+      obj.unlayoutCallback();
+      expect(ampFB.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.unlayoutOnPause()).to.be.true;
     });
 
     describes.realWin(
@@ -263,28 +253,27 @@ describes.realWin(
           doc = win.document;
         });
 
-        it('resizes facebook posts', () => {
+        it('resizes facebook posts', async () => {
           const iframeSrc =
             'http://ads.localhost:' +
             location.port +
             '/test/fixtures/served/iframe.html';
           resetServiceForTesting(win, 'bootstrapBaseUrl');
           setDefaultBootstrapBaseUrlForTesting(iframeSrc);
-          return getAmpFacebook(fbPostHref).then(ampFB => {
-            return new Promise((resolve, unusedReject) => {
-              const {firstChild: iframe, implementation_: impl} = ampFB;
-              impl.changeHeight = newHeight => {
-                expect(newHeight).to.equal(666);
-                resolve(ampFB);
-              };
-              const message = {
-                type: 'requestHeight',
-                is3p: true,
-                height: 666,
-              };
-              message['sentinel'] = iframe.getAttribute('data-amp-3p-sentinel');
-              iframe.contentWindow.postMessage(message, '*');
-            });
+          const ampFB = await getAmpFacebook(fbPostHref);
+          return new Promise((resolve, unusedReject) => {
+            const {firstChild: iframe, implementation_: impl} = ampFB;
+            impl.changeHeight = newHeight => {
+              expect(newHeight).to.equal(666);
+              resolve(ampFB);
+            };
+            const message = {
+              type: 'requestHeight',
+              is3p: true,
+              height: 666,
+            };
+            message['sentinel'] = iframe.getAttribute('data-amp-3p-sentinel');
+            iframe.contentWindow.postMessage(message, '*');
           });
         });
       }

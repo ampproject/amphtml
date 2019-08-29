@@ -31,7 +31,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getDailymotion(videoId, optResponsive, optCustomSettings) {
+    async function getDailymotion(videoId, optResponsive, optCustomSettings) {
       const dailymotion = doc.createElement('amp-dailymotion');
       dailymotion.setAttribute('data-videoid', videoId);
       dailymotion.setAttribute('width', '111');
@@ -44,41 +44,36 @@ describes.realWin(
         dailymotion.setAttribute('data-param-origin', 'example&.org');
       }
       doc.body.appendChild(dailymotion);
-      return dailymotion
-        .build()
-        .then(() => {
-          dailymotion.layoutCallback();
-        })
-        .then(() => dailymotion);
+      await dailymotion.build();
+      await dailymotion.layoutCallback();
+      return dailymotion;
     }
 
-    it('renders', () => {
-      return getDailymotion('x2m8jpp').then(dailymotion => {
-        const iframe = dailymotion.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
-        );
-      });
+    it('renders', async () => {
+      const dailymotion = await getDailymotion('x2m8jpp');
+
+      const iframe = dailymotion.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp'
+      );
     });
 
-    it('renders responsively', () => {
-      return getDailymotion('x2m8jpp', true).then(dailymotion => {
-        const iframe = dailymotion.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+    it('renders responsively', async () => {
+      const dailymotion = await getDailymotion('x2m8jpp', true);
+      const iframe = dailymotion.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
-    it('renders with custom settings', () => {
-      return getDailymotion('x2m8jpp', false, true).then(dailymotion => {
-        const iframe = dailymotion.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.src).to.equal(
-          'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example%26.org'
-        );
-      });
+    it('renders with custom settings', async () => {
+      const dailymotion = await getDailymotion('x2m8jpp', false, true);
+      const iframe = dailymotion.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+        'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example%26.org'
+      );
     });
 
     it('requires data-videoid', () => {

@@ -37,36 +37,28 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function get3QElement(playoutId) {
+    async function get3QElement(playoutId) {
       const player = doc.createElement('amp-3q-player');
       if (playoutId) {
         player.setAttribute('data-id', playoutId);
       }
       doc.body.appendChild(player);
-      return player
-        .build()
-        .then(() => {
-          player.layoutCallback();
-          const iframe = player.querySelector('iframe');
-          player.implementation_.sdnBridge_({
-            source: iframe.contentWindow,
-            data: JSON.stringify({data: 'ready'}),
-          });
-        })
-        .then(() => {
-          return player;
-        });
+      await player.build();
+      player.layoutCallback();
+      const iframe = player.querySelector('iframe');
+      player.implementation_.sdnBridge_({
+        source: iframe.contentWindow,
+        data: JSON.stringify({data: 'ready'}),
+      });
+      return player;
     }
 
-    it('renders', () => {
-      return get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158').then(
-        player => {
-          const iframe = player.querySelector('iframe');
-          expect(iframe).to.not.be.null;
-          expect(iframe.src).to.equal(
-            'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true'
-          );
-        }
+    it('renders', async () => {
+      const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
+      const iframe = player.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+        'https://playout.3qsdn.com/c8dbe7f4-7f7f-11e6-a407-0cc47a188158?autoplay=false&amp=true'
       );
     });
 
@@ -78,35 +70,23 @@ describes.realWin(
       });
     });
 
-    it('should forward events from amp-3q-player to the amp element', () => {
-      return get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158').then(
-        player => {
-          const iframe = player.querySelector('iframe');
-
-          return Promise.resolve()
-            .then(() => {
-              const p = listenOncePromise(player, VideoEvents.MUTED);
-              sendFakeMessage(player, iframe, 'muted');
-              return p;
-            })
-            .then(() => {
-              const p = listenOncePromise(player, VideoEvents.PLAYING);
-              sendFakeMessage(player, iframe, 'playing');
-              return p;
-            })
-            .then(() => {
-              const p = listenOncePromise(player, VideoEvents.PAUSE);
-              sendFakeMessage(player, iframe, 'paused');
-              return p;
-            })
-            .then(() => {
-              const p = listenOncePromise(player, VideoEvents.UNMUTED);
-              sendFakeMessage(player, iframe, 'unmuted');
-              const successTimeout = timer.promise(10);
-              return Promise.race([p, successTimeout]);
-            });
-        }
-      );
+    it('should forward events from amp-3q-player to the amp element', async () => {
+      const player = await get3QElement('c8dbe7f4-7f7f-11e6-a407-0cc47a188158');
+      const iframe = player.querySelector('iframe');
+      await Promise.resolve();
+      const p1 = listenOncePromise(player, VideoEvents.MUTED);
+      sendFakeMessage(player, iframe, 'muted');
+      await p1;
+      const p2 = listenOncePromise(player, VideoEvents.PLAYING);
+      sendFakeMessage(player, iframe, 'playing');
+      await p2;
+      const p3 = listenOncePromise(player, VideoEvents.PAUSE);
+      sendFakeMessage(player, iframe, 'paused');
+      await p3;
+      const p4 = listenOncePromise(player, VideoEvents.UNMUTED);
+      sendFakeMessage(player, iframe, 'unmuted');
+      const successTimeout = timer.promise(10);
+      return Promise.race([p4, successTimeout]);
     });
 
     function sendFakeMessage(player, iframe, command) {
