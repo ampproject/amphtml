@@ -74,6 +74,14 @@ function printDefaultTaskHelp() {
       green('to lazily build JS and extensions ') +
       green('when requested from the server.');
     log(lazyBuildMessage);
+  } else {
+    const extensionsMessage =
+      green('⤷ Use ') +
+      cyan('--extensions ') +
+      green('or ') +
+      cyan('--extensions_from ') +
+      green('to pre-build some extensions.');
+    log(extensionsMessage);
   }
 }
 
