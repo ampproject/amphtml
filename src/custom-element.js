@@ -254,9 +254,9 @@ function createBaseCustomElementClass(win) {
        * scheduled.
        * Note that this value may change over time if the element is enqueued,
        * then dequeued and re-enqueued by the scheduler.
-       * @type {number}
+       * @type {number|undefined}
        */
-      this.layoutScheduleTime = 0;
+      this.layoutScheduleTime = undefined;
 
       // Closure compiler appears to mark HTMLElement as @struct which
       // disables bracket access. Force this with a type coercion.
