@@ -5320,11 +5320,8 @@ tags: {
   html_format: ACTIONS
   enabled_by: "transformed"
   tag_name: "I-AMPHTML-SIZER"
+  spec_name: "I-AMPHTML-SIZER-RESPONSIVE"
   explicit_attrs_only: true
-  attrs: {
-    name: "class"
-    value: "i-amphtml-sizer"
-  }
   attrs: {
     name: "style"
     blacklisted_value_regex: "!\\s*important"
@@ -5333,6 +5330,23 @@ tags: {
       value_casei: "block"
     }
     css_declaration: { name: "padding-top" }
+    dispatch_key: NAME_DISPATCH
+    mandatory: true
+  }
+}
+
+tags: {
+  html_format: AMP
+  html_format: ACTIONS
+  enabled_by: "transformed"
+  tag_name: "I-AMPHTML-SIZER"
+  spec_name: "I-AMPHTML-SIZER-INTRINSIC"
+  explicit_attrs_only: true
+  attrs: {
+    name: "class"
+    value: "i-amphtml-sizer"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
   }
 }
 
@@ -5340,7 +5354,7 @@ tags: {
   html_format: AMP
   enabled_by: "transformed"
   tag_name: "IMG"
-  spec_name: 'IMG-I-AMPHTML-INTRINSIC-SIZER'
+  spec_name: "IMG-I-AMPHTML-INTRINSIC-SIZER"
   mandatory_parent: "I-AMPHTML-SIZER"
   attrs: {
     name: "alt"
