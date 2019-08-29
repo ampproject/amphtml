@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 950
+spec_file_revision: 952
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -6540,7 +6540,7 @@ attr_lists: {
   attrs: {
     name: "id"
     # When updating this blacklisted_value_regex, also update for
-    # mandatory-id-attr.
+    # mandatory-id-attr and validator-amp-mustache.protoascii.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -7039,6 +7039,10 @@ error_specificity {
   specificity: 120
 }
 error_specificity {
+  code: VALUE_SET_MISMATCH
+  specificity: 121
+}
+error_specificity {
   code: DEV_MODE_ONLY
   # This should always trump any other error. It is asserting
   # that the developer intends for this tag to be an error but
@@ -7509,6 +7513,11 @@ error_formats {
 error_formats {
   code: DOCUMENT_SIZE_LIMIT_EXCEEDED
   format: "Document exceeded %1 bytes limit. Actual size %2 bytes."
+}
+error_formats {
+  code: VALUE_SET_MISMATCH
+  format: "Attribute '%1' in tag '%2' contains a value that does not match any "
+          "other tags on the page."
 }
 error_formats {
   code: DEV_MODE_ONLY

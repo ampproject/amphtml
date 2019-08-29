@@ -96,11 +96,10 @@ describes.realWin(
         .returns(true);
     }
 
-    function layoutAndLoad(videoIframe) {
-      return whenUpgradedToCustomElement(videoIframe).then(() => {
-        videoIframe.implementation_.layoutCallback();
-        return listenOncePromise(videoIframe, VideoEvents.LOAD);
-      });
+    async function layoutAndLoad(videoIframe) {
+      await whenUpgradedToCustomElement(videoIframe);
+      videoIframe.implementation_.layoutCallback();
+      return listenOncePromise(videoIframe, VideoEvents.LOAD);
     }
 
     function stubPostMessage(videoIframe) {
