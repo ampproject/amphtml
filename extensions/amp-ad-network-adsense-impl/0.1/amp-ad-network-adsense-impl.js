@@ -219,7 +219,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
       const height = this.element.getAttribute('height');
       const width = this.element.getAttribute('width');
-      if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
+      // height is set to 0 by amp-auto-ads to avoid reflow.
+      if (height != 0 && height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
         user().warn(
           TAG,
           `Specified height ${height} in <amp-ad> tag is not equal to the ` +
