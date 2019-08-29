@@ -81,68 +81,6 @@ describes.realWin(
       return element;
     }
 
-    describe('schedulePreload', () => {
-      beforeEach(() => {
-        [parent, child1, child2].forEach(element => {
-          resources.getResourceForElement(element).state_ =
-            ResourceState.READY_FOR_LAYOUT;
-        });
-      });
-
-      it('should not throw with a single element', () => {
-        expect(() => {
-          owners.schedulePreload(parent, child1);
-        }).to.not.throw();
-      });
-
-      it('should not throw with an array of elements', () => {
-        expect(() => {
-          owners.schedulePreload(parent, [child1, child2]);
-        }).to.not.throw();
-      });
-
-      it('should be ok with non amp children', () => {
-        expect(() => {
-          owners.schedulePreload(parent, children);
-        }).to.not.throw();
-      });
-
-      it('should schedule on custom element with multiple children', () => {
-        owners.schedulePreload(parent, children);
-        expect(scheduleLayoutOrPreloadStub).to.be.calledTwice;
-      });
-
-      it('should schedule on nested custom element placeholder', () => {
-        const placeholder1 = createElementWithResource(
-          4,
-          ResourceState.READY_FOR_LAYOUT
-        );
-        child1.getPlaceholder = () => placeholder1;
-
-        const placeholder2 = createElementWithResource(
-          5,
-          ResourceState.READY_FOR_LAYOUT
-        );
-        child2.getPlaceholder = () => placeholder2;
-
-        owners.schedulePreload(parent, children);
-        expect(scheduleLayoutOrPreloadStub.callCount).to.equal(4);
-      });
-
-      it('should schedule amp-* placeholder inside non-amp element', () => {
-        const insidePlaceholder1 = createElementWithResource(
-          4,
-          ResourceState.READY_FOR_LAYOUT
-        );
-        const placeholder1 = doc.createElement('div');
-        child0.getElementsByClassName = () => [insidePlaceholder1];
-        child0.getPlaceholder = () => placeholder1;
-
-        owners.schedulePreload(parent, children);
-        expect(scheduleLayoutOrPreloadStub).to.be.calledThrice;
-      });
-    });
-
     describe('schedulePause', () => {
       it('should not throw with a single element', () => {
         expect(() => {
@@ -278,6 +216,68 @@ describes.realWin(
         owners.scheduleUnlayout(parent, children);
         expect(stub1.called).to.be.true;
         expect(stub2.called).to.be.true;
+      });
+    });
+
+    describe('schedulePreload', () => {
+      beforeEach(() => {
+        [parent, child1, child2].forEach(element => {
+          resources.getResourceForElement(element).state_ =
+            ResourceState.READY_FOR_LAYOUT;
+        });
+      });
+
+      it('should not throw with a single element', () => {
+        expect(() => {
+          owners.schedulePreload(parent, child1);
+        }).to.not.throw();
+      });
+
+      it('should not throw with an array of elements', () => {
+        expect(() => {
+          owners.schedulePreload(parent, [child1, child2]);
+        }).to.not.throw();
+      });
+
+      it('should be ok with non amp children', () => {
+        expect(() => {
+          owners.schedulePreload(parent, children);
+        }).to.not.throw();
+      });
+
+      it('should schedule on custom element with multiple children', () => {
+        owners.schedulePreload(parent, children);
+        expect(scheduleLayoutOrPreloadStub).to.be.calledTwice;
+      });
+
+      it('should schedule on nested custom element placeholder', () => {
+        const placeholder1 = createElementWithResource(
+          4,
+          ResourceState.READY_FOR_LAYOUT
+        );
+        child1.getPlaceholder = () => placeholder1;
+
+        const placeholder2 = createElementWithResource(
+          5,
+          ResourceState.READY_FOR_LAYOUT
+        );
+        child2.getPlaceholder = () => placeholder2;
+
+        owners.schedulePreload(parent, children);
+        expect(scheduleLayoutOrPreloadStub.callCount).to.equal(4);
+      });
+
+      it('should schedule amp-* placeholder inside non-amp element', () => {
+        const insidePlaceholder1 = createElementWithResource(
+          4,
+          ResourceState.READY_FOR_LAYOUT
+        );
+        const placeholder1 = doc.createElement('div');
+        child0.getElementsByClassName = () => [insidePlaceholder1];
+        child0.getPlaceholder = () => placeholder1;
+
+        owners.schedulePreload(parent, children);
+        expect(scheduleLayoutOrPreloadStub).to.be.calledThrice;
       });
     });
   }
