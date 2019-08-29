@@ -170,13 +170,11 @@ export class ProgressBar {
         );
 
         if (this.isBuilt_) {
-          this.segmentsAddedPromise_.then(() => {
-            this.updateProgress(
-              this.activeSegmentId_,
-              this.activeSegmentProgress_,
-              true /** updateAllSegments */
-            );
-          });
+          this.updateProgress(
+            this.activeSegmentId_,
+            this.activeSegmentProgress_,
+            true /** updateAllSegments */
+          );
         }
       },
       true /** callToInitialize */
@@ -488,29 +486,31 @@ export class ProgressBar {
    * @param {boolean} updateAllSegments Updates all of the segments.
    */
   updateProgress(segmentId, progress, updateAllSegments = false) {
-    this.assertVaildSegmentId_(segmentId);
-    const segmentIndex = this.segmentIdMap_[segmentId];
+    this.segmentsAddedPromise_.then(() => {
+      this.assertVaildSegmentId_(segmentId);
+      const segmentIndex = this.segmentIdMap_[segmentId];
 
-    this.updateProgressByIndex_(segmentIndex, progress);
+      this.updateProgressByIndex_(segmentIndex, progress);
 
-    // If updating progress for a new segment, update all the other progress
-    // bar segments.
-    if (this.activeSegmentIndex_ !== segmentIndex || updateAllSegments) {
-      this.updateSegments_(
-        segmentIndex,
-        progress,
-        this.activeSegmentIndex_,
-        this.activeSegmentProgress_
-      );
-    }
+      // If updating progress for a new segment, update all the other progress
+      // bar segments.
+      if (this.activeSegmentIndex_ !== segmentIndex || updateAllSegments) {
+        this.updateSegments_(
+          segmentIndex,
+          progress,
+          this.activeSegmentIndex_,
+          this.activeSegmentProgress_
+        );
+      }
 
-    this.activeSegmentProgress_ = progress;
-    this.activeSegmentIndex_ = segmentIndex;
-    this.activeSegmentId_ = segmentId;
+      this.activeSegmentProgress_ = progress;
+      this.activeSegmentIndex_ = segmentIndex;
+      this.activeSegmentId_ = segmentId;
 
-    if (this.segmentCount_ > MAX_SEGMENTS) {
-      this.checkIndexForOverflow_();
-    }
+      if (this.segmentCount_ > MAX_SEGMENTS) {
+        this.checkIndexForOverflow_();
+      }
+    });
   }
 
   /**
