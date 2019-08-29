@@ -28,6 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
@@ -384,11 +385,17 @@ function compile(
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
+        .pipe(rename(outputFilename))
+        .pipe(
+          gulpIf(
+            !argv.pseudo_names && options.shouldCheckUnknownDeps !== false,
+            checkForUnknownDeps()
+          )
+        )
         .on('error', err => {
           handleCompilerError(outputFilename);
           reject(err);
         })
-        .pipe(rename(outputFilename))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);
