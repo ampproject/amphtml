@@ -385,7 +385,13 @@ export class ProgressBar {
    * @private
    */
   onResize_() {
-    if (this.getRoot().classList.contains('i-amphtml-progress-bar-overflow')) {
+    // We need to take into account both conditionals since we could've switched
+    // from a screen that had an overflow to one that doesn't and viceversa.
+    if (
+      this.getRoot().classList.contains('i-amphtml-progress-bar-overflow') ||
+      this.segmentCount_ > MAX_SEGMENTS
+    ) {
+      this.getInitialFirstExpandedSegmentIndex_(this.activeSegmentIndex_);
       this.render_(false /** shouldAnimate */);
     }
   }
@@ -520,6 +526,8 @@ export class ProgressBar {
         segmentIndex - (segmentIndex % MAX_SEGMENTS);
     } else if (segmentIndex > MAX_SEGMENTS) {
       this.firstExpandedSegmentIndex_ = this.segmentCount_ - MAX_SEGMENTS;
+    } else {
+      this.firstExpandedSegmentIndex_ = 0;
     }
   }
 
