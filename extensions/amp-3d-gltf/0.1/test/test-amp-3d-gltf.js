@@ -57,8 +57,9 @@ describes.realWin(
       amp3dGltfEl.setAttribute('height', '240');
 
       doc.body.appendChild(amp3dGltfEl);
+      await amp3dGltfEl.build();
 
-      const amp3dGltf = (await amp3dGltfEl.build()).implementation_;
+      const amp3dGltf = amp3dGltfEl.implementation_;
       sandbox
         .stub(amp3dGltf, 'iframe_')
         .get(() => iframe)
@@ -76,7 +77,7 @@ describes.realWin(
     // Unskip when we figure out root cause.
     it.skip('renders iframe', async () => {
       await createElement();
-      await expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
+      expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
     });
 
     // TODO (#16080): this test times out on Travis. Re-enable when fixed.
