@@ -156,7 +156,8 @@ function doBuildJs(jsBundles, name, extraOptions) {
  * @param {boolean} minify
  * @return {!Promise}
  */
-function bootstrapThirdPartyFrames(watch, minify) {
+async function bootstrapThirdPartyFrames(watch, minify) {
+  const startTime = Date.now();
   const promises = [];
   thirdPartyFrames.forEach(frameObject => {
     promises.push(
@@ -170,7 +171,12 @@ function bootstrapThirdPartyFrames(watch, minify) {
       });
     });
   }
-  return Promise.all(promises);
+  await Promise.all(promises);
+  endBuildStep(
+    'Bootstrapped 3p frames into',
+    `dist.3p/${minify ? internalRuntimeVersion : 'current'}/`,
+    startTime
+  );
 }
 
 /**
@@ -594,13 +600,8 @@ function concatFilesToString(files) {
  * @return {!Promise}
  */
 function thirdPartyBootstrap(input, outputName, minify) {
-  const startTime = Date.now();
   if (!minify) {
-    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current'))).then(
-      () => {
-        endBuildStep('Processed', input, startTime);
-      }
-    );
+    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current')));
   }
 
   // By default we use an absolute URL, that is independent of the
@@ -628,9 +629,7 @@ function thirdPartyBootstrap(input, outputName, minify) {
           'dir'
         );
       })
-  ).then(() => {
-    endBuildStep('Processed', input, startTime);
-  });
+  );
 }
 
 /**
