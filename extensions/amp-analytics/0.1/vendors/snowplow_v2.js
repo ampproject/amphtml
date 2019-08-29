@@ -61,7 +61,7 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
       '$IF(COOKIE(_sp_asid), COOKIE(_sp_asid), ${generatedSessionId})',
     'sid': '$IF(${sessionId}, ${sessionId}, ${linkerSessionId})',
     'vid': '$IF(${spVisitIndex}, ${spVisitIndex}, 0)',
-    'duid': '$IF(${sessionId}, ${domainUserId}, ${ampVistorId})',
+    'duid': '$IF(${domainUserId}, ${domainUserId}, ${ampVistorId})',
     'customEventTemplate': [
       '{',
       '"schema":"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",',
