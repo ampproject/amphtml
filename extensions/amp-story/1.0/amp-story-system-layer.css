@@ -320,8 +320,9 @@
 }
 
 .i-amphtml-progress-bar-overflow.i-amphtml-story-progress-bar {
-  width: 100% !important;
-  margin: 4px 0 0 !important;
+  width: calc(100% - 4px) !important;
+  margin: 4px 2px 0 !important;
+  overflow: hidden !important;
   padding: 0 !important;
 }
 
@@ -330,7 +331,6 @@
   height: 3px !important;
   width: calc(100vw / 3) !important;
   margin: 0 24px !important;
-  overflow: hidden !important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {

@@ -1038,6 +1038,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
+    const isActualPage = pageId =>
+      !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
     const historyPage = /** @type {string} */ (getHistoryState(
       this.win,
       HistoryState.PAGE_ID
@@ -1045,18 +1047,12 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
-      const maybePage = maybePageId
-        ? this.element.querySelector(`#${escapeCssSelectorIdent(maybePageId)}`)
-        : null;
-      if (maybePageId && maybePage) {
+      if (maybePageId && isActualPage(maybePageId)) {
         return maybePageId;
       }
     }
 
-    const maybeHistoryPage = historyPage
-      ? this.element.querySelector(`#${escapeCssSelectorIdent(historyPage)}`)
-      : null;
-    if (historyPage && maybeHistoryPage) {
+    if (historyPage && isActualPage(historyPage)) {
       return historyPage;
     }
 
