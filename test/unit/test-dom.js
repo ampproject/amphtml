@@ -1010,6 +1010,21 @@ describes.sandboxed('DOM', {}, env => {
       });
     });
 
+    it('should not retry with noopener set', () => {
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'noopener,width=1')
+        .returns(null)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_blank',
+        'noopener,width=1'
+      );
+      expect(res).to.be.null;
+    });
+
     it('should retry only non-top target', () => {
       windowMock
         .expects('open')
