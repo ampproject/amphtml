@@ -55,6 +55,31 @@ export function mapRange(val, min1, max1, min2, max2) {
 }
 
 /**
+ * Maps a value in a first range to its equivalent on a logarithmic scale
+ * Ex.: 5 in the range [0,10] gives 60 in the range[40,80]
+ *
+ * @param {number} val the value in the source range
+ * @param {number} domainMax the upper bound of the source range
+ * @param {number} rangeMax the upper bound of the target range
+ * @return {number} the equivalent value in the target range
+ */
+export function logRange(val, domainMax, rangeMax) {
+  const sign = rangeMax > 0 ? 1 : -1;
+  return (
+    sign *
+    Math.exp(
+      mapRange(
+        Math.abs(val),
+        0,
+        domainMax,
+        Math.log(1),
+        Math.log(Math.abs(rangeMax))
+      )
+    )
+  );
+}
+
+/**
  * Computes the modulus of values `a` and `b`.
  *
  * This is needed because the % operator in JavaScript doesn't implement
@@ -152,4 +177,15 @@ export function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
     x: centerX + radius * Math.cos(angleInRadians),
     y: centerY + radius * Math.sin(angleInRadians),
   };
+}
+
+/**
+ * Sums up the values of the given array and returns the result
+ * @param {Array<number>} values
+ * @return {number}
+ */
+export function sum(values) {
+  return values.reduce(function(a, b) {
+    return a + b;
+  });
 }
