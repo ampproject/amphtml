@@ -18,6 +18,7 @@ import {
   boundValue,
   clamp,
   distance,
+  logRange,
   magnitude,
   mapRange,
   mod,
@@ -243,7 +244,18 @@ describes.sandboxed('utils/math', {}, () => {
     });
   });
 
-  describe('sum', () => {
+  describes('logRange', {}, () => {
+    it('should map a number to the corrent value', () => {
+      const scale1 = Math.log(100) / 10;
+      expect(logRange(2, 10, 100)).to.equal(Math.exp(scale1 * 2));
+      expect(logRange(3, 10, 100)).to.equal(Math.exp(scale1 * 3));
+      const scale2 = Math.log(30) / 20;
+      expect(logRange(6, 20, 30)).to.equal(Math.exp(scale2 * 6));
+      expect(logRange(10, 20, 30)).to.equal(Math.exp(scale2 * 10));
+    });
+  });
+
+  describes('sum', {}, () => {
     it('should sum up an array of numbers', () => {
       expect(sum([2, 10, 100])).to.equal(112);
       expect(sum([-3, 2, 44])).to.equal(43);
