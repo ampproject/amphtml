@@ -147,11 +147,6 @@ build.flags = {
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  with_video_iframe_integration:
-    '  Also watch and build the video-iframe-integration.js binary.',
-  with_amp_story_embed: '  Also watch and build the amp-story-embed.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
@@ -163,11 +158,6 @@ defaultTask.flags = {
   lazy_build:
     '  Lazily builds JS and extensions when they are requested from the server',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  with_video_iframe_integration:
-    '  Also watch and build the video-iframe-integration.js binary.',
-  with_amp_story_embed: '  Also watch and build the amp-story-embed.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',

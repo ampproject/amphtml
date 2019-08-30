@@ -146,6 +146,16 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
+  'amp-story-embed.js': {
+    srcDir: './src/',
+    srcFilename: 'amp-story-embed.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      minifiedName: 'amp-story-embed-v0.js',
+      includePolyfills: false,
+    },
+  },
   'amp-inabox-host.js': {
     srcDir: './ads/inabox/',
     srcFilename: 'inabox-host.js',
