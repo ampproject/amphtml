@@ -501,7 +501,6 @@ describe('amp-img', () => {
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
 
-      impl.mutateElement = fn => fn();
       impl.getViewport = function() {
         return {
           getWidth: () => windowWidth,

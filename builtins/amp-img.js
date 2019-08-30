@@ -103,7 +103,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   onMeasureChanged() {
-    this.maybeGenerateSizes_();
+    this.maybeGenerateSizes_(/* sync */ false);
   }
 
   /** @override */
@@ -175,9 +175,10 @@ export class AmpImg extends BaseElement {
       );
     }
 
+    // It is important to call this before setting `srcset` attribute.
+    this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    this.maybeGenerateSizes_();
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
@@ -187,9 +188,11 @@ export class AmpImg extends BaseElement {
   /**
    * This function automatically generates sizes for amp-imgs without
    * the sizes attribute.
+   * @param {boolean} sync Whether to immediately make the change or schedule
+   *     via mutateElement.
    * @private
    */
-  maybeGenerateSizes_() {
+  maybeGenerateSizes_(sync) {
     if (!this.img_) {
       return;
     }
@@ -228,9 +231,13 @@ export class AmpImg extends BaseElement {
 
     const generatedSizes = entry + defaultSize;
 
-    this.mutateElement(() => {
+    if (sync) {
       this.img_.setAttribute('sizes', generatedSizes);
-    });
+    } else {
+      this.mutateElement(() => {
+        this.img_.setAttribute('sizes', generatedSizes);
+      });
+    }
     this.sizesWidth_ = width;
   }
 
