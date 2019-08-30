@@ -832,7 +832,8 @@ export function installInaboxViewportService(ampdoc) {
     ampdoc,
     'viewport',
     function() {
-      return isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
+      // eslint-disable-next-line no-undef
+      return INABOX_LITE || isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
         ? new InaboxViewportImpl(ampdoc, binding)
         : new ViewportImpl(ampdoc, binding, Services.viewerForDoc(ampdoc));
     },
