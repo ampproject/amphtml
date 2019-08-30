@@ -107,6 +107,15 @@ export class OwnersDef {
    * @param {boolean} inLocalViewport
    */
   updateInViewport(parentElement, subElements, inLocalViewport) {}
+
+  /**
+   * Requires the layout of the specified element or top-level sub-elements
+   * within.
+   * @param {!Element} element
+   * @param {number=} opt_parentPriority
+   * @return {!Promise}
+   */
+  requireLayout(element, opt_parentPriority) {}
 }
 
 /**
@@ -150,13 +159,9 @@ export class Owners {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.resources_.findResourcesInElements(
-      parentResource,
-      subElements,
-      resource => {
-        resource.pause();
-      }
-    );
+    this.findResourcesInElements_(parentResource, subElements, resource => {
+      resource.pause();
+    });
   }
 
   /** @override */
@@ -164,13 +169,9 @@ export class Owners {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.resources_.findResourcesInElements(
-      parentResource,
-      subElements,
-      resource => {
-        resource.resume();
-      }
-    );
+    this.findResourcesInElements_(parentResource, subElements, resource => {
+      resource.resume();
+    });
   }
 
   /** @override */
@@ -178,13 +179,9 @@ export class Owners {
     const parentResource = this.resources_.getResourceForElement(parentElement);
     subElements = elements(subElements);
 
-    this.resources_.findResourcesInElements(
-      parentResource,
-      subElements,
-      resource => {
-        resource.unlayout();
-      }
-    );
+    this.findResourcesInElements_(parentResource, subElements, resource => {
+      resource.unlayout();
+    });
   }
 
   /** @override */
@@ -196,6 +193,83 @@ export class Owners {
     );
   }
 
+  /** @override */
+  requireLayout(element, opt_parentPriority) {
+    const promises = [];
+    this.discoverResourcesForElement_(element, resource => {
+      if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
+        return;
+      }
+      if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
+        promises.push(
+          resource.whenBuilt().then(() => {
+            resource.measure();
+            if (!resource.isDisplayed()) {
+              return;
+            }
+            this.resources_.scheduleLayoutOrPreload(
+              resource,
+              /* layout */ true,
+              opt_parentPriority,
+              /* forceOutsideViewport */ true
+            );
+            return resource.loadedOnce();
+          })
+        );
+      } else if (resource.isDisplayed()) {
+        promises.push(resource.loadedOnce());
+      }
+    });
+    return Promise.all(promises);
+  }
+
+  /**
+   * Finds resources within the parent resource's shallow subtree.
+   * @param {!Resource} parentResource
+   * @param {!Array<!Element>} elements
+   * @param {function(!Resource)} callback
+   * @private
+   */
+  findResourcesInElements_(parentResource, elements, callback) {
+    elements.forEach(element => {
+      devAssert(parentResource.element.contains(element));
+      this.discoverResourcesForElement_(element, callback);
+    });
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {function(!Resource)} callback
+   */
+  discoverResourcesForElement_(element, callback) {
+    // Breadth-first search.
+    if (element.classList.contains('i-amphtml-element')) {
+      callback(this.resources_.getResourceForElement(element));
+      // Also schedule amp-element that is a placeholder for the element.
+      const placeholder = element.getPlaceholder();
+      if (placeholder) {
+        this.discoverResourcesForElement_(placeholder, callback);
+      }
+    } else {
+      const ampElements = element.getElementsByClassName('i-amphtml-element');
+      const seen = [];
+      for (let i = 0; i < ampElements.length; i++) {
+        const ampElement = ampElements[i];
+        let covered = false;
+        for (let j = 0; j < seen.length; j++) {
+          if (seen[j].contains(ampElement)) {
+            covered = true;
+            break;
+          }
+        }
+        if (!covered) {
+          seen.push(ampElement);
+          callback(this.resources_.getResourceForElement(ampElement));
+        }
+      }
+    }
+  }
+
   /**
    * Schedules layout or preload for the sub-resources of the specified
    * resource.
@@ -205,27 +279,43 @@ export class Owners {
    * @private
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    this.resources_.findResourcesInElements(
-      parentResource,
-      subElements,
-      resource => {
-        if (resource.getState() === ResourceState.NOT_BUILT) {
-          resource.whenBuilt().then(() => {
-            this.resources_.measureAndTryScheduleLayout(
-              resource,
-              !layout,
-              parentResource.getLayoutPriority()
-            );
-          });
-        } else {
-          this.resources_.measureAndTryScheduleLayout(
+    this.findResourcesInElements_(parentResource, subElements, resource => {
+      if (resource.getState() === ResourceState.NOT_BUILT) {
+        resource.whenBuilt().then(() => {
+          this.measureAndTryScheduleLayout_(
             resource,
             !layout,
             parentResource.getLayoutPriority()
           );
-        }
+        });
+      } else {
+        this.measureAndTryScheduleLayout_(
+          resource,
+          !layout,
+          parentResource.getLayoutPriority()
+        );
       }
-    );
+    });
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} isPreload
+   * @param {number=} opt_parentPriority
+   * @private
+   */
+  measureAndTryScheduleLayout_(resource, isPreload, opt_parentPriority) {
+    resource.measure();
+    if (
+      resource.getState() === ResourceState.READY_FOR_LAYOUT &&
+      resource.isDisplayed()
+    ) {
+      this.resources_.scheduleLayoutOrPreload(
+        resource,
+        !isPreload,
+        opt_parentPriority
+      );
+    }
   }
 
   /**
@@ -241,13 +331,9 @@ export class Owners {
     inLocalViewport
   ) {
     const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.resources_.findResourcesInElements(
-      parentResource,
-      subElements,
-      resource => {
-        resource.setInViewport(inViewport);
-      }
-    );
+    this.findResourcesInElements_(parentResource, subElements, resource => {
+      resource.setInViewport(inViewport);
+    });
   }
 }
 

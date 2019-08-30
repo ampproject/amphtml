@@ -611,13 +611,9 @@ const forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
-  '\\.findResourcesInElements\\(': {
-    message: 'findResourcesInElements is a restricted API.',
-    whitelist: ['src/service/owners-impl.js'],
-  },
-  '\\.measureAndTryScheduleLayout\\(': {
-    message: 'measureAndTryScheduleLayout is a restricted API.',
-    whitelist: ['src/service/owners-impl.js'],
+  '\\.scheduleLayoutOrPreload\\(': {
+    message: 'scheduleLayoutOrPreload is a restricted API.',
+    whitelist: ['src/service/owners-impl.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',

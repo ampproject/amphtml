@@ -29,7 +29,7 @@ export class WebAnimationService {
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /** @private @const */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    this.owners_ = Services.ownersForDoc(ampdoc);
   }
 
   /**
@@ -43,7 +43,7 @@ export class WebAnimationService {
       this.ampdoc_.getRootNode(),
       this.ampdoc_.getUrl(),
       this.vsync_,
-      this.resources_
+      this.owners_
     );
   }
 }

@@ -265,21 +265,19 @@ export class ResourcesDef extends MutatorsDef {
   removeForChildWindow(childWin) {}
 
   /**
-   * Finds resources within the parent resource's shallow subtree.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} elements
-   * @param {function(!Resource)} callback
-   * @package
-   */
-  findResourcesInElements(parentResource, elements, callback) {}
-
-  /**
+   * Schedules layout or preload for the specified resource.
    * @param {!Resource} resource
-   * @param {boolean} isPreload
+   * @param {boolean} layout
    * @param {number=} opt_parentPriority
+   * @param {boolean=} opt_forceOutsideViewport
    * @package
    */
-  measureAndTryScheduleLayout(resource, isPreload, opt_parentPriority) {}
+  scheduleLayoutOrPreload(
+    resource,
+    layout,
+    opt_parentPriority,
+    opt_forceOutsideViewport
+  ) {}
 
   /**
    * Schedules the work pass at the latest with the specified delay.
@@ -305,15 +303,6 @@ export class ResourcesDef extends MutatorsDef {
    * May never be called in Shadow Mode.
    */
   ampInitComplete() {}
-
-  /**
-   * Requires the layout of the specified element or top-level sub-elements
-   * within.
-   * @param {!Element} element
-   * @param {number=} opt_parentPriority
-   * @return {!Promise}
-   */
-  requireLayout(element, opt_parentPriority) {}
 
   /**
    * Updates the priority of the resource. If there are tasks currently
@@ -839,48 +828,10 @@ export class Resources {
   }
 
   /** @override */
-  findResourcesInElements(parentResource, elements, callback) {
-    elements.forEach(element => {
-      devAssert(parentResource.element.contains(element));
-      this.discoverResourcesForElement_(element, callback);
-    });
-  }
-
-  /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
-  }
-
-  /** @override */
-  requireLayout(element, opt_parentPriority) {
-    const promises = [];
-    this.discoverResourcesForElement_(element, resource => {
-      if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
-        return;
-      }
-      if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(
-          resource.whenBuilt().then(() => {
-            resource.measure();
-            if (!resource.isDisplayed()) {
-              return;
-            }
-            this.scheduleLayoutOrPreload_(
-              resource,
-              /* layout */ true,
-              opt_parentPriority,
-              /* forceOutsideViewport */ true
-            );
-            return resource.loadedOnce();
-          })
-        );
-      } else if (resource.isDisplayed()) {
-        promises.push(resource.loadedOnce());
-      }
-    });
-    return Promise.all(promises);
   }
 
   /** @override */
@@ -1077,17 +1028,6 @@ export class Resources {
     }
 
     this.schedulePass(FOUR_FRAME_DELAY_);
-  }
-
-  /** @override */
-  measureAndTryScheduleLayout(resource, isPreload, opt_parentPriority) {
-    resource.measure();
-    if (
-      resource.getState() === ResourceState.READY_FOR_LAYOUT &&
-      resource.isDisplayed()
-    ) {
-      this.scheduleLayoutOrPreload_(resource, !isPreload, opt_parentPriority);
-    }
   }
 
   /** @override */
@@ -1692,7 +1632,7 @@ export class Resources {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         // TODO(dvoytenko): This extra build has to be merged with the
-        // scheduleLayoutOrPreload_ method below.
+        // scheduleLayoutOrPreload method below.
         // Force build for all resources visible, measured, and in the viewport.
         if (
           !r.isBuilt() &&
@@ -1715,7 +1655,7 @@ export class Resources {
         // layers. This is currently a short-term fix to the problem that
         // the fixed elements get incorrect top coord.
         if (r.isDisplayed() && r.overlaps(loadRect)) {
-          this.scheduleLayoutOrPreload_(r, /* layout */ true);
+          this.scheduleLayoutOrPreload(r, /* layout */ true);
         }
       }
     }
@@ -1742,7 +1682,7 @@ export class Resources {
           r.idleRenderOutsideViewport()
         ) {
           dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
-          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          this.scheduleLayoutOrPreload(r, /* layout */ false);
           idleScheduledCount++;
         }
       }
@@ -1760,7 +1700,7 @@ export class Resources {
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
-          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          this.scheduleLayoutOrPreload(r, /* layout */ false);
           idleScheduledCount++;
         }
       }
@@ -2162,15 +2102,8 @@ export class Resources {
     return true;
   }
 
-  /**
-   * Schedules layout or preload for the specified resource.
-   * @param {!Resource} resource
-   * @param {boolean} layout
-   * @param {number=} opt_parentPriority
-   * @param {boolean=} opt_forceOutsideViewport
-   * @private
-   */
-  scheduleLayoutOrPreload_(
+  /** @override */
+  scheduleLayoutOrPreload(
     resource,
     layout,
     opt_parentPriority,
@@ -2252,39 +2185,6 @@ export class Resources {
       this.schedulePass(this.calcTaskTimeout_(task));
     }
     task.resource.layoutScheduled(task.scheduleTime);
-  }
-
-  /**
-   * @param {!Element} element
-   * @param {function(!Resource)} callback
-   */
-  discoverResourcesForElement_(element, callback) {
-    // Breadth-first search.
-    if (element.classList.contains('i-amphtml-element')) {
-      callback(this.getResourceForElement(element));
-      // Also schedule amp-element that is a placeholder for the element.
-      const placeholder = element.getPlaceholder();
-      if (placeholder) {
-        this.discoverResourcesForElement_(placeholder, callback);
-      }
-    } else {
-      const ampElements = element.getElementsByClassName('i-amphtml-element');
-      const seen = [];
-      for (let i = 0; i < ampElements.length; i++) {
-        const ampElement = ampElements[i];
-        let covered = false;
-        for (let j = 0; j < seen.length; j++) {
-          if (seen[j].contains(ampElement)) {
-            covered = true;
-            break;
-          }
-        }
-        if (!covered) {
-          seen.push(ampElement);
-          callback(this.getResourceForElement(ampElement));
-        }
-      }
-    }
   }
 
   /**
