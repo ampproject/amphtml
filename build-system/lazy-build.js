@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const log = require('fancy-log');
 const {
   doBuildExtension,
   maybeInitializeExtensions,
+  getExtensionsToBuild,
 } = require('./tasks/extension-helpers');
+const {cyan, green} = require('ansi-colors');
 const {doBuildJs} = require('./tasks/helpers');
 const {jsBundles} = require('../bundles.config');
 
@@ -75,4 +78,15 @@ exports.lazyBuildExtensions = async function(req, res, next) {
 exports.lazyBuildJs = async function(req, res, next) {
   const matcher = /\/.*\/([^\/]*\.js)/;
   await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
+};
+
+exports.preBuildSomeExtensions = function(argv) {
+  const extensions = getExtensionsToBuild(argv);
+  log(green('Pre-building extensions:'), cyan(extensions.join(', ')));
+  for (const extensionBundle in extensionBundles) {
+    const extension = extensionBundles[extensionBundle].name;
+    if (extensions.includes(extension) && !extensionBundle.endsWith('latest')) {
+      build(extensionBundles, extensionBundle, doBuildExtension);
+    }
+  }
 };

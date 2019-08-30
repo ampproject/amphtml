@@ -74,7 +74,7 @@ function printDefaultTaskHelp() {
       green('to lazily build JS and extensions ') +
       green('when requested from the server.');
     log(lazyBuildMessage);
-  } else {
+  } else if (!argv.extensions && !argv.extensions_from) {
     const extensionsMessage =
       green('⤷ Use ') +
       cyan('--extensions ') +
@@ -98,7 +98,7 @@ async function performBuild(watch, defaultTask) {
   if (defaultTask) {
     printDefaultTaskHelp();
   }
-  if (!argv.lazy_build || argv.extensions || argv.extensions_from) {
+  if (!argv.lazy_build) {
     parseExtensionFlags();
   }
   await Promise.all([
@@ -124,9 +124,6 @@ async function defaultTask() {
   serve(argv.lazy_build);
   log(green('Started ') + cyan('gulp ') + green('server. '));
   if (argv.lazy_build) {
-    if (argv.extensions || argv.extensions_from) {
-      await buildExtensions({watch: true});
-    }
     log(green('JS and extensions will be lazily built when requested...'));
   } else {
     log(green('Building JS and extensions...'));
