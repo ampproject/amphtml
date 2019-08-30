@@ -6,6 +6,12 @@
     "expirationDateUTC": "2019-09-08",
     "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
   },
-  "experimentB": {},
+  "experimentB": {
+    "name": "INABOX_LITE",
+    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=_RTVEXP_INABOX_LITE",
+    "issue": "https://github.com/ampproject/amphtml/issues/22867",
+    "expirationDateUTC": "2019-10-10",
+    "defineExperimentConstant": "_RTVEXP_INABOX_LITE"
+  },
   "experimentC": {}
 }
