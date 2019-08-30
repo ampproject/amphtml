@@ -175,9 +175,10 @@ export class AmpImg extends BaseElement {
       );
     }
 
+    // It is important to call this before setting `srcset` attribute.
+    this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
