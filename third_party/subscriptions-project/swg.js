@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.64 */
+/** Version: 0.1.22.65 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -3780,7 +3780,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.64',
+    '_client': 'SwG 0.1.22.65',
   });
 }
 
@@ -3800,6 +3800,352 @@ function cacheParam(cacheKey) {
   const now = Date.now();
   return String(period <= 1 ? now : Math.floor(now / period));
 }
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Whether the specified error is an AbortError type.
+ * See https://heycam.github.io/webidl/#aborterror.
+ * @param {*} error
+ * @return {boolean}
+ */
+function isCancelError(error) {
+  return activityPorts_12(error);
+}
+
+/**
+ * Creates or emulates a DOMException of AbortError type.
+ * See https://heycam.github.io/webidl/#aborterror.
+ * @param {!Window} win
+ * @param {string=} opt_message
+ * @return {!DOMException}
+ */
+function createCancelError(win, opt_message) {
+  return activityPorts_11(win, opt_message);
+}
+
+/**
+ * A set of error utilities combined in a class to allow easy stubbing in tests.
+ */
+class ErrorUtils {
+  /**
+   * @param {!Error} error
+   */
+  static throwAsync(error) {
+    setTimeout(() => {
+      throw error;
+    });
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview
+ *
+ * Client-side experiments in SwG.
+ *
+ * The experiments can be set in a few different ways:
+ *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
+ *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
+ *     fragment.
+ *  3. By `swg.configure({experiments: [array]})` call.
+ *
+ * The `${experimentsString}` is defined as following:
+ *  - experimentString = (experimentSpec,)*
+ *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+ *
+ * Some examples:
+ *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
+ *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
+ *  - `A:0` - the experiment "A" will be disabled.
+ *  - `A:1` - enable the experiment "A" in 1% of impressions.
+ *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
+ *    control. In this case, 20% of the impressions will be split into two
+ *    categories: experiment and control. Notice, a control can be requested
+ *    only for the fraction under 20%.
+ */
+
+/**
+ * @enum {string}
+ */
+const Selection = {
+  EXPERIMENT: 'e',
+  CONTROL: 'c',
+};
+
+/**
+ * A comma-separated set of experiments.
+ * @type {string}
+ */
+let experimentsString = '';
+
+/**
+ * A parsed map of experiments.
+ * @type {?Object<string, boolean>}
+ */
+let experimentMap = null;
+
+/**
+ * Ensures that the experiments have been initialized and returns them.
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ */
+function getExperiments(win) {
+  if (!experimentMap) {
+    experimentMap = {};
+    let combinedExperimentString = experimentsString;
+    try {
+      const query = parseQueryString$1(win.location.hash);
+      const experimentStringFromHash = query['swg.experiments'];
+      if (experimentStringFromHash) {
+        combinedExperimentString += ',' + experimentStringFromHash;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      ErrorUtils.throwAsync(e);
+    }
+
+    // Format:
+    // - experimentString = (experimentSpec,)*
+    combinedExperimentString.split(',').forEach(s => {
+      s = s.trim();
+      if (!s) {
+        return;
+      }
+      try {
+        parseSetExperiment(win, experimentMap, s);
+      } catch (e) {
+        // Ignore: experiment parsing cannot block runtime.
+        ErrorUtils.throwAsync(e);
+      }
+    });
+  }
+  return experimentMap;
+}
+
+/**
+ * @param {!Window} win
+ * @param {?Object<string, boolean>} experimentMap
+ * @param {string} spec
+ */
+function parseSetExperiment(win, experimentMap, spec) {
+  // Format:
+  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+  let experimentId;
+  let fraction;
+  let control = false;
+  const eq = spec.indexOf(':');
+  if (eq == -1) {
+    experimentId = spec;
+    fraction = 100;
+    control = false;
+  } else {
+    experimentId = spec.substring(0, eq).trim();
+    spec = spec.substring(eq + 1);
+    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
+      control = true;
+      spec = spec.substring(0, spec.length - 1);
+    }
+    fraction = parseInt(spec, 10);
+  }
+  if (isNaN(fraction)) {
+    throw new Error('invalid fraction');
+  }
+
+  // Calculate "on"/"off".
+  let on;
+  if (fraction > 99) {
+    // Explicitly "on".
+    on = true;
+  } else if (fraction < 1) {
+    // Explicitly "off".
+    on = false;
+  } else if (win.sessionStorage) {
+    // Fractional and possibly with the control.
+    // Note that:
+    // a. We can't do persistent experiments if storage is not available.
+    // b. We can't run control on more than 20%.
+    control = control && fraction <= 20;
+    try {
+      // Set fraction in the experiment to make it unlaunchable.
+      const storageKey =
+        'subscribe.google.com:e:' +
+        experimentId +
+        ':' +
+        fraction +
+        (control ? 'c' : '');
+      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
+      if (!selection) {
+        // Is experiment/control range?
+        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
+          const inExperiment = control ? win.Math.random() <= 0.5 : true;
+          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
+          win.sessionStorage.setItem(storageKey, selection);
+        }
+      }
+      on = !!selection;
+      if (selection == Selection.CONTROL) {
+        experimentId = 'c-' + experimentId;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      on = false;
+      ErrorUtils.throwAsync(e);
+    }
+  } else {
+    on = false;
+  }
+
+  experimentMap[experimentId] = on;
+}
+
+/**
+ * @param {?string} s
+ * @return {?Selection}
+ */
+function parseSelection(s) {
+  // Do a simple if-then to inline the whole Selection enum.
+  return s == Selection.EXPERIMENT
+    ? Selection.EXPERIMENT
+    : s == Selection.CONTROL
+    ? Selection.CONTROL
+    : null;
+}
+
+/**
+ * Whether the specified experiment is on or off.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+function isExperimentOn(win, experimentId) {
+  return getExperiments(win)[experimentId] || false;
+}
+
+/**
+ * Toggles the experiment on or off. Returns the actual value of the experiment
+ * after toggling is done.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @param {boolean} on
+ */
+function setExperiment(win, experimentId, on) {
+  getExperiments(win)[experimentId] = on;
+}
+
+/**
+ * @return {!Array<string>}
+ */
+function getOnExperiments(win) {
+  const experimentMap = getExperiments(win);
+  const experiments = [];
+  for (const experiment in experimentMap) {
+    if (experimentMap[experiment]) {
+      experiments.push(experiment);
+    }
+  }
+  return experiments;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @enum {string}
+ */
+const ExperimentFlags = {
+  /**
+   * Enables GPay API in SwG.
+   * Cleanup issue: #406.
+   */
+  GPAY_API: 'gpay-api',
+
+  /**
+   * Enables GPay native support.
+   * Cleanup issue: #441.
+   */
+  GPAY_NATIVE: 'gpay-native',
+
+  /**
+   * Enables the feature that allows you to replace one subscription
+   * for another in the subscribe() API.
+   */
+  REPLACE_SUBSCRIPTION: 'replace-subscription',
+
+  /**
+   * Enables the contributions feature.
+   */
+  CONTRIBUTIONS: 'contributions',
+
+  /**
+   * Enables the Propensity feature
+   */
+  PROPENSITY: 'propensity',
+
+  /**
+   * Enables the Smartbox feature.
+   */
+  SMARTBOX: 'smartbox',
+
+  /**
+   * Enables logging events logged through the propensity API to the analytics
+   * server.
+   */
+  LOG_PROPENSITY_TO_SWG: 'log-propensity-to-swg',
+
+  /**
+   * Enables logging user events generated by the SwG and AMP clients to the
+   * publishers propensity server.
+   */
+  LOG_SWG_TO_PROPENSITY: 'log_swg_to_propensity',
+
+  /**
+   * Enables using new Activities APIs
+   */
+  HEJIRA: 'hejira',
+};
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -3933,7 +4279,17 @@ class SmartSubscriptionButtonApi {
     this.activityPorts_
       .openIframe(this.iframe_, this.src_, this.args_)
       .then(port => {
-        port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
+        if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
+          port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
+        } else {
+          port.onMessageDeprecated(result => {
+            const smartBoxMessage = new SmartBoxMessage();
+            if (result['clicked']) {
+              smartBoxMessage.setIsClicked(true);
+            }
+            this.handleSmartBoxClick_(smartBoxMessage);
+          });
+        }
       });
     return this.iframe_;
   }
@@ -4520,57 +4876,6 @@ class View {
  */
 
 /**
- * Whether the specified error is an AbortError type.
- * See https://heycam.github.io/webidl/#aborterror.
- * @param {*} error
- * @return {boolean}
- */
-function isCancelError(error) {
-  return activityPorts_12(error);
-}
-
-/**
- * Creates or emulates a DOMException of AbortError type.
- * See https://heycam.github.io/webidl/#aborterror.
- * @param {!Window} win
- * @param {string=} opt_message
- * @return {!DOMException}
- */
-function createCancelError(win, opt_message) {
-  return activityPorts_11(win, opt_message);
-}
-
-/**
- * A set of error utilities combined in a class to allow easy stubbing in tests.
- */
-class ErrorUtils {
-  /**
-   * @param {!Error} error
-   */
-  static throwAsync(error) {
-    setTimeout(() => {
-      throw error;
-    });
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @param {!../components/activities.ActivityPortDef} port
  * @param {string} requireOrigin
  * @param {boolean} requireOriginVerified
@@ -4753,6 +5058,25 @@ class ActivityIframeView extends View {
   onMessageDeprecated(callback) {
     this.getPortPromise_().then(port => {
       port.onMessageDeprecated(callback);
+    });
+  }
+  /**
+   * @param {!function(new: T)}  message
+   * @param {function(../proto/api_messages.Message)} callback
+   * @template T
+   */
+  on(message, callback) {
+    this.getPortPromise_().then(port => {
+      port.on(message, callback);
+    });
+  }
+
+  /**
+   * @param {!../proto/api_messages.Message} request
+   */
+  execute(request) {
+    this.getPortPromise_().then(port => {
+      port.execute(request);
     });
   }
 
@@ -6292,6 +6616,27 @@ class ContributionsFlow {
   }
 
   /**
+   * @param {AlreadySubscribedResponse} response
+   */
+  handleLinkRequest_(response) {
+    if (response.getSubscriberOrMember()) {
+      this.deps_.callbacks().triggerLoginRequest({
+        linkRequested: !!response.getLinkRequested(),
+      });
+    }
+  }
+
+  /**
+   * @param {SkuSelectedResponse} response
+   */
+  startPayFlow_(response) {
+    const sku = response.getSku();
+    if (sku) {
+      new PayStartFlow(this.deps_, sku, ProductType.UI_CONTRIBUTION).start();
+    }
+  }
+
+  /**
    * Starts the contributions flow or alreadyMember flow.
    * @return {!Promise}
    */
@@ -6305,24 +6650,33 @@ class ContributionsFlow {
         .callbacks()
         .triggerFlowCanceled(SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
     });
-
-    // If result is due to OfferSelection, redirect to payments.
-    this.activityIframeView_.onMessageDeprecated(result => {
-      if (result['alreadyMember']) {
-        this.deps_.callbacks().triggerLoginRequest({
-          linkRequested: !!result['linkRequested'],
-        });
-        return;
-      }
-      if (result['sku']) {
-        new PayStartFlow(
-          this.deps_,
-          /** @type {string} */ (result['sku']),
-          ProductType.UI_CONTRIBUTION
-        ).start();
-        return;
-      }
-    });
+    if (isExperimentOn(this.deps_.win(), ExperimentFlags.HEJIRA)) {
+      this.activityIframeView_.on(
+        AlreadySubscribedResponse,
+        this.handleLinkRequest_.bind(this)
+      );
+      this.activityIframeView_.on(
+        SkuSelectedResponse,
+        this.startPayFlow_.bind(this)
+      );
+    } else {
+      // If result is due to OfferSelection, redirect to payments.
+      this.activityIframeView_.onMessageDeprecated(result => {
+        if (result['alreadyMember']) {
+          const alreadySubscribedResponse = new AlreadySubscribedResponse();
+          alreadySubscribedResponse.setLinkRequested(result['linkRequested']);
+          alreadySubscribedResponse.setSubscriberOrMember(true);
+          this.handleLinkRequest_(alreadySubscribedResponse);
+          return;
+        }
+        if (result['sku']) {
+          const skuSelectedResponse = new SkuSelectedResponse();
+          skuSelectedResponse.setSku(result['sku']);
+          this.startPayFlow_(skuSelectedResponse);
+          return;
+        }
+      });
+    }
 
     return this.dialogManager_.openView(this.activityIframeView_);
   }
@@ -8247,72 +8601,6 @@ function irtpStringToBoolean(value) {
       return undefined;
   }
 }
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @enum {string}
- */
-const ExperimentFlags = {
-  /**
-   * Enables GPay API in SwG.
-   * Cleanup issue: #406.
-   */
-  GPAY_API: 'gpay-api',
-
-  /**
-   * Enables GPay native support.
-   * Cleanup issue: #441.
-   */
-  GPAY_NATIVE: 'gpay-native',
-
-  /**
-   * Enables the feature that allows you to replace one subscription
-   * for another in the subscribe() API.
-   */
-  REPLACE_SUBSCRIPTION: 'replace-subscription',
-
-  /**
-   * Enables the contributions feature.
-   */
-  CONTRIBUTIONS: 'contributions',
-
-  /**
-   * Enables the Propensity feature
-   */
-  PROPENSITY: 'propensity',
-
-  /**
-   * Enables the Smartbox feature.
-   */
-  SMARTBOX: 'smartbox',
-
-  /**
-   * Enables logging events logged through the propensity API to the analytics
-   * server.
-   */
-  LOG_PROPENSITY_TO_SWG: 'log-propensity-to-swg',
-
-  /**
-   * Enables logging user events generated by the SwG and AMP clients to the
-   * publishers propensity server.
-   */
-  LOG_SWG_TO_PROPENSITY: 'log_swg_to_propensity',
-};
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -12278,230 +12566,6 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
-/**
- * @fileoverview
- *
- * Client-side experiments in SwG.
- *
- * The experiments can be set in a few different ways:
- *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
- *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
- *     fragment.
- *  3. By `swg.configure({experiments: [array]})` call.
- *
- * The `${experimentsString}` is defined as following:
- *  - experimentString = (experimentSpec,)*
- *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
- *
- * Some examples:
- *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
- *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
- *  - `A:0` - the experiment "A" will be disabled.
- *  - `A:1` - enable the experiment "A" in 1% of impressions.
- *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
- *    control. In this case, 20% of the impressions will be split into two
- *    categories: experiment and control. Notice, a control can be requested
- *    only for the fraction under 20%.
- */
-
-/**
- * @enum {string}
- */
-const Selection = {
-  EXPERIMENT: 'e',
-  CONTROL: 'c',
-};
-
-/**
- * A comma-separated set of experiments.
- * @type {string}
- */
-let experimentsString = '';
-
-/**
- * A parsed map of experiments.
- * @type {?Object<string, boolean>}
- */
-let experimentMap = null;
-
-/**
- * Ensures that the experiments have been initialized and returns them.
- * @param {!Window} win
- * @return {!Object<string, boolean>}
- */
-function getExperiments(win) {
-  if (!experimentMap) {
-    experimentMap = {};
-    let combinedExperimentString = experimentsString;
-    try {
-      const query = parseQueryString$1(win.location.hash);
-      const experimentStringFromHash = query['swg.experiments'];
-      if (experimentStringFromHash) {
-        combinedExperimentString += ',' + experimentStringFromHash;
-      }
-    } catch (e) {
-      // Ignore: experiment parsing cannot block runtime.
-      ErrorUtils.throwAsync(e);
-    }
-
-    // Format:
-    // - experimentString = (experimentSpec,)*
-    combinedExperimentString.split(',').forEach(s => {
-      s = s.trim();
-      if (!s) {
-        return;
-      }
-      try {
-        parseSetExperiment(win, experimentMap, s);
-      } catch (e) {
-        // Ignore: experiment parsing cannot block runtime.
-        ErrorUtils.throwAsync(e);
-      }
-    });
-  }
-  return experimentMap;
-}
-
-/**
- * @param {!Window} win
- * @param {?Object<string, boolean>} experimentMap
- * @param {string} spec
- */
-function parseSetExperiment(win, experimentMap, spec) {
-  // Format:
-  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
-  let experimentId;
-  let fraction;
-  let control = false;
-  const eq = spec.indexOf(':');
-  if (eq == -1) {
-    experimentId = spec;
-    fraction = 100;
-    control = false;
-  } else {
-    experimentId = spec.substring(0, eq).trim();
-    spec = spec.substring(eq + 1);
-    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
-      control = true;
-      spec = spec.substring(0, spec.length - 1);
-    }
-    fraction = parseInt(spec, 10);
-  }
-  if (isNaN(fraction)) {
-    throw new Error('invalid fraction');
-  }
-
-  // Calculate "on"/"off".
-  let on;
-  if (fraction > 99) {
-    // Explicitly "on".
-    on = true;
-  } else if (fraction < 1) {
-    // Explicitly "off".
-    on = false;
-  } else if (win.sessionStorage) {
-    // Fractional and possibly with the control.
-    // Note that:
-    // a. We can't do persistent experiments if storage is not available.
-    // b. We can't run control on more than 20%.
-    control = control && fraction <= 20;
-    try {
-      // Set fraction in the experiment to make it unlaunchable.
-      const storageKey =
-        'subscribe.google.com:e:' +
-        experimentId +
-        ':' +
-        fraction +
-        (control ? 'c' : '');
-      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
-      if (!selection) {
-        // Is experiment/control range?
-        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
-          const inExperiment = control ? win.Math.random() <= 0.5 : true;
-          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
-          win.sessionStorage.setItem(storageKey, selection);
-        }
-      }
-      on = !!selection;
-      if (selection == Selection.CONTROL) {
-        experimentId = 'c-' + experimentId;
-      }
-    } catch (e) {
-      // Ignore: experiment parsing cannot block runtime.
-      on = false;
-      ErrorUtils.throwAsync(e);
-    }
-  } else {
-    on = false;
-  }
-
-  experimentMap[experimentId] = on;
-}
-
-/**
- * @param {?string} s
- * @return {?Selection}
- */
-function parseSelection(s) {
-  // Do a simple if-then to inline the whole Selection enum.
-  return s == Selection.EXPERIMENT
-    ? Selection.EXPERIMENT
-    : s == Selection.CONTROL
-    ? Selection.CONTROL
-    : null;
-}
-
-/**
- * Whether the specified experiment is on or off.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {boolean}
- */
-function isExperimentOn(win, experimentId) {
-  return getExperiments(win)[experimentId] || false;
-}
-
-/**
- * Toggles the experiment on or off. Returns the actual value of the experiment
- * after toggling is done.
- * @param {!Window} win
- * @param {string} experimentId
- * @param {boolean} on
- */
-function setExperiment(win, experimentId, on) {
-  getExperiments(win)[experimentId] = on;
-}
-
-/**
- * @return {!Array<string>}
- */
-function getOnExperiments(win) {
-  const experimentMap = getExperiments(win);
-  const experiments = [];
-  for (const experiment in experimentMap) {
-    if (experimentMap[experiment]) {
-      experiments.push(experiment);
-    }
-  }
-  return experiments;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const PAY_REQUEST_ID = 'swg-pay';
 const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
 
@@ -13190,6 +13254,47 @@ class OffersFlow {
   }
 
   /**
+   * @param {SkuSelectedResponse} response
+   * @private
+   */
+  startPayFlow_(response) {
+    const sku = response.getSku();
+    if (sku) {
+      this.eventManager_.logSwgEvent(
+        AnalyticsEvent.ACTION_OFFER_SELECTED,
+        true
+      );
+      new PayStartFlow(this.deps_, sku).start();
+    }
+  }
+
+  /**
+   * @param {AlreadySubscribedResponse} response
+   * @private
+   */
+  handleLinkRequest_(response) {
+    if (response.getSubscriberOrMember()) {
+      this.eventManager_.logSwgEvent(
+        AnalyticsEvent.ACTION_ALREADY_SUBSCRIBED,
+        true
+      );
+      this.deps_.callbacks().triggerLoginRequest({
+        linkRequested: !!response.getLinkRequested(),
+      });
+    }
+  }
+
+  /**
+   * @param {ViewSubscriptionsResponse} response
+   * @private
+   */
+  startNativeFlow_(response) {
+    if (response.getNative()) {
+      this.deps_.callbacks().triggerSubscribeRequest();
+    }
+  }
+
+  /**
    * Starts the offers flow or alreadySubscribed flow.
    * @return {!Promise}
    */
@@ -13199,27 +13304,45 @@ class OffersFlow {
     this.activityIframeView_.onCancel(() => {
       this.deps_.callbacks().triggerFlowCanceled(SubscriptionFlows.SHOW_OFFERS);
     });
-
-    // If result is due to OfferSelection, redirect to payments.
-    this.activityIframeView_.onMessageDeprecated(result => {
-      if (result['alreadySubscribed']) {
-        this.deps_.callbacks().triggerLoginRequest({
-          linkRequested: !!result['linkRequested'],
-        });
-        return;
-      }
-      if (result['sku']) {
-        new PayStartFlow(
-          this.deps_,
-          /** @type {string} */ (result['sku'])
-        ).start();
-        return;
-      }
-      if (result['native']) {
-        this.deps_.callbacks().triggerSubscribeRequest();
-        return;
-      }
-    });
+    if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
+      this.activityIframeView_.on(
+        SkuSelectedResponse,
+        this.startPayFlow_.bind(this)
+      );
+      this.activityIframeView_.on(
+        AlreadySubscribedResponse,
+        this.handleLinkRequest_.bind(this)
+      );
+      this.activityIframeView_.on(
+        ViewSubscriptionsResponse,
+        this.startNativeFlow_.bind(this)
+      );
+    } else {
+      // If result is due to OfferSelection, redirect to payments.
+      this.activityIframeView_.onMessageDeprecated(result => {
+        if (result['alreadySubscribed']) {
+          const alreadySubscribedResponse = new AlreadySubscribedResponse();
+          alreadySubscribedResponse.setSubscriberOrMember(true);
+          if (result['linkRequested']) {
+            alreadySubscribedResponse.setLinkRequested(true);
+          }
+          this.handleLinkRequest_(alreadySubscribedResponse);
+          return;
+        }
+        if (result['sku']) {
+          const skuSelectedResponse = new SkuSelectedResponse();
+          skuSelectedResponse.setSku(result['sku']);
+          this.startPayFlow_(skuSelectedResponse);
+          return;
+        }
+        if (result['native']) {
+          const viewSubscriptionsResponse = new ViewSubscriptionsResponse();
+          viewSubscriptionsResponse.setNative(true);
+          this.startNativeFlow_(viewSubscriptionsResponse);
+          return;
+        }
+      });
+    }
 
     this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_OFFERS);
 
@@ -13247,6 +13370,9 @@ class SubscribeOptionFlow {
 
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
@@ -13278,32 +13404,51 @@ class SubscribeOptionFlow {
         .callbacks()
         .triggerFlowCanceled(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     });
-
-    this.activityIframeView_.onMessageDeprecated(data => {
-      this.maybeOpenOffersFlow_(data);
-    });
+    if (isExperimentOn(this.deps_.win(), ExperimentFlags.HEJIRA)) {
+      this.activityIframeView_.on(
+        SubscribeResponse,
+        this.maybeOpenOffersFlow_.bind(this)
+      );
+    } else {
+      this.activityIframeView_.onMessageDeprecated(data => {
+        const response = new SubscribeResponse();
+        if (data['subscribe']) {
+          response.setSubscribe(true);
+        }
+        this.maybeOpenOffersFlow_(response);
+      });
+    }
     this.activityIframeView_.acceptResult().then(
       result => {
-        this.maybeOpenOffersFlow_(result.data);
+        const data = result.data;
+        const response = new SubscribeResponse();
+        if (data['subscribe']) {
+          response.setSubscribe(true);
+        }
+        this.maybeOpenOffersFlow_(response);
       },
       reason => {
         this.dialogManager_.completeView(this.activityIframeView_);
         throw reason;
       }
     );
+    this.eventManager_.logSwgEvent(
+      AnalyticsEvent.IMPRESSION_CLICK_TO_SHOW_OFFERS
+    );
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 
   /**
-   * @param {*} data
+   * @param {SubscribeResponse} response
    * @private
    */
-  maybeOpenOffersFlow_(data) {
-    if (data && data['subscribe']) {
+  maybeOpenOffersFlow_(response) {
+    if (response.getSubscribe()) {
       const options = this.options_ || {};
       if (options.isClosable == undefined) {
         options.isClosable = OFFERS_VIEW_CLOSABLE;
       }
+      this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_VIEW_OFFERS, true);
       new OffersFlow(this.deps_, options).start();
     }
   }
@@ -13334,6 +13479,9 @@ class AbbrvOfferFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
@@ -13352,6 +13500,22 @@ class AbbrvOfferFlow {
   }
 
   /**
+   * @param {AlreadySubscribedResponse} response
+   * @private
+   */
+  handleLinkRequest_(response) {
+    if (response.getSubscriberOrMember()) {
+      this.eventManager_.logSwgEvent(
+        AnalyticsEvent.ACTION_ALREADY_SUBSCRIBED,
+        true
+      );
+      this.deps_.callbacks().triggerLoginRequest({
+        linkRequested: !!response.getLinkRequested(),
+      });
+    }
+  }
+
+  /**
    * Starts the offers flow
    * @return {!Promise}
    */
@@ -13367,14 +13531,22 @@ class AbbrvOfferFlow {
     });
 
     // If the user is already subscribed, trigger login flow
-    this.activityIframeView_.onMessageDeprecated(data => {
-      if (data['alreadySubscribed']) {
-        this.deps_.callbacks().triggerLoginRequest({
-          linkRequested: !!data['linkRequested'],
-        });
-        return;
-      }
-    });
+    if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
+      this.activityIframeView_.on(
+        AlreadySubscribedResponse,
+        this.handleLinkRequest_.bind(this)
+      );
+    } else {
+      this.activityIframeView_.onMessageDeprecated(data => {
+        if (data['alreadySubscribed']) {
+          const alreadySubscrbiedResponse = new AlreadySubscribedResponse();
+          alreadySubscrbiedResponse.setSubscriberOrMember(true);
+          alreadySubscrbiedResponse.setLinkRequested(data['linkRequested']);
+          this.handleLinkRequest_(alreadySubscrbiedResponse);
+          return;
+        }
+      });
+    }
     // If result is due to requesting offers, redirect to offers flow
     this.activityIframeView_.acceptResult().then(result => {
       if (result.data['viewOffers']) {
@@ -13382,6 +13554,7 @@ class AbbrvOfferFlow {
         if (options.isClosable == undefined) {
           options.isClosable = OFFERS_VIEW_CLOSABLE;
         }
+        this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_VIEW_OFFERS, true);
         new OffersFlow(this.deps_, options).start();
         return;
       }
@@ -13392,6 +13565,10 @@ class AbbrvOfferFlow {
         return;
       }
     });
+
+    this.eventManager_.logSwgEvent(
+      AnalyticsEvent.IMPRESSION_CLICK_TO_SHOW_OFFERS_OR_ALREADY_SUBSCRIBED
+    );
 
     return this.dialogManager_.openView(this.activityIframeView_);
   }
@@ -14091,6 +14268,12 @@ class AnalyticsService {
    * @param {!../api/client-event-manager-api.ClientEvent} event
    */
   handleClientEvent_(event) {
+    //this event is just used to communicate information internally.  It should
+    //not be reported to the SwG analytics service.
+    if (event.eventType === AnalyticsEvent.EVENT_SUBSCRIPTION_STATE) {
+      return;
+    }
+
     if (
       ClientEventManager.isPublisherEvent(event) &&
       !this.shouldLogPublisherEvents_()

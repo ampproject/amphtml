@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.64 */
+/** Version: 0.1.22.65 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -326,6 +326,9 @@ class PageConfig {
  * Debug logger, only log message if #swg.log=1
  * @param {...*} var_args [decription]
  */
+
+/* eslint-disable */
+
 function debugLog(var_args) {
   if (/swg.debug=1/.test(self.location.hash)) {
     const logArgs = Array.prototype.slice.call(arguments, 0);
