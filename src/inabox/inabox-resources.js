@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Observable} from '../observable';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from '../service/resource';
@@ -52,6 +53,9 @@ class InaboxResources {
 
     /** @private @const {!Observable} */
     this.passObservable_ = new Observable();
+
+    /** @const @private {!Deferred} */
+    this.firstPassDone_ = new Deferred();
   }
 
   /** @override */
@@ -122,7 +126,12 @@ class InaboxResources {
   }
 
   /** @override */
-  schedulePass(opt_delay, opt_relayoutAll) {
+  scheduleLayoutOrPreload(unusedResource) {
+    // all elements are immediately scheduled for layout after being added
+  }
+
+  /** @override */
+  schedulePass(opt_delay) {
     return this.pass_.schedule(opt_delay);
   }
 
@@ -133,13 +142,6 @@ class InaboxResources {
 
   /** @override */
   ampInitComplete() {}
-
-  /** @override */
-  requireLayout(unusedElement, opt_parentPriority) {
-    // TODO: this is needed in amp-animation
-    dev().error(TAG, 'requireLayout not supported yet!');
-    return Promise.resolve();
-  }
 
   /** @override */
   updateLayoutPriority(unusedElement, unusedNewLayoutPriority) {
@@ -212,29 +214,12 @@ class InaboxResources {
     });
   }
 
-  // TODO(lannka): replace owners impl.
-  /* eslint-disable no-unused-vars */
-  /** @override */
-  setOwner(element, owner) {}
-
-  /** @override */
-  scheduleLayout(parentElement, subElements) {}
-
-  /** @override */
-  schedulePause(parentElement, subElements) {}
-
-  /** @override */
-  scheduleResume(parentElement, subElements) {}
-
-  /** @override */
-  scheduleUnlayout(parentElement, subElements) {}
-
-  /** @override */
-  schedulePreload(parentElement, subElements) {}
-
-  /** @override */
-  updateInViewport(parentElement, subElements, inLocalViewport) {}
-  /* eslint-enable no-unused-vars */
+  /**
+   * @return {!Promise} when first pass executed.
+   */
+  whenFirstPass() {
+    return this.firstPassDone_.promise;
+  }
 
   /**
    * @param {!Resource} resource
@@ -269,6 +254,7 @@ class InaboxResources {
       }
     });
     this.passObservable_.fire();
+    this.firstPassDone_.resolve();
   }
 }
 
