@@ -31,6 +31,7 @@ const webserver = require('gulp-webserver');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
+  preBuildCoreRuntime,
   preBuildSomeExtensions,
 } = require('./lazy-build');
 
@@ -96,6 +97,7 @@ if (noCachingExtensions) {
 if (lazyBuild) {
   middleware.push(lazyBuildExtensions);
   middleware.push(lazyBuildJs);
+  preBuildCoreRuntime();
   if (argv.extensions || argv.extensions_from) {
     preBuildSomeExtensions(argv);
   }

@@ -93,20 +93,21 @@ exports.lazyBuildJs = async function(req, res, next) {
 };
 
 /**
- * Pre-builds some extensions (and the core runtime) if requested via command
- * line flags. Note: We do not await the calls to build() so that the user can
- * start using the webserver immediately.
+ * Pre-builds the core runtime and returns immediately so that the user can
+ * start using the webserver.
+ */
+exports.preBuildCoreRuntime = function() {
+  build(jsBundles, 'amp.js', doBuildJs);
+};
+
+/**
+ * Pre-builds some extensions (requested via command line flags) and returns
+ * immediately so that the user can start using the webserver.
  * @param {!Object} argv
  */
 exports.preBuildSomeExtensions = function(argv) {
   const extensions = getExtensionsToBuild(argv);
-  log(
-    green('Pre-building'),
-    cyan(`amp.js`),
-    green('and extensions:'),
-    cyan(extensions.join(', '))
-  );
-  build(jsBundles, 'amp.js', doBuildJs);
+  log(green('Pre-building extensions:'), cyan(extensions.join(', ')));
   for (const extensionBundle in extensionBundles) {
     const extension = extensionBundles[extensionBundle].name;
     if (extensions.includes(extension) && !extensionBundle.endsWith('latest')) {
