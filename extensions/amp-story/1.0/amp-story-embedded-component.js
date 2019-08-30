@@ -71,7 +71,7 @@ export const EXPANDABLE_COMPONENTS = {
 const LAUNCHABLE_COMPONENTS = {
   'a': {
     actionIcon: ActionIcon.LAUNCH,
-    selector: 'a[href]',
+    selector: 'a[href]:not([affiliate-link-icon])',
   },
 };
 
