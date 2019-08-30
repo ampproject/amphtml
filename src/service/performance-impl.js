@@ -145,10 +145,7 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPIv76_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
+    this.supportsLayoutInstabilityAPIv76_ = false;
 
     /**
      * Whether the user agent supports the Layout Instability API that shipped
@@ -156,10 +153,7 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPIv77_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
+    this.supportsLayoutInstabilityAPIv77_ = false;
 
     /**
      * Whether the user agent supports the Event Timing API that shipped
@@ -167,21 +161,33 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsEventTimingAPIv76_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('firstInput');
-
+    this.supportsEventTimingAPIv76_ = false;
     /**
      * Whether the user agent supports the Event Timing API that shipped
      * with Chrome 77.
      *
      * @private {boolean}
      */
-    this.supportsEventTimingAPIv77_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('first-input');
+    this.supportsEventTimingAPIv77_ = false;
+
+    const {PerformanceObserver} = this.win;
+    if (PerformanceObserver) {
+      const {supportedEntryTypes} = PerformanceObserver;
+      if (supportedEntryTypes) {
+        this.supportsLayoutInstabilityAPIv76_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'layoutShift'
+        );
+        this.supportsLayoutInstabilityAPIv77_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'layout-shift'
+        );
+        this.supportsEventTimingAPIv76_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'firstInput'
+        );
+        this.supportsEventTimingAPIv77_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'first-input'
+        );
+      }
+    }
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
