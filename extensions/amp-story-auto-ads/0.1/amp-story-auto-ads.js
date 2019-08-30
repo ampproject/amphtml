@@ -24,7 +24,6 @@ import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {CtaTypes, StoryAdLocalization} from './story-ad-localization';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
-import {NavigationDirection} from '../../amp-story/1.0/amp-story-page';
 import {Services} from '../../../src/services';
 import {
   StateProperty,
@@ -95,7 +94,7 @@ const A4AVarNames = {
   CTA_URL: 'cta-url',
 };
 
-/** @const */
+/** @enum {number} */
 const AD_STATE = {
   PENDING: 0,
   INSERTED: 1,
@@ -235,7 +234,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   forceRender(pageBeforeAdId) {
     const pageBeforeId =
-      pageBeforeAdId || this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
+      pageBeforeAdId ||
+      /** @type {string} */ (this.storeService_.get(
+        StateProperty.CURRENT_PAGE_ID
+      ));
     this.isCurrentAdLoaded_ = true;
     // Setting distance manually to avoid flash of next page.
     const lastPage = this.adPageEls_[this.adPageEls_.length - 1];
@@ -245,7 +247,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // navigate to the ad page.
     const payload = dict({
       'targetPageId': 'i-amphtml-ad-page-1',
-      'direction': NavigationDirection.NEXT,
+      'direction': 'next',
     });
     const eventInit = {bubbles: true};
     dispatch(this.win, lastPage, EventType.SWITCH_PAGE, payload, eventInit);
