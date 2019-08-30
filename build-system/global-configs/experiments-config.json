@@ -8,10 +8,10 @@
   },
   "experimentB": {
     "name": "INABOX_LITE",
-    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=INABOX_LITE",
+    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=_RTVEXP_INABOX_LITE",
     "issue": "https://github.com/ampproject/amphtml/issues/22867",
     "expirationDateUTC": "2019-10-10",
-    "defineExperimentConstant": "INABOX_LITE"
+    "defineExperimentConstant": "_RTVEXP_INABOX_LITE"
   },
   "experimentC": {}
 }

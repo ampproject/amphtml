@@ -45,7 +45,7 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installInaboxCidService(ampdoc);
   if (
     // eslint-disable-next-line no-undef
-    INABOX_LITE ||
+    _RTVEXP_INABOX_LITE ||
     isExperimentOn(ampdoc.win, 'inabox-viewer-lite')
   ) {
     installInaboxViewerServiceForDoc(ampdoc);
