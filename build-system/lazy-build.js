@@ -70,16 +70,34 @@ async function build(bundles, bundle, buildFunc) {
   bundles[bundle].watched = true;
 }
 
+/**
+ * Lazy builds the correct version of an extension when requested.
+ * @param {!Object} req
+ * @param {!Object} res
+ * @param {function()} next
+ */
 exports.lazyBuildExtensions = async function(req, res, next) {
   const matcher = /\/dist\/v0\/([^\/]*)\.max\.js/;
   await lazyBuild(req.url, matcher, extensionBundles, doBuildExtension, next);
 };
 
+/**
+ * Lazy builds a non-extension JS file when requested.
+ * @param {!Object} req
+ * @param {!Object} res
+ * @param {function()} next
+ */
 exports.lazyBuildJs = async function(req, res, next) {
   const matcher = /\/.*\/([^\/]*\.js)/;
   await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
 };
 
+/**
+ * Pre-builds some extensions (and the core runtime) if requested via command
+ * line flags. Note: We do not await the calls to build() so that the user can
+ * start using the webserver immediately.
+ * @param {!Object} argv
+ */
 exports.preBuildSomeExtensions = function(argv) {
   const extensions = getExtensionsToBuild(argv);
   log(green('Pre-building extensions:'), cyan(extensions.join(', ')));
