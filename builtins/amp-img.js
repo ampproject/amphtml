@@ -103,7 +103,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   onMeasureChanged() {
-    this.maybeGenerateSizes_();
+    this.maybeGenerateSizes_(/* sync */ false);
   }
 
   /** @override */
