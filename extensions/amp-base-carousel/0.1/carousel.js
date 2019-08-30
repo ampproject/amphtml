@@ -1066,16 +1066,20 @@ export class Carousel {
    * @private
    */
   resetScrollReferencePoint_(force = false) {
-    this.scrolling_ = false;
-    this.runMutate_(() => {
-      this.notifyScrollPositionChanged_();
-    });
-
     // Make sure if the user is in the middle of a drag, we do not move
-    // anything.
+    // anything. The touch end will cause us to get called again.
     if (this.touching_) {
       return;
     }
+
+    // Scrolling has stopped, so clear the action source from whatever caused
+    // the scrolling in the first place.
+    this.actionSource_ = undefined;
+    this.scrolling_ = false;
+
+    this.runMutate_(() => {
+      this.notifyScrollPositionChanged_();
+    });
 
     // Check if the resting index we are centered around is the same as where
     // we stopped scrolling. If so, we do not want move anything or fire an
