@@ -25,7 +25,7 @@ import {htmlFor} from '../../../src/static-template';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
-const DARK_THEME_CLASS = 'i-amphtml-story-page-attachment-theme-dark';
+const DARK_THEME_CLASS = 'i-amphtml-story-draggable-drawer-theme-dark';
 
 /**
  * @enum {string}
