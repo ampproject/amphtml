@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import {LayoutPriority} from '../../src/layout';
-import {Owners} from '../../src/service/owners-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {Signals} from '../../src/utils/signals';
-import {layoutRectLtwh} from '../../src/layout-rect';
+import {Services} from '../../src/services';
 
-/*eslint "google-camelcase/google-camelcase": 0*/
 describes.realWin(
-  'Resources pause/resume/unlayout scheduling',
+  'owners-impl',
   {
     amp: true,
   },
@@ -32,82 +28,101 @@ describes.realWin(
     let owners;
     let parent;
     let children;
-    let child0;
-    let child1;
-    let child2;
+    let sandbox;
+    let scheduleLayoutOrPreloadStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      owners = new Owners(env.ampdoc);
-      resources = owners.resources_;
+      sandbox = env.sandbox;
+      owners = Services.ownersForDoc(env.ampdoc);
+      resources = Services.resourcesForDoc(env.ampdoc);
       resources.isRuntimeOn_ = false;
-      const parentTuple = createElementWithResource(1);
-      parent = parentTuple[0];
-      child0 = doc.createElement('div');
-      child1 = createElementWithResource(2)[0];
-      child2 = createElementWithResource(3)[0];
-      children = [child0, child1, child2];
-      children.forEach(child => {
-        parent.appendChild(child);
-      });
+      // DOM tree (numbers are resource IDs):
+      // body -- 0 -- div -- 3
+      //                  -- 4
+      //           -- 1
+      //           -- 2
+      parent = createElementWithResource(0);
+      doc.body.appendChild(parent);
+      const child0 = doc.createElement('div');
+      parent.appendChild(child0);
+      children = [child0];
+      for (let i = 1; i <= 4; ++i) {
+        children[i] = createElementWithResource(i);
+        if (i <= 2) {
+          parent.appendChild(children[i]);
+        } else {
+          children[0].appendChild(children[i]);
+        }
+      }
+      scheduleLayoutOrPreloadStub = sandbox.stub(
+        resources,
+        'scheduleLayoutOrPreload'
+      );
     });
-
-    function createAmpElement() {
-      const element = document.createElement('div');
-      element.classList.add('i-amphtml-element');
-      const signals = new Signals();
-      element.signals = () => signals;
-      element.whenBuilt = () => Promise.resolve();
-      element.isBuilt = () => true;
-      element.build = () => Promise.resolve();
-      element.isUpgraded = () => true;
-      element.updateLayoutBox = () => {};
-      element.getPlaceholder = () => null;
-      element.getLayoutPriority = () => LayoutPriority.CONTENT;
-      element.dispatchCustomEvent = () => {};
-      element.getLayout = () => 'fixed';
-      document.body.appendChild(element);
-      return element;
-    }
 
     function createElement() {
       const element = env.createAmpElement('amp-test');
-      sandbox.stub(element, 'isBuilt').callsFake(() => true);
+      sandbox.stub(element, 'isUpgraded').returns(true);
       return element;
     }
 
-    function createElementWithResource(id) {
+    function createElementWithResource(
+      id,
+      state = ResourceState.LAYOUT_COMPLETE
+    ) {
       const element = createElement();
       const resource = new Resource(id, element, resources);
-      resource.state_ = ResourceState.LAYOUT_COMPLETE;
-      resource.element['__AMP__RESOURCE'] = resource;
-      return [element, resource];
+      resource.state_ = state;
+      sandbox.stub(resource, 'measure').callsFake(() => {
+        resource.state_ = ResourceState.READY_FOR_LAYOUT;
+      });
+      resource.isDisplayedForTesting = true;
+      sandbox
+        .stub(resource, 'isDisplayed')
+        .callsFake(() => resource.isDisplayedForTesting);
+      resource.isInViewport = () => true;
+      return element;
+    }
+
+    function setAllResourceState(state) {
+      children.concat([parent]).forEach(element => {
+        setElementResourceState(element, state);
+      });
+    }
+
+    function setElementResourceState(element, state) {
+      const resource = resources.getResourceForElementOptional(element);
+      if (resource) {
+        resource.state_ = state;
+      }
+      return resource;
     }
 
     describe('schedulePause', () => {
       it('should not throw with a single element', () => {
         expect(() => {
-          owners.schedulePause(parent, child1);
+          owners.schedulePause(parent, children[1]);
         }).to.not.throw();
       });
 
       it('should not throw with an array of elements', () => {
         expect(() => {
-          owners.schedulePause(parent, [child1, child2]);
+          owners.schedulePause(parent, [children[1], children[2]]);
         }).to.not.throw();
       });
 
       it('should be ok with non amp children', () => {
         expect(() => {
           owners.schedulePause(parent, children);
-          owners.schedulePause(parent, child0);
+          owners.schedulePause(parent, children[0]);
         }).to.not.throw();
       });
 
       it('should call pauseCallback on custom element', () => {
-        const stub1 = sandbox.stub(child1, 'pauseCallback');
-        const stub2 = sandbox.stub(child2, 'pauseCallback');
+        const stub1 = sandbox.stub(children[1], 'pauseCallback');
+        const stub2 = sandbox.stub(children[2], 'pauseCallback');
 
         owners.schedulePause(parent, children);
         expect(stub1.calledOnce).to.be.true;
@@ -115,9 +130,9 @@ describes.realWin(
       });
 
       it('should call unlayoutCallback when unlayoutOnPause', () => {
-        const stub1 = sandbox.stub(child1, 'unlayoutCallback');
-        const stub2 = sandbox.stub(child2, 'unlayoutCallback');
-        sandbox.stub(child1, 'unlayoutOnPause').returns(true);
+        const stub1 = sandbox.stub(children[1], 'unlayoutCallback');
+        const stub2 = sandbox.stub(children[2], 'unlayoutCallback');
+        sandbox.stub(children[1], 'unlayoutOnPause').returns(true);
 
         owners.schedulePause(parent, children);
         expect(stub1.calledOnce).to.be.true;
@@ -128,37 +143,37 @@ describes.realWin(
     describe('scheduleResume', () => {
       beforeEach(() => {
         // Pause one child.
-        owners.schedulePause(parent, child1);
+        owners.schedulePause(parent, children[1]);
       });
 
       it('should not throw with a single element', () => {
         expect(() => {
-          owners.scheduleResume(parent, child1);
+          owners.scheduleResume(parent, children[1]);
         }).to.not.throw();
       });
 
       it('should not throw with an array of elements', () => {
         expect(() => {
-          owners.scheduleResume(parent, [child1, child2]);
+          owners.scheduleResume(parent, [children[1], children[2]]);
         }).to.not.throw();
       });
 
       it('should be ok with non amp children', () => {
         expect(() => {
           owners.scheduleResume(parent, children);
-          owners.scheduleResume(parent, child0);
+          owners.scheduleResume(parent, children[0]);
         }).to.not.throw();
       });
 
       it('should call resumeCallback on paused custom elements', () => {
-        const stub1 = sandbox.stub(child1, 'resumeCallback');
+        const stub1 = sandbox.stub(children[1], 'resumeCallback');
 
         owners.scheduleResume(parent, children);
         expect(stub1.calledOnce).to.be.true;
       });
 
       it('should call resumeCallback on non-paused custom elements', () => {
-        const stub2 = sandbox.stub(child2, 'resumeCallback');
+        const stub2 = sandbox.stub(children[2], 'resumeCallback');
 
         owners.scheduleResume(parent, children);
         expect(stub2.calledOnce).to.be.true;
@@ -166,72 +181,48 @@ describes.realWin(
     });
 
     describe('scheduleLayout', () => {
-      it('should schedule immediately when resource is READY_FOR_LAYOUT', () => {
-        const parentElement = createAmpElement();
-        const element = createAmpElement();
-        parentElement.appendChild(element);
-        sandbox
-          .stub(element, 'getBoundingClientRect')
-          .callsFake(() => layoutRectLtwh(0, 0, 10, 10));
-        new Resource(1, parentElement, resources);
-        const resource = new Resource(2, element, resources);
-        resource.state_ = ResourceState.READY_FOR_LAYOUT;
-        sandbox.stub(resource, 'isDisplayed').returns(true);
-        sandbox.stub(resource, 'isInViewport').returns(true);
-        const measureStub = sandbox.stub(resource, 'measure');
-        const scheduleStub = sandbox.stub(
-          resources,
-          'scheduleLayoutOrPreload_'
+      it('should schedule when resource is READY_FOR_LAYOUT', () => {
+        const resource1 = setElementResourceState(
+          children[1],
+          ResourceState.READY_FOR_LAYOUT
         );
-        owners.scheduleLayout(parentElement, element);
-        expect(measureStub).to.be.calledOnce;
-        expect(scheduleStub).to.be.calledOnce;
+        owners.scheduleLayout(parent, children[1]);
+        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(
+          resource1,
+          true,
+          parent.getLayoutPriority()
+        );
       });
 
-      it('should schedule after build', () => {
-        const parentElement = createAmpElement();
-        const element = createAmpElement();
-        parentElement.appendChild(element);
-        sandbox
-          .stub(element, 'getBoundingClientRect')
-          .callsFake(() => layoutRectLtwh(0, 0, 10, 10));
-        sandbox.stub(element, 'isBuilt').callsFake(() => false);
-        new Resource(1, parentElement, resources);
-        const resource = new Resource(2, element, resources);
-        resource.state_ = ResourceState.NOT_BUILT;
-        sandbox.stub(resource, 'isDisplayed').returns(true);
-        const measureStub = sandbox.stub(resource, 'measure').callsFake(() => {
-          resource.state_ = ResourceState.READY_FOR_LAYOUT;
-        });
-        const scheduleStub = sandbox.stub(
-          resources,
-          'scheduleLayoutOrPreload_'
+      it('should schedule after build', async () => {
+        const resource1 = setElementResourceState(
+          children[1],
+          ResourceState.NOT_BUILT
         );
-        owners.scheduleLayout(parentElement, element);
-        expect(measureStub).to.not.be.called;
-        expect(scheduleStub).to.not.be.called;
-        return resource
-          .build()
-          .then(() => {
-            return element.whenBuilt();
+        let buildResource;
+        sandbox.stub(resource1, 'whenBuilt').returns(
+          new Promise(resolve => {
+            buildResource = resolve;
           })
-          .then(() => {
-            expect(measureStub).to.be.calledOnce;
-            expect(scheduleStub).to.be.calledOnce;
-          });
+        );
+        owners.scheduleLayout(parent, children[1]);
+        expect(scheduleLayoutOrPreloadStub).to.not.be.called;
+        buildResource();
+        await Promise.resolve();
+        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(resource1, true);
       });
     });
 
     describe('scheduleUnlayout', () => {
       it('should not throw with a single element', () => {
         expect(() => {
-          owners.scheduleUnlayout(parent, child1);
+          owners.scheduleUnlayout(parent, children[1]);
         }).to.not.throw();
       });
 
       it('should not throw with an array of elements', () => {
         expect(() => {
-          owners.scheduleUnlayout(parent, [child1, child2]);
+          owners.scheduleUnlayout(parent, [children[1], children[2]]);
         }).to.not.throw();
       });
 
@@ -242,110 +233,148 @@ describes.realWin(
       });
 
       it('should schedule on custom element with multiple children', () => {
-        const stub1 = sandbox.stub(child1, 'unlayoutCallback');
-        const stub2 = sandbox.stub(child2, 'unlayoutCallback');
+        const stub1 = sandbox.stub(children[1], 'unlayoutCallback');
+        const stub2 = sandbox.stub(children[2], 'unlayoutCallback');
         owners.scheduleUnlayout(parent, children);
         expect(stub1.called).to.be.true;
         expect(stub2.called).to.be.true;
       });
     });
+
+    describe('schedulePreload', () => {
+      beforeEach(() => {
+        setAllResourceState(ResourceState.NOT_BUILT);
+        [parent, children[1], children[2]].forEach(element => {
+          setElementResourceState(element, ResourceState.READY_FOR_LAYOUT);
+        });
+      });
+
+      it('should not throw with a single element', () => {
+        expect(() => {
+          owners.schedulePreload(parent, children[1]);
+        }).to.not.throw();
+      });
+
+      it('should not throw with an array of elements', () => {
+        expect(() => {
+          owners.schedulePreload(parent, [children[1], children[2]]);
+        }).to.not.throw();
+      });
+
+      it('should be ok with non amp children', () => {
+        expect(() => {
+          owners.schedulePreload(parent, children);
+        }).to.not.throw();
+      });
+
+      it('should schedule on custom element with multiple children', () => {
+        owners.schedulePreload(parent, children);
+        expect(scheduleLayoutOrPreloadStub).to.be.calledTwice;
+      });
+
+      it('should schedule on nested custom element placeholder', () => {
+        const placeholder1 = createElementWithResource(
+          10,
+          ResourceState.READY_FOR_LAYOUT
+        );
+        children[1].getPlaceholder = () => placeholder1;
+
+        const placeholder2 = createElementWithResource(
+          11,
+          ResourceState.READY_FOR_LAYOUT
+        );
+        children[2].getPlaceholder = () => placeholder2;
+
+        owners.schedulePreload(parent, children);
+        expect(scheduleLayoutOrPreloadStub.callCount).to.equal(4);
+      });
+
+      it('should schedule amp-* placeholder inside non-amp element', () => {
+        const insidePlaceholder1 = createElementWithResource(
+          10,
+          ResourceState.READY_FOR_LAYOUT
+        );
+        const placeholder1 = doc.createElement('div');
+        children[0].getElementsByClassName = () => [insidePlaceholder1];
+        children[0].getPlaceholder = () => placeholder1;
+
+        owners.schedulePreload(parent, children);
+        expect(scheduleLayoutOrPreloadStub).to.be.calledThrice;
+      });
+    });
+
+    describe('requireLayout', () => {
+      beforeEach(() => {
+        children.concat([parent]).forEach(element => {
+          const resource = resources.getResourceForElementOptional(element);
+          if (!resource) {
+            return;
+          }
+          sandbox.stub(resource, 'whenBuilt').returns(Promise.resolve());
+          sandbox.stub(resource, 'loadedOnce').returns(Promise.resolve());
+        });
+      });
+
+      it('should layout AMP element itself', async () => {
+        setAllResourceState(ResourceState.READY_FOR_LAYOUT);
+        const scheduledElements = await owners.requireLayout(parent);
+        expect(scheduledElements).to.have.length(1);
+        expect(scheduleLayoutOrPreloadStub).to.be.calledOnce;
+        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(
+          resources.getResourceForElement(parent),
+          true
+        );
+      });
+
+      it("should layout non-AMP element's all AMP children", async () => {
+        setAllResourceState(ResourceState.READY_FOR_LAYOUT);
+        const scheduledElements = await owners.requireLayout(children[0]);
+        expect(scheduledElements).to.have.length(2);
+        expect(scheduleLayoutOrPreloadStub).to.be.calledTwice;
+        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(
+          resources.getResourceForElement(children[3]),
+          true
+        );
+        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(
+          resources.getResourceForElement(children[4]),
+          true
+        );
+      });
+
+      it('should layout element w/ state=LAYOUT_FAILED', async () => {
+        const resource = setElementResourceState(
+          parent,
+          ResourceState.LAYOUT_FAILED
+        );
+        await owners.requireLayout(parent);
+        expect(scheduleLayoutOrPreloadStub).to.be.calledOnce;
+        expect(scheduleLayoutOrPreloadStub).to.be.calledWith(resource, true);
+      });
+
+      it('should not layout element w/ state=LAYOUT_COMPLETE', async () => {
+        setElementResourceState(parent, ResourceState.LAYOUT_COMPLETE);
+        const scheduledElements = await owners.requireLayout(parent);
+        expect(scheduledElements).to.have.length(0);
+        expect(scheduleLayoutOrPreloadStub).to.not.be.called;
+      });
+
+      it('should not double schedule element w/ state=LAYOUT_SCHEDULED', async () => {
+        setElementResourceState(parent, ResourceState.LAYOUT_SCHEDULED);
+        const scheduledElements = await owners.requireLayout(parent);
+        expect(scheduledElements).to.have.length(1);
+        expect(scheduleLayoutOrPreloadStub).to.not.be.called;
+      });
+
+      it('should not require layout for undisplayed element', async () => {
+        const resource = setElementResourceState(
+          parent,
+          ResourceState.READY_FOR_LAYOUT
+        );
+        resource.isDisplayedForTesting = false;
+        const scheduledElements = await owners.requireLayout(parent);
+        expect(scheduledElements).to.have.length(1);
+        expect(scheduleLayoutOrPreloadStub).to.not.be.called;
+      });
+    });
   }
 );
-
-describes.realWin('Owners schedulePreload', {amp: true}, env => {
-  let win, doc;
-  let resources;
-  let owners;
-  let parent;
-  let children;
-  let child0;
-  let child1;
-  let child2;
-
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-    owners = new Owners(env.ampdoc);
-    resources = owners.resources_;
-    resources.isRuntimeOn_ = false;
-    const parentTuple = createElementWithResource(1);
-    parent = parentTuple[0];
-    child0 = doc.createElement('div');
-    child1 = createElementWithResource(2)[0];
-    child2 = createElementWithResource(3)[0];
-    children = [child0, child1, child2];
-    children.forEach(child => {
-      parent.appendChild(child);
-    });
-  });
-
-  function createElement() {
-    const element = env.createAmpElement('amp-test');
-    sandbox.stub(element, 'isBuilt').callsFake(() => true);
-    sandbox.stub(element, 'isUpgraded').callsFake(() => true);
-    return element;
-  }
-
-  function createElementWithResource(id) {
-    const element = createElement();
-    const resource = new Resource(id, element, resources);
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.element['__AMP__RESOURCE'] = resource;
-    resource.measure = sandbox.spy();
-    resource.isDisplayed = () => true;
-    resource.isInViewport = () => true;
-    return [element, resource];
-  }
-
-  it('should not throw with a single element', () => {
-    expect(() => {
-      owners.schedulePreload(parent, child1);
-    }).to.not.throw();
-  });
-
-  it('should not throw with an array of elements', () => {
-    expect(() => {
-      owners.schedulePreload(parent, [child1, child2]);
-    }).to.not.throw();
-  });
-
-  it('should be ok with non amp children', () => {
-    expect(() => {
-      owners.schedulePreload(parent, children);
-    }).to.not.throw();
-  });
-
-  it('should schedule on custom element with multiple children', () => {
-    const stub1 = sandbox.stub(resources, 'schedule_');
-    owners.schedulePreload(parent, children);
-    expect(stub1.called).to.be.true;
-    expect(stub1.callCount).to.be.equal(2);
-  });
-
-  it('should schedule on nested custom element placeholder', () => {
-    const stub1 = sandbox.stub(resources, 'schedule_');
-
-    const placeholder1 = createElementWithResource(4)[0];
-    child1.getPlaceholder = () => placeholder1;
-
-    const placeholder2 = createElementWithResource(5)[0];
-    child2.getPlaceholder = () => placeholder2;
-
-    owners.schedulePreload(parent, children);
-    expect(stub1.called).to.be.true;
-    expect(stub1.callCount).to.be.equal(4);
-  });
-
-  it('should schedule amp-* placeholder inside non-amp element', () => {
-    const stub1 = sandbox.stub(resources, 'schedule_');
-
-    const insidePlaceholder1 = createElementWithResource(4)[0];
-    const placeholder1 = doc.createElement('div');
-    child0.getElementsByClassName = () => [insidePlaceholder1];
-    child0.getPlaceholder = () => placeholder1;
-
-    owners.schedulePreload(parent, children);
-    expect(stub1.called).to.be.true;
-    expect(stub1.callCount).to.be.equal(3);
-  });
-});
