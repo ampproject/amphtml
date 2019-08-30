@@ -27,5 +27,5 @@ export function tracdelight(global, data) {
   validateData(data, mandatoryFields, optionalFields);
 
   global.tdData = data;
-  writeScript(global, 'https://scripts.tracdelight.com/amp.js');
+  writeScript(global, 'https://scripts.tracdelight.io/amp.js');
 }

@@ -955,7 +955,7 @@ export const adConfig = {
   },
 
   'tracdelight': {
-    prefetch: 'https://scripts.tracdelight.com/amp.js',
+    prefetch: 'https://scripts.tracdelight.io/amp.js',
     renderStartImplemented: true,
   },
 
