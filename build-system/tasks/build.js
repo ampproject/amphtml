@@ -80,7 +80,9 @@ function printDefaultTaskHelp() {
       cyan('--extensions ') +
       green('or ') +
       cyan('--extensions_from ') +
-      green('to pre-build some extensions.');
+      green('to pre-build ') +
+      cyan('amp.js ') +
+      green('and some extensions.');
     log(extensionsMessage);
   }
 }

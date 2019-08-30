@@ -100,7 +100,13 @@ exports.lazyBuildJs = async function(req, res, next) {
  */
 exports.preBuildSomeExtensions = function(argv) {
   const extensions = getExtensionsToBuild(argv);
-  log(green('Pre-building extensions:'), cyan(extensions.join(', ')));
+  log(
+    green('Pre-building'),
+    cyan(`amp.js`),
+    green('and extensions:'),
+    cyan(extensions.join(', '))
+  );
+  build(jsBundles, 'amp.js', doBuildJs);
   for (const extensionBundle in extensionBundles) {
     const extension = extensionBundles[extensionBundle].name;
     if (extensions.includes(extension) && !extensionBundle.endsWith('latest')) {
