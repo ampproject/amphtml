@@ -3,7 +3,7 @@
 ##### Stats:
 
 [![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg?logo=Travis%20CI&logoColor=white&style=flat-square "Build Status")](https://travis-ci.org/ampproject/amphtml/builds)
-[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Release")](https://github.com/ampproject/amphtml/releases)
+[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Release")](https://github.com/ampproject/amphtml/releases/latest)
 [![Contributors](https://img.shields.io/github/contributors-anon/ampproject/amphtml.svg?logo=GitHub&style=flat-square "Contributors")](https://github.com/ampproject/amphtml/graphs/contributors)
 [![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg?logo=GitHub&style=flat-square "Commits")](https://github.com/ampproject/amphtml/pulse/monthly)
 
