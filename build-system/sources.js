@@ -84,7 +84,7 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-a4a/**/*.js',
   // TODO(#24080) Remove this when story ads have full ad network support.
   // Needed for amp-story-auto-ads to validate amp-ad-exit config.
-  'extensions/amp-ad-exit/0.1/config.js',
+  'extensions/amp-ad-exit/**/*.js',
   // Currently needed for crypto.js and visibility.js.
   // Should consider refactoring.
   'extensions/amp-analytics/**/*.js',

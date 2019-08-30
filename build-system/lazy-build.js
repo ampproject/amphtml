@@ -34,20 +34,37 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
   const match = url.match(matcher);
   if (match && match.length == 2) {
     const bundle = match[1];
-    if (bundles[bundle] && !bundles[bundle].watched) {
+    if (bundles[bundle]) {
       if (bundles[bundle].pendingBuild) {
         await bundles[bundle].pendingBuild;
-      } else {
-        bundles[bundle].pendingBuild = buildFunc(bundles, bundle, {
-          watch: true,
-        });
-        await bundles[bundle].pendingBuild;
-        bundles[bundle].pendingBuild = undefined;
-        bundles[bundle].watched = true;
+      } else if (!bundles[bundle].watched) {
+        await build(bundles, bundle, buildFunc);
       }
     }
   }
   next();
+}
+
+/**
+ * Actually build a bundle.
+ * Marks the bundle as watched and stores the pendingBuild property whenever
+ * a build is pending.
+ * @param {!Object} bundles
+ * @param {string} bundle
+ * @param {function()} buildFunc
+ */
+async function build(bundles, bundle, buildFunc) {
+  bundles[bundle].pendingBuild = buildFunc(bundles, bundle, {
+    watch: true,
+    onWatchBuild: async bundlePromise => {
+      bundles[bundle].pendingBuild = bundlePromise;
+      await bundlePromise;
+      bundles[bundle].pendingBuild = undefined;
+    },
+  });
+  await bundles[bundle].pendingBuild;
+  bundles[bundle].pendingBuild = undefined;
+  bundles[bundle].watched = true;
 }
 
 exports.lazyBuildExtensions = async function(req, res, next) {

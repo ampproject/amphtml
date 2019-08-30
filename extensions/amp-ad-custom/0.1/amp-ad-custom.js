@@ -20,6 +20,7 @@ import {
 } from '../../amp-a4a/0.1/amp-ad-type-defs';
 import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base';
 import {NameFrameRenderer} from '../../amp-a4a/0.1/name-frame-renderer';
+import {Services} from '../../../src/services';
 import {TemplateRenderer} from '../../amp-a4a/0.1/template-renderer';
 import {TemplateValidator} from '../../amp-a4a/0.1/template-validator';
 import {addParamToUrl} from '../../../src/url';
@@ -89,6 +90,7 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
         }
       }
     });
+    url = Services.urlReplacementsForDoc(this.element).expandUrlSync(url);
     this.getContext().adUrl = url;
     return url;
   }

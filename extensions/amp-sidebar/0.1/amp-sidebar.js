@@ -344,6 +344,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForOpening_() {
     toggle(this.element, /* display */ true);
+    toggle(this.getMaskElement_(), /* display */ true);
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
     this.mutateElement(() => {
       // Wait for mutateElement, so that the element has been transfered to the
@@ -356,8 +357,8 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     this.element./*OK*/ scrollTop = 1;
-    this.openMask_();
     this.element.setAttribute('open', '');
+    this.getMaskElement_().setAttribute('open', '');
     this.element.setAttribute('aria-hidden', 'false');
     this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
     handleAutoscroll(this.getAmpDoc(), this.element);
@@ -382,6 +383,7 @@ export class AmpSidebar extends AMP.BaseElement {
     }
     this.triggerEvent_(SidebarEvents.OPEN);
     this.element.setAttribute('i-amphtml-sidebar-opened', '');
+    this.getMaskElement_().setAttribute('i-amphtml-sidebar-opened', '');
   }
 
   /**
@@ -389,7 +391,8 @@ export class AmpSidebar extends AMP.BaseElement {
    * @param {boolean} immediate
    */
   updateForClosing_(immediate) {
-    this.closeMask_();
+    this.getMaskElement_().removeAttribute('open');
+    this.getMaskElement_().removeAttribute('i-amphtml-sidebar-opened');
     this.mutateElement(() => {
       setModalAsClosed(this.element);
     });
@@ -407,6 +410,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   updateForClosed_() {
     toggle(this.element, /* display */ false);
+    toggle(this.getMaskElement_(), /* display */ false);
     Services.ownersForDoc(this.element).schedulePause(
       this.element,
       this.getRealChildren()
@@ -444,7 +448,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
-    this.dismiss_(false);
+    return this.dismiss_(false);
   }
 
   /**
@@ -467,8 +471,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.setUpdateFn_(() => this.updateForClosing_(immediate));
     // Immediately hide the sidebar so that animation does not play.
     if (immediate) {
-      this.closeMask_();
       toggle(this.element, /* display */ false);
+      toggle(this.getMaskElement_(), /* display */ false);
     }
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -540,10 +544,13 @@ export class AmpSidebar extends AMP.BaseElement {
       return side == Side.LEFT ? Side.RIGHT : Side.LEFT;
     }
   }
+
   /**
+   * Get the sidebar's mask element; create one if none exists.
+   * @return {!Element}
    * @private
    */
-  openMask_() {
+  getMaskElement_() {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
       mask.classList.add('i-amphtml-sidebar-mask');
@@ -559,16 +566,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.setupGestures_(mask);
       this.maskElement_ = mask;
     }
-    this.maskElement_.classList.toggle('i-amphtml-ghost', false);
-  }
-
-  /**
-   * @private
-   */
-  closeMask_() {
-    if (this.maskElement_) {
-      this.maskElement_.classList.toggle('i-amphtml-ghost', true);
-    }
+    return this.maskElement_;
   }
 
   /**
