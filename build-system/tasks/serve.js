@@ -70,6 +70,7 @@ function serve(lazyBuild) {
       path.dirname(require.resolve('../app-index')),
     ],
     env: {
+      // TODO(rsimha): Improve the cross-process message passing being done here
       'NODE_ENV': 'development',
       'SERVE_PORT': port,
       'SERVE_HOST': host,
@@ -79,6 +80,7 @@ function serve(lazyBuild) {
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
       'SERVE_EXTENSIONS_WITHOUT_CACHING': noCachingExtensions,
       'LAZY_BUILD': lazyBuild,
+      'ARGV': process.argv,
     },
     stdout: !quiet,
   };

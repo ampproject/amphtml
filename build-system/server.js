@@ -20,13 +20,20 @@
  * files and list directories for use with the gulp live server
  */
 const app = require('./app');
+const argv = require('minimist')(process.env.ARGV.split(',').slice(2));
 const colors = require('ansi-colors');
 const gulp = require('gulp');
+const header = require('connect-header');
 const isRunning = require('is-running');
 const log = require('fancy-log');
 const morgan = require('morgan');
 const webserver = require('gulp-webserver');
-const {lazyBuildExtensions, lazyBuildJs} = require('./lazy-build');
+const {
+  lazyBuildExtensions,
+  lazyBuildJs,
+  preBuildCoreRuntime,
+  preBuildSomeExtensions,
+} = require('./lazy-build');
 
 const {
   SERVE_HOST: host,
@@ -40,7 +47,6 @@ const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
 const noCachingExtensions =
   process.env.SERVE_EXTENSIONS_WITHOUT_CACHING == 'true';
 const lazyBuild = process.env.LAZY_BUILD == 'true';
-const header = require('connect-header');
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
@@ -91,6 +97,10 @@ if (noCachingExtensions) {
 if (lazyBuild) {
   middleware.push(lazyBuildExtensions);
   middleware.push(lazyBuildJs);
+  preBuildCoreRuntime();
+  if (argv.extensions || argv.extensions_from) {
+    preBuildSomeExtensions(argv);
+  }
 }
 
 // Start gulp webserver
