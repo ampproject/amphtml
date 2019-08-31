@@ -23,7 +23,6 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
-  compileCoreRuntime,
   compileJs,
   endBuildStep,
   hostname,
@@ -148,7 +147,6 @@ async function dist() {
     copyCss(),
     copyParsers(),
   ]);
-  await compileCoreRuntime(/* watch */ false, /* minify */ true);
 
   if (isTravisBuild()) {
     // New line after all the compilation progress dots on Travis.

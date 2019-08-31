@@ -156,7 +156,8 @@ function doBuildJs(jsBundles, name, extraOptions) {
  * @param {boolean} minify
  * @return {!Promise}
  */
-function bootstrapThirdPartyFrames(watch, minify) {
+async function bootstrapThirdPartyFrames(watch, minify) {
+  const startTime = Date.now();
   const promises = [];
   thirdPartyFrames.forEach(frameObject => {
     promises.push(
@@ -170,27 +171,12 @@ function bootstrapThirdPartyFrames(watch, minify) {
       });
     });
   }
-  return Promise.all(promises);
-}
-
-/**
- * Compiles the core runtime binary
- * @param {boolean} watch
- * @param {boolean} minify
- * @return {!Promise}
- */
-function compileCoreRuntime(watch, minify) {
-  return compileJs('./src/', 'amp.js', './dist', {
-    toName: 'amp.js',
-    minifiedName: 'v0.js',
-    includePolyfills: true,
-    watch,
-    minify,
-    wrapper: wrappers.mainBinary,
-    singlePassCompilation: argv.single_pass,
-    esmPassCompilation: argv.esm,
-    includeOnlyESMLevelPolyfills: argv.esm,
-  });
+  await Promise.all(promises);
+  endBuildStep(
+    'Bootstrapped 3p frames into',
+    `dist.3p/${minify ? internalRuntimeVersion : 'current'}/`,
+    startTime
+  );
 }
 
 /**
@@ -203,6 +189,14 @@ function compileCoreRuntime(watch, minify) {
 function compileAllJs(watch, minify) {
   return Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
+    doBuildJs(jsBundles, 'amp.js', {
+      watch,
+      minify,
+      wrapper: wrappers.mainBinary,
+      singlePassCompilation: argv.single_pass,
+      esmPassCompilation: argv.esm,
+      includeOnlyESMLevelPolyfills: argv.esm,
+    }),
     doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'examiner.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'ww.max.js', {watch, minify}),
@@ -606,13 +600,8 @@ function concatFilesToString(files) {
  * @return {!Promise}
  */
 function thirdPartyBootstrap(input, outputName, minify) {
-  const startTime = Date.now();
   if (!minify) {
-    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current'))).then(
-      () => {
-        endBuildStep('Processed', input, startTime);
-      }
-    );
+    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current')));
   }
 
   // By default we use an absolute URL, that is independent of the
@@ -640,9 +629,7 @@ function thirdPartyBootstrap(input, outputName, minify) {
           'dir'
         );
       })
-  ).then(() => {
-    endBuildStep('Processed', input, startTime);
-  });
+  );
 }
 
 /**
@@ -678,7 +665,6 @@ module.exports = {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
   compileAllUnminifiedJs,
-  compileCoreRuntime,
   compileJs,
   compileTs,
   devDependencies,
