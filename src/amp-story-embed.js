@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {setStyle} from '../src/style';
+
 /** @enum {string} */
 const LoadStateClass = {
   LOADING: 'loading',
@@ -87,7 +89,11 @@ export class AmpStoryEmbed {
     const story = this.stories_[index];
     this.iframeEl_ = this.doc_.createElement('iframe');
     this.iframeEl_.setAttribute('src', story.href);
-    this.iframeEl_.style.backgroundImage = story.getAttribute('data-poster-portrait-src');
+    setStyle(
+      this.iframeEl_,
+      'backgroundImage',
+      story.getAttribute('data-poster-portrait-src')
+    );
     this.iframeEl_.classList.add('story');
     this.initializeLoadingListeners_();
     this.rootEl_.appendChild(this.iframeEl_);
