@@ -15,105 +15,155 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2), {
-  string: ['rtv_serve_mode'],
-});
-const colors = require('ansi-colors');
+const app = require('../app');
+const argv = require('minimist')(process.argv.slice(2));
+const connect = require('gulp-connect');
+const header = require('connect-header');
 const log = require('fancy-log');
-const nodemon = require('nodemon');
-const path = require('path');
+const morgan = require('morgan');
+const watch = require('gulp-watch');
+const {
+  lazyBuildExtensions,
+  lazyBuildJs,
+  preBuildCoreRuntime,
+  preBuildSomeExtensions,
+} = require('../lazy-build');
 const {createCtrlcHandler} = require('../ctrlcHandler');
+const {cyan, green} = require('ansi-colors');
 const {isRtvMode} = require('../app-utils');
 
-const host = argv.host || 'localhost';
-const port = argv.port || process.env.PORT || 8000;
-const useHttps = argv.https != undefined;
-const quiet = argv.quiet != undefined;
-const sendCachingHeaders = argv.cache != undefined;
-const noCachingExtensions = argv.noCachingExtensions != undefined;
+// TODO(ampproject): Consolidate these into a single directory.
+const serverFiles = [
+  'build-system/app.js',
+  'build-system/recaptcha-router.js',
+  'build-system/routes/analytics.js',
+  'build-system/app-index/*',
+];
 
 /**
- * Starts a simple http server at the repository root
- * @param {boolean} lazyBuild
+ * Determines the server's mode based on command line arguments.
  */
-function serve(lazyBuild) {
-  createCtrlcHandler('serve');
-
-  // Get the serve mode
+function setServeMode() {
   if (argv.compiled) {
     process.env.SERVE_MODE = 'compiled';
-    log(colors.green('Serving minified js'));
+    log(green('Serving'), cyan('minified JS'));
   } else if (argv.cdn) {
     process.env.SERVE_MODE = 'cdn';
-    log(colors.green('Serving current prod js'));
+    log(green('Serving'), cyan('current prod JS'));
   } else if (argv.rtv_serve_mode) {
     const rtv = argv.rtv_serve_mode;
     if (isRtvMode(rtv)) {
       process.env.SERVE_MODE = rtv;
-      log(colors.green(`Serving RTV ${rtv} js`));
+      log(green('Serving'), cyan(`RTV ${rtv} JS`));
     } else {
       throw new Error(`Invalid rtv_serve_mode: ${rtv}`);
     }
   } else {
     process.env.SERVE_MODE = 'default';
-    log(colors.green('Serving unminified js'));
+    log(green('Serving'), cyan('unminified JS'));
   }
-
-  const config = {
-    script: require.resolve('../server.js'),
-    watch: [
-      require.resolve('../app.js'),
-      require.resolve('../routes/analytics.js'),
-      require.resolve('../server.js'),
-
-      // All devdash routes:
-      path.dirname(require.resolve('../app-index')),
-    ],
-    env: {
-      // TODO(rsimha): Improve the cross-process message passing being done here
-      'NODE_ENV': 'development',
-      'SERVE_PORT': port,
-      'SERVE_HOST': host,
-      'SERVE_USEHTTPS': useHttps,
-      'SERVE_PROCESS_ID': process.pid,
-      'SERVE_QUIET': quiet,
-      'SERVE_CACHING_HEADERS': sendCachingHeaders,
-      'SERVE_EXTENSIONS_WITHOUT_CACHING': noCachingExtensions,
-      'LAZY_BUILD': lazyBuild,
-      'ARGV': process.argv,
-    },
-    stdout: !quiet,
-  };
-
-  if (argv.inspect) {
-    Object.assign(config, {
-      execMap: {
-        js: 'node --inspect',
-      },
-    });
-  }
-
-  nodemon(config).once('quit', function() {
-    log(colors.green('Shutting down server'));
-  });
 }
 
-function getHost() {
-  return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
+/**
+ * Returns a list of middleware handler functions to use while serving
+ * @return {!Array<function()>}
+ */
+function getMiddleware() {
+  const middleware = [app];
+  if (!argv.quiet) {
+    middleware.push(morgan('dev'));
+  }
+  if (argv.cache) {
+    middleware.push(header({'cache-control': 'max-age=600'}));
+  } else if (argv.nocache) {
+    middleware.push(header({'cache-control': 'no-store'}));
+  }
+  if (argv.lazy_build) {
+    middleware.push(lazyBuildExtensions);
+    middleware.push(lazyBuildJs);
+  }
+  return middleware;
+}
+
+/**
+ * Launches a server and waits for it to fully start up
+ * @param {?Object} extraOptions
+ */
+async function startServer(extraOptions = {}) {
+  let started;
+  const startedPromise = new Promise(resolve => {
+    started = resolve;
+  });
+  const options = Object.assign(
+    {
+      root: process.cwd(),
+      host: argv.host || 'localhost',
+      port: argv.port || 8000,
+      https: argv.https,
+      silent: true,
+      middleware: getMiddleware,
+    },
+    extraOptions
+  );
+  connect.server(options, started);
+  await startedPromise;
+  log(
+    green('Started server at'),
+    cyan(`http${options.https ? 's' : ''}://${options.host}:${options.port}`)
+  );
+}
+
+/**
+ * Stops the currently running server
+ */
+function stopServer() {
+  connect.serverClose();
+  log(green('Stopped server'));
+}
+
+/**
+ * Closes the existing server and restarts it
+ */
+function restartServer() {
+  stopServer();
+  startServer();
+}
+
+/**
+ * Initiates pre-build steps requested via command line args.
+ */
+function initiatePreBuildSteps() {
+  if (argv.lazy_build) {
+    preBuildCoreRuntime();
+    if (argv.extensions || argv.extensions_from) {
+      preBuildSomeExtensions(argv);
+    }
+  }
+}
+
+/**
+ * Starts a webserver at the repository root to serve built files.
+ */
+async function serve() {
+  createCtrlcHandler('serve');
+  setServeMode();
+  watch(serverFiles, restartServer);
+  await startServer();
+  initiatePreBuildSteps();
 }
 
 module.exports = {
   serve,
+  startServer,
+  stopServer,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
-
-serve.description = 'Serves content in root dir over ' + getHost() + '/';
+serve.description = 'Starts a webserver at the project root directory';
 serve.flags = {
   'host': '  Hostname or IP address to bind to (default: localhost)',
   'port': '  Specifies alternative port (default: 8000)',
-  'https': '  Use HTTPS server (default: false)',
-  'quiet': '  Do not log HTTP requests (default: false)',
-  'cache': '  Make local resources cacheable by the browser (default: false)',
-  'inspect': '  Run nodemon in `inspect` mode',
+  'https': '  Use HTTPS server',
+  'quiet': "  Run in quiet mode and don't log HTTP requests",
+  'cache': '  Make local resources cacheable by the browser',
+  'nocache': '  Disable caching for all requests',
 };

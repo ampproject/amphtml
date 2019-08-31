@@ -18,8 +18,10 @@
 /**
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
+ * TODO(ampproject): Reorganize this file so that it can be reloaded on demand.
  */
 const app = require('express')();
+const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
@@ -42,7 +44,7 @@ const {replaceUrls, isRtvMode} = require('./app-utils');
 
 const upload = multer();
 
-const TEST_SERVER_PORT = process.env.SERVE_PORT;
+const TEST_SERVER_PORT = argv.port || 8000;
 
 app.use(bodyParser.text());
 app.use(require('./routes/a4a-envelopes'));
@@ -85,7 +87,7 @@ app.get('/serve_mode=:mode', (req, res) => {
   }
 });
 
-if (!global.AMP_TESTING) {
+if (!(argv._.includes('unit') || argv._.includes('integration'))) {
   // Dev dashboard routes break test scaffolding since they're global.
   devDashboard.installExpressMiddleware(app);
 }
