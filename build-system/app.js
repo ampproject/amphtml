@@ -18,7 +18,6 @@
 /**
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
- * TODO(ampproject): Reorganize this file so that it can be reloaded on demand.
  */
 const app = require('express')();
 const argv = require('minimist')(process.argv.slice(2));

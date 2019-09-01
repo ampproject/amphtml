@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const app = require('../app');
 const argv = require('minimist')(process.argv.slice(2));
 const connect = require('gulp-connect');
+const deglob = require('globs-to-files');
 const header = require('connect-header');
 const log = require('fancy-log');
 const morgan = require('morgan');
@@ -33,12 +33,17 @@ const {cyan, green} = require('ansi-colors');
 const {isRtvMode} = require('../app-utils');
 
 // TODO(ampproject): Consolidate these into a single directory.
-const serverFiles = [
+const serverFiles = deglob.sync([
+  'build-system/amp4test.js',
+  'build-system/amp-cors.js',
   'build-system/app.js',
+  'build-system/app-utils.js',
+  'build-system/app-video-testbench.js',
   'build-system/recaptcha-router.js',
-  'build-system/routes/analytics.js',
-  'build-system/app-index/*',
-];
+  'build-system/shadow-viewer.js',
+  'build-system/routes/**',
+  'build-system/app-index/**',
+]);
 
 /**
  * Determines the server's mode based on command line arguments.
@@ -69,7 +74,7 @@ function setServeMode() {
  * @return {!Array<function()>}
  */
 function getMiddleware() {
-  const middleware = [app];
+  const middleware = [require('../app')]; // Lazy-required to enable live-reload
   if (!argv.quiet) {
     middleware.push(morgan('dev'));
   }
@@ -114,6 +119,16 @@ async function startServer(extraOptions = {}) {
 }
 
 /**
+ * Clears server files from the require cache to allow for in-process server
+ * live-reload.
+ */
+function resetServerFiles() {
+  for (const serverFile in serverFiles) {
+    delete require.cache[serverFiles[serverFile]];
+  }
+}
+
+/**
  * Stops the currently running server
  */
 function stopServer() {
@@ -126,6 +141,7 @@ function stopServer() {
  */
 function restartServer() {
   stopServer();
+  resetServerFiles();
   startServer();
 }
 
