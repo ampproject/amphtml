@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   History,
@@ -25,6 +26,7 @@ import {Services} from '../../src/services';
 import {installTimerService} from '../../src/service/timer-impl';
 import {listenOncePromise} from '../../src/event-helper';
 import {parseUrlDeprecated} from '../../src/url';
+import {toggleExperiment} from '../../src/experiments';
 
 describes.fakeWin(
   'History',
@@ -41,7 +43,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       installTimerService(env.win);
-      clock = sandbox.useFakeTimers();
+      clock = lolex.install({target: env.win});
 
       const binding = {
         cleanup: () => {},
@@ -290,6 +292,48 @@ describes.fakeWin(
         .once();
       return history.updateFragment('fragment').then(() => {});
     });
+
+    describe.only('"rate-limit-history" experiment', () => {
+      beforeEach(() => {
+        toggleExperiment(env.win, 'rate-limit-history', true, true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(env.win, 'rate-limit-history', false, true);
+      });
+
+      it('should combine consecutive replace', () => {
+        bindingMock
+          .expects('replace')
+          .withExactArgs({
+            title: 'new-title',
+            fragment: '#new-fragment',
+            data: {foo: 1, bar: 2, baz: 3},
+          })
+          .returns(Promise.resolve())
+          .once();
+
+        history.replace({
+          title: 'title',
+          fragment: '#fragment',
+          data: {
+            foo: 1,
+            bar: 1,
+          },
+        });
+
+        history.replace({
+          title: 'new-title',
+          fragment: '#new-fragment',
+          data: {
+            bar: 2,
+            baz: 3,
+          },
+        });
+
+        clock.tick(1000);
+      });
+    });
   }
 );
 
@@ -346,13 +390,14 @@ describes.sandboxed('History install', {}, () => {
   });
 });
 
+// TODO: Refactor tests to not use the global window.
 describes.sandboxed('HistoryBindingNatural', {}, () => {
   let clock;
   let onStateUpdated;
   let history;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = clock = lolex.install();
     onStateUpdated = sandbox.spy();
     history = new HistoryBindingNatural_(window);
     history.setOnStateUpdated(onStateUpdated);
@@ -935,7 +980,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       installTimerService(env.win);
-      clock = sandbox.useFakeTimers();
+      clock = lolex.install({target: env.win});
     });
 
     afterEach(() => {

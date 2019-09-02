@@ -16,8 +16,9 @@
 
 import {Deferred, tryResolve} from '../utils/promise';
 import {Services} from '../services';
-import {dev, devAssert} from '../log';
-import {dict, map} from '../utils/object';
+import {debounce} from '../utils/rate-limit';
+import {deepMerge, dict, map} from '../utils/object';
+import {dev, devAssert, user} from '../log';
 import {getMode} from '../mode';
 import {
   getService,
@@ -25,6 +26,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {getState} from '../history';
+import {isExperimentOn} from '../experiments';
 
 /** @private @const {string} */
 const TAG_ = 'History';
@@ -36,12 +38,23 @@ const HISTORY_PROP_ = 'AMP.History';
 let HistoryIdDef;
 
 /**
- * @typedef {{stackIndex: HistoryIdDef, title: string, fragment: string, data: (!JsonObject|undefined)}}
+ * @typedef {{
+ *   stackIndex: HistoryIdDef,
+ *   title: string,
+ *   fragment: string,
+ *   data: (!JsonObject|undefined)
+ * }}
  */
 let HistoryStateDef;
 
 /**
- * @typedef {{title: (string|undefined), fragment: (string|undefined), url: (string|undefined), canonicalUrl: (string|undefined), data: (!JsonObject|undefined)}}
+ * @typedef {{
+ *   title: (string|undefined),
+ *   fragment: (string|undefined),
+ *   url: (string|undefined),
+ *   canonicalUrl: (string|undefined),
+ *   data: (!JsonObject|undefined)
+ * }}
  */
 let HistoryStateUpdateDef;
 
@@ -74,9 +87,14 @@ export class History {
      *   callback: function():!Promise,
      *   resolve: !Function,
      *   reject: !Function,
-     *   trace: (!Error|undefined)
+     *   trace: (!Error|undefined),
+     *   action: string,
+     *   stateUpdate: (!HistoryStateUpdateDef|undefined),
      * }>} */
     this.queue_ = [];
+
+    /** @const @private {function()} */
+    this.debouncedDeque_ = debounce(ampdoc.win, () => this.deque_(), 1000);
 
     this.binding_.setOnStateUpdated(this.onStateUpdated_.bind(this));
   }
@@ -130,7 +148,11 @@ export class History {
    * @return {!Promise}
    */
   replace(opt_stateUpdate) {
-    return this.enque_(() => this.binding_.replace(opt_stateUpdate), 'replace');
+    return this.enque_(
+      () => this.binding_.replace(opt_stateUpdate),
+      'replace',
+      opt_stateUpdate
+    );
   }
 
   /**
@@ -239,20 +261,61 @@ export class History {
 
   /**
    * @param {function():!Promise<RESULT>} callback
-   * @param {string} name
+   * @param {string} action
+   * @param {!HistoryStateUpdateDef=} opt_stateUpdate
    * @return {!Promise<RESULT>}
    * @template RESULT
    * @private
    */
-  enque_(callback, name) {
+  enque_(callback, action, opt_stateUpdate) {
     const deferred = new Deferred();
     const {promise, resolve, reject} = deferred;
 
+    const rateLimit = isExperimentOn(this.ampdoc_.win, 'rate-limit-history');
+
     // TODO(dvoytenko, #8785): cleanup after tracing.
-    const trace = new Error('history trace for ' + name + ': ');
-    this.queue_.push({callback, resolve, reject, trace});
+    const trace = new Error('history trace for ' + action + ': ');
+
+    const current = {
+      callback,
+      resolve,
+      reject,
+      trace,
+      action,
+      stateUpdate: opt_stateUpdate,
+    };
+    let shouldEnqueue = true;
+
+    // TODO: Comment.
+    const l = this.queue_.length;
+    if (rateLimit && l > 0) {
+      const previous = this.queue_[l - 1];
+      if (current.action === 'replace' && previous.action === 'replace') {
+        // Instead of pushing `current` onto queue, deep-merge its state update
+        // into previous entry.
+        if (current.stateUpdate && previous.stateUpdate) {
+          try {
+            deepMerge(previous.stateUpdate, current.stateUpdate, 15); // TODO: Magic #.
+          } catch (e) {
+            user().error(TAG_, 'TODO');
+          }
+        }
+        shouldEnqueue = false;
+      }
+    }
+
+    if (shouldEnqueue) {
+      this.queue_.push(current);
+    }
+
     if (this.queue_.length == 1) {
-      this.deque_();
+      // Only delay dequeue for "replace" to give a window for consecutive
+      // replaces to be combined.
+      if (rateLimit && action === 'replace') {
+        this.debouncedDeque_();
+      } else {
+        this.deque_();
+      }
     }
     return promise;
   }
