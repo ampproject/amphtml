@@ -83,8 +83,6 @@ function getMiddleware() {
   }
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
-  } else if (argv.nocache) {
-    middleware.push(header({'cache-control': 'no-store'}));
   }
   if (argv.lazy_build) {
     middleware.push(lazyBuildExtensions);
@@ -184,5 +182,5 @@ serve.flags = {
   'https': '  Use HTTPS server',
   'quiet': "  Run in quiet mode and don't log HTTP requests",
   'cache': '  Make local resources cacheable by the browser',
-  'nocache': '  Disable caching for all requests',
+  'no_caching_extensions': '  Disable caching for extensions',
 };

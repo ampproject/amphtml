@@ -838,6 +838,16 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
 });
 
 /**
+ * Disable caching for extensions if the --no_caching_extensions flag is used.
+ */
+app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
+  if (argv.no_caching_extensions) {
+    res.header('Cache-Control', 'no-store');
+  }
+  next();
+});
+
+/**
  * Video testbench endpoint
  */
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
