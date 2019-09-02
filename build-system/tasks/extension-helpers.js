@@ -167,27 +167,32 @@ function maybeInitializeExtensions(
 /**
  * Process the command line arguments --noextensions, --extensions, and
  * --extensions_from and return a list of the referenced extensions.
+ * @param {!Object=} argvObject
  * @return {!Array<string>}
  */
-function getExtensionsToBuild() {
+function getExtensionsToBuild(argvObject = argv) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
   extensionsToBuild = DEFAULT_EXTENSION_SET;
-  if (argv.extensions) {
-    if (argv.extensions === 'minimal_set') {
-      argv.extensions = MINIMAL_EXTENSION_SET.join(',');
-    } else if (argv.extensions === 'inabox') {
-      argv.extensions = INABOX_EXTENSION_SET.join(',');
+  if (argvObject.extensions) {
+    if (argvObject.extensions === 'minimal_set') {
+      argvObject.extensions = MINIMAL_EXTENSION_SET.join(',');
+    } else if (argvObject.extensions === 'inabox') {
+      argvObject.extensions = INABOX_EXTENSION_SET.join(',');
     }
-    const explicitExtensions = argv.extensions.split(',');
+    const explicitExtensions = argvObject.extensions.split(',');
     extensionsToBuild = dedupe(extensionsToBuild.concat(explicitExtensions));
   }
-  if (argv.extensions_from) {
-    const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
+  if (argvObject.extensions_from) {
+    const extensionsFrom = getExtensionsFromArg(argvObject.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
-  if (!argv.noextensions && !argv.extensions && !argv.extensions_from) {
+  if (
+    !argvObject.noextensions &&
+    !argvObject.extensions &&
+    !argvObject.extensions_from
+  ) {
     const allExtensions = [];
     for (const extension in extensions) {
       allExtensions.push(extensions[extension].name);
