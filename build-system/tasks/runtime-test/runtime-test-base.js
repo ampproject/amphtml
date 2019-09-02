@@ -261,6 +261,7 @@ class RuntimeTestRunner {
 
     await this.maybeBuild();
     await startServer({
+      name: 'AMP Test Server',
       host: 'localhost',
       port: this.config.client.testServerPort,
       middleware: () => {

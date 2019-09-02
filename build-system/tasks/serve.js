@@ -32,6 +32,9 @@ const {createCtrlcHandler} = require('../ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {isRtvMode} = require('../app-utils');
 
+// Used for logging during server start / stop.
+let url = '';
+
 // TODO(ampproject): Consolidate these into a single directory.
 const serverFiles = deglob.sync([
   'build-system/amp4test.js',
@@ -101,6 +104,7 @@ async function startServer(extraOptions = {}) {
   });
   const options = Object.assign(
     {
+      name: 'AMP Dev Server',
       root: process.cwd(),
       host: argv.host || 'localhost',
       port: argv.port || 8000,
@@ -112,10 +116,8 @@ async function startServer(extraOptions = {}) {
   );
   connect.server(options, started);
   await startedPromise;
-  log(
-    green('Started server at'),
-    cyan(`http${options.https ? 's' : ''}://${options.host}:${options.port}`)
-  );
+  url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
+  log(green('Started'), cyan(options.name), green('at'), cyan(url));
 }
 
 /**
@@ -133,7 +135,7 @@ function resetServerFiles() {
  */
 function stopServer() {
   connect.serverClose();
-  log(green('Stopped server'));
+  log(green('Stopped server at'), cyan(url));
 }
 
 /**
