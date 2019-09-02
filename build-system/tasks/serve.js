@@ -109,6 +109,7 @@ async function startServer(extraOptions = {}) {
       host: argv.host || 'localhost',
       port: argv.port || 8000,
       https: argv.https,
+      preferHttp1: true,
       silent: true,
       middleware: getMiddleware,
     },
