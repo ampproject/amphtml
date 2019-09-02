@@ -264,9 +264,7 @@ class RuntimeTestRunner {
       name: 'AMP Test Server',
       host: 'localhost',
       port: this.config.client.testServerPort,
-      middleware: () => {
-        return [app];
-      },
+      middleware: () => [app],
     });
     const handlerProcess = createCtrlcHandler(`gulp ${this.config.testType}`);
 
