@@ -42,7 +42,10 @@ export class AmpStoryEmbed {
    * @constructor
    */
   constructor(doc, element) {
-    console.assert(element.childElementCount > 0, 'Missing configuration.');
+    console./*OK*/ assert(
+      element.childElementCount > 0,
+      'Missing configuration.'
+    );
 
     /** @private {!Element} */
     this.element_ = element;
