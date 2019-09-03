@@ -109,7 +109,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
-import {installParallaxHandler} from './parallax';
+import {installParallaxFx} from './parallax_fx';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -779,11 +779,13 @@ export class AmpStory extends AMP.BaseElement {
     this.installGestureRecognizers_();
 
     // Install parallax handlers if opt-in is detected
-    this.parallaxService_ = installParallaxHandler(
-      this.win,
-      this.getVsync(),
-      toArray(this.element.querySelectorAll('amp-story-page'))
-    );
+    if (this.element.hasAttribute('parallax-fx')) {
+      this.parallaxService_ = installParallaxFx(
+        this.win,
+        this.vsync_,
+        toArray(this.element.querySelectorAll('amp-story-page'))
+      );
+    }
   }
 
   /** @private */
