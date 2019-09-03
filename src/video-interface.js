@@ -497,6 +497,13 @@ export const VideoAnalyticsEvents = {
 };
 
 /**
+ * This key can't predictably collide with custom var names as defined in
+ * analytics user configuration.
+ * @type {string}
+ */
+export const videoAnalyticsCustomEventTypeKey = '__amp:eventType';
+
+/**
  * Helper union type to be used internally, so that the compiler treats
  * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
  *

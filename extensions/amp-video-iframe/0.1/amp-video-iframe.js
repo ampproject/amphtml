@@ -311,7 +311,6 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     if (eventReceived == 'analytics') {
       const spec = devAssert(data['analytics']);
-
       this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
       return;
     }

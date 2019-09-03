@@ -30,6 +30,7 @@ import {
   VideoEvents,
   VideoServiceSignals,
   userInteractedWith,
+  videoAnalyticsCustomEventTypeKey,
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
@@ -522,7 +523,7 @@ class VideoEntry {
    * @param {!Object<string, string>} vars
    */
   logCustomAnalytics_(eventType, vars) {
-    const prefixedVars = dict({'customEventType': eventType});
+    const prefixedVars = {[videoAnalyticsCustomEventTypeKey]: eventType};
 
     Object.keys(vars).forEach(key => {
       prefixedVars[`custom_${key}`] = vars[key];
