@@ -33,9 +33,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
 
     beforeEach(() => {
       const loc = window.location;
-      ampDocUrl = `${loc.protocol}//iframe.${loc.hostname}:${
-        loc.port
-      }${ampDocSrc}`;
+      ampDocUrl = `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
 
       viewerEl = document.createElement('div');
       document.body.appendChild(viewerEl);

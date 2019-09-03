@@ -146,6 +146,11 @@ tags: {  # <amp-story-grid-layer>
     value: "thirds"
     value: "vertical"
   }
+  attrs: {
+    name: "position"
+    value: "landscape-half-left"
+    value: "landscape-half-right"
+  }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER default"

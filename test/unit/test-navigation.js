@@ -57,6 +57,7 @@ describes.sandboxed('Navigation', {}, () => {
       let anchor;
       let elementWithId;
       let anchorWithName;
+      let customAnchor;
 
       beforeEach(() => {
         win = env.win;
@@ -94,11 +95,17 @@ describes.sandboxed('Navigation', {}, () => {
         doc.body.appendChild(anchor);
         event.target = anchor;
 
+        customAnchor = doc.createElement('a');
+        customAnchor.href = 'https://www.google.com/custom';
+        doc.body.appendChild(customAnchor);
+
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
-        sandbox
-          .stub(Services, 'urlReplacementsForDoc')
-          .withArgs(anchor)
-          .returns(urlReplacements);
+        const urlReplacementStub = sandbox.stub(
+          Services,
+          'urlReplacementsForDoc'
+        );
+        urlReplacementStub.withArgs(anchor).returns(urlReplacements);
+        urlReplacementStub.withArgs(customAnchor).returns(urlReplacements);
 
         elementWithId = doc.createElement('div');
         elementWithId.id = 'test';
@@ -111,11 +118,22 @@ describes.sandboxed('Navigation', {}, () => {
 
       describe('discovery', () => {
         it('should select a direct link', () => {
+          // TODO(alabiaga): throughout the file -- invoke the handler via the
+          // document used to get the navigation service. e.g document.click().
           handler.handle_(event);
           expect(handleNavSpy).to.be.calledOnce;
           expect(handleNavSpy).to.be.calledWith(event, anchor);
           expect(handleCustomProtocolSpy).to.be.calledOnce;
           expect(handleCustomProtocolSpy).to.be.calledWith(event, anchor);
+        });
+
+        it('should select a custom linker target', () => {
+          event.target = null;
+          event['__AMP_CUSTOM_LINKER_TARGET__'] = customAnchor;
+          handler.handle_(event);
+
+          expect(handleNavSpy).to.be.calledOnce;
+          expect(handleNavSpy).to.be.calledWith(event, customAnchor);
         });
 
         it('should NOT handle custom protocol when not iframed', () => {
@@ -692,11 +710,16 @@ describes.sandboxed('Navigation', {}, () => {
           beforeEach(() => {
             win = env.win;
             doc = win.document;
-            ampdoc = env.ampdoc;
+            // TODO(#22733): cleanup `env.ampdoc` part.
+            ampdoc = doc.__AMPDOC || env.ampdoc;
             parentWin = env.parentWin;
             embed = env.embed;
 
-            handler = win.services.navigation.obj;
+            // TODO(#22733): cleanup `win.services.navigation` part.
+            handler = (
+              (ampdoc.services && ampdoc.services.navigation) ||
+              win.services.navigation
+            ).obj;
             winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
               return {};
             });

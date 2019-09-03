@@ -177,7 +177,7 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
 });
 
 /** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS = dict({
+const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'amp-anim': ['controls'],
   'form': ['name'],
   'input': BLACKLISTED_FIELDS_ATTR,
@@ -247,20 +247,18 @@ export function isValidAttr(
   }
 
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
-  let attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName] || [];
-  if (isAmp4Email(doc)) {
-    attrBlacklist = BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS[tagName] || [];
-  }
-  if (attrBlacklist.indexOf(attrName) != -1) {
+  const attrBlacklist = isAmp4Email(doc)
+    ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName]
+    : BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+  if (attrBlacklist && attrBlacklist.indexOf(attrName) != -1) {
     return false;
   }
 
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  let attrValueBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-  if (isAmp4Email(doc)) {
-    attrValueBlacklist = EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-  }
+  const attrValueBlacklist = isAmp4Email(doc)
+    ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName]
+    : BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   if (attrValueBlacklist) {
     const blacklistedValuesRegex = attrValueBlacklist[attrName];
     if (

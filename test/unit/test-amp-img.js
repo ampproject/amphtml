@@ -20,7 +20,7 @@ import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
@@ -517,13 +517,8 @@ describe('amp-img', () => {
       return impl;
     }
 
-    beforeEach(() => {
-      toggleExperiment(window, 'amp-img-auto-sizes', true, true);
-    });
-
     it('should not generate sizes for amp-imgs that already have sizes', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         src: '/examples/img/sample.jpg',
         srcset: SRCSET_STRING,
@@ -544,7 +539,6 @@ describe('amp-img', () => {
 
     it('should not generate sizes for amp-imgs without srcset', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         src: '/examples/img/sample.jpg',
         width: 300,
@@ -563,7 +557,6 @@ describe('amp-img', () => {
 
     it('should not generate sizes for amp-imgs with x descriptors', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         srcset: '/examples/img/hero@1x.jpg, /examples/img/hero@2x.jpg 2x',
         width: 300,
@@ -581,7 +574,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fixed', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.FIXED,
@@ -602,7 +594,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout responsive', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.RESPONSIVE,
@@ -623,7 +614,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fixed-height', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.FIXED_HEIGHT,
@@ -644,7 +634,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fill', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.FILL,
@@ -665,7 +654,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout flex-item', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.FLEX_ITEM,

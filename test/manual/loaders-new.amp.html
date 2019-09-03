@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8" />
+    <title>New Loaders</title>
+    <link rel="canonical" href="http://nonblocking.io/" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
+
+    <script>
+      // Hack to delay everything!
+      window.AMP_MODE = {test: true};
+      const delay = parseInt(window.location.search.replace('?', '')) || 3000;
+      document.addEventListener(
+        'amp:attached',
+        e => {
+          if (e.srcElement.hasAttribute('placeholder')) {
+            return;
+          }
+          const lc = e.srcElement.implementation_.layoutCallback.bind(
+            e.srcElement.implementation_
+          );
+          e.srcElement.implementation_.layoutCallback = function() {
+            if (e.srcElement.finishedLayoutAlready_) {
+              return Promise.resolve();
+            }
+            return new Promise(function(resolve) {
+              setTimeout(() => {
+                lc().then(resolve);
+                e.srcElement.finishedLayoutAlready_ = true;
+              }, delay);
+            });
+          };
+        },
+        true
+      );
+
+      function toggleExp(name) {
+        const isOn = AMP.isExperimentOn(name);
+        AMP.toggleExperiment(name, !isOn);
+        window.location.reload();
+      }
+    </script>
+    <script src="https://cdn.ampproject.org/v0.js"></script>
+    <script
+      async
+      custom-element="amp-ad"
+      src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"
+    ></script>
+    <style amp-custom>
+      /* boring boiler place stuff */
+      main {
+        max-width: 600px;
+        margin: auto;
+        border-left: 1px #eee solid;
+        border-right: 1px #eee solid;
+        min-height: 100vh;
+        font-family: 'Courier New', Courier, monospace;
+        padding: 0 5px;
+        text-align: center;
+        padding-bottom: 20vh;
+      }
+      button {
+        background: #5e35b1;
+        padding: 7px;
+        border: 1px solid #311b92;
+        color: #fafafa;
+        font-size: 12pt;
+        display: inline-block;
+      }
+
+      .toolbar {
+        text-align: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+      h1 {
+        border-top: 1px solid #f1f1f1;
+        border-bottom: 1px solid #f1f1f1;
+        padding: 10px;
+        color: #2196f3;
+        margin-bottom: 50px;
+        background: #eee;
+        margin-bottom: 10px !important;
+      }
+
+      h1 {
+        color: #e91e63;
+      }
+
+      .info {
+        padding: 5px;
+        font-size: 80%;
+        color: #444;
+        text-align: left;
+      }
+      amp-img img {
+        object-fit: cover;
+      }
+      /* END boring boiler place stuff */
+
+      /* Custom loader from ABE */
+      .custom-loader-1 .amp-active {
+        max-width: 10%;
+        max-height: 50%;
+        width: 2em;
+        height: 2em;
+        background-color: #333;
+
+        margin: -1em auto;
+        animation: sk-rotateplane 1.2s infinite ease-in-out;
+      }
+      @keyframes sk-rotateplane {
+        0% {
+          transform: perspective(120px);
+        }
+        50% {
+          transform: perspective(120px) rotateX(-180deg);
+        }
+        100% {
+          transform: perspective(120px) rotateX(-180deg) rotateY(-180deg);
+        }
+      }
+      /* Hide the three default dots */
+      .custom-loader-1 .amp-active > div {
+        display: none;
+      }
+
+      .button {
+        padding: 10px;
+        border: solid 1px blue;
+        background: silver;
+      }
+
+      .filters {
+        border: 1px solid #333;
+      }
+      .filters button {
+        display: block;
+        padding: 10px;
+        border: none;
+        border-right: 1px solid #666;
+        background-color: #eee;
+        color: #111;
+      }
+      .filters button.selected {
+        background: #fbc02d;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="info">
+        <div>- Default delay is ~4 seconds</div>
+        <div>
+          - You can change the delay by adding ?{number} (e.g. ?5000) to the Url
+        </div>
+      </div>
+      <div class="toolbar">
+        <button onclick="toggleExp('new-loaders')">
+          Toggle New/Old Default Loaders
+        </button>
+      </div>
+
+      <div class="filters">
+        <button
+          id="ampImgButton"
+          on="tap:sectionAmpImg.toggleVisibility(),ampImgButton.toggleClass(class='selected')"
+          class="selected"
+        >
+          amp-img
+        </button>
+      </div>
+
+      <section id="sectionAmpImg">
+        <h1>amp-img</h1>
+        <h2>normal</h2>
+        <amp-img
+          src="https://picsum.photos/1600/900?image=110"
+          layout="responsive"
+          width="1600"
+          height="900"
+        ></amp-img>
+
+        <h2>small</h2>
+        <amp-img
+          src="https://picsum.photos/320/50?image=165"
+          layout="fixed"
+          width="320"
+          height="50"
+        ></amp-img>
+
+        <h2>tiny</h2>
+        <amp-img
+          src="https://picsum.photos/100/100?image=125"
+          layout="fixed"
+          width="40"
+          height="40"
+        ></amp-img>
+
+        <h2>with blurry placeholder</h2>
+        <amp-img
+          src="https://rawcdn.githack.com/ampproject/amp-toolbox/6e4d9e794cf7bd0e98ea80224516d7180096c867/optimizer/spec/transformers/bball.jpg"
+          layout="responsive"
+          width="1600"
+          height="900"
+        >
+          <img
+            placeholder
+            class="i-amphtml-blurry-placeholder"
+            src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' xmlns%3Axlink='http%3A//www.w3.org/1999/xlink' viewBox='0 0 9 7'%3E%3Cfilter id='b' color-interpolation-filters='sRGB'%3E%3CfeGaussianBlur stdDeviation='.5'%3E%3C/feGaussianBlur%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1 1'%3E%3C/feFuncA%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cimage filter='url(%23b)' x='0' y='0' height='100%25' width='100%25' xlink%3Ahref='data%3Aimage/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAHCAYAAADam2dgAAAA4klEQVR4ARXBO04CURSA4f/OnHkpA4TRWGhFMg3oFlyCjTuwYRsULMEtuAgTGzUhttpZkagREwhEhwvjvI7x+8z0aqAHXYj3wA/gfpZz82yZXCakPYf8u0LspmGbGTxXaUfK21fJ7atltGiRHvn4cYOYXIl8RRSkVj5+Sv5JXvD7qWQrg2QW3BqWlDzOtuycGhSe3nOSdkmaeIjdKXfzjMNQGA1asF9wMXQ4G1Z0ogqxipuZYNyVkH4YsVg7FGuh73qcnAvecczqwSBL49AJI6a1QSolLJTexnB6bRC/4WUe8AdyJ1gLZ2JPFwAAAABJRU5ErkJggg=='%3E%3C/image%3E%3C/svg%3E"
+            style="object-fit: cover"
+          />
+        </amp-img>
+
+        <h2>Customized</h2>
+        <amp-img
+          src="https://picsum.photos/1600/900?image=210"
+          class="custom-loader-1"
+          layout="responsive"
+          width="1600"
+          height="900"
+        ></amp-img>
+      </section>
+    </main>
+  </body>
+</html>

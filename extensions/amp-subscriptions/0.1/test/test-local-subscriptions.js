@@ -390,5 +390,19 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         );
       });
     });
+    it('pingback should handle multiple entitlements ', () => {
+      const sendSignalStub = sandbox.stub(
+        localSubscriptionPlatform.xhr_,
+        'sendSignal'
+      );
+
+      return localSubscriptionPlatform.pingback([entitlement]).then(() => {
+        expect(sendSignalStub).to.be.calledOnce;
+        expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
+        expect(sendSignalStub.getCall(0).args[1].body).to.equal(
+          JSON.stringify([entitlement.jsonForPingback()])
+        );
+      });
+    });
   });
 });

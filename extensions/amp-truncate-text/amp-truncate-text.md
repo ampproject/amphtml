@@ -31,14 +31,14 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the `amp-truncate-text` experiment to use this component.</div></td>
+    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the <code>amp-truncate-text</code> experiment to use this component.</div></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-truncate-text" src="https://cdn.ampproject.org/v0/amp-truncate-text-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>container, fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
 </table>
@@ -71,8 +71,8 @@ Truncates text with an ellipsis, optionally showing an overflow element when the
 ```html
 <amp-truncate-text layout="fixed" height="3em" width="20em">
   Some text that may get truncated.
-  <button slot="expand">See more</button>
-  <button slot="collapse">See less</button>
+  <button slot="collapsed">See more</button>
+  <button slot="expanded">See less</button>
 </amp-truncate-text>
 ```
 

@@ -46,7 +46,7 @@ const argv = require('minimist')(process.argv.slice(2));
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
-const NOBUILD_HELP_TASKS = new Set(['test', 'visual-diff']);
+const NOBUILD_HELP_TASKS = new Set(['e2e', 'integration', 'visual-diff']);
 
 const MODULE_SEPARATOR = ';';
 const EXTENSION_BUNDLE_MAP = {
@@ -75,6 +75,13 @@ const MINIFIED_TARGETS = [
   'alp.js',
   'f.js',
 ];
+
+const WEB_PUSH_PUBLISHER_FILES = [
+  'amp-web-push-helper-frame',
+  'amp-web-push-permission-dialog',
+];
+
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 
 const BABELIFY_GLOBAL_TRANSFORM = {
   global: true, // Transform node_modules
@@ -219,20 +226,6 @@ function compile(watch, shouldMinify) {
         toName: 'amp-inabox-host.js',
         minifiedName: 'amp4ads-host-v0.js',
         includePolyfills: false,
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
-  if (argv.with_inabox_lite) {
-    promises.push(
-      // Entry point for inabox runtime.
-      compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
-        toName: 'amp-inabox-lite.js',
-        minifiedName: 'amp4ads-lite-v0.js',
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
         watch,
         minify: shouldMinify,
       })
@@ -715,7 +708,6 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildExaminer(options) {
-  options = options || {};
   return compileJs('./src/examiner/', 'examiner.js', './dist/', {
     toName: 'examiner.max.js',
     watch: options.watch,
@@ -731,13 +723,12 @@ function buildExaminer(options) {
  * @param {!Object} options
  */
 function buildWebWorker(options) {
-  const opts = Object.assign({}, options);
   return compileJs('./src/web-worker/', 'web-worker.js', './dist/', {
     toName: 'ww.max.js',
     minifiedName: 'ww.js',
     includePolyfills: true,
-    watch: opts.watch,
-    minify: opts.minify || argv.minify,
+    watch: options.watch,
+    minify: options.minify || argv.minify,
   });
 }
 
@@ -770,6 +761,8 @@ function toPromise(readable) {
 
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
+  WEB_PUSH_PUBLISHER_FILES,
+  WEB_PUSH_PUBLISHER_VERSIONS,
   buildAlp,
   buildExaminer,
   buildWebWorker,

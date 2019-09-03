@@ -23,6 +23,10 @@
   height: auto !important;
 }
 
+:host([i-amphtml-truncate-expanded]) ::slotted(i-amphtml-sizer) {
+  display: none !important;
+}
+
 :host([i-amphtml-truncate-expanded]) .content {
   position: static;
 }

@@ -100,7 +100,7 @@ describes.fakeWin('Viewport', {}, env => {
     installPlatformService(windowApi);
     installDocService(windowApi, /* isSingleDoc */ true);
     installGlobalDocumentStateService(windowApi);
-    ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
     installViewerServiceForDoc(ampdoc);
 
     binding = new ViewportBindingDef();
@@ -202,37 +202,6 @@ describes.fakeWin('Viewport', {}, env => {
       ampdoc.win.parent = {};
       new Viewport(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-iframed');
-    });
-
-    describe('experiments', () => {
-      afterEach(() => {
-        toggleExperiment(windowApi, 'inabox-remove-height-auto', false);
-      });
-
-      it(
-        'should set ' +
-          '.i-amphtml-inabox-preserve-height-auto ' +
-          'without an experiment',
-        () => {
-          ampdoc.win.parent = {};
-          new Viewport(ampdoc, binding, viewer);
-          expect(root).to.have.class('i-amphtml-inabox-preserve-height-auto');
-        }
-      );
-
-      it(
-        'should NOT set ' +
-          '.i-amphtml-inabox-preserve-height-auto ' +
-          'with the experiment',
-        () => {
-          toggleExperiment(windowApi, 'inabox-remove-height-auto', true);
-          ampdoc.win.parent = {};
-          new Viewport(ampdoc, binding, viewer);
-          expect(root).to.not.have.class(
-            'i-amphtml-inabox-preserve-height-auto'
-          );
-        }
-      );
     });
 
     describe('ios-webview', () => {
@@ -1471,7 +1440,7 @@ describe('Viewport META', () => {
       installPlatformService(windowApi);
       installDocService(windowApi, /* isSingleDoc */ true);
       installGlobalDocumentStateService(windowApi);
-      ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
+      ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
       viewport = new Viewport(ampdoc, binding, viewer);
@@ -1572,7 +1541,7 @@ describe('createViewport', () => {
         win.parent = win;
         installDocService(win, /* isSingleDoc */ true);
         installGlobalDocumentStateService(win);
-        const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
+        const ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
@@ -1583,7 +1552,7 @@ describe('createViewport', () => {
         win.parent = {};
         installDocService(win, /* isSingleDoc */ true);
         installGlobalDocumentStateService(win);
-        const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
+        const ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
@@ -1609,7 +1578,7 @@ describe('createViewport', () => {
         installVsyncService(win);
         installDocService(win, /* isSingleDoc */ true);
         installGlobalDocumentStateService(win);
-        ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
+        ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         viewer = Services.viewerForDoc(ampDoc);
         win.getComputedStyle = () => ({});

@@ -22,7 +22,7 @@ limitations under the License.
  <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -80,7 +80,7 @@ Used to uniquely identify the action. This is referenced in an action invocation
 
 ##### execute
 
-The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 
 e.g.
 

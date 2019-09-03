@@ -1701,7 +1701,7 @@ export function setConsentStateForTesting(newConsentState) {
  *
  * Copied from src/video-interface.js.
  *
- * @constant {!Object<string, string>}
+ * @const {!Object<string, string>}
  */
 // TODO(aghassemi, #9216): Use video-interface.js
 const VideoEvents = {

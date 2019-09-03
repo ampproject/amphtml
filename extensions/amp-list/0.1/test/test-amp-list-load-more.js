@@ -17,7 +17,6 @@
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpList} from '../amp-list';
 import {Services} from '../../../../src/services';
-import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 import {
   measureElementStub,
   measureMutateElementStub,
@@ -58,14 +57,10 @@ describes.realWin(
       };
       sandbox.stub(Services, 'templatesFor').returns(templates);
       sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
-
-      toggleExperiment(win, 'amp-list-load-more', true);
     });
 
     describe('manual', () => {
       beforeEach(() => {
-        expect(isExperimentOn(win, 'amp-list-load-more')).to.be.true;
-
         element = doc.createElement('amp-list');
         list = new AmpList(element);
 
@@ -151,8 +146,6 @@ describes.realWin(
 
     describe('loading states', () => {
       beforeEach(() => {
-        expect(isExperimentOn(win, 'amp-list-load-more')).to.be.true;
-
         element = doc.createElement('amp-list');
         list = new AmpList(element);
 

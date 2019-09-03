@@ -39,14 +39,14 @@ Provides the ability to collect and store a user's consent through a UI control.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-      <li><a href="https://ampbyexample.com/user_consent/basic_user_consent_flow/">Basic user consent flow</a></li>
-      <li><a href="https://ampbyexample.com/user_consent/advanced_user_consent_flow/">Advanced user consent flow</a></li>
+      <li><a href="https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/">Basic user consent flow</a></li>
+      <li><a href="https://amp.dev/documentation/examples/user-consent/advanced_user_consent_flow/">Advanced user consent flow</a></li>
     </td>
   </tr>
 </table>
@@ -418,7 +418,7 @@ The table below lists the vendors and components that are integrated with amp-co
 | ------------- |------------------| -----| -----|
 | DoubleClick & AdSense Integration      | 05/10/18 | [Link](https://support.google.com/dfp_premium/answer/7678538) |Yes|
 | AMP IMA Video Integration   |  05/15/18  |   [Link](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/consent-blocking.md) |Yes|
-| AMP Geo |  05/10/18      |  [Link](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/) |Yes|
+| AMP Geo |  05/10/18      |  [Link](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/) |Yes|
 | AMP Stories |   05/15/18     |[Link](#prompt-ui-for-stories)|Yes|
 
 
@@ -430,7 +430,7 @@ No. All desired behavior on AMP pages is managed by publishers and this is no di
 
 ##### How can I stop making ad and analytics calls on all my AMP pages?
 
-Use the [`data-block-on-consent`](#blocking-behaviors) attribute on the [`<amp-ad>`](https://www.ampproject.org/docs/reference/components/amp-ad) or [`<amp-analytics>`](https://www.ampproject.org/docs/reference/components/amp-analytics) component.
+Use the [`data-block-on-consent`](#blocking-behaviors) attribute on the [`<amp-ad>`](https://amp.dev/documentation/components/amp-ad) or [`<amp-analytics>`](https://amp.dev/documentation/components/amp-analytics) component.
 
 Example:
 
@@ -452,11 +452,11 @@ Note that you must configure either the [`promptIfUnknownForGeoGroup`](#promptif
 
 ##### How can I stop showing all of my content to users from the EEA?
 
-You could consider hiding all your content for EEA users by implementing [`<amp-geo>`](https://www.ampproject.org/docs/reference/components/amp-geo). See [this blog post](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/) for more details.
+You could consider hiding all your content for EEA users by implementing [`<amp-geo>`](https://amp.dev/documentation/components/amp-geo). See [this blog post](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/) for more details.
 
 ##### How can I target consent for only EEA users?
 
-Use [`<amp-geo>`](https://www.ampproject.org/docs/reference/components/amp-geo) to configure a country group and hook up the country group to `promptIfUnknownForGeoGroup` attribute in `<amp-consent>`. If the user accesses the AMP page from a country that's configured in the list, the appropriate consent UI will be invoked.
+Use [`<amp-geo>`](https://amp.dev/documentation/components/amp-geo) to configure a country group and hook up the country group to `promptIfUnknownForGeoGroup` attribute in `<amp-consent>`. If the user accesses the AMP page from a country that's configured in the list, the appropriate consent UI will be invoked.
 
 ##### Can I make the consent UI blocking?
 
@@ -486,15 +486,15 @@ The response on `checkConsentHref` also accepts values for the key [`sharedData`
 
 ##### I have a complicated consent UI, will it work?
 
-You should try out the [advanced consent flows](https://ampbyexample.com/user_consent/advanced_user_consent_flow/) to see how it's implemented. You could also consider using the [`<amp-selector>`](https://www.ampproject.org/docs/reference/components/amp-selector) component.
+You should try out the [advanced consent flows](https://amp.dev/documentation/examples/user-consent/advanced_user_consent_flow/) to see how it's implemented. You could also consider using the [`<amp-selector>`](https://amp.dev/documentation/components/amp-selector) component.
 
 ##### How can I show a persistent UX element for users to update their consent preferences?
 
-You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://ampbyexample.com/user_consent/basic_user_consent_flow/) for a similar implementation.
+You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/) for a similar implementation.
 
 ##### Can I keep the non-EU experience unchanged and just deliver an "opt-out" experience to all EU users?
 
-You can configure `<amp-consent>` and [`<amp-geo>`](https://www.ampproject.org/docs/reference/components/amp-geo) to show consent to users in specific countries (e.g., via a list of EEA countries that you configure). The `<amp-consent>` component can also be configured to automatically "reject" consent on behalf of the user, if the publisher so desires. The way to do this is by setting the [`timeout`](#timeout-optional) seconds to `0` and `fallbackAction` to `reject`. Note that the `fallbackAction` state won't be stored across sessions. Note also that each ad network will have its own implementation for how it interprets a "reject" action from a user.  There is no way to automatically 'accept' consent on behalf of the user.
+You can configure `<amp-consent>` and [`<amp-geo>`](https://amp.dev/documentation/components/amp-geo) to show consent to users in specific countries (e.g., via a list of EEA countries that you configure). The `<amp-consent>` component can also be configured to automatically "reject" consent on behalf of the user, if the publisher so desires. The way to do this is by setting the [`timeout`](#timeout-optional) seconds to `0` and `fallbackAction` to `reject`. Note that the `fallbackAction` state won't be stored across sessions. Note also that each ad network will have its own implementation for how it interprets a "reject" action from a user.  There is no way to automatically 'accept' consent on behalf of the user.
 
 You can [learn more](https://support.google.com/dfp_premium/answer/7678538) about how Google AdSense and DoubleClick plan to handle a 'reject', and any configuration available to serve non-personalized ads.
 
@@ -508,7 +508,7 @@ You can use the response of `checkConsentHref` to show a consent to the user if 
 
 ##### Can amp-geo work with amp-consent so that it only shows consent for a user that's accessing my content from a certain country?
 
-Yes. See example [here](https://ampbyexample.com/user_consent/geolocation-based_consent_flow/).
+Yes. See example [here](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/).
 
 ##### I can't see feature X being supported, what can I do?
 
@@ -518,7 +518,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 *   Blog post: [New functionality to help manage user choice in AMP pages](https://www.ampproject.org/latest/blog/new-functionality-to-help-manage-user-choice-in-amp-pages/)
 *   Blog post: [Dynamic geo-personalization](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/)
-*   [`<amp-geo>` documentation](https://www.ampproject.org/docs/reference/components/amp-geo)
+*   [`<amp-geo>` documentation](https://amp.dev/documentation/components/amp-geo)
 *   [DoubleClick/ AdSense documentation ](https://support.google.com/dfp_premium/answer/7678538#amp-pages)
 *   [New feature discussion for amp-consent](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345)
 

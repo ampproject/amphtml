@@ -15,7 +15,6 @@
  */
 
 import {escapeCssSelectorIdent} from './css';
-import {isExperimentOn} from './experiments';
 import {onDocumentReady} from './document-ready';
 import {urls} from './config';
 
@@ -119,9 +118,6 @@ function maybeTimeoutFonts(win) {
  * @param {!Window} win
  */
 function timeoutFontFaces(win) {
-  if (!isExperimentOn(win, 'font-display-swap')) {
-    return;
-  }
   const doc = win.document;
   // TODO(@cramforce) Switch to .values when FontFaceSet extern supports it.
   if (!doc.fonts || !doc.fonts['values']) {

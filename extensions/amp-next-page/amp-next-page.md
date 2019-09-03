@@ -43,14 +43,14 @@ Dynamically loads more documents recommended for the user.
   <tr>
     <td>
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a>
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a>
       </strong>
     </td>
     <td>N/A</td>
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-next-page/">amp-next-page example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-next-page/">amp-next-page example</a>.</td>
   </tr>
 </table>
 

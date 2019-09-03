@@ -75,7 +75,8 @@ describe('cid', () => {
           storage[key] = value;
         },
         getItem: key => {
-          expect(key).to.equal('amp-cid');
+          // isExperimentOn() in the code paths causes "amp-experiment-toggles".
+          expect(['amp-cid', 'amp-experiment-toggles']).to.contain(key);
           return storage[key];
         },
       },
@@ -105,7 +106,7 @@ describe('cid', () => {
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
     installGlobalDocumentStateService(fakeWin);
-    ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(fakeWin).getSingleDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
     installDocumentInfoServiceForDoc(ampdoc);

@@ -59,7 +59,10 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {
+  installDocService,
+  updateFieModeForTesting,
+} from '../../../../src/service/ampdoc-impl';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
@@ -241,7 +244,7 @@ describe('amp-a4a', () => {
    * @param {string} sfVersion
    * @param {boolean=} shouldSandbox
    */
-  function verifySafeFrameRender(element, sfVersion, shouldSandbox = false) {
+  function verifySafeFrameRender(element, sfVersion, shouldSandbox = true) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -277,7 +280,7 @@ describe('amp-a4a', () => {
    * @param {!Element} element
    * @param {boolean} shouldSandbox
    */
-  function verifyNameFrameRender(element, shouldSandbox = false) {
+  function verifyNameFrameRender(element, shouldSandbox = true) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -299,7 +302,7 @@ describe('amp-a4a', () => {
   function verifyCachedContentIframeRender(
     element,
     srcUrl,
-    shouldSandbox = false
+    shouldSandbox = true
   ) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
@@ -736,18 +739,8 @@ describe('amp-a4a', () => {
         });
       });
 
-      it("shouldn't set feature policy for sync-xhr with exp off-a4a", () => {
+      it('should set feature policy for sync-xhr', () => {
         a4a.sandboxHTMLCreativeFrame = () => true;
-        a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
-          expect(a4a.iframe.getAttribute('allow')).to.not.match(/sync-xhr/);
-        });
-      });
-
-      it('should set feature policy for sync-xhr with exp on-a4a', () => {
-        a4a.sandboxHTMLCreativeFrame = () => true;
-        toggleExperiment(a4a.win, 'no-sync-xhr-in-ads', true);
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyCachedContentIframeRender(a4aElement, TEST_URL, true);
@@ -2184,6 +2177,8 @@ describe('amp-a4a', () => {
       });
     });
     it('should render correctly', () => {
+      // TODO(#22733): remove this test once ampdoc-fie is launched.
+      const parentWin = a4aElement.ownerDocument.defaultView;
       return a4a.renderAmpCreative_(metaData).then(() => {
         // Verify iframe presence.
         expect(a4aElement.children.length).to.equal(1);
@@ -2203,6 +2198,38 @@ describe('amp-a4a', () => {
         expect(
           Services.urlReplacementsForDoc(frameDoc.documentElement)
         ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
+        expect(
+          Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
+        ).to.equal(parentWin);
+      });
+    });
+    it('should render correctly in ampdoc-fie mode', () => {
+      const parentWin = a4aElement.ownerDocument.defaultView;
+      const ampdocService = Services.ampdocServiceFor(parentWin);
+      toggleExperiment(parentWin, 'ampdoc-fie', true);
+      updateFieModeForTesting(ampdocService, true);
+      return a4a.renderAmpCreative_(metaData).then(() => {
+        // Verify iframe presence.
+        expect(a4aElement.children.length).to.equal(1);
+        const friendlyIframe = a4aElement.children[0];
+        expect(friendlyIframe.tagName).to.equal('IFRAME');
+        expect(friendlyIframe.src).to.not.be.ok;
+        expect(friendlyIframe.srcdoc).to.be.ok;
+        const frameDoc = friendlyIframe.contentDocument;
+        const styles = frameDoc.querySelectorAll('style[amp-custom]');
+        expect(
+          Array.prototype.some.call(styles, s => {
+            return s.innerHTML == 'p { background: green }';
+          }),
+          'Some style is "background: green"'
+        ).to.be.true;
+        expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+        expect(
+          Services.urlReplacementsForDoc(frameDoc.documentElement)
+        ).to.not.equal(Services.urlReplacementsForDoc(a4aElement));
+        expect(
+          Services.urlReplacementsForDoc(frameDoc.documentElement).ampdoc.win
+        ).to.equal(frameDoc.defaultView);
       });
     });
   });
@@ -2969,18 +2996,6 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
         expect(a4a.inNonAmpPreferenceExp()).to.equal(!!expected);
       })
     );
-  });
-
-  describe('#sandboxHTMLCreativeFrame', () => {
-    it('should return true if experiment enabled', () => {
-      toggleExperiment(a4a.win, 'sandbox-ads', true);
-      expect(a4a.sandboxHTMLCreativeFrame()).to.be.true;
-    });
-
-    it('should return true if experiment disabled', () => {
-      toggleExperiment(a4a.win, 'sandbox-ads', false);
-      expect(a4a.sandboxHTMLCreativeFrame()).to.be.false;
-    });
   });
 
   describe('single pass experiments', () => {

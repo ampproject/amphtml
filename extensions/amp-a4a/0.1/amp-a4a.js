@@ -59,7 +59,6 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -1333,7 +1332,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @return {boolean} whether html creatives should be sandboxed. */
   sandboxHTMLCreativeFrame() {
-    return isExperimentOn(this.win, 'sandbox-ads');
+    return true;
   }
 
   /**
@@ -1503,11 +1502,13 @@ export class AmpA4A extends AMP.BaseElement {
         extensionIds: creativeMetaData.customElementExtensions || [],
         fonts: fontsArray,
       },
-      embedWin => {
+      (embedWin, ampdoc) => {
+        const parentAmpdoc = this.getAmpDoc();
         installUrlReplacementsForEmbed(
-          this.getAmpDoc(),
+          // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
+          ampdoc || parentAmpdoc,
           embedWin,
-          new A4AVariableSource(this.getAmpDoc(), embedWin)
+          new A4AVariableSource(parentAmpdoc, embedWin)
         );
       }
     ).then(friendlyIframeEmbed => {
@@ -1555,12 +1556,10 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
-    if (isExperimentOn(this.win, 'no-sync-xhr-in-ads')) {
-      // Block synchronous XHR in ad. These are very rare, but super bad for UX
-      // as they block the UI thread for the arbitrary amount of time until the
-      // request completes.
-      mergedAttributes['allow'] = "sync-xhr 'none';";
-    }
+    // Block synchronous XHR in ad. These are very rare, but super bad for UX
+    // as they block the UI thread for the arbitrary amount of time until the
+    // request completes.
+    mergedAttributes['allow'] = "sync-xhr 'none';";
     this.iframe = createElementWithAttributes(
       /** @type {!Document} */ (this.element.ownerDocument),
       'iframe',

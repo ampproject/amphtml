@@ -841,7 +841,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
     }
   } else {
     execOrDie('gulp clean');
-    execOrDie('gulp dist --fortesting');
+    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
   }
 }
 
@@ -885,6 +885,8 @@ visualDiff.flags = {
   'master': '  Includes a blank snapshot (baseline for skipped builds)',
   'empty': '  Creates a dummy Percy build with only a blank snapshot',
   'chrome_debug': '  Prints debug info from Chrome',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'debug': '  Prints all the above debug info',
   'grep': '  Runs tests that match the pattern',

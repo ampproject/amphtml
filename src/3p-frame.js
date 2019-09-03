@@ -20,7 +20,6 @@ import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
@@ -141,17 +140,12 @@ export function getIframe(
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  if (isExperimentOn(parentWindow, 'no-sync-xhr-in-ads')) {
-    // Block synchronous XHR in ad. These are very rare, but super bad for UX
-    // as they block the UI thread for the arbitrary amount of time until the
-    // request completes.
-    iframe.setAttribute('allow', "sync-xhr 'none';");
-  }
+  // Block synchronous XHR in ad. These are very rare, but super bad for UX
+  // as they block the UI thread for the arbitrary amount of time until the
+  // request completes.
+  iframe.setAttribute('allow', "sync-xhr 'none';");
   const excludeFromSandbox = ['facebook'];
-  if (
-    isExperimentOn(parentWindow, 'sandbox-ads') &&
-    !excludeFromSandbox.includes(opt_type)
-  ) {
+  if (!excludeFromSandbox.includes(opt_type)) {
     applySandbox(iframe);
   }
   iframe.setAttribute(

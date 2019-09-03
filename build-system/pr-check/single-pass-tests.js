@@ -41,7 +41,7 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
+    timedExecOrDie('gulp dist --fortesting --single_pass');
     timedExecOrDie(
       'gulp integration --nobuild --compiled --single_pass --headless'
     );
@@ -54,7 +54,7 @@ function main() {
       buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
+      timedExecOrDie('gulp dist --fortesting --single_pass');
       timedExecOrDie(
         'gulp integration --nobuild --compiled --single_pass --headless'
       );

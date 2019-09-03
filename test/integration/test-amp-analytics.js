@@ -47,7 +47,6 @@ describe('amp-analytics', function() {
             "a": 1,
             "b": "\${title}",
             "cid": "\${clientId(_cid)}",
-            "loadend": "\${navTiming(loadEventEnd)}",
             "default": "\$DEFAULT( , test)",
             "cookie": "\${cookie(test-cookie)}"
           }
@@ -68,7 +67,6 @@ describe('amp-analytics', function() {
           expect(q['a']).to.equal('2');
           expect(q['b']).to.equal('AMP TEST');
           expect(q['cid']).to.equal('amp-12345');
-          expect(q['loadend']).to.not.equal('0');
           expect(q['default']).to.equal('test');
           // cookie set via http response header when requesting
           // localhost:9876/amp4test/compose-doc

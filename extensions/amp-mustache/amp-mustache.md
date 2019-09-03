@@ -38,7 +38,7 @@ Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-mustache/">annotated amp-mustache</a> example.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-mustache/">annotated amp-mustache</a> example.</td>
   </tr>
 </table>
 
