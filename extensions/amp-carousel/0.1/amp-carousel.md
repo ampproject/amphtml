@@ -161,7 +161,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
   </tr>
   <tr>
     <td width="40%"><strong>autoplay (optional)</strong></td>
-    <td><p>Advances the slide to the next slide without user interaction.<br>
+    <td><p>Regularly advances to the next slide without user interaction. If the user manually changes slides, then autoplay is stopped.<br>
   If present without a value:</p>
 <ul>
   <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.</li>
