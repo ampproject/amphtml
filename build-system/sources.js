@@ -98,6 +98,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-experiment/**/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
+  // Needed by amp-facebook-* for the loader logo
+  'extensions/amp-facebook/0.1/facebook-loader.js',
   // Needed to access inputmask impl from other extensions
   'extensions/amp-inputmask/**/*.js',
   // Needed for AccessService
