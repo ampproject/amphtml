@@ -16,10 +16,10 @@
 
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {svgFor} from '../../../src/static-template';
 
 class AmpTwitter extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -120,6 +120,7 @@ class AmpTwitter extends AMP.BaseElement {
    */
   updateForSuccessState_(height) {
     this.mutateElement(() => {
+      this.toggleLoading(false);
       if (this.userPlaceholder_) {
         this.togglePlaceholder(false);
       }
@@ -128,7 +129,7 @@ class AmpTwitter extends AMP.BaseElement {
   }
 
   /**
-   * Updates wheen the tweet that failed to load. This uses the fallback
+   * Updates when the tweet failed to load. This uses the fallback
    * provided if available. If not, it uses the user specified placeholder.
    * @private
    */
@@ -137,6 +138,7 @@ class AmpTwitter extends AMP.BaseElement {
     const content = fallback || this.userPlaceholder_;
 
     this.mutateElement(() => {
+      this.toggleLoading(false);
       if (fallback) {
         this.togglePlaceholder(false);
         this.toggleFallback(true);
@@ -148,21 +150,33 @@ class AmpTwitter extends AMP.BaseElement {
     });
   }
 
+  /**
+   * amp-twitter reuses the loading indicator when id changes via bind mutation
+   * @override
+   */
+  isLoadingReused() {
+    return true;
+  }
+
   /** @override */
   createLoaderLogoCallback() {
-    const svg = svgFor(this.element);
-    return svg`
-      <path
-        class="i-amphtml-new-loader-white-on-shim"
-        fill="#1DA1F2"
-        d="M56.29,68.13c7.55,0,11.67-6.25,11.67-11.67c0-0.18,0-0.35-0.01-0.53c0.8-0.58,1.5-1.3,2.05-2.12
+    const html = htmlFor(this.element);
+    return {
+      color: '#1DA1F2',
+      content: html`
+        <svg viewBox="0 0 72 72">
+          <path
+            fill="currentColor"
+            d="M32.29,44.13c7.55,0,11.67-6.25,11.67-11.67c0-0.18,0-0.35-0.01-0.53c0.8-0.58,1.5-1.3,2.05-2.12
     c-0.74,0.33-1.53,0.55-2.36,0.65c0.85-0.51,1.5-1.31,1.8-2.27c-0.79,0.47-1.67,0.81-2.61,1c-0.75-0.8-1.82-1.3-3-1.3
     c-2.27,0-4.1,1.84-4.1,4.1c0,0.32,0.04,0.64,0.11,0.94c-3.41-0.17-6.43-1.8-8.46-4.29c-0.35,0.61-0.56,1.31-0.56,2.06
     c0,1.42,0.72,2.68,1.83,3.42c-0.67-0.02-1.31-0.21-1.86-0.51c0,0.02,0,0.03,0,0.05c0,1.99,1.41,3.65,3.29,4.02
     c-0.34,0.09-0.71,0.14-1.08,0.14c-0.26,0-0.52-0.03-0.77-0.07c0.52,1.63,2.04,2.82,3.83,2.85c-1.4,1.1-3.17,1.76-5.1,1.76
-    c-0.33,0-0.66-0.02-0.98-0.06C51.82,67.45,53.97,68.13,56.29,68.13"
-      ></path>
-    `;
+    c-0.33,0-0.66-0.02-0.98-0.06C27.82,43.45,29.97,44.13,32.29,44.13"
+          />
+        </svg>
+      `,
+    };
   }
 
   /** @override */
@@ -177,6 +191,15 @@ class AmpTwitter extends AMP.BaseElement {
       this.iframe_ = null;
     }
     return true;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (this.iframe_ && mutations['data-tweetid'] != null) {
+      this.unlayoutCallback();
+      this.toggleLoading(true, /* opt_force */ true);
+      this.layoutCallback();
+    }
   }
 }
 

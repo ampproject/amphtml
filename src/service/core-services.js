@@ -28,12 +28,10 @@ import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
-import {
-  installOwnersServiceForDoc,
-  installResourcesServiceForDoc,
-} from './resources-impl';
+import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installPlatformService} from './platform-impl';
+import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
 import {installTemplatesService} from './template-impl';
@@ -76,10 +74,9 @@ export function installRuntimeServices(global) {
 /**
  * Install ampdoc-level services.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Object<string, string>=} opt_initParams
  * @restricted
  */
-export function installAmpdocServices(ampdoc, opt_initParams) {
+export function installAmpdocServices(ampdoc) {
   const isEmbedded = !!ampdoc.getParent();
 
   // When making changes to this method:
@@ -95,7 +92,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
     : installCidService(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'viewer')
-    : installViewerServiceForDoc(ampdoc, opt_initParams);
+    : installViewerServiceForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'viewport')
     : installViewportServiceForDoc(ampdoc);

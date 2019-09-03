@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const VPONANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const VPONANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'ctid': '${clientId(vpadn-ctid)}',
   },
@@ -62,3 +64,5 @@ export const VPONANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {VPONANALYTICS_CONFIG};

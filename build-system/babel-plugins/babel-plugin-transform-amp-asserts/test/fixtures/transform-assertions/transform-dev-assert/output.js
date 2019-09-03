@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-1 + 1;
-2 + 2;
-undefined;
-let result = dev();
-let result2 = undefined;
+(1 + 1);
+((2 + 2));
+let result = (dev());

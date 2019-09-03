@@ -30,6 +30,7 @@ import {
   VideoEvents,
   VideoServiceSignals,
   userInteractedWith,
+  videoAnalyticsCustomEventTypeKey,
 } from '../video-interface';
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
@@ -85,7 +86,7 @@ export class VideoManager {
       installAutoplayStylesForDoc(this.ampdoc)
     );
 
-    /** @private {!../service/viewport/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {?Array<!VideoEntry>} */
@@ -120,6 +121,8 @@ export class VideoManager {
 
   /** @override */
   dispose() {
+    this.getAutoFullscreenManager_().dispose();
+
     if (!this.entries_) {
       return;
     }
@@ -465,14 +468,24 @@ class VideoEntry {
     listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
     listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
 
-    listen(video.element, VideoAnalyticsEvents.CUSTOM, e => {
+    listen(video.element, VideoEvents.AD_START, () =>
+      analyticsEvent(this, VideoAnalyticsEvents.AD_START)
+    );
+
+    listen(video.element, VideoEvents.AD_END, () =>
+      analyticsEvent(this, VideoAnalyticsEvents.AD_END)
+    );
+
+    listen(video.element, VideoEvents.CUSTOM_TICK, e => {
       const data = getData(e);
       const eventType = data['eventType'];
-      const vars = data['vars'];
-      this.logCustomAnalytics_(
-        dev().assertString(eventType, '`eventType` missing'),
-        vars
-      );
+      if (!eventType) {
+        // CUSTOM_TICK is a generic event for 3p players whose semantics
+        // don't fit with other video events.
+        // If `eventType` is unset, it's not meant for analytics.
+        return;
+      }
+      this.logCustomAnalytics_(eventType, data['vars']);
     });
 
     video
@@ -510,13 +523,13 @@ class VideoEntry {
    * @param {!Object<string, string>} vars
    */
   logCustomAnalytics_(eventType, vars) {
-    const prefixedVars = {};
+    const prefixedVars = {[videoAnalyticsCustomEventTypeKey]: eventType};
 
     Object.keys(vars).forEach(key => {
       prefixedVars[`custom_${key}`] = vars[key];
     });
 
-    analyticsEvent(this, eventType, prefixedVars);
+    analyticsEvent(this, VideoAnalyticsEvents.CUSTOM, prefixedVars);
   }
 
   /** Listens for signals to delegate autoplay to a different module. */
@@ -996,6 +1009,12 @@ export class AutoFullscreenManager {
     /** @private @const {!Array<!../video-interface.VideoOrBaseElementDef>} */
     this.entries_ = [];
 
+    /**
+     * Unlisteners for global objects
+     * @private {!Array<!UnlistenDef>}
+     */
+    this.unlisteners_ = [];
+
     // eslint-disable-next-line jsdoc/require-returns
     /** @private @const {function()} */
     this.boundSelectBestCentered_ = () => this.selectBestCenteredInPortrait_();
@@ -1016,6 +1035,12 @@ export class AutoFullscreenManager {
 
     this.installOrientationObserver_();
     this.installFullscreenListener_();
+  }
+
+  /** @public */
+  dispose() {
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
   }
 
   /** @param {!VideoEntry} entry */
@@ -1046,10 +1071,12 @@ export class AutoFullscreenManager {
   installFullscreenListener_() {
     const root = this.ampdoc_.getRootNode();
     const exitHandler = () => this.onFullscreenExit_();
-    listen(root, 'webkitfullscreenchange', exitHandler);
-    listen(root, 'mozfullscreenchange', exitHandler);
-    listen(root, 'fullscreenchange', exitHandler);
-    listen(root, 'MSFullscreenChange', exitHandler);
+    this.unlisteners_.push(
+      listen(root, 'webkitfullscreenchange', exitHandler),
+      listen(root, 'mozfullscreenchange', exitHandler),
+      listen(root, 'fullscreenchange', exitHandler),
+      listen(root, 'MSFullscreenChange', exitHandler)
+    );
   }
 
   /**
@@ -1097,11 +1124,15 @@ export class AutoFullscreenManager {
     // exit fullscreen since 'change' does not fire in this case.
     if (screen && 'orientation' in screen) {
       const orient = /** @type {!ScreenOrientation} */ (screen.orientation);
-      listen(orient, 'change', () => this.onRotation_());
+      this.unlisteners_.push(
+        listen(orient, 'change', () => this.onRotation_())
+      );
     }
     // iOS Safari does not have screen.orientation but classifies
     // 'orientationchange' as a user interaction.
-    listen(win, 'orientationchange', () => this.onRotation_());
+    this.unlisteners_.push(
+      listen(win, 'orientationchange', () => this.onRotation_())
+    );
   }
 
   /** @private */
@@ -1266,7 +1297,7 @@ export class AutoFullscreenManager {
 }
 
 /**
- * @param {!./viewport/viewport-impl.Viewport} viewport
+ * @param {!./viewport/viewport-interface.ViewportInterface} viewport
  * @param {{top: number, height: number}} rect
  * @return {number}
  */
@@ -1500,7 +1531,7 @@ export class AnalyticsPercentageTracker {
 
 /**
  * @param {!VideoEntry} entry
- * @param {!VideoAnalyticsEvents|string} eventType
+ * @param {!VideoAnalyticsEvents} eventType
  * @param {!Object<string, string>=} opt_vars A map of vars and their values.
  * @private
  */

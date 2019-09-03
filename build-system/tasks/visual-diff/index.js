@@ -223,7 +223,7 @@ async function launchBrowser() {
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {JsonObject} viewport optional viewport size object with numeric
  *     fields `width` and `height`.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise<!Puppeteer.Page>}
  */
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
@@ -244,7 +244,8 @@ async function newPage(browser, viewport = null) {
     );
 
     if (
-      requestUrl.hostname == HOST ||
+      requestUrl.protocol === 'data:' ||
+      requestUrl.hostname === HOST ||
       requestUrl.hostname.endsWith(`.${HOST}`)
     ) {
       return interceptedRequest.continue();
@@ -763,7 +764,7 @@ async function createEmptyBuild() {
 
 /**
  * Runs the AMP visual diff tests.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function visualDiff() {
   ensureOrBuildAmpRuntimeInTestMode_();
@@ -777,11 +778,8 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
-  try {
-    await performVisualTests();
-  } finally {
-    return await cleanup_();
-  }
+  await performVisualTests();
+  return await cleanup_();
 }
 
 /**

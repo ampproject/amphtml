@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const GOOGLEANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'eventValue': '0',
     'documentLocation': 'SOURCE_URL',
@@ -104,6 +106,25 @@ export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'timingRequestType': 'adtiming',
       },
     },
+    'storyProgress': {
+      'on': 'story-page-visible',
+      'enabled': false,
+      'request': 'event',
+      'vars': {
+        'eventAction': 'story_progress',
+        'eventCategory': '${title}',
+        'eventLabel': '${storyPageId}',
+      },
+    },
+    'storyEnd': {
+      'on': 'story-last-page-visible',
+      'enabled': false,
+      'request': 'event',
+      'vars': {
+        'eventAction': 'story_complete',
+        'eventCategory': '${title}',
+      },
+    },
   },
   'extraUrlParamsReplaceMap': {
     'dimension': 'cd',
@@ -124,3 +145,5 @@ export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {GOOGLEANALYTICS_CONFIG};

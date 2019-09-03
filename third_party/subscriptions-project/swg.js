@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.61 */
+/** Version: 0.1.22.64 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -38,6 +38,10 @@ const AnalyticsEvent = {
   IMPRESSION_OFFERS: 3,
   IMPRESSION_SUBSCRIBE_BUTTON: 4,
   IMPRESSION_SMARTBOX: 5,
+  IMPRESSION_SWG_BUTTON: 6,
+  IMPRESSION_CLICK_TO_SHOW_OFFERS: 7,
+  IMPRESSION_CLICK_TO_SHOW_OFFERS_OR_ALREADY_SUBSCRIBED: 8,
+  IMPRESSION_SUBSCRIPTION_COMPLETE: 9,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -45,8 +49,12 @@ const AnalyticsEvent = {
   ACTION_SUBSCRIPTIONS_LANDING_PAGE: 1004,
   ACTION_PAYMENT_FLOW_STARTED: 1005,
   ACTION_OFFER_SELECTED: 1006,
+  ACTION_SWG_BUTTON_CLICK: 1007,
+  ACTION_VIEW_OFFERS: 1008,
+  ACTION_ALREADY_SUBSCRIBED: 1009,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
+  EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
 const EventOriginator = {
@@ -55,7 +63,73 @@ const EventOriginator = {
   AMP_CLIENT: 2,
   PROPENSITY_CLIENT: 3,
   SWG_SERVER: 4,
+  PUBLISHER_CLIENT: 5,
 };
+
+/**
+ * @implements {Message}
+ */
+class AlreadySubscribedResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.subscriberOrMember_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?boolean} */
+    this.linkRequested_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getSubscriberOrMember() {
+    return this.subscriberOrMember_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setSubscriberOrMember(value) {
+    this.subscriberOrMember_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getLinkRequested() {
+    return this.linkRequested_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setLinkRequested(value) {
+    this.linkRequested_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.subscriberOrMember_,  // field 1 - subscriber_or_member
+      this.linkRequested_,  // field 2 - link_requested
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AlreadySubscribedResponse';
+  }
+}
 
 /**
  * @implements {Message}
@@ -467,6 +541,53 @@ class EventParams {
 /**
  * @implements {Message}
  */
+class SkuSelectedResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.sku_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.sku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSku(value) {
+    this.sku_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.sku_,  // field 1 - sku
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'SkuSelectedResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class SmartBoxMessage {
  /**
   * @param {!Array=} data
@@ -511,12 +632,110 @@ class SmartBoxMessage {
   }
 }
 
+/**
+ * @implements {Message}
+ */
+class SubscribeResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.subscribe_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getSubscribe() {
+    return this.subscribe_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setSubscribe(value) {
+    this.subscribe_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.subscribe_,  // field 1 - subscribe
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'SubscribeResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class ViewSubscriptionsResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.native_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getNative() {
+    return this.native_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setNative(value) {
+    this.native_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.native_,  // field 1 - native
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'ViewSubscriptionsResponse';
+  }
+}
+
 const PROTO_MAP = {
+  'AlreadySubscribedResponse': AlreadySubscribedResponse,
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
   'EventParams': EventParams,
+  'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
+  'SubscribeResponse': SubscribeResponse,
+  'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
 };
 
 /**
@@ -2420,7 +2639,7 @@ class ActivityIframePort$1 {
     this.iframePort_ = new activityPorts_2(iframe, url, opt_args);
     /** @private @const {!Object<string, function(!Object)>} */
     this.callbackMap_ = {};
-    /** @private {?function(!Object)} */
+    /** @private {?function(!../proto/api_messages.Message)} */
     this.callbackOriginal_ = null;
   }
 
@@ -2520,7 +2739,7 @@ class ActivityIframePort$1 {
 
   /**
    * @param {!function(new: T)} message
-   * @param {function(Object)} callback
+   * @param {function(!../proto/api_messages.Message)} callback
    * @template T
    */
   on(message, callback) {
@@ -2543,96 +2762,101 @@ class ActivityIframePort$1 {
 }
 
 class ActivityPorts$1 {
- /**
-  * @param {!Window} win
-  */
+  /**
+   * @param {!Window} win
+   */
   constructor(win) {
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = new activityPorts_1(win);
   }
 
- /**
-  * Start an activity within the specified iframe.
-  * @param {!HTMLIFrameElement} iframe
-  * @param {string} url
-  * @param {?Object=} opt_args
-  * @return {!Promise<!ActivityIframePort>}
-  */
+  /**
+   * Start an activity within the specified iframe.
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} opt_args
+   * @return {!Promise<!ActivityIframePort>}
+   */
   openIframe(iframe, url, opt_args) {
     const activityPort = new ActivityIframePort$1(iframe, url, opt_args);
     return activityPort.connect().then(() => activityPort);
   }
 
- /**
-  * Start an activity in a separate window. The result will be delivered
-  * to the `onResult` callback.
-  *
-  * The activity can be opened in two modes: "popup" and "redirect". This
-  * depends on the `target` value, but also on the browser/environment.
-  *
-  * The allowed `target` values are `_blank`, `_top` and name targets. The
-  * `_self`, `_parent` and similar targets are not allowed.
-  *
-  * The `_top` target indicates that the activity should be opened as a
-  * "redirect", while other targets indicate that the activity should be
-  * opened as a popup. The activity client will try to honor the requested
-  * target. However, it's not always possible. Some environments do not
-  * allow popups and they either force redirect or fail the window open
-  * request. In this case, the activity will try to fallback to the "redirect"
-  * mode.
-  *
-  * @param {string} requestId
-  * @param {string} url
-  * @param {string} target
-  * @param {?Object=} opt_args
-  * @param {?web-activities/activity-ports.ActivityOpenOptions=} opt_options
-  * @return {{targetWin: ?Window}}
-  */
+  /**
+   * Start an activity in a separate window. The result will be delivered
+   * to the `onResult` callback.
+   *
+   * The activity can be opened in two modes: "popup" and "redirect". This
+   * depends on the `target` value, but also on the browser/environment.
+   *
+   * The allowed `target` values are `_blank`, `_top` and name targets. The
+   * `_self`, `_parent` and similar targets are not allowed.
+   *
+   * The `_top` target indicates that the activity should be opened as a
+   * "redirect", while other targets indicate that the activity should be
+   * opened as a popup. The activity client will try to honor the requested
+   * target. However, it's not always possible. Some environments do not
+   * allow popups and they either force redirect or fail the window open
+   * request. In this case, the activity will try to fallback to the "redirect"
+   * mode.
+   *
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?web-activities/activity-ports.ActivityOpenOptions=} opt_options
+   * @return {{targetWin: ?Window}}
+   */
   open(requestId, url, target, opt_args, opt_options) {
     return this.activityPorts_.open(
-        requestId, url, target, opt_args, opt_options);
+      requestId,
+      url,
+      target,
+      opt_args,
+      opt_options
+    );
   }
 
- /**
-  * Registers the callback for the result of the activity opened with the
-  * specified `requestId` (see the `open()` method). The callback is a
-  * function that takes a single `ActivityPort` argument. The client
-  * can use this object to verify the port using it's origin, verified and
-  * secure channel flags. Then the client can call
-  * `ActivityPort.acceptResult()` method to accept the result.
-  *
-  * The activity result is handled via a separate callback because of a
-  * possible redirect. So use of direct callbacks and/or promises is not
-  * possible in that case.
-  *
-  * A typical implementation would look like:
-  * ```
-  * ports.onResult('request1', function(port) {
-  *   port.acceptResult().then(function(result) {
-  *     // Only verified origins are allowed.
-  *     if (result.origin == expectedOrigin &&
-  *         result.originVerified &&
-  *         result.secureChannel) {
-  *       handleResultForRequest1(result);
-  *     }
-  *   });
-  * })
-  *
-  * ports.open('request1', request1Url, '_blank');
-  * ```
-  *
-  * @param {string} requestId
-  * @param {function(!ActivityPortDef)} callback
-  */
+  /**
+   * Registers the callback for the result of the activity opened with the
+   * specified `requestId` (see the `open()` method). The callback is a
+   * function that takes a single `ActivityPort` argument. The client
+   * can use this object to verify the port using it's origin, verified and
+   * secure channel flags. Then the client can call
+   * `ActivityPort.acceptResult()` method to accept the result.
+   *
+   * The activity result is handled via a separate callback because of a
+   * possible redirect. So use of direct callbacks and/or promises is not
+   * possible in that case.
+   *
+   * A typical implementation would look like:
+   * ```
+   * ports.onResult('request1', function(port) {
+   *   port.acceptResult().then(function(result) {
+   *     // Only verified origins are allowed.
+   *     if (result.origin == expectedOrigin &&
+   *         result.originVerified &&
+   *         result.secureChannel) {
+   *       handleResultForRequest1(result);
+   *     }
+   *   });
+   * })
+   *
+   * ports.open('request1', request1Url, '_blank');
+   * ```
+   *
+   * @param {string} requestId
+   * @param {function(!ActivityPortDef)} callback
+   */
   onResult(requestId, callback) {
     this.activityPorts_.onResult(requestId, port => {
       callback(new ActivityPortDeprecated(port));
     });
   }
 
- /**
-  * @param {function(!Error)} handler
-  */
+  /**
+   * @param {function(!Error)} handler
+   */
   onRedirectError(handler) {
     this.activityPorts_.onRedirectError(handler);
   }
@@ -2660,6 +2884,13 @@ class ActivityPorts$1 {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
 
 /**
  * Throws an error if the first argument isn't trueish.
@@ -2719,7 +2950,7 @@ function pushIfNonEmpty(array, val) {
 }
 
 function toString(val) {
-// Do check equivalent to `val instanceof Element` without cross-window bug
+  // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
@@ -2741,7 +2972,6 @@ function toString(val) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * Returns a map-like object.
@@ -2857,8 +3087,8 @@ const defaultStyles = {
   'display': 'block',
   'empty-cells': 'show',
   'filter': 'none',
-  'flex': 'none',  // flex-grow, flex-shrink, and flex-basis.
-  'flex-flow': 'row nowrap',  // flex-direction, flex-wrap.
+  'flex': 'none', // flex-grow, flex-shrink, and flex-basis.
+  'flex-flow': 'row nowrap', // flex-direction, flex-wrap.
   'float': 'none',
   'flood-color': 'rgb(0, 0, 0)',
   'flood-opacity': '1',
@@ -2868,7 +3098,7 @@ const defaultStyles = {
   'height': 'auto',
   'hyphens': 'manual',
   'image-rendering': 'auto',
-  'inline-size': '',  // Setting to 'auto' will not allow override.
+  'inline-size': '', // Setting to 'auto' will not allow override.
   'isolation': 'auto',
   'justify-content': 'normal',
   'justify-items': 'normal',
@@ -2887,10 +3117,10 @@ const defaultStyles = {
   'min-inline-size': '0',
   'min-width': '0',
   'mix-blend-mode': 'normal',
-  'object-fit': 'fill',  // Important for Safari browser.
-  'offset-distance': 'none',  // Chrome only (Experimental).
-  'offset-path': 'none',  // Chrome only (Experimental).
-  'offset-rotate': 'auto 0deg',  // Chrome only (Experimental).
+  'object-fit': 'fill', // Important for Safari browser.
+  'offset-distance': 'none', // Chrome only (Experimental).
+  'offset-path': 'none', // Chrome only (Experimental).
+  'offset-rotate': 'auto 0deg', // Chrome only (Experimental).
   'opacity': '1',
   'order': '0',
   'orphans': '2',
@@ -2907,7 +3137,7 @@ const defaultStyles = {
   'resize': 'none',
   'right': '0',
   'scroll-behavior': 'auto',
-  'tab-size': '8',  // Only Chrome, Safari (Experimental).
+  'tab-size': '8', // Only Chrome, Safari (Experimental).
   'table-layout': 'auto',
   'text-align': 'start',
   'text-align-last': 'auto',
@@ -2968,7 +3198,6 @@ function getVendorJsPropertyName_(style, titleCase) {
   return '';
 }
 
-
 /**
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
@@ -3006,7 +3235,6 @@ function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
   return propertyName;
 }
 
-
 /**
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
@@ -3016,10 +3244,12 @@ function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 function setImportantStyles(element, styles) {
   for (const k in styles) {
     element.style.setProperty(
-        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+      getVendorJsPropertyName(styles, k),
+      styles[k].toString(),
+      'important'
+    );
   }
 }
-
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
@@ -3030,14 +3260,17 @@ function setImportantStyles(element, styles) {
  * @param {boolean=} opt_bypassCache
  */
 function setStyle(element, property, value, opt_units, opt_bypassCache) {
-  const propertyName = getVendorJsPropertyName(element.style, property,
-      opt_bypassCache);
+  const propertyName = getVendorJsPropertyName(
+    element.style,
+    property,
+    opt_bypassCache
+  );
   if (propertyName) {
-    element.style[propertyName] =
-        /** @type {string} */ (opt_units ? value + opt_units : value);
+    element.style[propertyName] = /** @type {string} */ (opt_units
+      ? value + opt_units
+      : value);
   }
 }
-
 
 /**
  * Sets the CSS styles of the specified element. The styles
@@ -3051,7 +3284,6 @@ function setStyles(element, styles) {
   }
 }
 
-
 /**
  * Resets styles that were set dynamically (i.e. inline)
  * @param {!Element} element
@@ -3064,7 +3296,6 @@ function resetStyles(element, properties) {
   });
   setStyles(element, styleObj);
 }
-
 
 /**
  * Resets all the styles of an element to a given value. Defaults to null.
@@ -3094,7 +3325,6 @@ function resetAllStyles(element) {
 /** @const {string} */
 const styleType = 'text/css';
 
-
 /**
  * Add attributes to an element.
  * @param {!Element} element
@@ -3104,18 +3334,20 @@ const styleType = 'text/css';
 function addAttributesToElement(element, attributes) {
   for (const attr in attributes) {
     if (attr == 'style') {
-      setStyles(element,
-           /** @type !Object<string, string|boolean|number> */
-           (attributes[attr]));
+      setStyles(
+        element,
+        /** @type {!Object<string, string|boolean|number>} */
+        (attributes[attr])
+      );
     } else {
-      element.setAttribute(attr,
-          /** @type {string|boolean|number} */ (attributes[attr]));
+      element.setAttribute(
+        attr,
+        /** @type {string|boolean|number} */ (attributes[attr])
+      );
     }
-
   }
   return element;
 }
-
 
 /**
  * Create a new element on document with specified tagName and attributes.
@@ -3144,7 +3376,6 @@ function createElement(doc, tagName, attributes, opt_content) {
   return element;
 }
 
-
 /**
  * Removes the element.
  * @param {!Element} element
@@ -3155,7 +3386,6 @@ function removeElement(element) {
   }
 }
 
-
 /**
  * Removes all children from the parent element.
  * @param {!Element} parent
@@ -3163,7 +3393,6 @@ function removeElement(element) {
 function removeChildren(parent) {
   parent.textContent = '';
 }
-
 
 /**
  * Injects the provided styles in the HEAD section of the document.
@@ -3180,7 +3409,6 @@ function injectStyleSheet(doc, styleText) {
   return styleElement;
 }
 
-
 /**
  * Polyfill of the `Node.isConnected` API. See
  * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
@@ -3196,9 +3424,8 @@ function isConnected(node) {
   }
   // Polyfill.
   const root = node.ownerDocument && node.ownerDocument.documentElement;
-  return root && root.contains(node) || false;
+  return (root && root.contains(node)) || false;
 }
-
 
 /**
  * @param {!Window} win
@@ -3225,20 +3452,20 @@ function isEdgeBrowser$1(win) {
  * limitations under the License.
  */
 
-
 /**
  * @param {!Object<string, string>} map
  * @param {?string|?Element} langOrElement
  * @return {?string}
  */
 function msg(map, langOrElement) {
-  const lang =
-      !langOrElement ? '' :
-      typeof langOrElement == 'string' ? langOrElement :
-      langOrElement.lang ||
-      langOrElement.ownerDocument &&
-          langOrElement.ownerDocument.documentElement.lang;
-  let search = (lang && lang.toLowerCase() || 'en').replace(/_/g, '-');
+  const lang = !langOrElement
+    ? ''
+    : typeof langOrElement == 'string'
+    ? langOrElement
+    : langOrElement.lang ||
+      (langOrElement.ownerDocument &&
+        langOrElement.ownerDocument.documentElement.lang);
+  let search = ((lang && lang.toLowerCase()) || 'en').replace(/_/g, '-');
   while (search) {
     if (search in map) {
       return map[search];
@@ -3336,13 +3563,11 @@ function isBoolean(value) {
  * limitations under the License.
  */
 
-
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
  * @type {HTMLAnchorElement}
  */
 let a;
-
 
 /**
  * We cached all parsed URLs. As of now there are no use cases
@@ -3374,7 +3599,7 @@ function parseUrl$1(url, opt_nocache) {
 
   const info = parseUrlWithA(a, url);
 
-  return cache[url] = info;
+  return (cache[url] = info);
 }
 
 /**
@@ -3414,8 +3639,10 @@ function parseUrlWithA(a, url) {
 
   // 2) For URLs with implicit ports, IE11 parses to default ports while
   // other browsers leave the port field empty.
-  if ((info.protocol == 'http:' && info.port == 80) ||
-      (info.protocol == 'https:' && info.port == 443)) {
+  if (
+    (info.protocol == 'http:' && info.port == 80) ||
+    (info.protocol == 'https:' && info.port == 443)
+  ) {
     info.port = '';
     info.host = info.hostname;
   }
@@ -3432,7 +3659,6 @@ function parseUrlWithA(a, url) {
   return info;
 }
 
-
 /**
  * Parses and builds Object of URL query string.
  * @param {string} query The URL query string.
@@ -3443,18 +3669,17 @@ function parseQueryString$1(query) {
     return {};
   }
   return (/^[?#]/.test(query) ? query.slice(1) : query)
-      .split('&')
-      .reduce((params, param) => {
-        const item = param.split('=');
-        const key = decodeURIComponent(item[0] || '');
-        const value = decodeURIComponent(item[1] || '');
-        if (key) {
-          params[key] = value;
-        }
-        return params;
-      }, {});
+    .split('&')
+    .reduce((params, param) => {
+      const item = param.split('=');
+      const key = decodeURIComponent(item[0] || '');
+      const value = decodeURIComponent(item[1] || '');
+      if (key) {
+        params[key] = value;
+      }
+      return params;
+    }, {});
 }
-
 
 /**
  * Adds a parameter to a query string.
@@ -3505,10 +3730,9 @@ function addQueryParam(url, param, value) {
  */
 const CACHE_KEYS = {
   'nocache': 1,
-  'hr1': 3600000,  // 1hr = 1000 * 60 * 60
-  'hr12': 43200000,  // 12hr = 1000 * 60 * 60 * 12
+  'hr1': 3600000, // 1hr = 1000 * 60 * 60
+  'hr12': 43200000, // 12hr = 1000 * 60 * 60 * 12
 };
-
 
 /**
  * @return {string}
@@ -3516,7 +3740,6 @@ const CACHE_KEYS = {
 function feOrigin() {
   return parseUrl$1('https://news.google.com').origin;
 }
-
 
 /**
  * @param {string} url Relative URL, e.g. "/service1".
@@ -3543,7 +3766,6 @@ function feUrl(url, prefix = '') {
   return feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
 }
 
-
 /**
  * @param {string} url FE URL.
  * @return {string} The complete URL including cache params.
@@ -3552,17 +3774,15 @@ function feCached(url) {
   return addQueryParam(url, '_', cacheParam('hr1'));
 }
 
-
 /**
  * @param {!Object<string, ?>} args
  * @return {!Object<string, ?>}
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.61',
+    '_client': 'SwG 0.1.22.64',
   });
 }
-
 
 /**
  * @param {string} cacheKey
@@ -3611,7 +3831,6 @@ const Theme = {
   DARK: 'dark',
 };
 
-
 /**
  * The class for Smart button Api.
  */
@@ -3636,9 +3855,11 @@ class SmartSubscriptionButtonApi {
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-    /** @type {!HTMLIFrameElement} */ (
-        createElement(this.doc_, 'iframe', iframeAttributes));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_,
+      'iframe',
+      iframeAttributes
+    ));
 
     /** @private @const {!Element} */
     this.button_ = button;
@@ -3655,8 +3876,8 @@ class SmartSubscriptionButtonApi {
     const frontendArguments = {
       'productId': this.deps_.pageConfig().getProductId(),
       'publicationId': this.deps_.pageConfig().getPublicationId(),
-      'theme': this.options_ && this.options_.theme || 'light',
-      'lang': this.options_ && this.options_.lang || 'en',
+      'theme': (this.options_ && this.options_.theme) || 'light',
+      'lang': (this.options_ && this.options_.lang) || 'en',
     };
     const messageTextColor = this.options_ && this.options_.messageTextColor;
     if (messageTextColor) {
@@ -3665,6 +3886,19 @@ class SmartSubscriptionButtonApi {
 
     /** @private @const {!Object} */
     this.args_ = feArgs(frontendArguments);
+  }
+
+  /**
+   * @param {SmartBoxMessage} smartBoxMessage
+   */
+  handleSmartBoxClick_(smartBoxMessage) {
+    if (smartBoxMessage && smartBoxMessage.getIsClicked()) {
+      if (!this.callback_) {
+        throw new Error('No callback!');
+      }
+      this.callback_();
+      return;
+    }
   }
 
   /**
@@ -3691,20 +3925,16 @@ class SmartSubscriptionButtonApi {
       'width': '100%',
     });
     this.button_.appendChild(this.iframe_);
-    const analyticsContext = this.deps_.analytics().getContext().toArray();
+    const analyticsContext = this.deps_
+      .analytics()
+      .getContext()
+      .toArray();
     this.args_['analyticsContext'] = analyticsContext;
-    this.activityPorts_.openIframe(this.iframe_, this.src_, this.args_)
-        .then(port => {
-          port.onMessageDeprecated(result => {
-            if (result['clicked']) {
-              if (!this.callback_) {
-                throw new Error('No callback!');
-              }
-              this.callback_();
-              return;
-            }
-          });
-        });
+    this.activityPorts_
+      .openIframe(this.iframe_, this.src_, this.args_)
+      .then(port => {
+        port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
+      });
     return this.iframe_;
   }
 }
@@ -3725,7 +3955,6 @@ class SmartSubscriptionButtonApi {
  * limitations under the License.
  */
 
-
 /**
  * The button title should match that of button's SVG.
  */
@@ -3737,7 +3966,7 @@ const TITLE_LANG_MAP = {
   'es': 'Suscríbete con Google',
   'es-latam': 'Suscríbete con Google',
   'es-latn': 'Suscríbete con Google',
-  'fr': 'S\'abonner avec Google',
+  'fr': "S'abonner avec Google",
   'hi': 'Google के ज़रिये सदस्यता',
   'id': 'Berlangganan dengan Google',
   'it': 'Abbonati con Google',
@@ -3757,20 +3986,22 @@ const TITLE_LANG_MAP = {
   'zh-tw': '透過 Google 訂閱',
 };
 
-
 /**
  * The button stylesheet can be found in the `/assets/swg-button.css`.
  * It's produced by the `gulp assets` task and deployed to
  * `https://news.google.com/swg/js/v1/swg-button.css`.
  */
 class ButtonApi {
-
   /**
    * @param {!../model/doc.Doc} doc
+   * @param {!Promise<!./runtime.ConfiguredRuntime>} configuredRuntimePromise
    */
-  constructor(doc) {
+  constructor(doc, configuredRuntimePromise) {
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = doc;
+
+    /** @private @const {!Promise<!./runtime.ConfiguredRuntime>} */
+    this.configuredRuntimePromise_ = configuredRuntimePromise;
   }
 
   /**
@@ -3788,11 +4019,13 @@ class ButtonApi {
     }
 
     // <link rel="stylesheet" href="..." type="text/css">
-    head.appendChild(createElement(this.doc_.getWin().document, 'link', {
-      'rel': 'stylesheet',
-      'type': 'text/css',
-      'href': url,
-    }));
+    head.appendChild(
+      createElement(this.doc_.getWin().document, 'link', {
+        'rel': 'stylesheet',
+        'type': 'text/css',
+        'href': url,
+      })
+    );
   }
 
   /**
@@ -3812,8 +4045,9 @@ class ButtonApi {
    * @return {!Element}
    */
   attach(button, optionsOrCallback, opt_callback) {
-    const options = /** @type {!../api/subscriptions.ButtonOptions} */
-        (this.getOptions_(optionsOrCallback));
+    const options = /** @type {!../api/subscriptions.ButtonOptions} */ (this.getOptions_(
+      optionsOrCallback
+    ));
     const callback = this.getCallback_(optionsOrCallback, opt_callback);
 
     const theme = options['theme'];
@@ -3824,6 +4058,21 @@ class ButtonApi {
     }
     button.setAttribute('title', msg(TITLE_LANG_MAP, button) || '');
     button.addEventListener('click', callback);
+    button.addEventListener('click', () => {
+      this.configuredRuntimePromise_.then(configuredRuntime => {
+        configuredRuntime
+          .eventManager()
+          .logSwgEvent(
+            AnalyticsEvent.ACTION_SWG_BUTTON_CLICK,
+            /* isFromUserAction */ true
+          );
+      });
+    });
+    this.configuredRuntimePromise_.then(configuredRuntime => {
+      configuredRuntime
+        .eventManager()
+        .logSwgEvent(AnalyticsEvent.IMPRESSION_SWG_BUTTON);
+    });
     return button;
   }
 
@@ -3834,9 +4083,11 @@ class ButtonApi {
    * @private
    */
   getOptions_(optionsOrCallback) {
-    const options = /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */
-        (optionsOrCallback && typeof optionsOrCallback != 'function' ?
-        optionsOrCallback : {'theme': Theme.LIGHT});
+    const options =
+      /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (optionsOrCallback &&
+      typeof optionsOrCallback != 'function'
+        ? optionsOrCallback
+        : {'theme': Theme.LIGHT});
 
     const theme = options['theme'];
     if (theme !== Theme.LIGHT && theme !== Theme.DARK) {
@@ -3853,9 +4104,11 @@ class ButtonApi {
    * @private
    */
   getCallback_(optionsOrCallback, opt_callback) {
-    const callback = /** @type {function()|function(Event):boolean} */ (
-      (typeof optionsOrCallback == 'function' ? optionsOrCallback : null) ||
-          opt_callback);
+    const callback =
+      /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
+      'function'
+        ? optionsOrCallback
+        : null) || opt_callback);
     return callback;
   }
 
@@ -3867,16 +4120,33 @@ class ButtonApi {
    * @return {!Element}
    */
   attachSmartButton(deps, button, optionsOrCallback, opt_callback) {
-    const options = /** @type {!../api/subscriptions.SmartButtonOptions} */
-        (this.getOptions_(optionsOrCallback));
-    const callback = /** @type {function()} */
-        (this.getCallback_(optionsOrCallback, opt_callback));
+    const options = /** @type {!../api/subscriptions.SmartButtonOptions} */ (this.getOptions_(
+      optionsOrCallback
+    ));
+    const callback = /** @type {function()} */ (this.getCallback_(
+      optionsOrCallback,
+      opt_callback
+    ));
 
     // Add required CSS class, if missing.
     button.classList.add('swg-smart-button');
+    button.addEventListener('click', () =>
+      this.configuredRuntimePromise_.then(configuredRuntime =>
+        configuredRuntime
+          .eventManager()
+          .logSwgEvent(
+            AnalyticsEvent.ACTION_SWG_BUTTON_CLICK,
+            /* isFromUserAction */ true
+          )
+      )
+    );
 
     return new SmartSubscriptionButtonApi(
-        deps, button, options, callback).start();
+      deps,
+      button,
+      options,
+      callback
+    ).start();
   }
 }
 
@@ -3898,7 +4168,6 @@ const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!
  * limitations under the License.
  */
 
-
 /** @enum {number} */
 const CallbackId = {
   ENTITLEMENTS: 1,
@@ -3912,11 +4181,9 @@ const CallbackId = {
   CONTRIBUTION_RESPONSE: 9,
 };
 
-
 /**
  */
 class Callbacks {
-
   /**
    */
   constructor() {
@@ -3938,8 +4205,9 @@ class Callbacks {
    */
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
-        CallbackId.ENTITLEMENTS,
-        promise.then(res => res.clone()));
+      CallbackId.ENTITLEMENTS,
+      promise.then(res => res.clone())
+    );
   }
 
   /**
@@ -4046,8 +4314,9 @@ class Callbacks {
    */
   triggerSubscribeResponse(responsePromise) {
     return this.trigger_(
-        CallbackId.SUBSCRIBE_RESPONSE,
-        responsePromise.then(res => res.clone()));
+      CallbackId.SUBSCRIBE_RESPONSE,
+      responsePromise.then(res => res.clone())
+    );
   }
 
   /**
@@ -4056,8 +4325,9 @@ class Callbacks {
    */
   triggerContributionResponse(responsePromise) {
     return this.trigger_(
-        CallbackId.CONTRIBUTION_RESPONSE,
-        responsePromise.then(res => res.clone()));
+      CallbackId.CONTRIBUTION_RESPONSE,
+      responsePromise.then(res => res.clone())
+    );
   }
 
   /**
@@ -4181,14 +4451,12 @@ class Callbacks {
  * limitations under the License.
  */
 
-
 /**
  * abstract View Class. Used to render the content within the Dialog. The
  * extended class has actual content.
  * @abstract
  */
 class View {
-
   /**
    * Empty constructor.
    */
@@ -4251,7 +4519,6 @@ class View {
  * limitations under the License.
  */
 
-
 /**
  * Whether the specified error is an AbortError type.
  * See https://heycam.github.io/webidl/#aborterror.
@@ -4261,7 +4528,6 @@ class View {
 function isCancelError(error) {
   return activityPorts_12(error);
 }
-
 
 /**
  * Creates or emulates a DOMException of AbortError type.
@@ -4273,7 +4539,6 @@ function isCancelError(error) {
 function createCancelError(win, opt_message) {
   return activityPorts_11(win, opt_message);
 }
-
 
 /**
  * A set of error utilities combined in a class to allow easy stubbing in tests.
@@ -4305,7 +4570,6 @@ class ErrorUtils {
  * limitations under the License.
  */
 
-
 /**
  * @param {!../components/activities.ActivityPortDef} port
  * @param {string} requireOrigin
@@ -4314,14 +4578,17 @@ class ErrorUtils {
  * @return {!Promise<!Object>}
  */
 function acceptPortResultData(
-    port,
-    requireOrigin,
-    requireOriginVerified,
-    requireSecureChannel) {
+  port,
+  requireOrigin,
+  requireOriginVerified,
+  requireSecureChannel
+) {
   return port.acceptResult().then(result => {
-    if (result.origin != requireOrigin ||
-        requireOriginVerified && !result.originVerified ||
-        requireSecureChannel && !result.secureChannel) {
+    if (
+      result.origin != requireOrigin ||
+      (requireOriginVerified && !result.originVerified) ||
+      (requireSecureChannel && !result.secureChannel)
+    ) {
       throw new Error('channel mismatch');
     }
     return result.data;
@@ -4350,12 +4617,10 @@ const iframeAttributes$1 = {
   'scrolling': 'no',
 };
 
-
 /**
  * Class to build and render Activity iframe view.
  */
 class ActivityIframeView extends View {
-
   /**
    * @param {!Window} win
    * @param {!../components/activities.ActivityPorts} activityPorts
@@ -4365,12 +4630,13 @@ class ActivityIframeView extends View {
    * @param {boolean=} hasLoadingIndicator
    */
   constructor(
-      win,
-      activityPorts,
-      src,
-      args,
-      shouldFadeBody = false,
-      hasLoadingIndicator = false) {
+    win,
+    activityPorts,
+    src,
+    args,
+    shouldFadeBody = false,
+    hasLoadingIndicator = false
+  ) {
     super();
 
     /** @private @const {!Window} */
@@ -4380,9 +4646,11 @@ class ActivityIframeView extends View {
     this.doc_ = this.win_.document;
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (
-            createElement(this.doc_, 'iframe', iframeAttributes$1));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_,
+      'iframe',
+      iframeAttributes$1
+    ));
 
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
@@ -4424,8 +4692,9 @@ class ActivityIframeView extends View {
 
   /** @override */
   init(dialog) {
-    return this.activityPorts_.openIframe(this.iframe_, this.src_, this.args_)
-        .then(port => this.onOpenIframeResponse_(port, dialog));
+    return this.activityPorts_
+      .openIframe(this.iframe_, this.src_, this.args_)
+      .then(port => this.onOpenIframeResponse_(port, dialog));
   }
 
   /**
@@ -4505,10 +4774,15 @@ class ActivityIframeView extends View {
   acceptResultAndVerify(
     requireOrigin,
     requireOriginVerified,
-    requireSecureChannel) {
+    requireSecureChannel
+  ) {
     return this.getPortPromise_().then(port => {
-      return acceptPortResultData(port, requireOrigin,
-          requireOriginVerified, requireSecureChannel);
+      return acceptPortResultData(
+        port,
+        requireOrigin,
+        requireOriginVerified,
+        requireSecureChannel
+      );
     });
   }
 
@@ -4562,7 +4836,6 @@ class ActivityIframeView extends View {
  */
 const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
 
-
 /**
  * Converts a string which holds 8-bit code points, such as the result of atob,
  * into a Uint8Array with the corresponding bytes.
@@ -4580,7 +4853,6 @@ function stringToBytes(str) {
   return bytes;
 }
 
-
 /**
  * Converts a 8-bit bytes array into a string
  * @param {!Uint8Array} bytes
@@ -4596,7 +4868,6 @@ function bytesToString(bytes) {
   return array.join('');
 }
 
-
 /**
  * Interpret a byte array as a UTF-8 string.
  * @param {!BufferSource} bytes
@@ -4610,7 +4881,6 @@ function utf8DecodeSync(bytes) {
   return decodeURIComponent(escape(asciiString));
 }
 
-
 /**
  * Turn a string into UTF-8 bytes.
  * @param {string} string
@@ -4622,7 +4892,6 @@ function utf8EncodeSync(string) {
   }
   return stringToBytes(unescape(encodeURIComponent(string)));
 }
-
 
 /**
  * Converts a string which is in base64url encoding into a Uint8Array
@@ -4659,7 +4928,7 @@ function base64UrlDecodeToBytes(str) {
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 function parseJson(json) {
-  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**
@@ -4698,13 +4967,11 @@ function tryParseJson(json, opt_onFailed) {
  * limitations under the License.
  */
 
-
 /**
  * Provides helper methods to decode and verify JWT tokens.
  */
 class JwtHelper {
-  constructor() {
-  }
+  constructor() {}
 
   /**
    * Decodes JWT token and returns its payload.
@@ -5090,7 +5357,7 @@ class UserData {
 
 /**
  */
-class SubscribeResponse {
+class SubscribeResponse$1 {
 
   /**
    * @param {string} raw
@@ -5120,7 +5387,7 @@ class SubscribeResponse {
    * @return {!SubscribeResponse}
    */
   clone() {
-    return new SubscribeResponse(
+    return new SubscribeResponse$1(
         this.raw,
         this.purchaseData,
         this.userData,
@@ -5211,22 +5478,6 @@ class PurchaseData {
  * limitations under the License.
  */
 
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 
 /**
  */
@@ -5295,7 +5546,7 @@ class DeferredAccountCreationResponse {
 }
 
 /**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -5492,6 +5743,22 @@ const Event = {
 };
 
 /**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * @enum {string}
  */
 const PropensityType = {
@@ -5516,7 +5783,6 @@ const PropensityType = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /** @enum {string} */
 const SubscriptionFlows = {
@@ -5567,6 +5833,7 @@ function defaultConfig() {
   return {
     windowOpenMode: WindowOpenMode.AUTO,
     analyticsMode: AnalyticsMode.DEFAULT,
+    enableSwgAnalytics: false,
   };
 }
 
@@ -5594,7 +5861,6 @@ function defaultConfig() {
  * In other words, Flow = Payments + Account Creation.
  */
 
-
 /**
  * String values input by the publisher are mapped to the number values.
  * @type {!Object<string, number>}
@@ -5606,7 +5872,6 @@ const ReplaceSkuProrationModeMapping = {
   'IMMEDIATE_WITH_TIME_PRORATION': 1,
 };
 
-
 /**
  * The flow to initiate payment process.
  */
@@ -5617,9 +5882,10 @@ class PayStartFlow {
    * @param {!../api/subscriptions.ProductType} productType
    */
   constructor(
-        deps,
-        skuOrSubscriptionRequest,
-        productType = ProductType.SUBSCRIPTION) {
+    deps,
+    skuOrSubscriptionRequest,
+    productType = ProductType.SUBSCRIPTION
+  ) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
@@ -5634,14 +5900,18 @@ class PayStartFlow {
 
     /** @private @const {!../api/subscriptions.SubscriptionRequest} */
     this.subscriptionRequest_ =
-        typeof skuOrSubscriptionRequest == 'string' ?
-            {'skuId': skuOrSubscriptionRequest} : skuOrSubscriptionRequest;
+      typeof skuOrSubscriptionRequest == 'string'
+        ? {'skuId': skuOrSubscriptionRequest}
+        : skuOrSubscriptionRequest;
 
     /**@private @const {!ProductType} */
     this.productType_ = productType;
 
     /** @private @const {!../runtime/analytics-service.AnalyticsService} */
     this.analyticsService_ = deps.analytics();
+
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
   }
 
   /**
@@ -5650,48 +5920,56 @@ class PayStartFlow {
    */
   start() {
     // Add the 'publicationId' key to the subscriptionRequest_ object.
-    const swgPaymentRequest =
-        Object.assign({}, this.subscriptionRequest_, {
-          'publicationId': this.pageConfig_.getPublicationId()});
+    const swgPaymentRequest = Object.assign({}, this.subscriptionRequest_, {
+      'publicationId': this.pageConfig_.getPublicationId(),
+    });
 
     // Map the proration mode to the enum value (if proration exists).
     const prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
     if (prorationMode) {
       swgPaymentRequest.replaceSkuProrationMode =
-          ReplaceSkuProrationModeMapping[prorationMode];
+        ReplaceSkuProrationModeMapping[prorationMode];
     }
 
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SUBSCRIBE, this.subscriptionRequest_);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(
+        SubscriptionFlows.SUBSCRIBE,
+        this.subscriptionRequest_
+      );
     // TODO(chenshay): Create analytics for 'replace subscription'.
     this.analyticsService_.setSku(this.subscriptionRequest_.skuId);
-    this.analyticsService_.logEvent(AnalyticsEvent.ACTION_SUBSCRIBE);
-    this.payClient_.start({
-      'apiVersion': 1,
-      'allowedPaymentMethods': ['CARD'],
-      'environment': 'PRODUCTION',
-      'playEnvironment': 'PROD',
-      'swg': swgPaymentRequest,
-      'i': {
-        'startTimeMs': Date.now(),
-        'googleTransactionId': this.analyticsService_.getTransactionId(),
-        'productType': this.productType_,
+    this.eventManager_.logSwgEvent(
+      AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
+      true
+    );
+    this.payClient_.start(
+      {
+        'apiVersion': 1,
+        'allowedPaymentMethods': ['CARD'],
+        'environment': 'PRODUCTION',
+        'playEnvironment': 'PROD',
+        'swg': swgPaymentRequest,
+        'i': {
+          'startTimeMs': Date.now(),
+          'googleTransactionId': this.analyticsService_.getTransactionId(),
+          'productType': this.productType_,
+        },
       },
-    }, {
-      forceRedirect:
+      {
+        forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
-    });
+      }
+    );
     return Promise.resolve();
   }
 }
-
 
 /**
  * The flow for successful payments completion.
  */
 class PayCompleteFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    */
@@ -5699,20 +5977,28 @@ class PayCompleteFlow {
     deps.payClient().onResponse(payPromise => {
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
-      const promise =
-          validatePayResponse(deps, payPromise, flow.complete.bind(flow));
+      const promise = validatePayResponse(
+        deps,
+        payPromise,
+        flow.complete.bind(flow)
+      );
       deps.callbacks().triggerSubscribeResponse(promise);
-      return promise.then(response => {
-        flow.start(response);
-      }, reason => {
-        if (isCancelError(reason)) {
-          deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
-        } else {
-          deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
-          deps.jserror().error('Pay failed', reason);
+      return promise.then(
+        response => {
+          flow.start(response);
+        },
+        reason => {
+          if (isCancelError(reason)) {
+            deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
+          } else {
+            deps
+              .eventManager()
+              .logSwgEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED, false);
+            deps.jserror().error('Pay failed', reason);
+          }
+          throw reason;
         }
-        throw reason;
-      });
+      );
     });
   }
 
@@ -5743,6 +6029,9 @@ class PayCompleteFlow {
 
     /** @private @const {!../runtime/analytics-service.AnalyticsService} */
     this.analyticsService_ = deps.analytics();
+
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
   }
 
   /**
@@ -5759,7 +6048,11 @@ class PayCompleteFlow {
         this.analyticsService_.setSku(sku);
       }
     }
-    this.analyticsService_.logEvent(AnalyticsEvent.ACTION_PAYMENT_COMPLETE);
+
+    this.eventManager_.logSwgEvent(
+      AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
+      true
+    );
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
     const args = {
@@ -5769,21 +6062,24 @@ class PayCompleteFlow {
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
       args['idToken'] = response.userData.idToken;
-      this.deps_.entitlementsManager().pushNextEntitlements(
-          response.entitlements.raw);
+      this.deps_
+        .entitlementsManager()
+        .pushNextEntitlements(response.entitlements.raw);
     } else {
       args['loginHint'] = response.userData && response.userData.email;
     }
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/payconfirmiframe'),
-        feArgs(args),
-        /* shouldFadeBody */ true);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/payconfirmiframe'),
+      feArgs(args),
+      /* shouldFadeBody */ true
+    );
     this.activityIframeView_.onMessageDeprecated(data => {
       if (data['entitlements']) {
-        this.deps_.entitlementsManager().pushNextEntitlements(
-            /** @type {string} */ (data['entitlements']));
+        this.deps_
+          .entitlementsManager()
+          .pushNextEntitlements(/** @type {string} */ (data['entitlements']));
         return;
       }
     });
@@ -5799,21 +6095,25 @@ class PayCompleteFlow {
    * @return {!Promise}
    */
   complete() {
-    this.analyticsService_.logEvent(AnalyticsEvent.ACTION_ACCOUNT_CREATED);
+    this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_ACCOUNT_CREATED, true);
     this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
       this.activityIframeView_.messageDeprecated({'complete': true});
     });
-    return this.activityIframeView_.acceptResult().catch(() => {
-      // Ignore errors.
-    }).then(() => {
-      this.analyticsService_.logEvent(
-          AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED);
-      this.deps_.entitlementsManager().setToastShown(true);
-    });
+    return this.activityIframeView_
+      .acceptResult()
+      .catch(() => {
+        // Ignore errors.
+      })
+      .then(() => {
+        this.eventManager_.logSwgEvent(
+          AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED,
+          true
+        );
+        this.deps_.entitlementsManager().setToastShown(true);
+      });
   }
 }
-
 
 /**
  * @param {!./deps.DepsDef} deps
@@ -5834,7 +6134,6 @@ function validatePayResponse(deps, payPromise, completeHandler) {
     return parseSubscriptionResponse(deps, data, completeHandler);
   });
 }
-
 
 /**
  * @param {!./deps.DepsDef} deps
@@ -5877,15 +6176,15 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     throw new Error('unexpected payment response');
   }
   raw = JSON.stringify(/** @type {!JsonObject} */ (swgData));
-  return new SubscribeResponse(
-      raw,
-      parsePurchaseData(swgData),
-      parseUserData(swgData),
-      parseEntitlements(deps, swgData),
-      productType,
-      completeHandler);
+  return new SubscribeResponse$1(
+    raw,
+    parsePurchaseData(swgData),
+    parseUserData(swgData),
+    parseEntitlements(deps, swgData),
+    productType,
+    completeHandler
+  );
 }
-
 
 /**
  * @param {!Object} swgData
@@ -5896,7 +6195,6 @@ function parsePurchaseData(swgData) {
   const signature = swgData['purchaseDataSignature'];
   return new PurchaseData(raw, signature);
 }
-
 
 /**
  * @param {!Object} swgData
@@ -5912,7 +6210,6 @@ function parseUserData(swgData) {
   return new UserData(idToken, jwt);
 }
 
-
 /**
  * @param {!./deps.DepsDef} deps
  * @param {!Object} swgData
@@ -5926,14 +6223,13 @@ function parseEntitlements(deps, swgData) {
   return null;
 }
 
-
 /**
  * @param {!PurchaseData} purchaseData
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
   const json = tryParseJson(purchaseData.raw);
-  return json && json['productId'] || null;
+  return (json && json['productId']) || null;
 }
 
 /**
@@ -5952,12 +6248,10 @@ function parseSkuFromPurchaseDataSafe(purchaseData) {
  * limitations under the License.
  */
 
-
 /**
  * The class for Contributions flow.
  */
 class ContributionsFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!../api/subscriptions.OffersRequest|undefined} options
@@ -5982,18 +6276,19 @@ class ContributionsFlow {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/contributionsiframe'),
-        feArgs({
-          'productId': deps.pageConfig().getProductId(),
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'productType': ProductType.UI_CONTRIBUTION,
-          'list': options && options.list || 'default',
-          'skus': options && options.skus || null,
-          'isClosable': isClosable,
-        }),
-        /* shouldFadeBody */ true);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/contributionsiframe'),
+      feArgs({
+        'productId': deps.pageConfig().getProductId(),
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'productType': ProductType.UI_CONTRIBUTION,
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': isClosable,
+      }),
+      /* shouldFadeBody */ true
+    );
   }
 
   /**
@@ -6002,11 +6297,13 @@ class ContributionsFlow {
    */
   start() {
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
     this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(
-          SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
+      this.deps_
+        .callbacks()
+        .triggerFlowCanceled(SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
     });
 
     // If result is due to OfferSelection, redirect to payments.
@@ -6019,10 +6316,10 @@ class ContributionsFlow {
       }
       if (result['sku']) {
         new PayStartFlow(
-            this.deps_,
-            /** @type {string} */ (result['sku']),
-            ProductType.UI_CONTRIBUTION)
-            .start();
+          this.deps_,
+          /** @type {string} */ (result['sku']),
+          ProductType.UI_CONTRIBUTION
+        ).start();
         return;
       }
     });
@@ -6047,13 +6344,11 @@ class ContributionsFlow {
  * limitations under the License.
  */
 
-
 /**
  * The flow to initiate deferred account process.
  * See `Subscriptions.completeDeferredAccountCreation` API.
  */
 class DeferredAccountFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    * @param {?../api/deferred-account-creation.DeferredAccountCreationRequest} options
@@ -6101,34 +6396,44 @@ class DeferredAccountFlow {
     }
 
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
 
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/recoveriframe'),
-        feArgs({
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'productId': this.deps_.pageConfig().getProductId(),
-          'entitlements': entitlements && entitlements.raw || null,
-          'consent': this.options_.consent,
-        }),
-        /* shouldFadeBody */ true);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/recoveriframe'),
+      feArgs({
+        'publicationId': this.deps_.pageConfig().getPublicationId(),
+        'productId': this.deps_.pageConfig().getProductId(),
+        'entitlements': (entitlements && entitlements.raw) || null,
+        'consent': this.options_.consent,
+      }),
+      /* shouldFadeBody */ true
+    );
 
     this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_);
-    return this.activityIframeView_.acceptResult().then(result => {
-      // The consent part is complete.
-      return this.handleConsentResponse_(/** @type {!Object} */ (result.data));
-    }, reason => {
-      if (isCancelError(reason)) {
-        this.deps_.callbacks().triggerFlowCanceled(
-            SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
-      } else {
-        this.dialogManager_.completeView(this.activityIframeView_);
+    return this.activityIframeView_.acceptResult().then(
+      result => {
+        // The consent part is complete.
+        return this.handleConsentResponse_(
+          /** @type {!Object} */ (result.data)
+        );
+      },
+      reason => {
+        if (isCancelError(reason)) {
+          this.deps_
+            .callbacks()
+            .triggerFlowCanceled(
+              SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION
+            );
+        } else {
+          this.dialogManager_.completeView(this.activityIframeView_);
+        }
+        throw reason;
       }
-      throw reason;
-    });
+    );
   }
 
   /**
@@ -6143,20 +6448,23 @@ class DeferredAccountFlow {
     const entitlementsJwt = data['entitlements'];
     const idToken = data['idToken'];
     const productType = data['productType'];
-    const entitlements = this.deps_.entitlementsManager()
-        .parseEntitlements({'signedEntitlements': entitlementsJwt});
+    const entitlements = this.deps_
+      .entitlementsManager()
+      .parseEntitlements({'signedEntitlements': entitlementsJwt});
     const userData = new UserData(
-        idToken,
-        /** @type {!Object} */ (new JwtHelper().decode(idToken)));
-    const purchaseDataList =
-        data['purchaseDataList'] ?
-        data['purchaseDataList'].map(pd =>
-            new PurchaseData(pd['data'], pd['signature'])) :
-        [
+      idToken,
+      /** @type {!Object} */ (new JwtHelper().decode(idToken))
+    );
+    const purchaseDataList = data['purchaseDataList']
+      ? data['purchaseDataList'].map(
+          pd => new PurchaseData(pd['data'], pd['signature'])
+        )
+      : [
           // TODO(dvoytenko): cleanup/deprecate.
           new PurchaseData(
-              data['purchaseData']['data'],
-              data['purchaseData']['signature']),
+            data['purchaseData']['data'],
+            data['purchaseData']['signature']
+          ),
         ];
 
     // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
@@ -6165,39 +6473,26 @@ class DeferredAccountFlow {
     const completeHandler = creatingFlow.complete.bind(creatingFlow);
 
     const response = new DeferredAccountCreationResponse(
-        entitlements,
-        userData,
-        purchaseDataList,
-        completeHandler);
+      entitlements,
+      userData,
+      purchaseDataList,
+      completeHandler
+    );
 
     // Start the "sync" flow.
-    creatingFlow.start(new SubscribeResponse(
-        '',  // raw field doesn't matter in this case
+    creatingFlow.start(
+      new SubscribeResponse$1(
+        '', // raw field doesn't matter in this case
         purchaseDataList[0],
         userData,
         entitlements,
         productType,
-        () => Promise.resolve()  // completeHandler doesn't matter in this case
-    ));
+        () => Promise.resolve() // completeHandler doesn't matter in this case
+      )
+    );
     return response;
   }
 }
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
@@ -6217,7 +6512,6 @@ const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-ani
  * limitations under the License.
  */
 
-
 /**
  * @param {!Document} doc
  * @return {string}
@@ -6225,7 +6519,6 @@ const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-ani
 function getReadyState(doc) {
   return /** @type {string} */ (doc['readyState']);
 }
-
 
 /**
  * Whether the document is ready.
@@ -6297,24 +6590,21 @@ function whenDocumentReady(doc) {
  * limitations under the License.
  */
 
-
 /** @implements {Doc} */
 class GlobalDoc {
-
   /**
    * @param {!Window|!Document} winOrDoc
    */
   constructor(winOrDoc) {
     const isWin = !!winOrDoc.document;
     /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    this.win_ = /** @type {!Window} */ (isWin
+      ? /** @type {!Window} */ (winOrDoc)
+      : /** @type {!Document} */ (winOrDoc).defaultView);
     /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
+    this.doc_ = isWin
+      ? /** @type {!Window} */ (winOrDoc).document
+      : /** @type {!Document} */ (winOrDoc);
   }
 
   /** @override */
@@ -6354,18 +6644,17 @@ class GlobalDoc {
   }
 }
 
-
 /**
  * @param {!Document|!Window|!Doc} input
  * @return {!Doc}
  */
 function resolveDoc(input) {
   // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+  if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
     return new GlobalDoc(/** @type {!Document} */ (input));
   }
   // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
+  if (/** @type {!Window} */ (input).document) {
     return new GlobalDoc(/** @type {!Window} */ (input));
   }
   return /** @type {!Doc} */ (input);
@@ -6402,9 +6691,15 @@ function transition(el, props, durationMillis, curve) {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
-      setImportantStyles(el, Object.assign({
-        'transition': `transform ${tr}, opacity ${tr}`,
-      }, props));
+      setImportantStyles(
+        el,
+        Object.assign(
+          {
+            'transition': `transform ${tr}, opacity ${tr}`,
+          },
+          props
+        )
+      );
     });
   }).then(() => {
     setImportantStyles(el, {
@@ -6429,9 +6724,7 @@ function transition(el, props, durationMillis, curve) {
  * limitations under the License.
  */
 
-
 class Graypane {
-
   /**
    * @param {!../model/doc.Doc} doc
    * @param {number} zIndex
@@ -6441,8 +6734,9 @@ class Graypane {
     this.doc_ = doc;
 
     /** @private @const {!Element} */
-    this.fadeBackground_ = this.doc_.getWin().document.createElement(
-        'swg-popup-background');
+    this.fadeBackground_ = this.doc_
+      .getWin()
+      .document.createElement('swg-popup-background');
     setImportantStyles(this.fadeBackground_, {
       'z-index': zIndex,
       'display': 'none',
@@ -6494,9 +6788,14 @@ class Graypane {
       'opacity': animated ? 0 : 1,
     });
     if (animated) {
-      return transition(this.fadeBackground_, {
-        'opacity': 1,
-      }, 300, 'ease-out');
+      return transition(
+        this.fadeBackground_,
+        {
+          'opacity': 1,
+        },
+        300,
+        'ease-out'
+      );
     }
   }
 
@@ -6507,9 +6806,14 @@ class Graypane {
    */
   hide(animated = true) {
     if (animated) {
-      return transition(this.fadeBackground_, {
-        'opacity': 0,
-      }, 300, 'ease-out').then(() => {
+      return transition(
+        this.fadeBackground_,
+        {
+          'opacity': 0,
+        },
+        300,
+        'ease-out'
+      ).then(() => {
         setImportantStyles(this.fadeBackground_, {'display': 'none'});
       });
     }
@@ -6533,25 +6837,25 @@ class Graypane {
  * limitations under the License.
  */
 
-
 /**
  * Loading indicator class. Builds the loading indicator view to be injected in
  * parent element <iframe class="swg-dialog"> element. Provides methods to
  * show/hide loading indicator.
  */
 class LoadingView {
-
   /**
    * @param {!Document} doc
    */
   constructor(doc) {
-
     /** @private @const {!Document} */
     this.doc_ = doc;
 
     /** @private @const {!Element} */
-    this.loadingContainer_ =
-        createElement(this.doc_, 'swg-loading-container', {});
+    this.loadingContainer_ = createElement(
+      this.doc_,
+      'swg-loading-container',
+      {}
+    );
 
     /** @private @const {!Element} */
     this.loading_ = createElement(this.doc_, 'swg-loading', {});
@@ -6593,12 +6897,18 @@ class LoadingView {
   buildLoadingIndicator_() {
     const loadingContainer = this.loading_;
 
-    const loadingIndicatorTopContainer =
-        createElement(this.doc_, 'swg-loading-animate', {});
+    const loadingIndicatorTopContainer = createElement(
+      this.doc_,
+      'swg-loading-animate',
+      {}
+    );
     loadingContainer.appendChild(loadingIndicatorTopContainer);
 
-    const loadingIndicatorChildContainer =
-        createElement(this.doc_, 'swg-loading-image', {});
+    const loadingIndicatorChildContainer = createElement(
+      this.doc_,
+      'swg-loading-image',
+      {}
+    );
     loadingIndicatorTopContainer.appendChild(loadingIndicatorChildContainer);
   }
 }
@@ -6630,19 +6940,19 @@ const friendlyIframeAttributes = {
  * The class for building friendly iframe.
  */
 class FriendlyIframe {
-
   /**
    * @param {!Document} doc
    * @param {!Object<string, string|number>=} attrs
    */
   constructor(doc, attrs = {}) {
-
     const mergedAttrs = Object.assign({}, friendlyIframeAttributes, attrs);
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (
-            createElement(doc, 'iframe', mergedAttrs));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      doc,
+      'iframe',
+      mergedAttrs
+    ));
 
     // Ensure that the new iframe does not inherit any CSS styles.
     resetAllStyles(this.iframe_);
@@ -6674,8 +6984,9 @@ class FriendlyIframe {
    * @return {!Document}
    */
   getDocument() {
-    const doc = this.getElement().contentDocument ||
-        (this.getElement().contentWindow &&
+    const doc =
+      this.getElement().contentDocument ||
+      (this.getElement().contentWindow &&
         this.getElement().contentWindow.document);
 
     if (!doc) {
@@ -6766,13 +7077,11 @@ const PositionAt = {
   FULL: 'FULL',
 };
 
-
 /**
  * The class for the top level dialog.
  * @final
  */
 class Dialog {
-
   /**
    * Create a dialog for the provided doc.
    * @param {!../model/doc.Doc} doc
@@ -6784,16 +7093,19 @@ class Dialog {
     this.doc_ = doc;
 
     /** @private @const {!FriendlyIframe} */
-    this.iframe_ = new FriendlyIframe(
-        doc.getWin().document, {'class': 'swg-dialog'});
+    this.iframe_ = new FriendlyIframe(doc.getWin().document, {
+      'class': 'swg-dialog',
+    });
 
     /** @private @const {!Graypane} */
     this.graypane_ = new Graypane(doc, Z_INDEX - 1);
 
-    const modifiedImportantStyles =
-        Object.assign({}, rootElementImportantStyles, importantStyles);
-    setImportantStyles(
-        this.iframe_.getElement(), modifiedImportantStyles);
+    const modifiedImportantStyles = Object.assign(
+      {},
+      rootElementImportantStyles,
+      importantStyles
+    );
+    setImportantStyles(this.iframe_.getElement(), modifiedImportantStyles);
 
     setStyles(this.iframe_.getElement(), styles);
 
@@ -6801,7 +7113,7 @@ class Dialog {
     this.loadingView_ = null;
 
     /** @private {?Element} */
-    this.container_ = null;  // Depends on constructed document inside iframe.
+    this.container_ = null; // Depends on constructed document inside iframe.
 
     /** @private {?./view.View} */
     this.view_ = null;
@@ -6828,7 +7140,7 @@ class Dialog {
     }
 
     // Attach.
-    this.doc_.getBody().appendChild(iframe.getElement());  // Fires onload.
+    this.doc_.getBody().appendChild(iframe.getElement()); // Fires onload.
     this.graypane_.attach();
 
     if (hidden) {
@@ -6879,9 +7191,14 @@ class Dialog {
     if (animated) {
       animating = this.animate_(() => {
         this.graypane_.hide(/* animate */ true);
-        return transition(this.getElement(), {
-          'transform': 'translateY(100%)',
-        }, 300, 'ease-out');
+        return transition(
+          this.getElement(),
+          {
+            'transform': 'translateY(100%)',
+          },
+          300,
+          'ease-out'
+        );
       });
     } else {
       animating = Promise.resolve();
@@ -6937,7 +7254,7 @@ class Dialog {
     }
   }
 
-   /**
+  /**
    * Transition out of an old view.
    * @private
    */
@@ -6998,11 +7315,16 @@ class Dialog {
         'opactiy': 1,
         'visibility': 'visible',
       });
-      return transition(this.getElement(), {
-        'transform': 'translateY(0)',
-        'opacity': 1,
-        'visibility': 'visible',
-      }, 300, 'ease-out');
+      return transition(
+        this.getElement(),
+        {
+          'transform': 'translateY(0)',
+          'opacity': 1,
+          'visibility': 'visible',
+        },
+        300,
+        'ease-out'
+      );
     });
     this.hidden_ = false;
   }
@@ -7030,16 +7352,26 @@ class Dialog {
             'height': `${newHeight}px`,
             'transform': `translateY(${newHeight - oldHeight}px)`,
           });
-          return transition(this.getElement(), {
-            'transform': 'translateY(0)',
-          }, 300, 'ease-out');
+          return transition(
+            this.getElement(),
+            {
+              'transform': 'translateY(0)',
+            },
+            300,
+            'ease-out'
+          );
         });
       } else {
         // Collapse.
         animating = this.animate_(() => {
-          return transition(this.getElement(), {
-            'transform': `translateY(${oldHeight - newHeight}px)`,
-          }, 300, 'ease-out').then(() => {
+          return transition(
+            this.getElement(),
+            {
+              'transform': `translateY(${oldHeight - newHeight}px)`,
+            },
+            300,
+            'ease-out'
+          ).then(() => {
             setImportantStyles(this.getElement(), {
               'height': `${newHeight}px`,
               'transform': 'translateY(0)',
@@ -7066,13 +7398,18 @@ class Dialog {
    */
   animate_(callback) {
     const wait = this.animating_ || Promise.resolve();
-    return this.animating_ = wait.then(() => {
-      return callback();
-    }, () => {
-      // Ignore errors to make sure animations don't get stuck.
-    }).then(() => {
-      this.animating_ = null;
-    });
+    return (this.animating_ = wait
+      .then(
+        () => {
+          return callback();
+        },
+        () => {
+          // Ignore errors to make sure animations don't get stuck.
+        }
+      )
+      .then(() => {
+        this.animating_ = null;
+      }));
   }
 
   /**
@@ -7082,7 +7419,7 @@ class Dialog {
    * @private
    */
   getMaxAllowedHeight_(height) {
-    return Math.min(height, this.doc_.getWin()./*OK*/innerHeight * 0.9);
+    return Math.min(height, this.doc_.getWin()./*OK*/ innerHeight * 0.9);
   }
 
   /**
@@ -7109,7 +7446,7 @@ class Dialog {
    */
   updatePaddingToHtml_(newHeight) {
     if (this.inferPosition_() == PositionAt.BOTTOM) {
-      const bottomPadding = newHeight + 20;  // Add some extra padding.
+      const bottomPadding = newHeight + 20; // Add some extra padding.
       const htmlElement = this.doc_.getRootElement();
       setImportantStyles(htmlElement, {
         'padding-bottom': `${bottomPadding}px`,
@@ -7124,7 +7461,6 @@ class Dialog {
   removePaddingToHtml_() {
     this.doc_.getRootElement().style.removeProperty('padding-bottom');
   }
-
 
   /**
    * Calculates the position of the dialog. Currently dialog is positioned at
@@ -7187,13 +7523,11 @@ class Dialog {
 
 const POPUP_Z_INDEX = 2147483647;
 
-
 /**
  * The class for the top level dialog.
  * @final
  */
 class DialogManager {
-
   /**
    * @param {!../model/doc.Doc} doc
    */
@@ -7246,7 +7580,7 @@ class DialogManager {
       if (isCancelError(reason)) {
         this.completeView(view);
       }
-      throw (reason);
+      throw reason;
     });
     return this.openDialog(hidden).then(dialog => {
       return dialog.openView(view);
@@ -7338,14 +7672,12 @@ const iframeAttributes$2 = {
  * The class Notification toast.
  */
 class Toast {
-
   /**
    * @param {!../runtime/deps.DepsDef} deps
    * @param {string} src
    * @param {!Object<string, ?>} args
    */
   constructor(deps, src, args) {
-
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
@@ -7362,12 +7694,11 @@ class Toast {
     this.animating_ = null;
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (
-            createElement(
-                this.doc_.getWin().document,
-                'iframe',
-                iframeAttributes$2));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_.getWin().document,
+      'iframe',
+      iframeAttributes$2
+    ));
 
     setImportantStyles(this.iframe_, toastImportantStyles);
 
@@ -7390,7 +7721,7 @@ class Toast {
    * @return {!Promise}
    */
   open() {
-    this.doc_.getBody().appendChild(this.iframe_);  // Fires onload.
+    this.doc_.getBody().appendChild(this.iframe_); // Fires onload.
     return this.buildToast_();
   }
 
@@ -7399,30 +7730,37 @@ class Toast {
    */
   buildToast_() {
     const toastDurationSeconds = 7;
-    return this.activityPorts_.openIframe(
-        this.iframe_, this.src_, this.args_).then(port => {
-          return port.whenReady();
-        }).then(() => {
-          resetStyles(this.iframe_, ['height']);
+    return this.activityPorts_
+      .openIframe(this.iframe_, this.src_, this.args_)
+      .then(port => {
+        return port.whenReady();
+      })
+      .then(() => {
+        resetStyles(this.iframe_, ['height']);
 
-          this.animate_(() => {
-            setImportantStyles(this.iframe_, {
-              'transform': 'translateY(100%)',
-              'opactiy': 1,
-              'visibility': 'visible',
-            });
-            return transition(this.iframe_, {
+        this.animate_(() => {
+          setImportantStyles(this.iframe_, {
+            'transform': 'translateY(100%)',
+            'opactiy': 1,
+            'visibility': 'visible',
+          });
+          return transition(
+            this.iframe_,
+            {
               'transform': 'translateY(0)',
               'opacity': 1,
               'visibility': 'visible',
-            }, 400, 'ease-out');
-          });
-
-          // Close the Toast after the specified duration.
-          this.doc_.getWin().setTimeout(() => {
-            this.close();
-          }, (toastDurationSeconds + 1) * 1000);
+            },
+            400,
+            'ease-out'
+          );
         });
+
+        // Close the Toast after the specified duration.
+        this.doc_.getWin().setTimeout(() => {
+          this.close();
+        }, (toastDurationSeconds + 1) * 1000);
+      });
   }
 
   /**
@@ -7432,13 +7770,18 @@ class Toast {
    */
   animate_(callback) {
     const wait = this.animating_ || Promise.resolve();
-    return this.animating_ = wait.then(() => {
-      return callback();
-    }, () => {
-      // Ignore errors to make sure animations don't get stuck.
-    }).then(() => {
-      this.animating_ = null;
-    });
+    return (this.animating_ = wait
+      .then(
+        () => {
+          return callback();
+        },
+        () => {
+          // Ignore errors to make sure animations don't get stuck.
+        }
+      )
+      .then(() => {
+        this.animating_ = null;
+      }));
   }
 
   /**
@@ -7453,11 +7796,16 @@ class Toast {
         return Promise.resolve();
       }, 500);
 
-      return transition(this.iframe_, {
-        'transform': 'translateY(100%)',
-        'opacity': 1,
-        'visibility': 'visible',
-      }, 400, 'ease-out');
+      return transition(
+        this.iframe_,
+        {
+          'transform': 'translateY(100%)',
+          'opacity': 1,
+          'visibility': 'visible',
+        },
+        400,
+        'ease-out'
+      );
     });
   }
 }
@@ -7483,11 +7831,9 @@ const TOAST_STORAGE_KEY = 'toast';
 const ENTS_STORAGE_KEY = 'ents';
 const IS_READY_TO_PAY_STORAGE_KEY = 'isreadytopay';
 
-
 /**
  */
 class EntitlementsManager {
-
   /**
    * @param {!Window} win
    * @param {!../model/page-config.PageConfig} pageConfig
@@ -7538,7 +7884,9 @@ class EntitlementsManager {
   reset(opt_expectPositive) {
     this.responsePromise_ = null;
     this.positiveRetries_ = Math.max(
-        this.positiveRetries_, opt_expectPositive ? 3 : 0);
+      this.positiveRetries_,
+      opt_expectPositive ? 3 : 0
+    );
     if (opt_expectPositive) {
       this.storage_.remove(ENTS_STORAGE_KEY);
       this.storage_.remove(IS_READY_TO_PAY_STORAGE_KEY);
@@ -7558,29 +7906,11 @@ class EntitlementsManager {
   }
 
   /**
-   * @private
-   */
-  logPaywallImpression_() {
-    // Sends event to logging service asynchronously
-    this.analyticsService_.logEvent(AnalyticsEvent.IMPRESSION_PAYWALL);
-  }
-
-  /**
    * @return {string}
    * @private
    */
   getQueryString_() {
     return this.win_.location.search;
-  }
-
-  /**
-   * @private
-   * @return boolean true if UTM source is google
-   */
-  isGoogleUtmSource_() {
-    // TODO(sohanirao): b/120294106
-    const utmParams = parseQueryString$1(this.getQueryString_());
-    return (utmParams['utm_source'] == 'google');
   }
 
   /**
@@ -7590,15 +7920,12 @@ class EntitlementsManager {
   getEntitlements(opt_encryptedDocumentKey) {
     if (!this.responsePromise_) {
       this.responsePromise_ = this.getEntitlementsFlow_(
-          opt_encryptedDocumentKey);
+        opt_encryptedDocumentKey
+      );
     }
     return this.responsePromise_.then(response => {
       if (response.isReadyToPay != null) {
         this.analyticsService_.setReadyToPay(response.isReadyToPay);
-      }
-      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS ||
-            this.isGoogleUtmSource_()) {
-        this.logPaywallImpression_();
       }
       return response;
     });
@@ -7611,7 +7938,10 @@ class EntitlementsManager {
    */
   pushNextEntitlements(raw, opt_isReadyToPay) {
     const entitlements = this.getValidJwtEntitlements_(
-        raw, /* requireNonExpired */ true, opt_isReadyToPay);
+      raw,
+      /* requireNonExpired */ true,
+      opt_isReadyToPay
+    );
     if (entitlements && entitlements.enablesThis()) {
       this.storage_.set(ENTS_STORAGE_KEY, raw);
       return true;
@@ -7626,10 +7956,11 @@ class EntitlementsManager {
    */
   getEntitlementsFlow_(opt_encryptedDocumentKey) {
     return this.fetchEntitlementsWithCaching_(opt_encryptedDocumentKey).then(
-        entitlements => {
-          this.onEntitlementsFetched_(entitlements);
-          return entitlements;
-        });
+      entitlements => {
+        this.onEntitlementsFetched_(entitlements);
+        return entitlements;
+      }
+    );
   }
 
   /**
@@ -7647,8 +7978,10 @@ class EntitlementsManager {
       // Try cache first.
       if (raw && !opt_encryptedDocumentKey) {
         const cached = this.getValidJwtEntitlements_(
-            raw, /* requireNonExpired */ true,
-            irtpStringToBoolean(irtp));
+          raw,
+          /* requireNonExpired */ true,
+          irtpStringToBoolean(irtp)
+        );
         if (cached && cached.enablesThis()) {
           // Already have a positive response.
           this.positiveRetries_ = 0;
@@ -7726,7 +8059,10 @@ class EntitlementsManager {
     const signedData = json['signedEntitlements'];
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
-          signedData, /* requireNonExpired */ false, isReadyToPay);
+        signedData,
+        /* requireNonExpired */ false,
+        isReadyToPay
+      );
       if (entitlements) {
         return entitlements;
       }
@@ -7748,8 +8084,12 @@ class EntitlementsManager {
    * @return {?Entitlements}
    * @private
    */
-  getValidJwtEntitlements_(raw, requireNonExpired, opt_isReadyToPay,
-    opt_decryptedDocumentKey) {
+  getValidJwtEntitlements_(
+    raw,
+    requireNonExpired,
+    opt_isReadyToPay,
+    opt_decryptedDocumentKey
+  ) {
     try {
       const jwt = this.jwtHelper_.decode(raw);
       if (requireNonExpired) {
@@ -7760,12 +8100,21 @@ class EntitlementsManager {
         }
       }
       const entitlementsClaim = jwt['entitlements'];
-      return entitlementsClaim && this.createEntitlements_(
-          raw, entitlementsClaim, opt_isReadyToPay, opt_decryptedDocumentKey)
-          || null;
+      return (
+        (entitlementsClaim &&
+          this.createEntitlements_(
+            raw,
+            entitlementsClaim,
+            opt_isReadyToPay,
+            opt_decryptedDocumentKey
+          )) ||
+        null
+      );
     } catch (e) {
       // Ignore the error.
-      this.win_.setTimeout(() => {throw e;});
+      this.win_.setTimeout(() => {
+        throw e;
+      });
     }
     return null;
   }
@@ -7780,13 +8129,14 @@ class EntitlementsManager {
    */
   createEntitlements_(raw, json, opt_isReadyToPay, opt_decryptedDocumentKey) {
     return new Entitlements(
-        SERVICE_ID,
-        raw,
-        Entitlement.parseListFromJson(json),
-        this.pageConfig_.getProductId(),
-        this.ack_.bind(this),
-        opt_isReadyToPay,
-        opt_decryptedDocumentKey);
+      SERVICE_ID,
+      raw,
+      Entitlement.parseListFromJson(json),
+      this.pageConfig_.getProductId(),
+      this.ack_.bind(this),
+      opt_isReadyToPay,
+      opt_decryptedDocumentKey
+    );
   }
 
   /**
@@ -7803,8 +8153,9 @@ class EntitlementsManager {
     }
 
     // Notify on the received entitlements.
-    this.deps_.callbacks().triggerEntitlementsResponse(
-        Promise.resolve(entitlements));
+    this.deps_
+      .callbacks()
+      .triggerEntitlementsResponse(Promise.resolve(entitlements));
 
     // Show a toast if needed.
     this.maybeShowToast_(entitlements);
@@ -7839,10 +8190,14 @@ class EntitlementsManager {
    */
   showToast_(entitlement) {
     const source = entitlement.source || 'google';
-    return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
-      'publicationId': this.publicationId_,
-      'source': source,
-    })).open();
+    return new Toast(
+      this.deps_,
+      feUrl('/toastiframe'),
+      feArgs({
+        'publicationId': this.publicationId_,
+        'source': source,
+      })
+    ).open();
   }
 
   /**
@@ -7861,15 +8216,17 @@ class EntitlementsManager {
    * @private
    */
   fetch_(opt_encryptedDocumentKey) {
-    let url = '/publication/' +
-        encodeURIComponent(this.publicationId_) +
-        '/entitlements';
+    let url =
+      '/publication/' +
+      encodeURIComponent(this.publicationId_) +
+      '/entitlements';
     if (opt_encryptedDocumentKey) {
       //TODO(chenshay): Make this a 'Post'.
       url += '?crypt=' + encodeURIComponent(opt_encryptedDocumentKey);
     }
-    return this.fetcher_.fetchCredentialedJson(serviceUrl(url))
-        .then(json => this.parseEntitlements(json));
+    return this.fetcher_
+      .fetchCredentialedJson(serviceUrl(url))
+      .then(json => this.parseEntitlements(json));
   }
 }
 
@@ -7906,7 +8263,6 @@ function irtpStringToBoolean(value) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * @enum {string}
@@ -7974,7 +8330,6 @@ const ExperimentFlags = {
  * limitations under the License.
  */
 
-
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
@@ -7984,12 +8339,10 @@ const allowedFetchTypes_ = {
   text: 2,
 };
 
-
 /**
  * A class that polyfills Fetch API.
  */
 class Xhr {
-
   /**
    * @param {!Window} win
    */
@@ -8014,8 +8367,10 @@ class Xhr {
     // `credentials`.
     const creds = init.credentials;
     assert(
-        creds === undefined || creds == 'include' || creds == 'omit',
-        'Only credentials=include|omit support: %s', creds);
+      creds === undefined || creds == 'include' || creds == 'omit',
+      'Only credentials=include|omit support: %s',
+      creds
+    );
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we don't have to do any parsing
     // and document construction on the UI thread which would be expensive.
@@ -8033,11 +8388,18 @@ class Xhr {
   fetch(input, opt_init) {
     // TODO (avimehta): Figure out if CORS needs be handled the way AMP does it.
     const init = setupInit(opt_init);
-    return this.fetch_(input, init).then(response => response, reason => {
-      const targetOrigin = parseUrl$1(input).origin;
-      throw new Error('XHR Failed fetching' +
-          ` (${targetOrigin}/...):`, reason && reason.message);
-    }).then(response => assertSuccess(response));
+    return this.fetch_(input, init)
+      .then(
+        response => response,
+        reason => {
+          const targetOrigin = parseUrl$1(input).origin;
+          throw new Error(
+            `XHR Failed fetching (${targetOrigin}/...):`,
+            reason && reason.message
+          );
+        }
+      )
+      .then(response => assertSuccess(response));
   }
 }
 
@@ -8054,10 +8416,10 @@ function normalizeMethod_(method) {
   method = method.toUpperCase();
 
   assert(
-      allowedMethods_.includes(method),
-      'Only one of %s is currently allowed. Got %s',
-      allowedMethods_.join(', '),
-      method
+    allowedMethods_.includes(method),
+    'Only one of %s is currently allowed. Got %s',
+    allowedMethods_.join(', '),
+    method
   );
 
   return method;
@@ -8079,7 +8441,6 @@ function setupInit(opt_init, opt_accept) {
   }
   return init;
 }
-
 
 /**
  * A minimal polyfill of Fetch API. It only polyfills what we currently use.
@@ -8152,8 +8513,6 @@ function fetchPolyfill(input, init) {
  */
 function createXhrRequest(method, url) {
   const xhr = new XMLHttpRequest();
-  // TODO(avimehta): IE 8/9 don't support XHR (with CORS). Use XDR instead
-  // if we plan to support those browsers.
   if ('withCredentials' in xhr) {
     xhr.open(method, url, true);
   } else {
@@ -8169,7 +8528,6 @@ function createXhrRequest(method, url) {
 function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);
 }
-
 
 /**
  * Returns the response if successful or otherwise throws an error.
@@ -8192,7 +8550,6 @@ function assertSuccess(response) {
     throw err;
   });
 }
-
 
 /**
  * Response object in the Fetch API.
@@ -8257,8 +8614,9 @@ class FetchResponse {
    * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JsonObject>} */ (
-        this.drainText_().then(parseJson));
+    return /** @type {!Promise<!JsonObject>} */ (this.drainText_().then(
+      parseJson
+    ));
   }
 
   /**
@@ -8269,11 +8627,14 @@ class FetchResponse {
   document_() {
     assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    assert(this.xhr_.responseXML,
-        'responseXML should exist. Make sure to return ' +
-        'Content-Type: text/html header.');
-    return /** @type {!Promise<!Document>} */ (
-        Promise.resolve(assert(this.xhr_.responseXML)));
+    assert(
+      this.xhr_.responseXML,
+      'responseXML should exist. Make sure to return ' +
+        'Content-Type: text/html header.'
+    );
+    return /** @type {!Promise<!Document>} */ (Promise.resolve(
+      assert(this.xhr_.responseXML)
+    ));
   }
 
   /**
@@ -8282,11 +8643,11 @@ class FetchResponse {
    * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (
-        this.drainText_().then(utf8EncodeSync));
+    return /** @type {!Promise<!ArrayBuffer>} */ (this.drainText_().then(
+      utf8EncodeSync
+    ));
   }
 }
-
 
 /**
  * Provides access to the response headers as defined in the Fetch API.
@@ -8334,25 +8695,28 @@ class FetchResponseHeaders {
  * limitations under the License.
  */
 
-
 /**
  * @interface
  */
 class Fetcher {
-
   /**
    * @param {string} unusedUrl
    * @return {!Promise<!Object>}
    */
   fetchCredentialedJson(unusedUrl) {}
-}
 
+  /**
+   * @param {string} unusedUrl
+   * @param {!../utils/xhr.FetchInitDef} unusedInit
+   * @return {!Promise<!../utils/xhr.FetchResponse>}
+   */
+  fetch(unusedUrl, unusedInit) {}
+}
 
 /**
  * @implements {Fetcher}
  */
 class XhrFetcher {
-
   /**
    * @param {!Window} win
    */
@@ -8369,6 +8733,11 @@ class XhrFetcher {
       credentials: 'include',
     });
     return this.xhr_.fetch(url, init).then(response => response.json());
+  }
+
+  /** @override */
+  fetch(url, init) {
+    return this.xhr_.fetch(url, init);
   }
 }
 
@@ -8388,11 +8757,9 @@ class XhrFetcher {
  * limitations under the License.
  */
 
-
 /**
  */
 class JsError {
-
   /**
    * @param {!../model/doc.Doc} doc
    */
@@ -8417,17 +8784,20 @@ class JsError {
       }
       const img = this.doc_.getWin().document.createElement('img');
       img.src =
-          'https://news.google.com/_/SubscribewithgoogleClientUi/jserror' +
-          '?error=' + encodeURIComponent(String(error)) +
-          '&script=' + encodeURIComponent('https://news.google.com/swg/js/v1/swg.js') +
-          '&line=' + (error.lineNumber || 1) +
-          '&trace=' + encodeURIComponent(error.stack);
+        'https://news.google.com/_/SubscribewithgoogleClientUi/jserror' +
+        '?error=' +
+        encodeURIComponent(String(error)) +
+        '&script=' +
+        encodeURIComponent('https://news.google.com/swg/js/v1/swg.js') +
+        '&line=' +
+        (error.lineNumber || 1) +
+        '&trace=' +
+        encodeURIComponent(error.stack);
       // Appending this image to DOM is not necessary.
       error.reported = true;
     });
   }
 }
-
 
 /**
  * @param {...*} var_args
@@ -8455,7 +8825,6 @@ function createErrorVargs(var_args) {
   }
   return error;
 }
-
 
 /**
  * Some exceptions (DOMException, namely) have read-only message.
@@ -8497,12 +8866,10 @@ function duplicateErrorIfNecessary(error) {
 
 const LINK_REQUEST_ID = 'swg-link';
 
-
 /**
  * The flow to initiate linkback flow.
  */
 class LinkbackFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    */
@@ -8527,25 +8894,25 @@ class LinkbackFlow {
   start() {
     this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.LINK_ACCOUNT);
     const forceRedirect =
-        this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
+      this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
     const opener = this.activityPorts_.open(
-        LINK_REQUEST_ID,
-        feUrl('/linkbackstart'),
-        forceRedirect ? '_top' : '_blank',
-        feArgs({
-          'publicationId': this.pageConfig_.getPublicationId(),
-        }), {});
+      LINK_REQUEST_ID,
+      feUrl('/linkbackstart'),
+      forceRedirect ? '_top' : '_blank',
+      feArgs({
+        'publicationId': this.pageConfig_.getPublicationId(),
+      }),
+      {}
+    );
     this.dialogManager_.popupOpened(opener && opener.targetWin);
     return Promise.resolve();
   }
 }
 
-
 /**
  * The class for Link accounts flow.
  */
 class LinkCompleteFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    */
@@ -8559,19 +8926,26 @@ class LinkCompleteFlow {
       deps.callbacks().triggerLinkProgress();
       deps.dialogManager().popupClosed();
       const promise = acceptPortResultData(
-          port,
-          feOrigin(),
-          /* requireOriginVerified */ false,
-          /* requireSecureChannel */ false);
-      return promise.then(response => {
-        const flow = new LinkCompleteFlow(deps, response);
-        flow.start();
-      }, reason => {
-        if (isCancelError(reason)) {
-          deps.callbacks().triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
+        port,
+        feOrigin(),
+        /* requireOriginVerified */ false,
+        /* requireSecureChannel */ false
+      );
+      return promise.then(
+        response => {
+          const flow = new LinkCompleteFlow(deps, response);
+          flow.start();
+        },
+        reason => {
+          if (isCancelError(reason)) {
+            deps
+              .callbacks()
+              .triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
+          }
         }
-      });
-    }    deps.activities().onResult(LINK_REQUEST_ID, handler);
+      );
+    }
+    deps.activities().onResult(LINK_REQUEST_ID, handler);
   }
 
   /**
@@ -8594,18 +8968,18 @@ class LinkCompleteFlow {
     /** @private @const {!./callbacks.Callbacks} */
     this.callbacks_ = deps.callbacks();
 
-    const index = response && response['index'] || '0';
+    const index = (response && response['index']) || '0';
     /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ =
-        new ActivityIframeView(
-            this.win_,
-            this.activityPorts_,
-            feUrl('/linkconfirmiframe', '/u/' + index),
-            feArgs({
-              'productId': deps.pageConfig().getProductId(),
-              'publicationId': deps.pageConfig().getPublicationId(),
-            }),
-            /* shouldFadeBody */ true);
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/linkconfirmiframe', '/u/' + index),
+      feArgs({
+        'productId': deps.pageConfig().getProductId(),
+        'publicationId': deps.pageConfig().getPublicationId(),
+      }),
+      /* shouldFadeBody */ true
+    );
 
     /** @private {?function()} */
     this.completeResolver_ = null;
@@ -8622,20 +8996,24 @@ class LinkCompleteFlow {
    */
   start() {
     const promise = this.activityIframeView_.acceptResultAndVerify(
-        feOrigin(),
-        /* requireOriginVerified */ true,
-        /* requireSecureChannel */ true);
-    promise.then(response => {
-      this.complete_(response);
-    }).catch(reason => {
-      // Rethrow async.
-      setTimeout(() => {
-        throw reason;
+      feOrigin(),
+      /* requireOriginVerified */ true,
+      /* requireSecureChannel */ true
+    );
+    promise
+      .then(response => {
+        this.complete_(response);
+      })
+      .catch(reason => {
+        // Rethrow async.
+        setTimeout(() => {
+          throw reason;
+        });
+      })
+      .then(() => {
+        // The flow is complete.
+        this.dialogManager_.completeView(this.activityIframeView_);
       });
-    }).then(() => {
-      // The flow is complete.
-      this.dialogManager_.completeView(this.activityIframeView_);
-    });
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 
@@ -8648,7 +9026,7 @@ class LinkCompleteFlow {
     this.callbacks_.resetLinkProgress();
     this.entitlementsManager_.setToastShown(true);
     this.entitlementsManager_.unblockNextNotification();
-    this.entitlementsManager_.reset(response && response['success'] || false);
+    this.entitlementsManager_.reset((response && response['success']) || false);
     if (response && response['entitlements']) {
       this.entitlementsManager_.pushNextEntitlements(response['entitlements']);
     }
@@ -8665,7 +9043,6 @@ class LinkCompleteFlow {
  * The flow to save subscription information.
  */
 class LinkSaveFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!../api/subscriptions.SaveSubscriptionRequestCallback} callback
@@ -8724,13 +9101,11 @@ class LinkSaveFlow {
     if (result['linked']) {
       // When linking succeeds, start link confirmation flow
       this.dialogManager_.popupClosed();
-      this.deps_.callbacks().triggerFlowStarted(
-          SubscriptionFlows.LINK_ACCOUNT);
+      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.LINK_ACCOUNT);
       linkConfirm = new LinkCompleteFlow(this.deps_, result);
       startPromise = linkConfirm.start();
     } else {
-      startPromise = Promise.reject(
-          createCancelError(this.win_, 'not linked'));
+      startPromise = Promise.reject(createCancelError(this.win_, 'not linked'));
     }
     const completePromise = startPromise.then(() => {
       this.deps_.callbacks().triggerLinkProgress();
@@ -8755,55 +9130,63 @@ class LinkSaveFlow {
       'isClosable': true,
     };
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/linksaveiframe'),
-        feArgs(iframeArgs),
-        /* shouldFadeBody */ false,
-        /* hasLoadingIndicator */ true
+      this.win_,
+      this.activityPorts_,
+      feUrl('/linksaveiframe'),
+      feArgs(iframeArgs),
+      /* shouldFadeBody */ false,
+      /* hasLoadingIndicator */ true
     );
     this.activityIframeView_.onMessageDeprecated(data => {
       if (data['getLinkingInfo']) {
         this.requestPromise_ = new Promise(resolve => {
           resolve(this.callback_());
-        }).then(request => {
-          let saveRequest;
-          if (request && request.token) {
-            if (request.authCode) {
-              throw new Error('Both authCode and token are available');
+        })
+          .then(request => {
+            let saveRequest;
+            if (request && request.token) {
+              if (request.authCode) {
+                throw new Error('Both authCode and token are available');
+              } else {
+                saveRequest = {'token': request.token};
+              }
+            } else if (request && request.authCode) {
+              saveRequest = {'authCode': request.authCode};
             } else {
-              saveRequest = {'token': request.token};
+              throw new Error('Neither token or authCode is available');
             }
-          } else if (request && request.authCode) {
-            saveRequest = {'authCode': request.authCode};
-          } else {
-            throw new Error('Neither token or authCode is available');
-          }
-          this.activityIframeView_.messageDeprecated(saveRequest);
-        }).catch(reason => {
-          // The flow is complete.
-          this.complete_();
-          throw reason;
-        });
+            this.activityIframeView_.messageDeprecated(saveRequest);
+          })
+          .catch(reason => {
+            // The flow is complete.
+            this.complete_();
+            throw reason;
+          });
       }
     });
 
-    this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_,
-        /* hidden */ true);
-        /** {!Promise<boolean>} */
-    return this.activityIframeView_.acceptResultAndVerify(
+    this.openPromise_ = this.dialogManager_.openView(
+      this.activityIframeView_,
+      /* hidden */ true
+    );
+    /** {!Promise<boolean>} */
+    return this.activityIframeView_
+      .acceptResultAndVerify(
         feOrigin(),
         /* requireOriginVerified */ true,
         /* requireSecureChannel */ true
-      ).then(result => {
+      )
+      .then(result => {
         return this.handleLinkSaveResponse_(result);
-      }).catch(reason => {
+      })
+      .catch(reason => {
         // In case this flow wasn't complete, complete it here
         this.complete_();
         // Handle cancellation from user, link confirm start or completion here
         if (isCancelError(reason)) {
-          this.deps_.callbacks().triggerFlowCanceled(
-              SubscriptionFlows.LINK_ACCOUNT);
+          this.deps_
+            .callbacks()
+            .triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
           return false;
         }
         throw reason;
@@ -8827,7 +9210,6 @@ class LinkSaveFlow {
  * limitations under the License.
  */
 
-
 class LoginPromptApi {
   /**
    * @param {!./deps.DepsDef} deps
@@ -8850,17 +9232,17 @@ class LoginPromptApi {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/loginiframe'),
-        feArgs({
-          publicationId: deps.pageConfig().getPublicationId(),
-          productId: deps.pageConfig().getProductId(),
-          // First ask the user if they want us to log them in.
-          userConsent: true,
-          // TODO(chenshay): Pass entitlements value here.
-        }),
-        /* shouldFadeBody */ true
+      this.win_,
+      this.activityPorts_,
+      feUrl('/loginiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        // First ask the user if they want us to log them in.
+        userConsent: true,
+        // TODO(chenshay): Pass entitlements value here.
+      }),
+      /* shouldFadeBody */ true
     );
   }
 
@@ -8869,24 +9251,30 @@ class LoginPromptApi {
    * @return {!Promise}
    */
   start() {
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_LOGIN_PROMPT);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_LOGIN_PROMPT);
 
     this.openViewPromise_ = this.dialogManager_.openView(
-        this.activityIframeView_);
+      this.activityIframeView_
+    );
 
-    return this.activityIframeView_.acceptResult().then(() => {
-      // The consent part is complete.
-      this.dialogManager_.completeView(this.activityIframeView_);
-    }, reason => {
-      if (isCancelError(reason)) {
-        this.deps_.callbacks().triggerFlowCanceled(
-            SubscriptionFlows.SHOW_LOGIN_PROMPT);
-      } else {
+    return this.activityIframeView_.acceptResult().then(
+      () => {
+        // The consent part is complete.
         this.dialogManager_.completeView(this.activityIframeView_);
+      },
+      reason => {
+        if (isCancelError(reason)) {
+          this.deps_
+            .callbacks()
+            .triggerFlowCanceled(SubscriptionFlows.SHOW_LOGIN_PROMPT);
+        } else {
+          this.dialogManager_.completeView(this.activityIframeView_);
+        }
+        throw reason;
       }
-      throw reason;
-    });
+    );
   }
 }
 
@@ -8905,7 +9293,6 @@ class LoginPromptApi {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 class LoginNotificationApi {
   /**
@@ -8929,17 +9316,17 @@ class LoginNotificationApi {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/loginiframe'),
-        feArgs({
-          publicationId: deps.pageConfig().getPublicationId(),
-          productId: deps.pageConfig().getProductId(),
-          // No need to ask the user. Just tell them you're logging them in.
-          userConsent: false,
-          // TODO(chenshay): Pass entitlements value here.
-        }),
-        /* shouldFadeBody */ true
+      this.win_,
+      this.activityPorts_,
+      feUrl('/loginiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        // No need to ask the user. Just tell them you're logging them in.
+        userConsent: false,
+        // TODO(chenshay): Pass entitlements value here.
+      }),
+      /* shouldFadeBody */ true
     );
   }
 
@@ -8948,19 +9335,24 @@ class LoginNotificationApi {
    * @return {!Promise}
    */
   start() {
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
 
     this.openViewPromise_ = this.dialogManager_.openView(
-        this.activityIframeView_);
+      this.activityIframeView_
+    );
 
-    return this.activityIframeView_.acceptResult().then(() => {
-      // The consent part is complete.
-      this.dialogManager_.completeView(this.activityIframeView_);
-    }, reason => {
-      this.dialogManager_.completeView(this.activityIframeView_);
-      throw reason;
-    });
+    return this.activityIframeView_.acceptResult().then(
+      () => {
+        // The consent part is complete.
+        this.dialogManager_.completeView(this.activityIframeView_);
+      },
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
+      }
+    );
   }
 }
 
@@ -9392,23 +9784,6 @@ Constants.GPAY_BUTTON_CARD_INFO_BUTTON_STYLE = `
  * @const {string}
  */
 Constants.TRUSTED_DOMAIN = '.google.com';
-
-/**
- * @license
- * Copyright 2018 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 /**
  * @license
@@ -10947,7 +11322,9 @@ class PaymentsWebActivityDelegate {
    * @private
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
-    return null;
+    return null
+        && paymentDataRequest['i']
+        && paymentDataRequest['i'].renderContainerCenter;
   }
 
   /**
@@ -11124,7 +11501,8 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments = [{
+    const supportedInstruments = 
+        [{
           'supportedMethods': ['https://tez.google.com/pay'],
           'data': {
             'pa': parameters['payeeVpa'],
@@ -11236,7 +11614,8 @@ class UpiHandler {
    */
   redirectToGooglePlay_() {
     window.location.replace(
-        'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
+          // NOLINT
+            'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
     return Promise.reject(
         {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
   }
@@ -11925,7 +12304,6 @@ function isNativeDisabledInRequest(request) {
  *    only for the fraction under 20%.
  */
 
-
 /**
  * @enum {string}
  */
@@ -11945,7 +12323,6 @@ let experimentsString = '';
  * @type {?Object<string, boolean>}
  */
 let experimentMap = null;
-
 
 /**
  * Ensures that the experiments have been initialized and returns them.
@@ -11984,7 +12361,6 @@ function getExperiments(win) {
   }
   return experimentMap;
 }
-
 
 /**
  * @param {!Window} win
@@ -12032,8 +12408,11 @@ function parseSetExperiment(win, experimentMap, spec) {
     try {
       // Set fraction in the experiment to make it unlaunchable.
       const storageKey =
-          'subscribe.google.com:e:' + experimentId + ':' +
-          fraction + (control ? 'c' : '');
+        'subscribe.google.com:e:' +
+        experimentId +
+        ':' +
+        fraction +
+        (control ? 'c' : '');
       let selection = parseSelection(win.sessionStorage.getItem(storageKey));
       if (!selection) {
         // Is experiment/control range?
@@ -12059,17 +12438,18 @@ function parseSetExperiment(win, experimentMap, spec) {
   experimentMap[experimentId] = on;
 }
 
-
 /**
  * @param {?string} s
  * @return {?Selection}
  */
 function parseSelection(s) {
   // Do a simple if-then to inline the whole Selection enum.
-  return s == Selection.EXPERIMENT ? Selection.EXPERIMENT :
-      s == Selection.CONTROL ? Selection.CONTROL : null;
+  return s == Selection.EXPERIMENT
+    ? Selection.EXPERIMENT
+    : s == Selection.CONTROL
+    ? Selection.CONTROL
+    : null;
 }
-
 
 /**
  * Whether the specified experiment is on or off.
@@ -12081,7 +12461,6 @@ function isExperimentOn(win, experimentId) {
   return getExperiments(win)[experimentId] || false;
 }
 
-
 /**
  * Toggles the experiment on or off. Returns the actual value of the experiment
  * after toggling is done.
@@ -12092,7 +12471,6 @@ function isExperimentOn(win, experimentId) {
 function setExperiment(win, experimentId, on) {
   getExperiments(win)[experimentId] = on;
 }
-
 
 /**
  * @return {!Array<string>}
@@ -12153,7 +12531,6 @@ function payDecryptUrl() {
   return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
 }
 
-
 /**
  */
 class PayClient {
@@ -12164,10 +12541,9 @@ class PayClient {
    */
   constructor(win, activityPorts, dialogManager) {
     /** @const @private {!PayClientBindingDef} */
-    this.binding_ =
-        isExperimentOn(win, ExperimentFlags.GPAY_API) ?
-        new PayClientBindingPayjs(win, activityPorts) :
-        new PayClientBindingSwg(win, activityPorts, dialogManager);
+    this.binding_ = isExperimentOn(win, ExperimentFlags.GPAY_API)
+      ? new PayClientBindingPayjs(win, activityPorts)
+      : new PayClientBindingSwg(win, activityPorts, dialogManager);
   }
 
   /**
@@ -12176,7 +12552,8 @@ class PayClient {
   preconnect(pre) {
     pre.prefetch(payUrl());
     pre.prefetch(
-        'https://payments.google.com/payments/v4/js/integrator.js?ss=md');
+      'https://payments.google.com/payments/v4/js/integrator.js?ss=md'
+    );
     pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
     pre.preconnect('https://www.gstatic.com/');
     pre.preconnect('https://fonts.googleapis.com/');
@@ -12207,7 +12584,6 @@ class PayClient {
   }
 }
 
-
 /**
  * @implements {PayClientBindingDef}
  */
@@ -12234,12 +12610,13 @@ class PayClientBindingSwg {
   /** @override */
   start(paymentRequest, options) {
     const opener = this.activityPorts_.open(
-        GPAY_ACTIVITY_REQUEST$1,
-        payUrl(),
-        options.forceRedirect ? '_top' : '_blank',
-        feArgs(paymentRequest),
-        {});
-    this.dialogManager_.popupOpened(opener && opener.targetWin || null);
+      GPAY_ACTIVITY_REQUEST$1,
+      payUrl(),
+      options.forceRedirect ? '_top' : '_blank',
+      feArgs(paymentRequest),
+      {}
+    );
+    this.dialogManager_.popupOpened((opener && opener.targetWin) || null);
   }
 
   /** @override */
@@ -12275,12 +12652,14 @@ class PayClientBindingSwg {
           body: data['redirectEncryptedCallbackData'],
           mode: 'cors',
         });
-        return xhr.fetch(url, init).then(response => response.json())
-            .then(response => {
-              const dataClone = Object.assign({}, data);
-              delete dataClone['redirectEncryptedCallbackData'];
-              return Object.assign(dataClone, response);
-            });
+        return xhr
+          .fetch(url, init)
+          .then(response => response.json())
+          .then(response => {
+            const dataClone = Object.assign({}, data);
+            delete dataClone['redirectEncryptedCallbackData'];
+            return Object.assign(dataClone, response);
+          });
       }
       // Data is supplied directly: must be a verified and secure channel.
       if (result.originVerified && result.secureChannel) {
@@ -12290,7 +12669,6 @@ class PayClientBindingSwg {
     });
   }
 }
-
 
 /**
  * Binding based on the https://github.com/google/payjs.
@@ -12318,12 +12696,15 @@ class PayClientBindingPayjs {
     this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
 
     /** @private @const {!PaymentsAsyncClient} */
-    this.client_ = this.createClient_({
-      environment: 'PRODUCTION',
-      'i': {
-        'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+    this.client_ = this.createClient_(
+      {
+        environment: 'PRODUCTION',
+        'i': {
+          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+        },
       },
-    }, this.handleResponse_.bind(this));
+      this.handleResponse_.bind(this)
+    );
 
     // Prepare new verifier pair.
     this.redirectVerifierHelper_.prepare();
@@ -12337,10 +12718,11 @@ class PayClientBindingPayjs {
    */
   createClient_(options, handler) {
     return new PaymentsAsyncClient(
-        options,
-        handler,
-        /* useIframe */ false,
-        this.activityPorts_.getOriginalWebActivityPorts());
+      options,
+      handler,
+      /* useIframe */ false,
+      this.activityPorts_.getOriginalWebActivityPorts()
+    );
   }
 
   /** @override */
@@ -12355,12 +12737,15 @@ class PayClientBindingPayjs {
         'forceRedirect': options.forceRedirect || false,
       });
     }
-    setInternalParam(paymentRequest, 'disableNative',
-        // The page cannot be iframed at this time. May be relaxed later
-        // for AMP and similar contexts.
-        this.win_ != this.top_() ||
+    setInternalParam(
+      paymentRequest,
+      'disableNative',
+      // The page cannot be iframed at this time. May be relaxed later
+      // for AMP and similar contexts.
+      this.win_ != this.top_() ||
         // Experiment must be enabled.
-        !isExperimentOn(this.win_, ExperimentFlags.GPAY_NATIVE));
+        !isExperimentOn(this.win_, ExperimentFlags.GPAY_NATIVE)
+    );
     // Notice that the callback for verifier may execute asynchronously.
     this.redirectVerifierHelper_.useVerifier(verifier => {
       if (verifier) {
@@ -12417,7 +12802,6 @@ class PayClientBindingPayjs {
     return this.win_.top;
   }
 }
-
 
 /**
  * This helper generates key/verifier pair for the redirect mode. When the
@@ -12486,7 +12870,7 @@ class RedirectVerifierHelper {
           pair = null;
         }
       }
-      callback(pair && pair.verifier || null);
+      callback((pair && pair.verifier) || null);
     });
   }
 
@@ -12496,9 +12880,11 @@ class RedirectVerifierHelper {
    */
   restoreKey() {
     try {
-      return this.win_.localStorage
-          && this.win_.localStorage.getItem(REDIRECT_STORAGE_KEY)
-          || null;
+      return (
+        (this.win_.localStorage &&
+          this.win_.localStorage.getItem(REDIRECT_STORAGE_KEY)) ||
+        null
+      );
     } catch (e) {
       return null;
     }
@@ -12537,11 +12923,13 @@ class RedirectVerifierHelper {
     // c. Crypto random (crypto.getRandomValues);
     // d. SHA284 (crypto.subtle.digest).
     const crypto = this.win_.crypto;
-    if (this.win_.localStorage
-        && crypto
-        && crypto.getRandomValues
-        && crypto.subtle
-        && crypto.subtle.digest) {
+    if (
+      this.win_.localStorage &&
+      crypto &&
+      crypto.getRandomValues &&
+      crypto.subtle &&
+      crypto.subtle.digest
+    ) {
       this.pairPromise_ = new Promise((resolve, reject) => {
         // 1. Use crypto random to create a 128-bit (16 byte) redirect key.
         const keyBytes = new Uint8Array(16);
@@ -12551,23 +12939,30 @@ class RedirectVerifierHelper {
         const key = btoa(bytesToString(keyBytes));
 
         // 3. Create a hash.
-        crypto.subtle.digest({name: 'SHA-384'}, stringToBytes(key))
-            .then(buffer => {
-              const verifier = btoa(bytesToString(new Uint8Array(
-                  /** @type {!ArrayBuffer} */ (buffer))));
-              resolve({key, verifier});
-            }, reason => {
-              reject(reason);
-            });
-      }).catch(() => {
-        // Ignore failures. A failure to create a redirect verifier is often
-        // recoverable.
-        return null;
-      }).then(pair => {
-        this.pairCreated_ = true;
-        this.pair_ = pair;
-        return pair;
-      });
+        crypto.subtle.digest({name: 'SHA-384'}, stringToBytes(key)).then(
+          buffer => {
+            const verifier = btoa(
+              bytesToString(
+                new Uint8Array(/** @type {!ArrayBuffer} */ (buffer))
+              )
+            );
+            resolve({key, verifier});
+          },
+          reason => {
+            reject(reason);
+          }
+        );
+      })
+        .catch(() => {
+          // Ignore failures. A failure to create a redirect verifier is often
+          // recoverable.
+          return null;
+        })
+        .then(pair => {
+          this.pairCreated_ = true;
+          this.pair_ = pair;
+          return pair;
+        });
     } else {
       // Not supported.
       this.pairCreated_ = true;
@@ -12576,16 +12971,15 @@ class RedirectVerifierHelper {
   }
 }
 
-
 /**
  * @param {!Object} paymentRequest
  * @param {string} param
  * @param {*} value
  */
 function setInternalParam(paymentRequest, param, value) {
-  paymentRequest['i'] = Object.assign(
-      paymentRequest['i'] || {},
-      {[param]: value});
+  paymentRequest['i'] = Object.assign(paymentRequest['i'] || {}, {
+    [param]: value,
+  });
 }
 
 /**
@@ -12603,7 +12997,6 @@ function setInternalParam(paymentRequest, param, value) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 class WaitForSubscriptionLookupApi {
   /**
@@ -12631,15 +13024,15 @@ class WaitForSubscriptionLookupApi {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/waitforsubscriptionlookupiframe'),
-        feArgs({
-          publicationId: deps.pageConfig().getPublicationId(),
-          productId: deps.pageConfig().getProductId(),
-        }),
-        /* shouldFadeBody */ true,
-        /* hasLoadingIndicator */ true
+      this.win_,
+      this.activityPorts_,
+      feUrl('/waitforsubscriptionlookupiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+      }),
+      /* shouldFadeBody */ true,
+      /* hasLoadingIndicator */ true
     );
   }
 
@@ -12649,16 +13042,20 @@ class WaitForSubscriptionLookupApi {
    */
   start() {
     this.openViewPromise_ = this.dialogManager_.openView(
-        this.activityIframeView_);
+      this.activityIframeView_
+    );
 
-    return this.accountPromise_.then(account => {
-      // Account was found.
-      this.dialogManager_.completeView(this.activityIframeView_);
-      return account;
-    }, reason => {
-      this.dialogManager_.completeView(this.activityIframeView_);
-      throw reason;
-    });
+    return this.accountPromise_.then(
+      account => {
+        // Account was found.
+        this.dialogManager_.completeView(this.activityIframeView_);
+        return account;
+      },
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
+      }
+    );
   }
 }
 
@@ -12678,9 +13075,7 @@ class WaitForSubscriptionLookupApi {
  * limitations under the License.
  */
 
-
 class OffersApi {
-
   /**
    * @param {!../model/page-config.PageConfig} config
    * @param {!./fetcher.Fetcher} fetcher
@@ -12712,10 +13107,12 @@ class OffersApi {
    */
   fetch_(productId) {
     const url = serviceUrl(
-        '/publication/' +
+      '/publication/' +
         encodeURIComponent(this.config_.getPublicationId()) +
         '/offers' +
-        '?label=' + encodeURIComponent(productId));
+        '?label=' +
+        encodeURIComponent(productId)
+    );
     // TODO(dvoytenko): switch to a non-credentialed request after launch.
     return this.fetcher_.fetchCredentialedJson(url).then(json => {
       return json['offers'] || [];
@@ -12749,7 +13146,6 @@ const OFFERS_VIEW_CLOSABLE = true;
  * The class for Offers flow.
  */
 class OffersFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!../api/subscriptions.OffersRequest|undefined} options
@@ -12767,26 +13163,30 @@ class OffersFlow {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+
     let isClosable = options && options.isClosable;
     if (isClosable == undefined) {
-      isClosable = false;  // Default is to hide Close button.
+      isClosable = false; // Default is to hide Close button.
     }
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/offersiframe'),
-        feArgs({
-          'productId': deps.pageConfig().getProductId(),
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'showNative': deps.callbacks().hasSubscribeRequestCallback(),
-          'productType': ProductType.SUBSCRIPTION,
-          'list': options && options.list || 'default',
-          'skus': options && options.skus || null,
-          'isClosable': isClosable,
-        }),
-        /* shouldFadeBody */ true);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/offersiframe'),
+      feArgs({
+        'productId': deps.pageConfig().getProductId(),
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+        'productType': ProductType.SUBSCRIPTION,
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': isClosable,
+      }),
+      /* shouldFadeBody */ true
+    );
   }
 
   /**
@@ -12795,11 +13195,9 @@ class OffersFlow {
    */
   start() {
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_OFFERS);
+    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS);
     this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(
-          SubscriptionFlows.SHOW_OFFERS);
+      this.deps_.callbacks().triggerFlowCanceled(SubscriptionFlows.SHOW_OFFERS);
     });
 
     // If result is due to OfferSelection, redirect to payments.
@@ -12812,9 +13210,9 @@ class OffersFlow {
       }
       if (result['sku']) {
         new PayStartFlow(
-            this.deps_,
-            /** @type {string} */ (result['sku']))
-            .start();
+          this.deps_,
+          /** @type {string} */ (result['sku'])
+        ).start();
         return;
       }
       if (result['native']) {
@@ -12823,22 +13221,21 @@ class OffersFlow {
       }
     });
 
+    this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_OFFERS);
+
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 }
-
 
 /**
  * The class for subscribe option flow.
  */
 class SubscribeOptionFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!../api/subscriptions.OffersRequest|undefined} options
    */
   constructor(deps, options) {
-
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
@@ -12853,17 +13250,18 @@ class SubscribeOptionFlow {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        deps.win(),
-        this.activityPorts_,
-        feUrl('/optionsiframe'),
-        feArgs({
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'productId': deps.pageConfig().getProductId(),
-          'list': options && options.list || 'default',
-          'skus': options && options.skus || null,
-          'isClosable': true,
-        }),
-        /* shouldFadeBody */ false);
+      deps.win(),
+      this.activityPorts_,
+      feUrl('/optionsiframe'),
+      feArgs({
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'productId': deps.pageConfig().getProductId(),
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': true,
+      }),
+      /* shouldFadeBody */ false
+    );
   }
 
   /**
@@ -12872,22 +13270,27 @@ class SubscribeOptionFlow {
    */
   start() {
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(
-          SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
+      this.deps_
+        .callbacks()
+        .triggerFlowCanceled(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     });
 
     this.activityIframeView_.onMessageDeprecated(data => {
       this.maybeOpenOffersFlow_(data);
     });
-    this.activityIframeView_.acceptResult().then(result => {
-      this.maybeOpenOffersFlow_(result.data);
-    }, reason => {
-      this.dialogManager_.completeView(this.activityIframeView_);
-      throw reason;
-    });
+    this.activityIframeView_.acceptResult().then(
+      result => {
+        this.maybeOpenOffersFlow_(result.data);
+      },
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
+      }
+    );
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 
@@ -12906,19 +13309,16 @@ class SubscribeOptionFlow {
   }
 }
 
-
 /**
  * The class for Abbreviated Offer flow.
  *
  */
 class AbbrvOfferFlow {
-
   /**
    * @param {!./deps.DepsDef} deps
    * @param {!../api/subscriptions.OffersRequest=} options
    */
   constructor(deps, options = {}) {
-
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
@@ -12936,18 +13336,19 @@ class AbbrvOfferFlow {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/abbrvofferiframe'),
-        feArgs({
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'productId': deps.pageConfig().getProductId(),
-          'showNative': deps.callbacks().hasSubscribeRequestCallback(),
-          'list': options && options.list || 'default',
-          'skus': options && options.skus || null,
-          'isClosable': true,
-        }),
-        /* shouldFadeBody */ false);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/abbrvofferiframe'),
+      feArgs({
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'productId': deps.pageConfig().getProductId(),
+        'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': true,
+      }),
+      /* shouldFadeBody */ false
+    );
   }
 
   /**
@@ -12956,11 +13357,13 @@ class AbbrvOfferFlow {
    */
   start() {
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_ABBRV_OFFER);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_ABBRV_OFFER);
     this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(
-          SubscriptionFlows.SHOW_ABBRV_OFFER);
+      this.deps_
+        .callbacks()
+        .triggerFlowCanceled(SubscriptionFlows.SHOW_ABBRV_OFFER);
     });
 
     // If the user is already subscribed, trigger login flow
@@ -13010,41 +13413,7 @@ class AbbrvOfferFlow {
  * limitations under the License.
  */
 
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 class Preconnect {
-
   /**
    * @param {!Document} doc
    */
@@ -13119,9 +13488,7 @@ class Preconnect {
 
 const PREFIX = 'subscribe.google.com';
 
-
 class Storage {
-
   /**
    * @param {!Window} win
    */
@@ -13193,7 +13560,6 @@ class Storage {
   }
 }
 
-
 /**
  * @param {string} key
  * @return {string}
@@ -13243,687 +13609,6 @@ function uuidFast() {
     }
   }
   return uuid.join('');
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string, string>} */
-const iframeStyles = {
-  display: 'none',
-};
-
-
-class AnalyticsService {
-  /**
-   * @param {!./deps.DepsDef} deps
-   */
-  constructor(deps) {
-
-    /** @private @const {!../model/doc.Doc} */
-    this.doc_ = deps.doc();
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (createElement(
-            this.doc_.getWin().document, 'iframe', {}));
-
-    setImportantStyles(this.iframe_, iframeStyles);
-
-    /** @private @const {string} */
-    this.src_ = feUrl('/serviceiframe');
-
-    /** @private @const {string} */
-    this.publicationId_ = deps.pageConfig().getPublicationId();
-
-    this.args_ = feArgs({
-      publicationId: this.publicationId_,
-    });
-
-    /**
-     * @private @const {!AnalyticsContext}
-     */
-    this.context_ = new AnalyticsContext();
-
-    this.context_.setTransactionId(uuidFast());
-
-    /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
-    this.serviceReady_ = null;
-
-    /** @private {?Promise} */
-    this.lastAction_ = null;
-
-    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
-    this.eventManager_ = deps.eventManager();
-    this.eventManager_.registerEventListener(
-        this.handleClientEvent_.bind(this));
-
-    /** @private @const {!boolean} */
-    this.logPropensityExperiment_ = isExperimentOn(deps.win(),
-        ExperimentFlags.LOG_PROPENSITY_TO_SWG);
-
-    /** @private {!boolean} */
-    this.logPropensityConfig_ = false;
-  }
-
-  /**
-   * @param {string} transactionId
-   */
-  setTransactionId(transactionId) {
-    this.context_.setTransactionId(transactionId);
-  }
-
-  /**
-   * @return {string}
-   */
-  getTransactionId() {
-    return /** @type {string} */ (this.context_.getTransactionId());
-  }
-
-  /**
-   * @return {?string}
-   */
-  getSku() {
-    return this.context_.getSku();
-  }
-
-  /**
-   * @param {string} sku
-   */
-  setSku(sku) {
-    this.context_.setSku(sku);
-  }
-
-  /**
-   * @param {!Array<string>} labels
-   */
-  addLabels(labels) {
-    if (labels && labels.length > 0) {
-      const newLabels = [].concat(this.context_.getLabelList());
-      labels.forEach(label => {
-        if (newLabels.indexOf(label) == -1) {
-          newLabels.push(label);
-        }
-      });
-      this.context_.setLabelList(newLabels);
-    }
-  }
-
-  /**
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_;
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  getQueryString_() {
-    return this.doc_.getWin().location.search;
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  getReferrer_() {
-    return this.doc_.getWin().document.referrer;
-  }
-
-  /**
-   * @private
-   */
-  setContext_() {
-    const utmParams = parseQueryString$1(this.getQueryString_());
-    this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    const campaign = utmParams['utm_campaign'];
-    const medium = utmParams['utm_medium'];
-    const source = utmParams['utm_source'];
-    if (campaign) {
-      this.context_.setUtmCampaign(campaign);
-    }
-    if (medium) {
-      this.context_.setUtmMedium(medium);
-    }
-    if (source) {
-      this.context_.setUtmSource(source);
-    }
-    this.addLabels(getOnExperiments(this.doc_.getWin()));
-  }
-
-  /**
-   * @return {!Promise<!../components/activities.ActivityIframePort>}
-   * @private
-   */
-  start_() {
-    if (!this.serviceReady_) {
-      // TODO(sohanirao): Potentially do this even earlier
-      this.doc_.getBody().appendChild(this.getElement());
-      this.serviceReady_ = this.activityPorts_.openIframe(
-          this.iframe_, this.src_, this.args_).then(port => {
-            this.setContext_();
-            return port.whenReady().then(() => port);
-          });
-    }
-    return this.serviceReady_;
-  }
-
-  /**
-   * @param {boolean} isReadyToPay
-   */
-  setReadyToPay(isReadyToPay) {
-    this.context_.setReadyToPay(isReadyToPay);
-  }
-
-  /**
-   */
-  close() {
-    this.doc_.getBody().removeChild(this.getElement());
-  }
-
-  /**
-   * @return {!AnalyticsContext}
-   */
-  getContext() {
-    return this.context_;
-  }
-
-  /**
-   * @param {!../api/client-event-manager-api.ClientEvent} event
-   * @return {!AnalyticsRequest}
-   */
-  createLogRequest_(event) {
-    //ignore event.additionalParameters.  It may have data we shouldn't log
-    const meta = new AnalyticsEventMeta();
-    meta.setEventOriginator(event.eventOriginator);
-    meta.setIsFromUserAction(event.isFromUserAction);
-
-    const request = new AnalyticsRequest();
-    request.setEvent(event.eventType);
-    request.setContext(this.context_);
-    request.setMeta(meta);
-    return request;
-  }
-
-  /**
-   * This function can be used to log a buy-flow event from SwG.
-   * It exists as a helper and to ensure backwards compatability,
-   * you have additional parameters available if you call eventManager.logEvent
-   * directly.
-   * @param {!../proto/api_messages.AnalyticsEvent} eventTypeIn
-   * @param {!boolean=} isFromUserActionIn
-   */
-  logEvent(eventTypeIn, isFromUserActionIn) {
-    this.eventManager_.logEvent({
-      eventType: eventTypeIn,
-      eventOriginator: EventOriginator.SWG_CLIENT,
-      isFromUserAction: /** @type {?boolean} */
-          (isBoolean(isFromUserActionIn) ? isFromUserActionIn : null),
-      additionalParameters: null,
-    });
-  }
-
-  /**
-   * Handles the message received by the port.
-   * @param {function(!Object<string, string|boolean>)} callback
-   */
-  onMessage(callback) {
-    this.lastAction_ = this.start_().then(port => {
-      port.onMessageDeprecated(callback);
-    });
-  }
-
-  /**
-   *  Listens for new events from the events manager and handles logging
-   * @param {!../api/client-event-manager-api.ClientEvent} event
-   */
-  handleClientEvent_(event) {
-    if (!(this.logPropensityExperiment_ && this.logPropensityConfig_)
-        && event.eventOriginator === EventOriginator.PROPENSITY_CLIENT) {
-      return;
-    }
-    this.lastAction_ = this.start_().then(port => {
-      port.messageDeprecated({'buf': this.createLogRequest_(event).toArray()});
-    });
-  }
-
-  enableLoggingForPropensity() {
-    this.logPropensityConfig_ = true;
-  }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string,AnalyticsEvent>} */
-const PropensityEventToAnalyticsEvent = {
-  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
-  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
-  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
-  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-      AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
-  [Event.ACTION_PAYMENT_FLOW_STARTED]:
-      AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
-  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
-  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
-};
-
-/** @const {!Object<number,?Event>} */
-const AnalyticsEventToPropensityEvent = {
-  [AnalyticsEvent.UNKNOWN]: null,
-  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
-  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
-  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
-  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
-  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
-  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
-  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
-  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-      Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
-      Event.ACTION_PAYMENT_FLOW_STARTED,
-  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
-  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
-  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
-};
-
-/**
- * Converts a propensity event enum into an analytics event enum.
- * @param {!Event|string} propensityEvent
- * @returns {!AnalyticsEvent}
- */
-function propensityEventToAnalyticsEvent(propensityEvent) {
-  return PropensityEventToAnalyticsEvent[propensityEvent];
-}
-/**
- * Converts an analytics event enum into a propensity event enum.
- * @param {!AnalyticsEvent} analyticsEvent
- * @returns {?Event}
- */
-function analyticsEventToPropensityEvent(analyticsEvent) {
-  return AnalyticsEventToPropensityEvent[analyticsEvent];
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-/**
- * Implements interface to Propensity server
- */
-class PropensityServer {
-  /**
-   * Page configuration is known when Propensity API
-   * is available, publication ID is therefore used
-   * in constructor for the server interface.
-   * @param {string} publicationId
-   * @param {!../api/client-event-manager-api.ClientEventManagerApi} eventManager
-   */
-  constructor(win, publicationId, eventManager) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-    /** @private @const {string} */
-    this.publicationId_ = publicationId;
-    /** @private {?string} */
-    this.clientId_ = null;
-    /** @private @const {!Xhr} */
-    this.xhr_ = new Xhr(win);
-    /** @private @const {number} */
-    this.version_ = 1;
-
-    eventManager.registerEventListener(this.handleClientEvent_.bind(this));
-
-    // TODO(mborof): b/133519525
-    /** @private @const {!boolean} */
-    this.logSwgEventsExperiment_ = isExperimentOn(win,
-        ExperimentFlags.LOG_SWG_TO_PROPENSITY);
-
-    /** @private {!boolean} */
-    this.logSwgEventsConfig_ = false;
-  }
-
-  /**
-   * @private
-   * @return {string}
-   */
-  getDocumentCookie_() {
-    return this.win_.document.cookie;
-  }
-
-  /**
-   * Returns the client ID to be used.
-   * @return {?string}
-   * @private
-   */
-  getClientId_() {
-    if (!this.clientId_) {
-      // Match '__gads' (name of the cookie) dropped by Ads Tag.
-      const gadsmatch = this.getDocumentCookie_().match(
-          '(^|;)\\s*__gads\\s*=\\s*([^;]+)');
-      // Since the cookie will be consumed using decodeURIComponent(),
-      // use encodeURIComponent() here to match.
-      this.clientId_ = gadsmatch && encodeURIComponent(gadsmatch.pop());
-    }
-    return this.clientId_;
-  }
-
-  /**
-   * @param {string} state
-   * @param {?string} productsOrSkus
-   */
-  sendSubscriptionState(state, productsOrSkus) {
-    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-      method: 'GET',
-      credentials: 'include',
-    });
-    const clientId = this.getClientId_();
-    let userState = this.publicationId_ + ':' + state;
-    if (productsOrSkus) {
-      userState = userState + ':' + encodeURIComponent(productsOrSkus);
-    }
-    let url = adsUrl('/subopt/data?states=')
-        + encodeURIComponent(userState) + '&u_tz=240'
-        + '&v=' + this.version_;
-    if (clientId) {
-      url = url + '&cookie=' + clientId;
-    }
-    return this.xhr_.fetch(url, init);
-  }
-
-  /**
-   * @param {string} event
-   * @param {?string} context
-   * @private
-   */
-  sendEvent_(event, context) {
-    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-      method: 'GET',
-      credentials: 'include',
-    });
-    const clientId = this.getClientId_();
-    let eventInfo = this.publicationId_ + ':' + event;
-    if (context) {
-      eventInfo = eventInfo + ':' + encodeURIComponent(context);
-    }
-    let url = adsUrl('/subopt/data?events=')
-        + encodeURIComponent(eventInfo) + '&u_tz=240'
-        + '&v=' + this.version_;
-    if (clientId) {
-      url = url + '&cookie=' + clientId;
-    }
-    return this.xhr_.fetch(url, init);
-  }
-
-  /**
-   *
-   * @param {!../api/client-event-manager-api.ClientEvent} event
-   */
-  handleClientEvent_(event) {
-    const propEvent = analyticsEventToPropensityEvent(event.eventType);
-    if (propEvent == null) {
-      return;
-    }
-    if (!(this.logSwgEventsExperiment_ && this.logSwgEventsConfig_)
-        && event.eventOriginator !== EventOriginator.PROPENSITY_CLIENT) {
-      return;
-    }
-    let additionalParameters = event.additionalParameters;
-
-    if (isBoolean(event.isFromUserAction)) {
-      if (!isObject(additionalParameters)) {
-        additionalParameters = {};
-      }
-      additionalParameters['is_active'] = event.isFromUserAction;
-    }
-    this.sendEvent_(propEvent,
-        JSON.stringify(/** @type {?JsonObject} */ (additionalParameters)));
-  }
-
-  /**
-   * @param {JsonObject} response
-   * @return {!../api/propensity-api.PropensityScore}
-   */
-  parsePropensityResponse_(response) {
-    let defaultScore =
-        /** @type {!../api/propensity-api.PropensityScore} */ ({});
-    if (!response['header']) {
-      defaultScore =
-        /** @type {!../api/propensity-api.PropensityScore} */ ({
-          header: {ok: false},
-          body: {error: 'No valid response'},
-        });
-      return defaultScore;
-    }
-    const status = response['header'];
-    let scoreDetails = undefined;
-    if (status['ok']) {
-      const scores = response['scores'];
-      scoreDetails = [];
-      for (let i = 0; i < scores.length; i++) {
-        const result = scores[i];
-        const scoreStatus = !!result['score'];
-        let scoreDetail;
-        if (scoreStatus) {
-          const value = /** @type {!../api/propensity-api.Score} */({
-            value: result['score'],
-            bucketed: result['score_type'] == 2,
-          });
-          scoreDetail = /** @type {!../api/propensity-api.Body} */ ({
-            product: result['product'],
-            score: value,
-          });
-        } else {
-          scoreDetail = /** @type {!../api/propensity-api.Body} */ ({
-            product: result['product'],
-            error: result['error_message'],
-          });
-        }
-        scoreDetails.push(scoreDetail);
-      }
-      if (scoreDetails) {
-        defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
-          header: {ok: true},
-          body: {scores: scoreDetails},
-        });
-      }
-      return defaultScore;
-    }
-    defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
-      header: {ok: false},
-      body: {error: response['error']},
-    });
-    return defaultScore;
-  }
-  /**
-   * @param {string} referrer
-   * @param {string} type
-   * @return {?Promise<../api/propensity-api.PropensityScore>}
-   */
-  getPropensity(referrer, type) {
-    const clientId = this.getClientId_();
-    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-      method: 'GET',
-      credentials: 'include',
-    });
-    let url = adsUrl('/subopt/pts?products=') + this.publicationId_
-        + '&type=' + type + '&u_tz=240'
-        + '&ref=' + referrer
-        + '&v=' + this.version_;
-    if (clientId) {
-      url = url + '&cookie=' + clientId;
-    }
-    return this.xhr_.fetch(url, init).then(result => result.json())
-        .then(response => {
-          return this.parsePropensityResponse_(response);
-        });
-  }
-
-  enableLoggingSwgEvents() {
-    this.logSwgEventsConfig_ = true;
-  }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @implements {PropensityApi.PropensityApi}
- */
-class Propensity {
-
-  /**
-   * @param {!Window} win
-   * @param {!../model/page-config.PageConfig} pageConfig
-   * @param {!../api/client-event-manager-api.ClientEventManagerApi} eventManager
-   */
-  constructor(win, pageConfig, eventManager) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-    /** @private {PropensityServer} */
-    this.propensityServer_ = new PropensityServer(win,
-        pageConfig.getPublicationId(), eventManager);
-
-    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
-    this.eventManager_ = eventManager;
-  }
-
-  /** @override */
-  sendSubscriptionState(state, jsonProducts) {
-    if (!Object.values(SubscriptionState).includes(state)) {
-      throw new Error('Invalid subscription state provided');
-    }
-    if ((SubscriptionState.SUBSCRIBER == state ||
-         SubscriptionState.PAST_SUBSCRIBER == state)
-        && !jsonProducts) {
-      throw new Error('Entitlements must be provided for users with'
-          + ' active or expired subscriptions');
-    }
-    if (jsonProducts && !isObject(jsonProducts)) {
-      throw new Error('Entitlements must be an Object');
-    }
-    let productsOrSkus = null;
-    if (jsonProducts) {
-      productsOrSkus = JSON.stringify(jsonProducts);
-    }
-    this.propensityServer_.sendSubscriptionState(state, productsOrSkus);
-  }
-
-  /** @override */
-  getPropensity(type) {
-    if (type && !Object.values(PropensityType).includes(type)) {
-      throw new Error('Invalid propensity type requested');
-    }
-    if (!type) {
-      type = PropensityType.GENERAL;
-    }
-    return this.propensityServer_.getPropensity(this.win_.document.referrer,
-        type);
-  }
-
-  /** @override */
-  sendEvent(userEvent) {
-    const analyticsEvent = propensityEventToAnalyticsEvent(userEvent.name);
-    let data = null;
-    if (!isEnumValue(Event, userEvent.name)
-        || !analyticsEvent) {
-      throw new Error('Invalid user event provided(' + userEvent.name + ')');
-    }
-
-    if (userEvent.data) {
-      if (!isObject(userEvent.data)) {
-        throw new Error('Event data must be an Object(' + userEvent.data + ')');
-      } else {
-        data = {};
-        Object.assign(data, userEvent.data);
-      }
-    }
-
-    if (isBoolean(userEvent.active)) {
-      if (!data) {
-        data = {};
-      }
-      Object.assign(data, {'is_active': userEvent.active});
-    } else if (userEvent.active != null) {
-      throw new Error('Event active must be a boolean');
-    }
-
-    this.eventManager_.logEvent({
-      eventType: analyticsEvent,
-      eventOriginator: EventOriginator.PROPENSITY_CLIENT,
-      isFromUserAction: userEvent.active,
-      additionalParameters: data,
-    });
-  }
-
-  /**
-   * Enables logging events generated by the Subscribe with Google codebase
-   * to the Propensity to Subscribe server.
-   */
-  enableLoggingSwgEvents() {
-    this.propensityServer_.enableLoggingSwgEvents();
-  }
 }
 
 /**
@@ -14038,24 +13723,44 @@ function validateEvent(event) {
   }
 
   if (!isEnumValue(EventOriginator, event.eventOriginator)) {
-    throw new Error(createEventErrorMessage('eventOriginator',
-        event.eventOriginator));
+    throw new Error(
+      createEventErrorMessage('eventOriginator', event.eventOriginator)
+    );
   }
 
-  if (!isObject(event.additionalParameters)
-      && event.additionalParameters != null) {
-    throw new Error(createEventErrorMessage('additionalParameters',
-        event.additionalParameters));
+  if (
+    !isObject(event.additionalParameters) &&
+    event.additionalParameters != null
+  ) {
+    throw new Error(
+      createEventErrorMessage(
+        'additionalParameters',
+        event.additionalParameters
+      )
+    );
   }
 
   if (event.isFromUserAction != null && !isBoolean(event.isFromUserAction)) {
-    throw new Error(createEventErrorMessage('isFromUserAction',
-        event.isFromUserAction));
+    throw new Error(
+      createEventErrorMessage('isFromUserAction', event.isFromUserAction)
+    );
   }
 }
 
 /** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
 class ClientEventManager {
+  /**
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @return {boolean}
+   */
+  static isPublisherEvent(event) {
+    return (
+      event.eventOriginator === EventOriginator.PROPENSITY_CLIENT ||
+      event.eventOriginator === EventOriginator.PUBLISHER_CLIENT ||
+      event.eventOriginator === EventOriginator.AMP_CLIENT
+    );
+  }
+
   /**
    *
    * @param {!Promise} configuredPromise
@@ -14101,14 +13806,838 @@ class ClientEventManager {
     validateEvent(event);
     this.lastAction_ = this.isReadyPromise_.then(() => {
       for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
-        if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
-          return Promise.resolve();
+        try {
+          if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
+            return Promise.resolve();
+          }
+        } catch (e) {
+          log(e);
         }
       }
       for (let listener = 0; listener < this.listeners_.length; listener++) {
-        this.listeners_[listener](event);
+        try {
+          this.listeners_[listener](event);
+        } catch (e) {
+          log(e);
+        }
       }
       return Promise.resolve();
+    });
+  }
+
+  /**
+   * Creates an event with the arguments provided and calls logEvent.
+   * @param {!AnalyticsEvent} eventType
+   * @param {?boolean=} isFromUserAction
+   * @param {?Object=} additionalParameters
+   */
+  logSwgEvent(
+    eventType,
+    isFromUserAction = false,
+    additionalParameters = null
+  ) {
+    this.logEvent({
+      eventType,
+      eventOriginator: EventOriginator.SWG_CLIENT,
+      isFromUserAction,
+      additionalParameters,
+    });
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string, string>} */
+const iframeStyles = {
+  display: 'none',
+};
+
+class AnalyticsService {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = deps.doc();
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_.getWin().document,
+      'iframe',
+      {}
+    ));
+
+    setImportantStyles(this.iframe_, iframeStyles);
+
+    /** @private @const {string} */
+    this.src_ = feUrl('/serviceiframe');
+
+    /** @private @const {string} */
+    this.publicationId_ = deps.pageConfig().getPublicationId();
+
+    this.args_ = feArgs({
+      publicationId: this.publicationId_,
+    });
+
+    /**
+     * @private @const {!AnalyticsContext}
+     */
+    this.context_ = new AnalyticsContext();
+
+    this.context_.setTransactionId(uuidFast());
+
+    /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
+    this.serviceReady_ = null;
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+
+    /** @private @const {!ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+    this.eventManager_.registerEventListener(
+      this.handleClientEvent_.bind(this)
+    );
+
+    /** @private @const {!boolean} */
+    this.logPropensityExperiment_ = isExperimentOn(
+      deps.win(),
+      ExperimentFlags.LOG_PROPENSITY_TO_SWG
+    );
+  }
+
+  /**
+   * @param {string} transactionId
+   */
+  setTransactionId(transactionId) {
+    this.context_.setTransactionId(transactionId);
+  }
+
+  /**
+   * @return {string}
+   */
+  getTransactionId() {
+    return /** @type {string} */ (this.context_.getTransactionId());
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.context_.getSku();
+  }
+
+  /**
+   * @param {string} sku
+   */
+  setSku(sku) {
+    this.context_.setSku(sku);
+  }
+
+  /**
+   * @param {!Array<string>} labels
+   */
+  addLabels(labels) {
+    if (labels && labels.length > 0) {
+      const newLabels = [].concat(this.context_.getLabelList());
+      labels.forEach(label => {
+        if (newLabels.indexOf(label) == -1) {
+          newLabels.push(label);
+        }
+      });
+      this.context_.setLabelList(newLabels);
+    }
+  }
+
+  /**
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getQueryString_() {
+    return this.doc_.getWin().location.search;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getReferrer_() {
+    return this.doc_.getWin().document.referrer;
+  }
+
+  /**
+   * @private
+   */
+  setContext_() {
+    const utmParams = parseQueryString$1(this.getQueryString_());
+    this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
+    const campaign = utmParams['utm_campaign'];
+    const medium = utmParams['utm_medium'];
+    const source = utmParams['utm_source'];
+    if (campaign) {
+      this.context_.setUtmCampaign(campaign);
+    }
+    if (medium) {
+      this.context_.setUtmMedium(medium);
+    }
+    if (source) {
+      this.context_.setUtmSource(source);
+    }
+    this.addLabels(getOnExperiments(this.doc_.getWin()));
+  }
+
+  /**
+   * @return {!Promise<!../components/activities.ActivityIframePort>}
+   * @private
+   */
+  start_() {
+    if (!this.serviceReady_) {
+      // TODO(sohanirao): Potentially do this even earlier
+      this.doc_.getBody().appendChild(this.getElement());
+      this.serviceReady_ = this.activityPorts_
+        .openIframe(this.iframe_, this.src_, this.args_)
+        .then(port => {
+          this.setContext_();
+          return port.whenReady().then(() => port);
+        });
+    }
+    return this.serviceReady_;
+  }
+
+  /**
+   * @param {boolean} isReadyToPay
+   */
+  setReadyToPay(isReadyToPay) {
+    this.context_.setReadyToPay(isReadyToPay);
+  }
+
+  /**
+   */
+  close() {
+    this.doc_.getBody().removeChild(this.getElement());
+  }
+
+  /**
+   * @return {!AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @return {!AnalyticsRequest}
+   */
+  createLogRequest_(event) {
+    //ignore event.additionalParameters.  It may have data we shouldn't log
+    const meta = new AnalyticsEventMeta();
+    meta.setEventOriginator(event.eventOriginator);
+    meta.setIsFromUserAction(event.isFromUserAction);
+
+    const request = new AnalyticsRequest();
+    request.setEvent(event.eventType);
+    request.setContext(this.context_);
+    request.setMeta(meta);
+    return request;
+  }
+
+  /**
+   * Handles the message received by the port.
+   * @param {function(!Object<string, string|boolean>)} callback
+   */
+  onMessage(callback) {
+    this.lastAction_ = this.start_().then(port => {
+      port.onMessageDeprecated(callback);
+    });
+  }
+
+  /**
+   * @return {boolean}
+   */
+  shouldLogPublisherEvents_() {
+    return (
+      this.logPropensityExperiment_ && this.deps_.config().enableSwgAnalytics
+    );
+  }
+
+  /**
+   *  Listens for new events from the events manager and handles logging
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   */
+  handleClientEvent_(event) {
+    if (
+      ClientEventManager.isPublisherEvent(event) &&
+      !this.shouldLogPublisherEvents_()
+    ) {
+      return;
+    }
+    this.lastAction_ = this.start_().then(port => {
+      const request = this.createLogRequest_(event);
+      port.execute(request);
+    });
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string,AnalyticsEvent>} */
+const PublisherEventToAnalyticsEvent = {
+  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
+  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
+  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
+  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
+  [Event.ACTION_PAYMENT_FLOW_STARTED]:
+    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
+  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
+  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToPublisherEvent = {
+  [AnalyticsEvent.UNKNOWN]: null,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
+  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
+  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
+  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
+  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
+  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
+  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
+    Event.ACTION_PAYMENT_FLOW_STARTED,
+  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
+  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
+  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
+};
+
+/**
+ * Converts a propensity event enum into an analytics event enum.
+ * @param {!Event|string} propensityEvent
+ * @returns {!AnalyticsEvent}
+ */
+function publisherEventToAnalyticsEvent(propensityEvent) {
+  return PublisherEventToAnalyticsEvent[propensityEvent];
+}
+
+/**
+ * Converts an analytics event enum into a propensity event enum.
+ * @param {!AnalyticsEvent} analyticsEvent
+ * @returns {?Event}
+ */
+function analyticsEventToPublisherEvent(analyticsEvent) {
+  return AnalyticsEventToPublisherEvent[analyticsEvent];
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Implements interface to Propensity server
+ */
+class PropensityServer {
+  /**
+   * Page configuration is known when Propensity API
+   * is available, publication ID is therefore used
+   * in constructor for the server interface.
+   * @param {!Window} win
+   * @param {string} publicationId
+   * @param {!../api/client-event-manager-api.ClientEventManagerApi} eventManager
+   * @param {!./fetcher.Fetcher} fetcher
+   */
+  constructor(win, publicationId, eventManager, fetcher) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private @const {string} */
+    this.publicationId_ = publicationId;
+    /** @private {?string} */
+    this.clientId_ = null;
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+    /** @private @const {number} */
+    this.version_ = 1;
+
+    eventManager.registerEventListener(this.handleClientEvent_.bind(this));
+
+    // TODO(mborof): b/133519525
+    /** @private @const {!boolean} */
+    this.logSwgEventsExperiment_ = isExperimentOn(
+      win,
+      ExperimentFlags.LOG_SWG_TO_PROPENSITY
+    );
+
+    /** @private {!boolean} */
+    this.logSwgEventsConfig_ = false;
+  }
+
+  /**
+   * @private
+   * @return {string}
+   */
+  getDocumentCookie_() {
+    return this.win_.document.cookie;
+  }
+
+  /**
+   * Returns the client ID to be used.
+   * @return {?string}
+   * @private
+   */
+  getClientId_() {
+    if (!this.clientId_) {
+      // Match '__gads' (name of the cookie) dropped by Ads Tag.
+      const gadsmatch = this.getDocumentCookie_().match(
+        '(^|;)\\s*__gads\\s*=\\s*([^;]+)'
+      );
+      // Since the cookie will be consumed using decodeURIComponent(),
+      // use encodeURIComponent() here to match.
+      this.clientId_ = gadsmatch && encodeURIComponent(gadsmatch.pop());
+    }
+    return this.clientId_;
+  }
+
+  /**
+   * @private
+   * @param {string} url
+   * @return {string}
+   */
+  propensityUrl_(url) {
+    url = url + '&u_tz=240&v=' + this.version_;
+    const clientId = this.getClientId_();
+    if (clientId) {
+      url = url + '&cookie=' + clientId;
+    }
+    url = url + '&cdm=' + this.win_.location.hostname;
+    return url;
+  }
+
+  /**
+   * @param {string} state
+   * @param {?string} productsOrSkus
+   */
+  sendSubscriptionState(state, productsOrSkus) {
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+      method: 'GET',
+      credentials: 'include',
+    });
+    let userState = this.publicationId_ + ':' + state;
+    if (productsOrSkus) {
+      userState = userState + ':' + encodeURIComponent(productsOrSkus);
+    }
+    const url = adsUrl('/subopt/data?states=') + encodeURIComponent(userState);
+    return this.fetcher_.fetch(this.propensityUrl_(url), init);
+  }
+
+  /**
+   * @param {string} event
+   * @param {?string} context
+   * @private
+   */
+  sendEvent_(event, context) {
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+      method: 'GET',
+      credentials: 'include',
+    });
+    let eventInfo = this.publicationId_ + ':' + event;
+    if (context) {
+      eventInfo = eventInfo + ':' + encodeURIComponent(context);
+    }
+    const url = adsUrl('/subopt/data?events=') + encodeURIComponent(eventInfo);
+    return this.fetcher_.fetch(this.propensityUrl_(url), init);
+  }
+
+  /**
+   *
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   */
+  handleClientEvent_(event) {
+    if (event.eventType === AnalyticsEvent.EVENT_SUBSCRIPTION_STATE) {
+      this.sendSubscriptionState(
+        event.additionalParameters['state'],
+        event.additionalParameters['productsOrSkus']
+      );
+      return;
+    }
+    const propEvent = analyticsEventToPublisherEvent(event.eventType);
+    if (propEvent == null) {
+      return;
+    }
+    if (
+      !(this.logSwgEventsExperiment_ && this.logSwgEventsConfig_) &&
+      event.eventOriginator !== EventOriginator.PROPENSITY_CLIENT
+    ) {
+      return;
+    }
+    let additionalParameters = event.additionalParameters;
+
+    if (isBoolean(event.isFromUserAction)) {
+      if (!isObject(additionalParameters)) {
+        additionalParameters = {};
+      }
+      additionalParameters['is_active'] = event.isFromUserAction;
+    }
+    this.sendEvent_(
+      propEvent,
+      JSON.stringify(/** @type {?JsonObject} */ (additionalParameters))
+    );
+  }
+
+  /**
+   * @param {JsonObject} response
+   * @return {!../api/propensity-api.PropensityScore}
+   */
+  parsePropensityResponse_(response) {
+    let defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({});
+    if (!response['header']) {
+      defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
+        header: {ok: false},
+        body: {error: 'No valid response'},
+      });
+      return defaultScore;
+    }
+    const status = response['header'];
+    let scoreDetails = undefined;
+    if (status['ok']) {
+      const scores = response['scores'];
+      scoreDetails = [];
+      for (let i = 0; i < scores.length; i++) {
+        const result = scores[i];
+        const scoreStatus = !!result['score'];
+        let scoreDetail;
+        if (scoreStatus) {
+          const value = /** @type {!../api/propensity-api.Score} */ ({
+            value: result['score'],
+            bucketed: result['score_type'] == 2,
+          });
+          scoreDetail = /** @type {!../api/propensity-api.Body} */ ({
+            product: result['product'],
+            score: value,
+          });
+        } else {
+          scoreDetail = /** @type {!../api/propensity-api.Body} */ ({
+            product: result['product'],
+            error: result['error_message'],
+          });
+        }
+        scoreDetails.push(scoreDetail);
+      }
+      if (scoreDetails) {
+        defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
+          header: {ok: true},
+          body: {scores: scoreDetails},
+        });
+      }
+      return defaultScore;
+    }
+    defaultScore = /** @type {!../api/propensity-api.PropensityScore} */ ({
+      header: {ok: false},
+      body: {error: response['error']},
+    });
+    return defaultScore;
+  }
+  /**
+   * @param {string} referrer
+   * @param {string} type
+   * @return {?Promise<../api/propensity-api.PropensityScore>}
+   */
+  getPropensity(referrer, type) {
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+      method: 'GET',
+      credentials: 'include',
+    });
+    const url =
+      adsUrl('/subopt/pts?products=') +
+      this.publicationId_ +
+      '&type=' +
+      type +
+      '&ref=' +
+      referrer;
+    return this.fetcher_
+      .fetch(this.propensityUrl_(url), init)
+      .then(result => result.json())
+      .then(response => {
+        return this.parsePropensityResponse_(response);
+      });
+  }
+
+  enableLoggingSwgEvents() {
+    this.logSwgEventsConfig_ = true;
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @implements {PropensityApi.PropensityApi}
+ */
+class Propensity {
+  /**
+   * @param {!Window} win
+   * @param {!../model/page-config.PageConfig} pageConfig
+   * @param {!../api/client-event-manager-api.ClientEventManagerApi} eventManager
+   * @param {!./fetcher.Fetcher} fetcher
+   */
+  constructor(win, pageConfig, eventManager, fetcher) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+    /** @private {PropensityServer} */
+    this.propensityServer_ = new PropensityServer(
+      win,
+      pageConfig.getPublicationId(),
+      eventManager,
+      fetcher
+    );
+
+    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
+    this.eventManager_ = eventManager;
+  }
+
+  /** @override */
+  sendSubscriptionState(state, jsonProducts) {
+    if (!Object.values(SubscriptionState).includes(state)) {
+      throw new Error('Invalid subscription state provided');
+    }
+    if (
+      (SubscriptionState.SUBSCRIBER == state ||
+        SubscriptionState.PAST_SUBSCRIBER == state) &&
+      !jsonProducts
+    ) {
+      throw new Error(
+        'Entitlements must be provided for users with' +
+          ' active or expired subscriptions'
+      );
+    }
+    if (jsonProducts && !isObject(jsonProducts)) {
+      throw new Error('Entitlements must be an Object');
+    }
+    let productsOrSkus = null;
+    if (jsonProducts) {
+      productsOrSkus = JSON.stringify(jsonProducts);
+    }
+    this.propensityServer_.sendSubscriptionState(state, productsOrSkus);
+  }
+
+  /** @override */
+  getPropensity(type) {
+    if (type && !Object.values(PropensityType).includes(type)) {
+      throw new Error('Invalid propensity type requested');
+    }
+    if (!type) {
+      type = PropensityType.GENERAL;
+    }
+    return this.propensityServer_.getPropensity(
+      this.win_.document.referrer,
+      type
+    );
+  }
+
+  /** @override */
+  sendEvent(userEvent) {
+    const analyticsEvent = publisherEventToAnalyticsEvent(userEvent.name);
+    let data = null;
+    if (!isEnumValue(Event, userEvent.name) || !analyticsEvent) {
+      throw new Error('Invalid user event provided(' + userEvent.name + ')');
+    }
+
+    if (userEvent.data) {
+      if (!isObject(userEvent.data)) {
+        throw new Error('Event data must be an Object(' + userEvent.data + ')');
+      } else {
+        data = {};
+        Object.assign(data, userEvent.data);
+      }
+    }
+
+    if (isBoolean(userEvent.active)) {
+      if (!data) {
+        data = {};
+      }
+      Object.assign(data, {'is_active': userEvent.active});
+    } else if (userEvent.active != null) {
+      throw new Error('Event active must be a boolean');
+    }
+
+    this.eventManager_.logEvent({
+      eventType: analyticsEvent,
+      eventOriginator: EventOriginator.PROPENSITY_CLIENT,
+      isFromUserAction: userEvent.active,
+      additionalParameters: data,
+    });
+  }
+
+  /**
+   * Enables logging events generated by the Subscribe with Google codebase
+   * to the Propensity to Subscribe server.
+   */
+  enableLoggingSwgEvents() {
+    this.propensityServer_.enableLoggingSwgEvents();
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @implements {../api/logger-api.LoggerApi}
+ */
+class Logger {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
+    this.eventManager_ = deps.eventManager();
+  }
+
+  /** @override */
+  sendSubscriptionState(state, jsonProducts) {
+    if (!isEnumValue(SubscriptionState, state)) {
+      throw new Error('Invalid subscription state provided');
+    }
+    if (
+      (SubscriptionState.SUBSCRIBER == state ||
+        SubscriptionState.PAST_SUBSCRIBER == state) &&
+      !jsonProducts
+    ) {
+      throw new Error(
+        'Entitlements must be provided for users with' +
+          ' active or expired subscriptions'
+      );
+    }
+    if (jsonProducts && !isObject(jsonProducts)) {
+      throw new Error('Entitlements must be an Object');
+    }
+    let productsOrSkus = null;
+    if (jsonProducts) {
+      productsOrSkus = JSON.stringify(jsonProducts);
+    }
+    this.eventManager_.logEvent({
+      eventType: AnalyticsEvent.EVENT_SUBSCRIPTION_STATE,
+      eventOriginator: EventOriginator.PUBLISHER_CLIENT,
+      isFromUserAction: null,
+      additionalParameters: {
+        state,
+        productsOrSkus,
+      },
+    });
+  }
+
+  /** @override */
+  sendEvent(userEvent) {
+    let data = null;
+    if (
+      !isEnumValue(Event, userEvent.name) ||
+      !publisherEventToAnalyticsEvent(userEvent.name)
+    ) {
+      throw new Error('Invalid user event provided(' + userEvent.name + ')');
+    }
+
+    if (userEvent.data) {
+      if (!isObject(userEvent.data)) {
+        throw new Error('Event data must be an Object(' + userEvent.data + ')');
+      } else {
+        data = {};
+        Object.assign(data, userEvent.data);
+      }
+    }
+
+    if (isBoolean(userEvent.active)) {
+      if (!data) {
+        data = {};
+      }
+      Object.assign(data, {'is_active': userEvent.active});
+    } else if (userEvent.active != null) {
+      throw new Error('Event active must be a boolean');
+    }
+    this.eventManager_.logEvent({
+      eventType: publisherEventToAnalyticsEvent(userEvent.name),
+      eventOriginator: EventOriginator.PUBLISHER_CLIENT,
+      isFromUserAction: userEvent.active,
+      additionalParameters: data,
     });
   }
 }
@@ -14134,7 +14663,6 @@ class ClientEventManager {
  * @implements {Subscriptions}
  */
 class ConfiguredRuntime {
-
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
    * @param {!../model/page-config.PageConfig} pageConfig
@@ -14172,10 +14700,6 @@ class ConfiguredRuntime {
     /** @private @const {!../model/page-config.PageConfig} */
     this.pageConfig_ = pageConfig;
 
-    /** @private @const {!Propensity} */
-    this.propensityModule_ = new Propensity(this.win_,
-      this.pageConfig_, this.eventManager_);
-
     /** @private @const {!Promise} */
     this.documentParsed_ = this.doc_.whenReady();
 
@@ -14184,6 +14708,14 @@ class ConfiguredRuntime {
 
     /** @private @const {!Fetcher} */
     this.fetcher_ = opt_integr.fetcher || new XhrFetcher(this.win_);
+
+    /** @private @const {!Propensity} */
+    this.propensityModule_ = new Propensity(
+      this.win_,
+      this.pageConfig_,
+      this.eventManager_,
+      this.fetcher_
+    );
 
     /** @private @const {!Storage} */
     this.storage_ = new Storage(this.win_);
@@ -14196,7 +14728,10 @@ class ConfiguredRuntime {
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(
-        this.win_, this.activityPorts_, this.dialogManager_);
+      this.win_,
+      this.activityPorts_,
+      this.dialogManager_
+    );
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
@@ -14205,18 +14740,25 @@ class ConfiguredRuntime {
     //analytics service and entitlements manager are constructed unless
     //you are certain they do not rely on them because they are part of that
     //definition.
+    /** @private @const {!Logger} */
+    this.logger_ = new Logger(this);
+
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
 
     /** @private @const {!EntitlementsManager} */
     this.entitlementsManager_ = new EntitlementsManager(
-        this.win_, this.pageConfig_, this.fetcher_, this);
+      this.win_,
+      this.pageConfig_,
+      this.fetcher_,
+      this
+    );
 
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.pageConfig_, this.fetcher_);
 
     /** @private @const {!ButtonApi} */
-    this.buttonApi_ = new ButtonApi(this.doc_);
+    this.buttonApi_ = new ButtonApi(this.doc_, Promise.resolve(this));
 
     const preconnect = new Preconnect(this.win_.document);
 
@@ -14230,7 +14772,10 @@ class ConfiguredRuntime {
     // Report redirect errors if any.
     this.activityPorts_.onRedirectError(error => {
       this.analyticsService_.addLabels(['redirect']);
-      this.analyticsService_.logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
+      this.eventManager_.logSwgEvent(
+        AnalyticsEvent.EVENT_PAYMENT_FAILED,
+        false
+      );
       this.jserror_.error('Redirect error', error);
     });
   }
@@ -14311,16 +14856,18 @@ class ConfiguredRuntime {
     for (const k in config) {
       const v = config[k];
       if (k == 'windowOpenMode') {
-        if (v != WindowOpenMode.AUTO &&
-            v != WindowOpenMode.REDIRECT) {
+        if (v != WindowOpenMode.AUTO && v != WindowOpenMode.REDIRECT) {
           error = 'Unknown windowOpenMode: ' + v;
         }
       } else if (k == 'experiments') {
         v.forEach(experiment => setExperiment(this.win_, experiment, true));
       } else if (k == 'analyticsMode') {
-        if (v != AnalyticsMode.DEFAULT &&
-            v != AnalyticsMode.IMPRESSIONS) {
+        if (v != AnalyticsMode.DEFAULT && v != AnalyticsMode.IMPRESSIONS) {
           error = 'Unknown analytics mode: ' + v;
+        }
+      } else if (k == 'enableSwgAnalytics') {
+        if (!isBoolean(v)) {
+          error = 'Unknown enableSwgAnalytics value: ' + v;
         }
       } else {
         error = 'Unknown config property: ' + k;
@@ -14361,8 +14908,9 @@ class ConfiguredRuntime {
 
   /** @override */
   getEntitlements(opt_encryptedDocumentKey) {
-    return this.entitlementsManager_.getEntitlements(opt_encryptedDocumentKey)
-        .then(entitlements => entitlements.clone());
+    return this.entitlementsManager_
+      .getEntitlements(opt_encryptedDocumentKey)
+      .then(entitlements => entitlements.clone());
   }
 
   /** @override */
@@ -14468,8 +15016,10 @@ class ConfiguredRuntime {
 
   /** @override */
   subscribe(skuOrSubscriptionRequest) {
-    if (typeof skuOrSubscriptionRequest != 'string' &&
-        !isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION)) {
+    if (
+      typeof skuOrSubscriptionRequest != 'string' &&
+      !isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION)
+    ) {
       throw new Error('Not yet launched!');
     }
     return this.documentParsed_.then(() => {
@@ -14490,7 +15040,10 @@ class ConfiguredRuntime {
 
     return this.documentParsed_.then(() => {
       return new PayStartFlow(
-          this, skuOrSubscriptionRequest, ProductType.UI_CONTRIBUTION).start();
+        this,
+        skuOrSubscriptionRequest,
+        ProductType.UI_CONTRIBUTION
+      ).start();
     });
   }
 
@@ -14529,7 +15082,11 @@ class ConfiguredRuntime {
       throw new Error('Not yet launched!');
     }
     this.buttonApi_.attachSmartButton(
-        this, button, optionsOrCallback, opt_callback);
+      this,
+      button,
+      optionsOrCallback,
+      opt_callback
+    );
   }
 
   /** @override */
@@ -14537,37 +15094,17 @@ class ConfiguredRuntime {
     return Promise.resolve(this.propensityModule_);
   }
 
-  /** @override */
+  /** @override
+   * @return {!ClientEventManager}
+   */
   eventManager() {
     return this.eventManager_;
   }
+
+  /** @override */
+  getLogger() {
+    return Promise.resolve(this.logger_);
+  }
 }
 
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-export {
-  ConfiguredRuntime,
-  Entitlements,
-  Entitlement,
-  Fetcher,
-  SubscribeResponse,
-  ClientEventManagerApi,
-  ClientEvent,
-  FilterResult,
-  AnalyticsEvent,
-  EventOriginator,
-};
+export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, SubscribeResponse$1 as SubscribeResponse };

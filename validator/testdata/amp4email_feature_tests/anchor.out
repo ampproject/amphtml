@@ -166,5 +166,10 @@ amp4email_feature_tests/anchor.html:106:2 The relative URL '{{#foo}}' for attrib
 |    <a href="http://www.somelink.com">http allowed</a>
 |    <a href="https://www.somelink.com">https allowed</a>
 |    <a href="mailto:user@example.com">mailto allowed</a>
+|
+|    <!-- 'name' attribute is deprecated. -->
+|    <a name="protocol"></a>
+>>   ^~~~~~~~~
+amp4email_feature_tests/anchor.html:114:2 The attribute 'name' may not appear in tag 'A (AMP4EMAIL)'. [DISALLOWED_HTML]
 |  </body>
 |  </html>

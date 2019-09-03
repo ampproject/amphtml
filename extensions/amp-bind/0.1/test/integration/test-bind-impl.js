@@ -401,6 +401,17 @@ describe
           });
         });
 
+        it('should not update attribute for non-primitive new values', () => {
+          const list = createElement(env, container, `[src]="x"`, 'amp-list');
+          list.setAttribute('src', 'https://foo.example/data.json');
+
+          return onBindReadyAndSetState(env, bind, {x: [1, 2, 3]}).then(() => {
+            expect(list.getAttribute('src')).to.equal(
+              'https://foo.example/data.json'
+            );
+          });
+        });
+
         it('should scan fixed layer for bindings', () => {
           // Mimic FixedLayer by creating a sibling <body> element.
           const doc = env.win.document;
@@ -499,7 +510,7 @@ describe
         });
 
         it('should verify class bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           createElement(env, container, '[class]="\'foo\'" class="foo"');
           createElement(env, container, '[class]="\'foo\'" class=" foo "');
           createElement(env, container, '[class]="\'\'"');
@@ -512,7 +523,7 @@ describe
         });
 
         it('should verify string attribute bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           // Only the initial value for [a] binding does not match.
           createElement(
             env,
@@ -527,7 +538,7 @@ describe
         });
 
         it('should verify boolean attribute bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           createElement(env, container, '[disabled]="true" disabled', 'button');
           createElement(env, container, '[disabled]="false"', 'button');
           createElement(env, container, '[disabled]="true"', 'button'); // Mismatch.

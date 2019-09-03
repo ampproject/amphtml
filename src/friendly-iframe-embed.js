@@ -40,7 +40,7 @@ import {getExperimentBranch, isExperimentOn} from './experiments';
 import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
+import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
@@ -159,6 +159,8 @@ export function installFriendlyIframeEmbed(
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
+  iframe.setAttribute('marginheight', '0');
+  iframe.setAttribute('marginwidth', '0');
 
   // Pre-load extensions.
   if (spec.extensionIds) {
@@ -865,18 +867,11 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
  * Install polyfills in the child window (friendly iframe).
  * @param {!Window} parentWin
  * @param {!Window} childWin
- * @suppress {suspiciousCode}
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
-  installDOMTokenListToggle(childWin);
-  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
-  // is DCE'd from production builds. Note: When the hack is removed, remove the
-  // @suppress {suspiciousCode} annotation at the top of this function.
-  if (
-    (false && isExperimentOn(parentWin, 'custom-elements-v1')) ||
-    getMode().test
-  ) {
+  installDOMTokenList(childWin);
+  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
     installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');

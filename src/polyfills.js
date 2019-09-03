@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-/** @fileoverview @suppress {suspiciousCode} */
+/** @fileoverview */
 
 import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
+import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
@@ -39,17 +39,14 @@ installArrayIncludes(self);
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  installDOMTokenListToggle(self);
+  installDOMTokenList(self);
   installDocContains(self);
   installGetBoundingClientRect(self);
 
   // isExperimentOn() must be called after Object.assign polyfill is installed.
-  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
-  // is DCE'd from production builds. Note: When the hack is removed, remove the
-  // @suppress {suspiciousCode} annotation at the top of this file.
   // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
   if (
-    (false && isExperimentOn(self, 'custom-elements-v1')) ||
+    isExperimentOn(self, 'custom-elements-v1') ||
     (getMode().test && !getMode().testIe)
   ) {
     installCustomElements(self);

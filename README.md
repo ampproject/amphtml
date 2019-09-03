@@ -1,18 +1,16 @@
 # AMP ⚡
 
-##### Stats:
-
 [![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg?logo=Travis%20CI&logoColor=white&style=flat-square "Build Status")](https://travis-ci.org/ampproject/amphtml/builds)
-[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Release")](https://github.com/ampproject/amphtml/releases)
+[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Release")](https://github.com/ampproject/amphtml/releases/latest)
 [![Contributors](https://img.shields.io/github/contributors-anon/ampproject/amphtml.svg?logo=GitHub&style=flat-square "Contributors")](https://github.com/ampproject/amphtml/graphs/contributors)
 [![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg?logo=GitHub&style=flat-square "Commits")](https://github.com/ampproject/amphtml/pulse/monthly)
+[![Badges](https://img.shields.io/badge/badges-16-brightgreen?logo=GitHub&style=flat-square)](#)
 
-[![GitHub Issues (open)](https://img.shields.io/github/issues/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Issues (open)")](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue)
-[![GitHub Issues (closed)](https://img.shields.io/github/issues-closed/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Issues (closed)")](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aclosed)
-[![GitHub Pull Requests (open)](https://img.shields.io/github/issues-pr/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Pull Requests (open)")](https://github.com/ampproject/amphtml/pulls?q=is%3Aopen+is%3Apr)
-[![GitHub Pull Requests (closed)](https://img.shields.io/github/issues-pr-closed/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Pull Requests (closed)")](https://github.com/ampproject/amphtml/pulls?q=is%3Apr+is%3Aclosed)
-
-##### Metrics:
+<details>
+<summary>
+Metrics
+  
+</summary>
 
 [![Absolute Code Coverage](https://img.shields.io/endpoint.svg?logo=Codecov&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FAbsoluteCoverageMetric "Test coverage for the repository as computed by CodeCov")](https://codecov.io/gh/ampproject/amphtml/)
 [![Presubmit Latency](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FPresubmitLatencyMetric "Average Travis build time over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
@@ -20,16 +18,20 @@
 [![Release Granularity](https://img.shields.io/endpoint.svg?logo=GitHub&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FReleaseGranularityMetric "Average commits per release over the last 90 days")](https://github.com/ampproject/amphtml/releases)
 [![Travis Greenness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisGreennessMetric "Percentage of green Travis builds over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
 [![Travis Flakiness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisFlakinessMetric "Percentage of flaky Travis builds over the last 90 days")](https://travis-ci.org/ampproject/amphtml/builds)
+</details>
 
-##### Tooling:
+<details>
+<summary>
+Tooling
+
+</summary>
 
 [![Percy](https://img.shields.io/badge/%F0%9F%A6%94%20visual%20testing-Percy-violet.svg?style=flat-square "Percy")](https://percy.io/ampproject/amphtml)
 [![Prettier](https://img.shields.io/badge/code_style-Prettier-ff69b4.svg?logo=Prettier&logoColor=white&style=flat-square "Prettier")](https://github.com/prettier/prettier)
 [![Codecov](https://img.shields.io/badge/test_coverage-CodeCov-f01f7a.svg?logo=Codecov&logoColor=white&style=flat-square "Codecov")](https://codecov.io/gh/ampproject/amphtml/)
 [![LGTM](https://img.shields.io/lgtm/alerts/github/ampproject/amphtml.svg?logo=lgtm&style=flat-square "LGTM")](https://lgtm.com/projects/g/ampproject/amphtml/)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg?logo=dependabot&style=flat-square "Renovate")](https://renovateapp.com/)
-
-> **The [AMP Contributor Summit 2019](https://amp.dev/events/amp-cs-2019) will be in NYC October 8-10.** This technical summit is an opportunity for the AMP open source community to meet face-to-face to discuss the latest in AMP and where AMP is going.  It consists of a mix of different formats, including talks, breakout sessions and many opportunities for informal conversations.  **[Apply to attend the summit](https://events.withgoogle.com/ampcs2019/registrations/new/) by July 22, 2019!**
+</details>
 
 [AMP](https://amp.dev) is a web component framework for easily creating user-first websites, stories, ads, emails and more.
 

@@ -26,12 +26,13 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
+  getJsonConfigurationPlugin(),
   getReplacePlugin(),
 ];
 
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
-  './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+  './polyfills/domtokenlist': ['installDOMTokenList'],
   './polyfills/fetch': ['installFetch'],
   './polyfills/math-sign': ['installMathSign'],
   './polyfills/object-assign': ['installObjectAssign'],
@@ -84,11 +85,15 @@ function getReplacePlugin() {
 
     // check experiment expiration times
     if (experimentsConfig[experiment]['name'] && !expirationTimestampMs) {
-      throw new Error(`Invalid expiration date for ${experiment}`);
+      if (defineFlag) {
+        throw new Error(`Invalid expiration date for ${experiment}`);
+      }
     } else if (expirationTimestampMs < currentTimestampMs) {
-      throw new Error(
-        `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
-      );
+      if (defineFlag) {
+        throw new Error(
+          `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
+        );
+      }
     }
 
     const experimentDefine =
@@ -110,6 +115,10 @@ function getReplacePlugin() {
 const eliminateIntermediateBundles = () => [
   localPlugin('transform-prune-namespace'),
 ];
+
+function getJsonConfigurationPlugin() {
+  return localPlugin('transform-json-configuration');
+}
 
 /**
  * Resolves babel plugin set to apply before compiling on singlepass.
@@ -140,4 +149,9 @@ function plugins({isEsmBuild, isForTesting, isSinglePass}) {
   return applied;
 }
 
-module.exports = {plugins, eliminateIntermediateBundles, getReplacePlugin};
+module.exports = {
+  plugins,
+  eliminateIntermediateBundles,
+  getReplacePlugin,
+  getJsonConfigurationPlugin,
+};

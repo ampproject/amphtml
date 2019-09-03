@@ -108,6 +108,7 @@ import {atomx} from '../ads/atomx';
 import {baidu} from '../ads/baidu';
 import {beaverads} from '../ads/beaverads';
 import {bidtellect} from '../ads/bidtellect';
+import {blade} from '../ads/blade';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
 import {broadstreetads} from '../ads/broadstreetads';
@@ -209,6 +210,7 @@ import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
 import {rbinfox} from '../ads/rbinfox';
+import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
@@ -231,7 +233,6 @@ import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
-import {streamrail} from '../ads/streamrail';
 import {strossle} from '../ads/strossle';
 import {sunmedia} from '../ads/sunmedia';
 import {svknative} from '../ads/svknative';
@@ -259,6 +260,7 @@ import {wpmedia} from '../ads/wpmedia';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
+import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
 import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
@@ -298,15 +300,17 @@ const AMP_EMBED_ALLOWED = {
   postquare: true,
   pubexchange: true,
   rbinfox: true,
+  readmo: true,
+  runative: true,
   smartclip: true,
   smi2: true,
-  svknative: true,
+  speakol: true,
   strossle: true,
+  svknative: true,
   taboola: true,
+  yahoonativeads: true,
   zen: true,
   zergnet: true,
-  runative: true,
-  speakol: true,
 };
 
 init(window);
@@ -366,6 +370,7 @@ register('baidu', baidu);
 register('beaverads', beaverads);
 register('beopinion', beopinion);
 register('bidtellect', bidtellect);
+register('blade', blade);
 register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
@@ -475,6 +480,7 @@ register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
 register('rbinfox', rbinfox);
+register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
@@ -497,7 +503,6 @@ register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
-register('streamrail', streamrail);
 register('strossle', strossle);
 register('sunmedia', sunmedia);
 register('svknative', svknative);
@@ -527,6 +532,7 @@ register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
+register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);
 register('yengo', yengo);
 register('yieldbot', yieldbot);
@@ -559,12 +565,12 @@ const defaultAllowedTypesInCustomFrame = [
  * @param {!Window} win
  */
 function init(win) {
+  initLogConstructor();
   const config = getAmpConfig();
 
   // Overriding to short-circuit src/mode#getMode()
-  win.AMP_MODE = config.mode;
+  win.__AMP_MODE = config.mode;
 
-  initLogConstructor();
   setReportError(console.error.bind(console));
 
   setExperimentToggles(config.experimentToggles);

@@ -33,10 +33,10 @@ const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TEST_TIMEOUT = 20000;
+const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
-const defaultBrowsers = new Set(['chrome', 'firefox']);
+const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
@@ -79,6 +79,7 @@ let describesConfig = null;
 const capabilitiesKeys = {
   'chrome': 'chromeOptions',
   'firefox': 'moz:firefoxOptions',
+  'safari': 'safariOptions',
 };
 
 /**
@@ -88,7 +89,7 @@ const capabilitiesKeys = {
  */
 function configure(config) {
   if (describesConfig) {
-    throw new Error('describes.config should only be called once');
+    throw new Error('describes.configure should only be called once');
   }
 
   describesConfig = Object.assign({}, config);
@@ -111,7 +112,7 @@ function getConfig() {
 /**
  * Configure and launch a Puppeteer instance
  * @param {!PuppeteerConfigDef=} opt_config
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function createPuppeteer(opt_config = {}) {
   const browser = await puppeteer.launch({
@@ -130,9 +131,10 @@ async function createPuppeteer(opt_config = {}) {
  * @return {!SeleniumDriver}
  */
 async function createSelenium(browserName, opt_config = {}) {
-  // TODO(estherkim): implement sessions
-  // See https://w3c.github.io/webdriver/#sessions
   switch (browserName) {
+    case 'safari':
+      // Safari's only option is setTechnologyPreview
+      return createDriver(browserName, []);
     case 'firefox':
       return createDriver(browserName, getFirefoxArgs(opt_config));
     case 'chrome':
@@ -223,13 +225,40 @@ const EnvironmentVariantMap = {
     name: 'Shadow environment',
     value: {environment: 'shadow-demo'},
   },
+  [AmpdocEnvironment.A4A_FIE]: {
+    name: 'AMPHTML ads FIE environment',
+    value: {environment: 'a4a-fie'},
+  },
+  [AmpdocEnvironment.A4A_INABOX]: {
+    name: 'AMPHTML ads inabox environment',
+    value: {environment: 'a4a-inabox'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
+    name: 'AMPHTML ads inabox friendly frame environment',
+    value: {environment: 'a4a-inabox-friendly'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
+    name: 'AMPHTML ads inabox safeframe environment',
+    value: {environment: 'a4a-inabox-safeframe'},
+  },
 };
 
-const defaultEnvironments = [
-  AmpdocEnvironment.SINGLE,
-  AmpdocEnvironment.VIEWER_DEMO,
-  AmpdocEnvironment.SHADOW_DEMO,
-];
+const envPresets = {
+  'ampdoc-preset': [
+    AmpdocEnvironment.SINGLE,
+    AmpdocEnvironment.VIEWER_DEMO,
+    AmpdocEnvironment.SHADOW_DEMO,
+  ],
+  'amp4ads-preset': [
+    AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_INABOX,
+    AmpdocEnvironment.A4A_INABOX_FRIENDLY,
+    AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
+  ],
+};
+envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
+  envPresets['amp4ads-preset']
+);
 
 /**
  * Helper class to skip E2E tests in a specific AMP environment.
@@ -260,6 +289,11 @@ class ItConfig {
     return this;
   }
 
+  skipA4aFie() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'a4a-fie';
+    return this;
+  }
+
   run(name, fn) {
     if (this.skip) {
       return this.it.skip(name, fn);
@@ -276,7 +310,7 @@ class ItConfig {
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
  * @param {function(!Object):!Array<?Fixture>} factory
- * @return {*} TODO(#23582): Specify return type
+ * @return {function()}
  */
 function describeEnv(factory) {
   /**
@@ -284,11 +318,17 @@ function describeEnv(factory) {
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   const templateFunc = function(suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
-    const environments = spec.environments || defaultEnvironments;
+    let environments = spec.environments || 'ampdoc-preset';
+    if (typeof environments === 'string') {
+      environments = envPresets[environments];
+    }
+    if (!environments) {
+      throw new Error('Invalid environment preset: ' + spec.environments);
+    }
     const variants = Object.create(null);
     environments.forEach(environment => {
       const o = EnvironmentVariantMap[environment];
@@ -317,7 +357,7 @@ function describeEnv(factory) {
 
       const allowedBrowsers = browsers
         ? new Set(browsers.split(',').map(x => x.trim()))
-        : defaultBrowsers;
+        : supportedBrowsers;
 
       if (engine === 'puppeteer') {
         const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
@@ -328,6 +368,11 @@ function describeEnv(factory) {
           );
         }
         return result;
+      }
+
+      if (process.platform !== 'darwin' && allowedBrowsers.has('safari')) {
+        // silently skip safari tests
+        allowedBrowsers.delete('safari');
       }
 
       return allowedBrowsers;
@@ -390,7 +435,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   const mainFunc = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe);
@@ -400,7 +445,7 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
-   * @return {*} TODO(#23582): Specify return type
+   * @return {function()}
    */
   mainFunc.only = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe./*OK*/ only);
@@ -438,12 +483,21 @@ class EndToEndFixture {
     } = this.spec;
     const {environment} = env;
 
-    await toggleExperiments(ampDriver, testUrl, experiments);
+    const url = new URL(testUrl);
+    if (experiments.length > 0) {
+      if (environment.includes('inabox')) {
+        // inabox experiments are toggled at server side using <meta> tag
+        url.searchParams.set('exp', experiments.join(','));
+      } else {
+        // AMP doc experiments are toggled via cookies
+        await toggleExperiments(ampDriver, url.href, experiments);
+      }
+    }
 
     const {width, height} = initialRect;
     await controller.setWindowRect({width, height});
 
-    await ampDriver.navigateToEnvironment(environment, testUrl);
+    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
@@ -459,7 +513,7 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
- * @return {*} TODO(#23582): Specify return type
+ * @return {!SeleniumWebDriverController}
  */
 async function getController(
   {engine = 'selenium', headless = false},
@@ -484,10 +538,6 @@ async function getController(
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
-  if (!experiments.length) {
-    return;
-  }
-
   await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {

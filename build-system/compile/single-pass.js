@@ -19,6 +19,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
 const conf = require('../build.conf');
+const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -36,6 +37,7 @@ const tempy = require('tempy');
 const terser = require('terser');
 const through = require('through2');
 const {
+  extensionAliasBundles,
   extensionBundles,
   altMainBundles,
   TYPES,
@@ -59,7 +61,7 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
-const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
+const SPLIT_MARKER = `/** SPLIT_SINGLE_PASS */`;
 
 // Used to store transforms and compile v0.js
 const transformDir = tempy.directory();
@@ -112,7 +114,7 @@ exports.getFlags = function(config) {
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
     language_out: config.language_out || 'ES5',
-    module_output_path_prefix: config.writeTo || 'out/',
+    chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
     process_common_js_modules: true,
     externs: config.externs,
@@ -209,7 +211,7 @@ exports.getBundleFlags = function(g) {
         name,
       };
     }
-    // And now build --module $name:$numberOfJsFiles:$bundleDeps
+    // And now build --chunk $name:$numberOfJsFiles:$bundleDeps
     let cmd = name + ':' + bundle.modules.length;
     const bundleDeps = [];
     if (!isMain) {
@@ -228,7 +230,7 @@ exports.getBundleFlags = function(g) {
         }
       }
     }
-    flagsArray.push('--module', cmd);
+    flagsArray.push('--chunk', cmd);
     if (bundleKeys.length > 1) {
       function massageWrapper(w) {
         return w.replace('<%= contents %>', '%s');
@@ -243,7 +245,7 @@ exports.getBundleFlags = function(g) {
         const configEntry = getExtensionBundleConfig(originalName);
         const marker = configEntry ? SPLIT_MARKER : '';
         flagsArray.push(
-          '--module_wrapper',
+          '--chunk_wrapper',
           name +
             ':' +
             massageWrapper(
@@ -310,6 +312,7 @@ exports.getGraph = function(entryModules, config) {
     debug: true,
     deps: true,
     detectGlobals: false,
+    fast: true,
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
@@ -562,6 +565,8 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
+    .then(cleanupWeakModuleFiles)
+    .then(copyAliasedExtensions)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       throw err;
@@ -675,12 +680,32 @@ function postPrepend(extension, prependContents) {
   });
 }
 
+/**
+ * Copies JS for aliased extensions. (CSS is already dropped in place.)
+ */
+function copyAliasedExtensions() {
+  Object.keys(extensionAliasBundles).forEach(aliasedExtension => {
+    const {version, aliasedVersion} = extensionAliasBundles[aliasedExtension];
+    const src = `${aliasedExtension}-${version}.js`;
+    const dest = `${aliasedExtension}-${aliasedVersion}.js`;
+    fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
+    fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
+  });
+}
+
+/**
+ * Cleans up the weak module files written out by closure compiler.
+ * @return {!Promise}
+ */
+function cleanupWeakModuleFiles() {
+  const weakModuleJsFile = 'dist/$weak$.js';
+  const weakModuleMapFile = 'dist/$weak$.js.map';
+  return del([weakModuleJsFile, weakModuleMapFile]);
+}
+
 function compile(flagsArray) {
   if (isTravisBuild()) {
-    log(
-      'Minifying single-pass runtime targets with',
-      colors.cyan('closure-compiler')
-    );
+    log('Minifying single-pass JS with', colors.cyan('closure-compiler'));
   }
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {

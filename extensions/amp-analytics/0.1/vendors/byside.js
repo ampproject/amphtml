@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const BYSIDE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const BYSIDE_CONFIG = jsonLiteral({
   'vars': {
     'webcareZone': 'webcare',
     'webcareId': '',
@@ -63,3 +65,5 @@ export const BYSIDE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {BYSIDE_CONFIG};

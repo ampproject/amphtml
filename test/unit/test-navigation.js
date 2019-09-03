@@ -64,7 +64,7 @@ describes.sandboxed('Navigation', {}, () => {
         doc = win.document;
         const {documentElement} = doc;
 
-        handler = Services.navigationForDoc(doc);
+        handler = Services.navigationForDoc(documentElement);
         handler.isIframed_ = true;
 
         decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
@@ -634,6 +634,25 @@ describes.sandboxed('Navigation', {}, () => {
           expect(win.location.href).to.equal('https://www.pub.com/');
         });
 
+        it('should navigate relative to source url', () => {
+          win.location.href =
+            'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
+          const urlService = Services.urlForDoc(doc.documentElement);
+
+          sandbox.stub(urlService, 'getSourceUrl').callsFake(url => {
+            expect(url).to.equal('abc.html');
+            return 'https://www.pub.com/dir/abc.html';
+          });
+
+          allowConsoleError(() => {
+            handler.navigateTo(win, 'abc.html');
+          });
+
+          expect(win.location.href).to.equal(
+            'https://www.pub.com/dir/abc.html'
+          );
+        });
+
         it('should delegate navigation to viewer if necessary', () => {
           const meta = doc.createElement('meta');
           meta.setAttribute('name', 'amp-to-amp-navigation');
@@ -715,17 +734,17 @@ describes.sandboxed('Navigation', {}, () => {
             parentWin = env.parentWin;
             embed = env.embed;
 
-            // TODO(#22733): cleanup `win.services.navigation` part.
+            // TODO(#22733): cleanup `win.__AMP_SERVICES.navigation` part.
             handler = (
-              (ampdoc.services && ampdoc.services.navigation) ||
-              win.services.navigation
+              (ampdoc.__AMP_SERVICES && ampdoc.__AMP_SERVICES.navigation) ||
+              win.__AMP_SERVICES.navigation
             ).obj;
             winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
               return {};
             });
-            const viewport = parentWin.services.viewport.obj;
+            const viewport = parentWin.__AMP_SERVICES.viewport.obj;
             scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
-            const history = parentWin.services.history.obj;
+            const history = parentWin.__AMP_SERVICES.history.obj;
             replaceStateForTargetPromise = Promise.resolve();
             replaceStateForTargetStub = sandbox
               .stub(history, 'replaceStateForTarget')

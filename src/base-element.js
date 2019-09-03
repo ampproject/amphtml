@@ -21,7 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {isExperimentOn} from './experiments';
 import {preconnectForElement} from './preconnect';
 
 /**
@@ -160,9 +159,6 @@ export class BaseElement {
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
-
-    /** @public {?Object} For use by sub classes */
-    this.config = null;
 
     /**
      * The time at which this element was scheduled for layout relative to the
@@ -400,18 +396,6 @@ export class BaseElement {
   }
 
   /**
-   * Sets this element as the owner of the specified element. By setting itself
-   * as an owner, the element declares that it will manage the lifecycle of
-   * the owned element itself. This element, as an owner, will have to call
-   * {@link scheduleLayout}, {@link schedulePreload}, {@link updateInViewport}
-   * and similar methods.
-   * @param {!Element} element
-   */
-  setAsOwner(element) {
-    this.element.getResources().setOwner(element, this.element);
-  }
-
-  /**
    * Subclasses can override this method to opt-in into being called to
    * prerender when document itself is not yet visible (pre-render mode).
    *
@@ -437,10 +421,13 @@ export class BaseElement {
   /**
    * Subclasses can override this method to provide a svg logo that will be
    * displayed as the loader.
-   * @return {?Element}
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
    */
   createLoaderLogoCallback() {
-    return null;
+    return {};
   }
 
   /**
@@ -687,8 +674,9 @@ export class BaseElement {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      if (this.element.hasAttribute(attr)) {
-        element.setAttribute(attr, this.element.getAttribute(attr));
+      const val = this.element.getAttribute(attr);
+      if (null !== val) {
+        element.setAttribute(attr, val);
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
       }
@@ -830,7 +818,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   getViewport() {
     return Services.viewportForDoc(this.getAmpDoc());
@@ -843,44 +831,6 @@ export class BaseElement {
    */
   getIntersectionElementLayoutBox() {
     return this.getLayoutBox();
-  }
-
-  /**
-   * Schedule the layout request for the children element or elements
-   * specified. Resource manager will perform the actual layout based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleLayout(elements) {
-    this.element.getResources().scheduleLayout(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  schedulePause(elements) {
-    this.element.getResources().schedulePause(this.element, elements);
-  }
-
-  /**
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  scheduleResume(elements) {
-    this.element.getResources().scheduleResume(this.element, elements);
-  }
-
-  /**
-   * Schedule the preload request for the children element or elements
-   * specified. Resource manager will perform the actual preload based on the
-   * priority of this element and its children.
-   * @param {!Element|!Array<!Element>} elements
-   * @public
-   */
-  schedulePreload(elements) {
-    this.element.getResources().schedulePreload(this.element, elements);
   }
 
   /**
@@ -945,13 +895,20 @@ export class BaseElement {
    * The promise is resolved if the height is successfully updated.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @param {?Event=} opt_event
    * @return {!Promise}
    * @public
    */
-  attemptChangeSize(newHeight, newWidth) {
+  attemptChangeSize(newHeight, newWidth, opt_event) {
     return this.element
       .getResources()
-      .attemptChangeSize(this.element, newHeight, newWidth);
+      .attemptChangeSize(
+        this.element,
+        newHeight,
+        newWidth,
+        /* newMargin */ undefined,
+        opt_event
+      );
   }
 
   /**
@@ -1067,21 +1024,5 @@ export class BaseElement {
    */
   user() {
     return user(this.element);
-  }
-
-  /**
-   * Declares a child element (or ourselves) as a Layer
-   * @param {!Element=} opt_element
-   * @return {undefined}
-   */
-  declareLayer(opt_element) {
-    devAssert(
-      isExperimentOn(this.win, 'layers'),
-      'Layers must be enabled to declare layer.'
-    );
-    if (opt_element) {
-      devAssert(this.element.contains(opt_element));
-    }
-    return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }

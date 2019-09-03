@@ -15,9 +15,9 @@
  */
 
 @import './amp-story-access.css';
-@import './amp-story-bling-link.css';
+@import './amp-story-affiliate-link.css';
 @import './amp-story-desktop-panels.css';
-@import './amp-story-page-attachment.css';
+@import './amp-story-draggable-drawer.css';
 @import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
 @import './amp-story-vertical.css';
@@ -38,6 +38,14 @@ amp-consent {
   width: 100% !important;
   background: none !important;
   z-index: initial !important;
+}
+
+/**
+ * amp-hidden uses visiblity: hidden that does not propagate to shadow trees
+ * because of amp-story-shadow-reset.css. Use display: none instead.
+ */
+amp-consent.amp-hidden {
+  display: none !important;
 }
 
 .i-amphtml-story-system-reset,
@@ -205,14 +213,14 @@ amp-story-page[active] {
   animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
-[desktop] .i-amphtml-story-sidebar[open] {
-  max-width: 320px !important;
+[desktop] .i-amphtml-story-sidebar {
+  min-width: 25% !important;
+  max-width: 600px !important;
 }
 
 .i-amphtml-story-sidebar {
-  max-width: 280px !important;
-  min-width: 280px !important;
-  width: 280px !important;
+  min-width: 75% !important;
+  max-width: 360px !important;
   animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
   animation-duration: 0.2s !important;
   animation-name: i-amphtml-sidebar-slide-out-right;
@@ -293,11 +301,11 @@ amp-story-page [data-text-background-color] {
   bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  opacity: 0.75 !important;
+  opacity: 1 !important;
   display: block !important;
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
-  background-color: #000 !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
   visibility: visible;
   z-index: 100003 !important;
   transition: visibility 0.3s, opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
@@ -758,6 +766,7 @@ amp-story .amp-video-eq,
   to { transform: rotate(-130deg) }
 }
 
+.i-amphtml-story-page-error,
 .i-amphtml-story-page-play-button {
   display: flex !important;
   align-items: center !important;
@@ -805,17 +814,20 @@ amp-story .amp-video-eq,
   }
 }
 
+.i-amphtml-story-page-error[hidden],
 .i-amphtml-story-page-play-button[hidden] {
   display: none !important;
 }
 
+.i-amphtml-story-page-error-label,
 .i-amphtml-story-page-play-label {
   color: #fff !important;
   font-family: 'Roboto', sans-serif !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
 }
 
+.i-amphtml-story-page-error-icon,
 .i-amphtml-story-page-play-icon {
   display: inline-block !important;
   height: 24px !important;
@@ -823,6 +835,13 @@ amp-story .amp-video-eq,
   margin: 0 8px !important;
   border-radius: 24px !important;
   filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
+}
+
+.i-amphtml-story-page-error-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>') !important;
+}
+
+.i-amphtml-story-page-play-icon {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-4 29V15l12 9-12 9z"/></svg>') !important;
 }
 

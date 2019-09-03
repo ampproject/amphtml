@@ -23,7 +23,7 @@
  */
 const fs = require('fs');
 const https = require('https');
-const {getStdout} = require('./exec');
+const {getStdout, getStderr} = require('./exec');
 
 const setupInstructionsUrl =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
@@ -33,6 +33,16 @@ const gulpHelpUrl =
 
 const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
+const pythonExecutable = 'python';
+
+const wrongGulpPaths = [
+  '/bin/',
+  '/sbin/',
+  '/usr/bin/',
+  '/usr/sbin/',
+  '/usr/local/bin/',
+  '/usr/local/sbin/',
+];
 
 const warningDelaySecs = 10;
 
@@ -231,13 +241,12 @@ function runGulpChecks() {
   const firstInstall = !fs.existsSync('node_modules');
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
-  const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
   const defaultGulpPath = getStdout('which gulp', {
     'env': {'PATH': getParentShellPath()},
   }).trim();
-  const wrongGulp =
-    !defaultGulpPath.includes('yarn') &&
-    !defaultGulpPath.includes('amphtml/node_modules');
+  const wrongGulp = wrongGulpPaths.some(path =>
+    defaultGulpPath.startsWith(path)
+  );
   if (globalGulp) {
     console.log(
       yellow('WARNING: Detected a global install of'),
@@ -257,32 +266,13 @@ function runGulpChecks() {
       yellow('for more information.')
     );
     updatesNeeded.add('gulp');
-  } else if (!globalGulpCli) {
-    console.log(
-      yellow('WARNING: Could not find'),
-      cyan('gulp-cli') + yellow('.')
-    );
-    console.log(
-      yellow('⤷ To install it, run'),
-      cyan('"yarn global add gulp-cli"') + yellow('.')
-    );
-    console.log(
-      yellow('⤷ See'),
-      cyan(gulpHelpUrl),
-      yellow('for more information.')
-    );
-    updatesNeeded.add('gulp-cli');
   }
   if (wrongGulp) {
     console.log(
       yellow('WARNING: Found'),
       cyan('gulp'),
       yellow('in an unexpected location:'),
-      cyan(defaultGulpPath) + yellow('. (The location usually contains'),
-      cyan('yarn'),
-      yellow('or'),
-      cyan('amphtml/node_modules'),
-      yellow('in the path.)')
+      cyan(defaultGulpPath) + yellow('.')
     );
     console.log(
       yellow('⤷ To fix this, consider removing'),
@@ -319,6 +309,44 @@ function runGulpChecks() {
   }
 }
 
+function checkPythonVersion() {
+  // Python prints its version to stderr: https://bugs.python.org/issue18338
+  const pythonVersionResult = getStderr(`${pythonExecutable} --version`).trim();
+  const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
+  if (pythonVersion && pythonVersion.length == 2) {
+    const recommendedVersion = '2.7';
+    const versionNumber = pythonVersion[1];
+    if (versionNumber.startsWith(recommendedVersion)) {
+      console.log(
+        green('Detected'),
+        cyan('python'),
+        green('version'),
+        cyan(versionNumber) + green('.')
+      );
+    } else {
+      console.log(
+        yellow('WARNING: Detected python version'),
+        cyan(versionNumber) +
+          yellow('. Recommended version for AMP development is'),
+        cyan(recommendedVersion) + yellow('.')
+      );
+      console.log(
+        yellow('⤷ To fix this, install the correct version from'),
+        cyan(`https://www.python.org/download/releases/${recommendedVersion}`) +
+          yellow('.')
+      );
+    }
+  } else {
+    console.log(
+      yellow(
+        'WARNING: ' +
+          'Could not determine the local version of python. ' +
+          'AMP development requires python 2.7.'
+      )
+    );
+  }
+}
+
 function main() {
   // Yarn is already used by default on Travis, so there is nothing more to do.
   if (process.env.TRAVIS) {
@@ -327,6 +355,7 @@ function main() {
   ensureYarn();
   return checkNodeVersion().then(() => {
     runGulpChecks();
+    checkPythonVersion();
     checkYarnVersion();
     if (!process.env.TRAVIS && updatesNeeded.size > 0) {
       console.log(

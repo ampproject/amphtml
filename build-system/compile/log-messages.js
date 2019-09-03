@@ -42,7 +42,6 @@ const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
  */
 async function formatExtractedMessages() {
   const items = await extractedItems();
-  log('Formatting log messages from', cyan(extractedPath));
   return Promise.all(
     Object.entries(formats).map(async ([path, format]) => {
       const formatted = {};

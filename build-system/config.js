@@ -78,10 +78,16 @@ const chaiAsPromised = ['test/chai-as-promised/chai-as-promised.js'];
 const unitTestPaths = [
   'test/unit/**/*.js',
   'ads/**/test/test-*.js',
+  'ads/**/test/unit/test-*.js',
   'extensions/**/test/*.js',
+  'extensions/**/test/unit/*.js',
 ];
 
-const unitTestOnSaucePaths = ['test/unit/**/*.js', 'ads/**/test/test-*.js'];
+const unitTestOnSaucePaths = [
+  'test/unit/**/*.js',
+  'ads/**/test/test-*.js',
+  'ads/**/test/unit/test-*.js',
+];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -92,9 +98,51 @@ const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
 
 const devDashboardTestPaths = ['build-system/app-index/test/**/*.js'];
 
+const jisonPaths = ['extensions/**/*.jison'];
+
 const lintGlobs = [
   '**/*.js',
   // To ignore a file / directory, add it to .eslintignore.
+];
+
+const presubmitGlobs = [
+  '**/*.{css,js,go}',
+  // This does match dist.3p/current, so we run presubmit checks on the
+  // built 3p binary. This is done, so we make sure our special 3p checks
+  // run against the entire transitive closure of deps.
+  '!{node_modules,build,dist,dist.tools,' +
+    'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
+  '!dist.3p/current/**/ampcontext-lib.js',
+  '!dist.3p/current/**/iframe-transport-client-lib.js',
+  '!out/**/*.*',
+  '!validator/validator.pb.go',
+  '!validator/dist/**/*.*',
+  '!validator/node_modules/**/*.*',
+  '!validator/nodejs/node_modules/**/*.*',
+  '!validator/webui/dist/**/*.*',
+  '!validator/webui/node_modules/**/*.*',
+  '!build-system/tasks/e2e/node_modules/**/*.*',
+  '!build-system/tasks/presubmit-checks.js',
+  '!build-system/runner/build/**/*.*',
+  '!build-system/tasks/visual-diff/node_modules/**/*.*',
+  '!build-system/tasks/visual-diff/snippets/*.js',
+  '!build/polyfills.js',
+  '!build/polyfills/*.js',
+  '!third_party/**/*.*',
+  '!validator/chromeextension/*.*',
+  // Files in this testdata dir are machine-generated and are not part
+  // of the AMP runtime, so shouldn't be checked.
+  '!extensions/amp-a4a/*/test/testdata/*.js',
+  '!examples/**/*',
+  '!examples/visual-tests/**/*',
+  '!test/coverage/**/*.*',
+  '!firebase/**/*.*',
+];
+
+const jsonGlobs = [
+  '**/*.json',
+  '!{node_modules,build,dist,dist.3p,dist.tools,' +
+    'third_party,build-system}/**/*.*',
 ];
 
 /**
@@ -135,44 +183,9 @@ module.exports = {
   e2eTestPaths,
   lintGlobs,
   devDashboardTestPaths,
+  jisonPaths,
   thirdPartyFrames,
-  jsonGlobs: [
-    '**/*.json',
-    '!{node_modules,build,dist,dist.3p,dist.tools,' +
-      'third_party,build-system}/**/*.*',
-  ],
-  presubmitGlobs: [
-    '**/*.{css,js,go}',
-    // This does match dist.3p/current, so we run presubmit checks on the
-    // built 3p binary. This is done, so we make sure our special 3p checks
-    // run against the entire transitive closure of deps.
-    '!{node_modules,build,dist,dist.tools,' +
-      'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
-    '!dist.3p/current/**/ampcontext-lib.js',
-    '!dist.3p/current/**/iframe-transport-client-lib.js',
-    '!out/**/*.*',
-    '!validator/validator.pb.go',
-    '!validator/dist/**/*.*',
-    '!validator/node_modules/**/*.*',
-    '!validator/nodejs/node_modules/**/*.*',
-    '!validator/webui/dist/**/*.*',
-    '!validator/webui/node_modules/**/*.*',
-    '!build-system/tasks/e2e/node_modules/**/*.*',
-    '!build-system/tasks/presubmit-checks.js',
-    '!build-system/runner/build/**/*.*',
-    '!build-system/tasks/visual-diff/node_modules/**/*.*',
-    '!build-system/tasks/visual-diff/snippets/*.js',
-    '!build/polyfills.js',
-    '!build/polyfills/*.js',
-    '!third_party/**/*.*',
-    '!validator/chromeextension/*.*',
-    // Files in this testdata dir are machine-generated and are not part
-    // of the AMP runtime, so shouldn't be checked.
-    '!extensions/amp-a4a/*/test/testdata/*.js',
-    '!examples/**/*',
-    '!examples/visual-tests/**/*',
-    '!test/coverage/**/*.*',
-    '!firebase/**/*.*',
-  ],
+  jsonGlobs,
+  presubmitGlobs,
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };

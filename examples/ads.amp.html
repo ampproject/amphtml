@@ -118,6 +118,7 @@
         <option>beaverads</option>
         <option>beopinion</option>
         <option>bidtellect</option>
+        <option>blade</option>
         <option>brainy</option>
         <option>bringhub</option>
         <option>caajainfeed</option>
@@ -213,6 +214,7 @@
         <option>pulsepoint</option>
         <option>purch</option>
         <option>rbinfox</option>
+        <option>readmo</option>
         <option>realclick</option>
         <option>recomad</option>
         <option>relap</option>
@@ -235,7 +237,6 @@
         <option>sovrn</option>
         <option>speakol</option>
         <option>spotx</option>
-        <option>streamrail</option>
         <option>strossle</option>
         <option>sunmedia</option>
         <option>svknative</option>
@@ -263,6 +264,7 @@
         <option>xlift</option>
         <option>yahoo</option>
         <option>yahoojp</option>
+        <option>yahoonativeads</option>
         <option>yandex</option>
         <option>yengo</option>
         <option>yieldbot</option>
@@ -276,9 +278,9 @@
       <input type="submit" value="Go">
     </form>
   </div>
-  
+
   <h2>1WO</h2>
-  <amp-embed 
+  <amp-embed
       width="400"
       height="700"
       type="1wo"
@@ -287,7 +289,7 @@
       data-owo-mode="smart3"
       src="https://frontend-qa.1worldonline.biz/poller-constructor.js">
   </amp-embed>
-  
+
   <h2>24smi</h2>
   <amp-embed width="250" height="250"
       type="24smi"
@@ -746,16 +748,16 @@
   </amp-ad>
 
   <h2>AppNexus with JSON based configuration multi ad</h2>
-  <amp-ad width="300" height="250"
-      type="appnexus"
-      data-target="apn_ad_1"
+  <amp-ad width="728" height="90" type="appnexus" data-target="apn_ad_2"
+      json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
+  </amp-ad>
+  <!-- There could be no creative rendered for this tag, this is to test the behaviour when there are no bids for a tag -->
+  <amp-ad width="300" height="250" type="appnexus" data-target="apn_ad_1"
       json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
   </amp-ad>
 
-  <amp-ad width="728" height="90"
-      type="appnexus"
-      data-target="apn_ad_2"
-      json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
+  <amp-ad width="728" height="90" type="appnexus" data-target="apn_ad_3"
+      json='{"adUnits": [{"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_3"}]}'>
   </amp-ad>
 
   <h2>AppVador</h2>
@@ -796,6 +798,16 @@
       data-t="20bc0442-8bec-43f8-9992-08be6e6a3591"
       data-pid="925847381"
       data-sid="216072">
+  </amp-ad>
+
+  <h2>Blade</h2>
+  <amp-ad width="300" height="250"
+      type="blade"
+      servingDomain="ssr.streamrail.net"
+      data-blade_player_type="blade"
+      data-blade_macros='{"page_url":"[PAGE_URL]",  "ip":"[IP]","ua":"[UA]","cb":"[CB]","dnt":"[DNT]","sub_id":"[SUB_ID]","user_consent":"[USER_CONTENT]","gdpr":"[GDPR]"}'
+      data-blade_player_id="5af16139cb938a00022c1326"
+      data-blade_api_key="5af15a3b02e28f0002000001">
   </amp-ad>
 
   <h2>brainy</h2>
@@ -1463,6 +1475,7 @@
 
   <h2>Nativeroll</h2>
   <amp-ad width="480" height="340"
+          layout="responsive"
           type="nativeroll"
           data-gid="5d10df709762b6b31b8b461e"
   >
@@ -1720,6 +1733,15 @@
       src="https://rb.infox.sg/infox/503">
   </amp-embed>
 
+  <h2>ReadMo</h2>
+  <amp-embed width="300" height="250"
+      type="readmo"
+      layout="responsive"
+      heights="(min-width:1907px) 50%, (min-width:1200px) 50%, (min-width:780px) 50%, (min-width:480px) 75%, (min-width:460px) 100%, 100%"
+      data-section="5591639"
+      data-module="end-of-article-stacked">
+  </amp-embed>
+
   <h2>Realclick</h2>
   <amp-ad width="300" height="250"
       type="realclick"
@@ -1914,15 +1936,6 @@
       data-spotx_autoplay="1">
   </amp-ad>
 
-  <h2>Streamrail</h2>
-  <amp-ad width="300" height="250"
-      type="streamrail"
-      data-streamrail_player_type="blade"
-      data-streamrail_macros='{"page_url":"[PAGE_URL]",  "ip":"[IP]","ua":"[UA]","cb":"[CB]","dnt":"[DNT]","sub_id":"[SUB_ID]","user_consent":"[USER_CONTENT]","gdpr":"[GDPR]"}'
-      data-streamrail_player_id="5af16139cb938a00022c1326"
-      data-streamrail_api_key="5af15a3b02e28f0002000001">
-  </amp-ad>
-
   <h2>Strossle</h2>
   <amp-embed height="580"
              type="strossle"
@@ -2078,6 +2091,15 @@
       data-site="news"
       data-sa='{"LREC":"300x250","secure":"true","content":"no_expandable;"}'>
   </amp-ad>
+
+  <h2>Yahoo Native Ads</h2>
+  <amp-embed width="300" height="250"
+      type="yahoonativeads"
+      layout="responsive"
+      heights="(min-width:1907px) 39%, (min-width:1200px) 46%, (min-width:780px) 64%, (min-width:480px) 98%, (min-width:460px) 167%, 196%"
+      data-section="5591639"
+      data-module="end-of-article-stacked">
+  </amp-embed>
 
   <h2>YahooJP YDN</h2>
   <amp-ad width="300" height="250"

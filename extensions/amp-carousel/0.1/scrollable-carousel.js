@@ -17,10 +17,9 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeFixed} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
 
@@ -46,14 +45,11 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
-
-    /** @private {boolean} */
-    this.useLayers_ = false;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeFixed(layout);
   }
 
   /** @override */
@@ -64,14 +60,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
-    this.useLayers_ =
-      isExperimentOn(this.win, 'layers') &&
-      isExperimentOn(this.win, 'layers-prioritization');
-
     this.cells_.forEach(cell => {
-      if (!this.useLayers_) {
-        this.setAsOwner(cell);
-      }
+      Services.ownersForDoc(this.element).setOwner(cell, this.element);
       cell.classList.add('amp-carousel-slide');
       cell.classList.add('amp-scrollable-carousel-slide');
       this.container_.appendChild(cell);
@@ -92,10 +82,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
       },
       ActionTrust.LOW
     );
-
-    if (this.useLayers_) {
-      this.declareLayer(this.container_);
-    }
   }
 
   /** @override */
@@ -112,19 +98,15 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
-    if (!this.useLayers_) {
-      this.doLayout_(this.pos_);
-      this.preloadNext_(this.pos_, 1);
-    }
+    this.doLayout_(this.pos_);
+    this.preloadNext_(this.pos_, 1);
     this.setControlsState();
     return Promise.resolve();
   }
 
   /** @override */
   onViewportCallback(unusedInViewport) {
-    if (!this.useLayers_) {
-      this.updateInViewport_(this.pos_, this.pos_);
-    }
+    this.updateInViewport_(this.pos_, this.pos_);
   }
 
   /** @override */
@@ -263,12 +245,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
-    if (!this.useLayers_) {
-      this.updateInViewport_(pos, this.oldPos_);
-      this.doLayout_(pos);
-      this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
-      this.oldPos_ = pos;
-    }
+    this.updateInViewport_(pos, this.oldPos_);
+    this.doLayout_(pos);
+    this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
+    this.oldPos_ = pos;
     this.pos_ = pos;
     this.setControlsState();
   }
@@ -317,7 +297,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    */
   doLayout_(pos) {
     this.withinWindow_(pos, cell => {
-      this.scheduleLayout(cell);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, cell);
     });
   }
 
@@ -330,7 +310,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
       this.withinWindow_(nextPos, cell => {
-        this.schedulePreload(cell);
+        Services.ownersForDoc(this.element).schedulePreload(this.element, cell);
       });
     }
   }
@@ -353,12 +333,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
     if (oldPos != newPos) {
       this.withinWindow_(oldPos, cell => {
         if (!seen.includes(cell)) {
-          Services.ownersForDoc(this.element).updateInViewport(
-            this.element,
-            cell,
-            false
-          );
-          this.schedulePause(cell);
+          const owners = Services.ownersForDoc(this.element);
+          owners.updateInViewport(this.element, cell, false);
+          owners.schedulePause(this.element, cell);
         }
       });
     }

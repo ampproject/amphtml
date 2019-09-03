@@ -48,7 +48,7 @@ export class AmpFxCollection {
     /** @private @const {!Array<!Element>} */
     this.seen_ = [];
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
     Promise.all([ampdoc.whenReady(), this.viewer_.whenFirstVisible()]).then(

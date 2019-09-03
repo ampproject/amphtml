@@ -75,7 +75,7 @@ export const LogLevel = {
  * @param {function(*, !Element=)|undefined} fn
  */
 export function setReportError(fn) {
-  self.reportError = fn;
+  self.__AMP_REPORT_ERROR = fn;
 }
 
 /**
@@ -147,7 +147,7 @@ export class Log {
      * the tests runs because only the former is relayed to the console.
      * @const {!Window}
      */
-    this.win = getMode().test && win.AMP_TEST_IFRAME ? win.parent : win;
+    this.win = getMode().test && win.__AMP_TEST_IFRAME ? win.parent : win;
 
     /** @private @const {function(!./mode.ModeDef):!LogLevel} */
     this.levelFunc_ = levelFunc;
@@ -226,8 +226,13 @@ export class Log {
         fn = this.win.console.warn || fn;
       }
       const args = this.maybeExpandMessageArgs_(messages);
-      if (getMode().localDev) {
-        args.unshift('[' + tag + ']');
+      // Prefix console message with "[tag]".
+      const prefix = `[${tag}]`;
+      if (typeof args[0] === 'string') {
+        // Prepend string to avoid breaking string substitutions e.g. %s.
+        args[0] = prefix + ' ' + args[0];
+      } else {
+        args.unshift(prefix);
       }
       fn.apply(this.win.console, args);
     }
@@ -304,8 +309,8 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.name = tag || error.name;
-      // reportError is installed globally per window in the entry point.
-      self.reportError(error);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(error);
     }
   }
 
@@ -319,8 +324,8 @@ export class Log {
     const error = this.error_.apply(this, arguments);
     if (error) {
       error.expected = true;
-      // reportError is installed globally per window in the entry point.
-      self.reportError(error);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(error);
     }
   }
 
@@ -412,8 +417,8 @@ export class Log {
       e.associatedElement = firstElement;
       e.messageArray = messageArray;
       this.prepareError_(e);
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(e);
       throw e;
     }
     return shouldBeTrueish;
@@ -701,7 +706,7 @@ export function rethrowAsync(var_args) {
   const error = createErrorVargs.apply(null, arguments);
   setTimeout(() => {
     // reportError is installed globally per window in the entry point.
-    self.reportError(error);
+    self.__AMP_REPORT_ERROR(error);
     throw error;
   });
 }
@@ -711,13 +716,13 @@ export function rethrowAsync(var_args) {
  * on Log and closure literally can't even.
  * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
-self.log = self.log || {
+self.__AMP_LOG = self.__AMP_LOG || {
   user: null,
   dev: null,
   userForEmbed: null,
 };
 
-const logs = self.log;
+const logs = self.__AMP_LOG;
 
 /**
  * Eventually holds a constructor for Log objects. Lazily initialized, so we

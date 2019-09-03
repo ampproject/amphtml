@@ -44,7 +44,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     sandbox = env.sandbox;
 
     // Ensures window location == AMP cache passes.
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
 
     const doc = env.win.document;
     element = createElementWithAttributes(env.win.document, 'amp-ad', {

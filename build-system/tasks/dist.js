@@ -21,11 +21,16 @@ const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const {
-  buildExtensions,
-  extensionAliasFilePath,
-  getExtensionsToBuild,
-  parseExtensionFlags,
-} = require('./extension-helpers');
+  bootstrapThirdPartyFrames,
+  compileAllMinifiedJs,
+  compileJs,
+  endBuildStep,
+  hostname,
+  mkdirSync,
+  printConfigHelp,
+  printNobuildHelp,
+  toPromise,
+} = require('./helpers');
 const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
@@ -34,34 +39,29 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {
-  WEB_PUSH_PUBLISHER_FILES,
-  WEB_PUSH_PUBLISHER_VERSIONS,
-  buildAlp,
-  buildExaminer,
-  buildWebWorker,
-  compileJs,
-  compileAllMinifiedTargets,
-  endBuildStep,
-  hostname,
-  mkdirSync,
-  printConfigHelp,
-  printNobuildHelp,
-  toPromise,
-} = require('./helpers');
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
+const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
+const {VERSION} = require('../internal-version');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
+
+const WEB_PUSH_PUBLISHER_FILES = [
+  'amp-web-push-helper-frame',
+  'amp-web-push-permission-dialog',
+];
+
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 
 function transferSrcsToTempDir() {
   log(
@@ -123,25 +123,21 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
-  await compileCss(/* watch */ undefined, /* opt_compileAll */ true);
+  await compileCss();
+  await compileJison();
   await startNailgunServer(distNailgunPort, /* detached */ false);
 
   // Single pass has its own tmp directory processing. Only do this for
   // multipass.
-  // We need to execute this after `compileCss` so that we can copy that
+  // We need to execute this after `compileCss` and `compileJison` so that we can copy that
   // over to the tmp directory.
   if (!argv.single_pass) {
     transferSrcsToTempDir();
   }
 
   await Promise.all([
-    compileAllMinifiedTargets(),
-    // NOTE: When adding a line here,
-    // consider whether you need to include polyfills
-    // and whether you need to init logging (initLogConstructor).
-    buildAlp({minify: true, watch: false}),
-    buildExaminer({minify: true, watch: false}),
-    buildWebWorker({minify: true, watch: false}),
+    compileAllMinifiedJs(),
+    bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true),
     buildExtensions({minify: true, watch: false}),
     buildExperiments({minify: true, watch: false}),
     buildLoginDone('0.1', {minify: true, watch: false}),
@@ -149,6 +145,7 @@ async function dist() {
       postBuildWebPushPublisherFilesVersion
     ),
     copyCss(),
+    copyParsers(),
   ]);
 
   if (isTravisBuild()) {
@@ -157,7 +154,6 @@ async function dist() {
   }
 
   await stopNailgunServer(distNailgunPort);
-  await copyAliasExtensions();
   await formatExtractedMessages();
 
   if (argv.esm) {
@@ -175,7 +171,7 @@ async function dist() {
  * Build AMP experiments.js.
  *
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildExperiments(options) {
   return compileJs(
@@ -196,7 +192,7 @@ function buildExperiments(options) {
  *
  * @param {string} version
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildLoginDone(version, options) {
   const buildDir = `build/all/amp-access-${version}/`;
@@ -220,7 +216,7 @@ function buildLoginDone(version, options) {
  * Build amp-web-push publisher files HTML page.
  *
  * @param {!Object} options
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 function buildWebPushPublisherFiles(options) {
   const distDir = 'dist/v0';
@@ -265,35 +261,19 @@ function copyCss() {
       .src('build/css/amp-*.css', {base: 'build/css/'})
       .pipe(gulp.dest('dist/v0'))
   ).then(() => {
-    endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
+    endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
   });
 }
 
 /**
- * Copy built extension to alias extension
+ * Copies parsers from the build folder to the dist folder
  * @return {!Promise}
  */
-function copyAliasExtensions() {
-  if (argv.noextensions) {
-    return Promise.resolve();
-  }
-
-  const extensionsToBuild = getExtensionsToBuild();
-
-  for (const key in extensionAliasFilePath) {
-    if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1
-    ) {
-      continue;
-    }
-    fs.copySync(
-      'dist/v0/' + extensionAliasFilePath[key]['file'],
-      'dist/v0/' + key
-    );
-  }
-
-  return Promise.resolve();
+function copyParsers() {
+  const startTime = Date.now();
+  return fs.copy('build/parsers', 'dist/v0').then(() => {
+    endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
+  });
 }
 
 /**
@@ -355,7 +335,7 @@ function postBuildWebPushPublisherFilesVersion() {
 
 /**
  * Precompilation steps required to build experiment js binaries.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function preBuildExperiments() {
   const path = 'tools/experiments';
@@ -364,10 +344,12 @@ async function preBuildExperiments() {
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
-  const minHtml = html.replace(
-    '/dist.tools/experiments/experiments.js',
-    `https://${hostname}/v0/experiments.js`
-  );
+  const minHtml = html
+    .replace(
+      '/dist.tools/experiments/experiments.js',
+      `https://${hostname}/v0/experiments.js`
+    )
+    .replace(/\$internalRuntimeVersion\$/g, VERSION);
 
   await toPromise(
     gulp
@@ -457,4 +439,6 @@ dist.flags = {
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
+  disable_nailgun:
+    "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };

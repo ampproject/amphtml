@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const closureCompiler = require('google-closure-compiler');
 const colors = require('ansi-colors');
 const {highlight} = require('cli-highlight');
@@ -26,7 +27,7 @@ let compilerErrors = '';
  * dropping the closure compiler plugin's logging prefix and then syntax
  * highlighting the error text.
  * @param {string} message
- * @return {*} TODO(#23582): Specify return type
+ * @return {string}
  */
 function formatClosureCompilerError(message) {
   const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
@@ -83,9 +84,13 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
       '../../node_modules/google-closure-compiler-java/compiler.jar'
     );
   } else {
-    // On Mac OS and Linux, speed up compilation using nailgun.
+    // On Mac OS and Linux, speed up compilation using nailgun (unless the
+    // --disable_nailgun flag was passed in)
     // See https://github.com/facebook/nailgun.
-    if (process.platform == 'darwin' || process.platform == 'linux') {
+    if (
+      !argv.disable_nailgun &&
+      (process.platform == 'darwin' || process.platform == 'linux')
+    ) {
       compilerOptions = [
         '--nailgun-port',
         nailgunPort,
@@ -95,7 +100,8 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
       pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
       initOptions.extraArguments = null; // Already part of nailgun-server
     } else {
-      // For other platforms, use AMP's custom runner.jar
+      // For other platforms, or if nailgun is explicitly disabled, use AMP's
+      // custom runner.jar
       closureCompiler.compiler.JAR_PATH = require.resolve(
         `../runner/dist/${nailgunPort}/runner.jar`
       );
