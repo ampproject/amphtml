@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
  * Used for tracking whether or not an item is near the viewport. This is set
  * from the IntersectionObserver and consumed by a flush.
  */
-const NEARBY_VIEWPORT_FLAG = '__AMP_CAROUSEL_NEARBY_VIEWPORT';
+const NEAR_VIEWPORT_FLAG = '__AMP_CAROUSEL_NEAR_VIEWPORT';
 
 /**
  * Used for tracking whether or not an item is in the viewport. This is set
@@ -262,7 +262,7 @@ export class ChildLayoutManager {
     entries
       .filter(({isIntersecting}) => isIntersecting)
       .forEach(({target}) => {
-        target[NEARBY_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
+        target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
       });
 
     if (!this.queueChanges_ || this.flushNextNearingViewportChanges_) {
@@ -280,7 +280,7 @@ export class ChildLayoutManager {
     entries
       .filter(({isIntersecting}) => !isIntersecting)
       .forEach(({target}) => {
-        target[NEARBY_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
+        target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
       });
 
     if (!this.queueChanges_ || this.flushNextBackingAwayViewportChanges_) {
@@ -323,9 +323,9 @@ export class ChildLayoutManager {
     for (let i = 0; i < this.children_.length; i++) {
       const child = this.children_[i];
 
-      if (child[NEARBY_VIEWPORT_FLAG] == ViewportChangeState.ENTER) {
+      if (child[NEAR_VIEWPORT_FLAG] == ViewportChangeState.ENTER) {
         this.triggerLayout_(child, true);
-        child[NEARBY_VIEWPORT_FLAG] = null;
+        child[NEAR_VIEWPORT_FLAG] = null;
       }
     }
   }
@@ -337,9 +337,9 @@ export class ChildLayoutManager {
     for (let i = 0; i < this.children_.length; i++) {
       const child = this.children_[i];
 
-      if (child[NEARBY_VIEWPORT_FLAG] == ViewportChangeState.LEAVE) {
+      if (child[NEAR_VIEWPORT_FLAG] == ViewportChangeState.LEAVE) {
         this.triggerLayout_(child, false);
-        child[NEARBY_VIEWPORT_FLAG] = null;
+        child[NEAR_VIEWPORT_FLAG] = null;
       }
     }
   }
