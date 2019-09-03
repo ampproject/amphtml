@@ -1166,11 +1166,8 @@ export class VideoEventTracker extends EventTracker {
 
     return this.sessionObservable_.add(event => {
       const {type} = event;
-      const isVisibleType = type === VideoAnalyticsEvents.SESSION_VISIBLE;
-      const normalizedType = isVisibleType
-        ? VideoAnalyticsEvents.SESSION
-        : type;
       const details = /** @type {?JsonObject|undefined} */ (getData(event));
+      const normalizedType = normalizeVideoEventType(type, details);
 
       if (normalizedType !== on) {
         return;
@@ -1232,7 +1229,10 @@ export class VideoEventTracker extends EventTracker {
         lastPercentage = normalizedPercentageInt;
       }
 
-      if (isVisibleType && !endSessionWhenInvisible) {
+      if (
+        type === VideoAnalyticsEvents.SESSION_VISIBLE &&
+        !endSessionWhenInvisible
+      ) {
         return;
       }
 
@@ -1251,6 +1251,28 @@ export class VideoEventTracker extends EventTracker {
       });
     });
   }
+}
+
+/**
+ * Normalize video type from internal representation into the observed string
+ * from the analytics configuration.
+ * @param {string} type
+ * @param {Object<string,*>} details
+ * @return {string}
+ */
+function normalizeVideoEventType(type, details) {
+  if (type == VideoAnalyticsEvents.SESSION_VISIBLE) {
+    return VideoAnalyticsEvents.SESSION;
+  }
+  // Custom video analytics events are listened to from one signal type,
+  // but they're configured by user with their custom name.
+  if (type == VideoAnalyticsEvents.CUSTOM) {
+    const customEventType = dev().assertString(details['customEventType']);
+    // Prevent leaking to end-user var set.
+    delete details['customEventType'];
+    return customEventType;
+  }
+  return type;
 }
 
 /**

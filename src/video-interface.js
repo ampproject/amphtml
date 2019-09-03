@@ -350,6 +350,15 @@ export const VideoEvents = {
    * @event ad_end
    */
   AD_END: 'ad_end',
+
+  /**
+   * A 3p video player can send signals for analytics whose meaning doesn't
+   * fit for other events. In this case, a `tick` event is sent with additional
+   * information in its data property.
+   *
+   * @event amp:video:tick
+   */
+  CUSTOM_TICK: 'amp:video:tick',
 };
 
 /** @typedef {string} */
