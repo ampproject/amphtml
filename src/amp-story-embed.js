@@ -37,17 +37,18 @@ const CSS = `
  */
 export class AmpStoryEmbed {
   /**
+   * @param {!Document} doc
    * @param {!Element} element
    * @constructor
    */
-  constructor(element) {
+  constructor(doc, element) {
     console.assert(element.childElementCount > 0, 'Missing configuration.');
 
     /** @private {!Element} */
     this.element_ = element;
 
     /** @private {!Document} */
-    this.doc_ = element.ownerDocument;
+    this.doc_ = doc;
 
     /** @private {!Array<!HTMLAnchorElement>} */
     this.stories_ = Array.prototype.slice.call(element.querySelectorAll('a'));
@@ -114,9 +115,10 @@ export class AmpStoryEmbed {
   }
 }
 
-const embeds = document.getElementsByClassName('amp-story-embed');
+const doc = self.document;
+const embeds = doc.getElementsByClassName('amp-story-embed');
 for (let i = 0; i < embeds.length; i++) {
   const embed = embeds[i];
-  const embedImpl = new AmpStoryEmbed(embed);
+  const embedImpl = new AmpStoryEmbed(doc, embed);
   embedImpl.build();
 }
