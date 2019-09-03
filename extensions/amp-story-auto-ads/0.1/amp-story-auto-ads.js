@@ -46,6 +46,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {lastItem} from '../../../src/utils/array';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 
@@ -227,8 +228,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * Force this extension to render all amp-story-auto-ads controlled UI and
-   * navigate to ad.
+   * Force an immediate ad placement without waiting for ad being loaded, and then navigate to the ad page.
    * @param {string=} pageBeforeAdId
    * @visibleForTesting
    */
@@ -240,7 +240,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       ));
     this.isCurrentAdLoaded_ = true;
     // Setting distance manually to avoid flash of next page.
-    const lastPage = this.adPageEls_[this.adPageEls_.length - 1];
+    const lastPage = lastItem(this.adPageEls_);
     lastPage.setAttribute('distance', '1');
     this.tryToPlaceAdAfterPage_(pageBeforeId);
     // Once the ad is inserted into the story firing this event will
@@ -445,7 +445,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
         // remove loading attribute once loaded so that desktop CSS will position
         // offscren with all other pages
-        const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
+        const currentPageEl = lastItem(this.adPageEls_);
         currentPageEl.removeAttribute(Attributes.LOADING);
 
         this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_LOADED, {
@@ -764,7 +764,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   tryToPlaceAdAfterPage_(pageBeforeAdId) {
-    const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
+    const nextAdPageEl = lastItem(this.adPageEls_);
     if (!this.isCurrentAdLoaded_ && this.adTimedOut_()) {
       // timeout fail
       return AD_STATE.FAILED;
