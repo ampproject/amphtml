@@ -51,7 +51,7 @@ let ELLIPSE_WIDTH_PX = 2;
  * Size in pixels of the total side margins of a segment.
  * @const {number}
  */
-const SEGMENTS_MARGIN_PX = 2;
+const SEGMENTS_MARGIN_PX = 4;
 
 /**
  * Maximum number of segments that can be shown at a time before collapsing
@@ -197,7 +197,7 @@ export class ProgressBar {
     );
 
     Services.viewportForDoc(this.ampdoc_).onResize(
-      debounce(this.win_, () => this.onResize_(), 900)
+      debounce(this.win_, () => this.onResize_(), 30)
     );
 
     this.segmentsAddedPromise_.then(() => {
