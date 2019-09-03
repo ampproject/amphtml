@@ -254,4 +254,16 @@ export class LoadMoreService {
     loadMoreButton.classList.toggle('amp-visible', false);
     this.getLoadMoreLoadingElement().classList.toggle('amp-visible', false);
   }
+
+  /**
+   * Hide all load-more elements during reset.
+   */
+  hideAllLoadMoreElements() {
+    this.getLoadMoreButton().classList.toggle('amp-visible', false);
+    this.getLoadMoreLoadingElement().classList.toggle('amp-visible', false);
+    this.getLoadMoreFailedElement().classList.toggle('amp-visible', false);
+    if (this.getLoadMoreEndElement()) {
+      this.getLoadMoreEndElement().classList.toggle('amp-visible', false);
+    }
+  }
 }
