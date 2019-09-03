@@ -899,15 +899,30 @@ export class HistoryBindingVirtual_ {
    * otherwise.
    * @param {*} maybeHistoryState
    * @param {!HistoryStateDef} fallbackState
+   * @param {string} debugId
    * @return {!HistoryStateDef}
    * @private
    */
-  toHistoryState_(maybeHistoryState, fallbackState) {
-    if (maybeHistoryState && maybeHistoryState['stackIndex']) {
+  toHistoryState_(maybeHistoryState, fallbackState, debugId) {
+    if (this.isHistoryState_(maybeHistoryState)) {
       return /** @type {!HistoryStateDef} */ (maybeHistoryState);
+    } else {
+      dev().warn(
+        TAG_,
+        'Ignored unexpected "%s" data:',
+        debugId,
+        maybeHistoryState
+      );
     }
-
     return fallbackState;
+  }
+
+  /**
+   * @param {*} maybeHistoryState
+   * @return {boolean}
+   */
+  isHistoryState_(maybeHistoryState) {
+    return !!maybeHistoryState && maybeHistoryState['stackIndex'] !== undefined;
   }
 
   /**
@@ -923,13 +938,12 @@ export class HistoryBindingVirtual_ {
       {'stackIndex': this.stackIndex_ + 1},
       opt_stateUpdate || {}
     ));
+    const push = 'pushHistory';
     return this.viewer_
-      .sendMessageAwaitResponse('pushHistory', message)
+      .sendMessageAwaitResponse(push, message)
       .then(response => {
-        const newState = this.toHistoryState_(
-          response,
-          /** @type {!HistoryStateDef} */ (message)
-        );
+        const fallbackState = /** @type {!HistoryStateDef} */ (message);
+        const newState = this.toHistoryState_(response, fallbackState, push);
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -948,13 +962,14 @@ export class HistoryBindingVirtual_ {
       return this.get();
     }
     const message = dict({'stackIndex': this.stackIndex_});
+    const pop = 'popHistory';
     return this.viewer_
-      .sendMessageAwaitResponse('popHistory', message)
+      .sendMessageAwaitResponse(pop, message)
       .then(response => {
         const fallbackState = /** @type {!HistoryStateDef} */ (dict({
           'stackIndex': this.stackIndex_ - 1,
         }));
-        const newState = this.toHistoryState_(response, fallbackState);
+        const newState = this.toHistoryState_(response, fallbackState, pop);
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -988,17 +1003,12 @@ export class HistoryBindingVirtual_ {
       {'stackIndex': this.stackIndex_},
       opt_stateUpdate || {}
     ));
+    const replace = 'replaceHistory';
     return this.viewer_
-      .sendMessageAwaitResponse(
-        'replaceHistory',
-        message,
-        /* cancelUnsent */ true
-      )
+      .sendMessageAwaitResponse(replace, message, /* cancelUnsent */ true)
       .then(response => {
-        const newState = this.toHistoryState_(
-          response,
-          /** @type {!HistoryStateDef} */ (message)
-        );
+        const fallbackState = /** @type {!HistoryStateDef} */ (message);
+        const newState = this.toHistoryState_(response, fallbackState, replace);
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -1033,7 +1043,11 @@ export class HistoryBindingVirtual_ {
     if (data['newStackIndex'] !== undefined) {
       data['stackIndex'] = data['newStackIndex'];
     }
-    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (data));
+    if (this.isHistoryState_(data)) {
+      this.updateHistoryState_(/** @type {!HistoryStateDef} */ (data));
+    } else {
+      dev().warn(TAG_, 'Ignored unexpected "historyPopped" data:', data);
+    }
   }
 
   /**
