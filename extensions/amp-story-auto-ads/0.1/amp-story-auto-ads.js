@@ -228,30 +228,36 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * Force an immediate ad placement without waiting for ad being loaded, and then navigate to the ad page.
+   * Force an immediate ad placement without waiting for ad being loaded,
+   * and then navigate to the ad page.
    * @param {string=} pageBeforeAdId
    * @visibleForTesting
    */
-  forceRender(pageBeforeAdId) {
+  forcePlaceAdAfterPage(pageBeforeAdId) {
     const pageBeforeId =
       pageBeforeAdId ||
       /** @type {string} */ (this.storeService_.get(
         StateProperty.CURRENT_PAGE_ID
       ));
     this.isCurrentAdLoaded_ = true;
+    this.tryToPlaceAdAfterPage_(pageBeforeId);
+    this.navigateToFirstAdPage_();
+    this.hasForcedRender_ = true;
+  }
+
+  /**
+   * Fires event to navigate to ad page once inserted into the story.
+   */
+  navigateToFirstAdPage_() {
     // Setting distance manually to avoid flash of next page.
     const lastPage = lastItem(this.adPageEls_);
     lastPage.setAttribute('distance', '1');
-    this.tryToPlaceAdAfterPage_(pageBeforeId);
-    // Once the ad is inserted into the story firing this event will
-    // navigate to the ad page.
     const payload = dict({
       'targetPageId': 'i-amphtml-ad-page-1',
       'direction': 'next',
     });
     const eventInit = {bubbles: true};
     dispatch(this.win, lastPage, EventType.SWITCH_PAGE, payload, eventInit);
-    this.hasForcedRender_ = true;
   }
 
   /**
@@ -460,7 +466,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_['type'] === 'fake' &&
           !this.hasForcedRender_
         ) {
-          this.forceRender();
+          this.forcePlaceAdAfterPage();
         }
       });
 

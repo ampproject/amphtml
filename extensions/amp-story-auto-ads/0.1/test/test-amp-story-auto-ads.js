@@ -238,7 +238,7 @@ describes.realWin(
         `;
         addCtaValues(autoAds, 'SHOP', 'https://example.com'); // This url should be ignored.
         await insertAdContent(autoAds, iframeContent);
-        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
         const cta = doc.querySelector('.i-amphtml-story-ad-link');
         expect(cta.href).to.equal('https://amp.dev/');
       });
@@ -259,7 +259,7 @@ describes.realWin(
       it('does not render the ad choices icon if no meta tags present', async () => {
         addCtaValues(autoAds, 'SHOP', 'https://example.com');
         await insertAdContent(autoAds, ''); // No ad content.
-        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
         const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
         expect(adChoices).not.to.exist;
       });
@@ -271,7 +271,7 @@ describes.realWin(
         `;
         addCtaValues(autoAds, 'SHOP', 'https://example.com');
         await insertAdContent(autoAds, iframeContent);
-        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
         const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
         expect(adChoices).not.to.exist;
       });
@@ -287,7 +287,7 @@ describes.realWin(
         `;
         addCtaValues(autoAds, 'SHOP', 'https://example.com');
         await insertAdContent(autoAds, iframeContent);
-        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
         const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
         expect(adChoices).to.exist;
         expect(adChoices.getAttribute('src')).to.equal(icon);
