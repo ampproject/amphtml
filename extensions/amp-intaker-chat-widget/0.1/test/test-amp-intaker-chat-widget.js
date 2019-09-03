@@ -31,8 +31,8 @@ describes.realWin('amp-intaker-chat-widget', {
     win.document.body.appendChild(element);
   });
 
-  it('should have hello world when built', () => {
+  it('should have IntakerChatWidgetPlaceholder when built', () => {
     element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
+    expect(element.querySelector('div').textContent).to.equal('IntakerChatWidgetPlaceholder');
   });
 });

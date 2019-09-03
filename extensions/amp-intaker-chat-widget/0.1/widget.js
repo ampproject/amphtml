@@ -9,14 +9,13 @@ function removeClass(el, name) {
 }
 
 function loadCss(url) {
-  var head   = document.querySelector('head');
   var link   = document.createElement('link');
   // link.id    = 'chatter-bot-css';
   link.rel   = 'stylesheet';
   link.type  = 'text/css';
   link.href  = url;
   link.media = 'all';
-  head.appendChild(link);
+  (document.getElementsByTagName('head')[0] || document.body).appendChild(link);
 }
 
 function injectStyle(css) {
@@ -63,6 +62,7 @@ function closeFrame() {
   removeClass(document.body, 'chatter-bot-body-noscroll');
   removeClass(launcherContainer, 'chatter-bot-frame-container-active');
   frameContainer.style.display = 'none';
+  document.title               = originalTitle
 }
 
 function openFrame() {
@@ -76,6 +76,8 @@ function openFrame() {
     } else
       exitPreview();
   }
+
+  resizeAmpFrame();
 }
 
 function postAjax(url, data, success) {
@@ -185,13 +187,13 @@ function injectThemeCss(setting) {
   linkElement.setAttribute('rel', 'stylesheet');
   linkElement.setAttribute('type', 'text/css');
   linkElement.setAttribute('href', 'data:text/css;charset=UTF-8,' + encodeURIComponent(css));
-  document.head.appendChild(linkElement);
+  document.body.appendChild(linkElement);
 }
 
 function getChatSetting(callback) {
   postAjax(api + '/api/Chat/GetChatSetting', {
     "directLink"  : directLink,
-    "externalLink": location.host
+    "externalLink": externalUrl
   }, function (result) {
     result = JSON.parse(result);
     injectThemeCss(result);
@@ -209,12 +211,16 @@ function playDingSound() {
 }
 
 function loadDingSound() {
-  dingSound     = new Audio();
-  dingSound.src = "https://intaker.co/dist/light.mp3";
-  dingSound.load();
+  if (window.Audio) {
+    dingSound     = new Audio();
+    dingSound.src = "https://intaker.co/dist/light.mp3";
+    dingSound.load();
+  }
 }
 
 function autoLunch(setting) {
+  resizeAmpFrame();
+
   var cookie = CookiesAPI.getJSON(cookieName);
   if (cookie && cookie.autoLunch === false && !window.DEV_ENV)
     return;
@@ -295,21 +301,22 @@ var chatUrlHash         = '';//window[INTAKER_CHAT_URL] || window[INTKER_CHAT_UR
 var url                 = '';//atob(chatUrlHash);
 var useQA               = window['USE_INTAKER_QA'];
 var frameContainer, closeBtn, restartBtn, lunchBtn, frame;
-var api                 = '';//useQA ? 'https://intakerapiqa.azurewebsites.net' : 'https://idemanducoreapi20180624025640.azurewebsites.net';
-var cssUrl              = (useQA ? 'https://intakerclientqa.azurewebsites.net' : 'https://intaker.co') + '/dist/chat-widget.min.css';
-var directLink          = '';//getDirectLink(url);
-var isDesktop           = !isMobile();
-var cookieName          = 'INTAKER_CHAT_WIDGET_';
-var cookieValue         = {};
-var DEFAULT_AVATAR      = 'https://intaker.blob.core.windows.net/dashboard/a6.png';
-var dingSound           = null;
-var launcherContainer   = null;
-var isUniqueVisit       = false;
-var externalUrl         = '';
-var originalTitle       = document.title || '';
-var isAMP               = false;
-var platform            = window.platform;
-var INTAKER_CW_TMP      = INTAKER_CW_TMP || {};
+var api                 = '';//useQA ? 'https://intakerapiqa.azurewebsites.net' :
+                             // 'https://idemanducoreapi20180624025640.azurewebsites.net';
+var cssUrl            = (useQA ? 'https://intakerclientqa.azurewebsites.net' : 'https://intaker.co') + '/dist/chat-widget.min.css';
+var directLink        = '';//getDirectLink(url);
+var isDesktop         = !isMobile();
+var cookieName        = 'INTAKER_CHAT_WIDGET_';
+var cookieValue       = {};
+var DEFAULT_AVATAR    = 'https://intaker.blob.core.windows.net/dashboard/a6.png';
+var dingSound         = null;
+var launcherContainer = null;
+var isUniqueVisit     = false;
+var externalUrl       = '';
+var originalTitle     = document.title || '';
+var isAMP             = false;
+var platform          = window.platform;
+var INTAKER_CW_TMP    = INTAKER_CW_TMP || {};
 
 window.onmessage = function (e) {
   if (e.data.INTAKER_CHAT_WIDGET) {
@@ -319,13 +326,25 @@ window.onmessage = function (e) {
         exitPreview();
         break;
       case  'adjustHeight':
-        if (frameContainer)
-          frameContainer.style.height = data.height ? (data.height + 10) + 'px' : '';
+        if (frameContainer) {
+          var h                       = data.height ? data.height + 10 : 0;
+          frameContainer.style.height = h ? h + 'px' : '';
+          var opt                     = {};
+          if (h) {
+            opt.height = h + 90;
+            opt.width  = 400;
+          } else {
+            opt.height = 2000;
+            opt.width  = 2000;
+          }
+
+          resizeAmpFrame(opt);
+        }
         break;
       case 'newMessage':
         //isFromBot
         if (data.source === 1)
-          document.title = "You have a new message - " + originalTitle;
+          document.title = "(1) You have a new message - " + originalTitle;
         else
           document.title = originalTitle;
         break;
@@ -334,6 +353,32 @@ window.onmessage = function (e) {
   }
 };
 
+function resizeAmpFrame(options) {
+  if (!isAMP)
+    return;
+
+  options = options || {};
+
+  //full size
+  var w = isDesktop ? 460 : 2000;
+  var h = isDesktop ? 720 : 2000;
+
+  if (previewChatIsActive || !chatIsActive) {
+    h = options.height || document.body.scrollHeight;
+    if (h < 100)
+      h = 100;
+    w = options.width || document.body.scrollWidth;
+    if (w < 300)
+      w = 300;
+  }
+
+  window.parent.postMessage({
+    sentinel: 'amp',
+    type    : 'embed-size',
+    height  : h,
+    width   : w,
+  }, '*');
+}
 
 function bootstrap(amp) {
   if (amp) {
@@ -358,7 +403,13 @@ function bootstrap(amp) {
   url           = url.replace('attorney.chat', 'intaker.co/chat');
   useQA && (url = url.replace('intaker.co/chat', 'intakerclientqa.azurewebsites.net/chat'));
   url = url + '?externalUrl=' + externalUrl + '&referrer=' + encodeURI(document.referrer || '');
-   api                 = useQA ? 'https://intakerapiqa.azurewebsites.net' : 'https://idemanducoreapi20180624025640.azurewebsites.net';
+  api = useQA ? 'https://intakerapiqa.azurewebsites.net' : 'https://idemanducoreapi20180624025640.azurewebsites.net';
+
+  isAMP && window.parent.postMessage({
+    sentinel: 'amp',
+    type    : 'embed-ready'
+  }, '*');
+
   authenticate(function () {
 
     loadDingSound();
@@ -366,6 +417,7 @@ function bootstrap(amp) {
     !window.DEV_ENV && !isAMP && loadCss(cssUrl);
 
     getChatSetting(function (setting) {
+
       addToBody(INTAKER_CW_TMP.button);
       launcherContainer = document.getElementById('chatter-bot-launcher-container');
       isDesktop && addClass(launcherContainer, 'chatter-bot-is-desktop');
@@ -383,4 +435,5 @@ if (typeof AMP === 'object') {
   module.exports.widget = bootstrap;
 } else
   bootstrap();
+
 

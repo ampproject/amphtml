@@ -35,7 +35,15 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
   }
 
   /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
+  }
+
+  /** @override */
   buildCallback() {
+    // Get attributes, assertions of values, assign instance variables.
+    // Build lightweight DOM and append to this.element.
+
     this.urlHash                = this.element.getAttribute('data-value');
     this.dev                    = !!this.element.getAttribute('data-dev');
     this.qa                     = !!this.element.getAttribute('data-qa');
@@ -55,13 +63,14 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+  upgradeCallback(){
+    //If your extension provides different implementations depending on a late runtime condition (e.g. type attribute on the element, platform)
+
   }
 
   /** @override */
   layoutCallback() {
-
+    // Actually load your resource or render more expensive resources.
   }
 }
 
