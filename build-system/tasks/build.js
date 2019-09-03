@@ -121,8 +121,7 @@ async function performBuild(watch, defaultTask) {
  */
 async function defaultTask() {
   await watch(/* defaultTask */ true);
-  serve(argv.lazy_build);
-  log(green('Started ') + cyan('gulp ') + green('server. '));
+  await serve();
   if (argv.lazy_build) {
     log(green('JS and extensions will be lazily built when requested...'));
   } else {
