@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
-import {logRange, mapRange, sum} from '../../../src/utils/math';
+import {mapRange, sum} from '../../../src/utils/math';
 import {setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const SMOOTHING_PTS = 4;
-const PERSPECTIVE = 100;
+const PERSPECTIVE = 5000;
 
 /**
  * Installs parallax handlers
@@ -29,7 +30,7 @@ export class ParallaxService {
   /**
    * @param {!Window} global
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {Array<Element>} pages
+   * @param {Array<!Element>} pages
    */
   constructor(global, vsync, pages) {
     /** @private {!Window} */
@@ -38,8 +39,8 @@ export class ParallaxService {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
-    /** @private {Array} */
-    this.parallaxElements_ = [];
+    /** @private {!Array<!ParallaxPage>} */
+    this.parallaxPages_ = [];
 
     /** @private {?number} */
     this.middleX_ = 0;
@@ -59,47 +60,51 @@ export class ParallaxService {
         .map(page => {
           // Set the page's perspective
           setStyles(page, {
-            perspective: PERSPECTIVE * 10 + `px`,
+            perspective: PERSPECTIVE + `px`,
           });
+
+          this.parallaxPages_.push(new ParallaxPage(page, this.vsync_));
           // Loop through the layers in the page and assign a z-index following
           // DOM order (manual override will be added in the future)
           let zIndex = 1;
           const layers = this.getLayers(page);
+
           layers.map(layer => {
-            const fxElement = new ParallaxElement(
-              page,
-              layer,
-              this.vsync_,
-              zIndex++,
-              layers.length
-            );
-            this.parallaxElements_.push(fxElement);
+            this.vsync_.mutate(() => {
+              setStyles(layer, {
+                transform: `translateZ(${(zIndex - layers.length) *
+                  30}px) scale(${mapRange(zIndex, 1, layers.length, 1.2, 1)})`,
+              });
+              zIndex++;
+            });
           });
         });
     });
 
     listen(global, 'deviceorientation', event => {
-      this.parallaxOrientationMutate_(event, this.parallaxElements_);
+      this.parallaxOrientationMutate_(event, this.parallaxPages_);
     });
   }
 
   /**
    * Discovers and returns all layers inside a page
-   * @param {Element} page
-   * @return {Array<Element>}
+   * @param {!Element} page
+   * @return {!Array<!Element>}
    */
   getLayers(page) {
-    return toArray(page.querySelectorAll(`amp-story-grid-layer`));
+    return toArray(page.querySelectorAll(`amp-story-grid-layer`)).map(layer =>
+      dev().assertElement(layer)
+    );
   }
 
   /**
    * Calculate the smoothed change in position using the device orientation
    * change event then update each of the layers will its calculated position.
    * @param {Event} event
-   * @param {!Array<!ParallaxElement>} elements
+   * @param {!Array<!ParallaxPage>} pages
    * @private
    */
-  parallaxOrientationMutate_(event, elements) {
+  parallaxOrientationMutate_(event, pages) {
     const window = this.win_;
     const {screen} = window;
     let {gamma, beta} = event;
@@ -154,12 +159,12 @@ export class ParallaxService {
     mappedX = mapRange(mappedX, -75, 75, -25, 25);
     mappedY = mapRange(mappedY, -75, 75, -25, 25);
 
-    elements.forEach(element => {
-      if (element.shouldUpdate()) {
+    pages.forEach(page => {
+      if (page.shouldUpdate()) {
         if (this.middleY_ != 0 && this.middleX_ != 0) {
-          element.update(mappedX, mappedY);
+          page.update(mappedX, mappedY);
         } else {
-          element.update(0, 0);
+          page.update(0, 0);
         }
       }
     });
@@ -167,42 +172,19 @@ export class ParallaxService {
 }
 
 /**
- * Encapsulates and tracks an element's linear parallax effect.
+ * Encapsulates and tracks a story page's parallax effect.
  */
-export class ParallaxElement {
+export class ParallaxPage {
   /**
    * @param {!Element} page The parent page of thi element
-   * @param {!Element} element The element to give a parallax effect.
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {number} factor the index of the layer
-   * @param {number} total total number of layers
    */
-  constructor(page, element, vsync, factor, total) {
+  constructor(page, vsync) {
     /** @private @const {!Element} */
     this.page_ = page;
 
-    /** @private @const {!Element} */
-    this.element_ = element;
-
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
-
-    /** @private @const {number} */
-    this.factor_ = factor;
-
-    /** @private {number} */
-    this.offsetX_ = 0;
-
-    /** @private {number} */
-    this.offsetY_ = 0;
-
-    /** @private {number} */
-    this.total_ = total;
-
-    // We offset each element in the z-direction by its factor (its layer order
-    // within the page)
-    /** @private {number} */
-    this.offsetZ_ = this.factor_ * (PERSPECTIVE / this.total_);
   }
 
   /**
@@ -213,16 +195,8 @@ export class ParallaxElement {
    */
   update(x = 0, y = 0) {
     this.vsync_.mutate(() => {
-      // We use a log scale to make elements that are closer to the user (high
-      // z-index) move faster than elements in the background.
-      this.offsetX_ = logRange(this.factor_, this.total_, x);
-      this.offsetY_ = logRange(this.factor_, this.total_, y);
-
-      const translate3d = `translate3d(${this.offsetX_.toFixed(
-        2
-      )}px, ${this.offsetY_.toFixed(2)}px, ${this.offsetZ_.toFixed(2)}px) `;
-      setStyles(this.element_, {
-        transform: translate3d,
+      setStyles(this.page_, {
+        perspectiveOrigin: `${Math.round(x * 50)}px ${Math.round(y * 50)}px`,
       });
     });
   }
@@ -241,7 +215,7 @@ export class ParallaxElement {
  * if present on the story.
  * @param {!Window} win
  * @param {!../../../src/service/vsync-impl.Vsync} vsync
- * @param {Array<Element>} pages
+ * @param {Array<!Element>} pages
  * @return {ParallaxService}
  */
 export function installParallaxFx(win, vsync, pages) {
