@@ -174,7 +174,7 @@ function getChromeArgs(config) {
   const args = [
     '--no-sandbox',
     '--disable-gpu',
-    `--window-size=${DEFAULT_E2E_INITIAL_RECT.width}, ${DEFAULT_E2E_INITIAL_RECT.height}`,
+    `--window-size=${DEFAULT_E2E_INITIAL_RECT.width},${DEFAULT_E2E_INITIAL_RECT.height}`,
   ];
 
   // TODO(cvializ,estherkim,sparhami):
@@ -482,7 +482,7 @@ class EndToEndFixture {
     env.controller = controller;
     env.ampDriver = ampDriver;
 
-    const {testUrl, experiments = []} = this.spec;
+    const {testUrl, experiments = [], initialRect} = this.spec;
     const {environment} = env;
 
     const url = new URL(testUrl);
@@ -494,6 +494,11 @@ class EndToEndFixture {
         // AMP doc experiments are toggled via cookies
         await toggleExperiments(ampDriver, url.href, experiments);
       }
+    }
+
+    if (initialRect) {
+      const {width, height} = initialRect;
+      await controller.setWindowRect({width, height});
     }
 
     await ampDriver.navigateToEnvironment(environment, url.href);
