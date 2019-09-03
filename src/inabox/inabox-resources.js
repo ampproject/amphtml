@@ -252,7 +252,3 @@ class InaboxResources {
 export function installInaboxResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', InaboxResources);
 }
-
-function unsupported(method) {
-  throw new Error(TAG + ' Unsupported method: ' + method);
-}

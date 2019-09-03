@@ -471,7 +471,6 @@ export class Resource {
   measureViaResources_() {
     const viewport = Services.viewportForDoc(this.element);
     const box = viewport.getLayoutRect(this.element);
-    dev().fine(TAG, 'measure complete: ' + this.debugid, box);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
