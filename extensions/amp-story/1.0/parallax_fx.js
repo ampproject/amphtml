@@ -244,6 +244,6 @@ export class ParallaxElement {
  * @param {Array<Element>} pages
  * @return {ParallaxService}
  */
-export function installParallaxHandler(win, vsync, pages) {
+export function installParallaxFx(win, vsync, pages) {
   return new ParallaxService(win, vsync, pages);
 }
