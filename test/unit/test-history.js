@@ -919,6 +919,11 @@ describes.sandboxed('HistoryBindingVirtual', {}, () => {
       expect(onStateUpdated).to.be.calledOnce;
       expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 123});
     });
+
+    it('sends invalid data', () => {
+      onHistoryPopped({invalid: 'data'});
+      expect(onStateUpdated).to.not.be.called;
+    });
   });
 });
 
