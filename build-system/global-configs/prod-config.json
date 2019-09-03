@@ -39,7 +39,7 @@
   "ios-fixed-no-transfer": 0,
   "ios-scrollable-iframe": 0,
   "macro-after-long-task": 0,
-  "new-loaders": 0.1,
+  "new-loaders": 1,
   "pump-early-frame": 1,
   "version-locking": 1
 }
