@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+:root {
+  --sidebar-width: 45px;
+}
+
 amp-sidebar {
   --story-page-vh: 1vh;
   position: fixed !important;
   top: 0;
   max-height: 100vh !important;
   height: 100vh;
+  width: var(--sidebar-width);
   max-width: 80vw;
   background-color: #efefef;
   min-width: 45px !important;
@@ -29,6 +34,39 @@ amp-sidebar {
   z-index: 2147483647;
   -webkit-overflow-scrolling: touch;
   will-change: transform;
+}
+
+amp-sidebar [amp-submenu-group] {
+  transform: translateX(0);
+  transition: transform 300ms;
+}
+
+amp-sidebar [amp-submenu-group][show] {
+  transform: translateX(calc(-1 * var(--sidebar-width)));
+}
+
+amp-sidebar [amp-submenu-group] [amp-submenu] {
+  position: absolute;
+  top: 0;
+  left: var(--sidebar-width);
+  width: var(--sidebar-width);
+  animation: submenu-hide 0s linear 300ms forwards;
+}
+
+amp-sidebar [amp-submenu-group] [amp-submenu][show] {
+  animation: submenu-show 0s;
+}
+
+@keyframes submenu-show {
+  to {
+      visibility: visible;
+  }
+}
+
+@keyframes submenu-hide {
+  to {
+      visibility: hidden;
+  }
 }
 
 amp-sidebar[side="left"] {
