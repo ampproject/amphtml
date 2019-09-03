@@ -16,10 +16,7 @@
 
 import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
-import {
-  VideoAnalyticsEvents,
-  VideoEvents,
-} from '../../../../src/video-interface';
+import {VideoEvents} from '../../../../src/video-interface';
 import {
   addAttributesToElement,
   whenUpgradedToCustomElement,
@@ -353,7 +350,7 @@ describes.realWin(
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
             const expectedDispatch = dispatch.withArgs(
-              VideoAnalyticsEvents.CUSTOM,
+              VideoEvents.CUSTOM_TICK,
               expectedEventVars
             );
             implementation_.onMessage_({data});
@@ -362,8 +359,8 @@ describes.realWin(
             allowConsoleError(() => {
               expect(() => implementation_.onMessage_({data})).to.throw();
             });
-            expect(dispatch.withArgs(VideoAnalyticsEvents.CUSTOM, any)).to.not
-              .have.been.called;
+            expect(dispatch.withArgs(VideoEvents.CUSTOM_TICK, any)).to.not.have
+              .been.called;
           }
         });
       });

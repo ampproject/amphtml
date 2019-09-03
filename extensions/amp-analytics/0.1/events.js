@@ -20,6 +20,7 @@ import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
+  videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
@@ -1166,11 +1167,8 @@ export class VideoEventTracker extends EventTracker {
 
     return this.sessionObservable_.add(event => {
       const {type} = event;
-      const isVisibleType = type === VideoAnalyticsEvents.SESSION_VISIBLE;
-      const normalizedType = isVisibleType
-        ? VideoAnalyticsEvents.SESSION
-        : type;
       const details = /** @type {?JsonObject|undefined} */ (getData(event));
+      const normalizedType = normalizeVideoEventType(type, details);
 
       if (normalizedType !== on) {
         return;
@@ -1232,7 +1230,10 @@ export class VideoEventTracker extends EventTracker {
         lastPercentage = normalizedPercentageInt;
       }
 
-      if (isVisibleType && !endSessionWhenInvisible) {
+      if (
+        type === VideoAnalyticsEvents.SESSION_VISIBLE &&
+        !endSessionWhenInvisible
+      ) {
         return;
       }
 
@@ -1245,12 +1246,48 @@ export class VideoEventTracker extends EventTracker {
         'No target specified by video session event.'
       );
       targetReady.then(target => {
-        if (target.contains(el)) {
-          listener(new AnalyticsEvent(target, normalizedType, details));
+        if (!target.contains(el)) {
+          return;
         }
+        const normalizedDetails = removeInternalVars(details);
+        listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
       });
     });
   }
+}
+
+/**
+ * Normalize video type from internal representation into the observed string
+ * from the analytics configuration.
+ * @param {string} type
+ * @param {?JsonObject|undefined} details
+ * @return {string}
+ */
+function normalizeVideoEventType(type, details) {
+  if (type == VideoAnalyticsEvents.SESSION_VISIBLE) {
+    return VideoAnalyticsEvents.SESSION;
+  }
+
+  // Custom video analytics events are listened to from one signal type,
+  // but they're configured by user with their custom name.
+  if (type == VideoAnalyticsEvents.CUSTOM) {
+    return dev().assertString(details[videoAnalyticsCustomEventTypeKey]);
+  }
+
+  return type;
+}
+
+/**
+ * @param {?JsonObject|undefined} details
+ * @return {?JsonObject|undefined}
+ */
+function removeInternalVars(details) {
+  if (!details) {
+    return details;
+  }
+  const clean = Object.assign({}, details);
+  delete clean[videoAnalyticsCustomEventTypeKey];
+  return /** @type {!JsonObject} */ (clean);
 }
 
 /**
