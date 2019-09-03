@@ -488,10 +488,7 @@ export class Performance {
       ) {
         this.tickLayoutShiftScore_();
       }
-      if (
-        this.supportsLargestContentfulPaint_ &&
-        this.largestContentfulPaint_ !== null
-      ) {
+      if (this.supportsLargestContentfulPaint_) {
         this.tickLargestContentfulPaint_();
       }
     }
@@ -513,10 +510,7 @@ export class Performance {
       ) {
         this.tickLayoutShiftScore_();
       }
-      if (
-        this.supportsLargestContentfulPaint_ &&
-        this.largestContentfulPaint_ !== null
-      ) {
+      if (this.supportsLargestContentfulPaint_) {
         this.tickLargestContentfulPaint_();
       }
     }
@@ -615,6 +609,10 @@ export class Performance {
    * Tick the largest contentful paint metric.
    */
   tickLargestContentfulPaint_() {
+    // Don't record the metric if it hasn't been read from the Performance API.
+    if (this.largestContentfulPaint_ === null) {
+      return;
+    }
     this.tickDelta('lcp', this.largestContentfulPaint_);
     this.flush();
   }
