@@ -611,13 +611,9 @@ const forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
-  '\\.findResourcesInElements\\(': {
-    message: 'findResourcesInElements is a restricted API.',
-    whitelist: ['src/service/owners-impl.js'],
-  },
-  '\\.measureAndTryScheduleLayout\\(': {
-    message: 'measureAndTryScheduleLayout is a restricted API.',
-    whitelist: ['src/service/owners-impl.js'],
+  '\\.scheduleLayoutOrPreload\\(': {
+    message: 'scheduleLayoutOrPreload is a restricted API.',
+    whitelist: ['src/service/owners-impl.js', 'src/service/resources-impl.js'],
   },
   '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
     message: 'Use dom.openWindowDialog',
@@ -1011,7 +1007,6 @@ const forbiddenTermsSrcInclusive = {
       'src/inabox/inabox-viewport.js',
       'src/service/resources-impl.js',
       'src/service/viewport/viewport-binding-def.js',
-      'src/service/viewport/viewport-binding-ios-embed-sd.js',
       'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
       'src/service/viewport/viewport-binding-natural.js',
       'src/service/viewport/viewport-impl.js',

@@ -146,6 +146,5 @@ export function insertAdContent(autoAdsImpl, content) {
   const iframe = autoAdsImpl.doc_.createElement('iframe');
   iframe.srcdoc = content;
   autoAdsImpl.lastCreatedAdElement_.appendChild(iframe);
-  autoAdsImpl.lastCreatedAdImpl_.iframe = iframe;
   return autoAdsImpl.loadPromise(iframe);
 }

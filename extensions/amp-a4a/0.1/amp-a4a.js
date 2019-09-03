@@ -1000,7 +1000,7 @@ export class AmpA4A extends AMP.BaseElement {
             Services.viewerForDoc(this.getAmpDoc())
               .whenNextVisible()
               .then(() => {
-                Services.resourcesForDoc(this.getAmpDoc())./*OK*/ requireLayout(
+                Services.ownersForDoc(this.getAmpDoc())./*OK*/ requireLayout(
                   this.element
                 );
               });
