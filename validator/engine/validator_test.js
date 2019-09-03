@@ -1427,11 +1427,17 @@ describe('ValidatorRulesMakeSense', () => {
       it('extension must have a name field value', () => {
         expect(extensionSpec.name).toBeDefined();
       });
-      it('extension ' + extensionSpec.name + ' must have at least two ' +
-             'versions, latest and a numeric version, e.g `1.0`',
-      () => {
-        expect(extensionSpec.version.length).toBeGreaterThan(1);
-      });
+      // TODO(b/139732703): remove the guard when AMP4EMAIL supports
+      // amp-carousel 0.2.
+      if (extensionSpec.name !== 'amp-carousel' ||
+          !tagSpec.htmlFormat.includes(
+              amp.validator.HtmlFormat.Code.AMP4EMAIL)) {
+        it('extension ' + extensionSpec.name + ' must have at least two ' +
+               'versions, latest and a numeric version, e.g `1.0`',
+           () => {
+             expect(extensionSpec.version.length).toBeGreaterThan(1);
+           });
+      }
       it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
              'or a numeric value',
       () => {
