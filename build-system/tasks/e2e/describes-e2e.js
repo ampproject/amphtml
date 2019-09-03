@@ -153,6 +153,8 @@ async function createDriver(browserName, args) {
       // for some reason firefox.Options().addArguments() doesn't like arrays
       args.forEach(arg => {
         options.addArguments(arg);
+        options.width = DEFAULT_E2E_INITIAL_RECT.width;
+        options.height = DEFAULT_E2E_INITIAL_RECT.height;
       });
       builder.setFirefoxOptions(options);
     case 'chrome':
@@ -169,7 +171,11 @@ async function createDriver(browserName, args) {
  * @return {!Array<string>}
  */
 function getChromeArgs(config) {
-  const args = ['--no-sandbox', '--disable-gpu'];
+  const args = [
+    '--no-sandbox',
+    '--disable-gpu',
+    `--window-size=${DEFAULT_E2E_INITIAL_RECT.width}, ${DEFAULT_E2E_INITIAL_RECT.height}`,
+  ];
 
   // TODO(cvializ,estherkim,sparhami):
   // figure out why headless causes more flakes
@@ -476,11 +482,7 @@ class EndToEndFixture {
     env.controller = controller;
     env.ampDriver = ampDriver;
 
-    const {
-      testUrl,
-      experiments = [],
-      initialRect = DEFAULT_E2E_INITIAL_RECT,
-    } = this.spec;
+    const {testUrl, experiments = []} = this.spec;
     const {environment} = env;
 
     const url = new URL(testUrl);
@@ -493,9 +495,6 @@ class EndToEndFixture {
         await toggleExperiments(ampDriver, url.href, experiments);
       }
     }
-
-    const {width, height} = initialRect;
-    await controller.setWindowRect({width, height});
 
     await ampDriver.navigateToEnvironment(environment, url.href);
   }

@@ -15,6 +15,7 @@
  */
 
 import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
+import sleep from 'sleep-promise';
 
 describes.endtoend(
   'amp story share menu',
@@ -29,6 +30,11 @@ describes.endtoend(
 
     beforeEach(async () => {
       controller = env.controller;
+      await expect(
+        controller.findElement(
+          'a.i-amphtml-story-share-control.i-amphtml-story-button'
+        )
+      ).to.exist;
     });
 
     it('should copy the link using the share menu', async () => {
@@ -51,8 +57,10 @@ describes.endtoend(
       const input = await controller.findElement('#name-input');
       await controller.type(input, Key.CtrlV);
 
+      // give amp-bind half a second to magic
+      await sleep(500);
       const div = await controller.findElement('#name-input-value');
-      await expect(await controller.getElementText(div)).to.equal(
+      await expect(controller.getElementText(div)).to.equal(
         'Hello http://localhost:8000/test/manual/amp-story/amp-story.amp.html'
       );
     });
