@@ -17,18 +17,15 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const gulp = require('gulp');
 const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
-const webserver = require('gulp-webserver');
 
 const {
   reportTestErrored,
   reportTestFinished,
   reportTestRunComplete,
 } = require('../report-test-status');
-const {app} = require('../../test-server');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {Server} = require('karma');
@@ -226,22 +223,6 @@ function karmaRunStart() {
   }
 }
 
-function startTestServer(port) {
-  const server = gulp.src(process.cwd(), {base: '.'}).pipe(
-    webserver({
-      port,
-      host: 'localhost',
-      directoryListing: true,
-      middleware: [app],
-    }).on('kill', function() {
-      log(yellow(`Shutting down test responses server on localhost:${port}`));
-    })
-  );
-  log(yellow(`Started test responses server on localhost:${port}`));
-
-  return server;
-}
-
 /**
  * Runs tests in batches.
  *
@@ -409,5 +390,4 @@ module.exports = {
   maybePrintArgvMessages,
   runTestInBatches,
   shouldNotRun,
-  startTestServer,
 };

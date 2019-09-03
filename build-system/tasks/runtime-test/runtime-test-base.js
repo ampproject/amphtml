@@ -20,16 +20,13 @@ const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
 const testConfig = require('../../config');
-const {
-  createKarmaServer,
-  getAdTypes,
-  runTestInBatches,
-  startTestServer,
-} = require('./helpers');
+const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
+const {createKarmaServer, getAdTypes, runTestInBatches} = require('./helpers');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {reportTestStarted} = require('.././report-test-status');
+const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
 
 /**
@@ -257,22 +254,21 @@ class RuntimeTestRunner {
   }
 
   async setup() {
-    // TODO(alanorozco): Come up with a more elegant check?
-    global.AMP_TESTING = true;
-
     // Run tests against compiled code when explicitly specified via --compiled,
     // or when the minified runtime is automatically built.
     process.env.SERVE_MODE =
       argv.compiled || !argv.nobuild ? 'compiled' : 'default';
 
     await this.maybeBuild();
-
-    const testServer = startTestServer(this.config.client.testServerPort);
+    await startServer({
+      name: 'AMP Test Server',
+      host: 'localhost',
+      port: this.config.client.testServerPort,
+      middleware: () => [app],
+    });
     const handlerProcess = createCtrlcHandler(`gulp ${this.config.testType}`);
 
-    this.env = new Map()
-      .set('handlerProcess', handlerProcess)
-      .set('testServer', testServer);
+    this.env = new Map().set('handlerProcess', handlerProcess);
   }
 
   async run() {
@@ -286,7 +282,7 @@ class RuntimeTestRunner {
   }
 
   async teardown() {
-    this.env.get('testServer').emit('kill');
+    stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
 
     if (this.exitCode != 0) {
