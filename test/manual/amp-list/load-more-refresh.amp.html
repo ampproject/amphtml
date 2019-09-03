@@ -117,12 +117,14 @@
 
   <h1>AMP List</h1>
   <p>This is a flexbox amp-list with tiles, something like an infinite image gallery.</p>
+  <button on="tap:list.refresh">Click to Refresh</button>
   <amp-list width="auto" height="200"
     id="list"
     layout="fixed-height"
-    src="/list/infinite-scroll?items=10&left=50"
+    src="/list/infinite-scroll?items=4&left=8"
     [src]="data.url"
     load-more="auto"
+    reset-on-refresh
     load-more-bookmark="next">
     <template type="amp-mustache">
       <div class="pin-container">
@@ -133,12 +135,7 @@
         </div>
       </div>
     </template>
-    <div fallback>
-      FALLBACK
-   </div>
-   <div placeholder>
-     PLACEHOLDER
-   </div>
+
     <amp-list-load-more load-more-failed>
     </amp-list-load-more>
     <amp-list-load-more load-more-end>
