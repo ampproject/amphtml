@@ -25,6 +25,10 @@
  * </code>
  */
 import {
+  AFFILIATE_LINK_SELECTOR,
+  AmpStoryAffiliateLink,
+} from './amp-story-affiliate-link';
+import {
   Action,
   StateProperty,
   UIType,
@@ -32,7 +36,6 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
-import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -565,7 +568,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   findAndPrepareEmbeddedComponents_(forceResize = false) {
     this.addClickShieldToEmbeddedComponents_();
     this.resizeInteractiveEmbeddedComponents_(forceResize);
-    this.addStylesToBlingLinks_();
+    this.buildAffiliateLinks_();
   }
 
   /**
@@ -620,12 +623,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Adds icon and pulse animation to bling links
+   * Initializes affiliate links.
    */
-  addStylesToBlingLinks_() {
-    scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {
-      AmpStoryBlingLink.build(el);
-    });
+  buildAffiliateLinks_() {
+    scopedQuerySelectorAll(this.element, AFFILIATE_LINK_SELECTOR).forEach(
+      el => {
+        const link = new AmpStoryAffiliateLink(this.win, el);
+        link.build();
+      }
+    );
   }
 
   /** @private */
