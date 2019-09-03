@@ -850,17 +850,20 @@ export class FriendlyIframeEmbed {
  * @return {!Promise}
  */
 export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
-  return Services.resourcesForDoc(elementOrAmpDoc)
-    .getResourcesInRect(hostWin, rect)
-    .then(resources => {
-      const promises = [];
-      resources.forEach(r => {
-        if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
-          promises.push(r.loadedOnce());
-        }
-      });
-      return Promise.all(promises);
+  // TODO(lannka): should avoid this type casting by moving the `getResourcesInRect`
+  // logic here.
+  const resources = /** @type {!./service/resources-impl.Resources} */ (Services.resourcesForDoc(
+    elementOrAmpDoc
+  ));
+  return resources.getResourcesInRect(hostWin, rect).then(resources => {
+    const promises = [];
+    resources.forEach(r => {
+      if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
+        promises.push(r.loadedOnce());
+      }
     });
+    return Promise.all(promises);
+  });
 }
 
 /**

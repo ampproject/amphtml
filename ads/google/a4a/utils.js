@@ -228,8 +228,13 @@ export function groupAmpAdsByType(win, type, groupFn) {
   const ampAdSelector = r =>
     r.element./*OK*/ querySelector(`amp-ad[type=${type}]`);
   const {documentElement} = win.document;
+  // TODO(lannka): should avoid this type casting by moving the `getMeasuredResources`
+  // logic here.
+  const resources = /** @type {!../../../src/service/resources-impl.Resources} */ (Services.resourcesForDoc(
+    documentElement
+  ));
   return (
-    Services.resourcesForDoc(documentElement)
+    resources
       .getMeasuredResources(win, r => {
         const isAmpAdType =
           r.element.tagName == 'AMP-AD' &&

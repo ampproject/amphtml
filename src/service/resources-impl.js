@@ -192,25 +192,6 @@ export class ResourcesDef extends MutatorsDef {
   getAmpdoc() {}
 
   /**
-   * Returns a subset of resources which are (1) belong to the specified host
-   * window, and (2) meet the filterFn given.
-   * @param {!Window} hostWin
-   * @param {function(!Resource):boolean} filterFn
-   * @return {!Promise<!Array<!Resource>>}
-   */
-  getMeasuredResources(hostWin, filterFn) {}
-
-  /**
-   * Returns a subset of resources which are (1) belong to the specified host
-   * window, and (2) positioned in the specified rect.
-   * @param {!Window} hostWin
-   * @param {!../layout-rect.LayoutRectDef} rect
-   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
-   * @return {!Promise<!Array<!Resource>>}
-   */
-  getResourcesInRect(hostWin, rect, opt_isInPrerender) {}
-
-  /**
    * Returns the {@link Resource} instance corresponding to the specified AMP
    * Element. If no Resource is found, the exception is thrown.
    * @param {!AmpElement} element
@@ -547,7 +528,15 @@ export class Resources {
     return this.ampdoc;
   }
 
-  /** @override */
+  /**
+   * Returns a subset of resources which are (1) belong to the specified host
+   * window, and (2) meet the filterFn given.
+   *
+   * TODO(lannka): this method should be moved out of resources service.
+   * @param {!Window} hostWin
+   * @param {function(!Resource):boolean} filterFn
+   * @return {!Promise<!Array<!Resource>>}
+   */
   getMeasuredResources(hostWin, filterFn) {
     // First, wait for the `ready-scan` signal. Waiting for each element
     // individually is too expensive and `ready-scan` will cover most of
@@ -579,7 +568,16 @@ export class Resources {
       );
   }
 
-  /** @override */
+  /**
+   * Returns a subset of resources which are (1) belong to the specified host
+   * window, and (2) positioned in the specified rect.
+   *
+   * TODO(lannka): this method should be moved out of resources service.
+   * @param {!Window} hostWin
+   * @param {!../layout-rect.LayoutRectDef} rect
+   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
+   * @return {!Promise<!Array<!Resource>>}
+   */
   getResourcesInRect(hostWin, rect, opt_isInPrerender) {
     return this.getMeasuredResources(hostWin, r => {
       // TODO(jridgewell): Remove isFixed check here once the position

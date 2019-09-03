@@ -69,16 +69,6 @@ class InaboxResources {
   }
 
   /** @override */
-  getMeasuredResources(unusedHostWin, unusedFilterFn) {
-    return Promise.resolve(this.get());
-  }
-
-  /** @override */
-  getResourcesInRect(unusedHostWin, unusedRect, opt_isInPrerender) {
-    return Promise.resolve(this.get());
-  }
-
-  /** @override */
   getResourceForElement(element) {
     return Resource.forElement(element);
   }
@@ -150,24 +140,22 @@ class InaboxResources {
 
   /** @override */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    const resource = Resource.forElement(element);
-    resource./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
-    this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
-    if (opt_callback) {
-      opt_callback();
-    }
+    this.attemptChangeSize(element, newHeight, newWidth, opt_newMargins).then(
+      () => {
+        if (opt_callback) {
+          opt_callback();
+        }
+      }
+    );
   }
 
   /** @override */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
-    this./*OK*/ changeSize(
-      element,
-      newHeight,
-      newWidth,
-      undefined,
-      opt_newMargins
-    );
-    return Promise.resolve();
+    const resource = Resource.forElement(element);
+    return this.vsync_.mutatePromise(() => {
+      resource./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
+      this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
+    });
   }
 
   /** @override */
@@ -263,4 +251,8 @@ class InaboxResources {
  */
 export function installInaboxResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', InaboxResources);
+}
+
+function unsupported(method) {
+  throw new Error(TAG + ' Unsupported method: ' + method);
 }
