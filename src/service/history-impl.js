@@ -922,7 +922,7 @@ export class HistoryBindingVirtual_ {
    * @return {boolean}
    */
   isHistoryState_(maybeHistoryState) {
-    return maybeHistoryState && maybeHistoryState['stackIndex'] !== undefined;
+    return !!maybeHistoryState && maybeHistoryState['stackIndex'] !== undefined;
   }
 
   /**
