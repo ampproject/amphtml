@@ -435,5 +435,3 @@ if (typeof AMP === 'object') {
   module.exports.widget = bootstrap;
 } else
   bootstrap();
-
-
