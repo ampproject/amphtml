@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const CONTENTSQUARE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const CONTENTSQUARE_CONFIG = jsonLiteral({
   'vars': {
     'version': 'amp-0.0.1',
     'csid':
@@ -54,3 +56,5 @@ export const CONTENTSQUARE_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {CONTENTSQUARE_CONFIG};
