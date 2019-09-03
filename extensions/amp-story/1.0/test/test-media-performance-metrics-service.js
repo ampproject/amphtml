@@ -245,8 +245,8 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
       service.stopMeasuring(video);
 
       // playing: 600; waiting: 800
-      // 800 / (600 + 800) ~= 0.571
-      expect(tickStub).to.have.been.calledWithExactly('vrbr', 0.571);
+      // (800 / (600 + 800)) * 100 ~= 57
+      expect(tickStub).to.have.been.calledWithExactly('vrbr', 57);
     });
 
     it('should record mean time between rebuffers', () => {

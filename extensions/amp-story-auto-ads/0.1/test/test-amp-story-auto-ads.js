@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as analytics from '../../../../src/analytics';
 import {
   Action,
   UIType,
@@ -69,10 +68,50 @@ describes.realWin(
       autoAds = new AmpStoryAutoAds(adElement);
     });
 
+    describe('service installation', () => {
+      let installExtensionForDocStub;
+      beforeEach(() => {
+        installExtensionForDocStub = sandbox.spy();
+        sandbox
+          .stub(Services.extensionsFor(win), 'installExtensionForDoc')
+          .callsFake(installExtensionForDocStub);
+        new MockStoryImpl(storyElement);
+      });
+
+      it('should install amp-mustache when type="custom"', async () => {
+        const config = {
+          type: 'custom',
+          'data-url': '/some/fake/path',
+        };
+        addStoryAutoAdsConfig(adElement, config);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        expect(installExtensionForDocStub).to.be.calledWithExactly(
+          env.ampdoc,
+          'amp-mustache'
+        );
+      });
+
+      it('should not install amp-mustache when type!="custom"', async () => {
+        const config = {
+          type: 'doubleclick',
+          'data-slot': '/300200/foo',
+        };
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement, config);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        expect(installExtensionForDocStub).not.to.be.calledWithExactly(
+          env.ampdoc,
+          'amp-mustache'
+        );
+      });
+    });
+
     describe('glass pane', () => {
       beforeEach(async () => {
         new MockStoryImpl(storyElement);
-        addStoryAutoAdsConfig(doc, adElement);
+        addStoryAutoAdsConfig(adElement);
         await autoAds.buildCallback();
         autoAds.layoutCallback();
       });
@@ -128,7 +167,7 @@ describes.realWin(
       beforeEach(async () => {
         // Force sync mutateElement.
         sandbox.stub(autoAds, 'mutateElement').callsArg(0);
-        addStoryAutoAdsConfig(win.document, adElement);
+        addStoryAutoAdsConfig(adElement);
         storeService = getStoreService(win);
         await story.buildCallback();
         // Fire these events so that story ads thinks the parent story is ready.
@@ -170,7 +209,7 @@ describes.realWin(
 
     describe('CTA button', () => {
       beforeEach(async () => {
-        addStoryAutoAdsConfig(doc, adElement);
+        addStoryAutoAdsConfig(adElement);
         const storyImpl = new MockStoryImpl(storyElement);
         storyElement.getImpl = () => Promise.resolve(storyImpl);
         await addStoryPages(doc, storyImpl);
@@ -204,7 +243,7 @@ describes.realWin(
 
     describe('ad choices', () => {
       beforeEach(async () => {
-        addStoryAutoAdsConfig(doc, adElement);
+        addStoryAutoAdsConfig(adElement);
         const storyImpl = new MockStoryImpl(storyElement);
         storyElement.getImpl = () => Promise.resolve(storyImpl);
         await addStoryPages(doc, storyImpl);
@@ -283,22 +322,15 @@ describes.realWin(
         });
       });
 
-      it('should fire "story-ad-load" upon ad load', function*() {
-        const signals = {whenSignal: () => Promise.resolve()};
-        const fakeImpl = {signals: () => signals};
-        const ad = win.document.createElement('amp-ad');
-        ad.getImpl = () => Promise.resolve(fakeImpl);
-        sandbox.stub(autoAds, 'createAdElement_').returns(ad);
-        autoAds.adPageEls_ = [ad];
-
-        const page = win.document.createElement('amp-story-page');
-        sandbox.stub(autoAds, 'createPageElement_').returns(page);
-        page.getImpl = () => Promise.resolve({delegateVideoAutoplay: () => {}});
-
+      it('should fire "story-ad-load" upon ad load', async () => {
         const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.createAdPage_();
-        yield macroTask();
-
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        const ampAd = doc.querySelector('amp-ad');
+        ampAd.signals().signal(CommonSignals.INI_LOAD);
+        await macroTask();
         expect(analyticsStub).to.be.called;
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-load', {
           'loadTime': sinon.match.number,
@@ -362,114 +394,6 @@ describes.realWin(
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-exit', {
           'exitTime': sinon.match.number,
         });
-      });
-    });
-
-    describe('analyticsEvent_', () => {
-      let triggerStub;
-
-      beforeEach(() => {
-        triggerStub = sandbox.stub(analytics, 'triggerAnalyticsEvent');
-        autoAds.analyticsData_ = {1: {}};
-      });
-
-      it('should trigger the appropriate event', () => {
-        const vars = {
-          adIndex: 1,
-          foo: 1,
-        };
-
-        autoAds.analyticsEvent_('my-event', vars);
-        expect(triggerStub).calledWith(
-          sinon.match.any,
-          'my-event',
-          sinon.match(vars)
-        );
-      });
-
-      it('should aggregate data from previous events', () => {
-        autoAds.analyticsEvent_('event-1', {adIndex: 1, foo: 1});
-        autoAds.analyticsEvent_('event-2', {adIndex: 1, bar: 2});
-        autoAds.analyticsEvent_('event-3', {adIndex: 1, baz: 3});
-        expect(triggerStub).calledThrice;
-        expect(triggerStub).calledWith(
-          sinon.match.any,
-          'event-3',
-          sinon.match({
-            adIndex: 1,
-            foo: 1,
-            bar: 2,
-            baz: 3,
-          })
-        );
-      });
-    });
-
-    describe('analyticsEventWithCurrentAd_', () => {
-      it('should add the current ad index and call #analyticsEvent_', () => {
-        const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.analyticsEventWithCurrentAd_('cool-event', {foo: 1});
-        expect(analyticsStub).to.be.called;
-        expect(analyticsStub).to.have.been.calledWithMatch('cool-event', {
-          foo: 1,
-        });
-      });
-    });
-
-    describe('creation of amp-ad with attributes', () => {
-      let config;
-
-      beforeEach(() => {
-        config = {
-          'ad-attributes': {
-            type: 'doubleclick',
-            'data-slot': 'abcd',
-          },
-        };
-      });
-
-      it('should not allow blacklisted attributes', async () => {
-        Object.assign(config['ad-attributes'], {
-          height: 100,
-          width: 100,
-          layout: 'responsive',
-        });
-
-        addStoryAutoAdsConfig(doc, adElement, config);
-        const storyImpl = new MockStoryImpl(storyElement);
-        storyElement.getImpl = () => Promise.resolve(storyImpl);
-        await autoAds.buildCallback();
-        await autoAds.layoutCallback();
-
-        const ampAd = doc.querySelector('amp-ad');
-        expect(ampAd).to.have.attribute('type');
-        expect(ampAd).to.have.attribute('data-slot');
-        expect(ampAd).not.to.have.attribute('width');
-        expect(ampAd).not.to.have.attribute('height');
-        expect(ampAd.getAttribute('layout')).to.equal('fill');
-      });
-
-      it('should stringify attributes given as objects', async () => {
-        Object.assign(config['ad-attributes'], {
-          'rtc-config': {
-            vendors: {
-              vendor1: {'SLOT_ID': 1},
-              vendor2: {'PAGE_ID': 'abc'},
-            },
-          },
-        });
-
-        addStoryAutoAdsConfig(doc, adElement, config);
-        const storyImpl = new MockStoryImpl(storyElement);
-        storyElement.getImpl = () => Promise.resolve(storyImpl);
-        await autoAds.buildCallback();
-        await autoAds.layoutCallback();
-
-        const ampAd = doc.querySelector('amp-ad');
-        expect(ampAd.getAttribute('rtc-config')).to.equal(
-          '{"vendors":{"vendor1":{"SLOT_ID":1},' +
-            '"vendor2":{"PAGE_ID":"abc"}}}'
-        );
       });
     });
   }

@@ -21,11 +21,16 @@ const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const {
-  buildExtensions,
-  extensionAliasFilePath,
-  getExtensionsToBuild,
-  parseExtensionFlags,
-} = require('./extension-helpers');
+  bootstrapThirdPartyFrames,
+  compileAllMinifiedJs,
+  compileJs,
+  endBuildStep,
+  hostname,
+  mkdirSync,
+  printConfigHelp,
+  printNobuildHelp,
+  toPromise,
+} = require('./helpers');
 const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
@@ -34,22 +39,8 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {
-  WEB_PUSH_PUBLISHER_FILES,
-  WEB_PUSH_PUBLISHER_VERSIONS,
-  buildAlp,
-  buildExaminer,
-  buildWebWorker,
-  compileJs,
-  compileAllMinifiedTargets,
-  endBuildStep,
-  hostname,
-  mkdirSync,
-  printConfigHelp,
-  printNobuildHelp,
-  toPromise,
-} = require('./helpers');
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
@@ -64,6 +55,13 @@ const argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
+
+const WEB_PUSH_PUBLISHER_FILES = [
+  'amp-web-push-helper-frame',
+  'amp-web-push-permission-dialog',
+];
+
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 
 function transferSrcsToTempDir() {
   log(
@@ -125,7 +123,7 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
-  await compileCss(/* watch */ undefined, /* opt_compileAll */ true);
+  await compileCss();
   await compileJison();
   await startNailgunServer(distNailgunPort, /* detached */ false);
 
@@ -138,13 +136,8 @@ async function dist() {
   }
 
   await Promise.all([
-    compileAllMinifiedTargets(),
-    // NOTE: When adding a line here,
-    // consider whether you need to include polyfills
-    // and whether you need to init logging (initLogConstructor).
-    buildAlp({minify: true, watch: false}),
-    buildExaminer({minify: true, watch: false}),
-    buildWebWorker({minify: true, watch: false}),
+    compileAllMinifiedJs(),
+    bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true),
     buildExtensions({minify: true, watch: false}),
     buildExperiments({minify: true, watch: false}),
     buildLoginDone('0.1', {minify: true, watch: false}),
@@ -161,7 +154,6 @@ async function dist() {
   }
 
   await stopNailgunServer(distNailgunPort);
-  await copyAliasExtensions();
   await formatExtractedMessages();
 
   if (argv.esm) {
@@ -282,33 +274,6 @@ function copyParsers() {
   return fs.copy('build/parsers', 'dist/v0').then(() => {
     endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
-}
-
-/**
- * Copy built extension to alias extension
- * @return {!Promise}
- */
-function copyAliasExtensions() {
-  if (argv.noextensions) {
-    return Promise.resolve();
-  }
-
-  const extensionsToBuild = getExtensionsToBuild();
-
-  for (const key in extensionAliasFilePath) {
-    if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1
-    ) {
-      continue;
-    }
-    fs.copySync(
-      'dist/v0/' + extensionAliasFilePath[key]['file'],
-      'dist/v0/' + key
-    );
-  }
-
-  return Promise.resolve();
 }
 
 /**

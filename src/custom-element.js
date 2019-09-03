@@ -131,8 +131,8 @@ export function createCustomElementClass(win, name) {
  * @return {function(new:HTMLElement)}
  */
 function createBaseCustomElementClass(win) {
-  if (win.__AMP_BaseCustomElementClass) {
-    return win.__AMP_BaseCustomElementClass;
+  if (win.__AMP_BASE_CE_CLASS) {
+    return win.__AMP_BASE_CE_CLASS;
   }
   const htmlElement =
     /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
@@ -1863,8 +1863,8 @@ function createBaseCustomElementClass(win) {
       }
     }
   }
-  win.__AMP_BaseCustomElementClass = BaseCustomElement; // eslint-disable-line google-camelcase/google-camelcase
-  return /** @type {function(new:HTMLElement)} */ (win.__AMP_BaseCustomElementClass);
+  win.__AMP_BASE_CE_CLASS = BaseCustomElement;
+  return /** @type {function(new:HTMLElement)} */ (win.__AMP_BASE_CE_CLASS);
 }
 
 /**

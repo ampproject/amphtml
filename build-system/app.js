@@ -20,6 +20,7 @@
  * files and list directories for use with the gulp live server
  */
 const app = require('express')();
+const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
@@ -42,7 +43,7 @@ const {replaceUrls, isRtvMode} = require('./app-utils');
 
 const upload = multer();
 
-const TEST_SERVER_PORT = process.env.SERVE_PORT;
+const TEST_SERVER_PORT = argv.port || 8000;
 
 app.use(bodyParser.text());
 app.use(require('./routes/a4a-envelopes'));
@@ -85,7 +86,7 @@ app.get('/serve_mode=:mode', (req, res) => {
   }
 });
 
-if (!global.AMP_TESTING) {
+if (!(argv._.includes('unit') || argv._.includes('integration'))) {
   // Dev dashboard routes break test scaffolding since they're global.
   devDashboard.installExpressMiddleware(app);
 }
@@ -837,6 +838,16 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
 });
 
 /**
+ * Disable caching for extensions if the --no_caching_extensions flag is used.
+ */
+app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
+  if (argv.no_caching_extensions) {
+    res.header('Cache-Control', 'no-store');
+  }
+  next();
+});
+
+/**
  * Video testbench endpoint
  */
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
@@ -862,11 +873,11 @@ app.get(
           file = replaceUrls(mode, file, '', inabox);
         }
 
-        if (inabox) {
-          // TODO: remove this when inabox-viewport-friendly is fully launched.
+        const ampExperimentsOptIn = req.query['exp'];
+        if (ampExperimentsOptIn) {
           file = file.replace(
             '<head>',
-            '<head><meta name="amp-experiments-opt-in" content="inabox-viewport-friendly">'
+            `<head><meta name="amp-experiments-opt-in" content="${ampExperimentsOptIn}">`
           );
         }
 

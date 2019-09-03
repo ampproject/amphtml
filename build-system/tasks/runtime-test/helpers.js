@@ -17,18 +17,15 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
-const gulp = require('gulp');
 const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
-const webserver = require('gulp-webserver');
 
 const {
   reportTestErrored,
   reportTestFinished,
   reportTestRunComplete,
 } = require('../report-test-status');
-const {app} = require('../../test-server');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {Server} = require('karma');
@@ -182,6 +179,11 @@ function maybePrintCoverageMessage() {
   opn(url, {wait: false});
 }
 
+function karmaBrowserStart(browser) {
+  console./*OK*/ log('\n');
+  log(`${browser.name}: ${green('STARTED')}`);
+}
+
 function karmaBrowserComplete(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
@@ -219,22 +221,6 @@ function karmaRunStart() {
   if (!argv.saucelabs) {
     log(green('Running tests locally...'));
   }
-}
-
-function startTestServer(port) {
-  const server = gulp.src(process.cwd(), {base: '.'}).pipe(
-    webserver({
-      port,
-      host: 'localhost',
-      directoryListing: true,
-      middleware: [app],
-    }).on('kill', function() {
-      log(yellow(`Shutting down test responses server on localhost:${port}`));
-    })
-  );
-  log(yellow(`Started test responses server on localhost:${port}`));
-
-  return server;
 }
 
 /**
@@ -389,6 +375,7 @@ async function createKarmaServer(
   karmaServer
     .on('run_start', () => karmaRunStart())
     .on('browsers_ready', () => karmaBrowsersReady())
+    .on('browser_start', browser => karmaBrowserStart(browser))
     .on('browser_complete', browser => karmaBrowserComplete(browser))
     .on('run_complete', runCompleteFn);
 
@@ -403,5 +390,4 @@ module.exports = {
   maybePrintArgvMessages,
   runTestInBatches,
   shouldNotRun,
-  startTestServer,
 };
