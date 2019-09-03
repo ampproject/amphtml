@@ -21,7 +21,7 @@ import {setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const SMOOTHING_PTS = 4;
-const PERSPECTIVE = 5000;
+const PERSPECTIVE = 1500;
 
 /**
  * Installs parallax handlers
@@ -58,16 +58,17 @@ export class ParallaxService {
       pages
         .filter(page => !page.hasAttribute('no-parallax-fx'))
         .map(page => {
+          const layers = this.getLayers(page);
+
           // Set the page's perspective
           setStyles(page, {
-            perspective: PERSPECTIVE + `px`,
+            perspective: PERSPECTIVE * layers.length + `px`,
           });
 
           this.parallaxPages_.push(new ParallaxPage(page, this.vsync_));
           // Loop through the layers in the page and assign a z-index following
           // DOM order (manual override will be added in the future)
           let zIndex = 1;
-          const layers = this.getLayers(page);
 
           layers.map(layer => {
             this.vsync_.mutate(() => {
