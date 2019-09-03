@@ -206,6 +206,7 @@ function compileAllJs(watch, minify) {
     doBuildJs(jsBundles, 'recaptcha.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-viewer-host.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'video-iframe-integration.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-story-embed.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
