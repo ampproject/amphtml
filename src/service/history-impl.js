@@ -843,9 +843,6 @@ export class HistoryBindingNatural_ {
   }
 }
 
-/** @const {string} */
-const BAD_DATA_WARNING = 'Ignored unexpected "%s" data:';
-
 /**
  * Implementation of HistoryBindingInterface that assumes a virtual history that
  * relies on viewer's "pushHistory", "popHistory" and "historyPopped"
@@ -910,7 +907,12 @@ export class HistoryBindingVirtual_ {
     if (this.isHistoryState_(maybeHistoryState)) {
       return /** @type {!HistoryStateDef} */ (maybeHistoryState);
     } else {
-      dev().warn(TAG_, BAD_DATA_WARNING, debugId, maybeHistoryState);
+      dev().warn(
+        TAG_,
+        'Ignored unexpected "%s" data:',
+        debugId,
+        maybeHistoryState
+      );
     }
     return fallbackState;
   }
@@ -1044,7 +1046,7 @@ export class HistoryBindingVirtual_ {
     if (this.isHistoryState_(data)) {
       this.updateHistoryState_(/** @type {!HistoryStateDef} */ (data));
     } else {
-      dev().warn(TAG_, BAD_DATA_WARNING, 'historyPopped', data);
+      dev().warn(TAG_, 'Ignored unexpected "historyPopped" data:', data);
     }
   }
 
