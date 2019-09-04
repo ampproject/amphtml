@@ -218,7 +218,7 @@ function karmaBrowsersReady() {
 }
 
 function karmaBrowserError(browser, error) {
-  console.log('\n');
+  console./*OK*/ log('\n');
   log(yellow(`WARNING: Error detected with ${browser}`));
   log(yellow(JSON.stringify(error)));
 }
