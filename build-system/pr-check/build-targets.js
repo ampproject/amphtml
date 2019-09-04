@@ -67,8 +67,8 @@ const targetMatchers = [
     func: file => {
       return (
         file == 'build-system/tasks/dev-dashboard-tests.js' ||
-        file == 'build-system/app.js' ||
-        file.startsWith('build-system/app-index/')
+        file == 'build-system/server/app.js' ||
+        file.startsWith('build-system/server/app-index/')
       );
     },
   },

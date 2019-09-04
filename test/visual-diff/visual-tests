@@ -210,8 +210,8 @@
       "name": "AMP Article",
       "loading_complete_selectors": [
         ".article-body",
-        ".ad-one div[placeholder].amp-hidden",
-        ".ad-two div[placeholder].amp-hidden"
+        ".ad-one :not(.i-amphtml-loading-container) + iframe",
+        ".ad-two :not(.i-amphtml-loading-container) + iframe"
       ]
     },
     {
