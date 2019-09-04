@@ -114,11 +114,6 @@ class InaboxResources {
   }
 
   /** @override */
-  removeForChildWindow(unusedChildWin) {
-    // no child window in inabox
-  }
-
-  /** @override */
   scheduleLayoutOrPreload(unusedResource) {
     // all elements are immediately scheduled for layout after being added
   }

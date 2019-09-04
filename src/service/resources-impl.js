@@ -239,13 +239,6 @@ export class ResourcesDef extends MutatorsDef {
   remove(element) {}
 
   /**
-   * Removes all resources belonging to the specified child window.
-   * TODO(lannka): this method should not belong to resources.
-   * @param {!Window} childWin
-   */
-  removeForChildWindow(childWin) {}
-
-  /**
    * Schedules layout or preload for the specified resource.
    * @param {!Resource} resource
    * @param {boolean} layout
@@ -819,7 +812,11 @@ export class Resources {
     dev().fine(TAG_, 'element removed:', resource.debugid);
   }
 
-  /** @override */
+  /**
+   * Removes all resources belonging to the specified child window.
+   * TODO(lannka): this method should not belong to resources.
+   * @param {!Window} childWin
+   */
   removeForChildWindow(childWin) {
     const toRemove = this.resources_.filter(r => r.hostWin == childWin);
     toRemove.forEach(r => this.removeResource_(r, /* disconnect */ true));
