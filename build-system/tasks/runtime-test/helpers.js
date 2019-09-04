@@ -217,6 +217,12 @@ function karmaBrowsersReady() {
   log(green('Done. Running tests...'));
 }
 
+function karmaBrowserError(browser, error) {
+  console.log('\n');
+  log(yellow(`WARNING: Error detected with ${browser}`));
+  log(yellow(JSON.stringify(error)));
+}
+
 function karmaRunStart() {
   if (!argv.saucelabs) {
     log(green('Running tests locally...'));
@@ -377,6 +383,7 @@ async function createKarmaServer(
     .on('browsers_ready', () => karmaBrowsersReady())
     .on('browser_start', browser => karmaBrowserStart(browser))
     .on('browser_complete', browser => karmaBrowserComplete(browser))
+    .on('browser_error', (browser, error) => karmaBrowserError(browser, error))
     .on('run_complete', runCompleteFn);
 
   karmaServer.start();
