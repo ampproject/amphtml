@@ -19,7 +19,6 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllUnminifiedJs,
-  compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
 } = require('./helpers');
@@ -75,6 +74,14 @@ function printDefaultTaskHelp() {
       green('to lazily build JS and extensions ') +
       green('when requested from the server.');
     log(lazyBuildMessage);
+  } else if (!argv.extensions && !argv.extensions_from) {
+    const extensionsMessage =
+      green('⤷ Use ') +
+      cyan('--extensions ') +
+      green('or ') +
+      cyan('--extensions_from ') +
+      green('to pre-build some extensions.');
+    log(extensionsMessage);
   }
 }
 
@@ -99,9 +106,6 @@ async function performBuild(watch, defaultTask) {
     compileJison(),
     bootstrapThirdPartyFrames(watch),
   ]);
-  if (!argv.lazy_build) {
-    await compileCoreRuntime(watch);
-  }
   if (!defaultTask) {
     await compileAllUnminifiedJs(watch);
     await buildExtensions({watch});
@@ -117,8 +121,7 @@ async function performBuild(watch, defaultTask) {
  */
 async function defaultTask() {
   await watch(/* defaultTask */ true);
-  serve(argv.lazy_build);
-  log(green('Started ') + cyan('gulp ') + green('server. '));
+  await serve();
   if (argv.lazy_build) {
     log(green('JS and extensions will be lazily built when requested...'));
   } else {
