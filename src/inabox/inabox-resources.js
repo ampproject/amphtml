@@ -92,8 +92,11 @@ class InaboxResources {
 
   /** @override */
   upgraded(element) {
-    const resource = this.getResourceForElement(element);
-    this.buildThenSchedulePass_(resource);
+    const resource = Resource.forElement(element);
+    this.ampdoc_
+      .whenReady()
+      .then(resource.build.bind(resource))
+      .then(this.schedulePass.bind(this, FOUR_FRAME_DELAY));
     dev().fine(TAG, 'resource upgraded:', resource.debugid);
   }
 
@@ -152,7 +155,7 @@ class InaboxResources {
   /** @override */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return this.mutateElement(element, () => {
-      Resource.forElement(element)./*OK*/ changeSize(
+      this.getResourceForElement(element)./*OK*/ changeSize(
         newHeight,
         newWidth,
         opt_newMargins
@@ -162,21 +165,26 @@ class InaboxResources {
 
   /** @override */
   expandElement(element) {
-    const resource = Resource.forElement(element);
+    const resource = this.getResourceForElement(element);
     resource.completeExpand();
+    const owner = resource.getOwner();
+    if (owner) {
+      owner.expandedCallback(element);
+    }
     this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
   }
 
   /** @override */
   attemptCollapse(element) {
-    this.collapseElement(element);
-    return Promise.resolve();
+    return this.mutateElement(element, () => {
+      this.getResourceForElement(element).completeCollapse();
+    });
   }
 
   /** @override */
   collapseElement(element) {
-    const resource = this.getResourceForElement(element);
-    resource.completeCollapse();
+    this.getResourceForElement(element).completeCollapse();
+    this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
   }
 
   /** @override */
@@ -209,17 +217,6 @@ class InaboxResources {
    */
   whenFirstPass() {
     return this.firstPassDone_.promise;
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @private
-   */
-  buildThenSchedulePass_(resource) {
-    this.ampdoc_
-      .whenReady()
-      .then(resource.build.bind(resource))
-      .then(this.schedulePass.bind(this, FOUR_FRAME_DELAY));
   }
 
   /**
