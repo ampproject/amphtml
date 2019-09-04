@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import * as storyEvents from '../../../amp-story/1.0/events';
 import {
   Action,
+  StateProperty,
   UIType,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
@@ -30,6 +32,7 @@ import {
   fireBuildSignals,
   insertAdContent,
 } from './story-mock';
+import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {Services} from '../../../../src/services';
 import {macroTask} from '../../../../testing/yield';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -235,7 +238,7 @@ describes.realWin(
         `;
         addCtaValues(autoAds, 'SHOP', 'https://example.com'); // This url should be ignored.
         await insertAdContent(autoAds, iframeContent);
-        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
         const cta = doc.querySelector('.i-amphtml-story-ad-link');
         expect(cta.href).to.equal('https://amp.dev/');
       });
@@ -256,7 +259,7 @@ describes.realWin(
       it('does not render the ad choices icon if no meta tags present', async () => {
         addCtaValues(autoAds, 'SHOP', 'https://example.com');
         await insertAdContent(autoAds, ''); // No ad content.
-        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
         const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
         expect(adChoices).not.to.exist;
       });
@@ -268,7 +271,7 @@ describes.realWin(
         `;
         addCtaValues(autoAds, 'SHOP', 'https://example.com');
         await insertAdContent(autoAds, iframeContent);
-        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
         const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
         expect(adChoices).not.to.exist;
       });
@@ -284,7 +287,7 @@ describes.realWin(
         `;
         addCtaValues(autoAds, 'SHOP', 'https://example.com');
         await insertAdContent(autoAds, iframeContent);
-        autoAds.forceRender('story-page-0' /* pageBeforeAdId */);
+        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
         const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
         expect(adChoices).to.exist;
         expect(adChoices.getAttribute('src')).to.equal(icon);
@@ -394,6 +397,55 @@ describes.realWin(
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-exit', {
           'exitTime': sinon.match.number,
         });
+      });
+    });
+
+    describe('development mode', () => {
+      it('should immediately insert and navigate to ad page', async () => {
+        const storeService = await Services.storyStoreServiceForOrNull(win);
+        const storeStub = sandbox.stub(storeService, 'get');
+        storeStub
+          .withArgs(StateProperty.CURRENT_PAGE_ID)
+          .returns('story-page-0');
+        storeStub.callThrough();
+
+        const storyImpl = new MockStoryImpl(storyElement);
+        storyElement.getImpl = () => Promise.resolve(storyImpl);
+        await addStoryPages(doc, storyImpl);
+
+        adElement.id = 'i-amphtml-demo-1';
+        adElement.setAttribute('development', '');
+        const config = {
+          'a4a-conversion': true,
+          src: '/examples/amp-story/ads/app-install.html',
+          type: 'fake',
+        };
+        addStoryAutoAdsConfig(adElement, config);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        addCtaValues(autoAds, 'SHOP', 'https://example.com');
+
+        const adPageElement = doc.querySelector('#i-amphtml-ad-page-1');
+        const insertSpy = sandbox.spy(storyImpl, 'insertPage');
+        const dispatchStub = sandbox.spy(storyEvents, 'dispatch');
+
+        const ampAd = doc.querySelector('amp-ad');
+        ampAd.signals().signal(CommonSignals.INI_LOAD);
+        await macroTask();
+
+        expect(insertSpy).calledWith('story-page-0', 'i-amphtml-ad-page-1');
+        const payload = {
+          'targetPageId': 'i-amphtml-ad-page-1',
+          'direction': NavigationDirection.NEXT,
+        };
+        const eventInit = {bubbles: true};
+        expect(dispatchStub).calledWith(
+          win,
+          adPageElement,
+          storyEvents.EventType.SWITCH_PAGE,
+          sinon.match(payload),
+          sinon.match(eventInit)
+        );
       });
     });
   }
