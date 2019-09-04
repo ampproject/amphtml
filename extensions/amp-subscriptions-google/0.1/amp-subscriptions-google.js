@@ -344,8 +344,21 @@ export class GoogleSubscriptionsPlatform {
         }
 
         // Get the specifc entitlement we're looking for
-        const swgEntitlement = swgEntitlements.getEntitlementForThis();
-        if (!swgEntitlement) {
+        let swgEntitlement = swgEntitlements.getEntitlementForThis();
+        let granted = false;
+        if (swgEntitlement && swgEntitlement.source) {
+          granted = true;
+        } else if (
+          swgEntitlements.entitlements.length &&
+          swgEntitlements.entitlements[0].products.length
+        ) {
+          // We didn't find a grant so see if there is a non granting
+          // and return that. Note if we start returning multiple non
+          // granting we'll need to refactor to handle returning an
+          // array of Entitlement objects.
+          // #TODO(jpettitt) - refactor to handle multi entitlement case
+          swgEntitlement = swgEntitlements.entitlements[0];
+        } else {
           return null;
         }
         swgEntitlements.ack();
@@ -353,8 +366,9 @@ export class GoogleSubscriptionsPlatform {
           source: swgEntitlement.source,
           raw: swgEntitlements.raw,
           service: PLATFORM_ID,
-          granted: true, //swgEntitlements.getEntitlementForThis makes sure this is true.
-          grantReason: GrantReason.SUBSCRIBER, // there is no other case of subscription for SWG as of now.
+          granted,
+          // if it's granted it must be a subscriber
+          grantReason: granted ? GrantReason.SUBSCRIBER : null,
           dataObject: swgEntitlement.json(),
           decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
         });
