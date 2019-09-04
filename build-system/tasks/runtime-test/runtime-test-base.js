@@ -46,10 +46,10 @@ function updateBrowsers(config) {
       Object.assign(config, {
         browsers: [
           'SL_Chrome',
-          // 'SL_Firefox',
-          // 'SL_Edge_17',
-          // 'SL_Safari_12',
-          // 'SL_IE_11',
+          'SL_Firefox',
+          'SL_Edge_17',
+          'SL_Safari_12',
+          //'SL_IE_11',
           // TODO(amp-infra): Evaluate and add more platforms here.
           //'SL_Chrome_Android_7',
           //'SL_iOS_11',
