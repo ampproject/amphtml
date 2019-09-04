@@ -393,7 +393,6 @@ describes.realWin('child layout manager', {}, env => {
         .to.have.been.calledWith(domElementMock, el.children[1]);
     });
 
-
     it('should schedule layout when wasLaidOut is called', async () => {
       const el = createHorizontalScroller(5);
       const clm = new ChildLayoutManager({
@@ -437,7 +436,6 @@ describes.realWin('child layout manager', {}, env => {
         .to.have.been.calledWith(domElementMock, el.children[4], false);
     });
 
-
     it('should queue layout on scroll', async () => {
       const el = createHorizontalScroller(5);
       const clm = new ChildLayoutManager({
@@ -462,7 +460,6 @@ describes.realWin('child layout manager', {}, env => {
         .to.have.callCount(1)
         .to.have.been.calledWith(domElementMock, el.children[2]);
     });
-
 
     it('should queue scheduleUnlayout on scroll', async () => {
       const el = createHorizontalScroller(5);
@@ -493,7 +490,6 @@ describes.realWin('child layout manager', {}, env => {
         .to.have.been.calledWith(domElementMock, el.children[0]);
     });
 
-    
     it('should queue updateInViewport on scroll', async () => {
       const el = createHorizontalScroller(5);
       const clm = new ChildLayoutManager({
