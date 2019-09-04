@@ -1742,19 +1742,6 @@ describes.realWin(
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
       });
 
-      it('should set invalid origin fix experiment if on canonical', () => {
-        randomlySelectUnsetExperimentsStub.returns({});
-        impl.setPageLevelExperiments();
-        expect(impl.experimentIds.includes('21060933')).to.be.true;
-      });
-
-      it('should not set invalid origin fix if exp on', () => {
-        toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
-        randomlySelectUnsetExperimentsStub.returns({});
-        impl.setPageLevelExperiments();
-        expect(impl.experimentIds.includes('21060933')).to.be.true;
-      });
-
       it('should select SRA experiments', () => {
         randomlySelectUnsetExperimentsStub.returns({
           doubleclickSraExp: '117152667',
