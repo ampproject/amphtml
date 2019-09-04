@@ -52,8 +52,8 @@ const forbiddenTerms = {
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
     whitelist: [
-      'build-system/amp4test.js',
-      'build-system/app-index/boilerplate.js',
+      'build-system/server/amp4test.js',
+      'build-system/server/app-index/boilerplate.js',
       'build-system/tasks/extension-generator/index.js',
       'css/ampdoc.css',
       'css/ampshared.css',
@@ -109,8 +109,8 @@ const forbiddenTerms = {
       'If you run against this, use console/*OK*/.[log|error] to ' +
       'whitelist a legit case.',
     whitelist: [
-      'build-system/app.js',
-      'build-system/amp4test.js',
+      'build-system/server/app.js',
+      'build-system/server/amp4test.js',
       'build-system/check-package-manager.js',
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
@@ -170,7 +170,7 @@ const forbiddenTerms = {
     message:
       'This is only available in vendor config for temporary workarounds.',
     whitelist: [
-      'build-system/routes/analytics.js',
+      'build-system/server/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
       'extensions/amp-analytics/0.1/vendors.js',
@@ -649,7 +649,7 @@ const forbiddenTerms = {
       'and getMode() to access config',
     whitelist: [
       'build-system/amp.extern.js',
-      'build-system/app.js',
+      'build-system/server/app.js',
       'build-system/tasks/e2e/index.js',
       'build-system/tasks/firebase.js',
       'build-system/tasks/integration.js',
@@ -665,7 +665,7 @@ const forbiddenTerms = {
       'src/mode.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
-      'build-system/amp4test.js',
+      'build-system/server/amp4test.js',
       // TODO: @jonathantyng cleanup #22757
       'build-system/tasks/generate-vendor-jsons.js',
     ],
@@ -730,12 +730,12 @@ const forbiddenTerms = {
       'Use "describes.{realWin|sandboxed|fakeWin|integration}".',
     whitelist: [
       // Non test files. These can remain.
-      'build-system/app-index/test/test-amphtml-helpers.js',
-      'build-system/app-index/test/test-file-list.js',
-      'build-system/app-index/test/test-html.js',
-      'build-system/app-index/test/test-self.js',
-      'build-system/app-index/test/test-template.js',
-      'build-system/app-index/test/test.js',
+      'build-system/server/app-index/test/test-amphtml-helpers.js',
+      'build-system/server/app-index/test/test-file-list.js',
+      'build-system/server/app-index/test/test-html.js',
+      'build-system/server/app-index/test/test-self.js',
+      'build-system/server/app-index/test/test-template.js',
+      'build-system/server/app-index/test/test.js',
       'test/_init_tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
@@ -1120,12 +1120,12 @@ const forbiddenTermsSrcInclusive = {
       'code. Use a property of urls from src/config.js instead.',
     whitelist: [
       'ads/_a4a-config.js',
-      'build-system/amp4test.js',
-      'build-system/app-index/amphtml-helpers.js',
-      'build-system/app-video-testbench.js',
-      'build-system/app.js',
-      'build-system/app-utils.js',
-      'build-system/shadow-viewer.js',
+      'build-system/server/amp4test.js',
+      'build-system/server/app-index/amphtml-helpers.js',
+      'build-system/server/app-video-testbench.js',
+      'build-system/server/app.js',
+      'build-system/server/app-utils.js',
+      'build-system/server/shadow-viewer.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
@@ -1149,7 +1149,7 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.indexOf\\([\'"][^)]+\\)\\s*===?\\s*0\\b': {
     message: 'use startsWith helper in src/string.js',
-    whitelist: ['dist.3p/current/integration.js', 'build-system/app.js'],
+    whitelist: ['dist.3p/current/integration.js', 'build-system/server/app.js'],
   },
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
   '/url-parse-query-string': {

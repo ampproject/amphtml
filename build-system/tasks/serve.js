@@ -27,26 +27,15 @@ const {
   lazyBuildJs,
   preBuildCoreRuntime,
   preBuildSomeExtensions,
-} = require('../lazy-build');
+} = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
-const {isRtvMode} = require('../app-utils');
+const {isRtvMode} = require('../server/app-utils');
 
 // Used for logging during server start / stop.
 let url = '';
 
-// TODO(ampproject): Consolidate these into a single directory.
-const serverFiles = deglob.sync([
-  'build-system/amp4test.js',
-  'build-system/amp-cors.js',
-  'build-system/app.js',
-  'build-system/app-utils.js',
-  'build-system/app-video-testbench.js',
-  'build-system/recaptcha-router.js',
-  'build-system/shadow-viewer.js',
-  'build-system/routes/**',
-  'build-system/app-index/**',
-]);
+const serverFiles = deglob.sync(['build-system/server/**']);
 
 /**
  * Determines the server's mode based on command line arguments.
@@ -77,7 +66,7 @@ function setServeMode() {
  * @return {!Array<function()>}
  */
 function getMiddleware() {
-  const middleware = [require('../app')]; // Lazy-required to enable live-reload
+  const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
   if (!argv.quiet) {
     middleware.push(morgan('dev'));
   }
