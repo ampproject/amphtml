@@ -16,6 +16,8 @@
 
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
+import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
 import {
@@ -34,7 +36,7 @@ import {
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../../src/localized-strings';
 import {Services} from '../../../../src/services';
-import {closest} from '../../../../src/dom';
+import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
@@ -90,6 +92,14 @@ const REPLAY_ICON_TEMPLATE = {
 
 /** @const {string} */
 const TAG = 'amp-story-bookend';
+
+/** @enum {string} */
+const CLICKABLE_COMPONENT_TYPES = {
+  CTA_LINK: 'i-amphtml-story-bookend-cta-link',
+  LANDSCAPE: 'i-amphtml-story-bookend-landscape',
+  PORTRAIT: 'i-amphtml-story-bookend-portrait',
+  SMALL: 'i-amphtml-story-bookend-article',
+};
 
 /**
  * @param {string} title
@@ -211,6 +221,15 @@ export class AmpStoryBookend extends DraggableDrawer {
 
     /** @private {?ScrollableShareWidget} */
     this.shareWidget_ = null;
+
+    /** @private {!../story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win, this.element);
+
+    /** @const @private {!../variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(this.win);
+
+    /** @private {?Element} */
+    this.componentsContainer_ = null;
   }
 
   /**
@@ -530,10 +549,77 @@ export class AmpStoryBookend extends DraggableDrawer {
     const target = dev().assertElement(event.target);
     event[AMP_CUSTOM_LINKER_TARGET] = target;
 
+    this.fireAnalyticsEvent_(target);
+
     if (target.hasAttribute('on')) {
       const actionService = Services.actionServiceForDoc(this.element);
       actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
+  }
+
+  /**
+   * Configures analytics variables and fires analytic event.
+   * @param {!Element} target
+   * @private
+   */
+  fireAnalyticsEvent_(target) {
+    const anchorEl = closestAncestorElementBySelector(target, 'A');
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_TARGET_HREF,
+      anchorEl.href
+    );
+
+    const componentType = this.getClickedComponentType_(anchorEl);
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_COMPONENT_TYPE,
+      componentType
+    );
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_COMPONENT_POSITION,
+      this.getClickedComponentIndex_(anchorEl, componentType)
+    );
+
+    this.analyticsService_.triggerEvent(AnalyticsEvent.BOOKEND_CLICK);
+  }
+
+  /**
+   * Gets type of clicked component in the bookend.
+   * @param {!Element} element
+   * @return {string}
+   * @private
+   */
+  getClickedComponentType_(element) {
+    if (element.classList.contains(CLICKABLE_COMPONENT_TYPES.CTA_LINK)) {
+      return 'cta-link';
+    } else if (
+      element.classList.contains(CLICKABLE_COMPONENT_TYPES.LANDSCAPE)
+    ) {
+      return 'landscape';
+    } else if (element.classList.contains(CLICKABLE_COMPONENT_TYPES.PORTRAIT)) {
+      return 'portrait';
+    } else if (element.classList.contains(CLICKABLE_COMPONENT_TYPES.SMALL)) {
+      return 'small';
+    }
+  }
+
+  /**
+   * Gets the index of the clicked component relative its container.
+   * @param {!Element} element
+   * @param {string} componentType
+   * @return {number}
+   * @private
+   */
+  getClickedComponentIndex_(element, componentType) {
+    if (componentType === 'cta-link') {
+      // Cta links have a wrapper so we have to get that instead.
+      element = element.parentElement;
+    }
+    return Array.prototype.indexOf.call(
+      this.componentsContainer_.children,
+      element
+    );
   }
 
   /**
@@ -592,13 +678,15 @@ export class AmpStoryBookend extends DraggableDrawer {
           this.win.document,
           localizationService
         );
-        const container = dev().assertElement(
+        this.componentsContainer_ = dev().assertElement(
           BookendComponent.buildContainer(
             this.getShadowRoot(),
             this.win.document
           )
         );
-        this.mutateElement(() => container.appendChild(bookendEls));
+        this.mutateElement(() =>
+          this.componentsContainer_.appendChild(bookendEls)
+        );
       })
       .catch(e => {
         user().error(TAG, 'Unable to fetch localization service.', e.message);
