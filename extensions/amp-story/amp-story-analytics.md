@@ -16,6 +16,8 @@ limitations under the License.
 
 # AMP Story and Analytics
 
+This document details triggers associated with AMP Stories. If you're looking for a guide to setting up analytics for your AMP pages, see [this blog post](https://blog.amp.dev/2019/08/28/analytics-for-your-amp-stories/)
+
 ## Story triggers
 
 `amp-story` issues events for changes of state. These events can be reported through the analytics configuration by using triggers.
