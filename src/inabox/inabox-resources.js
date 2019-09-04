@@ -151,10 +151,12 @@ class InaboxResources {
 
   /** @override */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
-    const resource = Resource.forElement(element);
-    return this.vsync_.mutatePromise(() => {
-      resource./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
-      this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
+    return this.mutateElement(element, () => {
+      Resource.forElement(element)./*OK*/ changeSize(
+        newHeight,
+        newWidth,
+        opt_newMargins
+      );
     });
   }
 
