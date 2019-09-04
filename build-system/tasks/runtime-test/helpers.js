@@ -30,7 +30,7 @@ const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {Server} = require('karma');
 
-const BATCHSIZE = 4; // Number of Sauce Lab browsers
+const BATCHSIZE = 1; // Number of Sauce Lab browsers
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
 
