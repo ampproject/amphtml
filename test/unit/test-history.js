@@ -293,7 +293,7 @@ describes.fakeWin(
       return history.updateFragment('fragment').then(() => {});
     });
 
-    describe.only('"rate-limit-history" experiment', () => {
+    describe('"rate-limit-history" experiment', () => {
       beforeEach(() => {
         toggleExperiment(env.win, 'rate-limit-history', true, true);
       });
