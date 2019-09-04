@@ -153,8 +153,11 @@ function getFiles(testType) {
  */
 function updateReporters(config) {
   if (
-    (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
-    !isTravisBuild()
+    argv.testnames ||
+    argv.local_changes ||
+    argv.files ||
+    argv.verbose
+    // && !isTravisBuild()
   ) {
     config.reporters = ['mocha'];
   }
@@ -163,9 +166,9 @@ function updateReporters(config) {
     config.reporters.push('coverage-istanbul');
   }
 
-  if (argv.saucelabs) {
-    config.reporters.push('saucelabs');
-  }
+  // if (argv.saucelabs) {
+  //   config.reporters.push('saucelabs');
+  // }
 }
 
 class RuntimeTestConfig {
