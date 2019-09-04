@@ -56,7 +56,7 @@ describes.realWin(
       return nexxtv;
     }
 
-    it('renders nexxtv video player', async () => {
+    it.skip('renders nexxtv video player', async () => {
       const nexxtv = await getNexxtv('71QQG852413DU7J', '761');
       const playerIframe = nexxtv.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
@@ -80,7 +80,7 @@ describes.realWin(
       return getNexxtv('71QQG852413DU7J', null).should.eventually.be.rejected;
     });
 
-    it('should forward events from nexxtv-player to the amp element', async () => {
+    it.skip('should forward events from nexxtv-player to the amp element', async () => {
       const nexxtv = await getNexxtv('71QQG852413DU7J', '761');
       const iframe = nexxtv.querySelector('iframe');
       await Promise.resolve();
