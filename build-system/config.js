@@ -96,7 +96,7 @@ const integrationTestPaths = [
 
 const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
 
-const devDashboardTestPaths = ['build-system/app-index/test/**/*.js'];
+const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 
 const jisonPaths = ['extensions/**/*.jison'];
 

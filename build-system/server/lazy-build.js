@@ -18,10 +18,10 @@ const {
   doBuildExtension,
   maybeInitializeExtensions,
   getExtensionsToBuild,
-} = require('./tasks/extension-helpers');
+} = require('../tasks/extension-helpers');
 const {cyan, green} = require('ansi-colors');
-const {doBuildJs} = require('./tasks/helpers');
-const {jsBundles} = require('../bundles.config');
+const {doBuildJs} = require('../tasks/helpers');
+const {jsBundles} = require('../../bundles.config');
 
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);

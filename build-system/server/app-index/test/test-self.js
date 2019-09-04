@@ -110,7 +110,7 @@ describe('devdash', () => {
 
       it('passes with minimum valid doc', async() => {
         const validDocPath = path.join(__dirname,
-            '../../../validator/testdata/feature_tests/minimum_valid_amp.html');
+            '../../../../validator/testdata/feature_tests/minimum_valid_amp.html');
 
         const validDoc = (await fs.readFileAsync(validDocPath)).toString();
 

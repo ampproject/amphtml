@@ -30,8 +30,8 @@ const {renderTemplate} = require('./template');
 
 const pc = process;
 
-// Sitting on /build-system/app-index, so we go back twice for the repo root.
-const root = path.join(__dirname, '../../');
+// Sitting on /build-system/server/app-index, so we go back thrice for the repo root.
+const root = path.join(__dirname, '../../../');
 
 // CSS
 const mainCssFile = join(__dirname, '/main.css');
