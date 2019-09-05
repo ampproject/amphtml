@@ -28,12 +28,12 @@ const COMMON_CHROME_FLAGS = [
   '--autoplay-policy=no-user-gesture-required',
 ];
 
-// Reduces the odds of Sauce labs timing out during tests. See #16135.
+// Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
 const SAUCE_TIMEOUT_CONFIG = {
   maxDuration: 10 * 60,
   commandTimeout: 10 * 60,
-  idleTimeout: 5 * 60,
+  idleTimeout: 10 * 60,
 };
 
 const BABELIFY_CONFIG = Object.assign(
