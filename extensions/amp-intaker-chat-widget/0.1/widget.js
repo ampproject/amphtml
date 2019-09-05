@@ -174,7 +174,7 @@ function lunch(preview) {
     }
 
     if (!frameContainer) {
-      addToBody(INTAKER_CW_TMP.frame);
+      addToBody(Templates.frame);
       frameContainer = document.getElementById(frameContainerId);
       closeBtn = document.getElementById(closeBtnId);
       restartBtn = document.getElementById(restartBtnId);
@@ -468,7 +468,7 @@ let externalUrl = '';
 const originalTitle = document.title || '';
 let isAMP = false;
 
-let INTAKER_CW_TMP = INTAKER_CW_TMP || {};
+let Templates = this.INTAKER_CW_TMP || {};
 
 window.onmessage = function(e) {
   if (e.data.INTAKER_CHAT_WIDGET) {
@@ -552,7 +552,7 @@ function bootstrap(amp) {
     chatUrlHash = amp.urlHash;
     CookiesAPI = amp.CookiesAPI;
     platform = amp.platform;
-    INTAKER_CW_TMP = amp.templates;
+    Templates = amp.templates;
     useQA = amp.QA;
     this.setStyle = amp.setStyle;
 
@@ -601,7 +601,7 @@ function bootstrap(amp) {
     !window.DEV_ENV && !isAMP && loadCss(cssUrl);
 
     getChatSetting(function(setting) {
-      addToBody(INTAKER_CW_TMP.button);
+      addToBody(Templates.button);
       launcherContainer = document.getElementById(
         'chatter-bot-launcher-container'
       );
