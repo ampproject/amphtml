@@ -1009,22 +1009,48 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       perf.coreServicesAvailable();
       viewerVisibilityState = VisibilityState.INACTIVE;
 
-      // Fake a largest-contentful-paint entry.
+      expect(perf.events_.length).to.equal(0);
+
+      // Fake a largest-contentful-paint entry specifying a loadTime,
+      // simulating an image on a different origin without a proper
+      // Timing-Allow-Origin header.
       performanceObserver.triggerCallback({
         getEntries() {
-          return [{entryType: 'largest-contentful-paint', startTime: 10}];
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              loadTime: 10,
+            },
+          ];
         },
       });
 
-      expect(perf.events_.length).to.equal(0);
+      // Fake a largest-contentful-paint entry specifying a renderTime,
+      // simulating an image on the same origin or with a proper
+      // Timing-Allow-Origin header.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              renderTime: 23,
+            },
+          ];
+        },
+      });
 
       // The document has become hidden, e.g. via the user switching tabs.
       toggleVisibility(fakeWin, false);
 
-      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'lcp',
+        label: 'lcpl',
         delta: 10,
+      });
+
+      expect(perf.events_[1]).to.be.jsonEqual({
+        label: 'lcpr',
+        delta: 23,
       });
     });
   });

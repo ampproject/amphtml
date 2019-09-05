@@ -203,11 +203,20 @@ export class Performance {
     }
 
     /**
-     * The latest reported largest contentful paint time.
+     * The latest reported largest contentful paint time, where the loadTime
+     * is specified.
      *
      * @private {number|null}
      */
-    this.largestContentfulPaint_ = null;
+    this.largestContentfulPaintLoadTime_ = null;
+
+    /**
+     * The latest reported largest contentful paint time, where the renderTime
+     * is specified.
+     *
+     * @private {number|null}
+     */
+    this.largestContentfulPaintRenderTime_ = null;
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
@@ -367,7 +376,12 @@ export class Performance {
           this.aggregateShiftScore_ += entry.value;
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
-        this.largestContentfulPaint_ = entry.startTime;
+        if (entry.loadTime) {
+          this.largestContentfulPaintLoadTime_ = entry.loadTime;
+        }
+        if (entry.renderTime) {
+          this.largestContentfulPaintRenderTime_ = entry.renderTime;
+        }
       }
     };
 
@@ -606,14 +620,15 @@ export class Performance {
   }
 
   /**
-   * Tick the largest contentful paint metric.
+   * Tick the largest contentful paint metrics.
    */
   tickLargestContentfulPaint_() {
-    // Don't record the metric if it hasn't been read from the Performance API.
-    if (this.largestContentfulPaint_ === null) {
-      return;
+    if (this.largestContentfulPaintLoadTime_ !== null) {
+      this.tickDelta('lcpl', this.largestContentfulPaintLoadTime_);
     }
-    this.tickDelta('lcp', this.largestContentfulPaint_);
+    if (this.largestContentfulPaintRenderTime_ !== null) {
+      this.tickDelta('lcpr', this.largestContentfulPaintRenderTime_);
+    }
     this.flush();
   }
 

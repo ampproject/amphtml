@@ -40,4 +40,5 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | Layout Jank, second exit | `lj-2` | The aggregate jank score when the user leaves the page (navigation, tab switching, dismissing application) for the second time. |
 | Cumulative Layout Shift, first exit | `cls` | The aggregate layout shift score when the user leaves the page (navigation, tab switching, dismissing application) for the first time. See https://web.dev/layout-instability-api |
 | Cumulative Layout Shift, second exit | `cls-2` | The aggregate layout shift score when the user leaves the page (navigation, tab switching, dismissing application) for the second time. |
-| Largest Contentful Paint | `lcp` | The time in milliseconds for the first contentful element to load. See https://github.com/WICG/largest-contentful-paint |
+| Largest Contentful Paint, load time | `lcpl` | The time in milliseconds for the first contentful element to display. This is the load time version of this metric. See https://github.com/WICG/largest-contentful-paint |
+| Largest Contentful Paint, render time | `lcpr` | The time in milliseconds for the first contentful element to display. This is the render time version of this metric. https://github.com/WICG/largest-contentful-paint |
