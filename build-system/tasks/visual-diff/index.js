@@ -134,14 +134,12 @@ function setPercyTargetCommit() {
  *     and reachable.
  */
 async function launchWebServer() {
+  const stdio = argv.webserver_debug
+    ? ['ignore', process.stdout, process.stderr]
+    : 'ignore';
   webServerProcess_ = execScriptAsync(
-    `gulp serve --compiled --host ${HOST} --port ${PORT} ` +
-      `${process.env.WEBSERVER_QUIET}`,
-    {
-      stdio: argv.webserver_debug
-        ? ['ignore', process.stdout, process.stderr]
-        : 'ignore',
-    }
+    `gulp serve --compiled --host ${HOST} --port ${PORT}`,
+    {stdio}
   );
 
   webServerProcess_.on('close', code => {
@@ -722,14 +720,9 @@ async function snapshotWebpages(percy, browser, webpages) {
  * Enables debugging if requested via command line.
  */
 function setDebuggingLevel() {
-  process.env.WEBSERVER_QUIET = '--quiet';
-
   if (argv.debug) {
     argv['chrome_debug'] = true;
     argv['webserver_debug'] = true;
-  }
-  if (argv.webserver_debug) {
-    process.env.WEBSERVER_QUIET = '';
   }
 }
 
@@ -885,11 +878,11 @@ visualDiff.description = 'Runs the AMP visual diff tests.';
 visualDiff.flags = {
   'master': '  Includes a blank snapshot (baseline for skipped builds)',
   'empty': '  Creates a dummy Percy build with only a blank snapshot',
-  'chrome_debug': '  Prints debug info from Chrome',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
+  'chrome_debug': '  Prints debug info from Chrome',
   'webserver_debug': '  Prints debug info from the local gulp webserver',
-  'debug': '  Prints all the above debug info',
+  'debug': '  Prints debug info from Chrome and the local gulp webserver',
   'grep': '  Runs tests that match the pattern',
   'percy_project': '  Override the PERCY_PROJECT environment variable',
   'percy_token': '  Override the PERCY_TOKEN environment variable',
