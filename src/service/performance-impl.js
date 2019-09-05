@@ -403,13 +403,7 @@ export class Performance {
     }
 
     if (this.supportsEventTimingAPIv77_) {
-      // It's preferred to read first input delay entries that already occurred
-      // through the `buffered: true` flag, so create a separate
-      // PerformanceObserver to read this metric.
-      const firstInputObserver = new this.win.PerformanceObserver(list => {
-        list.getEntries().forEach(processEntry);
-        this.flush();
-      });
+      const firstInputObserver = this.createPerformanceObserver_();
       firstInputObserver.observe({type: 'first-input', buffered: true});
     }
 
@@ -432,23 +426,14 @@ export class Performance {
     }
 
     if (this.supportsLayoutInstabilityAPIv77_) {
-      // Layout shift entries are not available from the Performance Timeline
-      // through `getEntriesByType`, so a separate PerformanceObserver is
-      // required for this metric.
-      const layoutInstabilityObserver = new this.win.PerformanceObserver(
-        list => {
-          list.getEntries().forEach(processEntry);
-          this.flush();
-        }
+      const layoutInstabilityObserver = this.createPerformanceObserver_(
+        processEntry
       );
       layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
     }
 
     if (this.supportsLargestContentfulPaint_) {
-      const lcpObserver = new this.win.PerformanceObserver(list => {
-        list.getEntries().forEach(processEntry);
-        this.flush();
-      });
+      const lcpObserver = this.createPerformanceObserver_(processEntry);
       lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
     }
 
@@ -456,10 +441,7 @@ export class Performance {
       return;
     }
 
-    const observer = new this.win.PerformanceObserver(list => {
-      list.getEntries().forEach(processEntry);
-      this.flush();
-    });
+    const observer = this.createPerformanceObserver_(processEntry);
 
     // Wrap observer.observe() in a try statement for testing, because
     // Webkit throws an error if the entry types to observe are not natively
@@ -470,6 +452,18 @@ export class Performance {
       dev() /*OK*/
         .warn(err);
     }
+  }
+
+  /**
+   * @param {function(!PerformanceEntry)} processEntry
+   * @return {!PerformanceObserver}
+   * @private
+   */
+  createPerformanceObserver_(processEntry) {
+    return new this.win.PerformanceObserver(list => {
+      list.getEntries().forEach(processEntry);
+      this.flush();
+    });
   }
 
   /**
