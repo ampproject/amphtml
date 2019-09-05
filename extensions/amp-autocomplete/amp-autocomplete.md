@@ -42,7 +42,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example coming soon.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-autocomplete/">amp-autocomplete</a> sample.</td>
   </tr>
 </table>
 
