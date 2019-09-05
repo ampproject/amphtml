@@ -632,7 +632,11 @@ export class Performance {
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.whenFirstPass().then(() => {
-      return this.resources_
+      // TODO(lannka): should avoid this type casting by moving the `getResourcesInRect`
+      // logic here.
+      const resources = /** @type {!./resources-impl.Resources} */ (this
+        .resources_);
+      return resources
         .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
         .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
     });
