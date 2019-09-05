@@ -17,7 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {Resources} from '../../src/service/resources-impl';
+import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {VisibilityState} from '../../src/visibility-state';
@@ -39,7 +39,7 @@ describe('Resources', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new ResourcesImpl(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
   });
 
@@ -664,7 +664,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     toggleExperiment(window, 'amp-force-prerender-visible-elements', true);
     const viewer = Services.viewerForDoc(env.ampdoc);
     sandbox.stub(viewer, 'isRuntimeOn').returns(true);
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resources.remeasurePass_.schedule = () => {};
     resources.pass_.schedule = () => {};
     viewportMock = sandbox.mock(resources.viewport_);
@@ -1413,7 +1413,7 @@ describe('Resources changeSize', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new ResourcesImpl(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     resources.win = {
       location: {
@@ -2794,7 +2794,7 @@ describes.realWin('Resources mutateElement and collapse', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
     resources.vsync_ = {
@@ -3071,7 +3071,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
   beforeEach(() => {
     const infPromise = new Promise(() => {});
     sandbox.stub(env.ampdoc, 'whenReady').callsFake(() => infPromise);
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resources.isBuildOn_ = true;
     resources.pendingBuildResources_ = [];
     parent = createElementWithResource(1)[0];

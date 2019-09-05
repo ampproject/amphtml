@@ -26,7 +26,7 @@ const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;
 
 /**
- * @implements {../service/resources-impl.ResourcesDef}
+ * @implements {../service/resources-interface.ResourcesInterface}
  * @visibleForTesting
  */
 export class InaboxResources {

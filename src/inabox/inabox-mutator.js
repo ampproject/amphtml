@@ -17,15 +17,15 @@
 import {Services} from '../services';
 
 /**
- * @implements {../service/resources-impl.MutatorsDef}
+ * @implements {../service/mutator-interface.MutatorInterface}
  */
 export class InaboxMutator {
   /**
    * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../service/resources-impl.ResourcesDef} resources
+   * @param {!../service/resources-interface.ResourcesInterface} resources
    */
   constructor(ampdoc, resources) {
-    /** @const @private {!../service/resources-impl.ResourcesDef} */
+    /** @const @private {!../service/resources-interface.ResourcesInterface} */
     this.resources_ = resources;
 
     /** @private @const {!../service/vsync-impl.Vsync} */

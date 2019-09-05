@@ -18,20 +18,15 @@
 const app = require('express').Router();
 const cors = require('./amp-cors');
 const minimist = require('minimist');
-const argv = minimist(process.argv.slice(2), {
-  boolean: ['strictBabelTransform'],
-});
-const multer = require('multer');
+const argv = minimist(process.argv.slice(2));
 const path = require('path');
+const upload = require('multer')();
 const {renderShadowViewer} = require('./shadow-viewer');
-const {replaceUrls} = require('./app-utils');
-const upload = multer();
-
-/* eslint-disable max-len */
+const {replaceUrls, getServeMode} = require('./app-utils');
 
 const KARMA_SERVER_PORT = 9876;
-const {SERVE_MODE} = process.env;
 const CUSTOM_TEMPLATES = ['amp-mustache'];
+const SERVE_MODE = getServeMode();
 
 /**
  * Logs the given messages to the console when --verbose is specified.
@@ -48,10 +43,10 @@ app.use('/compose-doc', function(req, res) {
 
   const {body, css, experiments, extensions, spec} = req.query;
 
-  const compiled = process.env.SERVE_MODE == 'compiled';
-  const frameHtml = compiled
-    ? 'dist.3p/current-min/frame.html'
-    : 'dist.3p/current/frame.max.html';
+  const frameHtml =
+    SERVE_MODE == 'compiled'
+      ? 'dist.3p/current-min/frame.html'
+      : 'dist.3p/current/frame.max.html';
 
   let experimentsBlock = '';
   if (experiments) {
@@ -244,7 +239,7 @@ app.get('/a4a/:bid', (req, res) => {
 function composeDocument(config) {
   const {body, css, extensions, head, spec, mode} = config;
 
-  const m = mode || process.env.SERVE_MODE;
+  const m = mode || SERVE_MODE;
   const cdn = m === 'cdn';
   const compiled = m === 'compiled';
 
