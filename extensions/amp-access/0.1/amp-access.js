@@ -83,16 +83,16 @@ export class AccessService {
     /** @private @const {!Promise<!../../../src/service/cid-impl.CidDef>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @private @const {?../../../src/service/performance-impl.Performance} */
@@ -771,7 +771,10 @@ AMP.extension(TAG, '0.1', function(AMP) {
   });
 });
 
-/** @package Visible for testing only. */
+/**
+ * @package Visible for testing only.
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getAccessVarsClassForTesting() {
   return AccessVars;
 }

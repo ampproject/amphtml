@@ -21,27 +21,9 @@ const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const {
-  buildExtensions,
-  extensionAliasFilePath,
-  getExtensionsToBuild,
-  parseExtensionFlags,
-} = require('./extension-helpers');
-const {
-  closureNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
-const {
-  createModuleCompatibleES5Bundle,
-} = require('./create-module-compatible-es5-bundle');
-const {
-  WEB_PUSH_PUBLISHER_FILES,
-  WEB_PUSH_PUBLISHER_VERSIONS,
-  buildAlp,
-  buildExaminer,
-  buildWebWorker,
+  bootstrapThirdPartyFrames,
+  compileAllMinifiedJs,
   compileJs,
-  compileAllMinifiedTargets,
   endBuildStep,
   hostname,
   mkdirSync,
@@ -49,12 +31,24 @@ const {
   printNobuildHelp,
   toPromise,
 } = require('./helpers');
+const {
+  createModuleCompatibleES5Bundle,
+} = require('./create-module-compatible-es5-bundle');
+const {
+  distNailgunPort,
+  startNailgunServer,
+  stopNailgunServer,
+} = require('./nailgun');
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
+const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {formatExtractedMessages} = require('../compile/log-messages');
 const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
+const {VERSION} = require('../internal-version');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -62,10 +56,20 @@ const argv = require('minimist')(process.argv.slice(2));
 const babel = require('@babel/core');
 const deglob = require('globs-to-files');
 
+const WEB_PUSH_PUBLISHER_FILES = [
+  'amp-web-push-helper-frame',
+  'amp-web-push-permission-dialog',
+];
+
+const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
+
 function transferSrcsToTempDir() {
-  if (!isTravisBuild()) {
-    log('Transforming and executing JS files to', cyan(SRC_TEMP_DIR));
-  }
+  log(
+    'Performing multi-pass',
+    colors.cyan('babel'),
+    'transforms in',
+    colors.cyan(SRC_TEMP_DIR)
+  );
   const files = deglob.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
     if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
@@ -83,7 +87,9 @@ function transferSrcsToTempDir() {
     });
     const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
     fs.outputFileSync(name, code);
+    process.stdout.write('.');
   });
+  console.log('\n');
 }
 
 /**
@@ -117,67 +123,55 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
-  return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
-    .then(async () => {
-      await startNailgunServer(closureNailgunPort, /* detached */ false);
-    })
-    .then(() => {
-      // Single pass has its own tmp directory processing. Only do this for
-      // multipass.
-      // We need to execute this after `compileCss` so that we can copy that
-      // over to the tmp directory.
-      if (!argv.single_pass) {
-        transferSrcsToTempDir();
-      }
-      return Promise.all([
-        compileAllMinifiedTargets(),
-        // NOTE: When adding a line here,
-        // consider whether you need to include polyfills
-        // and whether you need to init logging (initLogConstructor).
-        buildAlp({minify: true, watch: false}),
-        buildExaminer({minify: true, watch: false}),
-        buildWebWorker({minify: true, watch: false}),
-        buildExtensions({minify: true, watch: false}),
-        buildExperiments({minify: true, watch: false}),
-        buildLoginDone('0.1', {minify: true, watch: false}),
-        buildWebPushPublisherFiles({minify: true, watch: false}).then(
-          postBuildWebPushPublisherFilesVersion
-        ),
-        copyCss(),
-      ]);
-    })
-    .then(() => {
-      if (isTravisBuild()) {
-        // New line after all the compilation progress dots on Travis.
-        console.log('\n');
-      }
-    })
-    .then(async () => {
-      await stopNailgunServer(closureNailgunPort);
-    })
-    .then(() => {
-      return copyAliasExtensions();
-    })
-    .then(() => {
-      if (argv.esm) {
-        return Promise.all([
-          createModuleCompatibleES5Bundle('v0.js'),
-          createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-          createModuleCompatibleES5Bundle('shadow-v0.js'),
-        ]);
-      } else {
-        return Promise.resolve();
-      }
-    })
-    .then(() => {
-      return exitCtrlcHandler(handlerProcess);
-    });
+  await compileCss();
+  await compileJison();
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+
+  // Single pass has its own tmp directory processing. Only do this for
+  // multipass.
+  // We need to execute this after `compileCss` and `compileJison` so that we can copy that
+  // over to the tmp directory.
+  if (!argv.single_pass) {
+    transferSrcsToTempDir();
+  }
+
+  await Promise.all([
+    compileAllMinifiedJs(),
+    bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true),
+    buildExtensions({minify: true, watch: false}),
+    buildExperiments({minify: true, watch: false}),
+    buildLoginDone('0.1', {minify: true, watch: false}),
+    buildWebPushPublisherFiles({minify: true, watch: false}).then(
+      postBuildWebPushPublisherFilesVersion
+    ),
+    copyCss(),
+    copyParsers(),
+  ]);
+
+  if (isTravisBuild()) {
+    // New line after all the compilation progress dots on Travis.
+    console.log('\n');
+  }
+
+  await stopNailgunServer(distNailgunPort);
+  await formatExtractedMessages();
+
+  if (argv.esm) {
+    await Promise.all([
+      createModuleCompatibleES5Bundle('v0.js'),
+      createModuleCompatibleES5Bundle('amp4ads-v0.js'),
+      createModuleCompatibleES5Bundle('shadow-v0.js'),
+    ]);
+  }
+
+  return exitCtrlcHandler(handlerProcess);
 }
 
 /**
  * Build AMP experiments.js.
  *
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildExperiments(options) {
   return compileJs(
@@ -198,6 +192,7 @@ function buildExperiments(options) {
  *
  * @param {string} version
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildLoginDone(version, options) {
   const buildDir = `build/all/amp-access-${version}/`;
@@ -221,6 +216,7 @@ function buildLoginDone(version, options) {
  * Build amp-web-push publisher files HTML page.
  *
  * @param {!Object} options
+ * @return {!Promise}
  */
 function buildWebPushPublisherFiles(options) {
   const distDir = 'dist/v0';
@@ -265,35 +261,19 @@ function copyCss() {
       .src('build/css/amp-*.css', {base: 'build/css/'})
       .pipe(gulp.dest('dist/v0'))
   ).then(() => {
-    endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
+    endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
   });
 }
 
 /**
- * Copy built extension to alias extension
+ * Copies parsers from the build folder to the dist folder
  * @return {!Promise}
  */
-function copyAliasExtensions() {
-  if (argv.noextensions) {
-    return Promise.resolve();
-  }
-
-  const extensionsToBuild = getExtensionsToBuild();
-
-  for (const key in extensionAliasFilePath) {
-    if (
-      extensionsToBuild.length > 0 &&
-      extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1
-    ) {
-      continue;
-    }
-    fs.copySync(
-      'dist/v0/' + extensionAliasFilePath[key]['file'],
-      'dist/v0/' + key
-    );
-  }
-
-  return Promise.resolve();
+function copyParsers() {
+  const startTime = Date.now();
+  return fs.copy('build/parsers', 'dist/v0').then(() => {
+    endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
+  });
 }
 
 /**
@@ -355,6 +335,7 @@ function postBuildWebPushPublisherFilesVersion() {
 
 /**
  * Precompilation steps required to build experiment js binaries.
+ * @return {!Promise}
  */
 async function preBuildExperiments() {
   const path = 'tools/experiments';
@@ -363,10 +344,12 @@ async function preBuildExperiments() {
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
-  const minHtml = html.replace(
-    '/dist.tools/experiments/experiments.js',
-    `https://${hostname}/v0/experiments.js`
-  );
+  const minHtml = html
+    .replace(
+      '/dist.tools/experiments/experiments.js',
+      `https://${hostname}/v0/experiments.js`
+    )
+    .replace(/\$internalRuntimeVersion\$/g, VERSION);
 
   await toPromise(
     gulp
@@ -456,4 +439,6 @@ dist.flags = {
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
+  disable_nailgun:
+    "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };

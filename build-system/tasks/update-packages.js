@@ -21,8 +21,6 @@ const log = require('fancy-log');
 const {exec, execOrDie, getStderr} = require('../exec');
 const {isTravisBuild} = require('../travis');
 
-const argv = require('minimist')(process.argv.slice(2));
-
 const yarnExecutable = 'npx yarn';
 
 /**
@@ -119,21 +117,6 @@ function patchRegisterElement() {
 }
 
 /**
- * Installs custom lint rules from build-system/eslint-rules to node_modules.
- */
-function installCustomEslintRules() {
-  const customRuleDir = 'build-system/eslint-rules';
-  const customRuleName = 'eslint-plugin-amphtml-internal';
-  exec(yarnExecutable + ' unlink', {'stdio': 'ignore', 'cwd': customRuleDir});
-  exec(yarnExecutable + ' link', {'stdio': 'ignore', 'cwd': customRuleDir});
-  exec(yarnExecutable + ' unlink ' + customRuleName, {'stdio': 'ignore'});
-  exec(yarnExecutable + ' link ' + customRuleName, {'stdio': 'ignore'});
-  if (!isTravisBuild()) {
-    log(colors.green('Installed lint rules from'), colors.cyan(customRuleDir));
-  }
-}
-
-/**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  */
 function runYarnCheck() {
@@ -178,9 +161,6 @@ function maybeUpdatePackages() {
  * web-animations-js and document-register-element if necessary.
  */
 async function updatePackages() {
-  if (isTravisBuild() || argv._.includes('lint')) {
-    installCustomEslintRules();
-  }
   if (!isTravisBuild()) {
     runYarnCheck();
   }

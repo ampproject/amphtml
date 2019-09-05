@@ -75,7 +75,7 @@ export class NextPageService {
     /** @private {?Element} */
     this.separator_ = null;
 
-    /** @private {?../../../src/service/resources-impl.Resources} */
+    /** @private {?../../../src/service/resources-impl.ResourcesDef} */
     this.resources_ = null;
 
     /** @private {?MultidocManager} */
@@ -90,7 +90,7 @@ export class NextPageService {
     /** @private {?../../../src/service/navigation.Navigation} */
     this.navigation_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
@@ -115,7 +115,11 @@ export class NextPageService {
     this.history_ = null;
   }
 
-  /** Returns true if the service has already been initialized. */
+  /**
+   * Returns true if the service has already been initialized.
+   *
+   * @return {*} TODO(#23582): Specify return type
+   */
   isActive() {
     return this.config_ !== null;
   }

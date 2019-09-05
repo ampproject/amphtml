@@ -71,6 +71,7 @@ describe('Platform', () => {
         standalone: standAloneBoolean,
         userAgent: userAgentString,
       },
+      matchMedia: sandbox.stub().returns({matches: true}),
     });
     expect(platform.isStandalone()).to.equal(isStandalone);
   }
@@ -209,6 +210,7 @@ describe('Platform', () => {
     isChrome = true;
     isWebKit = true;
     majorVersion = 44;
+    isStandalone = true;
     userAgent =
       'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E)' +
       ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.20' +
@@ -222,6 +224,7 @@ describe('Platform', () => {
     isChrome = true;
     isWebKit = true;
     majorVersion = 61;
+    isStandalone = true;
     userAgent =
       'Mozilla/5.0 (Linux; Android 8.0.0; Pixel XL Build/OPR6.' +
       '170623.011) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163' +

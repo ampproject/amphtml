@@ -26,9 +26,9 @@ import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
-let ButtonStateDef;
+let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
 
-/** @const {!Object<string, !ButtonStateDef>} */
+/** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {
   CLOSE_BOOKEND: {
     className: 'i-amphtml-story-back-close-bookend',
@@ -42,7 +42,7 @@ const BackButtonStates = {
   },
 };
 
-/** @const {!Object<string, !ButtonStateDef>} */
+/** @const {!Object<string, !ButtonState_1_0_Def>} */
 const ForwardButtonStates = {
   HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   NEXT_PAGE: {
@@ -96,12 +96,12 @@ function setClassOnHover(hoverEl, targetEl, className) {
 class PaginationButton {
   /**
    * @param {!Document} doc
-   * @param {!ButtonStateDef} initialState
+   * @param {!ButtonState_1_0_Def} initialState
    * @param {!./amp-story-store-service.AmpStoryStoreService} storeService
    * @param {!Window} win
    */
   constructor(doc, initialState, storeService, win) {
-    /** @private {!ButtonStateDef} */
+    /** @private {!ButtonState_1_0_Def} */
     this.state_ = initialState;
 
     /** @public @const {!Element} */
@@ -118,7 +118,7 @@ class PaginationButton {
     this.win_ = win;
   }
 
-  /** @param {!ButtonStateDef} state */
+  /** @param {!ButtonState_1_0_Def} state */
   updateState(state) {
     if (state === this.state_) {
       return;
@@ -129,7 +129,7 @@ class PaginationButton {
   }
 
   /**
-   * @return {!ButtonStateDef}
+   * @return {!ButtonState_1_0_Def}
    */
   getState() {
     return this.state_;
@@ -197,10 +197,10 @@ export class PaginationButtons {
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
 
-    /** @private {?ButtonStateDef} */
+    /** @private {?ButtonState_1_0_Def} */
     this.backButtonStateToRestore_ = null;
 
-    /** @private {?ButtonStateDef} */
+    /** @private {?ButtonState_1_0_Def} */
     this.forwardButtonStateToRestore_ = null;
 
     /** @private {function():Promise<boolean>} */
@@ -329,12 +329,12 @@ export class PaginationButtons {
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
       this.backButton_.updateState(
-        /** @type {!ButtonStateDef} */ (devAssert(
+        /** @type {!ButtonState_1_0_Def} */ (devAssert(
           this.backButtonStateToRestore_
         ))
       );
       this.forwardButton_.updateState(
-        /** @type {!ButtonStateDef} */ (devAssert(
+        /** @type {!ButtonState_1_0_Def} */ (devAssert(
           this.forwardButtonStateToRestore_
         ))
       );

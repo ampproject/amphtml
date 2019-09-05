@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocService, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
 import {Services} from '../../src/services';
 import {
@@ -112,6 +112,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
   beforeEach(() => {
     ampdoc = new AmpDocSingle(window);
+    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
     standardActions = new StandardActions(ampdoc);
     mutateElementStub = stubMutate('mutateElement');
     scrollStub = sandbox.stub(
@@ -394,7 +395,12 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"toggleClass" action', () => {
-    const dummyClass = 'i-amphtml-test-class-toggle';
+    const dummyClass = 'test-class-toggle';
+    const dummyInternalClasses = [
+      'i-amphtml-test-class-toggle',
+      '-amp-test-class-toggle',
+      'amp-test-class-toggle',
+    ];
 
     it('should add class when not in classList', () => {
       const element = createElement();
@@ -421,6 +427,37 @@ describes.sandboxed('StandardActions', {}, () => {
       };
       standardActions.handleToggleClass_(invocation);
       expectElementToDropClass(element, dummyClass);
+    });
+
+    it('should not add amp internal classes', () => {
+      const element = createElement();
+      dummyInternalClasses.forEach(dummyInternalClass => {
+        const invocation = {
+          node: element,
+          satisfiesTrust: () => true,
+          args: {
+            'class': dummyInternalClass,
+          },
+        };
+        standardActions.handleToggleClass_(invocation);
+        expect(element.classList.contains(dummyInternalClass)).to.be.false;
+      });
+    });
+
+    it('should not delete amp internal classes', () => {
+      const element = createElement();
+      dummyInternalClasses.forEach(dummyInternalClass => {
+        element.classList.add(dummyInternalClass);
+        const invocation = {
+          node: element,
+          satisfiesTrust: () => true,
+          args: {
+            'class': dummyInternalClass,
+          },
+        };
+        standardActions.handleToggleClass_(invocation);
+        expect(element.classList.contains(dummyInternalClass)).to.be.true;
+      });
     });
 
     it('should add class when not in classList, when force=true', () => {

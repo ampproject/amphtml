@@ -493,12 +493,19 @@ export class AnimationManager {
     this.getRunners_().forEach(runner => runner.resume());
   }
 
-  /** Determines if there is an entrance animation running. */
+  /**
+   * Determines if there is an entrance animation running.
+   *
+   * @return {*} TODO(#23582): Specify return type
+   */
   hasAnimationStarted() {
     return this.getRunners_().some(runner => runner.hasStarted());
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   getRunners_() {
     return devAssert(this.runners_, 'Executed before applyFirstFrame');
   }
@@ -676,7 +683,11 @@ class AnimationSequence {
     this.subscriptionResolvers_ = map();
   }
 
-  /** Decouples constructor for testing. */
+  /**
+   * Decouples constructor for testing.
+   *
+   * @return {!AnimationSequence}
+   */
   static create() {
     return new AnimationSequence();
   }

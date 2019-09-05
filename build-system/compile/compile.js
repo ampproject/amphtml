@@ -28,6 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
@@ -38,9 +39,10 @@ const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 
-// `--pseudo_names` slows down closure compilation and results in a race.
+// There's a race in the gulp plugin of closure compiler that gets exposed
+// during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.pseudo_names ? 1 : 4;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
@@ -50,12 +52,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.pseudo_names ? 1 : 4;
  * @return {!Array<string>}
  */
 function convertPathsToTmpRoot(paths) {
-  return paths.map(path => {
-    const hasNegation = path.charAt(0) === '!';
-    const newPath = hasNegation ? path.substr(1) : path;
-    return `${hasNegation ? '!' : ''}${SRC_TEMP_DIR}/${newPath}`;
-    return path;
-  });
+  return paths.map(path => path.replace(/^(\!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
 }
 
 // Compiles AMP with the closure compiler. This is intended only for
@@ -101,6 +98,7 @@ exports.closureCompile = async function(
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
+  del.sync('build/parsers');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
@@ -110,27 +108,28 @@ exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
+    'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
-    'third_party/subscriptions-project/',
     'third_party/d3/',
+    'third_party/inputmask/',
     'third_party/mustache/',
+    'third_party/react-dates/',
+    'third_party/set-dom/',
+    'third_party/subscriptions-project/',
     'third_party/vega/',
     'third_party/webcomponentsjs/',
-    'third_party/react-dates/',
-    'third_party/amp-toolbox-cache-url/',
-    'third_party/inputmask/',
     'node_modules/',
     'build/patched-module/',
-    // Generated code.
-    'extensions/amp-access/0.1/access-expr-impl.js',
   ];
   const baseExterns = [
     'build-system/amp.extern.js',
     'build-system/dompurify.extern.js',
     'build-system/event-timing.extern.js',
     'build-system/layout-jank.extern.js',
-    'third_party/closure-compiler/externs/web_animations.js',
+    'build-system/layout-shift.extern.js',
+    'build-system/performance-observer.extern.js',
+    'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
   ];
@@ -160,12 +159,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   }
 
   return new Promise(function(resolve, reject) {
-    let entryModuleFilename;
-    if (entryModuleFilenames instanceof Array) {
-      entryModuleFilename = entryModuleFilenames[0];
-    } else {
-      entryModuleFilename = entryModuleFilenames;
-      entryModuleFilenames = [entryModuleFilename];
+    if (!(entryModuleFilenames instanceof Array)) {
+      entryModuleFilenames = [entryModuleFilenames];
     }
     const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
@@ -264,9 +259,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      // Transpile from ES6 to ES5.
+      // Transpile from ES6 to ES5 if not running with `--esm`
+      // otherwise transpilation is done by Babel
       language_in: 'ECMASCRIPT6',
-      language_out: 'ECMASCRIPT5',
+      language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
@@ -284,7 +280,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
       // required.
-      only_closure_dependencies: true,
+      dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
       source_map_location_mapping: '|' + sourceMapBase,
@@ -318,12 +314,15 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       compilerOptions.jscomp_error.push(
         'conformanceViolations',
         'checkTypes',
-        'accessControls',
         'const',
         'constantProperty',
         'globalThis'
       );
-      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
+      compilerOptions.jscomp_off.push(
+        'accessControls',
+        'moduleLoad',
+        'unknownDefines'
+      );
       compilerOptions.conformance_configs =
         'build-system/conformance-config.textproto';
     } else {
@@ -358,7 +357,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.typeCheckOnly) {
       return gulp
         .src(srcs, {base: '.'})
-        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
           handleTypeCheckError();
           reject(err);
@@ -372,7 +371,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
         .on('error', err => {
           handleCompilerError(outputFilename);
           reject(err);

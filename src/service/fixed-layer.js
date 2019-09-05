@@ -43,6 +43,7 @@ const LIGHTBOX_ELEMENT_CLASS = 'i-amphtml-lightbox-element';
 
 /**
  * @param {!Element} el
+ * @return {boolean}
  */
 function isLightbox(el) {
   return el.tagName.indexOf('LIGHTBOX') !== -1;
@@ -214,7 +215,7 @@ export class FixedLayer {
    * @private
    */
   scanNode_(node, opt_lightboxMode) {
-    this.trySetupSelectorsNoInline(node, opt_lightboxMode);
+    this.trySetupSelectors_(node, opt_lightboxMode);
 
     // Sort tracked elements in document order.
     this.sortInDomOrder_();
@@ -565,13 +566,12 @@ export class FixedLayer {
    * Calls `setupSelectors_` in a try-catch.
    * Fails quietly with a dev error if call fails.
    * This method should not be inlined to prevent TryCatch deoptimization.
-   * NoInline keyword at the end of function name also prevents Closure compiler
-   * from inlining the function.
    * @param {!Node} root
    * @param {boolean=} opt_lightboxMode
    * @private
+   * @noinline
    */
-  trySetupSelectorsNoInline(root, opt_lightboxMode) {
+  trySetupSelectors_(root, opt_lightboxMode) {
     try {
       this.setupSelectors_(root, opt_lightboxMode);
     } catch (e) {

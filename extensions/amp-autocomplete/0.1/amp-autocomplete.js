@@ -166,7 +166,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
   }
 

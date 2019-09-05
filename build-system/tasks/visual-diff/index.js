@@ -223,6 +223,7 @@ async function launchBrowser() {
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {JsonObject} viewport optional viewport size object with numeric
  *     fields `width` and `height`.
+ * @return {!Promise<!Puppeteer.Page>}
  */
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
@@ -243,7 +244,8 @@ async function newPage(browser, viewport = null) {
     );
 
     if (
-      requestUrl.hostname == HOST ||
+      requestUrl.protocol === 'data:' ||
+      requestUrl.hostname === HOST ||
       requestUrl.hostname.endsWith(`.${HOST}`)
     ) {
       return interceptedRequest.continue();
@@ -438,9 +440,10 @@ async function generateSnapshots(percy, webpages) {
   // no interactions, and each test that has in interactive tests file should
   // load those tests here.
   for (const webpage of webpages) {
-    webpage.tests_ = {
-      '': async () => {},
-    };
+    webpage.tests_ = {};
+    if (!webpage.no_base_test) {
+      webpage.tests_[''] = async () => {};
+    }
     if (webpage.interactive_tests) {
       try {
         Object.assign(
@@ -761,6 +764,7 @@ async function createEmptyBuild() {
 
 /**
  * Runs the AMP visual diff tests.
+ * @return {!Promise}
  */
 async function visualDiff() {
   ensureOrBuildAmpRuntimeInTestMode_();
@@ -774,11 +778,8 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
-  try {
-    await performVisualTests();
-  } finally {
-    return await cleanup_();
-  }
+  await performVisualTests();
+  return await cleanup_();
 }
 
 /**

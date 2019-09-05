@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {startsWith} from './string';
+import {includes, startsWith} from './string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -648,7 +648,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   }
 
   // Then try with `_top` target.
-  if (!res && target != '_top') {
+  if (!res && target != '_top' && !includes(opt_features || '', 'noopener')) {
     res = win.open(url, '_top');
   }
   return res;
@@ -911,4 +911,15 @@ export function toggleAttribute(element, name, forced) {
   }
 
   return enabled;
+}
+
+/**
+ * @param {!Window} win
+ * @return {number} The width of the vertical scrollbar, in pixels.
+ */
+export function getVerticalScrollbarWidth(win) {
+  const {documentElement} = win.document;
+  const windowWidth = win./*OK*/ innerWidth;
+  const documentWidth = documentElement./*OK*/ clientWidth;
+  return windowWidth - documentWidth;
 }

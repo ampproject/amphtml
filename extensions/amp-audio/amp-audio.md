@@ -2,8 +2,8 @@
 $category@: media
 formats:
   - websites
-  - ads
   - stories
+  - ads
 teaser:
   text: Replaces the HTML5 audio tag.
 ---
@@ -129,6 +129,40 @@ Example:
   album="Amazing album">
   <source type="audio/mpeg" src="foo.mp3">
 </amp-audio>
+```
+
+## Analytics
+AMP audio analytics gathers data about how users interact with audios in AMP documents. AMP audio extension issues analytics events during their lifecycle. These events can be reported through the analytics configuration using `audio-*` triggers. `audio-play` and `audio-pause` are the two analytics events supported now.
+
+See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
+
+
+### Audio play trigger (`"on": "audio-play"`)
+
+The `audio-play` trigger is fired when the audio begins playing from a user clicking play or from autoplay beginning or resuming. Use these configurations to fire a request for this event.
+
+```javascript
+"triggers": {
+  "audioPlay": {
+    "on": "audio-play",
+    "request": "event",
+    "selector": "#audio1"
+  }
+}
+```
+
+### Audio pause trigger (`"on": "audio-pause"`)
+
+The `audio-pause` trigger is fired when the audio stops playing from a user clicking pause, from autoplay pausing, or from the audio reaching the end. Use these configurations to fire a request for this event.
+
+```javascript
+"triggers": {
+  "audioPause": {
+    "on": "audio-pause",
+    "request": "event",
+    "selector": "#audio1"
+  }
+}
 ```
 
 ## Validation

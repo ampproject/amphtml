@@ -350,6 +350,15 @@ export const VideoEvents = {
    * @event ad_end
    */
   AD_END: 'ad_end',
+
+  /**
+   * A 3p video player can send signals for analytics whose meaning doesn't
+   * fit for other events. In this case, a `tick` event is sent with additional
+   * information in its data property.
+   *
+   * @event amp:video:tick
+   */
+  CUSTOM_TICK: 'amp:video:tick',
 };
 
 /** @typedef {string} */
@@ -467,7 +476,32 @@ export const VideoAnalyticsEvents = {
    * @event video-custom
    */
   PERCENTAGE_PLAYED: 'video-percentage-played',
+
+  /**
+   * video-ad-start
+   *
+   * Indicates that an ad begins to play.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ad-start
+   */
+  AD_START: 'video-ad-start',
+
+  /**
+   * video-ad-end
+   *
+   * Indicates that an ad ended.
+   * @property {!VideoAnalyticsDetailsDef} details
+   * @event video-ad-end
+   */
+  AD_END: 'video-ad-end',
 };
+
+/**
+ * This key can't predictably collide with custom var names as defined in
+ * analytics user configuration.
+ * @type {string}
+ */
+export const videoAnalyticsCustomEventTypeKey = '__amp:eventType';
 
 /**
  * Helper union type to be used internally, so that the compiler treats

@@ -2,7 +2,9 @@
 $category@: layout
 formats:
   - websites
+  - stories
   - email
+  - stories
 teaser:
   text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
 ---
@@ -55,7 +57,6 @@ for content within the sidebar to be displayed on other parts of the main conten
 
 ## Behavior
 
-- The `<amp-sidebar>` should be a direct child of the `<body>`.
 - The sidebar can only appear on the left or right side of a page.
 - The `<amp-sidebar>` may contain any valid HTML elements (supported by AMP).
 - The `<amp-sidebar>` may contain any of the following AMP elements:
@@ -67,7 +68,8 @@ for content within the sidebar to be displayed on other parts of the main conten
     - `<amp-social-share>`
 - The max-height of the sidebar is 100vh, if the height exceeds 100vh then a vertical scrollbar appears. The default height is set to 100vh in CSS and is overridable in CSS.
 - The width of the sidebar can be set and adjusted using CSS (minimum width is 45px).
-- Touch zoom is disabled on the `amp-sidebar` and it's mask when the sidebar is open.
+- Touch zoom is disabled on the `amp-sidebar` and its mask when the sidebar is open.
+- `<amp-sidebar>` is *recommended* to be be a direct child of the `<body>` to preserve a logical DOM order (for accessibility) as well as to avoid altering its behavior by a container element. Note that having an ancestor of `amp-sidebar` with a set `z-index` may cause the sidebar to appear below other elements (such as headers), breaking its functionality.
 
 *Example:*
 
@@ -216,7 +218,7 @@ Use of `amp-sidebar` is supported within the `amp-story` [component](https://www
 - The `<amp-sidebar>` must be a direct child of `<amp-story>`.
 - The sidebar defaults to the "end" side, meaning right for left-right languages and left for right-to-left languages.
 - The `<amp-sidebar>` has default background color of white and is overridable in CSS.
-- Maximum width of `<amp-sidebar>` is enforced at `280px` and at `320px` for desktop experiences.
+- Default width of `<amp-sidebar>` is `75%` of the viewport up to `360px`, on and `25%` up to `600px` for desktop experiences. Width can be overriden using the CSS `width` property, but has to be contained within these intervals.
 - A 'hamburger' style button that opens/closes the sidebar will appear on the story UI.
 
 There are certain restrictions on what attributes and features are allowed in order to provide a consistent UI experience across the story platform. The following are allowed attributes and features of an `amp-sidebar` within an `amp-story`.

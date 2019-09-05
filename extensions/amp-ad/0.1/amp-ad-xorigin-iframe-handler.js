@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  ADSENSE_EXPERIMENTS,
-  ADSENSE_EXP_NAMES,
-} from '../../amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
@@ -25,15 +21,19 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
+  isPausable,
   listenFor,
   listenForOncePromise,
+  makePausable,
   postMessageToWindows,
+  setPaused,
 } from '../../../src/iframe-helper';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
 import {getHtml} from '../../../src/get-html';
+import {isExperimentOn} from '../../../src/experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';
@@ -60,7 +60,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?./amp-ad-ui.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
-    /** @type {?Element} iframe instance */
+    /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
     /** @private {?IntersectionObserver} */
@@ -78,10 +78,10 @@ export class AmpAdXOriginIframeHandler {
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {boolean} */
@@ -90,7 +90,7 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
-   * @param {!Element} iframe
+   * @param {!HTMLIFrameElement} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @param {boolean=} opt_letCreativeTriggerRenderStart Whether to wait for
    *    render start from the creative, or simply trigger it in here.
@@ -117,17 +117,13 @@ export class AmpAdXOriginIframeHandler {
       () => this.sendEmbedInfo_(this.baseInstance_.isInViewport())
     );
 
-    // TODO(bradfrizzell): Would be better to turn this on if
-    // A4A.isXhrEnabled() is false, or if we simply decide it is
-    // ok to turn this on for all traffic.
+    // Enable creative position observer if inabox experiment enabled OR
+    // adsense running on non-CDN cache where AMP creatives are xdomained and
+    // may require this information.
     if (
-      getExperimentBranch(
-        this.win_,
-        ADSENSE_EXP_NAMES.UNCONDITIONED_CANONICAL
-      ) == ADSENSE_EXPERIMENTS.UNCONDITIONED_CANONICAL_EXP ||
-      getExperimentBranch(this.win_, ADSENSE_EXP_NAMES.CANONICAL) ==
-        ADSENSE_EXPERIMENTS.CANONICAL_EXP ||
-      isExperimentOn(this.win_, 'inabox-position-api')
+      isExperimentOn(this.win_, 'inabox-position-api') ||
+      (/^adsense$/i.test(this.element_.getAttribute('type')) &&
+        !isGoogleAdsA4AValidEnvironment(this.win_))
     ) {
       // To provide position to inabox.
       this.inaboxPositionApi_ = new SubscriptionApi(
@@ -270,6 +266,12 @@ export class AmpAdXOriginIframeHandler {
       // received here as well.
       this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
     });
+
+    // If "pausable-iframe" enabled, try to make the iframe pausable. It doesn't
+    // matter here whether this will succeed or not.
+    if (isExperimentOn(this.win_, 'pausable-iframe')) {
+      makePausable(this.iframe);
+    }
 
     this.element_.appendChild(this.iframe);
     if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
@@ -498,6 +500,7 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * Retrieve iframe position entry in next animation frame.
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   getIframePositionPromise_() {
@@ -592,6 +595,27 @@ export class AmpAdXOriginIframeHandler {
       const e = new Error(message);
       e.name = '3pError';
       reportErrorToAnalytics(e, this.baseInstance_.win);
+    }
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isPausable() {
+    return (
+      isExperimentOn(this.win_, 'pausable-iframe') &&
+      !!this.iframe &&
+      isPausable(this.iframe)
+    );
+  }
+
+  /**
+   * See `BaseElement.pauseCallback()` and `BaseElement.resumeCallback()`.
+   * @param {boolean} paused
+   */
+  setPaused(paused) {
+    if (isExperimentOn(this.win_, 'pausable-iframe') && this.iframe) {
+      setPaused(this.iframe, paused);
     }
   }
 }

@@ -38,7 +38,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isInFie} from '../../../src/iframe-helper';
 import {removeElement, tryFocus} from '../../../src/dom';
 import {toArray} from '../../../src/types';
 
@@ -161,8 +161,9 @@ class AmpLightbox extends AMP.BaseElement {
           this.container_,
           'E#19457 this.container_'
         );
-        this.scheduleLayout(container);
-        this.scheduleResume(container);
+        const owners = Services.ownersForDoc(this.element);
+        owners.scheduleLayout(this.element, container);
+        owners.scheduleResume(this.element, container);
       },
       500
     );
@@ -191,7 +192,7 @@ class AmpLightbox extends AMP.BaseElement {
   takeOwnershipOfDescendants_() {
     devAssert(this.isScrollable_);
     this.getComponentDescendants_().forEach(child => {
-      this.setAsOwner(child);
+      Services.ownersForDoc(this.element).setOwner(child, this.element);
     });
   }
 
@@ -349,7 +350,11 @@ class AmpLightbox extends AMP.BaseElement {
 
     const container = dev().assertElement(this.container_);
     if (!this.isScrollable_) {
-      this.updateInViewport(container, true);
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        container,
+        true
+      );
     } else {
       this.scrollHandler_();
       this.updateChildrenInViewport_(this.pos_, this.pos_);
@@ -364,8 +369,9 @@ class AmpLightbox extends AMP.BaseElement {
 
     // TODO: instead of laying out children all at once, layout children based
     // on visibility.
-    this.scheduleLayout(container);
-    this.scheduleResume(container);
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(this.element, container);
+    owners.scheduleResume(this.element, container);
     this.triggerEvent_(LightboxEvents.OPEN);
 
     this.getHistory_()
@@ -488,7 +494,10 @@ class AmpLightbox extends AMP.BaseElement {
       this.boundCloseOnEscape_
     );
     this.boundCloseOnEscape_ = null;
-    this.schedulePause(dev().assertElement(this.container_));
+    Services.ownersForDoc(this.element).schedulePause(
+      this.element,
+      dev().assertElement(this.container_)
+    );
     this.active_ = false;
     this.triggerEvent_(LightboxEvents.CLOSE);
   }
@@ -582,13 +591,18 @@ class AmpLightbox extends AMP.BaseElement {
     const seen = [];
     this.forEachVisibleChild_(newPos, cell => {
       seen.push(cell);
-      this.updateInViewport(cell, true);
-      this.scheduleLayout(cell);
+      const owners = Services.ownersForDoc(this.element);
+      owners.updateInViewport(this.element, cell, true);
+      owners.scheduleLayout(this.element, cell);
     });
     if (oldPos != newPos) {
       this.forEachVisibleChild_(oldPos, cell => {
         if (!seen.includes(cell)) {
-          this.updateInViewport(cell, false);
+          Services.ownersForDoc(this.element).updateInViewport(
+            this.element,
+            cell,
+            false
+          );
         }
       });
     }

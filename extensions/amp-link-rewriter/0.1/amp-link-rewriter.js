@@ -66,6 +66,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   attachClickEvent_() {
     this.navigation_.registerAnchorMutator(anchor => {

@@ -117,8 +117,8 @@
 
   <h1>AMP List</h1>
   <p>This is a flexbox amp-list with tiles, something like an infinite image gallery.</p>
-
   <amp-list width="auto" height="200"
+    id="list"
     layout="fixed-height"
     src="/list/infinite-scroll?items=10&left=50"
     [src]="data.url"
@@ -135,10 +135,10 @@
     </template>
     <div fallback>
       FALLBACK
-    </div>
-    <div placeholder>
-      PLACEHOLDER
-    </div>
+   </div>
+   <div placeholder>
+     PLACEHOLDER
+   </div>
     <amp-list-load-more load-more-failed>
     </amp-list-load-more>
     <amp-list-load-more load-more-end>

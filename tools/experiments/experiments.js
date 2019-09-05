@@ -37,7 +37,8 @@ const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
  * @typedef {{
  *   id: string,
  *   name: string,
- *   spec: string
+ *   spec: string,
+ *   cleanupIssue: string,
  * }}
  */
 let ExperimentDef;
@@ -176,14 +177,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
   },
   {
-    id: 'ios-embed-sd',
-    name:
-      'A new iOS embedded viewport model that wraps the body into' +
-      ' shadow root',
-    spec:
-      'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
+    id: 'ios-scrollable-iframe',
+    name: 'iOS 13 enables iframe scrolling per spec',
+    spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23379',
   },
   {
     id: 'chunked-amp',
@@ -240,12 +237,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'disable-amp-story-desktop',
-    name: 'Disables responsive desktop experience for the amp-story component',
-    spec: 'https://github.com/ampproject/amphtml/issues/11714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
-  },
-  {
     id: 'disable-amp-story-default-media',
     name: 'Removes default media for amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/14535',
@@ -275,22 +266,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'layers',
-    name: 'Enables the new Layers position/measurement system',
-    spec: 'https://github.com/ampproject/amphtml/issues/3434',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
-  },
-  {
     id: 'blurry-placeholder',
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
-    id: 'amp-list-diffing',
-    name: 'Enables DOM diffing of amp-list renders via set-dom',
-    spec: 'https://github.com/ampproject/amphtml/pull/17000',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17637',
   },
   {
     id: 'custom-elements-v1',
@@ -325,11 +304,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/13575',
   },
   {
-    id: 'amp-script',
-    name: 'Enables <amp-script>.',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
@@ -352,20 +326,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
-    id: 'inabox-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in inabox rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
-  },
-  {
-    id: 'amp-force-prerender-visible-elements',
-    name:
-      'Force builds the AMP elements that are visible and in the viewport ' +
-      'during prerendering, beyond the 20 elements limit.',
-    spec: 'https://github.com/ampproject/amphtml/issues/21791',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
+    id: 'inabox-no-chunking',
+    name: 'Experiment to disable startup chunking in inabox runtime',
+    spec: 'https://github.com/ampproject/amphtml/issues/23573',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23573',
   },
   {
     id: 'amp-user-location',
@@ -374,12 +338,6 @@ const EXPERIMENTS = [
       'access after user interaction and approval',
     spec: 'https://github.com/ampproject/amphtml/issues/8929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
-  },
-  {
-    id: 'margin-bottom-in-content-height',
-    name: 'Fixes smaller-than-expected "documentHeight" on Safari.',
-    spec: 'https://github.com/ampproject/amphtml/issues/22718',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22749',
   },
   {
     id: 'untrusted-xhr-interception',
@@ -394,6 +352,39 @@ const EXPERIMENTS = [
     name: 'New default loaders',
     spec: 'https://github.com/ampproject/amphtml/issues/20237',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
+  },
+  {
+    id: 'macro-after-long-task',
+    name:
+      'If applicable, convert remaining micro tasks to the next macro ' +
+      ' tasks if a previous micro task execution took too long',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
+  },
+  {
+    id: 'pausable-iframe',
+    name: 'Use iframe freezing instead of recreating iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24110',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
+  },
+  {
+    id: 'adsense-ad-size-optimization',
+    name:
+      'Per publisher server side settings for changing the ad size ' +
+      'to responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/23568',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
+  },
+  {
+    id: 'fix-inconsistent-responsive-height-selection',
+    name: 'Fix inconsistent responsive height selection.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24166',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
+  },
+  {
+    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
+    name: 'Use amp-ad responsive to make amp auto ads responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24168',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
 ];
 
@@ -459,6 +450,7 @@ function build() {
 /**
  * Builds one row in the channel or experiments table.
  * @param {!ExperimentDef} experiment
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExperimentRow(experiment) {
   const tr = document.createElement('tr');
@@ -641,6 +633,7 @@ function showConfirmation_(message, callback) {
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the
  * user has (depends on whether they opted into canary or RC), so that
  * experiment state can reflect the default activated experiments.
+ * @return {*} TODO(#23582): Specify return type
  */
 function getAmpConfig() {
   const deferred = new Deferred();

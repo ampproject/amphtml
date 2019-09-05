@@ -102,8 +102,8 @@ export class AmpState extends AMP.BaseElement {
       dev().error(TAG, 'Viewer must be visible before mutation.');
       return;
     }
-    const src = mutations['src'];
-    if (src !== undefined) {
+    // "src" attribute may be missing if mutated with a non-primitive.
+    if (mutations['src'] !== undefined && this.element.hasAttribute('src')) {
       this.fetchAndUpdate_(/* isInit */ false);
     }
   }
@@ -121,7 +121,7 @@ export class AmpState extends AMP.BaseElement {
   parseAndUpdate() {
     if (this.localData_ === undefined) {
       this.localData_ = this.parse_();
-      if (this.localData_) {
+      if (this.localData_ !== null) {
         return this.updateState_(this.localData_, /* isInit */ true);
       }
     }

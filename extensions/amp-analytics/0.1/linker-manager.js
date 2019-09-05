@@ -19,7 +19,6 @@ import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
-import {cookieReader} from './cookie-reader';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
@@ -83,6 +82,7 @@ export class LinkerManager {
    * and register the callback with the navigation service. Since macro
    * resolution is asynchronous the callback may be looking for these values
    * before they are ready.
+   * @return {*} TODO(#23582): Specify return type
    */
   init() {
     if (!isObject(this.config_)) {
@@ -119,6 +119,7 @@ export class LinkerManager {
           }
         });
         this.resolvedIds_[name] = expandedIds;
+        return expandedIds;
       });
     });
 
@@ -128,7 +129,7 @@ export class LinkerManager {
         if (!element.href || event.type !== 'click') {
           return;
         }
-        this.maybeWriteHref_(element);
+        element.href = this.applyLinkers_(element.href);
       }, Priority.ANALYTICS_LINKER);
       navigation.registerNavigateToMutator(
         url => this.applyLinkers_(url),
@@ -139,20 +140,6 @@ export class LinkerManager {
     this.enableFormSupport_();
 
     return Promise.all(this.allLinkerPromises_);
-  }
-
-  /**
-   * TODO: Revisit this logic after #22787 is complete.
-   * Applys any matching linkers to the elements href. If no linkers exist,
-   * will not set href.
-   * @param {!Element} element
-   */
-  maybeWriteHref_(element) {
-    const {href} = element;
-    const maybeDecoratedUrl = this.applyLinkers_(href);
-    if (href !== maybeDecoratedUrl) {
-      element.href = maybeDecoratedUrl;
-    }
   }
 
   /**
@@ -219,13 +206,7 @@ export class LinkerManager {
    * @return {!Promise<string>} expanded template.
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
-    const bindings = this.variableService_.getMacros();
-
-    // TODO: (@zhouyx) Duplicate of binding in requests and linker.
-    // Move to varaible Servie once there's a way to detect FIE in that service
-    bindings['COOKIE'] = name =>
-      cookieReader(this.ampdoc_.win, this.element_, name);
-
+    const bindings = this.variableService_.getMacros(this.element_);
     return this.variableService_
       .expandTemplate(template, expansionOptions)
       .then(expanded => {
@@ -320,6 +301,7 @@ export class LinkerManager {
    * @param {string} url
    * @param {string} name Name given in linker config.
    * @param {?Array} domains
+   * @return {*} TODO(#23582): Specify return type
    */
   isDomainMatch_(url, name, domains) {
     const {hostname} = this.urlService_.parse(url);
@@ -434,6 +416,7 @@ export class LinkerManager {
    * @param {!Element} form
    * @param {function(string)} actionXhrMutator
    * @param {string} linkerName
+   * @return {*} TODO(#23582): Specify return type
    */
   addDataToForm_(form, actionXhrMutator, linkerName) {
     const ids = this.resolvedIds_[linkerName];
@@ -511,6 +494,7 @@ function getBaseDomain(domain) {
 /**
  * Escape any regex flags other than `*`
  * @param {string} str
+ * @return {*} TODO(#23582): Specify return type
  */
 function regexEscape(str) {
   return str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');

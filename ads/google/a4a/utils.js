@@ -37,7 +37,7 @@ import {whenUpgradedToCustomElement} from '../../../src/dom';
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
-const MAX_URL_LENGTH = 16384;
+const MAX_URL_LENGTH = 15360;
 
 /** @enum {string} */
 const AmpAdImplementation = {
@@ -228,8 +228,13 @@ export function groupAmpAdsByType(win, type, groupFn) {
   const ampAdSelector = r =>
     r.element./*OK*/ querySelector(`amp-ad[type=${type}]`);
   const {documentElement} = win.document;
+  // TODO(lannka): should avoid this type casting by moving the `getMeasuredResources`
+  // logic here.
+  const resources = /** @type {!../../../src/service/resources-impl.Resources} */ (Services.resourcesForDoc(
+    documentElement
+  ));
   return (
-    Services.resourcesForDoc(documentElement)
+    resources
       .getMeasuredResources(win, r => {
         const isAmpAdType =
           r.element.tagName == 'AMP-AD' &&
@@ -621,17 +626,18 @@ export function getCsiAmpAnalyticsConfig() {
  * @param {!AMP.BaseElement} a4a The A4A element.
  * @param {?string} qqid The query ID or null if the query ID has not been set
  *     yet.
+ * @return {!JsonObject}
  */
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
   const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
-  const vars = {
+  const vars = /** @type {!JsonObject} */ ({
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
     'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
-  };
+  });
   if (qqid) {
     vars['qqid'] = qqid;
   }
