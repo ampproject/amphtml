@@ -14,7 +14,29 @@
  * limitations under the License.
  */
 
-export const platform = {
-  name: window.navigator.userAgent,
-  version: '?',
+/**
+ *
+ * @type {{set: CookiesAPI.set, get: (function(): null), getJSON: (function(): null)}}
+ */
+export const CookiesAPI = {
+  /**
+   * @return {null}
+   */
+  set: () => {
+    return null;
+  },
+  /**
+   *
+   * @return {null}
+   */
+  getJSON: () => {
+    return null;
+  },
+  /**
+   *
+   * @return {null}
+   */
+  get: () => {
+    return null;
+  },
 };
