@@ -177,7 +177,7 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /**
