@@ -97,7 +97,7 @@ export class ProgressBar {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = Services.ampdocServiceFor(this.win_).getSingleDoc();
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(this.ampdoc_);
 
     /** @private {!Object<string, number>} */

@@ -130,7 +130,7 @@ export class Resource {
   /**
    * @param {number} id
    * @param {!AmpElement} element
-   * @param {!./resources-impl.ResourcesDef} resources
+   * @param {!./resources-interface.ResourcesInterface} resources
    */
   constructor(id, element, resources) {
     element[RESOURCE_PROP_] = this;
@@ -147,7 +147,7 @@ export class Resource {
     /** @const {!Window} */
     this.hostWin = toWin(element.ownerDocument.defaultView);
 
-    /** @const @private {!./resources-impl.ResourcesDef} */
+    /** @const @private {!./resources-interface.ResourcesInterface} */
     this.resources_ = resources;
 
     /** @const @private {boolean} */

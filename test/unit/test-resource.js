@@ -16,9 +16,9 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
-import {Owners} from '../../src/service/owners-impl';
+import {OwnersImpl} from '../../src/service/owners-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {Resources} from '../../src/service/resources-impl';
+import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
@@ -45,9 +45,9 @@ describes.realWin('Resource', {amp: true}, env => {
     const viewer = Services.viewerForDoc(doc);
     sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
     sandbox
-      .stub(Resources.prototype, 'rebuildDomWhenReady_')
+      .stub(ResourcesImpl.prototype, 'rebuildDomWhenReady_')
       .callsFake(() => {});
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resource = new Resource(1, element, resources);
 
     const vsync = Services.vsyncFor(win);
@@ -901,8 +901,8 @@ describes.realWin('Resource', {amp: true}, env => {
         return [grandChild];
       };
       const ampdoc = new AmpDocSingle(window);
-      resources = new Resources(ampdoc);
-      owners = new Owners(ampdoc);
+      resources = new ResourcesImpl(ampdoc);
+      owners = new OwnersImpl(ampdoc);
       parentResource = new Resource(1, parent, resources);
     });
 
@@ -1178,7 +1178,7 @@ describe('Resource idleRenderOutsideViewport', () => {
       viewportCallback: () => {},
       getLayoutPriority: () => LayoutPriority.CONTENT,
     };
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new ResourcesImpl(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     isWithinViewportRatio = sandbox.stub(resource, 'isWithinViewportRatio');
   });
@@ -1215,7 +1215,7 @@ describes.realWin('Resource renderOutsideViewport', {amp: true}, env => {
     element = env.createAmpElement('amp-ad');
     env.win.document.body.appendChild(element);
 
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resource = new Resource(1, element, resources);
     viewport = Services.viewportForDoc(env.ampdoc);
     renderOutsideViewport = sandbox.stub(element, 'renderOutsideViewport');

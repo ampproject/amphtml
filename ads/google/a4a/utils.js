@@ -230,7 +230,7 @@ export function groupAmpAdsByType(win, type, groupFn) {
   const {documentElement} = win.document;
   // TODO(lannka): should avoid this type casting by moving the `getMeasuredResources`
   // logic here.
-  const resources = /** @type {!../../../src/service/resources-impl.Resources} */ (Services.resourcesForDoc(
+  const resources = /** @type {!../../../src/service/resources-impl.ResourcesImpl} */ (Services.resourcesForDoc(
     documentElement
   ));
   return (

@@ -86,7 +86,7 @@ export class Performance {
     /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private {?./resources-impl.ResourcesDef} */
+    /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
     /** @private {boolean} */
@@ -634,7 +634,7 @@ export class Performance {
     return this.resources_.whenFirstPass().then(() => {
       // TODO(lannka): should avoid this type casting by moving the `getResourcesInRect`
       // logic here.
-      const resources = /** @type {!./resources-impl.Resources} */ (this
+      const resources = /** @type {!./resources-impl.ResourcesImpl} */ (this
         .resources_);
       return resources
         .getResourcesInRect(this.win, rect, /* isInPrerender */ true)

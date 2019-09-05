@@ -19,6 +19,7 @@ import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
+import {ResourcesInterface} from './resources-interface';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
@@ -72,226 +73,10 @@ let MarginChangeDef;
  */
 let ChangeSizeRequestDef;
 
-/* eslint-disable no-unused-vars */
 /**
- * @interface
+ * @implements {ResourcesInterface}
  */
-export class MutatorsDef {
-  /**
-   * Requests the runtime to change the element's size. When the size is
-   * successfully updated then the opt_callback is called.
-   * @param {!Element} element
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {function()=} opt_callback A callback function.
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
-   */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {}
-
-  /**
-   * Return a promise that requests the runtime to update the size of
-   * this element to the specified value.
-   * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeSize}, the runtime
-   * may refuse to make a change in which case it will reject promise, call the
-   * `overflowCallback` method on the target resource with the height value.
-   * Overflow callback is expected to provide the reader with the user action
-   * to update the height manually.
-   * Note that the runtime does not call the `overflowCallback` method if the
-   * requested height is 0 or negative.
-   * If the height is successfully updated then the promise is resolved.
-   * @param {!Element} element
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
-   * @return {!Promise}
-   * @param {?Event=} opt_event
-   */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {}
-
-  /**
-   * Expands the element.
-   * @param {!Element} element
-   */
-  expandElement(element) {}
-
-  /**
-   * Return a promise that requests runtime to collapse this element.
-   * The runtime will schedule this request and first attempt to resize
-   * the element to height and width 0. If success runtime will set element
-   * display to none, and notify element owner of this collapse.
-   * @param {!Element} element
-   * @return {!Promise}
-   */
-  attemptCollapse(element) {}
-
-  /**
-   * Collapses the element: ensures that it's `display:none`, notifies its
-   * owner and updates the layout box.
-   * @param {!Element} element
-   */
-  collapseElement(element) {}
-
-  /**
-   * Runs the specified measure, which is called in the "measure" vsync phase.
-   * This is simply a proxy to the privileged vsync service.
-   *
-   * @param {function()} measurer
-   * @return {!Promise}
-   */
-  measureElement(measurer) {}
-
-  /**
-   * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
-   *
-   * This method should be called whenever a significant mutations are done
-   * on the DOM that could affect layout of elements inside this subtree or
-   * its siblings. The top-most affected element should be specified as the
-   * first argument to this method and all the mutation work should be done
-   * in the mutator callback which is called in the "mutation" vsync phase.
-   *
-   * @param {!Element} element
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  mutateElement(element, mutator) {}
-
-  /**
-   * Runs the specified mutation on the element and ensures that remeasures and
-   * layouts performed for the affected elements.
-   *
-   * This method should be called whenever a significant mutations are done
-   * on the DOM that could affect layout of elements inside this subtree or
-   * its siblings. The top-most affected element should be specified as the
-   * first argument to this method and all the mutation work should be done
-   * in the mutator callback which is called in the "mutation" vsync phase.
-   *
-   * @param {!Element} element
-   * @param {?function()} measurer
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  measureMutateElement(element, measurer, mutator) {}
-}
-
-/**
- * @interface
- */
-export class ResourcesDef extends MutatorsDef {
-  /**
-   * Returns a list of resources.
-   * @return {!Array<!Resource>}
-   * @export
-   */
-  get() {}
-
-  /**
-   * @return {!./ampdoc-impl.AmpDoc}
-   */
-  getAmpdoc() {}
-
-  /**
-   * Returns the {@link Resource} instance corresponding to the specified AMP
-   * Element. If no Resource is found, the exception is thrown.
-   * @param {!AmpElement} element
-   * @return {!Resource}
-   */
-  getResourceForElement(element) {}
-
-  /**
-   * Returns the {@link Resource} instance corresponding to the specified AMP
-   * Element. Returns null if no resource is found.
-   * @param {!AmpElement} element
-   * @return {?Resource}
-   */
-  getResourceForElementOptional(element) {}
-
-  /**
-   * Returns the direction the user last scrolled.
-   *  - -1 for scrolling up
-   *  - 1 for scrolling down
-   *  - Defaults to 1
-   * TODO(lannka): this method should not belong to resources.
-   * @return {number}
-   */
-  getScrollDirection() {}
-
-  /**
-   * Signals that an element has been added to the DOM. Resources manager
-   * will start tracking it from this point on.
-   * @param {!AmpElement} element
-   */
-  add(element) {}
-
-  /**
-   * Signals that an element has been upgraded to the DOM. Resources manager
-   * will perform build and enable layout/viewport signals for this element.
-   * @param {!AmpElement} element
-   */
-  upgraded(element) {}
-
-  /**
-   * Signals that an element has been removed to the DOM. Resources manager
-   * will stop tracking it from this point on.
-   * @param {!AmpElement} element
-   */
-  remove(element) {}
-
-  /**
-   * Schedules layout or preload for the specified resource.
-   * @param {!Resource} resource
-   * @param {boolean} layout
-   * @param {number=} opt_parentPriority
-   * @param {boolean=} opt_forceOutsideViewport
-   * @package
-   */
-  scheduleLayoutOrPreload(
-    resource,
-    layout,
-    opt_parentPriority,
-    opt_forceOutsideViewport
-  ) {}
-
-  /**
-   * Schedules the work pass at the latest with the specified delay.
-   * @param {number=} opt_delay
-   * @param {boolean=} opt_relayoutAll
-   * @return {boolean}
-   */
-  schedulePass(opt_delay, opt_relayoutAll) {}
-
-  /**
-   * Registers a callback to be called when the next pass happens.
-   * @param {function()} callback
-   */
-  onNextPass(callback) {}
-
-  /**
-   * @return {!Promise} when first pass executed.
-   */
-  whenFirstPass() {}
-
-  /**
-   * Called when main AMP binary is fully initialized.
-   * May never be called in Shadow Mode.
-   */
-  ampInitComplete() {}
-
-  /**
-   * Updates the priority of the resource. If there are tasks currently
-   * scheduled, their priority is updated as well.
-   * @param {!Element} element
-   * @param {number} newLayoutPriority
-   */
-  updateLayoutPriority(element, newLayoutPriority) {}
-}
-/* eslint-enable no-unused-vars */
-
-/**
- * @implements {ResourcesDef}
- */
-export class Resources {
+export class ResourcesImpl {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
@@ -2333,5 +2118,5 @@ export let SizeDef;
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installResourcesServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
+  registerServiceBuilderForDoc(ampdoc, 'resources', ResourcesImpl);
 }

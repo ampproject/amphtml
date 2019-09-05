@@ -424,7 +424,7 @@ export class FriendlyIframeEmbed {
   destroy() {
     // TODO(lannka): should avoid this type casting by moving the `removeForChildWindow`
     // logic here.
-    const resources = /** @type {!./service/resources-impl.Resources} */ (Services.resourcesForDoc(
+    const resources = /** @type {!./service/resources-impl.ResourcesImpl} */ (Services.resourcesForDoc(
       this.iframe
     ));
     resources.removeForChildWindow(this.win);
@@ -566,7 +566,7 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @return {!./service/resources-impl.ResourcesDef}
+   * @return {!./service/resources-interface.ResourcesInterface}
    * @private
    */
   getResources_() {
@@ -857,7 +857,7 @@ export class FriendlyIframeEmbed {
 export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
   // TODO(lannka): should avoid this type casting by moving the `getResourcesInRect`
   // logic here.
-  const resources = /** @type {!./service/resources-impl.Resources} */ (Services.resourcesForDoc(
+  const resources = /** @type {!./service/resources-impl.ResourcesImpl} */ (Services.resourcesForDoc(
     elementOrAmpDoc
   ));
   return resources.getResourcesInRect(hostWin, rect).then(resources => {
