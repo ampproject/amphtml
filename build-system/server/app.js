@@ -832,7 +832,7 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
+app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
 });
