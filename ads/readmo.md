@@ -18,12 +18,12 @@ limitations under the License.
 
 ## Example
 
-ReadMo only requires a configured section code to run. Please work with your account manager to configure your AMP page sections.
+ReadMo only requires a section code to run. Please work your account manager to properly configure your AMP section.
 
 ### Basic
 
 ```html
-  <amp-embed width="320" height="320"
+  <amp-embed width="400" height="400"
              type="readmo"
              layout="responsive"
              data-infinite="true"
@@ -33,9 +33,11 @@ ReadMo only requires a configured section code to run. Please work with your acc
 
 ### Required parameters
 
-- `data-section` : Unique section id that represents your site and placement
+- `data-section` : A unique section code that represents your site and placement
 
 ### Optional parameters
 
-- `data-module` : Type of module to render (ex: `end-of-article`, `smart-feed`, `smart-feed-video`, `side-rail`)
+- `data-module` : Type of module to render (`end-of-article`, `smart-feed`, `smart-feed-video`, `side-rail`)
 - `data-infinite` : If true, will enable infinite feed
+- `data-title` : Text that will appear above the module (defaults to "You May Like")
+- `data-sponsored-by-label` : Custom text override to the "Sponsored by" label that appears next to the advertiser name

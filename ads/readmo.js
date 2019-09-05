@@ -21,25 +21,38 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function readmo(global, data) {
-  validateData(data, ['section'], ['module', 'infinite']);
+  validateData(
+    data,
+    ['section'],
+    ['module', 'sponsoredByLabel', 'infinite', 'title']
+  );
+
+  const {section, module, sponsoredByLabel, infinite, title} = data;
 
   (global.readmo = global.readmo || []).push({
-    section: data.section,
-    module: data.module,
-    infinite: data.infinite,
+    section,
+    module,
+    infinite,
+    title,
+    sponsoredByLabel,
     container: '#c',
     amp: true,
   });
 
-  global.context.observeIntersection(function(entries) {
-    entries.forEach(function(entry) {
-      if (global.Readmo) {
-        global.Readmo.onViewChange({
-          rects: entry,
-        });
-      }
-    });
-  });
+  global.context.observeIntersection(
+    entries => {
+      entries.forEach(entry => {
+        if (global.Readmo) {
+          global.Readmo.onViewChange({
+            intersectionRatio: entry.intersectionRatio,
+          });
+        }
+      });
+    },
+    {
+      threshold: [0, 0.5, 1],
+    }
+  );
 
   loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js', () =>
     global.context.renderStart()
