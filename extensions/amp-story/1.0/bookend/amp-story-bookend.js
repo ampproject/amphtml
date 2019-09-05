@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BookendComponent,
+} from './bookend-component';
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
-import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
 import {
   DEPRECATED_SHARE_PROVIDERS_KEY,
@@ -92,14 +95,6 @@ const REPLAY_ICON_TEMPLATE = {
 
 /** @const {string} */
 const TAG = 'amp-story-bookend';
-
-/** @enum {string} */
-const CLICKABLE_COMPONENT_TYPES = {
-  CTA_LINK: 'i-amphtml-story-bookend-cta-link',
-  LANDSCAPE: 'i-amphtml-story-bookend-landscape',
-  PORTRAIT: 'i-amphtml-story-bookend-portrait',
-  SMALL: 'i-amphtml-story-bookend-article',
-};
 
 /**
  * @param {string} title
@@ -564,62 +559,28 @@ export class AmpStoryBookend extends DraggableDrawer {
    */
   fireAnalyticsEvent_(target) {
     const anchorEl = closestAncestorElementBySelector(target, 'A');
+    if (!anchorEl) {
+      return;
+    }
+
+    const componentData = anchorEl[AMP_STORY_BOOKEND_COMPONENT_DATA];
 
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.BOOKEND_TARGET_HREF,
       anchorEl.href
     );
 
-    const componentType = this.getClickedComponentType_(anchorEl);
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.BOOKEND_COMPONENT_TYPE,
-      componentType
+      componentData.type
     );
 
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.BOOKEND_COMPONENT_POSITION,
-      this.getClickedComponentIndex_(anchorEl, componentType)
+      componentData.position
     );
 
     this.analyticsService_.triggerEvent(AnalyticsEvent.BOOKEND_CLICK);
-  }
-
-  /**
-   * Gets type of clicked component in the bookend.
-   * @param {!Element} element
-   * @return {string}
-   * @private
-   */
-  getClickedComponentType_(element) {
-    if (element.classList.contains(CLICKABLE_COMPONENT_TYPES.CTA_LINK)) {
-      return 'cta-link';
-    } else if (
-      element.classList.contains(CLICKABLE_COMPONENT_TYPES.LANDSCAPE)
-    ) {
-      return 'landscape';
-    } else if (element.classList.contains(CLICKABLE_COMPONENT_TYPES.PORTRAIT)) {
-      return 'portrait';
-    } else if (element.classList.contains(CLICKABLE_COMPONENT_TYPES.SMALL)) {
-      return 'small';
-    }
-  }
-
-  /**
-   * Gets the index of the clicked component relative its container.
-   * @param {!Element} element
-   * @param {string} componentType
-   * @return {number}
-   * @private
-   */
-  getClickedComponentIndex_(element, componentType) {
-    if (componentType === 'cta-link') {
-      // Cta links have a wrapper so we have to get that instead.
-      element = element.parentElement;
-    }
-    return Array.prototype.indexOf.call(
-      this.componentsContainer_.children,
-      element
-    );
   }
 
   /**

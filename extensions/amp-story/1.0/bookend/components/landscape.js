@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_CLASSES,
+} from '../bookend-component';
 import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
@@ -88,13 +92,11 @@ export class LandscapeComponent {
   }
 
   /** @override */
-  buildElement(landscapeData, doc) {
+  buildElement(landscapeData, doc, data) {
     landscapeData = /** @type {LandscapeComponentDef} */ (landscapeData);
     const html = htmlFor(doc);
     const el = html`
-        <a class="i-amphtml-story-bookend-landscape
-          i-amphtml-story-bookend-component"
-          target="_top">
+        <a class="i-amphtml-story-bookend-component" target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
           <h2 class="i-amphtml-story-bookend-article-heading"
@@ -106,6 +108,11 @@ export class LandscapeComponent {
             ref="meta"></div>
         </a>`;
     addAttributesToElement(el, dict({'href': landscapeData.url}));
+    el.classList.add(BOOKEND_COMPONENT_CLASSES.LANDSCAPE);
+    el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: AMP_STORY_BOOKEND_COMPONENT_DATA.LANDSCAPE,
+    };
 
     if (landscapeData['amphtml'] === true) {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));

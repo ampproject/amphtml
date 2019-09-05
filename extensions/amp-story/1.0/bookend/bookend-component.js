@@ -27,6 +27,30 @@ import {htmlFor} from '../../../../src/static-template';
 /** @type {string} */
 export const TAG = 'amp-story-bookend';
 
+/** @enum {string} */
+export const BOOKEND_COMPONENT_CLASSES = {
+  CTA_LINK: 'i-amphtml-story-bookend-cta-link',
+  LANDSCAPE: 'i-amphtml-story-bookend-landscape',
+  PORTRAIT: 'i-amphtml-story-bookend-portrait',
+  SMALL: 'i-amphtml-story-bookend-article',
+};
+
+export const BOOKEND_COMPONENT_TYPES = {
+  SMALL: 'small',
+  CTA_LINK: 'cta-link',
+  HEADING: 'heading',
+  LANDSCAPE: 'landscape',
+  PORTRAIT: 'portrait',
+  TEXTBOX: 'textbox',
+};
+
+/**
+ *
+ * @const {string}
+ */
+export const AMP_STORY_BOOKEND_COMPONENT_DATA =
+  '__AMP_STORY_BOOKEND_COMPONENT_DATA__';
+
 /**
  * @typedef {{
  *   bookendVersion: string,
@@ -81,17 +105,17 @@ function setBuilderInstance(type, ctor) {
  */
 function componentBuilderInstanceFor(type) {
   switch (type) {
-    case 'small':
+    case BOOKEND_COMPONENT_TYPES.SMALL:
       return setBuilderInstance(type, ArticleComponent);
-    case 'cta-link':
+    case BOOKEND_COMPONENT_TYPES.CTA_LINK:
       return setBuilderInstance(type, CtaLinkComponent);
-    case 'heading':
+    case BOOKEND_COMPONENT_TYPES.HEADING:
       return setBuilderInstance(type, HeadingComponent);
-    case 'landscape':
+    case BOOKEND_COMPONENT_TYPES.LANDSCAPE:
       return setBuilderInstance(type, LandscapeComponent);
-    case 'portrait':
+    case BOOKEND_COMPONENT_TYPES.PORTRAIT:
       return setBuilderInstance(type, PortraitComponent);
-    case 'textbox':
+    case BOOKEND_COMPONENT_TYPES.TEXTBOX:
       return setBuilderInstance(type, TextBoxComponent);
     default:
       return null;
@@ -160,13 +184,18 @@ export class BookendComponent {
 
     components = prependTitle(components, localizationService);
 
+    const data = {position: 1};
     components.forEach(component => {
       const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
-        fragment.appendChild(
-          componentBuilderInstanceFor(type).buildElement(component, doc)
+        const el = componentBuilderInstanceFor(type).buildElement(
+          component,
+          doc,
+          data
         );
+        fragment.appendChild(el);
       }
+      data.position++;
     });
     return fragment;
   }
