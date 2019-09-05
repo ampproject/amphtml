@@ -175,18 +175,7 @@ export class AmpSidebar extends AMP.BaseElement {
       element.setAttribute('role', 'menu');
     }
 
-    this.alwaysOpen_ = element.hasAttribute('always-open');
-    if (this.alwaysOpen_) {
-      const mainElement = this.getAmpDoc()
-        .getBody()
-        .querySelector('main');
-      if (mainElement) {
-        mainElement.setAttribute('open-sidebar', '');
-        this.opened_ = true;
-        toggle(this.element, /* display */ true);
-      }
-      return;
-    }
+    this.updateAlwaysOpen_();
 
     // The element is always closed by default, so update the aria state to
     // match.
@@ -316,7 +305,31 @@ export class AmpSidebar extends AMP.BaseElement {
         this.toolbars_.forEach(toolbar => {
           toolbar.onLayoutChange();
         });
+        this.updateAlwaysOpen_();
       });
+  }
+
+  updateAlwaysOpen_() {
+    const alwaysOpenMedia = this.element.getAttribute('always-open');
+    const alwaysOpen = this.getAmpDoc().win.matchMedia(alwaysOpenMedia).matches;
+    const mainElement = this.getAmpDoc()
+      .getBody()
+      .querySelector('main');
+    if (alwaysOpen == this.alwaysOpen_ || !mainElement) {
+      return;
+    }
+    this.alwaysOpen_ = alwaysOpen;
+    if (alwaysOpen) {
+      mainElement.setAttribute('nonmodal-sidebar', '');
+      this.element.setAttribute('nonmodal', '');
+      this.opened_ = true;
+      toggle(this.element, /* display */ true);
+      toggle(this.getMaskElement_(), /* display */ false);
+    } else {
+      mainElement.removeAttribute('nonmodal-sidebar');
+      this.element.removeAttribute('nonmodal');
+      this.close_();
+    }
   }
 
   /**
@@ -477,7 +490,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   dismiss_(immediate) {
-    if (!this.opened_) {
+    if (!this.opened_ || this.alwaysOpen_) {
       return false;
     }
     this.opened_ = false;
@@ -529,6 +542,10 @@ export class AmpSidebar extends AMP.BaseElement {
    * @param {!SwipeDef} data
    */
   handleSwipe_(data) {
+    if (this.alwaysOpen_) {
+      return;
+    }
+
     if (data.first) {
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.element),

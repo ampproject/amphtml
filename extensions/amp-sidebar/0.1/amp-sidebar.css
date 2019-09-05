@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-main[open-sidebar] {
+main[nonmodal-sidebar] {
   width: auto;
   max-height: 100vh;
   overflow: scroll;
@@ -43,7 +43,7 @@ amp-sidebar[side="left"] {
   animation-name: i-amphtml-sidebar-slide-out-left;
 }
 
-amp-sidebar[always-open][side="left"] {
+amp-sidebar[nonmodal][side="left"] {
   position: static !important;
   float: left;
   transform: none;
@@ -60,7 +60,7 @@ amp-sidebar[side="right"] {
   animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
-amp-sidebar[always-open][side="right"] {
+amp-sidebar[nonmodal][side="right"] {
   position: static !important;
   float: right;
   transform: none;
