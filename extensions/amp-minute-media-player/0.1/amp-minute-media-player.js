@@ -109,10 +109,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return (
-      isLayoutSizeDefined(layout) ||
-      layout == Layout.FLEX_ITEM
-    );
+    return isLayoutSizeDefined(layout) || layout == Layout.FLEX_ITEM;
   }
 
   /**
