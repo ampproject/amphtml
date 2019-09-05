@@ -18,22 +18,21 @@ limitations under the License.
 
 ## Example
 
-Yahoo Native Ads only requires a configured section code to run. Please work with your account manager to configure your AMP page sections.
+Yahoo Native Ads only requires a configured section code to run. Please work with your account manager to configure your AMP sections.
 
 ### Basic
 
 ```html
-  <amp-embed width="100" height="283"
+  <amp-embed width="320" height="320"
              type="yahoonativeads"
-             layout="responsive"
-             data-section="1234567">
+             data-code="192b5193-edb2-31c0-88be-4022dhca1090"
+             data-key="P55VS9SY2WQXH7TTN8ZA"
+             data-url="https://techcrunch.com">
   </amp-embed>
 ```
 
 ### Required parameters
 
-- `data-section` : Unique section id that represents your site and placement
-
-### Optional parameters
-
-- `data-module` : Type of module to render (ex: `end-of-article`, `smart-feed`, `smart-feed-video`, `side-rail`)
+- `data-code` : Unique section code that represents your site and placement
+- `data-key` : Unique API key that was issued for your site
+- `data-url` : Url that your API key and section code are valid to run on
