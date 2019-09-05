@@ -76,7 +76,7 @@ function printDefaultTaskHelp() {
 }
 
 /**
- * Performs pre-requisite build steps
+ * Performs the pre-requisite build steps for gulp, gulp build, and gulp watch
  * @param {boolean} watch
  * @return {!Promise}
  */
