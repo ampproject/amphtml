@@ -17,6 +17,7 @@
 import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
   BOOKEND_COMPONENT_CLASSES,
+  BOOKEND_COMPONENT_TYPES,
 } from '../bookend-component';
 import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
@@ -111,7 +112,7 @@ export class LandscapeComponent {
     el.classList.add(BOOKEND_COMPONENT_CLASSES.LANDSCAPE);
     el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
       position: data.position,
-      type: AMP_STORY_BOOKEND_COMPONENT_DATA.LANDSCAPE,
+      type: BOOKEND_COMPONENT_TYPES.LANDSCAPE,
     };
 
     if (landscapeData['amphtml'] === true) {

@@ -17,6 +17,8 @@
 import {Action} from '../amp-story-store-service';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryRequestService} from '../amp-story-request-service';
+import {AnalyticsEvent} from '../story-analytics';
+import {AnalyticsVariable} from '../variable-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
@@ -362,6 +364,99 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       expect(clickSpy.getCall(0).args[0]).to.contain({
         '__AMP_CUSTOM_LINKER_TARGET__': ctaLinks.children[0],
       });
+    });
+  });
+
+  it('should fire analytics event when clicking on a link', () => {
+    const userJson = {
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
+        'email',
+        {'provider': 'facebook', 'app_id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'cta-link',
+          'links': [
+            {
+              'text': 'buttonA',
+              'url': 'google.com',
+              'amphtml': true,
+            },
+          ],
+        },
+      ],
+    };
+
+    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const analyticsSpy = sandbox.spy(bookend.analyticsService_, 'triggerEvent');
+    const variableSpy = sandbox.spy(
+      bookend.variableService_,
+      'onVariableUpdate'
+    );
+
+    bookend.build();
+    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+      const ctaLinks = bookend.bookendEl_.querySelector(
+        '.i-amphtml-story-bookend-cta-link-wrapper'
+      );
+      ctaLinks.children[0].onclick = function(e) {
+        e.preventDefault(); // Make the test not actually navigate.
+      };
+      ctaLinks.children[0].click();
+
+      expect(analyticsSpy).to.have.been.calledWith(
+        AnalyticsEvent.BOOKEND_CLICK
+      );
+      expect(variableSpy).to.have.been.calledWith(
+        AnalyticsVariable.BOOKEND_TARGET_HREF,
+        'http://localhost:9876/google.com'
+      );
+      expect(variableSpy).to.have.been.calledWith(
+        AnalyticsVariable.BOOKEND_COMPONENT_TYPE,
+        'cta-link'
+      );
+      expect(variableSpy).to.have.been.calledWith(
+        AnalyticsVariable.BOOKEND_COMPONENT_POSITION,
+        2 // Default heading is in position 1.
+      );
+    });
+  });
+
+  it('should not fire analytics event when clicking non-clickable components', () => {
+    const userJson = {
+      'bookendVersion': 'v1.0',
+      'shareProviders': [
+        'email',
+        {'provider': 'facebook', 'app_id': '254325784911610'},
+        'whatsapp',
+      ],
+      'components': [
+        {
+          'type': 'textbox',
+          'text': [
+            'Food by Enrique McPizza',
+            'Choreography by Gabriel Filly',
+            'Script by Alan Ecma S.',
+            'Direction by Jon Tarantino',
+          ],
+        },
+      ],
+    };
+
+    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const analyticsSpy = sandbox.spy(bookend.analyticsService_, 'triggerEvent');
+
+    bookend.build();
+    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
+      const textEl = bookend.bookendEl_.querySelector(
+        '.i-amphtml-story-bookend-text'
+      );
+
+      textEl.click();
+
+      expect(analyticsSpy).to.not.have.been.called;
     });
   });
 
