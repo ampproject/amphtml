@@ -254,11 +254,6 @@ class RuntimeTestRunner {
   }
 
   async setup() {
-    // Run tests against compiled code when explicitly specified via --compiled,
-    // or when the minified runtime is automatically built.
-    process.env.SERVE_MODE =
-      argv.compiled || !argv.nobuild ? 'compiled' : 'default';
-
     await this.maybeBuild();
     await startServer({
       name: 'AMP Test Server',

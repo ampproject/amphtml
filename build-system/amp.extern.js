@@ -148,7 +148,6 @@ VideoAnalyticsDetailsDef.prototype.width;
 var process = {};
 process.env;
 process.env.NODE_ENV;
-process.env.SERVE_MODE;
 
 /** @type {boolean|undefined} */
 window.IS_AMP_ALT;
