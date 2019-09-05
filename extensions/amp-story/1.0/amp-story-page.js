@@ -191,7 +191,7 @@ export const NavigationDirection = {
  * animation.
  * @param {!Window} win
  * @param {!Element} page
- * @param {!../../../src/service/resources-impl.ResourcesDef} resources
+ * @param {!../../../src/service/resources-interface.ResourcesInterface} resources
  * @return {function(!Element, ?UnlistenDef)}
  */
 function debounceEmbedResize(win, page, resources) {
@@ -245,7 +245,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
     const deferred = new Deferred();

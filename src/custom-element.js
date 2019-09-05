@@ -189,7 +189,7 @@ function createBaseCustomElementClass(win) {
 
       /**
        * Resources can only be looked up when an element is attached.
-       * @private {?./service/resources-impl.ResourcesDef}
+       * @private {?./service/resources-interface.ResourcesInterface}
        */
       this.resources_ = null;
 
@@ -348,7 +348,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Returns Resources manager. Only available after attachment. It throws
      * exception before the element is attached.
-     * @return {!./service/resources-impl.ResourcesDef}
+     * @return {!./service/resources-interface.ResourcesInterface}
      * @final
      * @package
      */
@@ -357,7 +357,7 @@ function createBaseCustomElementClass(win) {
         this.resources_,
         'no resources yet, since element is not attached'
       );
-      return /** @typedef {!./service/resources-impl.ResourcesDef} */ this
+      return /** @typedef {!./service/resources-interface.ResourcesInterface} */ this
         .resources_;
     }
 

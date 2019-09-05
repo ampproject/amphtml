@@ -352,10 +352,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/owners-impl.Owners}
+   * @return {!./service/owners-interface.OwnersInterface}
    */
   static ownersForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/owners-impl.Owners} */ (getServiceForDoc(
+    return /** @type {!./service/owners-interface.OwnersInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'owners'
     ));
@@ -409,10 +409,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/resources-impl.ResourcesDef}
+   * @return {!./service/resources-interface.ResourcesInterface}
    */
   static resourcesForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/resources-impl.ResourcesDef} */ (getServiceForDoc(
+    return /** @type {!./service/resources-interface.ResourcesInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -420,10 +420,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/resources-impl.ResourcesDef>}
+   * @return {!Promise<!./service/resources-interface.ResourcesInterface>}
    */
   static resourcesPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/resources-impl.ResourcesDef>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/resources-interface.ResourcesInterface>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'resources'
     ));

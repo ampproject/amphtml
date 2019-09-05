@@ -59,7 +59,7 @@ export class AmpStoryAffiliateLink {
     /** @private {string} */
     this.text_ = this.element_.textContent;
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
   }
 
