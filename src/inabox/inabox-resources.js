@@ -139,7 +139,7 @@ export class InaboxResources {
 
   /** @override */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.mutator_.changeSize(
+    this.mutator_./*OK*/ changeSize(
       element,
       newHeight,
       newWidth,
