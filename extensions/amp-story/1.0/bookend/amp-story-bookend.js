@@ -222,9 +222,6 @@ export class AmpStoryBookend extends DraggableDrawer {
 
     /** @const @private {!../variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
-
-    /** @private {?Element} */
-    this.componentsContainer_ = null;
   }
 
   /**
@@ -639,15 +636,13 @@ export class AmpStoryBookend extends DraggableDrawer {
           this.win.document,
           localizationService
         );
-        this.componentsContainer_ = dev().assertElement(
+        const container = dev().assertElement(
           BookendComponent.buildContainer(
             this.getShadowRoot(),
             this.win.document
           )
         );
-        this.mutateElement(() =>
-          this.componentsContainer_.appendChild(bookendEls)
-        );
+        this.mutateElement(() => container.appendChild(bookendEls));
       })
       .catch(e => {
         user().error(TAG, 'Unable to fetch localization service.', e.message);
