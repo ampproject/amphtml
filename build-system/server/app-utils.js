@@ -14,6 +14,33 @@
  * limitations under the License.
  */
 
+const minimist = require('minimist');
+
+/**
+ * Determines the server's mode based on command line arguments.
+ * @return {string}
+ */
+function getServeMode() {
+  const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+  if (argv.compiled) {
+    return 'compiled';
+  }
+  if (argv.cdn) {
+    return 'cdn';
+  }
+  if (argv.rtv != undefined) {
+    const {rtv} = argv;
+    if (isRtvMode(rtv)) {
+      return 'rtv';
+    } else {
+      const err = new Error(`Invalid rtv: ${rtv}. (Must be 15 digits long.)`);
+      err.showStack = false;
+      throw err;
+    }
+  }
+  return 'default';
+}
+
 /**
  * @param {string} serveMode
  * @return {boolean}
@@ -117,4 +144,8 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
   return file;
 };
 
-module.exports = {replaceUrls, isRtvMode};
+module.exports = {
+  isRtvMode,
+  replaceUrls,
+  getServeMode,
+};
