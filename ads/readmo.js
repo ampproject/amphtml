@@ -21,7 +21,11 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function readmo(global, data) {
-  validateData(data, ['section'], ['module', 'sponsoredByLabel', 'infinite', 'title']);
+  validateData(
+    data,
+    ['section'],
+    ['module', 'sponsoredByLabel', 'infinite', 'title']
+  );
 
   const {section, module, sponsoredByLabel, infinite, title} = data;
 

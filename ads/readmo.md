@@ -23,7 +23,7 @@ ReadMo only requires a section code to run. Please work your account manager to 
 ### Basic
 
 ```html
-  <amp-embed width="320" height="320"
+  <amp-embed width="400" height="400"
              type="readmo"
              layout="responsive"
              data-infinite="true"
