@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-intaker-chat-widget-0.1.css';
 import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
 import {platform} from './platform';
-import {setStyle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/style';
 import {templates} from './templates';
 import {widget} from './widget';
 
@@ -60,6 +60,7 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
       QA: this.qa,
       templates,
       setStyle,
+      toggle,
     });
   }
 

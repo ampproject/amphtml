@@ -108,7 +108,7 @@ function closeFrame() {
   removeClass(frameContainer, 'chatter-bot-frame-container-active');
   removeClass(document.body, 'chatter-bot-body-noscroll');
   removeClass(launcherContainer, 'chatter-bot-frame-container-active');
-  this.setStyle(frameContainer, 'display', 'none');
+  hideEl(frameContainer);
   document.title = originalTitle;
 }
 
@@ -116,7 +116,7 @@ function closeFrame() {
  * @return {null}
  */
 function openFrame() {
-  this.setStyle(frameContainer, 'display', 'block');
+  showEl(frameContainer);
   addClass(frameContainer, 'chatter-bot-frame-container-active');
   addClass(launcherContainer, 'chatter-bot-frame-container-active');
   if (!isDesktop) {
@@ -180,6 +180,7 @@ function lunch(preview) {
       restartBtn = document.getElementById(restartBtnId);
       frame = document.getElementById(frameId);
 
+      hideEl(frameContainer);
       closeBtn.addEventListener('click', closeFrame);
       restartBtn.addEventListener('click', function() {
         frame.src = url;
@@ -200,7 +201,7 @@ function exitPreview() {
   addClass(document.body, 'chatter-bot-body-noscroll');
   removeClass(frameContainer, 'preview');
   removeClass(launcherContainer, 'preview');
-  this.setStyle(frameContainer, 'height', '');
+  setStyle(frameContainer, 'height', '');
   frame.contentWindow.postMessage('exitPreview', '*');
 }
 
@@ -468,7 +469,9 @@ let externalUrl = '';
 const originalTitle = document.title || '';
 let isAMP = false;
 
-let Templates = this.INTAKER_CW_TMP || {};
+let Templates = {};
+let setStyle = null;
+let toggle = null;
 
 window.onmessage = function(e) {
   if (e.data.INTAKER_CHAT_WIDGET) {
@@ -480,7 +483,7 @@ window.onmessage = function(e) {
       case 'adjustHeight':
         if (frameContainer) {
           const h = data.height ? data.height + 10 : 0;
-          this.setStyle(frameContainer, 'height', h ? h + 'px' : '');
+          setStyle(frameContainer, 'height', h ? h + 'px' : '');
           const opt = {};
           if (h) {
             opt.height = h + 90;
@@ -504,6 +507,22 @@ window.onmessage = function(e) {
     }
   }
 };
+
+/**
+ *
+ * @param {HTMLBaseElement} el
+ */
+function showEl(el) {
+  toggle(el, 'block');
+}
+
+/**
+ *
+ * @param {HTMLBaseElement} el
+ */
+function hideEl(el) {
+  toggle(el, isAMP ? false : 'none');
+}
 
 /**
  *
@@ -554,13 +573,17 @@ function bootstrap(amp) {
     platform = amp.platform;
     Templates = amp.templates;
     useQA = amp.QA;
-    this.setStyle = amp.setStyle;
+    setStyle = amp.setStyle;
+    toggle = amp.toggle;
 
     if (amp.DEV_ENV) {
       window.DEV_ENV = amp.DEV_ENV;
     }
   } else {
     chatUrlHash = window[INTAKER_CHAT_URL] || window[INTKER_CHAT_URL];
+    Templates = window['INTAKER_CW_TMP'];
+    setStyle = window['IntakerSetStyle'];
+    toggle = window['IntakerToggle'];
   }
 
   url = atob(chatUrlHash);
