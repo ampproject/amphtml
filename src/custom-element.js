@@ -248,6 +248,16 @@ function createBaseCustomElementClass(win) {
       /** @private {?Element|undefined} */
       this.overflowElement_ = undefined;
 
+      /**
+       * The time at which this element was scheduled for layout relative to
+       * the epoch. This value will be set to 0 until the this element has been
+       * scheduled.
+       * Note that this value may change over time if the element is enqueued,
+       * then dequeued and re-enqueued by the scheduler.
+       * @type {number|undefined}
+       */
+      this.layoutScheduleTime = undefined;
+
       // Closure compiler appears to mark HTMLElement as @struct which
       // disables bracket access. Force this with a type coercion.
       const nonStructThis = /** @type {!Object} */ (this);
