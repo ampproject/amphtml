@@ -385,6 +385,10 @@ function compile(
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
+        .on('error', err => {
+          handleCompilerError(outputFilename);
+          reject(err);
+        })
         .pipe(rename(outputFilename))
         .pipe(
           gulpIf(
