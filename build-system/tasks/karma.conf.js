@@ -334,7 +334,7 @@ module.exports = {
       'middleware:custom': [
         'factory',
         function() {
-          return require(require.resolve('../app.js'));
+          return require(require.resolve('../server/app.js'));
         },
       ],
     },
