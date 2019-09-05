@@ -16,23 +16,28 @@
 
 import '../amp-intaker-chat-widget';
 
-describes.realWin('amp-intaker-chat-widget', {
-  amp: {
-    extensions: ['amp-intaker-chat-widget'],
+describes.realWin(
+  'amp-intaker-chat-widget',
+  {
+    amp: {
+      extensions: ['amp-intaker-chat-widget'],
+    },
   },
-}, env => {
+  env => {
+    let win;
+    let element;
 
-  let win;
-  let element;
+    beforeEach(() => {
+      win = env.win;
+      element = win.document.createElement('amp-intaker-chat-widget');
+      win.document.body.appendChild(element);
+    });
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-intaker-chat-widget');
-    win.document.body.appendChild(element);
-  });
-
-  it('should have IntakerChatWidgetPlaceholder when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('IntakerChatWidgetPlaceholder');
-  });
-});
+    it('should have IntakerChatWidgetPlaceholder when built', () => {
+      element.build();
+      expect(element.querySelector('div').textContent).to.equal(
+        'IntakerChatWidgetPlaceholder'
+      );
+    });
+  }
+);
