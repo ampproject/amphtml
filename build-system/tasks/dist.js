@@ -153,7 +153,6 @@ async function dist() {
     console.log('\n');
   }
 
-  await generateFileListing();
   await stopNailgunServer(distNailgunPort);
   await formatExtractedMessages();
 
@@ -164,6 +163,8 @@ async function dist() {
       createModuleCompatibleES5Bundle('shadow-v0.js'),
     ]);
   }
+
+  await generateFileListing();
 
   return exitCtrlcHandler(handlerProcess);
 }
@@ -301,12 +302,13 @@ async function walk(dest) {
  * Generate a listing of all files in dist/ and save as dist/files.txt
  */
 async function generateFileListing() {
+  const startTime = Date.now();
   const distDir = 'dist';
   const filesOut = `${distDir}/files.txt`;
   fs.writeFileSync(filesOut, '');
   const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
   fs.writeFileSync(filesOut, files.join('\n'));
-  log('Generated', cyan(filesOut));
+  endBuildStep('Generated', filesOut, startTime);
 }
 
 /**
