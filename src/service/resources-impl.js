@@ -794,19 +794,15 @@ export class Resources {
 
   /**
    * @param {!Resource} resource
-   * @param {boolean=} opt_disconnect
    * @private
    */
-  removeResource_(resource, opt_disconnect) {
+  removeResource_(resource) {
     const index = this.resources_.indexOf(resource);
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
-    }
-    if (opt_disconnect) {
-      resource.disconnect();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
