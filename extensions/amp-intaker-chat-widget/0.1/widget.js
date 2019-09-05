@@ -93,7 +93,7 @@ function loadCss(url) {
  */
 function addToBody(string) {
   let tmp = document.createElement('div');
-  tmp.innerHTML = string;
+  tmp /*OK*/.innerHTML /*OK*/ = string;
   document.body.appendChild(tmp.firstChild);
   tmp = null;
 }
@@ -127,8 +127,6 @@ function openFrame() {
       exitPreview();
     }
   }
-
-  resizeAmpFrame();
 }
 
 /**
@@ -202,7 +200,8 @@ function exitPreview() {
   removeClass(frameContainer, 'preview');
   removeClass(launcherContainer, 'preview');
   setStyle(frameContainer, 'height', '');
-  frame.contentWindow.postMessage('exitPreview', '*');
+  frame.contentWindow /*OK*/
+    .postMessage(/*OK*/ 'exitPreview', '*');
 }
 
 /**
@@ -267,12 +266,15 @@ function authenticate(callback) {
       } else {
         if (console.error) {
           if (result === 'CustomerNotFound') {
-            console.error('This is not the chat you are looking for.');
+            console /*OK*/
+              .error('This is not the chat you are looking for.');
           } else {
-            console.error(
-              'Intaker Chatter Bot client is expired. Login to your dashboard and upgrade.'
-            );
-            console.error('https://intaker.co/dashboard');
+            console /*OK*/
+              .error(
+                'Intaker Chatter Bot client is expired. Login to your dashboard and upgrade.'
+              );
+            console /*OK*/
+              .error('https://intaker.co/dashboard');
           }
         }
       }
@@ -351,8 +353,6 @@ function loadDingSound() {
  * @return {null}
  */
 function autoLunch(setting) {
-  resizeAmpFrame();
-
   const cookie = CookiesAPI.getJSON(cookieName);
   if (cookie && cookie.autoLunch === false && !window.DEV_ENV) {
     return;
@@ -472,6 +472,7 @@ let isAMP = false;
 let Templates = {};
 let setStyle = null;
 let toggle = null;
+let referrer = '';
 
 window.onmessage = function(e) {
   if (e.data.INTAKER_CHAT_WIDGET) {
@@ -484,16 +485,6 @@ window.onmessage = function(e) {
         if (frameContainer) {
           const h = data.height ? data.height + 10 : 0;
           setStyle(frameContainer, 'height', h ? h + 'px' : '');
-          const opt = {};
-          if (h) {
-            opt.height = h + 90;
-            opt.width = 400;
-          } else {
-            opt.height = 2000;
-            opt.width = 2000;
-          }
-
-          resizeAmpFrame(opt);
         }
         break;
       case 'newMessage':
@@ -526,43 +517,6 @@ function hideEl(el) {
 
 /**
  *
- * @param {object} [options]
- */
-function resizeAmpFrame(options) {
-  if (!isAMP) {
-    return;
-  }
-
-  options = options || {};
-
-  //full size
-  let w = isDesktop ? 460 : 2000;
-  let h = isDesktop ? 720 : 2000;
-
-  if (previewChatIsActive || !chatIsActive) {
-    h = options.height || document.body.scrollHeight;
-    if (h < 100) {
-      h = 100;
-    }
-    w = options.width || document.body.scrollWidth;
-    if (w < 300) {
-      w = 300;
-    }
-  }
-
-  window.parent.postMessage(
-    {
-      sentinel: 'amp',
-      type: 'embed-size',
-      height: h,
-      width: w,
-    },
-    '*'
-  );
-}
-
-/**
- *
  * @param {object} [amp]
  */
 function bootstrap(amp) {
@@ -575,6 +529,7 @@ function bootstrap(amp) {
     useQA = amp.QA;
     setStyle = amp.setStyle;
     toggle = amp.toggle;
+    referrer = amp.referrer;
 
     if (amp.DEV_ENV) {
       window.DEV_ENV = amp.DEV_ENV;
@@ -584,6 +539,7 @@ function bootstrap(amp) {
     Templates = window['INTAKER_CW_TMP'];
     setStyle = window['IntakerSetStyle'];
     toggle = window['IntakerToggle'];
+    referrer = window['IntakerReferrer'];
   }
 
   url = atob(chatUrlHash);
@@ -604,19 +560,10 @@ function bootstrap(amp) {
     '?externalUrl=' +
     externalUrl +
     '&referrer=' +
-    encodeURI(document.referrer || '');
+    encodeURI(referrer || '');
   api = useQA
     ? 'https://intakerapiqa.azurewebsites.net'
     : 'https://idemanducoreapi20180624025640.azurewebsites.net';
-
-  isAMP &&
-    window.parent.postMessage(
-      {
-        sentinel: 'amp',
-        type: 'embed-ready',
-      },
-      '*'
-    );
 
   authenticate(function() {
     loadDingSound();

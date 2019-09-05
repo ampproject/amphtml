@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {} from '../../../src/service';
 import {CSS} from '../../../build/amp-intaker-chat-widget-0.1.css';
 import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
@@ -61,6 +62,7 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
       templates,
       setStyle,
       toggle,
+      referrer: '',
     });
   }
 
