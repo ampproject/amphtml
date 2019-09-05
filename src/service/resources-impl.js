@@ -17,7 +17,6 @@
 import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
-import {Owners} from './owners-impl';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
@@ -30,7 +29,6 @@ import {dev, devAssert, user} from '../log';
 import {dict} from '../utils/object';
 import {getSourceUrl, isProxyOrigin} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
-import {isArray} from '../types';
 import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
 import {loadPromise} from '../event-helper';
@@ -78,7 +76,7 @@ let ChangeSizeRequestDef;
 /**
  * @interface
  */
-class MutatorsAndOwnersDef extends Owners {
+class MutatorsDef {
   /**
    * Requests the runtime to change the element's size. When the size is
    * successfully updated then the opt_callback is called.
@@ -180,7 +178,7 @@ class MutatorsAndOwnersDef extends Owners {
 /**
  * @interface
  */
-export class ResourcesDef extends MutatorsAndOwnersDef {
+export class ResourcesDef extends MutatorsDef {
   /**
    * Returns a list of resources.
    * @return {!Array<!Resource>}
@@ -267,6 +265,21 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
   removeForChildWindow(childWin) {}
 
   /**
+   * Schedules layout or preload for the specified resource.
+   * @param {!Resource} resource
+   * @param {boolean} layout
+   * @param {number=} opt_parentPriority
+   * @param {boolean=} opt_forceOutsideViewport
+   * @package
+   */
+  scheduleLayoutOrPreload(
+    resource,
+    layout,
+    opt_parentPriority,
+    opt_forceOutsideViewport
+  ) {}
+
+  /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    * @param {boolean=} opt_relayoutAll
@@ -292,15 +305,6 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
   ampInitComplete() {}
 
   /**
-   * Requires the layout of the specified element or top-level sub-elements
-   * within.
-   * @param {!Element} element
-   * @param {number=} opt_parentPriority
-   * @return {!Promise}
-   */
-  requireLayout(element, opt_parentPriority) {}
-
-  /**
    * Updates the priority of the resource. If there are tasks currently
    * scheduled, their priority is updated as well.
    * @param {!Element} element
@@ -312,7 +316,6 @@ export class ResourcesDef extends MutatorsAndOwnersDef {
 
 /**
  * @implements {ResourcesDef}
- * @implements {./owners-impl.Owners}
  */
 export class Resources {
   /**
@@ -832,89 +835,6 @@ export class Resources {
   }
 
   /** @override */
-  setOwner(element, owner) {
-    Resource.setOwner(element, owner);
-  }
-
-  /** @override */
-  requireLayout(element, opt_parentPriority) {
-    const promises = [];
-    this.discoverResourcesForElement_(element, resource => {
-      if (resource.getState() == ResourceState.LAYOUT_COMPLETE) {
-        return;
-      }
-      if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(
-          resource.whenBuilt().then(() => {
-            resource.measure();
-            if (!resource.isDisplayed()) {
-              return;
-            }
-            this.scheduleLayoutOrPreload_(
-              resource,
-              /* layout */ true,
-              opt_parentPriority,
-              /* forceOutsideViewport */ true
-            );
-            return resource.loadedOnce();
-          })
-        );
-      } else if (resource.isDisplayed()) {
-        promises.push(resource.loadedOnce());
-      }
-    });
-    return Promise.all(promises);
-  }
-
-  /** @override */
-  scheduleLayout(parentElement, subElements) {
-    this.scheduleLayoutOrPreloadForSubresources_(
-      Resource.forElement(parentElement),
-      /* layout */ true,
-      elements_(subElements)
-    );
-  }
-
-  /** @override */
-  schedulePause(parentElement, subElements) {
-    const parentResource = Resource.forElement(parentElement);
-    subElements = elements_(subElements);
-
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.pause();
-    });
-  }
-
-  /** @override */
-  scheduleResume(parentElement, subElements) {
-    const parentResource = Resource.forElement(parentElement);
-    subElements = elements_(subElements);
-
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.resume();
-    });
-  }
-
-  /** @override */
-  scheduleUnlayout(parentElement, subElements) {
-    const parentResource = Resource.forElement(parentElement);
-    subElements = elements_(subElements);
-
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.unlayout();
-    });
-  }
-
-  /** @override */
-  schedulePreload(parentElement, subElements) {
-    this.scheduleLayoutOrPreloadForSubresources_(
-      Resource.forElement(parentElement),
-      /* layout */ false,
-      elements_(subElements)
-    );
-  }
-
-  /** @override */
   updateLayoutPriority(element, newLayoutPriority) {
     const resource = Resource.forElement(element);
 
@@ -928,15 +848,6 @@ export class Resources {
     });
 
     this.schedulePass();
-  }
-
-  /** @override */
-  updateInViewport(parentElement, subElements, inLocalViewport) {
-    this.updateInViewportForSubresources_(
-      Resource.forElement(parentElement),
-      elements_(subElements),
-      inLocalViewport
-    );
   }
 
   /** @override */
@@ -1721,7 +1632,7 @@ export class Resources {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         // TODO(dvoytenko): This extra build has to be merged with the
-        // scheduleLayoutOrPreload_ method below.
+        // scheduleLayoutOrPreload method below.
         // Force build for all resources visible, measured, and in the viewport.
         if (
           !r.isBuilt() &&
@@ -1744,7 +1655,7 @@ export class Resources {
         // layers. This is currently a short-term fix to the problem that
         // the fixed elements get incorrect top coord.
         if (r.isDisplayed() && r.overlaps(loadRect)) {
-          this.scheduleLayoutOrPreload_(r, /* layout */ true);
+          this.scheduleLayoutOrPreload(r, /* layout */ true);
         }
       }
     }
@@ -1771,7 +1682,7 @@ export class Resources {
           r.idleRenderOutsideViewport()
         ) {
           dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
-          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          this.scheduleLayoutOrPreload(r, /* layout */ false);
           idleScheduledCount++;
         }
       }
@@ -1789,7 +1700,7 @@ export class Resources {
           r.isDisplayed()
         ) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
-          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          this.scheduleLayoutOrPreload(r, /* layout */ false);
           idleScheduledCount++;
         }
       }
@@ -2191,15 +2102,8 @@ export class Resources {
     return true;
   }
 
-  /**
-   * Schedules layout or preload for the specified resource.
-   * @param {!Resource} resource
-   * @param {boolean} layout
-   * @param {number=} opt_parentPriority
-   * @param {boolean=} opt_forceOutsideViewport
-   * @private
-   */
-  scheduleLayoutOrPreload_(
+  /** @override */
+  scheduleLayoutOrPreload(
     resource,
     layout,
     opt_parentPriority,
@@ -2234,50 +2138,6 @@ export class Resources {
         forceOutsideViewport,
         resource.startLayout.bind(resource)
       );
-    }
-  }
-
-  /**
-   * Schedules layout or preload for the sub-resources of the specified
-   * resource.
-   * @param {!Resource} parentResource
-   * @param {boolean} layout
-   * @param {!Array<!Element>} subElements
-   * @private
-   */
-  scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      if (resource.getState() == ResourceState.NOT_BUILT) {
-        resource.whenBuilt().then(() => {
-          this.measureAndScheduleIfAllowed_(
-            resource,
-            layout,
-            parentResource.getLayoutPriority()
-          );
-        });
-      } else {
-        this.measureAndScheduleIfAllowed_(
-          resource,
-          layout,
-          parentResource.getLayoutPriority()
-        );
-      }
-    });
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @param {boolean} layout
-   * @param {number} parentPriority
-   * @private
-   */
-  measureAndScheduleIfAllowed_(resource, layout, parentPriority) {
-    resource.measure();
-    if (
-      resource.getState() == ResourceState.READY_FOR_LAYOUT &&
-      resource.isDisplayed()
-    ) {
-      this.scheduleLayoutOrPreload_(resource, layout, parentPriority);
     }
   }
 
@@ -2325,70 +2185,6 @@ export class Resources {
       this.schedulePass(this.calcTaskTimeout_(task));
     }
     task.resource.layoutScheduled(task.scheduleTime);
-  }
-
-  /**
-   * Updates inViewport state for the specified sub-resources of a resource.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   * @private
-   */
-  updateInViewportForSubresources_(
-    parentResource,
-    subElements,
-    inLocalViewport
-  ) {
-    const inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.setInViewport(inViewport);
-    });
-  }
-
-  /**
-   * Finds resources within the parent resource's shallow subtree.
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} elements
-   * @param {function(!Resource)} callback
-   */
-  discoverResourcesForArray_(parentResource, elements, callback) {
-    elements.forEach(element => {
-      devAssert(parentResource.element.contains(element));
-      this.discoverResourcesForElement_(element, callback);
-    });
-  }
-
-  /**
-   * @param {!Element} element
-   * @param {function(!Resource)} callback
-   */
-  discoverResourcesForElement_(element, callback) {
-    // Breadth-first search.
-    if (element.classList.contains('i-amphtml-element')) {
-      callback(Resource.forElement(element));
-      // Also schedule amp-element that is a placeholder for the element.
-      const placeholder = element.getPlaceholder();
-      if (placeholder) {
-        this.discoverResourcesForElement_(placeholder, callback);
-      }
-    } else {
-      const ampElements = element.getElementsByClassName('i-amphtml-element');
-      const seen = [];
-      for (let i = 0; i < ampElements.length; i++) {
-        const ampElement = ampElements[i];
-        let covered = false;
-        for (let j = 0; j < seen.length; j++) {
-          if (seen[j].contains(ampElement)) {
-            covered = true;
-            break;
-          }
-        }
-        if (!covered) {
-          seen.push(ampElement);
-          callback(Resource.forElement(ampElement));
-        }
-      }
-    }
   }
 
   /**
@@ -2529,16 +2325,6 @@ export class Resources {
 }
 
 /**
- * @param {!Element|!Array<!Element>} elements
- * @return {!Array<!Element>}
- */
-function elements_(elements) {
-  return /** @type {!Array<!Element>} */ (isArray(elements)
-    ? elements
-    : [elements]);
-}
-
-/**
  * The internal structure of a ChangeHeightRequest.
  * @typedef {{
  *   height: (number|undefined),
@@ -2553,13 +2339,4 @@ export let SizeDef;
  */
 export function installResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
-}
-
-/**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- */
-export function installOwnersServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'owners', ampdoc => {
-    return Services.resourcesForDoc(ampdoc);
-  });
 }

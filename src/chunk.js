@@ -230,8 +230,8 @@ class Task {
    * @protected
    */
   useRequestIdleCallback_() {
-    // By default, always use requestIdleCallback.
-    return true;
+    // By default, never use requestIdleCallback.
+    return false;
   }
 }
 

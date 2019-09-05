@@ -486,6 +486,9 @@ export class AmpList extends AMP.BaseElement {
           });
         }
         removeChildren(dev().assertElement(this.container_));
+        if (this.loadMoreEnabled_) {
+          this.getLoadMoreService_().hideAllLoadMoreElements();
+        }
       });
     }
   }

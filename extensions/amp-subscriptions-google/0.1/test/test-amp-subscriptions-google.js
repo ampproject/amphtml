@@ -162,16 +162,38 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
   });
 
+  it('should proxy fetch non-granting response', () => {
+    const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
+      expect(url).to.match(/publication\/example.org/);
+      expect(init).to.deep.equal({
+        credentials: 'include',
+        prerenderSafe: true,
+      });
+      return Promise.resolve({
+        json: () => {
+          return Promise.resolve({
+            entitlements: {
+              source: 'subscribe.google.com',
+              products: ['example.org:registered_user'],
+              subscriptionToken: 'tok1',
+            },
+          });
+        },
+      });
+    });
+    return platform.getEntitlements().then(ents => {
+      expect(ents.source).to.equal(PLATFORM_ID);
+      expect(ents.granted).to.be.false;
+      expect(fetchStub).to.be.calledOnce;
+    });
+  });
+
   it('should proxy fetch empty response', () => {
     sandbox.stub(xhr, 'fetchJson').callsFake(() => {
       return Promise.resolve({
         json: () => {
           return Promise.resolve({
-            entitlements: {
-              source: 'google',
-              products: ['example.org:other'],
-              subscriptionToken: 'tok1',
-            },
+            entitlements: {},
           });
         },
       });
@@ -553,7 +575,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       });
     });
 
-    it('should convert non granted entitlements to null', () => {
+    it('should convert non granted internal shape with granted == false', () => {
       sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
@@ -568,7 +590,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         });
       });
       return platform.getEntitlements().then(entitlement => {
-        expect(entitlement).to.be.equal(null);
+        expect(entitlement.source).to.be.equal('google');
+        expect(entitlement.granted).to.be.equal(false);
+        expect(entitlement.grantReason).to.be.null;
       });
     });
   });

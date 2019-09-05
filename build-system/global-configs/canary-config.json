@@ -1,11 +1,10 @@
 {
   "allow-doc-opt-in": [
     "amp-next-page",
-    "disable-amp-story-desktop",
     "inabox-viewport-friendly",
-    "inabox-css-cleanup",
     "inabox-no-chunking",
-    "inabox-viewport-lite"
+    "inabox-viewport-lite",
+    "inabox-viewer-lite"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
@@ -33,6 +32,7 @@
   "as-use-attr-for-format": 0.01,
   "blurry-placeholder": 1,
   "chunked-amp": 1,
+  "custom-elements-v1": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "fie-css-cleanup": 1,

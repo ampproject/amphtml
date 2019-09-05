@@ -31,7 +31,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getO2player(attributes, opt_responsive) {
+    async function getO2player(attributes, opt_responsive) {
       const o2 = doc.createElement('amp-o2-player');
       for (const key in attributes) {
         o2.setAttribute(key, attributes[key]);
@@ -42,38 +42,35 @@ describes.realWin(
         o2.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(o2);
-      return o2
-        .build()
-        .then(() => o2.layoutCallback())
-        .then(() => o2);
+      await o2.build();
+      await o2.layoutCallback();
+      return o2;
     }
 
-    it('renders', () => {
-      return getO2player({
+    it('renders', async () => {
+      const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
-      }).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://delivery.vidible.tv/htmlembed/pid=123/456.html'
-        );
       });
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://delivery.vidible.tv/htmlembed/pid=123/456.html'
+      );
     });
 
-    it('renders responsively', () => {
-      return getO2player(
+    it('renders responsively', async () => {
+      const o2 = await getO2player(
         {
           'data-pid': '573acb47e4b0564ec2e10011',
           'data-bcid': '50d595ec0364e95588c77bd2',
         },
         true
-      ).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+      );
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
     it('requires data-pid', () => {
@@ -104,50 +101,47 @@ describes.realWin(
       });
     });
 
-    it('renders with data-vid passed', () => {
-      return getO2player({
+    it('renders with data-vid passed', async () => {
+      const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
         'data-vid': '789',
         'data-bid': '987',
-      }).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://delivery.vidible.tv/htmlembed/pid=123/456.html?bid=987&vid=789'
-        );
       });
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://delivery.vidible.tv/htmlembed/pid=123/456.html?bid=987&vid=789'
+      );
     });
 
-    it('renders with data-macros passed', () => {
-      return getO2player({
+    it('renders with data-macros passed', async () => {
+      const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
         'data-macros': 'm.test=test',
-      }).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://delivery.vidible.tv/htmlembed/pid=123/456.html?m.test=test'
-        );
       });
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://delivery.vidible.tv/htmlembed/pid=123/456.html?m.test=test'
+      );
     });
 
-    it('respects data-env parameter', () => {
-      return getO2player({
+    it('respects data-env parameter', async () => {
+      const o2 = await getO2player({
         'data-pid': '123',
         'data-bcid': '456',
         'data-env': 'stage',
-      }).then(o2 => {
-        const iframe = o2.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.src).to.equal(
-          'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html'
-        );
       });
+      const iframe = o2.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html'
+      );
     });
   }
 );

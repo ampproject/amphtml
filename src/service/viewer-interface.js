@@ -32,6 +32,8 @@ export class ViewerInterface {
   /**
    * Returns the value of a viewer's startup parameter with the specified
    * name or "undefined" if the parameter wasn't defined at startup time.
+   * TODO(#22733): deprecate/remove when ampdoc-fie is launched. Be careful that it's
+   * exported. Need to make sure it's not used externally.
    * @param {string} name
    * @return {?string}
    * @export
