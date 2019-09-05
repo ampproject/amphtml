@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
-import {Layout} from '../../../src/layout';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
@@ -110,12 +110,8 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return (
-      layout == Layout.FILL ||
-      layout == Layout.FIXED ||
-      layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.FLEX_ITEM ||
-      layout == Layout.NODISPLAY ||
-      layout == Layout.RESPONSIVE
+      isLayoutSizeDefined(layout) ||
+      layout == Layout.FLEX_ITEM
     );
   }
 
