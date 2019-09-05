@@ -83,7 +83,7 @@ Example:
 
     The src attribute may be omitted if the <code>[src]</code> attribute exists.
 
-    If fetching the data at the src URL fails, the <amp-autocomplete> triggers a fallback.</td>
+    If fetching the data at the src URL fails, the <code><amp-autocomplete></code> triggers a fallback.</td>
   </tr>
   <tr>
     <td width="40%"><strong>filter-expr (optional)</strong></td>
