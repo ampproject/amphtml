@@ -15,10 +15,10 @@
  */
 
 import {Deferred} from '../utils/promise';
+import {InaboxMutator} from './inabox-mutator';
 import {Observable} from '../observable';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from '../service/resource';
-import {Services} from '../services';
 import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
 
@@ -27,8 +27,9 @@ const FOUR_FRAME_DELAY = 70;
 
 /**
  * @implements {../service/resources-impl.ResourcesDef}
+ * @visibleForTesting
  */
-class InaboxResources {
+export class InaboxResources {
   /**
    * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -45,17 +46,17 @@ class InaboxResources {
     /** @private {number} */
     this.resourceIdCounter_ = 0;
 
-    /** @private @const {!../service/vsync-impl.Vsync} */
-    this.vsync_ = Services./*OK*/ vsyncFor(this.win);
-
     /** @const @private {!Pass} */
-    this.pass_ = new Pass(this.win, this.doPass_.bind(this));
+    this.pass_ = new Pass(this.win, this.doPass_.bind(this), FOUR_FRAME_DELAY);
 
     /** @private @const {!Observable} */
     this.passObservable_ = new Observable();
 
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
+
+    /** @const @private {!InaboxMutator} */
+    this.mutator_ = new InaboxMutator(ampdoc, this);
   }
 
   /** @override */
@@ -96,7 +97,7 @@ class InaboxResources {
     this.ampdoc_
       .whenReady()
       .then(resource.build.bind(resource))
-      .then(this.schedulePass.bind(this, FOUR_FRAME_DELAY));
+      .then(this.schedulePass.bind(this));
     dev().fine(TAG, 'resource upgraded:', resource.debugid);
   }
 
@@ -138,73 +139,53 @@ class InaboxResources {
 
   /** @override */
   changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.attemptChangeSize(element, newHeight, newWidth, opt_newMargins).then(
-      () => {
-        if (opt_callback) {
-          opt_callback();
-        }
-      }
+    this.mutator_.changeSize(
+      element,
+      newHeight,
+      newWidth,
+      opt_callback,
+      opt_newMargins
     );
   }
 
   /** @override */
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
-    return this.mutateElement(element, () => {
-      this.getResourceForElement(element)./*OK*/ changeSize(
-        newHeight,
-        newWidth,
-        opt_newMargins
-      );
-    });
+    return this.mutator_.attemptChangeSize(
+      element,
+      newHeight,
+      newWidth,
+      opt_newMargins
+    );
   }
 
   /** @override */
   expandElement(element) {
-    const resource = this.getResourceForElement(element);
-    resource.completeExpand();
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.expandedCallback(element);
-    }
-    this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
+    this.mutator_.expandElement(element);
   }
 
   /** @override */
   attemptCollapse(element) {
-    return this.mutateElement(element, () => {
-      this.getResourceForElement(element).completeCollapse();
-    });
+    return this.mutator_.attemptCollapse(element);
   }
 
   /** @override */
   collapseElement(element) {
-    this.getResourceForElement(element).completeCollapse();
-    this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
+    this.mutator_.collapseElement(element);
   }
 
   /** @override */
   measureElement(measurer) {
-    return this.vsync_.measurePromise(measurer);
+    return this.mutator_.measureElement(measurer);
   }
 
   /** @override */
   mutateElement(element, mutator) {
-    return this.measureMutateElement(element, null, mutator);
+    return this.mutator_.mutateElement(element, mutator);
   }
 
   /** @override */
   measureMutateElement(element, measurer, mutator) {
-    return this.vsync_.runPromise({
-      measure: () => {
-        if (measurer) {
-          measurer();
-        }
-      },
-      mutate: () => {
-        mutator();
-        this./*OK*/ schedulePass(FOUR_FRAME_DELAY);
-      },
-    });
+    return this.mutator_.measureMutateElement(element, measurer, mutator);
   }
 
   /**

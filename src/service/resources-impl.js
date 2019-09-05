@@ -76,7 +76,7 @@ let ChangeSizeRequestDef;
 /**
  * @interface
  */
-class MutatorsDef {
+export class MutatorsDef {
   /**
    * Requests the runtime to change the element's size. When the size is
    * successfully updated then the opt_callback is called.
