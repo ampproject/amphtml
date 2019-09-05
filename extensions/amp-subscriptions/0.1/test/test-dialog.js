@@ -77,8 +77,9 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
         expect(styles.transform).to.not.contain('17');
         expect(dialog.closeButton_).to.have.display('none');
         expect(updatePaddingSpy).to.be.calledOnce.calledWith(17);
-        expect(addToFixedLayerSpy).to.be.calledOnce
-             .calledWith(dialog.getRoot());
+        expect(addToFixedLayerSpy).to.be.calledOnce.calledWith(
+          dialog.getRoot()
+        );
         expect(dialog.isVisible()).to.be.true;
       });
   });
