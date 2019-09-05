@@ -18,8 +18,7 @@ const app = require('express').Router();
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 const request = require('request');
-const {getServeMode} = require('../app-utils');
-const {replaceUrls} = require('../app-utils');
+const {getServeMode, replaceUrls} = require('../app-utils');
 
 // In-a-box envelope.
 // Examples:

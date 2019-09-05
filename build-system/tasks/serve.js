@@ -38,7 +38,7 @@ let url = '';
 const serverFiles = deglob.sync(['build-system/server/**']);
 
 /**
- * Determines the server's mode based on command line arguments.
+ * Logs the server's mode (based on command line arguments).
  */
 function logServeMode() {
   switch (getServeMode()) {
