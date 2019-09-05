@@ -555,21 +555,6 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the element that its activation is requested based on some
-   * user event. Intended to be implemented by actual components.
-   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
-   */
-  activate(unusedInvocation) {}
-
-  /**
-   * Minimum event trust required for activate().
-   * @return {ActionTrust}
-   */
-  activationTrust() {
-    return ActionTrust.HIGH;
-  }
-
-  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
    * and 'error' events.
    * @param {T} element
