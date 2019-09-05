@@ -174,15 +174,11 @@
     }
 
     amp-sidebar {
-      width: 50vw;
+      width: 300px;
     }
 
     #mybody section{
       background: red;
-    }
-
-    body#mybody > amp-sidebar {
-      background: grey;
     }
   </style>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -196,11 +192,11 @@
 
 </head>
 <body id="mybody">
-  <amp-sidebar
+    <amp-sidebar
     id="sidebar1"
     layout="nodisplay"
     on="sidebarOpen:focusOnMe.focus"
-    side="right">
+    side="right" always-open>
     <ul>
       <li><a id="focusOnMe" href="https://google.com">This gets focused on open</a></li>
       <li><a href="#section1">Section 1</li>
@@ -214,6 +210,25 @@
       <li on="tap:sidebar1.close"> Close</li>
     </ul>
   </amp-sidebar>
+  <amp-sidebar
+    id="sidebar1"
+    layout="nodisplay"
+    on="sidebarOpen:focusOnMe.focus"
+    side="left" always-open>
+    <ul>
+      <li><a id="focusOnMe" href="https://google.com">This gets focused on open</a></li>
+      <li><a href="#section1">Section 1</li>
+      <li><a href="#section2">Section 2</a></li>
+      <li><a href="#myImage">My Image</a></li>
+      <li><button on="tap:section3.scrollTo">Section 3</button></li>
+      <li> <button on="tap:myInput.focus,sidebar1.close">Click to focus input and close</button></li>
+      <li> <button on="tap:sidebar1.close,myInput.focus">Click to close and focus input</button></li>
+      <li> <a href="http://abcnews.go.com/">Google</a></li>
+      <li> <a href="http://www.wsj.com">WSJ</a></li>
+      <li on="tap:sidebar1.close"> Close</li>
+    </ul>
+  </amp-sidebar>
+  <main>
   <h1>AMP Sidebar Example</h1>
   <button
     class="hamburger"
@@ -381,5 +396,6 @@
       </div>
     </div>
   </article>
+  </main>
 </body>
 </html>

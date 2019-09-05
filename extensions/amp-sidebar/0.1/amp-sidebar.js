@@ -124,6 +124,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.opened_ = false;
 
+    /** @private {boolean} */
+    this.alwaysOpen_ = false;
+
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
@@ -168,13 +171,27 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
+    if (!element.hasAttribute('role')) {
+      element.setAttribute('role', 'menu');
+    }
+
+    this.alwaysOpen_ = element.hasAttribute('always-open');
+    if (this.alwaysOpen_) {
+      const mainElement = this.getAmpDoc()
+        .getBody()
+        .querySelector('main');
+      if (mainElement) {
+        mainElement.setAttribute('open-sidebar', '');
+        this.opened_ = true;
+        toggle(this.element, /* display */ true);
+      }
+      return;
+    }
+
     // The element is always closed by default, so update the aria state to
     // match.
     element.setAttribute('aria-hidden', 'true');
 
-    if (!element.hasAttribute('role')) {
-      element.setAttribute('role', 'menu');
-    }
     // Make sidebar programmatically focusable and focus on `open` for a11y.
     element.tabIndex = -1;
 
