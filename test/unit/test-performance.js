@@ -821,6 +821,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
   function setupFakesForVisibilityStateManipulation() {
     // Fake window to fake `document.visibilityState`.
+    // TODO: Consider how we can replace this with the fake window object
+    // offered in fake-dom.js. We can't immediately because
+    // document.visibilityState is a read-only property in that object.
     fakeWin = {
       Date: env.win.Date,
       PerformanceObserver: env.sandbox.stub(),
