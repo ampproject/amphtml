@@ -91,6 +91,15 @@ export function resetSharedState() {
 /** @type {string} */
 const FORMAT_EXP = 'as-use-attr-for-format';
 
+/** @const {!{branch: string, control: string, experiment: string}}
+    @visibleForTesting
+*/
+export const MAX_HEIGHT_EXP = {
+  branch: 'fix-inconsistent-responsive-height-selection',
+  control: '368226520',
+  experiment: '368226521',
+};
+
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
@@ -257,7 +266,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
           this.autoFormat_,
           viewportSize,
-          this.element
+          this.element,
+          this.isInResponsiveHeightFixExperimentBranch()
         ),
         viewportSize.width
       ).catch(() => {});
@@ -273,6 +283,27 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Ensure that build is not blocked by need for consent (delay will occur
     // prior to ad URL construction).
     return null;
+  }
+
+  /**
+   * Selects into the inconsistent responsive height fix experiment.
+   * Note that this needs to be done before responsive sizing, so it must
+   * be separate from divertExperiments below.
+   * @return {boolean}
+   */
+  isInResponsiveHeightFixExperimentBranch() {
+    const experimentInfoMap = /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [[MAX_HEIGHT_EXP.branch]]: {
+        isTrafficEligible: () => this.isResponsive_(),
+        branches: [[MAX_HEIGHT_EXP.control], [MAX_HEIGHT_EXP.experiment]],
+      },
+    });
+    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    Object.keys(setExps).forEach(expName =>
+      addExperimentIdToElement(setExps[expName], this.element)
+    );
+    return setExps[MAX_HEIGHT_EXP.branch] == MAX_HEIGHT_EXP.experiment;
   }
 
   /**
@@ -656,14 +687,23 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @param {string} autoFormat
    * @param {!{width: number, height: number}} viewportSize
    * @param {!Element} element <amp-ad> added by publisher.
+   * @param {boolean} isInResponsiveHeightFixExperimentBranch
    * @return {number}
    * @private
    */
-  static getResponsiveHeightForContext_(autoFormat, viewportSize, element) {
+  static getResponsiveHeightForContext_(
+    autoFormat,
+    viewportSize,
+    element,
+    isInResponsiveHeightFixExperimentBranch
+  ) {
     switch (autoFormat) {
       case ADSENSE_RSPV_TAG:
         const minHeight = 100;
-        const maxHeight = Math.min(300, viewportSize.height);
+        const maxHeight = Math.min(
+          isInResponsiveHeightFixExperimentBranch ? 500 : 300,
+          viewportSize.height
+        );
         // We aim for a 6:5 aspect ratio.
         const idealHeight = Math.round(viewportSize.width / 1.2);
         return clamp(idealHeight, minHeight, maxHeight);
