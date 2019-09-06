@@ -93,20 +93,6 @@ describes.realWin(
       expect(obj.iframe_).to.be.null;
     });
 
-    it('requires data-mediaid', () => {
-      expectAsyncConsoleError(/The data-mediaid attribute is required for/, 3);
-      return getNexxtv({'data-client': '71QQG852413DU7J'}).should.eventually.be.rejectedWith(
-        /The data-mediaid attribute is required/
-      );
-    });
-
-    it('requires data-client', () => {
-      expectAsyncConsoleError(/The data-client attribute is required for/, 3);
-      return getNexxtv({'data-mediaid': '71QQG852413DU7J'}).should.eventually.be.rejectedWith(
-        /The data-client attribute is required/
-      );
-    });
-
     it('should forward events from nexxtv-player to the amp element', async () => {
       const nexxtv = await getNexxtv({
         'data-mediaid': '71QQG852413DU7J',
