@@ -16,7 +16,6 @@
 
 import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
-  BOOKEND_COMPONENT_CLASSES,
   BOOKEND_COMPONENT_TYPES,
   BookendComponentInterface,
 } from './bookend-component-interface';
@@ -96,11 +95,10 @@ export class CtaLinkComponent {
     `;
 
     let linkSeed = html`
-      <a target="_top">
+      <a class="i-amphtml-story-bookend-cta-link" target="_top">
         <div class="i-amphtml-story-bookend-cta-link-text" ref="linkText"></div>
       </a>
     `;
-    linkSeed.classList.add(BOOKEND_COMPONENT_CLASSES.CTA_LINK);
     ctaLinksData['links'].forEach(currentLink => {
       const el = linkSeed.cloneNode(/* deep */ true);
       addAttributesToElement(el, dict({'href': currentLink['url']}));
@@ -113,14 +111,12 @@ export class CtaLinkComponent {
       refs['linkText'].textContent = currentLink['text'];
 
       el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
-        position: data.position++,
+        position: data.position,
         type: BOOKEND_COMPONENT_TYPES.CTA_LINK,
       };
 
       container.appendChild(el);
     });
-    // Reduce one position since we don't want to take into account the wrapper.
-    data.position--;
 
     linkSeed = null; // GC
 

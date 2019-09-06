@@ -15,13 +15,6 @@
  */
 
 /** @enum {string} */
-export const BOOKEND_COMPONENT_CLASSES = {
-  CTA_LINK: 'i-amphtml-story-bookend-cta-link',
-  LANDSCAPE: 'i-amphtml-story-bookend-landscape',
-  PORTRAIT: 'i-amphtml-story-bookend-portrait',
-  SMALL: 'i-amphtml-story-bookend-article',
-};
-
 export const BOOKEND_COMPONENT_TYPES = {
   SMALL: 'small',
   CTA_LINK: 'cta-link',

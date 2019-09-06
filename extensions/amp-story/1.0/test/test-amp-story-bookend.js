@@ -17,8 +17,8 @@
 import {Action} from '../amp-story-store-service';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryRequestService} from '../amp-story-request-service';
-import {AnalyticsEvent} from '../story-analytics';
-import {AnalyticsVariable} from '../variable-service';
+import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
@@ -36,6 +36,8 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
   let bookend;
   let bookendElem;
   let requestService;
+  let analytics;
+  let analyticsVariables;
 
   const expectedComponents = [
     {
@@ -139,6 +141,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     bookend = new AmpStoryBookend(bookendElem);
     bookend.buildCallback();
+
+    analytics = getAnalyticsService(win);
+    analyticsVariables = getVariableService(win);
 
     // Force sync mutateElement.
     sandbox.stub(bookend, 'mutateElement').callsArg(0);
@@ -390,11 +395,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     };
 
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
-    const analyticsSpy = sandbox.spy(bookend.analyticsService_, 'triggerEvent');
-    const variableSpy = sandbox.spy(
-      bookend.variableService_,
-      'onVariableUpdate'
-    );
+    const analyticsSpy = sandbox.spy(analytics, 'triggerEvent');
 
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {
@@ -409,18 +410,15 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       expect(analyticsSpy).to.have.been.calledWith(
         AnalyticsEvent.BOOKEND_CLICK
       );
-      expect(variableSpy).to.have.been.calledWith(
-        AnalyticsVariable.BOOKEND_TARGET_HREF,
-        'http://localhost:9876/google.com'
-      );
-      expect(variableSpy).to.have.been.calledWith(
-        AnalyticsVariable.BOOKEND_COMPONENT_TYPE,
-        'cta-link'
-      );
-      expect(variableSpy).to.have.been.calledWith(
-        AnalyticsVariable.BOOKEND_COMPONENT_POSITION,
-        2 // Default heading is in position 1.
-      );
+      expect(
+        analyticsVariables.get()[AnalyticsVariable.BOOKEND_TARGET_HREF]
+      ).to.equal('http://localhost:9876/google.com');
+      expect(
+        analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_TYPE]
+      ).to.equal('cta-link');
+      expect(
+        analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_POSITION]
+      ).to.equal(1);
     });
   });
 
@@ -446,7 +444,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     };
 
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
-    const analyticsSpy = sandbox.spy(bookend.analyticsService_, 'triggerEvent');
+    const analyticsSpy = sandbox.spy(analytics, 'triggerEvent');
 
     bookend.build();
     return bookend.loadConfigAndMaybeRenderBookend().then(() => {

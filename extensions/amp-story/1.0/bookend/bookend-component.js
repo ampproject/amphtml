@@ -160,19 +160,16 @@ export class BookendComponent {
     const fragment = doc.createDocumentFragment();
 
     components = prependTitle(components, localizationService);
-
-    const data = {position: 1};
-    components.forEach(component => {
+    components.forEach((component, index) => {
       const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
         const el = componentBuilderInstanceFor(type).buildElement(
           component,
           doc,
-          data
+          {position: index}
         );
         fragment.appendChild(el);
       }
-      data.position++;
     });
     return fragment;
   }

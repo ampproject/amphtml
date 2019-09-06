@@ -16,7 +16,6 @@
 
 import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
-  BOOKEND_COMPONENT_CLASSES,
   BOOKEND_COMPONENT_TYPES,
   BookendComponentInterface,
 } from './bookend-component-interface';
@@ -91,7 +90,10 @@ export class ArticleComponent {
     const html = htmlFor(doc);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const el = html`
-      <a class="i-amphtml-story-bookend-component" target="_top">
+      <a
+        class="i-amphtml-story-bookend-article i-amphtml-story-bookend-component"
+        target="_top"
+      >
         <div class="i-amphtml-story-bookend-article-text-content">
           <h2
             class="i-amphtml-story-bookend-article-heading"
@@ -102,7 +104,6 @@ export class ArticleComponent {
       </a>
     `;
     addAttributesToElement(el, dict({'href': articleData.url}));
-    el.classList.add(BOOKEND_COMPONENT_CLASSES.SMALL);
     el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
       position: data.position,
       type: BOOKEND_COMPONENT_TYPES.SMALL,

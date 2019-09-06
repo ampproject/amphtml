@@ -16,7 +16,6 @@
 
 import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
-  BOOKEND_COMPONENT_CLASSES,
   BOOKEND_COMPONENT_TYPES,
   BookendComponentInterface,
 } from './bookend-component-interface';
@@ -97,7 +96,7 @@ export class PortraitComponent {
     portraitData = /** @type {PortraitComponentDef} */ (portraitData);
     const html = htmlFor(doc);
     const el = html`
-        <a class="i-amphtml-story-bookend-component" target="_top">
+        <a class="i-amphtml-story-bookend-portrait i-amphtml-story-bookend-component" target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
           <h2 class="i-amphtml-story-bookend-article-heading"
@@ -109,7 +108,6 @@ export class PortraitComponent {
             ref="meta"></div>
         </a>`;
     addAttributesToElement(el, dict({'href': portraitData.url}));
-    el.classList.add(BOOKEND_COMPONENT_CLASSES.PORTRAIT);
     el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
       position: data.position,
       type: BOOKEND_COMPONENT_TYPES.PORTRAIT,
