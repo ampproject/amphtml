@@ -155,7 +155,7 @@ In the following example, we display a list of images and titles. Because the `<
 ```
 [/example]
 
-Here's the CSS for the `overflow`:
+AMP applies the following CSS to elements with the `overflow` attribute:
 
 ```css
 .list-overflow[overflow] {
