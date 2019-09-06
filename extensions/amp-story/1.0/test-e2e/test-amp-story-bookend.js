@@ -18,7 +18,7 @@ import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller
 import sleep from 'sleep-promise';
 
 describes.endtoend(
-  'amp story share menu',
+  'amp story bookend',
   {
     testUrl: 'http://localhost:8000/test/manual/amp-story/amp-story.amp.html',
     // TODO(estherkim): implement mobile emulation on Firefox when available on geckodriver
@@ -62,6 +62,9 @@ describes.endtoend(
       const getLinkButton = await controller.findElement(
         'div.i-amphtml-story-share-icon.i-amphtml-story-share-icon-link'
       );
+
+      // give shadow dom half a second to be interactable
+      await sleep(500);
       await controller.click(getLinkButton);
 
       // go to amp bind page with form
