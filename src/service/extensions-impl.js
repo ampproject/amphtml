@@ -243,8 +243,8 @@ export class Extensions {
    */
   reloadExtension(extensionId) {
     const attribute = isTemplateExtension(extensionId)
-      ? 'custom-element'
-      : 'custom-template';
+      ? 'custom-template'
+      : 'custom-element';
     // The :not is an extra prevention of recursion because it will be
     // added to script tags that go into the code path below.
     const oldScriptElement = this.win.document.head./*OK*/ querySelector(
@@ -525,8 +525,8 @@ export class Extensions {
     }
     if (holder.scriptPresent === undefined) {
       const attribute = isTemplateExtension(extensionId)
-        ? 'custom-element'
-        : 'custom-template';
+        ? 'custom-template'
+        : 'custom-element';
       const scriptInHead = this.win.document.head./*OK*/ querySelector(
         `[${attribute}="${extensionId}"]`
       );
