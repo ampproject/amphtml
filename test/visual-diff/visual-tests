@@ -370,7 +370,8 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
@@ -474,7 +475,8 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
@@ -530,7 +532,8 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/basic.rtl.html",
@@ -559,7 +562,8 @@
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       // The url here should not matter; this UI should be triggered for all
