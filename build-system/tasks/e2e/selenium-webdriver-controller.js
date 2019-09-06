@@ -37,6 +37,7 @@ const KeyToSeleniumMap = {
   [Key.Enter]: SeleniumKey.ENTER,
   [Key.Escape]: SeleniumKey.ESCAPE,
   [Key.Tab]: SeleniumKey.TAB,
+  [Key.CtrlV]: SeleniumKey.chord(SeleniumKey.CONTROL, 'v'),
 };
 
 /**

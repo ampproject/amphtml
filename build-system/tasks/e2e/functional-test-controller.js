@@ -57,6 +57,7 @@ const Key = {
   'Enter': 'Enter',
   'Escape': 'Escape',
   'Tab': 'Tab',
+  'CtrlV': 'CtrlV',
 };
 
 /** @interface */
