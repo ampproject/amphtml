@@ -31,7 +31,6 @@ describes.endtoend(
     let controller;
 
     beforeEach(async () => {
-      console.log('huh 2');
       controller = env.controller;
 
       // ensure story is loaded
@@ -52,7 +51,7 @@ describes.endtoend(
       ).to.exist;
     });
 
-    it.only('should copy the link using the bookend share menu', async () => {
+    it('should copy the link using the bookend share menu', async () => {
       await goToBookend();
 
       const shadowHost = await controller.findElement(
