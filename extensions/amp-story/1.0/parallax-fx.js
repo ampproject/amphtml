@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {mapRange, sum} from '../../../src/utils/math';
 import {setImportantStyles, setStyles} from '../../../src/style';
@@ -55,6 +55,7 @@ const MODE_ATTR = 'parallax-fx-mode';
 const LAYER_SPACING_ATTR = 'parallax-fx-layer-spacing';
 const NEAREST_SCALE_ATTR = 'parallax-fx-nearest-scale';
 const FARTHEST_SCALE_ATTR = 'parallax-fx-farthest-scale';
+const NO_PARALLAX_FX_ATTR = 'no-parallax-fx';
 
 /**
  * Installs parallax handlers
@@ -104,9 +105,23 @@ export class ParallaxService {
 
     this.init_();
 
-    listen(global, 'deviceorientation', event => {
-      this.parallaxOrientationMutate_(event, this.parallaxPages_);
-    });
+    userAssert(
+      this.win_.DeviceOrientationEvent || this.win_.DeviceMotionEvent,
+      "The current browser doesn't support the device motion/orientation events"
+    );
+
+    if (this.win_.DeviceOrientationEvent) {
+      listen(this.win_, 'deviceorientation', event => {
+        this.parallaxOrientationMutate_(event, this.parallaxPages_);
+      });
+    } else if (this.win_.DeviceMotionEvent) {
+      listen(this.win_, 'devicemotion', event => {
+        this.parallaxOrientationMutate_(
+          event.rotationRate,
+          this.parallaxPages_
+        );
+      });
+    }
   }
 
   /**
@@ -115,7 +130,7 @@ export class ParallaxService {
   init_() {
     this.vsync_.mutate(() => {
       this.getPages()
-        .filter(page => !page.hasAttribute('no-parallax-fx'))
+        .filter(page => !page.hasAttribute(NO_PARALLAX_FX_ATTR))
         .forEach(page => {
           const layers = this.getLayers(page);
 

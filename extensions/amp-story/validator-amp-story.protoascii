@@ -164,6 +164,10 @@ tags: {  # <amp-story-page>
     name: "parallax-fx-nearest-scale",
     value_regex: "[0-9]+([.][0-9]+)?"
   }
+  attrs: {
+    name: "no-parallax-fx",
+    value: ""
+  }
   attr_lists: "mandatory-id-attr"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
