@@ -21,28 +21,45 @@ describes.endtoend(
   'amp story share menu',
   {
     testUrl: 'http://localhost:8000/test/manual/amp-story/amp-story.amp.html',
-    browsers: ['chrome', 'firefox'],
+    // TODO(estherkim): implement mobile emulation on Firefox when available on geckodriver
+    browsers: ['chrome'],
     environments: ['single'],
+    deviceName: 'iPhone X', // bookend appears only on mobile
   },
   async env => {
     /** @type {SeleniumWebDriverController} */
     let controller;
 
     beforeEach(async () => {
+      console.log('huh 2');
       controller = env.controller;
+
+      // ensure story is loaded
+      await expect(controller.findElement('amp-story.i-amphtml-story-loaded'))
+        .to.exist;
+
+      // ensure page is in mobile emulation mode
+      const story = await controller.findElement('amp-story');
+      await expect(await story.getElement().getAttribute('desktop')).to.be.null;
+    });
+
+    it('should display bookend at the end of the story', async () => {
+      await goToBookend();
       await expect(
         controller.findElement(
-          'a.i-amphtml-story-share-control.i-amphtml-story-button'
+          'amp-story-bookend.i-amphtml-story-draggable-drawer-open'
         )
       ).to.exist;
     });
 
-    it('should copy the link using the browser share menu', async () => {
-      // copy link
-      const shareButton = await controller.findElement(
-        'a.i-amphtml-story-share-control.i-amphtml-story-button'
+    it.only('should copy the link using the bookend share menu', async () => {
+      await goToBookend();
+
+      const shadowHost = await controller.findElement(
+        '.i-amphtml-story-draggable-drawer-content > div'
       );
-      await controller.click(shareButton);
+      await controller.switchToShadowRoot(shadowHost);
+
       const getLinkButton = await controller.findElement(
         'div.i-amphtml-story-share-icon.i-amphtml-story-share-icon-link'
       );
@@ -64,5 +81,12 @@ describes.endtoend(
         'Hello http://localhost:8000/test/manual/amp-story/amp-story.amp.html'
       );
     });
+
+    async function goToBookend() {
+      const story = await controller.findElement('amp-story');
+      await controller.click(story);
+      await controller.click(story);
+      await controller.click(story);
+    }
   }
 );

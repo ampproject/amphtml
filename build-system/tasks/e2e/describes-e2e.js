@@ -127,41 +127,47 @@ async function createPuppeteer(opt_config = {}) {
 /**
  * Configure and launch a Selenium instance
  * @param {string} browserName
- * @param {!SeleniumConfigDef=} opt_config
+ * @param {!SeleniumConfigDef=} args
+ * @param {?string} deviceName
  * @return {!SeleniumDriver}
  */
-async function createSelenium(browserName, opt_config = {}) {
+async function createSelenium(browserName, args = {}, deviceName) {
   switch (browserName) {
     case 'safari':
       // Safari's only option is setTechnologyPreview
       return createDriver(browserName, []);
     case 'firefox':
-      return createDriver(browserName, getFirefoxArgs(opt_config));
+      return createDriver(browserName, getFirefoxArgs(args));
     case 'chrome':
     default:
-      return createDriver(browserName, getChromeArgs(opt_config));
+      return createDriver(browserName, getChromeArgs(args), deviceName);
   }
 }
 
-async function createDriver(browserName, args) {
+async function createDriver(browserName, args, deviceName) {
   const capabilities = Capabilities[browserName]();
   capabilities.set(capabilitiesKeys[browserName], {'args': args});
   const builder = new Builder().withCapabilities(capabilities);
+
   switch (browserName) {
     case 'firefox':
-      const options = new firefox.Options();
-      // for some reason firefox.Options().addArguments() doesn't like arrays
-      args.forEach(arg => {
-        options.addArguments(arg);
-        options.width = DEFAULT_E2E_INITIAL_RECT.width;
-        options.height = DEFAULT_E2E_INITIAL_RECT.height;
+      const firefoxOptions = new firefox.Options();
+      firefoxOptions.addArguments(...args);
+      firefoxOptions.windowSize({
+        width: DEFAULT_E2E_INITIAL_RECT.width,
+        height: DEFAULT_E2E_INITIAL_RECT.height,
       });
-      builder.setFirefoxOptions(options);
+      builder.setFirefoxOptions(firefoxOptions);
     case 'chrome':
-      builder.setChromeOptions(new chrome.Options().addArguments(args));
+      const chromeOptions = new chrome.Options();
+      chromeOptions.addArguments(args);
+      if (deviceName) {
+        chromeOptions.setMobileEmulation({deviceName});
+      }
+      builder.setChromeOptions(chromeOptions);
   }
-  const driver = await builder.build();
-  return driver;
+
+  return await builder.build();
 }
 
 /**
@@ -177,8 +183,6 @@ function getChromeArgs(config) {
     `--window-size=${DEFAULT_E2E_INITIAL_RECT.width},${DEFAULT_E2E_INITIAL_RECT.height}`,
   ];
 
-  // TODO(cvializ,estherkim,sparhami):
-  // figure out why headless causes more flakes
   if (config.headless) {
     args.push('--headless');
   }
@@ -205,7 +209,8 @@ function getFirefoxArgs(config) {
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string,
- *  initialRect: ({{width: number, height:number}}|undefined)
+ *  initialRect: ({{width: number, height:number}}|undefined),
+ *  deviceName: string|undefined,
  * }}
  */
 let TestSpec;
@@ -476,13 +481,13 @@ class EndToEndFixture {
    * @param {string} browserName
    */
   async setup(env, browserName) {
+    const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
     const config = getConfig();
-    const controller = await getController(config, browserName);
+    const controller = await getController(config, browserName, deviceName);
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
 
-    const {testUrl, experiments = [], initialRect} = this.spec;
     const {environment} = env;
 
     const url = new URL(testUrl);
@@ -517,11 +522,13 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
+ * @param {?string} deviceName
  * @return {!SeleniumWebDriverController}
  */
 async function getController(
   {engine = 'selenium', headless = false},
-  browserName
+  browserName,
+  deviceName
 ) {
   if (engine == 'puppeteer') {
     const browser = await createPuppeteer({headless});
@@ -529,7 +536,7 @@ async function getController(
   }
 
   if (engine == 'selenium') {
-    const driver = await createSelenium(browserName, {headless});
+    const driver = await createSelenium(browserName, {headless}, deviceName);
     return new SeleniumWebDriverController(driver);
   }
 }
