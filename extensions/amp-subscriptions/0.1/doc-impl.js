@@ -72,7 +72,7 @@ export class DocImpl {
 
   /** @override */
   addToFixedLayer(element) {
-    return this.addToFixedLayer.viewport_(element, /* Force Transfer */ true);
+    return this.viewport_.addToFixedLayer(element, /* Force Transfer */ true);
   }
 }
 
