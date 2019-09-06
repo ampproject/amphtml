@@ -155,7 +155,7 @@ export function findOverlappingIndex(
   }
 
   // Move outwards, since the closer indicies are more likely to overlap.
-  for (let i = 1; i < children.length / 2; i++) {
+  for (let i = 1; i <= children.length / 2; i++) {
     const nextIndex = mod(startIndex + i, children.length);
     const prevIndex = mod(startIndex - i, children.length);
 

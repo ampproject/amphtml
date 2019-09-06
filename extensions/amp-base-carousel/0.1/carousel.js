@@ -217,6 +217,11 @@ export class Carousel {
     this.allSpacers_ = [];
 
     /**
+     * @private {boolean}
+     */
+    this.layoutPaused_ = false;
+
+    /**
      * Set from sources of programmatic scrolls to avoid doing work associated
      * with regular scrolling.
      * @private {boolean}
@@ -419,20 +424,21 @@ export class Carousel {
   }
 
   /**
-   * Pauses the auto advance temporarily. This can be resumed by calling
-   * resumeAutoAdvance. This should only be used internally for the carousel
-   * implementation and not exposed.
+   * Pauses the layout temporarily. This can be resumed by calling
+   * `resumseLayout`.
    */
-  pauseAutoAdvance() {
+  pauseLayout() {
+    this.layoutPaused_ = true;
     this.autoAdvance_.pause();
   }
 
   /**
-   * Resumes auto advance when paused by pauseAutoAdvance. Note that if the
-   * autoadvance has been stopped, this has no effect. This should only be used
-   * internally for the carousel implementation and not exposed.
+   * Resumes layout of the component. This will update the UI to the correct
+   * state if there were changes since pausing layout.
    */
-  resumeAutoAdvance() {
+  resumeLayout() {
+    this.layoutPaused_ = false;
+    this.updateUi();
     this.autoAdvance_.resume();
   }
 
@@ -596,7 +602,6 @@ export class Carousel {
   updateSlides(slides) {
     this.slides_ = slides;
     this.carouselAccessibility_.updateSlides(slides);
-    this.updateUi();
   }
 
   /**
@@ -633,7 +638,7 @@ export class Carousel {
    * slide is at the start / center of the scrollable, depending on alignment).
    */
   updateUi() {
-    if (this.updating_) {
+    if (this.updating_ || this.layoutPaused_) {
       return;
     }
 

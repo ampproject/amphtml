@@ -386,7 +386,10 @@ exports.extensionBundles = [
     name: 'amp-base-carousel',
     version: '0.1',
     latestVersion: '0.1',
-    options: {hasCss: true},
+    options: {
+      hasCss: true,
+      cssBinaries: ['amp-base-carousel', 'carousel'],
+    },
     type: TYPES.MISC,
   },
   {
@@ -892,6 +895,13 @@ exports.extensionBundles = [
         'amp-story-auto-ads-attribution',
       ],
     },
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-stream-gallery',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {
