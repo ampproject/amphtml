@@ -164,6 +164,8 @@ async function dist() {
     ]);
   }
 
+  await generateFileListing();
+
   return exitCtrlcHandler(handlerProcess);
 }
 
@@ -274,6 +276,39 @@ function copyParsers() {
   return fs.copy('build/parsers', 'dist/v0').then(() => {
     endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
+}
+
+/**
+ * Obtain a recursive file listing of a directory
+ * @param {string} dest - Directory to be scanned
+ * @return {Array} - All files found in directory
+ */
+async function walk(dest) {
+  const filelist = [];
+  const files = await fs.readdir(dest);
+
+  for (let i = 0; i < files.length; i++) {
+    const file = `${dest}/${files[i]}`;
+
+    fs.statSync(file).isDirectory()
+      ? Array.prototype.push.apply(filelist, await walk(file))
+      : filelist.push(file);
+  }
+
+  return filelist;
+}
+
+/**
+ * Generate a listing of all files in dist/ and save as dist/files.txt
+ */
+async function generateFileListing() {
+  const startTime = Date.now();
+  const distDir = 'dist';
+  const filesOut = `${distDir}/files.txt`;
+  fs.writeFileSync(filesOut, '');
+  const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
+  fs.writeFileSync(filesOut, files.join('\n'));
+  endBuildStep('Generated', filesOut, startTime);
 }
 
 /**
