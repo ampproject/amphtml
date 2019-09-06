@@ -24,7 +24,6 @@ import {
   getResponsiveAttributeValue,
 } from '../../amp-base-carousel/0.1/responsive-attributes';
 import {Services} from '../../../src/services';
-import {clamp} from '../../../src/utils/math';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -104,7 +103,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     this.maxVisibleCount_ = Number.MAX_VALUE;
 
     /** @private {number} */
-    this.minItemWidth_ = 0;
+    this.minItemWidth_ = 1;
 
     /** @private {number} */
     this.minVisibleCount_ = 1;
@@ -247,7 +246,7 @@ class AmpStreamGallery extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     user().assert(
-      isExperimentOn(AMP.win, 'amp-stream-gallery'),
+      isExperimentOn(this.win, 'amp-stream-gallery'),
       'The amp-stream-gallery experiment must be enabled to use the ' +
         'component'
     );
@@ -462,16 +461,12 @@ class AmpStreamGallery extends AMP.BaseElement {
    * max/min size constraint.
    * @param {number} containerWidth The width of the container element.
    * @param {number} itemWidth The width of each item.
-   * @param {boolean} roundUp Whether the fractional number of items should
-   *    be rounded up or down.
-   * @return {number} The number of items to display.
+   * @return {number} The number of items to show.
    */
-  getItemsForWidth_(containerWidth, itemWidth, roundUp) {
+  getItemsForWidth_(containerWidth, itemWidth) {
     const availableWidth = containerWidth - this.peek_ * itemWidth;
     const fractionalItems = availableWidth / itemWidth;
-    const wholeItems = roundUp
-      ? Math.ceil(fractionalItems)
-      : Math.floor(fractionalItems);
+    const wholeItems = Math.floor(fractionalItems);
     // Always show at least 1 whole item.
     return Math.max(1, wholeItems) + this.peek_;
   }
@@ -555,7 +550,7 @@ class AmpStreamGallery extends AMP.BaseElement {
    * @param {number} minItemWidth
    */
   updateMinItemWidth_(minItemWidth) {
-    this.minItemWidth_ = minItemWidth || 0;
+    this.minItemWidth_ = minItemWidth || 1;
     this.updateVisibleCount_();
   }
 
@@ -582,35 +577,34 @@ class AmpStreamGallery extends AMP.BaseElement {
     } = this;
     // Need to subtract out the width of the next/prev arrows. If these are
     // inset, they will have no width.
-    const width = this.getLayoutBox().width - this.getWidthTakenByArrows_();
-    const maxItems = this.getItemsForWidth_(width, maxItemWidth_, true);
-    const minItems = this.getItemsForWidth_(width, minItemWidth_, false);
-    const items = Math.min(minItems, maxItems);
-
+    const width =
+      this.element./* OK */ getBoundingClientRect().width -
+      this.getWidthTakenByArrows_();
+    const items = this.getItemsForWidth_(width, minItemWidth_);
     const maxVisibleSlides = Math.min(slides_.length, maxVisibleCount_);
-    const visibleCount = clamp(items, minVisibleCount_, maxVisibleSlides);
+    // Cannot use clamp, maxVisibleSlides can be less than minVisibleCount_.
+    const visibleCount = Math.min(
+      Math.max(minVisibleCount_, items),
+      maxVisibleSlides
+    );
     const advanceCount = Math.floor(visibleCount);
 
     this.mutateElement(() => {
       /*
        * When we are going to show more slides than we have, cap the width so
        * that we do not go over the max requested slide width. Otherwise,
-       * when the number of min items is less than the number of maxItems,
-       * then we need to cap the width, so that the extra space goes to the
-       * sides.
+       * cap the max width based on how many items are showing and the max
+       * width for each item.
        */
       const maxContainerWidth =
         items > maxVisibleSlides
           ? `${maxVisibleSlides * maxItemWidth_}px`
-          : minItems <= maxItems
-          ? `${minItems * maxItemWidth_}px`
-          : '';
+          : `${items * maxItemWidth_}px`;
 
       setStyle(this.slidesContainer_, 'max-width', maxContainerWidth);
     });
     this.carousel_.updateSlides(this.slides_);
     this.carousel_.updateAdvanceCount(advanceCount);
-    this.carousel_.updateAutoAdvanceCount(advanceCount);
     this.carousel_.updateSnapBy(advanceCount);
     this.carousel_.updateVisibleCount(visibleCount);
   }
