@@ -59,7 +59,7 @@ describes.realWin(
     it('renders nexxtv video player', async () => {
       const nexxtv = await getNexxtv({
         'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761'
+        'data-client': '761',
       });
       const playerIframe = nexxtv.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
@@ -72,7 +72,7 @@ describes.realWin(
     it('renders player responsive', async () => {
       const nexxtv = await getNexxtv({
         'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761'
+        'data-client': '761',
       });
       const playerIframe = nexxtv.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
@@ -82,7 +82,7 @@ describes.realWin(
     it('removes iframe after unlayoutCallback', async () => {
       const nexxtv = await getNexxtv({
         'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761'
+        'data-client': '761',
       });
       const playerIframe = nexxtv.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
@@ -96,7 +96,7 @@ describes.realWin(
     it('should forward events from nexxtv-player to the amp element', async () => {
       const nexxtv = await getNexxtv({
         'data-mediaid': '71QQG852413DU7J',
-        'data-client': '761'
+        'data-client': '761',
       });
       const iframe = nexxtv.querySelector('iframe');
       await Promise.resolve();
