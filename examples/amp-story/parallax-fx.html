@@ -1,0 +1,146 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <title>My Story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="blink-link.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background: black;
+      }
+      h1 {
+        color: white;
+        font-size: 2.875em;
+        font-weight: normal;
+        line-height: 1.174;
+        text-transform: uppercase;
+      }
+      p {
+        color: white;
+      }
+      #mars, #earth, #jupiter {
+        position: absolute;
+      }
+      #jupiter {
+        bottom: 105px;
+        right: 180px
+      }
+      #mars {
+        bottom: 85px;
+        right: 90px
+      }
+      #earth {
+        bottom: 68px;
+        right: 32px
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone parallax-fx>
+
+      <amp-story-page parallax-fx-mode="depth" id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./img/1.jpeg" layout="fill"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./img/2.png" layout="fill"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img id="earth" src="./img/3.png" layout="fixed" width="120" height="120"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img id="mars" src="./img/4.png" layout="fixed" width="190" height="190"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+            <amp-img id="jupiter" src="./img/5.png" layout="fixed" width="210" height="210"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1>Solar System</h1>
+          <p>Depth parallax mode.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page parallax-fx-mode="pop-out" id="page-1">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./img/1.jpeg" layout="fill"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./img/2.png" layout="fill"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img id="earth" src="./img/3.png" layout="fixed" width="120" height="120"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img id="mars" src="./img/4.png" layout="fixed" width="190" height="190"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+            <amp-img id="jupiter" src="./img/5.png" layout="fixed" width="210" height="210"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1>Solar System</h1>
+          <p>Pop-out parallax mode.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page parallax-fx-mode="center" id="page-2">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./img/1.jpeg" layout="fill"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./img/2.png" layout="fill"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img id="earth" src="./img/3.png" layout="fixed" width="120" height="120"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img id="mars" src="./img/4.png" layout="fixed" width="190" height="190"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+            <amp-img id="jupiter" src="./img/5.png" layout="fixed" width="210" height="210"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1>Solar System</h1>
+          <p>Center parallax mode.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page 
+          parallax-fx-mode="pop-out" 
+          parallax-fx-layer-spacing="5" 
+          parallax-fx-farthest-scale="1.4"
+          parallax-fx-nearest-scale="0.8"
+          id="page-3">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./img/1.jpeg" layout="fill"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <amp-img src="./img/2.png" layout="fill"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img id="earth" src="./img/3.png" layout="fixed" width="120" height="120"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img id="mars" src="./img/4.png" layout="fixed" width="190" height="190"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+            <amp-img id="jupiter" src="./img/5.png" layout="fixed" width="210" height="210"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1>Solar System</h1>
+          <p>Pop-out parallax mode with custom spacing and scaling.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+  
+    </amp-story>
+  </body>
+</html>
