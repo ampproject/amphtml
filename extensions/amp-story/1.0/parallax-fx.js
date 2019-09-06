@@ -17,11 +17,44 @@
 import {dev} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {mapRange, sum} from '../../../src/utils/math';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
+
+/** @enum {string} */
+export const ParallaxModes = {
+  /**
+   * Indicates that the last (nearest) layer will appear at the
+   * surface of the screen and all previous layers are behind it
+   * "inside" the screen.
+   */
+  DEPTH: 'depth',
+
+  /**
+   * Indicates that the first (farthest) layer will appear at the surface
+   * of the screen and all subsequent layers will appear as "popping out"
+   * of the screen.
+   */
+  POP_OUT: 'pop-out',
+
+  /**
+   * Indicates that the middle layer will appear at the surface of the
+   * screen with the previous (farther) layers appearing behind the screen
+   * and the subsequent (nearer) layers popping out of the screen.
+   */
+  CENTER: 'center',
+};
 
 const SMOOTHING_PTS = 4;
 const PERSPECTIVE = 1500;
+const DEFAULT_MODE = ParallaxModes.DEPTH;
+const DEFAULT_LAYER_SPACING = 1;
+const DEFAULT_FARTHEST_SCALE = 1.2;
+const DEFAULT_NEAREST_SCALE = 1;
+
+const MODE_ATTR = 'parallax-fx-mode';
+const LAYER_SPACING_ATTR = 'parallax-fx-layer-spacing';
+const NEAREST_SCALE_ATTR = 'parallax-fx-nearest-scale';
+const FARTHEST_SCALE_ATTR = 'parallax-fx-farthest-scale';
 
 /**
  * Installs parallax handlers
@@ -30,22 +63,25 @@ export class ParallaxService {
   /**
    * @param {!Window} global
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {Array<!Element>} pages
+   * @param {!Element} story
    */
-  constructor(global, vsync, pages) {
+  constructor(global, vsync, story) {
     /** @private {!Window} */
     this.win_ = global;
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
+    /** @private {!Element} */
+    this.story_ = story;
+
     /** @private {!Array<!ParallaxPage>} */
     this.parallaxPages_ = [];
 
-    /** @private {?number} */
+    /** @private {number} */
     this.middleX_ = 0;
 
-    /** @private {?number} */
+    /** @private {number} */
     this.middleY_ = 0;
 
     /** @private {Array} */
@@ -54,10 +90,33 @@ export class ParallaxService {
     /** @private {Array} */
     this.smoothingPointsY_ = [];
 
+    /** @private {string} */
+    this.storyMode_ = this.story_.getAttribute(MODE_ATTR);
+
+    /** @private {string} */
+    this.storyLayerSpacing_ = this.story_.getAttribute(LAYER_SPACING_ATTR);
+
+    /** @private {string} */
+    this.storyFarthestScale_ = this.story_.getAttribute(FARTHEST_SCALE_ATTR);
+
+    /** @private {string} */
+    this.storyNearestScale_ = this.story_.getAttribute(NEAREST_SCALE_ATTR);
+
+    this.init_();
+
+    listen(global, 'deviceorientation', event => {
+      this.parallaxOrientationMutate_(event, this.parallaxPages_);
+    });
+  }
+
+  /**
+   * Initializes the pages by giving them perspective and initializating their layers
+   */
+  init_() {
     this.vsync_.mutate(() => {
-      pages
+      this.getPages()
         .filter(page => !page.hasAttribute('no-parallax-fx'))
-        .map(page => {
+        .forEach(page => {
           const layers = this.getLayers(page);
 
           // Set the page's perspective
@@ -66,25 +125,86 @@ export class ParallaxService {
           });
 
           this.parallaxPages_.push(new ParallaxPage(page, this.vsync_));
-          // Loop through the layers in the page and assign a z-index following
-          // DOM order (manual override will be added in the future)
-          let zIndex = 1;
 
-          layers.map(layer => {
-            this.vsync_.mutate(() => {
-              setStyles(layer, {
-                transform: `translateZ(${(zIndex - layers.length) *
-                  30}px) scale(${mapRange(zIndex, 1, layers.length, 1.2, 1)})`,
-              });
-              zIndex++;
-            });
-          });
+          const mode =
+            page.getAttribute(MODE_ATTR) || this.storyMode_ || DEFAULT_MODE;
+          const layerSpacing = Number(
+            page.getAttribute(LAYER_SPACING_ATTR) ||
+              this.storyLayerSpacing_ ||
+              DEFAULT_LAYER_SPACING
+          );
+          const farthestScale = Number(
+            page.getAttribute(FARTHEST_SCALE_ATTR) ||
+              this.storyFarthestScale_ ||
+              DEFAULT_FARTHEST_SCALE
+          );
+          const nearestScale = Number(
+            page.getAttribute(NEAREST_SCALE_ATTR) ||
+              this.storyNearestScale_ ||
+              DEFAULT_NEAREST_SCALE
+          );
+
+          this.initLayers_(
+            layers,
+            mode,
+            layerSpacing,
+            farthestScale,
+            nearestScale
+          );
         });
     });
+  }
 
-    listen(global, 'deviceorientation', event => {
-      this.parallaxOrientationMutate_(event, this.parallaxPages_);
+  /**
+   * Initializes the page's layers by giving them the appropriate translation and scaling
+   * @param {!Array<!Element>} layers
+   * @param {string} mode
+   * @param {number} layerSpacing
+   * @param {number} farthestScale
+   * @param {number} nearestScale
+   */
+  initLayers_(layers, mode, layerSpacing, farthestScale, nearestScale) {
+    // Loop through the layers in the page and assign a z-index following
+    // DOM order (manual override will be added in the future)
+    let order = 1;
+
+    const layerZIndexOffset =
+      mode == ParallaxModes.DEPTH
+        ? layers.length
+        : mode == ParallaxModes.CENTER
+        ? layers.length / 2
+        : 0;
+
+    layers.map(layer => {
+      this.vsync_.mutate(() => {
+        const translation = `translateZ(${(order - layerZIndexOffset) *
+          layerSpacing *
+          30}px)`;
+        const scale = `scale(${mapRange(
+          order,
+          1,
+          layers.length,
+          farthestScale,
+          nearestScale
+        )})`;
+        setImportantStyles(layer, {
+          contain: 'none',
+          overflow: 'visible',
+          transform: `${translation} ${scale}`,
+        });
+        order++;
+      });
     });
+  }
+
+  /**
+   * Discovers and returns all pages inside the story
+   * @return {!Array<!Element>}
+   */
+  getPages() {
+    return toArray(this.story_.querySelectorAll('amp-story-page')).map(page =>
+      dev().assertElement(page)
+    );
   }
 
   /**
@@ -165,7 +285,7 @@ export class ParallaxService {
         if (this.middleY_ != 0 && this.middleX_ != 0) {
           page.update(mappedX, mappedY);
         } else {
-          page.update(0, 0);
+          page.update(this.middleX_, this.middleY_);
         }
       }
     });
@@ -216,9 +336,9 @@ export class ParallaxPage {
  * if present on the story.
  * @param {!Window} win
  * @param {!../../../src/service/vsync-impl.Vsync} vsync
- * @param {Array<!Element>} pages
+ * @param {!Element} story
  * @return {ParallaxService}
  */
-export function installParallaxFx(win, vsync, pages) {
-  return new ParallaxService(win, vsync, pages);
+export function installParallaxFx(win, vsync, story) {
+  return new ParallaxService(win, vsync, story);
 }
