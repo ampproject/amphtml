@@ -18,8 +18,8 @@ import {
   AMP_STORY_BOOKEND_COMPONENT_DATA,
   BOOKEND_COMPONENT_CLASSES,
   BOOKEND_COMPONENT_TYPES,
-} from '../bookend-component';
-import {BookendComponentInterface} from './bookend-component-interface';
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {
-  AMP_STORY_BOOKEND_COMPONENT_DATA,
-  BookendComponent,
-} from './bookend-component';
+import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface';
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
 import {
   DEPRECATED_SHARE_PROVIDERS_KEY,

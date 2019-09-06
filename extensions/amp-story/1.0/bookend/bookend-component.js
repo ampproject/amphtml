@@ -15,6 +15,7 @@
  */
 
 import {ArticleComponent} from './components/article';
+import {BOOKEND_COMPONENT_TYPES} from './components/bookend-component-interface';
 import {CtaLinkComponent} from './components/cta-link';
 import {HeadingComponent} from './components/heading';
 import {LandscapeComponent} from './components/landscape';
@@ -26,30 +27,6 @@ import {htmlFor} from '../../../../src/static-template';
 
 /** @type {string} */
 export const TAG = 'amp-story-bookend';
-
-/** @enum {string} */
-export const BOOKEND_COMPONENT_CLASSES = {
-  CTA_LINK: 'i-amphtml-story-bookend-cta-link',
-  LANDSCAPE: 'i-amphtml-story-bookend-landscape',
-  PORTRAIT: 'i-amphtml-story-bookend-portrait',
-  SMALL: 'i-amphtml-story-bookend-article',
-};
-
-export const BOOKEND_COMPONENT_TYPES = {
-  SMALL: 'small',
-  CTA_LINK: 'cta-link',
-  HEADING: 'heading',
-  LANDSCAPE: 'landscape',
-  PORTRAIT: 'portrait',
-  TEXTBOX: 'textbox',
-};
-
-/**
- *
- * @const {string}
- */
-export const AMP_STORY_BOOKEND_COMPONENT_DATA =
-  '__AMP_STORY_BOOKEND_COMPONENT_DATA__';
 
 /**
  * @typedef {{

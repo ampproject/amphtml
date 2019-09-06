@@ -14,6 +14,30 @@
  * limitations under the License.
  */
 
+/** @enum {string} */
+export const BOOKEND_COMPONENT_CLASSES = {
+  CTA_LINK: 'i-amphtml-story-bookend-cta-link',
+  LANDSCAPE: 'i-amphtml-story-bookend-landscape',
+  PORTRAIT: 'i-amphtml-story-bookend-portrait',
+  SMALL: 'i-amphtml-story-bookend-article',
+};
+
+export const BOOKEND_COMPONENT_TYPES = {
+  SMALL: 'small',
+  CTA_LINK: 'cta-link',
+  HEADING: 'heading',
+  LANDSCAPE: 'landscape',
+  PORTRAIT: 'portrait',
+  TEXTBOX: 'textbox',
+};
+
+/**
+ *
+ * @const {string}
+ */
+export const AMP_STORY_BOOKEND_COMPONENT_DATA =
+  '__AMP_STORY_BOOKEND_COMPONENT_DATA__';
+
 /**
  * Interface implemented by the bookend components.
  * @interface
