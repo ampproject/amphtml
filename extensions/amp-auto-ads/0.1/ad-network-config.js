@@ -254,10 +254,15 @@ class DenakopNetworkConfig {
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
+    const publisherId = this.autoAmpAdsElement_.getAttribute(
+      'data-publisher-id'
+    );
+    const tagId = this.autoAmpAdsElement_.getAttribute('data-tag-id');
     return buildUrl(
       '//v2.denakop.com/ad-request/amp',
       {
-        'p': this.autoAmpAdsElement_.getAttribute('data-publisher-id'),
+        'p': publisherId,
+        't': tagId,
         'u': docInfo.canonicalUrl,
         'w': window.screen.width,
         'h': window.screen.height,
