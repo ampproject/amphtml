@@ -81,6 +81,9 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
   if (type == 'adsense') {
     return new AdSenseNetworkConfig(autoAmpAdsElement);
   }
+  if (type == 'denakop') {
+    return new DenakopNetworkConfig(autoAmpAdsElement);
+  }
   if (type == 'doubleclick') {
     return new DoubleclickNetworkConfig(autoAmpAdsElement);
   }
@@ -200,6 +203,78 @@ class AdSenseNetworkConfig {
       attributesObj['data-ad-host'] = dataAdHost;
     }
     return attributesObj;
+  }
+
+  /** @override */
+  getDefaultAdConstraints() {
+    const viewportHeight = Services.viewportForDoc(
+      this.autoAmpAdsElement_
+    ).getSize().height;
+    return {
+      initialMinSpacing: viewportHeight,
+      subsequentMinSpacing: [
+        {adCount: 3, spacing: viewportHeight * 2},
+        {adCount: 6, spacing: viewportHeight * 3},
+      ],
+      maxAdCount: 8,
+    };
+  }
+
+  /** @override */
+  getSizing() {
+    return {};
+  }
+}
+
+/**
+ * @implements {AdNetworkConfigDef}
+ */
+class DenakopNetworkConfig {
+  /**
+   * @param {!Element} autoAmpAdsElement
+   */
+  constructor(autoAmpAdsElement) {
+    this.autoAmpAdsElement_ = autoAmpAdsElement;
+  }
+
+  /**
+   * @param {!Window} unused
+   */
+  isEnabled(unused) {
+    return true;
+  }
+
+  /**
+   * True if responsive is enabled for auto-ads
+   */
+  isResponsiveEnabled() {
+    return false;
+  }
+
+  /** @override */
+  getConfigUrl() {
+    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
+    return buildUrl(
+      '//v2.denakop.com/ad-request/amp',
+      {
+        'p': this.autoAmpAdsElement_.getAttribute('data-publisher-id'),
+        'u': docInfo.canonicalUrl,
+        'w': window.screen.width,
+        'h': window.screen.height,
+      },
+      4096
+    );
+  }
+
+  /** @override */
+  getAttributes() {
+    const attributes = dict({
+      'layout': 'fixed',
+      'data-multi-size-validation': 'false',
+      'type': 'doubleclick',
+      'data-ad': 'denakop',
+    });
+    return attributes;
   }
 
   /** @override */
