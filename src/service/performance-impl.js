@@ -403,7 +403,7 @@ export class Performance {
     }
 
     if (this.supportsEventTimingAPIv77_) {
-      const firstInputObserver = this.createPerformanceObserver_();
+      const firstInputObserver = this.createPerformanceObserver_(processEntry);
       firstInputObserver.observe({type: 'first-input', buffered: true});
     }
 
