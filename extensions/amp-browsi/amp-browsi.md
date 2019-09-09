@@ -44,10 +44,10 @@ Provides realtime viewability prediction to ads on AMP pages using Browsi Predic
 
 ## Behavior
 
-The `amp-browsi` extension scans all ads on page and uses `rtc-config` attribute to call **Browsi Viewability Predictor**
-server which will return a targeting object that will be sent to the adServer 
+The `amp-browsi` extension detects all ads on page and uses `rtc-config` attribute to call **Browsi Viewability Predictor**
+service which will return a targeting object that will be sent to the adServer.
 
-`amp-browsi` is collecting user behaviour and ads data to allow **Browsi Viewability Predictor** to provide accurate predictions   
+`amp-browsi` collects data to allow **Browsi Viewability Predictor Service** to provide accurate predictions.   
 
 ## Example
 
