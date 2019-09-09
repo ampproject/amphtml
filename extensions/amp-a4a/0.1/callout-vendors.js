@@ -150,6 +150,12 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['ADSLOT_ID'],
     disableKeyAppend: true,
   },
+  browsi: {
+    url:
+      'https://amp.browsiprod.com/predict?,mt=BROWSI_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
+    disableKeyAppend: true,
+    macros: ['BROWSI_ID'],
+  },
 });
 
 // DO NOT MODIFY: Setup for tests
