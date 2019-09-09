@@ -42,6 +42,10 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
+    name: "no-parallax-fx",
+    value: ""
+  }
+  attrs: {
     name: "parallax-fx",
     value: ""
   }
@@ -51,7 +55,7 @@ tags: {  # <amp-story>
   }
   attrs: {
     name: "parallax-fx-layer-spacing",
-    value: "[0-9]+([.][0-9]+)?"
+    value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
     name: "parallax-fx-mode",
@@ -152,7 +156,7 @@ tags: {  # <amp-story-page>
   }
   attrs: {
     name: "parallax-fx-layer-spacing",
-    value: "[0-9]+([.][0-9]+)?"
+    value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
     name: "parallax-fx-mode",

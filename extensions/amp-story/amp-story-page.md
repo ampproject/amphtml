@@ -104,6 +104,22 @@ For example:
 <amp-story-page id="zurich" background-audio="./media/switzerland.mp3">
 ```
 
+##### no-parallax-fx [optional]
+
+Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Disables the tilt-controlled [3D Parallax Effect](amp-story.md#parallax-fx) for the current page.
+
+##### parallax-fx-mode [optional]
+
+Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Overrides the effect's mode for the current page.
+
+##### parallax-fx-layer-spacing [optional]
+
+Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Overrides the layer spacing for the parallax effect on the current page.
+
+##### parallax-fx-nearest-scale / parallax-fx-farthest-scale [optional]
+
+Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Overrides the scaling compensation factors for the parallax effect on the current page.
+
 ## Children (of amp-story-page)
 
 The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md).  Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
