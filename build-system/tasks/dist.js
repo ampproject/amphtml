@@ -23,7 +23,6 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
-  compileCoreRuntime,
   compileJs,
   endBuildStep,
   hostname,
@@ -33,12 +32,6 @@ const {
   toPromise,
 } = require('./helpers');
 const {
-  buildExtensions,
-  extensionAliasFilePath,
-  getExtensionsToBuild,
-  parseExtensionFlags,
-} = require('./extension-helpers');
-const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
 const {
@@ -47,6 +40,7 @@ const {
   stopNailgunServer,
 } = require('./nailgun');
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
@@ -153,7 +147,6 @@ async function dist() {
     copyCss(),
     copyParsers(),
   ]);
-  await compileCoreRuntime(/* watch */ false, /* minify */ true);
 
   if (isTravisBuild()) {
     // New line after all the compilation progress dots on Travis.
@@ -161,7 +154,6 @@ async function dist() {
   }
 
   await stopNailgunServer(distNailgunPort);
-  await copyAliasExtensions();
   await formatExtractedMessages();
 
   if (argv.esm) {
@@ -171,6 +163,8 @@ async function dist() {
       createModuleCompatibleES5Bundle('shadow-v0.js'),
     ]);
   }
+
+  await generateFileListing();
 
   return exitCtrlcHandler(handlerProcess);
 }
@@ -285,26 +279,36 @@ function copyParsers() {
 }
 
 /**
- * Copy built extension to alias extension
- * @return {!Promise}
+ * Obtain a recursive file listing of a directory
+ * @param {string} dest - Directory to be scanned
+ * @return {Array} - All files found in directory
  */
-function copyAliasExtensions() {
-  if (argv.noextensions) {
-    return Promise.resolve();
+async function walk(dest) {
+  const filelist = [];
+  const files = await fs.readdir(dest);
+
+  for (let i = 0; i < files.length; i++) {
+    const file = `${dest}/${files[i]}`;
+
+    fs.statSync(file).isDirectory()
+      ? Array.prototype.push.apply(filelist, await walk(file))
+      : filelist.push(file);
   }
 
-  const extensionsToBuild = getExtensionsToBuild();
+  return filelist;
+}
 
-  for (const key in extensionAliasFilePath) {
-    if (extensionsToBuild.includes(extensionAliasFilePath[key].name)) {
-      fs.copySync(
-        'dist/v0/' + extensionAliasFilePath[key].file,
-        'dist/v0/' + key
-      );
-    }
-  }
-
-  return Promise.resolve();
+/**
+ * Generate a listing of all files in dist/ and save as dist/files.txt
+ */
+async function generateFileListing() {
+  const startTime = Date.now();
+  const distDir = 'dist';
+  const filesOut = `${distDir}/files.txt`;
+  fs.writeFileSync(filesOut, '');
+  const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
+  fs.writeFileSync(filesOut, files.join('\n'));
+  endBuildStep('Generated', filesOut, startTime);
 }
 
 /**

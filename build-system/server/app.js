@@ -20,6 +20,7 @@
  * files and list directories for use with the gulp live server
  */
 const app = require('express')();
+const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
@@ -28,21 +29,21 @@ const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
-const multer = require('multer');
 const path = require('path');
 const request = require('request');
+const upload = require('multer')();
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
 } = require('./recaptcha-router');
+const {getServeMode} = require('./app-utils');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
 
-const upload = multer();
-
-const TEST_SERVER_PORT = process.env.SERVE_PORT;
+const TEST_SERVER_PORT = argv.port || 8000;
+let SERVE_MODE = getServeMode();
 
 app.use(bodyParser.text());
 app.use(require('./routes/a4a-envelopes'));
@@ -71,7 +72,7 @@ function isValidServeMode(serveMode) {
 }
 
 function setServeMode(serveMode) {
-  pc.env.SERVE_MODE = serveMode;
+  SERVE_MODE = serveMode;
 }
 
 app.get('/serve_mode=:mode', (req, res) => {
@@ -85,7 +86,11 @@ app.get('/serve_mode=:mode', (req, res) => {
   }
 });
 
-if (!global.AMP_TESTING) {
+if (argv._.includes('integration') && !argv.nobuild) {
+  setServeMode('compiled');
+}
+
+if (!(argv._.includes('unit') || argv._.includes('integration'))) {
   // Dev dashboard routes break test scaffolding since they're global.
   devDashboard.installExpressMiddleware(app);
 }
@@ -488,7 +493,7 @@ let itemCtr = 2;
 const doctype = '<!doctype html>\n';
 const liveListDocs = Object.create(null);
 app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
-  const mode = pc.env.SERVE_MODE;
+  const mode = SERVE_MODE;
   let liveListDoc = liveListDocs[req.baseUrl];
   if (mode != 'compiled' && mode != 'default') {
     // Only handle compile(prev min)/default (prev max) mode
@@ -753,7 +758,7 @@ app.post('/get-consent-no-prompt/', (req, res) => {
 // Example:
 // http://localhost:8000/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/proxy/', (req, res) => {
-  const mode = pc.env.SERVE_MODE;
+  const mode = SERVE_MODE;
   proxyToAmpProxy(req, res, mode);
 });
 
@@ -831,9 +836,19 @@ app.get('/iframe-echo-message', (req, res) => {
  * <script async custom-element="amp-form"
  *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
-app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
+app.use(['/dist/v0/amp-*.js', '/dist/amp*.js'], (req, res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
   setTimeout(next, sleep);
+});
+
+/**
+ * Disable caching for extensions if the --no_caching_extensions flag is used.
+ */
+app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
+  if (argv.no_caching_extensions) {
+    res.header('Cache-Control', 'no-store');
+  }
+  next();
 });
 
 /**
@@ -845,7 +860,7 @@ app.get(
   ['/examples/*.html', '/test/manual/*.html', '/test/fixtures/e2e/*/*.html'],
   (req, res, next) => {
     const filePath = req.path;
-    const mode = pc.env.SERVE_MODE;
+    const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
     fs.readFileAsync(pc.cwd() + filePath, 'utf8')
@@ -1072,7 +1087,7 @@ app.get('/adzerk/*', (req, res) => {
 app.get(
   ['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
   (req, res, next) => {
-    const mode = pc.env.SERVE_MODE;
+    const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
     let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
     if (mode == 'cdn') {
@@ -1105,7 +1120,7 @@ app.get(
   ['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
   (req, res, next) => {
     // Special case for entry point script url. Use compiled for testing
-    const mode = pc.env.SERVE_MODE;
+    const mode = SERVE_MODE;
     const fileName = path.basename(req.path);
     if (mode == 'cdn') {
       // This will not be useful until extension-location.js change in prod
@@ -1134,7 +1149,7 @@ app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
 });
 
 app.get('/dist/amp-inabox-host.js', (req, res, next) => {
-  const mode = pc.env.SERVE_MODE;
+  const mode = SERVE_MODE;
   if (mode == 'compiled') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
   }
@@ -1268,7 +1283,7 @@ app.use('/shadow/', (req, res) => {
     res.end(viewerHtml);
     return;
   }
-  res.end(replaceUrls(pc.env.SERVE_MODE, viewerHtml));
+  res.end(replaceUrls(SERVE_MODE, viewerHtml));
 });
 
 /**
@@ -1308,7 +1323,7 @@ function getUrlPrefix(req) {
 }
 
 function generateInfo(filePath) {
-  const mode = pc.env.SERVE_MODE;
+  const mode = SERVE_MODE;
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
 
   return (
@@ -1324,7 +1339,8 @@ function generateInfo(filePath) {
     'Change to DEFAULT mode (unminified JS)</a></h3>' +
     '<h3><a href = /serve_mode=compiled>' +
     'Change to COMPILED mode (minified JS)</a></h3>' +
-    '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>'
+    '<h3><a href = /serve_mode=cdn>' +
+    'Change to CDN mode (prod JS)</a></h3>'
   );
 }
 
@@ -1348,7 +1364,7 @@ function decryptDocumentKey(encryptedDocumentKey) {
 // serve local vendor config JSON files
 app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
   const {vendor} = req.params;
-  const serveMode = pc.env.SERVE_MODE;
+  const serveMode = SERVE_MODE;
 
   if (serveMode === 'cdn') {
     const vendorUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;

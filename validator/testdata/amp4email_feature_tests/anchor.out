@@ -170,6 +170,6 @@ amp4email_feature_tests/anchor.html:106:2 The relative URL '{{#foo}}' for attrib
 |    <!-- 'name' attribute is deprecated. -->
 |    <a name="protocol"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:114:2 The attribute 'name' in tag 'A (AMP4EMAIL)' is deprecated - use 'id' instead. [DEPRECATION]
+amp4email_feature_tests/anchor.html:114:2 The attribute 'name' may not appear in tag 'A (AMP4EMAIL)'. [DISALLOWED_HTML]
 |  </body>
 |  </html>

@@ -25,13 +25,12 @@ const {
   isMainPageFromUrl,
   formatBasepath,
 } = require('./util/listing');
+const {getServeMode} = require('../app-utils');
 const {join} = require('path');
 const {renderTemplate} = require('./template');
 
-const pc = process;
-
-// Sitting on /build-system/app-index, so we go back twice for the repo root.
-const root = path.join(__dirname, '../../');
+// Sitting on /build-system/server/app-index, so we go back thrice for the repo root.
+const root = path.join(__dirname, '../../../');
 
 // CSS
 const mainCssFile = join(__dirname, '/main.css');
@@ -51,7 +50,7 @@ async function serveIndex({url}, res, next) {
     selectModePrefix: '/',
     isMainPage: isMainPageFromUrl(url),
     basepath: formatBasepath(mappedPath),
-    serveMode: pc.env.SERVE_MODE || 'default',
+    serveMode: getServeMode(),
     css,
   });
 

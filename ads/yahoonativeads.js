@@ -21,26 +21,30 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function yahoonativeads(global, data) {
-  validateData(data, ['section'], ['module']);
+  validateData(data, ['key', 'code', 'url']);
 
-  (global.readmo = global.readmo || []).push({
-    section: data.section,
-    container: '#c',
-    module: data.module,
-    amp: true,
-  });
+  (global.native = global.native || []).push(data.code);
 
-  global.context.observeIntersection(function(entries) {
-    entries.forEach(function(entry) {
-      if (global.Readmo) {
-        global.Readmo.onViewChange({
-          rects: entry,
-        });
-      }
-    });
-  });
+  global.apiKey = data.key;
+  global.publisherUrl = data.url;
+  global.amp = true;
 
-  loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js', () =>
+  global.context.observeIntersection(
+    entries => {
+      entries.forEach(entry => {
+        if (global.Native) {
+          global.Native.onViewChange({
+            intersectionRatio: entry.intersectionRatio,
+          });
+        }
+      });
+    },
+    {
+      threshold: [0, 0.5, 1],
+    }
+  );
+
+  loadScript(global, 'https://s.yimg.com/dy/ads/native.js', () =>
     global.context.renderStart()
   );
 }

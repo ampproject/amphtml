@@ -85,7 +85,7 @@ export class FormValidator {
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = Services.ampdoc(form);
 
-    /** @const @protected {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @const @protected {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources = Services.resourcesForDoc(form);
 
     /** @protected @const {!Document|!ShadowRoot} */

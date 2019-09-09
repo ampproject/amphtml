@@ -177,16 +177,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
   },
   {
-    id: 'ios-embed-sd',
-    name:
-      'A new iOS embedded viewport model that wraps the body into' +
-      ' shadow root',
-    spec:
-      'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
-  },
-  {
     id: 'ios-scrollable-iframe',
     name: 'iOS 13 enables iframe scrolling per spec',
     spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
@@ -375,6 +365,26 @@ const EXPERIMENTS = [
     name: 'Use iframe freezing instead of recreating iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/24110',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
+  },
+  {
+    id: 'adsense-ad-size-optimization',
+    name:
+      'Per publisher server side settings for changing the ad size ' +
+      'to responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/23568',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
+  },
+  {
+    id: 'fix-inconsistent-responsive-height-selection',
+    name: 'Fix inconsistent responsive height selection.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24166',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
+  },
+  {
+    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
+    name: 'Use amp-ad responsive to make amp auto ads responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24168',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
 ];
 

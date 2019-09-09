@@ -73,6 +73,18 @@ describes.fakeWin('localization', {}, env => {
       );
     });
 
+    it('should handle registration of uppercase locales', () => {
+      env.win.document.documentElement.setAttribute('lang', 'zh-CN');
+      const localizationService = new LocalizationService(env.win);
+      localizationService.registerLocalizedStringBundle('zh-CN', {
+        '123': {
+          string: '买票',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('123')).to.equal('买票');
+    });
+
     it('should utilize fallback if string is missing', () => {
       const localizationService = new LocalizationService(env.win);
       localizationService.registerLocalizedStringBundle('en', {

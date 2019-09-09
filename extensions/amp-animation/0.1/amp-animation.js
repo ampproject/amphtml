@@ -502,7 +502,7 @@ export class AmpAnimation extends AMP.BaseElement {
         this.getRootNode_(),
         baseUrl,
         this.getVsync(),
-        this.element.getResources()
+        Services.ownersForDoc(this.element.getAmpDoc())
       );
       return builder.createRunner(configJson, args, opt_positionObserverData);
     });

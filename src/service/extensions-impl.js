@@ -239,17 +239,30 @@ export class Extensions {
   /**
    * Reloads the new version of the extension.
    * @param {string} extensionId
-   * @param {!Element} oldScriptElement
    * @return {!Promise<!ExtensionDef>}
    */
-  reloadExtension(extensionId, oldScriptElement) {
+  reloadExtension(extensionId) {
+    const attribute = isTemplateExtension(extensionId)
+      ? 'custom-template'
+      : 'custom-element';
+    // The :not is an extra prevention of recursion because it will be
+    // added to script tags that go into the code path below.
+    const oldScriptElement = this.win.document.head./*OK*/ querySelector(
+      `[${attribute}="${extensionId}"]:not([i-amphtml-inserted])`
+    );
+    devAssert(
+      oldScriptElement,
+      'Expected to find script for extension: %s',
+      extensionId
+    );
+
     // "Disconnect" the old script element and extension record.
     const holder = this.extensions_[extensionId];
     if (holder) {
       devAssert(!holder.loaded && !holder.error);
       delete this.extensions_[extensionId];
     }
-    oldScriptElement.removeAttribute('custom-element');
+    oldScriptElement.removeAttribute(attribute);
     oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
     const urlParts = parseExtensionUrl(oldScriptElement.src);
     return this.preloadExtension(extensionId, urlParts.extensionVersion);
@@ -511,8 +524,11 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
+      const attribute = isTemplateExtension(extensionId)
+        ? 'custom-template'
+        : 'custom-element';
       const scriptInHead = this.win.document.head./*OK*/ querySelector(
-        `[custom-element="${extensionId}"]`
+        `[${attribute}="${extensionId}"]`
       );
       holder.scriptPresent = !!scriptInHead;
     }
