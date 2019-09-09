@@ -42,5 +42,6 @@
   "macro-after-long-task": 0,
   "new-loaders": 1,
   "pump-early-frame": 1,
+  "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.01,
   "version-locking": 1
 }
