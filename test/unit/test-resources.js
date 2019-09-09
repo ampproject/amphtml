@@ -3366,20 +3366,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       expect(pauseOnRemoveStub).to.be.calledOnce;
       expect(disconnectStub).to.not.be.called;
     });
-
-    it('should disconnect resource when embed is destroyed', () => {
-      child1.isBuilt = () => true;
-      resources.add(child1);
-      const resource = child1['__AMP__RESOURCE'];
-      const pauseOnRemoveStub = sandbox.stub(resource, 'pauseOnRemove');
-      const disconnectStub = sandbox.stub(resource, 'disconnect');
-      const childWin = {};
-      resource.hostWin = childWin;
-      resources.removeForChildWindow(childWin);
-      expect(resources.get()).to.not.contain(resource);
-      expect(pauseOnRemoveStub).to.be.calledOnce;
-      expect(disconnectStub).to.be.called;
-    });
   });
 
   describe('reparent', () => {
