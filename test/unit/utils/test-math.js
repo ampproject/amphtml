@@ -243,7 +243,7 @@ describes.sandboxed('utils/math', {}, () => {
     });
   });
 
-  describes('sum', {}, () => {
+  describe('sum', () => {
     it('should sum up an array of numbers', () => {
       expect(sum([2, 10, 100])).to.equal(112);
       expect(sum([-3, 2, 44])).to.equal(43);

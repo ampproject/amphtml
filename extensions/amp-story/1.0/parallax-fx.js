@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ export class ParallaxService {
       this.vsync_.mutate(() => {
         const translation = `translateZ(${(order - layerZIndexOffset) *
           layerSpacing *
-          30}px)`;
+          (PERSPECTIVE / 50)}px)`;
         const scale = `scale(${mapRange(
           order,
           1,
