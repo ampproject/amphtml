@@ -23,11 +23,13 @@ import {loadScript, validateData} from '../3p/3p';
 export function readmo(global, data) {
   validateData(
     data,
-    ['section'],
+    ['section', 'url'],
     ['module', 'sponsoredByLabel', 'infinite', 'title']
   );
 
-  const {section, module, sponsoredByLabel, infinite, title} = data;
+  const {section, module, sponsoredByLabel, infinite, title, url} = data;
+
+  window.publisherUrl = url;
 
   (global.readmo = global.readmo || []).push({
     section,
