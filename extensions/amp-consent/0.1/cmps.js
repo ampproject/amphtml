@@ -40,3 +40,9 @@ CMP_CONFIG['didomi'] = {
   'checkConsentHref': 'https://api.privacy-center.org/amp/check-consent',
   'promptUISrc': 'https://sdk-amp.privacy-center.org/loader.html',
 };
+
+CMP_CONFIG['SourcePoint'] = {
+  'consentInstanceId': 'SourcePoint',
+  'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
+  'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
+};
