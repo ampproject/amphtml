@@ -33,17 +33,17 @@ describes.realWin(
       doc = win.document;
     });
 
-    async function getNexxtv(mediaid, client) {
+    async function getNexxtv(attributes, opt_responsive) {
       const nexxtv = doc.createElement('amp-nexxtv-player');
 
-      if (mediaid) {
-        nexxtv.setAttribute('data-mediaid', mediaid);
+      for (const key in attributes) {
+        nexxtv.setAttribute(key, attributes[key]);
       }
-      if (client) {
-        nexxtv.setAttribute('data-client', client);
+      nexxtv.setAttribute('width', '111');
+      nexxtv.setAttribute('height', '222');
+      if (opt_responsive) {
+        nexxtv.setAttribute('layout', 'responsive');
       }
-
-      // see yt test implementation
       doc.body.appendChild(nexxtv);
       await nexxtv.build();
       await nexxtv.layoutCallback();
@@ -56,8 +56,11 @@ describes.realWin(
       return nexxtv;
     }
 
-    it.skip('renders nexxtv video player', async () => {
-      const nexxtv = await getNexxtv('71QQG852413DU7J', '761');
+    it('renders nexxtv video player', async () => {
+      const nexxtv = await getNexxtv({
+        'data-mediaid': '71QQG852413DU7J',
+        'data-client': '761',
+      });
       const playerIframe = nexxtv.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
       expect(playerIframe.src).to.equal(
@@ -66,22 +69,35 @@ describes.realWin(
       );
     });
 
-    // NOTE(alanorozco): Test failing on Travis. Trivial to skip since this is
-    // covered by validation rules.
-    it.skip('fails without mediaid', () => {
-      expectAsyncConsoleError(/data-mediaid attribute is required/);
-      return getNexxtv(null, '761').should.eventually.be.rejected;
+    it('renders player responsive', async () => {
+      const nexxtv = await getNexxtv({
+        'data-mediaid': '71QQG852413DU7J',
+        'data-client': '761',
+      });
+      const playerIframe = nexxtv.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.className).to.match(/i-amphtml-fill-content/);
     });
 
-    // NOTE(alanorozco): Test failing on Travis. Trivial to skip since this is
-    // covered by validation rules.
-    it.skip('fails without client', () => {
-      expectAsyncConsoleError(/data-client attribute is required/);
-      return getNexxtv('71QQG852413DU7J', null).should.eventually.be.rejected;
+    it('removes iframe after unlayoutCallback', async () => {
+      const nexxtv = await getNexxtv({
+        'data-mediaid': '71QQG852413DU7J',
+        'data-client': '761',
+      });
+      const playerIframe = nexxtv.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+
+      const obj = nexxtv.implementation_;
+      obj.unlayoutCallback();
+      expect(nexxtv.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
     });
 
-    it.skip('should forward events from nexxtv-player to the amp element', async () => {
-      const nexxtv = await getNexxtv('71QQG852413DU7J', '761');
+    it('should forward events from nexxtv-player to the amp element', async () => {
+      const nexxtv = await getNexxtv({
+        'data-mediaid': '71QQG852413DU7J',
+        'data-client': '761',
+      });
       const iframe = nexxtv.querySelector('iframe');
       await Promise.resolve();
       const p1 = listenOncePromise(nexxtv, VideoEvents.PLAYING);
