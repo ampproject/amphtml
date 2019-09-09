@@ -4,7 +4,7 @@
     "environment": "AMP",
     "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
     "issue": "",
-    "expirationDateUTC": "2019-09-08",
+    "expirationDateUTC": "2019-10-08",
     "environment": "web",
     "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
   },
