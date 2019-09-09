@@ -1,0 +1,1930 @@
+?is cast to: ObjectPropertyDescriptor, 41  [synthetic:util/defineproperty] 
+?is cast to: Object, 33  [synthetic:util/global] 
+?is cast to: ?, 82  [synthetic:es6/symbol] 
+$jscomp.SymbolClassis cast to: ?, 85  [synthetic:es6/symbol] 
+function(): ?is cast to: function(): Function, 73  [synthetic:es6/symbol] 
+{next: function(this:Iterator<T>): T}is cast to: IteratorIterable, 165  [synthetic:es6/symbol] 
+(Arguments|Iterable<T>|Iterator<T>|string)is cast to: ?, 34  [synthetic:es6/util/makeiterator] 
+(Arguments|Iterable<T>|Iterator<T>|string)is cast to: Array, 36  [synthetic:es6/util/makeiterator] 
+Objectis cast to: JsonObject, 32 src/url-parse-query-string.js
+Nodeis cast to: Element, 391 src/polyfills/custom-elements.js
+Nodeis cast to: Element, 451 src/polyfills/custom-elements.js
+?is cast to: (function(...?): ?|undefined), 789 src/polyfills/custom-elements.js
+(Window|null)is cast to: Window, 96 src/types.js
+??is cast to: JsonObject, 170 src/log.js
+(Array|string|undefined)is cast to: Array, 393 src/log.js
+*is cast to: Element, 446 src/log.js
+*is cast to: string, 467 src/log.js
+*is cast to: number, 489 src/log.js
+*is cast to: Array, 508 src/log.js
+*is cast to: boolean, 528 src/log.js
+?is cast to: Array, 573 src/log.js
+(Element|string)is cast to: string, 637 src/log.js
+Objectis cast to: JsonObject, 52 src/utils/object.js
+Objectis cast to: JsonObject, 66 src/json.js
+*is cast to: string, 112 src/json.js
+*is cast to: (JsonObject|null), 112 src/json.js
+*is cast to: Object, 192 src/json.js
+*is cast to: Object, 193 src/json.js
+*is cast to: Object, 222 src/json.js
+Objectis cast to: JsonObject, 239 src/json.js
+(Object|boolean|null|number|string)is cast to: {
+  TO_MAKE_THIS_TYPE: string,
+  YOU_MUST_USE: string,
+  jsonLiteral: function(): ?
+}, 250 src/json.js
+Promise<(JsonObject|null)>is cast to: Promise<JsonObject>, 191 src/polyfills/fetch.js
+Promise<Uint8Array>is cast to: Promise<ArrayBuffer>, 202 src/polyfills/fetch.js
+Objectis cast to: {
+  getResponseHeader: function(string): string,
+  responseText: string,
+  status: number,
+  statusText: string
+}, 307 src/polyfills/fetch.js
+*is cast to: Promise$$module$node_modules$promise_pjs$promise_mjs, 103 node_modules/promise-pjs/promise.mjs
+?is cast to: Promise$$module$node_modules$promise_pjs$promise_mjs, 119 node_modules/promise-pjs/promise.mjs
+?is cast to: Promise$$module$node_modules$promise_pjs$promise_mjs, 151 node_modules/promise-pjs/promise.mjs
+?is cast to: Promise$$module$node_modules$promise_pjs$promise_mjs, 170 node_modules/promise-pjs/promise.mjs
+(typeof Promise$$module$node_modules$promise_pjs$promise_mjs)is cast to: ?, 26 src/polyfills/promise.js
+Elementis cast to: HTMLAnchorElement, 101 src/url.js
+?is cast to: string, 270 src/url.js
+?is cast to: string, 274 src/url.js
+(null|string|undefined)is cast to: string, 321 src/url.js
+??is cast to: (HTMLIFrameElement|null), 335 src/service.js
+(AmpDoc$$module$src$service$ampdoc_impl|Node)is cast to: Document, 350 src/service.js
+(AmpDoc$$module$src$service$ampdoc_impl|Node)is cast to: Node, 353 src/service.js
+(AmpDoc$$module$src$service$ampdoc_impl|Node)is cast to: AmpDoc$$module$src$service$ampdoc_impl, 355 src/service.js
+?is cast to: AmpDocService$$module$src$service$ampdoc_impl, 374 src/service.js
+(Promise|null)is cast to: Promise<Object>, 465 src/service.js
+(Object|null)is cast to: Object, 503 src/service.js
+Objectis cast to: Disposable$$module$src$service, 539 src/service.js
+Promise<Object>is cast to: Promise<(Object|null)>, 65 src/element-service.js
+Promise<Object>is cast to: Promise<(Object|null)>, 125 src/element-service.js
+Promise<Object>is cast to: Promise<(Object|null)>, 163 src/element-service.js
+Objectis cast to: Object, 186 src/element-service.js
+?is cast to: Promise<(Object|null)>, 265 src/element-service.js
+Promise<*>is cast to: Promise<AccessService$$module$extensions$amp_access$0_1$amp_access>, 47 src/services.js
+Promise<(Object|null)>is cast to: Promise<(AccessService$$module$extensions$amp_access$0_1$amp_access|null)>, 61 src/services.js
+Promise<*>is cast to: Promise<SubscriptionService$$module$extensions$amp_subscriptions$0_1$amp_subscriptions>, 74 src/services.js
+Promise<(Object|null)>is cast to: Promise<(SubscriptionService$$module$extensions$amp_subscriptions$0_1$amp_subscriptions|null)>, 87 src/services.js
+(Object|null)is cast to: ActionService$$module$src$service$action_impl, 99 src/services.js
+(Object|null)is cast to: StandardActions$$module$src$service$standard_actions_impl, 110 src/services.js
+Promise<*>is cast to: Promise<Activity$$module$extensions$amp_analytics$0_1$activity_impl>, 121 src/services.js
+?is cast to: AmpDocService$$module$src$service$ampdoc_impl, 136 src/services.js
+Promise<*>is cast to: Promise<InstrumentationService$$module$extensions$amp_analytics$0_1$instrumentation>, 165 src/services.js
+Promise<(Object|null)>is cast to: Promise<(InstrumentationService$$module$extensions$amp_analytics$0_1$instrumentation|null)>, 177 src/services.js
+?is cast to: BatchedXhr$$module$src$service$batched_xhr_impl, 189 src/services.js
+Promise<(Object|null)>is cast to: Promise<(Bind$$module$extensions$amp_bind$0_1$bind_impl|null)>, 200 src/services.js
+Promise<Object>is cast to: Promise<CidDef$$module$src$service$cid_impl>, 212 src/services.js
+?is cast to: Navigation$$module$src$service$navigation, 223 src/services.js
+Promise<*>is cast to: Promise<LoaderService$$module$extensions$amp_loader$0_1$amp_loader>, 234 src/services.js
+Promise<*>is cast to: Promise<StandaloneService$$module$extensions$amp_standalone$0_1$amp_standalone>, 246 src/services.js
+?is cast to: Crypto$$module$src$service$crypto_impl, 258 src/services.js
+?is cast to: DocInfo$$module$src$service$document_info_impl, 269 src/services.js
+?is cast to: Extensions$$module$src$service$extensions_impl, 280 src/services.js
+Promise<Object>is cast to: Promise<(FormSubmitService$$module$extensions$amp_form$0_1$form_submit_service|null)>, 293 src/services.js
+(Object|null)is cast to: HiddenObserver$$module$src$service$hidden_observer_impl, 314 src/services.js
+?is cast to: History$$module$src$service$history_impl, 326 src/services.js
+Promise<(Object|null)>is cast to: Promise<(AmpInputmaskService$$module$extensions$amp_inputmask$0_1$amp_inputmask|null)>, 346 src/services.js
+?is cast to: Owners$$module$src$service$owners_impl, 358 src/services.js
+?is cast to: Performance$$module$src$service$performance_impl, 369 src/services.js
+(Object|null)is cast to: Performance$$module$src$service$performance_impl, 380 src/services.js
+?is cast to: Platform$$module$src$service$platform_impl, 391 src/services.js
+?is cast to: PositionObserver$$module$src$service$position_observer$position_observer_impl, 404 src/services.js
+?is cast to: ResourcesDef$$module$src$service$resources_impl, 415 src/services.js
+Promise<Object>is cast to: Promise<ResourcesDef$$module$src$service$resources_impl>, 426 src/services.js
+Promise<(Object|null)>is cast to: Promise<(null|{incomingFragment: string, outgoingFragment: string})>, 437 src/services.js
+Promise<(Object|null)>is cast to: Promise<(JsonObject|null)>, 453 src/services.js
+(Object|null)is cast to: (AmpStoryVariableService$$module$extensions$amp_story$1_0$variable_service|null), 464 src/services.js
+Promise<(Object|null)>is cast to: Promise<(AmpStoryStoreService$$module$extensions$amp_story$0_1$amp_story_store_service|AmpStoryStoreService$$module$extensions$amp_story$1_0$amp_story_store_service|null)>, 477 src/services.js
+(Object|null)is cast to: (AmpStoryStoreService$$module$extensions$amp_story$1_0$amp_story_store_service|null), 488 src/services.js
+(Object|null)is cast to: (AmpStoryMediaQueryService$$module$extensions$amp_story$1_0$amp_story_media_query_service|null), 499 src/services.js
+(Object|null)is cast to: (AmpStoryRequestService$$module$extensions$amp_story$1_0$amp_story_request_service|null), 510 src/services.js
+(Object|null)is cast to: (MediaPerformanceMetricsService$$module$extensions$amp_story$1_0$media_performance_metrics_service|null), 521 src/services.js
+Promise<(Object|null)>is cast to: Promise<(LocalizationService$$module$src$service$localization|null)>, 532 src/services.js
+Promise<(Object|null)>is cast to: Promise<(StoryAnalyticsService$$module$extensions$amp_story$1_0$story_analytics|null)>, 552 src/services.js
+(Object|null)is cast to: (StoryAnalyticsService$$module$extensions$amp_story$1_0$story_analytics|null), 563 src/services.js
+Promise<(Object|null)>is cast to: Promise<(LocalizationService$$module$src$service$localization|null)>, 593 src/services.js
+Promise<(Object|null)>is cast to: Promise<(null|{ancestorOrigin: function(string, string): string})>, 613 src/services.js
+Promise<*>is cast to: Promise<WebAnimationService$$module$extensions$amp_animation$0_1$web_animation_service>, 629 src/services.js
+Promise<Object>is cast to: Promise<Storage$$module$src$service$storage_impl>, 638 src/services.js
+?is cast to: Templates$$module$src$service$template_impl, 649 src/services.js
+?is cast to: Timer$$module$src$service$timer_impl, 661 src/services.js
+(Object|null)is cast to: UrlReplacements$$module$src$service$url_replacements_impl, 672 src/services.js
+Promise<*>is cast to: Promise<UserNotificationManager$$module$extensions$amp_user_notification$0_1$amp_user_notification>, 685 src/services.js
+Promise<(Object|null)>is cast to: Promise<(ConsentPolicyManager$$module$extensions$amp_consent$0_1$consent_policy_manager|null)>, 702 src/services.js
+Promise<(Object|null)>is cast to: Promise<(null|{
+  ISOCountry: string,
+  allISOCountryGroups: Array<string>,
+  isInCountryGroup: function(string): GEO_IN_GROUP$$module$extensions$amp_geo$0_1$amp_geo_in_group<number>,
+  matchedISOCountryGroups: Array<string>
+})>, 717 src/services.js
+Promise<(Object|null)>is cast to: Promise<(UserLocationService$$module$extensions$amp_user_location$0_1$user_location_service|null)>, 732 src/services.js
+(Object|null)is cast to: Url$$module$src$service$url_impl, 747 src/services.js
+Promise<(Object|null)>is cast to: Promise<(Variants$$module$extensions$amp_experiment$0_1$variant|null)>, 760 src/services.js
+?is cast to: VideoManager$$module$src$service$video_manager_impl, 773 src/services.js
+Promise<(Object|null)>is cast to: Promise<(AmpViewerAssistance$$module$extensions$amp_viewer_assistance$0_1$amp_viewer_assistance|null)>, 786 src/services.js
+?is cast to: ViewerInterface$$module$src$service$viewer_interface, 799 src/services.js
+Promise<Object>is cast to: Promise<ViewerInterface$$module$src$service$viewer_interface>, 813 src/services.js
+?is cast to: Vsync$$module$src$service$vsync_impl, 824 src/services.js
+?is cast to: ViewportInterface$$module$src$service$viewport$viewport_interface, 835 src/services.js
+?is cast to: Xhr$$module$src$service$xhr_impl, 846 src/services.js
+*is cast to: string, 124 src/style.js
+(CSSStyleDeclaration|null)is cast to: (CSSStyleDeclaration|null), 334 src/style.js
+(CSSStyleDeclaration|null)is cast to: Object<string,string>, 335 src/style.js
+(null|string|undefined)is cast to: string, 210 src/layout.js
+(null|{height: string, width: string})is cast to: {height: string, width: string}, 294 src/layout.js
+Layout$$module$src$layout<string>is cast to: Layout$$module$src$layout<string>, 346 src/layout.js
+JsonObjectis cast to: (JsonObject|null|string|undefined), 78 src/event-helper.js
+JsonObjectis cast to: (JsonObject|null|string|undefined), 87 src/event-helper.js
+Objectis cast to: RenderDelayingService$$module$src$render_delaying_services, 115 src/render-delaying-services.js
+Windowis cast to: Window, 255 src/style-installer.js
+Elementis cast to: ?, 127 src/shadow-embed.js
+?is cast to: (HTMLElement|null), 143 src/shadow-embed.js
+Nodeis cast to: (ShadowRoot|null), 171 src/shadow-embed.js
+(Node|null)is cast to: (ShadowRoot|null), 174 src/shadow-embed.js
+*is cast to: string, 476 src/shadow-embed.js
+*is cast to: JsonObject, 109 src/error.js
+*is cast to: Error, 135 src/error.js
+*is cast to: Error, 156 src/error.js
+Erroris cast to: Error, 177 src/error.js
+*is cast to: Error, 225 src/error.js
+function(this:Window, (string|undefined), (string|undefined), (string|undefined), (string|undefined), (*|undefined)): undefinedis cast to: Function, 283 src/error.js
+(JsonObject|undefined)is cast to: JsonObject, 340 src/error.js
+Objectis cast to: JsonObject, 514 src/error.js
+*is cast to: (DeferredEvent$$module$src$service$action_impl|Event), 353 src/service/action-impl.js
+*is cast to: (DeferredEvent$$module$src$service$action_impl|Event), 375 src/service/action-impl.js
+?is cast to: JsonObject, 840 src/service/action-impl.js
+*is cast to: (boolean|number|string), 1125 src/service/action-impl.js
+(DeferredEvent$$module$src$service$action_impl|Event)is cast to: Event, 1147 src/service/action-impl.js
+{expression: string}is cast to: {expression: string}, 1160 src/service/action-impl.js
+(FormData|FormDataWrapperInterface|JsonObject|string|undefined)is cast to: FormDataWrapperInterface, 85 src/utils/xhr-utils.js
+(FormData|FormDataWrapperInterface|JsonObject|string|undefined)is cast to: JsonObject, 332 src/utils/xhr-utils.js
+(FormData|FormDataWrapperInterface|JsonObject|string|undefined)is cast to: JsonObject, 336 src/utils/xhr-utils.js
+(FormData|FormDataWrapperInterface|JsonObject|string|undefined)is cast to: FormDataWrapperInterface, 83 src/service/xhr-impl.js
+(null|string)is cast to: string, 103 src/cookies.js
+(boolean|null|string)is cast to: boolean, 217 src/service/cid-api.js
+Promise<null>is cast to: Promise<(null|string)>, 80 src/service/cache-cid-api.js
+Promise<null>is cast to: Promise<(null|string)>, 404 src/service/cid-impl.js
+Promise<string>is cast to: Promise<(null|string)>, 408 src/service/cid-impl.js
+Promise<string>is cast to: Promise<(null|string)>, 416 src/service/cid-impl.js
+Uint8Arrayis cast to: Uint8Array, 659 src/service/cid-impl.js
+Objectis cast to: JsonObject, 186 src/service/crypto-impl.js
+Objectis cast to: webCrypto.JsonWebKey, 187 src/service/crypto-impl.js
+Promise<webCrypto.CryptoKey>is cast to: Promise<webCrypto.CryptoKey>, 188 src/service/crypto-impl.js
+Promise<boolean>is cast to: Promise<boolean>, 209 src/service/crypto-impl.js
+(Document|HTMLHtmlElement|ShadowRoot)is cast to: (Element|ShadowRoot), 138 src/service/navigation.js
+Windowis cast to: Window, 54 src/service/hidden-observer-impl.js
+?is cast to: PopStateEvent, 479 src/service/history-impl.js
+*is cast to: JsonObject, 480 src/service/history-impl.js
+*is cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 729 src/service/history-impl.js
+*is cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 782 src/service/history-impl.js
+Objectis cast to: JsonObject, 832 src/service/history-impl.js
+Objectis cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 837 src/service/history-impl.js
+*is cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 907 src/service/history-impl.js
+Objectis cast to: JsonObject, 922 src/service/history-impl.js
+JsonObjectis cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 931 src/service/history-impl.js
+JsonObjectis cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 954 src/service/history-impl.js
+JsonObjectis cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 976 src/service/history-impl.js
+Objectis cast to: JsonObject, 987 src/service/history-impl.js
+JsonObjectis cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 1000 src/service/history-impl.js
+JsonObjectis cast to: {
+  data: (JsonObject|undefined),
+  fragment: string,
+  stackIndex: number,
+  title: string
+}, 1036 src/service/history-impl.js
+Promise<(JsonObject|null|string|undefined)>is cast to: Promise, 1097 src/service/history-impl.js
+Resource$$module$src$service$resourceis cast to: Resource$$module$src$service$resource, 92 src/service/resource.js
+?is cast to: (Resource$$module$src$service$resource|null), 104 src/service/resource.js
+(*|undefined)is cast to: (JsonObject|null), 448 src/iframe-helper.js
+?is cast to: (FriendlyIframeEmbed$$module$src$friendly_iframe_embed|null), 610 src/iframe-helper.js
+(null|{
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+})is cast to: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}, 562 src/intersection-observer-polyfill.js
+(string|undefined)is cast to: string, 192 src/size-list.js
+(string|undefined)is cast to: string, 36 src/consent.js
+stringis cast to: string, 55 src/consent.js
+stringis cast to: string, 76 src/consent.js
+function(new:HTMLElement): ?is cast to: function(new:HTMLElement): ?, 104 src/custom-element.js
+(typeof CustomAmpElement)is cast to: function(new:Element): ?, 124 src/custom-element.js
+(typeof HTMLElement)is cast to: function(new:HTMLElement): ?, 138 src/custom-element.js
+BaseCustomElementis cast to: Object, 253 src/custom-element.js
+(null|string)is cast to: string, 510 src/custom-element.js
+*is cast to: Error, 548 src/custom-element.js
+(BaseElement$$module$src$base_element|Promise<BaseElement$$module$src$base_element>)is cast to: BaseElement$$module$src$base_element, 926 src/custom-element.js
+*is cast to: Error, 1201 src/custom-element.js
+Documentis cast to: Document, 1692 src/custom-element.js
+Documentis cast to: Document, 1706 src/custom-element.js
+(typeof BaseCustomElement)is cast to: function(new:HTMLElement): ?, 1867 src/custom-element.js
+function(new:BaseElement$$module$src$base_element, Element): ?is cast to: Function, 43 src/service/custom-element-registry.js
+function(Event): (Promise|undefined)is cast to: function(Event): ?, 87 src/input.js
+(function(Event): ?|null)is cast to: function(Event): ?, 250 src/input.js
+(Array<Element>|Element)is cast to: Array<Element>, 33 src/service/owners-impl.js
+HTMLDocumentis cast to: Document, 53 src/pixel.js
+(null|string)is cast to: string, 114 builtins/amp-pixel.js
+(Navigator|null)is cast to: Navigator, 29 src/service/platform-impl.js
+{
+  callback: (function(boolean): ?|undefined),
+  event: (Event|null|undefined),
+  force: boolean,
+  marginChange: (undefined|{currentMargins: {
+  bottom: number,
+  left: number,
+  right: number,
+  top: number
+}, newMargins: {
+  bottom: (number|undefined),
+  left: (number|undefined),
+  right: (number|undefined),
+  top: (number|undefined)
+}}),
+  newHeight: (number|undefined),
+  newWidth: (number|undefined),
+  resource: Resource$$module$src$service$resource
+}is cast to: {
+  callback: (function(boolean): ?|undefined),
+  event: (Event|null|undefined),
+  force: boolean,
+  marginChange: (undefined|{currentMargins: {
+  bottom: number,
+  left: number,
+  right: number,
+  top: number
+}, newMargins: {
+  bottom: (number|undefined),
+  left: (number|undefined),
+  right: (number|undefined),
+  top: (number|undefined)
+}}),
+  newHeight: (number|undefined),
+  newWidth: (number|undefined),
+  resource: Resource$$module$src$service$resource
+}, 1215 src/service/resources-impl.js
+function(*, Element=): Erroris cast to: function(*): ?, 1766 src/service/resources-impl.js
+JsonObjectis cast to: JsonObject, 201 src/service/storage-impl.js
+Promise<(JsonObject|null|string|undefined)>is cast to: Promise, 403 src/service/storage-impl.js
+Elementis cast to: HTMLAnchorElement, 51 src/service/url-impl.js
+function(): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 157 src/service/url-replacements-impl.js
+function(): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 166 src/service/url-replacements-impl.js
+?is cast to: string, 349 src/service/url-replacements-impl.js
+stringis cast to: string, 356 src/service/url-replacements-impl.js
+function(?): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 347 src/service/url-replacements-impl.js
+function(): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 364 src/service/url-replacements-impl.js
+stringis cast to: string, 388 src/service/url-replacements-impl.js
+?is cast to: string, 390 src/service/url-replacements-impl.js
+function(?): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 381 src/service/url-replacements-impl.js
+function(?): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 400 src/service/url-replacements-impl.js
+function(?): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 415 src/service/url-replacements-impl.js
+function(): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 430 src/service/url-replacements-impl.js
+function(): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 440 src/service/url-replacements-impl.js
+function(): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 577 src/service/url-replacements-impl.js
+function(?): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 587 src/service/url-replacements-impl.js
+stringis cast to: string, 619 src/service/url-replacements-impl.js
+stringis cast to: string, 633 src/service/url-replacements-impl.js
+?is cast to: string, 634 src/service/url-replacements-impl.js
+stringis cast to: string, 645 src/service/url-replacements-impl.js
+?is cast to: string, 646 src/service/url-replacements-impl.js
+stringis cast to: string, 668 src/service/url-replacements-impl.js
+HTMLHtmlElementis cast to: (Element|ShadowRoot), 708 src/service/url-replacements-impl.js
+stringis cast to: string, 713 src/service/url-replacements-impl.js
+{
+  canonicalUrl: string,
+  linkRels: Object<string,(Array<string>|string)>,
+  metaTags: Object<string,(Array<string>|string)>,
+  pageViewId: string,
+  pageViewId64: Promise<string>,
+  replaceParams: (Object<string,(Array<string>|string)>|null),
+  sourceUrl: string
+}is cast to: Object, 726 src/service/url-replacements-impl.js
+?is cast to: (AccessVars$$module$extensions$amp_access$0_1$access_vars|null), 757 src/service/url-replacements-impl.js
+(Array<string>|string)is cast to: string, 794 src/service/url-replacements-impl.js
+{incomingFragment: string, outgoingFragment: string}is cast to: {incomingFragment: string, outgoingFragment: string}, 897 src/service/url-replacements-impl.js
+function(?, ?=): ?is cast to: function(...string): Promise<(boolean|null|number|string|undefined)>, 930 src/service/url-replacements-impl.js
+(Promise<string>|string)is cast to: string, 976 src/service/url-replacements-impl.js
+(Promise<string>|string)is cast to: Promise<string>, 996 src/service/url-replacements-impl.js
+(Promise<string>|string)is cast to: string, 1020 src/service/url-replacements-impl.js
+Promise<?>is cast to: Promise<string>, 1042 src/service/url-replacements-impl.js
+(Promise<string>|string)is cast to: Promise<string>, 1060 src/service/url-replacements-impl.js
+(Promise<string>|string)is cast to: string, 1072 src/service/url-replacements-impl.js
+*is cast to: (Error|string|undefined), 304 src/service/viewer-impl.js
+Object<string,string>is cast to: JsonObject, 379 src/service/viewer-impl.js
+Promise<?>is cast to: Promise<boolean>, 532 src/service/viewer-impl.js
+Promise<?>is cast to: Promise<string>, 582 src/service/viewer-impl.js
+JsonObjectis cast to: (JsonObject|undefined), 642 src/service/viewer-impl.js
+(JsonObject|null|string|undefined)is cast to: (JsonObject|null|string|undefined), 718 src/service/viewer-impl.js
+Promise<?>is cast to: Promise<(JsonObject|null|string|undefined)>, 714 src/service/viewer-impl.js
+HTMLIFrameElementis cast to: HTMLIFrameElement, 671 src/service/viewport/viewport-impl.js
+(Element|null)is cast to: (HTMLMetaElement|null), 803 src/service/viewport/viewport-impl.js
+(string|undefined)is cast to: string, 1094 src/service/viewport/viewport-impl.js
+function(?): undefinedis cast to: function(Object<string,*>=): ?, 209 src/service/vsync-impl.js
+function(?): ?is cast to: function(Object<string,*>=): boolean, 325 src/service/vsync-impl.js
+Promise<{elements: Object<string,{css: (null|string|undefined), implementationClass: function(new:BaseElement$$module$src$base_element, Element): ?}>, services: Object<string,{serviceClass: function(new:Object, AmpDoc$$module$src$service$ampdoc_impl): ?, serviceName: string}>}>is cast to: Promise<(null|{elements: Object<string,{css: (null|string|undefined), implementationClass: function(new:BaseElement$$module$src$base_element, Element): ?}>, services: Object<string,{serviceClass: function(new:Object, AmpDoc$$module$src$service$ampdoc_impl): ?, serviceName: string}>})>, 186 src/service/extensions-impl.js
+function(...(ExtensionPayload|function(Object): ?|undefined)): numberis cast to: function((ExtensionPayload|function(Object, Object): ?|null)): ?, 256 src/runtime.js
+*is cast to: JsonObject, 798 src/runtime.js
+?is cast to: ?, 363 src/service/ampdoc-impl.js
+?is cast to: ?, 426 src/service/ampdoc-impl.js
+booleanis cast to: ?, 442 src/service/ampdoc-impl.js
+?is cast to: ?, 462 src/service/ampdoc-impl.js
+?is cast to: ?, 473 src/service/ampdoc-impl.js
+?is cast to: ?, 482 src/service/ampdoc-impl.js
+(Error|null|number)is cast to: (null|number), 618 src/service/ampdoc-impl.js
+(Window|null)is cast to: Window, 239 src/friendly-iframe-embed.js
+(Window|null)is cast to: Window, 383 src/friendly-iframe-embed.js
+(HTMLBodyElement|null)is cast to: HTMLBodyElement, 558 src/friendly-iframe-embed.js
+(Object|null)is cast to: (IframeMessagingClient$$module$3p$iframe_messaging_client|null), 28 src/inabox/inabox-iframe-messaging-client.js
+(null|{
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+})is cast to: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}, 98 ads/inabox/position-observer.js
+Elementis cast to: HTMLElement, 508 src/inabox/inabox-viewport.js
+Elementis cast to: HTMLElement, 643 src/inabox/inabox-viewport.js
+(HTMLIFrameElement|HTMLObjectElement|null)is cast to: (HTMLIFrameElement|null), 708 src/inabox/inabox-viewport.js
+(HTMLIFrameElement|HTMLObjectElement|null)is cast to: (HTMLIFrameElement|null), 741 src/inabox/inabox-viewport.js
+{targetRect: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}, viewportRect: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}}is cast to: (JsonObject|null), 190 ads/inabox/inabox-messaging-host.js
+Elementis cast to: HTMLIFrameElement, 354 ads/inabox/inabox-messaging-host.js
+(HTMLIFrameElement|HTMLObjectElement|null)is cast to: HTMLIFrameElement, 360 ads/inabox/inabox-messaging-host.js
+function(?): undefinedis cast to: function((Event|null)): ?, 72 ads/inabox/inabox-host.js
+Objectis cast to: JsonObject, 45 extensions/amp-bind/0.1/bind-macro.js
+*is cast to: {allowedProtocols: (Object<string,boolean>|undefined), alternativeName: (string|undefined)}, 203 extensions/amp-bind/0.1/bind-validator.js
+*is cast to: {allowedProtocols: (Object<string,boolean>|undefined), alternativeName: (string|undefined)}, 207 extensions/amp-bind/0.1/bind-validator.js
+?is cast to: {
+  args: Array,
+  id: number,
+  method: string,
+  scope: number
+}, 68 src/web-worker/web-worker.js
+Elementis cast to: HTMLIFrameElement, 95 src/3p-frame.js
+??is cast to: string, 112 src/iframe-video.js
+(JsonObject|null|string|undefined)is cast to: JsonObject, 122 src/iframe-video.js
+function(...?): Promise<boolean>is cast to: function((Window|null), boolean): Promise<boolean>, 73 src/utils/video.js
+VideoInterface$$module$src$video_interfaceis cast to: BaseElement$$module$src$base_element, 200 src/service/video-manager-impl.js
+(undefined|{
+  album: string,
+  artist: string,
+  artwork: (Array|null),
+  title: string
+})is cast to: {
+  album: string,
+  artist: string,
+  artwork: (Array|null),
+  title: string
+}, 675 src/service/video-manager-impl.js
+(ScreenOrientation|null)is cast to: ScreenOrientation, 1126 src/service/video-manager-impl.js
+(BaseElement$$module$src$base_element|VideoInterface$$module$src$video_interface)is cast to: VideoInterface$$module$src$video_interface, 1294 src/service/video-manager-impl.js
+Objectis cast to: JsonObject, 144 extensions/amp-access-laterpay/0.1/laterpay-impl.js
+AccessTypeAdapterDef$$module$extensions$amp_access$0_1$amp_access_sourceis cast to: AccessVendorAdapter$$module$extensions$amp_access$0_1$amp_access_vendor, 34 extensions/amp-access-laterpay/0.1/amp-access-laterpay.js
+Objectis cast to: JsonObject, 173 extensions/amp-access-laterpay/0.2/laterpay-impl.js
+AccessTypeAdapterDef$$module$extensions$amp_access$0_1$amp_access_sourceis cast to: AccessVendorAdapter$$module$extensions$amp_access$0_1$amp_access_vendor, 34 extensions/amp-access-laterpay/0.2/amp-access-laterpay.js
+AccessTypeAdapterDef$$module$extensions$amp_access$0_1$amp_access_sourceis cast to: AccessVendorAdapter$$module$extensions$amp_access$0_1$amp_access_vendor, 34 extensions/amp-access-poool/0.1/amp-access-poool.js
+Elementis cast to: HTMLIFrameElement, 85 extensions/amp-access-scroll/0.1/scroll-bar.js
+Elementis cast to: HTMLIFrameElement, 87 extensions/amp-access-scroll/0.1/scroll-audio.js
+(JsonObject|null|string|undefined)is cast to: (JsonObject|null), 45 extensions/amp-access-scroll/0.1/scroll-relay.js
+HTMLDocumentis cast to: Document, 273 extensions/amp-access-scroll/0.1/scroll-impl.js
+AccessTypeAdapterDef$$module$extensions$amp_access$0_1$amp_access_sourceis cast to: AccessVendorAdapter$$module$extensions$amp_access$0_1$amp_access_vendor, 34 extensions/amp-access-scroll/0.1/amp-access-scroll.js
+Windowis cast to: Window, 116 extensions/amp-access/0.1/iframe-api/messenger.js
+Eventis cast to: MessageEvent, 194 extensions/amp-access/0.1/iframe-api/messenger.js
+stringis cast to: string, 199 extensions/amp-access/0.1/iframe-api/messenger.js
+{
+  headers: JsonObject,
+  status: number,
+  statusText: string
+}is cast to: ResponseInit, 97 src/document-fetcher.js
+(FormData|FormDataWrapperInterface|JsonObject|string|undefined)is cast to: FormData, 113 src/document-fetcher.js
+AccessTypeAdapterDef$$module$extensions$amp_access$0_1$amp_access_sourceis cast to: AccessVendorAdapter$$module$extensions$amp_access$0_1$amp_access_vendor, 257 extensions/amp-access/0.1/amp-access.js
+(JsonObject|{})is cast to: JsonObject, 755 extensions/amp-access/0.1/amp-access.js
+JsonObjectis cast to: JsonObject, 225 extensions/amp-accordion/0.1/amp-accordion.js
+Objectis cast to: {
+  additionalContextMetadata: (JsonObject|undefined),
+  creative: (string|undefined),
+  rawCreativeBytes: (ArrayBuffer|undefined),
+  sentinel: (string|undefined)
+}, 30 extensions/amp-a4a/0.1/name-frame-renderer.js
+(ArrayBuffer|undefined)is cast to: ArrayBuffer, 43 extensions/amp-a4a/0.1/name-frame-renderer.js
+(Document|null)is cast to: Document, 69 extensions/amp-a4a/0.1/name-frame-renderer.js
+JsonObjectis cast to: JsonObject, 71 extensions/amp-a4a/0.1/name-frame-renderer.js
+(Promise<?>|T)is cast to: Promise<string>, 69 extensions/amp-a4a/0.1/amp-ad-template-helper.js
+(Array|JsonObject)is cast to: Array, 89 extensions/amp-a4a/0.1/amp-ad-template-helper.js
+ArrayBufferis cast to: ArrayBuffer, 50 extensions/amp-a4a/0.1/template-validator.js
+(JsonObject|null)is cast to: {
+  analytics: (JsonObject|null|undefined),
+  data: (JsonObject|null|undefined),
+  templateUrl: string
+}, 51 extensions/amp-a4a/0.1/template-validator.js
+stringis cast to: string, 111 extensions/amp-a4a/0.1/a4a-variable-source.js
+?is cast to: string, 112 extensions/amp-a4a/0.1/a4a-variable-source.js
+stringis cast to: string, 122 extensions/amp-a4a/0.1/a4a-variable-source.js
+?is cast to: string, 123 extensions/amp-a4a/0.1/a4a-variable-source.js
+function(string, ...string): stringis cast to: function(...*): ?, 137 extensions/amp-a4a/0.1/a4a-variable-source.js
+(Document|null)is cast to: Document, 47 extensions/amp-a4a/0.1/friendly-frame-util.js
+Elementis cast to: HTMLIFrameElement, 46 extensions/amp-a4a/0.1/friendly-frame-util.js
+stringis cast to: string, 77 extensions/amp-a4a/0.1/friendly-frame-util.js
+Objectis cast to: {
+  adUrl: string,
+  creativeMetadata: {
+  customElementExtensions: Array<string>,
+  customStylesheets: Array<{href: string}>,
+  images: (Array<string>|null|undefined),
+  minifiedCreative: string
+},
+  size: {
+  height: string,
+  layout: string,
+  width: string
+},
+  templateData: {
+  analytics: (JsonObject|null|undefined),
+  data: (JsonObject|null|undefined),
+  templateUrl: string
+}
+}, 45 extensions/amp-a4a/0.1/template-renderer.js
+?is cast to: {
+  analytics: (JsonObject|null|undefined),
+  data: (JsonObject|null|undefined),
+  templateUrl: string
+}, 60 extensions/amp-a4a/0.1/template-renderer.js
+Promise<Object>is cast to: Promise<VisibilityInterface$$module$src$inabox$host_services>, 72 src/inabox/host-services.js
+Promise<Object>is cast to: Promise<FullscreenInterface$$module$src$inabox$host_services>, 104 src/inabox/host-services.js
+Promise<Object>is cast to: Promise<ExitInterface$$module$src$inabox$host_services>, 136 src/inabox/host-services.js
+Objectis cast to: JsonObject, 40 extensions/amp-analytics/0.1/iframe-transport-vendors.js
+Objectis cast to: JsonObject, 41 extensions/amp-analytics/0.1/iframe-transport-vendors.js
+JsonObjectis cast to: JsonObject, 129 extensions/amp-ad-exit/0.1/config.js
+JsonObjectis cast to: JsonObject, 130 extensions/amp-ad-exit/0.1/config.js
+{
+  bottom: (number|undefined),
+  left: (number|undefined),
+  relativeTo: (string|undefined),
+  right: (number|undefined),
+  top: (number|undefined),
+  type: FilterType$$module$extensions$amp_ad_exit$0_1$filters$filter<string>
+}is cast to: {
+  delay: number,
+  startTimingEvent: (string|undefined),
+  type: FilterType$$module$extensions$amp_ad_exit$0_1$filters$filter<string>
+}, 33 extensions/amp-ad-exit/0.1/filters/factory.js
+{
+  bottom: (number|undefined),
+  left: (number|undefined),
+  relativeTo: (string|undefined),
+  right: (number|undefined),
+  top: (number|undefined),
+  type: FilterType$$module$extensions$amp_ad_exit$0_1$filters$filter<string>
+}is cast to: {selector: string, type: FilterType$$module$extensions$amp_ad_exit$0_1$filters$filter<string>}, 41 extensions/amp-ad-exit/0.1/filters/factory.js
+(DeferredEvent$$module$src$service$action_impl|Event|null)is cast to: (DeferredEvent$$module$src$service$action_impl|Event), 97 extensions/amp-ad-exit/0.1/amp-ad-exit.js
+?is cast to: {defaultValue: (boolean|number|string), iframeTransportSignal: (string|undefined)}, 161 extensions/amp-ad-exit/0.1/amp-ad-exit.js
+stringis cast to: LayoutType$$module$ads$google$a4a$shared$content_recommendation<string>, 514 ads/google/a4a/shared/content-recommendation.js
+?is cast to: Promise<{
+  fetchTimeMs: (number|undefined),
+  freshLifetimeSecs: (number|undefined),
+  jar: (string|undefined),
+  pucrd: (string|undefined),
+  token: (string|undefined),
+  validLifetimeSecs: (number|undefined)
+}>, 886 ads/google/a4a/utils.js
+*is cast to: JsonObject, 339 extensions/amp-a4a/0.1/signature-verifier.js
+(Document|null)is cast to: Document, 40 src/extension-analytics.js
+JsonObjectis cast to: JsonObject, 212 src/extension-analytics.js
+(Promise<string>|string)is cast to: Promise<(null|string)>, 686 extensions/amp-a4a/0.1/amp-a4a.js
+*is cast to: Error, 1025 extensions/amp-a4a/0.1/amp-a4a.js
+Erroris cast to: Error, 1040 extensions/amp-a4a/0.1/amp-a4a.js
+(null|string)is cast to: string, 1364 extensions/amp-a4a/0.1/amp-a4a.js
+(Document|null)is cast to: Document, 1470 extensions/amp-a4a/0.1/amp-a4a.js
+Elementis cast to: HTMLIFrameElement, 1469 extensions/amp-a4a/0.1/amp-a4a.js
+(null|string)is cast to: string, 1500 extensions/amp-a4a/0.1/amp-a4a.js
+(Document|null)is cast to: Document, 1564 extensions/amp-a4a/0.1/amp-a4a.js
+Objectis cast to: JsonObject, 1566 extensions/amp-a4a/0.1/amp-a4a.js
+Elementis cast to: HTMLIFrameElement, 1563 extensions/amp-a4a/0.1/amp-a4a.js
+Objectis cast to: JsonObject, 1849 extensions/amp-a4a/0.1/amp-a4a.js
+stringis cast to: XORIGIN_MODE$$module$extensions$amp_a4a$0_1$amp_a4a<string>, 1938 extensions/amp-a4a/0.1/amp-a4a.js
+Promise<null>is cast to: Promise<(ArrayBuffer|null)>, 103 extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js
+(JsonObject|{})is cast to: {
+  analytics: (JsonObject|null|undefined),
+  data: (JsonObject|null|undefined),
+  templateUrl: string
+}, 110 extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js
+{
+  ctaType: (string|undefined),
+  ctaUrl: (string|undefined),
+  customElementExtensions: Array<string>,
+  customStylesheets: Array<{href: string}>,
+  images: (Array<string>|null|undefined),
+  minifiedCreative: string
+}is cast to: (null|{
+  ctaType: (string|undefined),
+  ctaUrl: (string|undefined),
+  customElementExtensions: Array<string>,
+  customStylesheets: Array<{href: string}>,
+  images: (Array<string>|null|undefined),
+  minifiedCreative: string
+}), 173 extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js
+JsonObjectis cast to: {
+  errorReportingUrl: (string|undefined),
+  sendRegardlessOfConsentState: (Array<string>|boolean|null|undefined),
+  timeoutMillis: number,
+  urls: (Array<?>|null|undefined),
+  vendors: (Object|null|undefined)
+}, 607 extensions/amp-a4a/0.1/real-time-config-manager.js
+(null|number)is cast to: number, 337 extensions/amp-a4a/0.1/refresh-manager.js
+(JsonObject|{})is cast to: JsonObject, 95 extensions/amp-ad-network-doubleclick-impl/0.1/safeframe-host.js
+Objectis cast to: {height: number, width: number}, 164 extensions/amp-ad-network-doubleclick-impl/0.1/safeframe-host.js
+Objectis cast to: JsonObject, 462 extensions/amp-ad-network-doubleclick-impl/0.1/safeframe-host.js
+Object<string,string>is cast to: Object, 412 extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils.js
+(ReadableStreamBYOBReader|ReadableStreamDefaultReader)is cast to: ReadableStreamDefaultReader, 53 ads/google/a4a/line-delimited-response-handler.js
+*is cast to: ArrayBuffer, 57 ads/google/a4a/line-delimited-response-handler.js
+(JsonObject|{})is cast to: Object<string,*>, 82 ads/google/a4a/line-delimited-response-handler.js
+Array<BaseElement$$module$src$base_element>is cast to: Array<AmpAdNetworkDoubleclickImpl$$module$extensions$amp_ad_network_doubleclick_impl$0_1$amp_ad_network_doubleclick_impl>, 1441 extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js
+*is cast to: Error, 1532 extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js
+{height: ?, width: ?}is cast to: {height: ?, width: ?}, 1606 extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js
+Responseis cast to: {headers: Headers, status: number}, 75 extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js
+{
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}is cast to: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}, 331 extensions/amp-ad/0.1/amp-ad-3p-impl.js
+(JsonObject|null|string|undefined)is cast to: JsonObject, 66 extensions/amp-addthis/0.1/post-message-dispatcher.js
+Objectis cast to: JsonObject, 92 extensions/amp-addthis/0.1/post-message-dispatcher.js
+(JsonObject|{})is cast to: JsonObject, 99 extensions/amp-addthis/0.1/post-message-dispatcher.js
+(Document|null)is cast to: Document, 295 extensions/amp-addthis/0.1/amp-addthis.js
+Elementis cast to: (HTMLIFrameElement|null), 310 extensions/amp-addthis/0.1/amp-addthis.js
+Objectis cast to: JsonObject, 227 extensions/amp-analytics/0.1/variables.js
+*is cast to: (Array<string>|null|string), 291 extensions/amp-analytics/0.1/variables.js
+Promise<Object>is cast to: Promise<VariableService$$module$extensions$amp_analytics$0_1$variables>, 368 extensions/amp-analytics/0.1/variables.js
+(JsonObject|null|{})is cast to: JsonObject, 410 extensions/amp-analytics/0.1/config.js
+Array<string>is cast to: Array<number>, 944 extensions/amp-analytics/0.1/events.js
+(JsonObject|null|string|undefined)is cast to: (JsonObject|null|undefined), 1170 extensions/amp-analytics/0.1/events.js
+Objectis cast to: JsonObject, 1290 extensions/amp-analytics/0.1/events.js
+?is cast to: JsonObject, 726 extensions/amp-analytics/0.1/visibility-manager.js
+{
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}is cast to: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}, 115 extensions/amp-analytics/0.1/visibility-manager-for-mapp.js
+EventTracker$$module$extensions$amp_analytics$0_1$eventsis cast to: CustomEventTracker$$module$extensions$amp_analytics$0_1$events, 80 extensions/amp-analytics/0.1/instrumentation.js
+?is cast to: (AnalyticsRoot$$module$extensions$amp_analytics$0_1$analytics_root|null), 115 extensions/amp-analytics/0.1/instrumentation.js
+Promise<Object>is cast to: Promise<(InstrumentationService$$module$extensions$amp_analytics$0_1$instrumentation|null)>, 133 extensions/amp-analytics/0.1/instrumentation.js
+(JsonObject|null|undefined)is cast to: JsonObject, 95 extensions/amp-analytics/0.1/linker-manager.js
+(Document|null)is cast to: Document, 458 extensions/amp-analytics/0.1/linker-manager.js
+Array<PerformanceEntry>is cast to: Array<PerformanceResourceTiming>, 123 extensions/amp-analytics/0.1/resource-timing.js
+(JsonObject|null)is cast to: JsonObject, 243 extensions/amp-analytics/0.1/requests.js
+Elementis cast to: HTMLIFrameElement, 170 extensions/amp-analytics/0.1/iframe-transport.js
+?is cast to: (string|undefined), 60 extensions/amp-analytics/0.1/transport.js
+(string|undefined)is cast to: (string|undefined), 135 extensions/amp-analytics/0.1/transport.js
+(TransportSerializerDef$$module$extensions$amp_analytics$0_1$transport_serializer|null)is cast to: TransportSerializerDef$$module$extensions$amp_analytics$0_1$transport_serializer, 234 extensions/amp-analytics/0.1/transport.js
+?is cast to: JsonObject, 229 extensions/amp-analytics/0.1/amp-analytics.js
+(Array<Object<string,*>>|Object<string,*>)is cast to: Array<(Object|null)>, 86 extensions/amp-animation/0.1/runners/native-web-animation-runner.js
+StyleSheetis cast to: CSSStyleSheet, 36 extensions/amp-animation/0.1/parsers/keyframes-extractor.js
+CSSRuleis cast to: CSSKeyframesRule, 84 extensions/amp-animation/0.1/parsers/keyframes-extractor.js
+CSSRuleis cast to: CSSSupportsRule, 120 extensions/amp-animation/0.1/parsers/keyframes-extractor.js
+CSSRuleis cast to: CSSKeyframeRule, 141 extensions/amp-animation/0.1/parsers/keyframes-extractor.js
+(Array<({animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})is cast to: ({animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}), 84 extensions/amp-animation/0.1/web-animations.js
+(Array<({animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})is cast to: {animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}, 91 extensions/amp-animation/0.1/web-animations.js
+(Array<({animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})is cast to: {switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}, 93 extensions/amp-animation/0.1/web-animations.js
+(Array<({animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})is cast to: {animation: string}, 95 extensions/amp-animation/0.1/web-animations.js
+(Array<({animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})is cast to: {keyframes: (Array<Object<string,*>>|Object<string,*>|string)}, 97 extensions/amp-animation/0.1/web-animations.js
+(Array<Object<string,*>>|Object<string,*>|null)is cast to: Object<string,*>, 472 extensions/amp-animation/0.1/web-animations.js
+(Array<Object<string,*>>|Object<string,*>)is cast to: Array<Object<string,*>>, 501 extensions/amp-animation/0.1/web-animations.js
+(string|undefined)is cast to: string, 669 extensions/amp-animation/0.1/web-animations.js
+(string|undefined)is cast to: WebAnimationTimingDirection$$module$extensions$amp_animation$0_1$web_animation_types<string>, 742 extensions/amp-animation/0.1/web-animations.js
+(string|undefined)is cast to: WebAnimationTimingFill$$module$extensions$amp_animation$0_1$web_animation_types<string>, 746 extensions/amp-animation/0.1/web-animations.js
+WebAnimationTimingDirection$$module$extensions$amp_animation$0_1$web_animation_types<string>is cast to: string, 767 extensions/amp-animation/0.1/web-animations.js
+WebAnimationTimingFill$$module$extensions$amp_animation$0_1$web_animation_types<string>is cast to: string, 772 extensions/amp-animation/0.1/web-animations.js
+Object<string,string>is cast to: CSSStyleDeclaration, 919 extensions/amp-animation/0.1/web-animations.js
+(JsonObject|null)is cast to: (JsonObject|null), 205 extensions/amp-animation/0.1/amp-animation.js
+(DeferredEvent$$module$src$service$action_impl|Event)is cast to: Event, 314 extensions/amp-animation/0.1/amp-animation.js
+(JsonObject|null)is cast to: ({animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}), 485 extensions/amp-animation/0.1/amp-animation.js
+(JsonObject|null)is cast to: (null|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)}|{switch: Array<({...}|{animation: string}|{animations: Array<({...}|{animation: string}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}|{keyframes: (Array<Object<string,*>>|Object<string,*>|string)})>}), 488 extensions/amp-animation/0.1/amp-animation.js
+?is cast to: (JsonObject|null), 322 extensions/amp-apester-media/0.1/amp-apester-media.js
+(Element|null)is cast to: Element, 450 extensions/amp-apester-media/0.1/amp-apester-media.js
+(Element|null)is cast to: Element, 462 extensions/amp-apester-media/0.1/amp-apester-media.js
+(Element|null)is cast to: Element, 473 extensions/amp-apester-media/0.1/amp-apester-media.js
+(Element|null)is cast to: (HTMLLinkElement|null), 380 extensions/amp-app-banner/0.1/amp-app-banner.js
+Objectis cast to: JsonObject, 303 extensions/amp-auto-ads/0.1/placement.js
+Objectis cast to: JsonObject, 91 extensions/amp-auto-ads/0.1/anchor-ad-strategy.js
+Objectis cast to: JsonObject, 73 extensions/amp-auto-ads/0.1/amp-auto-ads.js
+Objectis cast to: JsonObject, 89 extensions/amp-auto-ads/0.1/amp-auto-ads.js
+Elementis cast to: HTMLInputElement, 196 extensions/amp-autocomplete/0.1/amp-autocomplete.js
+(JsonObject|string)is cast to: string, 537 extensions/amp-autocomplete/0.1/amp-autocomplete.js
+JsonObjectis cast to: JsonObject, 562 extensions/amp-autocomplete/0.1/amp-autocomplete.js
+?is cast to: JsonObject, 243 extensions/amp-bind/0.1/amp-state.js
+Tis cast to: {
+  id: number,
+  method: string,
+  returnValue: *
+}, 175 src/web-worker/amp-worker.js
+?is cast to: JsonObject, 187 extensions/amp-bind/0.1/bind-impl.js
+(DeferredEvent$$module$src$service$action_impl|Event)is cast to: Event, 314 extensions/amp-bind/0.1/bind-impl.js
+(DeferredEvent$$module$src$service$action_impl|Event)is cast to: Event, 315 extensions/amp-bind/0.1/bind-impl.js
+Promise<JsonObject>is cast to: Promise<(JsonObject|null)>, 401 extensions/amp-bind/0.1/bind-impl.js
+*is cast to: (JsonObject|null), 521 extensions/amp-bind/0.1/bind-impl.js
+Array<?>is cast to: Array<{
+  argumentNames: (Array<string>|null),
+  expressionString: string,
+  id: string
+}>, 649 extensions/amp-bind/0.1/bind-impl.js
+Array<?>is cast to: Array<string>, 779 extensions/amp-bind/0.1/bind-impl.js
+(JsonObject|null|string|undefined)is cast to: string, 191 extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js
+(JsonObject|null|string|undefined)is cast to: (JsonObject|null), 198 extensions/amp-bodymovin-animation/0.1/amp-bodymovin-animation.js
+Elementis cast to: (HTMLIFrameElement|null), 170 extensions/amp-brid-player/0.1/amp-brid-player.js
+(JsonObject|null|string|undefined)is cast to: (null|string|undefined), 265 extensions/amp-brid-player/0.1/amp-brid-player.js
+(number|string)is cast to: number, 116 extensions/amp-brightcove/0.1/amp-brightcove.js
+(null|number)is cast to: number, 462 extensions/amp-brightcove/0.1/amp-brightcove.js
+(null|number)is cast to: number, 467 extensions/amp-brightcove/0.1/amp-brightcove.js
+(Array|null)is cast to: Array<Array<number>>, 472 extensions/amp-brightcove/0.1/amp-brightcove.js
+*is cast to: (Object|null), 115 extensions/amp-byside-content/0.1/amp-byside-content.js
+Elementis cast to: (HTMLIFrameElement|null), 177 extensions/amp-byside-content/0.1/amp-byside-content.js
+(Document|null)is cast to: Document, 284 extensions/amp-byside-content/0.1/amp-byside-content.js
+(Document|null)is cast to: Document, 315 extensions/amp-byside-content/0.1/amp-byside-content.js
+(number|string)is cast to: number, 216 extensions/amp-carousel/0.1/scrollable-carousel.js
+(number|string)is cast to: number, 176 extensions/amp-carousel/0.1/base-slides.js
+(number|string)is cast to: number, 279 extensions/amp-carousel/0.1/slidescroll.js
+(number|string)is cast to: number, 409 extensions/amp-carousel/0.1/slidescroll.js
+Elementis cast to: (HTMLIFrameElement|null), 142 extensions/amp-connatix-player/0.1/amp-connatix-player.js
+JsonObjectis cast to: JsonObject, 117 extensions/amp-consent/0.1/consent-config.js
+Objectis cast to: JsonObject, 125 extensions/amp-consent/0.1/consent-config.js
+Promise<T>is cast to: Promise, 306 extensions/amp-consent/0.1/consent-policy-manager.js
+(null|string)is cast to: string, 463 extensions/amp-consent/0.1/consent-state-manager.js
+(JsonObject|string)is cast to: JsonObject, 669 extensions/amp-consent/0.1/consent-ui.js
+(null|string)is cast to: string, 154 extensions/amp-consent/0.1/amp-consent.js
+Objectis cast to: ConsentPolicyManager$$module$extensions$amp_consent$0_1$consent_policy_manager, 169 extensions/amp-consent/0.1/amp-consent.js
+(null|string)is cast to: string, 171 extensions/amp-consent/0.1/amp-consent.js
+(JsonObject|null)is cast to: Object, 174 extensions/amp-consent/0.1/amp-consent.js
+Objectis cast to: ConsentStateManager$$module$extensions$amp_consent$0_1$consent_state_manager, 189 extensions/amp-consent/0.1/amp-consent.js
+Objectis cast to: NotificationUiManager$$module$src$service$notification_ui_manager, 196 extensions/amp-consent/0.1/amp-consent.js
+JsonObjectis cast to: JsonObject, 558 extensions/amp-consent/0.1/amp-consent.js
+(JsonObject|string)is cast to: string, 187 extensions/amp-dailymotion/0.1/amp-dailymotion.js
+{
+  day: number,
+  dayName: string,
+  dayNameShort: string,
+  dayPeriod: string,
+  dayTwoDigit: string,
+  hour: number,
+  hour12: string,
+  hour12TwoDigit: string,
+  hourTwoDigit: string,
+  iso: string, ...
+}is cast to: JsonObject, 130 extensions/amp-date-display/0.1/amp-date-display.js
+Objectis cast to: {
+  day: number,
+  dayName: string,
+  dayNameShort: string,
+  dayPeriod: string,
+  dayTwoDigit: string,
+  hour: number,
+  hour12: string,
+  hour12TwoDigit: string,
+  hourTwoDigit: string,
+  iso: string, ...
+}, 255 extensions/amp-date-display/0.1/amp-date-display.js
+?is cast to: JsonObject, 36 extensions/amp-date-picker/0.1/dates-list.js
+(moment|string)is cast to: string, 135 extensions/amp-date-picker/0.1/dates-list.js
+Objectis cast to: JsonObject, 204 extensions/amp-date-picker/0.1/date-picker-common.js
+?is cast to: (JsonObject|null), 28 extensions/amp-date-picker/0.1/date-range-picker.js
+?is cast to: function(new:React.Component, JsonObject): ?, 33 extensions/amp-date-picker/0.1/date-range-picker.js
+DeferredTypeis cast to: React.Component, 37 extensions/amp-date-picker/0.1/react-utils.js
+DeferredTypeis cast to: React.Component, 54 extensions/amp-date-picker/0.1/react-utils.js
+DeferredTypeis cast to: React.Component, 67 extensions/amp-date-picker/0.1/react-utils.js
+?is cast to: JsonObject, 27 extensions/amp-date-picker/0.1/single-date-picker.js
+?is cast to: function(new:React.Component, JsonObject): ?, 33 extensions/amp-date-picker/0.1/single-date-picker.js
+?is cast to: JsonObject, 218 extensions/amp-date-picker/0.1/amp-date-picker.js
+?is cast to: JsonObject, 227 extensions/amp-date-picker/0.1/amp-date-picker.js
+stringis cast to: DatePickerMode$$module$extensions$amp_date_picker$0_1$amp_date_picker<string>, 412 extensions/amp-date-picker/0.1/amp-date-picker.js
+(JsonObject|null)is cast to: Object, 878 extensions/amp-date-picker/0.1/amp-date-picker.js
+Objectis cast to: JsonObject, 877 extensions/amp-date-picker/0.1/amp-date-picker.js
+Objectis cast to: JsonObject, 1937 extensions/amp-date-picker/0.1/amp-date-picker.js
+Elementis cast to: (HTMLElement|null), 202 extensions/amp-delight-player/0.1/amp-delight-player.js
+(Array|null)is cast to: Array<(Array<number>|null)>, 552 extensions/amp-delight-player/0.1/amp-delight-player.js
+Objectis cast to: {name: string}, 146 src/service/origin-experiments-impl.js
+?is cast to: OriginExperiments$$module$src$service$origin_experiments_impl, 302 src/service/origin-experiments-impl.js
+Windowis cast to: Window, 81 extensions/amp-form/0.1/amp-form-textarea.js
+Windowis cast to: Window, 252 extensions/amp-form/0.1/amp-form-textarea.js
+Documentis cast to: Document, 319 extensions/amp-form/0.1/amp-form-textarea.js
+Windowis cast to: Window, 320 extensions/amp-form/0.1/amp-form-textarea.js
+HTMLBodyElementis cast to: HTMLBodyElement, 321 extensions/amp-form/0.1/amp-form-textarea.js
+*is cast to: Error, 178 extensions/amp-form/0.1/form-verifiers.js
+?is cast to: string, 112 src/ssr-template-helper.js
+(Array|JsonObject|null|string|undefined)is cast to: Array, 117 src/ssr-template-helper.js
+(Array|JsonObject|null|string|undefined)is cast to: JsonObject, 122 src/ssr-template-helper.js
+FormProxyis cast to: FormProxy, 126 extensions/amp-form/0.1/form-proxy.js
+?is cast to: FormProxy, 135 extensions/amp-form/0.1/form-proxy.js
+?is cast to: FormProxy, 140 extensions/amp-form/0.1/form-proxy.js
+??is cast to: string, 223 extensions/amp-form/0.1/form-proxy.js
+Promise<*>is cast to: Promise<JsonObject>, 900 extensions/amp-form/0.1/amp-form.js
+*is cast to: Error, 936 extensions/amp-form/0.1/amp-form.js
+{
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}is cast to: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}, 99 src/service/position-observer/position-observer-worker.js
+stringis cast to: ScrollTogglePosition$$module$extensions$amp_fx_collection$0_1$scroll_toggle<string>, 197 extensions/amp-fx-collection/0.1/scroll-toggle.js
+ScrollTogglePosition$$module$extensions$amp_fx_collection$0_1$scroll_toggle<string>is cast to: ScrollTogglePosition$$module$extensions$amp_fx_collection$0_1$scroll_toggle<string>, 85 extensions/amp-fx-collection/0.1/providers/fx-provider.js
+(null|number)is cast to: number, 179 extensions/amp-fx-collection/0.1/providers/fx-provider.js
+(null|number)is cast to: number, 185 extensions/amp-fx-collection/0.1/providers/fx-provider.js
+?is cast to: Object<string,Array<string>>, 219 extensions/amp-geo/0.1/amp-geo.js
+?is cast to: DOMTokenList, 346 extensions/amp-geo/0.1/amp-geo.js
+(Object|null)is cast to: JsonObject, 363 extensions/amp-geo/0.1/amp-geo.js
+(JsonObject|null|string|undefined)is cast to: (null|string|undefined), 195 extensions/amp-gfycat/0.1/amp-gfycat.js
+(string|undefined)is cast to: string, 259 extensions/amp-iframe/0.1/amp-iframe.js
+{
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}is cast to: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}, 357 extensions/amp-iframe/0.1/amp-iframe.js
+Elementis cast to: (HTMLIFrameElement|null), 404 extensions/amp-iframe/0.1/amp-iframe.js
+(string|undefined)is cast to: (null|string), 565 extensions/amp-iframe/0.1/amp-iframe.js
+(null|string)is cast to: string, 568 extensions/amp-iframe/0.1/amp-iframe.js
+Eventis cast to: Event, 194 extensions/amp-ima-video/0.1/amp-ima-video.js
+?is cast to: ImaPlayerData$$module$ads$google$ima_player_data, 288 extensions/amp-ima-video/0.1/amp-ima-video.js
+IThenable<?>is cast to: Promise, 207 src/motion.js
+(Promise|undefined)is cast to: (Promise|undefined), 608 extensions/amp-image-lightbox/0.1/amp-image-lightbox.js
+(EventTarget|null)is cast to: (Node|null), 836 extensions/amp-image-lightbox/0.1/amp-image-lightbox.js
+(Promise|undefined)is cast to: (Promise|undefined), 765 extensions/amp-image-viewer/0.1/amp-image-viewer.js
+(JsonObject|string)is cast to: string, 110 extensions/amp-imgur/0.1/amp-imgur.js
+(JsonObject|string)is cast to: string, 208 extensions/amp-instagram/0.1/amp-instagram.js
+Elementis cast to: (HTMLIFrameElement|null), 110 extensions/amp-jwplayer/0.1/amp-jwplayer.js
+Elementis cast to: (HTMLIFrameElement|null), 90 extensions/amp-kaltura-player/0.1/amp-kaltura-player.js
+stringis cast to: OverflowState$$module$extensions$amp_lightbox_gallery$0_1$lightbox_caption<string>, 110 extensions/amp-lightbox-gallery/0.1/lightbox-caption.js
+Documentis cast to: Document, 222 extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js
+?is cast to: string, 308 extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js
+Documentis cast to: Document, 1307 extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js
+Documentis cast to: Document, 1405 extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js
+Documentis cast to: Document, 1419 extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js
+Promise<*>is cast to: Promise<(LightboxManager$$module$extensions$amp_lightbox_gallery$0_1$service$lightbox_manager_impl|null)>, 1474 extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js
+function(Event): undefinedis cast to: (function(this:AmpLightbox$$module$extensions$amp_lightbox$0_1$amp_lightbox, (Event|null)): ?|null), 269 extensions/amp-lightbox/0.1/amp-lightbox.js
+(number|string)is cast to: number, 548 extensions/amp-lightbox/0.1/amp-lightbox.js
+HTMLBodyElementis cast to: HTMLBodyElement, 680 extensions/amp-lightbox/0.1/amp-lightbox.js
+HTMLBodyElementis cast to: HTMLBodyElement, 735 extensions/amp-lightbox/0.1/amp-lightbox.js
+Objectis cast to: Array, 361 extensions/amp-list/0.1/amp-list.js
+?is cast to: JsonObject, 367 extensions/amp-list/0.1/amp-list.js
+(Array<(JsonObject|null)>|JsonObject)is cast to: JsonObject, 518 extensions/amp-list/0.1/amp-list.js
+(Array<(JsonObject|null)>|JsonObject)is cast to: JsonObject, 534 extensions/amp-list/0.1/amp-list.js
+*is cast to: string, 578 extensions/amp-list/0.1/amp-list.js
+(Array<(JsonObject|null)>|JsonObject|{})is cast to: (Array<(JsonObject|null)>|JsonObject|null), 660 extensions/amp-list/0.1/amp-list.js
+(Array|JsonObject|null|string|undefined)is cast to: (Array|null), 680 extensions/amp-list/0.1/amp-list.js
+(Array<(JsonObject|null)>|JsonObject|null)is cast to: JsonObject, 698 extensions/amp-list/0.1/amp-list.js
+(Array<Element>|Element)is cast to: Array<Element>, 762 extensions/amp-list/0.1/amp-list.js
+Promise<Object>is cast to: Promise<LiveListManager$$module$extensions$amp_live_list$0_1$live_list_manager>, 127 extensions/amp-live-list/0.1/live-list-manager.js
+(JsonObject|string)is cast to: string, 185 extensions/amp-megaphone/0.1/amp-megaphone.js
+JsonObjectis cast to: JsonObject, 134 extensions/amp-mowplayer/0.1/amp-mowplayer.js
+?is cast to: JsonObject, 137 src/sanitizer.js
+?is cast to: function(new:BaseTemplate$$module$src$service$template_impl): ?, 29 extensions/amp-mustache/0.1/amp-mustache.js
+Objectis cast to: DomPurifyConfig, 131 src/purifier.js
+Nodeis cast to: Document, 431 src/purifier.js
+?is cast to: function(new:BaseTemplate$$module$src$service$template_impl): ?, 25 extensions/amp-mustache/0.2/amp-mustache.js
+*is cast to: {hideSelectors: (Array<string>|undefined), pages: Array<{
+  ampUrl: string,
+  image: string,
+  title: string
+}>}, 66 extensions/amp-next-page/0.1/config.js
+Promise<Object>is cast to: Promise<NextPageService$$module$extensions$amp_next_page$0_1$next_page_service>, 273 extensions/amp-next-page/0.1/amp-next-page.js
+Elementis cast to: (HTMLIFrameElement|null), 116 extensions/amp-o2-player/0.1/amp-o2-player.js
+(null|number)is cast to: number, 114 extensions/amp-orientation-observer/0.1/amp-orientation-observer.js
+(null|number)is cast to: number, 118 extensions/amp-orientation-observer/0.1/amp-orientation-observer.js
+(null|number)is cast to: number, 122 extensions/amp-orientation-observer/0.1/amp-orientation-observer.js
+?is cast to: (JsonObject|null), 92 extensions/amp-pinterest/0.1/pin-widget.js
+stringis cast to: string, 123 extensions/amp-playbuzz/0.1/utils.js
+function({
+  positionRect: (null|{
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}),
+  relativePos: string,
+  viewportRect: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}
+}): undefinedis cast to: function((null|{
+  positionRect: (null|{
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}),
+  relativePos: string,
+  viewportRect: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}
+})): ?, 136 extensions/amp-position-observer/0.1/amp-position-observer.js
+stringis cast to: string, 160 extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js
+Promise<Object>is cast to: Promise<AmpRecaptchaService$$module$extensions$amp_recaptcha_input$0_1$amp_recaptcha_service>, 398 extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js
+(Promise|null)is cast to: Promise, 114 extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js
+*is cast to: AmpScriptService$$module$extensions$amp_script$0_1$amp_script, 103 extensions/amp-script/0.1/amp-script.js
+stringis cast to: KEYBOARD_SELECT_MODES$$module$extensions$amp_selector$0_1$amp_selector<string>, 113 extensions/amp-selector/0.1/amp-selector.js
+Objectis cast to: JsonObject, 176 extensions/amp-skimlinks/0.1/tracking.js
+Objectis cast to: JsonObject, 212 extensions/amp-skimlinks/0.1/tracking.js
+(Document|HTMLHtmlElement|ShadowRoot)is cast to: (Element|ShadowRoot), 159 extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter.js
+Elementis cast to: HTMLElement, 141 extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js
+Elementis cast to: HTMLElement, 150 extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js
+JsonObjectis cast to: JsonObject, 87 extensions/amp-skimlinks/0.1/waypoint.js
+(AmpDoc$$module$src$service$ampdoc_impl|null)is cast to: AmpDoc$$module$src$service$ampdoc_impl, 103 extensions/amp-skimlinks/0.1/amp-skimlinks.js
+(null|string)is cast to: string, 106 extensions/amp-skimlinks/0.1/amp-skimlinks.js
+(Xhr$$module$src$service$xhr_impl|null)is cast to: Xhr$$module$src$service$xhr_impl, 110 extensions/amp-skimlinks/0.1/amp-skimlinks.js
+(AmpDoc$$module$src$service$ampdoc_impl|null)is cast to: AmpDoc$$module$src$service$ampdoc_impl, 128 extensions/amp-skimlinks/0.1/amp-skimlinks.js
+(null|string)is cast to: string, 209 extensions/amp-skimlinks/0.1/amp-skimlinks.js
+(AmpDoc$$module$src$service$ampdoc_impl|null)is cast to: AmpDoc$$module$src$service$ampdoc_impl, 97 extensions/amp-smartlinks/0.1/amp-smartlinks.js
+(Xhr$$module$src$service$xhr_impl|null)is cast to: Xhr$$module$src$service$xhr_impl, 99 extensions/amp-smartlinks/0.1/amp-smartlinks.js
+Objectis cast to: Object, 101 extensions/amp-smartlinks/0.1/amp-smartlinks.js
+JsonObjectis cast to: JsonObject, 196 extensions/amp-smartlinks/0.1/amp-smartlinks.js
+Elementis cast to: (HTMLIFrameElement|null), 112 extensions/amp-springboard-player/0.1/amp-springboard-player.js
+(JsonObject|null)is cast to: Object, 82 extensions/amp-story-auto-ads/0.1/story-ad-analytics.js
+(JsonObject|null)is cast to: JsonObject, 86 extensions/amp-story-auto-ads/0.1/story-ad-analytics.js
+Object<LocalizedStringId$$module$src$localized_strings<string>,{description: string, string: string}>is cast to: JsonObject, 126 src/localized-strings.js
+(JsonObject|null)is cast to: Object<LocalizedStringId$$module$src$localized_strings<string>,{description: string, string: string}>, 125 src/localized-strings.js
+stringis cast to: LocalizedStringId$$module$src$localized_strings<string>, 146 src/localized-strings.js
+numberis cast to: EmbedMode$$module$extensions$amp_story$1_0$embed_mode<number>, 72 extensions/amp-story/1.0/embed-mode.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 214 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 222 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 232 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 238 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 243 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 251 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 256 extensions/amp-story/1.0/amp-story-store-service.js
+*is cast to: {
+  clientX: number,
+  clientY: number,
+  element: Element,
+  state: EmbeddedComponentState$$module$extensions$amp_story$1_0$amp_story_store_service<number>
+}, 260 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 261 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 272 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 278 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 282 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 287 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 291 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 295 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 299 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 307 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 312 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 316 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 320 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 325 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 336 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 342 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 346 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 350 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 355 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 359 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: {
+  accessState: boolean,
+  actionsWhitelist: Array<{method: string, tagOrTarget: string}>,
+  adState: boolean,
+  affiliateLinkState: Element,
+  bookendState: boolean,
+  canInsertAutomaticAd: boolean,
+  canShowBookend: boolean,
+  canShowNavigationOverlayHint: boolean,
+  canShowPreviousPageHelp: boolean,
+  canShowSharingUis: boolean, ...
+}, 383 extensions/amp-story/1.0/amp-story-store-service.js
+Objectis cast to: JsonObject, 89 extensions/amp-story-auto-ads/0.1/story-ad-config.js
+*is cast to: Object, 251 extensions/amp-story/1.0/utils.js
+Elementis cast to: HTMLIFrameElement, 484 extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js
+(Element|null)is cast to: (HTMLIFrameElement|null), 656 extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js
+(Window|null)is cast to: Window, 172 extensions/amp-story/0.1/page-advancement.js
+stringis cast to: string, 231 extensions/amp-story/0.1/animation.js
+AnimationRunner$$module$extensions$amp_animation$0_1$runners$animation_runneris cast to: AnimationRunner$$module$extensions$amp_animation$0_1$runners$animation_runner, 315 extensions/amp-story/0.1/animation.js
+(PlaybackActivity$$module$extensions$amp_story$0_1$animation<number>|null)is cast to: PlaybackActivity$$module$extensions$amp_story$0_1$animation<number>, 356 extensions/amp-story/0.1/animation.js
+(Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>|{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+})is cast to: Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>, 40 extensions/amp-story/0.1/simple-template.js
+(Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>|{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+})is cast to: {
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}, 42 extensions/amp-story/0.1/simple-template.js
+(LocalizedStringId$$module$src$localized_strings<string>|undefined)is cast to: LocalizedStringId$$module$src$localized_strings<string>, 82 extensions/amp-story/0.1/simple-template.js
+Elementis cast to: HTMLMediaElement, 220 extensions/amp-story/0.1/media-pool.js
+HTMLMediaElementis cast to: HTMLMediaElement, 516 extensions/amp-story/0.1/media-pool.js
+(HTMLMediaElement|null)is cast to: HTMLMediaElement, 711 extensions/amp-story/0.1/media-pool.js
+Elementis cast to: HTMLMediaElement, 359 extensions/amp-story/0.1/amp-story-page.js
+Elementis cast to: HTMLMediaElement, 376 extensions/amp-story/0.1/amp-story-page.js
+Elementis cast to: HTMLMediaElement, 391 extensions/amp-story/0.1/amp-story-page.js
+Elementis cast to: HTMLMediaElement, 406 extensions/amp-story/0.1/amp-story-page.js
+Elementis cast to: HTMLMediaElement, 421 extensions/amp-story/0.1/amp-story-page.js
+Elementis cast to: HTMLMediaElement, 436 extensions/amp-story/0.1/amp-story-page.js
+Array<{
+  conforms: boolean,
+  element: Element,
+  level: LogLevel$$module$src$log<number>,
+  message: string,
+  moreInfo: (string|undefined),
+  rootElement: Element
+}>is cast to: ?, 677 extensions/amp-story/0.1/amp-story-page.js
+numberis cast to: EmbedMode$$module$extensions$amp_story$0_1$embed_mode<number>, 72 extensions/amp-story/0.1/embed-mode.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 101 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 109 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 114 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 119 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 124 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 128 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 133 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 140 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 153 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 157 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 161 extensions/amp-story/0.1/amp-story-store-service.js
+Objectis cast to: {
+  adstate: boolean,
+  bookendstate: boolean,
+  caninsertautomaticad: boolean,
+  canshowbookend: boolean,
+  canshownavigationoverlayhint: boolean,
+  canshowpreviouspagehelp: boolean,
+  canshowsharinguis: boolean,
+  canshowsystemlayerbuttons: boolean,
+  consentid: (null|string),
+  currentpageid: string, ...
+}, 186 extensions/amp-story/0.1/amp-story-store-service.js
+(JsonObject|null)is cast to: JsonObject, 82 extensions/amp-story/0.1/analytics.js
+(JsonObject|null)is cast to: (Object|null), 317 extensions/amp-story/0.1/amp-story-consent.js
+Objectis cast to: JsonObject, 143 extensions/amp-story/0.1/amp-story-share.js
+Array<?>is cast to: Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>, 140 extensions/amp-story/0.1/amp-story-share.js
+AmpDoc$$module$src$service$ampdoc_implis cast to: AmpDoc$$module$src$service$ampdoc_impl, 241 extensions/amp-story/0.1/amp-story-share.js
+(JsonObject|boolean)is cast to: JsonObject, 389 extensions/amp-story/0.1/amp-story-share.js
+{
+  domainName: string,
+  image: ?,
+  title: ?,
+  url: ?
+}is cast to: {
+  domainName: string,
+  image: (string|undefined),
+  title: string,
+  url: string
+}, 93 extensions/amp-story/0.1/related-articles.js
+{articles: ?, heading: string}is cast to: {articles: Array<{
+  domainName: string,
+  image: (string|undefined),
+  title: string,
+  url: string
+}>, heading: (string|undefined)}, 114 extensions/amp-story/0.1/related-articles.js
+Array<?>is cast to: Array<{articles: Array<{
+  domainName: string,
+  image: (string|undefined),
+  title: string,
+  url: string
+}>, heading: (string|undefined)}>, 101 extensions/amp-story/0.1/related-articles.js
+JsonObjectis cast to: JsonObject, 59 extensions/amp-story/0.1/amp-story-share-menu.js
+(Array<string>|string)is cast to: string, 46 extensions/amp-story/0.1/development-ui.js
+(JsonObject|null|string|undefined)is cast to: ?, 511 extensions/amp-story/0.1/amp-story.js
+(Element|null)is cast to: HTMLMediaElement, 1397 extensions/amp-story/0.1/amp-story.js
+(Element|null)is cast to: HTMLMediaElement, 1402 extensions/amp-story/0.1/amp-story.js
+*is cast to: number, 101 extensions/amp-story/1.0/variable-service.js
+Objectis cast to: Object, 637 extensions/amp-story/1.0/amp-story-embedded-component.js
+Object<string,Element>is cast to: {
+  arrow: Element,
+  buttonLeft: Element,
+  buttonRight: Element,
+  tooltip: Element
+}, 1169 extensions/amp-story/1.0/amp-story-embedded-component.js
+(Window|null)is cast to: Window, 196 extensions/amp-story/1.0/page-advancement.js
+*is cast to: {
+  clientX: number,
+  clientY: number,
+  element: Element,
+  state: EmbeddedComponentState$$module$extensions$amp_story$1_0$amp_story_store_service<number>
+}, 405 extensions/amp-story/1.0/page-advancement.js
+*is cast to: {
+  clientX: number,
+  clientY: number,
+  element: Element,
+  state: EmbeddedComponentState$$module$extensions$amp_story$1_0$amp_story_store_service<number>
+}, 546 extensions/amp-story/1.0/page-advancement.js
+*is cast to: {
+  clientX: number,
+  clientY: number,
+  element: Element,
+  state: EmbeddedComponentState$$module$extensions$amp_story$1_0$amp_story_store_service<number>
+}, 591 extensions/amp-story/1.0/page-advancement.js
+stringis cast to: string, 237 extensions/amp-story/1.0/animation.js
+AnimationRunner$$module$extensions$amp_animation$0_1$runners$animation_runneris cast to: AnimationRunner$$module$extensions$amp_animation$0_1$runners$animation_runner, 345 extensions/amp-story/1.0/animation.js
+(PlaybackActivity$$module$extensions$amp_story$1_0$animation<number>|null)is cast to: PlaybackActivity$$module$extensions$amp_story$1_0$animation<number>, 386 extensions/amp-story/1.0/animation.js
+{
+  duration: number,
+  easing: (string|undefined),
+  keyframes: (Array<Object<string,*>>|function({
+  pageHeight: number,
+  pageWidth: number,
+  targetHeight: number,
+  targetWidth: number,
+  targetX: number,
+  targetY: number
+}): Array<Object<string,*>>)
+}is cast to: {
+  duration: number,
+  easing: (string|undefined),
+  keyframes: (Array<Object<string,*>>|function({
+  pageHeight: number,
+  pageWidth: number,
+  targetHeight: number,
+  targetWidth: number,
+  targetX: number,
+  targetY: number
+}): Array<Object<string,*>>)
+}, 663 extensions/amp-story/1.0/animation.js
+(Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>|{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+})is cast to: Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>, 41 extensions/amp-story/1.0/simple-template.js
+(Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>|{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+})is cast to: {
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}, 43 extensions/amp-story/1.0/simple-template.js
+(JsonObject|undefined)is cast to: JsonObject, 78 extensions/amp-story/1.0/simple-template.js
+(LocalizedStringId$$module$src$localized_strings<string>|undefined)is cast to: LocalizedStringId$$module$src$localized_strings<string>, 87 extensions/amp-story/1.0/simple-template.js
+(Array<?>|undefined)is cast to: Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>, 98 extensions/amp-story/1.0/simple-template.js
+Elementis cast to: HTMLMediaElement, 275 extensions/amp-story/1.0/media-pool.js
+Elementis cast to: HTMLMediaElement, 398 extensions/amp-story/1.0/media-pool.js
+Elementis cast to: HTMLMediaElement, 518 extensions/amp-story/1.0/media-pool.js
+Elementis cast to: Element, 606 extensions/amp-story/1.0/media-pool.js
+HTMLMediaElementis cast to: HTMLMediaElement, 671 extensions/amp-story/1.0/media-pool.js
+Elementis cast to: Element, 677 extensions/amp-story/1.0/media-pool.js
+Nodeis cast to: Element, 731 extensions/amp-story/1.0/media-pool.js
+Elementis cast to: Element, 741 extensions/amp-story/1.0/media-pool.js
+(HTMLMediaElement|null)is cast to: HTMLMediaElement, 829 extensions/amp-story/1.0/media-pool.js
+?is cast to: HTMLMediaElement, 348 extensions/amp-story/1.0/media-performance-metrics-service.js
+(EventTarget|null)is cast to: HTMLMediaElement, 362 extensions/amp-story/1.0/media-performance-metrics-service.js
+(EventTarget|null)is cast to: HTMLMediaElement, 378 extensions/amp-story/1.0/media-performance-metrics-service.js
+(EventTarget|null)is cast to: HTMLMediaElement, 400 extensions/amp-story/1.0/media-performance-metrics-service.js
+Elementis cast to: HTMLIFrameElement, 688 extensions/amp-story/1.0/amp-story-page.js
+(boolean|undefined)is cast to: boolean, 766 extensions/amp-story/1.0/amp-story-page.js
+Elementis cast to: Element, 786 extensions/amp-story/1.0/amp-story-page.js
+Elementis cast to: Element, 822 extensions/amp-story/1.0/amp-story-page.js
+Elementis cast to: Element, 864 extensions/amp-story/1.0/amp-story-page.js
+Elementis cast to: Element, 894 extensions/amp-story/1.0/amp-story-page.js
+Elementis cast to: Element, 925 extensions/amp-story/1.0/amp-story-page.js
+Elementis cast to: Element, 973 extensions/amp-story/1.0/amp-story-page.js
+Elementis cast to: Element, 990 extensions/amp-story/1.0/amp-story-page.js
+Array<{
+  conforms: boolean,
+  element: Element,
+  level: LogLevel$$module$src$log<number>,
+  message: string,
+  moreInfo: (string|undefined),
+  rootElement: Element
+}>is cast to: ?, 1272 extensions/amp-story/1.0/amp-story-page.js
+Array<(Element|null)>is cast to: Array<HTMLMediaElement>, 1288 extensions/amp-story/1.0/amp-story-page.js
+(JsonObject|null)is cast to: Object, 288 extensions/amp-story/1.0/amp-story-access.js
+?is cast to: {login: ?, namespace: ?}, 307 extensions/amp-story/1.0/amp-story-access.js
+{
+  amphtml: ?,
+  domainName: string,
+  image: ?,
+  title: ?,
+  type: ?,
+  url: ?
+}is cast to: {
+  domainName: string,
+  image: (string|undefined),
+  title: string,
+  type: string,
+  url: string
+}, 81 extensions/amp-story/1.0/bookend/components/article.js
+({
+  domainName: string,
+  image: (string|undefined),
+  title: string,
+  type: string,
+  url: string
+}|{links: Array<{text: string, url: string}>, type: string}|{text: string, type: string})is cast to: {
+  category: string,
+  domainName: string,
+  image: string,
+  title: string,
+  type: string,
+  url: string
+}, 92 extensions/amp-story/1.0/bookend/components/landscape.js
+Object<string,Element>is cast to: {
+  category: Element,
+  domainName: string,
+  image: Element,
+  meta: Element,
+  title: Element
+}, 120 extensions/amp-story/1.0/bookend/components/landscape.js
+({
+  domainName: string,
+  image: (string|undefined),
+  title: string,
+  type: string,
+  url: string
+}|{links: Array<{text: string, url: string}>, type: string}|{text: string, type: string})is cast to: {
+  category: string,
+  domainName: string,
+  image: string,
+  title: string,
+  type: string,
+  url: string
+}, 92 extensions/amp-story/1.0/bookend/components/portrait.js
+Object<string,Element>is cast to: {
+  category: Element,
+  domainName: string,
+  image: Element,
+  meta: Element,
+  title: Element
+}, 119 extensions/amp-story/1.0/bookend/components/portrait.js
+Objectis cast to: JsonObject, 182 extensions/amp-story/1.0/amp-story-share.js
+Array<?>is cast to: Array<{
+  attrs: (JsonObject|undefined),
+  children: (Array<?>|undefined),
+  localizedStringId: (LocalizedStringId$$module$src$localized_strings<string>|undefined),
+  tag: string,
+  unlocalizedString: (string|undefined)
+}>, 179 extensions/amp-story/1.0/amp-story-share.js
+(Object|string)is cast to: JsonObject, 434 extensions/amp-story/1.0/amp-story-share.js
+(Object|string)is cast to: string, 450 extensions/amp-story/1.0/amp-story-share.js
+(JsonObject|null)is cast to: (Object|null), 332 extensions/amp-story/1.0/amp-story-consent.js
+Array<string>is cast to: Array<string>, 391 extensions/amp-story/1.0/amp-story-consent.js
+*is cast to: Object, 140 extensions/amp-story/1.0/amp-story-page-attachment.js
+{className: string, triggers: (string|undefined)}is cast to: {className: string, triggers: (string|undefined)}, 332 extensions/amp-story/1.0/pagination-buttons.js
+{className: string, triggers: (string|undefined)}is cast to: {className: string, triggers: (string|undefined)}, 337 extensions/amp-story/1.0/pagination-buttons.js
+(Array<string>|string)is cast to: string, 46 extensions/amp-story/1.0/development-ui.js
+*is cast to: UIType$$module$extensions$amp_story$1_0$amp_story_store_service<number>, 130 extensions/amp-story/1.0/amp-story-viewport-warning-layer.js
+*is cast to: {
+  clientX: number,
+  clientY: number,
+  element: Element,
+  state: EmbeddedComponentState$$module$extensions$amp_story$1_0$amp_story_store_service<number>
+}, 796 extensions/amp-story/1.0/amp-story.js
+(JsonObject|null|string|undefined)is cast to: ?, 845 extensions/amp-story/1.0/amp-story.js
+*is cast to: string, 1043 extensions/amp-story/1.0/amp-story.js
+(Element|null)is cast to: HTMLMediaElement, 2220 extensions/amp-story/1.0/amp-story.js
+(Element|null)is cast to: HTMLMediaElement, 2225 extensions/amp-story/1.0/amp-story.js
+*is cast to: Array<string>, 2537 extensions/amp-story/1.0/amp-story.js
+Objectis cast to: JsonObject, 106 extensions/amp-subscriptions/0.1/analytics.js
+Tis cast to: ?, 764 third_party/subscriptions-project/swg.js
+Elementis cast to: HTMLAnchorElement, 969 third_party/subscriptions-project/swg.js
+HTMLAnchorElementis cast to: HTMLAnchorElement, 972 third_party/subscriptions-project/swg.js
+?is cast to: function(new:DOMException, string, string): ?, 1144 third_party/subscriptions-project/swg.js
+(typeof Error)is cast to: function(new:DOMException, string): ?, 1154 third_party/subscriptions-project/swg.js
+Windowis cast to: Window, 1356 third_party/subscriptions-project/swg.js
+stringis cast to: string, 1571 third_party/subscriptions-project/swg.js
+(MessagePort|null)is cast to: MessagePort, 1621 third_party/subscriptions-project/swg.js
+(Window|null)is cast to: Window, 1667 third_party/subscriptions-project/swg.js
+?is cast to: ActivityResultCode$$module$third_party$subscriptions_project$swg<string>, 1813 third_party/subscriptions-project/swg.js
+?is cast to: number, 1836 third_party/subscriptions-project/swg.js
+(Window|null)is cast to: Window, 2163 third_party/subscriptions-project/swg.js
+?is cast to: ActivityResultCode$$module$third_party$subscriptions_project$swg<string>, 2240 third_party/subscriptions-project/swg.js
+*is cast to: (Object|null), 2266 third_party/subscriptions-project/swg.js
+?is cast to: string, 2957 third_party/subscriptions-project/swg.js
+(boolean|null|number|string)is cast to: string, 3269 third_party/subscriptions-project/swg.js
+(Object<string,(boolean|number|string)>|boolean|number|string)is cast to: Object<string,(boolean|number|string)>, 3340 third_party/subscriptions-project/swg.js
+(Object<string,(boolean|number|string)>|boolean|number|string)is cast to: (boolean|number|string), 3345 third_party/subscriptions-project/swg.js
+Elementis cast to: HTMLAnchorElement, 3591 third_party/subscriptions-project/swg.js
+Elementis cast to: HTMLIFrameElement, 3858 third_party/subscriptions-project/swg.js
+(?)is cast to: ?, 4048 third_party/subscriptions-project/swg.js
+??is cast to: (?), 4087 third_party/subscriptions-project/swg.js
+(function(): ?|undefined)is cast to: Function, 4108 third_party/subscriptions-project/swg.js
+(?)is cast to: ?, 4123 third_party/subscriptions-project/swg.js
+Functionis cast to: function(): ?, 4126 third_party/subscriptions-project/swg.js
+Elementis cast to: HTMLIFrameElement, 4649 third_party/subscriptions-project/swg.js
+*is cast to: string, 4931 third_party/subscriptions-project/swg.js
+*is cast to: (JsonObject|null), 4931 third_party/subscriptions-project/swg.js
+Arrayis cast to: Array<(Object|null)>, 5266 third_party/subscriptions-project/swg.js
+(boolean|string)is cast to: string, 6082 third_party/subscriptions-project/swg.js
+stringis cast to: string, 6150 third_party/subscriptions-project/swg.js
+*is cast to: Object, 6154 third_party/subscriptions-project/swg.js
+?is cast to: Object, 6159 third_party/subscriptions-project/swg.js
+??is cast to: JsonObject, 6178 third_party/subscriptions-project/swg.js
+(JsonObject|null|undefined)is cast to: Object, 6209 third_party/subscriptions-project/swg.js
+(boolean|string)is cast to: string, 6320 third_party/subscriptions-project/swg.js
+?is cast to: Object, 6421 third_party/subscriptions-project/swg.js
+(JsonObject|null|undefined)is cast to: Object, 6456 third_party/subscriptions-project/swg.js
+?is cast to: string, 6520 third_party/subscriptions-project/swg.js
+(Document|Window)is cast to: Window, 6602 third_party/subscriptions-project/swg.js
+(Document|Window)is cast to: Document, 6603 third_party/subscriptions-project/swg.js
+(Window|null)is cast to: Window, 6601 third_party/subscriptions-project/swg.js
+(Document|Window)is cast to: Window, 6606 third_party/subscriptions-project/swg.js
+(Document|Window)is cast to: Document, 6607 third_party/subscriptions-project/swg.js
+(HTMLHeadElement|null)is cast to: Element, 6628 third_party/subscriptions-project/swg.js
+(?|Document|Window)is cast to: Document, 6653 third_party/subscriptions-project/swg.js
+(?|Document|Window)is cast to: Document, 6654 third_party/subscriptions-project/swg.js
+(?|Document|Window)is cast to: Window, 6657 third_party/subscriptions-project/swg.js
+(?|Document|Window)is cast to: Window, 6658 third_party/subscriptions-project/swg.js
+(?|Document|Window)is cast to: ?, 6660 third_party/subscriptions-project/swg.js
+Elementis cast to: HTMLIFrameElement, 6951 third_party/subscriptions-project/swg.js
+(HTMLBodyElement|null)is cast to: Element, 7003 third_party/subscriptions-project/swg.js
+Documentis cast to: HTMLDocument, 7169 third_party/subscriptions-project/swg.js
+Elementis cast to: HTMLIFrameElement, 7697 third_party/subscriptions-project/swg.js
+Promise<(JsonObject|null|undefined)>is cast to: Promise<JsonObject>, 8617 third_party/subscriptions-project/swg.js
+Promise<(Document|null)>is cast to: Promise<Document>, 8635 third_party/subscriptions-project/swg.js
+Promise<Uint8Array>is cast to: Promise<ArrayBuffer>, 8646 third_party/subscriptions-project/swg.js
+?is cast to: Promise<?>, 9946 third_party/subscriptions-project/swg.js
+?is cast to: ?, 10247 third_party/subscriptions-project/swg.js
+Elementis cast to: HTMLIFrameElement, 10846 third_party/subscriptions-project/swg.js
+*is cast to: ?, 10966 third_party/subscriptions-project/swg.js
+Promise<ActivityResult$$module$third_party$subscriptions_project$swg>is cast to: Promise<Object>, 11416 third_party/subscriptions-project/swg.js
+?is cast to: ?, 11427 third_party/subscriptions-project/swg.js
+?is cast to: string, 11881 third_party/subscriptions-project/swg.js
+*is cast to: ?, 12039 third_party/subscriptions-project/swg.js
+?is cast to: PublicErrorCode$$module$third_party$subscriptions_project$swg<number>, 12224 third_party/subscriptions-project/swg.js
+?is cast to: Object, 12643 third_party/subscriptions-project/swg.js
+ArrayBufferis cast to: ArrayBuffer, 12946 third_party/subscriptions-project/swg.js
+(boolean|string)is cast to: string, 13214 third_party/subscriptions-project/swg.js
+Elementis cast to: HTMLIFrameElement, 13884 third_party/subscriptions-project/swg.js
+(null|string)is cast to: string, 13939 third_party/subscriptions-project/swg.js
+?is cast to: (JsonObject|null), 14338 third_party/subscriptions-project/swg.js
+?is cast to: string, 38 third_party/subscriptions-project/config.js
+(Document|Window)is cast to: Window, 168 third_party/subscriptions-project/config.js
+(Document|Window)is cast to: Document, 169 third_party/subscriptions-project/config.js
+(Window|null)is cast to: Window, 167 third_party/subscriptions-project/config.js
+(Document|Window)is cast to: Window, 172 third_party/subscriptions-project/config.js
+(Document|Window)is cast to: Document, 173 third_party/subscriptions-project/config.js
+(HTMLHeadElement|null)is cast to: Element, 194 third_party/subscriptions-project/config.js
+(Doc$$module$third_party$subscriptions_project$config|Document|Window)is cast to: Document, 219 third_party/subscriptions-project/config.js
+(Doc$$module$third_party$subscriptions_project$config|Document|Window)is cast to: Document, 220 third_party/subscriptions-project/config.js
+(Doc$$module$third_party$subscriptions_project$config|Document|Window)is cast to: Window, 223 third_party/subscriptions-project/config.js
+(Doc$$module$third_party$subscriptions_project$config|Document|Window)is cast to: Window, 224 third_party/subscriptions-project/config.js
+(Doc$$module$third_party$subscriptions_project$config|Document|Window)is cast to: Doc$$module$third_party$subscriptions_project$config, 226 third_party/subscriptions-project/config.js
+*is cast to: string, 431 third_party/subscriptions-project/config.js
+*is cast to: (JsonObject|null), 431 third_party/subscriptions-project/config.js
+*is cast to: (null|string), 769 third_party/subscriptions-project/config.js
+Objectis cast to: JsonObject, 97 extensions/amp-subscriptions/0.1/entitlement.js
+(boolean|undefined)is cast to: boolean, 144 extensions/amp-subscriptions/0.1/dialog.js
+SubscriptionPlatform$$module$extensions$amp_subscriptions$0_1$subscription_platformis cast to: SubscriptionPlatform$$module$extensions$amp_subscriptions$0_1$subscription_platform, 167 extensions/amp-subscriptions/0.1/platform-store.js
+JsonObjectis cast to: JsonObject, 57 extensions/amp-subscriptions/0.1/local-subscription-platform-renderer.js
+JsonObjectis cast to: JsonObject, 108 extensions/amp-subscriptions/0.1/local-subscription-platform-renderer.js
+JsonObjectis cast to: JsonObject, 150 extensions/amp-subscriptions/0.1/local-subscription-platform-renderer.js
+stringis cast to: string, 106 extensions/amp-subscriptions/0.1/local-subscription-platform-remote.js
+Promise<?>is cast to: Promise<(Entitlement$$module$extensions$amp_subscriptions$0_1$entitlement|null)>, 113 extensions/amp-subscriptions/0.1/viewer-subscription-platform.js
+stringis cast to: string, 128 extensions/amp-subscriptions/0.1/viewer-subscription-platform.js
+Entitlement$$module$extensions$amp_subscriptions$0_1$entitlementis cast to: Entitlement$$module$extensions$amp_subscriptions$0_1$entitlement, 403 extensions/amp-subscriptions/0.1/amp-subscriptions.js
+PageConfig$$module$third_party$subscriptions_project$configis cast to: PageConfig$$module$third_party$subscriptions_project$config, 565 extensions/amp-subscriptions/0.1/amp-subscriptions.js
+(Array<JsonObject>|JsonObject)is cast to: JsonObject, 220 extensions/amp-user-location/0.1/config-loader.js
+Promise<Object>is cast to: Promise<UserNotificationManager$$module$extensions$amp_user_notification$0_1$amp_user_notification>, 202 extensions/amp-user-notification/0.1/amp-user-notification.js
+Eventis cast to: MouseEvent, 475 extensions/amp-video-docking/0.1/controls.js
+?is cast to: {
+  bottom: number,
+  height: number,
+  left: number,
+  right: number,
+  top: number,
+  width: number,
+  x: number,
+  y: number
+}, 221 extensions/amp-video-docking/0.1/amp-video-docking.js
+(Document|ShadowRoot)is cast to: Document, 500 extensions/amp-video-docking/0.1/amp-video-docking.js
+?is cast to: TouchEvent, 519 extensions/amp-video-docking/0.1/amp-video-docking.js
+RelativeY$$module$extensions$amp_video_docking$0_1$amp_video_docking<number>is cast to: RelativeY$$module$extensions$amp_video_docking$0_1$amp_video_docking<number>, 796 extensions/amp-video-docking/0.1/amp-video-docking.js
+(BaseElement$$module$src$base_element|VideoInterface$$module$src$video_interface)is cast to: VideoInterface$$module$src$video_interface, 844 extensions/amp-video-docking/0.1/amp-video-docking.js
+Actions$$module$extensions$amp_video_docking$0_1$amp_video_docking<string>is cast to: string, 987 extensions/amp-video-docking/0.1/amp-video-docking.js
+*is cast to: (MouseEvent|TouchEvent), 1440 extensions/amp-video-docking/0.1/amp-video-docking.js
+Nodeis cast to: Text, 424 extensions/amp-viewer-integration/0.1/findtext.js
+*is cast to: AmpViewerMessage, 47 extensions/amp-viewer-integration/0.1/messaging/messaging.js
+stringis cast to: string, 55 extensions/amp-viewer-integration/0.1/messaging/messaging.js
+(JsonObject|null)is cast to: ?, 54 extensions/amp-viewer-integration/0.1/messaging/messaging.js
+(Object<string,*>|null)is cast to: JsonObject, 305 extensions/amp-viewer-integration/0.1/messaging/messaging.js
+*is cast to: JsonObject, 218 extensions/amp-viewer-integration/0.1/amp-viewer-integration.js
+?is cast to: {parse: {spec: function(JsonObject, function((Error|null), function(JsonObject): ?): ?): ?}}, 83 extensions/amp-viz-vega/0.1/amp-viz-vega.js
+(null|string|undefined)is cast to: string, 84 extensions/amp-viz-vega/0.1/amp-viz-vega.js
+(JsonObject|null)is cast to: (JsonObject|null), 152 extensions/amp-viz-vega/0.1/amp-viz-vega.js
+(JsonObject|null)is cast to: JsonObject, 212 extensions/amp-viz-vega/0.1/amp-viz-vega.js
+function(JsonObject): ?is cast to: function(JsonObject): ?, 217 extensions/amp-viz-vega/0.1/amp-viz-vega.js
+function(Event): undefinedis cast to: (function((Event|null)): (boolean|undefined)|null), 131 extensions/amp-web-push/0.1/window-messenger.js
+(function(Event): undefined|null)is cast to: (function((Event|null)): (boolean|undefined)|null), 225 extensions/amp-web-push/0.1/window-messenger.js
+Promise<Object>is cast to: Promise<WebPushService$$module$extensions$amp_web_push$0_1$web_push_service>, 65 extensions/amp-web-push/0.1/web-push-service.js

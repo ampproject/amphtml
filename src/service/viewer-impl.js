@@ -30,7 +30,7 @@ import {
   serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
-import {map} from '../utils/object';
+import {dict} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {startsWith} from '../string';
@@ -89,8 +89,8 @@ export class ViewerImpl {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {!Object<string, !Observable<!JsonObject>>} */
-    this.messageObservables_ = map();
+    /** @private {!JsonObject<!Observable<!JsonObject>>} */
+    this.messageObservables_ = dict();
 
     /** @private {!Object<string, !./viewer-interface.RequestResponderDef>} */
     this.messageResponders_ = map();
@@ -124,9 +124,9 @@ export class ViewerImpl {
     /**
      * Subset of this.params_ that only contains parameters in the URL hash,
      * e.g. "#foo=bar".
-     * @const @private {!Object<string, string>}
+     * @const @private {!JsonObject}
      */
-    this.hashParams_ = map();
+    this.hashParams_ = dict();
 
     if (ampdoc.isSingleDoc()) {
       Object.assign(this.hashParams_, parseQueryString(this.win.location.hash));
@@ -376,7 +376,7 @@ export class ViewerImpl {
         {},
         '',
         '#' +
-          serializeQueryString(/** @type {!JsonObject} */ (this.hashParams_))
+        serializeQueryString(this.hashParams_)
       );
     }
   }

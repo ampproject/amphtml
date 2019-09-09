@@ -41,7 +41,7 @@ function shouldGenerateRunner(subDir) {
   const generatedAtCommitPath = `${runnerJarDir}/${generatedAtCommitFile}`;
 
   // Always generate on Travis
-  if (isTravisBuild()) {
+  if (true) {
     return true;
   }
 

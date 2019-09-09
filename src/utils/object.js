@@ -143,3 +143,13 @@ export function omit(o, props) {
     return acc;
   }, {});
 }
+
+
+/**
+ * @param {!JsonObject} target
+ * @param {...(!JsonObject|null|undefined)} var_args
+ * @return {!JsonObject}
+ */
+export function jsonObjectAssign(target, var_args) {
+  return /** @type {!JsonObject} */ (Object.assign.apply(null, arguments));
+}

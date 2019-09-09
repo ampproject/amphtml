@@ -15,6 +15,7 @@
  */
 
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
+import {dict} from './utils/object';
 
 const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 
@@ -29,7 +30,7 @@ const regex = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
  * @return {!JsonObject}
  */
 export function parseQueryString_(queryString) {
-  const params = /** @type {!JsonObject} */ (Object.create(null));
+  const params = dict();
   if (!queryString) {
     return params;
   }
