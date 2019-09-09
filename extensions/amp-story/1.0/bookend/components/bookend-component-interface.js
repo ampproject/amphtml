@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
+/** @enum {string} */
+export const BOOKEND_COMPONENT_TYPES = {
+  SMALL: 'small',
+  CTA_LINK: 'cta-link',
+  HEADING: 'heading',
+  LANDSCAPE: 'landscape',
+  PORTRAIT: 'portrait',
+  TEXTBOX: 'textbox',
+};
+
+/**
+ *
+ * @const {string}
+ */
+export const AMP_STORY_BOOKEND_COMPONENT_DATA =
+  '__AMP_STORY_BOOKEND_COMPONENT_DATA__';
+
 /**
  * Interface implemented by the bookend components.
  * @interface
@@ -38,7 +55,8 @@ export class BookendComponentInterface {
    * Builds the DOM element for the component.
    * @param {../bookend-component.BookendComponentDef} unusedComponentJson
    * @param {!Document} unusedDoc
+   * @param {!Object} unusedData
    * @return {!Element}
    */
-  buildElement(unusedComponentJson, unusedDoc) {}
+  buildElement(unusedComponentJson, unusedDoc, unusedData) {}
 }

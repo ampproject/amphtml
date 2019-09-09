@@ -85,6 +85,12 @@
       ]
     },
     {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
+    },
+    {
       "type": "heading",
       "text": "credits"
     },

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
 import {userAssert} from '../../../../../src/log';
@@ -57,7 +61,7 @@ export class TextBoxComponent {
   }
 
   /** @override */
-  buildElement(textboxData, doc) {
+  buildElement(textboxData, doc, data) {
     const html = htmlFor(doc);
     const container = html`
       <div
@@ -65,6 +69,10 @@ export class TextBoxComponent {
           i-amphtml-story-bookend-component"
       ></div>
     `;
+    container[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.TEXTBOX,
+    };
 
     let textSeed = html`
       <h3 class="i-amphtml-story-bookend-text"></h3>
