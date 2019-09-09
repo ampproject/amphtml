@@ -26,6 +26,7 @@ ReadMo only requires a section code to run. Please work your account manager to 
   <amp-embed width="400" height="400"
              type="readmo"
              layout="responsive"
+             data-url="https://yoursite.com"
              data-infinite="true"
              data-section="1234567">
   </amp-embed>
@@ -34,6 +35,7 @@ ReadMo only requires a section code to run. Please work your account manager to 
 ### Required parameters
 
 - `data-section` : A unique section code that represents your site and placement
+- `data-url` : Url that your section code is valid to run on
 
 ### Optional parameters
 
