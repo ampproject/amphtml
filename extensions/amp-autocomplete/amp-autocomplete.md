@@ -42,7 +42,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example coming soon.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-autocomplete/">amp-autocomplete</a> sample.</td>
   </tr>
 </table>
 
@@ -83,7 +83,7 @@ Example:
 
     The src attribute may be omitted if the <code>[src]</code> attribute exists.
 
-    If fetching the data at the src URL fails, the <amp-autocomplete> triggers a fallback.</td>
+    If fetching the data at the src URL fails, the <code><amp-autocomplete></code> triggers a fallback.</td>
   </tr>
   <tr>
     <td width="40%"><strong>filter-expr (optional)</strong></td>
