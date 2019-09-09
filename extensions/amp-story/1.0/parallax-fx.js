@@ -106,20 +106,13 @@ export class ParallaxService {
     this.init_();
 
     userAssert(
-      this.win_.DeviceOrientationEvent || this.win_.DeviceMotionEvent,
+      this.win_.DeviceOrientationEvent,
       "The current browser doesn't support the device motion/orientation events"
     );
 
     if (this.win_.DeviceOrientationEvent) {
       listen(this.win_, 'deviceorientation', event => {
         this.parallaxOrientationMutate_(event, this.parallaxPages_);
-      });
-    } else if (this.win_.DeviceMotionEvent) {
-      listen(this.win_, 'devicemotion', event => {
-        this.parallaxOrientationMutate_(
-          event.rotationRate,
-          this.parallaxPages_
-        );
       });
     }
   }
