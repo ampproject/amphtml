@@ -21,14 +21,14 @@ import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 
 /**
- * @fileoverview Some simple tests for amp-carousel. Most of the functionality
- *    for changing slides, resizing, etc should be handled by the base
- *    implementation via amp-base-carousel's tests.
+ * @fileoverview Some simple tests for amp-stream-gallery. Most of the
+ *    functionality for changing slides, resizing, etc should be handled by
+ *    the base implementation via amp-base-carousel's tests.
  */
 
 /**
  * @param {!Element} el
- * @param {number=} index An intex to wait for.
+ * @param {number=} index An indtex to wait for.
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
@@ -39,6 +39,23 @@ async function afterIndexUpdate(el, index) {
   if (index != undefined && getDetail(event)['index'] != index) {
     return afterIndexUpdate(el, index);
   }
+}
+
+/**
+ * @param {!Element} el
+ * @param {string} attributeName
+ * @return {!Promise<undefined>}
+ */
+async function afterAttributeMutation(el, attributeName) {
+  return new Promise(resolve => {
+    const mo = new el.ownerDocument.defaultView.MutationObserver(() => {
+      resolve();
+    });
+    mo.observe(el, {
+      attributes: true,
+      attributeFilter: [attributeName],
+    });
+  });
 }
 
 function getNextArrowSlot(el) {
@@ -617,6 +634,30 @@ describes.realWin(
         expect(items[0].getBoundingClientRect().left).to.equal(-400);
         expect(items[2].getBoundingClientRect().left).to.equal(0);
       });
+
+      it('should be disabled at the end when not looping', async function() {
+        const slideCount = 10;
+        const el = await getGallery({
+          slideCount,
+          width: 500,
+          attrs: {
+            'min-item-width': '200',
+            'max-item-width': '200',
+            'peek': '0.5',
+            'loop': 'false',
+          },
+        });
+        const items = getItems(el);
+        const nextButton = getNextButton(el);
+
+        // Go to slide instantly for testing.
+        setStyle(getScrollContainer(el), 'scroll-behavior', 'auto');
+
+        items[9].scrollIntoView();
+        await afterAttributeMutation(nextButton, 'disabled');
+
+        expect(nextButton.disabled).to.be.true;
+      });
     });
 
     describe('prev button', () => {
@@ -643,6 +684,21 @@ describes.realWin(
 
         expect(items[0].getBoundingClientRect().left).to.equal(400);
         expect(items[8].getBoundingClientRect().left).to.equal(0);
+      });
+
+      it('should be disabled at start when not looping', async () => {
+        const slideCount = 10;
+        const el = await getGallery({
+          slideCount,
+          width: 500,
+          attrs: {
+            'min-item-width': '200',
+            'peek': '0.5',
+            'loop': 'false',
+          },
+        });
+
+        expect(getPrevButton(el).disabled).to.be.true;
       });
     });
   }

@@ -1141,6 +1141,12 @@ export class Carousel {
         : 0;
     const pos = elementStart - offset - containerStart + scrollPos;
 
+    // No scroll will happen, ,ake sure the `ignoreNextScroll_` flag is not
+    // set.
+    if (scrollPos == pos) {
+      return;
+    }
+
     this.ignoreNextScroll_ = true;
     runDisablingSmoothScroll(scrollContainer_, () => {
       setScrollPosition(axis_, scrollContainer_, pos);
