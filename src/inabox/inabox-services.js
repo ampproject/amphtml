@@ -22,15 +22,16 @@ import {installHiddenObserverForDoc} from '../service/hidden-observer-impl';
 import {installHistoryServiceForDoc} from '../service/history-impl';
 import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
 import {installInaboxCidService} from './inabox-cid';
+import {installInaboxResourcesServiceForDoc} from './inabox-resources';
+import {installInaboxViewerServiceForDoc} from './inabox-viewer';
 import {installInaboxViewportService} from './inabox-viewport';
-import {
-  installOwnersServiceForDoc,
-  installResourcesServiceForDoc,
-} from '../service/resources-impl';
+import {installOwnersServiceForDoc} from '../service/owners-impl';
+import {installResourcesServiceForDoc} from '../service/resources-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {isExperimentOn} from '../experiments';
 import {rejectServicePromiseForDoc} from '../service';
 
 /**
@@ -43,11 +44,27 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installUrlForDoc(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installInaboxCidService(ampdoc);
-  installViewerServiceForDoc(ampdoc);
+  if (
+    // eslint-disable-next-line no-undef
+    _RTVEXP_INABOX_LITE ||
+    isExperimentOn(ampdoc.win, 'inabox-viewer-lite')
+  ) {
+    installInaboxViewerServiceForDoc(ampdoc);
+  } else {
+    installViewerServiceForDoc(ampdoc);
+  }
   installInaboxViewportService(ampdoc);
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
+  if (
+    // eslint-disable-next-line no-undef
+    _RTVEXP_INABOX_LITE ||
+    isExperimentOn(ampdoc.win, 'inabox-resources-lite')
+  ) {
+    installInaboxResourcesServiceForDoc(ampdoc);
+  } else {
+    installResourcesServiceForDoc(ampdoc);
+  }
   installOwnersServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);

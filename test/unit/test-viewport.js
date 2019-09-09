@@ -16,7 +16,6 @@
 
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
-import {ViewportBindingIosEmbedShadowRoot_} from '../../src/service/viewport/viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 import {
   ViewportImpl,
@@ -1641,67 +1640,6 @@ describe('createViewport', () => {
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
         expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
-      });
-
-      it('should bind to "iOS embed SD" when the experiment is on', () => {
-        sandbox
-          .stub(Services.platformFor(win), 'getIosVersionString')
-          .callsFake(() => '12.2');
-        toggleExperiment(win, 'ios-embed-sd', true);
-        win.parent = {};
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(
-          ViewportBindingIosEmbedShadowRoot_
-        );
-      });
-
-      it('should bind to "iOS embed SD" in future Safari', () => {
-        sandbox
-          .stub(Services.platformFor(win), 'getIosVersionString')
-          .callsFake(() => '12.2');
-        toggleExperiment(win, 'ios-embed-sd', true);
-        win.parent = {};
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(
-          ViewportBindingIosEmbedShadowRoot_
-        );
-      });
-
-      it('should NOT bind to "iOS embed SD" in Safari before 12.2', () => {
-        // This is due to some scrolling, position:fixed and SD bugs.
-        sandbox
-          .stub(Services.platformFor(win), 'getMajorVersion')
-          .callsFake(() => '12.1');
-        toggleExperiment(win, 'ios-embed-sd', true);
-        win.parent = {};
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(
-          ViewportBindingIosEmbedWrapper_
-        );
-      });
-
-      it('should only bind to "iOS embed SD" when SD is supported', () => {
-        // Reset SD support.
-        sandbox.defineProperty(win.Element.prototype, 'attachShadow', {
-          value: null,
-        });
-        sandbox
-          .stub(Services.platformFor(win), 'getMajorVersion')
-          .callsFake(() => '12.2');
-        toggleExperiment(win, 'ios-embed-sd', true);
-        win.parent = {};
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(
-          ViewportBindingIosEmbedWrapper_
-        );
       });
 
       it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {

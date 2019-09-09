@@ -366,12 +366,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
-    if (
-      !isCdnProxy(this.win) &&
-      !isExperimentOn(this.win, 'expDfpInvOrigDeprecated')
-    ) {
-      this.experimentIds.push('21060933');
-    }
     let forcedExperimentId;
     if (urlExperimentId) {
       forcedExperimentId = {
@@ -1063,7 +1057,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       devAssert(this.iframe);
       Navigation.installAnchorClickInterceptor(
         this.getAmpDoc(),
-        this.iframe.contentWindow
+        devAssert(this.iframe.contentWindow)
       );
     }
     if (this.ampAnalyticsConfig_) {

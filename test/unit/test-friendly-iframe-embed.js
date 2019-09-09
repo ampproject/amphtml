@@ -107,6 +107,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     // Attributes set.
     expect(iframe.style.visibility).to.equal('hidden');
     expect(iframe.getAttribute('referrerpolicy')).to.equal('unsafe-url');
+    expect(iframe.getAttribute('marginheight')).to.equal('0');
+    expect(iframe.getAttribute('marginwidth')).to.equal('0');
 
     // Iframe has been appended to DOM.
     expect(iframe.parentElement).to.equal(document.body);
@@ -344,23 +346,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     );
     return embedPromise.then(() => {
       expect(installExtensionsInChildWindowStub).to.be.calledOnce;
-    });
-  });
-
-  it('should uninstall all resources', () => {
-    extensionsMock.expects('preloadExtension').atLeast(1);
-    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
-      url: 'https://acme.org/url1',
-      html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
-    });
-    return embedPromise.then(embed => {
-      expect(installExtensionsInChildWindowStub).to.be.calledOnce;
-      resourcesMock
-        .expects('removeForChildWindow')
-        .withExactArgs(embed.win)
-        .once();
-      embed.destroy();
     });
   });
 

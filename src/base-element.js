@@ -159,19 +159,6 @@ export class BaseElement {
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
-
-    /** @public {?Object} For use by sub classes */
-    this.config = null;
-
-    /**
-     * The time at which this element was scheduled for layout relative to the
-     * epoch. This value will be set to 0 until the this element has been
-     * scheduled.
-     * Note that this value may change over time if the element is enqueued,
-     * then dequeued and re-enqueued by the scheduler.
-     * @public {number}
-     */
-    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -555,21 +542,6 @@ export class BaseElement {
    */
   reconstructWhenReparented() {
     return true;
-  }
-
-  /**
-   * Instructs the element that its activation is requested based on some
-   * user event. Intended to be implemented by actual components.
-   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
-   */
-  activate(unusedInvocation) {}
-
-  /**
-   * Minimum event trust required for activate().
-   * @return {ActionTrust}
-   */
-  activationTrust() {
-    return ActionTrust.HIGH;
   }
 
   /**

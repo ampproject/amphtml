@@ -28,12 +28,12 @@ const COMMON_CHROME_FLAGS = [
   '--autoplay-policy=no-user-gesture-required',
 ];
 
-// Reduces the odds of Sauce labs timing out during tests. See #16135.
+// Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
 const SAUCE_TIMEOUT_CONFIG = {
   maxDuration: 10 * 60,
   commandTimeout: 10 * 60,
-  idleTimeout: 5 * 60,
+  idleTimeout: 10 * 60,
 };
 
 const BABELIFY_CONFIG = Object.assign(
@@ -305,7 +305,7 @@ module.exports = {
   // karma-sauce-launcher.
   // See https://github.com/karma-runner/karma-sauce-launcher/pull/161.
   browserDisconnectTimeout: 15 * 60 * 1000,
-  browserNoActivityTimeout: 15 * 60 * 1000,
+  browserNoActivityTimeout: 2 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
@@ -334,7 +334,7 @@ module.exports = {
       'middleware:custom': [
         'factory',
         function() {
-          return require(require.resolve('../app.js'));
+          return require(require.resolve('../server/app.js'));
         },
       ],
     },

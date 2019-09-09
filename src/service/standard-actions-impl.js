@@ -79,7 +79,7 @@ export class StandardActions {
       ? opt_win.document.documentElement
       : ampdoc.getHeadNode();
 
-    /** @const @private {!./resources-impl.ResourcesDef} */
+    /** @const @private {!./resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @const @private {!./viewport/viewport-interface.ViewportInterface} */
