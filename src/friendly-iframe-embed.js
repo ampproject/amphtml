@@ -422,12 +422,7 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    // TODO(lannka): should avoid this type casting by moving the `removeForChildWindow`
-    // logic here.
-    const resources = /** @type {!./service/resources-impl.ResourcesImpl} */ (Services.resourcesForDoc(
-      this.iframe
-    ));
-    resources.removeForChildWindow(this.win);
+    this.removeResources_();
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
       this.ampdoc.dispose();
@@ -586,6 +581,21 @@ export class FriendlyIframeEmbed {
       task.measure || null,
       task.mutate
     );
+  }
+
+  /**
+   * Removes all resources belonging to the FIE window.
+   * @private
+   */
+  removeResources_() {
+    const resources = this.getResources_();
+    const toRemove = resources
+      .get()
+      .filter(resource => resource.hostWin == this.win);
+    toRemove.forEach(resource => {
+      resources.remove(resource.element);
+      resource.disconnect();
+    });
   }
 
   /**

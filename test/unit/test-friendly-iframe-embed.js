@@ -349,23 +349,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     });
   });
 
-  it('should uninstall all resources', () => {
-    extensionsMock.expects('preloadExtension').atLeast(1);
-    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
-      url: 'https://acme.org/url1',
-      html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
-    });
-    return embedPromise.then(embed => {
-      expect(installExtensionsInChildWindowStub).to.be.calledOnce;
-      resourcesMock
-        .expects('removeForChildWindow')
-        .withExactArgs(embed.win)
-        .once();
-      embed.destroy();
-    });
-  });
-
   it.skip('should install and dispose services', () => {
     const disposeSpy = sandbox.spy();
     const embedService = {
