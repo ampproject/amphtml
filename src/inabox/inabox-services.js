@@ -56,7 +56,11 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installInaboxViewportService(ampdoc);
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
-  if (isExperimentOn(ampdoc.win, 'inabox-resources-lite')) {
+  if (
+    // eslint-disable-next-line no-undef
+    _RTVEXP_INABOX_LITE ||
+    isExperimentOn(ampdoc.win, 'inabox-resources-lite')
+  ) {
     installInaboxResourcesServiceForDoc(ampdoc);
   } else {
     installResourcesServiceForDoc(ampdoc);
