@@ -127,7 +127,13 @@ In `<amp-list>`, you can use the [`items`](#items-optional) attribute to render 
 
 ### Specifying an overflow
 
-Optionally, the `<amp-list>` element can contain an element with an `overflow` attribute. This element is shown if the AMP Runtime cannot resize the `<amp-list>` element as requested, which is the case if the list is inside the viewport. If the list is outside the viewport, it will be automatically expanded.
+Optionally, the `<amp-list>` element can contain an element with the `overflow` attribute. The AMP `overflow` attribute to resize AMP components that fetch content if the AMP framework is unable to size the component as requested. An element inside of the AMP component with the `overflow` attribute will appear if one of the following conditions are met:
+
+- The AMP component is in the viewport and the bottom of the `overflow` element is below the viewport.
+
+- The AMP component is in the viewport and bottom of the `overflow` element is within 15% of the height of the entire page and within 1000px of the end of the page.
+
+If `amp-list` is outside the viewport, it will be automatically expanded.
 
 *Example: Displaying an overflow when the list needs more space*
 
@@ -148,7 +154,8 @@ In the following example, we display a list of images and titles. Because the `<
     </div>
   {% endraw %}</template>
   <div overflow
-    class="list-overflow">
+    class="list-overflow"
+    style="background-color:red;">
     See more
   </div>
 </amp-list>
