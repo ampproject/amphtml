@@ -121,6 +121,7 @@ tags: {  # <amp-autocomplete> > <template>
     name: "type"
     mandatory: true
     value: "amp-mustache"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   reference_points: {
     tag_spec_name: "AMP-AUTOCOMPLETE > template > child"
