@@ -242,7 +242,35 @@ describes.realWin(
       });
     });
 
-    it('renderResults_() should update the container_ with rich text', () => {
+    it('renderResults_() should update the container_ with rich text from value', () => {
+      const sourceData = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
+      impl.templateElement_ = doc.createElement('template');
+      const renderedChildren = [];
+      sourceData.forEach(item => {
+        const renderedChild = doc.createElement('div');
+        renderedChild.setAttribute('value', item.value);
+        renderedChildren.push(renderedChild);
+      });
+      const renderTemplateSpy = sandbox
+        .stub(impl.templates_, 'renderTemplateArray')
+        .returns(Promise.resolve(renderedChildren));
+
+      return impl.renderResults_(sourceData, impl.container_).then(() => {
+        expect(impl.container_.children.length).to.equal(3);
+        expect(impl.container_.children[0].getAttribute('value')).to.equal(
+          'apple'
+        );
+        expect(impl.container_.children[1].getAttribute('value')).to.equal(
+          'mango'
+        );
+        expect(impl.container_.children[2].getAttribute('value')).to.equal(
+          'pear'
+        );
+        expect(renderTemplateSpy).to.have.been.calledOnce;
+      });
+    });
+
+    it('renderResults_() should update the container_ with rich text from data-value', () => {
       const sourceData = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
       impl.templateElement_ = doc.createElement('template');
       const renderedChildren = [];
@@ -772,7 +800,21 @@ describes.realWin(
         });
     });
 
-    it('should fire select event from selectItem_', () => {
+    it('should fire select event from selectItem_ with value', () => {
+      const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
+      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+      const mockEl = doc.createElement('div');
+      return element.layoutCallback().then(() => {
+        impl.toggleResults_(true);
+        mockEl.setAttribute('value', 'test');
+        impl.selectItem_(mockEl);
+        expect(fireEventSpy).to.have.been.calledOnce;
+        expect(fireEventSpy).to.have.been.calledWith('test');
+        expect(triggerSpy).to.have.been.calledOnce;
+      });
+    });
+
+    it('should fire select event from selectItem_ with data-value', () => {
       const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
       const triggerSpy = sandbox.spy(impl.action_, 'trigger');
       const mockEl = doc.createElement('div');
@@ -782,6 +824,21 @@ describes.realWin(
         impl.selectItem_(mockEl);
         expect(fireEventSpy).to.have.been.calledOnce;
         expect(fireEventSpy).to.have.been.calledWith('test');
+        expect(triggerSpy).to.have.been.calledOnce;
+      });
+    });
+
+    it('should fire select event from selectItem_ with value taking precedence to data-value', () => {
+      const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
+      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+      const mockEl = doc.createElement('div');
+      return element.layoutCallback().then(() => {
+        impl.toggleResults_(true);
+        mockEl.setAttribute('value', 'test1');
+        mockEl.setAttribute('data-value', 'test2');
+        impl.selectItem_(mockEl);
+        expect(fireEventSpy).to.have.been.calledOnce;
+        expect(fireEventSpy).to.have.been.calledWith('test1');
         expect(triggerSpy).to.have.been.calledOnce;
       });
     });
@@ -869,11 +926,38 @@ describes.realWin(
 
     it('should not select disabled items', () => {
       const disabledItem = doc.createElement('div');
+      disabledItem.setAttribute('disabled', '');
+      expect(impl.selectItem_(disabledItem)).to.be.undefined;
+    });
+
+    it('should not select data-disabled items', () => {
+      const disabledItem = doc.createElement('div');
       disabledItem.setAttribute('data-disabled', '');
       expect(impl.selectItem_(disabledItem)).to.be.undefined;
     });
 
     it('should not return disabled items from getEnabledItems_()', () => {
+      impl.templateElement_ = doc.createElement('template');
+      const sourceData = ['apple', 'mango', 'pear'];
+      const renderedChildren = sourceData.map(item => {
+        const renderedChild = doc.createElement('div');
+        renderedChild.setAttribute('value', item);
+        return renderedChild;
+      });
+      renderedChildren[2].setAttribute('disabled', '');
+      sandbox
+        .stub(impl.templates_, 'renderTemplateArray')
+        .returns(Promise.resolve(renderedChildren));
+
+      return impl.renderResults_(sourceData, impl.container_).then(() => {
+        expect(impl.container_.children.length).to.equal(3);
+        expect(impl.getEnabledItems_().length).to.equal(2);
+        expect(impl.container_.children[2].hasAttribute('aria-disabled')).to.be
+          .true;
+      });
+    });
+
+    it('should not return data-disabled items from getEnabledItems_()', () => {
       impl.templateElement_ = doc.createElement('template');
       const sourceData = ['apple', 'mango', 'pear'];
       const renderedChildren = sourceData.map(item => {

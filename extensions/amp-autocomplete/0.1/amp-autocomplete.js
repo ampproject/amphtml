@@ -219,14 +219,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.element,
         'template, script[template]'
       );
-      // Dummy render to verify existence of "data-value" attribute.
+      // Dummy render to verify existence of "value" attribute.
       this.templates_
         .renderTemplate(this.templateElement_, /** @type {!JsonObject} */ ({}))
         .then(renderedEl => {
           userAssert(
             renderedEl.hasAttribute('data-value') ||
-              renderedEl.hasAttribute('data-disabled'),
-            `${TAG} requires a "data-value" or "data-disabled" attribute.`
+              renderedEl.hasAttribute('data-disabled') ||
+              renderedEl.hasAttribute('value') ||
+              renderedEl.hasAttribute('disabled'),
+            `${TAG} requires a "value" or "disabled" attribute.`
           );
         });
     }
@@ -414,7 +416,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'option');
-    element.setAttribute('data-value', item);
+    element.setAttribute('value', item);
     element.setAttribute('dir', 'auto');
     element.textContent = item;
     const text = element.childNodes[0];
@@ -519,7 +521,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         .renderTemplateArray(this.templateElement_, filteredData)
         .then(renderedChildren => {
           renderedChildren.map(child => {
-            if (child.hasAttribute('data-disabled')) {
+            if (
+              child.hasAttribute('data-disabled') ||
+              child.hasAttribute('disabled')
+            ) {
               child.setAttribute('aria-disabled', 'true');
             }
             child.classList.add('i-amphtml-autocomplete-item');
@@ -798,12 +803,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectItem_(element) {
-    if (element === null || element.hasAttribute('data-disabled')) {
+    if (
+      element === null ||
+      element.hasAttribute('data-disabled') ||
+      element.hasAttribute('disabled')
+    ) {
       return;
     }
-    this.inputElement_.value = this.userInput_ = element.getAttribute(
-      'data-value'
-    );
+    this.inputElement_.value = this.userInput_ =
+      element.getAttribute('value') || element.getAttribute('data-value');
     this.fireSelectEvent_(this.userInput_);
     this.clearAllItems_();
   }
@@ -843,7 +851,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     const activeIndex = mod(index, enabledElements.length);
     const newActiveElement = enabledElements[activeIndex];
-    this.inputElement_.value = newActiveElement.getAttribute('data-value');
+    this.inputElement_.value =
+      newActiveElement.getAttribute('value') ||
+      newActiveElement.getAttribute('data-value');
 
     // Highlight if suggest-first is present.
     if (this.suggestFirst_) {
@@ -892,13 +902,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /** Returns all item elements in the results container that do not have the
-   * 'data-disabled' attribute.
+   * 'data-disabled' or 'disabled' attributes.
    * @return {!NodeList}
    * @private
    */
   getEnabledItems_() {
     return this.container_.querySelectorAll(
-      '.i-amphtml-autocomplete-item:not([data-disabled])'
+      '.i-amphtml-autocomplete-item:not([data-disabled]):not([disabled])'
     );
   }
 
