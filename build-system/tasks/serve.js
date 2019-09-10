@@ -68,7 +68,7 @@ function getMiddleware() {
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
   }
-  if (argv.lazy_build) {
+  if (!argv._.includes('serve') && !argv.eager_build) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
   }
@@ -134,10 +134,10 @@ function restartServer() {
  * Initiates pre-build steps requested via command line args.
  */
 function initiatePreBuildSteps() {
-  if (argv.lazy_build) {
+  if (!argv._.includes('serve') && !argv.eager_build) {
     preBuildCoreRuntime();
     if (argv.extensions || argv.extensions_from) {
-      preBuildSomeExtensions(argv);
+      preBuildSomeExtensions();
     }
   }
 }

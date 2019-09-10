@@ -33,20 +33,6 @@ const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
 /**
- * Extensions to build when `--extensions=minimal_set`.
- */
-const MINIMAL_EXTENSION_SET = [
-  'amp-ad',
-  'amp-ad-network-adsense-impl',
-  'amp-analytics',
-  'amp-audio',
-  'amp-image-lightbox',
-  'amp-lightbox',
-  'amp-sidebar',
-  'amp-video',
-];
-
-/**
  * Extensions to build when `--extensions=inabox`.
  * See AMPHTML ads spec for supported extensions:
  * https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/
@@ -167,32 +153,28 @@ function maybeInitializeExtensions(
 /**
  * Process the command line arguments --noextensions, --extensions, and
  * --extensions_from and return a list of the referenced extensions.
- * @param {!Object=} argvObject
  * @return {!Array<string>}
  */
-function getExtensionsToBuild(argvObject = argv) {
+function getExtensionsToBuild() {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
   extensionsToBuild = DEFAULT_EXTENSION_SET;
-  if (argvObject.extensions) {
-    if (argvObject.extensions === 'minimal_set') {
-      argvObject.extensions = MINIMAL_EXTENSION_SET.join(',');
-    } else if (argvObject.extensions === 'inabox') {
-      argvObject.extensions = INABOX_EXTENSION_SET.join(',');
+  if (argv.extensions) {
+    if (typeof argv.extensions !== 'string') {
+      log(red('ERROR:'), 'Missing list of extensions.');
+      process.exit(1);
+    } else if (argv.extensions === 'inabox') {
+      argv.extensions = INABOX_EXTENSION_SET.join(',');
     }
-    const explicitExtensions = argvObject.extensions.split(',');
+    const explicitExtensions = argv.extensions.replace(/\s/g, '').split(',');
     extensionsToBuild = dedupe(extensionsToBuild.concat(explicitExtensions));
   }
-  if (argvObject.extensions_from) {
-    const extensionsFrom = getExtensionsFromArg(argvObject.extensions_from);
+  if (argv.extensions_from) {
+    const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
-  if (
-    !argvObject.noextensions &&
-    !argvObject.extensions &&
-    !argvObject.extensions_from
-  ) {
+  if (!argv.noextensions && !argv.extensions && !argv.extensions_from) {
     const allExtensions = [];
     for (const extension in extensions) {
       allExtensions.push(extensions[extension].name);
@@ -204,61 +186,61 @@ function getExtensionsToBuild(argvObject = argv) {
 
 /**
  * Parses the --extensions, --extensions_from, and the --noextensions flags,
- * and prints a helpful message that lets the developer know how to build the
- * runtime with a list of extensions, all the extensions used by a test file,
- * or no extensions at all.
+ * and prints a helpful message that lets the developer know how to (pre)build
+ * the runtime with a list of extensions, all the extensions used by a test
+ * file, or no extensions at all.
+ * @param {boolean=} preBuild
  */
-function parseExtensionFlags() {
-  if (!isTravisBuild()) {
-    const noExtensionsMessage =
-      green('⤷ Use ') +
-      cyan('--noextensions ') +
-      green('to skip building extensions.');
-    const extensionsMessage =
-      green('⤷ Use ') +
-      cyan('--extensions=amp-foo,amp-bar ') +
-      green('to choose which extensions to build.');
-    const minimalSetMessage =
-      green('⤷ Use ') +
-      cyan('--extensions=minimal_set ') +
-      green('to build just the extensions needed to load ') +
-      cyan('article.amp.html') +
-      green('.');
-    const inaboxSetMessage =
-      green('⤷ Use ') +
-      cyan('--extensions=inabox ') +
-      green('to build just the extensions that are supported in AMPHTML ads') +
-      green('.');
-    const extensionsFromMessage =
-      green('⤷ Use ') +
-      cyan('--extensions_from=examples/foo.amp.html ') +
-      green('to build extensions from example docs.');
-    if (argv.extensions) {
-      if (typeof argv.extensions !== 'string') {
-        log(red('ERROR:'), 'Missing list of extensions.');
-        log(noExtensionsMessage);
-        log(extensionsMessage);
-        log(minimalSetMessage);
-        log(inaboxSetMessage);
-        log(extensionsFromMessage);
-        process.exit(1);
-      }
-      argv.extensions = argv.extensions.replace(/\s/g, '');
-    }
+function parseExtensionFlags(preBuild = false) {
+  if (isTravisBuild()) {
+    return;
+  }
 
+  const buildOrPreBuild = preBuild ? 'pre-build' : 'build';
+  const noExtensionsMessage =
+    green('⤷ Use ') +
+    cyan('--noextensions ') +
+    green('to skip building extensions.');
+  const extensionsMessage =
+    green('⤷ Use ') +
+    cyan('--extensions=amp-foo,amp-bar ') +
+    green(`to choose which extensions to ${buildOrPreBuild}.`);
+  const inaboxSetMessage =
+    green('⤷ Use ') +
+    cyan('--extensions=inabox ') +
+    green(`to ${buildOrPreBuild} just the extensions needed to load AMP ads.`);
+  const extensionsFromMessage =
+    green('⤷ Use ') +
+    cyan('--extensions_from=examples/foo.amp.html ') +
+    green(`to ${buildOrPreBuild} just the extensions needed to load `) +
+    cyan('foo.amp.html') +
+    green('.');
+
+  if (preBuild) {
     if (argv.extensions || argv.extensions_from) {
+      log(
+        green('Pre-building extension(s):'),
+        cyan(getExtensionsToBuild().join(', '))
+      );
+    } else {
+      log(green('Not pre-building any AMP extensions.'));
+    }
+    log(extensionsMessage);
+    log(inaboxSetMessage);
+    log(extensionsFromMessage);
+  } else {
+    if (argv.noextensions) {
+      log(green('Not building any AMP extensions.'));
+    } else if (argv.extensions || argv.extensions_from) {
       log(
         green('Building extension(s):'),
         cyan(getExtensionsToBuild().join(', '))
       );
-    } else if (argv.noextensions) {
-      log(green('Not building any AMP extensions.'));
     } else {
       log(green('Building all AMP extensions.'));
     }
     log(noExtensionsMessage);
     log(extensionsMessage);
-    log(minimalSetMessage);
     log(inaboxSetMessage);
     log(extensionsFromMessage);
   }
