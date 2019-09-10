@@ -206,22 +206,22 @@ feature_tests/forms.html:165:2 The mandatory attribute 'action' is missing in ta
 |      <div submitting template="submitting_template">
 |        <template type="amp-mustache">Submitting in inlined template</template>
 >>       ^~~~~~~~~
-feature_tests/forms.html:184:6 The tag 'template' may not appear as a descendant of tag 'form div [submitting][template]'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+feature_tests/forms.html:184:6 The parent tag of tag 'AMP-AUTOCOMPLETE > template' is 'div', but it can only be 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_TAG_PROBLEM]
 |      </div>
 |      <div submit-success template="submit_success_template">
 |        <template type="amp-mustache">Success in inlined template</template>
 >>       ^~~~~~~~~
-feature_tests/forms.html:187:6 The tag 'template' may not appear as a descendant of tag 'form div [submit-success][template]'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+feature_tests/forms.html:187:6 The parent tag of tag 'AMP-AUTOCOMPLETE > template' is 'div', but it can only be 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_TAG_PROBLEM]
 |      </div>
 |      <div submit-error template="submit_error_template">
 |        <template type="amp-mustache">Error in inlined template</template>
 >>       ^~~~~~~~~
-feature_tests/forms.html:190:6 The tag 'template' may not appear as a descendant of tag 'form div [submit-error][template]'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+feature_tests/forms.html:190:6 The parent tag of tag 'AMP-AUTOCOMPLETE > template' is 'div', but it can only be 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_TAG_PROBLEM]
 |      </div>
 |      <div verify-error template="verify_error_template">
 |        <template type="amp-mustache">Verify in inlined template</template>
 >>       ^~~~~~~~~
-feature_tests/forms.html:193:6 The tag 'template' may not appear as a descendant of tag 'form div [verify-error][template]'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+feature_tests/forms.html:193:6 The parent tag of tag 'AMP-AUTOCOMPLETE > template' is 'div', but it can only be 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_TAG_PROBLEM]
 |      </div>
 |    </form>
 |    <!-- Valid: form with verify-xhr and input with no-verify-->

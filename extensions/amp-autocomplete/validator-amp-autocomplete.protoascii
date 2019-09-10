@@ -109,3 +109,48 @@ tags: {  # amp-autocomplete JSON
     }
   }
 }
+# The template element is also defined at
+# extensions/amp-mustache/validator-amp-mustache.protoascii
+tags: {  # <amp-autocomplete> > <template>
+  html_format: AMP
+  tag_name: "TEMPLATE"
+  spec_name: "AMP-AUTOCOMPLETE > template"
+  mandatory_parent: "AMP-AUTOCOMPLETE"
+  requires_extension:"amp-mustache"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "amp-mustache"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-AUTOCOMPLETE > template > child"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-AUTOCOMPLETE > template > children"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-AUTOCOMPLETE > template > child"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: {
+    name: "value"
+    value: ""
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-autocomplete"
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-AUTOCOMPLETE > template > children"
+  reference_points: {
+    tag_spec_name: "AMP-AUTOCOMPLETE > template > child"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-AUTOCOMPLETE > template > children"
+  }
+}

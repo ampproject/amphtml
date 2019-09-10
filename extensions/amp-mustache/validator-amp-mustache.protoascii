@@ -129,6 +129,9 @@ tags: {
   mandatory_ancestor: "BODY"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "TEMPLATE"
+  # <templates> tags inside <amp-autocomplete> have additional requirements
+  # as specified in the validator-amp-autocomplete.protoascii rule file.
+  disallowed_ancestor: "AMP-AUTOCOMPLETE"
   # <templates> tags inside <amp-date-picker> have additional requirements
   # as specified in the validator-amp-date-picker.protoascii rule file.
   disallowed_ancestor: "AMP-DATE-PICKER"
