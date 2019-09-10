@@ -34,13 +34,12 @@ const {serve} = require('./serve');
 
 /**
  * Enables watching for file changes in css, extensions.
- * @param {boolean} defaultTask
  * @return {!Promise}
  */
-async function watch(defaultTask) {
+async function watch() {
   maybeUpdatePackages();
   createCtrlcHandler('watch');
-  return performBuild(/* watch */ true, defaultTask);
+  return performBuild(/* watch */ true);
 }
 
 /**
@@ -62,54 +61,44 @@ function printDefaultTaskHelp() {
   const defaultTaskMessage =
     green('⤷ JS and extensions will be ') +
     green(
-      argv.lazy_build
-        ? 'lazily built when requested from the server.'
-        : 'built after server startup.'
+      argv.eager_build
+        ? 'built after server startup.'
+        : 'lazily built when requested from the server.'
     );
   log(defaultTaskMessage);
-  if (!argv.lazy_build) {
-    const lazyBuildMessage =
+  if (!argv.eager_build) {
+    const eagerBuildMessage =
       green('⤷ Use ') +
-      cyan('--lazy_build ') +
-      green('to lazily build JS and extensions ') +
-      green('when requested from the server.');
-    log(lazyBuildMessage);
-  } else if (!argv.extensions && !argv.extensions_from) {
-    const extensionsMessage =
-      green('⤷ Use ') +
-      cyan('--extensions ') +
-      green('or ') +
-      cyan('--extensions_from ') +
-      green('to pre-build some extensions.');
-    log(extensionsMessage);
+      cyan('--eager_build ') +
+      green('to build JS and extensions after server startup.');
+    log(eagerBuildMessage);
   }
 }
 
 /**
- * Performs the build steps for gulp, gulp build, and gulp watch
+ * Performs the pre-requisite build steps for gulp, gulp build, and gulp watch
  * @param {boolean} watch
- * @param {boolean} defaultTask
  * @return {!Promise}
  */
-async function performBuild(watch, defaultTask) {
+async function performPrerequisiteSteps(watch) {
+  await compileCss(watch);
+  await compileJison();
+  await bootstrapThirdPartyFrames(watch);
+}
+
+/**
+ * Performs the build steps for gulp build and gulp watch
+ * @param {boolean} watch
+ * @return {!Promise}
+ */
+async function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
-  printConfigHelp(defaultTask ? 'gulp' : watch ? 'gulp watch' : 'gulp build');
-  if (defaultTask) {
-    printDefaultTaskHelp();
-  }
-  if (!argv.lazy_build) {
-    parseExtensionFlags();
-  }
-  await Promise.all([
-    compileCss(watch),
-    compileJison(),
-    bootstrapThirdPartyFrames(watch),
-  ]);
-  if (!defaultTask) {
-    await compileAllUnminifiedJs(watch);
-    await buildExtensions({watch});
-  }
+  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+  parseExtensionFlags();
+  await performPrerequisiteSteps(watch);
+  await compileAllUnminifiedJs(watch);
+  await buildExtensions({watch});
   if (isTravisBuild()) {
     // New line after all the compilation progress dots on Travis.
     console.log('\n');
@@ -118,15 +107,22 @@ async function performBuild(watch, defaultTask) {
 
 /**
  * The default task run when `gulp` is executed
+ * @return {!Promise}
  */
 async function defaultTask() {
-  await watch(/* defaultTask */ true);
+  maybeUpdatePackages();
+  createCtrlcHandler('gulp');
+  process.env.NODE_ENV = 'development';
+  printConfigHelp('gulp');
+  printDefaultTaskHelp();
+  parseExtensionFlags(/* preBuild */ !argv.eager_build);
+  await performPrerequisiteSteps(/* watch */ true);
   await serve();
-  if (argv.lazy_build) {
+  if (!argv.eager_build) {
     log(green('JS and extensions will be lazily built when requested...'));
   } else {
     log(green('Building JS and extensions...'));
-    await compileAllUnminifiedJs(watch);
+    await compileAllUnminifiedJs(/* watch */ true);
     await buildExtensions({watch: true});
   }
 }
@@ -156,10 +152,11 @@ watch.flags = {
   noextensions: '  Watches and builds with no extensions.',
 };
 
-defaultTask.description = 'Runs "watch" and then "serve"';
+defaultTask.description =
+  'Starts the dev server and lazily builds JS and extensions when requested';
 defaultTask.flags = {
-  lazy_build:
-    '  Lazily builds JS and extensions when they are requested from the server',
+  eager_build:
+    '  Starts the dev server and builds JS and extensions after server startup',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
