@@ -35,9 +35,11 @@ tags: {  # <amp-browsi>
   attrs: {
     name: "pub-key"
     value: "98569856"
+    mandatory: true
   }
   attrs: {
       name: "site-key"
       value: "demo"
+      mandatory: true
     }
 }
