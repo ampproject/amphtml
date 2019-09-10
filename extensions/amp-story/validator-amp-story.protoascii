@@ -42,10 +42,6 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
-    name: "no-parallax-fx",
-    value: ""
-  }
-  attrs: {
     name: "parallax-fx",
     value: ""
   }
