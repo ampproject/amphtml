@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, userAssert} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
 import {mapRange, sum} from '../../../src/utils/math';
 import {setImportantStyles, setStyles} from '../../../src/style';
@@ -104,28 +104,24 @@ export class ParallaxService {
     this.storyNearestScale_ = this.story_.getAttribute(NEAREST_SCALE_ATTR);
 
     this.init_();
-
-    userAssert(
-      this.win_.DeviceOrientationEvent,
-      "The current browser doesn't support the device motion/orientation events"
-    );
-
-    if (this.win_.DeviceOrientationEvent) {
-      listen(this.win_, 'deviceorientation', event => {
-        this.parallaxOrientationMutate_(event, this.parallaxPages_);
-      });
-    }
   }
 
   /**
    * Initializes the pages by giving them perspective and initializating their layers
    */
   init_() {
+    if (!this.win_.DeviceOrientationEvent) {
+      user().warn(
+        "The current browser doesn't support the device motion/orientation events"
+      );
+      return;
+    }
+
     this.vsync_.mutate(() => {
-      this.getPages()
+      this.getPages_()
         .filter(page => !page.hasAttribute(NO_PARALLAX_FX_ATTR))
         .forEach(page => {
-          const layers = this.getLayers(page);
+          const layers = this.getLayers_(page);
 
           // Set the page's perspective
           setStyles(page, {
@@ -161,6 +157,10 @@ export class ParallaxService {
           );
         });
     });
+
+    listen(this.win_, 'deviceorientation', event => {
+      this.parallaxOrientationMutate_(event, this.parallaxPages_);
+    });
   }
 
   /**
@@ -172,26 +172,24 @@ export class ParallaxService {
    * @param {number} nearestScale
    */
   initLayers_(layers, mode, layerSpacing, farthestScale, nearestScale) {
-    // Loop through the layers in the page and assign a z-index following
-    // DOM order (manual override will be added in the future)
-    let order = 1;
-
     const layerZIndexOffset =
       mode == ParallaxModes.DEPTH
-        ? layers.length
+        ? layers.length - 1
         : mode == ParallaxModes.CENTER
         ? layers.length / 2
         : 0;
 
-    layers.map(layer => {
+    // Loop through the layers in the page and assign a z-index following
+    // DOM order (manual override will be added in the future)
+    layers.forEach((layer, order) => {
       this.vsync_.mutate(() => {
         const translation = `translateZ(${(order - layerZIndexOffset) *
           layerSpacing *
           (PERSPECTIVE / 50)}px)`;
         const scale = `scale(${mapRange(
           order,
-          1,
-          layers.length,
+          0,
+          layers.length - 1,
           farthestScale,
           nearestScale
         )})`;
@@ -200,7 +198,6 @@ export class ParallaxService {
           overflow: 'visible',
           transform: `${translation} ${scale}`,
         });
-        order++;
       });
     });
   }
@@ -208,8 +205,9 @@ export class ParallaxService {
   /**
    * Discovers and returns all pages inside the story
    * @return {!Array<!Element>}
+   * @private
    */
-  getPages() {
+  getPages_() {
     return toArray(this.story_.querySelectorAll('amp-story-page')).map(page =>
       dev().assertElement(page)
     );
@@ -219,8 +217,9 @@ export class ParallaxService {
    * Discovers and returns all layers inside a page
    * @param {!Element} page
    * @return {!Array<!Element>}
+   * @private
    */
-  getLayers(page) {
+  getLayers_(page) {
     return toArray(page.querySelectorAll(`amp-story-grid-layer`)).map(layer =>
       dev().assertElement(layer)
     );
@@ -238,14 +237,9 @@ export class ParallaxService {
     const {screen} = window;
     let {gamma, beta} = event;
 
-    let angle;
-
     // Detect the implementation of orientation angle
-    if ('orientation' in screen) {
-      angle = screen.orientation.angle;
-    } else {
-      angle = window.orientation;
-    }
+    const angle =
+      'orientation' in screen ? screen.orientation.angle : screen.orientation;
 
     // Reverse gamma/beta if the device is in landscape
     if (window.orientation == 90 || window.orientation == -90) {
@@ -288,15 +282,15 @@ export class ParallaxService {
     mappedX = mapRange(mappedX, -75, 75, -25, 25);
     mappedY = mapRange(mappedY, -75, 75, -25, 25);
 
-    pages.forEach(page => {
-      if (page.shouldUpdate()) {
+    pages
+      .filter(page => page.shouldUpdate())
+      .forEach(page => {
         if (this.middleY_ != 0 && this.middleX_ != 0) {
           page.update(mappedX, mappedY);
         } else {
           page.update(this.middleX_, this.middleY_);
         }
-      }
-    });
+      });
   }
 }
 
