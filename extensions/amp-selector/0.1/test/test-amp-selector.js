@@ -868,6 +868,7 @@ describes.realWin(
           method: 'toggle',
           args,
           satisfiesTrust: () => true,
+          trust: 789,
         });
 
         expect(triggerSpy).to.be.calledOnce;
@@ -879,7 +880,7 @@ describes.realWin(
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
 
         const trust = triggerSpy.firstCall.args[3];
-        expect(trust).to.equal(ActionTrust.LOW);
+        expect(trust).to.equal(789);
       });
 
       it('should trigger "select" event for multiple selections', function*() {
@@ -941,6 +942,7 @@ describes.realWin(
           impl.executeAction({
             method: 'selectDown',
             satisfiesTrust: () => true,
+            trust: 789,
           });
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
@@ -954,7 +956,7 @@ describes.realWin(
           expect(event.detail).to.have.deep.property('selectedOptions', ['1']);
 
           const trust = triggerSpy.firstCall.args[3];
-          expect(trust).to.equal(ActionTrust.LOW);
+          expect(trust).to.equal(789);
         }
       );
 
@@ -978,7 +980,11 @@ describes.realWin(
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
-          impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
+          impl.executeAction({
+            method: 'selectUp',
+            satisfiesTrust: () => true,
+            trust: 789,
+          });
 
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[5].hasAttribute('selected')).to.be.true;
@@ -992,7 +998,7 @@ describes.realWin(
           expect(event.detail).to.have.deep.property('selectedOptions', ['5']);
 
           const trust = triggerSpy.firstCall.args[3];
-          expect(trust).to.equal(ActionTrust.LOW);
+          expect(trust).to.equal(789);
         }
       );
 

@@ -122,9 +122,9 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction(
       'selectUp',
       invocation => {
-        const {args} = invocation;
+        const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
-        this.select_(delta);
+        this.select_(delta, trust);
       },
       ActionTrust.LOW
     );
@@ -132,9 +132,9 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction(
       'selectDown',
       invocation => {
-        const {args} = invocation;
+        const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
-        this.select_(delta);
+        this.select_(delta, trust);
       },
       ActionTrust.LOW
     );
@@ -142,7 +142,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction(
       'toggle',
       invocation => {
-        const {args} = invocation;
+        const {args, trust} = invocation;
         userAssert(args['index'] >= 0, "'index' must be greater than 0");
         userAssert(
           args['index'] < this.elements_.length,
@@ -150,7 +150,7 @@ export class AmpSelector extends AMP.BaseElement {
             'be less than the length of options in the <amp-selector>'
         );
         if (args && args['index'] !== undefined) {
-          return this.toggle_(args['index'], args['value']);
+          return this.toggle_(args['index'], args['value'], trust);
         } else {
           return Promise.reject("'index' must be specified");
         }
@@ -400,18 +400,18 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles toggle action.
    * @param {number} index
-   * @param {boolean=} opt_value
+   * @param {boolean|undefined} value
+   * @param {!ActionTrust} trust
    * @return {!Promise}
    * @private
    */
-  toggle_(index, opt_value) {
+  toggle_(index, value, trust) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
     const el = this.elements_[index];
     const indexCurrentStatus = el.hasAttribute('selected');
-    const indexFinalStatus =
-      opt_value !== undefined ? opt_value : !indexCurrentStatus;
+    const indexFinalStatus = value !== undefined ? value : !indexCurrentStatus;
     const selectedIndex = this.elements_.indexOf(this.selectedElements_[0]);
 
     if (indexFinalStatus === indexCurrentStatus) {
@@ -429,8 +429,8 @@ export class AmpSelector extends AMP.BaseElement {
       } else {
         this.clearSelection_(el);
       }
-      // "toggle" action only requires "low" trust.
-      this.fireSelectEvent_(el, ActionTrust.LOW);
+      // Propagate the trust of the originating action.
+      this.fireSelectEvent_(el, trust);
     });
   }
 
@@ -458,9 +458,10 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles selectUp events.
    * @param {number} delta
+   * @param {!ActionTrust} trust
    * @private
    */
-  select_(delta) {
+  select_(delta, trust) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
@@ -481,8 +482,8 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     this.setInputs_();
-    // "selectUp" and "selectDown" actions only require "low" trust.
-    this.fireSelectEvent_(el, ActionTrust.LOW);
+    // Propagate the trust of the source action.
+    this.fireSelectEvent_(el, trust);
   }
 
   /**
