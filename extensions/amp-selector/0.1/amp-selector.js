@@ -363,7 +363,8 @@ export class AmpSelector extends AMP.BaseElement {
       }
       // Newly picked option should always have focus.
       this.updateFocus_(el);
-      this.fireSelectEvent_(el);
+      // User gesture trigger is "high" trust.
+      this.fireSelectEvent_(el, ActionTrust.HIGH);
     });
   }
 
@@ -428,8 +429,8 @@ export class AmpSelector extends AMP.BaseElement {
       } else {
         this.clearSelection_(el);
       }
-
-      this.fireSelectEvent_(el);
+      // "toggle" action only requires "low" trust.
+      this.fireSelectEvent_(el, ActionTrust.LOW);
     });
   }
 
@@ -438,9 +439,10 @@ export class AmpSelector extends AMP.BaseElement {
    * 'targetOption' - option value of the selected or deselected element.
    * 'selectedOptions' - array of option values of selected elements.
    * @param {!Element} el The element that was selected or deslected.
+   * @param {!ActionTrust} trust
    * @private
    */
-  fireSelectEvent_(el) {
+  fireSelectEvent_(el, trust) {
     const name = 'select';
     const selectEvent = createCustomEvent(
       this.win,
@@ -450,7 +452,7 @@ export class AmpSelector extends AMP.BaseElement {
         'selectedOptions': this.selectedOptions_(),
       })
     );
-    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
+    this.action_.trigger(this.element, name, selectEvent, trust);
   }
 
   /**
@@ -479,7 +481,8 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     this.setInputs_();
-    this.fireSelectEvent_(el);
+    // "selectUp" and "selectDown" actions only require "low" trust.
+    this.fireSelectEvent_(el, ActionTrust.LOW);
   }
 
   /**
