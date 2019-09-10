@@ -22,15 +22,22 @@ tags: {  # amp-browsi
     version: "0.1"
     version: "latest"
   }
-  attr_lists: "pub-id"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-browsi>
   html_format: AMP
   tag_name: "AMP-BROWSI"
   requires_extension: "amp-browsi"
-  attr_lists: "pub-id"
-  # spec_url: "https://amp.dev/documentation/components/amp-browsi"
+  spec_url: "https://amp.dev/documentation/components/amp-browsi"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
+  attrs: {
+    name: "pub-key"
+    value: "98569856"
+  }
+  attrs: {
+      name: "site-key"
+      value: "demo"
+    }
 }
