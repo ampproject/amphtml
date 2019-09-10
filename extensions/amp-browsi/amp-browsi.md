@@ -63,7 +63,7 @@ service which will return a targeting object that will be sent to the adServer.
 
 <table>
   <tr>
-    <td width="40%"><strong>pub-id</strong></td>
+    <td width="40%"><strong>pub-key</strong></td>
     <td>The `pub-key` attribute identify the publisher's id so Browsi could return the correct prediction</td>
   </tr>
   <tr>
