@@ -88,6 +88,15 @@ class FunctionalTestController {
   async getTitle() {}
 
   /**
+   * Select the given window.
+   * {@link https://www.w3.org/TR/webdriver1/#dfn-switch-to-window}
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise}
+   */
+  async switchToWindow(unusedHandle) {}
+
+  /**
    * Selects the current top-level browsing context or a child browsing context
    * of the current browsing context to use as the current browsing context for
    * subsequent commands.
@@ -314,6 +323,15 @@ class FunctionalTestController {
    * @return {!ControllerPromise<boolean>}
    */
   async isElementEnabled(unusedHandle) {}
+
+  /**
+   * Return an array of handles consisting of all windows in the browser
+   * session.
+   * {@link https://www.w3.org/TR/webdriver1/#get-window-handles}
+   *
+   * @return {!Promise<!ElementHandle>}
+   */
+  async getAllWindows() {}
 
   /**
    * The Set Window Rect command alters the size and the position of the
