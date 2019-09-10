@@ -33,6 +33,7 @@ import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
@@ -67,6 +68,7 @@ const Phase = {
 export const StorageLocation = {
   LOCAL: 0,
   SESSION: 1,
+  AMP_STATE: 2,
 };
 
 export class AmpScript extends AMP.BaseElement {
@@ -159,7 +161,7 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-      sanitizer: new SanitizerImpl(this.win, sandboxTokens),
+      sanitizer: new SanitizerImpl(this.win, this.element, sandboxTokens),
       // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
@@ -424,11 +426,15 @@ const FORM_ELEMENTS = [
 export class SanitizerImpl {
   /**
    * @param {!Window} win
+   * @param {!AmpScript} element
    * @param {!Array<string>} sandboxTokens
    */
-  constructor(win, sandboxTokens) {
+  constructor(win, element, sandboxTokens) {
     /** @private @const {!Window} */
     this.win_ = win;
+
+    /** @private @const {!AmpScript} */
+    this.element_ = element;
 
     /** @private @const {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
@@ -475,7 +481,7 @@ export class SanitizerImpl {
    * @param {string|null} value
    * @return {boolean}
    */
-  changeAttribute(node, attribute, value) {
+  setAttribute(node, attribute, value) {
     // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
     // so an amp-img can update its child img when [src] is changed.
 
@@ -529,7 +535,7 @@ export class SanitizerImpl {
    * @param {string} value
    * @return {boolean}
    */
-  changeProperty(node, property, value) {
+  setProperty(node, property, value) {
     const prop = property.toLowerCase();
 
     // worker-dom's supported properties and corresponding attribute name
@@ -543,9 +549,17 @@ export class SanitizerImpl {
 
   /**
    * @param {!StorageLocation} location
+   * @param {string} opt_key
    * @return {?Object}
    */
-  getStorage(location) {
+  getStorage(location, opt_key) {
+    if (location === StorageLocation.AMP_STATE) {
+      return Services.bindForDocOrNull(this.element_).then(bind => {
+        if (bind) {
+          return bind.getStateValue(opt_key || '.');
+        }
+      });
+    }
     // Note that filtering out amp-* keys will affect the predictability of
     // Storage.key(). We could preserve indices by adding empty entries but
     // that might be even more confusing.
@@ -565,7 +579,19 @@ export class SanitizerImpl {
    * @param {?string} key
    * @param {?string} value
    */
-  changeStorage(location, key, value) {
+  setStorage(location, key, value) {
+    if (location === StorageLocation.AMP_STATE) {
+      Services.bindForDocOrNull(this.element_).then(bind => {
+        if (bind) {
+          const state = tryParseJson(value, () => {
+            dev().error(TAG, 'Invalid AMP.setState() argument: %s', value);
+          });
+          if (state) {
+            bind.setState(state, /* skipEval */ true, /* skipAmpState */ false);
+          }
+        }
+      });
+    }
     const storage = this.storageFor_(location);
     if (key === null) {
       if (value === null) {
