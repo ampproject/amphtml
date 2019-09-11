@@ -558,7 +558,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     const filteredData = data.filter(item => {
       if (typeof item === 'object') {
-        item = getValueForExpr(/** @type {!JsonObject} */ (item), itemsExpr);
+        item = getValueForExpr(item, itemsExpr);
       }
       userAssert(
         typeof item === 'string',

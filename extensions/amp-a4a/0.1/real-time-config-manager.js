@@ -604,7 +604,13 @@ export class RealTimeConfigManager {
     }
     rtcConfig['timeoutMillis'] =
       timeout !== undefined ? timeout : defaultTimeoutMillis;
-    this.rtcConfig_ = /** @type {RtcConfigDef} */ (rtcConfig);
+    this.rtcConfig_ = {
+      errorReportingUrl: rtcConfig['errorReportingUrl'],
+      sendRegardlessOfConsentState: rtcConfig['sendRegardlessOfConsentState'],
+      timeoutMillis: rtcConfig['timeoutMillis'],
+      urls: rtcConfig['urls'],
+      vendors: rtcConfig['vendors'],
+    };
     return true;
   }
 }

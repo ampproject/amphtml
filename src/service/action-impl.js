@@ -837,7 +837,7 @@ export class ActionService {
    * @private
    */
   addTargetPropertiesAsDetail_(event) {
-    const detail = /** @type {!JsonObject} */ (map());
+    const detail = dict();
     const {target} = event;
 
     if (target.value !== undefined) {

@@ -19,6 +19,7 @@ import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
+import {jsonObjectAssign} from '../../../src/utils/object';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:config';
@@ -86,11 +87,11 @@ export class StoryAdConfig {
       }
     }
 
-    return /** @type {!JsonObject} */ (Object.assign(
+    return jsonObjectAssign(
       {},
       adAttributes,
       requiredAttrs
-    ));
+    );
   }
 
   /**

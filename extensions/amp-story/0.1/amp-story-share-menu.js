@@ -56,7 +56,7 @@ const TEMPLATE = {
  */
 const AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE = {
   tag: 'amp-social-share',
-  attrs: /** @type {!JsonObject} */ (dict({'type': 'system'})),
+  attrs: dict({'type': 'system'}),
 };
 
 /**

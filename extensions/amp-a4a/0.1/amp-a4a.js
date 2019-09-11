@@ -39,7 +39,7 @@ import {
   duplicateErrorIfNecessary,
   user,
 } from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
@@ -1542,13 +1542,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   iframeRenderHelper_(attributes) {
-    const mergedAttributes = Object.assign(
+    const mergedAttributes = dict(Object.assign(
       attributes,
       dict({
         'height': this.creativeSize_.height,
         'width': this.creativeSize_.width,
       })
-    );
+    ));
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
@@ -1560,10 +1560,10 @@ export class AmpA4A extends AMP.BaseElement {
     this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
       /** @type {!Document} */ (this.element.ownerDocument),
       'iframe',
-      /** @type {!JsonObject} */ (Object.assign(
+      jsonObjectAssign(
         mergedAttributes,
         SHARED_IFRAME_PROPERTIES
-      ))
+      )
     ));
     if (this.sandboxHTMLCreativeFrame()) {
       applySandbox(this.iframe);
@@ -1846,10 +1846,10 @@ export class AmpA4A extends AMP.BaseElement {
     const analyticsEvent = devAssert(
       LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]
     );
-    const analyticsVars = /** @type {!JsonObject} */ (Object.assign(
+    const analyticsVars = jsonObjectAssign(
       dict({'time': Math.round(this.getNow_())}),
       this.getA4aAnalyticsVars(analyticsEvent)
-    ));
+    );
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 

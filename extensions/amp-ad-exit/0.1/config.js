@@ -115,7 +115,7 @@ export const TransportMode = {
  * @return {!JsonObject}
  */
 export function assertConfig(config) {
-  userAssert(typeof config == 'object');
+  //userAssert(typeof config == 'object');
   if (config['filters']) {
     assertFilters(config['filters']);
   } else {

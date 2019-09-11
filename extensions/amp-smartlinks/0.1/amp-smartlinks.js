@@ -193,7 +193,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   buildPageImpressionPayload_() {
-    return /** @type {!JsonObject} */ (dict({
+    return dict({
       'events': [{'is_amp': true}],
       'organization_id': this.linkmateOptions_.publisherID,
       'organization_type': 'publisher',
@@ -203,7 +203,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
         'previous_url': this.referrer_,
         'user_agent': this.ampDoc_.win.navigator.userAgent,
       },
-    }));
+    });
   }
 
   /**

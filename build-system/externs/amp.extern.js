@@ -893,3 +893,13 @@ class FeaturePolicy {
  * @type {?FeaturePolicy}
  */
 HTMLIFrameElement.prototype.featurePolicy;
+
+
+/**
+ * @typedef {{stackIndex: HistoryIdDef, title: string, fragment: string, data: (!JsonObject|undefined)}}
+ */
+let HistoryStateDef;
+
+/**
+ * @typedef {{title: (string|undefined), fragment: (string|undefined), url: (string|undefined), canonicalUrl: (string|undefined), data: (!JsonObject|undefined)}}
+ */

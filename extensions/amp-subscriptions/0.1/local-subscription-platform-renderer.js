@@ -105,7 +105,7 @@ export class LocalSubscriptionPlatformRenderer {
           return this.templates_
             .renderTemplate(candidate, authResponse)
             .then(element => {
-              const renderState = /** @type {!JsonObject} */ (authResponse);
+              const renderState = authResponse;
               return this.renderActionsInNode_(
                 renderState,
                 element,

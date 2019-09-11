@@ -975,9 +975,7 @@ export class BaseElement {
    * - Must be called inside a mutate context.
    * - Boolean attributes have a value of `true` and `false` when
    *       present and missing, respectively.
-   * @param {
-   *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
-   * } unusedMutations
+   * @param {!JsonObject<string, (null|boolean|string|number|Array|Object)>} unusedMutations
    */
   mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.

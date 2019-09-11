@@ -114,10 +114,10 @@ export class ConsentConfig {
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
-      /** @type {!JsonObject} */ (userAssert(
+      userAssert(
         this.getInlineConfig_(),
         '%s: Inline config not found'
-      ))
+      )
     );
 
     const cmpConfig = this.getCMPConfig_();

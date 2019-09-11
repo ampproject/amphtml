@@ -131,7 +131,7 @@ class AmpMowplayer extends AMP.BaseElement {
     });
     const src = addParamsToUrl(
       'https://cdn.mowplayer.com/player.html',
-      /** @type {!JsonObject} */ (params)
+      params
     );
 
     return (this.videoIframeSrc_ = src);

@@ -554,10 +554,10 @@ export class AmpConsent extends AMP.BaseElement {
   initPromptUI_(isConsentRequired) {
     this.consentUI_ = new ConsentUI(
       this,
-      /** @type {!JsonObject} */ (devAssert(
+      devAssert(
         this.consentConfig_,
         'consent config not found'
-      ))
+      )
     );
 
     // Get current consent state
