@@ -76,10 +76,10 @@ function createAdsAndEmbed(siteId, embedId) {
   });
 
   // load ads code
-  var b = c.createElement(s);
+  const b = c.createElement(s);
   b.src = u;
   b.async = !0;
-  var d = c.getElementsByTagName(s)[0];
+  const d = c.getElementsByTagName(s)[0];
   d.parentNode.insertBefore(b, d);
 
   // execute functions of insticator object on the window (load ads and embed)
