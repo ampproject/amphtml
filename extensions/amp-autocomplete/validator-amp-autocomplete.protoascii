@@ -140,7 +140,6 @@ tags: {
   }
   attrs: {
     name: "value"
-    value: ""
   }
   spec_url: "https://amp.dev/documentation/components/amp-autocomplete"
 }
