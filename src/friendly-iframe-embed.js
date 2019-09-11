@@ -889,6 +889,8 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenList(childWin);
+  console /*OK*/
+    .log('getMode().test', getMode().test);
   if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
     installCustomElements(childWin);
   } else {

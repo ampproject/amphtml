@@ -27,6 +27,7 @@ import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
 import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {dev, user} from '../../../../../src/log';
+import {getMode} from '../../../../../src/mode';
 import {toArray} from '../../../../../src/types';
 
 /**
@@ -180,6 +181,12 @@ describe
           fieBody = env.embed.getBodyElement();
 
           hostWindow = env.ampdoc.win;
+        });
+
+        it('should enable test mode when running on Travis', () => {
+          console /*OK*/
+            .log('checking getMode().test');
+          expect(getMode().test).to.be.true;
         });
 
         it('should scan for bindings when ampdoc is ready', () => {
