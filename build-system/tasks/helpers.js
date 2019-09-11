@@ -71,11 +71,10 @@ const EXTENSION_BUNDLE_MAP = {
  */
 const UNMINIFIED_TARGETS = [
   'amp.js',
-  'amp-esm.js',
-  'amp-shadow.js',
   'amp-inabox.js',
   'alp.max.js',
-  'integration.js',
+  'amp-shadow.js',
+  'amp-esm.js',
 ];
 
 /**
@@ -83,10 +82,9 @@ const UNMINIFIED_TARGETS = [
  */
 const MINIFIED_TARGETS = [
   'v0.js',
-  'shadow-v0.js',
   'amp4ads-v0.js',
   'alp.js',
-  'f.js',
+  'shadow-v0.js',
 ];
 
 /**
