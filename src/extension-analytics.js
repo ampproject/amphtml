@@ -93,7 +93,7 @@ class CustomEventReporter {
     /** @private {!AmpElement} */
     this.parent_ = parent;
 
-    /** @private {JsonObject} */
+    /** @private {?JsonObject} */
     this.config_ = config;
 
     for (const event in config['triggers']) {
@@ -209,7 +209,7 @@ export class CustomEventReporterBuilder {
     devAssert(this.config_, 'CustomEventReporter already built');
     const report = new CustomEventReporter(
       this.parent_,
-      /** @type {!JsonObject} */ (this.config_)
+      this.config_
     );
     this.config_ = null;
     return report;

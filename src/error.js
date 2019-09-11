@@ -511,7 +511,7 @@ export function getErrorReportData(
   // https://github.com/ampproject/error-tracker
   // It stores error reports via https://cloud.google.com/error-reporting/
   // for analyzing production issues.
-  const data = /** @type {!JsonObject} */ (Object.create(null));
+  const data = dict();
   data['v'] = getMode().rtvVersion;
   data['noAmp'] = hasNonAmpJs ? '1' : '0';
   data['m'] = message.replace(USER_ERROR_SENTINEL, '');

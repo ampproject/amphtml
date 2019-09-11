@@ -127,9 +127,30 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
     this.locale_ = this.element.getAttribute('locale') || DEFAULT_LOCALE;
 
-    const data = /** @type {!JsonObject} */ (this.getDataForTemplate_());
+    const data = this.getDataForTemplate_();
     this.templates_
-      .findAndRenderTemplate(this.element, data)
+      .findAndRenderTemplate(this.element, dict({
+        'year': data.year,
+        'month': data.month,
+        'monthName': data.monthName,
+        'monthNameShort': data.monthNameShort,
+        'day': data.day,
+        'dayName': data.dayName,
+        'dayNameShort': data.dayNameShort,
+        'hour': data.hour,
+        'minute': data.minute,
+        'second': data.second,
+        'iso': data.iso,
+        'yearTwoDigit': data.yearTwoDigit,
+        'monthTwoDigit': data.monthTwoDigit,
+        'dayTwoDigit': data.dayTwoDigit,
+        'hourTwoDigit': data.hourTwoDigit,
+        'hour12': data.hour12,
+        'hour12TwoDigit': data.hour12TwoDigit,
+        'minuteTwoDigit': data.minuteTwoDigit,
+        'secondTwoDigit': data.secondTwoDigit,
+        'dayPeriod': data.dayPeriod,
+      }))
       .then(this.boundRendered_);
   }
 

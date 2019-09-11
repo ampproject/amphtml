@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-access-laterpay-0.2.css';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {listen} from '../../../src/event-helper';
@@ -48,15 +48,16 @@ const CONFIG_BASE_PATH =
   '&return_url=RETURN_URL';
 const AUTHORIZATION_TIMEOUT = 3000;
 
-const DEFAULT_MESSAGES = {
-  payLaterButton: 'Buy Now, Pay Later',
-  payNowButton: 'Buy Now',
-  defaultButton: 'Buy Now',
-  alreadyPurchasedLink: 'I already bought this',
-  sandbox: 'Site in test mode. No payment required.',
-  laterpayBadgePrefix: 'Powered by ',
-  laterpayBadgeSuffix: '',
-};
+/** @type {!JsonObject} */
+const DEFAULT_MESSAGES = dict({
+  'payLaterButton': 'Buy Now, Pay Later',
+  'payNowButton': 'Buy Now',
+  'defaultButton': 'Buy Now',
+  'alreadyPurchasedLink': 'I already bought this',
+  'sandbox': 'Site in test mode. No payment required.',
+  'laterpayBadgePrefix': 'Powered by ',
+  'laterpayBadgeSuffix': '',
+});
 
 /**
  * @typedef {{
@@ -170,11 +171,11 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (Object.assign(
+    this.i18n_ = jsonObjectAssign(
       dict(),
       DEFAULT_MESSAGES,
       this.laterpayConfig_['localeMessages'] || dict()
-    ));
+    );
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;

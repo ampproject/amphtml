@@ -702,10 +702,10 @@ export class Services {
    * Returns a promise for the geo service or a promise for null if
    * the service is not available on the current page.
    * @param {!Element|!ShadowRoot} element
-   * @return {!Promise<?../extensions/amp-geo/0.1/amp-geo.GeoDef>}
+   * @return {!Promise<?GeoDef>}
    */
   static geoForDocOrNull(element) {
-    return /** @type {!Promise<?../extensions/amp-geo/0.1/amp-geo.GeoDef>} */ (getElementServiceIfAvailableForDoc(
+    return /** @type {!Promise<?GeoDef>} */ (getElementServiceIfAvailableForDoc(
       element,
       'geo',
       'amp-geo',

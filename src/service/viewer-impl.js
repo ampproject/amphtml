@@ -20,6 +20,7 @@ import {Services} from '../services';
 import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
 import {dev, devAssert, duplicateErrorIfNecessary} from '../log';
+import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -30,7 +31,6 @@ import {
   serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
-import {dict} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {startsWith} from '../string';
@@ -375,8 +375,7 @@ export class ViewerImpl {
       this.win.history.replaceState(
         {},
         '',
-        '#' +
-        serializeQueryString(this.hashParams_)
+        '#' + serializeQueryString(this.hashParams_)
       );
     }
   }

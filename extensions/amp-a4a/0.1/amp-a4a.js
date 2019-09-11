@@ -114,7 +114,7 @@ export const XORIGIN_MODE = {
   IFRAME_GET: 'iframe_get',
 };
 
-/** @type {!Object} @private */
+/** @type {!JsonObject} */
 const SHARED_IFRAME_PROPERTIES = dict({
   'frameborder': '0',
   'allowfullscreen': '',

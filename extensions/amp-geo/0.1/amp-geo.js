@@ -54,6 +54,7 @@ import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
+import {dict} from '../../../src/utils/object';
 
 /** @const */
 const TAG = 'amp-geo';
@@ -81,16 +82,6 @@ const mode = {
   GEO_PRERENDER: 1, // We've been prerendered by an AMP Cache or publisher CMS
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
 };
-
-/**
- * @typedef {{
- *   ISOCountry: string,
- *   matchedISOCountryGroups: !Array<string>,
- *   allISOCountryGroups: !Array<string>,
- *   isInCountryGroup: (function(string):GEO_IN_GROUP),
- * }}
- */
-export let GeoDef;
 
 export class AmpGeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -211,7 +202,7 @@ export class AmpGeo extends AMP.BaseElement {
 
   /**
    * Find matching country groups
-   * @param {Object} config
+   * @param {!JsonObject} config
    */
   matchCountryGroups_(config) {
     // ISOCountryGroups are optional but if specified at least one must exist
@@ -296,8 +287,8 @@ export class AmpGeo extends AMP.BaseElement {
    */
   addToBody_(config) {
     const ampdoc = this.getAmpDoc();
-    /** @type {Object} */
-    const states = {};
+    /** @type {!JsonObject} */
+    const states = dict();
     const self = this;
 
     // Wait for the body before we figure anything out because we might be
@@ -317,7 +308,7 @@ export class AmpGeo extends AMP.BaseElement {
           // Intentionally fall through.
           case mode.GEO_HOT_PATCH:
             // Build the AMP State, add classes
-            states.ISOCountry = self.country_;
+            states['ISOCountry'] = self.country_;
 
             const classesToAdd = self.matchedGroups_.map(group => {
               states[group] = true;
@@ -332,7 +323,7 @@ export class AmpGeo extends AMP.BaseElement {
               classesToAdd.push('amp-geo-error');
             }
 
-            states.ISOCountryGroups = self.matchedGroups_;
+            states['ISOCountryGroups'] = self.matchedGroups_;
             classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
             // Let the runtime know we're mutating the AMP body

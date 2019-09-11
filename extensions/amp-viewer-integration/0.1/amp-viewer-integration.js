@@ -215,7 +215,7 @@ export class AmpViewerIntegration {
     messaging.setDefaultHandler((type, payload, awaitResponse) => {
       return viewer.receiveMessage(
         type,
-        dict(payload),
+        /** @type {!JsonObject} */ (payload),
         awaitResponse
       );
     });

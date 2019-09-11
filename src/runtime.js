@@ -35,6 +35,7 @@ import {
   waitForBodyOpenPromise,
 } from './dom';
 import {config} from './config';
+import {dict} from './utils/object';
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -796,7 +797,7 @@ export class MultidocManager {
       this.timer_.delay(() => {
         viewer.receiveMessage(
           'broadcast',
-          /** @type {!JsonObject} */ (data),
+          dict(data),
           /* awaitResponse */ false
         );
       }, 0);

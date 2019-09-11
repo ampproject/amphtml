@@ -896,10 +896,11 @@ HTMLIFrameElement.prototype.featurePolicy;
 
 
 /**
- * @typedef {{stackIndex: HistoryIdDef, title: string, fragment: string, data: (!JsonObject|undefined)}}
+ * @typedef {{
+ *   ISOCountry: string,
+ *   matchedISOCountryGroups: !Array<string>,
+ *   allISOCountryGroups: !Array<string>,
+ *   isInCountryGroup: (function(string): number),
+ * }}
  */
-let HistoryStateDef;
-
-/**
- * @typedef {{title: (string|undefined), fragment: (string|undefined), url: (string|undefined), canonicalUrl: (string|undefined), data: (!JsonObject|undefined)}}
- */
+let GeoDef;
