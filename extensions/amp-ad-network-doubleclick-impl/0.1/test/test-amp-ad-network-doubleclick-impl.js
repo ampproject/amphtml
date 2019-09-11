@@ -624,6 +624,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('returns the right URL', () => {
+      const viewer = Services.viewerForDoc(element);
+      // inabox-viewer.getReferrerUrl() returns Promise<string>.
+      sandbox
+        .stub(viewer, 'getReferrerUrl')
+        .returns(Promise.resolve('http://fake.example/?foo=bar'));
+
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       const impl2 = new AmpAdNetworkDoubleclickImpl(element);
       impl.setPageviewStateToken('abc');
@@ -664,7 +670,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)eid=([^&]+%2C)*12345678(%2C[^&]+)*(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
-          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
+          /(\?|&)ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/,
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
           /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
