@@ -268,7 +268,7 @@ class DenakopNetworkConfig {
         'w': window.screen.width,
         'h': window.screen.height,
       },
-      4096
+      /* maxLength */ 4096
     );
   }
 
