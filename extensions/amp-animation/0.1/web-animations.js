@@ -151,7 +151,7 @@ export class Builder {
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {!../../../src/service/owners-impl.OwnersDef} owners
+   * @param {!../../../src/service/owners-interface.OwnersInterface} owners
    */
   constructor(win, rootNode, baseUrl, vsync, owners) {
     /** @const @private */

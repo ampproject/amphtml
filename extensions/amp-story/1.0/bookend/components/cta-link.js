@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
@@ -81,7 +85,7 @@ export class CtaLinkComponent {
   }
 
   /** @override */
-  buildElement(ctaLinksData, doc) {
+  buildElement(ctaLinksData, doc, data) {
     const html = htmlFor(doc);
     const container = html`
       <div
@@ -105,6 +109,11 @@ export class CtaLinkComponent {
 
       const refs = htmlRefs(el);
       refs['linkText'].textContent = currentLink['text'];
+
+      el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+        position: data.position,
+        type: BOOKEND_COMPONENT_TYPES.CTA_LINK,
+      };
 
       container.appendChild(el);
     });

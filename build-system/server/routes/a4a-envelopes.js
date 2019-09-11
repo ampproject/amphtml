@@ -18,8 +18,7 @@ const app = require('express').Router();
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 const request = require('request');
-const {replaceUrls} = require('../app-utils');
-const {SERVE_MODE} = process.env;
+const {getServeMode, replaceUrls} = require('../app-utils');
 
 // In-a-box envelope.
 // Examples:
@@ -78,7 +77,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
     const content = fillTemplate(template, url.href, req.query)
       .replace(/CHECKSIG/g, force3p || '')
       .replace(/DISABLE3PFALLBACK/g, !force3p);
-    res.end(replaceUrls(SERVE_MODE, content));
+    res.end(replaceUrls(getServeMode(), content));
   });
 });
 
