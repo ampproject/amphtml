@@ -118,14 +118,13 @@ export class AmpGeo extends AMP.BaseElement {
       );
     }
 
-    const config = children.length
-      ? tryParseJson(children[0].textContent, () =>
-          this.assertWithErrorReturn_(false, `${TAG} Unable to parse JSON`)
-        )
-      : {};
+    const config = children.length ?
+      tryParseJson(children[0].textContent, () => {
+        this.assertWithErrorReturn_(false, `${TAG} Unable to parse JSON`);
+      }) : dict();
 
     /** @type {!Promise<!GeoDef>} */
-    const geo = this.addToBody_(config || {});
+    const geo = this.addToBody_(config || dict());
 
     /* resolve the service promise singleton we stashed earlier */
     geoDeferred.resolve(geo);
@@ -281,7 +280,7 @@ export class AmpGeo extends AMP.BaseElement {
 
   /**
    * Adds the given country groups to HTML element as classes
-   * @param {Object} config
+   * @param {!JsonObject} config
    * @return {!Promise<!GeoDef>} service response
    * @private
    */
@@ -289,7 +288,6 @@ export class AmpGeo extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     /** @type {!JsonObject} */
     const states = dict();
-    const self = this;
 
     // Wait for the body before we figure anything out because we might be
     // prerendered and we know that from body classes
@@ -297,39 +295,39 @@ export class AmpGeo extends AMP.BaseElement {
       .whenReady()
       .then(() => ampdoc.waitForBodyOpen())
       .then(body => {
-        self.findCountry_(ampdoc);
-        self.matchCountryGroups_(config);
+        this.findCountry_(ampdoc);
+        this.matchCountryGroups_(config);
 
         let classesToRemove = [];
 
-        switch (self.mode_) {
+        switch (this.mode_) {
           case mode.GEO_OVERRIDE:
-            classesToRemove = self.clearPreRender_(body);
+            classesToRemove = this.clearPreRender_(body);
           // Intentionally fall through.
           case mode.GEO_HOT_PATCH:
             // Build the AMP State, add classes
-            states['ISOCountry'] = self.country_;
+            states['ISOCountry'] = this.country_;
 
-            const classesToAdd = self.matchedGroups_.map(group => {
+            const classesToAdd = this.matchedGroups_.map(group => {
               states[group] = true;
               return GROUP_PREFIX + group;
             });
 
-            if (!self.matchedGroups_.length) {
+            if (!this.matchedGroups_.length) {
               classesToAdd.push('amp-geo-no-group');
             }
 
-            if (self.error_) {
+            if (this.error_) {
               classesToAdd.push('amp-geo-error');
             }
 
-            states['ISOCountryGroups'] = self.matchedGroups_;
+            states['ISOCountryGroups'] = this.matchedGroups_;
             classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
             // Let the runtime know we're mutating the AMP body
             // Actual change happens in callback so runtime can
             // optimize dom mutations.
-            self.mutateElement(() => {
+            this.mutateElement(() => {
               const {classList} = body;
               // Always remove the pending class
               classesToRemove.push('amp-geo-pending');
@@ -365,8 +363,8 @@ export class AmpGeo extends AMP.BaseElement {
         }
 
         return {
-          ISOCountry: self.country_,
-          matchedISOCountryGroups: self.matchedGroups_,
+          ISOCountry: this.country_,
+          matchedISOCountryGroups: this.matchedGroups_,
           allISOCountryGroups: this.definedGroups_,
           /* API */
           isInCountryGroup: this.isInCountryGroup.bind(this),

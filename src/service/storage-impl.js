@@ -198,7 +198,7 @@ export class Store {
    */
   constructor(obj, opt_maxValues) {
     /** @const {!JsonObject} */
-    this.obj = recreateNonProtoObject(obj);
+    this.obj = /** @type {!JsonObject} */ (recreateNonProtoObject(obj));
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;

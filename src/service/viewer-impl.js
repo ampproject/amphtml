@@ -375,7 +375,8 @@ export class ViewerImpl {
       this.win.history.replaceState(
         {},
         '',
-        '#' + serializeQueryString(this.hashParams_)
+        '#' +
+          serializeQueryString(/** @type {!JsonObject} */ (this.hashParams_))
       );
     }
   }

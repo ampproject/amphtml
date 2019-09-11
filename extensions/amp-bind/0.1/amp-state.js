@@ -238,7 +238,7 @@ export class AmpState extends AMP.BaseElement {
     const id = userAssert(this.element.id, '<amp-state> must have an id.');
     return Services.bindForDocOrNull(this.element).then(bind => {
       devAssert(bind);
-      const state = /** @type {!JsonObject} */ (map());
+      const state = dict();
       state[id] = json;
       // As a rule, initialization should skip evaluation.
       // If we're not initializing then this must be a mutation, so we must

@@ -85,11 +85,11 @@ export function ownProperty(obj, key) {
  *
  * @param {!Object} target
  * @param {!Object} source
- * @param {number} depth The maximum merge depth. If exceeded, Object.assign
+ * @param {number=} depth the maximum merge depth. if exceeded, object.assign
  *                       will be used instead.
  * @return {!Object}
- * @throws {Error} If source contains a circular reference.
- * Note: Only nested objects are deep-merged, primitives and arrays are not.
+ * @throws {error} if source contains a circular reference.
+ * note: only nested objects are deep-merged, primitives and arrays are not.
  */
 export function deepMerge(target, source, depth = 10) {
   // Keep track of seen objects to detect recursive references.
@@ -144,6 +144,7 @@ export function omit(o, props) {
   }, {});
 }
 
+
 /**
  * @param {!JsonObject} target
  * @param {...(!JsonObject|null|undefined)} var_args
@@ -151,4 +152,17 @@ export function omit(o, props) {
  */
 export function jsonObjectAssign(target, var_args) {
   return /** @type {!JsonObject} */ (Object.assign.apply(null, arguments));
+}
+
+/**
+ * @param {!JsonObject} target
+ * @param {!JsonObject} source
+ * @param {number} depth the maximum merge depth. if exceeded, object.assign
+ *                       will be used instead.
+ * @return {!JsonObject}
+ * @throws {error} if source contains a circular reference.
+ * Note: only nested objects are deep-merged, primitives and arrays are not.
+ */
+export function jsonObjectDeepMerge(target, source, depth) {
+  return /** @type {!JsonObject} */ (deepMerge(target, source, depth));
 }

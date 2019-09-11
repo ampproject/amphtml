@@ -18,7 +18,7 @@ import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
@@ -218,13 +218,12 @@ export class VariableService {
    * @return {!JsonObject} contains all registered macros
    */
   getMacros(element) {
-    const elementMacros = {
+    const elementMacros = dict({
       'COOKIE': name =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
-    };
-    const merged = Object.assign({}, this.macros_, elementMacros);
-    return /** @type {!JsonObject} */ (merged);
+    });
+    return jsonObjectAssign(dict(), this.macros_, elementMacros);
   }
 
   /**

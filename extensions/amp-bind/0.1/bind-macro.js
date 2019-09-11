@@ -15,6 +15,7 @@
  */
 
 import {BindExpression} from './bind-expression';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 
 /**
  * A single parsed Bind macro.
@@ -42,7 +43,7 @@ export class BindMacro {
    * @return {BindExpressionResultDef}
    */
   evaluate(scope, args) {
-    const copy = /** @type {!JsonObject} */ (Object.assign({}, scope));
+    const copy = jsonObjectAssign(dict(), scope);
     for (let i = 0; i < this.argumentNames_.length; i++) {
       copy[this.argumentNames_[i]] = args[i];
     }

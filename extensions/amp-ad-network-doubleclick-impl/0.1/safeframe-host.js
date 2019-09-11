@@ -323,10 +323,10 @@ export class SafeframeHostApi {
     this.channel = channel;
     this.setupGeom_();
     this.sendMessage_(
-      {
+      dict({
         'message': 'connect',
         'c': this.channel,
-      },
+      }),
       ''
     );
   }
@@ -369,10 +369,10 @@ export class SafeframeHostApi {
         this.checkStillCurrent_();
         const formattedGeom = this.formatGeom_(iframeBox);
         this.sendMessage_(
-          {
-            newGeometry: formattedGeom,
-            uid: this.uid_,
-          },
+          dict({
+            'newGeometry': formattedGeom,
+            'uid': this.uid_,
+          }),
           SERVICE.GEOMETRY_UPDATE
         );
       })
@@ -447,7 +447,7 @@ export class SafeframeHostApi {
 
   /**
    * Handles serializing and sending messages to the safeframe.
-   * @param {!Object} payload
+   * @param {!JsonObject} payload
    * @param {string} serviceName
    * @private
    */
@@ -662,16 +662,16 @@ export class SafeframeHostApi {
         this.checkStillCurrent_();
         const formattedGeom = this.formatGeom_(iframeBox);
         this.sendMessage_(
-          {
-            uid: this.uid_,
-            success,
-            newGeometry: formattedGeom,
+          dict({
+            'uid': this.uid_,
+            'success': success,
+            'newGeometry': formattedGeom,
             'expand_t': this.currentGeometry_['allowedExpansion_t'],
             'expand_b': this.currentGeometry_['allowedExpansion_b'],
             'expand_r': this.currentGeometry_['allowedExpansion_r'],
             'expand_l': this.currentGeometry_['allowedExpansion_l'],
-            push: true,
-          },
+            'push': true,
+          }),
           messageType
         );
       })

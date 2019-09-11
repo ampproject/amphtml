@@ -129,7 +129,10 @@ class AmpMowplayer extends AMP.BaseElement {
     const params = dict({
       'code': this.mediaid_,
     });
-    const src = addParamsToUrl('https://cdn.mowplayer.com/player.html', params);
+    const src = addParamsToUrl(
+      'https://cdn.mowplayer.com/player.html',
+      /** @type {!JsonObject} */ (params)
+    );
 
     return (this.videoIframeSrc_ = src);
   }

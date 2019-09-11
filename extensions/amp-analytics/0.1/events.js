@@ -23,7 +23,7 @@ import {
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict, hasOwn, jsonObjectAssign} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isEnumValue, isFiniteNumber} from '../../../src/types';
@@ -1378,9 +1378,9 @@ function removeInternalVars(details) {
   if (!details) {
     return details;
   }
-  const clean = Object.assign({}, details);
+  const clean = jsonObjectAssign(dict(), details);
   delete clean[videoAnalyticsCustomEventTypeKey];
-  return /** @type {!JsonObject} */ (clean);
+  return clean;
 }
 
 /**

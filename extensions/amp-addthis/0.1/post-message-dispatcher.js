@@ -17,6 +17,7 @@
 import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants';
 import {getData} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {startsWith} from '../../../src/string';
 
 import {tryParseJson} from '../../../src/json';
@@ -83,20 +84,20 @@ export class PostMessageDispatcher {
       return;
     }
 
-    const data = this.getMessageData_(event) || {};
+    const data = this.getMessageData_(event) || dict();
 
     switch (data['event']) {
       case CONFIGURATION_EVENT: {
         this.emit_(
           CONFIGURATION_EVENT,
-          /** @type {!JsonObject} */ (Object.assign({}, data, {
+          jsonObjectAssign(dict(), data, dict({
             'source': event.source,
           }))
         );
         break;
       }
       case SHARE_EVENT: {
-        this.emit_(SHARE_EVENT, /** @type {!JsonObject} */ (data));
+        this.emit_(SHARE_EVENT, data);
         break;
       }
     }

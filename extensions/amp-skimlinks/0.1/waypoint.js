@@ -82,6 +82,9 @@ export class Waypoint {
       queryParams['xcust'] = xcust;
     }
     const affiliationUrl = this.skimOptions_.waypointBaseUrl;
-    return addParamsToUrl(affiliationUrl, queryParams);
+    return addParamsToUrl(
+      affiliationUrl,
+      /** @type {!JsonObject} */ (queryParams)
+    );
   }
 }

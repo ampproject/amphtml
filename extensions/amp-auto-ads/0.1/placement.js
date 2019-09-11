@@ -30,7 +30,7 @@ import {
 } from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {getElementLayoutBox} from './utils';
 
 /** @const */
@@ -333,7 +333,7 @@ export class Placement {
    * @private
    */
   createAdElement_(baseAttributes, width) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
+    const attributes = jsonObjectAssign(
       dict({
         'layout': width ? 'fixed' : 'fixed-height',
         'height': '0',
@@ -342,7 +342,7 @@ export class Placement {
       }),
       baseAttributes,
       this.attributes_
-    ));
+    );
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',

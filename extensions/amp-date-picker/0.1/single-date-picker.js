@@ -24,7 +24,7 @@ import {withDatePickerCommon} from './date-picker-common';
  * @return {function(new:React.Component, !JsonObject)} A single date picker component class
  */
 function createSingleDatePickerBase() {
-  const constants = /** @type {!JsonObject} */ (requireExternal(
+  const constants = /** @type {!ReactDatesConstants} */ (requireExternal(
     'react-dates/constants'
   ));
 

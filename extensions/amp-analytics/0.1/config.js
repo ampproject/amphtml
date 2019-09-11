@@ -46,7 +46,7 @@ export class AnalyticsConfig {
     this.predefinedConfig_ = ANALYTICS_CONFIG;
 
     /**
-     * @private {JsonObject}
+     * @private {!JsonObject}
      */
     this.config_ = dict();
 
@@ -60,7 +60,7 @@ export class AnalyticsConfig {
   }
 
   /**
-   * @return {!Promise<JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   loadConfig() {
     this.win_ = this.element_.ownerDocument.defaultView;

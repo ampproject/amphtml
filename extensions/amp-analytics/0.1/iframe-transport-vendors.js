@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
+
 /**
  * Vendors who have IAB viewability certification may use iframe transport
  * (see ../amp-analytics.md and ../integrating-analytics.md). In this case,
@@ -22,20 +24,23 @@
  * This object is separated from vendors.js to be shared with extensions
  * other than amp-analytics, for instance amp-ad-exit.
  *
- * @const {!Object}
+ * @const {!JsonObject}
  */
-const prodConfig = {
+const prodConfig = dict({
   'bg': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
   'moat': 'https://z.moatads.com/ampanalytics093284/iframe.html',
-};
+});
 /**
  * Canary config override
  *
- * @const {!Object}
+ * @const {!JsonObject}
  */
-const canaryConfig = Object.assign({}, prodConfig, {
+const canaryConfig = jsonObjectAssign(dict(), prodConfig, dict({
   'bg': 'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
-});
+}));
 
-export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ (prodConfig);
-export const IFRAME_TRANSPORTS_CANARY = /** @type {!JsonObject} */ (canaryConfig);
+/** @type {!JsonObject} */
+export const IFRAME_TRANSPORTS = prodConfig;
+
+/** @type {!JsonObject} */
+export const IFRAME_TRANSPORTS_CANARY = canaryConfig;

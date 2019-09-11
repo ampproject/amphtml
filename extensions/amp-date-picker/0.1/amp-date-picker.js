@@ -39,7 +39,7 @@ import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, map} from '../../../src/utils/object';
+import {dict, jsonObjectAssign, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
@@ -214,19 +214,18 @@ export class AmpDatePicker extends AMP.BaseElement {
      */
     this.reactRender_ = requireExternal('react-dom').render;
 
-    /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
+    /** @private @const {!ReactDates} */
+    this.ReactDates_ = /** @type {!ReactDates} */ (requireExternal(
       'react-dates'
     ));
 
     /**
      * @private
      * @const
-     * @dict
+     * @type {!ReactDatesConstants}
      */
-    this.ReactDatesConstants_ = /** @type {!JsonObject} */ (requireExternal(
-      'react-dates/constants'
-    ));
+    this.ReactDatesConstants_ = /** @type {!ReactDatesConstants} */ (
+        requireExternal('react-dates/constants'));
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -876,11 +875,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setState_(newState) {
     return this.render(
-      /** @type {!JsonObject} */ (Object.assign(
-        /** @type {!Object} */ (this.state_),
-        newState
-      ))
-    );
+        jsonObjectAssign(/** @type {!JsonObject} */ (this.state_), newState));
   }
 
   /**
@@ -1936,11 +1931,11 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @return {!Promise}
    */
   render(opt_additionalProps) {
-    const props = /** @type {!JsonObject} */ (Object.assign(
-      {},
+    const props = jsonObjectAssign(
+      dict({}),
       this.props_,
       opt_additionalProps
-    ));
+    );
     const shouldBeOpen = props['isOpen'] || this.mode_ == DatePickerMode.STATIC;
     const Picker = shouldBeOpen ? this.pickerClass_ : null;
 

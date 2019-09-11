@@ -328,35 +328,43 @@ RRule.prototype.after = function(unusedDt, unusedInc) {};
 let PropTypes = {};
 
 /**
- * @@dict
+ * @constructor
+ * @param {!JsonObject} obj
  */
-let ReactDates = {};
-
-/** @constructor */
-ReactDates.DayPickerSingleDateController;
-
-/** @dict */
-ReactDates.DayPickerRangeController;
-
-/** @type {function(*):boolean} */
-ReactDates.isInclusivelyAfterDay;
-
-/** @type {function(*):boolean} */
-ReactDates.isInclusivelyBeforeDay;
-
-/** @type {function(*,*):boolean} */
-ReactDates.isSameDay;
+function DayPickerSingleDateController(obj) {}
 
 /**
+ * @constructor
  * @dict
  */
-let ReactDatesConstants = {};
+function ReactDates() {}
+
+/** @type {!DayPickerSingleDateController} */
+ReactDates.prototype.DayPickerSingleDateController;
+
+/** @type {!JsonObject} */
+ReactDates.prototype.DayPickerRangeController;
+
+/** @type {function(*):boolean} */
+ReactDates.prototype.isInclusivelyAfterDay;
+
+/** @type {function(*):boolean} */
+ReactDates.prototype.isInclusivelyBeforeDay;
+
+/** @type {function(*,*):boolean} */
+ReactDates.prototype.isSameDay;
+
+/**
+ * @constructor
+ * @dict
+ */
+function ReactDatesConstants() {}
 
 /** @const {string} */
-ReactDatesConstants.ANCHOR_LEFT;
+ReactDatesConstants.prototype.ANCHOR_LEFT;
 
 /** @const {string} */
-ReactDatesConstants.HORIZONTAL_ORIENTATION;
+ReactDatesConstants.prototype.HORIZONTAL_ORIENTATION;
 
 // amp-inputmask externs
 /**

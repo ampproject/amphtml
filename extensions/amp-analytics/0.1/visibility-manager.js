@@ -42,6 +42,16 @@ const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 let visibilityIdCounter = 1;
 
 /**
+ * @typedef {{
+ *  element: !Element,
+ *  intersectionRatio: number,
+ *  intersectionRect: ?JsonObject,
+ *  listeners: !Array<function(number)>
+ * }}
+ */
+let TrackedElementDef;
+
+/**
  * @param {!Element} element
  * @return {number}
  */
@@ -584,11 +594,8 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
     /**
      * @const
-     * @private {!Object<number, {
-     *   element: !Element,
-     *   intersectionRatio: number,
-     *   listeners: !Array<function(number)>
-     * }>}
+     * @private
+     * @type {!Object<number, !TrackedElementDef>}
      */
     this.trackedElements_ = map();
 
@@ -669,12 +676,12 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     const id = getElementId(element);
     let trackedElement = this.trackedElements_[id];
     if (!trackedElement) {
-      trackedElement = {
+      trackedElement = /** @type {!TrackedElementDef} */ ({
         element,
         intersectionRatio: 0,
         intersectionRect: null,
         listeners: [],
-      };
+      });
       this.trackedElements_[id] = trackedElement;
     } else if (trackedElement.intersectionRatio > 0) {
       // This has already been tracked and the `intersectionRatio` is fresh.
@@ -718,6 +725,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       return null;
     }
     const id = getElementId(element);
+    /** @type {?TrackedElementDef} */
     const trackedElement = this.trackedElements_[id];
     if (trackedElement) {
       return /** @type {!JsonObject} */ (trackedElement.intersectionRect);
@@ -820,7 +828,16 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     const trackedElement = this.trackedElements_[id];
     if (trackedElement) {
       trackedElement.intersectionRatio = intersectionRatio;
-      trackedElement.intersectionRect = intersectionRect;
+      trackedElement.intersectionRect = dict({
+        'bottom': intersectionRect.bottom,
+        'height': intersectionRect.height,
+        'left': intersectionRect.left,
+        'right': intersectionRect.right,
+        'top': intersectionRect.top,
+        'width': intersectionRect.width,
+        'x': intersectionRect.x,
+        'y': intersectionRect.y,
+      });
       for (let i = 0; i < trackedElement.listeners.length; i++) {
         trackedElement.listeners[i](intersectionRatio);
       }

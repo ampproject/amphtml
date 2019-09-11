@@ -209,7 +209,7 @@ export class CustomEventReporterBuilder {
     devAssert(this.config_, 'CustomEventReporter already built');
     const report = new CustomEventReporter(
       this.parent_,
-      this.config_
+      /** @type {!JsonObject} */ (this.config_)
     );
     this.config_ = null;
     return report;

@@ -45,14 +45,15 @@ const CONFIG_BASE_PATH =
   '&return_url=RETURN_URL';
 const AUTHORIZATION_TIMEOUT = 3000;
 
-const DEFAULT_MESSAGES = {
-  premiumContentTitle: 'Buy only this article',
-  payLaterButton: 'Buy Now, Pay Later',
-  payNowButton: 'Buy Now',
-  defaultButton: 'Buy Now',
-  alreadyPurchasedLink: 'I already bought this',
-  sandbox: 'Site in test mode. No payment required.',
-};
+/** @type {!JsonObject} */
+const DEFAULT_MESSAGES = dict({
+  'premiumContentTitle': 'Buy only this article',
+  'payLaterButton': 'Buy Now, Pay Later',
+  'payNowButton': 'Buy Now',
+  'defaultButton': 'Buy Now',
+  'alreadyPurchasedLink': 'I already bought this',
+  'sandbox': 'Site in test mode. No payment required.',
+});
 
 /**
  * @typedef {{
