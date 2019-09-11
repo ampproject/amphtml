@@ -276,15 +276,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
 
-  it.configure()
-    .skipFirefox()
-    .run('should replace DOCUMENT_REFERRER', () => {
-      return expandUrlAsync('?ref=DOCUMENT_REFERRER').then(res => {
-        expect(res).to.equal(
-          '?ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html'
-        );
-      });
-    });
+  it('should replace DOCUMENT_REFERRER', async () => {
+    const replacements = await getReplacements();
+    sandbox
+      .stub(viewerService, 'getReferrerUrl')
+      .returns('http://fake.example/?foo=bar');
+    const res = await replacements.expandUrlAsync('?ref=DOCUMENT_REFERRER');
+    expect(res).to.equal('?ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar');
+  });
 
   it('should replace EXTERNAL_REFERRER', () => {
     const windowInterface = mockWindowInterface(sandbox);

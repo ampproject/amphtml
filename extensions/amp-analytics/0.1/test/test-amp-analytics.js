@@ -534,6 +534,9 @@ describes.realWin(
       });
 
       it('expands platform vars', () => {
+        sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
@@ -543,7 +546,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html/
+            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/
           );
         });
       });
@@ -679,6 +682,9 @@ describes.realWin(
       });
 
       it('expands url-replacements vars', () => {
+        sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
@@ -697,7 +703,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html&title=Test%20Title/
+            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar&title=Test%20Title/
           );
         });
       });
