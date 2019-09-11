@@ -119,6 +119,11 @@ Example:
     </td>
   </tr>
   <tr>
+    <td width="40%"><strong>highlight-user-entry (optional)</strong></td>
+    <td>If present, exposes the <code>autocomplete-partial</code> class on the substring within the suggested item that resulted in its match with the user input. This can be used to stylize the corresponding match to stand out to the user. <strong>Defaults to false.</strong>
+    </td>
+  </tr>
+  <tr>
     <td width="40%"><strong>items (optional)</strong></td>
     <td>Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response. The default value is <code>"items"</code>. The expected response: <code>{items: [...]}</code>.
     </td>
