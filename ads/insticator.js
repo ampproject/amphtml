@@ -2,6 +2,24 @@
 import { validateData, loadScript } from '../3p/3p';
 
 
+/*
+ * @param {!Window} global
+ * @param {!Object} data
+*/
+// ------- AMP EMBED - INSTICATOR EXPORT ------- //
+export function insticator(global, data) {
+  // validate passed data attributes
+  validateData(data, ['siteId', 'embedId']);
+
+  // load insticator scripts that create an embed and ads
+  createComponent(global.document.getElementById('c'), data.siteId, data.embedId);
+
+  // envoke AMP library (with new insticator embed)
+  loadScript(global, url.lib);
+};
+
+
+
 // ------- HELPER VARIABLES ------- //
 // reusable URL references to ads, embed and the library
 // Don't forget to preconnect and prefetch as it's described in the docs
@@ -13,38 +31,30 @@ const url = {
 
 
 // ------- HELPER FUNCTIONS ------- //
-const createInitialMarkup = (embedId) => {
-  return `
+function createTemplate(embedId) {
+  const template = document.createElement('template');
+  template.innerHTML = `
     <div id="insticator-container">
       <div id="div-insticator-ad-1"></div>
       <div id="insticator-embed" embed-id="${embedId}"></div>
       <div id="div-insticator-ad-2"></div>
     </div>
   `;
-};
-
-const createTemplate = (domString) => {
-  const template = document.createElement('template');
-  template.innerHTML = domString;
   return template.content;
-};
+}
 
-const appendElement = (location, el) => {
-  location.appendChild(el);
-};
-
-const createElement = (location, el, attrs) => {
+function createElement(location, el, attrs) {
   const newEl = location.createElement(el);
   Object.entries(attrs).forEach(attr => newEl.setAttribute(attr[0], attr[1]));
   return newEl;
-};
+}
 
 
 /*
  * @param {!Object} componentContainer
 */
 // ------- COMPONENT CREATOR ------- //
-const createComponent = (componentContainer, siteId, embedId) => {
+function createComponent(componentContainer, siteId, embedId) {
   // API available to embed
   // https://github.com/ampproject/amphtml/blob/master/ads/README.md#available-information-to-the-ad
   // console.log(window.context)
@@ -91,25 +101,7 @@ const createComponent = (componentContainer, siteId, embedId) => {
   bodyCode.appendChild(document.createTextNode(`Insticator.ad.loadAd("div-insticator-ad-1");Insticator.ad.loadAd("div-insticator-ad-2");Insticator.load("em",{id : "${embedId}"});`));
   
   // append component and script markup to the DOM
-  appendElement(componentContainer, createTemplate(createInitialMarkup(embedId)));
-  appendElement(componentContainer, headerCode);
-  appendElement(componentContainer, bodyCode);
-};
-
-
-
-/*
- * @param {!Window} global
- * @param {!Object} data
-*/
-// ------- AMP EMBED - INSTICATOR EXPORT ------- //
-export function insticator(global, data) {
-  // validate passed data attributes
-  validateData(data, ['siteId', 'embedId']);
-
-  // load insticator scripts that create an embed and ads
-  createComponent(global.document.getElementById('c'), data.siteId, data.embedId);
-
-  // envoke AMP library (with new insticator embed)
-  loadScript(global, url.lib);
-};
+  componentContainer.appendChild(createTemplate(embedId));
+  componentContainer.appendChild(headerCode);
+  componentContainer.appendChild(bodyCode);
+}
