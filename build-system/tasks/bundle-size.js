@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const brotliSize = require('brotli-size');
 const colors = require('ansi-colors');
+const fs = require('fs-extra');
 const log = require('fancy-log');
 const Octokit = require('@octokit/rest');
 const path = require('path');
@@ -30,7 +31,8 @@ const {
   travisRepoSlug,
 } = require('../travis');
 const {getStdout} = require('../exec');
-const {gitCommitHash, gitTravisMasterBaseline} = require('../git');
+const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
+const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const runtimeFile = './dist/v0.js';
 
@@ -251,6 +253,23 @@ async function reportBundleSize() {
   }
 }
 
+function getLocalBundleSize() {
+  if (!fs.existsSync(runtimeFile)) {
+    log('Could not find', cyan(runtimeFile) + '.');
+    log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
+    return;
+  } else {
+    log(
+      'Computing bundle size for version',
+      cyan(internalRuntimeVersion),
+      'at commit',
+      cyan(shortSha(gitCommitHash())) + '.'
+    );
+  }
+  getGzippedBundleSize();
+  getBrotliBundleSize();
+}
+
 async function bundleSize() {
   if (argv.on_skipped_build) {
     return await skipBundleSize();
@@ -258,6 +277,8 @@ async function bundleSize() {
     return await storeBundleSize();
   } else if (argv.on_pr_build) {
     return await reportBundleSize();
+  } else if (argv.on_local_build) {
+    return getLocalBundleSize();
   } else {
     log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
     process.exitCode = 1;
@@ -278,4 +299,5 @@ bundleSize.flags = {
   'on_skipped_build':
     "  Set the status of this pull request's bundle " +
     'size check in GitHub to `skipped`',
+  'on_local_build': '  Compute the bundle size of the locally built runtime',
 };
