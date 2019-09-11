@@ -49,12 +49,12 @@ import {ampGeoPresets} from './amp-geo-presets';
 
 import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {dev, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
-import {dict} from '../../../src/utils/object';
 
 /** @const */
 const TAG = 'amp-geo';
@@ -118,10 +118,11 @@ export class AmpGeo extends AMP.BaseElement {
       );
     }
 
-    const config = children.length ?
-      tryParseJson(children[0].textContent, () => {
-        this.assertWithErrorReturn_(false, `${TAG} Unable to parse JSON`);
-      }) : dict();
+    const config = children.length
+      ? tryParseJson(children[0].textContent, () => {
+          this.assertWithErrorReturn_(false, `${TAG} Unable to parse JSON`);
+        })
+      : dict();
 
     /** @type {!Promise<!GeoDef>} */
     const geo = this.addToBody_(config || dict());

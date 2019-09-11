@@ -224,8 +224,9 @@ export class AmpDatePicker extends AMP.BaseElement {
      * @const
      * @type {!ReactDatesConstants}
      */
-    this.ReactDatesConstants_ = /** @type {!ReactDatesConstants} */ (
-        requireExternal('react-dates/constants'));
+    this.ReactDatesConstants_ = /** @type {!ReactDatesConstants} */ (requireExternal(
+      'react-dates/constants'
+    ));
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -875,7 +876,8 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   setState_(newState) {
     return this.render(
-        jsonObjectAssign(/** @type {!JsonObject} */ (this.state_), newState));
+      jsonObjectAssign(/** @type {!JsonObject} */ (this.state_), newState)
+    );
   }
 
   /**
@@ -1931,11 +1933,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @return {!Promise}
    */
   render(opt_additionalProps) {
-    const props = jsonObjectAssign(
-      dict({}),
-      this.props_,
-      opt_additionalProps
-    );
+    const props = jsonObjectAssign(dict({}), this.props_, opt_additionalProps);
     const shouldBeOpen = props['isOpen'] || this.mode_ == DatePickerMode.STATIC;
     const Picker = shouldBeOpen ? this.pickerClass_ : null;
 

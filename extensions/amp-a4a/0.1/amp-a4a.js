@@ -1542,13 +1542,15 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   iframeRenderHelper_(attributes) {
-    const mergedAttributes = dict(Object.assign(
-      attributes,
-      dict({
-        'height': this.creativeSize_.height,
-        'width': this.creativeSize_.width,
-      })
-    ));
+    const mergedAttributes = dict(
+      Object.assign(
+        attributes,
+        dict({
+          'height': this.creativeSize_.height,
+          'width': this.creativeSize_.width,
+        })
+      )
+    );
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
@@ -1560,10 +1562,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
       /** @type {!Document} */ (this.element.ownerDocument),
       'iframe',
-      jsonObjectAssign(
-        mergedAttributes,
-        SHARED_IFRAME_PROPERTIES
-      )
+      jsonObjectAssign(mergedAttributes, SHARED_IFRAME_PROPERTIES)
     ));
     if (this.sandboxHTMLCreativeFrame()) {
       applySandbox(this.iframe);

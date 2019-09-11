@@ -366,7 +366,7 @@ export class AmpList extends AMP.BaseElement {
     };
 
     const src = mutations['src'];
-    const state = mutations.state;
+    const {state} = mutations;
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.

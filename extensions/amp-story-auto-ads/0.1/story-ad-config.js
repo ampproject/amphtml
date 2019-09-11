@@ -61,11 +61,11 @@ export class StoryAdConfig {
 
     const jsonConfig = parseJson(child.textContent);
 
-    const requiredAttrs = {
-      class: 'i-amphtml-story-ad',
-      layout: 'fill',
+    const requiredAttrs = dict({
+      'class': 'i-amphtml-story-ad',
+      'layout': 'fill',
       'amp-story': '',
-    };
+    });
 
     const adAttributes = jsonConfig['ad-attributes'];
     userAssert(

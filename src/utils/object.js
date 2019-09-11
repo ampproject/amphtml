@@ -144,7 +144,6 @@ export function omit(o, props) {
   }, {});
 }
 
-
 /**
  * @param {!JsonObject} target
  * @param {...(!JsonObject|null|undefined)} var_args

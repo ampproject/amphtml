@@ -35,9 +35,13 @@ const prodConfig = dict({
  *
  * @const {!JsonObject}
  */
-const canaryConfig = jsonObjectAssign(dict(), prodConfig, dict({
-  'bg': 'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
-}));
+const canaryConfig = jsonObjectAssign(
+  dict(),
+  prodConfig,
+  dict({
+    'bg': 'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
+  })
+);
 
 /** @type {!JsonObject} */
 export const IFRAME_TRANSPORTS = prodConfig;

@@ -15,9 +15,9 @@
  */
 
 import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {isObject} from '../../../src/types';
-import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {startsWith} from '../../../src/string';
 
 import {tryParseJson} from '../../../src/json';
@@ -90,9 +90,13 @@ export class PostMessageDispatcher {
       case CONFIGURATION_EVENT: {
         this.emit_(
           CONFIGURATION_EVENT,
-          jsonObjectAssign(dict(), data, dict({
-            'source': event.source,
-          }))
+          jsonObjectAssign(
+            dict(),
+            data,
+            dict({
+              'source': event.source,
+            })
+          )
         );
         break;
       }

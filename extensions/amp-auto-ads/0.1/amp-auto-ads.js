@@ -23,11 +23,11 @@ import {
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {getAdNetworkConfig} from './ad-network-config';
 import {getPlacementsFromConfigObj} from './placement';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
-import {dict, jsonObjectAssign} from '../../../src/utils/object';
 
 /** @const */
 const TAG = 'amp-auto-ads';
