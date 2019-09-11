@@ -239,6 +239,7 @@ class DenakopNetworkConfig {
 
   /**
    * @param {!Window} unused
+   * @override
    */
   isEnabled(unused) {
     return true;
