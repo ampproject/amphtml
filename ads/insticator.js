@@ -11,8 +11,11 @@ export function insticator(global, data) {
   // validate passed data attributes
   validateData(data, ['siteId', 'embedId']);
 
-  // load insticator scripts that create an embed and ads
-  createComponent(global.document.getElementById('c'), data.siteId, data.embedId);
+  // create insticator markup
+  global.document.getElementById('c').appendChild(createTemplate(data.embedId));
+
+  // create ads and embed
+  createAdsAndEmbed(data.siteId, data.embedId);
 
   // envoke AMP library (with new insticator embed)
   loadScript(global, url.lib);
@@ -89,17 +92,4 @@ function createAdsAndEmbed(siteId, embedId) {
   Insticator.ad.loadAd("div-insticator-ad-1");
   Insticator.ad.loadAd("div-insticator-ad-2");
   Insticator.load("em", {id : embedId});
-}
-
-
-/*
- * @param {!Object} componentContainer
-*/
-// ------- COMPONENT CREATOR ------- //
-function createComponent(componentContainer, siteId, embedId) {
-  // create initial markup
-  componentContainer.appendChild(createTemplate(embedId));
-
-  // create ads and embed
-  createAdsAndEmbed(siteId, embedId);
 }
