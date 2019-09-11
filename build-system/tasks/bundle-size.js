@@ -75,10 +75,7 @@ function getBrotliBundleSize() {
   // normalize this across pull requests by replacing that RTV with a constant.
   const normalizedFileContents = fs
     .readFileSync(runtimeFile, 'utf8')
-    .replace(
-      new RegExp(`\\b${internalRuntimeVersion}\\b`, 'g'),
-      normalizedRtvNumber
-    );
+    .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
   const bundleSize = parseFloat(
     (brotliSize.sync(normalizedFileContents) / 1024).toFixed(2)
   );
