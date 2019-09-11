@@ -662,7 +662,7 @@ function installPatches(win, registry) {
     // Only upgrade elements if the cloned node belonged to _this_ document.
     // Eg, when cloning a <template>'s content, the cloned document fragment
     // does not belong to this document.
-    if (this.ownerDocument === document) {
+    if (cloned.ownerDocument === document) {
       registry.upgradeSelf(cloned);
       registry.upgrade(cloned);
     }
