@@ -3,8 +3,9 @@
     "amp-next-page",
     "inabox-viewport-friendly",
     "inabox-no-chunking",
-    "inabox-viewport-lite",
-    "inabox-viewer-lite"
+    "inabox-resources-lite",
+    "inabox-viewer-lite",
+    "inabox-viewport-lite"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",

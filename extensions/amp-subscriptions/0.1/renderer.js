@@ -28,7 +28,7 @@ export class Renderer {
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     // Initial state is "unknown".

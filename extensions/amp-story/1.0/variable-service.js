@@ -25,6 +25,9 @@ export let StoryVariableDef;
 
 /** @enum {string} */
 export const AnalyticsVariable = {
+  BOOKEND_COMPONENT_POSITION: 'storyBookendComponentPosition',
+  BOOKEND_COMPONENT_TYPE: 'storyBookendComponentType',
+  BOOKEND_TARGET_HREF: 'storyBookendTargetHref',
   STORY_PAGE_ID: 'storyPageId',
   STORY_PAGE_INDEX: 'storyPageIndex',
   STORY_PAGE_COUNT: 'storyPageCount',
@@ -64,6 +67,9 @@ export class AmpStoryVariableService {
   constructor(win) {
     /** @private {!StoryVariableDef} */
     this.variables_ = dict({
+      [AnalyticsVariable.BOOKEND_COMPONENT_POSITION]: null,
+      [AnalyticsVariable.BOOKEND_COMPONENT_TYPE]: null,
+      [AnalyticsVariable.BOOKEND_TARGET_HREF]: null,
       [AnalyticsVariable.STORY_PAGE_INDEX]: null,
       [AnalyticsVariable.STORY_PAGE_ID]: null,
       [AnalyticsVariable.STORY_PAGE_COUNT]: null,

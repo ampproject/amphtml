@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const log = require('fancy-log');
 const {
   doBuildExtension,
   maybeInitializeExtensions,
   getExtensionsToBuild,
 } = require('../tasks/extension-helpers');
-const {cyan, green} = require('ansi-colors');
 const {doBuildJs} = require('../tasks/helpers');
 const {jsBundles} = require('../../bundles.config');
 
@@ -103,11 +101,9 @@ exports.preBuildCoreRuntime = function() {
 /**
  * Pre-builds some extensions (requested via command line flags) and returns
  * immediately so that the user can start using the webserver.
- * @param {!Object} argv
  */
-exports.preBuildSomeExtensions = function(argv) {
-  const extensions = getExtensionsToBuild(argv);
-  log(green('Pre-building extensions:'), cyan(extensions.join(', ')));
+exports.preBuildSomeExtensions = function() {
+  const extensions = getExtensionsToBuild();
   for (const extensionBundle in extensionBundles) {
     const extension = extensionBundles[extensionBundle].name;
     if (extensions.includes(extension) && !extensionBundle.endsWith('latest')) {
