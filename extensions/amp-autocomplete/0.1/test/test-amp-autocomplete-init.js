@@ -278,6 +278,38 @@ describes.realWin(
       });
     });
 
+    it('should fetch remote data when specified in src and using nested items property', () => {
+      const data = {
+        deeply: {
+          nested: {
+            cities: [
+              'Albany, New York',
+              'Annapolis, Maryland',
+              'Atlanta, Georgia',
+              'Augusta, Maine',
+              'Austin, Texas',
+            ],
+          },
+        },
+      };
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'src': 'https://examples.com/json',
+          'items': 'deeply.nested.cities',
+        },
+        data,
+        false
+      ).then(ampAutocomplete => {
+        ampAutocomplete.layoutCallback().then(() => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).to.have.ordered.members(
+            data.deeply.nested.cities
+          );
+        });
+      });
+    });
+
     it('should error without the form ancestor', () => {
       return allowConsoleError(() => {
         const autocomplete = setupAutocomplete({'filter': 'substring'});
