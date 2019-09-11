@@ -139,7 +139,8 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     this.players_.forEach(player => {
       if (
         oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
-        player.playState == WebAnimationPlayState.PAUSED
+        player.playState == WebAnimationPlayState.PAUSED ||
+        player.playState == WebAnimationPlayState.PENDING
       ) {
         player.play();
         this.runningCount_++;
