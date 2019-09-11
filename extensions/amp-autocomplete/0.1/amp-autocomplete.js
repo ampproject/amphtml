@@ -294,7 +294,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
       return [];
     }
-    return items;
+    return user().assertArray(items);
   }
 
   /**
