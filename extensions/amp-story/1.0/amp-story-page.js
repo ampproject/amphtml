@@ -856,15 +856,26 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   preloadAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      if (this.isBotUserAgent_) {
-        // No-op.
-        return Promise.resolve();
-      } else {
-        return mediaPool.preload(
-          /** @type {!./media-pool.DomElementDef} */ (mediaEl)
-        );
-      }
+      this.preloadMedia_(mediaPool, mediaEl);
     });
+  }
+
+  /**
+   * Preloads the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise<!Element>} Promise that resolves with the preloading element.
+   * @private
+   */
+  preloadMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      // No-op.
+      return Promise.resolve();
+    } else {
+      return mediaPool.preload(
+        /** @type {!./media-pool.DomElementDef} */ (mediaEl)
+      );
+    }
   }
 
   /**
@@ -1372,12 +1383,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.mediaPoolPromise_.then(mediaPool => {
       if (visible) {
-        this.registerMedia_(mediaPool, videoEl).then(() => {
-          this.playMedia_(mediaPool, videoEl);
-          if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-            this.unmuteAllMedia();
-          }
-        });
+        this.registerMedia_(mediaPool, videoEl)
+          .then(() => this.preloadMedia_(mediaPool, videoEl))
+          .then(poolVideoEl => {
+            this.playMedia_(mediaPool, poolVideoEl);
+            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+              this.unmuteAllMedia();
+            }
+          });
       } else {
         this.pauseMedia_(mediaPool, videoEl, true /** rewindToBeginning */);
         this.muteMedia_(mediaPool, videoEl);
