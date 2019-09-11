@@ -70,21 +70,23 @@ const EXTENSION_BUNDLE_MAP = {
  * List of unminified targets to which AMP_CONFIG should be written
  */
 const UNMINIFIED_TARGETS = [
-  'amp.js',
-  'amp-inabox.js',
   'alp.max.js',
+  'amp-inabox.js',
   'amp-shadow.js',
+  'amp.js',
   'amp-esm.js',
 ];
 
 /**
  * List of minified targets to which AMP_CONFIG should be written
+ * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
+ * for details.
  */
 const MINIFIED_TARGETS = [
-  'v0.js',
-  'amp4ads-v0.js',
   'alp.js',
+  'amp4ads-v0.js',
   'shadow-v0.js',
+  'v0.js',
 ];
 
 /**
