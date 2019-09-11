@@ -49,59 +49,57 @@ function createElement(location, el, attrs) {
   return newEl;
 }
 
+function createAdsAndEmbed(siteId, embedId) {
+  // helper vars
+  const a = window;
+  const c = document;
+  const s = 'script';
+  const u = `${url.content}/ads-code/AMP_EMBED_TEST_${siteId}.js`; // vars from preconnect urls and data attributes on amp-embed tag
+
+  // create insticator object on the window
+  'Insticator' in a || (a.Insticator = {
+      ad: {
+          loadAd: function(b) {
+              Insticator.ad.q.push(b)
+          },
+          q: []
+      },
+      helper: {},
+      embed: {},
+      version: "4.0",
+      q: [],
+      amp: null, // this will get set to window.context which is the AMP API so we can access from our ads code
+      load: function(t, o) {
+          Insticator.amp = window.context; // set the Insticator object property amp to window.context which is the AMP API so we can access from our ads code
+          Insticator.q.push({
+              t: t,
+              o: o
+          })
+      }
+  });
+
+  // load ads code
+  var b = c.createElement(s);
+  b.src = u;
+  b.async = !0;
+  var d = c.getElementsByTagName(s)[0];
+  d.parentNode.insertBefore(b, d);
+
+  // execute functions of insticator object on the window (load ads and embed)
+  Insticator.ad.loadAd("div-insticator-ad-1");
+  Insticator.ad.loadAd("div-insticator-ad-2");
+  Insticator.load("em", {id : embedId});
+}
+
 
 /*
  * @param {!Object} componentContainer
 */
 // ------- COMPONENT CREATOR ------- //
 function createComponent(componentContainer, siteId, embedId) {
-  // API available to embed
-  // https://github.com/ampproject/amphtml/blob/master/ads/README.md#available-information-to-the-ad
-  // console.log(window.context)
-
-  // create virtual script tag elements
-  const headerCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
-  const bodyCode = createElement(componentContainer.ownerDocument, 'script', { type: 'text/javascript' });
-
-  // populate script tag elements with standard insticator embed code (slightly modified header code to account for AMP specific constraints)
-  headerCode.appendChild(document.createTextNode(`
-    (function(a, c, s, u) {
-      'Insticator' in a || (a.Insticator = {
-          ad: {
-              loadAd: function(b) {
-                  Insticator.ad.q.push(b)
-              },
-              q: []
-          },
-          helper: {},
-          embed: {},
-          version: "4.0",
-          q: [],
-          amp: null, // this will get set to window.context which is the AMP API so we can access from our ads code
-          load: function(t, o) {
-              Insticator.amp = window.context; // set the Insticator object property amp to window.context which is the AMP API so we can access from our ads code
-              Insticator.q.push({
-                  t: t,
-                  o: o
-              })
-          }
-      });
-      var b = c.createElement(s);
-      b.src = u;
-      b.async = !0;
-      var d = c.getElementsByTagName(s)[0];
-      d.parentNode.insertBefore(b, d)
-    })(
-        window,
-        document,
-        'script',
-        '${url.content}/ads-code/AMP_EMBED_TEST_${siteId}.js' // vars from preconnect urls and data attributes on amp-embed tag
-    );
-  `));
-  bodyCode.appendChild(document.createTextNode(`Insticator.ad.loadAd("div-insticator-ad-1");Insticator.ad.loadAd("div-insticator-ad-2");Insticator.load("em",{id : "${embedId}"});`));
-  
-  // append component and script markup to the DOM
+  // create initial markup
   componentContainer.appendChild(createTemplate(embedId));
-  componentContainer.appendChild(headerCode);
-  componentContainer.appendChild(bodyCode);
+
+  // create ads and embed
+  createAdsAndEmbed(siteId, embedId);
 }
