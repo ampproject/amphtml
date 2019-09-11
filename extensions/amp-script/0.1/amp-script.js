@@ -426,14 +426,14 @@ const FORM_ELEMENTS = [
 export class SanitizerImpl {
   /**
    * @param {!Window} win
-   * @param {!AmpScript} element
+   * @param {!Element} element
    * @param {!Array<string>} sandboxTokens
    */
   constructor(win, element, sandboxTokens) {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!AmpScript} */
+    /** @private @const {!Element} */
     this.element_ = element;
 
     /** @private @const {!DomPurifyDef} */
