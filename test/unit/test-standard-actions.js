@@ -395,12 +395,8 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"toggleClass" action', () => {
-    const dummyClass = 'test-class-toggle';
-    const dummyInternalClasses = [
-      'i-amphtml-test-class-toggle',
-      '-amp-test-class-toggle',
-      'amp-test-class-toggle',
-    ];
+    const dummyClass = 'amp-test-class-toggle';
+    const dummyInternalClass = 'i-amphtml-test-class-toggle';
 
     it('should add class when not in classList', () => {
       const element = createElement();
@@ -431,33 +427,29 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should not add amp internal classes', () => {
       const element = createElement();
-      dummyInternalClasses.forEach(dummyInternalClass => {
-        const invocation = {
-          node: element,
-          satisfiesTrust: () => true,
-          args: {
-            'class': dummyInternalClass,
-          },
-        };
-        standardActions.handleToggleClass_(invocation);
-        expect(element.classList.contains(dummyInternalClass)).to.be.false;
-      });
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': dummyInternalClass,
+        },
+      };
+      standardActions.handleToggleClass_(invocation);
+      expect(element.classList.contains(dummyInternalClass)).to.be.false;
     });
 
     it('should not delete amp internal classes', () => {
       const element = createElement();
-      dummyInternalClasses.forEach(dummyInternalClass => {
-        element.classList.add(dummyInternalClass);
-        const invocation = {
-          node: element,
-          satisfiesTrust: () => true,
-          args: {
-            'class': dummyInternalClass,
-          },
-        };
-        standardActions.handleToggleClass_(invocation);
-        expect(element.classList.contains(dummyInternalClass)).to.be.true;
-      });
+      element.classList.add(dummyInternalClass);
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': dummyInternalClass,
+        },
+      };
+      standardActions.handleToggleClass_(invocation);
+      expect(element.classList.contains(dummyInternalClass)).to.be.true;
     });
 
     it('should add class when not in classList, when force=true', () => {
