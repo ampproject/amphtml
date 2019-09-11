@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.64 */
+/** Version: 0.1.22.67 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -154,6 +154,15 @@ class Doc {
    * @return {!Promise}
    */
   whenReady() {}
+
+  /**
+   * Adds the element to the fixed layer.
+   * @param {!Element} unusedElement
+   * @return {!Promise}
+   *
+   * This is a no-op for except in AMP on iOS < 13.0.
+   */
+  addToFixedLayer(unusedElement) {}
 }
 
 /** @implements {Doc} */
@@ -207,6 +216,11 @@ class GlobalDoc {
   /** @override */
   whenReady() {
     return whenDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  addToFixedLayer(unusedElement) {
+    return Promise.resolve();
   }
 }
 
@@ -326,6 +340,9 @@ class PageConfig {
  * Debug logger, only log message if #swg.log=1
  * @param {...*} var_args [decription]
  */
+
+/* eslint-disable */
+
 function debugLog(var_args) {
   if (/swg.debug=1/.test(self.location.hash)) {
     const logArgs = Array.prototype.slice.call(arguments, 0);
