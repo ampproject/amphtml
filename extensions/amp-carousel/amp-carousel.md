@@ -25,7 +25,7 @@ limitations under the License.
 # amp-carousel
 
 {% call callout('Note', type='note') %}
-The is the documentation for `<amp-carousel>` version 0.2. The documentation for version 0.1 is [available on Github](https://github.com/ampproject/amphtml/tree/master/extensions/amp-carousel/0.1/amp-carousel.md).
+This is the documentation for `<amp-carousel>` version 0.2. The documentation for version 0.1 is [available on Github](https://github.com/ampproject/amphtml/tree/master/extensions/amp-carousel/0.1/amp-carousel.md).
 {% endcall %}
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be flexible and performant.
