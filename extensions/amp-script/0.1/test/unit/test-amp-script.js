@@ -206,7 +206,7 @@ describe('SanitizerImpl', () => {
 
   beforeEach(() => {
     win = new FakeWindow();
-    s = new SanitizerImpl(win, []);
+    s = new SanitizerImpl(win, /* element */ null, []);
     el = win.document.createElement('div');
   });
 
@@ -271,7 +271,7 @@ describe('SanitizerImpl', () => {
     });
 
     it('should allow changes to form elements if sandbox=allow-forms', () => {
-      s = new SanitizerImpl(win, ['allow-forms']);
+      s = new SanitizerImpl(win, /* element */ null, ['allow-forms']);
 
       const form = win.document.createElement('form');
       s.setAttribute(form, 'action-xhr', 'https://example.com/post');
@@ -285,7 +285,7 @@ describe('SanitizerImpl', () => {
     });
   });
 
-  describe('storage', () => {
+  describe('localStorage & sessionStorage', () => {
     it('getStorage()', () => {
       it('should be initially empty', () => {
         expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({});
@@ -375,6 +375,63 @@ describe('SanitizerImpl', () => {
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('x')).to.equal('1');
       });
+    });
+  });
+
+  describe('amp-state', () => {
+    let bind;
+
+    beforeEach(() => {
+      bind = {
+        getStateValue: () => {},
+        setState: () => {},
+      };
+      sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
+    });
+
+    it('AMP.setState(json)', async () => {
+      sandbox.spy(bind, 'setState');
+
+      await s.setStorage(
+        StorageLocation.AMP_STATE,
+        /* key */ null,
+        '{"foo":"bar"}'
+      );
+
+      expect(bind.setState).to.be.calledOnce;
+      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, true, false);
+    });
+
+    it('AMP.setState(not_json)', async () => {
+      sandbox.spy(bind, 'setState');
+
+      await s.setStorage(
+        StorageLocation.AMP_STATE,
+        /* key */ null,
+        '"foo":"bar'
+      );
+
+      expect(bind.setState).to.not.be.called;
+    });
+
+    it('AMP.getState(string)', async () => {
+      sandbox.stub(bind, 'getStateValue').returns('bar');
+
+      const state = await s.getStorage(StorageLocation.AMP_STATE, 'foo');
+      expect(state).to.equal('bar');
+
+      expect(bind.getStateValue).to.be.calledOnce;
+      expect(bind.getStateValue).to.be.calledWithExactly('foo');
+    });
+
+    it('AMP.getState()', async () => {
+      sandbox.stub(bind, 'getStateValue').returns({foo: 'bar'});
+
+      const state = await s.getStorage(StorageLocation.AMP_STATE, '');
+      expect(state).to.deep.equal({foo: 'bar'});
+
+      expect(bind.getStateValue).to.be.calledOnce;
+      expect(bind.getStateValue).to.be.calledWithExactly('.');
     });
   });
 });

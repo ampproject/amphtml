@@ -548,9 +548,10 @@ export class SanitizerImpl {
   }
 
   /**
+   * TODO(choumx): Make this method always return a Promise.
    * @param {!StorageLocation} location
    * @param {string} opt_key
-   * @return {?Object}
+   * @return {!Promise<Object>|?Object}
    */
   getStorage(location, opt_key) {
     if (location === StorageLocation.AMP_STATE) {
@@ -578,10 +579,11 @@ export class SanitizerImpl {
    * @param {!StorageLocation} location
    * @param {?string} key
    * @param {?string} value
+   * @return {!Promise}
    */
   setStorage(location, key, value) {
     if (location === StorageLocation.AMP_STATE) {
-      Services.bindForDocOrNull(this.element_).then(bind => {
+      return Services.bindForDocOrNull(this.element_).then(bind => {
         if (bind) {
           const state = tryParseJson(value, () => {
             dev().error(TAG, 'Invalid AMP.setState() argument: %s', value);
@@ -608,6 +610,7 @@ export class SanitizerImpl {
         }
       }
     }
+    return Promise.resolve();
   }
 
   /**
