@@ -257,7 +257,7 @@ export class AmpList extends AMP.BaseElement {
     if (placeholder) {
       this.attemptToFit_(placeholder);
     } else if (this.hasInitialContent_) {
-      this.attemptToFit_(this.container_);
+      this.attemptToFit_(dev().assertElement(this.container_));
     }
 
     this.viewport_.onResize(() => {
