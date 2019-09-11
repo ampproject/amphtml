@@ -46,12 +46,6 @@ function createTemplate(embedId) {
   return template.content;
 }
 
-function createElement(location, el, attrs) {
-  const newEl = location.createElement(el);
-  Object.entries(attrs).forEach(attr => newEl.setAttribute(attr[0], attr[1]));
-  return newEl;
-}
-
 function createAdsAndEmbed(siteId, embedId) {
   // helper vars
   const a = window;
