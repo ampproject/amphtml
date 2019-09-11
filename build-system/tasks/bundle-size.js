@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const brotliSize = require('brotli-size');
 const colors = require('ansi-colors');
-const fs = require('fs-extra');
+const fs = require('fs');
 const log = require('fancy-log');
 const Octokit = require('@octokit/rest');
 const path = require('path');
@@ -35,6 +35,7 @@ const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const runtimeFile = './dist/v0.js';
+const normalizedRtvNumber = '1234567890123';
 
 const buildArtifactsRepoOptions = {
   owner: 'ampproject',
@@ -70,8 +71,13 @@ function getGzippedBundleSize() {
  * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
 function getBrotliBundleSize() {
+  // Brotli compressed size fluctuates because of changes in the RTV number, so
+  // normalize this across pull requests by replacing that RTV with a constant.
+  const normalizedFileContents = fs
+    .readFileSync(runtimeFile, 'utf8')
+    .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
   const bundleSize = parseFloat(
-    (brotliSize.fileSync(runtimeFile) / 1024).toFixed(2)
+    (brotliSize.sync(normalizedFileContents) / 1024).toFixed(2)
   );
   log('Bundle size', cyan('(brotli)'), 'is', cyan(`${bundleSize}KB`));
   return bundleSize;
