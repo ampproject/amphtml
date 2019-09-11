@@ -47,10 +47,10 @@ The value of `rtc-config` must conform to the following specification:
 - `data-slot`: Required. Data attributes to serve ads.
 - `rtc-config`: JSON configuration data which handles the communication with AMP RTC.
    - `vendors` : Required object. The key is `IndexExchange` and the value is the `SITE_ID`.</br>
-**Note:** Refer to the materials provided by your account team for your specific **SITE_ID** details. We recommend one **SITE_ID** per domain, per unique slot and size. To use more than one SITE_ID, contact your IX Representative.
+**Note:** Refer to the materials provided by your account team for your specific SITE_ID details. We recommend one SITE_ID per domain, per unique slot and size. To use more than one SITE_ID, contact your IX Representative.
    - `timeoutMillis`: Optional integer. Defines the timeout in milliseconds for each individual RTC callout. The configured timeout must be greater than 0 and less than 1000ms. If omitted, the timeout value defaults to 1000ms.
 
-Additional parameters including JSON are passed through in the resulting call to DFP. For details refer to the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md).
+Additional parameters including JSON are passed through in the resulting call to DFP. For details refer to the [Google Ad Manager documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md).
 
 To learn about the required Google Ad Manager (GAM) configuration, refer to [Index Exchange Knowledge Base](https://kb.indexexchange.com/Mobile/AMP_Integration.htm).
 
