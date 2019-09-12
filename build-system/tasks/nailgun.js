@@ -21,7 +21,6 @@ const log = require('fancy-log');
 const sleep = require('sleep-promise');
 const {exec, execScriptAsync, getStdout} = require('../exec');
 const {green, red, cyan, yellow} = colors;
-const {isTravisBuild} = require('../travis');
 const {maybeGenerateRunner} = require('./generate-runner');
 
 // Used to start and stop the Closure nailgun server
@@ -111,9 +110,7 @@ async function startNailgunServer(port, detached) {
     try {
       const version = getStdout(getVersionCmd).trim();
       if (/Version/.test(version)) {
-        if (!isTravisBuild()) {
-          log('Started', cyan('nailgun-server.jar'), 'on port', cyan(port));
-        }
+        log('Started', cyan('nailgun-server.jar'), 'on port', cyan(port));
         return;
       }
     } catch (e) {
@@ -146,9 +143,7 @@ async function stopNailgunServer(port) {
   if (process.platform == 'darwin' || process.platform == 'linux') {
     const stopNailgunServerCmd = `${nailgunRunner} --nailgun-port ${port} ng-stop`;
     if (exec(stopNailgunServerCmd, {stdio: 'pipe'}).status == 0) {
-      if (!isTravisBuild()) {
-        log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
-      }
+      log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
     } else {
       log(
         yellow('WARNING:'),
