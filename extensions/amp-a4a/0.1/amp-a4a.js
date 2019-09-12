@@ -1542,14 +1542,12 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   iframeRenderHelper_(attributes) {
-    const mergedAttributes = dict(
-      Object.assign(
-        attributes,
-        dict({
-          'height': this.creativeSize_.height,
-          'width': this.creativeSize_.width,
-        })
-      )
+    const mergedAttributes = jsonObjectAssign(
+      attributes,
+      dict({
+        'height': this.creativeSize_.height,
+        'width': this.creativeSize_.width,
+      })
     );
 
     if (this.sentinel) {

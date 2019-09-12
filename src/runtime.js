@@ -35,7 +35,6 @@ import {
   waitForBodyOpenPromise,
 } from './dom';
 import {config} from './config';
-import {dict} from './utils/object';
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -797,11 +796,7 @@ export class MultidocManager {
       this.timer_.delay(() => {
         // TODO: receive message needs !JsonObject type but broadcast here
         // can be anything. Ask @dvoytenko what we can do here.
-        viewer.receiveMessage(
-          'broadcast',
-          data,
-          /* awaitResponse */ false
-        );
+        viewer.receiveMessage('broadcast', data, /* awaitResponse */ false);
       }, 0);
     });
   }

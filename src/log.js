@@ -174,7 +174,7 @@ export class Log {
         .then(response => response.json(), noop)
         .then(opt_messages => {
           if (opt_messages) {
-            this.messages_ =  opt_messages;
+            this.messages_ = opt_messages;
           }
         });
     });

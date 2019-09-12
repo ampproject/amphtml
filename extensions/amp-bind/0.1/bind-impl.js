@@ -184,7 +184,7 @@ export class Bind {
      * The current values of all bound expressions on the page.
      * @const @private {!JsonObject}
      */
-    this.state_ = dict();
+    this.state_ = /** @type {!JsonObject} */ (map());
 
     /** @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);

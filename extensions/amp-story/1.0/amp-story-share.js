@@ -369,11 +369,7 @@ export class ShareWidget {
     providers.forEach(provider => {
       if (isObject(provider)) {
         this.add_(
-          buildProvider(
-            this.win.document,
-            provider['provider'],
-            provider
-          )
+          buildProvider(this.win.document, provider['provider'], provider)
         );
         return;
       }

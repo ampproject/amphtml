@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
-import {dict, jsonObjectAssign} from '../../../src/utils/object';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:config';
@@ -87,11 +87,7 @@ export class StoryAdConfig {
       }
     }
 
-    return jsonObjectAssign(
-      dict(),
-      adAttributes,
-      requiredAttrs
-    );
+    return jsonObjectAssign(dict(), adAttributes, requiredAttrs);
   }
 
   /**

@@ -16,8 +16,8 @@
 
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {deepMerge} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
+import {dict, jsonObjectDeepMerge} from '../../../src/utils/object';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
