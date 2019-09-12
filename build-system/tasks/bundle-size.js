@@ -85,8 +85,6 @@ function getBrotliBundleSize() {
 /**
  * Store the bundle size of a commit hash in the build artifacts storage
  * repository to the passed value.
- *
- * @return {!Promise}
  */
 async function storeBundleSize() {
   if (!isTravisPushBuild()) {
