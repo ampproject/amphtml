@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const brotliSize = require('brotli-size');
 const colors = require('ansi-colors');
+const fs = require('fs');
 const log = require('fancy-log');
 const Octokit = require('@octokit/rest');
 const path = require('path');
@@ -30,9 +31,11 @@ const {
   travisRepoSlug,
 } = require('../travis');
 const {getStdout} = require('../exec');
-const {gitCommitHash, gitTravisMasterBaseline} = require('../git');
+const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
+const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const runtimeFile = './dist/v0.js';
+const normalizedRtvNumber = '1234567890123';
 
 const buildArtifactsRepoOptions = {
   owner: 'ampproject',
@@ -68,8 +71,13 @@ function getGzippedBundleSize() {
  * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
 function getBrotliBundleSize() {
+  // Brotli compressed size fluctuates because of changes in the RTV number, so
+  // normalize this across pull requests by replacing that RTV with a constant.
+  const normalizedFileContents = fs
+    .readFileSync(runtimeFile, 'utf8')
+    .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
   const bundleSize = parseFloat(
-    (brotliSize.fileSync(runtimeFile) / 1024).toFixed(2)
+    (brotliSize.sync(normalizedFileContents) / 1024).toFixed(2)
   );
   log('Bundle size', cyan('(brotli)'), 'is', cyan(`${bundleSize}KB`));
   return bundleSize;
@@ -251,6 +259,23 @@ async function reportBundleSize() {
   }
 }
 
+function getLocalBundleSize() {
+  if (!fs.existsSync(runtimeFile)) {
+    log('Could not find', cyan(runtimeFile) + '.');
+    log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
+    return;
+  } else {
+    log(
+      'Computing bundle size for version',
+      cyan(internalRuntimeVersion),
+      'at commit',
+      cyan(shortSha(gitCommitHash())) + '.'
+    );
+  }
+  getGzippedBundleSize();
+  getBrotliBundleSize();
+}
+
 async function bundleSize() {
   if (argv.on_skipped_build) {
     return await skipBundleSize();
@@ -258,6 +283,8 @@ async function bundleSize() {
     return await storeBundleSize();
   } else if (argv.on_pr_build) {
     return await reportBundleSize();
+  } else if (argv.on_local_build) {
+    return getLocalBundleSize();
   } else {
     log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
     process.exitCode = 1;
@@ -278,4 +305,5 @@ bundleSize.flags = {
   'on_skipped_build':
     "  Set the status of this pull request's bundle " +
     'size check in GitHub to `skipped`',
+  'on_local_build': '  Compute the bundle size of the locally built runtime',
 };
