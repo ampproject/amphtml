@@ -36,10 +36,6 @@ const {VERSION: internalRuntimeVersion} = require('../internal-version');
 const runtimeFile = './dist/v0.js';
 const normalizedRtvNumber = '1234567890123';
 
-const buildArtifactsRepoOptions = {
-  owner: 'ampproject',
-  repo: 'amphtml-build-artifacts',
-};
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
 const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 
