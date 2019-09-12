@@ -107,7 +107,7 @@ const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
  */
 const externalMessageUrl = (id, interpolatedParts) =>
   interpolatedParts.reduce(
-    (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
+    (prefix, arg) => `${prefix}&s[]=${messageArgToEncodedComponent(arg)}`,
     `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
   );
 
@@ -118,6 +118,19 @@ const externalMessageUrl = (id, interpolatedParts) =>
  */
 const externalMessagesSimpleTableUrl = () =>
   `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
+
+/**
+ * @param {*} arg
+ * @return {string}
+ */
+function messageArgToEncodedComponent(arg) {
+  try {
+    return encodeURIComponent(toString(arg));
+  } catch (_) {
+    // Some objects can't be serialized.
+    return encodeURIComponent('[object Object]');
+  }
+}
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
