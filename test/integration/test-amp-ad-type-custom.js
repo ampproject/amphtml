@@ -76,7 +76,7 @@ describes.integration(
     });
 
     it('should enable test mode when running on Travis', () => {
-      expect(browser.getMode().test).to.be.true;
+      expect(browser.getTestMode()).to.be.true;
     });
 
     it('should render template', () => {

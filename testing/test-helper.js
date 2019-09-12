@@ -216,8 +216,8 @@ export class BrowserController {
     this.doc_ = this.win_.document;
   }
 
-  getMode() {
-    return getMode(this.win);
+  getTestMode() {
+    return getMode(this.win).test;
   }
 
   wait(duration) {
