@@ -665,7 +665,9 @@ export class FixedLayer {
     opt_lightboxMode
   ) {
     // Warn that pub-authored inline styles may be overriden by FixedLayer.
-    this.warnAboutInlineStylesIfNecessary_(element);
+    if (!opt_forceTransfer) {
+      this.warnAboutInlineStylesIfNecessary_(element);
+    }
 
     // Ignore lightboxes because FixedLayer can interfere with their
     // opening/closing animations (#19149).
