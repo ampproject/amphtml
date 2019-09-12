@@ -119,6 +119,81 @@ describes.realWin(
       });
     });
 
+    describe('Denakop', () => {
+      const PUBLISHER_ID = '1000';
+      const TAG_ID = '2819896d-f724';
+
+      beforeEach(() => {
+        ampAutoAdsElem.setAttribute('data-publisher-id', PUBLISHER_ID);
+        ampAutoAdsElem.setAttribute('data-tag-id', TAG_ID);
+      });
+
+      it('should report enabled always', () => {
+        const adNetwork = getAdNetworkConfig('denakop', ampAutoAdsElem);
+        expect(adNetwork.isEnabled(env.win)).to.equal(true);
+      });
+
+      it('should generate the config fetch URL', () => {
+        const adNetwork = getAdNetworkConfig('denakop', ampAutoAdsElem);
+        const configUrl = adNetwork.getConfigUrl();
+
+        expect(configUrl).to.contain('//v2.denakop.com/ad-request/amp');
+        expect(configUrl).to.contain('p=' + PUBLISHER_ID);
+        expect(configUrl).to.contain('t=' + TAG_ID);
+        expect(configUrl).to.contain('u=https%3A%2F%2Ffoo.bar%2Fbaz');
+      });
+
+      it.skip("should truncate the URL if it's too long", () => {
+        const adNetwork = getAdNetworkConfig('denakop', ampAutoAdsElem);
+
+        const canonicalUrl =
+          'http://foo.bar/a'.repeat(4050) + 'shouldnt_be_included';
+
+        const docInfo = Services.documentInfoForDoc(ampAutoAdsElem);
+        sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);
+
+        const url = adNetwork.getConfigUrl();
+        expect(url).to.contain('ama_t=amp');
+        expect(url).to.contain('url=http%3A%2F%2Ffoo.bar');
+        expect(url).not.to.contain('shouldnt_be_included');
+      });
+
+      it('should generate the attributes', () => {
+        const adNetwork = getAdNetworkConfig('denakop', ampAutoAdsElem);
+        expect(adNetwork.getAttributes()).to.deep.equal({
+          'layout': 'fixed',
+          'data-multi-size-validation': 'false',
+          'type': 'doubleclick',
+          'data-ad': 'denakop',
+        });
+      });
+
+      it('should get the default ad constraints', () => {
+        const viewportMock = sandbox.mock(
+          Services.viewportForDoc(env.win.document)
+        );
+        viewportMock
+          .expects('getSize')
+          .returns({width: 320, height: 500})
+          .atLeast(1);
+
+        const adNetwork = getAdNetworkConfig('denakop', ampAutoAdsElem);
+        expect(adNetwork.getDefaultAdConstraints()).to.deep.equal({
+          initialMinSpacing: 500,
+          subsequentMinSpacing: [
+            {adCount: 3, spacing: 1000},
+            {adCount: 6, spacing: 1500},
+          ],
+          maxAdCount: 8,
+        });
+      });
+
+      it('should not be responsive-enabled', () => {
+        const adNetwork = getAdNetworkConfig('denakop', ampAutoAdsElem);
+        expect(adNetwork.isResponsiveEnabled()).to.be.false;
+      });
+    });
+
     describe('Doubleclick', () => {
       const AD_LEGACY_CLIENT = 'ca-pub-1234';
 
