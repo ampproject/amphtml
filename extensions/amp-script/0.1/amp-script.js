@@ -110,6 +110,13 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.development_ = this.element.hasAttribute('development');
+    if (this.development_) {
+      user().warn(
+        TAG,
+        'JS size and security constraints disabled in development mode.',
+        this.element
+      );
+    }
 
     return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
       this.setService(/** @type {!AmpScriptService} */ (service));
