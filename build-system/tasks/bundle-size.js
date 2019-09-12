@@ -21,7 +21,6 @@ const brotliSize = require('brotli-size');
 const colors = require('ansi-colors');
 const fs = require('fs');
 const log = require('fancy-log');
-const Octokit = require('@octokit/rest');
 const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
@@ -110,72 +109,33 @@ async function storeBundleSize() {
     return;
   }
 
-  if (!process.env.GITHUB_ARTIFACTS_RW_TOKEN) {
-    log(
-      red(
-        'ERROR: Missing GITHUB_ARTIFACTS_RW_TOKEN, cannot store the ' +
-          'bundle size in the artifacts repository on GitHub!'
-      )
-    );
+  const commitHash = gitCommitHash();
+  try {
+    const response = await requestPost({
+      uri: url.resolve(
+        bundleSizeAppBaseUrl,
+        path.join('commit', commitHash, 'report')
+      ),
+      json: true,
+      body: {
+        token: process.env.BUNDLE_SIZE_TOKEN,
+        // TODO(#21275): replace the gzippedBundleSize value once the
+        // bundle-size app prefers Brotli.
+        gzippedBundleSize: `${getGzippedBundleSize()}KB`,
+        brotliBundleSize: `${getBrotliBundleSize()}KB`,
+      },
+    });
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw new Error(
+        `${response.statusCode} ${response.statusMessage}: ` + response.body
+      );
+    }
+  } catch (error) {
+    log(red('Could not store the bundle size'));
+    log(red(error));
     process.exitCode = 1;
     return;
   }
-
-  const octokit = new Octokit({
-    auth: `token ${process.env.GITHUB_ARTIFACTS_RW_TOKEN}`,
-  });
-
-  for (const [compression, extension, getBundleSize] of [
-    ['gzip', '', getGzippedBundleSize],
-    ['brotli', '.br', getBrotliBundleSize],
-  ]) {
-    const bundleSize = `${getBundleSize()}KB`;
-    const bundleSizeFile = `${gitCommitHash()}${extension}`;
-    const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
-      path: path.join('bundle-size', bundleSizeFile),
-    });
-
-    try {
-      await octokit.repos.getContents(githubApiCallOptions);
-      log(
-        'The file',
-        cyan(`bundle-size/${bundleSizeFile}`),
-        'already exists in the',
-        'build artifacts repository on GitHub. Skipping...'
-      );
-      continue;
-    } catch {
-      // The file was not found in the GitHub repository, so continue to create
-      // it...
-    }
-
-    try {
-      await octokit.repos.createOrUpdateFile(
-        Object.assign(githubApiCallOptions, {
-          message: `bundle-size: ${bundleSizeFile} (${bundleSize})`,
-          content: Buffer.from(bundleSize).toString('base64'),
-        })
-      );
-      log(
-        'Stored the new',
-        cyan(compression),
-        'bundle size of',
-        cyan(bundleSize),
-        'in the artifacts',
-        'repository on GitHub'
-      );
-    } catch (error) {
-      log(
-        red(
-          `ERROR: Failed to create the bundle-size/${bundleSizeFile} file in`
-        ),
-        red('the build artifacts repository on GitHub!')
-      );
-      log(red('Error message was:'), error.message);
-      return Promise.reject(error);
-    }
-  }
-  return Promise.resolve();
 }
 
 /**
