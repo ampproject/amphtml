@@ -1250,7 +1250,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       (returnedSizeDifferent && heightNotIncreased)
     ) {
       this.attemptChangeSize(newHeight, newWidth).catch(() => {});
-      if (newWidth > width) {
+      if (
+        newWidth > width &&
+        // Nothing to adjust if the returned size was one that was requested.
+        this.parameterSize &&
+        this.parameterSize.indexOf(`${newWidth}x${newHeight}`) == -1
+      ) {
         this.adjustSlotPostExpansion_(newWidth);
       }
     }
