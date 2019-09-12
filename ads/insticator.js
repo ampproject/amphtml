@@ -17,8 +17,8 @@ export function insticator(global, data) {
   // create ads and embed
   createAdsAndEmbed(data.siteId, data.embedId);
 
-  // envoke AMP library (with new insticator embed)
-  loadScript(global, url.lib);
+  // envoke AMP library
+  loadScript(global);
 };
 
 
@@ -27,10 +27,7 @@ export function insticator(global, data) {
 // reusable URL references to ads, embed and the library
 // Don't forget to preconnect and prefetch as it's described in the docs
 // https://github.com/ampproject/amphtml/blob/master/ads/README.md
-const url = {
-  content: '//d3lcz8vpax4lo2.cloudfront.net',
-  lib: 'https://testthisshit.online/amp-embed-lib/insticator.js'
-};
+const url = { content: '//d3lcz8vpax4lo2.cloudfront.net' };
 
 
 // ------- HELPER FUNCTIONS ------- //
@@ -51,7 +48,7 @@ function createAdsAndEmbed(siteId, embedId) {
   const a = window;
   const c = document;
   const s = 'script';
-  const u = `${url.content}/ads-code/AMP_EMBED_TEST_${siteId}.js`; // vars from preconnect urls and data attributes on amp-embed tag
+  const u = `${url.content}/ads-code/${siteId}.js`; // vars from preconnect urls and data attributes on amp-embed tag
 
   // create insticator object on the window
   'Insticator' in a || (a.Insticator = {
