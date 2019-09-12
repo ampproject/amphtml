@@ -113,7 +113,7 @@ export class AmpScript extends AMP.BaseElement {
     if (this.development_) {
       user().warn(
         TAG,
-        'JS size and security constraints disabled in development mode.',
+        'JavaScript size and script hash requirements are disabled in development mode.',
         this.element
       );
     }
