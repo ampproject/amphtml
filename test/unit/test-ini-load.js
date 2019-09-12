@@ -1,6 +1,5 @@
+import {Deferred} from '../../src/utils/promise';
 import {Services} from '../../src/services';
-import {setSrcdocSupportedForTesting} from '../../src/friendly-iframe-embed';
-import {toggleExperiment} from '../../src/experiments';
 import {whenContentIniLoad} from '../../src/ini-load';
 
 /**
@@ -20,88 +19,69 @@ import {whenContentIniLoad} from '../../src/ini-load';
  */
 
 describes.realWin('friendly-iframe-embed', {amp: true}, env => {
-  let window, document;
-  let iframe;
-  let extensionsMock;
-  let resourcesMock;
-  let ampdocServiceMock;
+  let win, doc;
+  let ampdoc;
+  let sandbox;
 
   beforeEach(() => {
-    window = env.win;
-    document = window.document;
-
-    const extensions = Services.extensionsFor(window);
-    const resources = Services.resourcesForDoc(window.document);
-    const ampdocService = {
-      installFieDoc: () => {},
-    };
-
-    extensionsMock = sandbox.mock(extensions);
-    resourcesMock = sandbox.mock(resources);
-    ampdocServiceMock = sandbox.mock(ampdocService);
-    sandbox.stub(Services, 'ampdocServiceFor').callsFake(() => ampdocService);
-
-    iframe = document.createElement('iframe');
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    sandbox = env.sandbox;
   });
 
-  afterEach(() => {
-    if (iframe.parentElement) {
-      iframe.parentElement.removeChild(iframe);
-    }
-    extensionsMock.verify();
-    resourcesMock.verify();
-    ampdocServiceMock.verify();
-    setSrcdocSupportedForTesting(undefined);
-    toggleExperiment(window, 'ampdoc-fie', false);
-    sandbox.restore();
-  });
-
-  it('should find and await all content elements', () => {
-    function resource(tagName) {
-      const res = {
-        element: {
-          tagName: tagName.toUpperCase(),
-        },
-        loadedComplete: false,
-      };
-      res.loadedOnce = () =>
-        Promise.resolve().then(() => {
-          res.loadedComplete = true;
-        });
-      return res;
-    }
-
+  it('should find and await all visible content elements in given rect', async () => {
     let content1;
     let content2;
-    let blacklistedAd;
-    let blacklistedAnalytics;
-    let blacklistedPixel;
-    let blacklistedAmpAdExit;
 
-    const context = document.createElement('div');
-    document.body.appendChild(context);
-    resourcesMock
-      .expects('getResourcesInRect')
-      .withArgs(sinon.match(arg => arg == window))
-      .returns(
-        Promise.resolve([
-          (content1 = resource('amp-img', 0)),
-          (content2 = resource('amp-video', 0)),
-          (blacklistedAd = resource('amp-ad', 0)),
-          (blacklistedAnalytics = resource('amp-analytics', 0)),
-          (blacklistedPixel = resource('amp-pixel', 0)),
-          (blacklistedAmpAdExit = resource('amp-ad-exit', 0)),
-        ])
-      )
-      .once();
+    const context = doc.createElement('div');
+    doc.body.appendChild(context);
+    const resources = Services.resourcesForDoc(ampdoc);
+    sandbox.stub(resources, 'get').returns([
+      (content1 = resource(win, 'amp-img')),
+      (content2 = resource(win, 'amp-video')),
+      resource(win, 'amp-img', false), // resource outside rect
+      resource(win, 'amp-img', true, false), // hidden resource
+      resource(win, 'amp-ad'), // blacklisted resource
+    ]);
 
-    return whenContentIniLoad(context, window).then(() => {
-      expect(content1.loadedComplete).to.be.true;
-      expect(content2.loadedComplete).to.be.true;
-      expect(blacklistedAd.loadedComplete).to.be.false;
-      expect(blacklistedAnalytics.loadedComplete).to.be.false;
-      expect(blacklistedPixel.loadedComplete).to.be.false;
-      expect(blacklistedAmpAdExit.loadedComplete).to.be.false;
+    let contentIniLoadComplete = false;
+    whenContentIniLoad(ampdoc, win, {}).then(() => {
+      contentIniLoadComplete = true;
     });
+
+    ampdoc.signals().signal('ready-scan');
+    await new Promise(setTimeout);
+
+    content1.load();
+    await new Promise(setTimeout);
+    expect(contentIniLoadComplete).to.be.false;
+
+    content2.load();
+    await new Promise(setTimeout);
+    expect(contentIniLoadComplete).to.be.true;
   });
 });
+
+function resource(win, tagName, overlaps = true, displayed = true) {
+  const deferred = new Deferred();
+  return {
+    element: {
+      tagName: tagName.toUpperCase(),
+    },
+    load: () => {
+      deferred.resolve();
+    },
+    loadedOnce: () => {
+      return deferred.promise;
+    },
+    isDisplayed: () => displayed,
+    overlaps: () => overlaps,
+    isFixed: () => false,
+    prerenderAllowed: () => true,
+    hasBeenMeasured: () => true,
+    hasOwner: () => false,
+    getPageLayoutBoxAsync: () => Promise.resolve(),
+    hostWin: win,
+  };
+}
