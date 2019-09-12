@@ -90,6 +90,16 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {string} */
     this.debugId_ = 'amp-script[unknown].js';
+
+    /**
+     * If true, most production constraints are disabled including script size,
+     * script hash sum for local scripts, etc. Default is false.
+     *
+     * Enabled by the "development" attribute which is intentionally invalid.
+     *
+     * @private {boolean}
+     */
+    this.development_ = false;
   }
 
   /** @override */
@@ -99,6 +109,15 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.development_ = this.element.hasAttribute('development');
+    if (this.development_) {
+      user().warn(
+        TAG,
+        'JavaScript size and script hash requirements are disabled in development mode.',
+        this.element
+      );
+    }
+
     return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
       this.setService(/** @type {!AmpScriptService} */ (service));
     });
@@ -134,7 +153,10 @@ export class AmpScript extends AMP.BaseElement {
       const workerScript = results[0];
       const authorScript = results[1];
 
-      if (this.service_.sizeLimitExceeded(authorScript.length)) {
+      if (
+        !this.development_ &&
+        this.service_.sizeLimitExceeded(authorScript.length)
+      ) {
         user().error(
           TAG,
           'Maximum total script size exceeded (%s). %s is disabled. ' +
@@ -237,7 +259,11 @@ export class AmpScript extends AMP.BaseElement {
           id
         );
         const text = local.textContent;
-        return this.service_.checkSha384(text, debugId).then(() => text);
+        if (this.development_) {
+          return Promise.resolve(text);
+        } else {
+          return this.service_.checkSha384(text, debugId).then(() => text);
+        }
       }
     }
     // No [src] or [script].
@@ -274,10 +300,15 @@ export class AmpScript extends AMP.BaseElement {
           }
           return response.text();
         } else {
-          // For cross-origin, verify hash of script itself.
-          return response.text().then(text => {
-            return this.service_.checkSha384(text, debugId).then(() => text);
-          });
+          // For cross-origin, verify hash of script itself (skip in
+          // development mode).
+          if (this.development_) {
+            return response.text();
+          } else {
+            return response.text().then(text => {
+              return this.service_.checkSha384(text, debugId).then(() => text);
+            });
+          }
         }
       });
   }
@@ -321,9 +352,10 @@ export class AmpScript extends AMP.BaseElement {
 
     // Otherwise, terminate the worker.
     this.workerDom_.terminate();
-    // TODO(dvoytenko): a better UI to indicate the broken state.
+
     this.element.classList.remove('i-amphtml-hydrated');
     this.element.classList.add('i-amphtml-broken');
+
     user().error(
       TAG,
       '%s was terminated due to illegal mutation.',
