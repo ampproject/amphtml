@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- /** @enum {string} */
+/** @enum {string} */
 export const CarouselEvents = {
   INDEX_CHANGE: 'amp-carousel:indexchange',
   SCROLL_START: 'amp-carousel:scrollstart',

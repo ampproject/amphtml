@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {INDEX_CHANGE, SCROLL_POSITION_CHANGED, SCROLL_START} from '../../amp-base-carousel/0.1/carousel-events';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
+import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
@@ -139,15 +139,18 @@ class AmpCarousel extends AMP.BaseElement {
     // Setup actions and listeners
     this.setupActions_();
     this.stopTouchMovePropagation_();
-    this.element.addEventListener(INDEX_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
-    this.element.addEventListener(SCROLL_START, () => {
+    this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
       this.onScrollStarted_();
     });
-    this.element.addEventListener(SCROLL_POSITION_CHANGED, () => {
-      this.onScrollPositionChanged_();
-    });
+    this.element.addEventListener(
+      CarouselEvents.SCROLL_POSITION_CHANGED,
+      () => {
+        this.onScrollPositionChanged_();
+      }
+    );
     this.prevButton_.addEventListener('click', () => this.interactionPrev());
     this.nextButton_.addEventListener('click', () => this.interactionNext());
 

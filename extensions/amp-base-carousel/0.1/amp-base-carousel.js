@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {INDEX_CHANGE} from './carousel-events';
 import {ActionSource} from './action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel.js';
+import {CarouselEvents} from './carousel-events';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
@@ -183,7 +183,7 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Setup actions and listeners
     this.setupActions_();
-    this.element.addEventListener(INDEX_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
     this.prevArrowSlot_.addEventListener('click', event => {
