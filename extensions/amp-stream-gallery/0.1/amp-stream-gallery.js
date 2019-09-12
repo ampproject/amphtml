@@ -72,6 +72,9 @@ class AmpStreamGallery extends AMP.BaseElement {
       this.getAttributeConfig_()
     );
 
+    /** @private @const {boolean} */
+    this.isIos_ = Services.platformFor(this.win).isIos();
+
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
@@ -208,10 +211,13 @@ class AmpStreamGallery extends AMP.BaseElement {
    * @private
    */
   setupListeners_() {
-    this.element.addEventListener('indexchange', event => {
+    this.element.addEventListener('amp-carousel:indexchange', event => {
       this.onIndexChanged_(event);
     });
-    this.element.addEventListener('scrollpositionchange', () => {
+    this.element.addEventListener('amp-carousel:scrollstart', () => {
+      this.onScrollStarted_();
+    });
+    this.element.addEventListener('amp-carousel:scrollpositionchange', () => {
       this.onScrollPositionChanged_();
     });
     this.prevArrowSlot_.addEventListener('click', event => {
@@ -275,18 +281,13 @@ class AmpStreamGallery extends AMP.BaseElement {
 
     // Set up management of layout for the child slides.
     const owners = Services.ownersForDoc(this.element);
-    const isIos = Services.platformFor(this.win).isIos();
     this.childLayoutManager_ = new ChildLayoutManager({
       ampElement: this,
       intersectionElement: this.scrollContainer_,
-      // For iOS, we cannot trigger layout during scrolling or the UI will
-      // flicker, so tell the layout to simply queue the changes, which we
-      // flush after scrolling stops.
-      queueChanges: isIos,
       // For iOS, we queue changes until scrolling stops, which we detect
       // ~200ms after it actually stops. Load items earlier so they have time
       // to load.
-      nearbyMarginInPercent: isIos ? 200 : 100,
+      nearbyMarginInPercent: this.isIos_ ? 200 : 100,
       viewportIntersectionCallback: (child, isIntersecting) => {
         if (isIntersecting) {
           owners.scheduleResume(this.element, child);
@@ -295,6 +296,10 @@ class AmpStreamGallery extends AMP.BaseElement {
         }
       },
     });
+    // For iOS, we cannot trigger layout during scrolling or the UI will
+    // flicker, so tell the layout to simply queue the changes, which we
+    // flush after scrolling stops.
+    this.childLayoutManager_.setQueueChanges(this.isIos_);
 
     this.childLayoutManager_.updateChildren(this.slides_);
     this.carousel_.updateSlides(this.slides_);
@@ -366,8 +371,14 @@ class AmpStreamGallery extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.updateVisibleCount_();
-    this.childLayoutManager_.wasLaidOut();
     this.carousel_.updateUi();
+    this.childLayoutManager_.wasLaidOut();
+
+    // requestAnimationFrame(() => {
+    //   setTimeout(() => {
+    //     this.childLayoutManager_.flushChanges();
+    //   });
+    // });
 
     return Promise.resolve();
   }
@@ -670,6 +681,14 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 
   /**
+   * Starts queuing all intersection based changes when scrolling starts, to
+   * prevent paint flickering on iOS.
+   */
+  onScrollStarted_() {
+    this.childLayoutManager_.setQueueChanges(this.isIos_);
+  }
+
+  /**
    * Update the UI (buttons) for the new scroll position. This occurs when
    * scrolling has settled.
    */
@@ -677,6 +696,8 @@ class AmpStreamGallery extends AMP.BaseElement {
     // Now that scrolling has settled, flush any layout changes for iOS since
     // it will not cause flickering.
     this.childLayoutManager_.flushChanges();
+    this.childLayoutManager_.setQueueChanges(false);
+
     this.updateUi_();
   }
 
