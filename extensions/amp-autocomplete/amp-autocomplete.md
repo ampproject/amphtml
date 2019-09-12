@@ -125,7 +125,26 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>items (optional)</strong></td>
-    <td>Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response. The default value is <code>"items"</code>. The expected response: <code>{items: [...]}</code>.
+    <td>Specifies the key to the data array within the JSON response. Nested keys can be expressed with a dot-notated value such as <code>field1.field2.</code> The default value is <code>"items"</code>. The following are examples with and without usage:
+    <pre lang="html">
+
+      <amp-autocomplete filter="prefix">
+          <input type="text">
+          <script type=application/json>
+            { "items" : ["apples", "bananas", "pears"] }
+           </script>
+      </amp-autocomplete>
+  </pre>
+  <pre lang="html">
+
+      <amp-autocomplete filter="prefix" items="fruit">
+        <input type="text">
+        <script type=application/json>
+          { "fruit" : ["apples", "bananas", "pears"] }
+          </script>
+      </amp-autocomplete>
+  </pre>
+      In the first example, the JSON payload is queued by the "items" key, and thus no component attribute is needed because the default value corresponds. In the second example, the JSON payload is queued by the "fruit" key, so the <code>items</code> attribute is given the value <code>"fruit"</code> so as to accurately etrieve the intended datasource. In both examples, the end user interaction is the same.
     </td>
   </tr>
 </table>
