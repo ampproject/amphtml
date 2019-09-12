@@ -172,6 +172,10 @@ Since custom JS run in `amp-script` is not subject to normal [Content Security P
 </body>
 ```
 
+{% call callout('Tip', type='success') %}
+The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
+{% endcall %}
+
 ## Attributes
 
 **src**
