@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AdNetworkConfigDef} from './ad-network-config';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
@@ -23,7 +22,7 @@ import {dict} from '../../../src/utils/object';
  * A fake ad network integration that is mainly used for testing
  * and demo purposes. This implementation gets stripped out in compiled
  * production code.
- * @implements {AdNetworkConfigDef}
+ * @implements {./ad-network-config.AdNetworkConfigDef}
  * @visibleForTesting
  */
 export class PingNetworkConfig {
