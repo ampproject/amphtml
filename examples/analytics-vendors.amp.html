@@ -1309,18 +1309,14 @@ For complete documentation and additional examples please see: https://marketing
 <!-- End Snowplow Analytics example -->
 
 <!-- Snowplow v2 Analytics tracking -->
-<!-- reason behinf maxTimerLength": 4.99  is discussed here https://github.com/ampproject/amphtml/issues/16910 -->
 <amp-analytics type="snowplow_v2" id="snowplow_v2" data-credentials="include">
 <script type="application/json">
   {
     "vars": {
-      "collectorHost": "d3rkrsqld9gmqf.cloudfront.net",
-      "appId": "amp-examples",
-      "userId": "${cookie(_sp_uid)}",
-      "domainUserId": "${cookie(_sp_duid)}",
-      "sessionId": "${cookie(_sp_sid)}",
-      "spVisitIndex": "${cookie(_sp_vid)}",
-      "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0\",\"data\":[{\"schema\":\"iglu:com.google.analytics/cookies/jsonschema/1-0-0\",\"data\":{\"_ga\":\"${clientId(_ga)}\"}}]}"
+      "collectorHost": "collector.snplow.net",
+      "appId": "amp-examples-v2.0.1",
+      "userId": "someUserId",
+      "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/gdpr/jsonschema/1-0-0\",\"data\":{\"basisForProcessing\":\"legitimate_interests\"}}"
     },
     "linkers": {
       "enabled": true,
@@ -1366,15 +1362,15 @@ For complete documentation and additional examples please see: https://marketing
           }
         }
       },
-      "trackSelfDescribedEvent": {
+      "trackSelfDescribingEvent": {
         "on": "click",
         "selector": "a",
-        "request": "selfDescribedEvent",
+        "request": "selfDescribingEvent",
         "vars": {
           "customEventSchemaVendor": "com.snowplowanalytics.snowplow",
           "customEventSchemaName": "link_click",
           "customEventSchemaVersion": "1-0-1",
-          "customEventSchemaData": "\"targetUrl\":\"${targetUrl}\",\"elementId\":\"TEST\",\"elementContent\":\"${elementContent}\""
+          "customEventSchemaData": "{\"targetUrl\":\"${targetUrl}\",\"elementId\":\"TEST\",\"elementContent\":\"${elementContent}\"}"
         }
       },
       "clickOnTest1Trigger": {

@@ -14,95 +14,70 @@
  * limitations under the License.
  */
 
+// To contribute, please submit issues and PRs to https://github.com/snowplow-incubator/amphtml
+
 import {jsonLiteral} from '../../../../src/json';
 
 const SNOWPLOW_V2_CONFIG = jsonLiteral({
   'linkers': {
     'linker': {
       'ids': {
-        '_sp_asid': '${linkerSessionId}',
-        '_sp_aduid': '${duid}',
+        '_sp_duid': '${duid}',
+        'amp_id': '${ampVistorId}',
       },
     },
   },
   'cookies': {
     'enabled': true,
     'cookieMaxAge': 1800,
-    '_sp_lsid': {
+    '_sp_duid': {
       'value':
-        '$IF(LINKER_PARAM(linker,_sp_asid), LINKER_PARAM(linker,_sp_asid), QUERY_PARAM(_sp_asid))',
-    },
-    '_sp_lduid': {
-      'value':
-        '$IF(LINKER_PARAM(linker,_sp_aduid), LINKER_PARAM(linker,_sp_aduid), QUERY_PARAM(_sp_aduid))',
-    },
-    '_sp_asid': {
-      'value': '$IF(COOKIE(_sp_asid), COOKIE(_sp_asid), COOKIE(_sp_lsid))',
-    },
-    '_sp_aduid': {
-      'value': '$IF(COOKIE(_sp_aduid), COOKIE(_sp_aduid), COOKIE(_sp_lduid))',
+        '$IF($IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $SUBSTR(QUERY_PARAM(_sp),0,36))',
     },
   },
   'vars': {
+    'aaVersion': 'amp-1.0.0',
     'ampVistorId': 'CLIENT_ID(_sp_id)',
-    'generatedSessionId': [
-      '616d70',
-      '$SUBSTR(RANDOM,2,2)',
-      '-',
-      '$SUBSTR(RANDOM,2,4)',
-      '-4',
-      '$SUBSTR(RANDOM,2,3)',
-      '-8',
-      '$SUBSTR(RANDOM,2,3)',
-      '-',
-      '$SUBSTR(RANDOM,2,12)',
-    ].join(''),
-    'linkerSessionId':
-      '$IF(COOKIE(_sp_asid), COOKIE(_sp_asid), ${generatedSessionId})',
-    'sid': '$IF(${sessionId}, ${sessionId}, ${linkerSessionId})',
-    'vid': '$IF(${spVisitIndex}, ${spVisitIndex}, 0)',
-    'duid': '$IF(${domainUserId}, ${domainUserId}, ${ampVistorId})',
+    'nullString': 'null',
     'customEventTemplate': [
       '{',
       '"schema":"iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",',
       '"data":{',
       '"schema":"iglu:${customEventSchemaVendor}/${customEventSchemaName}/jsonschema/${customEventSchemaVersion}",',
-      '"data":{',
+      '"data":',
       '${customEventSchemaData}',
       '}',
       '}',
-      '}',
     ].join(''),
+    'contextsHead':
+      '{"schema":"iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0","data":[{"schema":"iglu:dev.amp.snowplow/amp_id/jsonschema/1-0-0","data":{"ampClientId":"${ampVistorId}", "domainUserid": "COOKIE(_sp_duid)", "userId": "${userId}"}},$REPLACE(`${customContexts}`, `^,*(.+?),*$`, `$1,`)',
+    'contextsTail':
+      '{"schema":"iglu:dev.amp.snowplow/amp_web_page/jsonschema/1-0-0","data":{"ampPageViewId":"PAGE_VIEW_ID_64"}}]}',
   },
   'requests': {
-    'aaVersion': 'amp_v2-0.1',
-    'basePrefix': 'https://${collectorHost}/i?p=web',
+    'basePrefix': 'https://${collectorHost}/i?p=web&tv=${aaVersion}',
     'pageView': '${basePrefix}&e=pv',
     'structEvent':
-      '${basePrefix}&e=se&se_ca=${structEventCategory}&se_ac=${structEventAction}&se_la=${structEventLabel}&se_pr=${structEventProperty}&se_va=${structEventValue}',
+      '${basePrefix}&e=se&se_ca=${structEventCategory}&se_ac=${structEventAction}&se_la=${structEventLabel}&se_pr=${structEventProperty}&se_va=$IF(${structEventValue}, ${structEventValue}, ${nullString})',
     'pagePing': '${basePrefix}&e=pp&pp_mix=${scrollLeft}&pp_miy=${scrollTop}',
-    'selfDescribedEvent': '${basePrefix}&e=ue&ue_pr=${customEventTemplate}',
+    'selfDescribingEvent': '${basePrefix}&e=ue&ue_pr=${customEventTemplate}',
   },
   'extraUrlParams': {
-    'url': '${canonicalUrl}',
+    'url': '${ampdocUrl}',
     'page': '${title}',
     'res': '${screenWidth}x${screenHeight}',
-    'stm': '${timestamp}',
+    'dtm': '${timestamp}',
     'tz': '${timezoneCode}',
     'aid': '${appId}',
-    'tv': '${aaVersion}',
     'cd': '${screenColorDepth}',
     'cs': '${documentCharset}',
-    'duid': '${duid}',
     'lang': '${browserLanguage}',
     'refr': '${documentReferrer}',
     'vp': '${viewportWidth}x${viewportHeight}',
     'ua': '${userAgent}',
     'ds': '${scrollWidth}x${scrollHeight}',
     'uid': '${userId}',
-    'vid': '${vid}',
-    'sid': '${sid}',
-    'co': '${customContexts}',
+    'co': '${contextsHead}${contextsTail}',
   },
   'transport': {
     'beacon': false,
