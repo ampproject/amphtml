@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {INDEX_CHANGE, SCROLL_POSITION_CHANGED, SCROLL_START} from './carousel-events';
 import {ActionSource} from './action-source';
 import {
   Alignment,
@@ -688,7 +689,7 @@ export class Carousel {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'amp-carousel:indexchange',
+        INDEX_CHANGE,
         dict({
           'index': restingIndex,
           'actionSource': this.actionSource_,
@@ -704,7 +705,7 @@ export class Carousel {
    */
   notifyScrollStart() {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'amp-carousel:scrollstart', null)
+      createCustomEvent(this.win_, SCROLL_START, null)
     );
   }
 
@@ -715,7 +716,7 @@ export class Carousel {
    */
   notifyScrollPositionChanged_() {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'amp-carousel:scrollpositionchange', null)
+      createCustomEvent(this.win_, SCROLL_POSITION_CHANGED, null)
     );
   }
 

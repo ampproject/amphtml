@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {INDEX_CHANGE, SCROLL_POSITION_CHANGED, SCROLL_START} from '../../amp-base-carousel/0.1/carousel-events';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
@@ -138,13 +139,13 @@ class AmpCarousel extends AMP.BaseElement {
     // Setup actions and listeners
     this.setupActions_();
     this.stopTouchMovePropagation_();
-    this.element.addEventListener('amp-carousel:indexchange', event => {
+    this.element.addEventListener(INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
-    this.element.addEventListener('amp-carousel:scrollstart', () => {
+    this.element.addEventListener(SCROLL_START, () => {
       this.onScrollStarted_();
     });
-    this.element.addEventListener('amp-carousel:scrollpositionchange', () => {
+    this.element.addEventListener(SCROLL_POSITION_CHANGED, () => {
       this.onScrollPositionChanged_();
     });
     this.prevButton_.addEventListener('click', () => this.interactionPrev());
