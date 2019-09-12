@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AdSenseNetworkConfig} from './ad-adsense-network-config';
-import {DenakopNetworkConfig} from './ad-denakop-network-config';
-import {DoubleclickNetworkConfig} from './ad-doubleclick-network-config';
-import {PingNetworkConfig} from './ad-ping-network-config';
+import {AdSenseNetworkConfig} from './adsense-network-config';
+import {DenakopNetworkConfig} from './denakop-network-config';
+import {DoubleclickNetworkConfig} from './doubleclick-network-config';
+import {PingNetworkConfig} from './ping-network-config';
 import {getMode} from '../../../src/mode';
 
 /** @typedef {{width: (number|undefined), height: (number|undefined)}} */
