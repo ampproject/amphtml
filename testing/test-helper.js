@@ -15,6 +15,7 @@
  */
 
 import {WindowInterface} from '../src/window-interface';
+import {getMode} from '../src/mode';
 import {
   getService,
   getServiceForDoc,
@@ -213,6 +214,10 @@ export class BrowserController {
   constructor(win) {
     this.win_ = win;
     this.doc_ = this.win_.document;
+  }
+
+  getMode() {
+    return getMode(this.win);
   }
 
   wait(duration) {

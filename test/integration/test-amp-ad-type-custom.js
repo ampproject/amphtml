@@ -75,6 +75,10 @@ describes.integration(
       return browser.waitForElementLayout('amp-ad');
     });
 
+    it('should enable test mode when running on Travis', () => {
+      expect(browser.getMode().test).to.be.true;
+    });
+
     it('should render template', () => {
       expect(doc.querySelectorAll('amp-img')).to.have.length(3);
 

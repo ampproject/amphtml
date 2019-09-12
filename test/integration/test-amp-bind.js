@@ -289,6 +289,10 @@ describe
         browser = new BrowserController(env.win);
       });
 
+      it('should enable test mode when running on Travis', () => {
+        expect(browser.getMode().test).to.be.true;
+      });
+
       it('[src]', () => {
         expect(list.getAttribute('src')).to.equal(
           '/list/fruit-data/get?cors=0'
