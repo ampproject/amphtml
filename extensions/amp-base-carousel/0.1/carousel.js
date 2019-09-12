@@ -688,7 +688,7 @@ export class Carousel {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'indexchange',
+        'amp-carousel:indexchange',
         dict({
           'index': restingIndex,
           'actionSource': this.actionSource_,
@@ -702,9 +702,20 @@ export class Carousel {
    * settled. In some situations, the index may not change, but you still want
    * to react to the scroll position changing.
    */
+  notifyScrollStart() {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'amp-carousel:scrollstart', null)
+    );
+  }
+
+  /**
+   * Fires an event when the scroll position has changed, once scrolling has
+   * settled. In some situations, the index may not change, but you still want
+   * to react to the scroll position changing.
+   */
   notifyScrollPositionChanged_() {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'scrollpositionchange', null)
+      createCustomEvent(this.win_, 'amp-carousel:scrollpositionchange', null)
     );
   }
 
@@ -756,6 +767,7 @@ export class Carousel {
 
     this.scrolling_ = true;
     this.updateCurrent_();
+    this.notifyScrollStart();
     this.debouncedResetScrollReferencePoint_();
   }
 

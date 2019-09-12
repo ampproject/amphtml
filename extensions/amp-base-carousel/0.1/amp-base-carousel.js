@@ -182,7 +182,7 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Setup actions and listeners
     this.setupActions_();
-    this.element.addEventListener('indexchange', event => {
+    this.element.addEventListener('amp-carousel:indexchange', event => {
       this.onIndexChanged_(event);
     });
     this.prevArrowSlot_.addEventListener('click', event => {
