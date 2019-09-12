@@ -35,7 +35,6 @@ const wrappers = require('../compile-wrappers');
 const {altMainBundles, jsBundles} = require('../../bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {isTravisBuild} = require('../travis');
 const {thirdPartyFrames} = require('../config');
 const {transpileTs} = require('../typescript');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
@@ -106,9 +105,7 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
  * @return {!Promise}
  */
 function compileAllMinifiedJs() {
-  if (isTravisBuild()) {
-    log('Minifying multi-pass JS with', cyan('closure-compiler'));
-  }
+  log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
   return compileAllJs(/* watch */ false, /* minify */ true);
 }
 
@@ -118,9 +115,7 @@ function compileAllMinifiedJs() {
  * @return {!Promise}
  */
 function compileAllUnminifiedJs(watch) {
-  if (isTravisBuild()) {
-    log('Compiling JS with', cyan('browserify'));
-  }
+  log('Compiling JS with', cyan('browserify') + '...');
   return compileAllJs(/* watch */ watch);
 }
 
@@ -432,11 +427,6 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
           return enableLocalTesting(`${destDir}/${destFilename}`);
         }
-      })
-      .then(() => {
-        if (isTravisBuild()) {
-          process.stdout.write('.');
-        }
       });
   }
 
@@ -496,9 +486,7 @@ function endBuildStep(stepName, targetName, startTime) {
   } else {
     timeString += secs + '.' + ms + ' s)';
   }
-  if (!isTravisBuild()) {
-    log(stepName, cyan(targetName), green(timeString));
-  }
+  log(stepName, cyan(targetName), green(timeString));
 }
 
 /**
@@ -506,43 +494,39 @@ function endBuildStep(stepName, targetName, startTime) {
  * @param {string} command Command being run.
  */
 function printConfigHelp(command) {
-  if (!isTravisBuild()) {
-    log(
-      green('Building version'),
-      cyan(internalRuntimeVersion),
-      green('of the runtime for local testing with the'),
-      cyan(argv.config === 'canary' ? 'canary' : 'prod'),
-      green('AMP config.')
-    );
-    log(
-      green('⤷ Use'),
-      cyan('--config={canary|prod}'),
-      green('with your'),
-      cyan(command),
-      green('command to specify which config to apply.')
-    );
-  }
+  log(
+    green('Building version'),
+    cyan(internalRuntimeVersion),
+    green('of the runtime for local testing with the'),
+    cyan(argv.config === 'canary' ? 'canary' : 'prod'),
+    green('AMP config.')
+  );
+  log(
+    green('⤷ Use'),
+    cyan('--config={canary|prod}'),
+    green('with your'),
+    cyan(command),
+    green('command to specify which config to apply.')
+  );
 }
 
 /**
  * Prints a message that could help speed up local development.
  */
 function printNobuildHelp() {
-  if (!isTravisBuild()) {
-    for (const task of NOBUILD_HELP_TASKS) {
-      // eslint-disable-line local/no-for-of-statement
-      if (argv._.includes(task)) {
-        log(
-          green('To skip building during future'),
-          cyan(task),
-          green('runs, use'),
-          cyan('--nobuild'),
-          green('with your'),
-          cyan(`gulp ${task}`),
-          green('command.')
-        );
-        return;
-      }
+  for (const task of NOBUILD_HELP_TASKS) {
+    // eslint-disable-line local/no-for-of-statement
+    if (argv._.includes(task)) {
+      log(
+        green('To skip building during future'),
+        cyan(task),
+        green('runs, use'),
+        cyan('--nobuild'),
+        green('with your'),
+        cyan(`gulp ${task}`),
+        green('command.')
+      );
+      return;
     }
   }
 }

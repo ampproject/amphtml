@@ -24,7 +24,6 @@ const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
-const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 /**
@@ -69,9 +68,7 @@ async function checkTypes() {
       await startNailgunServer(checkTypesNailgunPort, /* detached */ false);
     })
     .then(() => {
-      if (!isTravisBuild()) {
-        log('Checking types...');
-      }
+      log('Checking types...');
       return Promise.all([
         closureCompile(
           compileSrcs.concat(extensionSrcs),
@@ -119,12 +116,6 @@ async function checkTypes() {
           }
         ),
       ]);
-    })
-    .then(() => {
-      if (isTravisBuild()) {
-        // New line after all the compilation progress dots on Travis.
-        console.log('\n');
-      }
     })
     .then(async () => {
       await stopNailgunServer(checkTypesNailgunPort);
