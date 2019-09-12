@@ -18,6 +18,7 @@ import {AdNetworkConfigDef} from './ad-network-config';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
+import {parseUrlDeprecated} from '../../../src/url';
 
 /**
  * @implements {AdNetworkConfigDef}
