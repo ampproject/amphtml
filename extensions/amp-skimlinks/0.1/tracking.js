@@ -15,7 +15,7 @@
  */
 
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
-import {dict} from '../../../src/utils/object';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
@@ -166,14 +166,14 @@ export class Tracking {
   /**
    * Sends tracking request to Skimlinks tracking API in order to
    * register page impression request.
-   * @param {!Object} commonData
+   * @param {!JsonObject} commonData
    * @param {number} numberAffiliateLinks
    * @private
    */
   sendPageImpressionTracking_(commonData, numberAffiliateLinks) {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
-    const data = /** @type {!JsonObject} */ (Object.assign(
+    const data = jsonObjectAssign(
       dict({
         'slc': numberAffiliateLinks,
         'jsl': 0, // Javascript load time, not relevant in AMP context.
@@ -182,7 +182,7 @@ export class Tracking {
         't': 1,
       }),
       commonData
-    ));
+    );
 
     // Sends POST request. Second param is the object used to interpolate
     // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL
@@ -198,7 +198,7 @@ export class Tracking {
   /**
    * Sends tracking request to Skimlinks tracking API in order to
    * register link impression request.
-   * @param {!Object} commonData
+   * @param {!JsonObject} commonData
    * @param {number} numberAffiliateLinks
    * @param {!JsonObject} urls
    * @private
@@ -209,14 +209,14 @@ export class Tracking {
       return;
     }
 
-    const data = /** @type {!JsonObject} */ (Object.assign(
+    const data = jsonObjectAssign(
       dict({
         'dl': urls,
         'hae': numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
         'typ': 'l',
       }),
       commonData
-    ));
+    );
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../../../src/utils/object';
+import {dict, jsonObjectAssign} from '../../../src/utils/object';
 
 /** @enum {string} */
 export const GrantReason = {
@@ -94,11 +94,11 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   jsonForPingback() {
-    return /** @type {!JsonObject} */ (Object.assign(
-      {},
-      {'raw': this.raw},
+    return jsonObjectAssign(
+      dict({}),
+      dict({'raw': this.raw}),
       this.json()
-    ));
+    );
   }
 
   /**

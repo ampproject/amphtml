@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dict, omit} from '../../../src/utils/object';
+import {dict, jsonObjectOmit} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 
 /**
@@ -201,10 +201,10 @@ export function withDatePickerCommon(WrappedComponent) {
 
   /** @override */
   DateComponent.prototype.render = function() {
-    const props = /** @type {!JsonObject} */ (omit(
+    const props = jsonObjectOmit(
       this.props,
       Object.keys(defaultProps)
-    ));
+    );
 
     const date = props['date'];
     const daySize = props['daySize'];

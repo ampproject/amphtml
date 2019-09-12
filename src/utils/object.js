@@ -144,6 +144,7 @@ export function omit(o, props) {
   }, {});
 }
 
+
 /**
  * @param {!JsonObject} target
  * @param {...(!JsonObject|null|undefined)} var_args
@@ -164,4 +165,13 @@ export function jsonObjectAssign(target, var_args) {
  */
 export function jsonObjectDeepMerge(target, source, depth) {
   return /** @type {!JsonObject} */ (deepMerge(target, source, depth));
+}
+
+/**
+ * @param {!JsonObject} o An json object to remove properties from
+ * @param {!Array<string>} props A list of properties to remove from the Object
+ * @return {!JsonObject} An json object with the given properties removed
+ */
+export function jsonObjectOmit(o, props) {
+  return /** @type {!JsonObject} */ (omit(o, props));
 }

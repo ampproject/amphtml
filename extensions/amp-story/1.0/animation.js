@@ -125,6 +125,9 @@ class AnimationRunner {
 
     /** @private @const {!Promise<!Object<string, *>>} */
     this.firstFrameProps_ = this.keyframes_.then(keyframes =>
+      // TODO(erwinm): any occurrence of "omit" can be dangerous as keys
+      // could be obfuscated. Check with the owner if this object typedef
+      // should be in extern or if we can make this a JsonObject.
       omit(keyframes[0], ['offset'])
     );
 

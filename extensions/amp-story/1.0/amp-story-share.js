@@ -21,7 +21,7 @@ import {
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from './../../../src/utils/object';
+import {dict, jsonObjectAssign, map} from './../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
@@ -151,7 +151,7 @@ function buildProvider(doc, shareType, opt_params) {
     /** @type {!Array<!./simple-template.ElementDef>} */ ([
       {
         tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (Object.assign(
+        attrs: jsonObjectAssign(
           dict({
             'width': 48,
             'height': 48,
@@ -159,7 +159,7 @@ function buildProvider(doc, shareType, opt_params) {
             'type': shareType,
           }),
           buildProviderParams(opt_params)
-        )),
+        ),
         children: [
           {
             tag: 'span',
@@ -372,7 +372,7 @@ export class ShareWidget {
           buildProvider(
             this.win.document,
             provider['provider'],
-            /** @type {!JsonObject} */ (provider)
+            provider
           )
         );
         return;

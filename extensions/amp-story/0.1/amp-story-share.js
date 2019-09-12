@@ -21,7 +21,7 @@ import {
   isCopyingToClipboardSupported,
 } from '../../../src/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict, map} from './../../../src/utils/object';
+import {dict, jsonObjectAssign, map} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -140,7 +140,7 @@ function buildProvider(doc, shareType, opt_params) {
     /** @type {!Array<!./simple-template.ElementDef>} */ ([
       {
         tag: 'amp-social-share',
-        attrs: /** @type {!JsonObject} */ (Object.assign(
+        attrs: jsonObjectAssign(
           dict({
             'width': 48,
             'height': 66,
@@ -148,7 +148,7 @@ function buildProvider(doc, shareType, opt_params) {
             'type': shareType,
           }),
           buildProviderParams(opt_params)
-        )),
+        ),
         localizedStringId: shareProviderLocalizedStringId,
       },
     ])
