@@ -115,8 +115,8 @@ async function storeBundleSize() {
         token: process.env.BUNDLE_SIZE_TOKEN,
         // TODO(#21275): replace the gzippedBundleSize value once the
         // bundle-size app prefers Brotli.
-        gzippedBundleSize: `${getGzippedBundleSize()}KB`,
-        brotliBundleSize: `${getBrotliBundleSize()}KB`,
+        gzippedBundleSize: getGzippedBundleSize(),
+        brotliBundleSize: getBrotliBundleSize(),
       },
     });
     if (response.statusCode < 200 || response.statusCode >= 300) {
