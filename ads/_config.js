@@ -238,7 +238,7 @@ const adConfig = jsonConfiguration({
 
   'adyoulike': {
     consentHandlingOverride: true,
-    prefetch: 'https://pixels.omnitagjs.com/amp.js',
+    prefetch: 'https://fo-static.omnitagjs.com/amp.js',
     renderStartImplemented: true,
   },
 
