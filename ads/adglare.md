@@ -28,10 +28,8 @@ limitations under the License.
 ```
 
 ## Configuration
+For more details, see AdGlare's blog article about [AMP Ad Tags](https://www.adglare.com/kb/51/amp-ad-server).
 
-For details on the configuration semantics, please contact AdGlare Support. 
-
-Supported parameters:
 ### Required parameters
 - `data-host`
 - `data-zid`
