@@ -23,9 +23,9 @@ import {validateData, writeScript} from '../3p/3p';
 export function adglare(global, data) {
   validateData(data, ['host','zid'], ['keywords']);
   
-  let s = global.document.createElement('span');
-  s.id = 'zone' + data.zid;
-  global.document.getElementById('c').appendChild(s);
+  let adglare_span = global.document.createElement('span');
+  adglare_span.id = 'zone' + data.zid;
+  global.document.getElementById('c').appendChild(adglare_span);
   
   let url = 'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
   if(data.keywords) url += '&keywords=' + data.keywords;
