@@ -28,16 +28,10 @@ export function adglare(global, data) {
   global.document.getElementById('c').appendChild(adglareSpan);
 
   let url =
-    'https://' +
-    data.host +
-    '.engine.adglare.net/?' +
-    data.zid +
-    '&amp';
-  if(data.keywords) {
+    'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
+  if( data.keywords ) {
     url =
-      url +
-      '&keywords=' +
-      data.keywords;
+      url + '&keywords=' + data.keywords;
   }
 
   writeScript(global, url);
