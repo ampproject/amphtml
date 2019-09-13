@@ -22,7 +22,7 @@ limitations under the License.
 <amp-ad width="300" height="250" layout="responsive"
     type="adglare"
     data-host="try"
-    data-id="810958668"
+    data-zid="810958668"
     data-keywords="blue,car">
 </amp-ad>
 ```
@@ -34,7 +34,7 @@ For details on the configuration semantics, please contact AdGlare Support.
 Supported parameters:
 ### Required parameters
 - `data-host`
-- `data-id`
+- `data-zid`
 
 ### Optional parameters
 - `data-keywords`
