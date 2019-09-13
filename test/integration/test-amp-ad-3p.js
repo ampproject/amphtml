@@ -119,7 +119,7 @@ describe.configure().run('amp-ad 3P', () => {
         });
         expect(parseInt(context.pageViewId, 10)).to.be.greaterThan(0);
         // In some browsers the referrer is empty.
-        if (context.referrer !== '') {
+        if (context.referrer && context.referrer.length > 0) {
           expect(context.referrer).to.contain(
             'http://localhost:' + location.port
           );
