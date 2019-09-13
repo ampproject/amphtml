@@ -237,6 +237,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Adform](../../ads/adform.md)
 - [Adfox](../../ads/adfox.md)
 - [Ad Generation](../../ads/adgeneration.md)
+- [AdGlare](../../ads/adglare.md)
 - [Adhese](../../ads/adhese.md)
 - [Adincube](../../ads/adincube.md)
 - [ADITION](../../ads/adition.md)
