@@ -425,7 +425,7 @@ describes.realWin('child layout manager', {}, env => {
       const el = createHorizontalScroller(5);
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
-        intersectionElement: el
+        intersectionElement: el,
       });
 
       clm.setQueueChanges(true);
