@@ -16,10 +16,6 @@
 
 import {validateData, writeScript} from '../3p/3p';
 
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
 export function adglare(global, data) {
   validateData(data, ['host', 'zid'], ['keywords']);
 
