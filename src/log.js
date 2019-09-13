@@ -123,9 +123,8 @@ const externalMessagesSimpleTableUrl = () =>
  * @param {*} arg
  * @return {string}
  */
-function messageArgToEncodedComponent(arg) {
-  return encodeURIComponent(elementStringOrPassthru(arg).toString());
-}
+const messageArgToEncodedComponent = arg =>
+  encodeURIComponent(elementStringOrPassthru(arg).toString());
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
