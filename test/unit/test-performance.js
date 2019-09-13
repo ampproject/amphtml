@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
@@ -519,27 +520,16 @@ describes.realWin('performance', {amp: true}, env => {
     });
 
   it('should wait for visible resources', () => {
-    function resource() {
-      const res = {
-        loadedComplete: false,
-      };
-      res.loadedOnce = () =>
-        Promise.resolve().then(() => {
-          res.loadedComplete = true;
-        });
-      return res;
-    }
-
     const resources = Services.resourcesForDoc(ampdoc);
-    const resourcesMock = sandbox.mock(resources);
+    sandbox.stub(resources, 'whenFirstPass').returns(Promise.resolve());
+    const whenContentIniLoadStub = sandbox
+      .stub(IniLoad, 'whenContentIniLoad')
+      .returns(Promise.resolve());
     perf.resources_ = resources;
 
-    const res1 = resource();
-    const res2 = resource();
-
-    resourcesMock
-      .expects('getResourcesInRect')
-      .withExactArgs(
+    return perf.whenViewportLayoutComplete_().then(() => {
+      expect(whenContentIniLoadStub).to.be.calledWith(
+        perf.win.document.documentElement,
         perf.win,
         sinon.match(
           arg =>
@@ -549,17 +539,7 @@ describes.realWin('performance', {amp: true}, env => {
             arg.height == perf.win.innerHeight
         ),
         /* inPrerender */ true
-      )
-      .returns(Promise.resolve([res1, res2]))
-      .once();
-    resourcesMock
-      .expects('whenFirstPass')
-      .returns(Promise.resolve())
-      .once();
-
-    return perf.whenViewportLayoutComplete_().then(() => {
-      expect(res1.loadedComplete).to.be.true;
-      expect(res2.loadedComplete).to.be.true;
+      );
     });
   });
 
