@@ -125,6 +125,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
 
+  'adglare': {
+    renderStartImplemented: true,
+  },
+
   'adhese': {
     renderStartImplemented: true,
   },
