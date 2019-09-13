@@ -917,6 +917,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'smilewanted': {
+    prefetch: 'https://prebid.smilewanted.com/amp/amp.js',
+    preconnect: 'https://static.smilewanted.com',
+    renderStartImplemented: true,
+  },
+
   'sogouad': {
     prefetch: 'https://theta.sogoucdn.com/wap/js/aw.js',
     renderStartImplemented: true,
