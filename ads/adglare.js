@@ -29,9 +29,8 @@ export function adglare(global, data) {
 
   let url =
     'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
-  if( data.keywords ) {
-    url =
-      url + '&keywords=' + data.keywords;
+  if (data.keywords) {
+    url = url + '&keywords=' + data.keywords;
   }
 
   writeScript(global, url);
