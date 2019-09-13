@@ -28,7 +28,7 @@ export function adglare(global, data) {
   global.document.getElementById('c').appendChild(s);
   
   var url = 'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
-  if(data.keywords) url += '&keywords=' = data.keywords;
+  if(data.keywords) url = url + '&keywords=' + data.keywords;
 
   writeScript(global, url);
 }
