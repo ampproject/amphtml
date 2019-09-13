@@ -21,14 +21,24 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function adglare(global, data) {
-  validateData(data, ['host','zid'], ['keywords']);
-  
-  let adglare_span = global.document.createElement('span');
-  adglare_span.id = 'zone' + data.zid;
-  global.document.getElementById('c').appendChild(adglare_span);
-  
-  let url = 'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
-  if(data.keywords) url += '&keywords=' + data.keywords;
+  validateData(data, ['host', 'zid'], ['keywords']);
+
+  const adglareSpan = global.document.createElement('span');
+  adglareSpan.id = 'zone' + data.zid;
+  global.document.getElementById('c').appendChild(adglareSpan);
+
+  let url =
+    'https://' +
+    data.host +
+    '.engine.adglare.net/?' +
+    data.zid +
+    '&amp';
+  if(data.keywords) {
+    url =
+      url +
+      '&keywords=' +
+      data.keywords;
+  }
 
   writeScript(global, url);
 }
