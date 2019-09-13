@@ -24,6 +24,7 @@ import {isCanary} from '../experiments';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
+import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
 /**
@@ -632,13 +633,12 @@ export class Performance {
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.whenFirstPass().then(() => {
-      // TODO(lannka): should avoid this type casting by moving the `getResourcesInRect`
-      // logic here.
-      const resources = /** @type {!./resources-impl.ResourcesImpl} */ (this
-        .resources_);
-      return resources
-        .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
-        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+      return whenContentIniLoad(
+        documentElement,
+        this.win,
+        rect,
+        /* isInPrerender */ true
+      );
     });
   }
 

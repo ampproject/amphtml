@@ -56,14 +56,7 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
-
-/** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD = [
-  'AMP-AD',
-  'AMP-ANALYTICS',
-  'AMP-PIXEL',
-  'AMP-AD-EXIT',
-];
+import {whenContentIniLoad} from './ini-load';
 
 /**
  * @const {{experiment: string, control: string, branch: string}}
@@ -854,31 +847,6 @@ export class FriendlyIframeEmbed {
     });
     return Promise.all(promises);
   }
-}
-
-/**
- * Returns the promise that will be resolved when all content elements
- * have been loaded in the initially visible set.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
- * @param {!Window} hostWin
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!Promise}
- */
-export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
-  // TODO(lannka): should avoid this type casting by moving the `getResourcesInRect`
-  // logic here.
-  const resources = /** @type {!./service/resources-impl.ResourcesImpl} */ (Services.resourcesForDoc(
-    elementOrAmpDoc
-  ));
-  return resources.getResourcesInRect(hostWin, rect).then(resources => {
-    const promises = [];
-    resources.forEach(r => {
-      if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
-        promises.push(r.loadedOnce());
-      }
-    });
-    return Promise.all(promises);
-  });
 }
 
 /**
