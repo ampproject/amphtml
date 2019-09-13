@@ -124,12 +124,7 @@ const externalMessagesSimpleTableUrl = () =>
  * @return {string}
  */
 function messageArgToEncodedComponent(arg) {
-  try {
-    return encodeURIComponent(toString(arg));
-  } catch (_) {
-    // Some objects can't be serialized.
-    return encodeURIComponent('[object Object]');
-  }
+  return encodeURIComponent(elementStringOrPassthru(arg).toString());
 }
 
 /**
@@ -423,7 +418,7 @@ export class Log {
         }
         messageArray.push(val);
         pushIfNonEmpty(messageArray, nextConstant.trim());
-        formatted += toString(val) + nextConstant;
+        formatted += stringOrElementString(val) + nextConstant;
       }
       const e = new Error(formatted);
       e.fromAssert = true;
@@ -642,12 +637,19 @@ export class Log {
  * @param {string|!Element} val
  * @return {string}
  */
-function toString(val) {
+const stringOrElementString = val =>
+  /** @type {string} */ (elementStringOrPassthru(val));
+
+/**
+ * @param {*} val
+ * @return {*}
+ */
+function elementStringOrPassthru(val) {
   // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
-  return /** @type {string} */ (val);
+  return val;
 }
 
 /**
