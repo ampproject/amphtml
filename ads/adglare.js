@@ -23,12 +23,12 @@ import {validateData, writeScript} from '../3p/3p';
 export function adglare(global, data) {
   validateData(data, ['host','zid'], ['keywords']);
   
-  var s = global.document.createElement('span');
+  let s = global.document.createElement('span');
   s.id = 'zone' + data.zid;
   global.document.getElementById('c').appendChild(s);
   
-  var url = 'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
-  if(data.keywords) url = url + '&keywords=' + data.keywords;
+  let url = 'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
+  if(data.keywords) url += '&keywords=' + data.keywords;
 
   writeScript(global, url);
 }
