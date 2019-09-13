@@ -1047,7 +1047,7 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     ];
     sandbox
       .stub(IniLoad, 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
@@ -1072,8 +1072,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     );
     ampAdResource.element.createdCallback = true;
     sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
@@ -1103,8 +1103,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     );
     ampAdResource.element.createdCallback = true;
     sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', element =>
       element.getAttribute('foo')
     ).then(result => {
