@@ -19,7 +19,7 @@ import {AmpViewerIntegrationVariableService} from '../../amp-viewer-integration/
 import {CSS} from '../../../build/amp-intaker-chat-widget-0.1.css';
 import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+// import {Services} from '../../../src/services';
 import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
 import {platform} from './platform';
 import {setStyle, toggle} from '../../../src/style';
@@ -63,8 +63,8 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     this.container_.textContent = 'IntakerChatWidgetPlaceholder';
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_, /* replacedContent */ true);
-    this.ampdoc = getAmpdoc(this.win.document);
-    this.viewer = Services.viewerForDoc(this.ampdoc);
+    // this.ampdoc = getAmpdoc(this.win.document);
+    // this.viewer = Services.viewerForDoc(this.ampdoc);
 
     widget({
       urlHash: this.urlHash,
