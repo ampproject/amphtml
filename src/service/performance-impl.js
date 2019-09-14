@@ -24,6 +24,7 @@ import {isCanary} from '../experiments';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
+import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
 /**
@@ -86,7 +87,7 @@ export class Performance {
     /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private {?./resources-impl.ResourcesDef} */
+    /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
     /** @private {boolean} */
@@ -143,10 +144,7 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPIv76_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
+    this.supportsLayoutInstabilityAPIv76_ = false;
 
     /**
      * Whether the user agent supports the Layout Instability API that shipped
@@ -154,10 +152,41 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPIv77_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
+    this.supportsLayoutInstabilityAPIv77_ = false;
+
+    /**
+     * Whether the user agent supports the Event Timing API that shipped
+     * with Chrome 76.
+     *
+     * @private {boolean}
+     */
+    this.supportsEventTimingAPIv76_ = false;
+    /**
+     * Whether the user agent supports the Event Timing API that shipped
+     * with Chrome 77.
+     *
+     * @private {boolean}
+     */
+    this.supportsEventTimingAPIv77_ = false;
+
+    const {PerformanceObserver} = this.win;
+    if (PerformanceObserver) {
+      const {supportedEntryTypes} = PerformanceObserver;
+      if (supportedEntryTypes) {
+        this.supportsLayoutInstabilityAPIv76_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'layoutShift'
+        );
+        this.supportsLayoutInstabilityAPIv77_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'layout-shift'
+        );
+        this.supportsEventTimingAPIv76_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'firstInput'
+        );
+        this.supportsEventTimingAPIv77_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'first-input'
+        );
+      }
+    }
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
     this.onViewerVisibilityChange_ = this.onViewerVisibilityChange_.bind(this);
@@ -308,7 +337,11 @@ export class Performance {
       ) {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
-      } else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
+      } else if (
+        (entry.entryType === 'firstInput' ||
+          entry.entryType === 'first-input') &&
+        !recordedFirstInputDelay
+      ) {
         this.tickDelta('fid', entry.processingStart - entry.startTime);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layoutJank') {
@@ -333,12 +366,23 @@ export class Performance {
       entryTypesToObserve.push('paint');
     }
 
-    if (this.win.PerformanceEventTiming) {
+    if (this.supportsEventTimingAPIv76_) {
       // Programmatically read once as currently PerformanceObserver does not
       // report past entries as of Chrome 61.
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance.getEntriesByType('firstInput').forEach(processEntry);
       entryTypesToObserve.push('firstInput');
+    }
+
+    if (this.supportsEventTimingAPIv77_) {
+      // It's preferred to read first input delay entries that already occurred
+      // through the `buffered: true` flag, so create a separate
+      // PerformanceObserver to read this metric.
+      const firstInputObserver = new this.win.PerformanceObserver(list => {
+        list.getEntries().forEach(processEntry);
+        this.flush();
+      });
+      firstInputObserver.observe({type: 'first-input', buffered: true});
     }
 
     if (this.win.PerformanceLayoutJank) {
@@ -589,9 +633,12 @@ export class Performance {
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.whenFirstPass().then(() => {
-      return this.resources_
-        .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
-        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+      return whenContentIniLoad(
+        documentElement,
+        this.win,
+        rect,
+        /* isInPrerender */ true
+      );
     });
   }
 

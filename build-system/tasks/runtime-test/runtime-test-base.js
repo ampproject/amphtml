@@ -20,7 +20,7 @@ const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
 const testConfig = require('../../config');
-const {app} = require('../../test-server');
+const {app} = require('../../server/test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {createKarmaServer, getAdTypes, runTestInBatches} = require('./helpers');
 const {green, yellow, cyan, red} = require('ansi-colors');
@@ -254,11 +254,6 @@ class RuntimeTestRunner {
   }
 
   async setup() {
-    // Run tests against compiled code when explicitly specified via --compiled,
-    // or when the minified runtime is automatically built.
-    process.env.SERVE_MODE =
-      argv.compiled || !argv.nobuild ? 'compiled' : 'default';
-
     await this.maybeBuild();
     await startServer({
       name: 'AMP Test Server',

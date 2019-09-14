@@ -256,6 +256,8 @@ export class AmpList extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     if (placeholder) {
       this.attemptToFit_(placeholder);
+    } else if (this.hasInitialContent_) {
+      this.attemptToFit_(dev().assertElement(this.container_));
     }
 
     this.viewport_.onResize(() => {
@@ -486,6 +488,9 @@ export class AmpList extends AMP.BaseElement {
           });
         }
         removeChildren(dev().assertElement(this.container_));
+        if (this.loadMoreEnabled_) {
+          this.getLoadMoreService_().hideAllLoadMoreElements();
+        }
       });
     }
   }

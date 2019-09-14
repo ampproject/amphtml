@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
@@ -519,27 +520,16 @@ describes.realWin('performance', {amp: true}, env => {
     });
 
   it('should wait for visible resources', () => {
-    function resource() {
-      const res = {
-        loadedComplete: false,
-      };
-      res.loadedOnce = () =>
-        Promise.resolve().then(() => {
-          res.loadedComplete = true;
-        });
-      return res;
-    }
-
     const resources = Services.resourcesForDoc(ampdoc);
-    const resourcesMock = sandbox.mock(resources);
+    sandbox.stub(resources, 'whenFirstPass').returns(Promise.resolve());
+    const whenContentIniLoadStub = sandbox
+      .stub(IniLoad, 'whenContentIniLoad')
+      .returns(Promise.resolve());
     perf.resources_ = resources;
 
-    const res1 = resource();
-    const res2 = resource();
-
-    resourcesMock
-      .expects('getResourcesInRect')
-      .withExactArgs(
+    return perf.whenViewportLayoutComplete_().then(() => {
+      expect(whenContentIniLoadStub).to.be.calledWith(
+        perf.win.document.documentElement,
         perf.win,
         sinon.match(
           arg =>
@@ -549,17 +539,7 @@ describes.realWin('performance', {amp: true}, env => {
             arg.height == perf.win.innerHeight
         ),
         /* inPrerender */ true
-      )
-      .returns(Promise.resolve([res1, res2]))
-      .once();
-    resourcesMock
-      .expects('whenFirstPass')
-      .returns(Promise.resolve())
-      .once();
-
-    return perf.whenViewportLayoutComplete_().then(() => {
-      expect(res1.loadedComplete).to.be.true;
-      expect(res2.loadedComplete).to.be.true;
+      );
     });
   });
 
@@ -927,14 +907,28 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           delta: 15,
         }
       );
-      delete env.win.PerformanceEventTiming;
     });
   });
 
   describe('should forward first input metrics for performance entries', () => {
+    let PerformanceObserverConstructorStub, performanceObserver;
+    beforeEach(() => {
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+
+      PerformanceObserverStub.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
+    });
     it('created before performance service registered', () => {
       // Pretend that the EventTiming API exists.
-      env.win.PerformanceEventTiming = true;
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
 
       const entries = [
         {
@@ -963,25 +957,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         label: 'fid',
         delta: 3,
       });
-
-      delete env.win.PerformanceEventTiming;
     });
 
     it('created after performance service registered', () => {
       // Pretend that the EventTiming API exists.
-      env.win.PerformanceEventTiming = true;
-
-      // Stub and fake the PerformanceObserver constructor.
-      const PerformanceObserverStub = env.sandbox.stub();
-
-      let performanceObserver;
-      PerformanceObserverStub.callsFake(callback => {
-        performanceObserver = new PerformanceObserverImpl(callback);
-        return performanceObserver;
-      });
-      env.sandbox
-        .stub(env.win, 'PerformanceObserver')
-        .callsFake(PerformanceObserverStub);
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
 
       installPerformanceService(env.win);
 
@@ -1010,7 +990,38 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         label: 'fid',
         delta: 3,
       });
-      delete env.win.PerformanceEventTiming;
+    });
+
+    it('created before performance service registered for Chrome 77', () => {
+      // Pretend that the EventTiming API exists.
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['first-input'];
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      // Fake fid that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              cancelable: true,
+              duration: 8,
+              entryType: 'firstInput',
+              name: 'mousedown',
+              processingEnd: 105,
+              processingStart: 103,
+              startTime: 100,
+            },
+          ];
+        },
+      });
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'fid',
+        delta: 3,
+      });
     });
   });
 

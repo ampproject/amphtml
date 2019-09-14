@@ -64,6 +64,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "refresh"
   }
   attrs: { name: "credentials" }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: {
     name: "load-more"

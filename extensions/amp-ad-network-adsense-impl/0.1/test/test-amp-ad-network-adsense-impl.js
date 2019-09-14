@@ -23,6 +23,7 @@ import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
+  MAX_HEIGHT_EXP,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
@@ -920,6 +921,29 @@ describes.realWin(
         expect(adsense.attemptChangeSize).to.be.calledWith(300, VIEWPORT_WIDTH);
       });
 
+      it('should schedule a resize with the right height for max height responsive experiment', function*() {
+        forceExperimentBranch(
+          impl.win,
+          MAX_HEIGHT_EXP.branch,
+          MAX_HEIGHT_EXP.experiment
+        );
+
+        const adsense = constructImpl({
+          width: '100vw',
+          height: '100',
+          'data-auto-format': 'rspv',
+        });
+        env.sandbox
+          .stub(adsense, 'attemptChangeSize')
+          .returns(Promise.resolve());
+
+        const promise = adsense.buildCallback();
+        expect(promise).to.exist;
+        yield promise;
+
+        expect(adsense.attemptChangeSize).to.be.calledWith(313, VIEWPORT_WIDTH);
+      });
+
       it('should call divertExperiments after isResponsive', () => {
         const adsense = constructImpl({
           width: '320',
@@ -1059,44 +1083,57 @@ describes.realWin(
     });
 
     describe('#getResponsiveHeightForContext', () => {
-      it('should request 100px height for very small viewports', () => {
+      it('should return 100px height for very small viewports', () => {
         expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
             'rspv',
             {width: 100, height: 667},
-            doc.createElement('div')
+            doc.createElement('div'),
+            /* isInResponsiveHeightFixExperimentBranch= */ false
           )
         ).to.be.equal(100);
       });
 
-      it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
+      it('should return 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
         expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
             'rspv',
             {width: 320, height: 568},
-            doc.createElement('div')
+            doc.createElement('div'),
+            /* isInResponsiveHeightFixExperimentBranch= */ false
           )
         ).to.be.equal(267);
       });
 
-      it('should request 300px height for wide viewports', () => {
+      it('should return 300px height for wide viewports without the responsive height fix', () => {
         expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
             'rspv',
             {width: 500, height: 667},
-            doc.createElement('div')
+            doc.createElement('div'),
+            /* isInResponsiveHeightFixExperimentBranch= */ false
           )
         ).to.be.equal(300);
       });
-    });
 
-    describe('#getMCResponsiveHeightForContext_', () => {
+      it('should return 500px height for wide viewports with the responsive height fix', () => {
+        expect(
+          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
+            'rspv',
+            {width: 1000, height: 1000},
+            doc.createElement('div'),
+            /* isInResponsiveHeightFixExperimentBranch= */ true
+          )
+        ).to.be.equal(500);
+      });
+
       it('get matched content responsive height for iPhone 6', () => {
         expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
             'mcrspv',
             {width: 375, height: 320},
-            doc.createElement('div')
+            doc.createElement('div'),
+            /* isInResponsiveHeightFixExperimentBranch= */ false
           )
         ).to.be.equal(1386);
       });
@@ -1106,7 +1143,8 @@ describes.realWin(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
             'mcrspv',
             {width: 320, height: 320},
-            doc.createElement('div')
+            doc.createElement('div'),
+            /* isInResponsiveHeightFixExperimentBranch= */ false
           )
         ).to.be.equal(1200);
       });

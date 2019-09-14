@@ -125,6 +125,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-sidebar-v2',
+    name: 'Updated sidebar component with nested menu and animations',
+  },
+  {
     id: 'ampdoc-fie',
     name: 'Install AmpDoc on FIE level',
     spec: 'https://github.com/ampproject/amphtml/issues/22734',

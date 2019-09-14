@@ -27,48 +27,32 @@ const {
   lazyBuildJs,
   preBuildCoreRuntime,
   preBuildSomeExtensions,
-} = require('../lazy-build');
+} = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
-const {isRtvMode} = require('../app-utils');
+const {getServeMode} = require('../server/app-utils');
 
 // Used for logging during server start / stop.
 let url = '';
 
-// TODO(ampproject): Consolidate these into a single directory.
-const serverFiles = deglob.sync([
-  'build-system/amp4test.js',
-  'build-system/amp-cors.js',
-  'build-system/app.js',
-  'build-system/app-utils.js',
-  'build-system/app-video-testbench.js',
-  'build-system/recaptcha-router.js',
-  'build-system/shadow-viewer.js',
-  'build-system/routes/**',
-  'build-system/app-index/**',
-]);
+const serverFiles = deglob.sync(['build-system/server/**']);
 
 /**
- * Determines the server's mode based on command line arguments.
+ * Logs the server's mode (based on command line arguments).
  */
-function setServeMode() {
-  if (argv.compiled) {
-    process.env.SERVE_MODE = 'compiled';
-    log(green('Serving'), cyan('minified JS'));
-  } else if (argv.cdn) {
-    process.env.SERVE_MODE = 'cdn';
-    log(green('Serving'), cyan('current prod JS'));
-  } else if (argv.rtv_serve_mode) {
-    const rtv = argv.rtv_serve_mode;
-    if (isRtvMode(rtv)) {
-      process.env.SERVE_MODE = rtv;
-      log(green('Serving'), cyan(`RTV ${rtv} JS`));
-    } else {
-      throw new Error(`Invalid rtv_serve_mode: ${rtv}`);
-    }
-  } else {
-    process.env.SERVE_MODE = 'default';
-    log(green('Serving'), cyan('unminified JS'));
+function logServeMode() {
+  switch (getServeMode()) {
+    case 'compiled':
+      log(green('Serving'), cyan('minified'), green('JS'));
+      break;
+    case 'cdn':
+      log(green('Serving'), cyan('current prod'), green('JS'));
+      break;
+    case 'rtv':
+      log(green('Serving JS from RTV'), cyan(`${argv.rtv}`));
+      break;
+    default:
+      log(green('Serving'), cyan('unminified'), green('JS'));
   }
 }
 
@@ -77,14 +61,14 @@ function setServeMode() {
  * @return {!Array<function()>}
  */
 function getMiddleware() {
-  const middleware = [require('../app')]; // Lazy-required to enable live-reload
+  const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
   if (!argv.quiet) {
     middleware.push(morgan('dev'));
   }
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
   }
-  if (argv.lazy_build) {
+  if (!argv._.includes('serve') && !argv.eager_build) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
   }
@@ -150,10 +134,10 @@ function restartServer() {
  * Initiates pre-build steps requested via command line args.
  */
 function initiatePreBuildSteps() {
-  if (argv.lazy_build) {
+  if (!argv._.includes('serve') && !argv.eager_build) {
     preBuildCoreRuntime();
     if (argv.extensions || argv.extensions_from) {
-      preBuildSomeExtensions(argv);
+      preBuildSomeExtensions();
     }
   }
 }
@@ -163,7 +147,7 @@ function initiatePreBuildSteps() {
  */
 async function serve() {
   createCtrlcHandler('serve');
-  setServeMode();
+  logServeMode();
   watch(serverFiles, restartServer);
   await startServer();
   initiatePreBuildSteps();
@@ -183,4 +167,7 @@ serve.flags = {
   'quiet': "  Run in quiet mode and don't log HTTP requests",
   'cache': '  Make local resources cacheable by the browser',
   'no_caching_extensions': '  Disable caching for extensions',
+  'compiled': '  Serve minified JS',
+  'cdn': '  Serve current prod JS',
+  'rtv': '  Serve JS from the RTV provided',
 };

@@ -17,7 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {Resources} from '../../src/service/resources-impl';
+import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {VisibilityState} from '../../src/visibility-state';
@@ -39,7 +39,7 @@ describe('Resources', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new ResourcesImpl(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
   });
 
@@ -664,7 +664,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     toggleExperiment(window, 'amp-force-prerender-visible-elements', true);
     const viewer = Services.viewerForDoc(env.ampdoc);
     sandbox.stub(viewer, 'isRuntimeOn').returns(true);
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resources.remeasurePass_.schedule = () => {};
     resources.pass_.schedule = () => {};
     viewportMock = sandbox.mock(resources.viewport_);
@@ -1160,99 +1160,6 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     );
   });
 
-  describe('getResourcesInRect', () => {
-    beforeEach(() => {
-      resources.isRuntimeOn_ = false;
-      resources.ampdoc.signals().signal('ready-scan');
-    });
-
-    it.skip('should wait until ready-scan', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      resources.ampdoc.signals().reset('ready-scan');
-      expect(resource1.hasBeenMeasured()).to.be.false;
-      const promise = resources.getResourcesInRect(window, rect);
-      resource1.measure();
-      const stub = sandbox.stub(resource1, 'measure');
-      resources.ampdoc.signals().signal('ready-scan');
-      return promise.then(() => {
-        expect(stub).to.not.be.called;
-      });
-    });
-
-    it('should measure when needed only', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      expect(resource1.hasBeenMeasured()).to.be.false;
-      expect(resource2.hasBeenMeasured()).to.be.false;
-      resource1.measure();
-      const stub1 = sandbox.stub(resource1, 'measure');
-      const stub2 = sandbox.stub(resource2, 'measure');
-      return resources.getResourcesInRect(env.win, rect).then(() => {
-        expect(stub1).to.not.be.called;
-        expect(stub2).to.be.calledOnce;
-      });
-    });
-
-    it('should measure only filtered elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      expect(resource1.hasBeenMeasured()).to.be.false;
-      expect(resource2.hasBeenMeasured()).to.be.false;
-      resource1.hostWin = {};
-      resource2.hasOwner = () => true;
-      const stub1 = sandbox.stub(resource1, 'measure');
-      const stub2 = sandbox.stub(resource2, 'measure');
-      return resources.getResourcesInRect(env.win, rect).then(() => {
-        expect(stub1).to.not.be.called;
-        expect(stub2).to.not.be.called;
-      });
-    });
-
-    it('should resolve visible elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(2);
-        expect(res[0]).to.equal(resource1);
-        expect(res[1]).to.equal(resource2);
-      });
-    });
-
-    it('should ignore invisible elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
-      resource2.element.getBoundingClientRect = () =>
-        layoutRectLtwh(0, 0, 0, 0);
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(1);
-        expect(res[0]).to.equal(resource1);
-      });
-    });
-
-    it('should ignore out-of-rect elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(1);
-        expect(res[0]).to.equal(resource1);
-      });
-    });
-
-    it('should allow out-of-rect fixed elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      resource2.isFixed = () => true;
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(2);
-        expect(res[0]).to.equal(resource1);
-        expect(res[1]).to.equal(resource2);
-      });
-    });
-
-    it('should filter out elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
-      resource1.hostWin = {};
-      resource2.hasOwner = () => true;
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(0);
-      });
-    });
-  });
-
   describe('onNextPass', () => {
     it('should only run callbacks once.', () => {
       resources.isRuntimeOn_ = true;
@@ -1413,7 +1320,7 @@ describe('Resources changeSize', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new ResourcesImpl(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     resources.win = {
       location: {
@@ -2794,7 +2701,7 @@ describes.realWin('Resources mutateElement and collapse', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
     resources.vsync_ = {
@@ -3071,7 +2978,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
   beforeEach(() => {
     const infPromise = new Promise(() => {});
     sandbox.stub(env.ampdoc, 'whenReady').callsFake(() => infPromise);
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resources.isBuildOn_ = true;
     resources.pendingBuildResources_ = [];
     parent = createElementWithResource(1)[0];
@@ -3365,20 +3272,6 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
       expect(resources.get()).to.not.contain(resource);
       expect(pauseOnRemoveStub).to.be.calledOnce;
       expect(disconnectStub).to.not.be.called;
-    });
-
-    it('should disconnect resource when embed is destroyed', () => {
-      child1.isBuilt = () => true;
-      resources.add(child1);
-      const resource = child1['__AMP__RESOURCE'];
-      const pauseOnRemoveStub = sandbox.stub(resource, 'pauseOnRemove');
-      const disconnectStub = sandbox.stub(resource, 'disconnect');
-      const childWin = {};
-      resource.hostWin = childWin;
-      resources.removeForChildWindow(childWin);
-      expect(resources.get()).to.not.contain(resource);
-      expect(pauseOnRemoveStub).to.be.calledOnce;
-      expect(disconnectStub).to.be.called;
     });
   });
 
