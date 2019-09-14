@@ -1,24 +1,13 @@
-<!--
-  1. Change "category" below to one of:
-       ads-analytics
-       dynamic-content
-       layout
-       media
-       presentation
-       social
-
-  2. Remove any of the "formats" that don't apply.
-     You can also add the "ads" and "stories" formats if they apply.
-
-  3. And remove this comment! (no empty lines before "---")
--->
 ---
-$category: presentation
+$category: dynamic-content
+
 formats:
   - websites
-  - email
+  
 teaser:
-  text: FILL THIS IN.
+
+  text: chat widget for intaker.co .
+  
 ---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -41,11 +30,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Chat widget for Intaker.co clients</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Intaker.co paid customers only</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -53,17 +42,17 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
+    <td>NODISPLAY</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td></td>
   </tr>
 </table>
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+Creates a chat widget for intaker.co clients
 
 ## Attributes
 
@@ -71,8 +60,8 @@ FILL THIS IN. Does this extension allow for properties to configure?
 
 <table>
   <tr>
-    <td width="40%"><strong>data-my-attribute</strong></td>
-    <td>FILL THIS IN. This table <strong>must</strong> be written in HTML.</td>
+    <td width="40%"><strong>data-value</strong></td>
+    <td>hash key generated from intakerco/dashboard</td>
   </tr>
 </table>
 

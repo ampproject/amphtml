@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-import '../amp-intaker-chat-widget';
-
-describes.realWin(
-  'amp-intaker-chat-widget',
-  {
-    amp: {
-      extensions: ['amp-intaker-chat-widget'],
-    },
+/**
+ *
+ * @type {{set: CookiesAPI.set, get: (function(): null), getJSON: (function(): null)}}
+ */
+export const CookiesAPI = {
+  /**
+   * @return {null}
+   */
+  set: () => {
+    return null;
   },
-  env => {
-    let win;
-    let element;
-
-    beforeEach(() => {
-      win = env.win;
-      element = win.document.createElement('amp-intaker-chat-widget');
-      win.document.body.appendChild(element);
-    });
-
-    it('should have IntakerChatWidgetPlaceholder when built', () => {
-      element.build();
-      expect(element.querySelector('div').textContent).to.equal(
-        'IntakerChatWidgetPlaceholder'
-      );
-    });
-  }
-);
+  /**
+   *
+   * @return {null}
+   */
+  getJSON: () => {
+    return null;
+  },
+  /**
+   *
+   * @return {null}
+   */
+  get: () => {
+    return null;
+  },
+};

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {CSS}              from '../../../build/amp-intaker-chat-widget-0.1.css';
-import {Layout}           from '../../../src/layout';
-import {CookiesAPI}       from './cookie';
-import {platform}         from './platform';
-import {widget}           from './widget';
-import {templates}        from './templates';
+import {} from '../../../src/service';
+import {CSS} from '../../../build/amp-intaker-chat-widget-0.1.css';
+import {CookiesAPI} from './cookies';
+import {Layout} from '../../../src/layout';
+import {platform} from './platform';
+import {setStyle, toggle} from '../../../src/style';
+import {templates} from './templates';
+import {widget} from './widget';
 
 export class AmpIntakerChatWidget extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -30,13 +31,13 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
     this.urlHash = null;
-    this.dev     = false;
-    this.qa      = false;
+    this.dev = false;
+    this.qa = false;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout === Layout.NODISPLAY;
   }
 
   /** @override */
@@ -44,28 +45,30 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     // Get attributes, assertions of values, assign instance variables.
     // Build lightweight DOM and append to this.element.
 
-    this.urlHash                = this.element.getAttribute('data-value');
-    this.dev                    = !!this.element.getAttribute('data-dev');
-    this.qa                     = !!this.element.getAttribute('data-qa');
-    this.container_             = this.element.ownerDocument.createElement('div');
+    this.urlHash = this.element.getAttribute('data-value');
+    this.dev = !!this.element.getAttribute('data-dev');
+    this.qa = !!this.element.getAttribute('data-qa');
+    this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.textContent = 'IntakerChatWidgetPlaceholder';
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_, /* replacedContent */ true);
 
     widget({
-      urlHash   : this.urlHash,
-      CookiesAPI: CookiesAPI,
-      platform  : platform,
-      DEV_ENV   : this.dev,
-      QA        : this.qa,
-      templates : templates,
+      urlHash: this.urlHash,
+      CookiesAPI,
+      platform,
+      DEV_ENV: this.dev,
+      QA: this.qa,
+      templates,
+      setStyle,
+      toggle,
+      referrer: '',
     });
   }
 
   /** @override */
-  upgradeCallback(){
+  upgradeCallback() {
     //If your extension provides different implementations depending on a late runtime condition (e.g. type attribute on the element, platform)
-
   }
 
   /** @override */
