@@ -93,7 +93,7 @@ function loadCss(url) {
  */
 function addToBody(string) {
   let tmp = document.createElement('div');
-  tmp /*OK*/.innerHTML = string;
+  tmp./*OK*/ innerHTML = string;
   document.body.appendChild(tmp.firstChild);
   tmp = null;
 }
@@ -105,7 +105,7 @@ function closeFrame() {
   exitPreview();
   visitor(false);
   chatIsActive = false;
-  removeClass(frameContainer, 'chatter-bot-frame-container-active');
+  removeClass(frameContainer, 'chatter-bot-rame-container-active');
   removeClass(document.body, 'chatter-bot-body-noscroll');
   removeClass(launcherContainer, 'chatter-bot-frame-container-active');
   hideEl(frameContainer);
@@ -200,8 +200,7 @@ function exitPreview() {
   removeClass(frameContainer, 'preview');
   removeClass(launcherContainer, 'preview');
   setStyle(frameContainer, 'height', '');
-  frame.contentWindow /*OK*/
-    .postMessage('exitPreview', '*');
+  frame.contentWindow./*OK*/ postMessage('exitPreview', '*');
 }
 
 /**
