@@ -65,7 +65,7 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     // this.ampdoc = getAmpdoc(this.win.document);
     // this.viewer = Services.viewerForDoc(this.ampdoc);
 
-    widget({
+    new widget().bootstrap({
       urlHash: this.urlHash,
       CookiesAPI,
       DEV_ENV: this.dev,
