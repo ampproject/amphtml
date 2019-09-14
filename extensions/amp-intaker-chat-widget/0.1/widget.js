@@ -93,7 +93,7 @@ function loadCss(url) {
  */
 function addToBody(string) {
   let tmp = document.createElement('div');
-  tmp /*OK*/.innerHTML /*OK*/ = string;
+  tmp /*OK*/.innerHTML = string;
   document.body.appendChild(tmp.firstChild);
   tmp = null;
 }
@@ -201,7 +201,7 @@ function exitPreview() {
   removeClass(launcherContainer, 'preview');
   setStyle(frameContainer, 'height', '');
   frame.contentWindow /*OK*/
-    .postMessage(/*OK*/ 'exitPreview', '*');
+    .postMessage('exitPreview', '*');
 }
 
 /**

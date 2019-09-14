@@ -37,7 +37,7 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout === Layout.NODISPLAY;
   }
 
   /** @override */
