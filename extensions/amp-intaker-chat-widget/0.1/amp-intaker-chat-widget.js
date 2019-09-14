@@ -21,7 +21,6 @@ import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
 // import {Services} from '../../../src/services';
 import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
-import {platform} from './platform';
 import {setStyle, toggle} from '../../../src/style';
 import {templates} from './templates';
 import {widget} from './widget';
@@ -69,7 +68,6 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     widget({
       urlHash: this.urlHash,
       CookiesAPI,
-      platform,
       DEV_ENV: this.dev,
       QA: this.qa,
       templates,

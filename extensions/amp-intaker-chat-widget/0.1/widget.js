@@ -93,7 +93,7 @@ function loadCss(url) {
  */
 function addToBody(string) {
   let tmp = document.createElement('div');
-  tmp./*OK*/ innerHTML = string;
+  tmp /*OK*/.innerHTML /*OK*/ = string;
   document.body.appendChild(tmp.firstChild);
   tmp = null;
 }
@@ -105,7 +105,7 @@ function closeFrame() {
   exitPreview();
   visitor(false);
   chatIsActive = false;
-  removeClass(frameContainer, 'chatter-bot-rame-container-active');
+  removeClass(frameContainer, 'chatter-bot-frame-container-active');
   removeClass(document.body, 'chatter-bot-body-noscroll');
   removeClass(launcherContainer, 'chatter-bot-frame-container-active');
   hideEl(frameContainer);
@@ -200,7 +200,8 @@ function exitPreview() {
   removeClass(frameContainer, 'preview');
   removeClass(launcherContainer, 'preview');
   setStyle(frameContainer, 'height', '');
-  frame.contentWindow./*OK*/ postMessage('exitPreview', '*');
+  frame.contentWindow /*OK*/
+    .postMessage(/*OK*/ 'exitPreview', '*');
 }
 
 /**
@@ -414,14 +415,15 @@ function visitor(openedChat) {
     api + '/api/Chat/Visitor',
     {
       'uniqueVisit': isUniqueVisit,
-      'pageName': document.title,
-      'pageTitle': document.title,
+      'pageName': originalTitle,
+      'pageTitle': originalTitle,
       'openedChat': openedChat === true,
       'closedChat': openedChat === false,
       'userBrowser': platform.name,
       'browserVersion': platform.version,
       'customerName': directLink,
       'Device': navigator.userAgent || navigator.vendor || window.opera,
+      'chatUniqueId': chatUniqueId,
     },
     function() {}
   );
@@ -431,13 +433,13 @@ function visitor(openedChat) {
  * @return {null}
  */
 function lunchBtnClicked() {
-  visitor(true);
+  manualOpenedChat = true;
   lunch();
 }
 
 // let CHAT_TYPE_FULL      = 'full';
 // let CHAT_TYPE_PREVIEW   = 'preview';
-let {CookiesApi: CookiesAPI, platform} = window;
+let CookiesAPI = window.CookiesApi;
 let chatIsActive = false;
 let previewChatIsActive = false;
 const frameId = 'chatter-bot-iframe';
@@ -467,13 +469,16 @@ let isUniqueVisit = false;
 let externalUrl = '';
 const originalTitle = document.title || '';
 let isAMP = false;
-
+let platform = null;
 let Templates = {};
 let setStyle = null;
 let toggle = null;
 let referrer = '';
+let chatUniqueId = null;
+let manualOpenedChat = false;
 
 window.onmessage = function(e) {
+  console.log(e.data);
   if (e.data.INTAKER_CHAT_WIDGET) {
     const data = e.data.INTAKER_CHAT_WIDGET;
     switch (data.action) {
@@ -493,6 +498,13 @@ window.onmessage = function(e) {
         } else {
           document.title = originalTitle;
         }
+        break;
+      case 'chatStarted':
+        chatUniqueId = data.uniqueId;
+        platform = data.platform;
+
+        visitor(manualOpenedChat ? true : null);
+        manualOpenedChat = false;
         break;
     }
   }
@@ -523,7 +535,6 @@ function bootstrap(amp) {
     isAMP = true;
     chatUrlHash = amp.urlHash;
     CookiesAPI = amp.CookiesAPI;
-    platform = amp.platform;
     Templates = amp.templates;
     useQA = amp.QA;
     setStyle = amp.setStyle;
@@ -582,7 +593,6 @@ function bootstrap(amp) {
       autoLunch(setting);
     });
   });
-  visitor();
 }
 
 export const widget = bootstrap;
