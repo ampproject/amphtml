@@ -99,7 +99,7 @@ Intaker.Widget = function() {
    */
   function addToBody(string) {
     let tmp = document.createElement('div');
-    tmp /*OK*/.innerHTML /*OK*/ = string;
+    tmp./*OK*/ innerHTML = string;
     document.body.appendChild(tmp.firstChild);
     tmp = null;
   }
@@ -206,8 +206,7 @@ Intaker.Widget = function() {
     removeClass(frameContainer, 'preview');
     removeClass(launcherContainer, 'preview');
     Intaker.SetStyle(frameContainer, 'height', '');
-    frame.contentWindow /*OK*/
-      .postMessage(/*OK*/ 'exitPreview', '*');
+    frame.contentWindow./*OK*/ postMessage('exitPreview', '*');
   }
 
   /**
@@ -527,7 +526,6 @@ Intaker.Widget = function() {
   };
 
   window.onmessage = function(e) {
-    console.log(e.data);
     if (e.data.INTAKER_CHAT_WIDGET) {
       const data = e.data.INTAKER_CHAT_WIDGET;
       switch (data.action) {
