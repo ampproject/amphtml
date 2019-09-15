@@ -19,6 +19,7 @@ import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
 // import {Services} from '../../../src/services';
 // import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
+import * as eventHelper from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {setStyle, toggle} from '../../../src/style';
 import {templates} from './templates';
@@ -74,6 +75,7 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
       toggle,
       referrer: '',
       parseJson,
+      eventHelper,
     });
   }
 

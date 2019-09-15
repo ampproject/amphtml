@@ -80,7 +80,6 @@ Intaker.Widget = function() {
   /**
    *
    * @param {string} url
-   * @return {loadCss}
    */
   function loadCss(url) {
     const link = document.createElement('link');
@@ -138,14 +137,15 @@ Intaker.Widget = function() {
 
   /**
    * Success callback for ajax calls.
-   * @callback ajaxSuccessCallback
+   * @name ajaxSuccessCallback
+   * @function
    * @param {string} result
    */
 
   /**
    *
    * @param {string} url
-   * @param {Object} data
+   * @param {JsonObject} data
    * @param {ajaxSuccessCallback} success
    * @return {XMLHttpRequest}
    */
@@ -338,7 +338,7 @@ Intaker.Widget = function() {
   }
 
   /**
-   * @return {null}
+   *
    */
   function playDingSound() {
     const promise = dingSound.play();
@@ -480,6 +480,7 @@ Intaker.Widget = function() {
       Intaker.Toggle = amp.toggle;
       Intaker.Referrer = amp.referrer;
       Intaker.parseJson = amp.parseJson;
+      Intaker.eventHelper = amp.eventHelper;
 
       if (amp.DEV_ENV) {
         window.DEV_ENV = amp.DEV_ENV;
@@ -538,7 +539,7 @@ Intaker.Widget = function() {
    * @param {Object} e
    */
   window.onmessage = function(e) {
-    const data = e.data['INTAKER_CHAT_WIDGET'];
+    const data = Intaker.eventHelper.getData(e)['INTAKER_CHAT_WIDGET'];
     if (data) {
       switch (data.action) {
         case 'exitPreview':
