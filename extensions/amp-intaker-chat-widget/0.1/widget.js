@@ -137,10 +137,15 @@ Intaker.Widget = function() {
 
   /**
    * Success callback for ajax calls.
+   * @interface
    * @name ajaxSuccessCallback
    * @function
    * @param {string} result
+   * @return {string|null|JsonObject}
    */
+  function ajaxSuccessCallback(result) {
+    return result;
+  }
 
   /**
    *
@@ -267,7 +272,7 @@ Intaker.Widget = function() {
 
     postAjax(
       api + '/api/Chat/CheckCustomerSubscription',
-      {
+      /** @type {JsonObject} */ {
         'directLink': directLink,
         'externalLink': externalUrl,
       },
@@ -325,7 +330,7 @@ Intaker.Widget = function() {
   function getChatSetting(callback) {
     postAjax(
       api + '/api/Chat/GetChatSetting',
-      {
+      /** @type {JsonObject} */ {
         'directLink': directLink,
         'externalLink': externalUrl,
       },
@@ -424,7 +429,7 @@ Intaker.Widget = function() {
 
     postAjax(
       api + '/api/Chat/Visitor',
-      {
+      /** @type {JsonObject} */ {
         'uniqueVisit': isUniqueVisit,
         'pageName': originalTitle,
         'pageTitle': originalTitle,
@@ -569,6 +574,9 @@ Intaker.Widget = function() {
       }
     }
   };
+
+  //dummy
+  ajaxSuccessCallback('');
 };
 
 export const widget = Intaker.Widget;
