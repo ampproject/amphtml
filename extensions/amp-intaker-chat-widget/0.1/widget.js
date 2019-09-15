@@ -136,22 +136,10 @@ Intaker.Widget = function() {
   }
 
   /**
-   * Success callback for ajax calls.
-   * @interface
-   * @name ajaxSuccessCallback
-   * @function
-   * @param {string} result
-   * @return {string|null|JsonObject}
-   */
-  function ajaxSuccessCallback(result) {
-    return result;
-  }
-
-  /**
    *
    * @param {string} url
    * @param {JsonObject} data
-   * @param {ajaxSuccessCallback} success
+   * @param {function(?): undefined} success
    * @return {XMLHttpRequest}
    */
   function postAjax(url, data, success) {
@@ -264,7 +252,7 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {ajaxSuccessCallback} callback
+   * @param {function(): undefined} callback
    */
   function authenticate(callback) {
     // if (useQA)
@@ -272,10 +260,10 @@ Intaker.Widget = function() {
 
     postAjax(
       api + '/api/Chat/CheckCustomerSubscription',
-      /** @type {JsonObject} */ {
+      /** @type {!JsonObject} */ ({
         'directLink': directLink,
         'externalLink': externalUrl,
-      },
+      }),
       function(result) {
         result = Intaker.parseJson(result);
         if (result === 'Paid' || result === 'Trial') {
@@ -325,15 +313,15 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {ajaxSuccessCallback} callback
+   * @param {function(?): undefined} callback
    */
   function getChatSetting(callback) {
     postAjax(
       api + '/api/Chat/GetChatSetting',
-      /** @type {JsonObject} */ {
+      /** @type {!JsonObject} */ ({
         'directLink': directLink,
         'externalLink': externalUrl,
-      },
+      }),
       function(result) {
         result = Intaker.parseJson(result);
         injectThemeCss(result);
@@ -429,7 +417,7 @@ Intaker.Widget = function() {
 
     postAjax(
       api + '/api/Chat/Visitor',
-      /** @type {JsonObject} */ {
+      /** @type {!JsonObject} */ ({
         'uniqueVisit': isUniqueVisit,
         'pageName': originalTitle,
         'pageTitle': originalTitle,
@@ -440,7 +428,7 @@ Intaker.Widget = function() {
         'customerName': directLink,
         'Device': navigator.userAgent || navigator.vendor || window.opera,
         'chatUniqueId': chatUniqueId,
-      },
+      }),
       function() {}
     );
   }
@@ -576,7 +564,7 @@ Intaker.Widget = function() {
   };
 
   //dummy
-  ajaxSuccessCallback('');
+  // ajaxSuccessCallback('');
 };
 
 export const widget = Intaker.Widget;
