@@ -19,6 +19,7 @@ import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
 // import {Services} from '../../../src/services';
 // import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
+import {parseJson} from '../../../src/json';
 import {setStyle, toggle} from '../../../src/style';
 import {templates} from './templates';
 import {widget} from './widget';
@@ -72,18 +73,19 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
       setStyle,
       toggle,
       referrer: '',
+      parseJson,
     });
   }
 
-  /** @override */
-  upgradeCallback() {
-    //If your extension provides different implementations depending on a late runtime condition (e.g. type attribute on the element, platform)
-  }
+  // /** @override */
+  // upgradeCallback() {
+  //   //If your extension provides different implementations depending on a late runtime condition (e.g. type attribute on the element, platform)
+  // }
 
-  /** @override */
-  layoutCallback() {
-    // Actually load your resource or render more expensive resources.
-  }
+  // /** @override */
+  // layoutCallback() {
+  //   // Actually load your resource or render more expensive resources.
+  // }
 }
 
 AMP.extension('amp-intaker-chat-widget', '0.1', AMP => {

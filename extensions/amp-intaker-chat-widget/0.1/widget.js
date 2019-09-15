@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 const Intaker = {};
+/**
+ *
+ * @constructor
+ */
 Intaker.Widget = function() {
-  let {
-    CookiesApi: CookiesAPI,
-    USE_INTAKER_QA: useQA,
-    IntakerWidgetTemplates: Templates,
-  } = window;
+  let CookiesAPI = window['CookiesApi'];
   let chatIsActive = false;
   let previewChatIsActive = false;
   const frameId = 'chatter-bot-iframe';
@@ -31,7 +31,7 @@ Intaker.Widget = function() {
   const INTKER_CHAT_URL = btoa('INTKER_CHAT_URL'); //support for old generated widgets
   let chatUrlHash = ''; //window[INTAKER_CHAT_URL] || window[INTKER_CHAT_URL];
   let url = ''; //atob(chatUrlHash);
-
+  let useQA = window['USE_INTAKER_QA'];
   let frameContainer, closeBtn, restartBtn, lunchBtn, frame;
   let api = '';
   const cssUrl =
@@ -51,15 +51,15 @@ Intaker.Widget = function() {
   const originalTitle = document.title || '';
   let isAMP = false;
   let platform = null;
-
+  let Templates = window['IntakerWidgetTemplates'];
   let chatUniqueId = null;
   let manualOpenedChat = false;
 
   /**
    *
-   * @param {HTMLBaseElement} el
+   * @param {Element} el
    * @param {string} name
-   * @return {HTMLBaseElement}
+   * @return {Element}
    */
   function addClass(el, name) {
     el.classList.add(name);
@@ -68,9 +68,9 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {HTMLBaseElement} el
+   * @param {Element} el
    * @param {string} name
-   * @return {HTMLBaseElement}
+   * @return {Element}
    */
   function removeClass(el, name) {
     el.classList.remove(name);
@@ -80,6 +80,7 @@ Intaker.Widget = function() {
   /**
    *
    * @param {string} url
+   * @return {loadCss}
    */
   function loadCss(url) {
     const link = document.createElement('link');
@@ -105,7 +106,7 @@ Intaker.Widget = function() {
   }
 
   /**
-   * @return {null}
+   *
    */
   function closeFrame() {
     exitPreview();
@@ -119,7 +120,7 @@ Intaker.Widget = function() {
   }
 
   /**
-   * @return {null}
+   *
    */
   function openFrame() {
     showEl(frameContainer);
@@ -136,10 +137,16 @@ Intaker.Widget = function() {
   }
 
   /**
+   * Success callback for ajax calls.
+   * @callback ajaxSuccessCallback
+   * @param {string} result
+   */
+
+  /**
    *
    * @param {string} url
-   * @param {object} data
-   * @param {function} success
+   * @param {Object} data
+   * @param {ajaxSuccessCallback} success
    * @return {XMLHttpRequest}
    */
   function postAjax(url, data, success) {
@@ -199,7 +206,7 @@ Intaker.Widget = function() {
   }
 
   /**
-   * @return {null}
+   *
    */
   function exitPreview() {
     addClass(document.body, 'chatter-bot-body-noscroll');
@@ -212,7 +219,7 @@ Intaker.Widget = function() {
   /**
    *
    * @param {string} url
-   * @return {string}
+   * @return {string|null}
    */
   function getDirectLink(url) {
     const parts = url.split('/');
@@ -252,7 +259,7 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {function} callback
+   * @param {ajaxSuccessCallback} callback
    */
   function authenticate(callback) {
     // if (useQA)
@@ -265,7 +272,7 @@ Intaker.Widget = function() {
         'externalLink': externalUrl,
       },
       function(result) {
-        result = JSON.parse(result);
+        result = Intaker.parseJson(result);
         if (result === 'Paid' || result === 'Trial') {
           callback();
         } else {
@@ -289,7 +296,7 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {object} setting
+   * @param {Object} setting
    */
   function injectThemeCss(setting) {
     const avatar = setting.avatarUrl || DEFAULT_AVATAR;
@@ -313,7 +320,7 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {function} callback
+   * @param {ajaxSuccessCallback} callback
    */
   function getChatSetting(callback) {
     postAjax(
@@ -323,7 +330,7 @@ Intaker.Widget = function() {
         'externalLink': externalUrl,
       },
       function(result) {
-        result = JSON.parse(result);
+        result = Intaker.parseJson(result);
         injectThemeCss(result);
         callback(result);
       }
@@ -341,7 +348,7 @@ Intaker.Widget = function() {
   }
 
   /**
-   * @return {null}
+   *
    */
   function loadDingSound() {
     if (window.Audio) {
@@ -353,9 +360,8 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {object} setting
-   *
-   * @return {null}
+   * @param {Object} setting
+   * @return {undefined}
    */
   function autoLunch(setting) {
     const cookie = CookiesAPI.getJSON(cookieName);
@@ -411,7 +417,7 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {boolean} [openedChat]
+   * @param {boolean|undefined|null} [openedChat]
    */
   function visitor(openedChat) {
     ///api/Chat/Visitor
@@ -435,7 +441,7 @@ Intaker.Widget = function() {
   }
 
   /**
-   * @return {null}
+   *
    */
   function lunchBtnClicked() {
     manualOpenedChat = true;
@@ -444,7 +450,7 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {HTMLBaseElement} el
+   * @param {Element} el
    */
   function showEl(el) {
     Intaker.Toggle(el, 'block');
@@ -452,7 +458,7 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {HTMLBaseElement} el
+   * @param {Element} el
    */
   function hideEl(el) {
     Intaker.Toggle(el, isAMP ? false : 'none');
@@ -460,7 +466,8 @@ Intaker.Widget = function() {
 
   /**
    *
-   * @param {object} [amp]
+   * @param {Object} [amp]
+   * @public
    */
   this.bootstrap = amp => {
     if (amp) {
@@ -472,6 +479,7 @@ Intaker.Widget = function() {
       Intaker.SetStyle = amp.setStyle;
       Intaker.Toggle = amp.toggle;
       Intaker.Referrer = amp.referrer;
+      Intaker.parseJson = amp.parseJson;
 
       if (amp.DEV_ENV) {
         window.DEV_ENV = amp.DEV_ENV;
@@ -525,9 +533,13 @@ Intaker.Widget = function() {
     });
   };
 
+  /**
+   *
+   * @param {Object} e
+   */
   window.onmessage = function(e) {
-    if (e.data.INTAKER_CHAT_WIDGET) {
-      const data = e.data.INTAKER_CHAT_WIDGET;
+    const data = e.data['INTAKER_CHAT_WIDGET'];
+    if (data) {
       switch (data.action) {
         case 'exitPreview':
           exitPreview();

@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/**
- *
- * @type {{set: CookiesAPI.set, get: (function(): null), getJSON: (function(): null)}}
- */
 export const CookiesAPI = {
   /**
    * @return {null}
