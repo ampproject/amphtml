@@ -29,8 +29,11 @@ tags: {  # <amp-intaker-chat-widget>
   tag_name: "AMP-INTAKER-CHAT-WIDGET"
   requires_extension: "amp-intaker-chat-widget"
   attr_lists: "extended-amp-global"
+  attrs: { name: "data-value" }
+  attrs: { name: "data-dev" }
+  attrs: { name: "data-qa" }
   spec_url: "https://amp.dev/documentation/components/amp-intaker-chat-widget"
   amp_layout: {
-    supported_layouts: RESPONSIVE
+    supported_layouts: NODISPLAY
   }
 }

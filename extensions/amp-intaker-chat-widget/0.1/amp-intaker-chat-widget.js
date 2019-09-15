@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import {} from '../../../src/service';
-import {AmpViewerIntegrationVariableService} from '../../amp-viewer-integration/0.1/variable-service';
 import {CSS} from '../../../build/amp-intaker-chat-widget-0.1.css';
 import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
 // import {Services} from '../../../src/services';
-import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
+// import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
 import {setStyle, toggle} from '../../../src/style';
 import {templates} from './templates';
 import {widget} from './widget';
@@ -36,13 +34,13 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     this.dev = false;
     this.qa = false;
 
-    /** @const @private {!AmpViewerIntegrationVariableService} */
-    this.variableService_ = new AmpViewerIntegrationVariableService(
-      getAmpdoc(this.win.document)
-    );
-    registerServiceBuilder(this.win, 'viewer-integration-variable', () =>
-      this.variableService_.get()
-    );
+    // /** @const @private {!AmpViewerIntegrationVariableService} */
+    // this.variableService_ = new AmpViewerIntegrationVariableService(
+    //   getAmpdoc(this.win.document)
+    // );
+    // registerServiceBuilder(this.win, 'viewer-integration-variable', () =>
+    //   this.variableService_.get()
+    // );
   }
 
   /** @override */
