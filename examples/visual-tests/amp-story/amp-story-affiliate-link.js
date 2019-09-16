@@ -28,10 +28,11 @@ module.exports = {
     await page.waitFor(150); // For animations to finish.
     await page.tap('a#blink-1');
     await page.waitFor(300); // For animations to finish.
-    await verifySelectorsVisible(page, name, '.i-amphtml-story-affiliate-link-text');
+    await verifySelectorsVisible(page, name, ['a#blink-1 .i-amphtml-story-affiliate-link-text']);
   },
 
-  '[RTL] should do something': async page => {
+  '[RTL] tapping on an affiliate link should expand the link': async (page, name) => {
+    const screen = page.touchscreen;
     await page.$eval('body', e => e.setAttribute('dir', 'rtl'));
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-1[active]');
@@ -41,6 +42,6 @@ module.exports = {
     await page.waitFor(150); // For animations to finish.
     await page.tap('a#blink-1');
     await page.waitFor(300); // For animations to finish.
-    await verifySelectorsVisible(page, name, '.i-amphtml-story-affiliate-link-text');
+    await verifySelectorsVisible(page, name, ['a#blink-1 .i-amphtml-story-affiliate-link-text']);
   }
 }
