@@ -23,7 +23,6 @@ describe
   .run('amp-story analytics', function() {
     const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
     const body = `
-
       <amp-story standalone>
         <amp-analytics>
           <script type="application/json">
@@ -123,19 +122,19 @@ describe
 
       it('should send analytics event when landing on a page', async () => {
         await browser.waitForElementLayout('#page-1');
-        await RequestBank.withdraw().then(req => {
-          const q = parseQueryString(req.url.substr(1));
-          expect(q['pageVisible']).to.equal('page-1');
-        });
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['pageVisible']).to.equal('page-1');
       });
 
       it('should send analytics event when navigating', async () => {
         browser.click('#page-1');
         await browser.waitForElementLayout('#page-2');
-        await RequestBank.withdraw().then(req => {
-          const q = parseQueryString(req.url.substr(1));
-          expect(q['pageVisible']).to.equal('page-2');
-        });
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['pageVisible']).to.equal('page-2');
       });
 
       it('should send analytics event when entering bookend', async () => {
@@ -143,10 +142,10 @@ describe
         await browser.waitForElementLayout('#page-2');
         browser.click('#page-2');
         await browser.wait(100);
-        await RequestBank.withdraw().then(req => {
-          const q = parseQueryString(req.url.substr(1));
-          expect(q['bookendEnter']).to.equal('true');
-        });
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['bookendEnter']).to.equal('true');
       });
 
       it('should send analytics event when exiting bookend', async () => {
@@ -156,10 +155,10 @@ describe
         await browser.wait(100);
         browser.click('amp-story-bookend');
         await browser.wait(100);
-        await RequestBank.withdraw().then(req => {
-          const q = parseQueryString(req.url.substr(1));
-          expect(q['bookendExit']).to.equal('true');
-        });
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['bookendExit']).to.equal('true');
       });
     });
   });
