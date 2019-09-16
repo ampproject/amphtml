@@ -33,6 +33,11 @@ READY_FILE="sauce_connect_ready"
 READY_DELAY_SECS=120
 LOG_PREFIX=$(YELLOW "start_sauce_connect.sh")
 
+if [[ -z "$SAUCE_USERNAME" || -z "$SAUCE_ACCESS_KEY" ]]; then
+  echo "$LOG_PREFIX The $(CYAN "SAUCE_USERNAME") and $(CYAN "SAUCE_ACCESS_KEY") environment variables must be set."
+  exit 1
+fi
+
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
   DOWNLOAD_URL="https://saucelabs.com/downloads/$SC_VERSION-linux.tar.gz"
   ARCHIVE_FILE="$DOWNLOAD_DIR/$SC_VERSION-linux.tar.gz"
