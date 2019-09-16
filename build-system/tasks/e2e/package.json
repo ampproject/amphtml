@@ -6,7 +6,7 @@
   "devDependencies": {
     "@babel/register": "7.6.0",
     "babel-regenerator-runtime": "6.5.0",
-    "chromedriver": "76.0.0",
+    "chromedriver": "76.0.1",
     "puppeteer": "1.19.0",
     "geckodriver": "1.16.2",
     "selenium-webdriver": "4.0.0-alpha.4"
