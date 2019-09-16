@@ -70,6 +70,8 @@ jobs:
       name: 'Visual Diff Tests'
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
+      env:
+        - CACHE_NAME=VISUALDIFFJOB
     - stage: test
       name: 'Local Tests'
       script:
@@ -85,6 +87,8 @@ jobs:
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
+      env:
+        - CACHE_NAME=E2EJOB
     - stage: experiment
       name: "Experiment A Tests"
       script:
@@ -109,5 +113,4 @@ cache:
     - validator/node_modules
     - validator/nodejs/node_modules
     - validator/webui/node_modules
-    - $HOME/Library/Caches/Homebrew
   yarn: true
