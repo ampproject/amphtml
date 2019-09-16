@@ -16,11 +16,11 @@
     "defineExperimentConstant": "_RTVEXP_INABOX_LITE"
   },
   "experimentC": {
-    "name": "CEv1",
+    "name": "Custom Elements V1",
     "environment": "AMP",
     "command": "gulp dist --defineExperimentConstant=CUSTOM_ELEMENTS_V1",
     "issue": "https://github.com/ampproject/amphtml/issues/17243",
-    "expirationDateUTC": "2020-12-31",
+    "expirationDateUTC": "2020-01-01",
     "defineExperimentConstant": "CUSTOM_ELEMENTS_V1"
   }
 }
