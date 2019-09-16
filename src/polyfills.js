@@ -28,7 +28,6 @@ import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
-import {isExperimentOn} from './experiments';
 
 installFetch(self);
 installMathSign(self);
@@ -43,7 +42,6 @@ if (self.document) {
   installDocContains(self);
   installGetBoundingClientRect(self);
 
-  // isExperimentOn() must be called after Object.assign polyfill is installed.
   // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
   if (
     // eslint-disable-next-line no-undef
