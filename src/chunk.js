@@ -267,13 +267,8 @@ class StartupTask extends Task {
 
   /** @override */
   useRequestIdleCallback_() {
-    // DO NOT SUBMIT: do we still need this code?
-
-    // We only start using requestIdleCallback when the viewer has
-    // been initialized. Otherwise we risk starving ourselves
-    // before we get into a state where the viewer can tell us
-    // that we are visible.
-    return !!this.chunks_.viewer;
+    // DO NOT SUBMIT: is this ok?
+    return true;
   }
 
   /**
