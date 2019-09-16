@@ -535,10 +535,8 @@ const adConfig = jsonConfiguration({
   },
 
   'insticator': {
-    prefetch: 'https://testthisshit.online/amp-embed-lib/insticator.js',
-    preconnect: [
-      'https://d3lcz8vpax4lo2.cloudfront.net'
-    ]
+    preconnect: 'https://d3lcz8vpax4lo2.cloudfront.net', // can also be array if more than one URL needed
+    renderStartImplemented: true,
    },
 
   'invibes': {
