@@ -44,6 +44,7 @@ const TAG = 'amp-analytics/events';
  * @enum {string}
  */
 export const AnalyticsEventType = {
+  AMP_STORY: 'amp-story',
   CLICK: 'click',
   CUSTOM: 'custom',
   HIDDEN: 'hidden',
@@ -79,6 +80,13 @@ const TRACKER_TYPE = Object.freeze({
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new CustomEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.AMP_STORY]: {
+    name: AnalyticsEventType.AMP_STORY,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) {
+      return new AmpStoryEventTracker(root);
     },
   },
   [AnalyticsEventType.HIDDEN]: {
@@ -139,6 +147,14 @@ export const trackerTypeForTesting = TRACKER_TYPE;
  * @param {string} triggerType
  * @return {boolean}
  */
+function isAmpStoryTriggerType(triggerType) {
+  return startsWith(triggerType, 'story');
+}
+
+/**
+ * @param {string} triggerType
+ * @return {boolean}
+ */
 function isVideoTriggerType(triggerType) {
   return startsWith(triggerType, 'video');
 }
@@ -158,6 +174,9 @@ function isReservedTriggerType(triggerType) {
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
     return AnalyticsEventType.VIDEO;
+  }
+  if (isAmpStoryTriggerType(eventType)) {
+    return AnalyticsEventType.AMP_STORY;
   }
   if (!isReservedTriggerType(eventType)) {
     return AnalyticsEventType.CUSTOM;
@@ -382,6 +401,84 @@ export class CustomEventTracker extends EventTracker {
         this.buffer_[eventType] = this.buffer_[eventType] || [];
         this.buffer_[eventType].push(event);
       }
+    }
+  }
+}
+
+export class AmpStoryEventTracker extends CustomEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    // TODO(artezan): add support for storySpec.
+    const rootTarget = this.root.getRootElement();
+
+    // Fire buffered events if any.
+    const buffer = this.buffer_ && this.buffer_[eventType];
+    if (buffer) {
+      const bufferLength = buffer.length;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const event = buffer[i];
+        this.fireListener_(event, rootTarget, config, listener);
+      }
+    }
+
+    let observables = this.observables_[eventType];
+    if (!observables) {
+      observables = new Observable();
+      this.observables_[eventType] = observables;
+    }
+
+    return this.observables_[eventType].add(event => {
+      this.fireListener_(event, rootTarget, config, listener);
+    });
+  }
+
+  /**
+   * Fires listener given the specified configuration.
+   * @param {!AnalyticsEvent} event
+   * @param {!Element} rootTarget
+   * @param {!JsonObject} config
+
+   * @param {function(!AnalyticsEvent)} listener
+   */
+  fireListener_(event, rootTarget, config, listener) {
+    const {type} = event;
+    const on = config['on'];
+
+    if (type !== on) {
+      return;
+    }
+
+    const vars = event['vars'];
+
+    listener(new AnalyticsEvent(rootTarget, type, vars));
+  }
+
+  /**
+   * Triggers a custom event for the associated root, or buffers them if the
+   * observables aren't present yet.
+   * @param {!AnalyticsEvent} event
+   */
+  trigger(event) {
+    const eventType = event['type'];
+    const observables = this.observables_[eventType];
+
+    // If listeners already present - trigger right away.
+    if (observables) {
+      observables.fire(event);
+    }
+
+    // Create buffer and enqueue event if needed.
+    if (this.buffer_) {
+      this.buffer_[eventType] = this.buffer_[eventType] || [];
+      this.buffer_[eventType].push(event);
     }
   }
 }
