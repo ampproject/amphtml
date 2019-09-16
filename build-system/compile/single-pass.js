@@ -46,7 +46,6 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
-const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
@@ -457,15 +456,11 @@ function setupBundles(graph) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  if (isTravisBuild()) {
-    // New line after all the compilation progress dots on Travis.
-    console.log('\n');
-  }
   log(
     'Performing single-pass',
     colors.cyan('babel'),
     'transforms in',
-    colors.cyan(graph.tmp)
+    colors.cyan(graph.tmp) + '...'
   );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
@@ -704,9 +699,7 @@ function cleanupWeakModuleFiles() {
 }
 
 function compile(flagsArray) {
-  if (isTravisBuild()) {
-    log('Minifying single-pass JS with', colors.cyan('closure-compiler'));
-  }
+  log('Minifying single-pass JS with', colors.cyan('closure-compiler') + '...');
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp

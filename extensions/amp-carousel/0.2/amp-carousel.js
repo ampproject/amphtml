@@ -610,6 +610,7 @@ class AmpCarousel extends AMP.BaseElement {
     this.element.dispatchCustomEvent(name, data);
     this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
     this.updateCurrentIndex_(index);
+    this.updateUi_();
   }
 
   /**
