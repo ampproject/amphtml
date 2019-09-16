@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CarouselEvents} from './carousel-events';
 import {getDetail} from '../../../src/event-helper';
 
 /**
@@ -69,7 +70,7 @@ export class CarouselAccessibility {
       },
       true
     );
-    element.addEventListener('indexchange', event => {
+    element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
   }
