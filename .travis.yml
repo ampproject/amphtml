@@ -31,8 +31,6 @@ addons:
       - protobuf-compiler
   chrome: stable
   hosts:
-    - ads.localhost
-    - iframe.localhost
     # CURLs amp subdomain for the amp-recaptcha-input integration test. The hash
     # is the CURLS subdomain for localhost:9876
     - jgla3zmib2ggq5buc4hwi5taloh6jlvzukddfr4zltz3vay5s5rq.recaptcha.localhost
