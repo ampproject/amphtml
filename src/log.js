@@ -107,7 +107,7 @@ const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
  */
 const externalMessageUrl = (id, interpolatedParts) =>
   interpolatedParts.reduce(
-    (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
+    (prefix, arg) => `${prefix}&s[]=${messageArgToEncodedComponent(arg)}`,
     `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
   );
 
@@ -118,6 +118,13 @@ const externalMessageUrl = (id, interpolatedParts) =>
  */
 const externalMessagesSimpleTableUrl = () =>
   `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
+
+/**
+ * @param {*} arg
+ * @return {string}
+ */
+const messageArgToEncodedComponent = arg =>
+  encodeURIComponent(elementStringOrPassthru(arg).toString());
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -410,7 +417,7 @@ export class Log {
         }
         messageArray.push(val);
         pushIfNonEmpty(messageArray, nextConstant.trim());
-        formatted += toString(val) + nextConstant;
+        formatted += stringOrElementString(val) + nextConstant;
       }
       const e = new Error(formatted);
       e.fromAssert = true;
@@ -629,12 +636,19 @@ export class Log {
  * @param {string|!Element} val
  * @return {string}
  */
-function toString(val) {
+const stringOrElementString = val =>
+  /** @type {string} */ (elementStringOrPassthru(val));
+
+/**
+ * @param {*} val
+ * @return {*}
+ */
+function elementStringOrPassthru(val) {
   // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
-  return /** @type {string} */ (val);
+  return val;
 }
 
 /**
