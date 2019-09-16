@@ -857,7 +857,11 @@ export class FriendlyIframeEmbed {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenList(childWin);
-  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
+  if (
+    // eslint-disable-next-line no-undef
+    CUSTOM_ELEMENTS_V1 ||
+    getMode().test
+  ) {
     installCustomElements(childWin);
   } else {
     installRegisterElement(childWin, 'auto');
