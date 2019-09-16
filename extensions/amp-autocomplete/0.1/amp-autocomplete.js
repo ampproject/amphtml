@@ -284,16 +284,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const json = tryParseJson(script.textContent, error => {
       throw error;
     });
-    const items = json['items'];
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    const items = getValueForExpr(/**@type {!JsonObject}*/ (json), itemsExpr);
     if (!items) {
       user().warn(
         TAG,
-        'Expected key "items" in data but found nothing. ' +
-          'Rendering empty results.'
+        'Expected key "%s" in data but found nothing. Rendering empty results.',
+        itemsExpr
       );
       return [];
     }
-    return items;
+    return user().assertArray(items);
   }
 
   /**
@@ -305,16 +306,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
-    return batchFetchJsonFor(ampdoc, this.element, 'items', policy).catch(e => {
-      if (e.message === 'Response is undefined.') {
-        user().warn(
-          TAG,
-          'Expected key "items" in data but found nothing. ' +
-            'Rendering empty results.'
-        );
-        return [];
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy).catch(
+      e => {
+        if (e.message === 'Response is undefined.') {
+          user().warn(
+            TAG,
+            'Expected key "%s" in data but found nothing. Rendering empty results.',
+            itemsExpr
+          );
+          return [];
+        }
       }
-    });
+    );
   }
 
   /**
