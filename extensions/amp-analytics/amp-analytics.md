@@ -49,7 +49,7 @@ Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/docum
 
 ### Sending data to an analytics vendor <a name="analytics-vendors"></a>
 
-AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors]() to see if they’ve integrated their solution with AMP.
+AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics-vendors) to see if they’ve integrated their solution with AMP.
 
 For integrated AMP analytics vendors:
 
