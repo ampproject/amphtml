@@ -127,6 +127,7 @@ do
     END_TIME=$( date +%s )
     TOTAL_TIME=$(( END_TIME - START_TIME ))
     echo "$LOG_PREFIX Done running $(CYAN "start_sauce_connect.sh") Total time: $(CYAN "$TOTAL_TIME"s)"
+    echo "$LOG_PREFIX To stop the proxy, run $(CYAN "stop_sauce_connect.sh") from the same directory"
     break
   else
     # Continue waiting.
