@@ -52,11 +52,9 @@ module.exports = function(api) {
   return {
     'presets': [
       [
-        '@babel/preset-env',
+        'babel-preset-modules',
         {
-          'modules': isDist ? false : 'commonjs',
           'loose': true,
-          'targets': esm ? moduleTarget : noModuleTarget,
         },
       ],
     ],

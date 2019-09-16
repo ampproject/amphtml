@@ -139,6 +139,9 @@ function plugins({isEsmBuild, isForTesting, isSinglePass}) {
     applied.push(localPlugin('transform-amp-asserts'));
   }
   if (isEsmBuild) {
+    applied.push(['@babel/plugin-transform-block-scoping', {
+      throwIfClosureRequired: false,
+    }]);
     applied.push(['filter-imports', {imports: esmRemovedImports}]);
   }
   if (!isForTesting) {
