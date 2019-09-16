@@ -25,6 +25,8 @@ yarn-error.log
 PERCY_BUILD_ID
 chromedriver.log
 sc-*-linux*
+sc-*-osx*
+sauce_connect_*
 EXTENSIONS_CSS_MAP
 deps.txt
 firebase
