@@ -26,7 +26,6 @@ const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
-const evilDns = require('evil-dns');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
@@ -45,9 +44,6 @@ const {replaceUrls, isRtvMode} = require('./app-utils');
 
 const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
-
-// Envelopes require rewriting these DNS records
-evilDns.add('*.localhost', '127.0.0.1');
 
 app.use(bodyParser.text());
 app.use(require('./routes/a4a-envelopes'));
