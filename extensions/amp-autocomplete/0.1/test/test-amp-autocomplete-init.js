@@ -210,6 +210,23 @@ describes.realWin(
       });
     });
 
+    it('should accept different item property from JSON script', () => {
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'items': 'fruit',
+        },
+        '{ "fruit" : [ "apples", "bananas", "pears" ] }'
+      ).then(ampAutocomplete => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.sourceData_).to.have.ordered.members([
+          'apples',
+          'bananas',
+          'pears',
+        ]);
+      });
+    });
+
     it('should fetch remote data when specified in src', () => {
       const data = {
         items: [
@@ -231,6 +248,64 @@ describes.realWin(
         ampAutocomplete.layoutCallback().then(() => {
           const impl = ampAutocomplete.implementation_;
           expect(impl.sourceData_).to.have.ordered.members(data.items);
+        });
+      });
+    });
+
+    it('should fetch remote data when specified in src and using items property', () => {
+      const data = {
+        cities: [
+          'Albany, New York',
+          'Annapolis, Maryland',
+          'Atlanta, Georgia',
+          'Augusta, Maine',
+          'Austin, Texas',
+        ],
+      };
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'src': 'https://examples.com/json',
+          'items': 'cities',
+        },
+        data,
+        false
+      ).then(ampAutocomplete => {
+        ampAutocomplete.layoutCallback().then(() => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).to.have.ordered.members(data.cities);
+        });
+      });
+    });
+
+    it('should fetch remote data when specified in src and using nested items property', () => {
+      const data = {
+        deeply: {
+          nested: {
+            cities: [
+              'Albany, New York',
+              'Annapolis, Maryland',
+              'Atlanta, Georgia',
+              'Augusta, Maine',
+              'Austin, Texas',
+            ],
+          },
+        },
+      };
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'src': 'https://examples.com/json',
+          'items': 'deeply.nested.cities',
+        },
+        data,
+        false
+      ).then(ampAutocomplete => {
+        ampAutocomplete.layoutCallback().then(() => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).to.have.ordered.members(
+            data.deeply.nested.cities
+          );
         });
       });
     });
