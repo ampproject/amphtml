@@ -83,4 +83,7 @@ function createAdsAndEmbed(siteId, embedId) {
   Insticator.ad.loadAd("div-insticator-ad-1");
   Insticator.ad.loadAd("div-insticator-ad-2");
   Insticator.load("em", {id : embedId});
+
+  // now tell AMP runtime to start rendering ads
+  window.context.renderStart();
 }
