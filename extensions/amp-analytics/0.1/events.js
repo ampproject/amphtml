@@ -449,7 +449,7 @@ export class AmpStoryEventTracker extends CustomEventTracker {
    * @param {function(!AnalyticsEvent)} listener
    */
   fireListener_(event, rootTarget, config, listener) {
-    const {type} = event;
+    const type = event['type'];
     const on = config['on'];
 
     if (type !== on) {

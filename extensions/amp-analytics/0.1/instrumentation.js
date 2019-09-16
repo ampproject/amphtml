@@ -97,10 +97,10 @@ export class InstrumentationService {
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
-    const tracker = root.getTracker(
+    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(
       trackerName,
       this.getTrackerClass_(trackerName)
-    );
+    ));
     tracker.trigger(event);
   }
 
