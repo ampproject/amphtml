@@ -28,7 +28,6 @@ import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
-import {isExperimentOn} from './experiments';
 
 installFetch(self);
 installMathSign(self);
@@ -43,14 +42,10 @@ if (self.document) {
   installDocContains(self);
   installGetBoundingClientRect(self);
 
-  // isExperimentOn() must be called after Object.assign polyfill is installed.
   // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
   if (
-    // NOTE: isExperimentOn cannot be called this early due to
-    // a dependency of logging having been initialized.
-    // This is just a minimal revert of
-    // https://github.com/ampproject/amphtml/pull/24215
-    (false && isExperimentOn(self, 'custom-elements-v1')) ||
+    // eslint-disable-next-line no-undef
+    CUSTOM_ELEMENTS_V1 ||
     (getMode().test && !getMode().testIe)
   ) {
     installCustomElements(self);
