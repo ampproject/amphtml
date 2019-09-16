@@ -276,12 +276,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
   {
-    id: 'custom-elements-v1',
-    name: 'Enable a new custom elements v1 polyfill',
-    spec: 'https://github.com/ampproject/amphtml/pull/17205',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
-  },
-  {
     id: 'amp-carousel-chrome-scroll-snap',
     name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
