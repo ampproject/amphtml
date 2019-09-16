@@ -28,6 +28,7 @@ import {
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
+import {CarouselEvents} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {clamp, mod} from '../../../src/utils/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
@@ -688,7 +689,7 @@ export class Carousel {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'indexchange',
+        CarouselEvents.INDEX_CHANGE,
         dict({
           'index': restingIndex,
           'actionSource': this.actionSource_,
@@ -702,9 +703,20 @@ export class Carousel {
    * settled. In some situations, the index may not change, but you still want
    * to react to the scroll position changing.
    */
+  notifyScrollStart() {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, CarouselEvents.SCROLL_START, null)
+    );
+  }
+
+  /**
+   * Fires an event when the scroll position has changed, once scrolling has
+   * settled. In some situations, the index may not change, but you still want
+   * to react to the scroll position changing.
+   */
   notifyScrollPositionChanged_() {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'scrollpositionchange', null)
+      createCustomEvent(this.win_, CarouselEvents.SCROLL_POSITION_CHANGED, null)
     );
   }
 
@@ -756,6 +768,7 @@ export class Carousel {
 
     this.scrolling_ = true;
     this.updateCurrent_();
+    this.notifyScrollStart();
     this.debouncedResetScrollReferencePoint_();
   }
 

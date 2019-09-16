@@ -16,6 +16,7 @@
 
 import '../amp-carousel';
 import {ActionTrust} from '../../../../src/action-constants';
+import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -30,7 +31,7 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
-  const event = await listenOncePromise(el, 'indexchange');
+  const event = await listenOncePromise(el, CarouselEvents.INDEX_CHANGE);
   await el.implementation_.mutateElement(() => {});
   await el.implementation_.mutateElement(() => {});
 
