@@ -23,6 +23,7 @@ amp-sidebar {
   max-width: 80vw;
   background-color: #efefef;
   min-width: 45px !important;
+  width: var(--sidebar-width);
   outline: none;
   overflow-x: hidden !important;
   overflow-y: auto !important;
@@ -54,6 +55,49 @@ amp-sidebar[side="right"][open] {
 amp-sidebar[side][i-amphtml-sidebar-opened] {
   transform: none;
   animation: none;
+}
+
+amp-sidebar [amp-sidebar-submenu-group],
+amp-sidebar [amp-sidebar-submenu] {
+  position: absolute;
+  outline: none;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  transform: translateX(0);
+  transition: transform 233ms;
+}
+
+amp-sidebar [amp-sidebar-submenu] {
+  left: 100%;
+  animation: i-amphtml-sidebar-submenu-hide 233ms linear forwards;
+}
+
+amp-sidebar [amp-sidebar-submenu][open] {
+  visibility: visible;
+  animation: none;
+}
+
+amp-sidebar [amp-sidebar-submenu-group][child-open],
+amp-sidebar [amp-sidebar-submenu][child-open] {
+  transform: translateX(-100%);
+  animation: i-amphtml-sidebar-submenu-parent-hide 233ms linear forwards;
+}
+
+@keyframes i-amphtml-sidebar-submenu-hide {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes i-amphtml-sidebar-submenu-parent-hide {
+  to {
+    visibility: hidden;
+  }
 }
 
 amp-sidebar[side], .i-amphtml-sidebar-mask {

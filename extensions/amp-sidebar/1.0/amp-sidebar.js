@@ -20,6 +20,7 @@ import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {SubmenuManager} from './submenu-manager';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
 import {
@@ -34,8 +35,8 @@ import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
+import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
@@ -125,6 +126,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.opened_ = false;
 
     /** @private @const */
+    this.submenuManager_ = new SubmenuManager(this);
+
+    /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
       cb => this.mutateElement(cb),
@@ -155,6 +159,9 @@ export class AmpSidebar extends AMP.BaseElement {
       element.setAttribute('side', this.side_);
     }
 
+    const width = element.getAttribute('width');
+    setImportantStyles(element, {'--sidebar-width': `${width}px`});
+
     // Get the toolbar attribute from the child navs.
     const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
 
@@ -182,6 +189,8 @@ export class AmpSidebar extends AMP.BaseElement {
         if (this.close_()) {
           event.preventDefault();
         }
+      } else {
+        this.submenuManager_.handleKeyDown(event);
       }
     });
 
@@ -203,31 +212,40 @@ export class AmpSidebar extends AMP.BaseElement {
     element.addEventListener(
       'click',
       e => {
-        const target = closestAncestorElementBySelector(
-          dev().assertElement(e.target),
-          'A'
-        );
-        if (target && target.href) {
-          const tgtLoc = Services.urlForDoc(element).parse(target.href);
-          const currentHref = this.getAmpDoc().win.location.href;
-          // Important: Only close sidebar (and hence pop sidebar history entry)
-          // when navigating locally, Chrome might cancel navigation request
-          // due to after-navigation history manipulation inside a timer callback.
-          // See this issue for more details:
-          // https://github.com/ampproject/amphtml/issues/6585
-          if (removeFragment(target.href) != removeFragment(currentHref)) {
-            return;
-          }
-
-          if (tgtLoc.hash) {
-            this.close_();
-          }
-        }
+        this.handleAnchorClick_(e);
+        this.submenuManager_.handleClick(e);
       },
       true
     );
 
     this.setupGestures_(this.element);
+  }
+
+  /**
+   * Handler on anchor element click.
+   * @param {Event} e
+   */
+  handleAnchorClick_(e) {
+    const target = closestAncestorElementBySelector(
+      dev().assertElement(e.target),
+      'A'
+    );
+    if (target && target.href) {
+      const tgtLoc = Services.urlForDoc(this.element).parse(target.href);
+      const currentHref = this.getAmpDoc().win.location.href;
+      // Important: Only close sidebar (and hence pop sidebar history entry)
+      // when navigating locally, Chrome might cancel navigation request
+      // due to after-navigation history manipulation inside a timer callback.
+      // See this issue for more details:
+      // https://github.com/ampproject/amphtml/issues/6585
+      if (removeFragment(target.href) != removeFragment(currentHref)) {
+        return;
+      }
+
+      if (tgtLoc.hash) {
+        this.close_();
+      }
+    }
   }
 
   /**
@@ -411,6 +429,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element,
       this.getRealChildren()
     );
+    if (this.historyId_ != -1) {
+      this.getHistory_().pop(this.historyId_);
+      this.historyId_ = -1;
+    }
     this.triggerEvent_(SidebarEvents.CLOSE);
   }
 
@@ -469,10 +491,6 @@ export class AmpSidebar extends AMP.BaseElement {
     if (immediate) {
       toggle(this.element, /* display */ false);
       toggle(this.getMaskElement_(), /* display */ false);
-    }
-    if (this.historyId_ != -1) {
-      this.getHistory_().pop(this.historyId_);
-      this.historyId_ = -1;
     }
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
       // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
