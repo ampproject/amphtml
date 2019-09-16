@@ -649,6 +649,17 @@ export class AmpDoc {
     return this.visibilityState_ == VisibilityState.VISIBLE;
   }
 
+  // QQQQ: keep or inline?
+  /**
+   * Whether the AMP document has been ever visible before. Since the visiblity
+   * state of a document can be flipped back and forth we sometimes want to know
+   * if a document has ever been visible.
+   * @return {boolean}
+   */
+  hasBeenVisible() {
+    return this.getLastVisibleTime() != null;
+  }
+
   /**
    * Adds a "visibilitychange" event listener for viewer events. The
    * callback can check {@link isVisible} and {@link getPrefetchCount}
