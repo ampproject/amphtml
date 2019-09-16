@@ -420,12 +420,11 @@ class SeleniumWebDriverController {
     );
   }
   /**
-   * @return {!Promise<!ElementHandle>}
+   * @return {!Promise<string>}
    * @override
    */
   async getAllWindows() {
-    const handles = await this.driver.getAllWindowHandles();
-    return handles.map(handle => new ElementHandle(handle, this));
+    return await this.driver.getAllWindowHandles();
   }
 
   /**
@@ -610,12 +609,12 @@ class SeleniumWebDriverController {
   }
 
   /**
-   * @param {!ElementHandle} handle
+   * @param {string} handle
    * @return {!Promise}
    * @override
    */
   async switchToWindow(handle) {
-    await this.driver.switchTo().window(handle.getElement());
+    await this.driver.switchTo().window(handle);
   }
 
   /**

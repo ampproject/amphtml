@@ -91,10 +91,10 @@ class FunctionalTestController {
    * Select the given window.
    * {@link https://www.w3.org/TR/webdriver1/#dfn-switch-to-window}
    *
-   * @param {!ElementHandle} unusedHandle
+   * @param {string} unusedString
    * @return {!Promise}
    */
-  async switchToWindow(unusedHandle) {}
+  async switchToWindow(unusedString) {}
 
   /**
    * Selects the current top-level browsing context or a child browsing context
@@ -329,7 +329,7 @@ class FunctionalTestController {
    * session.
    * {@link https://www.w3.org/TR/webdriver1/#get-window-handles}
    *
-   * @return {!Promise<!ElementHandle>}
+   * @return {!Promise<string>}
    */
   async getAllWindows() {}
 
