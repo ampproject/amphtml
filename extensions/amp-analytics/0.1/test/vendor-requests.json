@@ -325,7 +325,7 @@
     "pageview": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=Pageview&_ep_isp_info=%24ip_isp_info&_ep_geo_info=%24ip_geo_info&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
     "engagement": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=PageviewEngagement&_ep_engaged_time=5&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
     "completion": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=PageviewEngagement&_ep_completion=0.25&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
-    "custom": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=!event&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_",
+    "custom": "https://!namespace.amp.permutive.com/track?k=!key&i=_client_id_&it=amp&e=!event&_ep_client.type=amp&_ep_client.title=_title_&_ep_client.domain=_canonical_host_&_ep_client.url=_canonical_url_&_ep_client.referrer=_document_referrer_&_ep_client.user_agent=_user_agent_"
   },
   "piStats": {
     "host": "https://events.pi-stats.com",
@@ -357,10 +357,10 @@
     "custom": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!collection"
   },
   "reppublika": {
-	  "host": "https://t5.mindtake.com",
-	  "basePrefix": "/tag/cid/",
-	  "baseSuffix": "Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_",
-	  "pageview": "https://t5.mindtake.com/tag/cid/!code/track.gif?Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_"
+    "host": "https://t5.mindtake.com",
+    "basePrefix": "/tag/cid/",
+    "baseSuffix": "Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_",
+    "pageview": "https://t5.mindtake.com/tag/cid/!code/track.gif?Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_"
   },
   "retargetly": {
     "host": "https://api.retargetly.com",
@@ -389,14 +389,14 @@
     "timer": "https://edge.simplereach.com/t?amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&channels=!categories&tags=!tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=!article_id&ignore_metadata=!ignore_metadata&t=5000&e=5000"
   },
   "snowplow": {
-    "aaVersion": "amp-0.2",
-    "basePrefix": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=!appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_",
-    "pageView": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=!appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=pv",
-    "structEvent": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=!appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=se&se_ca=!structEventCategory&se_ac=!structEventAction&se_la=!structEventLabel&se_pr=!structEventProperty&se_va=!structEventValue"
+    "aaVersion": "amp-0.3",
+    "basePrefix": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_code_&aid=!appId&p=web&tv=amp-0.3&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&vp=_viewport_width_x_viewport_height_&ds=_scroll_width_x_scroll_height_",
+    "pageView": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_code_&aid=!appId&p=web&tv=amp-0.3&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&vp=_viewport_width_x_viewport_height_&ds=_scroll_width_x_scroll_height_&e=pv",
+    "structEvent": "https://!collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_code_&aid=!appId&p=web&tv=amp-0.3&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&vp=_viewport_width_x_viewport_height_&ds=_scroll_width_x_scroll_height_&e=se&se_ca=!structEventCategory&se_ac=!structEventAction&se_la=!structEventLabel&se_pr=!structEventProperty&se_va=!structEventValue"
   },
   "teaanalytics": {
     "domain": "https://!channel/v1/amp",
-    "commonParams":"user.user_unique_id=_client_id_&header.app_id=!app_id&header.language=_browser_language_&header.screen_height=_screen_height_&header.screen_width=_screen_width_&header.resolution=_screen_height_x_screen_width_&header.tz_offset=_timezone_&header.tz_name=_timezone_code_&header.referrer=_document_referrer_&header.custom.user_agent=_user_agent_&event.local_time_ms=_timestamp_&event.params._staging_flag=!debug&verbose=!debug",
+    "commonParams": "user.user_unique_id=_client_id_&header.app_id=!app_id&header.language=_browser_language_&header.screen_height=_screen_height_&header.screen_width=_screen_width_&header.resolution=_screen_height_x_screen_width_&header.tz_offset=_timezone_&header.tz_name=_timezone_code_&header.referrer=_document_referrer_&header.custom.user_agent=_user_agent_&event.local_time_ms=_timestamp_&event.params._staging_flag=!debug&verbose=!debug",
     "base": "https://!channel/v1/amp?user.user_unique_id=_client_id_&header.app_id=!app_id&header.language=_browser_language_&header.screen_height=_screen_height_&header.screen_width=_screen_width_&header.resolution=_screen_height_x_screen_width_&header.tz_offset=_timezone_&header.tz_name=_timezone_code_&header.referrer=_document_referrer_&header.custom.user_agent=_user_agent_&event.local_time_ms=_timestamp_&event.params._staging_flag=!debug&verbose=!debug&rnd=_random_",
     "pageview": "https://!channel/v1/amp?user.user_unique_id=_client_id_&header.app_id=!app_id&header.language=_browser_language_&header.screen_height=_screen_height_&header.screen_width=_screen_width_&header.resolution=_screen_height_x_screen_width_&header.tz_offset=_timezone_&header.tz_name=_timezone_code_&header.referrer=_document_referrer_&header.custom.user_agent=_user_agent_&event.local_time_ms=_timestamp_&event.params._staging_flag=!debug&verbose=!debug&rnd=_random_&event=predefine_pageview&event.params.url=_source_url_&event.params.url_path=_source_path_&event.params.title=_title_",
     "event": "https://!channel/v1/amp?user.user_unique_id=_client_id_&header.app_id=!app_id&header.language=_browser_language_&header.screen_height=_screen_height_&header.screen_width=_screen_width_&header.resolution=_screen_height_x_screen_width_&header.tz_offset=_timezone_&header.tz_name=_timezone_code_&header.referrer=_document_referrer_&header.custom.user_agent=_user_agent_&event.local_time_ms=_timestamp_&event.params._staging_flag=!debug&verbose=!debug&rnd=_random_"
@@ -436,13 +436,13 @@
     "pageview": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time&_ename=$w_page_view&_eprops=!eventProps",
     "event": "https://b.cnzz.com/utrack?&_siteid=!siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=!initial_view_time&_ename=!eventName&_eprops=!eventProps"
   },
-  "upscore":{
-      "host":"https://hit-pool.upscore.com/amp?",
-      "basePrefix":"u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_",
-      "initialHit":"author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_",
-      "finalbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=final",
-      "heartbeat":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=pulse",
-      "pageview":"https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_&type=init"
+  "upscore": {
+    "host": "https://hit-pool.upscore.com/amp?",
+    "basePrefix": "u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_",
+    "initialHit": "author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_",
+    "finalbeat": "https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=final",
+    "heartbeat": "https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=pulse",
+    "pageview": "https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_&type=init"
   },
   "vponanalytics": {
     "host": "<ignore for test>",
