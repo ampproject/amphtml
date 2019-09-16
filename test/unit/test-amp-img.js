@@ -673,4 +673,45 @@ describe('amp-img', () => {
       );
     });
   });
+  describe('layout intrinsic', () => {
+    beforeEach(() => {
+      iframe.iframe.height = 800;
+      iframe.iframe.width = 800;
+    });
+    it('should not exceed given width and height even if image\
+      natural size is larger', () => {
+      return getImg({
+        src: '/examples/img/sample.jpg', // 641 x 481
+        width: 100,
+        height: 100,
+        layout: 'intrinsic',
+      }).then(ampImg => {
+        const dimensions = ampImg.getBoundingClientRect();
+        expect(dimensions.height).to.equal(100);
+        expect(dimensions.width).to.equal(100);
+        const img = ampImg.querySelector('img');
+        const imgDimensions = img.getBoundingClientRect();
+        expect(imgDimensions.height).to.equal(100);
+        expect(imgDimensions.width).to.equal(100);
+      });
+    });
+
+    it('should reach given width and height even if image\
+      natural size is smaller', () => {
+      return getImg({
+        src: '/examples/img/sample.jpg', // 641 x 481
+        width: 800,
+        height: 600,
+        layout: 'intrinsic',
+      }).then(ampImg => {
+        const dimensions = ampImg.getBoundingClientRect();
+        expect(dimensions.height).to.equal(600);
+        expect(dimensions.width).to.equal(800);
+        const img = ampImg.querySelector('img');
+        const imgDimensions = img.getBoundingClientRect();
+        expect(imgDimensions.height).to.equal(600);
+        expect(imgDimensions.width).to.equal(800);
+      });
+    });
+  });
 });
