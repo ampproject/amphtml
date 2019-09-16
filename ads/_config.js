@@ -809,6 +809,7 @@ export const adConfig = {
 
   'puffnetwork': {
     prefetch: 'https://static.puffnetwork.com/amp_ad.js',
+    renderStartImplemented: true,
   },
 
   'pulsepoint': {
