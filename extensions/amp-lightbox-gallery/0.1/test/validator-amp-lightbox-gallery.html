@@ -34,6 +34,9 @@
 </head>
 <body>
   <!-- Valid -->
+  <amp-lightbox-gallery layout="nodisplay" id="foo"></amp-lightbox-gallery>
+
+  <!-- Valid -->
   <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
   <amp-img src="/awesome.png" width="300" height="300" lightbox="a"></amp-img>
   <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>
@@ -59,6 +62,7 @@
     layout="responsive"></amp-youtube>
 
   <!-- Valid -->
+  <amp-lightbox-gallery></amp-lightbox-gallery>
   <amp-carousel width=400 height=300 layout=responsive type=slides lightbox></amp-carousel>
   <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
       <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
@@ -92,7 +96,7 @@
       data-aax_src="302">
     </amp-ad>
   </amp-carousel>
- 
+
   <!-- Invalid: missing value for lightbox-thumbnail-id -->
   <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
   <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->

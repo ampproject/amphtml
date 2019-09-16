@@ -35,6 +35,11 @@ FAIL
 |  </head>
 |  <body>
 |    <!-- Valid -->
+|    <amp-lightbox-gallery layout="nodisplay" id="foo"></amp-lightbox-gallery>
+>>   ^~~~~~~~~
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:37:2 The tag 'amp-lightbox-gallery' requires including the 'amp-lightbox-galley' extension JavaScript. (see https://amp.dev/documentation/components/amp-lightbox-galley) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|
+|    <!-- Valid -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox="a"></amp-img>
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>
@@ -42,7 +47,7 @@ FAIL
 |    <!-- Invalid: missing value for lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
 >>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:42:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:45:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
 |
@@ -62,6 +67,11 @@ amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:42:2 The attri
 |      layout="responsive"></amp-youtube>
 |
 |    <!-- Valid -->
+|    <amp-lightbox-gallery></amp-lightbox-gallery>
+>>   ^~~~~~~~~
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:65:2 The implied layout 'CONTAINER' is not supported by tag 'amp-lightbox-gallery'. (see https://amp.dev/documentation/components/amp-lightbox-galley) [AMP_LAYOUT_PROBLEM]
+>>   ^~~~~~~~~
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:65:2 The tag 'amp-lightbox-gallery' requires including the 'amp-lightbox-galley' extension JavaScript. (see https://amp.dev/documentation/components/amp-lightbox-galley) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-carousel width=400 height=300 layout=responsive type=slides lightbox></amp-carousel>
 |    <amp-carousel width=400 height=300 layout=responsive type=slides lightbox>
 |        <amp-img src="/awesome.png" width="300" height="300" lightbox></amp-img>
@@ -95,16 +105,16 @@ amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:42:2 The attri
 |        data-aax_src="302">
 |      </amp-ad>
 |    </amp-carousel>
-|   
+|
 |    <!-- Invalid: missing value for lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id></amp-img>
 >>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:97:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:101:2 The attribute 'lightbox-thumbnail-id' in tag 'amp-img' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <!-- Invalid: missing lightbox attribute for element with lightbox-thumbnail-id -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox-thumbnail-id="a"></amp-img>
 |    <!-- Invalid: invalid use of lightbox-exclude -->
 |    <amp-img src="/awesome.png" width="300" height="300" lightbox-exclude></amp-img>
 >>   ^~~~~~~~~
-amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:101:2 The attribute 'lightbox-exclude' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
+amp-lightbox-gallery/0.1/test/validator-amp-lightbox-gallery.html:105:2 The attribute 'lightbox-exclude' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |  </body>
 |  </html>
