@@ -229,7 +229,7 @@ describes.repeated(
             expect(resource.resetPendingChangeSize).calledOnce;
           });
 
-          it('should attemptChangeHeight the placeholder, if present', () => {
+          it('should attemptChangeHeight placeholder, if present', () => {
             const itemElement = doc.createElement('div');
             const placeholder = doc.createElement('div');
             placeholder.style.height = '1337px';
@@ -628,21 +628,48 @@ describes.repeated(
               expect(list.container_.contains(newImg)).to.be.true;
             });
 
+            it('should attemptChangeHeight initial content', async () => {
+              const initialContent = doc.createElement('div');
+              initialContent.setAttribute('role', 'list');
+              initialContent.style.height = '1337px';
+
+              // Initial content must be set before buildCallback(), so use
+              // a new test AmpList instance.
+              element = createAmpListElement();
+              element.setAttribute('diffable', '');
+              element.style.height = '10px';
+              element.appendChild(initialContent);
+              doc.body.appendChild(element);
+
+              list = createAmpList(element);
+              // Expect attemptChangeHeight() twice: once to resize to initial
+              // content, once to resize to rendered contents.
+              listMock
+                .expects('attemptChangeHeight')
+                .withExactArgs(1337)
+                .returns(Promise.resolve())
+                .twice();
+
+              const itemElement = doc.createElement('div');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+              await list.layoutCallback();
+            });
+
             it('should diff against initial content', async () => {
               const img = createAmpImg('foo.jpg');
               img.setAttribute('class', 'i-amphtml-element');
               const newImg = createAmpImg('foo.jpg'); // Same src.
               newImg.setAttribute('class', 'bar');
 
-              const initialContainer = doc.createElement('div');
-              initialContainer.setAttribute('role', 'list');
-              initialContainer.appendChild(img);
+              const initialContent = doc.createElement('div');
+              initialContent.setAttribute('role', 'list');
+              initialContent.appendChild(img);
 
               // Initial content must be set before buildCallback(), so use
               // a new test AmpList instance.
               element = createAmpListElement();
               element.setAttribute('diffable', '');
-              element.appendChild(initialContainer);
+              element.appendChild(initialContent);
               list = createAmpList(element);
 
               const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [

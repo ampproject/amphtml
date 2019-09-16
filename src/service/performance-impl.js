@@ -24,6 +24,7 @@ import {isCanary} from '../experiments';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
+import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
 /**
@@ -86,7 +87,7 @@ export class Performance {
     /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private {?./resources-impl.ResourcesDef} */
+    /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
     /** @private {boolean} */
@@ -632,9 +633,12 @@ export class Performance {
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.whenFirstPass().then(() => {
-      return this.resources_
-        .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
-        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+      return whenContentIniLoad(
+        documentElement,
+        this.win,
+        rect,
+        /* isInPrerender */ true
+      );
     });
   }
 

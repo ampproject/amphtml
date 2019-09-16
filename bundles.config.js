@@ -797,7 +797,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-sidebar',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -1130,6 +1130,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,
+  },
+  {
+    name: 'amp-minute-media-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
   },
 ];
 

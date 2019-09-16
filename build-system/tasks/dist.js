@@ -46,7 +46,6 @@ const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
-const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../internal-version');
 
@@ -113,13 +112,11 @@ async function dist() {
     printConfigHelp(cmd);
   }
   if (argv.single_pass) {
-    if (!isTravisBuild()) {
-      log(
-        green('Building all AMP extensions in'),
-        cyan('single_pass'),
-        green('mode.')
-      );
-    }
+    log(
+      green('Building all AMP extensions in'),
+      cyan('single_pass'),
+      green('mode.')
+    );
   } else {
     parseExtensionFlags();
   }
@@ -148,11 +145,6 @@ async function dist() {
     copyParsers(),
   ]);
 
-  if (isTravisBuild()) {
-    // New line after all the compilation progress dots on Travis.
-    console.log('\n');
-  }
-
   await stopNailgunServer(distNailgunPort);
   await formatExtractedMessages();
 
@@ -163,6 +155,8 @@ async function dist() {
       createModuleCompatibleES5Bundle('shadow-v0.js'),
     ]);
   }
+
+  await generateFileListing();
 
   return exitCtrlcHandler(handlerProcess);
 }
@@ -274,6 +268,39 @@ function copyParsers() {
   return fs.copy('build/parsers', 'dist/v0').then(() => {
     endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
+}
+
+/**
+ * Obtain a recursive file listing of a directory
+ * @param {string} dest - Directory to be scanned
+ * @return {Array} - All files found in directory
+ */
+async function walk(dest) {
+  const filelist = [];
+  const files = await fs.readdir(dest);
+
+  for (let i = 0; i < files.length; i++) {
+    const file = `${dest}/${files[i]}`;
+
+    fs.statSync(file).isDirectory()
+      ? Array.prototype.push.apply(filelist, await walk(file))
+      : filelist.push(file);
+  }
+
+  return filelist;
+}
+
+/**
+ * Generate a listing of all files in dist/ and save as dist/files.txt
+ */
+async function generateFileListing() {
+  const startTime = Date.now();
+  const distDir = 'dist';
+  const filesOut = `${distDir}/files.txt`;
+  fs.writeFileSync(filesOut, '');
+  const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
+  fs.writeFileSync(filesOut, files.join('\n'));
+  endBuildStep('Generated', filesOut, startTime);
 }
 
 /**

@@ -21,6 +21,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @enum {string} */
 export const AnalyticsEvent = {
+  BOOKEND_CLICK: 'story-bookend-click',
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',

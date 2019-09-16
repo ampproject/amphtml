@@ -26,6 +26,7 @@ import {
   toggleExperiment,
 } from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
+import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
@@ -228,20 +229,19 @@ export function groupAmpAdsByType(win, type, groupFn) {
   const ampAdSelector = r =>
     r.element./*OK*/ querySelector(`amp-ad[type=${type}]`);
   const {documentElement} = win.document;
+  const ampdoc = Services.ampdoc(documentElement);
   return (
-    Services.resourcesForDoc(documentElement)
-      .getMeasuredResources(win, r => {
-        const isAmpAdType =
-          r.element.tagName == 'AMP-AD' &&
-          r.element.getAttribute('type') == type;
-        if (isAmpAdType) {
-          return true;
-        }
-        const isAmpAdContainerElement =
-          Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!ampAdSelector(r);
-        return isAmpAdContainerElement;
-      })
+    getMeasuredResources(ampdoc, win, r => {
+      const isAmpAdType =
+        r.element.tagName == 'AMP-AD' && r.element.getAttribute('type') == type;
+      if (isAmpAdType) {
+        return true;
+      }
+      const isAmpAdContainerElement =
+        Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
+        !!ampAdSelector(r);
+      return isAmpAdContainerElement;
+    })
       // Need to wait on any contained element resolution followed by build
       // of child ad.
       .then(resources =>

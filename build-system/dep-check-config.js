@@ -157,6 +157,7 @@ exports.rules = [
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
+      'ads/google/a4a/utils.js->src/ini-load.js',
       'ads/google/a4a/utils.js->src/layout.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
@@ -256,6 +257,7 @@ exports.rules = [
       'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/events.js',
       // TODO(#24080) Remove this when story ads have full ad network support.
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-ad-exit/0.1/config.js',
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
@@ -314,6 +316,8 @@ exports.rules = [
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
+        'src/service/video-manager-impl.js',
+      'extensions/amp-minute-media-player/0.1/amp-minute-media-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
         'src/service/video-manager-impl.js',

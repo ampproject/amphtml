@@ -18,8 +18,7 @@ const app = require('express').Router();
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
 const request = require('request');
-const {replaceUrls} = require('../app-utils');
-const {SERVE_MODE} = process.env;
+const {getServeMode, replaceUrls} = require('../app-utils');
 
 // In-a-box envelope.
 // Examples:
@@ -27,7 +26,7 @@ const {SERVE_MODE} = process.env;
 // http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox/', (req, res) => {
   const templatePath =
-    process.cwd() + '/build-system/server-inabox-template.html';
+    process.cwd() + '/build-system/server/server-inabox-template.html';
   fs.readFileAsync(templatePath, 'utf8').then(template => {
     template = template.replace(/SOURCE/g, 'AD_URL');
     const url = getInaboxUrl(req);
@@ -40,7 +39,7 @@ app.use('/inabox/', (req, res) => {
 // http://localhost:8000/inabox-friendly/examples/animations.amp.html
 // http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox-(friendly|safeframe)', (req, res) => {
-  const templatePath = '/build-system/server-inabox-template.html';
+  const templatePath = '/build-system/server/server-inabox-template.html';
   fs.readFileAsync(process.cwd() + templatePath, 'utf8')
     .then(template => {
       let url;
@@ -72,13 +71,13 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
 // http://localhost:8000/a4a[-3p]/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/a4a(|-3p)/', (req, res) => {
   const force3p = req.baseUrl.startsWith('/a4a-3p');
-  const templatePath = '/build-system/server-a4a-template.html';
+  const templatePath = '/build-system/server/server-a4a-template.html';
   const url = getInaboxUrl(req);
   fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
     const content = fillTemplate(template, url.href, req.query)
       .replace(/CHECKSIG/g, force3p || '')
       .replace(/DISABLE3PFALLBACK/g, !force3p);
-    res.end(replaceUrls(SERVE_MODE, content));
+    res.end(replaceUrls(getServeMode(), content));
   });
 });
 

@@ -19,8 +19,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const brotliSize = require('brotli-size');
 const colors = require('ansi-colors');
+const fs = require('fs');
 const log = require('fancy-log');
-const Octokit = require('@octokit/rest');
 const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
@@ -30,14 +30,12 @@ const {
   travisRepoSlug,
 } = require('../travis');
 const {getStdout} = require('../exec');
-const {gitCommitHash, gitTravisMasterBaseline} = require('../git');
+const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
+const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const runtimeFile = './dist/v0.js';
+const normalizedRtvNumber = '1234567890123';
 
-const buildArtifactsRepoOptions = {
-  owner: 'ampproject',
-  repo: 'amphtml-build-artifacts',
-};
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
 const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 
@@ -68,8 +66,13 @@ function getGzippedBundleSize() {
  * @return {string} the bundle size in KB rounded to 2 decimal points.
  */
 function getBrotliBundleSize() {
+  // Brotli compressed size fluctuates because of changes in the RTV number, so
+  // normalize this across pull requests by replacing that RTV with a constant.
+  const normalizedFileContents = fs
+    .readFileSync(runtimeFile, 'utf8')
+    .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
   const bundleSize = parseFloat(
-    (brotliSize.fileSync(runtimeFile) / 1024).toFixed(2)
+    (brotliSize.sync(normalizedFileContents) / 1024).toFixed(2)
   );
   log('Bundle size', cyan('(brotli)'), 'is', cyan(`${bundleSize}KB`));
   return bundleSize;
@@ -78,8 +81,6 @@ function getBrotliBundleSize() {
 /**
  * Store the bundle size of a commit hash in the build artifacts storage
  * repository to the passed value.
- *
- * @return {!Promise}
  */
 async function storeBundleSize() {
   if (!isTravisPushBuild()) {
@@ -102,72 +103,33 @@ async function storeBundleSize() {
     return;
   }
 
-  if (!process.env.GITHUB_ARTIFACTS_RW_TOKEN) {
-    log(
-      red(
-        'ERROR: Missing GITHUB_ARTIFACTS_RW_TOKEN, cannot store the ' +
-          'bundle size in the artifacts repository on GitHub!'
-      )
-    );
+  const commitHash = gitCommitHash();
+  try {
+    const response = await requestPost({
+      uri: url.resolve(
+        bundleSizeAppBaseUrl,
+        path.join('commit', commitHash, 'store')
+      ),
+      json: true,
+      body: {
+        token: process.env.BUNDLE_SIZE_TOKEN,
+        // TODO(#21275): replace the gzippedBundleSize value once the
+        // bundle-size app prefers Brotli.
+        gzippedBundleSize: getGzippedBundleSize(),
+        brotliBundleSize: getBrotliBundleSize(),
+      },
+    });
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw new Error(
+        `${response.statusCode} ${response.statusMessage}: ` + response.body
+      );
+    }
+  } catch (error) {
+    log(red('Could not store the bundle size'));
+    log(red(error));
     process.exitCode = 1;
     return;
   }
-
-  const octokit = new Octokit({
-    auth: `token ${process.env.GITHUB_ARTIFACTS_RW_TOKEN}`,
-  });
-
-  for (const [compression, extension, getBundleSize] of [
-    ['gzip', '', getGzippedBundleSize],
-    ['brotli', '.br', getBrotliBundleSize],
-  ]) {
-    const bundleSize = `${getBundleSize()}KB`;
-    const bundleSizeFile = `${gitCommitHash()}${extension}`;
-    const githubApiCallOptions = Object.assign(buildArtifactsRepoOptions, {
-      path: path.join('bundle-size', bundleSizeFile),
-    });
-
-    try {
-      await octokit.repos.getContents(githubApiCallOptions);
-      log(
-        'The file',
-        cyan(`bundle-size/${bundleSizeFile}`),
-        'already exists in the',
-        'build artifacts repository on GitHub. Skipping...'
-      );
-      continue;
-    } catch {
-      // The file was not found in the GitHub repository, so continue to create
-      // it...
-    }
-
-    try {
-      await octokit.repos.createOrUpdateFile(
-        Object.assign(githubApiCallOptions, {
-          message: `bundle-size: ${bundleSizeFile} (${bundleSize})`,
-          content: Buffer.from(bundleSize).toString('base64'),
-        })
-      );
-      log(
-        'Stored the new',
-        cyan(compression),
-        'bundle size of',
-        cyan(bundleSize),
-        'in the artifacts',
-        'repository on GitHub'
-      );
-    } catch (error) {
-      log(
-        red(
-          `ERROR: Failed to create the bundle-size/${bundleSizeFile} file in`
-        ),
-        red('the build artifacts repository on GitHub!')
-      );
-      log(red('Error message was:'), error.message);
-      return Promise.reject(error);
-    }
-  }
-  return Promise.resolve();
 }
 
 /**
@@ -251,6 +213,23 @@ async function reportBundleSize() {
   }
 }
 
+function getLocalBundleSize() {
+  if (!fs.existsSync(runtimeFile)) {
+    log('Could not find', cyan(runtimeFile) + '.');
+    log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
+    return;
+  } else {
+    log(
+      'Computing bundle size for version',
+      cyan(internalRuntimeVersion),
+      'at commit',
+      cyan(shortSha(gitCommitHash())) + '.'
+    );
+  }
+  getGzippedBundleSize();
+  getBrotliBundleSize();
+}
+
 async function bundleSize() {
   if (argv.on_skipped_build) {
     return await skipBundleSize();
@@ -258,6 +237,8 @@ async function bundleSize() {
     return await storeBundleSize();
   } else if (argv.on_pr_build) {
     return await reportBundleSize();
+  } else if (argv.on_local_build) {
+    return getLocalBundleSize();
   } else {
     log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
     process.exitCode = 1;
@@ -278,4 +259,5 @@ bundleSize.flags = {
   'on_skipped_build':
     "  Set the status of this pull request's bundle " +
     'size check in GitHub to `skipped`',
+  'on_local_build': '  Compute the bundle size of the locally built runtime',
 };
