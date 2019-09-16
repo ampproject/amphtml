@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "google-closure-compiler": "20190819.0.0",
-    "google-closure-library": "20190819.0.0",
+    "google-closure-library": "20190909.0.0",
     "jasmine": "3.4.0"
   }
 }
