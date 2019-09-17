@@ -23,6 +23,7 @@ import {Services} from '../../../../src/services';
 describes.realWin('amp-story-affiliate-link', {amp: true}, env => {
   let win;
   let link;
+  let linkEl;
   const text = 'amp.devamp.devamp.devamp.devamp';
 
   beforeEach(() => {
@@ -33,7 +34,7 @@ describes.realWin('amp-story-affiliate-link', {amp: true}, env => {
       mutator();
     });
 
-    const linkEl = win.document.createElement('a');
+    linkEl = win.document.createElement('a');
     linkEl.setAttribute('affiliate-link-icon', 'shopping-cart');
     linkEl.setAttribute('href', 'https://amp.dev');
     linkEl.setAttribute('target', '_blank');
@@ -56,17 +57,20 @@ describes.realWin('amp-story-affiliate-link', {amp: true}, env => {
   it('should build affiliate link', () => {
     link.build();
 
-    expect(link.element_.hasAttribute('expanded')).to.be.false;
-    expect(link.element_.hasAttribute('pristine')).to.be.true;
+    expect(linkEl.hasAttribute('expanded')).to.be.false;
+    expect(linkEl.hasAttribute('pristine')).to.be.true;
 
-    expect(link.textEl_).to.not.be.null;
-    expect(link.textEl_.hasAttribute('hidden')).to.be.true;
+    const textEl = linkEl.querySelector('.i-amphtml-story-affiliate-link-text');
+    expect(textEl).to.not.be.null;
+    expect(textEl.hasAttribute('hidden')).to.be.true;
+    expect(textEl.textContent).to.equal(text);
 
-    expect(link.launchEl_).to.not.be.null;
-    expect(link.launchEl_.hasAttribute('hidden')).to.be.true;
+    const launchEl = linkEl.querySelector(
+      '.i-amphtml-story-affiliate-link-launch'
+    );
+    expect(launchEl).to.not.be.null;
+    expect(launchEl.hasAttribute('hidden')).to.be.true;
 
-    expect(link.text_).to.equal(text);
-
-    expect(link.element_[AFFILIATE_LINK_BUILT]).to.be.true;
+    expect(linkEl[AFFILIATE_LINK_BUILT]).to.be.true;
   });
 });
