@@ -1,7 +1,7 @@
 {
   "experimentA": {
     "name": "ANALYTICS_VENDOR_SPLIT",
-    "environment": "AMP",
+    "environment": "INABOX",
     "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
     "issue": "",
     "expirationDateUTC": "2019-10-08",
