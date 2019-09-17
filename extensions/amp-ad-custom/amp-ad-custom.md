@@ -44,17 +44,17 @@ Note: at this stage, domains need to be whitelisted manually in AMP Cache to exp
 
 ## Ad server
 
-The ad network needs to provide a new serving endpoint that returns an AMP CORS response in a JSON format:
+The ad network needs to provide a new serving endpoint that returns a CORS response in a JSON format:
 
 ```js
 {
-  templateUrl: “https://adexample.com/amp_template_1.html”
+  templateUrl: "https://adexample.com/amp_template_1.html"
   data: {
-    clickUrl: “https://buy.com/buy-1”,
-    buttonText: ”Buy now”
+    clickUrl: "https://buy.com/buy-1",
+    buttonText: "Buy now"
   }
   analytics: {
-    type: “googleanalytics”,
+    type: "googleanalytics",
     config: {
       ...
     }
@@ -63,23 +63,22 @@ The ad network needs to provide a new serving endpoint that returns an AMP CORS 
 ```
 
 The response requires a couple of custom headers:
-- custom headers for AMP CORS (obsolete, just do regular CORS)
+- custom headers for CORS
 - AMP-Ad-Template-Extension: amp-mustache
 - Amp-Ad-Response-Type: template
-- Access-Control-Expose-Headers: AMP-Access-Control-Allow-Source-Origin
 
 ## Ads tag
 
 The `amp-ad-custom` extension can be used to quickly declare ad slots, using key-value pairs set on data attributes to form the ad request. An example slot might look like:
 
 <amp-ad-custom width=320 height=50
-  src=”http://www.my-ad-network.com”
-  data-request-param-{param_1}=”{val_1}”
-  data-request-param-{param_2}=”{val_2}”
+  src="http://www.my-ad-network.com"
+  data-request-param-{param_1}="{val_1}"
+  data-request-param-{param_2}="{val_2}"
   . . .
-  data-request-param-{param_N}=”{val_N}”>
+  data-request-param-{param_N}="{val_N}">
 </amp-ad-custom>
 
-And the resultant ad request URL would be: “http://www.my-ad-network.com?{param_1}={val_1}&{param_2}={val_2}&...&{param_N}={val_N}”.
+And the resultant ad request URL would be: "http://www.my-ad-network.com?{param_1}={val_1}&{param_2}={val_2}&...&{param_N}={val_N}".
 
 
