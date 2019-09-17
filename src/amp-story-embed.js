@@ -119,7 +119,7 @@ export class AmpStoryEmbed {
 }
 
 const doc = self.document;
-const embeds = doc.getElementsByClassName('amp-story-embed');
+const embeds = doc.getElementsByTagName('amp-story-embed');
 for (let i = 0; i < embeds.length; i++) {
   const embed = embeds[i];
   const embedImpl = new AmpStoryEmbed(doc, embed);
