@@ -60,7 +60,7 @@ export class AmpViewerAssistance {
       );
     });
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/action-impl.ActionService} */

@@ -29,7 +29,7 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {provideVisibilityManager} from './visibility-manager';
 import {tryResolve} from '../../../src/utils/promise';
-import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
+import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';
 
@@ -130,7 +130,7 @@ export class AnalyticsRoot {
 
   /**
    * The viewer of analytics root
-   * @return {!../../../src/service/viewer-impl.Viewer}
+   * @return {!../../../src/service/viewer-interface.ViewerInterface}
    */
   getViewer() {
     return Services.viewerForDoc(this.ampdoc);

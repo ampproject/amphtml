@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
@@ -422,20 +423,20 @@ describes.realWin('performance', {amp: true}, env => {
             expect(
               viewerSendMessageStub.withArgs('tick').getCall(0).args[1]
             ).to.be.jsonEqual({
-              label: 'msr',
-              delta: 1,
-            });
-            expect(
-              viewerSendMessageStub.withArgs('tick').getCall(1).args[1]
-            ).to.be.jsonEqual({
               label: 'start0',
               value: 0,
             });
             expect(
-              viewerSendMessageStub.withArgs('tick').getCall(2).args[1]
+              viewerSendMessageStub.withArgs('tick').getCall(1).args[1]
             ).to.be.jsonEqual({
               label: 'start1',
               value: 1,
+            });
+            expect(
+              viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
+            ).to.be.jsonEqual({
+              label: 'msr',
+              delta: 1,
             });
           });
         });
@@ -500,31 +501,35 @@ describes.realWin('performance', {amp: true}, env => {
             );
           });
         });
+
+        it('should flush with the story experiment enabled', () => {
+          const storyEl = win.document.createElement('amp-story');
+          const bodyEl = win.document.body;
+          bodyEl.insertBefore(storyEl, bodyEl.firstElementChild || null);
+
+          return perf.coreServicesAvailable().then(() => {
+            expect(viewerSendMessageStub.withArgs('sendCsi')).to.have.callCount(
+              1
+            );
+            const call = viewerSendMessageStub.withArgs('sendCsi').getCall(0);
+            expect(call.args[1]).to.have.property('ampexp');
+            expect(call.args[1].ampexp).to.contain('story');
+          });
+        });
       });
     });
 
   it('should wait for visible resources', () => {
-    function resource() {
-      const res = {
-        loadedComplete: false,
-      };
-      res.loadedOnce = () =>
-        Promise.resolve().then(() => {
-          res.loadedComplete = true;
-        });
-      return res;
-    }
-
     const resources = Services.resourcesForDoc(ampdoc);
-    const resourcesMock = sandbox.mock(resources);
+    sandbox.stub(resources, 'whenFirstPass').returns(Promise.resolve());
+    const whenContentIniLoadStub = sandbox
+      .stub(IniLoad, 'whenContentIniLoad')
+      .returns(Promise.resolve());
     perf.resources_ = resources;
 
-    const res1 = resource();
-    const res2 = resource();
-
-    resourcesMock
-      .expects('getResourcesInRect')
-      .withExactArgs(
+    return perf.whenViewportLayoutComplete_().then(() => {
+      expect(whenContentIniLoadStub).to.be.calledWith(
+        perf.win.document.documentElement,
         perf.win,
         sinon.match(
           arg =>
@@ -534,13 +539,7 @@ describes.realWin('performance', {amp: true}, env => {
             arg.height == perf.win.innerHeight
         ),
         /* inPrerender */ true
-      )
-      .returns(Promise.resolve([res1, res2]))
-      .once();
-
-    return perf.whenViewportLayoutComplete_().then(() => {
-      expect(res1.loadedComplete).to.be.true;
-      expect(res2.loadedComplete).to.be.true;
+      );
     });
   });
 
@@ -908,14 +907,28 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           delta: 15,
         }
       );
-      delete env.win.PerformanceEventTiming;
     });
   });
 
   describe('should forward first input metrics for performance entries', () => {
+    let PerformanceObserverConstructorStub, performanceObserver;
+    beforeEach(() => {
+      // Stub and fake the PerformanceObserver constructor.
+      const PerformanceObserverStub = env.sandbox.stub();
+
+      PerformanceObserverStub.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+      PerformanceObserverConstructorStub = env.sandbox.stub(
+        env.win,
+        'PerformanceObserver'
+      );
+      PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
+    });
     it('created before performance service registered', () => {
       // Pretend that the EventTiming API exists.
-      env.win.PerformanceEventTiming = true;
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
 
       const entries = [
         {
@@ -944,25 +957,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         label: 'fid',
         delta: 3,
       });
-
-      delete env.win.PerformanceEventTiming;
     });
 
     it('created after performance service registered', () => {
       // Pretend that the EventTiming API exists.
-      env.win.PerformanceEventTiming = true;
-
-      // Stub and fake the PerformanceObserver constructor.
-      const PerformanceObserverStub = env.sandbox.stub();
-
-      let performanceObserver;
-      PerformanceObserverStub.callsFake(callback => {
-        performanceObserver = new PerformanceObserverImpl(callback);
-        return performanceObserver;
-      });
-      env.sandbox
-        .stub(env.win, 'PerformanceObserver')
-        .callsFake(PerformanceObserverStub);
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
 
       installPerformanceService(env.win);
 
@@ -991,7 +990,38 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         label: 'fid',
         delta: 3,
       });
-      delete env.win.PerformanceEventTiming;
+    });
+
+    it('created before performance service registered for Chrome 77', () => {
+      // Pretend that the EventTiming API exists.
+      PerformanceObserverConstructorStub.supportedEntryTypes = ['first-input'];
+
+      installPerformanceService(env.win);
+
+      const perf = Services.performanceFor(env.win);
+
+      // Fake fid that occured before the Performance service is started.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              cancelable: true,
+              duration: 8,
+              entryType: 'firstInput',
+              name: 'mousedown',
+              processingEnd: 105,
+              processingStart: 103,
+              startTime: 100,
+            },
+          ];
+        },
+      });
+
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'fid',
+        delta: 3,
+      });
     });
   });
 
@@ -1089,6 +1119,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       });
       sandbox.stub(Services, 'resourcesForDoc').returns({
         getResourcesInRect: () => unresolvedPromise,
+        whenFirstPass: () => Promise.resolve(),
       });
       sandbox.stub(Services, 'viewportForDoc').returns({
         getSize: () => viewportSize,
@@ -1165,38 +1196,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
       toggleVisibility(fakeWin, false);
       expect(perf.events_.length).to.equal(2);
-    });
-
-    it("for browsers that don't support the visibilitychange event", () => {
-      // Specify an iPhone Safari user agent, which does not support
-      // the visibilitychange event.
-      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
-
-      // Document should be initially visible.
-      expect(fakeWin.document.visibilityState).to.equal('visible');
-
-      // Fake layoutJank that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layoutJank')
-        .returns([
-          {entryType: 'layoutJank', fraction: 0.25},
-          {entryType: 'layoutJank', fraction: 0.3},
-        ]);
-
-      const perf = getPerformance();
-      // visibilitychange/beforeunload listeners are now added.
-      perf.coreServicesAvailable();
-
-      // The document has become hidden, e.g. via the user switching tabs.
-      // Note: Don't fire visibilitychange (not supported in this case).
-      fakeWin.document.visibilityState = 'hidden';
-      fireEvent('beforeunload');
-
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'lj',
-        delta: 0.55,
-      });
     });
 
     it('forwards layout jank metric on viewer visibility change to inactive', () => {
@@ -1285,6 +1284,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       });
       sandbox.stub(Services, 'resourcesForDoc').returns({
         getResourcesInRect: () => unresolvedPromise,
+        whenFirstPass: () => Promise.resolve(),
       });
       sandbox.stub(Services, 'viewportForDoc').returns({
         getSize: () => viewportSize,
@@ -1441,43 +1441,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
       toggleVisibility(fakeWin, false);
       expect(perf.events_.length).to.equal(2);
-    });
-
-    it("for browsers that don't support the visibilitychange event", () => {
-      // Specify an iPhone Safari user agent, which does not support
-      // the visibilitychange event.
-      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
-
-      // Fake the Performance API.
-      fakeWin.PerformanceObserver.supportedEntryTypes = ['layout-shift'];
-
-      // Document should be initially visible.
-      expect(fakeWin.document.visibilityState).to.equal('visible');
-
-      const perf = getPerformance();
-      // visibilitychange/beforeunload listeners are now added.
-      perf.coreServicesAvailable();
-
-      // Fake layout-shift that occured before the Performance service is started.
-      performanceObserver.triggerCallback({
-        getEntries() {
-          return [
-            {entryType: 'layout-shift', value: 0.25, hadRecentInput: false},
-            {entryType: 'layout-shift', value: 0.3, hadRecentInput: false},
-          ];
-        },
-      });
-
-      // The document has become hidden, e.g. via the user switching tabs.
-      // Note: Don't fire visibilitychange (not supported in this case).
-      fakeWin.document.visibilityState = 'hidden';
-      fireEvent('beforeunload');
-
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'cls',
-        delta: 0.55,
-      });
     });
 
     it('when the viewer visibility changes to inactive', () => {

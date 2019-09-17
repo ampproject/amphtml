@@ -19,7 +19,6 @@ import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingIosEmbedShadowRoot_} from './viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
@@ -61,7 +60,7 @@ export class ViewportImpl {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!ViewportBindingDef} binding
-   * @param {!../viewer-impl.Viewer} viewer
+   * @param {!../viewer-interface.ViewerInterface} viewer
    */
   constructor(ampdoc, binding, viewer) {
     const {win} = ampdoc;
@@ -78,7 +77,7 @@ export class ViewportImpl {
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
 
-    /** @const {!../viewer-impl.Viewer} */
+    /** @const {!../viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
 
     /**
@@ -128,7 +127,7 @@ export class ViewportImpl {
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
-    /** @private @const {!Observable} */
+    /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
     /** @private {?Element|undefined} */
@@ -1129,16 +1128,7 @@ function createViewport(ampdoc) {
     ampdoc.isSingleDoc() &&
     getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED
   ) {
-    if (
-      isExperimentOn(win, 'ios-embed-sd') &&
-      win.Element.prototype.attachShadow &&
-      // We need the native Shadow DOM support and jumping-fixed-element fix.
-      parseFloat(Services.platformFor(win).getIosVersionString()) >= 12.2
-    ) {
-      binding = new ViewportBindingIosEmbedShadowRoot_(win);
-    } else {
-      binding = new ViewportBindingIosEmbedWrapper_(win);
-    }
+    binding = new ViewportBindingIosEmbedWrapper_(win);
   } else {
     binding = new ViewportBindingNatural_(ampdoc);
   }
@@ -1167,7 +1157,7 @@ const ViewportType = {
 
 /**
  * @param {!Window} win
- * @param {!../viewer-impl.Viewer} viewer
+ * @param {!../viewer-interface.ViewerInterface} viewer
  * @return {string}
  */
 function getViewportType(win, viewer) {
