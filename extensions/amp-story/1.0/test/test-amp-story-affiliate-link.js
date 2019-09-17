@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ describes.realWin('amp-story-affiliate-link', {amp: true}, env => {
     linkEl.setAttribute('affiliate-link-icon', 'shopping-cart');
     linkEl.setAttribute('href', 'https://amp.dev');
     linkEl.setAttribute('target', '_blank');
-    linkEl.insertAdjacentText('afterbegin', text);
+    linkEl.textContent = text;
 
     const storyGridLayerEl = win.document.createElement('amp-story-grid-layer');
     storyGridLayerEl.appendChild(linkEl);
@@ -52,25 +52,28 @@ describes.realWin('amp-story-affiliate-link', {amp: true}, env => {
     win.document.body.appendChild(storyEl);
 
     link = new AmpStoryAffiliateLink(win, linkEl);
+    link.build();
   });
 
   it('should build affiliate link', () => {
-    link.build();
+    expect(linkEl[AFFILIATE_LINK_BUILT]).to.be.true;
+  });
 
+  it('should initialize the <a> tag', () => {
     expect(linkEl.hasAttribute('expanded')).to.be.false;
     expect(linkEl.hasAttribute('pristine')).to.be.true;
+  });
 
+  it('should add textContext to the text element', () => {
     const textEl = linkEl.querySelector('.i-amphtml-story-affiliate-link-text');
-    expect(textEl).to.not.be.null;
     expect(textEl.hasAttribute('hidden')).to.be.true;
     expect(textEl.textContent).to.equal(text);
+  });
 
+  it('should append the launch element', () => {
     const launchEl = linkEl.querySelector(
       '.i-amphtml-story-affiliate-link-launch'
     );
-    expect(launchEl).to.not.be.null;
     expect(launchEl.hasAttribute('hidden')).to.be.true;
-
-    expect(linkEl[AFFILIATE_LINK_BUILT]).to.be.true;
   });
 });

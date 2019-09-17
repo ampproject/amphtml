@@ -608,11 +608,20 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-affiliate-link.html",
       "name": "amp-story: affiliate link",
-      "viewport": {"width": 320, "height": 480},
+      "viewport": {"width": 375, "height": 812},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded"
       ],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-affiliate-link.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-affiliate-link.html",
+      "name": "amp-story: affiliate link desktop",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-affiliate-link-desktop.js"
     },
     {
       // TODO(#22070): Re-enable test.
