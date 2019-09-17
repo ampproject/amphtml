@@ -39,7 +39,6 @@ import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
-import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
@@ -132,8 +131,8 @@ export function createCustomElementClass(win, name) {
  * @return {function(new:HTMLElement)}
  */
 function createBaseCustomElementClass(win) {
-  if (win.BaseCustomElementClass) {
-    return win.BaseCustomElementClass;
+  if (win.__AMP_BASE_CE_CLASS) {
+    return win.__AMP_BASE_CE_CLASS;
   }
   const htmlElement =
     /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
@@ -190,15 +189,9 @@ function createBaseCustomElementClass(win) {
 
       /**
        * Resources can only be looked up when an element is attached.
-       * @private {?./service/resources-impl.ResourcesDef}
+       * @private {?./service/resources-interface.ResourcesInterface}
        */
       this.resources_ = null;
-
-      /**
-       * Layers can only be looked up when an element is attached.
-       * @private {?./service/layers-impl.LayoutLayers}
-       */
-      this.layers_ = null;
 
       /** @private {!Layout} */
       this.layout_ = Layout.NODISPLAY;
@@ -255,13 +248,24 @@ function createBaseCustomElementClass(win) {
       /** @private {?Element|undefined} */
       this.overflowElement_ = undefined;
 
+      /**
+       * The time at which this element was scheduled for layout relative to
+       * the epoch. This value will be set to 0 until the this element has been
+       * scheduled.
+       * Note that this value may change over time if the element is enqueued,
+       * then dequeued and re-enqueued by the scheduler.
+       * @type {number|undefined}
+       */
+      this.layoutScheduleTime = undefined;
+
       // Closure compiler appears to mark HTMLElement as @struct which
       // disables bracket access. Force this with a type coercion.
       const nonStructThis = /** @type {!Object} */ (this);
 
       // `opt_implementationClass` is only used for tests.
       let Ctor =
-        win.ampExtendedElements && win.ampExtendedElements[this.elementName()];
+        win.__AMP_EXTENDED_ELEMENTS &&
+        win.__AMP_EXTENDED_ELEMENTS[this.elementName()];
       if (getMode().test && nonStructThis['implementationClassForTesting']) {
         Ctor = nonStructThis['implementationClassForTesting'];
       }
@@ -344,7 +348,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Returns Resources manager. Only available after attachment. It throws
      * exception before the element is attached.
-     * @return {!./service/resources-impl.ResourcesDef}
+     * @return {!./service/resources-interface.ResourcesInterface}
      * @final
      * @package
      */
@@ -353,20 +357,8 @@ function createBaseCustomElementClass(win) {
         this.resources_,
         'no resources yet, since element is not attached'
       );
-      return /** @typedef {!./service/resources-impl.ResourcesDef} */ this
+      return /** @typedef {!./service/resources-interface.ResourcesInterface} */ this
         .resources_;
-    }
-
-    /**
-     * Returns LayoutLayers. Only available after attachment. It throws
-     * exception before the element is attached.
-     * @return {!./service/layers-impl.LayoutLayers}
-     * @final
-     * @package
-     */
-    getLayers() {
-      devAssert(this.layers_, 'no layers yet, since element is not attached');
-      return /** @typedef {!./service/layers-impl.LayoutLayers} */ this.layers_;
     }
 
     /**
@@ -853,13 +845,6 @@ function createBaseCustomElementClass(win) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
       }
-      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
-        if (!this.layers_) {
-          // Resources can now be initialized since the ampdoc is now available.
-          this.layers_ = Services.layersForDoc(this.ampdoc_);
-        }
-        this.getLayers().add(this);
-      }
       this.getResources().add(this);
 
       if (this.everAttached) {
@@ -999,9 +984,6 @@ function createBaseCustomElementClass(win) {
 
       this.isConnected_ = false;
       this.getResources().remove(this);
-      if (isExperimentOn(this.ampdoc_.win, 'layers')) {
-        this.getLayers().remove(this);
-      }
       this.implementation_.detachedCallback();
     }
 
@@ -1891,8 +1873,8 @@ function createBaseCustomElementClass(win) {
       }
     }
   }
-  win.BaseCustomElementClass = BaseCustomElement;
-  return /** @type {function(new:HTMLElement)} */ (win.BaseCustomElementClass);
+  win.__AMP_BASE_CE_CLASS = BaseCustomElement;
+  return /** @type {function(new:HTMLElement)} */ (win.__AMP_BASE_CE_CLASS);
 }
 
 /**

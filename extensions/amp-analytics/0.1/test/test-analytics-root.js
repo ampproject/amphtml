@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as IniLoad from '../../../../src/ini-load';
 import {AmpDocShadow} from '../../../../src/service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEventType, CustomEventTracker} from '../events';
@@ -28,7 +29,7 @@ import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   let win;
   let ampdoc;
-  let resources, viewport;
+  let viewport;
   let root;
   let body, target, child, other;
   let mockVisibilityInterface;
@@ -36,8 +37,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    resources = win.services.resources.obj;
-    viewport = win.services.viewport.obj;
+    viewport = win.__AMP_SERVICES.viewport.obj;
     root = new AmpdocAnalyticsRoot(ampdoc);
     body = win.document.body;
 
@@ -104,39 +104,40 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should provide the correct rect for ini-load for main doc', () => {
-    const stub = sandbox
-      .stub(resources, 'getResourcesInRect')
-      .callsFake(() => Promise.resolve([]));
+    const spy = sandbox.spy(IniLoad, 'whenContentIniLoad');
     root.whenIniLoaded();
-    expect(stub).to.be.calledOnce;
-    expect(stub.args[0][0]).to.equal(win);
-    expect(stub.args[0][1]).to.contain({
-      top: 0,
-      left: 0,
-      width: win.innerWidth,
-      height: win.innerHeight,
-    });
+    expect(spy).to.be.calledWith(
+      ampdoc,
+      win,
+      sinon.match({
+        top: 0,
+        left: 0,
+        width: win.innerWidth,
+        height: win.innerHeight,
+      })
+    );
   });
 
   it('should provide the correct rect for ini-load for inabox', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == win.document.documentElement) {
         return {left: 10, top: 11, width: 100, height: 200};
       }
     });
-    const stub = sandbox
-      .stub(resources, 'getResourcesInRect')
-      .callsFake(() => Promise.resolve([]));
+    const spy = sandbox.spy(IniLoad, 'whenContentIniLoad');
+
     root.whenIniLoaded();
-    expect(stub).to.be.calledOnce;
-    expect(stub.args[0][0]).to.equal(win);
-    expect(stub.args[0][1]).to.contain({
-      left: 10,
-      top: 11,
-      width: 100,
-      height: 200,
-    });
+    expect(spy).to.be.calledWith(
+      ampdoc,
+      win,
+      sinon.match({
+        left: 10,
+        top: 11,
+        width: 100,
+        height: 200,
+      })
+    );
   });
 
   it('should create visibility root', () => {

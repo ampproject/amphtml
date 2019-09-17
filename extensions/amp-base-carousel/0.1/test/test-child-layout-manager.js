@@ -144,200 +144,309 @@ describes.realWin('child layout manager', {}, env => {
     return el.children;
   }
 
-  it('should just setOwner when not laid out', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
+  describe('when not queuing changes', () => {
+    it('should just setOwner when not laid out', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      await afterRenderPromise();
+
+      expect(ownersMock.setOwner).to.have.callCount(5);
+      expect(ownersMock.scheduleLayout).to.have.not.been.called;
     });
 
-    clm.updateChildren(el.children);
-    await afterRenderPromise();
+    it('should schedule layout for one extra viewport on layout', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
 
-    expect(ownersMock.setOwner).to.have.callCount(5);
-    expect(ownersMock.scheduleLayout).to.have.not.been.called;
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      expect(ownersMock.scheduleLayout)
+        .to.have.callCount(2)
+        .to.have.been.calledWith(domElementMock, el.children[0])
+        .to.have.been.calledWith(domElementMock, el.children[1]);
+    });
+
+    it('should schedule layout when wasLaidOut is called', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      await afterRenderPromise();
+
+      expect(ownersMock.scheduleLayout).to.have.not.been.called;
+
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      expect(ownersMock.scheduleLayout)
+        .to.have.callCount(2)
+        .to.have.been.calledWith(domElementMock, el.children[0])
+        .to.have.been.calledWith(domElementMock, el.children[1]);
+    });
+
+    it('should schedule layout when children change', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      ownersMock.scheduleLayout.resetHistory();
+      const newChildren = replaceChildren(el, 3);
+      clm.updateChildren(newChildren);
+      await afterRenderPromise();
+
+      expect(ownersMock.scheduleLayout)
+        .to.have.callCount(2)
+        .to.have.been.calledWith(domElementMock, newChildren[0])
+        .to.have.been.calledWith(domElementMock, newChildren[1]);
+    });
+
+    it('should update viewport visibility', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      expect(ownersMock.updateInViewport)
+        .to.have.callCount(5)
+        .to.have.been.calledWith(domElementMock, el.children[0], true)
+        .to.have.been.calledWith(domElementMock, el.children[1], false)
+        .to.have.been.calledWith(domElementMock, el.children[2], false)
+        .to.have.been.calledWith(domElementMock, el.children[3], false)
+        .to.have.been.calledWith(domElementMock, el.children[4], false);
+    });
+
+    it('should call the viewportIntersectionCallback', async () => {
+      const viewportIntersectionCallback = env.sandbox.spy();
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+        viewportIntersectionCallback,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      expect(viewportIntersectionCallback)
+        .to.have.callCount(5)
+        .to.have.been.calledWith(el.children[0], true)
+        .to.have.been.calledWith(el.children[1], false)
+        .to.have.been.calledWith(el.children[2], false)
+        .to.have.been.calledWith(el.children[3], false)
+        .to.have.been.calledWith(el.children[4], false);
+    });
+
+    it('should scheduleLayout on scroll', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      ownersMock.scheduleLayout.resetHistory();
+      await afterScrollAndIntersectingPromise(el.children[1], el);
+
+      expect(ownersMock.scheduleLayout)
+        .to.have.callCount(1)
+        .to.have.been.calledWith(domElementMock, el.children[2]);
+    });
+
+    it('should scheduleUnlayout on scroll', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      ownersMock.scheduleUnlayout.resetHistory();
+      await afterScrollAndIntersectingPromise(el.children[3], el);
+      await afterRenderPromise();
+
+      // Note, el.children[1] was not unlaidout, even though it is more than one
+      // viewport away. The unlayout has an extra buffer space to avoid switching
+      // between layout and unlayout at the edge.
+      expect(ownersMock.scheduleUnlayout)
+        .to.have.callCount(1)
+        .to.have.been.calledWith(domElementMock, el.children[0]);
+    });
+
+    it('should scheduleUnlayout on wasUnlaidOut', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      ownersMock.scheduleUnlayout.resetHistory();
+      clm.wasUnlaidOut();
+      await afterRenderPromise();
+
+      expect(ownersMock.scheduleUnlayout)
+        .to.have.callCount(5)
+        .to.have.been.calledWith(domElementMock, el.children[0])
+        .to.have.been.calledWith(domElementMock, el.children[1])
+        .to.have.been.calledWith(domElementMock, el.children[2])
+        .to.have.been.calledWith(domElementMock, el.children[3])
+        .to.have.been.calledWith(domElementMock, el.children[4]);
+    });
+
+    it('should updateInViewport on scroll', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
+
+      ownersMock.updateInViewport.resetHistory();
+      await afterScrollAndIntersectingPromise(el.children[1], el);
+      await afterRenderPromise();
+
+      expect(ownersMock.updateInViewport)
+        .to.have.callCount(2)
+        .to.have.been.calledWith(domElementMock, el.children[0], false)
+        .to.have.been.calledWith(domElementMock, el.children[1], true);
+    });
   });
 
-  it('should schedule layout for one extra viewport', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
+  describe('queuing changes', () => {
+    it('should just setOwner when not laid out', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
+
+      clm.setQueueChanges(true);
+      clm.updateChildren(el.children);
+      await afterRenderPromise();
+
+      expect(ownersMock.setOwner).to.have.callCount(5);
+      expect(ownersMock.scheduleLayout).to.have.not.been.called;
     });
 
-    clm.updateChildren(el.children);
-    clm.wasLaidOut();
-    await afterRenderPromise();
+    it('should queue layout on scroll', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
 
-    expect(ownersMock.scheduleLayout)
-      .to.have.callCount(2)
-      .to.have.been.calledWith(domElementMock, el.children[0])
-      .to.have.been.calledWith(domElementMock, el.children[1]);
-  });
+      clm.setQueueChanges(true);
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
 
-  it('should schedule layout when wasLaidOut is called', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
+      clm.flushChanges();
+      ownersMock.scheduleLayout.resetHistory();
+      await afterScrollAndIntersectingPromise(el.children[1], el);
+
+      // Make sure changes are not applied yet.
+      expect(ownersMock.scheduleLayout).to.have.not.been.called;
+      // Now flush the changes and check that they are applied.
+      clm.flushChanges();
+
+      expect(ownersMock.scheduleLayout)
+        .to.have.callCount(1)
+        .to.have.been.calledWith(domElementMock, el.children[2]);
     });
 
-    clm.updateChildren(el.children);
-    await afterRenderPromise();
-    clm.wasLaidOut();
-    await afterRenderPromise();
+    it('should queue scheduleUnlayout on scroll', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
 
-    expect(ownersMock.scheduleLayout)
-      .to.have.callCount(2)
-      .to.have.been.calledWith(domElementMock, el.children[0])
-      .to.have.been.calledWith(domElementMock, el.children[1]);
-  });
+      clm.setQueueChanges(true);
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
 
-  it('should schedule layout when children change', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
+      clm.flushChanges();
+      ownersMock.scheduleUnlayout.resetHistory();
+      await afterScrollAndIntersectingPromise(el.children[3], el);
+      await afterRenderPromise();
+
+      // Make sure changes are not applied yet.
+      expect(ownersMock.scheduleUnlayout).to.have.not.been.called;
+      // Now flush the changes and check that they are applied.
+      clm.flushChanges();
+
+      // Note, el.children[1] was not unlaidout, even though it is more than one
+      // viewport away. The unlayout has an extra buffer space to avoid switching
+      // between layout and unlayout at the edge.
+      expect(ownersMock.scheduleUnlayout)
+        .to.have.callCount(1)
+        .to.have.been.calledWith(domElementMock, el.children[0]);
     });
 
-    clm.updateChildren(el.children);
-    clm.wasLaidOut();
-    await afterRenderPromise();
+    it('should queue updateInViewport on scroll', async () => {
+      const el = createHorizontalScroller(5);
+      const clm = new ChildLayoutManager({
+        ampElement: ampElementMock,
+        intersectionElement: el,
+      });
 
-    ownersMock.scheduleLayout.resetHistory();
-    const newChildren = replaceChildren(el, 3);
-    clm.updateChildren(newChildren);
-    await afterRenderPromise();
+      clm.setQueueChanges(true);
+      clm.updateChildren(el.children);
+      clm.wasLaidOut();
+      await afterRenderPromise();
 
-    expect(ownersMock.scheduleLayout)
-      .to.have.callCount(2)
-      .to.have.been.calledWith(domElementMock, newChildren[0])
-      .to.have.been.calledWith(domElementMock, newChildren[1]);
-  });
+      clm.flushChanges();
+      ownersMock.updateInViewport.resetHistory();
+      await afterScrollAndIntersectingPromise(el.children[1], el);
+      await afterRenderPromise();
 
-  it('should update viewport visibility', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
+      // Make sure changes are not applied yet.
+      expect(ownersMock.updateInViewport).to.have.not.been.called;
+      // Now flush the changes and check that they are applied.
+      clm.flushChanges();
+
+      expect(ownersMock.updateInViewport)
+        .to.have.callCount(2)
+        .to.have.been.calledWith(domElementMock, el.children[0], false)
+        .to.have.been.calledWith(domElementMock, el.children[1], true);
     });
-
-    clm.updateChildren(el.children);
-    clm.wasLaidOut();
-    await afterRenderPromise();
-
-    expect(ownersMock.updateInViewport)
-      .to.have.callCount(5)
-      .to.have.been.calledWith(domElementMock, el.children[0], true)
-      .to.have.been.calledWith(domElementMock, el.children[1], false)
-      .to.have.been.calledWith(domElementMock, el.children[2], false)
-      .to.have.been.calledWith(domElementMock, el.children[3], false)
-      .to.have.been.calledWith(domElementMock, el.children[4], false);
-  });
-
-  it('should call the viewportIntersectionCallback', async () => {
-    const viewportIntersectionCallback = env.sandbox.spy();
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
-      viewportIntersectionCallback,
-    });
-
-    clm.updateChildren(el.children);
-    clm.wasLaidOut();
-    await afterRenderPromise();
-
-    expect(viewportIntersectionCallback)
-      .to.have.callCount(5)
-      .to.have.been.calledWith(el.children[0], true)
-      .to.have.been.calledWith(el.children[1], false)
-      .to.have.been.calledWith(el.children[2], false)
-      .to.have.been.calledWith(el.children[3], false)
-      .to.have.been.calledWith(el.children[4], false);
-  });
-
-  it('should scheduleLayout on scroll', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
-    });
-
-    clm.updateChildren(el.children);
-    clm.wasLaidOut();
-    await afterRenderPromise();
-
-    ownersMock.scheduleLayout.resetHistory();
-    await afterScrollAndIntersectingPromise(el.children[1], el);
-
-    expect(ownersMock.scheduleLayout)
-      .to.have.callCount(1)
-      .to.have.been.calledWith(domElementMock, el.children[2]);
-  });
-
-  it('should scheduleUnlayout on scroll', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
-    });
-
-    clm.updateChildren(el.children);
-    clm.wasLaidOut();
-    await afterRenderPromise();
-
-    ownersMock.scheduleUnlayout.resetHistory();
-    await afterScrollAndIntersectingPromise(el.children[2], el);
-    await afterRenderPromise();
-
-    expect(ownersMock.scheduleUnlayout)
-      .to.have.callCount(1)
-      .to.have.been.calledWith(domElementMock, el.children[0]);
-  });
-
-  it('should scheduleUnlayout on wasUnlaidOut', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
-    });
-
-    clm.updateChildren(el.children);
-    clm.wasLaidOut();
-    await afterRenderPromise();
-
-    ownersMock.scheduleUnlayout.resetHistory();
-    clm.wasUnlaidOut();
-    await afterRenderPromise();
-
-    expect(ownersMock.scheduleUnlayout)
-      .to.have.callCount(5)
-      .to.have.been.calledWith(domElementMock, el.children[0])
-      .to.have.been.calledWith(domElementMock, el.children[1])
-      .to.have.been.calledWith(domElementMock, el.children[2])
-      .to.have.been.calledWith(domElementMock, el.children[3])
-      .to.have.been.calledWith(domElementMock, el.children[4]);
-  });
-
-  it('should updateInViewport on scroll', async () => {
-    const el = createHorizontalScroller(5);
-    const clm = new ChildLayoutManager({
-      ampElement: ampElementMock,
-      intersectionElement: el,
-    });
-
-    clm.updateChildren(el.children);
-    clm.wasLaidOut();
-    await afterRenderPromise();
-
-    ownersMock.updateInViewport.resetHistory();
-    await afterScrollAndIntersectingPromise(el.children[1], el);
-    await afterRenderPromise();
-
-    expect(ownersMock.updateInViewport)
-      .to.have.callCount(2)
-      .to.have.been.calledWith(domElementMock, el.children[0], false)
-      .to.have.been.calledWith(domElementMock, el.children[1], true);
   });
 });

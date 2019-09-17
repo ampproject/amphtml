@@ -23,7 +23,6 @@ import {
   mergeHtmlForTesting,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
-  whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
@@ -107,6 +106,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     // Attributes set.
     expect(iframe.style.visibility).to.equal('hidden');
     expect(iframe.getAttribute('referrerpolicy')).to.equal('unsafe-url');
+    expect(iframe.getAttribute('marginheight')).to.equal('0');
+    expect(iframe.getAttribute('marginwidth')).to.equal('0');
 
     // Iframe has been appended to DOM.
     expect(iframe.parentElement).to.equal(document.body);
@@ -347,23 +348,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     });
   });
 
-  it('should uninstall all resources', () => {
-    extensionsMock.expects('preloadExtension').atLeast(1);
-    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
-      url: 'https://acme.org/url1',
-      html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
-    });
-    return embedPromise.then(embed => {
-      expect(installExtensionsInChildWindowStub).to.be.calledOnce;
-      resourcesMock
-        .expects('removeForChildWindow')
-        .withExactArgs(embed.win)
-        .once();
-      embed.destroy();
-    });
-  });
-
   it.skip('should install and dispose services', () => {
     const disposeSpy = sandbox.spy();
     const embedService = {
@@ -381,7 +365,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       }
     );
     return embedPromise.then(embed => {
-      expect(embed.win.services['c'].obj).to.equal(embedService);
+      expect(embed.win.__AMP_SERVICES['c'].obj).to.equal(embedService);
       expect(disposeSpy).to.not.be.called;
       embed.destroy();
       expect(disposeSpy).to.be.calledOnce;
@@ -539,55 +523,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         expect(embed.signals().get('ini-load')).to.be.ok;
         return embed.whenReady(); // `whenReady` should also be complete.
       });
-  });
-
-  it('should find and await all content elements', () => {
-    function resource(tagName) {
-      const res = {
-        element: {
-          tagName: tagName.toUpperCase(),
-        },
-        loadedComplete: false,
-      };
-      res.loadedOnce = () =>
-        Promise.resolve().then(() => {
-          res.loadedComplete = true;
-        });
-      return res;
-    }
-
-    let content1;
-    let content2;
-    let blacklistedAd;
-    let blacklistedAnalytics;
-    let blacklistedPixel;
-    let blacklistedAmpAdExit;
-
-    const context = document.createElement('div');
-    document.body.appendChild(context);
-    resourcesMock
-      .expects('getResourcesInRect')
-      .withArgs(sinon.match(arg => arg == window))
-      .returns(
-        Promise.resolve([
-          (content1 = resource('amp-img', 0)),
-          (content2 = resource('amp-video', 0)),
-          (blacklistedAd = resource('amp-ad', 0)),
-          (blacklistedAnalytics = resource('amp-analytics', 0)),
-          (blacklistedPixel = resource('amp-pixel', 0)),
-          (blacklistedAmpAdExit = resource('amp-ad-exit', 0)),
-        ])
-      )
-      .once();
-
-    return whenContentIniLoad(context, window).then(() => {
-      expect(content1.loadedComplete).to.be.true;
-      expect(content2.loadedComplete).to.be.true;
-      expect(blacklistedAd.loadedComplete).to.be.false;
-      expect(blacklistedAnalytics.loadedComplete).to.be.false;
-      expect(blacklistedPixel.loadedComplete).to.be.false;
-      expect(blacklistedAmpAdExit.loadedComplete).to.be.false;
-    });
   });
 
   describe('mergeHtml', () => {
@@ -798,7 +733,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
 
       polls = [];
       win = {
-        services: {
+        __AMP_SERVICES: {
           'extensions': {
             obj: {
               preloadExtension: () => {},
@@ -1181,17 +1116,23 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
 
   it('should install built-ins', () => {
     fie.installExtensionsInChildWindow(extensions, iframeWin, []);
-    expect(iframeWin.ampExtendedElements).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-pixel']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-pixel']).to.not.equal(
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.not.equal(
       ElementStub
     );
     // Legacy elements are installed as well.
-    expect(iframeWin.ampExtendedElements['amp-ad']).to.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-embed']).to.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-video']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(
+      ElementStub
+    );
   });
 
   it('should adopt standard services', () => {
@@ -1218,11 +1159,11 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       'amp-test',
     ]);
     // Must be stubbed already.
-    expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
     expect(
       iframeWin.document.createElement('amp-test').implementation_
     ).to.be.instanceOf(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
@@ -1236,8 +1177,8 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     );
     return promise.then(() => {
       // Main extension.
-      expect(parentWin.ampExtendedElements['amp-test']).to.be.undefined;
-      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.be.undefined;
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
       expect(iframeWin.document.querySelector('style[amp-extension=amp-test]'))
         .to.exist;
       // Must be upgraded already.
@@ -1246,8 +1187,8 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       ).to.be.instanceOf(AmpTest);
 
       // Secondary extension.
-      expect(parentWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
-      expect(iframeWin.ampExtendedElements['amp-test-sub']).to.equal(
+      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
         AmpTestSub
       );
       expect(
@@ -1316,22 +1257,24 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       function() {
         // Built-ins not installed yet.
         expect(
-          iframeWin.ampExtendedElements &&
-            iframeWin.ampExtendedElements['amp-img']
+          iframeWin.__AMP_EXTENDED_ELEMENTS &&
+            iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']
         ).to.not.exist;
         // Extension is not loaded yet.
         expect(
-          iframeWin.ampExtendedElements &&
-            iframeWin.ampExtendedElements['amp-test']
+          iframeWin.__AMP_EXTENDED_ELEMENTS &&
+            iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']
         ).to.not.exist;
         preinstallCount++;
       }
     );
     expect(preinstallCount).to.equal(1);
-    expect(iframeWin.ampExtendedElements).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
 
     // Resolve the promise.
     extensions.registerExtension(
@@ -1344,7 +1287,7 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     return promise.then(() => {
       // Extension elements are stubbed immediately, but registered only
       // after extension is loaded.
-      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
     });
   });
 
@@ -1445,17 +1388,23 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
 
   it('should install built-ins', () => {
     fie.installExtensionsInFie(extensions, ampdoc, []);
-    expect(iframeWin.ampExtendedElements).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-pixel']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-pixel']).to.not.equal(
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.not.equal(
       ElementStub
     );
     // Legacy elements are installed as well.
-    expect(iframeWin.ampExtendedElements['amp-ad']).to.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-embed']).to.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-video']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(
+      ElementStub
+    );
   });
 
   it('should create new standard services', () => {
@@ -1494,11 +1443,11 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
       'amp-test',
     ]);
     // Must be stubbed already.
-    expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
     expect(
       iframeWin.document.createElement('amp-test').implementation_
     ).to.be.instanceOf(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
@@ -1512,8 +1461,8 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
     );
     return promise.then(() => {
       // Main extension.
-      expect(parentWin.ampExtendedElements['amp-test']).to.be.undefined;
-      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.be.undefined;
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
       expect(iframeWin.document.querySelector('style[amp-extension=amp-test]'))
         .to.exist;
       // Must be upgraded already.
@@ -1522,8 +1471,8 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
       ).to.be.instanceOf(AmpTest);
 
       // Secondary extension.
-      expect(parentWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
-      expect(iframeWin.ampExtendedElements['amp-test-sub']).to.equal(
+      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
         AmpTestSub
       );
       expect(
@@ -1597,22 +1546,24 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
         expect(ampdocArg).to.equal(ampdoc);
         // Built-ins not installed yet.
         expect(
-          iframeWin.ampExtendedElements &&
-            iframeWin.ampExtendedElements['amp-img']
+          iframeWin.__AMP_EXTENDED_ELEMENTS &&
+            iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']
         ).to.not.exist;
         // Extension is not loaded yet.
         expect(
-          iframeWin.ampExtendedElements &&
-            iframeWin.ampExtendedElements['amp-test']
+          iframeWin.__AMP_EXTENDED_ELEMENTS &&
+            iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']
         ).to.not.exist;
         preinstallCount++;
       }
     );
     expect(preinstallCount).to.equal(1);
-    expect(iframeWin.ampExtendedElements).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
 
     // Resolve the promise.
     extensions.registerExtension(
@@ -1625,7 +1576,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
     return promise.then(() => {
       // Extension elements are stubbed immediately, but registered only
       // after extension is loaded.
-      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
     });
   });
 });

@@ -16,7 +16,6 @@
 import {Deferred} from '../../../src/utils/promise';
 import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
-  VideoAnalyticsEvents,
   VideoEvents,
 } from '../../../src/video-interface';
 import {
@@ -312,7 +311,6 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     if (eventReceived == 'analytics') {
       const spec = devAssert(data['analytics']);
-
       this.dispatchCustomAnalyticsEvent_(spec['eventType'], spec['vars']);
       return;
     }
@@ -336,10 +334,13 @@ class AmpVideoIframe extends AMP.BaseElement {
       ANALYTICS_EVENT_TYPE_PREFIX
     );
 
-    this.element.dispatchCustomEvent(VideoAnalyticsEvents.CUSTOM, {
-      eventType,
-      vars,
-    });
+    this.element.dispatchCustomEvent(
+      VideoEvents.CUSTOM_TICK,
+      dict({
+        'eventType': eventType,
+        'vars': vars,
+      })
+    );
   }
 
   /**
@@ -385,14 +386,14 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    if (!this.iframe_ || !this.iframe_.contentWindow) {
-      return;
-    }
     const {promise} = this.readyDeferred_;
     if (!promise) {
       return;
     }
     promise.then(() => {
+      if (!this.iframe_ || !this.iframe_.contentWindow) {
+        return;
+      }
       this.iframe_.contentWindow./*OK*/ postMessage(
         JSON.stringify(message),
         '*'

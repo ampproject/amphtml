@@ -16,12 +16,36 @@
 
 import {Services} from '../../../src/services';
 
+/**
+ * Used for tracking whether or not an item is near the viewport. This is set
+ * from the IntersectionObserver and consumed by a flush.
+ */
+const NEAR_VIEWPORT_FLAG = '__AMP_CAROUSEL_NEAR_VIEWPORT';
+
+/**
+ * Used for tracking whether or not an item is in the viewport. This is set
+ * from the IntersectionObserver and consumed by a flush.
+ */
+const IN_VIEWPORT_FLAG = '__AMP_CAROUSEL_IN_VIEWPORT';
+
+/**
+ * The value for having no margin for intersection. That is, the item must
+ * intersect the intersection root itself.
+ */
 const NO_INTERSECTION_MARGIN = '0%';
 
 /**
- * The default margin around the scrolling element.
+ * The default margin around the scrolling element. This is a percentage of the
+ * width of the element.
  */
-const DEFAULT_NEARBY_MARGIN = '100%';
+const DEFAULT_NEARBY_MARGIN = 100;
+
+/**
+ * Additional margin before something is unlaidout. This is a percentage of the
+ * width of the element. This is used to avoid a rapid back and forth between
+ * layout and unlayout at the threshold of the nearby margin.
+ */
+const UNLAYOUT_MARGIN = 10;
 
 /**
  * What percentage of an Element must intersect before being considered as
@@ -35,6 +59,14 @@ const DEFAULT_NEARBY_MARGIN = '100%';
  * there are actual no pixels actually visible at this threshold.
  */
 const DEFAULT_INTERSECTION_THRESHOLD = 0.01;
+
+/**
+ * @enum {number}
+ */
+const ViewportChangeState = {
+  ENTER: 0,
+  LEAVE: 1,
+};
 
 /**
  * Manages scheduling layout/unlayout for children of an AMP component as they
@@ -77,12 +109,13 @@ export class ChildLayoutManager {
    *
    * Note: If the children live within a scrolling container, the
    * intersectionElement must be the scrolling container, and not an
-   * ancestor in order for `nearbyMargin` to work.
+   * ancestor in order for `nearbyMarginInPercent` to work.
    * @param {{
    *  ampElement: !AMP.BaseElement,
    *  intersectionElement: !Element,
    *  intersectionThreshold: (number|undefined),
-   *  nearbyMargin: (string|undefined),
+   *  nearbyMarginInPercent: (number|undefined),
+   *  viewportIntersectionThreshold: (number|undefined),
    *  viewportIntersectionCallback: (function(!Element, boolean)|undefined)
    * }} config
    */
@@ -90,7 +123,8 @@ export class ChildLayoutManager {
     ampElement,
     intersectionElement,
     intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
-    nearbyMargin = DEFAULT_NEARBY_MARGIN,
+    nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
+    viewportIntersectionThreshold = intersectionThreshold,
     viewportIntersectionCallback = () => {},
   }) {
     /** @private @const */
@@ -106,42 +140,41 @@ export class ChildLayoutManager {
     this.intersectionThreshold_ = intersectionThreshold;
 
     /** @private @const */
-    this.nearbyMargin_ = nearbyMargin;
+    this.nearbyMarginInPercent_ = nearbyMarginInPercent;
+
+    /** @private @const */
+    this.viewportIntersectionThreshold_ = viewportIntersectionThreshold;
 
     /** @private @const */
     this.viewportIntersectionCallback_ = viewportIntersectionCallback;
 
+    /** @private */
+    this.queueChanges_ = false;
+
     /** @private {!IArrayLike<!Element>} */
     this.children_ = [];
 
-    /** @private {?IntersectionObserver}] */
-    this.nearbyObserver_ = null;
+    /** @private {?IntersectionObserver} */
+    this.nearingViewportObserver_ = null;
 
-    /** @private {?IntersectionObserver}] */
-    this.visibleObserver_ = null;
+    /** @private {?IntersectionObserver} */
+    this.backingAwayViewportObserver_ = null;
+
+    /** @private {?IntersectionObserver} */
+    this.inViewportObserver_ = null;
 
     /** @private {boolean} */
     this.laidOut_ = false;
   }
 
   /**
-   * @param {string} margin
-   * @param {function(!Element, boolean)} intersectionCallback
-   * @return {!IntersectionObserver}
+   * Sets whether visibility changes should be applied immediately or queued
+   * for a later flush. This is useful on iOS, as doing layout during scrolling
+   * can cause flickering due to paint.
+   * @param {boolean} queueChanges
    */
-  createObserver_(margin, intersectionCallback) {
-    return new this.ampElement_.win.IntersectionObserver(
-      entries => {
-        entries.forEach(({target, isIntersecting}) => {
-          intersectionCallback(target, isIntersecting);
-        });
-      },
-      {
-        root: this.intersectionElement_,
-        rootMargin: margin,
-        threshold: this.intersectionThreshold_,
-      }
-    );
+  setQueueChanges(queueChanges) {
+    this.queueChanges_ = queueChanges;
   }
 
   /**
@@ -173,26 +206,155 @@ export class ChildLayoutManager {
 
   /**
    * Sets up for intersection monitoring, creating IntersectionObserver
-   * instances for nearby Eelements as well as those that are actually visible.
+   * instances for doing layout  as well as those that are actually visible.
+   *
+   * We set up separate observers for layout and unlayout. When the element is
+   * near to the viewport, we trigger layout. However, we have some extra
+   * buffer space before triggering unlayout, to prevent cycling between the
+   * two on the threshold, which can cause problems in Safari.
    */
   setup_() {
-    if (this.nearbyObserver_ && this.visibleObserver_) {
+    if (
+      this.nearingViewportObserver_ &&
+      this.backingAwayViewportObserver_ &&
+      this.inViewportObserver_
+    ) {
       return;
     }
 
-    this.nearbyObserver_ = this.createObserver_(
-      this.nearbyMargin_,
-      (target, isIntersecting) => {
-        this.triggerLayout_(target, isIntersecting);
+    const {win} = this.ampElement_;
+
+    this.nearingViewportObserver_ = new win.IntersectionObserver(
+      entries => this.processNearingChanges_(entries),
+      {
+        root: this.intersectionElement_,
+        rootMargin: `${this.nearbyMarginInPercent_}%`,
+        threshold: this.intersectionThreshold_,
       }
     );
 
-    this.visibleObserver_ = this.createObserver_(
-      NO_INTERSECTION_MARGIN,
-      (target, isIntersecting) => {
-        this.triggerVisibility_(target, isIntersecting);
+    this.backingAwayViewportObserver_ = new win.IntersectionObserver(
+      entries => this.processBackingAwayChanges_(entries),
+      {
+        root: this.intersectionElement_,
+        rootMargin: `${this.nearbyMarginInPercent_ + UNLAYOUT_MARGIN}%`,
+        threshold: this.intersectionThreshold_,
       }
     );
+
+    this.inViewportObserver_ = new win.IntersectionObserver(
+      entries => this.processInViewportChanges_(entries),
+      {
+        root: this.intersectionElement_,
+        rootMargin: NO_INTERSECTION_MARGIN,
+        threshold: this.viewportIntersectionThreshold_,
+      }
+    );
+  }
+
+  /**
+   * Processes the intersection entries for things nearing the viewport,
+   * marking them applying the changes if needed.
+   * @param {!Array<!IntersectionObserverEntry>} entries
+   */
+  processNearingChanges_(entries) {
+    entries
+      .filter(({isIntersecting}) => isIntersecting)
+      .forEach(({target}) => {
+        target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
+      });
+
+    if (!this.queueChanges_) {
+      this.flushNearingViewportChanges_();
+    }
+  }
+
+  /**
+   * Processes the intersection entries for things backing away from viewport,
+   * marking them applying the changes if needed.
+   * @param {!Array<!IntersectionObserverEntry>} entries
+   */
+  processBackingAwayChanges_(entries) {
+    entries
+      .filter(({isIntersecting}) => !isIntersecting)
+      .forEach(({target}) => {
+        target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
+      });
+
+    if (!this.queueChanges_) {
+      this.flushBackingAwayViewportChanges_();
+    }
+  }
+
+  /**
+   * Processes the intersection entries for things in the viewport,
+   * marking them applying the changes if needed.
+   * @param {!Array<!IntersectionObserverEntry>} entries
+   */
+  processInViewportChanges_(entries) {
+    entries.forEach(({target, isIntersecting}) => {
+      target[IN_VIEWPORT_FLAG] = isIntersecting
+        ? ViewportChangeState.ENTER
+        : ViewportChangeState.LEAVE;
+    });
+
+    if (!this.queueChanges_) {
+      this.flushInViewportChanges_();
+    }
+  }
+
+  /**
+   * Flush all intersection changes previously picked up.
+   */
+  flushChanges() {
+    this.flushNearingViewportChanges_();
+    this.flushBackingAwayViewportChanges_();
+    this.flushInViewportChanges_();
+  }
+
+  /**
+   * Flush changes for things nearing the viewport.
+   */
+  flushNearingViewportChanges_() {
+    for (let i = 0; i < this.children_.length; i++) {
+      const child = this.children_[i];
+
+      if (child[NEAR_VIEWPORT_FLAG] == ViewportChangeState.ENTER) {
+        this.triggerLayout_(child, true);
+        child[NEAR_VIEWPORT_FLAG] = null;
+      }
+    }
+  }
+
+  /**
+   * Flush changes for things backing away from the viewport.
+   */
+  flushBackingAwayViewportChanges_() {
+    for (let i = 0; i < this.children_.length; i++) {
+      const child = this.children_[i];
+
+      if (child[NEAR_VIEWPORT_FLAG] == ViewportChangeState.LEAVE) {
+        this.triggerLayout_(child, false);
+        child[NEAR_VIEWPORT_FLAG] = null;
+      }
+    }
+  }
+
+  /**
+   * Flush changes for things in the viewport.
+   */
+  flushInViewportChanges_() {
+    for (let i = 0; i < this.children_.length; i++) {
+      const child = this.children_[i];
+
+      if (child[IN_VIEWPORT_FLAG] == ViewportChangeState.ENTER) {
+        this.triggerVisibility_(child, true);
+      } else if (child[IN_VIEWPORT_FLAG] == ViewportChangeState.LEAVE) {
+        this.triggerVisibility_(child, false);
+      }
+
+      child[IN_VIEWPORT_FLAG] = null;
+    }
   }
 
   /**
@@ -212,14 +374,16 @@ export class ChildLayoutManager {
     // Simply disconnect, in case the children have changed, we can make sure
     // everything is detached.
     if (!observe) {
-      this.nearbyObserver_.disconnect();
-      this.visibleObserver_.disconnect();
+      this.nearingViewportObserver_.disconnect();
+      this.backingAwayViewportObserver_.disconnect();
+      this.inViewportObserver_.disconnect();
       return;
     }
 
     for (let i = 0; i < this.children_.length; i++) {
-      this.nearbyObserver_.observe(this.children_[i]);
-      this.visibleObserver_.observe(this.children_[i]);
+      this.nearingViewportObserver_.observe(this.children_[i]);
+      this.backingAwayViewportObserver_.observe(this.children_[i]);
+      this.inViewportObserver_.observe(this.children_[i]);
     }
   }
 

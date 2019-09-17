@@ -160,10 +160,6 @@ class TestConfig {
     });
   }
 
-  skipWindows() {
-    return this.skip(() => this.platform.isWindows());
-  }
-
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;
@@ -378,7 +374,7 @@ function preventAsyncErrorThrows() {
     rethrowAsyncSandbox = sinon.createSandbox();
     rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
       const error = log.createErrorVargs.apply(null, args);
-      self.reportError(error);
+      self.__AMP_REPORT_ERROR(error);
       throw error;
     });
   };
@@ -414,12 +410,12 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
   window.context = undefined;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
-  window.AMP_TEST = true;
+  window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
   installRuntimeServices(window);
@@ -456,7 +452,7 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
   delete window.document['__AMPDOC'];
 
   if (windowState.length != initialWindowState.length) {

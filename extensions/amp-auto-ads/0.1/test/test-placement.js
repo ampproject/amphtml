@@ -18,7 +18,9 @@ import '../../../amp-ad/0.1/amp-ad';
 import * as Utils from '../utils';
 import {AdTracker} from '../ad-tracker';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
+import {RESPONSIVE_SIZING_EXP} from '../amp-auto-ads';
 import {Services} from '../../../../src/services';
+import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 describes.realWin(
   'placement',
@@ -48,7 +50,7 @@ describes.realWin(
       // Stub whenBuilt to resolve immediately to handle upgrade for AdSense
       // to FF impl.
       sinon
-        .stub(win.BaseCustomElementClass.prototype, 'whenBuilt')
+        .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
     });
 
@@ -609,7 +611,7 @@ describes.realWin(
         });
       });
 
-      it('should not resize to full-width responsive if width exceeds limit', () => {
+      it('should set the correct attributes for responsive enabled ads using amp-ad responsive', () => {
         const anchor = doc.createElement('div');
         anchor.id = 'anId';
         container.appendChild(anchor);
@@ -620,17 +622,21 @@ describes.realWin(
         });
         sandbox.stub(resource.viewport_, 'getWidth').callsFake(() => 2000);
 
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
               },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
+            ],
+          },
+          RESPONSIVE_SIZING_EXP.experiment
+        );
         expect(placements).to.have.lengthOf(1);
 
         const attributes = {
@@ -647,12 +653,20 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
-              anchor.firstChild,
-              250,
-              undefined
-            );
-            expect(placementState).to.equal(PlacementState.PLACED);
+            const adElement = anchor.firstChild;
+            expect(adElement.tagName).to.equal('AMP-AD');
+            expect(adElement.getAttribute('type')).to.equal('_ping_');
+            expect(adElement.getAttribute('layout')).to.equal('fixed');
+            expect(adElement.getAttribute('height')).to.equal('0');
+            expect(adElement.getAttribute('data-auto-format')).to.equal('rspv');
+            expect(adElement.hasAttribute('data-full-width')).to.be.true;
+            expect(adElement.style.marginTop).to.equal('');
+            expect(adElement.style.marginBottom).to.equal('');
+            expect(adElement.style.marginLeft).to.equal('');
+            expect(adElement.style.marginRight).to.equal('');
+            expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
+            expect(isInExperiment(adElement, RESPONSIVE_SIZING_EXP.experiment))
+              .to.be.true;
           });
       });
 

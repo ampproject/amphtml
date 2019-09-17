@@ -23,7 +23,6 @@ const colors = require('ansi-colors');
 const fs = BBPromise.promisifyAll(require('fs'));
 const log = require('fancy-log');
 const path = require('path');
-const {isTravisBuild} = require('../../travis');
 
 const {red, cyan} = colors;
 
@@ -163,15 +162,13 @@ function applyConfig(
       return writeTarget(target, fileString, argv.dryrun);
     })
     .then(() => {
-      if (!isTravisBuild()) {
-        const details =
-          '(' +
-          cyan(config) +
-          (opt_localDev ? ', ' + cyan('localDev') : '') +
-          (opt_fortesting ? ', ' + cyan('test') : '') +
-          ')';
-        log('Applied AMP config', details, 'to', cyan(path.basename(target)));
-      }
+      const details =
+        '(' +
+        cyan(config) +
+        (opt_localDev ? ', ' + cyan('localDev') : '') +
+        (opt_fortesting ? ', ' + cyan('test') : '') +
+        ')';
+      log('Applied AMP config', details, 'to', cyan(path.basename(target)));
     });
 }
 
@@ -195,16 +192,14 @@ function enableLocalDev(config, target, configJson) {
       thirdPartyFrameHost: TESTING_HOST_NO_PROTOCOL,
       thirdPartyFrameRegex: TESTING_HOST_NO_PROTOCOL,
     });
-    if (!isTravisBuild()) {
-      log(
-        'Set',
-        cyan('TESTING_HOST'),
-        'to',
-        cyan(TESTING_HOST),
-        'in',
-        cyan(target)
-      );
-    }
+    log(
+      'Set',
+      cyan('TESTING_HOST'),
+      'to',
+      cyan(TESTING_HOST),
+      'in',
+      cyan(target)
+    );
   }
   return Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
 }
@@ -223,9 +218,7 @@ function removeConfig(target) {
     const config = /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
     contents = contents.replace(config, '');
     return writeTarget(target, contents, argv.dryrun).then(() => {
-      if (!isTravisBuild()) {
-        log('Removed existing config from', cyan(target));
-      }
+      log('Removed existing config from', cyan(target));
     });
   });
 }

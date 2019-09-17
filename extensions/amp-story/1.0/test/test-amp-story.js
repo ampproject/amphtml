@@ -104,6 +104,7 @@ describes.realWin(
       replaceStateStub = sandbox.stub(win.history, 'replaceState');
       // Required by the bookend code.
       win.document.title = 'Story';
+      env.ampdoc.defaultView = env.win;
 
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox
@@ -111,6 +112,10 @@ describes.realWin(
         .withArgs('swipe')
         .returns(hasSwipeCapability);
       sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+      registerServiceBuilder(win, 'performance', () => ({
+        isPerformanceTrackingOn: () => false,
+      }));
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);

@@ -34,27 +34,25 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getAmpTwitter(tweetid) {
+    async function getAmpTwitter(tweetid) {
       const ampTwitter = doc.createElement('amp-twitter');
       ampTwitter.setAttribute('data-tweetid', tweetid);
       ampTwitter.setAttribute('width', '111');
       ampTwitter.setAttribute('height', '222');
       doc.body.appendChild(ampTwitter);
-      return ampTwitter
-        .build()
-        .then(() => ampTwitter.layoutCallback())
-        .then(() => ampTwitter);
+      await ampTwitter.build();
+      await ampTwitter.layoutCallback();
+      return ampTwitter;
     }
 
-    it('renders iframe in amp-twitter', () => {
-      return getAmpTwitter(tweetId).then(ampTwitter => {
-        const iframe = ampTwitter.firstChild;
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.getAttribute('width')).to.equal('111');
-        expect(iframe.getAttribute('height')).to.equal('222');
-        expect(iframe.getAttribute('allowfullscreen')).to.equal('true');
-      });
+    it('renders iframe in amp-twitter', async () => {
+      const ampTwitter = await getAmpTwitter(tweetId);
+      const iframe = ampTwitter.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.getAttribute('width')).to.equal('111');
+      expect(iframe.getAttribute('height')).to.equal('222');
+      expect(iframe.getAttribute('allowfullscreen')).to.equal('true');
     });
 
     it('adds tweet element correctly for a tweet', () => {
@@ -116,16 +114,26 @@ describes.realWin(
       expect(tweet).not.to.be.undefined;
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getAmpTwitter(tweetId).then(ampTwitter => {
-        const iframe = ampTwitter.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        const obj = ampTwitter.implementation_;
-        obj.unlayoutCallback();
-        expect(ampTwitter.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
-        expect(obj.unlayoutOnPause()).to.be.true;
-      });
+    it('removes iframe after unlayoutCallback', async () => {
+      const ampTwitter = await getAmpTwitter(tweetId);
+      const iframe = ampTwitter.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = ampTwitter.implementation_;
+      obj.unlayoutCallback();
+      expect(ampTwitter.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.unlayoutOnPause()).to.be.true;
+    });
+
+    it('should replace iframe after tweetid mutation', async () => {
+      const newTweetId = '638793490521001985';
+      const ampTwitter = await getAmpTwitter(tweetId);
+      const spy = sandbox.spy(ampTwitter.implementation_, 'toggleLoading');
+      const iframe = ampTwitter.querySelector('iframe');
+      ampTwitter.setAttribute('data-tweetid', newTweetId);
+      ampTwitter.mutatedAttributesCallback({'data-tweetid': newTweetId});
+      expect(spy).to.be.calledWith(true);
+      expect(ampTwitter.querySelector('iframe')).to.not.equal(iframe);
     });
 
     describe('cleanupTweetId_', () => {

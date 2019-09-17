@@ -33,10 +33,10 @@ const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TEST_TIMEOUT = 20000;
+const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
-const defaultBrowsers = new Set(['chrome', 'firefox']);
+const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
  * TODO(cvializ): Firefox now experimentally supports puppeteer.
  * When it's more mature we might want to support it.
@@ -79,6 +79,7 @@ let describesConfig = null;
 const capabilitiesKeys = {
   'chrome': 'chromeOptions',
   'firefox': 'moz:firefoxOptions',
+  'safari': 'safariOptions',
 };
 
 /**
@@ -88,7 +89,7 @@ const capabilitiesKeys = {
  */
 function configure(config) {
   if (describesConfig) {
-    throw new Error('describes.config should only be called once');
+    throw new Error('describes.configure should only be called once');
   }
 
   describesConfig = Object.assign({}, config);
@@ -126,38 +127,47 @@ async function createPuppeteer(opt_config = {}) {
 /**
  * Configure and launch a Selenium instance
  * @param {string} browserName
- * @param {!SeleniumConfigDef=} opt_config
+ * @param {!SeleniumConfigDef=} args
+ * @param {?string} deviceName
  * @return {!SeleniumDriver}
  */
-async function createSelenium(browserName, opt_config = {}) {
-  // TODO(estherkim): implement sessions
-  // See https://w3c.github.io/webdriver/#sessions
+async function createSelenium(browserName, args = {}, deviceName) {
   switch (browserName) {
+    case 'safari':
+      // Safari's only option is setTechnologyPreview
+      return createDriver(browserName, []);
     case 'firefox':
-      return createDriver(browserName, getFirefoxArgs(opt_config));
+      return createDriver(browserName, getFirefoxArgs(args));
     case 'chrome':
     default:
-      return createDriver(browserName, getChromeArgs(opt_config));
+      return createDriver(browserName, getChromeArgs(args), deviceName);
   }
 }
 
-async function createDriver(browserName, args) {
+async function createDriver(browserName, args, deviceName) {
   const capabilities = Capabilities[browserName]();
   capabilities.set(capabilitiesKeys[browserName], {'args': args});
   const builder = new Builder().withCapabilities(capabilities);
+
   switch (browserName) {
     case 'firefox':
-      const options = new firefox.Options();
-      // for some reason firefox.Options().addArguments() doesn't like arrays
-      args.forEach(arg => {
-        options.addArguments(arg);
+      const firefoxOptions = new firefox.Options();
+      firefoxOptions.addArguments(...args);
+      firefoxOptions.windowSize({
+        width: DEFAULT_E2E_INITIAL_RECT.width,
+        height: DEFAULT_E2E_INITIAL_RECT.height,
       });
-      builder.setFirefoxOptions(options);
+      builder.setFirefoxOptions(firefoxOptions);
     case 'chrome':
-      builder.setChromeOptions(new chrome.Options().addArguments(args));
+      const chromeOptions = new chrome.Options();
+      chromeOptions.addArguments(args);
+      if (deviceName) {
+        chromeOptions.setMobileEmulation({deviceName});
+      }
+      builder.setChromeOptions(chromeOptions);
   }
-  const driver = await builder.build();
-  return driver;
+
+  return await builder.build();
 }
 
 /**
@@ -167,10 +177,12 @@ async function createDriver(browserName, args) {
  * @return {!Array<string>}
  */
 function getChromeArgs(config) {
-  const args = ['--no-sandbox', '--disable-gpu'];
+  const args = [
+    '--no-sandbox',
+    '--disable-gpu',
+    `--window-size=${DEFAULT_E2E_INITIAL_RECT.width},${DEFAULT_E2E_INITIAL_RECT.height}`,
+  ];
 
-  // TODO(cvializ,estherkim,sparhami):
-  // figure out why headless causes more flakes
   if (config.headless) {
     args.push('--headless');
   }
@@ -197,7 +209,8 @@ function getFirefoxArgs(config) {
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
  *  testUrl: string,
- *  initialRect: ({{width: number, height:number}}|undefined)
+ *  initialRect: ({{width: number, height:number}}|undefined),
+ *  deviceName: string|undefined,
  * }}
  */
 let TestSpec;
@@ -248,9 +261,7 @@ const envPresets = {
     AmpdocEnvironment.SHADOW_DEMO,
   ],
   'amp4ads-preset': [
-    // TODO(lannka): unskip this test. It passes locally but fails on Travis:
-    // https://travis-ci.org/ampproject/amphtml/jobs/570977015
-    // AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_FIE,
     AmpdocEnvironment.A4A_INABOX,
     AmpdocEnvironment.A4A_INABOX_FRIENDLY,
     AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
@@ -357,7 +368,7 @@ function describeEnv(factory) {
 
       const allowedBrowsers = browsers
         ? new Set(browsers.split(',').map(x => x.trim()))
-        : defaultBrowsers;
+        : supportedBrowsers;
 
       if (engine === 'puppeteer') {
         const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
@@ -368,6 +379,11 @@ function describeEnv(factory) {
           );
         }
         return result;
+      }
+
+      if (process.platform !== 'darwin' && allowedBrowsers.has('safari')) {
+        // silently skip safari tests
+        allowedBrowsers.delete('safari');
       }
 
       return allowedBrowsers;
@@ -465,25 +481,32 @@ class EndToEndFixture {
    * @param {string} browserName
    */
   async setup(env, browserName) {
+    const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
     const config = getConfig();
-    const controller = await getController(config, browserName);
+    const controller = await getController(config, browserName, deviceName);
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
 
-    const {
-      testUrl,
-      experiments = [],
-      initialRect = DEFAULT_E2E_INITIAL_RECT,
-    } = this.spec;
     const {environment} = env;
 
-    await toggleExperiments(ampDriver, testUrl, experiments);
+    const url = new URL(testUrl);
+    if (experiments.length > 0) {
+      if (environment.includes('inabox')) {
+        // inabox experiments are toggled at server side using <meta> tag
+        url.searchParams.set('exp', experiments.join(','));
+      } else {
+        // AMP doc experiments are toggled via cookies
+        await toggleExperiments(ampDriver, url.href, experiments);
+      }
+    }
 
-    const {width, height} = initialRect;
-    await controller.setWindowRect({width, height});
+    if (initialRect) {
+      const {width, height} = initialRect;
+      await controller.setWindowRect({width, height});
+    }
 
-    await ampDriver.navigateToEnvironment(environment, testUrl);
+    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
@@ -499,11 +522,13 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
+ * @param {?string} deviceName
  * @return {!SeleniumWebDriverController}
  */
 async function getController(
   {engine = 'selenium', headless = false},
-  browserName
+  browserName,
+  deviceName
 ) {
   if (engine == 'puppeteer') {
     const browser = await createPuppeteer({headless});
@@ -511,7 +536,7 @@ async function getController(
   }
 
   if (engine == 'selenium') {
-    const driver = await createSelenium(browserName, {headless});
+    const driver = await createSelenium(browserName, {headless}, deviceName);
     return new SeleniumWebDriverController(driver);
   }
 }
@@ -524,10 +549,6 @@ async function getController(
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
-  if (!experiments.length) {
-    return;
-  }
-
   await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {

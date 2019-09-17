@@ -37,7 +37,11 @@ import {
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {AdvancementMode, getAnalyticsService} from './story-analytics';
+import {
+  AdvancementMode,
+  AnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -70,7 +74,6 @@ import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
-import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {
   SwipeXYRecognizer,
   SwipeYRecognizer,
@@ -329,7 +332,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.element);
 
     /**
@@ -598,9 +601,10 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds the system layer DOM.
+   * @param {string} initialPageId
    * @private
    */
-  buildSystemLayer_() {
+  buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
 
     let pageIds;
@@ -611,7 +615,7 @@ export class AmpStory extends AMP.BaseElement {
       pageIds = Array.prototype.map.call(pages, el => el.id);
     }
     this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
-    this.element.appendChild(this.systemLayer_.build());
+    this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
 
   /** @private */
@@ -642,9 +646,7 @@ export class AmpStory extends AMP.BaseElement {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
         this.analyticsService_.triggerEvent(
-          isMuted
-            ? StoryAnalyticsEvent.STORY_MUTED
-            : StoryAnalyticsEvent.STORY_UNMUTED
+          isMuted ? AnalyticsEvent.STORY_MUTED : AnalyticsEvent.STORY_UNMUTED
         );
       },
       false /** callToInitialize */
@@ -918,8 +920,9 @@ export class AmpStory extends AMP.BaseElement {
       this.element.querySelector('amp-story-page'),
       'Story must have at least one page.'
     );
+    const initialPageId = this.getInitialPageId_(firstPageEl);
 
-    this.buildSystemLayer_();
+    this.buildSystemLayer_(initialPageId);
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -950,12 +953,7 @@ export class AmpStory extends AMP.BaseElement {
           });
         }
       })
-      .then(() =>
-        this.switchTo_(
-          this.getInitialPageId_(firstPageEl),
-          NavigationDirection.NEXT
-        )
-      )
+      .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
       .then(() => this.updateViewportSizeStyles_())
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
@@ -1041,7 +1039,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   getInitialPageId_(firstPageEl) {
     const isActualPage = pageId =>
-      findIndex(this.pages_, page => page.element.id === pageId) >= 0;
+      !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
     const historyPage = /** @type {string} */ (getHistoryState(
       this.win,
       HistoryState.PAGE_ID
@@ -1841,10 +1839,7 @@ export class AmpStory extends AMP.BaseElement {
       return UIType.VERTICAL;
     }
 
-    if (
-      !this.isDesktop_() ||
-      isExperimentOn(this.win, 'disable-amp-story-desktop')
-    ) {
+    if (!this.isDesktop_()) {
       return UIType.MOBILE;
     }
 

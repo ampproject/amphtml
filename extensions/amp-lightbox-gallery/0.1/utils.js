@@ -17,6 +17,7 @@
  * @fileoverview Description of this file.
  */
 import {Services} from '../../../src/services';
+import {padStart} from '../../../src/string';
 /**
  * Runs a delay after deferring to the event loop. This is useful to call from
  * within an animation frame, as you can be sure that at least duration
@@ -35,25 +36,6 @@ export function delayAfterDeferringToEventLoop(win, duration) {
   // requestAnimationFrame, this will place us after render. Second, wait
   // for duration to elapse.
   return timer.promise(eventLoopDelay).then(() => timer.promise(duration));
-}
-
-/**
- * Pads the beginning of a string with a substring to a target length.
- * @param {string} s
- * @param {number} targetLength
- * @param {string} padString
- * @return {*} TODO(#23582): Specify return type
- */
-function padStart(s, targetLength, padString) {
-  if (s.length >= targetLength) {
-    return s;
-  }
-  targetLength = targetLength - s.length;
-  let padding = padString;
-  while (targetLength > padding.length) {
-    padding += padString;
-  }
-  return padding.slice(0, targetLength) + s;
 }
 
 /**

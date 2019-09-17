@@ -71,7 +71,7 @@ export const EXPANDABLE_COMPONENTS = {
 const LAUNCHABLE_COMPONENTS = {
   'a': {
     actionIcon: ActionIcon.LAUNCH,
-    selector: 'a[href]',
+    selector: 'a[href]:not([affiliate-link-icon])',
   },
 };
 
@@ -283,10 +283,10 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
-    /** @private @const {!../../../src/service/owners-impl.Owners} */
+    /** @private @const {!../../../src/service/owners-interface.OwnersInterface} */
     this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
@@ -801,7 +801,7 @@ export class AmpStoryEmbeddedComponent {
    * that content around stays put.
    * @param {!Element} pageEl
    * @param {!Element} element
-   * @param {!../../../src/service/resources-impl.ResourcesDef} resources
+   * @param {!../../../src/service/resources-interface.ResourcesInterface} resources
    */
   static prepareForAnimation(pageEl, element, resources) {
     let elId = null;

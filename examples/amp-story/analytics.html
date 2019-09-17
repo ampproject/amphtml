@@ -43,7 +43,7 @@
               "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
               "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
               "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
-              "click": "${base}?index=${storyPageIndex}&id=${storyPageId}"
+              "click": "${base}?index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}"
             },
             "triggers": {
               "trackAnchorClicks": {
@@ -54,12 +54,16 @@
                   "eventId": "clickOnAnyAnchor"
                 }
               },
+              "trackBookendClicks": {
+                "on": "story-bookend-click",
+                "request": "click",
+                "vars": {
+                  "eventId": "clickOnBookend"
+                }
+              },
               "trackPageview": {
                 "on": "story-page-visible",
-                "request": "pageView",
-                "storySpec": {
-                  "repeat": false
-                }
+                "request": "pageView"
               },
               "trackBookendEnter": {
                 "on": "story-bookend-enter",

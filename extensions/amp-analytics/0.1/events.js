@@ -20,8 +20,8 @@ import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
+  videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {StoryAnalyticsEvent} from '../../../src/analytics';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
@@ -44,7 +44,6 @@ const TAG = 'amp-analytics/events';
  * @enum {string}
  */
 export const AnalyticsEventType = {
-  AMP_STORY: 'amp-story',
   CLICK: 'click',
   CUSTOM: 'custom',
   HIDDEN: 'hidden',
@@ -67,13 +66,6 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  *   }>}
  */
 const TRACKER_TYPE = Object.freeze({
-  [AnalyticsEventType.AMP_STORY]: {
-    name: AnalyticsEventType.AMP_STORY,
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new AmpStoryEventTracker(root);
-    },
-  },
   [AnalyticsEventType.CLICK]: {
     name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
@@ -155,14 +147,6 @@ function isVideoTriggerType(triggerType) {
  * @param {string} triggerType
  * @return {boolean}
  */
-function isAmpStoryTriggerType(triggerType) {
-  return startsWith(triggerType, 'story');
-}
-
-/**
- * @param {string} triggerType
- * @return {boolean}
- */
 function isReservedTriggerType(triggerType) {
   return isEnumValue(AnalyticsEventType, triggerType);
 }
@@ -174,9 +158,6 @@ function isReservedTriggerType(triggerType) {
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
     return AnalyticsEventType.VIDEO;
-  }
-  if (isAmpStoryTriggerType(eventType)) {
-    return AnalyticsEventType.AMP_STORY;
   }
   if (!isReservedTriggerType(eventType)) {
     return AnalyticsEventType.CUSTOM;
@@ -402,64 +383,6 @@ export class CustomEventTracker extends EventTracker {
         this.buffer_[eventType].push(event);
       }
     }
-  }
-}
-
-export class AmpStoryEventTracker extends EventTracker {
-  /**
-   * @param {!./analytics-root.AnalyticsRoot} root
-   */
-  constructor(root) {
-    super(root);
-
-    /** @private {?Observable<!Event>} */
-    this.sessionObservable_ = new Observable();
-
-    /** @private {?function(!Event)} */
-    this.boundOnSession_ = this.sessionObservable_.fire.bind(
-      this.sessionObservable_
-    );
-
-    Object.keys(StoryAnalyticsEvent).forEach(key => {
-      this.root
-        .getRoot()
-        .addEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
-    });
-  }
-
-  /** @override */
-  dispose() {
-    const root = this.root.getRoot();
-    Object.keys(StoryAnalyticsEvent).forEach(key => {
-      root.removeEventListener(StoryAnalyticsEvent[key], this.boundOnSession_);
-    });
-    this.boundOnSession_ = null;
-    this.sessionObservable_ = null;
-  }
-
-  /** @override */
-  add(context, eventType, config, listener) {
-    const storySpec = config['storySpec'] || {};
-    const rootTarget = this.root.getRootElement();
-
-    const repeat = storySpec['repeat'];
-    const on = config['on'];
-
-    return this.sessionObservable_.add(event => {
-      const {type} = event;
-
-      if (type !== on) {
-        return;
-      }
-      const details = /** @type {?JsonObject|undefined} */ (getData(event));
-      const detailsForPage = details['detailsForPage'];
-
-      if (repeat === false && detailsForPage['repeated']) {
-        return;
-      }
-
-      listener(new AnalyticsEvent(rootTarget, type, details));
-    });
   }
 }
 
@@ -1244,11 +1167,8 @@ export class VideoEventTracker extends EventTracker {
 
     return this.sessionObservable_.add(event => {
       const {type} = event;
-      const isVisibleType = type === VideoAnalyticsEvents.SESSION_VISIBLE;
-      const normalizedType = isVisibleType
-        ? VideoAnalyticsEvents.SESSION
-        : type;
       const details = /** @type {?JsonObject|undefined} */ (getData(event));
+      const normalizedType = normalizeVideoEventType(type, details);
 
       if (normalizedType !== on) {
         return;
@@ -1310,7 +1230,10 @@ export class VideoEventTracker extends EventTracker {
         lastPercentage = normalizedPercentageInt;
       }
 
-      if (isVisibleType && !endSessionWhenInvisible) {
+      if (
+        type === VideoAnalyticsEvents.SESSION_VISIBLE &&
+        !endSessionWhenInvisible
+      ) {
         return;
       }
 
@@ -1323,12 +1246,48 @@ export class VideoEventTracker extends EventTracker {
         'No target specified by video session event.'
       );
       targetReady.then(target => {
-        if (target.contains(el)) {
-          listener(new AnalyticsEvent(target, normalizedType, details));
+        if (!target.contains(el)) {
+          return;
         }
+        const normalizedDetails = removeInternalVars(details);
+        listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
       });
     });
   }
+}
+
+/**
+ * Normalize video type from internal representation into the observed string
+ * from the analytics configuration.
+ * @param {string} type
+ * @param {?JsonObject|undefined} details
+ * @return {string}
+ */
+function normalizeVideoEventType(type, details) {
+  if (type == VideoAnalyticsEvents.SESSION_VISIBLE) {
+    return VideoAnalyticsEvents.SESSION;
+  }
+
+  // Custom video analytics events are listened to from one signal type,
+  // but they're configured by user with their custom name.
+  if (type == VideoAnalyticsEvents.CUSTOM) {
+    return dev().assertString(details[videoAnalyticsCustomEventTypeKey]);
+  }
+
+  return type;
+}
+
+/**
+ * @param {?JsonObject|undefined} details
+ * @return {?JsonObject|undefined}
+ */
+function removeInternalVars(details) {
+  if (!details) {
+    return details;
+  }
+  const clean = Object.assign({}, details);
+  delete clean[videoAnalyticsCustomEventTypeKey];
+  return /** @type {!JsonObject} */ (clean);
 }
 
 /**

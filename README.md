@@ -1,7 +1,7 @@
 # AMP ⚡
 
 [![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg?logo=Travis%20CI&logoColor=white&style=flat-square "Build Status")](https://travis-ci.org/ampproject/amphtml/builds)
-[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Release")](https://github.com/ampproject/amphtml/releases)
+[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square "GitHub Release")](https://github.com/ampproject/amphtml/releases/latest)
 [![Contributors](https://img.shields.io/github/contributors-anon/ampproject/amphtml.svg?logo=GitHub&style=flat-square "Contributors")](https://github.com/ampproject/amphtml/graphs/contributors)
 [![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg?logo=GitHub&style=flat-square "Commits")](https://github.com/ampproject/amphtml/pulse/monthly)
 [![Badges](https://img.shields.io/badge/badges-16-brightgreen?logo=GitHub&style=flat-square)](#)
@@ -32,8 +32,6 @@ Tooling
 [![LGTM](https://img.shields.io/lgtm/alerts/github/ampproject/amphtml.svg?logo=lgtm&style=flat-square "LGTM")](https://lgtm.com/projects/g/ampproject/amphtml/)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg?logo=dependabot&style=flat-square "Renovate")](https://renovateapp.com/)
 </details>
-
-> **The [AMP Contributor Summit 2019](https://amp.dev/events/amp-cs-2019) will be in NYC October 8-10.** This technical summit is an opportunity for the AMP open source community to meet face-to-face to discuss the latest in AMP and where AMP is going.  It consists of a mix of different formats, including talks, breakout sessions and many opportunities for informal conversations.  **[Apply to attend the summit](https://events.withgoogle.com/ampcs2019/registrations/new/) by July 22, 2019!**
 
 [AMP](https://amp.dev) is a web component framework for easily creating user-first websites, stories, ads, emails and more.
 

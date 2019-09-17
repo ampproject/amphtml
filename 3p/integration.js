@@ -71,6 +71,7 @@ import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
 import {adfox} from '../ads/adfox';
 import {adgeneration} from '../ads/adgeneration';
+import {adglare} from '../ads/adglare';
 import {adhese} from '../ads/adhese';
 import {adincube} from '../ads/adincube';
 import {adition} from '../ads/adition';
@@ -210,6 +211,7 @@ import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
 import {rbinfox} from '../ads/rbinfox';
+import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
@@ -227,6 +229,7 @@ import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {smi2} from '../ads/smi2';
+import {smilewanted} from '../ads/smilewanted';
 import {sogouad} from '../ads/sogouad';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
@@ -299,6 +302,7 @@ const AMP_EMBED_ALLOWED = {
   postquare: true,
   pubexchange: true,
   rbinfox: true,
+  readmo: true,
   runative: true,
   smartclip: true,
   smi2: true,
@@ -330,6 +334,7 @@ register('adbutler', adbutler);
 register('adform', adform);
 register('adfox', adfox);
 register('adgeneration', adgeneration);
+register('adglare', adglare);
 register('adhese', adhese);
 register('adincube', adincube);
 register('adition', adition);
@@ -478,6 +483,7 @@ register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
 register('rbinfox', rbinfox);
+register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
@@ -496,6 +502,7 @@ register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('smi2', smi2);
+register('smilewanted', smilewanted);
 register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);
@@ -566,7 +573,7 @@ function init(win) {
   const config = getAmpConfig();
 
   // Overriding to short-circuit src/mode#getMode()
-  win.AMP_MODE = config.mode;
+  win.__AMP_MODE = config.mode;
 
   setReportError(console.error.bind(console));
 
