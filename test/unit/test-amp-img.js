@@ -26,7 +26,7 @@ describe('amp-img', () => {
   let sandbox;
   let screenWidth;
   let windowWidth;
-  let iframe;
+  let fixture;
 
   const SRCSET_STRING = `/examples/img/hero@1x.jpg 641w,
                         /examples/img/hero@2x.jpg 1282w`;
@@ -43,7 +43,7 @@ describe('amp-img', () => {
     });
 
     return createIframePromise().then(iframeFixture => {
-      iframe = iframeFixture;
+      fixture = iframeFixture;
     });
   });
 
@@ -52,12 +52,12 @@ describe('amp-img', () => {
   });
 
   function getImg(attributes, children) {
-    installImg(iframe.win);
-    Object.defineProperty(iframe.win.screen, 'width', {
+    installImg(fixture.win);
+    Object.defineProperty(fixture.win.screen, 'width', {
       get: () => screenWidth,
     });
 
-    const img = iframe.doc.createElement('amp-img');
+    const img = fixture.doc.createElement('amp-img');
     for (const key in attributes) {
       img.setAttribute(key, attributes[key]);
     }
@@ -67,7 +67,7 @@ describe('amp-img', () => {
         img.appendChild(children[key]);
       }
     }
-    return Promise.resolve(iframe.addElement(img));
+    return Promise.resolve(fixture.addElement(img));
   }
 
   it('should load an img with more attributes', () => {
@@ -291,7 +291,7 @@ describe('amp-img', () => {
         expect(impl.img_).to.have.class('i-amphtml-ghost');
 
         // On load, remove fallback
-        const loadEvent = createCustomEvent(iframe.win, 'load');
+        const loadEvent = createCustomEvent(fixture.win, 'load');
         impl.img_.dispatchEvent(loadEvent);
 
         expect(errorSpy).to.be.calledOnce;
@@ -302,7 +302,7 @@ describe('amp-img', () => {
         expect(impl.img_).to.not.have.class('i-amphtml-ghost');
 
         // On further error, do not bring back the fallback image
-        const errorEvent = createCustomEvent(iframe.win, 'error');
+        const errorEvent = createCustomEvent(fixture.win, 'error');
         impl.img_.dispatchEvent(errorEvent);
 
         expect(errorSpy).to.be.calledTwice;
@@ -675,8 +675,8 @@ describe('amp-img', () => {
   });
   describe('layout intrinsic', () => {
     beforeEach(() => {
-      iframe.iframe.height = 800;
-      iframe.iframe.width = 800;
+      fixture.iframe.height = 800;
+      fixture.iframe.width = 800;
     });
     it('should not exceed given width and height even if image\
       natural size is larger', () => {
