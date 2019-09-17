@@ -68,7 +68,7 @@ In the future, additional functionality, such as animation playback control, cou
         URLs when ingesting AMP files to point to a cached version of the image.
         [/filter]
         [filter formats="email"]
-        Similar to the <code>src</code> attribute on the `img` tag. The value must be a URL that uses an <code>https</code> protocal. 
+        Similar to the <code>src</code> attribute on the `img` tag. For emails, the URL must be <code>https</code>. 
         [/filter]
     </td>
   </tr>
