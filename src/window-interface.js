@@ -67,6 +67,15 @@ export class WindowInterface {
 
   /**
    * @static
+   * @return {number}
+   */
+  static getDevicePixelRatio() {
+    // No matter the window, the device-pixel-ratio is always one.
+    return self.devicePixelRatio || 1;
+  }
+
+  /**
+   * @static
    * @param {!Window} win
    * @return {function(string,(ArrayBufferView|Blob|FormData|null|string)=):boolean|undefined}
    */

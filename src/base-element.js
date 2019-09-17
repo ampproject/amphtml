@@ -628,14 +628,6 @@ export class BaseElement {
   }
 
   /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    return this.win.devicePixelRatio || 1;
-  }
-
-  /**
    * Utility method that propagates attributes from this element
    * to the given element.
    * If `opt_removeMissingAttrs` is true, then also removes any specified

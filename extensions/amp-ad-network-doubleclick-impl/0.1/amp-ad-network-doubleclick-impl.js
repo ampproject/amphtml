@@ -70,6 +70,7 @@ import {
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
+import {WindowInterface} from '../../../src/window-interface';
 import {
   createElementWithAttributes,
   isRTL,
@@ -516,7 +517,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           : null,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
-      'u_sd': this.win.devicePixelRatio,
+      'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
     };

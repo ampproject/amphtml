@@ -20,6 +20,7 @@ import * as lolex from 'lolex';
 import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
+import {WindowInterface} from '../../../../src/window-interface';
 import {parseSrcset} from '../../../../src/srcset';
 
 describes.realWin(
@@ -281,8 +282,8 @@ describes.realWin(
       doc = win.document;
       clock = lolex.install();
 
+      sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
       lightbox = {
-        getDpr: () => 1,
         element: {
           ownerDocument: doc,
         },
@@ -441,8 +442,8 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
       lightbox = {
-        getDpr: () => 1,
         close: () => {},
         toggleViewMode: () => {},
         element: {
