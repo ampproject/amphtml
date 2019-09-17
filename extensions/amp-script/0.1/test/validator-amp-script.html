@@ -41,11 +41,23 @@
     </div>
   </amp-script>
 
-  <!-- Valid: 'sandbox' attribute. -->
+  <!-- Valid: Optional 'sandbox' attribute. -->
   <amp-script layout=container src="https://example.com/foo.js" sandbox="allow-forms">
   </amp-script>
 
-  <!-- Valid: With <canvas> element. -->
+  <!-- Valid: Optional 'max-age' attribute. -->
+  <amp-script layout=container script="hello" max-age="604800">
+  </amp-script>
+
+  <!-- Invalid: Optional 'max-age' attribute with non-numeric chars. -->
+  <amp-script layout=container script="hello" max-age="1d">
+  </amp-script>
+
+  <!-- Invalid: Optional 'max-age' attribute without 'script' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" max-age="604800">
+  </amp-script>
+
+  <!-- Valid: <canvas> child element. -->
   <amp-script layout=container src="https://example.com/foo.js">
     <canvas id="myCanvas" width="100px" height="100px"></canvas>
   </amp-script>

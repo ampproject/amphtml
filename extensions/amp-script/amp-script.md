@@ -148,7 +148,7 @@ The rules for mutations are as follows:
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
 
-- Same-origin `src` must have [`Content-Type: application/json`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+- Same-origin `src` must have [`Content-Type: application/javascript`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
 - Cross-origin `src` and local scripts must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string. For example:
 
 ```html
@@ -180,9 +180,13 @@ The JavaScript size and script hash requirements can be disabled during developm
 
 **src**
 
-The URL of a JS file that will be executed in the context of this `<amp-script>`.
+For executing remote scripts.
+
+The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript`.
 
 **script**
+
+For executing local scripts.
 
 The `id` of a `script[type=text/plain][target=amp-script]` element whose text content contains JS that will be executed in the context of this `<amp-script>`.
 
@@ -192,13 +196,27 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 
 - `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
+**max-age (optional)**
+
+Requires the `script` attribute.
+
+The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing.
+
+If you don't publish signed exchanges, `max-age` does nothing.
+
+**development (optional, invalid)**
+
+A boolean attribute that disables the JS size and security constraints for a more convenient development experience.
+
+This attribute is not allowed by the AMP Validator and should not be used on pages in production.
+
 **common attributes**
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Interested in using amp-script?
 
-We recommend developing against a local build of `amp-script`. This enables dev-only debugging hooks e.g. human-readable `postMessage` events.
+We recommend developing against a local build of `amp-script`. This enables debugging hooks e.g. human-readable `postMessage` events.
 
 See our [Quick Start](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup) guide for setting up your local environment.
 
