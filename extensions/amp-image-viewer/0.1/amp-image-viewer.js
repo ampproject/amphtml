@@ -29,6 +29,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {WindowInterface} from '../../../src/window-interface';
 import {bezierCurve} from '../../../src/curve';
 import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
@@ -422,7 +423,10 @@ export class AmpImageViewer extends AMP.BaseElement {
       this.imageBox_.width * this.maxSeenScale_,
       this.sourceWidth_
     );
-    const src = this.srcset_.select(width, this.getDpr());
+    const src = this.srcset_.select(
+      width,
+      WindowInterface.getDevicePixelRatio()
+    );
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
