@@ -27,6 +27,7 @@ const url = require('url');
 const {
   isTravisPullRequestBuild,
   isTravisPushBuild,
+  travisPushBranch,
   travisRepoSlug,
 } = require('../travis');
 const {getStdout} = require('../exec');
@@ -83,11 +84,11 @@ function getBrotliBundleSize() {
  * repository to the passed value.
  */
 async function storeBundleSize() {
-  if (!isTravisPushBuild()) {
+  if (!isTravisPushBuild() || travisPushBranch() !== 'master') {
     log(
       yellow('Skipping'),
       cyan('--on_push_build') + ':',
-      'this action can only be performed on `push` builds on Travis'
+      'this action can only be performed on `master` push builds on Travis'
     );
     return;
   }

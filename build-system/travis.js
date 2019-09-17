@@ -139,6 +139,21 @@ function travisPullRequestBranch() {
 }
 
 /**
+ * Returns the Travis branch for push builds.
+ * @return {string}
+ */
+function travisPushBranch() {
+  if (!isTravisPushBuild()) {
+    log(
+      red('ERRROR:'),
+      'This is not a Travis push build. Cannot get',
+      cyan('process.env.TRAVIS_BRANCH') + '.'
+    );
+  }
+  return process.env.TRAVIS_BRANCH;
+}
+
+/**
  * Returns the commit SHA being tested by the ongoing Travis build.
  * @return {string}
  */
@@ -163,5 +178,6 @@ module.exports = {
   travisJobUrl,
   travisPullRequestBranch,
   travisPullRequestSha,
+  travisPushBranch,
   travisRepoSlug,
 };
