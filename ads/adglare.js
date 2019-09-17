@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,18 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function adyoulike(global, data) {
-  validateData(data, ['placement'], ['dc', 'campaign']);
-  global.adyoulikeParams = data;
+export function adglare(global, data) {
+  validateData(data, ['host', 'zid'], ['keywords']);
 
-  writeScript(global, 'https://fo-static.omnitagjs.com/amp.js');
+  const adglareSpan = global.document.createElement('span');
+  adglareSpan.id = 'zone' + data.zid;
+  global.document.getElementById('c').appendChild(adglareSpan);
+
+  let url =
+    'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
+  if (data.keywords) {
+    url = url + '&keywords=' + data.keywords;
+  }
+
+  writeScript(global, url);
 }

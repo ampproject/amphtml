@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function adyoulike(global, data) {
-  validateData(data, ['placement'], ['dc', 'campaign']);
-  global.adyoulikeParams = data;
-
-  writeScript(global, 'https://fo-static.omnitagjs.com/amp.js');
-}
+/** @enum {string} */
+export const CarouselEvents = {
+  INDEX_CHANGE: 'amp-carousel:indexchange',
+  SCROLL_START: 'amp-carousel:scrollstart',
+  SCROLL_POSITION_CHANGED: 'amp-carousel:scrollpositionchange',
+};

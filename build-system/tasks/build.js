@@ -27,7 +27,6 @@ const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
-const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {serve} = require('./serve');
@@ -99,10 +98,6 @@ async function performBuild(watch) {
   await performPrerequisiteSteps(watch);
   await compileAllUnminifiedJs(watch);
   await buildExtensions({watch});
-  if (isTravisBuild()) {
-    // New line after all the compilation progress dots on Travis.
-    console.log('\n');
-  }
 }
 
 /**

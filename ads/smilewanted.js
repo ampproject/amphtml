@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
+import {loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-export function adyoulike(global, data) {
-  validateData(data, ['placement'], ['dc', 'campaign']);
-  global.adyoulikeParams = data;
-
-  writeScript(global, 'https://fo-static.omnitagjs.com/amp.js');
+export function smilewanted(global, data) {
+  // For more flexibility, we construct the call to SmileWanted's URL in the external loader, based on the data received from the AMP tag.
+  global.smilewantedConfig = data;
+  loadScript(global, 'https://prebid.smilewanted.com/amp/amp.js');
 }

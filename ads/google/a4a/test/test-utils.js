@@ -16,6 +16,7 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import * as IniLoad from '../../../../src/ini-load';
 import {
   ADX_ADY_EXP,
   EXPERIMENT_ATTRIBUTE,
@@ -1045,8 +1046,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       createResource({}, 'amp-foo'),
     ];
     sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
@@ -1071,8 +1072,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     );
     ampAdResource.element.createdCallback = true;
     sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
@@ -1102,8 +1103,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     );
     ampAdResource.element.createdCallback = true;
     sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', element =>
       element.getAttribute('foo')
     ).then(result => {

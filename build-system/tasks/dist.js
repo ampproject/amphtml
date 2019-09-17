@@ -46,7 +46,6 @@ const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
-const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../internal-version');
 
@@ -113,13 +112,11 @@ async function dist() {
     printConfigHelp(cmd);
   }
   if (argv.single_pass) {
-    if (!isTravisBuild()) {
-      log(
-        green('Building all AMP extensions in'),
-        cyan('single_pass'),
-        green('mode.')
-      );
-    }
+    log(
+      green('Building all AMP extensions in'),
+      cyan('single_pass'),
+      green('mode.')
+    );
   } else {
     parseExtensionFlags();
   }
@@ -147,11 +144,6 @@ async function dist() {
     copyCss(),
     copyParsers(),
   ]);
-
-  if (isTravisBuild()) {
-    // New line after all the compilation progress dots on Travis.
-    console.log('\n');
-  }
 
   await stopNailgunServer(distNailgunPort);
   await formatExtractedMessages();
