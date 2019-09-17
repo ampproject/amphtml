@@ -112,7 +112,7 @@ This attribute is similar to the `src` attribute on the `img` tag. The value mus
 [/filter]
 
 [filter formats="email"]
-This attribute is similar to the `src` attribute on the `img` tag. The value must be a URL that uses an `https` protocal. 
+This attribute is similar to the `src` attribute on the `img` tag. For emails, the URL must be `https`. 
 [/filter]
 
 **srcset**
