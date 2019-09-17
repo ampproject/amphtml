@@ -267,8 +267,10 @@ class StartupTask extends Task {
 
   /** @override */
   useRequestIdleCallback_() {
-    // DO NOT SUBMIT: is this ok?
-    return true;
+    // We only start using requestIdleCallback when the core runtime has
+    // been initialized. Otherwise we risk starving ourselves
+    // before the render-critical work is done.
+    return this.chunks_.coreReady;
   }
 
   /**
@@ -322,11 +324,12 @@ class Chunks {
       }
     });
 
-    // DO NOT SUBMIT: do we still need a viewer at all?
-    /** @protected {?./service/viewer-interface.ViewerInterface} */
-    this.viewer = null;
-    Services.viewerPromiseForDoc(ampDoc).then(viewer => {
-      this.viewer = viewer;
+    /** @protected {boolean} */
+    this.coreReady = false;
+    Services.viewerPromiseForDoc(ampDoc).then(() => {
+      // Once the viewer has been resolved, most of core runtime has been
+      // initialized as well.
+      this.coreReady = true;
     });
 
     ampDoc.onVisibilityChanged(() => {
