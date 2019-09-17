@@ -147,7 +147,7 @@ function travisPushBranch() {
     log(
       red('ERRROR:'),
       'This is not a Travis push build. Cannot get',
-      cyan('process.env.TRAVIS_BRANCH')
+      cyan('process.env.TRAVIS_BRANCH') + '.'
     );
   }
   return process.env.TRAVIS_BRANCH;
