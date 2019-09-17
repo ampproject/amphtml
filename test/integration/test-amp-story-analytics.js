@@ -121,7 +121,7 @@ describe
       });
 
       it('should send analytics event when landing on a page', async () => {
-        await browser.waitForElementLayout('#page-1', 15000);
+        await browser.waitForElementLayout('#page-1', 20000);
 
         const req = await RequestBank.withdraw();
         const q = parseQueryString(req.url.substr(1));
@@ -130,7 +130,7 @@ describe
 
       it('should send analytics event when navigating', async () => {
         browser.click('#page-1');
-        await browser.waitForElementLayout('#page-2', 15000);
+        await browser.waitForElementLayout('#page-2', 20000);
 
         const req = await RequestBank.withdraw();
         const q = parseQueryString(req.url.substr(1));
@@ -139,7 +139,7 @@ describe
 
       it('should send analytics event when entering bookend', async () => {
         browser.click('#page-1');
-        await browser.waitForElementLayout('#page-2', 15000);
+        await browser.waitForElementLayout('#page-2', 20000);
         browser.click('#page-2');
         await browser.wait(100);
 
@@ -150,7 +150,7 @@ describe
 
       it('should send analytics event when exiting bookend', async () => {
         browser.click('#page-1');
-        await browser.waitForElementLayout('#page-2', 15000);
+        await browser.waitForElementLayout('#page-2', 20000);
         browser.click('#page-2');
         await browser.wait(100);
         browser.click('amp-story-bookend');

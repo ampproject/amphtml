@@ -666,15 +666,12 @@ describes.realWin('Events', {amp: 1}, env => {
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
-      tracker = root.getTracker(
-        AnalyticsEventType.AMP_STORY,
-        AmpStoryEventTracker
-      );
+      tracker = root.getTracker(AnalyticsEventType.STORY, AmpStoryEventTracker);
       rootTarget = root.getRootElement();
       getRootElementSpy = sandbox.spy(root, 'getRootElement');
     });
 
-    it('should initalize, add listeners and dispose', () => {
+    it('should initalize, add listeners, and dispose', () => {
       expect(tracker.root).to.equal(root);
       expect(tracker.buffer_).to.exist;
 
@@ -684,18 +681,8 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should listen on story events', () => {
       const handler2 = sandbox.spy();
-      tracker.add(
-        analyticsElement,
-        'story-event-1',
-        {on: 'story-event-1'},
-        handler
-      );
-      tracker.add(
-        analyticsElement,
-        'story-event-2',
-        {on: 'story-event-2'},
-        handler2
-      );
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+      tracker.add(analyticsElement, 'story-event-2', {}, handler2);
       tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
       expect(getRootElementSpy).to.be.calledTwice;
 
@@ -711,7 +698,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler2).to.be.calledOnce;
     });
 
-    it('should buffer custom events early on', () => {
+    it('should buffer story events early on', () => {
       // Events before listeners added.
       tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
       tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
@@ -722,18 +709,8 @@ describes.realWin('Events', {amp: 1}, env => {
       // Listeners added: immediate events fired.
       const handler2 = sandbox.spy();
       const handler3 = sandbox.spy();
-      tracker.add(
-        analyticsElement,
-        'story-event-1',
-        {on: 'story-event-1'},
-        handler
-      );
-      tracker.add(
-        analyticsElement,
-        'story-event-2',
-        {on: 'story-event-2'},
-        handler2
-      );
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+      tracker.add(analyticsElement, 'story-event-2', {}, handler2);
       tracker.add(
         analyticsElement,
         'story-event-3',
@@ -776,11 +753,11 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.buffer_).to.be.undefined;
     });
 
-    it('should not fire twice from observerable and buffer', () => {
+    it('should not fire twice from observable and buffer', () => {
       tracker.trigger(
         new AnalyticsEvent(target, 'story-event-1', {'order': '1'})
       );
-      tracker.add(target, 'story-event-1', {on: 'story-event-1'}, handler);
+      tracker.add(target, 'story-event-1', {}, handler);
 
       tracker.trigger(
         new AnalyticsEvent(target, 'story-event-1', {'order': '2'})
@@ -802,12 +779,7 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.trigger(
         new AnalyticsEvent(target, 'story-event-1', {'order': '2'})
       );
-      tracker.add(
-        analyticsElement,
-        'story-event-1',
-        {on: 'story-event-1'},
-        handler
-      );
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
 
       tracker.trigger(
         new AnalyticsEvent(target, 'story-event-1', {'order': '3'})

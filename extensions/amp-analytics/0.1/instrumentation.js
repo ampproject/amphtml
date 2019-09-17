@@ -79,7 +79,7 @@ export class InstrumentationService {
    */
   getTrackerClass_(trackerName) {
     switch (trackerName) {
-      case AnalyticsEventType.AMP_STORY:
+      case AnalyticsEventType.STORY:
         return AmpStoryEventTracker;
       default:
         return CustomEventTracker;

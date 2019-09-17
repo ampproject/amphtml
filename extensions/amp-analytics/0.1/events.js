@@ -46,11 +46,11 @@ const TAG = 'amp-analytics/events';
 export const AnalyticsEventType = {
   CLICK: 'click',
   CUSTOM: 'custom',
-  AMP_STORY: 'amp-story',
   HIDDEN: 'hidden',
   INI_LOAD: 'ini-load',
   RENDER_START: 'render-start',
   SCROLL: 'scroll',
+  STORY: 'story',
   TIMER: 'timer',
   VIDEO: 'video',
   VISIBLE: 'visible',
@@ -82,13 +82,6 @@ const TRACKER_TYPE = Object.freeze({
       return new CustomEventTracker(root);
     },
   },
-  [AnalyticsEventType.AMP_STORY]: {
-    name: AnalyticsEventType.AMP_STORY,
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new AmpStoryEventTracker(root);
-    },
-  },
   [AnalyticsEventType.HIDDEN]: {
     name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
@@ -115,6 +108,13 @@ const TRACKER_TYPE = Object.freeze({
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new ScrollEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.STORY]: {
+    name: AnalyticsEventType.STORY,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
+    klass: function(root) {
+      return new AmpStoryEventTracker(root);
     },
   },
   [AnalyticsEventType.TIMER]: {
@@ -176,7 +176,7 @@ export function getTrackerKeyName(eventType) {
     return AnalyticsEventType.VIDEO;
   }
   if (isAmpStoryTriggerType(eventType)) {
-    return AnalyticsEventType.AMP_STORY;
+    return AnalyticsEventType.STORY;
   }
   if (!isReservedTriggerType(eventType)) {
     return AnalyticsEventType.CUSTOM;
@@ -450,12 +450,6 @@ export class AmpStoryEventTracker extends CustomEventTracker {
    */
   fireListener_(event, rootTarget, config, listener) {
     const type = event['type'];
-    const on = config['on'];
-
-    if (type !== on) {
-      return;
-    }
-
     const vars = event['vars'];
 
     listener(new AnalyticsEvent(rootTarget, type, vars));
