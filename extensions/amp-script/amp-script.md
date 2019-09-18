@@ -80,10 +80,6 @@ If `src` points to a cross-origin URL, then a ["script hash"](#security-features
 
 #### Load JavaScript from a local element
 
-[tip type="important"]
-Using the `script` attribute is currently invalid. See [#24309](https://github.com/ampproject/amphtml/issues/24309) for details.
-[/tip]
-
 Use the `script` attribute to reference a local `script` element by `id`.
 
 ```html
