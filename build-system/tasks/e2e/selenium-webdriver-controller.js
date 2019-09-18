@@ -420,7 +420,7 @@ class SeleniumWebDriverController {
     );
   }
   /**
-   * @return {!Promise<string>}
+   * @return {!Promise<Array<string>>}
    * @override
    */
   async getAllWindows() {

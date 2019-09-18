@@ -329,7 +329,7 @@ class FunctionalTestController {
    * session.
    * {@link https://www.w3.org/TR/webdriver1/#get-window-handles}
    *
-   * @return {!Promise<string>}
+   * @return {!Promise<Array<string>>}
    */
   async getAllWindows() {}
 

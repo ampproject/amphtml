@@ -74,8 +74,8 @@ describes.endtoend(
       await expect(windows.length).to.equal(2);
 
       await controller.switchToWindow(windows[1]);
-      await expect(await controller.getCurrentUrl()).to.equal(
-        'http://localhost:8000/?product1&x=71&y=98&e=Product%201&shouldNotBeReplaced=AMP_VERSION'
+      await expect(await controller.getCurrentUrl()).to.match(
+        /^http:\/\/localhost:8000\/\?product1&x=71&y=9[78]&e=Product%201&shouldNotBeReplaced=AMP_VERSION$/
       );
     });
 
