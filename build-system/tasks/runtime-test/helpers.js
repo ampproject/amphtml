@@ -121,6 +121,9 @@ function maybePrintArgvMessages() {
     local_changes:
       'Running unit tests directly affected by the files' +
       ' changed in the local branch.',
+    compiled: 'Running tests in compiled mode.',
+    stable: 'Running tests only on stable browsers.',
+    beta: 'Running tests only on beta browsers.',
   };
   if (argv.chrome_flags) {
     log(
@@ -179,12 +182,20 @@ function maybePrintCoverageMessage() {
   opn(url, {wait: false});
 }
 
-function karmaBrowserStart(browser) {
+/**
+ * @param {Object} browser
+ * @private
+ */
+function karmaBrowserStart_(browser) {
   console./*OK*/ log('\n');
   log(`${browser.name}: ${green('STARTED')}`);
 }
 
-function karmaBrowserComplete(browser) {
+/**
+ * @param {Object} browser
+ * @private
+ */
+function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
   // Prevent cases where Karma detects zero tests and still passes. #16851.
@@ -212,15 +223,66 @@ function karmaBrowserComplete(browser) {
   log(message);
 }
 
-function karmaBrowsersReady() {
+/**
+ * @private
+ */
+function karmaBrowsersReady_() {
   console./*OK*/ log('\n');
   log(green('Done. Running tests...'));
 }
 
-function karmaRunStart() {
+/**
+ * @private
+ */
+function karmaRunStart_() {
   if (!argv.saucelabs) {
     log(green('Running tests locally...'));
   }
+}
+
+/**
+ * Runs tests in sauce labs
+ *
+ * If --stable is provided, runs tests only on stable browsers in sauce labs without batching.
+ * If --beta is provided, runs tests only on beta browsers in sauce labs without batching. Does not fail.
+ * If neither --stable nor --beta are provided, runs test on all browsers in sauce labs with batching.
+ *
+ * @param {Object} config karma config
+ * @return {!Promise<number>} exitCode
+ */
+async function runTestInSauceLabs(config) {
+  const browsers = {stable: [], beta: []};
+  for (const browserId of config.browsers) {
+    browsers[
+      browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable'
+    ].push(browserId);
+  }
+
+  if (argv.stable) {
+    config.browsers = browsers.stable;
+    return createKarmaServer(config, reportTestRunComplete);
+  }
+
+  if (argv.beta) {
+    config.browsers = browsers.beta;
+    const betaExitCode = await createKarmaServer(config, () => {});
+    if (betaExitCode != 0) {
+      log(
+        yellow('Some tests have failed on'),
+        cyan('beta'),
+        yellow('browsers.')
+      );
+      log(
+        yellow('This is not currently a fatal error, but will become an'),
+        yellow('error once the beta browsers are released as next stable'),
+        yellow('version!')
+      );
+    }
+
+    return 0;
+  }
+
+  return await runTestInBatches_(config, browsers);
 }
 
 /**
@@ -232,16 +294,11 @@ function karmaRunStart() {
  * an exit code of 0.
  *
  * @param {Object} config karma config
+ * @param {!Array<string>} browsers browsers
  * @return {number} exitCode
+ * @private
  */
-async function runTestInBatches(config) {
-  const browsers = {stable: [], beta: []};
-  for (const browserId of config.browsers) {
-    browsers[
-      browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable'
-    ].push(browserId);
-  }
-
+async function runTestInBatches_(config, browsers) {
   let errored = false;
   let totalStableSuccess = 0;
   let totalStableFailed = 0;
@@ -255,7 +312,7 @@ async function runTestInBatches(config) {
   };
 
   if (browsers.stable.length) {
-    const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
+    const allBatchesExitCodes = await runTestInBatchesWithBrowsers_(
       'stable',
       browsers.stable,
       config,
@@ -279,7 +336,7 @@ async function runTestInBatches(config) {
   }
 
   if (browsers.beta.length) {
-    const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
+    const allBatchesExitCodes = await runTestInBatchesWithBrowsers_(
       'beta',
       browsers.beta,
       config,
@@ -313,8 +370,9 @@ async function runTestInBatches(config) {
  *     `run_complete` event. It should take two arguments, (browser, results),
  *     and return nothing.
  * @return {number} processExitCode
+ * @private
  */
-async function runTestInBatchesWithBrowsers(
+async function runTestInBatchesWithBrowsers_(
   batchName,
   browsers,
   config,
@@ -373,10 +431,10 @@ async function createKarmaServer(
   });
 
   karmaServer
-    .on('run_start', () => karmaRunStart())
-    .on('browsers_ready', () => karmaBrowsersReady())
-    .on('browser_start', browser => karmaBrowserStart(browser))
-    .on('browser_complete', browser => karmaBrowserComplete(browser))
+    .on('run_start', karmaRunStart_)
+    .on('browsers_ready', karmaBrowsersReady_)
+    .on('browser_start', karmaBrowserStart_)
+    .on('browser_complete', karmaBrowserComplete_)
     .on('run_complete', runCompleteFn);
 
   karmaServer.start();
@@ -388,6 +446,6 @@ module.exports = {
   createKarmaServer,
   getAdTypes,
   maybePrintArgvMessages,
-  runTestInBatches,
+  runTestInSauceLabs,
   shouldNotRun,
 };
