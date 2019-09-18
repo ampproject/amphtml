@@ -6939,10 +6939,10 @@ gulp-if@^2.0.0:
     ternary-stream "^2.0.1"
     through2 "^2.0.1"
 
-gulp-jest@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/gulp-jest/-/gulp-jest-4.0.2.tgz#cc20e3c2c23c4fc81c3e92ca2dec24c2098fc0c9"
-  integrity sha512-+ir9/nZCQQDwjBC4XZObJ8Xx1Ks5bMFLYnJbGL+67Bx1y8uclMMFk8USMM2zuR7yu4yg5GwRuG5he4JthMxVlw==
+gulp-jest@4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/gulp-jest/-/gulp-jest-4.0.3.tgz#4cecf904585ba434d3cb8ef400ba83b5dc388f05"
+  integrity sha512-kTlnq4jNCPwoz9wcvU1cajbBwRNoWY/KiTLOfKrbYkobgItImgTB13D68917iIPd9I+LMBCH0Wza7O99BrO9SQ==
   dependencies:
     plugin-error "^1.0.1"
     through2 "^2.0.1"
