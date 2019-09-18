@@ -15,7 +15,7 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('./global-configs/experiments-config.json');
-
+const experimentsConstantBackup = require('./global-configs/experiments-const.json');
 const localPlugin = name =>
   require.resolve(`./babel-plugins/babel-plugin-${name}`);
 
@@ -96,10 +96,21 @@ function getReplacePlugin() {
         );
       }
     }
-
     const experimentDefine =
       experimentsConfig[experiment]['defineExperimentConstant'];
 
+    function flagExists(element) {
+      return element['identifierName'] === experimentDefine;
+    }
+
+    // only add default replacement if it already doesn't exist in array
+    if (experimentDefine && !replacements.some(flagExists)) {
+      replacements.push(createReplacement(experimentDefine, false));
+    }
+  });
+
+  // default each backup experiment constant to false as well
+  Object.keys(experimentsConstantBackup).forEach(experimentDefine => {
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
     }
