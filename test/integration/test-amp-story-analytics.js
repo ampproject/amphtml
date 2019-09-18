@@ -17,9 +17,8 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-describe('amp-story analytics', function() {
-  const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
-  const body = `
+const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
+const body = `
       <amp-story standalone>
         <amp-analytics>
           <script type="application/json">
@@ -111,54 +110,53 @@ describe('amp-story analytics', function() {
           </script>
         </amp-story-bookend>
       </amp-story>`;
-  describes.integration('amp-story analytics', {body, extensions}, env => {
-    let browser;
-    beforeEach(() => {
-      browser = new BrowserController(env.win);
-      env.iframe.style.height = '732px';
-      env.iframe.style.width = '412px';
-      return browser.waitForElementLayout('amp-story', 20000);
-    });
+describes.integration('amp-story analytics', {body, extensions}, env => {
+  let browser;
+  beforeEach(() => {
+    browser = new BrowserController(env.win);
+    env.iframe.style.height = '732px';
+    env.iframe.style.width = '412px';
+    return browser.waitForElementLayout('amp-story', 20000);
+  });
 
-    it('should send analytics event when landing on a page', async () => {
-      await browser.waitForElementLayout('#page-1', 20000);
+  it('should send analytics event when landing on a page', async () => {
+    await browser.waitForElementLayout('#page-1', 20000);
 
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['pageVisible']).to.equal('page-1');
-    });
+    const req = await RequestBank.withdraw();
+    const q = parseQueryString(req.url.substr(1));
+    expect(q['pageVisible']).to.equal('page-1');
+  });
 
-    it('should send analytics event when navigating', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
+  it('should send analytics event when navigating', async () => {
+    browser.click('#page-1');
+    await browser.waitForElementLayout('#page-2', 20000);
 
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['pageVisible']).to.equal('page-2');
-    });
+    const req = await RequestBank.withdraw();
+    const q = parseQueryString(req.url.substr(1));
+    expect(q['pageVisible']).to.equal('page-2');
+  });
 
-    it('should send analytics event when entering bookend', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
-      browser.click('#page-2');
-      await browser.wait(100);
+  it('should send analytics event when entering bookend', async () => {
+    browser.click('#page-1');
+    await browser.waitForElementLayout('#page-2', 20000);
+    browser.click('#page-2');
+    await browser.wait(100);
 
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['bookendEnter']).to.equal('true');
-    });
+    const req = await RequestBank.withdraw();
+    const q = parseQueryString(req.url.substr(1));
+    expect(q['bookendEnter']).to.equal('true');
+  });
 
-    it('should send analytics event when exiting bookend', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
-      browser.click('#page-2');
-      await browser.wait(100);
-      browser.click('amp-story-bookend');
-      await browser.wait(100);
+  it('should send analytics event when exiting bookend', async () => {
+    browser.click('#page-1');
+    await browser.waitForElementLayout('#page-2', 20000);
+    browser.click('#page-2');
+    await browser.wait(100);
+    browser.click('amp-story-bookend');
+    await browser.wait(100);
 
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['bookendExit']).to.equal('true');
-    });
+    const req = await RequestBank.withdraw();
+    const q = parseQueryString(req.url.substr(1));
+    expect(q['bookendExit']).to.equal('true');
   });
 });
