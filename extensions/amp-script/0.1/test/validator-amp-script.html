@@ -28,18 +28,25 @@
   <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
 </head>
 <body>
-  <!-- Valid: With 'script' attribute. -->
-  <amp-script layout=container script=hello></amp-script>
-  <script type=text/plain target=amp-script id=hello>
-    document.body.textContent = "Hello world!";
-  </script>
-
-  <!-- Valid: With 'src' attribute. -->
+  <!-- Valid: 'src' attribute. -->
   <amp-script layout=container src="https://example.com/foo.js">
     <div class="root">
       <p>Some text to hydrate.</p>
     </div>
   </amp-script>
+
+  <!-- Invalid: 'src' attribute with non-HTTPS protocol. -->
+  <amp-script layout=container src="http://example.com/foo.js">
+  </amp-script>
+
+  <!-- Valid: 'script' attribute. -->
+  <amp-script layout=container script=hello></amp-script>
+  <script type=text/plain target=amp-script id=hello>
+    document.body.textContent = "Hello world!";
+  </script>
+
+  <!-- Invalid: 'script' attribute with invalid #id reference. -->
+  <amp-script layout=container script=missing></amp-script>
 
   <!-- Valid: Optional 'sandbox' attribute. -->
   <amp-script layout=container src="https://example.com/foo.js" sandbox="allow-forms">
