@@ -379,10 +379,10 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
-geckodriver@1.16.2:
-  version "1.16.2"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.16.2.tgz#4766e6eb6835e9ec8797f1dce1966df2b3fb5985"
-  integrity sha512-kXZP4QferAv57Ru4Fx2WYuu//ErKJP4hPEkJm4mSETo42jsdYFwdNxwQ4vCGhf14gsCdxU9YrwNupJ8gr1GxPg==
+geckodriver@1.17.0:
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.17.0.tgz#91fe7d2e9d1162c79883b55cebfb2d174c57a87b"
+  integrity sha512-G+fN3RzzPrD+tZMKKQ7urWVYsNP5EIzRgXr7HNB2NMC1JP3vdg2BV4DSRrnkEO4j8KufYz0VucTU2FwOwacAtQ==
   dependencies:
     adm-zip "0.4.11"
     bluebird "3.4.6"
