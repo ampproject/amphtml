@@ -92,18 +92,9 @@ function transferSrcsToTempDir() {
 }
 
 /**
- * Dist Build
- * @return {!Promise}
+ * Prints a useful help message prior to the gulp dist task
  */
-async function dist() {
-  maybeUpdatePackages();
-  const handlerProcess = createCtrlcHandler('dist');
-  process.env.NODE_ENV = 'production';
-  printNobuildHelp();
-  cleanupBuildDir();
-
-  await prebuild();
-
+function printDistHelp() {
   if (argv.fortesting) {
     let cmd = 'gulp dist --fortesting';
     if (argv.single_pass) {
@@ -120,33 +111,43 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
+}
+
+/**
+ * Dist Build
+ * @return {!Promise}
+ */
+async function dist() {
+  maybeUpdatePackages();
+  const handlerProcess = createCtrlcHandler('dist');
+  process.env.NODE_ENV = 'production';
+  printNobuildHelp();
+  printDistHelp();
+
+  cleanupBuildDir();
+  await prebuild();
   await compileCss();
   await compileJison();
-  await startNailgunServer(distNailgunPort, /* detached */ false);
 
-  // Single pass has its own tmp directory processing. Only do this for
-  // multipass.
-  // We need to execute this after `compileCss` and `compileJison` so that we can copy that
-  // over to the tmp directory.
+  // This is the temp directory processing for multi-pass (single-pass does its
+  // own processing). Executed after `compileCss` and `compileJison` so their
+  // results can be copied too.
   if (!argv.single_pass) {
     transferSrcsToTempDir();
   }
 
-  await Promise.all([
-    compileAllMinifiedJs(),
-    bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true),
-    buildExtensions({minify: true, watch: false}),
-    buildExperiments({minify: true, watch: false}),
-    buildLoginDone('0.1', {minify: true, watch: false}),
-    buildWebPushPublisherFiles({minify: true, watch: false}).then(
-      postBuildWebPushPublisherFilesVersion
-    ),
-    copyCss(),
-    copyParsers(),
-  ]);
+  await copyCss();
+  await copyParsers();
+  await bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true);
 
+  // Steps that use closure compiler. Small ones before large (parallel) ones.
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+  await buildExperiments({minify: true, watch: false});
+  await buildLoginDone('0.1', {minify: true, watch: false});
+  await buildWebPushPublisherFiles({minify: true, watch: false});
+  await compileAllMinifiedJs();
+  await buildExtensions({minify: true, watch: false});
   await stopNailgunServer(distNailgunPort);
-  await formatExtractedMessages();
 
   if (argv.esm) {
     await Promise.all([
@@ -156,6 +157,7 @@ async function dist() {
     ]);
   }
 
+  await formatExtractedMessages();
   await generateFileListing();
 
   return exitCtrlcHandler(handlerProcess);
@@ -210,9 +212,8 @@ function buildLoginDone(version, options) {
  * Build amp-web-push publisher files HTML page.
  *
  * @param {!Object} options
- * @return {!Promise}
  */
-function buildWebPushPublisherFiles(options) {
+async function buildWebPushPublisherFiles(options) {
   const distDir = 'dist/v0';
   const promises = [];
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
@@ -230,7 +231,8 @@ function buildWebPushPublisherFiles(options) {
       promises.push(p);
     });
   });
-  return Promise.all(promises);
+  await Promise.all(promises);
+  await postBuildWebPushPublisherFilesVersion();
 }
 
 async function prebuild() {
