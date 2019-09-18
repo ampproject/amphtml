@@ -189,7 +189,7 @@ Example of script hashes:
   <!--
     A "src" attribute with a cross-origin URL requires adding a script hash.
 
-    If the hash of remote.js's contents is "fake_has_of_remote_js",
+    If the hash of remote.js's contents is "fake_hash_of_remote_js",
     we'll add "sha384-fake_hash_of_remote_js" to the <meta> tag above.
   -->
   <amp-script src="cross.origin/remote.js" layout=container>
@@ -199,7 +199,7 @@ Example of script hashes:
     A "script" attribute also requires adding a script hash.
 
     If the hash of #myScript's text contents is "fake_hash_of_local_script",
-    we'll add "sha384-fake_hash_of_local_script" to the <meta> tag.
+    we'll add "sha384-fake_hash_of_local_script" to the <meta> tag above.
   -->
   <amp-script script=myScript layout=container>
   </amp-script>
