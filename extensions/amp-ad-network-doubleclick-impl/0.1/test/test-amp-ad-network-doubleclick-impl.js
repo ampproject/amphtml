@@ -1739,10 +1739,9 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        sandbox.stub(impl, 'getAmpDoc').returns({});
-        sandbox
-          .stub(Services, 'viewerForDoc')
-          .returns({whenFirstVisible: () => new Deferred().promise});
+        sandbox.stub(impl, 'getAmpDoc').returns({
+          whenFirstVisible: () => new Deferred().promise,
+        });
       });
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
