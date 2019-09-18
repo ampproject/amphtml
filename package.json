@@ -38,7 +38,7 @@
     "@babel/plugin-proposal-class-properties": "7.5.5",
     "@babel/preset-env": "7.6.0",
     "@jridgewell/resorcery": "0.0.3",
-    "acorn-globals": "4.3.3",
+    "acorn-globals": "4.3.4",
     "amphtml-validator": "1.0.23",
     "ansi-colors": "4.1.1",
     "ast-replace": "1.1.3",

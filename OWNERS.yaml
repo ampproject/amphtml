@@ -2,3 +2,5 @@
 - dvoytenko
 - jridgewell
 - "**/validator-*.protoascii": ampproject/wg-caching
+- "**/validator-*.html": ampproject/wg-caching
+- "**/validator-*.out": ampproject/wg-caching
