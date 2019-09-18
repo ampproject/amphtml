@@ -22,11 +22,21 @@ import {validateData, writeScript} from '../3p/3p';
  */
 export function rubicon(global, data) {
   // TODO: check mandatory fields
-  validateData(data, [], [
-    'account', 'site', 'zone', 'size',
-    'kw', 'visitor', 'inventory',
-    'method', 'callback',
-  ]);
+  validateData(
+    data,
+    [],
+    [
+      'account',
+      'site',
+      'zone',
+      'size',
+      'kw',
+      'visitor',
+      'inventory',
+      'method',
+      'callback',
+    ]
+  );
 
   if (data.method === 'smartTag') {
     smartTag(global, data);
@@ -50,6 +60,10 @@ function smartTag(global, data) {
   global.rp_amp = 'st';
   global.rp_callback = data.callback;
   /* eslint-enable */
-  writeScript(global, 'https://ads.rubiconproject.com/ad/'
-      + encodeURIComponent(data.account) + '.js');
+  writeScript(
+    global,
+    'https://ads.rubiconproject.com/ad/' +
+      encodeURIComponent(data.account) +
+      '.js'
+  );
 }

@@ -22,4 +22,4 @@ If the user has responded negatively to the amp-consent component (user rejects 
 If the user’s response to the amp-consent is unknown (user dismisses the consent prompt), by default, no ad requests or RTC call-outs are sent.  
 If `data-npa-on-unknown-consent` is set to true, non-personalized ads will be requested but RTC call-outs are not sent.
 
-See [Doubleclick Help Center article](https://support.google.com/dfp_premium/answer/7678538) for more information.
+See [Google Ad Manager Help Center article](https://support.google.com/dfp_premium/answer/7678538) for more information.

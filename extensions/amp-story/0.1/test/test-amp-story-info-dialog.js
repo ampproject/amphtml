@@ -27,7 +27,6 @@ import {
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-
 describes.realWin('amp-story-share-menu', {amp: true}, env => {
   let moreInfoLinkUrl;
   let embedded;
@@ -82,8 +81,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
   it('should hide more info link when there is no viewer messaging', () => {
     embedded = false;
     return infoDialog.build().then(() => {
-      expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
-          .not.to.have.class(MOREINFO_VISIBLE_CLASS);
+      expect(
+        infoDialog.element_.querySelector(MOREINFO_CLASS)
+      ).not.to.have.class(MOREINFO_VISIBLE_CLASS);
     });
   });
 
@@ -91,8 +91,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     moreInfoLinkUrl = null;
 
     return infoDialog.build().then(() => {
-      expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
-          .not.to.have.class(MOREINFO_VISIBLE_CLASS);
+      expect(
+        infoDialog.element_.querySelector(MOREINFO_CLASS)
+      ).not.to.have.class(MOREINFO_VISIBLE_CLASS);
     });
   });
 
@@ -100,8 +101,9 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     moreInfoLinkUrl = 'https://example.com/more-info.html';
 
     return infoDialog.build().then(() => {
-      expect(infoDialog.element_.querySelector(MOREINFO_CLASS))
-          .to.have.class(MOREINFO_VISIBLE_CLASS);
+      expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).to.have.class(
+        MOREINFO_VISIBLE_CLASS
+      );
     });
   });
 

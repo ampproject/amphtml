@@ -46,10 +46,11 @@ export class AmpBindMacro extends AMP.BaseElement {
   /**
    * @return {string} Returns a string to identify this tag. May not be unique
    *     if the element name is not unique.
-   * @private
+   * @protected
    */
   getName_() {
-    return '<amp-bind-macro> ' +
-        (this.element.getAttribute('id') || '<unknown id>');
+    return (
+      '<amp-bind-macro> ' + (this.element.getAttribute('id') || '<unknown id>')
+    );
   }
 }

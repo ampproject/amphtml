@@ -31,11 +31,10 @@ import {
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode} from '../../../src/dom';
 import {toWin} from '../../../src/types';
-
 
 /** @const @enum {string} */
 export const MediaType = {
@@ -44,38 +43,32 @@ export const MediaType = {
   VIDEO: 'video',
 };
 
-
 /**
  * Represents the distance of an element from the current place in the document.
  * @typedef {function(!HTMLMediaElement): number}
  */
 export let ElementDistanceFnDef;
 
-
 /**
  * Represents a task to be executed on a media element.
  * @typedef {function(!HTMLMediaElement, *): !Promise}
  */
-let ElementTaskDef;
-
+let ElementTask_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
 /**
  * @const {string}
  */
 const DOM_MEDIA_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
 
-
 /**
  * @const {string}
  */
 const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
 
-
 /**
  * @const {string}
  */
 const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
-
 
 /**
  * The name for a string attribute that represents the ID of a media element
@@ -84,21 +77,17 @@ const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
  */
 export const REPLACED_MEDIA_PROPERTY_NAME = 'replaced-media';
 
-
 /**
  * @type {!Object<string, !MediaPool>}
  */
 const instances = {};
-
 
 /**
  * @type {number}
  */
 let nextInstanceId = 0;
 
-
 let elId = 0;
-
 
 /**
  * Media pool class, providing an optimized and cross browser interface to
@@ -192,7 +181,6 @@ export class MediaPool {
     this.initializeMediaPool_(maxCounts);
   }
 
-
   /**
    * Fills the media pool by creating the maximum number of media elements for
    * each of the types of media elements.  We need to create these eagerly so
@@ -211,8 +199,10 @@ export class MediaPool {
         return;
       }
 
-      const ctor = dev().assert(this.mediaFactory_[type],
-          `Factory for media type \`${type}\` unset.`);
+      const ctor = devAssert(
+        this.mediaFactory_[type],
+        `Factory for media type \`${type}\` unset.`
+      );
 
       // Cloning nodes is faster than building them.
       // Construct a seed media element as a small optimization.
@@ -225,13 +215,14 @@ export class MediaPool {
       // this optimization automatically. However, it skips it due to a
       // comparison with the itervar below, so we have to roll it by hand.
       for (let i = count; i > 0; i--) {
-        const mediaEl = /** @type {!HTMLMediaElement} */
-            // Use seed element at end of set to prevent wasting it.
-            (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
+        // Use seed element at end of set to prevent wasting it.
+        const mediaEl =
+          /** @type {!HTMLMediaElement} */ (i == 1
+            ? mediaElSeed
+            : mediaElSeed.cloneNode(/* deep */ true));
         const sources = this.getDefaultSource_(type);
         mediaEl.setAttribute('pool-element', elId++);
-        this.enqueueMediaElementTask_(mediaEl,
-            new UpdateSourcesTask(sources));
+        this.enqueueMediaElementTask_(mediaEl, new UpdateSourcesTask(sources));
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
         // is returned.  If so, we should adjust the pool size/distribution
         // between media types.
@@ -239,7 +230,6 @@ export class MediaPool {
       }
     });
   }
-
 
   /**
    * @param {!MediaType} mediaType The media type whose source should be
@@ -258,12 +248,12 @@ export class MediaPool {
     }
   }
 
-
   /**
    * Comparison function that compares the distance of each element from the
    * current position in the document.
    * @param {!HTMLMediaElement} mediaA The first element to compare.
    * @param {!HTMLMediaElement} mediaB The second element to compare.
+   * @return {number}
    * @private
    */
   compareMediaDistances_(mediaA, mediaB) {
@@ -271,7 +261,6 @@ export class MediaPool {
     const distanceB = this.distanceFn_(mediaB);
     return distanceA < distanceB ? -1 : 1;
   }
-
 
   /**
    * @return {string} A unique ID.
@@ -300,7 +289,6 @@ export class MediaPool {
     }
   }
 
-
   /**
    * Reserves an element of the specified type by removing it from the set of
    * unallocated elements and returning it.
@@ -311,7 +299,6 @@ export class MediaPool {
   reserveUnallocatedMediaElement_(mediaType) {
     return this.unallocated[mediaType].pop();
   }
-
 
   /**
    * Retrieves the media element from the pool that matches the specified
@@ -335,7 +322,6 @@ export class MediaPool {
     return allocatedEls[index];
   }
 
-
   /**
    * Allocates the specified media element of the specified type.
    * @param {!MediaType} mediaType The type of media element to allocate.
@@ -352,7 +338,6 @@ export class MediaPool {
       unallocatedEls.splice(indexToRemove, 1);
     }
   }
-
 
   /**
    * Deallocates and returns the media element of the specified type furthest
@@ -375,8 +360,10 @@ export class MediaPool {
     // played is further than the farthest allocated element.
     if (opt_elToAllocate) {
       const furthestEl = allocatedEls[allocatedEls.length - 1];
-      if (!furthestEl ||
-          this.distanceFn_(furthestEl) < this.distanceFn_(opt_elToAllocate)) {
+      if (
+        !furthestEl ||
+        this.distanceFn_(furthestEl) < this.distanceFn_(opt_elToAllocate)
+      ) {
         return null;
       }
     }
@@ -386,7 +373,6 @@ export class MediaPool {
     this.unallocated[mediaType].push(poolMediaEl);
     return poolMediaEl;
   }
-
 
   /**
    * Forcibly deallocates a specific media element, regardless of its distance
@@ -398,17 +384,17 @@ export class MediaPool {
   forceDeallocateMediaElement_(poolMediaEl) {
     const mediaType = this.getMediaType_(poolMediaEl);
     const allocatedEls = this.allocated[mediaType];
-    const removeFromDom = isConnectedNode(poolMediaEl) ?
-      this.swapPoolMediaElementOutOfDom_(poolMediaEl) : Promise.resolve();
+    const removeFromDom = isConnectedNode(poolMediaEl)
+      ? this.swapPoolMediaElementOutOfDom_(poolMediaEl)
+      : Promise.resolve();
 
     return removeFromDom.then(() => {
       const index = allocatedEls.indexOf(poolMediaEl);
-      dev().assert(index >= 0, 'Cannot deallocate unallocated media element.');
+      devAssert(index >= 0, 'Cannot deallocate unallocated media element.');
       allocatedEls.splice(index, 1);
       this.unallocated[mediaType].push(poolMediaEl);
     });
   }
-
 
   /**
    * Evicts an element of the specified type, replaces it in the DOM with the
@@ -420,8 +406,10 @@ export class MediaPool {
    * @private
    */
   evictMediaElement_(mediaType, opt_elToAllocate) {
-    const poolMediaEl =
-        this.deallocateMediaElement_(mediaType, opt_elToAllocate);
+    const poolMediaEl = this.deallocateMediaElement_(
+      mediaType,
+      opt_elToAllocate
+    );
     if (!poolMediaEl) {
       return null;
     }
@@ -429,7 +417,6 @@ export class MediaPool {
     this.swapPoolMediaElementOutOfDom_(poolMediaEl);
     return poolMediaEl;
   }
-
 
   /**
    * @param {!MediaType} mediaType The media type to check.
@@ -441,7 +428,6 @@ export class MediaPool {
   isAllocatedMediaElement_(mediaType, el) {
     return this.allocated[mediaType].indexOf(el) >= 0;
   }
-
 
   /**
    * Replaces a media element that was originally in the DOM with a media
@@ -460,19 +446,24 @@ export class MediaPool {
     const ampMediaForDomEl = ampMediaElementFor(domMediaEl);
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
 
-    return this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapIntoDomTask(domMediaEl))
-        .then(() => {
-          this.maybeResetAmpMedia_(ampMediaForPoolEl);
-          this.maybeResetAmpMedia_(ampMediaForDomEl);
-          this.enqueueMediaElementTask_(poolMediaEl,
-              new UpdateSourcesTask(sources));
-          this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
-        }, () => {
-          this.forceDeallocateMediaElement_(poolMediaEl);
-        });
+    return this.enqueueMediaElementTask_(
+      poolMediaEl,
+      new SwapIntoDomTask(domMediaEl)
+    ).then(
+      () => {
+        this.maybeResetAmpMedia_(ampMediaForPoolEl);
+        this.maybeResetAmpMedia_(ampMediaForDomEl);
+        this.enqueueMediaElementTask_(
+          poolMediaEl,
+          new UpdateSourcesTask(sources)
+        );
+        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
+      },
+      () => {
+        this.forceDeallocateMediaElement_(poolMediaEl);
+      }
+    );
   }
-
 
   /**
    * @param {?Element} componentEl
@@ -495,7 +486,6 @@ export class MediaPool {
     });
   }
 
-
   /**
    * @param {!HTMLMediaElement} poolMediaEl The element whose source should be
    *     reset.
@@ -506,10 +496,11 @@ export class MediaPool {
     const mediaType = this.getMediaType_(poolMediaEl);
     const defaultSources = this.getDefaultSource_(mediaType);
 
-    return this.enqueueMediaElementTask_(poolMediaEl,
-        new UpdateSourcesTask(defaultSources));
+    return this.enqueueMediaElementTask_(
+      poolMediaEl,
+      new UpdateSourcesTask(defaultSources)
+    );
   }
-
 
   /**
    * Removes a pool media element from the DOM and replaces it with the video
@@ -523,14 +514,16 @@ export class MediaPool {
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
     const oldDomMediaElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
     const oldDomMediaEl = /** @type {!HTMLMediaElement} */ (dev().assertElement(
-        this.domMediaEls_[oldDomMediaElId],
-        'No media element to put back into DOM after eviction.'));
+      this.domMediaEls_[oldDomMediaElId],
+      'No media element to put back into DOM after eviction.'
+    ));
 
-    const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapOutOfDomTask(oldDomMediaEl))
-        .then(() => {
-          poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
-        });
+    const swapOutOfDom = this.enqueueMediaElementTask_(
+      poolMediaEl,
+      new SwapOutOfDomTask(oldDomMediaEl)
+    ).then(() => {
+      poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
+    });
 
     this.resetPoolMediaElementSource_(poolMediaEl);
     return swapOutOfDom;
@@ -563,7 +556,6 @@ export class MediaPool {
     });
   }
 
-
   /**
    * Preloads the content of the specified media element in the DOM and returns
    * a media element that can be used in its stead for playback.
@@ -579,19 +571,21 @@ export class MediaPool {
     }
 
     const mediaType = this.getMediaType_(domMediaEl);
-    const existingPoolMediaEl =
-        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+    const existingPoolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
     if (existingPoolMediaEl) {
       // The element being loaded already has an allocated media element.
       return Promise.resolve(existingPoolMediaEl);
     }
 
     const sources = this.sources_[domMediaEl.id];
-    dev().assert(sources instanceof Sources,
-        'Cannot play unregistered element.');
+    devAssert(sources instanceof Sources, 'Cannot play unregistered element.');
 
-    const poolMediaEl = this.reserveUnallocatedMediaElement_(mediaType) ||
-        this.evictMediaElement_(mediaType, domMediaEl);
+    const poolMediaEl =
+      this.reserveUnallocatedMediaElement_(mediaType) ||
+      this.evictMediaElement_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
       // If there is no space in the pool to allocate a new element, and no
@@ -601,10 +595,12 @@ export class MediaPool {
 
     this.allocateMediaElement_(mediaType, poolMediaEl);
 
-    return this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources)
-        .then(() => poolMediaEl);
+    return this.swapPoolMediaElementIntoDom_(
+      domMediaEl,
+      poolMediaEl,
+      sources
+    ).then(() => poolMediaEl);
   }
-
 
   /**
    * "Blesses" the specified media element for future playback without a user
@@ -621,7 +617,6 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(poolMediaEl, new BlessTask());
   }
-
 
   /**
    * Registers the specified element to be usable by the media pool.  Elements
@@ -659,7 +654,6 @@ export class MediaPool {
     return Promise.resolve();
   }
 
-
   /**
    * Preloads the content of the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element, found in the DOM,
@@ -674,7 +668,6 @@ export class MediaPool {
     return this.loadInternal_(domMediaEl).then();
   }
 
-
   /**
    * Plays the specified media element in the DOM by replacing it with a media
    * element from the pool and playing that.
@@ -683,16 +676,14 @@ export class MediaPool {
    *     element has been successfully played.
    */
   play(domMediaEl) {
-    return this.loadInternal_(domMediaEl)
-        .then(poolMediaEl => {
-          if (!poolMediaEl) {
-            return Promise.resolve();
-          }
+    return this.loadInternal_(domMediaEl).then(poolMediaEl => {
+      if (!poolMediaEl) {
+        return Promise.resolve();
+      }
 
-          return this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
-        });
+      return this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
+    });
   }
-
 
   /**
    * Pauses the specified media element in the DOM.
@@ -704,23 +695,26 @@ export class MediaPool {
    */
   pause(domMediaEl, rewindToBeginning = false) {
     const mediaType = this.getMediaType_(domMediaEl);
-    const poolMediaEl =
-        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+    const poolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
 
     if (!poolMediaEl) {
       return Promise.resolve();
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
-        .then(() => {
-          if (rewindToBeginning) {
-            this.enqueueMediaElementTask_(
-                /** @type {!HTMLMediaElement} */ (poolMediaEl),
-                new RewindTask());
-          }
-        });
+    return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask()).then(
+      () => {
+        if (rewindToBeginning) {
+          this.enqueueMediaElementTask_(
+            /** @type {!HTMLMediaElement} */ (poolMediaEl),
+            new RewindTask()
+          );
+        }
+      }
+    );
   }
-
 
   /**
    * Rewinds a specified media element in the DOM to 0.
@@ -730,8 +724,10 @@ export class MediaPool {
    */
   rewindToBeginning(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
-    const poolMediaEl =
-        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+    const poolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
 
     if (!poolMediaEl) {
       return Promise.resolve();
@@ -739,7 +735,6 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
   }
-
 
   /**
    * Mutes the specified media element in the DOM.
@@ -749,8 +744,10 @@ export class MediaPool {
    */
   mute(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
-    const poolMediaEl =
-        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+    const poolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
 
     if (!poolMediaEl) {
       return Promise.resolve();
@@ -758,7 +755,6 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
   }
-
 
   /**
    * Unmutes the specified media element in the DOM.
@@ -768,8 +764,10 @@ export class MediaPool {
    */
   unmute(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
-    const poolMediaEl =
-        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+    const poolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
 
     if (!poolMediaEl) {
       return Promise.resolve();
@@ -777,7 +775,6 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
   }
-
 
   /**
    * "Blesses" all media elements in the media pool for future playback without
@@ -797,14 +794,13 @@ export class MediaPool {
     });
 
     return Promise.all(blessPromises)
-        .then(() => {
-          this.blessed_ = true;
-        }).catch(reason => {
-          dev().expectedError('AMP-STORY', 'Blessing all media failed: ',
-              reason);
-        });
+      .then(() => {
+        this.blessed_ = true;
+      })
+      .catch(reason => {
+        dev().expectedError('AMP-STORY', 'Blessing all media failed: ', reason);
+      });
   }
-
 
   /**
    * @param {!HTMLMediaElement} mediaEl The element whose task queue should be
@@ -820,13 +816,14 @@ export class MediaPool {
     const task = queue[0];
 
     const executionFn = () => {
-      task.execute(mediaEl)
-          .catch(reason => dev().error('AMP-STORY', reason))
-          .then(() => {
-            // Run regardless of success or failure of task execution.
-            queue.shift();
-            this.executeNextMediaElementTask_(mediaEl);
-          });
+      task
+        .execute(mediaEl)
+        .catch(reason => dev().error('AMP-STORY', reason))
+        .then(() => {
+          // Run regardless of success or failure of task execution.
+          queue.shift();
+          this.executeNextMediaElementTask_(mediaEl);
+        });
     };
 
     if (task.requiresSynchronousExecution()) {
@@ -835,7 +832,6 @@ export class MediaPool {
       this.timer_.delay(executionFn.bind(this), 0);
     }
   }
-
 
   /**
    * @param {!HTMLMediaElement} mediaEl The element for which the specified task
@@ -862,7 +858,6 @@ export class MediaPool {
     return task.whenComplete();
   }
 
-
   /**
    * @param {!MediaPoolRoot} root
    * @return {!MediaPool}
@@ -879,14 +874,14 @@ export class MediaPool {
     const newId = String(nextInstanceId++);
     element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
     instances[newId] = new MediaPool(
-        toWin(root.getElement().ownerDocument.defaultView),
-        root.getMaxMediaElementCounts(),
-        element => root.getElementDistance(element));
+      toWin(root.getElement().ownerDocument.defaultView),
+      root.getMaxMediaElementCounts(),
+      element => root.getElementDistance(element)
+    );
 
     return instances[newId];
   }
 }
-
 
 /**
  * Defines a common interface for elements that contain a MediaPool.
@@ -910,7 +905,6 @@ export class MediaPoolRoot {
    *     from the MediaPool first).
    */
   getElementDistance(unusedElement) {}
-
 
   /**
    * @return {!Object<!MediaType, number>} The maximum amount of each media

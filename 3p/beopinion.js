@@ -45,6 +45,7 @@ function addCanonicalLinkTag(global) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @return {?Node}
  */
 function createContainer(global, data) {
   // add canonical link tag
@@ -100,7 +101,7 @@ function getBeOpinionAsyncInit(global, accountId) {
       },
       onHeightChange: function(newHeight) {
         const c = global.document.getElementById('c');
-        const boundingClientRect = c./*REVIEW*/getBoundingClientRect();
+        const boundingClientRect = c./*REVIEW*/ getBoundingClientRect();
         context.onResizeDenied(context.requestResize.bind(context));
         context.requestResize(boundingClientRect.width, newHeight);
       },

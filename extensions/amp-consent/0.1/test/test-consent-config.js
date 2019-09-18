@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {ConsentConfig, expandPolicyConfig} from '../consent-config';
 import {dict} from '../../../../src/utils/object';
@@ -29,17 +28,10 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     win = env.win;
     doc = env.win.document;
     element = doc.createElement('div');
-    toggleExperiment(win, 'multi-consent', true);
     toggleExperiment(win, 'amp-consent-v2', true);
     defaultConfig = dict({
-      'consents': {
-        'ABC': {
-          'checkConsentHref': 'https://response1',
-        },
-        'DEF': {
-          'checkConsentHref': 'https://response1',
-        },
-      },
+      'consentInstanceId': 'ABC',
+      'checkConsentHref': 'https://response1',
     });
   });
 
@@ -54,76 +46,129 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     it('read inline config', () => {
       appendConfigScriptElement(doc, element, defaultConfig);
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'ABC': {
+      expect(consentConfig.getConsentConfig()).to.deep.equal(
+        dict({
+          'consentInstanceId': 'ABC',
           'checkConsentHref': 'https://response1',
-        },
-        'DEF': {
-          'checkConsentHref': 'https://response1',
-        },
-      }));
-      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
-      expect(consentConfig.getPostPromptUI()).to.not.be.ok;
+        })
+      );
     });
 
     it('read cmp config', () => {
       appendConfigScriptElement(doc, element, dict({}));
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        '_ping_': {
-          'checkConsentHref': 'http://localhost:8000/get-consent-v1',
-          'promptUISrc':
-              'http://ads.localhost:8000/test/manual/diy-consent.html',
-        },
-      }));
-      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
-      expect(consentConfig.getPostPromptUI()).to.not.be.ok;
+      expect(consentConfig.getConsentConfig()).to.deep.equal(
+        dict({
+          'consentInstanceId': '_ping_',
+          'checkConsentHref': '/get-consent-v1',
+          'promptUISrc': '/test/manual/diy-consent.html',
+        })
+      );
+    });
+
+    it('support deprecated config format', () => {
+      appendConfigScriptElement(
+        doc,
+        element,
+        dict({
+          'consents': {
+            'ABC': {
+              'promptIfUnknownForGeoGroup': 'eea',
+              'checkConsentHref': '/href',
+              'clientConfig': {
+                'test': 'error',
+              },
+            },
+          },
+          'clientConfig': {
+            'test': 'ABC',
+          },
+          'uiConfig': {
+            'overlay': true,
+          },
+          'postPromptUI': 'test',
+        })
+      );
+      const consentConfig = new ConsentConfig(element);
+      expect(consentConfig.getConsentConfig()).to.deep.equal(
+        dict({
+          'consentInstanceId': 'ABC',
+          'promptIfUnknownForGeoGroup': 'eea',
+          'checkConsentHref': '/href',
+          'clientConfig': {
+            'test': 'ABC',
+          },
+          'uiConfig': {
+            'overlay': true,
+          },
+          'postPromptUI': 'test',
+        })
+      );
     });
 
     it('merge inline config w/ cmp config', () => {
-      appendConfigScriptElement(doc, element, dict({
-        'consents': {
-          '_ping_': {
-            'promptIfUnknownForGeoGroup': 'eea',
-            'checkConsentHref': '/override',
+      appendConfigScriptElement(
+        doc,
+        element,
+        dict({
+          'consentInstanceId': '_ping_',
+          'promptIfUnknownForGeoGroup': 'eea',
+          'checkConsentHref': '/override',
+          'clientConfig': {
+            'test': 'ABC',
           },
-        },
-        'policy': {
-          'default': {
-            'waitFor': {},
+          'uiConfig': {
+            'overlay': true,
           },
-        },
-        'postPromptUI': 'test',
-      }));
+          'policy': {
+            'default': {
+              'waitFor': {},
+            },
+          },
+          'postPromptUI': 'test',
+        })
+      );
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        '_ping_': {
+      expect(consentConfig.getConsentConfig()).to.deep.equal(
+        dict({
+          'consentInstanceId': '_ping_',
           'checkConsentHref': '/override',
-          'promptUISrc':
-              'http://ads.localhost:8000/test/manual/diy-consent.html',
+          'promptUISrc': '/test/manual/diy-consent.html',
           'promptIfUnknownForGeoGroup': 'eea',
-        },
-      }));
-      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({
-        'default': {
-          'waitFor': {},
-        },
-      }));
-      expect(consentConfig.getPostPromptUI()).to.equal('test');
+          'postPromptUI': 'test',
+          'clientConfig': {
+            'test': 'ABC',
+          },
+          'uiConfig': {
+            'overlay': true,
+          },
+          'policy': {
+            'default': {
+              'waitFor': {},
+            },
+          },
+        })
+      );
     });
 
     it('assert valid config', () => {
-      const scriptTypeError = 'amp-consent/consent-config: <script> child ' +
-          'must have type="application/json"';
-      const consentExistError = 'amp-consent/consent-config: ' +
-          'consents config is required';
+      const scriptTypeError =
+        'amp-consent/consent-config: <script> child ' +
+        'must have type="application/json"';
+      const consentExistError =
+        'amp-consent/consent-config: ' +
+        'consentInstanceId to store consent info is required';
       const multiScriptError =
-          'amp-consent/consent-config: Found 2 <script> children. Expected 1';
-      const invalidJsonError = 'amp-consent/consent-config: ' +
-          'Failed to parse <script> contents. Is it valid JSON?';
+        'amp-consent/consent-config: Found 2 <script> children. Expected 1';
+      const invalidJsonError =
+        'amp-consent/consent-config: ' +
+        'Failed to parse <script> contents. Is it valid JSON?';
       const invalidCMPError = 'amp-consent/consent-config: invalid CMP type';
+      const multiConsentError =
+        'amp-consent/consent-config: ' +
+        'only single consent instance is supported';
       // Check script type equals to application/json
 
       const scriptElement = doc.createElement('script');
@@ -131,68 +176,91 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       scriptElement.setAttribute('type', '');
       element.appendChild(scriptElement);
 
-      expect(() => new ConsentConfig(element).getConsentConfig())
-          .to.throw(scriptTypeError);
+      expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
+        scriptTypeError
+      );
 
       // Check consent config exists
       scriptElement.setAttribute('type', 'application/json');
       scriptElement.textContent = JSON.stringify({});
       allowConsoleError(() => {
-        expect(() => new ConsentConfig(element).getConsentConfig())
-            .to.throw(consentExistError);
+        expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
+          consentExistError
+        );
+      });
+
+      scriptElement.textContent = JSON.stringify({
+        'consents': {
+          'ABC': {},
+          'DEF': {},
+        },
+      });
+      allowConsoleError(() => {
+        expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
+          multiConsentError
+        );
       });
 
       // Check invalid CMP
+      scriptElement.textContent = JSON.stringify({
+        'clientConfig': 'test',
+      });
       element.setAttribute('type', 'not_exist');
       allowConsoleError(() => {
-        expect(() => new ConsentConfig(element).getConsentConfig())
-            .to.throw(invalidCMPError);
+        expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
+          invalidCMPError
+        );
       });
 
       scriptElement.textContent = '"abc": {"a",}';
-      expect(() => new ConsentConfig(element).getConsentConfig())
-          .to.throw(invalidJsonError);
+      expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
+        invalidJsonError
+      );
 
       // Check there is only one script object
       scriptElement.textContent = JSON.stringify(defaultConfig);
       const script2 = doc.createElement('script');
       element.appendChild(script2);
-      expect(() => new ConsentConfig(element).getConsentConfig())
-          .to.throw(multiScriptError);
+      expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
+        multiScriptError
+      );
     });
 
     it('remove not supported policy', () => {
       toggleExperiment(win, 'multi-consent', false);
-      appendConfigScriptElement(doc, element, dict({
-        'consents': {
-          'ABC': 'r1',
-        },
-        'policy': {
-          'ABC': undefined,
-        },
-      }));
+      appendConfigScriptElement(
+        doc,
+        element,
+        dict({
+          'consentInstanceId': 'ABC',
+          'policy': {
+            'ABC': undefined,
+          },
+        })
+      );
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getPolicyConfig()).to.deep.equal({});
+      expect(consentConfig.getConsentConfig()).to.deep.equal({
+        'consentInstanceId': 'ABC',
+        'policy': {},
+      });
     });
   });
 
   describe('expandPolicyConfig', () => {
     it('create default policy', () => {
-      const policy = expandPolicyConfig(dict({}), defaultConfig['consents']);
+      const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['default']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
-          'DEF': undefined,
         },
       });
     });
 
-    it('create predefined _till_responded policy', function* () {
-      const policy = expandPolicyConfig(dict({}), defaultConfig['consents']);
+    it('create predefined _till_responded policy', function*() {
+      const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_till_responded']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
-          'DEF': undefined,
         },
         'unblockOn': [
           CONSENT_POLICY_STATE.UNKNOWN,
@@ -203,22 +271,20 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('create predefined _till_accepted policy', function* () {
-      const policy = expandPolicyConfig(dict({}), defaultConfig['consents']);
+    it('create predefined _till_accepted policy', function*() {
+      const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_till_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
-          'DEF': undefined,
         },
       });
     });
 
-    it('create default _auto_reject policy', function* () {
-      const policy = expandPolicyConfig(dict({}), defaultConfig['consents']);
+    it('create default _auto_reject policy', function*() {
+      const policy = expandPolicyConfig(dict({}), 'ABC');
       expect(policy['_auto_reject']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
-          'DEF': undefined,
         },
         'timeout': {
           'seconds': 0,
@@ -233,23 +299,27 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('override default policy', function* () {
-      const policy = expandPolicyConfig(dict({
-        'default': {
-          'waitFor': {
-            'ABC': [],
+    it('override default policy', function*() {
+      const policy = expandPolicyConfig(
+        dict({
+          'default': {
+            'waitFor': {
+              'ABC': [],
+            },
+            'timeout': 2,
           },
-        },
-      }), defaultConfig['consents']);
+        }),
+        'ABC'
+      );
       expect(policy['default']).to.deep.equal({
         'waitFor': {
           'ABC': [],
         },
+        'timeout': 2,
       });
       expect(policy['_till_accepted']).to.deep.equal({
         'waitFor': {
           'ABC': undefined,
-          'DEF': undefined,
         },
       });
     });

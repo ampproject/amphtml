@@ -179,11 +179,6 @@ event.value</pre>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
-  <tr>
-    <td><code>toggleAutoplay</code></td>
-    <td>Will, on user tap or click, toggle the autoplay status for the carousel. You can either specify the status you want by specifying it: <code>carousel-id.toggleAutoplay(toggleOn=false)</code> or flip the status by not specifying a value.</td>
-    <td><pre>optional toggle status</pre></td>
-  </tr>
 </table>
 
 ### amp-lightbox
@@ -201,6 +196,20 @@ event.index</pre></td>
   <tr>
     <td><code>lightboxClose</code></td>
     <td>Fired when lightbox is fully closed.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-list
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
     <td>None</td>
   </tr>
 </table>
@@ -238,6 +247,20 @@ event.selectedOptions</pre></td>
   <tr>
     <td><code>sidebarClose</code></td>
     <td>Fired when sidebar is fully closed after transition has ended.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-state
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
     <td>None</td>
   </tr>
 </table>
@@ -312,11 +335,15 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>show</code></td>
-    <td>Shows the target element.</td>
+    <td>Shows the target element. If an
+    <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus"><code>autofocus</code> element</a> becomes visible as a
+    result, it gains focus.</td>
   </tr>
   <tr>
     <td><code>toggleVisibility</code></td>
-    <td>Toggles the visibility of the target element.</td>
+    <td>Toggles the visibility of the target element. If an
+    <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#autofocus"><code>autofocus</code> element</a> becomes visible as a
+    result, it gains focus.</td>
   </tr>
   <tr>
     <td><code>toggleClass(class=STRING, force=BOOLEAN)</code></td>
@@ -324,12 +351,13 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>
-    <td>Scrolls an element into view with a smooth animation. If defined,
-    <code>duration</code> specifies the length of the animation in milliseconds
-    (default is 500ms). <code>position</code> is optional and takes one of
-    <code>top</code>, <code>center</code> or <code>bottom</code> defining where
-    in the viewport the element will be at the end of the scroll (default is
-    <code>top</code>).</td>
+    <td>Scrolls an element into view with a smooth animation.<br>
+    <code>duration</code> is optional. Specifies the length of the animation in milliseconds. If unspecified, an amount relative to scroll difference
+    under or equal to 500 milliseconds is used.<br>
+    <code>position</code> is optional. One of <code>top</code>, <code>center</code>
+    or <code>bottom</code> (default <code>top</code>).
+    Specifies the position of the element relative to the viewport after
+    scrolling.</td>
   </tr>
   <tr>
     <td><code>focus</code></td>
@@ -393,6 +421,10 @@ event.response</pre></td>
   <tr>
     <td><code>goToSlide(index=INTEGER)</code></td>
     <td>Advances the carousel to a specified slide index.</td>
+  </tr>
+  <tr>
+    <td><code>toggleAutoplay(toggleOn=true|false)</code></td>
+    <td>Toggle the carousel's autoplay status. <code>toggleOn</code> is optional.</td>
   </tr>
 </table>
 
@@ -488,6 +520,18 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-state
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>refresh</code></td>
+    <td>Refetches data at the `src` attribute while ignoring browser cache.</td>
+  </tr>
+</table>
+
 ### amp-user-notification
 <table>
   <tr>
@@ -566,6 +610,10 @@ actions that apply to the whole document.
     <td>Navigates current window to given URL, to the optional specified target if given (currenly only supporting <code>_top</code> and <code>_blank </code>). The optional <code>opener</code> parameter can be specified when using a target of <code>_blank</code> to allow the newly opened page to access <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener<code></a>. Supports <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">standard URL substitutions</a>.</td>
   </tr>
   <tr>
+    <td><code>closeOrNavigateTo(url=STRING, target=STRING, opener=BOOLEAN)</code></td>
+    <td>Tries to close the window if allowed, otherwise it navigates similar to <code>navigateTo</code> Action. Useful for use-cases where a "Back" button may need to close the window if it were opened in a new window from previous page or navigate if it wasn't opened.</td>
+  </tr>
+  <tr>
     <td><code>goBack</code></td>
     <td>Navigates back in history.</td>
   </tr>
@@ -584,7 +632,7 @@ actions that apply to the whole document.
   <tr>
     <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>
     <td>
-      <p>Requires <a href="https://www.ampproject.org/docs/reference/components/amp-bind.html#updating-state-with-ampsetstate">amp-bind</a>.</p>
+      <p>Requires <a href="https://amp.dev/documentation/components/amp-bind.html#updating-state-with-ampsetstate">amp-bind</a>.</p>
       <p>Merges an object literal into the bindable state.</p>
       <p></p>
     </td>
@@ -592,7 +640,7 @@ actions that apply to the whole document.
   <tr>
     <td><code>pushState({foo: 'bar'})</code><sup>1</sup></td>
     <td>
-      <p>Requires <a href="https://www.ampproject.org/docs/reference/components/amp-bind.html#modifying-history-with-amppushstate">amp-bind</a>.</p>
+      <p>Requires <a href="https://amp.dev/documentation/components/amp-bind.html#modifying-history-with-amppushstate">amp-bind</a>.</p>
       <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
   </tr>
 </table>
@@ -601,11 +649,11 @@ actions that apply to the whole document.
 
 ### Target: amp-access
 
-The `amp-access` target is provided by the [amp-access](https://www.ampproject.org/docs/reference/components/amp-access.html) component.
+The `amp-access` target is provided by the [amp-access](https://amp.dev/documentation/components/amp-access.html) component.
 
 The `amp-access` target is special for these reasons:
 
 1.  You can't give an arbitrary ID to this target. The target is always `amp-access`.
-2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configuration](https://www.ampproject.org/docs/reference/components/amp-access#configuration).
+2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configuration](https://amp.dev/documentation/components/amp-access#configuration).
 
-See [details](https://www.ampproject.org/docs/reference/components/amp-access#login-link) about using the `amp-access` target.
+See [details](https://amp.dev/documentation/components/amp-access#login-link) about using the `amp-access` target.

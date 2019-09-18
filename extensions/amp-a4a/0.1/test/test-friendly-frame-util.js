@@ -23,7 +23,6 @@ const realWinConfig = {
 };
 
 describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
-
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;
@@ -36,7 +35,10 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
     });
     containerElement.renderStarted = () => {};
     containerElement.getLayoutBox = () => ({
-      left: 0, top: 0, width: 0, height: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
     });
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
@@ -51,7 +53,11 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
     };
 
     renderPromise = renderCreativeIntoFriendlyFrame(
-        adUrl, size, containerElement, creativeMetadata);
+      adUrl,
+      size,
+      containerElement,
+      creativeMetadata
+    );
   });
 
   afterEach(() => {
@@ -61,16 +67,18 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
   it('should append iframe child', () => {
     return renderPromise.then(iframe => {
       expect(iframe).to.be.ok;
-      expect(iframe.contentWindow.document.body.innerHTML)
-          .to.equal(minifiedCreative);
+      expect(iframe.contentWindow.document.body.innerHTML).to.equal(
+        minifiedCreative
+      );
     });
   });
 
   it('should set the correct srcdoc on the iframe', () => {
-    const srcdoc = '<base href="http://www.google.com">'
-        + '<meta http-equiv=Content-Security-Policy content="script-src '
-        + '\'none\';object-src \'none\';child-src \'none\'">'
-        + '<p>Hello, World!</p>';
+    const srcdoc =
+      '<base href="http://www.google.com">' +
+      '<meta http-equiv=Content-Security-Policy content="script-src ' +
+      "'none';object-src 'none';child-src 'none'\">" +
+      '<p>Hello, World!</p>';
     return renderPromise.then(iframe => {
       expect(iframe).to.be.ok;
       expect(iframe.getAttribute('srcdoc')).to.equal(srcdoc);
@@ -92,9 +100,9 @@ describes.realWin('FriendlyFrameUtil', realWinConfig, env => {
   it('should style body of iframe document to be visible', () => {
     return renderPromise.then(iframe => {
       expect(iframe).to.be.ok;
-      expect(iframe.contentWindow.document.body.style.visibility)
-          .to.equal('visible');
+      expect(iframe.contentWindow.document.body.style.visibility).to.equal(
+        'visible'
+      );
     });
   });
 });
-

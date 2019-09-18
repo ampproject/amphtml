@@ -1,0 +1,100 @@
+<!doctype html>
+<html ⚡>
+
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <title>My Story</title>
+  <meta name="description" content="Get started with amp-story">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link rel="canonical" href="grid-layer-templates.html">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    amp-story-page {
+      background: white;
+    }
+
+    h2 {
+      color: white;
+    }
+
+    .button {
+      font: bold 20px Arial;
+      text-decoration: none;
+      background-color: rgba(0, 240, 248, 0.63);
+      color: #333333;
+      padding: 2px 6px 2px 6px;
+      border-top: 1px solid #CCCCCC;
+      border-right: 1px solid #333333;
+      border-bottom: 1px solid #333333;
+      border-left: 1px solid #CCCCCC;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+    }
+  </style>
+</head>
+
+<body>
+  <amp-story standalone>
+
+    <amp-story-page id="fill-with-caption-example">
+      <amp-story-grid-layer template="fill">
+        <amp-img src="https://unsplash.it/800/400/" width="800" height="400"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="thirds">
+          <h2 grid-area="lower-third">
+            <span data-text-background-color="crimson">
+              Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+            </span>
+          </h2>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="cta-example">
+      <amp-story-grid-layer template="vertical">
+            <h1 data-text-background-color="plum">Full block background color</h1>
+            <h2><span data-text-background-color="mediumvioletred">Text only background color because I'm in a &lt;span&gt;</span></h5>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <a href="https://amp.dev" class="button" data-text-background-color="plum"> 
+          <p>
+            Call to action example
+          </p>
+          <p>
+            <span data-text-background-color="lavender">
+              Text text text
+            </span>
+          </p>
+        </a>
+      </amp-story-cta-layer>
+    </amp-story-page>
+
+    <amp-story-page id="page-attachment-example">
+      <amp-story-grid-layer template="fill">
+          <amp-img src="https://unsplash.it/800/400/" width="800" height="400"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical">
+          <h2>
+            <span data-text-background-color="crimson">
+              Page attachment example
+            </span>
+          </h2>
+      </amp-story-grid-layer>
+      <amp-story-page-attachment layout="nodisplay">
+        <h2>
+          <span data-text-background-color="midnightblue">
+            Cat ipsum dolor sit amet, sitting in a box for ask for petting
+          </span>
+        </h2>
+      </amp-story-page-attachment>
+    </amp-story-page>
+  </amp-story>
+</body>
+
+</html>

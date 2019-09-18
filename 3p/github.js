@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {user} from '../src/log';
+import {userAssert} from '../src/log';
 import {writeScript} from './3p';
 
 /**
@@ -26,11 +26,11 @@ import {writeScript} from './3p';
  *
  * @param {!Window} global
  * @param {string} scriptSource The source of the script, different for post and comment embeds.
- * @param {function(*)} cb
+ * @param {function()} cb
  */
 function getGistJs(global, scriptSource, cb) {
   writeScript(global, scriptSource, function() {
-    cb(global.gist);
+    cb();
   });
 }
 
@@ -39,13 +39,14 @@ function getGistJs(global, scriptSource, cb) {
  * @param {!Object} data
  */
 export function github(global, data) {
-  user().assert(
-      data.gistid,
-      'The data-gistid attribute is required for <amp-gist> %s',
-      data.element);
+  userAssert(
+    data.gistid,
+    'The data-gistid attribute is required for <amp-gist> %s',
+    data.element
+  );
 
   let gistUrl =
-      'https://gist.github.com/' + encodeURIComponent(data.gistid) + '.js';
+    'https://gist.github.com/' + encodeURIComponent(data.gistid) + '.js';
 
   if (data.file) {
     gistUrl += '?file=' + encodeURIComponent(data.file);
@@ -65,8 +66,8 @@ export function github(global, data) {
     }
 
     context.updateDimensions(
-        gistContainer./*OK*/offsetWidth,
-        gistContainer./*OK*/offsetHeight
+      gistContainer./*OK*/ offsetWidth,
+      gistContainer./*OK*/ offsetHeight
     );
   });
 }

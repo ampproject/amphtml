@@ -15,8 +15,7 @@
  */
 
 import {AmpViewerIntegration} from '../../amp-viewer-integration';
-import {WebviewViewerForTesting} from '../webview-viewer-for-testing.js';
-
+import {WebviewViewerForTesting} from '../../webview-viewer-for-testing.js';
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
@@ -27,8 +26,7 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
 
     beforeEach(() => {
       const loc = window.location;
-      const ampDocUrl =
-        `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
+      const ampDocUrl = `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
 
       viewerEl = document.createElement('div');
       document.body.appendChild(viewerEl);
@@ -41,12 +39,13 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
 
     it('should confirm the handshake', () => {
-      console/*OK*/.log('sending handshake response');
+      console /*OK*/
+        .log('sending handshake response');
       return viewer.waitForDocumentLoaded();
     });
 
     it('should handle unload correctly', () => {
-      viewer.waitForDocumentLoaded().then(() => {
+      return viewer.waitForDocumentLoaded().then(() => {
         const stub = sandbox.stub(viewer, 'handleUnload_');
         window.eventListeners.fire({type: 'unload'});
         expect(stub).to.be.calledOnce;
@@ -54,26 +53,31 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
     });
   });
 
-  describes.fakeWin('webview window init', {
-    amp: {
-      params: {
-        webview: '1',
-        origin: null,
+  describes.fakeWin(
+    'webview window init',
+    {
+      amp: {
+        params: {
+          webview: '1',
+          origin: null,
+        },
       },
     },
-  }, env => {
-    let integr;
+    env => {
+      let integr;
 
-    beforeEach(() => {
-      integr = new AmpViewerIntegration(env.win);
-    });
+      beforeEach(() => {
+        env.sandbox.useFakeTimers();
+        integr = new AmpViewerIntegration(env.win);
+      });
 
-    it('should set source and origin for webview', () => {
-      const stub =
-          sandbox.stub(integr, 'webviewPreHandshakePromise_').callsFake(
-              () => new Promise(() => {}));
-      integr.init();
-      expect(stub).to.be.calledWith(/* source */ null, /* origin */ '');
-    });
-  });
+      it('should set source and origin for webview', () => {
+        const stub = sandbox
+          .stub(integr, 'webviewPreHandshakePromise_')
+          .callsFake(() => new Promise(() => {}));
+        integr.init();
+        expect(stub).to.be.calledWith(/* source */ null, /* origin */ '');
+      });
+    }
+  );
 });

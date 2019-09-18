@@ -1,3 +1,10 @@
+---
+$category@: layout
+formats:
+  - websites
+teaser:
+  text: Displays an iframe.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,26 +21,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-iframe"></a> `amp-iframe`
+# amp-iframe
+
+Displays an iframe.
 
 [TOC]
 
 <table>
   <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays an iframe.</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-iframe/">Annotated code example for amp-iframe</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-iframe/">Annotated code example for amp-iframe</a></td>
   </tr>
 </table>
 
@@ -53,7 +58,7 @@ limitations under the License.
     sandbox="allow-scripts allow-same-origin"
     layout="responsive"
     frameborder="0"
-    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=iceland">
+    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland">
 </amp-iframe>
 ```
 
@@ -63,18 +68,18 @@ Renders as:
     sandbox="allow-scripts allow-same-origin"
     layout="responsive"
     frameborder="0"
-    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=iceland">
+    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland">
 </amp-iframe>
 
 {% call callout('Tip', type='success') %}
-To see more demos of the `amp-iframe`, visit [AMP By Example](https://ampbyexample.com/components/amp-iframe/).
+To see more demos of the `amp-iframe`, visit [AMP By Example](https://amp.dev/documentation/examples/components/amp-iframe/).
 {% endcall %}
 
 ## Usage of amp-iframe for advertising
 
 `amp-iframe` **must not** be used for the primary purpose of displaying advertising. It is OK to use `amp-iframe` for the purpose of displaying videos, where part of the videos are advertising. This AMP policy may be enforced by not rendering the respective iframes.
 
-Advertising use cases should use [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad) instead.
+Advertising use cases should use [`amp-ad`](https://amp.dev/documentation/components/amp-ad) instead.
 
 The reasons for this policy are that:
 
@@ -85,31 +90,34 @@ The reasons for this policy are that:
 
 ## Attributes
 
-##### src
-
-The `src` attribute behaves mainly like on a standard iframe with one exception: the `#amp=1` fragment is added to the URL to allow
-source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by `src` does
-not already have a fragment.
-
-#####  srcdoc, frameborder, allowfullscreen, allowpaymentrequest, allowtransparency, referrerpolicy
-
-These attributes should all behave like they do on standard iframes.
-
-If `frameborder` is not specified, by default, it will be set to `0`.
-
-##### sandbox
-
-Iframes created by `amp-iframe` always have the `sandbox` attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting `sandbox` values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
-
-If you are iframing a document that was not specifically created with sandboxing in mind, you will most likely need to add `allow-scripts allow-same-origin` to the `sandbox` attribute and you might need to allow additional capabilities.
-
-Note also, that the sandbox applies to all windows opened from a sandboxed iframe. This includes new windows created by a link with `target=_blank` (add `allow-popups` to allow this to happen). Adding `allow-popups-to-escape-sandbox` to the `sandbox` attribute, makes those new windows behave like non-sandboxed new windows. This is likely most of the time what you want and expect. Unfortunately, as of this writing, `allow-popups-to-escape-sandbox` is only supported by Chrome.
-
-See the [docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the sandbox attribute.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>src</strong></td>
+    <td>The <code>src</code> attribute behaves mainly like on a standard iframe with one exception: the <code>#amp=1</code> fragment is added to the URL to allow
+source documents to know that they are embedded in the AMP context. This fragment is only added if the URL specified by <code>src</code> does
+not already have a fragment.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>srcdoc, frameborder, allowfullscreen, allowpaymentrequest, allowtransparency, referrerpolicy</strong></td>
+    <td>These attributes should all behave like they do on standard iframes.
+<br>
+If <code>frameborder</code> is not specified, by default, it will be set to <code>0</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>sandbox</strong></td>
+    <td>Iframes created by <code>amp-iframe</code> always have the <code>sandbox</code> attribute defined on them. By default, the value is empty, which means that they are "maximum sandboxed". By setting <code>sandbox</code> values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. For example, setting <code>sandbox="allow-scripts"</code> allows the iframe to run JavaScript, or <code>sandbox="allow-scripts allow-same-origin"</code> allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
+<br><br>
+If you are iframing a document that was not specifically created with sandboxing in mind, you will most likely need to add <code>allow-scripts allow-same-origin</code> to the <code>sandbox</code> attribute and you might need to allow additional capabilities.
+<br><br>
+Note also, that the sandbox applies to all windows opened from a sandboxed iframe. This includes new windows created by a link with <code>target=_blank</code> (add <code>allow-popups</code> to allow this to happen). Adding <code>allow-popups-to-escape-sandbox</code> to the <code>sandbox</code> attribute, makes those new windows behave like non-sandboxed new windows. This is likely most of the time what you want and expect. Unfortunately, as of this writing, <code>allow-popups-to-escape-sandbox</code> is only supported by Chrome.
+<br><br>
+See the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox">docs on MDN</a> for further details on the sandbox attribute.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Iframe with placeholder
 
@@ -220,7 +228,7 @@ The intersection message would be sent by the parent to the iframe when the ifra
 
 ## Tracking/analytics iframes
 
-We strongly recommend using [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics) for analytics purposes, because it is significantly more robust, complete and an efficient solution which can be configured for a wide range of analytics vendors.
+We strongly recommend using [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics) for analytics purposes, because it is significantly more robust, complete and an efficient solution which can be configured for a wide range of analytics vendors.
 
 AMP only allows a single iframe that is used for analytics and tracking purposes, per page. To conserve resources, these iframes will be removed from the DOM 5 seconds after they loaded, which should be sufficient time to complete whatever work is needed to be done.
 

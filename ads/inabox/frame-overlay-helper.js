@@ -26,7 +26,6 @@ import {
 import {resetStyles, setImportantStyles} from '../../src/style';
 import {restrictedVsync, timer} from './util';
 
-
 const CENTER_TRANSITION_TIME_MS = 150;
 const CENTER_TRANSITION_END_WAIT_TIME_MS = 50;
 
@@ -38,37 +37,46 @@ const CENTER_TRANSITION_END_WAIT_TIME_MS = 50;
  * @private
  */
 const expandFrameImpl = function(win, iframe, onFinish) {
-  restrictedVsync(win, {
-    measure(state) {
-      state.viewportSize = {
-        width: win./*OK*/innerWidth,
-        height: win./*OK*/innerHeight,
-      };
-      state.rect = layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
+  restrictedVsync(
+    win,
+    {
+      measure(state) {
+        state.viewportSize = {
+          width: win./*OK*/ innerWidth,
+          height: win./*OK*/ innerHeight,
+        };
+        state.rect = layoutRectFromDomRect(
+          iframe./*OK*/ getBoundingClientRect()
+        );
+      },
+      mutate(state) {
+        const {width, height} = state.viewportSize;
+        const expandedRect = layoutRectLtwh(0, 0, width, height);
+
+        centerFrameUnderVsyncMutate(
+          iframe,
+          state.rect,
+          state.viewportSize,
+          CENTER_TRANSITION_TIME_MS
+        );
+
+        // To prevent double click during transition;
+        setImportantStyles(iframe, {'pointer-events': 'none'});
+
+        timer(() => {
+          restrictedVsync(win, {
+            mutate() {
+              resetStyles(iframe, ['pointer-events']);
+              expandFrameUnderVsyncMutate(iframe);
+              onFinish(state.rect, expandedRect);
+            },
+          });
+        }, CENTER_TRANSITION_TIME_MS + CENTER_TRANSITION_END_WAIT_TIME_MS);
+      },
     },
-    mutate(state) {
-      const {width, height} = state.viewportSize;
-      const expandedRect = layoutRectLtwh(0, 0, width, height);
-
-      centerFrameUnderVsyncMutate(iframe, state.rect, state.viewportSize,
-          CENTER_TRANSITION_TIME_MS);
-
-      // To prevent double click during transition;
-      setImportantStyles(iframe, {'pointer-events': 'none'});
-
-      timer(() => {
-        restrictedVsync(win, {
-          mutate() {
-            resetStyles(iframe, ['pointer-events']);
-            expandFrameUnderVsyncMutate(iframe);
-            onFinish(state.rect, expandedRect);
-          },
-        });
-      }, CENTER_TRANSITION_TIME_MS + CENTER_TRANSITION_END_WAIT_TIME_MS);
-    },
-  }, {});
+    {}
+  );
 };
-
 
 /**
  * Resets the frame from full overlay mode.
@@ -89,13 +97,13 @@ const collapseFrameImpl = function(win, iframe, onFinish, onMeasure) {
       restrictedVsync(win, {
         measure() {
           onMeasure(
-              layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect()));
+            layoutRectFromDomRect(iframe./*OK*/ getBoundingClientRect())
+          );
         },
       });
     },
   });
 };
-
 
 /**
  * Places the child frame in full overlay mode.
@@ -105,7 +113,6 @@ const collapseFrameImpl = function(win, iframe, onFinish, onMeasure) {
  */
 export let expandFrame = expandFrameImpl;
 
-
 /**
  * @param {!Function} implFn
  * @visibleForTesting
@@ -114,14 +121,12 @@ export function stubExpandFrameForTesting(implFn) {
   expandFrame = implFn;
 }
 
-
 /**
  * @visibleForTesting
  */
 export function resetExpandFrameForTesting() {
   expandFrame = expandFrameImpl;
 }
-
 
 /**
  * Places the child frame in full overlay mode.
@@ -132,7 +137,6 @@ export function resetExpandFrameForTesting() {
  */
 export let collapseFrame = collapseFrameImpl;
 
-
 /**
  * @param {!Function} implFn
  * @visibleForTesting
@@ -140,7 +144,6 @@ export let collapseFrame = collapseFrameImpl;
 export function stubCollapseFrameForTesting(implFn) {
   collapseFrame = implFn;
 }
-
 
 /**
  * @visibleForTesting

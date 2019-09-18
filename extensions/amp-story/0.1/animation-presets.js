@@ -47,7 +47,7 @@ const FULL_BLEED_ANIMATION_NAMES = [
  */
 const ANIMATION_CSS_CLASS_NAMES = {
   [FULL_BLEED_CATEGORY]:
-      'i-amphtml-story-grid-template-with-full-bleed-animation',
+    'i-amphtml-story-grid-template-with-full-bleed-animation',
 };
 
 /**
@@ -59,10 +59,14 @@ export function setStyleForPreset(el, presetName) {
   // For full bleed animations.
   if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
-    if (parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT])) {
-      parent.classList
-          .remove(GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]);
+    if (
+      parent.classList.contains(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+      )
+    ) {
+      parent.classList.remove(
+        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
+      );
     }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
@@ -157,8 +161,10 @@ export const PRESETS = {
   'drop': {
     duration: 1600,
     keyframes(dimensions) {
-      const maxBounceHeight =
-          Math.max(160, dimensions.targetY + dimensions.targetHeight);
+      const maxBounceHeight = Math.max(
+        160,
+        dimensions.targetY + dimensions.targetHeight
+      );
 
       return [
         {
@@ -283,17 +289,11 @@ export const PRESETS = {
   'zoom-in': {
     duration: 1000,
     easing: 'linear',
-    keyframes: [
-      {transform: 'scale(1,1)'},
-      {transform: 'scale(3,3)'},
-    ],
+    keyframes: [{transform: 'scale(1,1)'}, {transform: 'scale(3,3)'}],
   },
   'zoom-out': {
     duration: 1000,
     easing: 'linear',
-    keyframes: [
-      {transform: 'scale(3,3)'},
-      {transform: 'scale(1,1)'},
-    ],
+    keyframes: [{transform: 'scale(3,3)'}, {transform: 'scale(1,1)'}],
   },
 };

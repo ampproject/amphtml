@@ -28,15 +28,13 @@ import {
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
-
+const TAG = 'amp-vimeo';
 
 /**
  * Get the name of the method for a given getter or setter.
@@ -49,10 +47,10 @@ function getMethodName(prop, optType = null) {
   if (!optType) {
     return prop;
   }
-  return optType.toLowerCase() + prop.substr(0, 1).toUpperCase() +
-    prop.substr(1);
+  return (
+    optType.toLowerCase() + prop.substr(0, 1).toUpperCase() + prop.substr(1)
+  );
 }
-
 
 /**
  * Maps events coming from the Vimeo frame to events to be dispatched from the
@@ -70,10 +68,8 @@ const VIMEO_EVENTS = {
   'volumechange': null,
 };
 
-
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpVimeo extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -92,6 +88,7 @@ class AmpVimeo extends AMP.BaseElement {
 
     /**
      * @param {!Event} e
+     * @return {*} TODO(#23582): Specify return type
      * @private
      */
     this.boundOnMessage_ = e => this.onMessage_(e);
@@ -122,8 +119,7 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.isAutoplay_().then(isAutoplay =>
-      this.buildIframe_(isAutoplay));
+    return this.isAutoplay_().then(isAutoplay => this.buildIframe_(isAutoplay));
   }
 
   /**
@@ -133,10 +129,11 @@ class AmpVimeo extends AMP.BaseElement {
    */
   buildIframe_(isAutoplay) {
     const {element} = this;
-    const vidId = user().assert(
-        element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-vimeo> %s',
-        element);
+    const vidId = userAssert(
+      element.getAttribute('data-videoid'),
+      'The data-videoid attribute is required for <amp-vimeo> %s',
+      element
+    );
 
     // See
     // https://developer.vimeo.com/player/embedding
@@ -207,8 +204,13 @@ class AmpVimeo extends AMP.BaseElement {
    * @private
    */
   onMessage_(event) {
-    if (!originMatches(event, this.iframe_,
-        /^(https?:)?\/\/((player|www).)?vimeo.com(?=$|\/)/)) {
+    if (
+      !originMatches(
+        event,
+        this.iframe_,
+        /^(https?:)?\/\/((player|www)\.)?vimeo.com(?=$|\/)/
+      )
+    ) {
       return;
     }
 
@@ -360,14 +362,23 @@ class AmpVimeo extends AMP.BaseElement {
     if (!contentWindow) {
       return;
     }
-    contentWindow./*OK*/postMessage(JSON.stringify(dict({
-      'method': method,
-      'value': optParams || '',
-    })), '*');
+    contentWindow./*OK*/ postMessage(
+      JSON.stringify(
+        dict({
+          'method': method,
+          'value': optParams || '',
+        })
+      ),
+      '*'
+    );
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
   }
 }
 
-
-AMP.extension('amp-vimeo', '0.1', AMP => {
-  AMP.registerElement('amp-vimeo', AmpVimeo);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVimeo);
 });

@@ -1,3 +1,11 @@
+---
+$category@: layout
+formats:
+  - websites
+  - email
+teaser:
+  text: Provides a lightbox effect for a specified image.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,24 +22,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-image-lightbox"></a> `amp-image-lightbox`
+# amp-image-lightbox
+
+Provides a lightbox effect for a specified image.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides a lightbox effect for a specified image.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-image-lightbox/">amp-image-lightbox</a> sample.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-image-lightbox/">amp-image-lightbox</a> sample.</td>
   </tr>
 </table>
 
@@ -54,7 +60,7 @@ The following is a typical example using an `amp-image-lightbox`:
     width="200" height="100"></amp-img>
 ```
 
-When the user clicks the image, the `<amp-img>` activates the `<amp-image-lightbox>` via the [`on`](https://www.ampproject.org/docs/reference/spec#on) action, which references the ID of the `<amp-image-lightbox>` element (i.e., `lightbox1`). The `<amp-image-lightbox>` then displays the image in the center of the full-viewport lightbox. Note that the `amp-image-lightbox` element itself must be empty and must be set to `layout=nodisplay`.
+When the user clicks the image, the `<amp-img>` activates the `<amp-image-lightbox>` via the [`on`](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on) action, which references the ID of the `<amp-image-lightbox>` element (i.e., `lightbox1`). The `<amp-image-lightbox>` then displays the image in the center of the full-viewport lightbox. Note that the `amp-image-lightbox` element itself must be empty and must be set to `layout=nodisplay`.
 
 Among other things the `amp-image-lightbox` allows the following user manipulations: zooming, panning, showing/hiding of the description.
 Pressing the escape key on a keyboard closes the lightbox.
@@ -74,7 +80,7 @@ In this example, two images display: a cat and a frog.  When the user clicks eit
     src="/img/frog.jpg"
     layout="responsive"
     width="360" height="360"></amp-img>
-  
+
 <amp-img on="tap:lightbox1"
     role="button"
     tabindex="0"
@@ -118,20 +124,24 @@ Optionally, you can display captions at the bottom of the viewport for the image
 
 ## Attributes
 
-##### layout (required)
+<table>
+  <tr>
+    <td width="40%"><strong>layout (required)</strong></td>
+    <td>Must be set to <code>nodisplay</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>id (required)</strong></td>
+    <td>The ID for the lightbox element that's used as a target for the image's <code>on</code> action.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-close-button-aria-label (optional)</strong></td>
+    <td>An ARIA label that you can use for a close button.</td>
+  </tr>
+</table>
 
-Must be set to `nodisplay`.
-
-##### id (required)
-
-The ID for the lightbox element that's used as a target for the image's `on` action.
-
-##### data-close-button-aria-label (optional)
-
-An ARIA label that you can use for a close button.
 
 ```html
-<amp-image-lightbox id="image-lightbox1" layout="nodisplay" 
+<amp-image-lightbox id="image-lightbox1" layout="nodisplay"
     data-close-button-aria-label="Close"></amp-image-lightbox>
 ```
 
@@ -143,7 +153,7 @@ section.
 
 ## Actions
 
-The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
+The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 <table>
   <tr>

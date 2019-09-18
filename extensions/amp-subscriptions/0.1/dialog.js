@@ -18,7 +18,6 @@ import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {setImportantStyles, toggle} from '../../../src/style';
 
-
 export class Dialog {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -34,7 +33,7 @@ export class Dialog {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /**
-     * @private @const {!../../../src/service/viewport/viewport-impl.Viewport}
+     * @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface}
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
@@ -49,19 +48,24 @@ export class Dialog {
 
     const doc = this.ampdoc_.win.document;
 
+    /** @private @const {!Element} */
     this.wrapper_ = createElementWithAttributes(
-        doc,
-        'amp-subscriptions-dialog', /** @type {!JsonObject} */ ({
-          'role': 'dialog',
-        }));
+      doc,
+      'amp-subscriptions-dialog',
+      /** @type {!JsonObject} */ ({
+        'role': 'dialog',
+      })
+    );
     toggle(this.wrapper_, false);
 
     /** @private @const {!Element} */
     this.closeButton_ = createElementWithAttributes(
-        doc,
-        'button', /** @type {!JsonObject} */ ({
-          'class': 'i-amphtml-subs-dialog-close-button',
-        }));
+      doc,
+      'button',
+      /** @type {!JsonObject} */ ({
+        'class': 'i-amphtml-subs-dialog-close-button',
+      })
+    );
     this.showCloseAction(false);
     this.wrapper_.appendChild(this.closeButton_);
     this.closeButton_.addEventListener('click', () => {
@@ -113,7 +117,7 @@ export class Dialog {
    * @private
    */
   action_(action) {
-    return this.lastAction_ = this.lastAction_.then(action);
+    return (this.lastAction_ = this.lastAction_.then(action));
   }
 
   /**
@@ -134,29 +138,34 @@ export class Dialog {
       return Promise.resolve();
     }
     this.visible_ = true;
-    return this.vsync_.mutatePromise(() => {
-      toggle(this.wrapper_, true);
-      this.showCloseAction(/** @type {boolean} */ (showCloseAction));
-    }).then(() => {
-      // Animate to display.
-      return this.vsync_.mutatePromise(() => {
-        setImportantStyles(this.wrapper_, {
-          transform: 'translateY(0)',
+    return this.vsync_
+      .mutatePromise(() => {
+        toggle(this.wrapper_, true);
+        this.showCloseAction(/** @type {boolean} */ (showCloseAction));
+      })
+      .then(() => {
+        // Animate to display.
+        return this.vsync_
+          .mutatePromise(() => {
+            setImportantStyles(this.wrapper_, {
+              transform: 'translateY(0)',
+            });
+          })
+          .then(() => this.timer_.promise(300));
+      })
+      .then(() => {
+        // Update page layout.
+        let offsetHeight;
+        return this.vsync_.runPromise({
+          measure: () => {
+            offsetHeight = this.wrapper_./*OK*/ offsetHeight;
+          },
+          mutate: () => {
+            this.viewport_.updatePaddingBottom(offsetHeight);
+            this.viewport_.addToFixedLayer(this.wrapper_, true);
+          },
         });
-        return this.timer_.promise(300);
       });
-    }).then(() => {
-      // Update page layout.
-      let offsetHeight;
-      return this.vsync_.runPromise({
-        measure: () => {
-          offsetHeight = this.wrapper_./*OK*/offsetHeight;
-        },
-        mutate: () => {
-          this.viewport_.updatePaddingBottom(offsetHeight);
-        },
-      });
-    });
   }
 
   /**
@@ -168,18 +177,22 @@ export class Dialog {
     if (!this.visible_) {
       return Promise.resolve();
     }
-    return this.vsync_.mutatePromise(() => {
-      setImportantStyles(this.wrapper_, {
-        transform: 'translateY(100%)',
+    return this.vsync_
+      .mutatePromise(() => {
+        setImportantStyles(this.wrapper_, {
+          transform: 'translateY(100%)',
+        });
+      })
+      .then(() => {
+        return this.timer_.promise(300);
+      })
+      .then(() => {
+        return this.vsync_.mutatePromise(() => {
+          toggle(this.wrapper_, false);
+          this.viewport_.updatePaddingBottom(0);
+          this.visible_ = false;
+        });
       });
-      return this.timer_.promise(300);
-    }).then(() => {
-      return this.vsync_.mutatePromise(() => {
-        toggle(this.wrapper_, false);
-        this.viewport_.updatePaddingBottom(0);
-        this.visible_ = false;
-      });
-    });
   }
 
   /**

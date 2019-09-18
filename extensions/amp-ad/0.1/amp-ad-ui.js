@@ -2,7 +2,7 @@
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use baseInstance file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
+import {isNewLoaderExperimentEnabled} from '../../../src/loader';
+import {isProxyOrigin} from '../../../src/url';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-ad';
 
 export class AmpAdUIHandler {
-
   /**
    * @param {!AMP.BaseElement} baseInstance
    */
@@ -36,8 +41,11 @@ export class AmpAdUIHandler {
     if (this.element_.hasAttribute('data-ad-container-id')) {
       const id = this.element_.getAttribute('data-ad-container-id');
       const container = this.doc_.getElementById(id);
-      if (container && container.tagName == 'AMP-LAYOUT' &&
-          container.contains(this.element_)) {
+      if (
+        container &&
+        container.tagName == 'AMP-LAYOUT' &&
+        container.contains(this.element_)
+      ) {
         // Parent <amp-layout> component with reference id can serve as the
         // ad container
         this.containerElement_ = container;
@@ -55,8 +63,13 @@ export class AmpAdUIHandler {
   /**
    * Create a default placeholder if not provided.
    * Should be called in baseElement createPlaceholderCallback.
+   * @return {?Element}
    */
   createPlaceholder() {
+    if (isNewLoaderExperimentEnabled(this.element_)) {
+      return null;
+    }
+
     return this.addDefaultUiComponent_('placeholder');
   }
 
@@ -65,19 +78,45 @@ export class AmpAdUIHandler {
    * Order: try collapse -> apply provided fallback -> apply default fallback
    */
   applyNoContentUI() {
-    if (getAdContainer(this.element_) == 'AMP-STICKY-AD') {
+    if (getAdContainer(this.element_) === 'AMP-STICKY-AD') {
       // Special case: force collapse sticky-ad if no content.
-      this.baseInstance_./*OK*/collapse();
+      this.baseInstance_./*OK*/ collapse();
+      return;
+    }
+
+    if (getAdContainer(this.element_) === 'AMP-FX-FLYING-CARPET') {
+      /**
+       * Special case: Force collapse the ad if it is the,
+       * only and direct child of a flying carpet.
+       * Also, this will not handle
+       * the amp-layout case for now, as it could be
+       * inefficient. And we have not seen an amp-layout
+       * used with flying carpet and ads yet.
+       */
+
+      const flyingCarpetElements = ancestorElementsByTag(
+        this.element_,
+        'amp-fx-flying-carpet'
+      );
+      const flyingCarpetElement = flyingCarpetElements[0];
+
+      flyingCarpetElement.getImpl().then(implementation => {
+        const children = implementation.getChildren();
+
+        if (children.length === 1 && children[0] === this.element_) {
+          this.baseInstance_./*OK*/ collapse();
+        }
+      });
       return;
     }
 
     let attemptCollapsePromise;
     if (this.containerElement_) {
       // Collapse the container element if there's one
-      attemptCollapsePromise = this.element_.getResources().attemptCollapse(
-          this.containerElement_);
-      attemptCollapsePromise.then(() => {
-      });
+      attemptCollapsePromise = this.element_
+        .getResources()
+        .attemptCollapse(this.containerElement_);
+      attemptCollapsePromise.then(() => {});
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();
     }
@@ -129,21 +168,26 @@ export class AmpAdUIHandler {
    * @param {number|string|undefined} width
    * @param {number} iframeHeight
    * @param {number} iframeWidth
+   * @param {!MessageEvent} event
    * @return {!Promise<!Object>}
    */
-  updateSize(height, width, iframeHeight, iframeWidth) {
+  updateSize(height, width, iframeHeight, iframeWidth, event) {
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
     height = parseInt(height, 10);
     if (!isNaN(height)) {
-      newHeight = Math.max(this.element_./*OK*/offsetHeight +
-          height - iframeHeight, height);
+      newHeight = Math.max(
+        this.element_./*OK*/ offsetHeight + height - iframeHeight,
+        height
+      );
     }
     width = parseInt(width, 10);
     if (!isNaN(width)) {
-      newWidth = Math.max(this.element_./*OK*/offsetWidth +
-          width - iframeWidth, width);
+      newWidth = Math.max(
+        this.element_./*OK*/ offsetWidth + width - iframeWidth,
+        width
+      );
     }
 
     /** @type {!Object<boolean, number|undefined, number|undefined>} */
@@ -162,13 +206,36 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    return this.baseInstance_.attemptChangeSize(
-        newHeight, newWidth).then(() => {
-      return resizeInfo;
-    }, () => {
-      resizeInfo.success = false;
-      return resizeInfo;
-    });
+    // TODO(#23926): cleanup once user activation for resize is
+    // implemented.
+    const isProxy = isProxyOrigin(this.baseInstance_.win.location);
+    if (isProxy) {
+      user().expectedError(TAG, 'RESIZE_REQUEST');
+    }
+    return this.baseInstance_
+      .attemptChangeSize(newHeight, newWidth, event)
+      .then(
+        () => {
+          return resizeInfo;
+        },
+        () => {
+          if (isProxy) {
+            // TODO(#23926): cleanup once user activation for resize is
+            // implemented.
+            user().expectedError(TAG, 'RESIZE_REJECT');
+            const activated =
+              event &&
+              event.userActivation &&
+              event.userActivation.hasBeenActive;
+            if (activated) {
+              // Report false negatives.
+              user().expectedError(TAG, 'RESIZE_REJECT_ACTIVE');
+            }
+          }
+          resizeInfo.success = false;
+          return resizeInfo;
+        }
+      );
   }
 }
 

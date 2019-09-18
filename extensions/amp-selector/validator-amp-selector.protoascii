@@ -15,7 +15,7 @@
 #
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-selector"
@@ -41,7 +41,7 @@ tags: {
 tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SELECTOR"
   requires_extension: "amp-selector"
@@ -70,7 +70,7 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
     tag_spec_name: "AMP-SELECTOR child"
   }
   attr_lists: "extended-amp-global"
-  attr_lists: "input-name-attr"
+  attr_lists: "name-attr"
   amp_layout {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -94,7 +94,7 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
 tags: {
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
   attrs: {
@@ -109,12 +109,12 @@ tags: {
     name: "selected"
     value: ""
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
+  spec_url: "https://amp.dev/documentation/components/amp-selector"
 }
 tags: {
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"
   reference_points: {

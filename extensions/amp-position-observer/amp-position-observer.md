@@ -1,3 +1,11 @@
+---
+$category@: layout
+formats:
+  - websites
+  - ads
+teaser:
+  text: Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,28 +22,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-position-observer"></a> `amp-position-observer`
+# amp-position-observer
+
+Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with
+other AMP components.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with
-    other AMP components.</code>
-    </td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
       <ul>
-        <li><a href="https://ampbyexample.com/visual_effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
+        <li><a href="https://amp.dev/documentation/examples/visual-effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
         <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with samples</a></li>
       </ul>
     </td>
@@ -48,7 +53,7 @@ limitations under the License.
 
 The `amp-position-observer` component monitors the position of an
 element within the viewport as a user scrolls, and dispatches
-`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation).
+`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation).
 
 {% call callout('Note', type='note') %}
 The `amp-position-observer` component is only useful when used with other components and does not do anything on its own.
@@ -56,7 +61,7 @@ The `amp-position-observer` component is only useful when used with other compon
 
 ## What can I do with amp-position-observer?
 
-Currently, [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
+Currently, [amp-animation](https://amp.dev/documentation/components/amp-animation)
 and several video players in AMP are the only components that allow low-trust events
 to trigger their actions (e.g., starting an animation, seeking to a position
 within the animation, pausing a video, etc.).
@@ -190,34 +195,45 @@ as clock becomes less than 50% visible.
 
 ## Attributes
 
-##### target (optional)
-Specifies the ID of the element to observe. If **not specified**, the **parent** of `<amp-position-observer>` is used as the target.
-
-##### intersection-ratios (optional)
-
-Defines how much of the target should be visible in the viewport before `<amp-position-observer>` triggers any of its events. The value is a number between 0 and 1 (default is 0).
-
-You can specify different ratios for top vs. bottom by providing two values (`<top> <bottom>`).
-
-- `intersection-ratios="0"` means `enter` is triggered as soon as a single pixel of the target comes into viewport and `exit` is triggered as soon as the very last pixel of the target goes out of the viewport.
-- `intersection-ratios="0.5"` means `enter` is triggered as soon as 50% of the target comes into viewport and `exit` is triggered as soon as less than 50% of the target is in the viewport.
-- `intersection-ratios="1"` means `enter` is triggered when target is fully visible and `exit` is triggered as soon as a single pixel goes out of the viewport.
-- `intersection-ratios="0 1"` makes the conditions different depending on whether the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
-
-
-##### viewport-margins (optional)
-
-A `px` or `vh` value which can be used to shrink the area of the viewport used for visibility calculations. A number without a unit will be assumed `px`. Defaults to 0.
-
-You can specify different values for top vs. bottom by providing two values (`<top> <bottom>`).
-
-- `viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
-- `viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom. Effectively only considering the middle 50% of the viewport.
-- `viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
-
-##### once (optional)
-
-Only triggers the `enter` and `exit` events once. The `scroll` event will also only perform one iteration.
+<table>
+  <tr>
+    <td width="40%"><strong>target (optional)</strong></td>
+    <td>Specifies the ID of the element to observe. If <strong>not specified</strong>, the <strong>parent</strong> of <code>&lt;amp-position-observer&gt;</code> is used as the target.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>intersection-ratios (optional)</strong></td>
+    <td><p>Defines how much of the target should be visible in the viewport before <code>&lt;amp-position-observer&gt;</code> triggers any of its events. The value is a number between 0 and 1 (default is 0).</p>
+<p>You can specify different ratios for top vs. bottom by providing two values (<code>&lt;top&gt; &lt;bottom&gt;</code>).<br></p>
+<ul>
+  <li>`intersection-ratios="0"` means `enter` is triggered as soon as a single pixel of the target comes into viewport and `exit` is triggered as soon as the very last pixel of the target goes out of the viewport.
+  </li>
+  <li>`intersection-ratios="0.5"` means `enter` is triggered as soon as 50% of the target comes into viewport and `exit` is triggered as soon as less than 50% of the target is in the viewport.
+  </li>
+  <li>`intersection-ratios="1"` means `enter` is triggered when target is fully visible and `exit` is triggered as soon as a single pixel goes out of the viewport.
+  </li>
+  <li>`intersection-ratios="0 1"` makes the conditions different depending on whether the target is entering/exiting from top (0 will be used) or bottom (1 will be used).
+  </li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>viewport-margins (optional)</strong></td>
+    <td><p>A <code>px</code> or <code>vh</code> value which can be used to shrink the area of the viewport used for visibility calculations. A number without a unit will be assumed <code>px</code>. Defaults to 0.</p>
+<p>You can specify different values for top vs. bottom by providing two values (<code>&lt;top&gt; &lt;bottom&gt;</code>).<br></p>
+<ul>
+  <li>`viewport-margins="100px"` means shrink the viewport by 100px from the top and 100px from the bottom.
+  </li>
+  <li>`viewport-margins="25vh"` means shrink the viewport by 25% from the top and 25% from the bottom. Effectively only considering the middle 50% of the viewport.
+  </li>
+  <li>`viewport-margins="100px 10vh"` means shrink the viewport by 100px from the top and 10% from the bottom.
+  </li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>once (optional)</strong></td>
+    <td>Only triggers the <code>enter</code> and <code>exit</code> events once. The <code>scroll</code> event will also only perform one iteration.
+<p>The presence of the attribute represents the <code>true</code> value and the absence of the attribute represents the <code>false</code> value. If the attribute is present, its value must be an empty string, <code>once</code> or not assigned.</p></td>
+  </tr>
+</table>
 
 ## Validation
 

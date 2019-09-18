@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-
 import {Poller} from '../poller';
 import {Services} from '../../../../src/services';
-
 
 describe('Poller', () => {
   let sandbox;
@@ -68,16 +66,18 @@ describe('Poller', () => {
     poller.start();
     clock.tick(4000);
     expect(workStub).to.be.calledOnce;
-    return poller.lastWorkPromise_.then(() => {
-      clock.tick(2000);
-      expect(workStub).to.be.calledOnce;
-      clock.tick(2000);
-      expect(workStub).to.have.callCount(2);
-      poller.stop();
-    }).then(() => {
-      clock.tick(8000);
-      expect(workStub).to.have.callCount(2);
-    });
+    return poller.lastWorkPromise_
+      .then(() => {
+        clock.tick(2000);
+        expect(workStub).to.be.calledOnce;
+        clock.tick(2000);
+        expect(workStub).to.have.callCount(2);
+        poller.stop();
+      })
+      .then(() => {
+        clock.tick(8000);
+        expect(workStub).to.have.callCount(2);
+      });
   });
 
   it('should execute work w/o initial delay', () => {
@@ -85,20 +85,22 @@ describe('Poller', () => {
     expect(workStub).to.have.not.been.called;
     poller.start(true);
     expect(workStub).to.be.calledOnce;
-    return poller.lastWorkPromise_.then(() => {
-      expect(workStub).to.be.calledOnce;
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(2);
-      return poller.lastWorkPromise_.then(() => {
-        expect(workStub).to.have.callCount(2);
+    return poller.lastWorkPromise_
+      .then(() => {
+        expect(workStub).to.be.calledOnce;
         clock.tick(4000);
+        expect(workStub).to.have.callCount(2);
+        return poller.lastWorkPromise_.then(() => {
+          expect(workStub).to.have.callCount(2);
+          clock.tick(4000);
+          expect(workStub).to.have.callCount(3);
+          poller.stop();
+        });
+      })
+      .then(() => {
+        clock.tick(8000);
         expect(workStub).to.have.callCount(3);
-        poller.stop();
       });
-    }).then(() => {
-      clock.tick(8000);
-      expect(workStub).to.have.callCount(3);
-    });
   });
 
   it('should not double any work if already started', () => {
@@ -108,15 +110,17 @@ describe('Poller', () => {
     clock.tick(4000);
     expect(workStub).to.be.calledOnce;
     poller.start();
-    return poller.lastWorkPromise_.then(() => {
-      expect(workStub).to.be.calledOnce;
-      poller.start();
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(2);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      expect(workStub).to.have.callCount(2);
-    });
+    return poller.lastWorkPromise_
+      .then(() => {
+        expect(workStub).to.be.calledOnce;
+        poller.start();
+        clock.tick(4000);
+        expect(workStub).to.have.callCount(2);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        expect(workStub).to.have.callCount(2);
+      });
   });
 
   it('should run backoff and recover on retriable error', () => {
@@ -134,43 +138,50 @@ describe('Poller', () => {
     clock.tick(4000);
     expect(workStub).to.be.calledOnce;
 
-    return poller.lastWorkPromise_.then(() => {
-      expect(workStub).to.be.calledOnce;
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(2);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      expect(workStub).to.have.callCount(2);
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(3);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      expect(workStub).to.have.callCount(3);
-      clock.tick(700);
-      expect(workStub).to.have.callCount(4);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      expect(workStub).to.have.callCount(4);
-      clock.tick(700);
-      expect(workStub).to.have.callCount(4);
-      clock.tick(700);
-      expect(workStub).to.have.callCount(5);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      expect(workStub).to.have.callCount(5);
-      clock.tick(2800);
-      expect(workStub).to.have.callCount(6);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      expect(workStub).to.have.callCount(6);
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(7);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      expect(workStub).to.have.callCount(7);
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(8);
-    });
+    return poller.lastWorkPromise_
+      .then(() => {
+        expect(workStub).to.be.calledOnce;
+        clock.tick(4000);
+        expect(workStub).to.have.callCount(2);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        expect(workStub).to.have.callCount(2);
+        clock.tick(4000);
+        expect(workStub).to.have.callCount(3);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        expect(workStub).to.have.callCount(3);
+        clock.tick(700);
+        expect(workStub).to.have.callCount(4);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        expect(workStub).to.have.callCount(4);
+        clock.tick(700);
+        expect(workStub).to.have.callCount(4);
+        clock.tick(700);
+        expect(workStub).to.have.callCount(5);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        expect(workStub).to.have.callCount(5);
+        clock.tick(2800);
+        expect(workStub).to.have.callCount(6);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        expect(workStub).to.have.callCount(6);
+        clock.tick(4000);
+        expect(workStub).to.have.callCount(7);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        expect(workStub).to.have.callCount(7);
+        clock.tick(4000);
+        expect(workStub).to.have.callCount(8);
+      });
   });
 
   it('should stop work if stopped', () => {
@@ -179,20 +190,23 @@ describe('Poller', () => {
     poller.start();
     clock.tick(4000);
     expect(workStub).to.be.calledOnce;
-    return poller.lastWorkPromise_.then(() => {
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(2);
-      poller.stop();
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(2);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      clock.tick(4000);
-      expect(workStub).to.have.callCount(2);
-      return poller.lastWorkPromise_;
-    });
+    return poller.lastWorkPromise_
+      .then(() => {
+        clock.tick(4000);
+        expect(workStub).to.have.callCount(2);
+        poller.stop();
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        clock.tick(4000);
+        expect(workStub).to.have.callCount(2);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        clock.tick(4000);
+        expect(workStub).to.have.callCount(2);
+        return poller.lastWorkPromise_;
+      });
   });
 
   it('should shutoff backoff if stopped', () => {
@@ -203,30 +217,35 @@ describe('Poller', () => {
     poller.start();
     clock.tick(4000);
     expect(workStub).to.be.calledOnce;
-    return poller.lastWorkPromise_.then(() => {
-      expect(workStub).to.be.calledOnce;
-      clock.tick(700);
-      expect(workStub).to.have.callCount(2);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      expect(workStub).to.have.callCount(2);
-      clock.tick(1400);
-      expect(workStub).to.have.callCount(3);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      poller.stop();
-      clock.tick(2800);
-      expect(workStub).to.have.callCount(3);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      clock.tick(5600);
-      expect(workStub).to.have.callCount(3);
-      return poller.lastWorkPromise_;
-    }).then(() => {
-      clock.tick(11200);
-      expect(workStub).to.have.callCount(3);
-      return poller.lastWorkPromise_;
-    });
+    return poller.lastWorkPromise_
+      .then(() => {
+        expect(workStub).to.be.calledOnce;
+        clock.tick(700);
+        expect(workStub).to.have.callCount(2);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        expect(workStub).to.have.callCount(2);
+        clock.tick(1400);
+        expect(workStub).to.have.callCount(3);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        poller.stop();
+        clock.tick(2800);
+        expect(workStub).to.have.callCount(3);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        clock.tick(5600);
+        expect(workStub).to.have.callCount(3);
+        return poller.lastWorkPromise_;
+      })
+      .then(() => {
+        clock.tick(11200);
+        expect(workStub).to.have.callCount(3);
+        return poller.lastWorkPromise_;
+      });
   });
 
   it('should clear timeout ids if stopped', () => {

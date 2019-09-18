@@ -53,6 +53,14 @@ const INVALID_NAMES = [
 ];
 
 /**
+ * A MutationObserverInit dictionary to track subtree modifications.
+ */
+const TRACK_SUBTREE = {
+  'childList': true,
+  'subtree': true,
+};
+
+/**
  * Asserts that the custom element name conforms to the spec.
  *
  * @param {!Function} SyntaxError
@@ -77,7 +85,8 @@ function hasCustomElements(win) {
     customElements &&
     customElements.define &&
     customElements.get &&
-    customElements.whenDefined);
+    customElements.whenDefined
+  );
 }
 
 /**
@@ -89,6 +98,17 @@ function hasCustomElements(win) {
 function isPatched(win) {
   const tag = win.HTMLElement.toString();
   return tag.indexOf('[native code]') === -1;
+}
+
+/**
+ * Throws the error outside the current event loop.
+ *
+ * @param {!Error} error
+ */
+function rethrowAsync(error) {
+  new /*OK*/ Promise(() => {
+    throw error;
+  });
 }
 
 /**
@@ -173,7 +193,7 @@ class CustomElementRegistry {
     }
 
     let resolve;
-    const promise = new /*OK*/Promise(res => resolve = res);
+    const promise = new /*OK*/ Promise(res => (resolve = res));
     pending[name] = {
       promise,
       resolve,
@@ -238,6 +258,14 @@ class Registry {
      * @private {MutationObserver}
      */
     this.mutationObserver_ = null;
+
+    /**
+     * All the observed DOM trees, including shadow trees. This is cleared out
+     * when the mutation observer is created.
+     *
+     * @private @const {!Array<!Node>}
+     */
+    this.observed_ = [win.document];
   }
 
   /**
@@ -305,8 +333,7 @@ class Registry {
 
     assertValidName(SyntaxError, name);
 
-    if (this.getByName(name) ||
-        this.getByConstructor(ctor)) {
+    if (this.getByName(name) || this.getByConstructor(ctor)) {
       throw new Error(`duplicate definition "${name}"`);
     }
 
@@ -361,7 +388,7 @@ class Registry {
       return;
     }
 
-    this.upgradeSelf_(/** @type {!Element} */(node), def);
+    this.upgradeSelf_(/** @type {!Element} */ (node), def);
   }
 
   /**
@@ -396,11 +423,16 @@ class Registry {
     // run on the node. The node itself is already constructed, so the return
     // value is just the node.
     this.current_ = node;
-    const el = new ctor();
+    try {
+      const el = new ctor();
 
-    if (el !== node) {
-      throw new this.win_.Error(
-          'Constructor illegally returned a different instance.');
+      if (el !== node) {
+        throw new this.win_.Error(
+          'Constructor illegally returned a different instance.'
+        );
+      }
+    } catch (e) {
+      rethrowAsync(e);
     }
   }
 
@@ -416,13 +448,17 @@ class Registry {
     if (!def) {
       return;
     }
-    this.upgradeSelf_(/** @type {!Element} */(node), def);
+    this.upgradeSelf_(/** @type {!Element} */ (node), def);
     // TODO(jridgewell): It may be appropriate to adoptCallback, if the node
     // used to be in another doc.
     // TODO(jridgewell): I should be calling the definitions connectedCallback
     // with node as the context.
     if (node.connectedCallback) {
-      node.connectedCallback();
+      try {
+        node.connectedCallback();
+      } catch (e) {
+        rethrowAsync(e);
+      }
     }
   }
 
@@ -435,7 +471,11 @@ class Registry {
     // TODO(jridgewell): I should be calling the definitions connectedCallback
     // with node as the context.
     if (node.disconnectedCallback) {
-      node.disconnectedCallback();
+      try {
+        node.disconnectedCallback();
+      } catch (e) {
+        rethrowAsync(e);
+      }
     }
   }
 
@@ -463,17 +503,32 @@ class Registry {
     this.query_ = name;
 
     // The first registered name starts the mutation observer.
-    this.mutationObserver_ = new this.win_.MutationObserver(records => {
+    const mo = new this.win_.MutationObserver(records => {
       if (records) {
         this.handleRecords_(records);
       }
     });
-    this.mutationObserver_.observe(this.doc_, {
-      childList: true,
-      subtree: true,
+    this.mutationObserver_ = mo;
+
+    this.observed_.forEach(tree => {
+      mo.observe(tree, TRACK_SUBTREE);
     });
+    this.observed_.length = 0;
 
     installPatches(this.win_, this);
+  }
+
+  /**
+   * Adds the shadow tree to be observed by the polyfill.
+   *
+   * @param {!Node} tree
+   */
+  observe(tree) {
+    if (this.mutationObserver_) {
+      this.mutationObserver_.observe(tree, TRACK_SUBTREE);
+    } else {
+      this.observed_.push(tree);
+    }
   }
 
   /**
@@ -530,7 +585,7 @@ class Registry {
  * @param {!Registry} registry
  */
 function installPatches(win, registry) {
-  const {Document, Element, Node, Object} = win;
+  const {Document, Element, Node, Object, document} = win;
   const docProto = Document.prototype;
   const elProto = Element.prototype;
   const nodeProto = Node.prototype;
@@ -558,7 +613,14 @@ function installPatches(win, registry) {
   // TODO(jridgewell): Can fire adoptedCallback for cross doc imports.
   docProto.importNode = function() {
     const imported = importNode.apply(this, arguments);
-    if (imported) {
+
+    // Only upgrade elements if the document that the nodes were imported into
+    // is _this_ document. If it's another document, then that document's
+    // element registry must do the upgrade.
+    // Eg, when importing from a <template>, the cloned document fragment
+    // should be upgraded. But importing from document into the <template>
+    // should not.
+    if (imported && this === document) {
       registry.upgradeSelf(imported);
       registry.upgrade(imported);
     }
@@ -596,8 +658,14 @@ function installPatches(win, registry) {
   // Patch cloneNode to immediately upgrade custom elements.
   nodeProto.cloneNode = function() {
     const cloned = cloneNode.apply(this, arguments);
-    registry.upgradeSelf(cloned);
-    registry.upgrade(cloned);
+
+    // Only upgrade elements if the cloned node belonged to _this_ document.
+    // Eg, when cloning a <template>'s content, the cloned document fragment
+    // does not belong to this document.
+    if (cloned.ownerDocument === document) {
+      registry.upgradeSelf(cloned);
+      registry.upgrade(cloned);
+    }
     return cloned;
   };
 
@@ -618,7 +686,7 @@ function installPatches(win, registry) {
  * @param {!Window} win
  */
 function polyfill(win) {
-  const {HTMLElement, Object, document} = win;
+  const {Element, HTMLElement, Object, document} = win;
   const {createElement} = document;
 
   const registry = new Registry(win);
@@ -634,10 +702,45 @@ function polyfill(win) {
     value: customElements,
   });
 
+  // Have to patch shadow methods now, since there's no way to find shadow trees
+  // later.
+  const elProto = Element.prototype;
+  const {attachShadow, createShadowRoot} = elProto;
+  if (attachShadow) {
+    /**
+     * @param {!{mode: string}} unused
+     * @return {!ShadowRoot}
+     */
+    elProto.attachShadow = function(unused) {
+      const shadow = attachShadow.apply(this, arguments);
+      registry.observe(shadow);
+      return shadow;
+    };
+    // Necessary for Shadow AMP
+    elProto.attachShadow.toString = function() {
+      return attachShadow.toString();
+    };
+  }
+  if (createShadowRoot) {
+    /**
+     * @return {!ShadowRoot}
+     */
+    elProto.createShadowRoot = function() {
+      const shadow = createShadowRoot.apply(this, arguments);
+      registry.observe(shadow);
+      return shadow;
+    };
+    // Necessary for Shadow AMP
+    elProto.createShadowRoot.toString = function() {
+      return createShadowRoot.toString();
+    };
+  }
+
   /**
    * You can't use the real HTMLElement constructor, because you can't subclass
    * it without using native classes. So, mock its approximation using
    * createElement.
+   * @return {*} TODO(#23582): Specify return type
    */
   function HTMLElementPolyfill() {
     const {constructor} = this;
@@ -693,6 +796,7 @@ function polyfill(win) {
 function wrapHTMLElement(win) {
   const {HTMLElement, Reflect, Object} = win;
   /**
+   * @return {!Element}
    */
   function HTMLElementWrapper() {
     const ctor = /** @type {function(...?):?|undefined} */ (this.constructor);
@@ -729,29 +833,32 @@ function subClass(Object, superClass, subClass) {
 }
 
 /**
- * Polyfills Custom Elements v1 API. This has 4 modes:
+ * Polyfills Custom Elements v1 API. This has 5 modes:
  *
  * 1. Custom elements v1 already supported, using native classes
  * 2. Custom elements v1 already supported, using transpiled classes
  * 3. Custom elements v1 not supported, using native classes
  * 4. Custom elements v1 not supported, using transpiled classes
+ * 5. No sample class constructor provided
  *
  * In mode 1, nothing is done. In mode 2, a minimal polyfill is used to support
- * extending the HTMLElement base class. In mode 3 and 4, a full polyfill is
+ * extending the HTMLElement base class. In mode 3, 4, and 5 a full polyfill is
  * done.
  *
  * @param {!Window} win
- * @param {!Function} ctor
+ * @param {!Function=} opt_ctor
  */
-export function install(win, ctor) {
-  if (isPatched(win)) {
+export function install(win, opt_ctor) {
+  // Don't install in no-DOM environments e.g. worker.
+  const shouldInstall = win.document;
+  if (!shouldInstall || isPatched(win)) {
     return;
   }
 
   let install = true;
   let installWrapper = false;
 
-  if (hasCustomElements(win)) {
+  if (opt_ctor && hasCustomElements(win)) {
     // If ctor is constructable without new, it's a function. That means it was
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.
@@ -759,14 +866,13 @@ export function install(win, ctor) {
       const {Object, Reflect} = win;
 
       // "Construct" ctor using ES5 idioms
-      const instance = Object.create(ctor.prototype);
-      ctor.call(instance);
+      const instance = Object.create(opt_ctor.prototype);
+      opt_ctor.call(instance);
 
       // If that succeeded, we're in a transpiled environment
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
       installWrapper = !!(Reflect && Reflect.construct);
     } catch (e) {
-
       // The ctor threw when we constructed is via ES5, so it's a real class.
       // We're ok to not install the polyfill.
       install = false;

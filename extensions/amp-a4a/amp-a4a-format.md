@@ -25,24 +25,13 @@ performant ads in AMP pages.  To ensure that AMPHTML ad documents ("AMP
 creatives") can be rendered quickly and smoothly in the browser and do
 not degrade user experience, AMP creatives must obey a set of validation
 rules.  Similar in spirit to the
-[AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html), AMPHTML ads have
+[AMP format rules](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml), AMPHTML ads have
 access to a limited set of allowed tags, capabilities, and extensions.
-
-**Table of Contents**
-
-* [AMPHTML ad format rules](#amphtml-ad-format-rules)
-    * [Boilerplate](#boilerplate)
-    * [CSS](#css)
-        * [CSS animations and transitions](#css-animations-and-transitions)
-            * [Selectors](#selectors)
-            * [Transitionable and animatable properties](#transitionable-and-animatable-properties)
-    * [Allowed AMP extensions and builtins](#allowed-amp-extensions-and-builtins)
-    * [HTML tags](#html-tags)
 
 ## AMPHTML ad format rules
 
 Unless otherwise specified below, the creative must obey all rules given by the
-[AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html),
+[AMP format rules](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml.html),
 included here by reference.  For example, the AMPHTML ad [Boilerplate](#boilerplate) deviates from the AMP standard boilerplate.
 
 In addition, creatives must obey the following rules:
@@ -247,28 +236,26 @@ transition: background-color 2s;
 The following are _allowed_ AMP extension modules and AMP built-in tags in an
 AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohibited.
 
-* [amp-accordion](https://www.ampproject.org/docs/reference/components/amp-accordion)
-* [amp-ad-exit](https://www.ampproject.org/docs/reference/components/amp-ad-exit)
-* [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics)
-* [amp-anim](https://www.ampproject.org/docs/reference/components/amp-anim)
-* [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
-* [amp-audio](https://www.ampproject.org/docs/reference/components/amp-audio)
-* [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind)
-* [amp-carousel](https://www.ampproject.org/docs/reference/components/amp-carousel)
-* [amp-fit-text](https://www.ampproject.org/docs/reference/components/amp-fit-text)
-* [amp-font](https://www.ampproject.org/docs/reference/components/amp-font)
-* [amp-form](https://www.ampproject.org/docs/reference/components/amp-form)
-* [amp-img](https://www.ampproject.org/docs/reference/components/amp-img)
-* [amp-layout](https://www.ampproject.org/docs/reference/components/amp-layout)
-* [amp-lightbox](https://www.ampproject.org/docs/reference/components/amp-lightbox)
-* [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache)
-* [amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)
-* [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
-* [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share)
-* [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
-
-
+* [amp-accordion](https://amp.dev/documentation/components/amp-accordion)
+* [amp-ad-exit](https://amp.dev/documentation/components/amp-ad-exit)
+* [amp-analytics](https://amp.dev/documentation/components/amp-analytics)
+* [amp-anim](https://amp.dev/documentation/components/amp-anim)
+* [amp-animation](https://amp.dev/documentation/components/amp-animation)
+* [amp-audio](https://amp.dev/documentation/components/amp-audio)
+* [amp-bind](https://amp.dev/documentation/components/amp-bind)
+* [amp-carousel](https://amp.dev/documentation/components/amp-carousel)
+* [amp-fit-text](https://amp.dev/documentation/components/amp-fit-text)
+* [amp-font](https://amp.dev/documentation/components/amp-font)
+* [amp-form](https://amp.dev/documentation/components/amp-form)
+* [amp-img](https://amp.dev/documentation/components/amp-img)
+* [amp-layout](https://amp.dev/documentation/components/amp-layout)
+* [amp-lightbox](https://amp.dev/documentation/components/amp-lightbox)
+* amp-mraid, on an experimental basis.  If you're considering using this, please open an issue at [wg-ads](https://github.com/ampproject/wg-ads/issues/new).
+* [amp-mustache](https://amp.dev/documentation/components/amp-mustache)
+* [amp-pixel](https://amp.dev/documentation/components/amp-pixel)
+* [amp-position-observer](https://amp.dev/documentation/components/amp-position-observer)
+* [amp-social-share](https://amp.dev/documentation/components/amp-social-share)
+* [amp-video](https://amp.dev/documentation/components/amp-video)
 
 Most of the omissions are either for performance or to make AMPHTML ads
 simpler to analyze.

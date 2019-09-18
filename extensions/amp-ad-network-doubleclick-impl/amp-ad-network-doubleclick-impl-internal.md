@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# DoubleClick
+# Google Ad Manager
 
 ### <a name="amp-ad-network-doubleclick-impl"></a> `amp-ad-network-doubleclick-impl`
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>DoubleClick implementation of the AMP Ad tag.  Click <a href="/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
+    <td>Google Ad Manager implementation of the AMP Ad tag.  Click <a href="/ads/google/a4a/docs/Network-Impl-Guide.md">here</a>
     for Fast Fetch details, and <a href="/extensions/amp-a4a/amp-a4a-format.md">here</a>
     for AMPHTML ad format details. This tag should
     not be directly referenced by pages and instead is dynamically loaded
@@ -83,12 +83,12 @@ limitations under the License.
   <tr>
     <td><a href="sra.md">SRA: Single Request Architecture</a></td>
     <td>When enabled, all eligible slots on the page will be serviced by a single ad request.</td>
-    <td>Beta</td>
+    <td>Launched</td>
   </tr>
   <tr>
     <td><a href="single-page-ad.md">Single Page Ads</a></td>
     <td>Ads that appear within an AMP story, the new ad format for visual storytelling.</td>
-    <td>Beta</td>
+    <td>Launched</td>
   <tr>
     <td><a href="amp-consent.md">AMP Consent Integration</a></td>
     <td>Integration with AMP Consent extension.</td>
@@ -97,7 +97,7 @@ limitations under the License.
 </table>
 
 #### Examples
-Example - DoubleClick Ad
+Example - Google Ad Manager Ad
 ```html
 <amp-ad width=728 height=90
     type="doubleclick"

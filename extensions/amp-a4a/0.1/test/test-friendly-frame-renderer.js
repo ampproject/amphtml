@@ -23,7 +23,6 @@ const realWinConfig = {
 };
 
 describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
-
   const minifiedCreative = '<p>Hello, World!</p>';
 
   let containerElement;
@@ -52,7 +51,10 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
     });
     containerElement.renderStarted = () => {};
     containerElement.getLayoutBox = () => ({
-      left: 0, top: 0, width: 0, height: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
     });
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
@@ -69,16 +71,18 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
     return renderPromise.then(() => {
       const iframe = containerElement.querySelector('iframe');
       expect(iframe).to.be.ok;
-      expect(iframe.contentWindow.document.body.innerHTML)
-          .to.equal(minifiedCreative);
+      expect(iframe.contentWindow.document.body.innerHTML).to.equal(
+        minifiedCreative
+      );
     });
   });
 
   it('should set the correct srcdoc on the iframe', () => {
-    const srcdoc = '<base href="http://www.google.com">'
-        + '<meta http-equiv=Content-Security-Policy content="script-src '
-        + '\'none\';object-src \'none\';child-src \'none\'">'
-        + '<p>Hello, World!</p>';
+    const srcdoc =
+      '<base href="http://www.google.com">' +
+      '<meta http-equiv=Content-Security-Policy content="script-src ' +
+      "'none';object-src 'none';child-src 'none'\">" +
+      '<p>Hello, World!</p>';
     return renderPromise.then(() => {
       const iframe = containerElement.querySelector('iframe');
       expect(iframe).to.be.ok;
@@ -103,8 +107,9 @@ describes.realWin('FriendlyFrameRenderer', realWinConfig, env => {
     return renderPromise.then(() => {
       const iframe = containerElement.querySelector('iframe');
       expect(iframe).to.be.ok;
-      expect(iframe.contentWindow.document.body.style.visibility)
-          .to.equal('visible');
+      expect(iframe.contentWindow.document.body.style.visibility).to.equal(
+        'visible'
+      );
     });
   });
 });

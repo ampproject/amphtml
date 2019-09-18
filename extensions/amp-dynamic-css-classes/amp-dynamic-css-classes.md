@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Adds several dynamic CSS class names onto the HTML element.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,7 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-dynamic-css-classes"></a> AMP Dynamic CSS Classes
+# AMP Dynamic CSS Classes
 
 <table>
   <tr>
@@ -27,7 +34,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-dynamic-css-classes/">amp-dynamic-css-classes</a> example.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-dynamic-css-classes/">amp-dynamic-css-classes</a> example.</td>
   </tr>
 </table>
 

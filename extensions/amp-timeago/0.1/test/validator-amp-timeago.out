@@ -42,12 +42,12 @@ FAIL
 |      <!-- invalid, datetime is not ISO date format -->
 |      <amp-timeago layout="fixed" width="160" height="20" datetime="2017/04/11">Saturday 11 April 2017 00.37</amp-timeago>
 >>     ^~~~~~~~~
-amp-timeago/0.1/test/validator-amp-timeago.html:42:4 The attribute 'datetime' in tag 'amp-timeago' is set to the invalid value '2017/04/11'. (see https://www.ampproject.org/docs/reference/components/amp-timeago) [DISALLOWED_HTML]
+amp-timeago/0.1/test/validator-amp-timeago.html:42:4 The attribute 'datetime' in tag 'amp-timeago' is set to the invalid value '2017/04/11'. (see https://amp.dev/documentation/components/amp-timeago) [DISALLOWED_HTML]
 |
 |      <!-- invalid, needs datetime -->
 |      <amp-timeago layout="fixed" width="160" height="20">Saturday 11 April 2017 00.37</amp-timeago>
 >>     ^~~~~~~~~
-amp-timeago/0.1/test/validator-amp-timeago.html:45:4 The mandatory attribute 'datetime' is missing in tag 'amp-timeago'. (see https://www.ampproject.org/docs/reference/components/amp-timeago) [AMP_TAG_PROBLEM]
+amp-timeago/0.1/test/validator-amp-timeago.html:45:4 The mandatory attribute 'datetime' is missing in tag 'amp-timeago'. (see https://amp.dev/documentation/components/amp-timeago) [AMP_TAG_PROBLEM]
 |
 |    </body>
 |  </html>

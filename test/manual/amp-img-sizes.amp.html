@@ -1,0 +1,66 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    .large {
+      width: 600px;
+    }
+
+    .small {
+      width: 200px;
+    }
+
+    #img2 {
+      width: 50vw;
+    }
+
+    #img3 {
+      width: 50vw;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+</head>
+<body>
+
+    <amp-state id="data">
+        <script type="application/json">
+          "small"
+        </script>
+      </amp-state>
+
+
+  <h1>Srcset and Sizes</h1>
+
+  <h2>Change size on bind</h2>
+  <button on="tap:AMP.setState({data: data == 'large' ? 'small' : 'large'})">Toggle Image Size</button>
+
+  <div id="container" class="small" [class]="data">
+    <amp-img srcset="/examples/img/hero@1x.jpg 641w,
+                    /examples/img/hero@2x.jpg 1282w"
+      width=641 height=480 layout=responsive noloading>
+    </amp-img>
+  </div>
+
+  <h2>Change size on viewport change</h2>
+  <h3>Layout RESPONSIVE</h3>
+  <amp-img id="img2" srcset="/examples/img/hero@1x.jpg 641w,
+    /examples/img/hero@2x.jpg 1282w"
+  width=641 height=480 layout=responsive noloading>
+  </amp-img>
+
+  <h2>Layout INTRINSIC</h2>
+  <amp-img id="img3" srcset="https://picsum.photos/400/400 400w,
+    https://picsum.photos/800/800 800w"
+    width=641 height=480 layout=intrinsic noloading>
+  </amp-img>
+
+</body>
+</html>

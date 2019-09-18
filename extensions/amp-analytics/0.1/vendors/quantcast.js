@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-export const QUANTCAST_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const QUANTCAST_CONFIG = jsonLiteral({
   'vars': {
     'labels': '',
   },
   'requests': {
     'host': 'https://pixel.quantserve.com/pixel',
-    'pageview': '${host};r=${random};a=${pcode};labels=${labels};' +
+    'pageview':
+      '${host};r=${random};a=${pcode};labels=${labels};' +
       'fpan=;fpa=${clientId(__qca)};ns=0;ce=1;cm=;je=0;' +
       'sr=${screenWidth}x${screenHeight}x${screenColorDepth};' +
       'enc=n;et=${timestamp};ref=${documentReferrer};url=${canonicalUrl}',
@@ -37,3 +40,5 @@ export const QUANTCAST_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {QUANTCAST_CONFIG};

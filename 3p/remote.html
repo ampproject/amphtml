@@ -7,7 +7,7 @@
 var v = location.search.substr(1);
 if (!(/^\d+(-canary)?$/.test(v))) return;
 var u = 'https://3p.ampproject.net/'+encodeURIComponent(v)+'/f.js';
-document.write('<script'+' src="'+encodeURI(u)+'"><'+'/script>');
+document.write('<script'+' src="'+encodeURI(u)+'"><'+'/script>'); // lgtm [js/eval-like-call]
 })();
 </script>
 </head>

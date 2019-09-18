@@ -28,21 +28,23 @@ PASS
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
 |  </head>
 |
 |  <body>
-|    <!-- VALID BINDINGS -->
-|    <p [text]="foo.bar" [class]="foo.bar">p</p>
-|    <a [href]="foo.bar">a</a>
-|    <amp-img src="http://pictures.com/image.jpg" alt="pic" width=10 height=10
-|        [src]="foo.bar" [alt]="foo.bar" [width]="foo.bar" [height]="foo.bar">
-|    </amp-img>
-|    <button [disabled]="foo.bar" [type]="foo.bar" [value]="foo.bar">
-|      button
-|    </button>
+|    <!-- VALID BINDINGS ON NON-AMP ELEMENTS -->
+|    <p [text]="foo" [class]="foo">p</p>
+|    <textarea [defaultText]="foo" [text]="foo">textarea</textarea>
+|    <a [href]="foo">a</a>
+|    <amp-img src="http://example.com/image.jpg" width=10 height=10 [src]="foo" [alt]="foo" [width]="foo" [height]="foo"></amp-img>
+|    <button [disabled]="foo" [type]="foo" [value]="foo">button</button>
+|    <form method="post" action-xhr="https://example.com/subscribe">
+|      <input type="password" [type]="foo">
+|    </form>
 |
-|    <amp-bind-macro id="macroWithArgs" arguments="arg1, arg2" expression="arg1 + arg2"></amp-bind-macro>
-|    <amp-bind-macro id="macroWithoutArgs" expression="foo.bar + 'baz'"></amp-bind-macro>
+|    <!-- AMP-BIND-MACRO -->
+|    <amp-bind-macro id="macroWithArgs" arguments="x, y" expression="x + y"></amp-bind-macro>
+|    <amp-bind-macro id="macroWithoutArgs" expression="foo + bar"></amp-bind-macro>
 |
 |    <!-- AMP-STATE -->
 |    <!-- amp-state with child script -->

@@ -24,7 +24,6 @@ import {
 import {createElementWithAttributes} from '../../../../src/dom';
 import {tripleliftIsA4AEnabled} from '../triplelift-a4a-config';
 
-
 describes.realWin('triplelift-a4a-config', {amp: false}, env => {
   let doc;
   let win;
@@ -68,49 +67,56 @@ describes.realWin('triplelift-a4a-config', {amp: false}, env => {
   });
 });
 
-
-describes.realWin('amp-ad-network-triplelift-impl', {
-  amp: {
-    extensions: ['amp-ad-network-triplelift-impl'],
+describes.realWin(
+  'amp-ad-network-triplelift-impl',
+  {
+    amp: {
+      extensions: ['amp-ad-network-triplelift-impl'],
+    },
   },
-}, env => {
-  let win, doc;
-  let tripleliftImpl;
-  let tripleliftImplElem;
+  env => {
+    let win, doc;
+    let tripleliftImpl;
+    let tripleliftImplElem;
 
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-    tripleliftImplElem = doc.createElement('amp-ad');
-    tripleliftImplElem.setAttribute('type', 'triplelift');
-    tripleliftImplElem.setAttribute('src',
-        'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed');
-    tripleliftImplElem.setAttribute('data-use-a4a','true');
-    sandbox.stub(
-        AmpAdNetworkTripleliftImpl.prototype,
-        'getSigningServiceNames').callsFake(
-        () => {
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      tripleliftImplElem = doc.createElement('amp-ad');
+      tripleliftImplElem.setAttribute('type', 'triplelift');
+      tripleliftImplElem.setAttribute(
+        'src',
+        'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed'
+      );
+      tripleliftImplElem.setAttribute('data-use-a4a', 'true');
+      sandbox
+        .stub(AmpAdNetworkTripleliftImpl.prototype, 'getSigningServiceNames')
+        .callsFake(() => {
           return ['cloudflare'];
         });
-    tripleliftImpl = new AmpAdNetworkTripleliftImpl(tripleliftImplElem);
-  });
-
-  describe('#isValidElement', () => {
-    it('should be valid', () => {
-      expect(tripleliftImpl.isValidElement()).to.be.true;
-    });
-    it('should NOT be valid (impl tag name)', () => {
-      tripleliftImplElem = doc.createElement('amp-ad-network-triplelift-impl');
-      tripleliftImplElem.setAttribute('type', 'triplelift');
       tripleliftImpl = new AmpAdNetworkTripleliftImpl(tripleliftImplElem);
-      expect(tripleliftImpl.isValidElement()).to.be.false;
     });
-  });
 
-  describe('#getAdUrl', () => {
-    it('should be valid', () => {
-      expect(tripleliftImpl.getAdUrl()).to.equal(
-          'https://amp.3lift.com/_a4a/amp/auction?inv_code=ampforadstest_main_feed');
+    describe('#isValidElement', () => {
+      it('should be valid', () => {
+        expect(tripleliftImpl.isValidElement()).to.be.true;
+      });
+      it('should NOT be valid (impl tag name)', () => {
+        tripleliftImplElem = doc.createElement(
+          'amp-ad-network-triplelift-impl'
+        );
+        tripleliftImplElem.setAttribute('type', 'triplelift');
+        tripleliftImpl = new AmpAdNetworkTripleliftImpl(tripleliftImplElem);
+        expect(tripleliftImpl.isValidElement()).to.be.false;
+      });
     });
-  });
-});
+
+    describe('#getAdUrl', () => {
+      it('should be valid', () => {
+        expect(tripleliftImpl.getAdUrl()).to.equal(
+          'https://amp.3lift.com/_a4a/amp/auction?inv_code=ampforadstest_main_feed'
+        );
+      });
+    });
+  }
+);

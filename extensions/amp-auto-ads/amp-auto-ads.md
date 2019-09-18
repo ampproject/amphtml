@@ -1,3 +1,10 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+teaser:
+  text: Dynamically injects ads into an AMP page by using a remotely-served configuration file.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-auto-ads"></a> `amp-auto-ads`
+# amp-auto-ads
+
+Dynamically injects ads into an AMP page by using a remotely-served configuration file.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Dynamically injects ads into an AMP page by
-      using a remotely-served configuration file.
-    </td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Experimental</td>
@@ -39,7 +42,7 @@ limitations under the License.
   <tr>
     <td class="col-fourty">
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
           Supported Layouts
         </a>
       </strong>
@@ -77,18 +80,20 @@ should be specified on the tag.
 - [DoubleClick (experimental)](../../ads/google/doubleclick.md)
 
 ## Attributes
-
-##### type (required)
-
-An identifier for the ad network.
-
-##### data-foo-bar
-
-Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>type (required)</strong></td>
+    <td>An identifier for the ad network.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-foo-bar</strong></td>
+    <td>Most ad networks require further configuration, which can be passed to the network by using HTML <code>data-</code> attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar". See the documentation for the <a href="#supported-ad-networks">ad network</a> on which attributes can be used.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Configuration Spec
 
@@ -125,7 +130,7 @@ positions immediately after all `<P class='paragraph'>` elements that are within
 
 #### ConfigObj
 
-The fields to specify in the configuration object: 
+The fields to specify in the configuration object:
 
 <table>
   <tr>
@@ -161,7 +166,7 @@ The fields to specify in the configuration object:
 
 #### PlacementObj
 
-The fields to specify in the `placements` configuration object: 
+The fields to specify in the `placements` configuration object:
 
 <table>
   <tr>
@@ -202,11 +207,20 @@ The fields to specify in the `placements` configuration object:
       </ul>
     </td>
   </tr>
+  <tr>
+    <td><code>stickyAdAttributes</code></td>
+    <td>Object&lt;string, string&gt;</td>
+    <td>An <em>optional</em> field for a  map from attribute name to value for attributes to apply to all <code>&lt;amp-sticky-ad&gt;</code> elements injected using this placement. Only the following attribute names are allowed:
+      <ul>
+        <li>data-* (i.e. any data attribute)</li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 #### AnchorObj
 
-The fields to specify in the `anchor` configuration object: 
+The fields to specify in the `anchor` configuration object:
 
 <table>
   <tr>
@@ -246,7 +260,7 @@ The fields to specify in the `anchor` configuration object:
 
 #### PlacementStyleObj
 
-The fields to specify in the `style` configuration object: 
+The fields to specify in the `style` configuration object:
 
 <table>
   <tr>
@@ -270,7 +284,7 @@ The fields to specify in the `style` configuration object:
 
 #### RelativePositionEnum
 
-The ENUM values for the `pos` field in the `placements` configuration object: 
+The ENUM values for the `pos` field in the `placements` configuration object:
 
 <table>
   <tr>
@@ -300,9 +314,31 @@ The ENUM values for the `pos` field in the `placements` configuration object:
   </tr>
 </table>
 
+#### AttributesEnum
+
+The ENUM value indicates attributes from configuration object for different ad formats:
+
+<table>
+  <tr>
+    <th class="col-fourty">Name</th>
+    <th class="col-twenty">Value</th>
+    <th class="col-fourty" >Description</th>
+  </tr>
+  <tr>
+    <td>BASE_ATTRIBUTES</td>
+    <td>attributes</td>
+    <td>Indicates the `attributes` field in the configuration object.</td>
+  </tr>
+  <tr>
+    <td>STICKY_AD_ATTRIBUTES</td>
+    <td>stickyAdAttributes</td>
+    <td>Indicates the `stickyAdAttributes` field in the configuration object.</td>
+  </tr>
+</table>
+
 #### PlacementTypeEnum
 
-The ENUM values for the `type` field in the `placements` configuration object: 
+The ENUM values for the `type` field in the `placements` configuration object:
 
 <table>
   <tr>
@@ -319,7 +355,7 @@ The ENUM values for the `type` field in the `placements` configuration object:
 
 #### AdConstraintsObj
 
-The fields to specify in the `adConstraints` configuration object: 
+The fields to specify in the `adConstraints` configuration object:
 
 <table>
   <tr>

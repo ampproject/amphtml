@@ -13,6 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-1 + 1;
-let result = 3;
-let result2 = undefined;
+let num = 5;
+
+/** @type {number} */
+(num);
+
+/** @type {number} */
+(1 + 1);
+let result =
+/** @type {number} */
+(3);
+
+/** @type {number} */
+(0);

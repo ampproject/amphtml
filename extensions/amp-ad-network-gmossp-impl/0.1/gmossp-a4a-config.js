@@ -30,8 +30,11 @@ const GMOSSP_SRC_A4A_PREFIX_ = 'https://amp.sp.gmossp-sp.jp/_a4a/';
  */
 export function gmosspIsA4AEnabled(win, element, useRemoteHtml) {
   let src;
-  return !useRemoteHtml && !!(src = element.getAttribute('src')) &&
-      !!element.getAttribute('data-use-a4a') &&
-      (startsWith(src, GMOSSP_SRC_PREFIX_) ||
-       startsWith(src, GMOSSP_SRC_A4A_PREFIX_));
+  return (
+    !useRemoteHtml &&
+    !!(src = element.getAttribute('src')) &&
+    !!element.getAttribute('data-use-a4a') &&
+    (startsWith(src, GMOSSP_SRC_PREFIX_) ||
+      startsWith(src, GMOSSP_SRC_A4A_PREFIX_))
+  );
 }

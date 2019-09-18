@@ -38,4 +38,8 @@ export const Keys = {
   UP_ARROW: 'ArrowUp',
   RIGHT_ARROW: 'ArrowRight',
   DOWN_ARROW: 'ArrowDown',
+  TAB: 'Tab',
+  BACKSPACE: 'Backspace',
+  HOME: 'Home',
+  END: 'End',
 };

@@ -20,7 +20,7 @@ A single page ad allows an ad creative to appear as a full page, dynamically int
 
 ## Adding a Single Page Ad to Your Story
 
-Single page ads are similar to regular DoubleClick ads, but must be tagged as script elements within an `<amp-story-auto-ads>` element as follows:
+Single page ads are similar to regular Google Ad Manager ads, but must be tagged as script elements within an `<amp-story-auto-ads>` element as follows:
 
 ```html
 <amp-story-auto-ads>
@@ -54,8 +54,8 @@ A third meta tag should also be included to indicate the [landing page type](htt
 See the above link for allowed call-to-action buttons. By design, these will be the only clickable elements of the creative unit. This means that while things like AMP carousels are allowed within a single page story ad, they will not be clickable.
 
 ## Example
-You can find a fully working example hosted on [ampbyexample.com](https://ampbyexample.com/stories/monetization/doubleclick/).
+You can find a fully working example hosted on [ampbyexample.com](https://amp.dev/documentation/examples/advertising-analytics/doubleclick_amp_story_ads/).
 
-DoubleClick trafficking instructions can be found in the [DFP Help Center](https://support.google.com/dfp_premium/answer/9038178). 
+Google Ad Manager trafficking instructions can be found in the [DFP Help Center](https://support.google.com/dfp_premium/answer/9038178).
 
-#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to DoubleClick</a>
+#### <a href="amp-ad-network-doubleclick-impl-internal.md">Back to Google Ad Manager</a>

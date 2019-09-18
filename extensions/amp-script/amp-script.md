@@ -1,4 +1,14 @@
-# <a name="amp-script"></a> `amp-script`
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Allows running custom JavaScript to render UI.
+experimental: true
+---
+# amp-script
+
+Allows running custom JavaScript to render UI.
 
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -20,14 +30,6 @@ limitations under the License.
 
 <table>
   <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Allows rendering of custom UI components running on third-party JavaScript.</td>
-  </tr>
-  <tr>
-    <td><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -35,54 +37,166 @@ limitations under the License.
       </div>
     </td>
   </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td>
+      <ul>
+        <li><a href="https://github.com/ampproject/amphtml/tree/master/examples/amp-script">Unannotated code samples</a></li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Tutorials</strong></td>
+    <td>
+      <ul>
+        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript">Getting started with amp-script</a></li>
+        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript-tutorial?format=websites">Custom password requirements with amp-script</a></li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 ## Overview
 
-The `amp-script` component allows you to render widgets and other UI using custom third-party JavaScript, e.g. a React component.
-
-{% call callout('Important', type='caution') %}
-`amp-script` is in active development and under [experimental availability](https://www.ampproject.org/docs/reference/experimental.html). It's subject to breaking API changes and should not yet be used in production.
-{% endcall %}
+The `amp-script` component allows you run custom JavaScript to render UI elements, such as a React component.
 
 ### A simple example
 
+An `amp-script` element can load a JavaScript file from a URL:
+
 ```html
-<!-- hello-world.html -->
+<!-- Use an remote script via the "src" attribute. -->
 <amp-script layout="container" src="https://example.com/hello-world.js">
-  <button id="hello">Insert Hello World!</button>
+  <button>Hello amp-script!</button>
 </amp-script>
 ```
 
-```js
-// hello-world.js
-const button = document.getElementById('hello');
-button.addEventListener('click', () => {
-  const el = document.createElement('h1');
-  el.textContent = 'Hello World!';
-  // `document.body` is effectively the <amp-script> element.
-  document.body.appendChild(el);
-});
+...or reference a local `script` element by `id`:
+
+```html
+<!-- Local scripts require adding a "script hash" to the document head. -->
+<head>
+  <!-- ... -->
+  <meta
+    name="amp-script-src"
+    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG">
+</head>
+
+<!-- Reference a local script by [id] via the "script" attribute. -->
+<amp-script width=200 height=50 script="hello-world">
+  <button>Hello amp-script!</button>
+</amp-script>
+
+<!-- Local scripts must also have [target="amp-script"]. -->
+<script id="hello-world" type="text/plain" target="amp-script">
+  const btn = document.querySelector('button');
+  btn.addEventListener('click', () => {
+    document.body.textContent = 'Hello World!';
+  });
+</script>
 ```
 
-A live demo of this example is [deployed here](https://willchou-misc.firebaseapp.com/).
+{% call callout('Important', type='caution') %}
+`amp-script` elements that use local scripts or cross-origin `src` require adding a `<meta name="amp-script-src" content="sha384-HASH">` to the document head, where `HASH` is a base64-encoded SHA-384 of the script source (similar to CSP's [`script-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#Sources)).
 
-{% call callout('Tip', type='success') %}
-Enable the experiment via `AMP.toggleExperiment('amp-script')` in dev console.
+A console error will be generated with the expected `HASH` value for affected `amp-script` elements. You can copy/paste from the error to create the appropriate `<meta>` tag.
 {% endcall %}
-
-For additional code samples, see [`examples/amp-script/`](https://github.com/ampproject/amphtml/tree/master/examples/amp-script).
 
 ### How does it work?
 
-`amp-script` is an AMP component wrapper for [`worker-dom`](https://github.com/ampproject/worker-dom/).
+`amp-script` runs your custom JavaScript in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) that contains a virtual DOM. When your JavaScript code modifies this virtual DOM, `amp-script` forwards these changes to the main thread and applies them to the `amp-script` element subtree.
 
-`worker-dom` runs third-party JavaScript in a web worker containing a virtual DOM. The virtual DOM listens for mutations and forwards them to the main page which reflects the changes on the real DOM.
+For example, adding an element to `document.body`:
 
-For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
-For more information on `worker-dom`, see the [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/) repository.
+```js
+// my-script.js
+const p = document.createElement('p');
+p.textContent = 'I am added to the body!';
+document.body.appendChild(p);
+```
 
-## Interested in using `<amp-script>`?
+Will be reflected on the page as a new child of the `amp-script` element:
+
+```html
+<amp-script src="http://example.com/my-script.js" width=300 height=100>
+  <p>I am added to the body!</p>
+</amp-script>
+```
+
+Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/). For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
+
+### Restrictions
+
+#### Size of JavaScript code
+
+`amp-script` has the following restrictions on JavaScript file size:
+
+- Maximum of 10,000 bytes per `amp-script` element that uses a local script via `script[type=text/plain][target=amp-script]`.
+- Maximum total of 150,000 bytes for all `amp-script` elements on the page.
+
+#### User gestures
+
+`amp-script` generally requires a user gesture to apply changes triggered by your JavaScript code to the page (we call these "mutations"). This requirement helps avoid poor user experience from unexpected content jumping.
+
+The rules for mutations are as follows:
+
+1. Mutations are always accepted for five seconds after a user gesture.
+2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
+3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height < 300px`.
+
+#### Security features
+
+Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
+
+- Same-origin `src` must have [`Content-Type: application/json`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+- Cross-origin `src` and local scripts must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string. For example:
+
+```html
+<head>
+  <!-- Script hashes are space-delimited. -->
+  <meta
+    name=amp-script-src
+    content="sha384-abc123 sha384-def456">
+</head>
+<body>
+  <!-- Cross-origin [src] requires hash: sha384(example.js) == "abc123" -->
+  <amp-script src="cross.origin/example.js" layout=container>
+  </amp-script>
+
+  <!-- Local script requires hash: sha384(#myScript) == "def456" -->
+  <amp-script script=myScript layout=container>
+  </amp-script>
+  <script type=text/plain target=amp-script id=myScript>
+    document.body.textContent += 'Hello world!';
+  </script>
+</body>
+```
+
+{% call callout('Tip', type='success') %}
+The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
+{% endcall %}
+
+## Attributes
+
+**src**
+
+The URL of a JS file that will be executed in the context of this `<amp-script>`.
+
+**script**
+
+The `id` of a `script[type=text/plain][target=amp-script]` element whose text content contains JS that will be executed in the context of this `<amp-script>`.
+
+**sandbox (optional)**
+
+Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Similar to the `iframe[sandbox]` attribute, the value of the attribute can either be empty to apply all restrictions, or space-separated tokens to lift particular restrictions:
+
+- `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
+
+**common attributes**
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+
+## Interested in using amp-script?
 
 We recommend developing against a local build of `amp-script`. This enables dev-only debugging hooks e.g. human-readable `postMessage` events.
 
@@ -90,10 +204,28 @@ See our [Quick Start](https://github.com/ampproject/amphtml/blob/master/contribu
 
 ## FAQ
 
-1. Which JavaScript APIs can I use?
+#### Which JavaScript APIs can I use?
 
-   * Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet. We'll publish an API support matrix soon.
+Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet.
 
-2. Can you support ____ API?
+See the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md) for details.
 
-    * Our feature timelines are informed by your real-world use cases! Please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
+#### Can you support ____ API?
+
+Our feature timelines are informed by your real-world use cases! Please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
+
+#### I'm getting a "maximum total script size exceeded" runtime error.
+
+`amp-script` limits the size of the JS source that may be used. See [Size of JavaScript code](#size-of-javascript-code) above.
+
+#### I'm getting a "script hash not found" runtime error.
+
+Local scripts and cross-origin `src` require adding a special `<meta>` tag to be used. See [Security features](#security-features) above.
+
+#### I'm getting a "custom JavaScript is not allowed" validation error.
+
+Currently, local scripts are not valid AMP. We're working on fixing this soon ([issue #24171](https://github.com/ampproject/amphtml/issues/24171)).
+
+#### I'm getting a "amp-script... was terminated due to illegal mutation" runtime error.
+
+To avoid unexpected content jumping, `amp-script` generally requires user gestures for DOM changes. See [User gestures](#user-gestures) above.

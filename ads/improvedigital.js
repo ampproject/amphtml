@@ -23,13 +23,19 @@ import {validateData, writeScript} from '../3p/3p';
 export function improvedigital(global, data) {
   validateData(data, ['placement'], ['width', 'height', 'optin', 'keyvalue']);
 
-  let url = 'https://ad.360yield.com' +
-      '/adj?' +
-      'p=' + encodeURIComponent(data.placement) +
-      '&w=' + encodeURIComponent(data.width) +
-      '&h=' + encodeURIComponent(data.height) +
-      '&optin=' + encodeURIComponent(data.optin) +
-      '&tz=' + new Date().getTimezoneOffset();
+  let url =
+    'https://ad.360yield.com' +
+    '/adj?' +
+    'p=' +
+    encodeURIComponent(data.placement) +
+    '&w=' +
+    encodeURIComponent(data.width) +
+    '&h=' +
+    encodeURIComponent(data.height) +
+    '&optin=' +
+    encodeURIComponent(data.optin) +
+    '&tz=' +
+    new Date().getTimezoneOffset();
 
   const value = data.keyvalue;
   let newData = '';
@@ -38,11 +44,12 @@ export function improvedigital(global, data) {
 
   if (value && value.length > 0) {
     const keys = value.split('&');
-    for (let i = 0; i < keys.length; i++)
-    {
-      if (!keys[i]) {continue;}
+    for (let i = 0; i < keys.length; i++) {
+      if (!keys[i]) {
+        continue;
+      }
       const segment = keys[i].split('=');
-      const segment1 = (segment[1] ? encodeURIComponent(segment[1]) : '');
+      const segment1 = segment[1] ? encodeURIComponent(segment[1]) : '';
       if (validKey > 0) {
         newData += amps;
       }

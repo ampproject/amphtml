@@ -21,21 +21,20 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {Layout} from '../../../src/layout';
+import {Layout, isLayoutSizeFixed} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {closestByTag} from '../../../src/dom';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const TAG = 'amp-audio';
-
 
 /**
  * Visible for testing only.
  */
 export class AmpAudio extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -48,12 +47,11 @@ export class AmpAudio extends AMP.BaseElement {
 
     /** @public {boolean} */
     this.isPlaying = false;
-
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeFixed(layout);
   }
 
   /** @override */
@@ -71,6 +69,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /**
    * Builds the internal <audio> element
+   * @return {*} TODO(#23582): Specify return type
    */
   buildAudioElement() {
     const audio = this.element.ownerDocument.createElement('audio');
@@ -86,15 +85,24 @@ export class AmpAudio extends AMP.BaseElement {
       assertHttpsUrl(src, this.element);
     }
     this.propagateAttributes(
-        ['src', 'preload', 'autoplay', 'muted', 'loop', 'aria-label',
-          'aria-describedby', 'aria-labelledby', 'controlsList'],
-        audio);
+      [
+        'src',
+        'preload',
+        'autoplay',
+        'muted',
+        'loop',
+        'aria-label',
+        'aria-describedby',
+        'aria-labelledby',
+        'controlsList',
+      ],
+      audio
+    );
 
     this.applyFillContent(audio);
     this.getRealChildNodes().forEach(child => {
       if (child.getAttribute && child.getAttribute('src')) {
-        assertHttpsUrl(child.getAttribute('src'),
-            dev().assertElement(child));
+        assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
       }
       audio.appendChild(child);
     });
@@ -102,6 +110,13 @@ export class AmpAudio extends AMP.BaseElement {
     this.audio_ = audio;
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
+
+    listen(this.audio_, 'play', () =>
+      triggerAnalyticsEvent(this.element, 'audio-play')
+    );
+    listen(this.audio_, 'pause', () =>
+      triggerAnalyticsEvent(this.element, 'audio-pause')
+    );
   }
 
   /** @override */
@@ -114,20 +129,29 @@ export class AmpAudio extends AMP.BaseElement {
     // Gather metadata
     const {document} = this.getAmpDoc().win;
     const artist = this.getElementAttribute_('artist') || '';
-    const title = this.getElementAttribute_('title')
-                  || this.getElementAttribute_('aria-label')
-                  || document.title || '';
+    const title =
+      this.getElementAttribute_('title') ||
+      this.getElementAttribute_('aria-label') ||
+      document.title ||
+      '';
     const album = this.getElementAttribute_('album') || '';
-    const artwork = this.getElementAttribute_('artwork')
-                   || parseSchemaImage(document)
-                   || parseOgImage(document)
-                   || parseFavicon(document) || '';
+    const artwork =
+      this.getElementAttribute_('artwork') ||
+      parseSchemaImage(document) ||
+      parseOgImage(document) ||
+      parseFavicon(document) ||
+      '';
     this.metadata_ = {
       title,
       artist,
       album,
       artwork: [{src: artwork}],
     };
+
+    // Resolve layoutCallback right away if the audio won't preload.
+    if (this.element.getAttribute('preload') === 'none') {
+      return this.audio_;
+    }
 
     return this.loadPromise(this.audio_);
   }
@@ -163,8 +187,11 @@ export class AmpAudio extends AMP.BaseElement {
       return false;
     }
     if (this.isStoryDescendant_()) {
-      user().warn(TAG, '<amp-story> elements do not support actions on ' +
-        '<amp-audio> elements');
+      user().warn(
+        TAG,
+        '<amp-story> elements do not support actions on ' +
+          '<amp-audio> elements'
+      );
       return false;
     }
     return true;
@@ -209,7 +236,7 @@ export class AmpAudio extends AMP.BaseElement {
    * @private
    */
   isStoryDescendant_() {
-    return closestByTag(this.element, 'AMP-STORY');
+    return closestAncestorElementBySelector(this.element, 'AMP-STORY');
   }
 
   /** @private */
@@ -225,10 +252,14 @@ export class AmpAudio extends AMP.BaseElement {
 
     // Update the media session
     setMediaSession(
-        this.getAmpDoc(), this.metadata_, playHandler, pauseHandler);
+      this.element,
+      this.win,
+      this.metadata_,
+      playHandler,
+      pauseHandler
+    );
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAudio);

@@ -18,9 +18,21 @@ import {data} from './testdata/valid_css_at_rules_amp.reserialized';
 import {getAmpAdMetadata} from '../amp-ad-utils';
 
 describe('getAmpAdMetadata', () => {
-
   it('should parse metadata successfully', () => {
     const creativeMetadata = getAmpAdMetadata(data.reserialized);
+    expect(creativeMetadata).to.be.ok;
+    expect(creativeMetadata.minifiedCreative).to.equal(data.minifiedCreative);
+    expect(creativeMetadata.customElementExtensions.length).to.equal(1);
+    expect(creativeMetadata.customElementExtensions[0]).to.equal('amp-font');
+    expect(creativeMetadata.customStylesheets.length).to.equal(1);
+    expect(creativeMetadata.customStylesheets[0]).to.deep.equal({
+      'href': 'https://fonts.googleapis.com/css?family=Questrial',
+    });
+    expect(creativeMetadata.images).to.not.be.ok;
+  });
+
+  it('should parse metadata despite missing offsets', () => {
+    const creativeMetadata = getAmpAdMetadata(data.reserializedMissingOffset);
     expect(creativeMetadata).to.be.ok;
     expect(creativeMetadata.minifiedCreative).to.equal(data.minifiedCreative);
     expect(creativeMetadata.customElementExtensions.length).to.equal(1);
@@ -39,8 +51,8 @@ describe('getAmpAdMetadata', () => {
 
   it('should return null -- missing closing script tag', () => {
     const creativeMetadata = getAmpAdMetadata(
-        data.reserializedMissingScriptTag);
+      data.reserializedMissingScriptTag
+    );
     expect(creativeMetadata).to.be.null;
   });
-
 });

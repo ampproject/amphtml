@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CustomEventTracker} from '../events';
-
-import {
-  InstrumentationService,
-} from '../instrumentation.js';
+import {AmpDocFie} from '../../../../src/service/ampdoc-impl';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
+import {AnalyticsEventType, CustomEventTracker} from '../events';
+import {InstrumentationService} from '../instrumentation.js';
+import {Services} from '../../../../src/services';
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;
@@ -32,7 +32,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     service = new InstrumentationService(ampdoc);
-    root = service.ampdocRoot_;
+    root = service.root_;
 
     analyticsElement = win.document.createElement('amp-analytics');
     win.document.body.appendChild(analyticsElement);
@@ -44,7 +44,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
   it('should create and dispose the ampdoc root', () => {
     expect(root).to.be.ok;
     expect(root.ampdoc).to.equal(ampdoc);
-    expect(root.parent).to.be.null;
+    expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
 
     const stub = sandbox.stub(root, 'dispose');
     service.dispose();
@@ -52,7 +52,10 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
   });
 
   it('should trigger a custom event on the ampdoc root', () => {
-    const tracker = root.getTracker('custom', CustomEventTracker);
+    const tracker = root.getTracker(
+      AnalyticsEventType.CUSTOM,
+      CustomEventTracker
+    );
     const triggerStub = sandbox.stub(tracker, 'trigger');
     service.triggerEventForTarget(target, 'test-event', {foo: 'bar'});
     expect(triggerStub).to.be.calledOnce;
@@ -62,63 +65,65 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     expect(event.type).to.equal('test-event');
     expect(event.vars).to.deep.equal({foo: 'bar'});
   });
-
-  it('should backfill target for the old triggerEvent', () => {
-    // TODO(dvoytenko): remove in preference of triggerEventForTarget.
-    const tracker = root.getTracker('custom', CustomEventTracker);
-    const triggerStub = sandbox.stub(tracker, 'trigger');
-    service.triggerEventForTarget(ampdoc, 'test-event', {foo: 'bar'});
-    expect(triggerStub).to.be.calledOnce;
-
-    const event = triggerStub.args[0][0];
-    expect(event.target).to.equal(ampdoc);
-    expect(event.type).to.equal('test-event');
-    expect(event.vars).to.deep.equal({foo: 'bar'});
-  });
 });
 
+describes.realWin(
+  'InstrumentationService in FIE',
+  {
+    amp: {ampdoc: 'fie'},
+  },
+  env => {
+    let win;
+    let embed;
+    let ampdoc;
+    let service;
+    let root;
+    let analyticsElement;
+    let target;
 
-describes.realWin('InstrumentationService in FIE', {
-  amp: {ampdoc: 'fie'},
-}, env => {
-  let win;
-  let embed;
-  let ampdoc;
-  let service;
-  let root;
-  let analyticsElement;
-  let target;
+    beforeEach(() => {
+      win = env.win;
+      embed = env.embed;
+      ampdoc = env.ampdoc;
+      service = new InstrumentationService(ampdoc);
+      root = service.root_;
 
-  beforeEach(() => {
-    win = env.win;
-    embed = env.embed;
-    ampdoc = env.ampdoc;
-    service = new InstrumentationService(ampdoc);
-    root = service.ampdocRoot_;
+      analyticsElement = win.document.createElement('amp-analytics');
+      win.document.body.appendChild(analyticsElement);
 
-    analyticsElement = win.document.createElement('amp-analytics');
-    win.document.body.appendChild(analyticsElement);
+      target = win.document.createElement('div');
+      win.document.body.appendChild(target);
+    });
 
-    target = win.document.createElement('div');
-    win.document.body.appendChild(target);
-  });
+    it('should create and reuse embed root', () => {
+      expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
+      expect(root.ampdoc).to.equal(ampdoc);
 
-  it('should create and reuse embed root', () => {
-    expect(root.ampdoc).to.equal(ampdoc);
-    expect(root.parent).to.be.null;
+      const group1 = service.createAnalyticsGroup(analyticsElement);
+      const embedRoot = group1.root_;
+      expect(embedRoot).to.not.equal(root);
+      expect(embedRoot.ampdoc).to.equal(ampdoc);
+      expect(embedRoot.embed).to.equal(embed);
 
-    const group1 = service.createAnalyticsGroup(analyticsElement);
-    const embedRoot = group1.root_;
-    expect(embedRoot).to.not.equal(root);
-    expect(embedRoot.parent).to.equal(root);
-    expect(embedRoot.ampdoc).to.equal(ampdoc);
-    expect(embedRoot.embed).to.equal(embed);
+      // Reuse the previously created instance.
+      const analyticsElement2 = win.document.createElement('amp-analytics');
+      win.document.body.appendChild(analyticsElement2);
+      const group2 = service.createAnalyticsGroup(analyticsElement2);
+      expect(group2.root_).to.equal(embedRoot);
+    });
 
-    // Reuse the previously created instance.
-    const analyticsElement2 = win.document.createElement('amp-analytics');
-    win.document.body.appendChild(analyticsElement2);
-    const group2 = service.createAnalyticsGroup(analyticsElement2);
-    expect(group2.root_).to.equal(embedRoot);
-  });
-});
-
+    it('should create embed root for ampdoc-fie', () => {
+      const parentAmpdoc = ampdoc;
+      ampdoc = new AmpDocFie(win, 'https://example.org', parentAmpdoc);
+      sandbox.stub(Services, 'ampdoc').callsFake(context => {
+        if (context == win.document) {
+          return ampdoc;
+        }
+      });
+      service = new InstrumentationService(ampdoc);
+      root = service.root_;
+      expect(root).to.be.instanceof(EmbedAnalyticsRoot);
+      expect(root.ampdoc).to.equal(ampdoc);
+    });
+  }
+);

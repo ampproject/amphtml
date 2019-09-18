@@ -1,3 +1,11 @@
+---
+$category@: presentation
+formats:
+  - websites
+  - email
+teaser:
+  text: Provides fuzzy timestamps by formatting dates as "time ago" (for example, 3 hours ago).
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,24 +22,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-timeago`"></a> `amp-timeago`
+# amp-timeago
+
+Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td width="40%"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td width="40%"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fixed, fixed-height, responsive</td>
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-timeago/">amp-timeago example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-timeago/">amp-timeago example</a>.</td>
   </tr>
 </table>
 
@@ -52,14 +58,14 @@ Example:
 
 ## Attributes
 
-##### datetime (required)
-
-An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) *or* 2017-03-09T20:00:00-05:00 (specifying timezone offset).
-
-##### locale (optional)
-
-By default, the local is set to <code>en</code>; however, you can specify one of the following locales:
-
+<table>
+  <tr>
+    <td width="40%"><strong>datetime (required)</strong></td>
+    <td>An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) <em>or</em> 2017-03-09T20:00:00-05:00 (specifying timezone offset).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>locale (optional)</strong></td>
+    <td><p>By default, the local is set to <code>en</code>; however, you can specify one of the following locales:</p>
 <ul>
   <li>ar (Arabic)</li>
   <li>be (Belarusian)</li>
@@ -98,15 +104,17 @@ By default, the local is set to <code>en</code>; however, you can specify one of
   <li>vi (Vietnamese)</li>
   <li>zhCN (Chinese)</li>
   <li>zhTW (Taiwanese)</li>
-</ul>
-
-##### cutoff (optional)
-
-Display the original date if time distance is older than cutoff (seconds).
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>cutoff (optional)</strong></td>
+    <td>Display the original date if time distance is older than cutoff (seconds).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

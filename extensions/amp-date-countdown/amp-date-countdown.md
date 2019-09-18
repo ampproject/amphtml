@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Displays GL Transmission Format (gITF) 3D models.
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,24 +21,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-date-countdown`"></a> `amp-date-countdown`
+# amp-date-countdown
+Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.</td>
-  </tr>
   <tr>
     <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
   </tr>
 </table>
 
@@ -164,7 +168,7 @@ Allows the `amp-date-countdown` component to calculate the time difference based
 
 ## Events
 
-The `amp-date-countdown` component exposes the following event that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
+The `amp-date-countdown` component exposes the following event that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 Event | Description
 -- | --

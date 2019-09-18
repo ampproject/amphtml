@@ -1,6 +1,7 @@
 {
   "rules": {
-    "amphtml-internal/no-export-side-effect": 0,
-    "amphtml-internal/no-style-property-setting": 0
+    "local/no-export-side-effect": 0,
+    "local/no-module-exports": 0,
+    "local/no-style-property-setting": 0
   }
 }

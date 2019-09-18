@@ -21,7 +21,7 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {isArray} from '../../../src/types';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 const ADSENSE_REC_ORIGIN = 'https://googleads.g.doubleclick.net';
 
@@ -51,13 +51,15 @@ export let AmpNextPageItem;
  * @return {!AmpNextPageConfig}
  */
 export function assertConfig(context, config, documentUrl) {
-  user().assert(config, 'amp-next-page config must be specified');
-  user().assert(isArray(config.pages), 'pages must be an array');
+  userAssert(config, 'amp-next-page config must be specified');
+  userAssert(isArray(config.pages), 'pages must be an array');
   assertRecos(context, config.pages, documentUrl);
 
   if ('hideSelectors' in config) {
-    user().assert(isArray(config['hideSelectors']),
-        'amp-next-page hideSelectors should be an array');
+    userAssert(
+      isArray(config['hideSelectors']),
+      'amp-next-page hideSelectors should be an array'
+    );
     assertSelectors(config['hideSelectors']);
   }
 
@@ -73,9 +75,7 @@ function assertRecos(context, recos, documentUrl) {
   recos.forEach(reco => assertReco(context, reco, documentUrl));
 }
 
-const BANNED_SELECTOR_PATTERNS = [
-  /(^|\W)i-amphtml-/,
-];
+const BANNED_SELECTOR_PATTERNS = [/(^|\W)i-amphtml-/];
 
 /**
  * Asserts for valid selectors.
@@ -85,10 +85,15 @@ const BANNED_SELECTOR_PATTERNS = [
 function assertSelectors(selectors) {
   selectors.forEach(selector => {
     BANNED_SELECTOR_PATTERNS.forEach(pattern => {
-      user().assertString(selector,
-          'amp-next-page hideSelector value should be a string');
-      user().assert(!pattern.test(selector),
-          'amp-next-page hideSelector %s not allowed', selector);
+      user().assertString(
+        selector,
+        'amp-next-page hideSelector value should be a string'
+      );
+      userAssert(
+        !pattern.test(selector),
+        'amp-next-page hideSelector %s not allowed',
+        selector
+      );
     });
   });
 }
@@ -110,19 +115,24 @@ function assertReco(context, reco, documentUrl) {
   const {origin} = urlService.parse(documentUrl);
   const sourceOrigin = getSourceOrigin(documentUrl);
 
-  user().assert(
-      url.origin === origin || url.origin === sourceOrigin
-      || isValidAdSenseURL(context, url, origin),
-      'pages must be from the same origin as the current document');
+  userAssert(
+    url.origin === origin ||
+      url.origin === sourceOrigin ||
+      isValidAdSenseURL(context, url, origin),
+    'pages must be from the same origin as the current document'
+  );
   user().assertString(reco.image, 'image must be a string');
   user().assertString(reco.title, 'title must be a string');
 
   // Rewrite canonical URLs to cache URLs, when served from the cache.
   if (sourceOrigin !== origin && url.origin === sourceOrigin) {
-    reco.ampUrl = `${origin}/c/` +
-        (url.protocol === 'https:' ? 's/' : '') +
-        encodeURIComponent(url.host) +
-        url.pathname + (url.search || '') + (url.hash || '');
+    reco.ampUrl =
+      `${origin}/c/` +
+      (url.protocol === 'https:' ? 's/' : '') +
+      encodeURIComponent(url.host) +
+      url.pathname +
+      (url.search || '') +
+      (url.hash || '');
   }
 }
 
