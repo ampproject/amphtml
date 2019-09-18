@@ -15,8 +15,7 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('./global-configs/experiments-config.json');
-const experimentsConstantBackup =
-  require('./global-configs/experiments-const.json')
+const experimentsConstantBackup = require('./global-configs/experiments-const.json');
 const localPlugin = name =>
   require.resolve(`./babel-plugins/babel-plugin-${name}`);
 
