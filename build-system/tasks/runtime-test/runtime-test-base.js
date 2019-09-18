@@ -20,9 +20,13 @@ const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
 const testConfig = require('../../config');
+const {
+  createKarmaServer,
+  getAdTypes,
+  runTestInSauceLabs,
+} = require('./helpers');
 const {app} = require('../../server/test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
-const {createKarmaServer, getAdTypes, runTestInBatches} = require('./helpers');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {reportTestStarted} = require('.././report-test-status');
@@ -270,7 +274,7 @@ class RuntimeTestRunner {
     reportTestStarted();
 
     if (argv.saucelabs) {
-      this.exitCode = await runTestInBatches(this.config);
+      this.exitCode = await runTestInSauceLabs(this.config);
     } else {
       this.exitCode = await createKarmaServer(this.config);
     }
