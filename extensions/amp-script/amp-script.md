@@ -80,9 +80,9 @@ If `src` points to a cross-origin URL, then a ["script hash"](#security-features
 
 #### Load JavaScript from a local element
 
-{% call callout('Warning', type='caution') %}
+[tip type="important"]
 Using the `script` attribute is currently invalid. See [#24309](https://github.com/ampproject/amphtml/issues/24309) for details.
-{% endcall %}
+[/tip]
 
 Use the `script` attribute to reference a local `script` element by `id`.
 
@@ -109,11 +109,11 @@ Use the `script` attribute to reference a local `script` element by `id`.
 </script>
 ```
 
-{% call callout('Important', type='caution') %}
+[tip type="default"]
 `amp-script` elements that have a `script` or cross-origin `src` attribute require a ["script hash"](#security-features). Script hashes are specified in a `<meta name="amp-script-src" content="...">` element in the document head.
 
 A console error will be thrown with the expected `content` value -- you can copy/paste from the error to create the appropriate `<meta>` tag.
-{% endcall %}
+[/tip]
 
 ### How does it work?
 
@@ -209,9 +209,9 @@ Example of script hashes:
 </body>
 ```
 
-{% call callout('Tip', type='success') %}
+[tip type="default"]
 The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
-{% endcall %}
+[/tip]
 
 ## Attributes
 
