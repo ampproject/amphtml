@@ -405,6 +405,8 @@ export class CustomEventTracker extends EventTracker {
   }
 }
 
+// TODO(Enriqe): If needed, add support for sandbox story event.
+// (e.g. sandbox-story-xxx).
 export class AmpStoryEventTracker extends CustomEventTracker {
   /**
    * @param {!./analytics-root.AnalyticsRoot} root
@@ -415,7 +417,7 @@ export class AmpStoryEventTracker extends CustomEventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    // TODO(artezan): add support for storySpec.
+    // TODO(Enriqe): add support for storySpec.
     const rootTarget = this.root.getRootElement();
 
     // Fire buffered events if any.
