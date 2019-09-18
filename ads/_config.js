@@ -892,6 +892,21 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'shemedia': {
+    prefetch: [
+      'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+      'https://ads.shemedia.com/static/amp.js'
+    ],
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://securepubads.g.doubleclick.net',
+      'https://tpc.googlesyndication.com',
+      'https://ads.blogherads.com',
+      'https://ads.shemedia.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'sklik': {
     prefetch: 'https://c.imedia.cz/js/amp.js',
   },
