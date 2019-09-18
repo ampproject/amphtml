@@ -895,7 +895,7 @@ const adConfig = jsonConfiguration({
   'shemedia': {
     prefetch: [
       'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
-      'https://ads.shemedia.com/static/amp.js'
+      'https://ads.shemedia.com/static/amp.js',
     ],
     preconnect: [
       'https://partner.googleadservices.com',
