@@ -117,7 +117,7 @@ describe('amp-story analytics', function() {
       browser = new BrowserController(env.win);
       env.iframe.style.height = '732px';
       env.iframe.style.width = '412px';
-      return browser.waitForElementLayout('amp-story');
+      return browser.waitForElementLayout('amp-story', 20000);
     });
 
     it('should send analytics event when landing on a page', async () => {
