@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
+import {Services} from '../../../src/services';
+import {clamp, mapRange, sum} from '../../../src/utils/math';
+import {
+  computedStyle,
+  resetStyles,
+  setImportantStyles,
+  setStyles,
+} from '../../../src/style';
+import {dev} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
-import {mapRange, sum} from '../../../src/utils/math';
-import {setImportantStyles, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @enum {string} */
@@ -45,11 +51,12 @@ export const ParallaxModes = {
 };
 
 const SMOOTHING_PTS = 4;
-const PERSPECTIVE = 1500;
+const PERSPECTIVE = 1000;
+const MAX_TILT = 15;
 const DEFAULT_MODE = ParallaxModes.DEPTH;
 const DEFAULT_LAYER_SPACING = 1;
-const DEFAULT_FARTHEST_SCALE = 1.2;
-const DEFAULT_NEAREST_SCALE = 1;
+const DEFAULT_FARTHEST_SCALE = 1.3;
+const DEFAULT_NEAREST_SCALE = 0.8;
 
 const MODE_ATTR = 'parallax-fx-mode';
 const LAYER_SPACING_ATTR = 'parallax-fx-layer-spacing';
@@ -72,6 +79,9 @@ export class ParallaxService {
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
+
+    /** @private @const {!../../../src/service/platform-impl.Platform} */
+    this.platform_ = Services.platformFor(global);
 
     /** @private {!Element} */
     this.story_ = story;
@@ -110,26 +120,10 @@ export class ParallaxService {
    * Initializes the pages by giving them perspective and initializating their layers
    */
   init_() {
-    if (!this.win_.DeviceOrientationEvent) {
-      user().warn(
-        "The current browser doesn't support the device motion/orientation events"
-      );
-      return;
-    }
-
     this.vsync_.mutate(() => {
       this.getPages_()
         .filter(page => !page.hasAttribute(NO_PARALLAX_FX_ATTR))
         .forEach(page => {
-          const layers = this.getLayers_(page);
-
-          // Set the page's perspective
-          setStyles(page, {
-            perspective: PERSPECTIVE * layers.length + `px`,
-          });
-
-          this.parallaxPages_.push(new ParallaxPage(page, this.vsync_));
-
           const mode =
             page.getAttribute(MODE_ATTR) || this.storyMode_ || DEFAULT_MODE;
           const layerSpacing = Number(
@@ -148,58 +142,31 @@ export class ParallaxService {
               DEFAULT_NEAREST_SCALE
           );
 
-          this.initLayers_(
-            layers,
+          const parallaxPage = new ParallaxPage(
+            this.win_,
+            page,
+            this.vsync_,
             mode,
             layerSpacing,
             farthestScale,
             nearestScale
           );
+          this.parallaxPages_.push(parallaxPage);
         });
     });
 
-    listen(this.win_, 'deviceorientation', event => {
-      this.parallaxOrientationMutate_(event, this.parallaxPages_);
-    });
-  }
-
-  /**
-   * Initializes the page's layers by giving them the appropriate translation and scaling
-   * @param {!Array<!Element>} layers
-   * @param {string} mode
-   * @param {number} layerSpacing
-   * @param {number} farthestScale
-   * @param {number} nearestScale
-   */
-  initLayers_(layers, mode, layerSpacing, farthestScale, nearestScale) {
-    const layerZIndexOffset =
-      mode == ParallaxModes.DEPTH
-        ? layers.length - 1
-        : mode == ParallaxModes.CENTER
-        ? layers.length / 2
-        : 0;
-
-    // Loop through the layers in the page and assign a z-index following
-    // DOM order (manual override will be added in the future)
-    layers.forEach((layer, order) => {
-      this.vsync_.mutate(() => {
-        const translation = `translateZ(${(order - layerZIndexOffset) *
-          layerSpacing *
-          (PERSPECTIVE / 50)}px)`;
-        const scale = `scale(${mapRange(
-          order,
-          0,
-          layers.length - 1,
-          farthestScale,
-          nearestScale
-        )})`;
-        setImportantStyles(layer, {
-          contain: 'none',
-          overflow: 'visible',
-          transform: `${translation} ${scale}`,
-        });
+    if (
+      (this.platform_.isIos() || this.platform_.isAndroid()) &&
+      this.win_.DeviceOrientationEvent
+    ) {
+      listen(this.win_, 'deviceorientation', event => {
+        this.parallaxOrientationMutate_(event, this.parallaxPages_);
       });
-    });
+    } else {
+      listen(this.win_, 'mousemove', event => {
+        this.parallaxMouseMutate_(event, this.parallaxPages_);
+      });
+    }
   }
 
   /**
@@ -214,18 +181,6 @@ export class ParallaxService {
   }
 
   /**
-   * Discovers and returns all layers inside a page
-   * @param {!Element} page
-   * @return {!Array<!Element>}
-   * @private
-   */
-  getLayers_(page) {
-    return toArray(page.querySelectorAll(`amp-story-grid-layer`)).map(layer =>
-      dev().assertElement(layer)
-    );
-  }
-
-  /**
    * Calculate the smoothed change in position using the device orientation
    * change event then update each of the layers will its calculated position.
    * @param {Event} event
@@ -235,6 +190,12 @@ export class ParallaxService {
   parallaxOrientationMutate_(event, pages) {
     const window = this.win_;
     const {screen} = window;
+
+    const page = pages.filter(page => page.shouldUpdate())[0];
+    if (!page) {
+      return;
+    }
+
     let {gamma, beta} = event;
 
     // Detect the implementation of orientation angle
@@ -283,14 +244,58 @@ export class ParallaxService {
     mappedY = mapRange(mappedY, -75, 75, -25, 25);
 
     pages
-      .filter(page => page.shouldUpdate())
+      .filter(page => !page.shouldUpdate())
       .forEach(page => {
-        if (this.middleY_ != 0 && this.middleX_ != 0) {
-          page.update(mappedX, mappedY);
-        } else {
-          page.update(this.middleX_, this.middleY_);
-        }
+        page.resetStyles();
       });
+
+    if (this.middleY_ != 0 && this.middleX_ != 0) {
+      page.update(mappedX, mappedY);
+    } else {
+      page.update(this.middleX_, this.middleY_);
+    }
+  }
+
+  /**
+   * Calculate the smoothed change in position using the mouse's position
+   * then update each of the layers will its calculated position.
+   * @param {Event} event
+   * @param {!Array<!ParallaxPage>} pages
+   * @private
+   */
+  parallaxMouseMutate_(event, pages) {
+    const page = pages.filter(page => page.shouldUpdate())[0];
+    if (!page) {
+      return;
+    }
+
+    const percentageX =
+      (event.pageX - (page.element.offsetLeft - page.element.offsetWidth / 2)) /
+      page.element.offsetWidth;
+    const percentageY =
+      (event.pageY - page.element.offsetTop) / page.element.offsetHeight;
+
+    const mappedX = mapRange(percentageX * 100, 0, 100, -25, 25);
+    const mappedY = mapRange(percentageY * 100, 0, 100, -25, 25);
+
+    const tiltX = clamp(
+      MAX_TILT / 2 - percentageX * MAX_TILT,
+      -MAX_TILT,
+      MAX_TILT
+    ).toFixed(2);
+    const tiltY = clamp(
+      percentageY * MAX_TILT - MAX_TILT / 2,
+      -MAX_TILT,
+      MAX_TILT
+    ).toFixed(2);
+
+    pages
+      .filter(page => !page.shouldUpdate())
+      .forEach(page => {
+        page.resetStyles();
+      });
+
+    page.update(mappedX, mappedY, tiltX, tiltY);
   }
 }
 
@@ -299,15 +304,49 @@ export class ParallaxService {
  */
 export class ParallaxPage {
   /**
-   * @param {!Element} page The parent page of thi element
+   * @param {!Window} global
+   * @param {!Element} element The parent page of thi element
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
+   * @param {string} mode
+   * @param {number} layerSpacing
+   * @param {number} farthestScale
+   * @param {number} nearestScale
    */
-  constructor(page, vsync) {
-    /** @private @const {!Element} */
-    this.page_ = page;
+  constructor(
+    global,
+    element,
+    vsync,
+    mode,
+    layerSpacing,
+    farthestScale,
+    nearestScale
+  ) {
+    /** @private {!Window} */
+    this.win_ = global;
+
+    /** @const {!Element} */
+    this.element = element;
+
+    /** @private @const {boolean} */
+    this.initialized_ = false;
+
+    /** @private @const {string} */
+    this.initialTransform_ = '';
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
+
+    /** @private @const {string} */
+    this.mode_ = mode;
+
+    /** @private @const {string} */
+    this.layerSpacing_ = layerSpacing;
+
+    /** @private @const {string} */
+    this.farthestScale_ = farthestScale;
+
+    /** @private @const {string} */
+    this.nearestScale_ = nearestScale;
   }
 
   /**
@@ -315,13 +354,100 @@ export class ParallaxPage {
    * x and y axes
    * @param {number} x The movement of the layer in the x axis
    * @param {number} y The movement of the layer in the y axis
+   * @param {number} tiltX Rotation on the X axis
+   * @param {number} tiltY Rotation on the Y axis
    */
-  update(x = 0, y = 0) {
+  update(x = 0, y = 0, tiltX = 0, tiltY = 0) {
+    if (!this.initialized_) {
+      this.initialTransform_ = computedStyle(
+        this.win_,
+        this.element
+      ).getPropertyValue('transform');
+      this.setInitialStyles_();
+    }
+
     this.vsync_.mutate(() => {
-      setStyles(this.page_, {
+      setStyles(this.element, {
         perspectiveOrigin: `${Math.round(x * 50)}px ${Math.round(y * 50)}px`,
+        willChange: 'transform',
+      });
+
+      setImportantStyles(this.element, {
+        transform:
+          this.initialTransform_ + ` rotateX(${tiltY}deg) rotateY(${tiltX}deg)`,
+        transition: 'opacity 350ms cubic-bezier(0.0,0.0,0.2,1)',
       });
     });
+  }
+
+  /**
+   * Resets any styles applied during the updates
+   */
+  resetStyles() {
+    const layers = this.getLayers();
+
+    this.vsync_.mutate(() => {
+      resetStyles(this.element, [
+        'transform',
+        'perspectiveOrigin',
+        'willChange',
+        'perspective',
+      ]);
+
+      layers.forEach(layer => {
+        resetStyles(layer, ['contain', 'overflow', 'transform']);
+      });
+    });
+
+    // Reset the transitions after all other styles are reset to avoid
+    // animating the reset
+    this.vsync_.mutate(() => {
+      resetStyles(this.element, ['transition']);
+    });
+
+    this.initialized_ = false;
+  }
+
+  /**
+   * Initializes the page's layers by giving them the appropriate translation and scaling
+   */
+  setInitialStyles_() {
+    const layers = this.getLayers();
+
+    setStyles(this.element, {
+      perspective: PERSPECTIVE * layers.length + 'px',
+    });
+
+    const layerZIndexOffset =
+      this.mode_ == ParallaxModes.DEPTH
+        ? layers.length - 1
+        : this.mode_ == ParallaxModes.CENTER
+        ? layers.length / 2
+        : 0;
+
+    // Loop through the layers in the page and assign a z-index following
+    // DOM order (manual override will be added in the future)
+    layers.forEach((layer, order) => {
+      this.vsync_.mutate(() => {
+        const translation = `translateZ(${(order - layerZIndexOffset) *
+          this.layerSpacing_ *
+          (PERSPECTIVE / 35)}px)`;
+        const scale = `scale(${mapRange(
+          order,
+          0,
+          layers.length - 1,
+          this.farthestScale_,
+          this.nearestScale_
+        )})`;
+        setImportantStyles(layer, {
+          contain: 'none',
+          overflow: 'visible',
+          transform: `${translation} ${scale}`,
+        });
+      });
+    });
+
+    this.initialized_ = true;
   }
 
   /**
@@ -329,7 +455,17 @@ export class ParallaxPage {
    * @return {boolean}
    */
   shouldUpdate() {
-    return this.page_.hasAttribute('active');
+    return this.element.hasAttribute('active');
+  }
+
+  /**
+   * Discovers and returns all layers inside a page
+   * @return {!Array<!Element>}
+   */
+  getLayers() {
+    return toArray(this.element.querySelectorAll(`amp-story-grid-layer`)).map(
+      layer => dev().assertElement(layer)
+    );
   }
 }
 

@@ -795,7 +795,7 @@ export class AmpStory extends AMP.BaseElement {
     this.installGestureRecognizers_();
 
     // Install parallax handlers if opt-in is detected on a mobile environment
-    if (!this.isDesktop_() && this.element.hasAttribute('parallax-fx')) {
+    if (this.element.hasAttribute('parallax-fx')) {
       installParallaxFx(this.win, this.vsync_, this.element);
     }
   }
