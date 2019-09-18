@@ -899,10 +899,8 @@ const adConfig = jsonConfiguration({
     ],
     preconnect: [
       'https://partner.googleadservices.com',
-      'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
       'https://ads.blogherads.com',
-      'https://ads.shemedia.com',
     ],
     renderStartImplemented: true,
   },
