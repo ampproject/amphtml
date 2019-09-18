@@ -49,7 +49,10 @@ async function main() {
 
     await startSauceConnect(FILENAME);
     timedExecOrDie('gulp unit --nobuild --saucelabs');
-    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
+    timedExecOrDie(
+      'gulp integration --nobuild --compiled --saucelabs --stable'
+    );
+    timedExec('gulp integration --nobuild --compiled --saucelabs --beta');
 
     stopSauceConnect(FILENAME);
   } else {
