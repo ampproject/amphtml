@@ -174,7 +174,7 @@
     "topological-sort": "0.3.0",
     "traverse": "0.6.6",
     "try-net-connect": "3.0.2",
-    "tsickle": "0.36.0",
+    "tsickle": "0.37.0",
     "typescript": "3.5.3",
     "uglifyify": "5.0.2",
     "vinyl-buffer": "1.0.1",
