@@ -29,7 +29,7 @@ const {
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
-  timedExec,
+  timedExec: timedExecBase,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
@@ -37,8 +37,8 @@ const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExec = cmd => timedExecBase(cmd, FILENAME);
+const timedExecOrDie = cmd => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);

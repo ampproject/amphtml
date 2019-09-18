@@ -20,7 +20,6 @@ const fs = require('fs');
 const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
-
 const {
   reportTestErrored,
   reportTestFinished,
