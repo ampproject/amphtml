@@ -141,6 +141,10 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
 
 Specifies that the associated action should only take place for changes between the specified range along the y axis. Specified as a space separated list of 2 values (e.g., `gamma-range="0 90"`. By default the related action is triggered for all changes between `0` and `360 degrees`.
 
+##### smoothing (optional)
+
+When enabled, outputs a moving average of the last `n` values instead of the raw value read from the sensor. By default smoothing is enabled and set to 4.
+
 ## Validation
 
 See [amp-orientation-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-orientation-observer/validator-amp-orientation-observer.protoascii) in the AMP validator specification.
