@@ -216,22 +216,25 @@ To run the tests on Sauce Labs:
 * Create a Sauce Labs account.  If you are only going to use your account for open source projects like this one you can sign up for a free [Open Sauce](https://saucelabs.com/solutions/open-source) account.  (If you create an account through the normal account creation mechanism you'll be signing up for a free trial that expires; you can contact Sauce Labs customer service to switch your account to Open Sauce if you did this accidentally.)
 * Set the `SAUCE_USERNAME` and `SAUCE_ACCESS_KEY` environment variables.  On Linux add this to your `.bashrc`:
 
-   ```
+   ```sh
    export SAUCE_USERNAME=<Sauce Labs username>
    export SAUCE_ACCESS_KEY=<Sauce Labs access key>
    ```
 
   You can find your Sauce Labs access key on the [User Settings](https://saucelabs.com/beta/user-settings) page.
-* Install the [Sauce Connect Proxy](https://wiki.saucelabs.com/display/DOCS/Setting+Up+Sauce+Connect+Proxy).
 * Run the proxy and then run the tests:
-   ```
-   # start the proxy
-   sc
+   ```sh
+   # Start the proxy
+   ./build-system/sauce_connect/start_sauce_connect.sh
 
-   # after seeing the "Sauce Connect is up" msg, run the tests
+   # Run tests
    gulp [unit|integration] --saucelabs
+
+   # Stop the proxy
+   ./build-system/sauce_connect/stop_sauce_connect.sh
    ```
-* It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
+* It may take several seconds for the proxy to start and for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
+* The tunnel ID used during local development is the email address of the author of the latest commit on the local branch.
 
 ## Visual Diff Tests
 

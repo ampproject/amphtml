@@ -242,7 +242,8 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
   );
 });
 
-describe('A more real AMPHTML image ad', () => {
+// TODO(wg-ads, #24421): Flaky in experiment B (INABOX_LITE) on Chrome.
+describe.skip('A more real AMPHTML image ad', () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   // The image ad as seen in examples/inabox.gpt.html,
