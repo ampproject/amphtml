@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.68 */
+/** Version: 0.1.22.69 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -56,6 +56,10 @@ const AnalyticsEvent = {
   ACTION_NEW_DEFERRED_ACCOUNT: 1010,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
+  EVENT_CONFIRM_TX_ID: 3001,
+  EVENT_CHANGED_TX_ID: 3002,
+  EVENT_GPAY_NO_TX_ID: 3003,
+  EVENT_GPAY_CANNOT_CONFIRM_TX_ID: 3004,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -504,6 +508,12 @@ class EventParams {
 
     /** @private {?string} */
     this.smartboxMessage_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.gpayTransactionId_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?boolean} */
+    this.hadLogged_ = (data[3] == null) ? null : data[3];
   }
 
   /**
@@ -521,6 +531,34 @@ class EventParams {
   }
 
   /**
+   * @return {?string}
+   */
+  getGpayTransactionId() {
+    return this.gpayTransactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setGpayTransactionId(value) {
+    this.gpayTransactionId_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getHadLogged() {
+    return this.hadLogged_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setHadLogged(value) {
+    this.hadLogged_ = value;
+  }
+
+  /**
    * @return {!Array}
    * @override
    */
@@ -528,6 +566,8 @@ class EventParams {
     return [
       this.label(),  // message label
       this.smartboxMessage_,  // field 1 - smartbox_message
+      this.gpayTransactionId_,  // field 2 - gpay_transaction_id
+      this.hadLogged_,  // field 3 - had_logged
     ];
   }
 
@@ -543,6 +583,118 @@ class EventParams {
 /**
  * @implements {Message}
  */
+class LinkSaveTokenRequest {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.authCode_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.token_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getAuthCode() {
+    return this.authCode_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setAuthCode(value) {
+    this.authCode_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getToken() {
+    return this.token_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setToken(value) {
+    this.token_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.authCode_,  // field 1 - auth_code
+      this.token_,  // field 2 - token
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'LinkSaveTokenRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class LinkingInfoResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.requested_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getRequested() {
+    return this.requested_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setRequested(value) {
+    this.requested_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.requested_,  // field 1 - requested
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'LinkingInfoResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class SkuSelectedResponse {
  /**
   * @param {!Array=} data
@@ -551,6 +703,9 @@ class SkuSelectedResponse {
 
     /** @private {?string} */
     this.sku_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.oldSku_ = (data[2] == null) ? null : data[2];
   }
 
   /**
@@ -568,6 +723,20 @@ class SkuSelectedResponse {
   }
 
   /**
+   * @return {?string}
+   */
+  getOldSku() {
+    return this.oldSku_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setOldSku(value) {
+    this.oldSku_ = value;
+  }
+
+  /**
    * @return {!Array}
    * @override
    */
@@ -575,6 +744,7 @@ class SkuSelectedResponse {
     return [
       this.label(),  // message label
       this.sku_,  // field 1 - sku
+      this.oldSku_,  // field 2 - old_sku
     ];
   }
 
@@ -734,6 +904,8 @@ const PROTO_MAP = {
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
   'EventParams': EventParams,
+  'LinkSaveTokenRequest': LinkSaveTokenRequest,
+  'LinkingInfoResponse': LinkingInfoResponse,
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse,
@@ -3879,7 +4051,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.68',
+    '_client': 'SwG 0.1.22.69',
   });
 }
 
@@ -4227,12 +4399,6 @@ const ExperimentFlags = {
    * Enables the Smartbox feature.
    */
   SMARTBOX: 'smartbox',
-
-  /**
-   * Enables logging user events generated by the SwG and AMP clients to the
-   * publishers  propensity server.
-   */
-  LOG_SWG_TO_PROPENSITY: 'log_swg_to_propensity',
 
   /**
    * Enables using new Activities APIs
@@ -6330,6 +6496,16 @@ class PayStartFlow {
 
     /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
     this.eventManager_ = deps.eventManager();
+
+    // Map the proration mode to the enum value (if proration exists).
+    this.prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
+    this.prorationEnum = 0;
+    if (this.prorationMode) {
+      this.prorationEnum = ReplaceSkuProrationModeMapping[this.prorationMode];
+    } else if (this.subscriptionRequest_.oldSku) {
+      this.prorationEnum =
+        ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
+    }
   }
 
   /**
@@ -6342,11 +6518,8 @@ class PayStartFlow {
       'publicationId': this.pageConfig_.getPublicationId(),
     });
 
-    // Map the proration mode to the enum value (if proration exists).
-    const prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
-    if (prorationMode) {
-      swgPaymentRequest.replaceSkuProrationMode =
-        ReplaceSkuProrationModeMapping[prorationMode];
+    if (this.prorationEnum) {
+      swgPaymentRequest.replaceSkuProrationMode = this.prorationEnum;
     }
 
     // Start/cancel events.
@@ -6480,9 +6653,11 @@ class PayCompleteFlow {
     );
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
+    // TODO(dianajing): find a way to specify whether response is a subscription update
     const args = {
       'publicationId': this.deps_.pageConfig().getPublicationId(),
       'productType': this.response_['productType'],
+      // 'isSubscriptionUpdate': !!response.oldSku,
     };
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
@@ -6548,14 +6723,47 @@ class PayCompleteFlow {
  */
 function validatePayResponse(deps, payPromise, completeHandler) {
   return payPromise.then(data => {
-    // If there was a redirect, we may have lost our stored transaction
-    // ID. Pay service is supposed to send back the transaction ID that
-    // was sent in the request and so, ideally it should be the same.
-    // In any case, we must remember and use this transaction ID going
-    // forward and assume whatever memory we had before redirect is lost.
-    if (typeof data == 'object' && data['googleTransactionId']) {
-      deps.analytics().setTransactionId(data['googleTransactionId']);
+    // 1) We log against a random TX ID which is how we track a specific user
+    //    anonymously.
+    // 2) If there was a redirect to gPay, we may have lost our stored TX ID.
+    // 3) Pay service is supposed to give us the TX ID it logged against.
+
+    const hasLogged = deps.analytics().getHasLogged();
+    let eventType = AnalyticsEvent.UNKNOWN;
+    let eventParams = undefined;
+    if (typeof data !== 'object' || !data['googleTransactionId']) {
+      // If gPay doesn't give us a TX ID it means that something may
+      // be wrong.  If we previously logged then we are at least continuing to
+      // log against the same TX ID.  If we didn't previously log then we have
+      // lost all connection to the events that preceded the payment event and
+      // we at least want to know why that data was lost.
+      eventParams = new EventParams();
+      eventParams.setHadLogged(hasLogged);
+      eventType = AnalyticsEvent.EVENT_GPAY_NO_TX_ID;
+    } else {
+      const oldTxId = deps.analytics().getTransactionId();
+      const newTxId = data['googleTransactionId'];
+
+      if (!hasLogged) {
+        // This is the expected case for full redirects.  It may be happening
+        // unexpectedly at other times too though and we want to be aware of it
+        // if it does.
+        deps.analytics().setTransactionId(newTxId);
+        eventType = AnalyticsEvent.EVENT_GPAY_CANNOT_CONFIRM_TX_ID;
+      } else {
+        if (oldTxId === newTxId) {
+          // This is the expected case for non-redirect pay events
+          eventType = AnalyticsEvent.EVENT_CONFIRM_TX_ID;
+        } else {
+          // This is an unexpected case: gPay rejected our TX ID and created
+          // its own.  Log the gPay TX ID but keep our logging consistent.
+          eventParams = new EventParams();
+          eventParams.setGpayTransactionId(newTxId);
+          eventType = AnalyticsEvent.EVENT_CHANGED_TX_ID;
+        }
+      }
     }
+    deps.eventManager().logSwgEvent(eventType, true, eventParams);
     return parseSubscriptionResponse(deps, data, completeHandler);
   });
 }
@@ -6953,7 +7161,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -7619,9 +7827,7 @@ class Dialog {
     }
     return this.doc_
       .addToFixedLayer(iframe.getElement())
-      .then(() => {
-        iframe.whenReady();
-      })
+      .then(() => iframe.whenReady())
       .then(() => {
         this.buildIframe_();
         return this;
@@ -9521,6 +9727,49 @@ class LinkSaveFlow {
   }
 
   /**
+   * @param {LinkingInfoResponse} response
+   * @private
+   */
+  sendLinkSaveToken_(response) {
+    if (!response || !response.getRequested()) {
+      return;
+    }
+    this.requestPromise_ = new Promise(resolve => {
+      resolve(this.callback_());
+    })
+      .then(request => {
+        const saveRequest = new LinkSaveTokenRequest();
+        if (request && request.token) {
+          if (request.authCode) {
+            throw new Error('Both authCode and token are available');
+          } else {
+            saveRequest.setToken(request.token);
+          }
+        } else if (request && request.authCode) {
+          saveRequest.setAuthCode(request.authCode);
+        } else {
+          throw new Error('Neither token or authCode is available');
+        }
+        if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
+          this.activityIframeView_.execute(saveRequest);
+        } else {
+          const saveRequestJson = {};
+          if (saveRequest.getAuthCode()) {
+            saveRequestJson['authCode'] = request.authCode;
+          } else if (saveRequest.getToken()) {
+            saveRequestJson['token'] = request.token;
+          }
+          this.activityIframeView_.messageDeprecated(saveRequestJson);
+        }
+      })
+      .catch(reason => {
+        // The flow is complete.
+        this.complete_();
+        throw reason;
+      });
+  }
+
+  /**
    * @return {?Promise}
    */
   /**
@@ -9540,33 +9789,20 @@ class LinkSaveFlow {
       /* shouldFadeBody */ false,
       /* hasLoadingIndicator */ true
     );
-    this.activityIframeView_.onMessageDeprecated(data => {
-      if (data['getLinkingInfo']) {
-        this.requestPromise_ = new Promise(resolve => {
-          resolve(this.callback_());
-        })
-          .then(request => {
-            let saveRequest;
-            if (request && request.token) {
-              if (request.authCode) {
-                throw new Error('Both authCode and token are available');
-              } else {
-                saveRequest = {'token': request.token};
-              }
-            } else if (request && request.authCode) {
-              saveRequest = {'authCode': request.authCode};
-            } else {
-              throw new Error('Neither token or authCode is available');
-            }
-            this.activityIframeView_.messageDeprecated(saveRequest);
-          })
-          .catch(reason => {
-            // The flow is complete.
-            this.complete_();
-            throw reason;
-          });
-      }
-    });
+    if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
+      this.activityIframeView_.on(
+        LinkingInfoResponse,
+        this.sendLinkSaveToken_.bind(this)
+      );
+    } else {
+      this.activityIframeView_.onMessageDeprecated(data => {
+        const response = new LinkingInfoResponse();
+        if (data['getLinkingInfo']) {
+          response.setRequested(true);
+        }
+        this.sendLinkSaveToken_(response);
+      });
+    }
 
     this.openPromise_ = this.dialogManager_.openView(
       this.activityIframeView_,
@@ -13350,20 +13586,59 @@ class OffersFlow {
       isClosable = false; // Default is to hide Close button.
     }
 
+    const feArgsObj = {
+      'productId': deps.pageConfig().getProductId(),
+      'publicationId': deps.pageConfig().getPublicationId(),
+      'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+      'productType': ProductType.SUBSCRIPTION,
+      'list': (options && options.list) || 'default',
+      'skus': (options && options.skus) || null,
+      'isClosable': isClosable,
+    };
+
+    this.prorationMode = feArgsObj['replaceSkuProrationMode'] || undefined;
+
+    if (options && options.oldSku) {
+      feArgsObj['oldSku'] = options.oldSku;
+    }
+
+    if (feArgsObj['oldSku']) {
+      assert(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
+
+      // Remove old sku from offers if in list.
+      let skuList = feArgsObj['skus'];
+      const /** @type {string} */ oldSku = feArgsObj['oldSku'];
+      skuList = skuList.filter(sku => sku !== oldSku);
+
+      assert(
+        skuList.length > 0,
+        'Sku list only contained offer user already has'
+      );
+      feArgsObj['skus'] = skuList;
+    }
+
+    // Redirect to payments if only one upgrade option is passed.
+    if (feArgsObj['skus'] && feArgsObj['skus'].length === 1) {
+      const sku = feArgsObj['skus'][0];
+      const /** @type {string|undefined} */ oldSku = feArgsObj['oldSku'];
+      // Update subscription triggers experimental flag if oldSku is passed,
+      // so we need to check for oldSku to decide if it needs to be sent.
+      // Otherwise we might accidentally block a regular subscription request.
+      if (oldSku) {
+        new PayStartFlow(this.deps_, {
+          skuId: sku,
+          oldSku,
+          replaceSkuProrationMode: this.prorationMode,
+        }).start();
+        return;
+      }
+    }
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
       feUrl('/offersiframe'),
-      feArgs({
-        'productId': deps.pageConfig().getProductId(),
-        'publicationId': deps.pageConfig().getPublicationId(),
-        'showNative': deps.callbacks().hasSubscribeRequestCallback(),
-        'productType': ProductType.SUBSCRIPTION,
-        'list': (options && options.list) || 'default',
-        'skus': (options && options.skus) || null,
-        'isClosable': isClosable,
-      }),
+      feArgs(feArgsObj),
       /* shouldFadeBody */ true
     );
   }
@@ -13374,12 +13649,21 @@ class OffersFlow {
    */
   startPayFlow_(response) {
     const sku = response.getSku();
+    const oldSku = response.getOldSku();
     if (sku) {
       this.eventManager_.logSwgEvent(
         AnalyticsEvent.ACTION_OFFER_SELECTED,
         true
       );
-      new PayStartFlow(this.deps_, sku).start();
+      let skuOrSubscriptionRequest;
+      if (oldSku) {
+        skuOrSubscriptionRequest = {};
+        skuOrSubscriptionRequest['skuId'] = sku;
+        skuOrSubscriptionRequest['oldSku'] = oldSku;
+      } else {
+        skuOrSubscriptionRequest = sku;
+      }
+      new PayStartFlow(this.deps_, skuOrSubscriptionRequest).start();
     }
   }
 
@@ -13414,54 +13698,67 @@ class OffersFlow {
    * @return {!Promise}
    */
   start() {
-    // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS);
-    this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(SubscriptionFlows.SHOW_OFFERS);
-    });
-    if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
-      this.activityIframeView_.on(
-        SkuSelectedResponse,
-        this.startPayFlow_.bind(this)
-      );
-      this.activityIframeView_.on(
-        AlreadySubscribedResponse,
-        this.handleLinkRequest_.bind(this)
-      );
-      this.activityIframeView_.on(
-        ViewSubscriptionsResponse,
-        this.startNativeFlow_.bind(this)
-      );
-    } else {
-      // If result is due to OfferSelection, redirect to payments.
-      this.activityIframeView_.onMessageDeprecated(result => {
-        if (result['alreadySubscribed']) {
-          const alreadySubscribedResponse = new AlreadySubscribedResponse();
-          alreadySubscribedResponse.setSubscriberOrMember(true);
-          if (result['linkRequested']) {
-            alreadySubscribedResponse.setLinkRequested(true);
-          }
-          this.handleLinkRequest_(alreadySubscribedResponse);
-          return;
-        }
-        if (result['sku']) {
-          const skuSelectedResponse = new SkuSelectedResponse();
-          skuSelectedResponse.setSku(result['sku']);
-          this.startPayFlow_(skuSelectedResponse);
-          return;
-        }
-        if (result['native']) {
-          const viewSubscriptionsResponse = new ViewSubscriptionsResponse();
-          viewSubscriptionsResponse.setNative(true);
-          this.startNativeFlow_(viewSubscriptionsResponse);
-          return;
-        }
+    if (this.activityIframeView_) {
+      // So no error if skipped to payment screen.
+      // Start/cancel events.
+      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS);
+      this.activityIframeView_.onCancel(() => {
+        this.deps_
+          .callbacks()
+          .triggerFlowCanceled(SubscriptionFlows.SHOW_OFFERS);
       });
+      if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
+        this.activityIframeView_.on(
+          SkuSelectedResponse,
+          this.startPayFlow_.bind(this)
+        );
+        this.activityIframeView_.on(
+          AlreadySubscribedResponse,
+          this.handleLinkRequest_.bind(this)
+        );
+        this.activityIframeView_.on(
+          ViewSubscriptionsResponse,
+          this.startNativeFlow_.bind(this)
+        );
+      } else {
+        // If result is due to OfferSelection, redirect to payments.
+        this.activityIframeView_.onMessageDeprecated(result => {
+          if (result['alreadySubscribed']) {
+            const alreadySubscribedResponse = new AlreadySubscribedResponse();
+            alreadySubscribedResponse.setSubscriberOrMember(true);
+            if (result['linkRequested']) {
+              alreadySubscribedResponse.setLinkRequested(true);
+            }
+            this.handleLinkRequest_(alreadySubscribedResponse);
+            return;
+          }
+          if (result['oldSku']) {
+            const skuSelectedResponse = new SkuSelectedResponse();
+            skuSelectedResponse.setSku(result['sku']);
+            skuSelectedResponse.setOldSku(result['oldSku']);
+            this.startPayFlow_(skuSelectedResponse);
+            return;
+          }
+          if (result['sku']) {
+            const skuSelectedResponse = new SkuSelectedResponse();
+            skuSelectedResponse.setSku(result['sku']);
+            this.startPayFlow_(skuSelectedResponse);
+            return;
+          }
+          if (result['native']) {
+            const viewSubscriptionsResponse = new ViewSubscriptionsResponse();
+            viewSubscriptionsResponse.setNative(true);
+            this.startNativeFlow_(viewSubscriptionsResponse);
+            return;
+          }
+        });
+      }
+
+      this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_OFFERS);
+
+      return this.dialogManager_.openView(this.activityIframeView_);
     }
-
-    this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_OFFERS);
-
-    return this.dialogManager_.openView(this.activityIframeView_);
+    return Promise.resolve();
   }
 }
 
@@ -14078,18 +14375,14 @@ class ClientEventManager {
    * Creates an event with the arguments provided and calls logEvent.
    * @param {!AnalyticsEvent} eventType
    * @param {?boolean=} isFromUserAction
-   * @param {?Object=} additionalParameters
+   * @param {../proto/api_messages.EventParams=} eventParams
    */
-  logSwgEvent(
-    eventType,
-    isFromUserAction = false,
-    additionalParameters = null
-  ) {
+  logSwgEvent(eventType, isFromUserAction = false, eventParams = null) {
     this.logEvent({
       eventType,
       eventOriginator: EventOriginator.SWG_CLIENT,
       isFromUserAction,
-      additionalParameters,
+      additionalParameters: eventParams,
     });
   }
 }
@@ -14147,6 +14440,9 @@ class AnalyticsService {
     this.args_ = feArgs({
       publicationId: this.publicationId_,
     });
+
+    /** @private @type {!boolean} */
+    this.everLogged_ = false;
 
     /**
      * @private @const {!AnalyticsContext}
@@ -14294,11 +14590,18 @@ class AnalyticsService {
   }
 
   /**
+   * Returns true if any logs have already be sent to the analytics server.
+   * @return {boolean}
+   */
+  getHasLogged() {
+    return this.everLogged_;
+  }
+
+  /**
    * @param {!../api/client-event-manager-api.ClientEvent} event
    * @return {!AnalyticsRequest}
    */
   createLogRequest_(event) {
-    //ignore event.additionalParameters.  It may have data we shouldn't log
     const meta = new AnalyticsEventMeta();
     meta.setEventOriginator(event.eventOriginator);
     meta.setIsFromUserAction(event.isFromUserAction);
@@ -14307,6 +14610,9 @@ class AnalyticsService {
     request.setEvent(event.eventType);
     request.setContext(this.context_);
     request.setMeta(meta);
+    if (event.additionalParameters instanceof EventParams) {
+      request.setParams(event.additionalParameters);
+    } // Ignore event.additionalParameters.  It may have data we shouldn't log.
     return request;
   }
 
@@ -14346,6 +14652,7 @@ class AnalyticsService {
     }
     this.lastAction_ = this.start_().then(port => {
       const request = this.createLogRequest_(event);
+      this.everLogged_ = true;
       port.execute(request);
     });
   }
@@ -14465,13 +14772,6 @@ class PropensityServer {
     this.deps_
       .eventManager()
       .registerEventListener(this.handleClientEvent_.bind(this));
-
-    // TODO(mborof): b/133519525
-    /** @private @const {!boolean} */
-    this.logSwgEventsExperiment_ = isExperimentOn(
-      win,
-      ExperimentFlags.LOG_SWG_TO_PROPENSITY
-    );
   }
 
   /**
@@ -14556,11 +14856,11 @@ class PropensityServer {
    */
   handleClientEvent_(event) {
     /**
-     * Does a live check of the config because we don't know when publisher called to
-     * enable (it may be after a consent dialog)
+     * Does a live check of the config because we don't know when publisher
+     * called to enable (it may be after a consent dialog).
      */
     if (
-      !(this.deps_.config().enablePropensity && this.logSwgEventsExperiment_) &&
+      !this.deps_.config().enablePropensity &&
       event.eventOriginator !== EventOriginator.PROPENSITY_CLIENT
     ) {
       return;
@@ -14578,7 +14878,10 @@ class PropensityServer {
       return;
     }
     let additionalParameters = event.additionalParameters;
-
+    // The EventParams object is private to SwG analytics.  Do not send.
+    if (additionalParameters instanceof EventParams) {
+      additionalParameters = undefined;
+    }
     if (isBoolean(event.isFromUserAction)) {
       if (!isObject(additionalParameters)) {
         additionalParameters = {};
@@ -15121,7 +15424,7 @@ class ConfiguredRuntime {
       }
     }
     // Throw error string if it's not null
-    assert(!error, error);
+    assert(!error, error || undefined);
     // Assign.
     Object.assign(this.config_, config);
   }
@@ -15172,6 +15475,26 @@ class ConfiguredRuntime {
   /** @override */
   showOffers(opt_options) {
     return this.documentParsed_.then(() => {
+      const errorMessage =
+        'The showOffers() method cannot be used to update a subscription. ' +
+        'Use the showUpdateOffers() method instead.';
+      assert(opt_options ? !opt_options['oldSku'] : true, errorMessage);
+      const flow = new OffersFlow(this, opt_options);
+      return flow.start();
+    });
+  }
+
+  /** @override */
+  showUpdateOffers(opt_options) {
+    assert(
+      isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION),
+      'Not yet launched!'
+    );
+    return this.documentParsed_.then(() => {
+      const errorMessage =
+        'The showUpdateOffers() method cannot be used for new subscribers. ' +
+        'Use the showOffers() method instead.';
+      assert(opt_options ? !!opt_options['oldSku'] : false, errorMessage);
       const flow = new OffersFlow(this, opt_options);
       return flow.start();
     });
@@ -15195,9 +15518,10 @@ class ConfiguredRuntime {
 
   /** @override */
   showContributionOptions(opt_options) {
-    if (!isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS)) {
-      throw new Error('Not yet launched!');
-    }
+    assert(
+      isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS),
+      'Not yet launched!'
+    );
     return this.documentParsed_.then(() => {
       const flow = new ContributionsFlow(this, opt_options);
       return flow.start();
@@ -15261,15 +15585,31 @@ class ConfiguredRuntime {
   }
 
   /** @override */
-  subscribe(skuOrSubscriptionRequest) {
-    if (
-      typeof skuOrSubscriptionRequest != 'string' &&
-      !isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION)
-    ) {
-      throw new Error('Not yet launched!');
-    }
+  subscribe(sku) {
+    const errorMessage =
+      'The subscribe() method can only take a sku as its parameter; ' +
+      'for subscription updates please use the updateSubscription() method';
+    assert(typeof sku === 'string', errorMessage);
     return this.documentParsed_.then(() => {
-      return new PayStartFlow(this, skuOrSubscriptionRequest).start();
+      return new PayStartFlow(this, sku).start();
+    });
+  }
+
+  /** @override */
+  updateSubscription(subscriptionRequest) {
+    assert(
+      isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION),
+      'Not yet launched!'
+    );
+    const errorMessage =
+      'The updateSubscription() method should be used for subscription ' +
+      'updates; for new subscriptions please use the subscribe() method';
+    assert(
+      subscriptionRequest ? subscriptionRequest['oldSku'] : false,
+      errorMessage
+    );
+    return this.documentParsed_.then(() => {
+      return new PayStartFlow(this, subscriptionRequest).start();
     });
   }
 
@@ -15280,9 +15620,10 @@ class ConfiguredRuntime {
 
   /** @override */
   contribute(skuOrSubscriptionRequest) {
-    if (!isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS)) {
-      throw new Error('Not yet launched!');
-    }
+    assert(
+      isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS),
+      'Not yet launched!'
+    );
 
     return this.documentParsed_.then(() => {
       return new PayStartFlow(
@@ -15324,9 +15665,10 @@ class ConfiguredRuntime {
 
   /** @override */
   attachSmartButton(button, optionsOrCallback, opt_callback) {
-    if (!isExperimentOn(this.win_, ExperimentFlags.SMARTBOX)) {
-      throw new Error('Not yet launched!');
-    }
+    assert(
+      isExperimentOn(this.win_, ExperimentFlags.SMARTBOX),
+      'Not yet launched!'
+    );
     this.buttonApi_.attachSmartButton(
       this,
       button,
