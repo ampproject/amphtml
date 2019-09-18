@@ -29,6 +29,7 @@ const {
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
+  timedExec,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
@@ -85,9 +86,7 @@ async function main() {
       timedExecOrDie(
         'gulp integration --nobuild --compiled --saucelabs --stable'
       );
-      timedExecOrDie(
-        'gulp integration --nobuild --compiled --saucelabs --beta'
-      );
+      timedExec('gulp integration --nobuild --compiled --saucelabs --beta');
     }
     stopSauceConnect(FILENAME);
   }

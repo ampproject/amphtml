@@ -431,10 +431,10 @@ async function createKarmaServer(
   });
 
   karmaServer
-    .on('run_start', () => karmaRunStart_())
-    .on('browsers_ready', () => karmaBrowsersReady_())
-    .on('browser_start', browser => karmaBrowserStart_(browser))
-    .on('browser_complete', browser => karmaBrowserComplete_(browser))
+    .on('run_start', karmaRunStart_)
+    .on('browsers_ready', karmaBrowsersReady_)
+    .on('browser_start', karmaBrowserStart_)
+    .on('browser_complete', karmaBrowserComplete_)
     .on('run_complete', runCompleteFn);
 
   karmaServer.start();
