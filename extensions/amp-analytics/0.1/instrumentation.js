@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  AmpStoryEventTracker,
+  AnalyticsEvent,
+  AnalyticsEventType,
+  CustomEventTracker,
+  getTrackerKeyName,
+} from './events';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
-import {AnalyticsEvent, AnalyticsEventType, CustomEventTracker} from './events';
 import {AnalyticsGroup} from './analytics-group';
 import {Services} from '../../../src/services';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
@@ -68,6 +74,19 @@ export class InstrumentationService {
   }
 
   /**
+   * @param {string} trackerName
+   * @private
+   */
+  getTrackerClass_(trackerName) {
+    switch (trackerName) {
+      case AnalyticsEventType.STORY:
+        return AmpStoryEventTracker;
+      default:
+        return CustomEventTracker;
+    }
+  }
+
+  /**
    * Triggers the analytics event with the specified type.
    *
    * @param {!Element} target
@@ -77,9 +96,10 @@ export class InstrumentationService {
   triggerEventForTarget(target, eventType, opt_vars) {
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
-    const tracker = /** @type {!CustomEventTracker} */ (root.getTracker(
-      AnalyticsEventType.CUSTOM,
-      CustomEventTracker
+    const trackerName = getTrackerKeyName(eventType);
+    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(
+      trackerName,
+      this.getTrackerClass_(trackerName)
     ));
     tracker.trigger(event);
   }
