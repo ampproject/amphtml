@@ -26,6 +26,8 @@ const REMOVABLE = {
   dev: [
     'assert',
     'fine',
+    'info',
+    'warn',
     'assertElement',
     'assertString',
     'assertNumber',
