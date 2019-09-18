@@ -8363,10 +8363,10 @@ jest-docblock@^24.3.0:
   dependencies:
     detect-newline "^2.1.0"
 
-jest-dot-reporter@1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/jest-dot-reporter/-/jest-dot-reporter-1.0.8.tgz#6301e4d77e5897f8675354241af023f0ccecb616"
-  integrity sha512-2dW6c1GT2fBedPDDLFMzR/MkxdSy00CiycC8Ie+PO4pku2Ivqa5vpDZsxinMSPdZJykWD6UF0TBdzQHc1QMc7Q==
+jest-dot-reporter@1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/jest-dot-reporter/-/jest-dot-reporter-1.0.10.tgz#3a94d58bc893add036e5c49dd02896e9142934b2"
+  integrity sha512-rJn3M0R/xrH/6L3I1g+5T8acz09jFNGtmo/BFPXogLC0LQeFrisfeCsWM5E8feekq1oPF1EkxcJfrMUm9EkZcA==
   dependencies:
     chalk "2.4.2"
     moment "2.24.0"
