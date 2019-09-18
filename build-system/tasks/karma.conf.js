@@ -304,7 +304,7 @@ module.exports = {
   // TODO(rsimha): Reduce this number once keepalives are implemented by
   // karma-sauce-launcher.
   // See https://github.com/karma-runner/karma-sauce-launcher/pull/161.
-  browserDisconnectTimeout: 15 * 60 * 1000,
+  browserDisconnectTimeout: 2 * 60 * 1000,
   browserNoActivityTimeout: 2 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
