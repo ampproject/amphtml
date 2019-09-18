@@ -77,7 +77,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
 
     /** @private {?number} */
     this.smoothing_ = this.element.hasAttribute('smoothing')
-      ? this.element.getAttribute('smoothing') || DEFAULT_SMOOTHING_PTS
+      ? Number(this.element.getAttribute('smoothing')) || DEFAULT_SMOOTHING_PTS
       : null;
   }
 
@@ -160,7 +160,9 @@ export class AmpOrientationObserver extends AMP.BaseElement {
 
       if (Math.abs(alpha - this.alphaValue_) > DELTA_CONST) {
         if (this.smoothing_) {
-          this.alphaValue_ = this.smoothedAlphaValue_(alpha);
+          this.alphaValue_ = this.smoothedAlphaValue_(
+            /** @type {number} */ (alpha)
+          );
         } else {
           this.alphaValue_ = /** @type {number} */ (alpha);
         }
@@ -168,7 +170,9 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       }
       if (Math.abs(beta - this.betaValue_) > DELTA_CONST) {
         if (this.smoothing_) {
-          this.betaValue_ = this.smoothedBetaValue_(beta);
+          this.betaValue_ = this.smoothedBetaValue_(
+            /** @type {number} */ (beta)
+          );
         } else {
           this.betaValue_ = /** @type {number} */ (beta);
         }
@@ -176,7 +180,9 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       }
       if (Math.abs(gamma - this.gammaValue_) > DELTA_CONST) {
         if (this.smoothing_) {
-          this.gammaValue_ = this.smoothedGammaValue_(gamma);
+          this.gammaValue_ = this.smoothedGammaValue_(
+            /** @type {number} */ (gamma)
+          );
         } else {
           this.gammaValue_ = /** @type {number} */ (gamma);
         }
@@ -249,7 +255,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    * Dispatches the event to signify change in the device orientation
    * along a certain axis.
    * @param {string} eventName
-   * @param {?number} eventValue
+   * @param {number} eventValue
    * @param {Array} eventRange
    * @private
    */
@@ -262,7 +268,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       this.win,
       `${TAG}.${eventName}`,
       dict({
-        'angle': clamp(eventValue.toFixed(), eventRange[0], eventRange[1]),
+        'angle': clamp(eventValue, eventRange[0], eventRange[1]).toFixed(),
         'percent': percentValue / (eventRange[1] - eventRange[0]),
       })
     );
