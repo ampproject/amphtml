@@ -194,18 +194,20 @@ function karmaBrowserStart_(browser) {
  * @param {Object} browser
  * @private
  */
-function karmaBrowserComplete_(browser) {
+async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
-  // Prevent cases where Karma detects zero tests and still passes. #16851.
+  // Set test status to "error" if browser_complete shows zero tests (#16851).
+  // Sometimes, Sauce labs can follow this up with another successful status, in
+  // which case the error status will be replaced by a pass / fail status.
   if (result.total == 0) {
-    log(red('ERROR: Zero tests detected by Karma.'));
-    log(red(JSON.stringify(result)));
-    reportTestErrored().finally(() => {
-      if (!argv.watch) {
-        process.exit(1);
-      }
-    });
+    log(
+      yellow('WARNING:'),
+      'Received a status with zero tests:',
+      cyan(JSON.stringify(result))
+    );
+    await reportTestErrored();
+    return;
   }
   // Print a summary for each browser as soon as tests complete.
   let message =
