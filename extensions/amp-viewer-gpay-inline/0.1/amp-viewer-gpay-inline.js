@@ -13,35 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  AmpPaymentGoogleInlineService,
+  AmpPaymentGoogleIntegration,
+} from '../../../src/service/payments/amp-payment-google';
+import {CSS} from '../../../build/amp-viewer-gpay-inline-0.1.css';
+import {getServiceForDoc} from '../../../src/service';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
-import {Layout} from '../../../src/layout';
+/** @const {string} */
+const TAG = 'amp-viewer-gpay-inline';
 
+/** @implements {../../../src/async-input.AsyncInput} */
 export class AmpViewerGpayInline extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {string} */
-    this.myText_ = 'hello world';
-
-    /** @private {?Element} */
-    this.container_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    /**
+     * @private {!AmpPaymentGoogleIntegration}
+     */
+    this.paymentsIntegration_ = getServiceForDoc(
+      this.win.document,
+      'amp-payment-google-integration'
+    );
+    this.paymentsIntegration_.startInlinePayment(
+      this.element);
+  }
+
+  /** @override */
+  layoutCallback() {
+    return this.paymentsIntegration_.whenInlineWidgetReady();
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  getTag_() {
+    return TAG;
+  }
+
+  /**@override */
+  getValue() {
+    return this.paymentsIntegration_.populatePaymentToken();
   }
 }
 
-AMP.extension('amp-viewer-gpay-inline', '0.1', AMP => {
-  AMP.registerElement('amp-viewer-gpay-inline', AmpViewerGpayInline);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerServiceForDoc(
+    'payment-google-inline',
+    AmpPaymentGoogleInlineService
+  );
+  AMP.registerServiceForDoc('amp-payment-google-integration', function(ampdoc) {
+    return new AmpPaymentGoogleIntegration(ampdoc);
+  });
+  AMP.registerElement(TAG, AmpViewerGpayInline, CSS);
 });

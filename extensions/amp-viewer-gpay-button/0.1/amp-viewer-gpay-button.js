@@ -14,34 +14,49 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+import {AmpPaymentGoogleIntegration} from '../../../src/service/payments/amp-payment-google';
+import {getServiceForDoc} from '../../../src/service';
 
-export class AmpViewerGpayButton extends AMP.BaseElement {
+/** @const {string} */
+const TAG = 'amp-viewer-gpay-button';
+
+class AmpViewerGpayButton extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+  }
 
-    /** @private {string} */
-    this.myText_ = 'hello world';
-
-    /** @private {?Element} */
-    this.container_ = null;
+  /** @override */
+  isLayoutSupported(unusedLayout) {
+    return true;
   }
 
   /** @override */
   buildCallback() {
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    /**
+     * @private {!AmpPaymentGoogleIntegration}
+     */
+    this.paymentsIntegration_ = getServiceForDoc(
+      this.win.document,
+      'amp-payment-google-integration'
+    );
+    this.paymentsIntegration_.startGpayButton(this.element);
   }
 
   /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+  layoutCallback() {
+    return this.paymentsIntegration_.whenButtonReady();
+  }
+
+  /** @override */
+  getTag_() {
+    return TAG;
   }
 }
 
-AMP.extension('amp-viewer-gpay-button', '0.1', AMP => {
-  AMP.registerElement('amp-viewer-gpay-button', AmpViewerGpayButton);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerServiceForDoc('amp-payment-google-integration', function(ampdoc) {
+    return new AmpPaymentGoogleIntegration(ampdoc);
+  });
+  AMP.registerElement(TAG, AmpViewerGpayButton);
 });

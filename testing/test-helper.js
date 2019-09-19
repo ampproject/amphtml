@@ -62,6 +62,30 @@ export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
   return mock;
 }
 
+export function mockServiceForDocWithVariables(
+  sandbox,
+  ampdoc,
+  serviceId,
+  methods,
+  variables
+) {
+  resetServiceForTesting(ampdoc.win, serviceId);
+  const impl = {};
+  methods.forEach(method => {
+    if (variables[method]) {
+      impl[method] = variables[method];
+    } else {
+      impl[method] = () => {};
+    }
+  });
+  registerServiceBuilderForDoc(ampdoc, serviceId, () => impl);
+  const mock = {};
+  methods.forEach(method => {
+    mock[method] = sandbox.stub(impl, method);
+  });
+  return mock;
+}
+
 export function mockWindowInterface(sandbox) {
   const methods = Object.getOwnPropertyNames(WindowInterface).filter(
     p => typeof WindowInterface[p] === 'function'

@@ -61,6 +61,7 @@ export class SsrTemplateHelper {
         return this.viewer_.hasCapability('viewerRenderTemplate');
       }
     }
+    userAssert().error('false')
     return false;
   }
 

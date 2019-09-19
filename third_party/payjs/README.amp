@@ -1,0 +1,9 @@
+URL: https://github.com/google/payjs
+License: Apache 2.0
+License File: https://github.com/google/payjs/blob/master/LICENSE
+
+Description:
+Copy of Google Pay integration library
+
+Local Modifications:
+Removed bazel build files
