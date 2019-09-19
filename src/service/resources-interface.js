@@ -16,6 +16,9 @@
 
 import {MutatorInterface} from './mutator-interface';
 
+/** @const {string} */
+export const READY_SCAN_SIGNAL = 'ready-scan';
+
 /* eslint-disable no-unused-vars */
 /**
  * @interface

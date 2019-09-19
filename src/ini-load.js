@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
+import {READY_SCAN_SIGNAL} from './service/resources-interface';
 import {Services} from './services';
-
-/** @const {string} */
-const READY_SCAN_SIGNAL_ = 'ready-scan';
 
 /** @const {!Array<string>} */
 const EXCLUDE_INI_LOAD = [
@@ -82,7 +80,7 @@ export function getMeasuredResources(ampdoc, hostWin, filterFn) {
   // "layer has been measured" signal.
   return ampdoc
     .signals()
-    .whenSignal(READY_SCAN_SIGNAL_)
+    .whenSignal(READY_SCAN_SIGNAL)
     .then(() => {
       // Second, wait for any left-over elements to complete measuring.
       const measurePromiseArray = [];
