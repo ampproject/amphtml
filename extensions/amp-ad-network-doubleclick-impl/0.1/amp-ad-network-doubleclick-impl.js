@@ -1296,12 +1296,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // setStyles cannot have computed style names, so we must do this by cases.
     if (isRtl) {
       setStyles(this.element, {
-        'z-index': '30',
+        'z-index': '11',
         'margin-right': `${Math.round(newMargin)}px`,
       });
     } else {
       setStyles(this.element, {
-        'z-index': '30',
+        'z-index': '11',
         'margin-left': `${Math.round(newMargin)}px`,
       });
     }
