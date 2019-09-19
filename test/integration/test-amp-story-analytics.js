@@ -123,11 +123,11 @@ config.run('amp-story analytics', () => {
       env.iframe.style.height = '732px';
       env.iframe.style.width = '412px';
       browser.waitForElementLayout('amp-analytics');
-      return browser.waitForElementLayout('amp-story', 20000);
+      return browser.waitForElementLayout('amp-story');
     });
 
     it('should send analytics event when landing on a page', async () => {
-      await browser.waitForElementLayout('#page-1[active]', 20000);
+      await browser.waitForElementLayout('#page-1[active]');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
@@ -136,7 +136,7 @@ config.run('amp-story analytics', () => {
 
     it('should send analytics event when navigating', async () => {
       browser.click('#page-1 h1');
-      await browser.waitForElementLayout('#page-2[active]', 20000);
+      await browser.waitForElementLayout('#page-2[active]');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
@@ -145,7 +145,7 @@ config.run('amp-story analytics', () => {
 
     it('should send analytics event when entering bookend', async () => {
       browser.click('#page-1 h1');
-      await browser.waitForElementLayout('#page-2[active]', 20000);
+      await browser.waitForElementLayout('#page-2[active]');
       browser.click('#page-2 h1');
       await browser.wait(1000);
 
@@ -156,7 +156,7 @@ config.run('amp-story analytics', () => {
 
     it('should send analytics event when exiting bookend', async () => {
       browser.click('#page-1 h1');
-      await browser.waitForElementLayout('#page-2[active]', 20000);
+      await browser.waitForElementLayout('#page-2[active]');
       browser.click('#page-2 h1');
       await browser.wait(1000);
       browser.click('amp-story-bookend');
