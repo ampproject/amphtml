@@ -18,8 +18,8 @@ import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
+import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {Resource, ResourceState} from './resource';
-import {ResourcesInterface} from './resources-interface';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
@@ -38,7 +38,6 @@ import {remove} from '../utils/array';
 import {startupChunk} from '../chunk';
 
 const TAG_ = 'Resources';
-const READY_SCAN_SIGNAL_ = 'ready-scan';
 const LAYOUT_TASK_ID_ = 'L';
 const LAYOUT_TASK_OFFSET_ = 0;
 const PRELOAD_TASK_ID_ = 'P';
@@ -825,14 +824,14 @@ export class ResourcesImpl {
     if (
       this.documentReady_ &&
       this.ampInitialized_ &&
-      !this.ampdoc.signals().get(READY_SCAN_SIGNAL_)
+      !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
     ) {
       // This signal mainly signifies that most of elements have been measured
       // by now. This is mostly used to avoid measuring too many elements
       // individually. This will be superceeded by layers API, e.g.
       // "layer measured".
       // May not be called in shadow mode.
-      this.ampdoc.signals().signal(READY_SCAN_SIGNAL_);
+      this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
     }
 
     if (this.maybeChangeHeight_) {

@@ -18,6 +18,7 @@ import {Deferred} from '../utils/promise';
 import {InaboxMutator} from './inabox-mutator';
 import {Observable} from '../observable';
 import {Pass} from '../pass';
+import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';
 import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
@@ -216,6 +217,8 @@ export class InaboxResources {
         resource.startLayout();
       }
     });
+
+    this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
   }
