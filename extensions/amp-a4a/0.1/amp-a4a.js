@@ -1797,6 +1797,7 @@ export class AmpA4A extends AMP.BaseElement {
       if (this.isSinglePageStoryAd) {
         // CTA Type is a required meta tag. CTA Url can come from meta tag, or
         // (temporarily) amp-ad-exit config.
+        // TODO(#24080): maybe rerequire cta url?
         if (!metaDataObj['ctaType']) {
           throw new Error(INVALID_SPSA_RESPONSE);
         }
