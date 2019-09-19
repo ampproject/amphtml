@@ -59,28 +59,27 @@ amp-sidebar[side][i-amphtml-sidebar-opened] {
 
 amp-sidebar [amp-sidebar-submenu-group],
 amp-sidebar [amp-sidebar-submenu] {
-  position: absolute;
-  outline: none;
-  top: 0;
-  width: 100%;
-  height: 100vh;
-  transform: translateX(0);
+  position: absolute !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  transform: translateX(0) !important;
   transition: transform 233ms;
 }
 
 amp-sidebar [amp-sidebar-submenu] {
-  left: 100%;
+  left: 100% !important;
   animation: i-amphtml-sidebar-submenu-hide 233ms linear forwards;
 }
 
 amp-sidebar [amp-sidebar-submenu][open] {
-  visibility: visible;
+  visibility: visible !important;
   animation: none;
 }
 
 amp-sidebar [amp-sidebar-submenu-group][child-open],
 amp-sidebar [amp-sidebar-submenu][child-open] {
-  transform: translateX(-100%);
+  transform: translateX(-100%) !important;
   animation: i-amphtml-sidebar-submenu-parent-hide 233ms linear forwards;
 }
 

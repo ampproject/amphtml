@@ -24,10 +24,13 @@ import {dev} from '../../../src/log';
  */
 export class SubmenuManager {
   /**
-   * @param {*} sidebar
+   * @param {!AmpElement} sidebar
    */
   constructor(sidebar) {
     this.sidebar_ = sidebar;
+
+    /** @private {!../../../src/service/history-impl.History} */
+    this.history_ = Services.historyForDoc(this.sidebar_.getAmpDoc());
 
     /** @private {Array} */
     this.historyIds_ = [];
@@ -37,30 +40,60 @@ export class SubmenuManager {
   }
 
   /**
-   * On click handler.
-   * @param {Event} e
+   *
    */
-  handleClick(e) {
-    this.handleSubmenuOpenClick_(e);
-    this.handleSubmenuCloseClick_(e);
+  build() {
+    const sidebarElement = this.sidebar_.element;
+    const openElements = sidebarElement.querySelectorAll(
+      '[amp-sidebar-submenu-open]'
+    );
+    const closeElements = sidebarElement.querySelectorAll(
+      '[amp-sidebar-submenu-close]'
+    );
+    openElements.forEach(element => {
+      element.addEventListener('click', e =>
+        this.maybeHandleSubmenuOpenClick_(e)
+      );
+    });
+    closeElements.forEach(element => {
+      element.addEventListener('click', e =>
+        this.maybeHandleSubmenuCloseClick_(e)
+      );
+    });
+  }
+
+  /**
+   * Handles click events on open/close submenu elements.
+   * @param {Event} e
+   * @return {boolean} whether event was actually handled by submenus.
+   */
+  maybeHandleClick(e) {
+    return (
+      this.maybeHandleSubmenuOpenClick_(e) ||
+      this.maybeHandleSubmenuCloseClick_(e)
+    );
   }
 
   /**
    * Handler for submenu open element click.
    * @param {Event} e
+   * @return {boolean} whether event target is a submenu open element.
    */
-  handleSubmenuOpenClick_(e) {
+  maybeHandleSubmenuOpenClick_(e) {
     const submenuOpen = closestAncestorElementBySelector(
       dev().assertElement(e.target),
       '[amp-sidebar-submenu-open]'
     );
-    const submenu =
-      submenuOpen &&
-      submenuOpen.parentElement.querySelector('[amp-sidebar-submenu]');
-
+    if (!submenuOpen) {
+      return false;
+    }
+    const submenu = submenuOpen.parentElement.querySelector(
+      '[amp-sidebar-submenu]'
+    );
     if (submenu) {
       this.open_(submenu);
     }
+    return true;
   }
 
   /**
@@ -75,7 +108,7 @@ export class SubmenuManager {
     if (submenuParent) {
       submenuParent.setAttribute('child-open', '');
       submenu.setAttribute('open', '');
-      Services.historyForDoc(this.sidebar_.getAmpDoc())
+      this.history_
         .push(() => this.close_(submenu))
         .then(historyId => {
           this.historyIds_.push(historyId);
@@ -87,19 +120,24 @@ export class SubmenuManager {
   /**
    * Handler for submenu close element click.
    * @param {Event} e
+   * @return {boolean} whether event target is a submenu close element.
    */
-  handleSubmenuCloseClick_(e) {
+  maybeHandleSubmenuCloseClick_(e) {
     const submenuClose = closestAncestorElementBySelector(
       dev().assertElement(e.target),
       '[amp-sidebar-submenu-close]'
     );
-    const submenu =
-      submenuClose &&
-      closestAncestorElementBySelector(submenuClose, '[amp-sidebar-submenu]');
-
+    if (!submenuClose) {
+      return false;
+    }
+    const submenu = closestAncestorElementBySelector(
+      submenuClose,
+      '[amp-sidebar-submenu]'
+    );
     if (submenu) {
       this.close_(submenu);
     }
+    return true;
   }
 
   /**
@@ -116,7 +154,7 @@ export class SubmenuManager {
       submenu.removeAttribute('open');
       if (this.historyIds_.length > 0) {
         const lastHistoryId = this.historyIds_.pop();
-        Services.historyForDoc(this.sidebar_.getAmpDoc()).pop(lastHistoryId);
+        this.history_.pop(lastHistoryId);
       }
       this.currentSubmenu_ = submenuParent;
     }

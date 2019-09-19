@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
@@ -211,21 +212,25 @@ export class AmpSidebar extends AMP.BaseElement {
 
     element.addEventListener(
       'click',
-      e => {
-        this.handleAnchorClick_(e);
-        this.submenuManager_.handleClick(e);
-      },
+      e =>
+        this.maybeHandleAnchorClick_(e) ||
+        this.submenuManager_.maybeHandleClick(e),
       true
     );
+
+    // element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+    //   this.submenuManager_.build();
+    // });
 
     this.setupGestures_(this.element);
   }
 
   /**
-   * Handler on anchor element click.
+   * Handler for anchor element click.
    * @param {Event} e
+   * @return {boolean} whether event target is a navigable anchor element.
    */
-  handleAnchorClick_(e) {
+  maybeHandleAnchorClick_(e) {
     const target = closestAncestorElementBySelector(
       dev().assertElement(e.target),
       'A'
@@ -238,14 +243,15 @@ export class AmpSidebar extends AMP.BaseElement {
       // due to after-navigation history manipulation inside a timer callback.
       // See this issue for more details:
       // https://github.com/ampproject/amphtml/issues/6585
-      if (removeFragment(target.href) != removeFragment(currentHref)) {
-        return;
-      }
-
-      if (tgtLoc.hash) {
+      if (
+        removeFragment(target.href) == removeFragment(currentHref) &&
+        tgtLoc.hash
+      ) {
         this.close_();
       }
+      return true;
     }
+    return false;
   }
 
   /**
