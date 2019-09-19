@@ -36,12 +36,11 @@ import {
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../../src/localized-strings';
 import {Services} from '../../../../src/services';
-import {StoryAnalyticsEvent} from '../../../../src/analytics';
+import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
-import {getAnalyticsService} from '../story-analytics';
 import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';

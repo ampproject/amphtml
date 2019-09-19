@@ -15,13 +15,23 @@
  */
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {
-  StoryAnalyticsEvent,
-  triggerAnalyticsEvent,
-} from '../../../src/analytics';
 import {getVariableService} from './variable-service';
 import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
+
+/** @enum {string} */
+export const StoryAnalyticsEvent = {
+  BOOKEND_CLICK: 'story-bookend-click',
+  BOOKEND_ENTER: 'story-bookend-enter',
+  BOOKEND_EXIT: 'story-bookend-exit',
+  LAST_PAGE_VISIBLE: 'story-last-page-visible',
+  PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
+  PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
+  PAGE_VISIBLE: 'story-page-visible',
+  STORY_MUTED: 'story-audio-muted',
+  STORY_UNMUTED: 'story-audio-unmuted',
+};
 
 /** @enum {string} */
 export const AdvancementMode = {
@@ -72,8 +82,8 @@ export class StoryAnalyticsService {
     /** @private {!Object} */
     this.eventsPerPage_ = map();
 
-    /** @private {!Object} */
-    this.details_ = {};
+    /** @private {!JsonObject} */
+    this.details_ = /** @type {!JsonObject} */ ({});
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
@@ -136,7 +146,7 @@ export class StoryAnalyticsService {
    * Gets details for a given event type.
    * @param {!StoryAnalyticsEvent} eventType
    * @private
-   * @return {!Object}
+   * @return {!JsonObject}}
    */
   getDetails_(eventType) {
     const details = {};
@@ -147,7 +157,10 @@ export class StoryAnalyticsService {
       Object.assign(details, {repeated: true});
     }
 
-    this.details_ = Object.assign({detailsForPage: details}, vars);
+    this.details_ = /** @type {!JsonObject} */ (Object.assign(
+      {detailsForPage: details},
+      vars
+    ));
     return this.details_;
   }
 

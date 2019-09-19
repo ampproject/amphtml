@@ -24,10 +24,9 @@ import {LandscapeComponent} from '../bookend/components/landscape';
 import {LocalizationService} from '../../../../src/service/localization';
 import {PortraitComponent} from '../bookend/components/portrait';
 import {Services} from '../../../../src/services';
-import {StoryAnalyticsEvent} from '../../../../src/analytics';
+import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {TextBoxComponent} from '../bookend/components/text-box';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {getAnalyticsService} from '../story-analytics';
 import {registerServiceBuilder} from '../../../../src/service';
 import {user} from '../../../../src/log';
 
