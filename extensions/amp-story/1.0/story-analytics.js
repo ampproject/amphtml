@@ -116,8 +116,12 @@ export class StoryAnalyticsService {
    * @param {!StoryAnalyticsEvent} eventType
    */
   triggerEvent(eventType) {
-    this.details_ = this.getDetails_(eventType);
-    triggerAnalyticsEvent(this.element_, eventType, this.details_);
+    this.incrementEventCountForPage_(eventType);
+    triggerAnalyticsEvent(
+      this.element_,
+      eventType,
+      this.getDetails_(eventType)
+    );
   }
 
   /**
@@ -129,7 +133,7 @@ export class StoryAnalyticsService {
   }
 
   /**
-   * Consolidates count of event types per page and variables of the event.
+   * Gets details for a given event type.
    * @param {!StoryAnalyticsEvent} eventType
    * @private
    * @return {!Object}
@@ -139,17 +143,26 @@ export class StoryAnalyticsService {
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
 
-    this.eventsPerPage_[pageId] = this.eventsPerPage_[pageId] || {};
-
-    this.eventsPerPage_[pageId][eventType] =
-      this.eventsPerPage_[pageId][eventType] || 0;
-
-    this.eventsPerPage_[pageId][eventType]++;
-
     if (this.eventsPerPage_[pageId][eventType] > 1) {
       Object.assign(details, {repeated: true});
     }
 
-    return Object.assign({detailsForPage: details}, vars);
+    this.details_ = Object.assign({detailsForPage: details}, vars);
+    return this.details_;
+  }
+
+  /**
+   * Keeps count of number of events emitted by page for an event type.
+   * @param {!StoryAnalyticsEvent} eventType
+   * @private
+   */
+  incrementEventCountForPage_(eventType) {
+    const vars = this.variableService_.get();
+    const pageId = vars['storyPageId'];
+
+    this.eventsPerPage_[pageId] = this.eventsPerPage_[pageId] || {};
+    this.eventsPerPage_[pageId][eventType] =
+      this.eventsPerPage_[pageId][eventType] || 0;
+    this.eventsPerPage_[pageId][eventType]++;
   }
 }
