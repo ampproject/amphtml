@@ -29,6 +29,7 @@ tags: {  # <amp-lightbox-gallery>
   html_format: AMP
   tag_name: "AMP-LIGHTBOX-GALLERY"
   requires_extension: "amp-lightbox-galley"
+  unique: true
   mandatory_parent: "BODY"
   amp_layout: {
     supported_layouts: NODISPLAY
