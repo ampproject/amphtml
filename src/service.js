@@ -286,6 +286,7 @@ export function getServicePromiseForDoc(elementOrAmpDoc, id) {
  * @return {?Promise<!Object>}
  */
 export function getServicePromiseOrNullForDoc(elementOrAmpDoc, id) {
+  debugger;
   return getServicePromiseOrNullInternal(
     getAmpdocServiceHolder(elementOrAmpDoc),
     id

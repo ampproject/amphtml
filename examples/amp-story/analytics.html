@@ -6,6 +6,7 @@
     <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
     <title>My Story</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <link rel="canonical" href="analytics.html">
@@ -43,7 +44,7 @@
               "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
               "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
               "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
-              "click": "${base}?index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}"
+              "click": "${base}&index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}&tooltipTarget=${storyTooltipTarget}&tooltipTargetAttribute=${storyTooltipTargetAttribute}"
             },
             "triggers": {
               "trackAnchorClicks": {
@@ -59,6 +60,13 @@
                 "request": "click",
                 "vars": {
                   "eventId": "clickOnBookend"
+                }
+              },
+              "trackTooltipClicks": {
+                "on": "story-tooltip-click",
+                "request": "click",
+                "vars": {
+                  "eventId": "clickOnTooltip"
                 }
               },
               "trackPageview": {
@@ -89,12 +97,19 @@
       <amp-story-page id="p1">
         <amp-story-grid-layer template="vertical">
           <h1>Page One</h1>
+          <a href="google.com" role="link" data-tooltip-text="Adios" class="title-small center">Click me!</a>
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="p2">
         <amp-story-grid-layer template="vertical">
           <h1>Page Two</h1>
+          <amp-twitter width="375" data-tooltip-text="my twitter embed"
+            height="472"
+            layout="responsive"
+            data-tweetid="1166723359696130049"
+            interactive>
+          </amp-twitter>
         </amp-story-grid-layer>
       </amp-story-page>
 

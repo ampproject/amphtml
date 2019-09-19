@@ -22,7 +22,12 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
+import {
+  AdvancementMode,
+  AnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -60,6 +65,7 @@ export const EXPANDABLE_COMPONENTS = {
     actionIcon: ActionIcon.EXPAND,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
+    trackingAttribute: 'data-tweetid',
   },
 };
 
@@ -72,6 +78,7 @@ const LAUNCHABLE_COMPONENTS = {
   'a': {
     actionIcon: ActionIcon.LAUNCH,
     selector: 'a[href]:not([affiliate-link-icon])',
+    trackingAttribute: 'href',
   },
 };
 
@@ -282,6 +289,12 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
+
+    /** @private @const {!./variable-service} */
+    this.variableService_ = getVariableService(this.win_);
+
+    /** @private @const {!./story-analytics} */
+    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
 
     /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
@@ -502,8 +515,31 @@ export class AmpStoryEmbeddedComponent {
     this.focusedStateOverlay_.addEventListener('click', event =>
       this.onOutsideTooltipClick_(event)
     );
+    this.tooltip_.addEventListener(
+      'click',
+      () => this.tooltipAnalytics_(),
+      true /** capture */
+    );
 
     return this.shadowRoot_;
+  }
+
+  /**
+   * @private
+   */
+  tooltipAnalytics_() {
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.TOOLTIP_TARGET,
+      this.triggeringTarget_.tagName.toLowerCase()
+    );
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.TOOLTIP_TARGET_ATTRIBUTE,
+      this.triggeringTarget_.getAttribute(
+        this.getEmbedConfigFor_(this.triggeringTarget_).trackingAttribute
+      )
+    );
+    this.analyticsService_.triggerEvent(AnalyticsEvent.TOOLTIP_CLICK);
   }
 
   /**

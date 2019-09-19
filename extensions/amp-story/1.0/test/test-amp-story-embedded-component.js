@@ -16,10 +16,12 @@
 
 import {
   Action,
-  AmpStoryStoreService,
   EmbeddedComponentState,
+  getStoreService,
 } from '../amp-story-store-service';
 import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
+import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {EventType} from '../events';
 import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
@@ -35,13 +37,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
   let clickableEl;
   let fakeCover;
   let fakeComponent;
+  let analyticsService;
+  let variableService;
 
   beforeEach(() => {
     win = env.win;
-    storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
-    clickableEl = win.document.createElement('a');
-    addAttributesToElement(clickableEl, {'href': 'https://google.com'});
 
     // Making sure resource tasks run synchronously.
     sandbox.stub(Services, 'resourcesForDoc').returns({
@@ -69,6 +69,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     parentEl.appendChild(fakeCover);
     parentEl.appendChild(fakePage);
 
+    clickableEl = win.document.createElement('a');
+    addAttributesToElement(clickableEl, {'href': 'https://google.com'});
+
     component = new AmpStoryEmbeddedComponent(win, parentEl);
     fakeComponent = {
       element: clickableEl,
@@ -76,6 +79,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
       clientX: 50,
       clientY: 50,
     };
+
+    storeService = getStoreService(win);
+    analyticsService = getAnalyticsService(win);
+    variableService = getVariableService(win);
+    registerServiceBuilder(win, 'story-store', () => storeService);
   });
 
   it('should build the tooltip', () => {
@@ -228,6 +236,31 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     return timeout(150).then(() => {
       expect(tooltipTextEl.textContent).to.equal('google.com');
     });
+  });
+
+  it('should fire analytics event when clicking on the tooltip', () => {
+    const analyticsSpy = sandbox.spy(analyticsService, 'triggerEvent');
+    fakePage.appendChild(clickableEl);
+    storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+      element: clickableEl,
+      state: EmbeddedComponentState.FOCUSED,
+    });
+
+    const tooltip = component.focusedStateOverlay_.querySelector(
+      'a.i-amphtml-story-tooltip'
+    );
+    tooltip.onclick = function(e) {
+      e.preventDefault(); // Make the test not actually navigate.
+    };
+
+    tooltip.click();
+    expect(variableService.get()[AnalyticsVariable.TOOLTIP_TARGET]).to.equal(
+      'a'
+    );
+    expect(
+      variableService.get()[AnalyticsVariable.TOOLTIP_TARGET_ATTRIBUTE]
+    ).to.equal('https://google.com');
+    expect(analyticsSpy).to.have.been.calledWith(AnalyticsEvent.TOOLTIP_CLICK);
   });
 });
 
