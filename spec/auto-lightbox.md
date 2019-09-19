@@ -4,7 +4,8 @@ The standard AMP runtime finds elligible [`amp-img`](https://amp.dev/documentati
 elements and automatically makes them clickable in order to open an [`amp-lightbox-gallery`](https://amp.dev/documentation/components/amp-lightbox-gallery)
 for enhanced user experience that includes panning and pinch-to-zoom.
 
-Documents that explicitly use `amp-lightbox-gallery` are excluded from this treatment.
+Documents that include the [`amp-lightbox-gallery` extension](https://amp.dev/documentation/components/amp-lightbox-gallery/) and [use it explicitly](https://amp.dev/documentation/components/amp-lightbox-gallery/#usage) by setting the `lightbox` attribute on a valid element, are excluded from the auto-lightbox treatment.
+
 Otherwise, it's applied only on documents that contain either of the following:
 
 - an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag
