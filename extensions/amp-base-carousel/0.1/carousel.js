@@ -682,9 +682,11 @@ export class Carousel {
   /**
    * Updates the resting index as well as firing an event.
    * @param {number} restingIndex The new resting index.
+   * @param {ActionSource=} actionSource The actionSource associated with this
+   *    change.
    * @private
    */
-  updateRestingIndex_(restingIndex) {
+  updateRestingIndex_(restingIndex, actionSource) {
     this.restingIndex_ = restingIndex;
     this.element_.dispatchEvent(
       createCustomEvent(
@@ -692,7 +694,7 @@ export class Carousel {
         CarouselEvents.INDEX_CHANGE,
         dict({
           'index': restingIndex,
-          'actionSource': this.actionSource_,
+          'actionSource': actionSource,
         })
       )
     );
@@ -1079,6 +1081,8 @@ export class Carousel {
    * @private
    */
   resetScrollReferencePoint_(force = false) {
+    const {actionSource_} = this;
+
     // Make sure if the user is in the middle of a drag, we do not move
     // anything. The touch end will cause us to get called again.
     if (this.touching_) {
@@ -1116,7 +1120,7 @@ export class Carousel {
     const totalLength = sum(this.getSlideLengths_());
 
     this.runMutate_(() => {
-      this.updateRestingIndex_(this.currentIndex_);
+      this.updateRestingIndex_(this.currentIndex_, actionSource_);
 
       this.resetSlideTransforms_(totalLength);
       this.hideSpacersAndSlides_();
