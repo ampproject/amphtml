@@ -138,7 +138,6 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Setup actions and listeners
     this.setupActions_();
-    this.stopTouchMovePropagation_();
     this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
