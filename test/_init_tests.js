@@ -121,7 +121,6 @@ class TestConfig {
     this.runOnSafari = this.platform.isSafari.bind(this.platform);
     this.runOnIos = this.platform.isIos.bind(this.platform);
     this.runOnIe = this.platform.isIe.bind(this.platform);
-    this.runOnWindows = this.platform.isWindows.bind(this.platform);
 
     /**
      * By default, IE is skipped. Individual tests may opt in.
@@ -147,10 +146,6 @@ class TestConfig {
 
   skipIos() {
     return this.skip(this.runOnIos);
-  }
-
-  skipWindows() {
-    return this.skip(this.runOnWindows);
   }
 
   skipIfPropertiesObfuscated() {
@@ -201,10 +196,6 @@ class TestConfig {
   ifIe() {
     // It's necessary to first enable IE because we skip it by default.
     return this.enableIe().if(this.runOnIe);
-  }
-
-  ifWindows() {
-    return this.if(this.runOnWindows);
   }
 
   /**
