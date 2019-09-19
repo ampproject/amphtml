@@ -238,7 +238,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     });
   });
 
-  it('should fire analytics event when clicking on the tooltip', () => {
+  it('should fire analytics event when clicking on the tooltip of a link', () => {
     const analyticsSpy = sandbox.spy(analyticsService, 'triggerEvent');
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
@@ -246,9 +246,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
       state: EmbeddedComponentState.FOCUSED,
     });
 
-    const tooltip = component.focusedStateOverlay_.querySelector(
-      'a.i-amphtml-story-tooltip'
-    );
+    const tooltip = component
+      .getShadowRootForTesting()
+      .querySelector('a.i-amphtml-story-tooltip');
     tooltip.onclick = function(e) {
       e.preventDefault(); // Make the test not actually navigate.
     };
@@ -260,6 +260,36 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     expect(
       variableService.get()[AnalyticsVariable.TOOLTIP_TARGET_ATTRIBUTE]
     ).to.equal('https://google.com');
+    expect(analyticsSpy).to.have.been.calledWith(AnalyticsEvent.TOOLTIP_CLICK);
+  });
+
+  it('should fire analytics event when clicking on the tooltip of a tweet', () => {
+    const analyticsSpy = sandbox.spy(analyticsService, 'triggerEvent');
+    clickableEl = win.document.createElement('amp-twitter');
+    addAttributesToElement(clickableEl, {
+      'data-tweetid': '1166723359696130049',
+    });
+    fakePage.appendChild(clickableEl);
+
+    storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+      element: clickableEl,
+      state: EmbeddedComponentState.FOCUSED,
+    });
+
+    const tooltip = component
+      .getShadowRootForTesting()
+      .querySelector('a.i-amphtml-story-tooltip');
+    tooltip.onclick = function(e) {
+      e.preventDefault(); // Make the test not actually navigate.
+    };
+
+    tooltip.click();
+    expect(variableService.get()[AnalyticsVariable.TOOLTIP_TARGET]).to.equal(
+      'amp-twitter'
+    );
+    expect(
+      variableService.get()[AnalyticsVariable.TOOLTIP_TARGET_ATTRIBUTE]
+    ).to.equal('1166723359696130049');
     expect(analyticsSpy).to.have.been.calledWith(AnalyticsEvent.TOOLTIP_CLICK);
   });
 });

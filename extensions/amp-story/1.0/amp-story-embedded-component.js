@@ -525,6 +525,7 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
+   * Configures analytics variables and fires analytic event.
    * @private
    */
   tooltipAnalytics_() {
@@ -1246,5 +1247,13 @@ export class AmpStoryEmbeddedComponent {
       undefined,
       {bubbles: true}
     );
+  }
+
+  /**
+   * @visibleForTesting
+   * @return {!Element}
+   */
+  getShadowRootForTesting() {
+    return this.shadowRoot_;
   }
 }

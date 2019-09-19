@@ -372,7 +372,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     });
   });
 
-  it.only('should fire analytics event when clicking on a link', () => {
+  it('should fire analytics event when clicking on a link', () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
