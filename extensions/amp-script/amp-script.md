@@ -147,7 +147,7 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings).
 
 [tip type="default"]
-`AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension to be installed.
+`AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script to be included in the document head.
 [/tip]
 
 ```js
@@ -168,7 +168,7 @@ AMP.getState(expr) {}
 ##### Example with WebSocket and AMP.setState()
 
 ```html
-<amp-script width=1 height=1 script="webSocketDemo" development>
+<amp-script width=1 height=1 script="webSocketDemo">
 </amp-script>
 
 <!--
