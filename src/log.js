@@ -107,7 +107,8 @@ const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
  */
 const externalMessageUrl = (id, interpolatedParts) =>
   interpolatedParts.reduce(
-    (prefix, arg) => `${prefix}&s[]=${messageArgToEncodedComponent(arg)}`,
+    (prefix, part) =>
+      `${prefix}&s[]=${encodeURIComponent(messagePartToString(part))}`,
     `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
   );
 
@@ -120,11 +121,26 @@ const externalMessagesSimpleTableUrl = () =>
   `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
 
 /**
- * @param {*} arg
+ * Serializes any interpolated message part to a string that can be used in an
+ * extracted message URL.
+ * @param {*} part
  * @return {string}
  */
-const messageArgToEncodedComponent = arg =>
-  encodeURIComponent(String(elementStringOrPassthru(arg)));
+function messagePartToString(part) {
+  const asElementStringOptional = elementStringOrPassthru(part);
+  try {
+    // `null` and `undefined` don't have a `toString()` method.
+    return String(asElementStringOptional);
+  } catch (_) {
+    // Some objects won't serialize with the `String` constructor.
+    if (typeof asElementStringOptional.toString == 'function') {
+      return asElementStringOptional.toString();
+    }
+    // Objects created with e.g. `Object.create(null)` don't implement
+    // `toString()`.
+    return Object.prototype.toString.call(asElementStringOptional);
+  }
+}
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
