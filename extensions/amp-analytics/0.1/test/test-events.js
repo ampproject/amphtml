@@ -15,8 +15,8 @@
  */
 
 import * as lolex from 'lolex';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
+  AmpStoryEventTracker,
   AnalyticsEvent,
   AnalyticsEventType,
   ClickEventTracker,
@@ -28,6 +28,7 @@ import {
   VisibilityTracker,
   trackerTypeForTesting,
 } from '../events';
+import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {Deferred} from '../../../../src/utils/promise';
 import {Signals} from '../../../../src/utils/signals';
 import {macroTask} from '../../../../testing/yield';
@@ -653,6 +654,152 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(handler.lastCall).to.be.calledWith(
         new AnalyticsEvent(target, 'sandbox-1-event-1', {'order': '4'})
+      );
+    });
+  });
+
+  describe('AmpStoryEventTracker', () => {
+    let tracker;
+    let clock;
+    let getRootElementSpy;
+    let rootTarget;
+
+    beforeEach(() => {
+      clock = sandbox.useFakeTimers();
+      tracker = root.getTracker(AnalyticsEventType.STORY, AmpStoryEventTracker);
+      rootTarget = root.getRootElement();
+      getRootElementSpy = sandbox.spy(root, 'getRootElement');
+    });
+
+    it('should initalize, add listeners, and dispose', () => {
+      expect(tracker.root).to.equal(root);
+      expect(tracker.buffer_).to.exist;
+
+      tracker.dispose();
+      expect(tracker.buffer_).to.not.exist;
+    });
+
+    it('should listen on story events', () => {
+      const handler2 = sandbox.spy();
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+      tracker.add(analyticsElement, 'story-event-2', {}, handler2);
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      expect(getRootElementSpy).to.be.calledTwice;
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.not.been.called;
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.be.calledOnce;
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.be.calledOnce;
+    });
+
+    it('should buffer story events early on', () => {
+      // Events before listeners added.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      expect(tracker.buffer_['story-event-1']).to.have.length(1);
+      expect(tracker.buffer_['story-event-2']).to.have.length(2);
+
+      // Listeners added: immediate events fired.
+      const handler2 = sandbox.spy();
+      const handler3 = sandbox.spy();
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+      tracker.add(analyticsElement, 'story-event-2', {}, handler2);
+      tracker.add(
+        analyticsElement,
+        'story-event-3',
+        {on: 'story-event-3'},
+        handler3
+      );
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.callCount(2);
+      expect(handler3).to.have.not.been.called;
+      expect(tracker.buffer_['story-event-1']).to.have.length(1);
+      expect(tracker.buffer_['story-event-2']).to.have.length(2);
+      expect(tracker.buffer_['story-event-3']).to.be.undefined;
+
+      // Second round of events.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-3'));
+      expect(getRootElementSpy).to.have.callCount(3);
+
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.have.callCount(3);
+      expect(handler3).to.be.calledOnce;
+      expect(tracker.buffer_['story-event-1']).to.have.length(2);
+      expect(tracker.buffer_['story-event-2']).to.have.length(3);
+      expect(tracker.buffer_['story-event-3']).to.have.length(1);
+
+      // Buffering time expires.
+      clock.tick(10001);
+      expect(tracker.buffer_).to.be.undefined;
+
+      // Post-buffering round of events.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-3'));
+
+      expect(handler).to.have.callCount(3);
+      expect(handler2).to.have.callCount(4);
+      expect(handler3).to.have.callCount(2);
+      expect(tracker.buffer_).to.be.undefined;
+    });
+
+    it('should not fire twice from observable and buffer', () => {
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '1'})
+      );
+      tracker.add(target, 'story-event-1', {}, handler);
+
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '2'})
+      );
+
+      expect(handler).to.have.callCount(2);
+      expect(handler.firstCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '1'})
+      );
+      expect(handler.secondCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '2'})
+      );
+    });
+
+    it('should handle all events without duplicate trigger', () => {
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '1'})
+      );
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '2'})
+      );
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '3'})
+      );
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '4'})
+      );
+
+      expect(handler).to.have.callCount(4);
+      expect(handler.firstCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '1'})
+      );
+      expect(handler.secondCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '2'})
+      );
+      expect(handler.thirdCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '3'})
+      );
+      expect(handler.lastCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '4'})
       );
     });
   });
