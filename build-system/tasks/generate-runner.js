@@ -127,12 +127,10 @@ async function generateRunner(subDir) {
     reason.showStack = false;
     return Promise.reject(reason);
   } else {
-    if (!isTravisBuild()) {
-      log(
-        'Generated custom closure compiler',
-        cyan(`${runnerJarDir}/runner.jar`)
-      );
-    }
+    log(
+      'Generated custom closure compiler',
+      cyan(`${runnerJarDir}/runner.jar`)
+    );
   }
 }
 

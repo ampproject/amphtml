@@ -151,9 +151,9 @@ export class Builder {
    * @param {!Document|!ShadowRoot} rootNode
    * @param {string} baseUrl
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {!../../../src/service/resources-impl.ResourcesDef} resources
+   * @param {!../../../src/service/owners-interface.OwnersInterface} owners
    */
-  constructor(win, rootNode, baseUrl, vsync, resources) {
+  constructor(win, rootNode, baseUrl, vsync, owners) {
     /** @const @private */
     this.win_ = win;
 
@@ -164,7 +164,7 @@ export class Builder {
     this.vsync_ = vsync;
 
     /** @const @private */
-    this.resources_ = resources;
+    this.owners_ = owners;
 
     /** @const @private {!Array<!Element>} */
     this.targets_ = [];
@@ -231,7 +231,7 @@ export class Builder {
   requireLayout(target) {
     if (!this.targets_.includes(target)) {
       this.targets_.push(target);
-      this.loaders_.push(this.resources_.requireLayout(target));
+      this.loaders_.push(this.owners_.requireLayout(target));
     }
   }
 

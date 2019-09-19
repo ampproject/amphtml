@@ -501,7 +501,6 @@ describe('amp-img', () => {
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
 
-      impl.mutateElement = fn => fn();
       impl.getViewport = function() {
         return {
           getWidth: () => windowWidth,
@@ -527,26 +526,6 @@ describe('amp-img', () => {
         .then(() => {
           const img = impl.img_;
           expect(img.getAttribute('sizes')).to.equal('50vw');
-        });
-    });
-
-    it('should not generate sizes for amp-imgs with layout intrinsic', () => {
-      let impl;
-      return getImg({
-        layout: Layout.INTRINSIC,
-        src: '/examples/img/sample.jpg',
-        srcset: SRCSET_STRING,
-        width: 300,
-        height: 200,
-      })
-        .then(ampImg => {
-          impl = ampImg.implementation_;
-          impl.buildCallback();
-          return impl.layoutCallback();
-        })
-        .then(() => {
-          const img = impl.img_;
-          expect(img.getAttribute('sizes')).to.be.null;
         });
     });
 
