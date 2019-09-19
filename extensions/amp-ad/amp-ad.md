@@ -384,6 +384,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [SAS CI 360 Match](../../ads/sas.md)
 - [Sekindo](../../ads/sekindo.md)
 - [Sharethrough](../../ads/sharethrough.md)
+- [SHE Media](../../ads/shemedia.md)
 - [Sklik](../../ads/sklik.md)
 - [SlimCut Media](../../ads/slimcutmedia.md)
 - [Smart AdServer](../../ads/smartadserver.md)
