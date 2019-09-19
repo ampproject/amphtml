@@ -62,14 +62,14 @@ const RTC_VENDORS = jsonConfiguration({
     url:
       'https://prebid.adnxs.com/pbs/v1/openrtb2/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING',
     macros: ['PLACEMENT_ID',
-            'CONSENT_STRING'],
+           'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   prebidrubicon: {
     url:
       'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING',
     macros: ['REQUEST_ID',
-            'CONSENT_STRING'],
+           'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   indexexchange: {
