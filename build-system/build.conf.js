@@ -21,7 +21,7 @@ const localPlugin = name =>
 
 const defaultPlugins = [
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
-  [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
+  [localPlugin('transform-log-methods'), {replaceCallArguments: true}],
   localPlugin('transform-parenthesize-expression'),
   localPlugin('is_minified-constant-transformer'),
   localPlugin('transform-amp-extension-call'),
