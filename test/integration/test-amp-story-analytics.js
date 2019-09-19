@@ -20,11 +20,11 @@ import {parseQueryString} from '../../src/url';
 const config = describe
   .configure()
   .skipEdge()
+  .skipWindows() // TODO(#24639): Re-enable tests.
   .ifChrome()
   .skipSinglePass();
 
-// TODO(#24639): Re-enable tests.
-config.skip('amp-story analytics', () => {
+config.run('amp-story analytics', () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
   const body = `
         <amp-story standalone>
