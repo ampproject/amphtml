@@ -127,7 +127,7 @@ config.run('amp-story analytics', () => {
     });
 
     it('should send analytics event when landing on a page', async () => {
-      await browser.waitForElementLayout('#page-1', 20000);
+      await browser.waitForElementLayout('#page-1[active]', 20000);
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
@@ -135,8 +135,8 @@ config.run('amp-story analytics', () => {
     });
 
     it('should send analytics event when navigating', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
+      browser.click('#page-1 h1');
+      await browser.waitForElementLayout('#page-2[active]', 20000);
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
@@ -144,9 +144,9 @@ config.run('amp-story analytics', () => {
     });
 
     it('should send analytics event when entering bookend', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
-      browser.click('#page-2');
+      browser.click('#page-1 h1');
+      await browser.waitForElementLayout('#page-2[active]', 20000);
+      browser.click('#page-2 h1');
       await browser.wait(1000);
 
       const req = await RequestBank.withdraw();
@@ -155,9 +155,9 @@ config.run('amp-story analytics', () => {
     });
 
     it('should send analytics event when exiting bookend', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
-      browser.click('#page-2');
+      browser.click('#page-1 h1');
+      await browser.waitForElementLayout('#page-2[active]', 20000);
+      browser.click('#page-2 h1');
       await browser.wait(1000);
       browser.click('amp-story-bookend');
       await browser.wait(1000);
