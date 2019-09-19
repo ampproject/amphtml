@@ -202,11 +202,13 @@ function karmaBrowserComplete_(browser) {
   if (result.total == 0) {
     log(red('ERROR: Zero tests detected by Karma.'));
     log(red(JSON.stringify(result)));
-    reportTestErrored().finally(() => {
-      if (!argv.watch) {
-        process.exit(1);
-      }
-    });
+    if (!argv.saucelabs && !argv.beta) {
+      reportTestErrored().finally(() => {
+        if (!argv.watch) {
+          process.exit(1);
+        }
+      });
+    }
   }
   // Print a summary for each browser as soon as tests complete.
   let message =
