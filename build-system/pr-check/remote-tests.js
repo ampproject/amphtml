@@ -29,7 +29,6 @@ const {
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
-  timedExec: timedExecBase,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
@@ -37,7 +36,6 @@ const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExec = cmd => timedExecBase(cmd, FILENAME);
 const timedExecOrDie = cmd => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
@@ -52,7 +50,7 @@ async function main() {
     timedExecOrDie(
       'gulp integration --nobuild --compiled --saucelabs --stable'
     );
-    timedExec('gulp integration --nobuild --compiled --saucelabs --beta');
+    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs --beta');
 
     stopSauceConnect(FILENAME);
   } else {
@@ -89,7 +87,9 @@ async function main() {
       timedExecOrDie(
         'gulp integration --nobuild --compiled --saucelabs --stable'
       );
-      timedExec('gulp integration --nobuild --compiled --saucelabs --beta');
+      timedExecOrDie(
+        'gulp integration --nobuild --compiled --saucelabs --beta'
+      );
     }
     stopSauceConnect(FILENAME);
   }

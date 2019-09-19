@@ -266,7 +266,7 @@ async function runTestInSauceLabs(config) {
 
   if (argv.beta) {
     config.browsers = browsers.beta;
-    const betaExitCode = await createKarmaServer(config, () => {});
+    const betaExitCode = await createKarmaServer(config, reportTestRunComplete);
     if (betaExitCode != 0) {
       log(
         yellow('Some tests have failed on'),
@@ -311,13 +311,6 @@ async function runTestInBatches_(config, browsers) {
       totalStableFailed += results.failed;
     }
   };
-  const betaRunCompleteFn = async (browsers, results) => {
-    if (results.error) {
-      await reportTestErrored();
-    } else {
-      await reportTestFinished(results.success, results.failed);
-    }
-  };
 
   if (browsers.stable.length) {
     const allBatchesExitCodes = await runTestInBatchesWithBrowsers_(
@@ -348,7 +341,7 @@ async function runTestInBatches_(config, browsers) {
       'beta',
       browsers.beta,
       config,
-      betaRunCompleteFn
+      reportTestRunComplete
     );
     if (allBatchesExitCodes) {
       log(
