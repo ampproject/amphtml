@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Implements subscription-style access protocol for Subscribe with Google.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-subscriptions-google"></a> `amp-subscriptions-google`
+# amp-subscriptions-google
+
+Implements subscription-style access protocol for Subscribe with Google.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Implements subscription-style access protocol for Subscribe with Google.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Beta.</td>
@@ -37,7 +42,7 @@ limitations under the License.
   <tr>
     <td class="col-fourty">
       <strong>
-        <a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">
+        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
           Supported Layouts
         </a>
       </strong>
@@ -61,7 +66,7 @@ See [Subscribe with Google GitHub repo](https://github.com/subscriptions-project
 
 The `amp-subscriptions-google` is configured as part of `amp-subscriptions` configuration.
 
-```
+```html
 <head>
   ...
   <script async custom-element="amp-subscriptions"
@@ -82,8 +87,28 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
   </script>
 </head>
 ```
-## Example with markup
+## Entitlements pingback
+As described in [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md#pingback-endpoint), if a `pingbackUrl` is specified by the local service, the entitlements response returned by the "winning" service will be sent to the  `pingbackUrl` via a POST request.
+
+If `subscribe.google.com` is the "winning" service, the request to the `pingbackUrl` will be of the following format:
+```json
+{
+  "raw":"...",
+  "source":"google",
+  "service":"subscribe.google.com",
+  "granted":true,
+  "grantReason":"SUBSCRIBER",
+  "data":{
+    "source":"google",
+    "products":[ ... ],
+    "subscriptionToken":"..."
+  }
+}
 ```
+Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response) format.
+
+## Example with markup
+```html
 <head>
   ...
   <script async custom-element="amp-subscriptions"

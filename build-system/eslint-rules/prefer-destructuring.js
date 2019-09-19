@@ -24,18 +24,22 @@ module.exports = {
     function shouldBeDestructure(node, renamable = false) {
       const {id, init} = node;
 
-      if (!init ||
+      if (
+        !init ||
         id.type !== 'Identifier' ||
-        init.type !== 'MemberExpression') {
+        init.type !== 'MemberExpression'
+      ) {
         return false;
       }
 
       const {name} = id;
       const {object, property, computed} = init;
-      if (computed ||
+      if (
+        computed ||
         object.type === 'Super' ||
         property.leadingComments ||
-        property.type !== 'Identifier') {
+        property.type !== 'Identifier'
+      ) {
         return false;
       }
 

@@ -1,7 +1,7 @@
 # Guidelines for Integrating with AMP
 
 If you are an ad technology provider looking to integrate with AMP HTML, please see the guidelines below.
-To ensure minimum latency and quality, please follow the instructions listed [here](../3p/README.md#ads) before submitting a pull request to the AMP open-source project. For general guidance on how to get started with contributing to the AMP project, please see [here](../CONTRIBUTING.md).
+To ensure minimum latency and quality, please follow the instructions listed [here](../3p/README.md#ads) before submitting a pull request to the AMP open-source project. For general guidance on how to get started with contributing to AMP, please see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Ad Server
 
@@ -73,7 +73,7 @@ If you are a video ad network, please work with your publisher to ensure that:
 ## Data Management Platform (DMP)
 *Examples : KRUX, Bluekai*
 
-See [how to enhance custom ad configuration](https://www.ampproject.org/docs/reference/components/amp-ad#enhance-incoming-ad-configuration).
+See [how to enhance custom ad configuration](https://amp.dev/documentation/components/amp-ad#enhance-incoming-ad-configuration).
 
 You can use a similar approach to enrich the ad call by passing in audience segments that you get from the user cookie into the ad call.
 
@@ -91,4 +91,4 @@ Also, see the approach to using the [intersection observer pattern](https://gith
 
 *Examples : Taboola, Outbrain*
 
-Useful if you have some piece of JavaScript embeded on the publisher website today but the approach will not work in AMP pages. If you would like to recommend content on an AMP page, we suggest that you use the [`amp-embed` extension](https://www.ampproject.org/docs/reference/components/amp-ad) to request the content details. Please see the [Taboola](https://github.com/ampproject/amphtml/blob/master/ads/taboola.md) example.
+Useful if you have some piece of JavaScript embeded on the publisher website today but the approach will not work in AMP pages. If you would like to recommend content on an AMP page, we suggest that you use the [`amp-embed` extension](https://amp.dev/documentation/components/amp-ad) to request the content details. Please see the [Taboola](https://github.com/ampproject/amphtml/blob/master/ads/taboola.md) example.

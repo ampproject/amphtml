@@ -13,6 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-true;
-let result = false;
-let result2 = undefined;
+const falsey = false;
+
+/** @type {boolean} */
+(falsey);
+
+/** @type {boolean} */
+(true);
+let result =
+/** @type {boolean} */
+(false);

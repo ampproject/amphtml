@@ -1,0 +1,59 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>AMP Selector Demo</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+</head>
+<body>
+    <h1>Selector Examples</h1>
+    <h2>Single Select</h2>
+    <amp-selector class="sample-selector"
+        layout="container">
+    <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+        <li option="4">Option 4</li>
+    </ul>
+    </amp-selector>
+
+    <h2>Multi Select</h2>
+    <amp-selector layout="container"
+    class="sample-selector"
+    multiple>
+    <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+        <li option="4">Option 4</li>
+    </ul>
+    </amp-selector>
+    
+    <h2>Actions</h2>
+    <amp-selector id="actionsSample"
+  layout="container"
+  class="sample-selector"
+  multiple>
+  <ul>
+        <li option="1">Option 1</li>
+        <li option="2">Option 2</li>
+        <li option="3">Option 3</li>
+        <li option="4">Option 4</li>
+        <li option="5">Option 5</li>
+        <li option="6">Option 6</li>
+    </ul>
+    </amp-selector>
+<button on="tap:actionsSample.clear">clear</button>
+<button on="tap:actionsSample.selectUp">selectUp</button>
+<button on="tap:actionsSample.selectUp(delta=2)">selectUp(delta=2)</button>
+<button on="tap:actionsSample.selectDown">selectDown</button>
+<button on="tap:actionsSample.selectDown(delta=2)">selectDown(delta=2)</button>
+<button on="tap:actionsSample.toggle(index=1)">toggle(index=1)</button>
+<button on="tap:actionsSample.toggle(index=1, value=true)">toggle(index=1, value=true)</button>
+</body>
+</html>

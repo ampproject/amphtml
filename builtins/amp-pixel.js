@@ -17,17 +17,15 @@
 import {BaseElement} from '../src/base-element';
 import {Services} from '../src/services';
 import {createPixel} from '../src/pixel';
-import {dev, user} from '../src/log';
+import {dev, userAssert} from '../src/log';
 import {registerElement} from '../src/service/custom-element-registry';
 
 const TAG = 'amp-pixel';
-
 
 /**
  * A simple analytics instrument. Fires as an impression signal.
  */
 export class AmpPixel extends BaseElement {
-
   /** @override */
   constructor(element) {
     super(element);
@@ -53,12 +51,16 @@ export class AmpPixel extends BaseElement {
       // Safari doesn't support referrerPolicy yet. We're using an
       // iframe based trick to remove referrer, which apparently can
       // only do "no-referrer".
-      user().assert(this.referrerPolicy_ == 'no-referrer',
-          `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
-          + ' Only "no-referrer" is supported');
+      userAssert(
+        this.referrerPolicy_ == 'no-referrer',
+        `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".` +
+          ' Only "no-referrer" is supported'
+      );
     }
-    if (this.element.hasAttribute('i-amphtml-ssr') &&
-        this.element.querySelector('img')) {
+    if (
+      this.element.hasAttribute('i-amphtml-ssr') &&
+      this.element.querySelector('img')
+    ) {
       dev().info(TAG, 'inabox img already present');
       return;
     }
@@ -69,6 +71,7 @@ export class AmpPixel extends BaseElement {
 
   /**
    * Triggers the signal.
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   trigger_() {
@@ -79,19 +82,21 @@ export class AmpPixel extends BaseElement {
     }
     // Delay(1) provides a rudimentary "idle" signal.
     // TODO(dvoytenko): use an improved idle signal when available.
-    this.triggerPromise_ = Services.timerFor(this.win).promise(1).then(() => {
-      const src = this.element.getAttribute('src');
-      if (!src) {
-        return;
-      }
-      return Services.urlReplacementsForDoc(this.element)
+    this.triggerPromise_ = Services.timerFor(this.win)
+      .promise(1)
+      .then(() => {
+        const src = this.element.getAttribute('src');
+        if (!src) {
+          return;
+        }
+        return Services.urlReplacementsForDoc(this.element)
           .expandUrlAsync(this.assertSource_(src))
           .then(src => {
             const pixel = createPixel(this.win, src, this.referrerPolicy_);
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });
-    });
+      });
   }
 
   /**
@@ -100,10 +105,12 @@ export class AmpPixel extends BaseElement {
    * @private
    */
   assertSource_(src) {
-    user().assert(
-        /^(https\:\/\/|\/\/)/i.test(src),
-        'The <amp-pixel> src attribute must start with ' +
-        '"https://" or "//". Invalid value: ' + src);
+    userAssert(
+      /^(https\:\/\/|\/\/)/i.test(src),
+      'The <amp-pixel> src attribute must start with ' +
+        '"https://" or "//". Invalid value: ' +
+        src
+    );
     return /** @type {string} */ (src);
   }
 }

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {LiveListManager, liveListManagerForDoc} from '../live-list-manager';
+import {
+  AMP_LIVE_LIST_CUSTOM_SLOT_ID,
+  LiveListManager,
+} from '../live-list-manager';
 import {Services} from '../../../../src/services';
 
 const XHR_BUFFER_SIZE = 2;
@@ -36,13 +39,18 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    const docReadyPromise = new Promise(resolve => { ready = resolve; });
-    sandbox.stub(LiveListManager.prototype, 'whenDocReady_')
-        .returns(docReadyPromise);
+
     clock = sandbox.useFakeTimers();
     xhrs = setUpMockXhrs(sandbox);
     viewer = Services.viewerForDoc(ampdoc);
-    manager = liveListManagerForDoc(ampdoc);
+
+    manager = new LiveListManager(ampdoc);
+    const docReadyPromise = new Promise(resolve => {
+      ready = resolve;
+    });
+    sandbox.stub(manager, 'whenDocReady_').returns(docReadyPromise);
+    sandbox.stub(LiveListManager, 'forDoc').returns(Promise.resolve(manager));
+
     liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval').callsFake(() => 5000);
   });
@@ -52,7 +60,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     const xhrs = [];
     const xhrResolvers = [];
     for (let i = 0; i < XHR_BUFFER_SIZE; i++) {
-      xhrs[i] = new Promise(resolve => xhrResolvers[i] = resolve);
+      xhrs[i] = new Promise(resolve => (xhrResolvers[i] = resolve));
     }
     let xhrCount = 0;
     mockXhr.onCreate = function(xhr) {
@@ -67,15 +75,13 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
   /** @implements {!LiveListInterface} */
   class AmpLiveListMock {
-
     constructor(el) {
       this.element = el;
     }
 
     buildCallback() {
-      this.manager_ = liveListManagerForDoc(ampdoc);
+      manager.register(this.element.getAttribute('id'), this);
       this.updateTime_ = Number(this.element.getAttribute('data-sort-time'));
-      this.manager_.register(this.element.getAttribute('id'), this);
     }
 
     getInterval() {
@@ -98,6 +104,10 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
     getUpdateTime() {
       return this.updateTime_;
+    }
+
+    hasCustomSlot() {
+      return !!this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
     }
   }
 
@@ -157,6 +167,40 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     });
   });
 
+  it(
+    'should use custom containers for live-lists dynamically appended ' +
+      'in the client',
+    () => {
+      const customSlot = document.createElement('div');
+      customSlot.setAttribute('id', 'custom-slot');
+
+      const fromServer = doc.createElement('div');
+      fromServer.appendChild(customSlot);
+      fromServer.getElementById = () => {};
+      sandbox.stub(fromServer, 'getElementById').callsFake(id => {
+        return fromServer.querySelector(`#${id}`);
+      });
+
+      ready();
+      const clientLiveList = getLiveList(
+        {
+          'data-poll-interval': '9000',
+          'sort': 'ascending',
+          'disable-scrolling': '',
+          'disable-pagination': '',
+          'auto-insert': '',
+        },
+        'i-amphtml-custom-slot-dynamic-list'
+      );
+      clientLiveList.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = customSlot.id;
+      clientLiveList.buildCallback();
+
+      return manager.whenDocReady_().then(() => {
+        expect(manager.getCustomSlots_(fromServer)).to.have.length(1);
+      });
+    }
+  );
+
   it('should get the amp_latest_update_time on doc ready', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
     ready();
@@ -168,12 +212,13 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       const tick = interval - jitterOffset;
       expect(manager.poller_.isRunning()).to.be.true;
       clock.tick(tick);
-      return xhrs[0].then(
-          xhr => expect(xhr.url).to.match(/amp_latest_update_time=2222/));
+      return xhrs[0].then(xhr =>
+        expect(xhr.url).to.match(/amp_latest_update_time=2222/)
+      );
     });
   });
 
-  it('should not poll if all amp-live-list\'s are disabled on register', () => {
+  it("should not poll if all amp-live-list's are disabled on register", () => {
     const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
 
     liveList.toggle(false);
@@ -189,42 +234,146 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     });
   });
 
-  it('should poll if at least one amp-live-list\'s is still active after  ' +
-     'register', () => {
-    const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+  it(
+    'should not poll if live-story-disabled is present and other live-lists ' +
+      'are also disabled',
+    () => {
+      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
 
-    ready();
-    // Important that we set this before build since then is when they register
-    liveList.buildCallback();
-    liveList2.buildCallback();
-    liveList.toggle(false);
-    liveList2.toggle(true);
-    return manager.whenDocReady_().then(() => {
+      ready();
+      // Important that we set this before build since then is when they register
+      liveList.buildCallback();
+      liveList2.buildCallback();
+      expect(liveList.isEnabled()).to.be.true;
+      expect(liveList2.isEnabled()).to.be.true;
+      return manager.whenDocReady_().then(() => {
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer1 = doc.createElement('div');
+        const fromServer1List1 = doc.createElement('amp-live-list');
+        fromServer1List1.setAttribute('id', 'id-1');
+        const fromServer1List2 = doc.createElement('amp-live-list');
+        fromServer1List2.setAttribute('id', 'id-2');
+        fromServer1List2.setAttribute('live-story-disabled', '');
+        fromServer1.appendChild(fromServer1List1);
+        fromServer1.appendChild(fromServer1List2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.true;
+
+        manager.updateLiveLists_(fromServer1);
+
+        // Still polls since at least one live list can still receive updates.
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer2 = doc.createElement('div');
+        const fromServer2List1 = doc.createElement('amp-live-list');
+        fromServer2List1.setAttribute('id', 'id-1');
+        fromServer2List1.setAttribute('disabled', '');
+        fromServer2.appendChild(fromServer2List1);
+
+        manager.updateLiveLists_(fromServer2);
+
+        expect(liveList.isEnabled()).to.be.false;
+        expect(liveList2.isEnabled()).to.be.false;
+        // At this point nothing can ever turn this back on since we stopped
+        // polling altogether.
+        expect(manager.poller_.isRunning()).to.be.false;
+      });
+    }
+  );
+
+  it(
+    "should poll if at least one amp-live-list's is still active after " +
+      'register and a live-story-disabled attribute is used',
+    () => {
+      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+      ready();
+      // Important that we set this before build since then is when they register
+      liveList.buildCallback();
+      liveList2.buildCallback();
+      expect(liveList.isEnabled()).to.be.true;
+      expect(liveList2.isEnabled()).to.be.true;
+      return manager.whenDocReady_().then(() => {
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer1 = doc.createElement('div');
+        const fromServer1List1 = doc.createElement('amp-live-list');
+        fromServer1List1.setAttribute('id', 'id-1');
+        const fromServer1List2 = doc.createElement('amp-live-list');
+        fromServer1List2.setAttribute('id', 'id-2');
+        fromServer1List2.setAttribute('live-story-disabled', '');
+        fromServer1.appendChild(fromServer1List1);
+        fromServer1.appendChild(fromServer1List2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.true;
+
+        manager.updateLiveLists_(fromServer1);
+
+        // Still polls since at least one live list can still receive updates.
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer2 = doc.createElement('div');
+        const fromServer2List1 = doc.createElement('amp-live-list');
+        fromServer2List1.setAttribute('id', 'id-1');
+        fromServer2.appendChild(fromServer2List1);
+
+        manager.updateLiveLists_(fromServer2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+      });
+    }
+  );
+
+  it(
+    "should poll if at least one amp-live-list's is still active after  " +
+      'register',
+    () => {
+      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+      ready();
+      // Important that we set this before build since then is when they register
+      liveList.buildCallback();
+      liveList2.buildCallback();
       liveList.toggle(false);
       liveList2.toggle(true);
-      expect(manager.poller_.isRunning()).to.be.true;
-    });
-  });
+      return manager.whenDocReady_().then(() => {
+        liveList.toggle(false);
+        liveList2.toggle(true);
+        expect(manager.poller_.isRunning()).to.be.true;
+      });
+    }
+  );
 
-  it('should not poll if no amp-live-list\'s is still active after  ' +
-     'register', () => {
-    const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+  it(
+    "should not poll if no amp-live-list's is still active after  " +
+      'register',
+    () => {
+      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
 
-    ready();
-    // Important that we set this before build since then is when they register
-    liveList.buildCallback();
-    liveList2.buildCallback();
-    liveList.toggle(false);
-    liveList2.toggle(false);
-    return manager.whenDocReady_().then(() => {
+      ready();
+      // Important that we set this before build since then is when they register
+      liveList.buildCallback();
+      liveList2.buildCallback();
       liveList.toggle(false);
       liveList2.toggle(false);
-      expect(manager.poller_.isRunning()).to.be.false;
-    });
-  });
+      return manager.whenDocReady_().then(() => {
+        liveList.toggle(false);
+        liveList2.toggle(false);
+        expect(manager.poller_.isRunning()).to.be.false;
+      });
+    }
+  );
 
-  it('should not poll if all amp-live-list\'s are disabled after ' +
-     'updates', () => {
+  it("should not poll if all amp-live-list's are disabled after updates", () => {
     const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
 
     ready();
@@ -248,7 +397,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(liveList.isEnabled()).to.be.true;
       expect(liveList2.isEnabled()).to.be.true;
 
-      manager.getLiveLists_(fromServer1);
+      manager.updateLiveLists_(fromServer1);
 
       // Still polls since at least one live list can still receive updates.
       expect(liveList.isEnabled()).to.be.true;
@@ -261,7 +410,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       fromServer2List1.setAttribute('disabled', '');
       fromServer2.appendChild(fromServer2List1);
 
-      manager.getLiveLists_(fromServer2);
+      manager.updateLiveLists_(fromServer2);
 
       expect(liveList.isEnabled()).to.be.false;
       expect(liveList2.isEnabled()).to.be.false;
@@ -295,7 +444,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     expect(updateSpy1).to.have.not.been.called;
     expect(updateSpy2).to.have.not.been.called;
 
-    manager.getLiveLists_(fromServer1);
+    manager.updateLiveLists_(fromServer1);
 
     expect(updateSpy1).to.be.calledOnce;
     expect(updateSpy2).to.have.not.been.called;
@@ -313,7 +462,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     expect(updateSpy1).to.be.calledOnce;
     expect(updateSpy2).to.have.not.been.called;
 
-    manager.getLiveLists_(fromServer2);
+    manager.updateLiveLists_(fromServer2);
 
     expect(updateSpy1).to.have.callCount(2);
     expect(updateSpy2).to.be.calledOnce;
@@ -331,22 +480,28 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      xhrs[0].then(
-          xhr => xhr.respond(
-              200, {
-                'Content-Type': 'text/xml',
-              },
-              '<html></html>'));
+      xhrs[0].then(xhr =>
+        xhr.respond(
+          200,
+          {
+            'Content-Type': 'text/xml',
+          },
+          '<html></html>'
+        )
+      );
 
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        xhrs[1].then(
-            xhr => xhr.respond(
-                415, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
+        xhrs[1].then(xhr =>
+          xhr.respond(
+            415,
+            {
+              'Content-Type': 'text/xml',
+            },
+            '<html></html>'
+          )
+        );
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.backoffClock_).to.be.null;
         return manager.poller_.lastWorkPromise_.then(() => {
@@ -369,22 +524,28 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      xhrs[0].then(
-          xhr => xhr.respond(
-              200, {
-                'Content-Type': 'text/xml',
-              },
-              '<html></html>'));
+      xhrs[0].then(xhr =>
+        xhr.respond(
+          200,
+          {
+            'Content-Type': 'text/xml',
+          },
+          '<html></html>'
+        )
+      );
 
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        xhrs[1].then(
-            xhr => xhr.respond(
-                500, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
+        xhrs[1].then(xhr =>
+          xhr.respond(
+            500,
+            {
+              'Content-Type': 'text/xml',
+            },
+            '<html></html>'
+          )
+        );
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.backoffClock_).to.be.null;
         return manager.poller_.lastWorkPromise_.then(() => {
@@ -409,24 +570,30 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
       expect(manager.poller_.backoffClock_).to.be.null;
-      xhrs[0].then(
-          xhr => xhr.respond(
-              415, {
-                'Content-Type': 'text/xml',
-              },
-              '<html></html>'));
+      xhrs[0].then(xhr =>
+        xhr.respond(
+          415,
+          {
+            'Content-Type': 'text/xml',
+          },
+          '<html></html>'
+        )
+      );
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         expect(manager.poller_.backoffClock_).to.be.a('function');
         // tick 1 max initial backoff with random = 1
         clock.tick(700);
         expect(fetchSpy).to.have.callCount(2);
-        xhrs[1].then(
-            xhr => xhr.respond(
-                200, {
-                  'Content-Type': 'text/xml',
-                },
-                '<html></html>'));
+        xhrs[1].then(xhr =>
+          xhr.respond(
+            200,
+            {
+              'Content-Type': 'text/xml',
+            },
+            '<html></html>'
+          )
+        );
         return manager.poller_.lastWorkPromise_.then(() => {
           expect(manager.poller_.isRunning()).to.be.true;
           expect(manager.poller_.backoffClock_).to.be.null;
@@ -435,44 +602,47 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     });
   });
 
-  it('should stop all polling if viewer is not visible ' +
-    'and immediately fetch when visible', () => {
-    ready();
-    const fetchSpy = sandbox.spy(manager, 'work_');
-    expect(fetchSpy).to.have.not.been.called;
-    liveList.buildCallback();
-    return manager.whenDocReady_().then(() => {
-      expect(viewer.isVisible()).to.be.true;
-      expect(manager.poller_.isRunning()).to.be.true;
-      viewer.receiveMessage('visibilitychange', {
-        state: 'hidden',
-      });
+  it(
+    'should stop all polling if viewer is not visible ' +
+      'and immediately fetch when visible',
+    () => {
+      ready();
+      const fetchSpy = sandbox.spy(manager, 'work_');
       expect(fetchSpy).to.have.not.been.called;
-      expect(manager.poller_.isRunning()).to.be.false;
-      viewer.receiveMessage('visibilitychange', {
-        state: 'visible',
+      liveList.buildCallback();
+      return manager.whenDocReady_().then(() => {
+        expect(viewer.isVisible()).to.be.true;
+        expect(manager.poller_.isRunning()).to.be.true;
+        viewer.receiveMessage('visibilitychange', {
+          state: 'hidden',
+        });
+        expect(fetchSpy).to.have.not.been.called;
+        expect(manager.poller_.isRunning()).to.be.false;
+        viewer.receiveMessage('visibilitychange', {
+          state: 'visible',
+        });
+        expect(fetchSpy).to.be.calledOnce;
+        expect(manager.poller_.isRunning()).to.be.true;
+        viewer.receiveMessage('visibilitychange', {
+          state: 'inactive',
+        });
+        expect(fetchSpy).to.be.calledOnce;
+        expect(manager.poller_.isRunning()).to.be.false;
+        viewer.receiveMessage('visibilitychange', {
+          state: 'visible',
+        });
+        expect(fetchSpy).to.have.callCount(2);
+        expect(manager.poller_.isRunning()).to.be.true;
+        viewer.receiveMessage('visibilitychange', {
+          state: 'prerender',
+        });
+        expect(fetchSpy).to.have.callCount(2);
+        expect(manager.poller_.isRunning()).to.be.false;
+        clock.tick(20000);
+        expect(fetchSpy).to.have.callCount(2);
       });
-      expect(fetchSpy).to.be.calledOnce;
-      expect(manager.poller_.isRunning()).to.be.true;
-      viewer.receiveMessage('visibilitychange', {
-        state: 'inactive',
-      });
-      expect(fetchSpy).to.be.calledOnce;
-      expect(manager.poller_.isRunning()).to.be.false;
-      viewer.receiveMessage('visibilitychange', {
-        state: 'visible',
-      });
-      expect(fetchSpy).to.have.callCount(2);
-      expect(manager.poller_.isRunning()).to.be.true;
-      viewer.receiveMessage('visibilitychange', {
-        state: 'prerender',
-      });
-      expect(fetchSpy).to.have.callCount(2);
-      expect(manager.poller_.isRunning()).to.be.false;
-      clock.tick(20000);
-      expect(fetchSpy).to.have.callCount(2);
-    });
-  });
+    }
+  );
 
   it('should fetch with url', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
@@ -496,6 +666,65 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     });
   });
 
+  it(
+    'should fetch with url from the cache if on publisher origin ' +
+      'and is transformed',
+    () => {
+      sandbox.stub(Math, 'random').callsFake(() => 1);
+      sandbox.stub(viewer, 'isVisible').returns(true);
+      manager.url_ = 'https://www.example.com/foo/bar?hello=world#dev=1';
+      manager.isTransformed_ = true;
+      ready();
+      const fetchSpy = sandbox.spy(manager, 'work_');
+      liveList.buildCallback();
+      return manager.whenDocReady_().then(() => {
+        const interval = liveList.getInterval();
+        const tick = interval - jitterOffset;
+        expect(manager.poller_.isRunning()).to.be.true;
+        expect(fetchSpy).to.have.not.been.called;
+        clock.tick(tick);
+        expect(fetchSpy).to.be.calledOnce;
+        return xhrs[0].then(xhr => {
+          expect(xhr.url).to.match(
+            /^https:\/\/cdn\.ampproject\.org\/c\/www\.example\.com\/foo\/bar\?hello=world/
+          );
+          expect(xhr.url).to.match(/#dev=1/);
+          expect(xhr.url).to.match(/amp_latest_update_time/);
+        });
+      });
+    }
+  );
+
+  it(
+    'should not fetch with url from the cache if on cache origin ' +
+      'and is not transformed',
+    () => {
+      sandbox.stub(Math, 'random').callsFake(() => 1);
+      sandbox.stub(viewer, 'isVisible').returns(true);
+      manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
+      manager.isTransformed_ = false;
+      manager.location_ =
+        'https://cdn.ampproject.org' +
+        '/c/s/www.example.com/foo/bar?hello=world#dev=1';
+      ready();
+      const fetchSpy = sandbox.spy(manager, 'work_');
+      liveList.buildCallback();
+      return manager.whenDocReady_().then(() => {
+        const interval = liveList.getInterval();
+        const tick = interval - jitterOffset;
+        expect(manager.poller_.isRunning()).to.be.true;
+        expect(fetchSpy).to.have.not.been.called;
+        clock.tick(tick);
+        expect(fetchSpy).to.be.calledOnce;
+        return xhrs[0].then(xhr => {
+          expect(xhr.url).to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
+          expect(xhr.url).to.match(/#dev=1/);
+          expect(xhr.url).to.match(/amp_latest_update_time/);
+        });
+      });
+    }
+  );
+
   it('should find highest "update time" from amp-live-list elements', () => {
     const doc = [];
     const list1 = getLiveList(undefined, 'id1');
@@ -509,7 +738,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
-    manager.getLiveLists_(doc);
+    manager.updateLiveLists_(doc);
     expect(manager.latestUpdateTime_).to.equal(2000);
   });
 
@@ -531,65 +760,77 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       xhrs[0].then(xhr => {
         expect(xhr.url).to.match(/amp_latest_update_time=1111/);
         xhr.respond(
-            200, {
-              'Content-Type': 'text/xml',
-            },
-            '<html><amp-live-list id="id-1"></amp-live-list></html>');
+          200,
+          {
+            'Content-Type': 'text/xml',
+          },
+          '<html><amp-live-list id="id-1"></amp-live-list></html>'
+        );
       });
       return manager.poller_.lastWorkPromise_.then(() => {
         clock.tick(tick);
         expect(fetchSpy).to.have.callCount(2);
-        return xhrs[1].then(
-            xhr => expect(xhr.url).to.match(/amp_latest_update_time=2500/));
+        return xhrs[1].then(xhr =>
+          expect(xhr.url).to.match(/amp_latest_update_time=2500/)
+        );
       });
     });
   });
 });
 
-describes.realWin('install scripts', {
-  amp: true,
-  fakeRegisterElement: true,
-}, env => {
-  let manager;
-  let ampdoc;
-  let win;
-  let doc;
-  let extensions;
+describes.realWin(
+  'install scripts',
+  {
+    amp: true,
+    fakeRegisterElement: true,
+  },
+  env => {
+    let manager;
+    let ampdoc;
+    let win;
+    let doc;
+    let extensions;
 
-  beforeEach(function() {
-    win = env.win;
-    doc = win.document;
-    ampdoc = env.ampdoc;
-    extensions = env.extensions;
-    manager = liveListManagerForDoc(ampdoc);
-  });
+    beforeEach(function() {
+      win = env.win;
+      doc = win.document;
+      ampdoc = env.ampdoc;
+      extensions = env.extensions;
+      manager = new LiveListManager(ampdoc);
+      sandbox.stub(LiveListManager, 'forDoc').returns(Promise.resolve(manager));
+    });
 
-  it('should install newly discovered script tags on xhr doc', () => {
-    // Emulate doc
-    const div = document.createElement('div');
-    const script1 = document.createElement('script');
-    const script2 = document.createElement('script');
-    script1.setAttribute('custom-element', 'amp-test');
-    script2.setAttribute('custom-template', 'amp-template');
-    div.appendChild(script1);
-    div.appendChild(script2);
+    it('should install newly discovered script tags on xhr doc', () => {
+      // Emulate doc
+      const div = document.createElement('div');
+      const script1 = document.createElement('script');
+      const script2 = document.createElement('script');
+      script1.setAttribute('custom-element', 'amp-test');
+      script2.setAttribute('custom-template', 'amp-template');
+      div.appendChild(script1);
+      div.appendChild(script2);
 
-    expect(doc.head.querySelectorAll(
-        '[custom-element="amp-test"]')).to.have.length(0);
-    expect(extensions.extensions_['amp-test']).to.be.undefined;
+      expect(
+        doc.head.querySelectorAll('[custom-element="amp-test"]')
+      ).to.have.length(0);
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
 
-    expect(doc.head.querySelectorAll(
-        '[custom-template="amp-template"]')).to.have.length(0);
-    expect(extensions.extensions_['amp-template']).to.be.undefined;
+      expect(
+        doc.head.querySelectorAll('[custom-template="amp-template"]')
+      ).to.have.length(0);
+      expect(extensions.extensions_['amp-template']).to.be.undefined;
 
-    manager.installExtensionsForDoc_(div);
+      manager.installExtensionsForDoc_(div);
 
-    expect(doc.head.querySelectorAll(
-        '[custom-element="amp-test"]')).to.have.length(1);
-    expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(
+        doc.head.querySelectorAll('[custom-element="amp-test"]')
+      ).to.have.length(1);
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
 
-    expect(doc.head.querySelectorAll(
-        '[custom-element="amp-template"]')).to.have.length(1);
-    expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
-  });
-});
+      expect(
+        doc.head.querySelectorAll('[custom-element="amp-template"]')
+      ).to.have.length(1);
+      expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
+    });
+  }
+);

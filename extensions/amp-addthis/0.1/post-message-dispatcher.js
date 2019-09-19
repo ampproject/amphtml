@@ -43,7 +43,7 @@ export class PostMessageDispatcher {
 
   /**
    * @param {string} eventType
-   * @param {!Object} eventData
+   * @param {!JsonObject} eventData
    * @private
    */
   emit_(eventType, eventData) {
@@ -56,13 +56,14 @@ export class PostMessageDispatcher {
   /**
    * Utility method to parse out the data from the supplied `postMessage` event.
    * @param {!Event} event
+   * @return {?JsonObject|undefined}
    * @private
    */
   getMessageData_(event) {
     const data = getData(event);
 
     if (isObject(data)) {
-      return data;
+      return /** @type {!JsonObject} */ (data);
     }
 
     if (typeof data === 'string' && startsWith(data, '{')) {
@@ -84,16 +85,18 @@ export class PostMessageDispatcher {
 
     const data = this.getMessageData_(event) || {};
 
-    switch (data.event) {
+    switch (data['event']) {
       case CONFIGURATION_EVENT: {
         this.emit_(
-            CONFIGURATION_EVENT,
-            Object.assign({}, data, {source: event.source})
+          CONFIGURATION_EVENT,
+          /** @type {!JsonObject} */ (Object.assign({}, data, {
+            'source': event.source,
+          }))
         );
         break;
       }
       case SHARE_EVENT: {
-        this.emit_(SHARE_EVENT, data);
+        this.emit_(SHARE_EVENT, /** @type {!JsonObject} */ (data));
         break;
       }
     }

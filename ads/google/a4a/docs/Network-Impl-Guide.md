@@ -51,7 +51,7 @@ To support Fast Fetch, ad networks are required to implement the following:
 2. The JavaScript to build the ad request, which must be located within the AMP
 HTML GitHub repository (example implementations:
 [AdSense](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-adsense-impl)
-& [DoubleClick](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-doubleclick-impl)).
+& [Google Ad Manager](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-doubleclick-impl)).
 
 ## Detailed design
 
@@ -104,32 +104,22 @@ is allowed by including the following headers in the response:
   <dt><code>Access-Control-Allow-Origin</code></dt>
   <dd>With the value matching the value of the request "Origin" header only if
     the origin domain is allowed. Note that requests from pages hosted on the
-    Google AMP Cache will have a value matching the <code>https://cdn.ampproject.org</code>
-    domain.</dd>
-  <dt><code>AMP-Access-Control-Allow-Source-Origin</code></dt>
-  <dd>With the value matching the value of the <code>"__amp_source_origin"</code>
-    request parameter, which is <a href="https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L103">added</a>
-    by the AMP Runtime and matches the origin of the request had the page not
-    been served from <a href="https://www.ampproject.org/docs/get_started/about-amp.html">Google AMP Cache</a>
-    (the originating source of the page).  Ad network can use this to prevent
-    access by particular publisher domains where lack of response header will
-    cause the response to be <a href="https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L137">dropped</a>
-    by the AMP Runtime.</dd>
+    <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a> will have a value matching the <code>https://your-domain.cdn.ampproject.org</code> domain.</dd>
   <dt><code>Access-Control-Allow-Credentials</code></dt>
   <dd>With the value "true" if cookies should be included in the request.</dd>
-    <dt><code>Access-Control-Expose-Headers</code></dt>
+  <dt><code>Access-Control-Expose-Headers</code></dt>
   <dd>With the value matching a comma-separated list of any non-standard
-    response headers included in the response. At a minimum, this should
-    include <code>"AMP-Access-Control-Allow-Source-Origin"</code>. If other
+    response headers included in the response. If other
     custom headers are not included, they will be dropped by the browser.</dd>
 </dl>
 
+For details on CORS verification in AMP context, see [Verify CORS requests](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#verify-cors-header).
 
 ### Creating an AMPHTML ad extension implementation
 
-The [`<amp-ad>`](https://www.ampproject.org/docs/reference/components/amp-ad)
+The [`<amp-ad>`](https://amp.dev/documentation/components/amp-ad)
 element differentiates between different ad network implementations via the
-`type` attribute. For example, the following amp-ad tag utilizes the DoubleClick
+`type` attribute. For example, the following amp-ad tag utilizes the Google Ad Manager
 ad network:
 
 ```html
@@ -158,10 +148,10 @@ To create an ad network implementation, you must perform the following:
   file hierarchy to the AMP repository as show in Figure 2, with `<TYPE>`
   replaced by their own network. Files must implement all requirements as
   specified below. Anything not specified, i.e. helper functions etc are at the
-  discretion of the ad network, but must be approved by AMP project members just
-  as any other contributions.
+  discretion of the ad network, but must be approved using the [process required
+  for all AMP contributions](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md).
 
-#### Create the implementation script 
+#### Create the implementation script
 
 *For reference, see [Figure 1 Parts B and D](#detailed-design).*
 
@@ -175,7 +165,7 @@ To create an ad network implementation, you must perform the following:
       // @return {string} - the ad url
     ```
 
-Examples of network implementations can be seen for [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js).
+Examples of network implementations can be seen for [Google Ad Manager](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js) and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js).
 Usage of `getAdUrl` can be seen within the `this.adPromise_ promise` chain in
 [amp-a4a.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js).
 
@@ -211,16 +201,15 @@ Usage of `getAdUrl` can be seen within the `this.adPromise_ promise` chain in
     });
     ```
 
-Example configs: [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config.js#L80)
-and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68).
-Usage of DoubleClick and AdSense configs can be seen in [_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
+Example configs: [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68).
+Usage of Google Ad Manager and AdSense configs can be seen in [_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
 
 #### Create documentation
 
 Create a file named `amp-ad-network-<TYPE>-impl-internal.md`, and within this
 file provide thorough documentation for the use of your implementation.
 
-Examples: See [DoubleClick](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md)
+Examples: See [Google Ad Manager](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md)
 and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/amp-ad-network-adsense-impl-internal.md).
 
 #### Create tests
@@ -228,7 +217,7 @@ and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a
 Create the `test-amp-ad-network-<TYPE>-impl.js` file, and write thorough testing
 for your AMP ad network implementation.
 
-## Checklist for ad network implementation 
+## Checklist for ad network implementation
 
 - [ ] All Server-AMP communication done with SSL
 - [ ] AMP ads sent to validation server

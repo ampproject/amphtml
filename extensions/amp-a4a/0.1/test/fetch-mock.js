@@ -41,7 +41,6 @@ export let MockResponse;
  * it. The window is stubbed when this class's constructor is called.
  */
 export class FetchMock {
-
   /** @param {!Window} win */
   constructor(win) {
     /** @private {!Window} */
@@ -116,17 +115,18 @@ export class FetchMock {
     }
     route.called = true;
     return Promise.resolve(
-        typeof route.response == 'function' ?
-          route.response() : route.response)
-        .then(data => {
-          if (data === null || typeof data == 'string') {
-            return new Response(data);
-          } else {
-            const {body, status, headers} = data;
-            return new Response(body, /** @type {!ResponseInit} */ (
-              {status, headers}));
-          }
-        });
+      typeof route.response == 'function' ? route.response() : route.response
+    ).then(data => {
+      if (data === null || typeof data == 'string') {
+        return new Response(data);
+      } else {
+        const {body, status, headers} = data;
+        return new Response(
+          body,
+          /** @type {!ResponseInit} */ ({status, headers})
+        );
+      }
+    });
   }
 }
 

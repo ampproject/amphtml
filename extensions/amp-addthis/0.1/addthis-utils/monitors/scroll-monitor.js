@@ -48,8 +48,8 @@ export class ScrollMonitor {
     const scrollTop = this.viewport_.getScrollTop() || 0;
     this.maxScrollTop_ = Math.max(this.maxScrollTop_, scrollTop);
     this.maxScrollPlusHeight_ = Math.max(
-        this.maxScrollPlusHeight_,
-        (this.viewport_.getHeight() || 0) + scrollTop
+      this.maxScrollPlusHeight_,
+      (this.viewport_.getHeight() || 0) + scrollTop
     );
   }
 

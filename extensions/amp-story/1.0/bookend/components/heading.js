@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
-import {user} from '../../../../../src/log';
+import {userAssert} from '../../../../../src/log';
 
 /**
  * @typedef {{
@@ -37,8 +41,10 @@ export class HeadingComponent {
    * @override
    * */
   assertValidity(headingJson) {
-    user().assert('text' in headingJson, 'Heading component must contain ' +
-      '`text` field, skipping invalid.');
+    userAssert(
+      'text' in headingJson,
+      'Heading component must contain `text` field, skipping invalid.'
+    );
   }
 
   /**
@@ -53,17 +59,19 @@ export class HeadingComponent {
     };
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} headingData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
-  buildElement(headingData, doc) {
+  /** @override */
+  buildElement(headingData, doc, data) {
     const html = htmlFor(doc);
-    const template =
-      html`<h3 class="i-amphtml-story-bookend-component
-        i-amphtml-story-bookend-heading"></h3>`;
+    const template = html`
+      <h3
+        class="i-amphtml-story-bookend-component
+        i-amphtml-story-bookend-heading"
+      ></h3>
+    `;
+    template[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.HEADING,
+    };
 
     template.textContent = headingData.text;
 

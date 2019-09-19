@@ -1,5 +1,13 @@
 - cramforce
 - dvoytenko
 - jridgewell
-- ampproject/validator:
-  - "*.protoascii"
+- "**/validator-*.protoascii": ampproject/wg-caching
+- "**/validator-*.html": ampproject/wg-caching
+- "**/validator-*.out": ampproject/wg-caching
+- "*.md": ampproject/wg-outreach
+- ".*, babel.config.js, bundles.config.js, gulpfile.js, renovate.json":
+  - ampproject/wg-infra
+- "package.json, yarn.lock":
+  - ampproject/wg-infra
+  - ampproject/wg-runtime
+  - ampproject/wg-performance

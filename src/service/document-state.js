@@ -15,11 +15,16 @@
  */
 
 import {Observable} from '../observable';
-import {getVendorJsPropertyName} from '../style';
+import {
+  addDocumentVisibilityChangeListener,
+  getDocumentVisibilityState,
+  isDocumentHidden,
+} from '../utils/document-visibility';
 import {registerServiceBuilder} from '../service';
-import {waitForChild} from '../dom';
 
 /**
+ * INTENT TO DEPRECATE.
+ * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
  */
 export class DocumentState {
   /**
@@ -32,42 +37,15 @@ export class DocumentState {
     /** @private @const {!Document} */
     this.document_ = win.document;
 
-    /** @private {string|null} */
-    this.hiddenProp_ = getVendorJsPropertyName(this.document_, 'hidden', true);
-    if (this.document_[this.hiddenProp_] === undefined) {
-      this.hiddenProp_ = null;
-    }
-
-    /** @private {string|null} */
-    this.visibilityStateProp_ = getVendorJsPropertyName(this.document_,
-        'visibilityState', true);
-    if (this.document_[this.visibilityStateProp_] === undefined) {
-      this.visibilityStateProp_ = null;
-    }
-
     /** @private @const {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private {string|null} */
-    this.visibilityChangeEvent_ = null;
-    if (this.hiddenProp_) {
-      this.visibilityChangeEvent_ = 'visibilitychange';
-      const vendorStop = this.hiddenProp_.indexOf('Hidden');
-      if (vendorStop != -1) {
-        this.visibilityChangeEvent_ =
-            this.hiddenProp_.substring(0, vendorStop) + 'Visibilitychange';
-      }
-    }
-
     /** @private @const {!Function} */
     this.boundOnVisibilityChanged_ = this.onVisibilityChanged_.bind(this);
-    if (this.visibilityChangeEvent_) {
-      this.document_.addEventListener(this.visibilityChangeEvent_,
-          this.boundOnVisibilityChanged_);
-    }
-
-    /** @private {?Observable} */
-    this.bodyAvailableObservable_ = null;
+    addDocumentVisibilityChangeListener(
+      this.document_,
+      this.boundOnVisibilityChanged_
+    );
   }
 
   /**
@@ -77,10 +55,7 @@ export class DocumentState {
    * @return {boolean}
    */
   isHidden() {
-    if (!this.hiddenProp_) {
-      return false;
-    }
-    return this.document_[this.hiddenProp_];
+    return isDocumentHidden(this.document_);
   }
 
   /**
@@ -89,10 +64,7 @@ export class DocumentState {
    * @return {string}
    */
   getVisibilityState() {
-    if (!this.visibilityStateProp_) {
-      return this.isHidden() ? 'hidden' : 'visible';
-    }
-    return this.document_[this.visibilityStateProp_];
+    return getDocumentVisibilityState(this.document_);
   }
 
   /**
@@ -107,39 +79,11 @@ export class DocumentState {
   onVisibilityChanged_() {
     this.visibilityObservable_.fire();
   }
-
-  /**
-   * If body is already available, callback is called synchronously and null
-   * is returned.
-   * @param {function()} handler
-   * @return {?UnlistenDef}
-   */
-  onBodyAvailable(handler) {
-    const doc = this.document_;
-    if (doc.body) {
-      handler();
-      return null;
-    }
-    if (!this.bodyAvailableObservable_) {
-      this.bodyAvailableObservable_ = new Observable();
-      waitForChild(doc.documentElement, () => !!doc.body,
-          this.onBodyAvailable_.bind(this));
-    }
-    return this.bodyAvailableObservable_.add(handler);
-  }
-
-  /** @private */
-  onBodyAvailable_() {
-    this.bodyAvailableObservable_.fire();
-    this.bodyAvailableObservable_.removeAll();
-    this.bodyAvailableObservable_ = null;
-  }
 }
-
 
 /**
  * @param {!Window} window
  */
-export function installDocumentStateService(window) {
+export function installGlobalDocumentStateService(window) {
   registerServiceBuilder(window, 'documentState', DocumentState);
 }

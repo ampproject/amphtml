@@ -19,7 +19,6 @@
  * connection before the real request can be made.
  */
 
-
 import {Services} from './services';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
@@ -27,10 +26,10 @@ import {htmlFor} from './static-template';
 import {parseUrlDeprecated} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
+import {whenDocumentComplete} from './document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
-
 
 /**
  * @typedef {{
@@ -66,7 +65,6 @@ function getPreconnectFeatures(win) {
   return preconnectFeatures;
 }
 
-
 /**
  * @param {?PreconnectFeaturesDef} features
  */
@@ -74,9 +72,7 @@ export function setPreconnectFeaturesForTesting(features) {
   preconnectFeatures = features;
 }
 
-
 class PreconnectService {
-
   /**
    * @param {!Window} win
    */
@@ -117,7 +113,7 @@ class PreconnectService {
   /**
    * Preconnects to a URL. Always also does a dns-prefetch because
    * browser support for that is better.
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {boolean=} opt_alsoConnecting Set this flag if you also just
    *    did or are about to connect to this host. This is for the case
@@ -127,16 +123,16 @@ class PreconnectService {
    *    when it is more fully rendered, you already know that the connection
    *    will be used very soon.
    */
-  url(viewer, url, opt_alsoConnecting) {
-    viewer.whenFirstVisible().then(() => {
-      this.url_(viewer, url, opt_alsoConnecting);
+  url(ampdoc, url, opt_alsoConnecting) {
+    ampdoc.whenFirstVisible().then(() => {
+      this.url_(ampdoc, url, opt_alsoConnecting);
     });
   }
 
   /**
    * Preconnects to a URL. Always also does a dns-prefetch because
    * browser support for that is better.
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {boolean=} opt_alsoConnecting Set this flag if you also just
    *    did or are about to connect to this host. This is for the case
@@ -145,8 +141,9 @@ class PreconnectService {
    *    E.g. when you preconnect to a host that an embed will connect to
    *    when it is more fully rendered, you already know that the connection
    *    will be used very soon.
+   * @private
    */
-  url_(viewer, url, opt_alsoConnecting) {
+  url_(ampdoc, url, opt_alsoConnecting) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
@@ -190,18 +187,18 @@ class PreconnectService {
       }
     }, 10000);
 
-    this.preconnectPolyfill_(viewer, origin);
+    this.preconnectPolyfill_(ampdoc, origin);
   }
 
   /**
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {string=} opt_preloadAs
    */
-  preload(viewer, url, opt_preloadAs) {
+  preload(ampdoc, url, opt_preloadAs) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
@@ -209,7 +206,7 @@ class PreconnectService {
       return;
     }
     this.urls_[url] = true;
-    this.url(viewer, url, /* opt_alsoConnecting */ true);
+    this.url(ampdoc, url, /* opt_alsoConnecting */ true);
     if (!this.features_.preload) {
       return;
     }
@@ -221,7 +218,7 @@ class PreconnectService {
       //   as attribute).
       return;
     }
-    viewer.whenFirstVisible().then(() => {
+    ampdoc.whenFirstVisible().then(() => {
       this.performPreload_(url);
     });
   }
@@ -280,16 +277,18 @@ class PreconnectService {
    * This is expected and fine to leave as is. Its fine to send a non 404
    * response, but please make it small :)
    *
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} origin
    * @private
    */
-  preconnectPolyfill_(viewer, origin) {
+  preconnectPolyfill_(ampdoc, origin) {
     // Unfortunately there is no reliable way to feature detect whether
     // preconnect is supported, so we do this only in Safari, which is
     // the most important browser without support for it.
-    if (this.features_.preconnect ||
-        !(this.platform_.isSafari() || this.platform_.isIos())) {
+    if (
+      this.features_.preconnect ||
+      !(this.platform_.isSafari() || this.platform_.isIos())
+    ) {
       return;
     }
 
@@ -307,9 +306,10 @@ class PreconnectService {
     // entropy as seen by servers and thus allows reverse proxies
     // (read CDNs) to respond more efficiently.
     const cacheBust = now - (now % ACTIVE_CONNECTION_TIMEOUT_MS);
-    const url = origin +
-        '/amp_preconnect_polyfill_404_or_other_error_expected.' +
-        '_Do_not_worry_about_it?' + cacheBust;
+    const url =
+      origin +
+      '/robots.txt?_AMP_safari_preconnect_polyfill_cachebust=' +
+      cacheBust;
     const xhr = new XMLHttpRequest();
     xhr.open('HEAD', url, true);
     // We only support credentialed preconnect for now.
@@ -318,7 +318,6 @@ class PreconnectService {
     xhr.send();
   }
 }
-
 
 export class Preconnect {
   /**
@@ -332,19 +331,19 @@ export class Preconnect {
     /** @const @private {!Element} */
     this.element_ = element;
 
-    /** @private {?./service/viewer-impl.Viewer} */
-    this.viewer_ = null;
+    /** @private {?./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = null;
   }
 
   /**
-   * @return {!./service/viewer-impl.Viewer}
+   * @return {!./service/ampdoc-impl.AmpDoc}
    * @private
    */
-  getViewer_() {
-    if (!this.viewer_) {
-      this.viewer_ = Services.viewerForDoc(this.element_);
+  getAmpdoc_() {
+    if (!this.ampdoc_) {
+      this.ampdoc_ = Services.ampdoc(this.element_);
     }
-    return this.viewer_;
+    return this.ampdoc_;
   }
 
   /**
@@ -360,7 +359,7 @@ export class Preconnect {
    *    will be used very soon.
    */
   url(url, opt_alsoConnecting) {
-    this.preconnectService_.url(this.getViewer_(), url, opt_alsoConnecting);
+    this.preconnectService_.url(this.getAmpdoc_(), url, opt_alsoConnecting);
   }
 
   /**
@@ -371,7 +370,7 @@ export class Preconnect {
    * @param {string=} opt_preloadAs
    */
   preload(url, opt_preloadAs) {
-    this.preconnectService_.preload(this.getViewer_(), url, opt_preloadAs);
+    this.preconnectService_.preload(this.getAmpdoc_(), url, opt_preloadAs);
   }
 }
 
@@ -384,4 +383,21 @@ export function preconnectForElement(element) {
   registerServiceBuilder(serviceHolder, 'preconnect', PreconnectService);
   const preconnectService = getService(serviceHolder, 'preconnect');
   return new Preconnect(preconnectService, element);
+}
+
+/**
+ * Preconnects to the source URL and canonical domains to make sure
+ * outbound navigations are quick. Waits for onload to avoid blocking
+ * more high priority loads.
+ * @param {!Document} document
+ * @return {Promise} When work is done.
+ */
+export function preconnectToOrigin(document) {
+  return whenDocumentComplete(document).then(() => {
+    const element = document.documentElement;
+    const preconnect = preconnectForElement(element);
+    const info = Services.documentInfoForDoc(element);
+    preconnect.url(info.sourceUrl);
+    preconnect.url(info.canonicalUrl);
+  });
 }

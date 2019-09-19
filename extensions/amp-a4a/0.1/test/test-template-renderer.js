@@ -32,7 +32,6 @@ const realWinConfig = {
 };
 
 describes.realWin('TemplateRenderer', realWinConfig, env => {
-
   const templateUrl = 'https://adnetwork.com/amp-template.html';
   const headers = {
     get: name => {
@@ -42,6 +41,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     },
   };
 
+  let doc;
   let containerElement;
   let context;
   let renderer;
@@ -50,10 +50,11 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
   let sandbox;
 
   beforeEach(() => {
+    doc = env.win.document;
     renderer = new TemplateRenderer();
     validator = new TemplateValidator();
 
-    containerElement = document.createElement('div');
+    containerElement = doc.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.signals = () => ({
@@ -61,15 +62,21 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     });
     containerElement.renderStarted = () => {};
     containerElement.getPageLayoutBox = () => ({
-      left: 0, top: 0, width: 0, height: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
     });
     containerElement.getLayoutBox = () => ({
-      left: 0, top: 0, width: 0, height: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
     });
     containerElement.getIntersectionChangeEntry = () => ({});
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
-    document.body.appendChild(containerElement);
+    doc.body.appendChild(containerElement);
 
     context = {
       win: env.win,
@@ -84,102 +91,110 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       return Promise.resolve(data.adTemplate);
     });
 
-    validatorPromise = validator.validate(context,
-        utf8Encode(JSON.stringify({
+    validatorPromise = validator.validate(
+      context,
+      utf8Encode(
+        JSON.stringify({
           templateUrl,
           data: {url: 'https://buy.com/buy-1'},
           analytics: {foo: 'bar'},
-        })), headers);
+        })
+      ),
+      headers
+    );
   });
 
   afterEach(() => {
     sandbox.restore();
-    document.body.removeChild(containerElement);
+    doc.body.removeChild(containerElement);
   });
 
   it('should append iframe child with correct template values', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
     return validatorPromise.then(validatorOutput => {
-
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
-      return renderer.render(context, containerElement, creativeData)
-          .then(() => {
-            const iframe = containerElement.querySelector('iframe');
-            expect(iframe).to.be.ok;
-            expect(iframe.contentWindow.document.body.innerHTML.trim()).to
-                .equal('<div>\n      <p>ipsum lorem</p>\n      <a href=' +
-                    '"https://buy.com/buy-1" target="_top">Click for ad!</a>' +
-                    '\n    <amp-analytics class="i-amphtml-element i-amphtml' +
-                    '-notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml' +
-                    '-layout-size-defined amp-unresolved i-amphtml-' +
-                    'unresolved" style="width: 1px; height: 1px;">' +
-                    '</amp-analytics></div>');
-          });
+      return renderer
+        .render(context, containerElement, creativeData)
+        .then(() => {
+          const iframe = containerElement.querySelector('iframe');
+          expect(iframe).to.be.ok;
+          expect(iframe.contentWindow.document.body.innerHTML.trim()).to.equal(
+            '<div>\n      <p>ipsum lorem</p>\n      <a href=' +
+              '"https://buy.com/buy-1" target="_top">Click for ad!</a>' +
+              '\n    <amp-analytics class="i-amphtml-element i-amphtml' +
+              '-notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml' +
+              '-layout-size-defined amp-unresolved i-amphtml-' +
+              'unresolved" i-amphtml-layout="fixed" style="width: 1px;' +
+              ' height: 1px;"></amp-analytics></div>'
+          );
+        });
     });
   });
 
   it('should set correct attributes on the iframe', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
     return validatorPromise.then(validatorOutput => {
-
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
-      return renderer.render(context, containerElement, creativeData)
-          .then(() => {
-            const iframe = containerElement.querySelector('iframe');
-            expect(iframe).to.be.ok;
-            expect(iframe.getAttribute('width')).to.equal('320');
-            expect(iframe.getAttribute('height')).to.equal('50');
-            expect(iframe.getAttribute('frameborder')).to.equal('0');
-            expect(iframe.getAttribute('allowfullscreen')).to.equal('');
-            expect(iframe.getAttribute('allowtransparency')).to.equal('');
-            expect(iframe.getAttribute('scrolling')).to.equal('no');
-          });
+      return renderer
+        .render(context, containerElement, creativeData)
+        .then(() => {
+          const iframe = containerElement.querySelector('iframe');
+          expect(iframe).to.be.ok;
+          expect(iframe.getAttribute('width')).to.equal('320');
+          expect(iframe.getAttribute('height')).to.equal('50');
+          expect(iframe.getAttribute('frameborder')).to.equal('0');
+          expect(iframe.getAttribute('allowfullscreen')).to.equal('');
+          expect(iframe.getAttribute('allowtransparency')).to.equal('');
+          expect(iframe.getAttribute('scrolling')).to.equal('no');
+        });
     });
   });
 
   it('should style body of iframe document to be visible', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
     return validatorPromise.then(validatorOutput => {
-
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
-      return renderer.render(context, containerElement, creativeData)
-          .then(() => {
-            const iframe = containerElement.querySelector('iframe');
-            expect(iframe).to.be.ok;
-            expect(iframe.contentWindow.document.body.style.visibility)
-                .to.equal('visible');
-          });
+      return renderer
+        .render(context, containerElement, creativeData)
+        .then(() => {
+          const iframe = containerElement.querySelector('iframe');
+          expect(iframe).to.be.ok;
+          expect(iframe.contentWindow.document.body.style.visibility).to.equal(
+            'visible'
+          );
+        });
     });
   });
 
   it('should insert analytics', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
     const insertAnalyticsSpy = sandbox.spy(
-        getAmpAdTemplateHelper(env.win), 'insertAnalytics');
+      getAmpAdTemplateHelper(env.win),
+      'insertAnalytics'
+    );
     return validatorPromise.then(validatorOutput => {
-
       // Sanity check. This behavior is tested in test-template-validator.js.
       expect(validatorOutput).to.be.ok;
       expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
       const {creativeData} = validatorOutput;
       expect(creativeData).to.be.ok;
-      return renderer.render(context, containerElement, creativeData)
-          .then(() => {
-            expect(insertAnalyticsSpy).to.be.calledOnce;
-          });
+      return renderer
+        .render(context, containerElement, creativeData)
+        .then(() => {
+          expect(insertAnalyticsSpy).to.be.calledOnce;
+        });
     });
   });
 });
-

@@ -25,7 +25,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -35,15 +35,11 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
 
 /** @private @const {string} */
 const TAG = 'amp-powr-player';
-
 
 /** @private @const {!Object.<string,string>} */
 const PLAYER_EVENT_MAP = {
@@ -55,10 +51,8 @@ const PLAYER_EVENT_MAP = {
   'ads-ad-ended': VideoEvents.AD_END,
 };
 
-
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpPowrPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -110,10 +104,9 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const ampdoc = this.getAmpDoc();
-    const deferred = new Deferred();
+    this.urlReplacements_ = Services.urlReplacementsForDoc(this.element);
 
-    this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
+    const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
   }
@@ -124,13 +117,11 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        e => this.handlePlayerMessage_(e));
+    this.unlistenMessage_ = listen(this.win, 'message', e =>
+      this.handlePlayerMessage_(e)
+    );
 
-    return this.loadPromise(iframe)
-        .then(() => this.playerReadyPromise_);
+    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
 
   /**
@@ -144,10 +135,15 @@ class AmpPowrPlayer extends AMP.BaseElement {
       // We still need to check this.iframe_ as the component may have
       // been unlaid out by now.
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow. /*OK*/ postMessage(JSON.stringify(dict({
-          'command': command,
-          'args': arg,
-        })), 'https://player.powr.com');
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          JSON.stringify(
+            dict({
+              'command': command,
+              'args': arg,
+            })
+          ),
+          'https://player.powr.com'
+        );
       }
     });
   }
@@ -195,8 +191,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     if (eventType === 'volumechange') {
       const muted = data['muted'];
-      if (muted == null ||
-          this.muted_ == muted) {
+      if (muted == null || this.muted_ == muted) {
         return;
       }
       this.muted_ = muted;
@@ -219,10 +214,13 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     this.playerReadyResolver_(this.iframe_);
 
-    dev().info(TAG,
-        'Player %s ready. ' +
+    dev().info(
+      TAG,
+      'Player %s ready. ' +
         'Powr Player version: %s IFrame Support version: %s',
-        this.playerId_, data['powrVersion'], data['iframeVersion']
+      this.playerId_,
+      data['powrVersion'],
+      data['iframeVersion']
     );
   }
 
@@ -232,24 +230,27 @@ class AmpPowrPlayer extends AMP.BaseElement {
    */
   getIframeSrc_() {
     const {element: el} = this;
-    const account = user().assert(
-        el.getAttribute('data-account'),
-        'The data-account attribute is required for <amp-powr-player> %s',
-        el);
+    const account = userAssert(
+      el.getAttribute('data-account'),
+      'The data-account attribute is required for <amp-powr-player> %s',
+      el
+    );
 
-    this.playerId_ = user().assert(
-        el.getAttribute('data-player'),
-        'The data-player attribute is required for <amp-powr-player> %s',
-        el);
+    this.playerId_ = userAssert(
+      el.getAttribute('data-player'),
+      'The data-player attribute is required for <amp-powr-player> %s',
+      el
+    );
 
     const video = el.getAttribute('data-video');
     const terms = el.getAttribute('data-terms');
 
-    user().assert(
-        video || terms,
-        'The data-video or data-terms attribute is required for ' +
+    userAssert(
+      video || terms,
+      'The data-video or data-terms attribute is required for ' +
         '<amp-powr-player> %s',
-        el);
+      el
+    );
 
     const srcPrefix = 'https://player.powr.com/iframe.html';
 
@@ -271,8 +272,8 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     if (customReferrer) {
       el.setAttribute(
-          'data-param-referrer',
-          this.urlReplacements_.expandUrlSync(customReferrer)
+        'data-param-referrer',
+        this.urlReplacements_.expandUrlSync(customReferrer)
       );
     }
 
@@ -287,8 +288,11 @@ class AmpPowrPlayer extends AMP.BaseElement {
     const account = mutations['data-account'];
     const playerId = mutations['data-player'] || mutations['data-player-id'];
     const video = mutations['data-video'];
-    if (account !== undefined || playerId !== undefined ||
-      video !== undefined) {
+    if (
+      account !== undefined ||
+      playerId !== undefined ||
+      video !== undefined
+    ) {
       if (this.iframe_) {
         this.iframe_.src = this.getIframeSrc_();
       }
@@ -297,8 +301,12 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_ && this.iframe_.contentWindow &&
-      this.frameHasAmpSupport_ && this.playing_) {
+    if (
+      this.iframe_ &&
+      this.iframe_.contentWindow &&
+      this.frameHasAmpSupport_ &&
+      this.playing_
+    ) {
       this.pause();
     }
   }
@@ -426,8 +434,12 @@ class AmpPowrPlayer extends AMP.BaseElement {
     return [];
   }
 
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-AMP.extension('amp-powr-player', '0.1', AMP => {
-  AMP.registerElement('amp-powr-player', AmpPowrPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpPowrPlayer);
 });

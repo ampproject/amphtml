@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Displays a dismissable notification to the user.
+---
 <!--
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +21,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-user-notification"></a> `amp-user-notification`
+# amp-user-notification
 
 [TOC]
 
+Displays a dismissable notification to the user.
+
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a dismissable notification to the user. </td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
@@ -33,15 +38,15 @@ limitations under the License.
     </td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
       <ul>
-        <li><a href="https://ampbyexample.com/components/amp-user-notification/">Annotated code example for amp-user-notification (with local storage)</a></li>
-        <li><a href="https://ampbyexample.com/advanced/amp-user-notification_with_server_endpoint/">Annotated code example for amp-user-notification (with Server Endpoint)</a></li>
+        <li><a href="https://amp.dev/documentation/examples/components/amp-user-notification/#basic-usage-with-local-storage">Annotated code example for amp-user-notification (with local storage)</a></li>
+        <li><a href="https://amp.dev/documentation/examples/components/amp-user-notification/#advanced-usage-with-a-server-endpoint">Annotated code example for amp-user-notification (with Server Endpoint)</a></li>
       </ul>
     </td>
   </tr>
@@ -100,7 +105,7 @@ You can add it as a query string field (e.g.,
 If the `data-show-if-href` attribute is not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
 
 {% call callout('Important', type='caution') %}
-For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
+For handling CORS requests and responses, see the [AMP CORS spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests).
 {% endcall %}
 
 **CORS GET request** query string fields: `elementId`, `ampUserId`
@@ -154,7 +159,7 @@ In this example if the user is located in Mexico (`mx`) the `amp-geo` will retur
 
 This is the opposite of `data-show-if-geo`.  When specified `amp-user-notification` will only trigger if the `amp-geo` country group does not match the supplied list.
 
-Example: 
+Example:
 
 In this example user in Mexico would not trigger the notification, but a user in an unknon country (assigned to the  `whereIsWaldo` group) would trigger the notifcation.
 
@@ -312,7 +317,7 @@ amp-user-notification.amp-active {
 ```
 
 ## Actions
-The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events):
+The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 <table>
   <tr>
@@ -330,8 +335,8 @@ The `amp-user-notification` exposes the following actions that you can use [AMP 
 Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
 - [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
-- [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad)
-- [`amp-analytics`](https://www.ampproject.org/docs/reference/components/amp-analytics)
+- [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
+- [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
 
 ## Validation
 

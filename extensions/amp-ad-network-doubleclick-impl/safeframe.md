@@ -1,13 +1,13 @@
-# Doubleclick Fast Fetch SafeFrame API
+# Google Ad Manager Fast Fetch SafeFrame API
 
-Doubleclick's Fast Fetch implementation supports some aspects of the [GPT SafeFrame API](https://support.google.com/dfp_premium/answer/6023110) for non-AMP creatives that are rendered within a SafeFrame. Please refer to the [IAB specification](https://www.iab.com/wp-content/uploads/2014/08/SafeFrames_v1.1_final.pdf) of SafeFrame and the [GPT implementation details](https://support.google.com/dfp_premium/answer/6023110) for a comprehensive explanation of SafeFrame. This document is primarily aimed to explain the AMP-specific differences.
+Google Ad Manager's Fast Fetch implementation supports some aspects of the [GPT SafeFrame API](https://support.google.com/dfp_premium/answer/6023110) for non-AMP creatives that are rendered within a SafeFrame. Please refer to the [IAB specification](https://www.iab.com/wp-content/uploads/2014/08/SafeFrames_v1.1_final.pdf) of SafeFrame and the [GPT implementation details](https://support.google.com/dfp_premium/answer/6023110) for a comprehensive explanation of SafeFrame. This document is primarily aimed to explain the AMP-specific differences.
 
 SafeFrame support (including ext.js library injection) can be forced client-side by setting `data-force-safeframe=true` attribute on amp-ad type=doubleclick elements.
 
 
 # Supported Methods
 
-The following methods all work for creatives rendered in SafeFrames via Doubleclick Fast Fetch, but have AMP-specific key differences that should be noted:
+The following methods all work for creatives rendered in SafeFrames via Google Ad Manager Fast Fetch, but have AMP-specific key differences that should be noted:
 
 ## \$sf.ext.resize({t, b, l, r})
 

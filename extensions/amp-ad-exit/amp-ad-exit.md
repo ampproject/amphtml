@@ -1,3 +1,11 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+  - ads
+teaser:
+  text: Provides configurable behavior for ad exits for A4A (AMP for Ads).
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,21 +22,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-ad-exit"></a> `amp-ad-exit`
+# amp-ad-exit
 
 [TOC]
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Provides configurable behavior for ad exits for <a href="https://www.ampproject.org/docs/ads/amphtml_ads">AMPHTML ads</a>.</td>
+    <td>Provides configurable behavior for ad exits for <a href="https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads">AMPHTML ads</a>.</td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay or do not specify a layout</td>
   </tr>
 </table>
@@ -36,7 +44,7 @@ limitations under the License.
 ## Overview
 
 The `amp-ad-exit` element is configured with a JSON child script element and
-exposes an "exit" action to other elements in the [AMPHTML ad)](https://www.ampproject.org/docs/ads/a4a_spec). Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
+exposes an "exit" action to other elements in the [AMPHTML ad)](https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec). Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
 
 1. Parse the JSON config (if it hasn't yet been parsed).
 2. Find the requested exit target.
@@ -62,7 +70,10 @@ exposes an "exit" action to other elements in the [AMPHTML ad)](https://www.ampp
     },
     "flour": {
       "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
-      "filters": ["3sClick", "borderProtection"]
+      "filters": ["3sClick", "borderProtection"],
+      "behaviors": {
+        "clickTarget": "_top"
+      }
     },
     "bannetons": {
       "finalUrl": "https://example.com/artisan-baking/bannetons",
@@ -355,6 +366,13 @@ replaced. For example, if you define a custom variable named "_b" with value
 "foo", `/?a_b_c=_b` will become `/?afoo_c=foo`.
 {% endcall %}
 
+## Behaviors
+Behaviors specify additional properties of the exit action.
+
+### Click Target
+
+The `clickTarget` behavior specifies where a target's click should try to open.  A click defaults to opening a new tab, if it is possible in the environment.  With this behavior a user can specify that the click should try open the same tab, by setting this to `"_top"`.  If this is not set to `"_top"`, then it will fall back to opening a new tab.
+
 ## `exit` action
 
 The `amp-ad-exit` element exposes an `exit` action that other elements reference in `on="tap:..."` attributes. The action accepts a "target" string parameter that must match a named `NavigationTarget` in the `ExitConfig`. Custom variables beginning with an underscore can also be passed in.
@@ -381,10 +399,12 @@ The `amp-ad-exit` element exposes an `exit` action that other elements reference
 See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/config.js).
 
 ## Attributes
-
-##### id
-
-An `id` is required so that `amp-exit` can be referenced by tappable elements.
+<table>
+  <tr>
+    <td width="40%"><strong>id</strong></td>
+    <td>An <code>id</code> is required so that <code>amp-exit</code> can be referenced by tappable elements.</td>
+  </tr>
+</table>
 
 ## Validation
 The `amp-ad-exit` element is only available for [AMPHTML ads)](https://www.ampproject.org/docs/ads/amphtml_ads).

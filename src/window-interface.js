@@ -20,7 +20,6 @@
  * See test-helper.js#mockWindowInterface
  */
 export class WindowInterface {
-
   /**
    * @static
    * @param {!Window} win
@@ -64,6 +63,15 @@ export class WindowInterface {
    */
   static getUserLanguage(win) {
     return win.navigator.userLanguage || win.navigator.language;
+  }
+
+  /**
+   * @static
+   * @return {number}
+   */
+  static getDevicePixelRatio() {
+    // No matter the window, the device-pixel-ratio is always one.
+    return self.devicePixelRatio || 1;
   }
 
   /**

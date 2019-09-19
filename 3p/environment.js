@@ -43,7 +43,7 @@ export function manageWin(win) {
     manageWin_(win);
   } catch (e) {
     // We use a try block, because the ad integrations often swallow errors.
-    console./*OK*/error(e.message, e.stack);
+    console./*OK*/ error(e.message, e.stack);
   }
 }
 
@@ -64,7 +64,6 @@ function manageWin_(win) {
   maybeInstrumentsNodes(win, win.document.querySelectorAll('iframe'));
   blockSyncPopups(win);
 }
-
 
 /**
  * Add instrumentation code to doc.write.
@@ -115,15 +114,14 @@ function maybeInstrumentsNodes(win, addedNodes) {
       }
       const src = node.getAttribute('src');
       const srcdoc = node.getAttribute('srcdoc');
-      if (src == null || /^(about:|javascript:)/i.test(src.trim()) ||
-          srcdoc) {
+      if (src == null || /^(about:|javascript:)/i.test(src.trim()) || srcdoc) {
         if (node.contentWindow) {
           instrumentIframeWindow(node, win, node.contentWindow);
           node.addEventListener('load', () => {
             try {
               instrumentIframeWindow(node, win, node.contentWindow);
             } catch (e) {
-              console./*OK*/error(e.message, e.stack);
+              console./*OK*/ error(e.message, e.stack);
             }
           });
         } else if (srcdoc) {
@@ -131,7 +129,7 @@ function maybeInstrumentsNodes(win, addedNodes) {
         }
       }
     } catch (e) {
-      console./*OK*/error(e.message, e.stack);
+      console./*OK*/ error(e.message, e.stack);
     }
   }
 }
@@ -191,12 +189,13 @@ function instrumentEntryPoints(win) {
     const args = Array.prototype.slice.call(arguments);
     /**
      * @return {*}
+     * @suppress {uselessCode}
      */
     function wrapper() {
       next();
       if (typeof fn == 'string') {
         // Handle rare and dangerous string arg case.
-        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn); // lgtm [js/useless-expression]
+        return (0, win.eval /*NOT OK but whatcha gonna do.*/).call(win, fn); // lgtm [js/useless-expression]
       } else {
         return fn.apply(this, arguments);
       }
@@ -245,7 +244,7 @@ function blockSyncPopups(win) {
       return false;
     };
   } catch (e) {
-    console./*OK*/error(e.message, e.stack);
+    console./*OK*/ error(e.message, e.stack);
   }
 }
 
@@ -270,8 +269,7 @@ function minTime(time) {
  * Installs embed state listener.
  */
 export function installEmbedStateListener() {
-  /** @suppress {deprecated} */
   listenParent(window, 'embed-state', function(data) {
-    inViewport = data.inViewport;
+    inViewport = data['inViewport'];
   });
 }

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-export const MPULSE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const MPULSE_CONFIG = jsonLiteral({
   'requests': {
-    'onvisible': 'https://${beacon_url}?' +
+    'onvisible':
+      'https://${beacon_url}?' +
       'h.d=${h.d}' +
       '&h.key=${h.key}' +
       '&h.t=${h.t}' +
@@ -76,3 +79,5 @@ export const MPULSE_CONFIG = /** @type {!JsonObject} */ ({
     'custom_metric.': 'cmet.',
   },
 });
+
+export {MPULSE_CONFIG};

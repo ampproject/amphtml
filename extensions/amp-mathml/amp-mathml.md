@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Displays a MathML formula.
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,19 +21,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-mathml`"></a> `amp-mathml`
+# amp-mathml
+
+Displays a <a href="https://www.w3.org/Math/">MathML formula</a>.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a <a href="https://www.w3.org/Math/">MathML formula</a>.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-mathml" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>container</td>
   </tr>
   <tr>
@@ -55,12 +60,12 @@ This extension creates an iframe and renders a MathML formula.
 #### Example: Double angle formula for Cosines
 
 ```html
-<amp-mathml layout="container" data-formula="\[ \cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ) \]">
+<amp-mathml layout="container" data-formula="$$ \cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ) $$">
 </amp-mathml>
 ```
 #### Example: Inline formula
 
-This is an example of a formula placed  inline in the middle of a block of text. `<amp-mathml layout="container" inline data-formula="\[ \cos(θ+φ) \]"></amp-mathml>` This shows how the formula will fit inside a block of text and can be styled with CSS.
+This is an example of a formula of ``<amp-mathml layout="container" inline data-formula="`x`"></amp-mathml>``, `<amp-mathml layout="container" inline data-formula="\(x = {-b \pm \sqrt{b^2-4ac} \over 2a}\)"></amp-mathml>` placed inline in the middle of a block of text. `<amp-mathml layout="container" inline data-formula="\( \cos(θ+φ) \)"></amp-mathml>` This shows how the formula will fit inside a block of text and can be styled with CSS.
 
 ## Attributes
 

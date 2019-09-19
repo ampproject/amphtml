@@ -31,7 +31,6 @@ const realWinConfig = {
 };
 
 describes.realWin('CryptographicValidator', realWinConfig, env => {
-
   const headers = {'Content-Type': 'application/jwk-set+json'};
   let sandbox;
   let userErrorStub;
@@ -53,56 +52,59 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
     env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
       verify: () => Promise.resolve(VerificationStatus.OK),
     };
-    return validator.validate(
-        {win: env.win}, utf8Encode(data.reserialized), headers)
-        .then(validatorOutput => {
-          expect(validatorOutput).to.be.ok;
-          expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
-          expect(validatorOutput.adResponseType).to.equal(
-              AdResponseType.CRYPTO);
-          expect(validatorOutput.creativeData).to.be.ok;
+    return validator
+      .validate({win: env.win}, utf8Encode(data.reserialized), headers)
+      .then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
+        expect(validatorOutput.adResponseType).to.equal(AdResponseType.CRYPTO);
+        expect(validatorOutput.creativeData).to.be.ok;
 
-          const {creativeMetadata} = validatorOutput.creativeData;
-          expect(creativeMetadata.minifiedCreative).to.equal(
-              data.minifiedCreative);
-        });
+        const {creativeMetadata} = validatorOutput.creativeData;
+        expect(creativeMetadata.minifiedCreative).to.equal(
+          data.minifiedCreative
+        );
+      });
   });
 
   it('should have non-AMP validator result', () => {
     env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
       verify: () => Promise.resolve(VerificationStatus.UNVERIFIED),
     };
-    return validator.validate(
-        {win: env.win}, utf8Encode(data.reserialized), headers)
-        .then(validatorOutput => {
-          expect(validatorOutput).to.be.ok;
-          expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
-          expect(validatorOutput.adResponseType).to.equal(
-              AdResponseType.CRYPTO);
-          expect(validatorOutput.creativeData).to.be.ok;
+    return validator
+      .validate({win: env.win}, utf8Encode(data.reserialized), headers)
+      .then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
+        expect(validatorOutput.adResponseType).to.equal(AdResponseType.CRYPTO);
+        expect(validatorOutput.creativeData).to.be.ok;
 
-          const {creativeMetadata} = validatorOutput.creativeData;
-          expect(creativeMetadata.minifiedCreative).to.equal(
-              data.minifiedCreative);
-          expect(userErrorStub).to.be.calledOnce;
-        });
+        const {creativeMetadata} = validatorOutput.creativeData;
+        expect(creativeMetadata.minifiedCreative).to.equal(
+          data.minifiedCreative
+        );
+        expect(userErrorStub).to.be.calledOnce;
+      });
   });
 
   it('should have non-AMP validator result due to bad metadata', () => {
     env.win[SIGNATURE_VERIFIER_PROPERTY_NAME] = {
       verify: () => Promise.resolve(VerificationStatus.UNVERIFIED),
     };
-    return validator.validate(
-        {win: env.win}, utf8Encode(data.reserializedInvalidOffset), headers)
-        .then(validatorOutput => {
-          expect(validatorOutput).to.be.ok;
-          expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
-          expect(validatorOutput.adResponseType).to.equal(
-              AdResponseType.CRYPTO);
-          expect(validatorOutput.creativeData).to.be.ok;
-          expect(validatorOutput.creativeData.creativeMetadata).to.not.be.ok;
+    return validator
+      .validate(
+        {win: env.win},
+        utf8Encode(data.reserializedInvalidOffset),
+        headers
+      )
+      .then(validatorOutput => {
+        expect(validatorOutput).to.be.ok;
+        expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
+        expect(validatorOutput.adResponseType).to.equal(AdResponseType.CRYPTO);
+        expect(validatorOutput.creativeData).to.be.ok;
+        expect(validatorOutput.creativeData.creativeMetadata).to.not.be.ok;
 
-          expect(userErrorStub).to.be.calledOnce;
-        });
+        expect(userErrorStub).to.be.calledOnce;
+      });
   });
 });

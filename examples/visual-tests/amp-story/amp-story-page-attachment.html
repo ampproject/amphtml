@@ -1,0 +1,67 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <title>AMP Story page attachment</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="index.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      amp-story-page {
+        background: black;
+        color: white;
+        font-family: sans-serif;
+      }
+
+      .i-amphtml-story-spinner-container {
+        /* Hide the spinner for loading pages, since this causes flakes */
+        display: none;
+      }
+
+      amp-story-page-attachment {
+        color: rgba(0, 0, 0, 0.87);
+        font-size: 16px;
+        line-height: 1.48em;
+      }
+
+      amp-story-page-attachment h1 {
+        padding: 0 24px;
+        font-size: 28px;
+        line-height: 1.48em;
+      }
+
+      amp-story-page-attachment p {
+        padding: 0 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
+        publisher-logo-src="/examples/visual-tests/photos/120.png"
+        poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
+        poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+        poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg"
+        supports-landscape>
+      <amp-story-page id="cover">
+        <amp-story-page-attachment layout="nodisplay">
+          <h1>Some really cool video</h1>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+          <amp-video width="auto" height="270" autoplay src="/examples/visual-tests/video/tokyo.mp4" controls>
+          </amp-video>
+          <p>
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
+          </p>
+        </amp-story-page-attachment>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

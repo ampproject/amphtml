@@ -26,7 +26,7 @@ AMP video analytics gathers data about how users interact with videos in AMP doc
 | `<amp-video>` | Full support |
 | `<amp-3q-player>` | Partial support<sup>[1]</sup> |
 | `<amp-brid-player>` | Partial support<sup>[1]</sup> |
-| `<amp-brightcove>` | Partial support<sup>[1]</sup> |
+| `<amp-brightcove>` | Full support |
 | `<amp-dailymotion>` | Partial support<sup>[1]</sup> |
 | `<amp-ima-video>` | Partial support<sup>[1]</sup> |
 | `<amp-nexxtv-player>` | Partial support<sup>[1]</sup> |
@@ -128,6 +128,54 @@ The `video-seconds-played` trigger is fired every `interval` seconds when the vi
 }
 ```
 
+
+### Video percentage played trigger (`"on": "video-percentage-played"`)
+
+The `video-percentage-played` trigger is fired every `percentages` when the video is playing. The `video-percentage-played` trigger *requires* `percentages` to be set in the `videoSpec`. Use these configurations to fire a request for this event.
+
+Percentages must be set in increments of 5% and must be over zero.
+
+```javascript
+"triggers": {
+  "myVideoPercentagePlayed": {
+    "on": "video-percentage-played",
+    "request": "event",
+    "selector": "#myVideo",
+    "videoSpec": {
+      "percentages": [5, 25, 50, 75, 100], /* required */
+      /* other optional videoSpec properties */
+    }
+  },
+}
+```
+
+### Ad Start trigger (`"on": "video-ad-start"`)
+
+The `video-ad-start` trigger is fired when an Ad starts playing.
+
+```javascript
+"triggers": {
+  "adStart": {
+    "on": "video-ad-start",
+    "request": "event",
+    "selector": "#myVideo"
+  },
+}
+```
+
+
+### Ad End trigger (`"on": "video-ad-end"`))
+The `video-ad-start` trigger is fired when an Ad ends playing.
+
+```javascript
+"triggers": {
+  "adEnd": {
+    "on": "video-ad-end",
+    "request": "event",
+    "selector": "#myVideo"
+  },
+}
+```
 
 ## Video spec
 

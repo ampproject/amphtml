@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <title>amp-inabox-host example</title>
+  <style>
+    body {
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h2>
+    This page tests amp-inabox memory usage on refresh. Follow the instructions
+    below.
+  </h2>
+  <hr>
+  <h3>Inabox above the fold</h3>
+
+  Start Chrome with:
+  <pre>--js-flags="--expose-gc" --enable-precise-memory-info</pre>
+  then visit this page.  Memory usage should stay more or less constant, to
+  within about a megabyte.  If it grows without bound there's a leak.
+
+  <p>
+
+  Note: if you have devtools open you'll see memory grow as if there's a leak,
+  so you need to run this with devtools closed.
+
+  <p>
+
+  Memory usage:
+  <span id=memory-usage>make sure you enabled precise memory info</span>
+
+  <hr>
+
+  <script>
+    let n = 0;
+    let iframe = null;
+    window.ampInaboxIframes = window.ampInaboxIframes || [];
+    function update_memory_usage() {
+      window.gc();
+      var memory_usage_span = document.getElementById("memory-usage");
+      if (window.performance && window.performance.memory) {
+        memory_usage_span.textContent = (
+            window.performance.memory.usedJSHeapSize / 1000000 + "MB");
+      }
+    }
+    function make_ad_iframe() {
+      iframe = document.createElement('iframe');
+      iframe.name = 'iframe-' + n;
+      n++;
+      iframe.src = '//ads.localhost:8000/examples/amphtml-ads/visibility-ad.a4a.html';
+      iframe.scrolling = 'no';
+      iframe.width = 300;
+      iframe.height = 200;
+      window.ampInaboxIframes.push(iframe);
+      document.body.appendChild(iframe);
+    }
+    function remove_ad_iframe() {
+      if (!window.AMP) {
+        console.log("window.AMP not defined");
+      } else {
+        window.AMP.inaboxUnregisterIframe(iframe);
+      }
+      iframe.remove();
+    }
+    function repeatedly_replace_ad_iframe() {
+      update_memory_usage();
+      make_ad_iframe();
+      window.setTimeout(() => {
+        remove_ad_iframe(iframe);
+        repeatedly_replace_ad_iframe();
+      }, 1000);
+    }
+    repeatedly_replace_ad_iframe();
+  </script>
+  <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
+</body>

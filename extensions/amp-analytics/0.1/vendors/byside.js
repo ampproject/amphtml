@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const BYSIDE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const BYSIDE_CONFIG = jsonLiteral({
   'vars': {
     'webcareZone': 'webcare',
     'webcareId': '',
@@ -26,8 +28,9 @@ export const BYSIDE_CONFIG = /** @type {!JsonObject} */ ({
     'host': '//${webcareZone}.byside.com/',
     'base': '${host}BWA${webcareId}/amp/',
     'pageview': '${base}pixel.php',
-    'event': '${base}signal.php?event_id=${eventId}' +
-    '&event_label=${eventLabel}&fields=${fields}',
+    'event':
+      '${base}signal.php?event_id=${eventId}' +
+      '&event_label=${eventLabel}&fields=${fields}',
   },
   'extraUrlParams': {
     'webcare_id': '${webcareId}',
@@ -62,3 +65,5 @@ export const BYSIDE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {BYSIDE_CONFIG};

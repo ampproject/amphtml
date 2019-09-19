@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-
 /**
  * Absolute time in milliseconds.
  * @typedef {number}
  */
 export let timeDef;
-
 
 /**
  * Number between 0 and 1 that designates normalized time, as in "from start to

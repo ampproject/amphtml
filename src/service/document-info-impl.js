@@ -20,6 +20,8 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from '../url';
+
+import {getRandomString64} from './cid-impl';
 import {isArray} from '../types';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
@@ -32,6 +34,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
+ *     - pageViewId64: Id for this page view. High entropy but should be unique
  *       for concurrent page views of a user().
  *     - linkRels: A map object of link tag's rel (key) and corresponding
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
@@ -45,6 +48,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
+ *   pageViewId64: !Promise<string>,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
  *   replaceParams: ?Object<string, string|!Array<string>>
@@ -52,14 +56,13 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  */
 export let DocumentInfoDef;
 
-
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {*} TODO(#23582): Specify return type
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
   return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
 }
-
 
 export class DocInfo {
   /**
@@ -70,6 +73,8 @@ export class DocInfo {
     this.ampdoc_ = ampdoc;
     /** @private {?DocumentInfoDef} */
     this.info_ = null;
+    /** @private {?Promise<string>} */
+    this.pageViewId64_ = null;
   }
 
   /** @return {!DocumentInfoDef} */
@@ -81,8 +86,7 @@ export class DocInfo {
     const url = ampdoc.getUrl();
     const sourceUrl = getSourceUrl(url);
     const rootNode = ampdoc.getRootNode();
-    let canonicalUrl = rootNode && rootNode.AMP
-        && rootNode.AMP.canonicalUrl;
+    let canonicalUrl = rootNode && rootNode.AMP && rootNode.AMP.canonicalUrl;
     if (!canonicalUrl) {
       const canonicalTag = rootNode.querySelector('link[rel=canonical]');
       canonicalUrl = canonicalTag
@@ -94,20 +98,28 @@ export class DocInfo {
     const metaTags = getMetaTags(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
 
-    return this.info_ = {
+    return (this.info_ = {
       /** @return {string} */
       get sourceUrl() {
         return getSourceUrl(ampdoc.getUrl());
       },
       canonicalUrl,
       pageViewId,
+      get pageViewId64() {
+        // Must be calculated async since getRandomString64() can load the
+        // amp-crypto-polyfill on some browsers, and extensions service
+        // may not be registered yet.
+        if (!this.pageViewId64_) {
+          this.pageViewId64_ = getRandomString64(ampdoc.win);
+        }
+        return this.pageViewId64_;
+      },
       linkRels,
       metaTags,
       replaceParams,
-    };
+    });
   }
 }
-
 
 /**
  * Returns a relatively low entropy random string.
@@ -200,8 +212,10 @@ function getMetaTags(doc) {
  */
 function getReplaceParams(ampdoc) {
   // The "amp_r" parameter is only supported for ads.
-  if (!ampdoc.isSingleDoc() ||
-      getProxyServingType(ampdoc.win.location.href) != 'a') {
+  if (
+    !ampdoc.isSingleDoc() ||
+    getProxyServingType(ampdoc.win.location.href) != 'a'
+  ) {
     return null;
   }
   const url = parseUrlDeprecated(ampdoc.win.location.href);

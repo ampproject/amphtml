@@ -37,7 +37,8 @@ const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
 /**
  * @typedef {{
- * loc:*, title:string,
+ * loc:*,
+ * title:string,
  * pubId:string,
  * atConfig: JsonObject<AtConfigDef>,
  * referrer: string,
@@ -70,14 +71,11 @@ let LojsonDataDef;
  */
 let AtConfigDef;
 
-const getLojsonData = (/** @type {!LojsonDataDef} */ {
-  loc,
-  title,
-  pubId,
-  atConfig,
-  referrer,
-  ampDoc,
-}) => {
+/**
+ * @param {!LojsonDataDef} param1
+ * @return {!JsonObject}
+ */
+export function getLojsonData({loc, title, pubId, atConfig, referrer, ampDoc}) {
   const {href, hostname, host, search, pathname, hash, protocol, port} = loc;
   const pageInfo = {
     du: href.split('#').shift(),
@@ -98,21 +96,26 @@ const getLojsonData = (/** @type {!LojsonDataDef} */ {
   const service = getServiceFromUrlFragment(pageInfo.du);
   const {win} = ampDoc;
   const metaElements = toArray(getMetaElements(win.document));
-  const isDNTEnabled = win.navigator.doNotTrack &&
-      win.navigator.doNotTrack !== 'unspecified' &&
-      win.navigator.doNotTrack !== 'no' &&
-      win.navigator.doNotTrack !== '0';
+  const isDNTEnabled =
+    win.navigator.doNotTrack &&
+    win.navigator.doNotTrack !== 'unspecified' &&
+    win.navigator.doNotTrack !== 'no' &&
+    win.navigator.doNotTrack !== '0';
 
   return dict({
     'amp': 1,
-    'bl': 0 |
-    (atConfig['use_cookies'] !== false ? 1 : 0) |
-    (atConfig['track_textcopy'] === true ? 2 : 0) |
-    (atConfig['track_addressbar'] === true ? 4 : 0),
+    'bl':
+      0 |
+      (atConfig['use_cookies'] !== false ? 1 : 0) |
+      (atConfig['track_textcopy'] === true ? 2 : 0) |
+      (atConfig['track_addressbar'] === true ? 4 : 0),
     'cb': classifyPage(pageInfo, metaElements),
     'colc': Date.now(),
-    'ct': atConfig['track_clickback'] !== false &&
-    atConfig['track_linkback'] !== false ? 1 : 0,
+    'ct':
+      atConfig['track_clickback'] !== false &&
+      atConfig['track_linkback'] !== false
+        ? 1
+        : 0,
     'dc': 1,
     'dp': host,
     'dr': host === parsedReferrer.host ? undefined : parsedReferrer.host,
@@ -123,20 +126,24 @@ const getLojsonData = (/** @type {!LojsonDataDef} */ {
     'ln': langWithoutLocale,
     'lnlc': locale,
     'mk': getKeywordsString(metaElements),
-    'of': isDNTEnabled ? 4 :
-      nonTrackedDomainMatcher.test(hostname) ? 1 :
-        0,
+    'of': isDNTEnabled ? 4 : nonTrackedDomainMatcher.test(hostname) ? 1 : 0,
     'pd': isProductPage(win.document, metaElements) ? 1 : 0,
     'pub': pubId,
-    'rb': classifyReferrer(referrer, parsedReferrer,
-        parseUrlDeprecated(pageInfo.du)),
+    'rb': classifyReferrer(
+      referrer,
+      parsedReferrer,
+      parseUrlDeprecated(pageInfo.du)
+    ),
     'sid': getSessionId(),
     'skipb': 1,
     'sr': service,
   });
-};
+}
 
-export const callLojson = props => {
+/**
+ * @param {!LojsonDataDef} props
+ */
+export function callLojson(props) {
   const data = getLojsonData(props);
   const endpoint = `${API_SERVER}/live/red_lojson/300lo.json`;
 
@@ -145,4 +152,4 @@ export const callLojson = props => {
     endpoint,
     data,
   });
-};
+}

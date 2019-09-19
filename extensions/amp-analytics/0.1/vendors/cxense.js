@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-export const CXENSE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const CXENSE_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://scomcluster.cxense.com',
     'base': '${host}/Repo/rep.gif',
-    'pageview': '${base}?ver=1&typ=pgv&sid=${siteId}&ckp=${clientId(cX_P)}&' +
-        'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
-        'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
-        'bln=${browserLanguage}&chs=${documentCharset}&' +
-        'col=${screenColorDepth}&tzo=${timezone}&cp_cx_channel=amp',
+    'pageview':
+      '${base}?ver=1&typ=pgv&sid=${siteId}&ckp=${clientId(cX_P)}&' +
+      'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
+      'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
+      'bln=${browserLanguage}&chs=${documentCharset}&' +
+      'col=${screenColorDepth}&tzo=${timezone}&cp_cx_channel=amp',
   },
   'triggers': {
     'defaultPageview': {
@@ -36,3 +39,5 @@ export const CXENSE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {CXENSE_CONFIG};

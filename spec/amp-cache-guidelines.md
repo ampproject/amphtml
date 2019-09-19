@@ -6,17 +6,17 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 ## Preamble
 
-In the AMP ecosystem, the platform that links to content may freely choose which AMP Cache (if any) to use. It is an inversion of the typical model where content delivery is the responsibility of the publisher. 
+In the AMP ecosystem, the platform that links to content may freely choose which AMP Cache (if any) to use. It is an inversion of the typical model where content delivery is the responsibility of the publisher.
 
 This allows platforms to provide their users with predictable load performance and among other things allows them to ensure required security and privacy invariants during AMP’s pre-rendering phase.
 
-AMP is an open ecosystem and the AMP Project actively encourages the development of more AMP Caches.
+AMP is an open ecosystem and actively encourages the development of more AMP Caches.
 
 ## Guidelines: Core
 
 1. An AMP Cache only serves [valid AMP input documents](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
 
-2. It participates in the AMP Project's [validator release cycle](https://github.com/ampproject/amphtml/tree/master/validator).
+2. It participates in the [AMP validator release cycle](https://github.com/ampproject/amphtml/tree/master/validator).
 
 3. It participates in the AMP JS library release cycle and makes every effort to serve the latest version. It does not allow sites to perform version locking.
 
@@ -24,7 +24,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     1. See for example: the [Google AMP Cache URL format](https://developers.google.com/amp/cache/overview#amp-cache-url-format).
 
-5. Pledges to maintain URL space forever (even beyond the lifetime of the cache itself): 
+5. Pledges to maintain URL space forever (even beyond the lifetime of the cache itself):
 
     1. This can be achieved by donating the URL space to a trustworthy third party entity such as [archive.org](http://archive.org).
 
@@ -38,9 +38,9 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
     2. The CSP should be equivalent or stronger to what is being served on `cdn.ampproject.org`.
 
-    3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
+    3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP.
 
-8. Supports a public Update Cache mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
+8. Supports a public Update Cache mechanism for document publishers to notify the AMP cache about new, updated or deleted documents:
 
     1. Equivalent to the [Google AMP Update Cache API](https://developers.google.com/amp/cache/update-cache)
 
@@ -50,7 +50,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
 10. Provides a faithful visual and UX reproduction of source document. E.g. changes in image resolution or compression rate may be acceptable if they provide strong benefits in terms of bandwidth usage and load time.
 
-11. No obstruction of the contents, branding or attribution of the original AMP document. 
+11. No obstruction of the contents, branding or attribution of the original AMP document.
 
 12. No changes to ads, monetization, access (paywall monetization and similar), analytics, or similar.
 
@@ -62,7 +62,7 @@ AMP is an open ecosystem and the AMP Project actively encourages the development
 
 15. Follows [AMP cache modifications best practices](../spec/amp-cache-modifications.md).
 
-## Guidelines: Crawling 
+## Guidelines: Crawling
 
 * [robots.txt](https://cdn.ampproject.org/robots.txt): Content should be served from the Cache with either the same robot rules as the origin content or stricter rules. See [https://cdn.ampproject.org/robots.txt](https://cdn.ampproject.org/robots.txt) for an example.
 
@@ -98,15 +98,10 @@ For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may no
 
 ## Guidelines: Adding a new cache to the AMP ecosystem
 
-* Contact relevant publishers to make sure they update their CORS policies to include your origin.
-  * For further information please refer to the [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+* Add the details of your cache to [caches.json](../caches.json).
+  * Some tools use the deployed version of this file (<https://cdn.ampproject.org/caches.json>) to automatically generate appropriate CORS headers as described at [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
 * Handle dynamically generated components:
   * [`<amp-geo>`](../extensions/amp-geo/amp-geo.md) — at delivery time, the string `{{AMP_ISO_COUNTRY_HOTPATCH}}` in [`amp-geo.js`](../extensions/amp-geo/0.1/amp-geo.js) is replaced by a string consisting of the user's ISO country code followed by exactly 26 spaces (to avoid breaking map files).
-* Publicly announce your cache so people know where to find your documentation.
-* Examples of AMP Cache providers:
-  * [Google AMP Cache](https://developers.google.com/amp/cache/)
-  * [Cloudflare AMP Cache](https://www.cloudflare.com/website-optimization/accelerated-mobile-links/)
-
 
 ## References
 
@@ -116,10 +111,8 @@ For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may no
   * The [Google AMP Cache](https://developers.google.com/amp/cache/) is a proxy-based content delivery network for delivering all valid AMP documents.
   * It fetches AMP HTML pages, caches them, and improves page performance automatically.
   * When using the Google AMP Cache, the document, all JS files and all images load from the same origin, which is using [HTTP 2.0](https://http2.github.io/) for maximum efficiency.
-  * The cache also comes with a built-in [validation system](https://github.com/ampproject/amphtml/tree/master/validator) which confirms that the page works, and that it doesn’t depend on external resources. 
+  * The cache also comes with a built-in [validation system](https://github.com/ampproject/amphtml/tree/master/validator) which confirms that the page works, and that it doesn’t depend on external resources.
   * The validation system runs a series of assertions confirming that the page’s markup meets the AMP HTML specification.
   * [Google AMP Cache FAQ](https://developers.google.com/amp/cache/faq)
   * [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates)
   * [Crawling Google AMP Cache URLs - How-to for search engines](https://docs.google.com/document/d/1V_uLHoa48IlbFl7_3KWT_1JmCf6BnFtt3S_oR4UsasQ/edit?usp=sharing)
-
-

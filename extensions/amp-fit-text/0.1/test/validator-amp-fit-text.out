@@ -65,7 +65,7 @@ FAIL
 |    <div class="fixedblock">
 |      <amp-fit-text
 >>     ^~~~~~~~~
-amp-fit-text/0.1/test/validator-amp-fit-text.html:65:4 The specified layout 'CONTAINER' is not supported by tag 'amp-fit-text'. (see https://www.ampproject.org/docs/reference/components/amp-fit-text) [AMP_LAYOUT_PROBLEM]
+amp-fit-text/0.1/test/validator-amp-fit-text.html:65:4 The specified layout 'CONTAINER' is not supported by tag 'amp-fit-text'. (see https://amp.dev/documentation/components/amp-fit-text) [AMP_LAYOUT_PROBLEM]
 |        layout="container"
 |        height="200"
 |        width="200">

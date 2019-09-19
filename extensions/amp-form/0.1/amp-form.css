@@ -20,6 +20,17 @@ form.amp-form-submit-error [submit-error] {
   display: block;
 }
 
+textarea[autoexpand]:not(.i-amphtml-textarea-max) {
+  overflow: hidden!important;
+}
+
+.i-amphtml-textarea-clone {
+  visibility: hidden;
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  height: 0!important;
+}
 
 .i-amphtml-validation-bubble {
   transform: translate(-50%, -100%);

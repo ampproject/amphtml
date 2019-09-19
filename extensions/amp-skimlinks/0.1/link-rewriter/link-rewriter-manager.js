@@ -20,7 +20,6 @@ import {LinkRewriter} from './link-rewriter';
 import {Priority} from '../../../../src/service/navigation';
 import {Services} from '../../../../src/services';
 
-
 /**
  * LinkRewriterManager works together with LinkRewriter to allow rewriting
  * links at click time. E.g: Replacing a link by its affiliate version only if
@@ -54,7 +53,6 @@ export class LinkRewriterManager {
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /**
      * Use getRootNode() to support "shadow AMP" mode where the rootNode is not
      * necessarily the page document.
@@ -81,7 +79,9 @@ export class LinkRewriterManager {
     this.installGlobalEventListener_(this.rootNode_);
     const navigation = Services.navigationForDoc(ampdoc);
     navigation.registerAnchorMutator(
-        this.maybeRewriteLink.bind(this), Priority.LINK_REWRITER_MANAGER);
+      this.maybeRewriteLink.bind(this),
+      Priority.LINK_REWRITER_MANAGER
+    );
   }
 
   /**
@@ -102,13 +102,16 @@ export class LinkRewriterManager {
    */
   registerLinkRewriter(linkRewriterId, resolveUnknownLinks, options) {
     const linkRewriter = new LinkRewriter(
-        this.rootNode_,
-        linkRewriterId,
-        resolveUnknownLinks,
-        options
+      this.rootNode_,
+      linkRewriterId,
+      resolveUnknownLinks,
+      options
     );
-    this.insertInListBasedOnPriority_(this.linkRewriters_, linkRewriter,
-        this.priorityList_);
+    this.insertInListBasedOnPriority_(
+      this.linkRewriters_,
+      linkRewriter,
+      this.priorityList_
+    );
     // Trigger initial scan.
     linkRewriter.onDomUpdated();
 
@@ -135,7 +138,7 @@ export class LinkRewriterManager {
    */
   maybeRewriteLink(anchor, event) {
     const suitableLinkRewriters = this.getSuitableLinkRewritersForLink_(
-        /** @type {!HTMLElement} */(anchor)
+      /** @type {!HTMLElement} */ (anchor)
     );
     if (suitableLinkRewriters.length) {
       let chosenLinkRewriter = null;
@@ -144,7 +147,7 @@ export class LinkRewriterManager {
       // replaces the link.
       for (let i = 0; i < suitableLinkRewriters.length; i++) {
         const hasReplaced = suitableLinkRewriters[i].rewriteAnchorUrl(
-            /** @type {!HTMLElement} */(anchor)
+          /** @type {!HTMLElement} */ (anchor)
         );
         if (hasReplaced) {
           chosenLinkRewriter = suitableLinkRewriters[i];
@@ -193,8 +196,10 @@ export class LinkRewriterManager {
    * @private
    */
   installGlobalEventListener_(rootNode) {
-    rootNode.addEventListener(AmpEvents.DOM_UPDATE,
-        this.onDomChanged_.bind(this));
+    rootNode.addEventListener(
+      AmpEvents.DOM_UPDATE,
+      this.onDomChanged_.bind(this)
+    );
   }
 
   /**
