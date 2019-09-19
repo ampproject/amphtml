@@ -802,6 +802,52 @@ describes.realWin('Events', {amp: 1}, env => {
         new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '4'})
       );
     });
+
+    it('should only fire event once when repeat option is false', () => {
+      const storyAnalyticsConfig = {
+        'on': 'story-page-visible',
+        'storySpec': {
+          'repeat': false,
+        },
+      };
+      const vars = {
+        'storyPageIndex': '0',
+        'storyPageId': 'p4',
+        'storyPageCount': '4',
+        'detailsForPage': {'repeated': false},
+      };
+
+      tracker.add(target, 'story-page-visible', storyAnalyticsConfig, handler);
+      tracker.trigger(new AnalyticsEvent(target, 'story-page-visible', vars));
+      expect(handler).to.have.been.calledOnce;
+
+      // This would normally be set by the story analytics code.
+      vars['detailsForPage']['repeated'] = true;
+      tracker.trigger(new AnalyticsEvent(target, 'story-page-visible', vars));
+      expect(handler).to.have.been.calledOnce;
+    });
+
+    it('should fire event more than once when repeat option is absent', () => {
+      const storyAnalyticsConfig = {
+        'on': 'story-page-visible',
+        'storySpec': {},
+      };
+      const vars = {
+        'storyPageIndex': '0',
+        'storyPageId': 'p4',
+        'storyPageCount': '4',
+        'detailsForPage': {'repeated': false},
+      };
+
+      tracker.add(target, 'story-page-visible', storyAnalyticsConfig, handler);
+      tracker.trigger(new AnalyticsEvent(target, 'story-page-visible', vars));
+      expect(handler).to.have.been.calledOnce;
+
+      // This would normally be set by the story analytics code.
+      vars['detailsForPage']['repeated'] = true;
+      tracker.trigger(new AnalyticsEvent(target, 'story-page-visible', vars));
+      expect(handler).to.have.been.calledTwice;
+    });
   });
 
   describe('SignalTracker', () => {

@@ -417,7 +417,6 @@ export class AmpStoryEventTracker extends CustomEventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    // TODO(Enriqe): add support for storySpec.
     const rootTarget = this.root.getRootElement();
 
     // Fire buffered events if any.
@@ -453,6 +452,13 @@ export class AmpStoryEventTracker extends CustomEventTracker {
   fireListener_(event, rootTarget, config, listener) {
     const type = event['type'];
     const vars = event['vars'];
+    const storySpec = config['storySpec'] || {};
+    const repeat = storySpec['repeat'];
+    const detailsForPage = vars['detailsForPage'];
+
+    if (repeat === false && detailsForPage['repeated']) {
+      return;
+    }
 
     listener(new AnalyticsEvent(rootTarget, type, vars));
   }

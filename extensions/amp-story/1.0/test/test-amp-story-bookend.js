@@ -17,7 +17,6 @@
 import {Action} from '../amp-story-store-service';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryRequestService} from '../amp-story-request-service';
-import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
@@ -25,8 +24,10 @@ import {LandscapeComponent} from '../bookend/components/landscape';
 import {LocalizationService} from '../../../../src/service/localization';
 import {PortraitComponent} from '../bookend/components/portrait';
 import {Services} from '../../../../src/services';
+import {StoryAnalyticsEvent} from '../../../../src/analytics';
 import {TextBoxComponent} from '../bookend/components/text-box';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {getAnalyticsService} from '../story-analytics';
 import {registerServiceBuilder} from '../../../../src/service';
 import {user} from '../../../../src/log';
 
@@ -406,7 +407,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     };
     ctaLinks.children[0].click();
 
-    expect(analyticsSpy).to.have.been.calledWith(AnalyticsEvent.BOOKEND_CLICK);
+    expect(analyticsSpy).to.have.been.calledWith(
+      StoryAnalyticsEvent.BOOKEND_CLICK
+    );
     expect(
       analyticsVariables.get()[AnalyticsVariable.BOOKEND_TARGET_HREF]
     ).to.equal('http://localhost:9876/google.com');
