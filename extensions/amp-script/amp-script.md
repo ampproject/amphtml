@@ -142,7 +142,13 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 
 #### Passing data between amp-script and the page
 
-`amp-script` supports getting and setting `amp-state` JSON via JavaScript.
+`amp-script` supports getting and setting [`amp-state`](https://amp.dev/documentation/components/amp-bind/#initializing-state-with-amp-state) JSON via JavaScript.
+
+This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings).
+
+[tip type="default"]
+`AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension to be installed.
+[/tip]
 
 ```js
 /**
@@ -159,7 +165,7 @@ AMP.setState(json) {}
 AMP.getState(expr) {}
 ```
 
-For example:
+##### Example with WebSocket and AMP.setState()
 
 ```html
 <amp-script width=1 height=1 script="webSocketDemo" development>
