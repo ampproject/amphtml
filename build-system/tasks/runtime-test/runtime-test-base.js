@@ -271,7 +271,9 @@ class RuntimeTestRunner {
   }
 
   async run() {
-    reportTestStarted();
+    if (!argv.saucelabs && !argv.beta) {
+      reportTestStarted();
+    }
 
     if (argv.saucelabs) {
       this.exitCode = await runTestInSauceLabs(this.config);
