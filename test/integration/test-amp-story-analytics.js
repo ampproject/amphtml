@@ -23,7 +23,8 @@ const config = describe
   .ifChrome()
   .skipSinglePass();
 
-config.run('amp-story analytics', () => {
+// TODO(#24639): Re-enable tests.
+config.skip('amp-story analytics', () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
   const body = `
         <amp-story standalone>
