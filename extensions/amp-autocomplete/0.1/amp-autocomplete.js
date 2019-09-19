@@ -354,7 +354,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.keyDownHandler_(e);
     });
     this.inputElement_.addEventListener('focus', () => {
-      this.focusHandler_();
+      this.checkFirstInteractionAndMaybeFetchData_();
       this.toggleResultsHandler_(true);
     });
     this.inputElement_.addEventListener('blur', () => {
@@ -729,12 +729,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Requests remote data source on first user interaction if one is provided.
-   * Triggers toggleResultsHandler_ to display results regardless.
+   * Requests remote data source, if provided, on first user interaction.
    * @return {!Promise}
    * @private
    */
-  focusHandler_() {
+  checkFirstInteractionAndMaybeFetchData_() {
     if (!this.interacted_ && this.element.hasAttribute('src')) {
       this.interacted_ = true;
       const remoteDataPromise = this.getRemoteData_().catch(e => {

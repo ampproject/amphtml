@@ -928,7 +928,7 @@ describes.realWin(
       it('should display fallback after user interaction if provided', () => {
         sandbox.stub(impl, 'getFallback').returns(true);
         return element.layoutCallback().then(() => {
-          impl.focusHandler_().then(() => {
+          impl.checkFirstInteractionAndMaybeFetchData_().then(() => {
             expect(getDataSpy).to.have.been.calledOnce;
             expect(fallbackSpy).to.have.been.calledWith('Error for test');
             expect(toggleFallbackSpy).to.have.been.calledWith(true);
