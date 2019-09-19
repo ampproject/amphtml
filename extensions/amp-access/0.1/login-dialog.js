@@ -334,6 +334,7 @@ export class WebLoginDialog {
    * @private
    */
   getReturnUrl_() {
+    console.log('QQQQ: viewer? ', this.viewer);
     const currentUrl = this.viewer.getResolvedViewerUrl();
     let returnUrl;
     if (getMode().localDev) {

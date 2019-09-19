@@ -270,7 +270,7 @@ class StartupTask extends Task {
     // We only start using requestIdleCallback when the core runtime has
     // been initialized. Otherwise we risk starving ourselves
     // before the render-critical work is done.
-    return this.chunks_.coreReady;
+    return this.chunks_.coreReady_;
   }
 
   /**
@@ -325,11 +325,11 @@ class Chunks {
     });
 
     /** @protected {boolean} */
-    this.coreReady = false;
+    this.coreReady_ = false;
     Services.viewerPromiseForDoc(ampDoc).then(() => {
       // Once the viewer has been resolved, most of core runtime has been
       // initialized as well.
-      this.coreReady = true;
+      this.coreReady_ = true;
     });
 
     ampDoc.onVisibilityChanged(() => {
