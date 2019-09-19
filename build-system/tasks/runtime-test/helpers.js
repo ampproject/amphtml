@@ -301,14 +301,22 @@ async function runTestInSauceLabs(config) {
  */
 async function runTestInBatches_(config, browsers) {
   let errored = false;
-  let totalStableSuccess = 0;
-  let totalStableFailed = 0;
+  let totalSuccess = 0;
+  let totalFailed = 0;
   const partialTestRunCompleteFn = async (browsers, results) => {
     if (results.error) {
       errored = true;
     } else {
-      totalStableSuccess += results.success;
-      totalStableFailed += results.failed;
+      totalSuccess += results.success;
+      totalFailed += results.failed;
+    }
+  };
+
+  const reportResults = async () => {
+    if (errored) {
+      await reportTestErrored();
+    } else {
+      await reportTestFinished(totalSuccess, totalFailed);
     }
   };
 
@@ -319,12 +327,8 @@ async function runTestInBatches_(config, browsers) {
       config,
       partialTestRunCompleteFn
     );
-    if (errored) {
-      await reportTestErrored();
-    } else {
-      await reportTestFinished(totalStableSuccess, totalStableFailed);
-    }
     if (allBatchesExitCodes || errored) {
+      await reportResults();
       log(
         yellow('Some tests have failed on'),
         cyan('stable'),
@@ -341,7 +345,7 @@ async function runTestInBatches_(config, browsers) {
       'beta',
       browsers.beta,
       config,
-      reportTestRunComplete
+      partialTestRunCompleteFn
     );
     if (allBatchesExitCodes) {
       log(
@@ -357,6 +361,7 @@ async function runTestInBatches_(config, browsers) {
     }
   }
 
+  await reportResults();
   return 0;
 }
 
