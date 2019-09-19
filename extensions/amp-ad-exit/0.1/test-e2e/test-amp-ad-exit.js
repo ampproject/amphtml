@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {RequestBank} from '../../../../testing/request-bank';
 
 describes.endtoend(
   'amp-ad-exit',
@@ -23,9 +24,15 @@ describes.endtoend(
   },
   env => {
     let controller;
+    let requestBank;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
+      requestBank = new RequestBank('http://localhost:8000', 'ampadexit');
+    });
+
+    afterEach(() => {
+      return requestBank.tearDown();
     });
 
     // Setting the time explicitly to avoid test flakiness.
@@ -91,6 +98,7 @@ describes.endtoend(
       await expect(await controller.getCurrentUrl()).to.match(
         /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
       );
+      await requestBank.withdraw('tracking');
     });
   }
 );
