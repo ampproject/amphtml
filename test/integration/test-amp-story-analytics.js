@@ -20,62 +20,26 @@ import {parseQueryString} from '../../src/url';
 const config = describe
   .configure()
   .skipEdge()
-  .ifChrome()
+  .skipSafari()
   .skipSinglePass();
 
-// TODO(#24639): Re-enable tests.
-config.skip('amp-story analytics', () => {
+config.run('amp-story analytics', () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
   const body = `
-        <amp-story standalone>
-          <amp-analytics>
-            <script type="application/json">
-            {
-              "requests": {
-                "endpoint": "${RequestBank.getUrl()}"
-              },
-              "triggers": {
-                "trackPageview": {
-                  "on": "story-page-visible",
-                  "request": "endpoint",
-                  "extraUrlParams": {
-                    "pageVisible": "\${storyPageId}"
-                  }
-                },
-                "trackBookendEnter": {
-                  "on": "story-bookend-enter",
-                  "request": "endpoint",
-                  "extraUrlParams": {
-                    "bookendEnter": true
-                  }
-                },
-                "trackBookendExit": {
-                  "on": "story-bookend-exit",
-                  "request": "endpoint",
-                  "extraUrlParams": {
-                    "bookendExit": true
-                  }
-                }
-              },
-              "extraUrlParams": {
-                "pageVisible": "\${storyPageId}",
-                "bookendEnter": false,
-                "bookendExit": false,
-                "muted": false,
-                "unmuted": false
-              }
-            }
-            </script>
-          </amp-analytics>
+        <amp-story standalone supports-landscape>
           <amp-story-page id="page-1">
-            <amp-story-grid-layer template="vertical">
-              <h1>First page</h1>
-            </amp-story-grid-layer>
+            <amp-story-grid-layer template="horizontal">
+              <p>First page</p>
+              <p>Center</p>
+              <p id="right-1">Click me</p>
+            </amp-story-grid-layer>            
           </amp-story-page>
           <amp-story-page id="page-2">
-            <amp-story-grid-layer template="vertical">
-              <h1>Second page</h1>
-            </amp-story-grid-layer>
+            <amp-story-grid-layer template="horizontal">
+              <p>Second page</p>
+              <p>Center</p>
+              <p id="right-2">Click me</p>
+            </amp-story-grid-layer>            
           </amp-story-page>
           <amp-story-bookend layout="nodisplay">
             <script type="application/json">
@@ -117,18 +81,64 @@ config.skip('amp-story analytics', () => {
             }
             </script>
           </amp-story-bookend>
-        </amp-story>`;
+        </amp-story>
+        <amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "trackPageview": {
+              "on": "story-page-visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "pageVisible": "\${storyPageId}"
+              }
+            },
+            "trackBookendEnter": {
+              "on": "story-bookend-enter",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "bookendEnter": true
+              }
+            },
+            "trackBookendExit": {
+              "on": "story-bookend-exit",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "bookendExit": true
+              }
+            }
+          },
+          "extraUrlParams": {
+            "pageVisible": "\${storyPageId}",
+            "bookendEnter": false,
+            "bookendExit": false,
+            "muted": false,
+            "unmuted": false
+          }
+        }
+        </script>
+      </amp-analytics>`;
   describes.integration('amp-story analytics', {body, extensions}, env => {
     let browser;
-    beforeEach(() => {
+    let clickAndWait;
+
+    beforeEach(async () => {
       browser = new BrowserController(env.win);
+      clickAndWait = async selector => {
+        browser.click(selector);
+        await browser.wait(1000);
+      };
       env.iframe.style.height = '732px';
       env.iframe.style.width = '412px';
-      return browser.waitForElementLayout('amp-story', 20000);
+      await browser.waitForElementLayout('amp-analytics');
+      return browser.waitForElementLayout('amp-story');
     });
 
     it('should send analytics event when landing on a page', async () => {
-      await browser.waitForElementLayout('#page-1', 20000);
+      await browser.waitForElementLayout('#page-1[active]');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
@@ -136,8 +146,10 @@ config.skip('amp-story analytics', () => {
     });
 
     it('should send analytics event when navigating', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
+      await browser.waitForElementLayout('#page-1[active]');
+      await clickAndWait('#right-1');
+
+      await browser.waitForElementLayout('#page-2[active]');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
@@ -145,10 +157,13 @@ config.skip('amp-story analytics', () => {
     });
 
     it('should send analytics event when entering bookend', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
-      browser.click('#page-2');
-      await browser.wait(100);
+      await browser.waitForElementLayout('#page-1[active]');
+      await clickAndWait('#right-1');
+
+      await browser.waitForElementLayout('#page-2[active]');
+      await clickAndWait('#right-2');
+
+      await browser.waitForElementLayout('amp-story-bookend');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
@@ -156,12 +171,14 @@ config.skip('amp-story analytics', () => {
     });
 
     it('should send analytics event when exiting bookend', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
-      browser.click('#page-2');
-      await browser.wait(100);
-      browser.click('amp-story-bookend');
-      await browser.wait(100);
+      await browser.waitForElementLayout('#page-1[active]');
+      await clickAndWait('#right-1');
+
+      await browser.waitForElementLayout('#page-2[active]');
+      await clickAndWait('#right-2');
+
+      await browser.waitForElementLayout('amp-story-bookend');
+      await clickAndWait('amp-story-bookend');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
