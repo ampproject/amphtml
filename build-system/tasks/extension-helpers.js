@@ -316,7 +316,7 @@ async function buildExtensions(options) {
     }
   }
   await Promise.all(results);
-  if (!options.compileOnlyCss) {
+  if (!options.compileOnlyCss && !argv.single_pass) {
     endBuildStep(
       options.minify ? 'Minified all' : 'Compiled all',
       'extensions',
