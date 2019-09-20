@@ -112,6 +112,9 @@ export class StoryAdPage {
 
     /** @private {!JsonObject} */
     this.a4aVars_ = dict();
+
+    /** @private {!Array<Function>} */
+    this.loadCallbacks_ = [];
   }
 
   /** @return {?Document} ad document within FIE */
@@ -132,6 +135,19 @@ export class StoryAdPage {
   /** @return {boolean} */
   isLoaded() {
     return this.loaded_;
+  }
+
+  /** @return {?Element} */
+  getElement() {
+    return this.pageElement_;
+  }
+
+  /**
+   * Register functions to be executed when ad has loaded.
+   * @param {Function} cb
+   */
+  registerLoadCallback(cb) {
+    this.loadCallbacks_.push(cb);
   }
 
   /**
@@ -226,16 +242,7 @@ export class StoryAdPage {
 
     this.loaded_ = true;
 
-    // !!!!WIP figure out where this should live.
-    // Development mode forces navigation to ad page for better dev-x.
-    // Only do this once to prevent an infinite view->request->navigate loop.
-    // if (
-    //   this.element.hasAttribute('development') &&
-    //   this.config_['type'] === 'fake' &&
-    //   !this.hasForcedRender_
-    // ) {
-    //   this.forcePlaceAdAfterPage();
-    // }
+    this.loadCallbacks_.forEach(cb => cb());
   }
 
   /**

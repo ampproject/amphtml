@@ -97,9 +97,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {?StoryAdPage}} */
     this.visibleAdPage_ = null;
 
-    /** @private {boolean} */
-    this.isCurrentAdLoaded_ = false;
-
     /** @private {!JsonObject} */
     this.config_ = dict();
 
@@ -209,15 +206,24 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Fires event to navigate to ad page once inserted into the story.
    */
   navigateToFirstAdPage_() {
+    const lastPageElement = lastItem(this.adPages_).getElement();
+    if (!lastPageElement) {
+      return;
+    }
     // Setting distance manually to avoid flash of next page.
-    const lastPage = lastItem(this.adPages_);
-    lastPage.setAttribute('distance', '1');
+    lastPageElement.setAttribute('distance', '1');
     const payload = dict({
       'targetPageId': 'i-amphtml-ad-page-1',
       'direction': 'next',
     });
     const eventInit = {bubbles: true};
-    dispatch(this.win, lastPage, EventType.SWITCH_PAGE, payload, eventInit);
+    dispatch(
+      this.win,
+      lastPageElement,
+      EventType.SWITCH_PAGE,
+      payload,
+      eventInit
+    );
   }
 
   /**
@@ -366,6 +372,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       index,
       this.localizationService_
     );
+
+    page.registerLoadCallback(() => this.maybeForceAdPlacement_());
+
     const pageElement = page.build();
     this.adPages_.push(page);
 
@@ -383,6 +392,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.ampStory_.addPage(impl);
       this.timeCurrentPageCreated_ = Date.now();
     });
+  }
+
+  /**
+   * Development mode forces navigation to ad page for better dev-x.
+   * Only do this once to prevent an infinite view->request->navigate loop.
+   */
+  maybeForceAdPlacement_() {
+    if (
+      this.element.hasAttribute('development') &&
+      this.config_['type'] === 'fake' &&
+      !this.hasForcedRender_
+    ) {
+      this.forcePlaceAdAfterPage();
+    }
   }
 
   /**
