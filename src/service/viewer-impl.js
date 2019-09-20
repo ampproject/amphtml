@@ -257,7 +257,7 @@ export class ViewerImpl {
 
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
-    this.whenFirstVisible().then(() => {
+    this.ampdoc.whenFirstVisible().then(() => {
       this.maybeUpdateFragmentForCct();
     });
   }
@@ -421,11 +421,6 @@ export class ViewerImpl {
     return this.overtakeHistory_;
   }
 
-  /** @override */
-  getVisibilityState() {
-    return this.ampdoc.getVisibilityState();
-  }
-
   /**
    * Sets the viewer defined visibility state.
    * @param {?string|undefined} state
@@ -449,37 +444,11 @@ export class ViewerImpl {
     }
 
     this.ampdoc.overrideVisibilityState(state);
-    dev().fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
-  }
-
-  /** @override */
-  isVisible() {
-    return this.ampdoc.isVisible();
-  }
-
-  /** @override */
-  hasBeenVisible() {
-    return this.ampdoc.getLastVisibleTime() != null;
-  }
-
-  /** @override */
-  whenFirstVisible() {
-    return this.ampdoc.whenFirstVisible();
-  }
-
-  /** @override */
-  whenNextVisible() {
-    return this.ampdoc.whenNextVisible();
-  }
-
-  /** @override */
-  getFirstVisibleTime() {
-    return this.ampdoc.getFirstVisibleTime();
-  }
-
-  /** @override */
-  getLastVisibleTime() {
-    return this.ampdoc.getLastVisibleTime();
+    dev().fine(
+      TAG_,
+      'visibilitychange event:',
+      this.ampdoc.getVisibilityState()
+    );
   }
 
   /** @override */
@@ -600,11 +569,6 @@ export class ViewerImpl {
       return false;
     }
     return urls.trustedViewerHosts.some(th => th.test(url.hostname));
-  }
-
-  /** @override */
-  onVisibilityChanged(handler) {
-    return this.ampdoc.onVisibilityChanged(handler);
   }
 
   /** @override */

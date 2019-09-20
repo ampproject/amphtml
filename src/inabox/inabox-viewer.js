@@ -90,46 +90,6 @@ class InaboxViewer {
   }
 
   /** @override */
-  getVisibilityState() {
-    return this.ampdoc_.getVisibilityState();
-  }
-
-  /** @override */
-  onVisibilityChanged(handler) {
-    return this.ampdoc_.onVisibilityChanged(handler);
-  }
-
-  /** @override */
-  isVisible() {
-    return this.ampdoc_.isVisible();
-  }
-
-  /** @override */
-  hasBeenVisible() {
-    return this.ampdoc_.getLastVisibleTime() != null;
-  }
-
-  /** @override */
-  whenFirstVisible() {
-    return this.ampdoc_.whenFirstVisible();
-  }
-
-  /** @override */
-  whenNextVisible() {
-    return this.ampdoc_.whenNextVisible();
-  }
-
-  /** @override */
-  getFirstVisibleTime() {
-    return this.ampdoc_.getFirstVisibleTime();
-  }
-
-  /** @override */
-  getLastVisibleTime() {
-    return this.ampdoc_.getLastVisibleTime();
-  }
-
-  /** @override */
   getPrerenderSize() {
     return 0;
   }

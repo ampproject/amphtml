@@ -638,7 +638,7 @@ describes.fakeWin(
         expect(preloadStub).to.not.be.called;
         return loadPromise(win)
           .then(() => {
-            return viewer.whenFirstVisible();
+            return ampdoc.whenFirstVisible();
           })
           .then(() => {
             expect(preloadStub).to.be.calledOnce;

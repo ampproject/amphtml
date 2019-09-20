@@ -18,7 +18,6 @@ import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
 } from '../live-list-manager';
-import {Services} from '../../../../src/services';
 
 const XHR_BUFFER_SIZE = 2;
 
@@ -30,7 +29,6 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   let liveList;
   let xhrs;
   let clock;
-  let viewer;
   let ready;
   let sandbox;
 
@@ -42,7 +40,6 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
     clock = sandbox.useFakeTimers();
     xhrs = setUpMockXhrs(sandbox);
-    viewer = Services.viewerForDoc(ampdoc);
 
     manager = new LiveListManager(ampdoc);
     const docReadyPromise = new Promise(resolve => {
@@ -138,7 +135,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should start poller when doc is ready', () => {
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     expect(manager.poller_).to.be.null;
     liveList.buildCallback();
     ready();
@@ -148,7 +145,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should not start poller when no live-list is registered', () => {
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     expect(manager.poller_).to.be.null;
     ready();
     return manager.whenDocReady_().then(() => {
@@ -558,7 +555,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
   it('should recover after transient 415 response', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
     liveList.buildCallback();
@@ -603,7 +600,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it(
-    'should stop all polling if viewer is not visible ' +
+    'should stop all polling if ampdoc is not visible ' +
       'and immediately fetch when visible',
     () => {
       ready();
@@ -611,31 +608,21 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       liveList.buildCallback();
       return manager.whenDocReady_().then(() => {
-        expect(viewer.isVisible()).to.be.true;
+        expect(ampdoc.isVisible()).to.be.true;
         expect(manager.poller_.isRunning()).to.be.true;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'hidden',
-        });
+        ampdoc.overrideVisibilityState('hidden');
         expect(fetchSpy).to.have.not.been.called;
         expect(manager.poller_.isRunning()).to.be.false;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'visible',
-        });
+        ampdoc.overrideVisibilityState('visible');
         expect(fetchSpy).to.be.calledOnce;
         expect(manager.poller_.isRunning()).to.be.true;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'inactive',
-        });
+        ampdoc.overrideVisibilityState('inactive');
         expect(fetchSpy).to.be.calledOnce;
         expect(manager.poller_.isRunning()).to.be.false;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'visible',
-        });
+        ampdoc.overrideVisibilityState('visible');
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.isRunning()).to.be.true;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'prerender',
-        });
+        ampdoc.overrideVisibilityState('prerender');
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.isRunning()).to.be.false;
         clock.tick(20000);
@@ -646,7 +633,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
   it('should fetch with url', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
@@ -671,7 +658,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       'and is transformed',
     () => {
       sandbox.stub(Math, 'random').callsFake(() => 1);
-      sandbox.stub(viewer, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
       manager.url_ = 'https://www.example.com/foo/bar?hello=world#dev=1';
       manager.isTransformed_ = true;
       ready();
@@ -700,7 +687,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       'and is not transformed',
     () => {
       sandbox.stub(Math, 'random').callsFake(() => 1);
-      sandbox.stub(viewer, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
       manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
       manager.isTransformed_ = false;
       manager.location_ =
@@ -744,7 +731,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
   it('should add amp_latest_update_time on requests', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
     sandbox.stub(liveList, 'update').returns(2500);
     ready();

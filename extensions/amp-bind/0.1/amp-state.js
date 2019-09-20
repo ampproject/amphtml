@@ -96,10 +96,9 @@ export class AmpState extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const viewer = Services.viewerForDoc(this.element);
-    if (!viewer.hasBeenVisible()) {
+    if (!this.getAmpDoc().hasBeenVisible()) {
       const TAG = this.getName_();
-      dev().error(TAG, 'Viewer must be visible before mutation.');
+      dev().error(TAG, 'ampdoc must be visible before mutation.');
       return;
     }
     // "src" attribute may be missing if mutated with a non-primitive.
@@ -220,8 +219,7 @@ export class AmpState extends AMP.BaseElement {
    */
   fetchAndUpdate_(isInit, opt_refresh) {
     // Don't fetch in prerender mode.
-    const viewer = Services.viewerForDoc(this.element);
-    return viewer
+    return this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
       .then(json => this.updateState_(json, isInit));

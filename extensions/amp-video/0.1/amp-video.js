@@ -312,14 +312,15 @@ class AmpVideo extends AMP.BaseElement {
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
+    if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      viewer.whenFirstVisible().then(() => {
-        this.propagateLayoutChildren_();
-      });
+      this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.propagateLayoutChildren_();
+        });
     } else {
       this.propagateLayoutChildren_();
     }

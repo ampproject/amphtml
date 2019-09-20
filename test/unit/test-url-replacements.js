@@ -922,9 +922,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 0', () => {
     const win = getFakeWindow();
-    win.__AMP_SERVICES.viewer = {
-      obj: {isVisible: () => true},
-    };
+    const {ampdoc} = win;
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     return Services.urlReplacementsForDoc(win.document.documentElement)
       .expandUrlAsync('?sh=BACKGROUND_STATE')
       .then(res => {
@@ -934,9 +933,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 1', () => {
     const win = getFakeWindow();
-    win.__AMP_SERVICES.viewer = {
-      obj: {isVisible: () => false},
-    };
+    const {ampdoc} = win;
+    sandbox.stub(ampdoc, 'isVisible').returns(false);
     return Services.urlReplacementsForDoc(win.document.documentElement)
       .expandUrlAsync('?sh=BACKGROUND_STATE')
       .then(res => {

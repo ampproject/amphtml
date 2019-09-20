@@ -31,13 +31,13 @@ describes.realWin(
   env => {
     let win;
     let sandbox;
+    let ampdoc;
 
     let element;
     let ampState;
     let bind;
 
     // Viewer-related vars.
-    let viewer;
     let whenFirstVisiblePromise;
     let whenFirstVisiblePromiseResolve;
     let whenFirstVisiblePromiseReject;
@@ -50,15 +50,14 @@ describes.realWin(
     }
 
     beforeEach(() => {
-      ({win, sandbox} = env);
+      ({win, sandbox, ampdoc} = env);
 
-      viewer = Services.viewerForDoc(win.document);
       whenFirstVisiblePromise = new Promise((resolve, reject) => {
         whenFirstVisiblePromiseResolve = resolve;
         whenFirstVisiblePromiseReject = reject;
       });
-      sandbox.stub(viewer, 'whenFirstVisible').returns(whenFirstVisiblePromise);
-      sandbox.stub(viewer, 'hasBeenVisible').returns(false);
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenFirstVisiblePromise);
+      sandbox.stub(ampdoc, 'hasBeenVisible').returns(false);
 
       element = getAmpState();
       ampState = element.implementation_;
@@ -77,7 +76,7 @@ describes.realWin(
       sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
-    it('should not fetch until viewer is visible', async () => {
+    it('should not fetch until doc is visible', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
@@ -160,7 +159,7 @@ describes.realWin(
       const action = {method: 'refresh', satisfiesTrust: () => true};
       await ampState.executeAction(action);
 
-      // Fetch via "refresh" should also wait for viewer visible.
+      // Fetch via "refresh" should also wait for doc visible.
       expect(ampState.fetch_).to.not.have.been.called;
       expect(bind.setState).to.not.have.been.called;
 
@@ -197,7 +196,7 @@ describes.realWin(
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       await element.build();
 
-      // No fetch should happen until viewer is visible.
+      // No fetch should happen until doc is visible.
       expect(ampState.fetch_).to.not.have.been.called;
       expect(bind.setState).calledWithMatch(
         {myAmpState: {local: 'data'}},
@@ -218,18 +217,18 @@ describes.realWin(
       );
     });
 
-    it('should not fetch if `src` is mutated and viewer is not visible', () => {
+    it('should not fetch if `src` is mutated and doc is not visible', () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
-      // No fetch should happen until viewer is visible.
+      // No fetch should happen until doc is visible.
       expect(ampState.fetch_).to.not.have.been.called;
 
       allowConsoleError(() => {
         element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
       });
 
-      // Viewer still not visible.
+      // Doc still not visible.
       expect(ampState.fetch_).to.not.have.been.called;
     });
 
@@ -237,10 +236,10 @@ describes.realWin(
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
-      // No fetch should happen until viewer is visible.
+      // No fetch should happen until doc is visible.
       expect(ampState.fetch_).to.not.have.been.called;
 
-      viewer.hasBeenVisible.returns(true);
+      ampdoc.hasBeenVisible.returns(true);
 
       element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
 

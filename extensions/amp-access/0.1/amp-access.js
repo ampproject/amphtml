@@ -383,7 +383,7 @@ export class AccessService {
   runAuthorization_(opt_disableFallback) {
     this.toggleTopClass_('amp-access-loading', true);
 
-    const authorizations = this.viewer_.whenFirstVisible().then(() => {
+    const authorizations = this.ampdoc.whenFirstVisible().then(() => {
       return Promise.all(
         this.sources_.map(source => this.runOneAuthorization_(source))
       );
@@ -559,11 +559,11 @@ export class AccessService {
     }
     this.reportViewPromise_ = null;
     this.ampdoc.whenReady().then(() => {
-      if (this.viewer_.isVisible()) {
+      if (this.ampdoc.isVisible()) {
         this.reportWhenViewed_(timeToView);
       }
-      this.viewer_.onVisibilityChanged(() => {
-        if (this.viewer_.isVisible()) {
+      this.ampdoc.onVisibilityChanged(() => {
+        if (this.ampdoc.isVisible()) {
           this.reportWhenViewed_(timeToView);
         }
       });
@@ -624,8 +624,8 @@ export class AccessService {
     return new Promise((resolve, reject) => {
       // 1. Document becomes invisible again: cancel.
       unlistenSet.push(
-        this.viewer_.onVisibilityChanged(() => {
-          if (!this.viewer_.isVisible()) {
+        this.ampdoc.onVisibilityChanged(() => {
+          if (!this.ampdoc.isVisible()) {
             reject(cancellation());
           }
         })

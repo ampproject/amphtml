@@ -301,11 +301,12 @@ describes.fakeWin(
       elementError.setAttribute('amp-access-hide', '');
       document.body.appendChild(elementError);
 
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+      sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
       service.viewer_ = {
-        isVisible: () => true,
-        whenFirstVisible: () => Promise.resolve(),
-        onVisibilityChanged: () => {},
         broadcast: () => {},
         onBroadcast: () => {},
       };
@@ -711,6 +712,7 @@ describes.fakeWin(
     let configElement;
     let adapterMock;
     let cidMock;
+    let isVisibleStub;
     let visibilityChanged;
     let scrolled;
     let service;
@@ -736,6 +738,13 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      isVisibleStub = sandbox.stub(ampdoc, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+      visibilityChanged = new Observable();
+      sandbox
+        .stub(ampdoc, 'onVisibilityChanged')
+        .callsFake(callback => visibilityChanged.add(callback));
+
       service = new AccessService(ampdoc);
 
       const adapter = {
@@ -757,11 +766,7 @@ describes.fakeWin(
         onReady: callback => callback(),
       };
 
-      visibilityChanged = new Observable();
       service.viewer_ = {
-        isVisible: () => true,
-        whenFirstVisible: () => Promise.resolve(),
-        onVisibilityChanged: callback => visibilityChanged.add(callback),
         broadcast: () => {},
       };
 
@@ -895,7 +900,7 @@ describes.fakeWin(
       const p = service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
         .then(() => {
-          service.viewer_.isVisible = () => false;
+          isVisibleStub.returns(false);
           visibilityChanged.fire();
           return p;
         })
@@ -953,7 +958,7 @@ describes.fakeWin(
         .then(() => {
           p1 = service.reportViewPromise_;
           expect(p1).to.exist;
-          service.viewer_.isVisible = () => false;
+          isVisibleStub.returns(false);
           visibilityChanged.fire();
           return p1;
         })
@@ -965,7 +970,7 @@ describes.fakeWin(
         })
         .then(() => {
           // 2. Second attempt is rescheduled and will complete.
-          service.viewer_.isVisible = () => true;
+          isVisibleStub.returns(true);
           visibilityChanged.fire();
           const p2 = service.reportViewPromise_;
           expect(p2).to.exist;
@@ -1109,6 +1114,9 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
 
       const cid = {
@@ -1125,8 +1133,6 @@ describes.fakeWin(
 
       service.viewer_ = {
         broadcast: () => {},
-        isVisible: () => true,
-        onVisibilityChanged: () => {},
       };
     });
 
@@ -1192,6 +1198,9 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
 
       const cid = {
@@ -1210,8 +1219,6 @@ describes.fakeWin(
 
       service.viewer_ = {
         broadcast: () => {},
-        isVisible: () => true,
-        onVisibilityChanged: () => {},
       };
     });
 

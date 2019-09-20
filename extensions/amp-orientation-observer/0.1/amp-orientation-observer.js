@@ -62,8 +62,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     // layoutCallback is meaningless. We delay the heavy work until
     // we become visible.
     this.action_ = Services.actionServiceForDoc(this.element);
-    const viewer = Services.viewerForDoc(this.ampdoc_);
-    viewer.whenFirstVisible().then(this.init_.bind(this));
+    this.ampdoc_.whenFirstVisible().then(this.init_.bind(this));
   }
 
   /**

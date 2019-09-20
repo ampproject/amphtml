@@ -772,7 +772,7 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
-    this.viewer_.onVisibilityChanged(() => this.onVisibilityChanged_());
+    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -988,7 +988,7 @@ export class AmpStory extends AMP.BaseElement {
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
     // visible.
-    if (!this.viewer_.hasBeenVisible()) {
+    if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(firstPageEl).then(() => {
         return Promise.all([
           firstPageEl.whenBuilt(),
@@ -1747,7 +1747,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.viewer_.isVisible() ? this.resumeCallback() : this.pauseCallback();
+    this.getAmpDoc().isVisible() ? this.resumeCallback() : this.pauseCallback();
   }
 
   /**

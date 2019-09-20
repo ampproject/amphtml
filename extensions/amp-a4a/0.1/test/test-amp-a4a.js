@@ -2544,7 +2544,7 @@ describe('amp-a4a', () => {
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.adPromise_ = Promise.resolve();
-      a4a.getAmpDoc = () => a4a.win.document;
+      a4a.getAmpDoc = () => fixture.ampdoc;
       a4a.getResource = () => {
         return {
           layoutCanceled: () => {},
@@ -2583,7 +2583,7 @@ describe('amp-a4a', () => {
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.adPromise_ = Promise.resolve();
-      a4a.getAmpDoc = () => a4a.win.document;
+      a4a.getAmpDoc = () => fixture.ampdoc;
       a4a.getResource = () => {
         return {
           layoutCanceled: () => {},
@@ -2622,7 +2622,7 @@ describe('amp-a4a', () => {
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.adPromise_ = null;
-      a4a.getAmpDoc = () => a4a.win.document;
+      a4a.getAmpDoc = () => fixture.ampdoc;
       a4a.getResource = () => {
         return {
           layoutCanceled: () => {},

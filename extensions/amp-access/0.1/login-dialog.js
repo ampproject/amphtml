@@ -36,7 +36,7 @@ const RETURN_URL_REGEX = new RegExp('RETURN_URL');
  */
 export function createLoginDialog(ampdoc, urlOrPromise) {
   const viewer = Services.viewerForDoc(ampdoc);
-  const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
+  const overrideDialog = parseInt(ampdoc.getParam('dialog'), 10);
   if (overrideDialog) {
     return new ViewerLoginDialog(viewer, urlOrPromise);
   }
