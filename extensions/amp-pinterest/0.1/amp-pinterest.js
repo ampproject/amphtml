@@ -106,7 +106,7 @@ class AmpPinterest extends AMP.BaseElement {
   /** @override */
   createLoaderLogoCallback() {
     if (this.type_ != 'embedPin') {
-      return;
+      return {};
     }
 
     const html = htmlFor(this.element);
