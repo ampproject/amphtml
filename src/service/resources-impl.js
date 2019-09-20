@@ -111,7 +111,7 @@ export class ResourcesImpl {
     this.buildAttemptsCount_ = 0;
 
     /** @private {boolean} */
-    this.visible_ = this.viewer_.isVisible();
+    this.visible_ = this.ampdoc.isVisible();
 
     /** @private {number} */
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
@@ -209,7 +209,7 @@ export class ResourcesImpl {
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
-      this.viewer_.getVisibilityState()
+      this.ampdoc.getVisibilityState()
     );
 
     // When viewport is resized, we have to re-measure all elements.
@@ -228,8 +228,8 @@ export class ResourcesImpl {
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
-    this.viewer_.onVisibilityChanged(() => {
-      if (this.firstVisibleTime_ == -1 && this.viewer_.isVisible()) {
+    this.ampdoc.onVisibilityChanged(() => {
+      if (this.firstVisibleTime_ == -1 && this.ampdoc.isVisible()) {
         this.firstVisibleTime_ = Date.now();
       }
       this.schedulePass();
@@ -388,7 +388,7 @@ export class ResourcesImpl {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_ < 20 || this.viewer_.hasBeenVisible();
+    return this.buildAttemptsCount_ < 20 || this.ampdoc.hasBeenVisible();
   }
 
   /**
@@ -412,7 +412,7 @@ export class ResourcesImpl {
     // prerendered. This avoids wasting our prerender build quota.
     // See isUnderBuildQuota_() for more details.
     const shouldBuildResource =
-      this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
+      this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
       resource.prerenderAllowed();
 
     if (buildingEnabled && shouldBuildResource) {
@@ -772,7 +772,7 @@ export class ResourcesImpl {
       return;
     }
 
-    this.visible_ = this.viewer_.isVisible();
+    this.visible_ = this.ampdoc.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
     const firstPassAfterDocumentReady =
@@ -820,7 +820,7 @@ export class ResourcesImpl {
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
-    this.visibilityStateMachine_.setState(this.viewer_.getVisibilityState());
+    this.visibilityStateMachine_.setState(this.ampdoc.getVisibilityState());
     if (
       this.documentReady_ &&
       this.ampInitialized_ &&
@@ -1782,7 +1782,7 @@ export class ResourcesImpl {
     // (and they can't prerender).
     if (!this.visible_) {
       if (
-        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
+        this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
         !resource.prerenderAllowed()
       ) {
         return false;
@@ -1906,7 +1906,7 @@ export class ResourcesImpl {
       PAUSED: paused,
       INACTIVE: inactive,
     } = VisibilityState;
-    const doPass = () => {
+    const doWork = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
       if (viewportSize.height > 0 && viewportSize.width > 0) {
@@ -1944,32 +1944,32 @@ export class ResourcesImpl {
     };
     const resume = () => {
       this.resources_.forEach(r => r.resume());
-      doPass();
+      doWork();
     };
 
-    vsm.addTransition(prerender, prerender, doPass);
-    vsm.addTransition(prerender, visible, doPass);
-    vsm.addTransition(prerender, hidden, doPass);
-    vsm.addTransition(prerender, inactive, doPass);
-    vsm.addTransition(prerender, paused, doPass);
+    vsm.addTransition(prerender, prerender, doWork);
+    vsm.addTransition(prerender, visible, doWork);
+    vsm.addTransition(prerender, hidden, doWork);
+    vsm.addTransition(prerender, inactive, doWork);
+    vsm.addTransition(prerender, paused, doWork);
 
-    vsm.addTransition(visible, visible, doPass);
-    vsm.addTransition(visible, hidden, doPass);
+    vsm.addTransition(visible, visible, doWork);
+    vsm.addTransition(visible, hidden, doWork);
     vsm.addTransition(visible, inactive, unload);
     vsm.addTransition(visible, paused, pause);
 
-    vsm.addTransition(hidden, visible, doPass);
-    vsm.addTransition(hidden, hidden, doPass);
+    vsm.addTransition(hidden, visible, doWork);
+    vsm.addTransition(hidden, hidden, doWork);
     vsm.addTransition(hidden, inactive, unload);
     vsm.addTransition(hidden, paused, pause);
 
     vsm.addTransition(inactive, visible, resume);
     vsm.addTransition(inactive, hidden, resume);
     vsm.addTransition(inactive, inactive, noop);
-    vsm.addTransition(inactive, paused, doPass);
+    vsm.addTransition(inactive, paused, doWork);
 
     vsm.addTransition(paused, visible, resume);
-    vsm.addTransition(paused, hidden, doPass);
+    vsm.addTransition(paused, hidden, doWork);
     vsm.addTransition(paused, inactive, unload);
     vsm.addTransition(paused, paused, noop);
   }
