@@ -354,8 +354,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.keyDownHandler_(e);
     });
     this.inputElement_.addEventListener('focus', () => {
-      this.checkFirstInteractionAndMaybeFetchData_();
-      this.toggleResultsHandler_(true);
+      this.checkFirstInteractionAndMaybeFetchData_().then(() => {
+        this.toggleResultsHandler_(true);
+      });
     });
     this.inputElement_.addEventListener('blur', () => {
       this.toggleResultsHandler_(false);
@@ -746,6 +747,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
       });
     }
+    return Promise.resolve();
   }
 
   /**
