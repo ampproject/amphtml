@@ -21,7 +21,6 @@ import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {SubmenuManager} from './submenu-manager';
 import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {Toolbar} from './toolbar';
 import {
@@ -126,8 +125,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.opened_ = false;
 
-    /** @private @const */
-    this.submenuManager_ = new SubmenuManager(this);
+    /** @private {?Element} */
+    this.drilldownMenu_ = null;
 
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
@@ -174,6 +173,13 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
+    this.maybeBuildDrilldownMenu_();
+    // Drilldown menu may not be present during buildCallback if it is rendered
+    // dynamically with amp-list, in which case listen for dom update.
+    element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.maybeBuildDrilldownMenu_();
+    });
+
     if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
     }
@@ -190,8 +196,6 @@ export class AmpSidebar extends AMP.BaseElement {
         if (this.close_()) {
           event.preventDefault();
         }
-      } else {
-        this.submenuManager_.handleKeyDown(event);
       }
     });
 
@@ -212,46 +216,50 @@ export class AmpSidebar extends AMP.BaseElement {
 
     element.addEventListener(
       'click',
-      e =>
-        this.maybeHandleAnchorClick_(e) ||
-        this.submenuManager_.maybeHandleClick(e),
+      e => {
+        const target = closestAncestorElementBySelector(
+          dev().assertElement(e.target),
+          'A'
+        );
+        if (target && target.href) {
+          const tgtLoc = Services.urlForDoc(element).parse(target.href);
+          const currentHref = this.getAmpDoc().win.location.href;
+          // Important: Only close sidebar (and hence pop sidebar history entry)
+          // when navigating locally, Chrome might cancel navigation request
+          // due to after-navigation history manipulation inside a timer callback.
+          // See this issue for more details:
+          // https://github.com/ampproject/amphtml/issues/6585
+          if (removeFragment(target.href) != removeFragment(currentHref)) {
+            return;
+          }
+
+          if (tgtLoc.hash) {
+            this.close_();
+          }
+        }
+      },
       true
     );
-
-    // element.addEventListener(AmpEvents.DOM_UPDATE, () => {
-    //   this.submenuManager_.build();
-    // });
 
     this.setupGestures_(this.element);
   }
 
   /**
-   * Handler for anchor element click.
-   * @param {Event} e
-   * @return {boolean} whether event target is a navigable anchor element.
+   * Loads the extension for drilldown menu if sidebar contains one and it
+   * has not been installed already.
    */
-  maybeHandleAnchorClick_(e) {
-    const target = closestAncestorElementBySelector(
-      dev().assertElement(e.target),
-      'A'
-    );
-    if (target && target.href) {
-      const tgtLoc = Services.urlForDoc(this.element).parse(target.href);
-      const currentHref = this.getAmpDoc().win.location.href;
-      // Important: Only close sidebar (and hence pop sidebar history entry)
-      // when navigating locally, Chrome might cancel navigation request
-      // due to after-navigation history manipulation inside a timer callback.
-      // See this issue for more details:
-      // https://github.com/ampproject/amphtml/issues/6585
-      if (
-        removeFragment(target.href) == removeFragment(currentHref) &&
-        tgtLoc.hash
-      ) {
-        this.close_();
-      }
-      return true;
+  maybeBuildDrilldownMenu_() {
+    if (this.drilldownMenu_) {
+      return;
     }
-    return false;
+    const drilldownMenu = this.element.querySelector('amp-drilldown');
+    if (drilldownMenu) {
+      Services.extensionsFor(this.win).installExtensionForDoc(
+        this.getAmpDoc(),
+        'amp-drilldown'
+      );
+      this.drilldownMenu_ = drilldownMenu;
+    }
   }
 
   /**

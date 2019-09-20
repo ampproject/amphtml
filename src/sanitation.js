@@ -184,11 +184,10 @@ export const WHITELISTED_ATTRS = [
   'subscriptions-display',
   'subscriptions-section',
   'subscriptions-service',
-  // Attributes for amp-sidebar.
-  'amp-sidebar-submenu',
-  'amp-sidebar-submenu-group',
-  'amp-sidebar-submenu-open',
-  'amp-sidebar-submenu-close',
+  // Attributes for amp-drilldown.
+  'amp-drilldown-submenu',
+  'amp-drilldown-submenu-open',
+  'amp-drilldown-submenu-close',
   // A global attribute used for structured data.
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemprop
   'itemprop',

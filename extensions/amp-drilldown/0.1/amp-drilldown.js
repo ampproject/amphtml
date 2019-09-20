@@ -14,86 +14,116 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-drilldown-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 
-/**
- * Class representing submenu behavior inside sidebar
- */
-export class SubmenuManager {
-  /**
-   * @param {!AmpElement} sidebar
-   */
-  constructor(sidebar) {
-    this.sidebar_ = sidebar;
+const TAG = 'amp-drilldown';
 
-    /** @private {!../../../src/service/history-impl.History} */
-    this.history_ = Services.historyForDoc(this.sidebar_.getAmpDoc());
+// TODO(stevenye): add unit tests for click handlers and history.
+// https://github.com/ampproject/amphtml/issues/24668
+export class AmpDrilldown extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {!Document} */
+    this.document_ = this.win.document;
+
+    /** @private @const {!Element} */
+    this.documentElement_ = this.document_.documentElement;
 
     /** @private {Array} */
     this.historyIds_ = [];
 
     /** @private {?Element} */
     this.currentSubmenu_ = null;
+
+    /** @private {function(!Event)} */
+    this.submenuOpenHandler_ = this.handleSubmenuOpenClick_.bind(this);
+
+    /** @private {function(!Event)} */
+    this.submenuCloseHandler_ = this.handleSubmenuCloseClick_.bind(this);
+  }
+
+  /** @override */
+  buildCallback() {
+    userAssert(isExperimentOn(this.win, 'amp-sidebar-v2'), 'Experiment is off');
+
+    this.documentElement_.addEventListener('keydown', e =>
+      this.handleKeyDown_(e)
+    );
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.registerEventListeners_();
+    return Promise.resolve();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    this.unregisterEventListeners_();
+    return true;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.FILL;
   }
 
   /**
-   *
+   * Add event listeners on submenu open/close elements.
    */
-  build() {
-    const sidebarElement = this.sidebar_.element;
-    const openElements = sidebarElement.querySelectorAll(
-      '[amp-sidebar-submenu-open]'
-    );
-    const closeElements = sidebarElement.querySelectorAll(
-      '[amp-sidebar-submenu-close]'
+  registerEventListeners_() {
+    const openElements = this.element.querySelectorAll(
+      '[amp-drilldown-submenu-open]'
     );
     openElements.forEach(element => {
-      element.addEventListener('click', e =>
-        this.maybeHandleSubmenuOpenClick_(e)
-      );
+      element.addEventListener('click', this.submenuOpenHandler_);
     });
+    const closeElements = this.element.querySelectorAll(
+      '[amp-drilldown-submenu-close]'
+    );
     closeElements.forEach(element => {
-      element.addEventListener('click', e =>
-        this.maybeHandleSubmenuCloseClick_(e)
-      );
+      element.addEventListener('click', this.submenuCloseHandler_);
     });
   }
 
   /**
-   * Handles click events on open/close submenu elements.
-   * @param {Event} e
-   * @return {boolean} whether event was actually handled by submenus.
+   * Remove listeners on all submenu open/close elements.
    */
-  maybeHandleClick(e) {
-    return (
-      this.maybeHandleSubmenuOpenClick_(e) ||
-      this.maybeHandleSubmenuCloseClick_(e)
+  unregisterEventListeners_() {
+    const openElements = this.element.querySelectorAll(
+      '[amp-drilldown-submenu-open]'
     );
+    openElements.forEach(element => {
+      element.removeEventListener('click', this.submenuOpenHandler_);
+    });
+    const closeElements = this.element.querySelectorAll(
+      '[amp-drilldown-submenu-close]'
+    );
+    closeElements.forEach(element => {
+      element.removeEventListener('click', this.submenuCloseHandler_);
+    });
   }
 
   /**
    * Handler for submenu open element click.
    * @param {Event} e
-   * @return {boolean} whether event target is a submenu open element.
    */
-  maybeHandleSubmenuOpenClick_(e) {
-    const submenuOpen = closestAncestorElementBySelector(
-      dev().assertElement(e.target),
-      '[amp-sidebar-submenu-open]'
-    );
-    if (!submenuOpen) {
-      return false;
-    }
+  handleSubmenuOpenClick_(e) {
+    const submenuOpen = dev().assertElement(e.target);
     const submenu = submenuOpen.parentElement.querySelector(
-      '[amp-sidebar-submenu]'
+      '[amp-drilldown-submenu]'
     );
     if (submenu) {
       this.open_(submenu);
     }
-    return true;
   }
 
   /**
@@ -108,7 +138,7 @@ export class SubmenuManager {
     if (submenuParent) {
       submenuParent.setAttribute('child-open', '');
       submenu.setAttribute('open', '');
-      this.history_
+      this.getHistory_()
         .push(() => this.close_(submenu))
         .then(historyId => {
           this.historyIds_.push(historyId);
@@ -120,24 +150,16 @@ export class SubmenuManager {
   /**
    * Handler for submenu close element click.
    * @param {Event} e
-   * @return {boolean} whether event target is a submenu close element.
    */
-  maybeHandleSubmenuCloseClick_(e) {
-    const submenuClose = closestAncestorElementBySelector(
-      dev().assertElement(e.target),
-      '[amp-sidebar-submenu-close]'
-    );
-    if (!submenuClose) {
-      return false;
-    }
+  handleSubmenuCloseClick_(e) {
+    const submenuClose = dev().assertElement(e.target);
     const submenu = closestAncestorElementBySelector(
       submenuClose,
-      '[amp-sidebar-submenu]'
+      '[amp-drilldown-submenu]'
     );
     if (submenu) {
       this.close_(submenu);
     }
-    return true;
   }
 
   /**
@@ -154,19 +176,20 @@ export class SubmenuManager {
       submenu.removeAttribute('open');
       if (this.historyIds_.length > 0) {
         const lastHistoryId = this.historyIds_.pop();
-        this.history_.pop(lastHistoryId);
+        this.getHistory_().pop(lastHistoryId);
       }
       this.currentSubmenu_ = submenuParent;
     }
   }
 
   /**
-   *
+   * Handles arrow key navigation.
    * @param {Event} e
    */
-  handleKeyDown(e) {
+  handleKeyDown_(e) {
     switch (e.key) {
       // TODO(stevenye): Add support for all arrow keys and for RTL.
+      // https://github.com/ampproject/amphtml/issues/24665
       case Keys.LEFT_ARROW:
         const submenu = this.currentSubmenu_;
         if (submenu) {
@@ -190,7 +213,20 @@ export class SubmenuManager {
   getParentMenu_(submenu) {
     return closestAncestorElementBySelector(
       dev().assertElement(submenu.parentElement),
-      '[amp-sidebar-submenu],[amp-sidebar-submenu-group]'
+      'amp-drilldown,[amp-drilldown-submenu]'
     );
   }
+
+  /**
+   * Returns the history for the ampdoc.
+   * @return {!../../../src/service/history-impl.History}
+   * @private
+   */
+  getHistory_() {
+    return Services.historyForDoc(this.getAmpDoc());
+  }
 }
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpDrilldown, CSS);
+});
