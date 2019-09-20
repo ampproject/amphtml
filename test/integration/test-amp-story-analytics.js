@@ -25,16 +25,20 @@ const config = describe
 config.run('amp-story analytics', () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
   const body = `
-        <amp-story standalone>
+        <amp-story standalone supports-landscape>
           <amp-story-page id="page-1">
-            <amp-story-grid-layer template="vertical">
-              <h1>First page</h1>
-            </amp-story-grid-layer>
+            <amp-story-grid-layer template="horizontal">
+              <p>First page</p>
+              <p>Center</p>
+              <p id="right-1">Click me</p>
+            </amp-story-grid-layer>            
           </amp-story-page>
           <amp-story-page id="page-2">
-            <amp-story-grid-layer template="vertical">
-              <h1>Second page</h1>
-            </amp-story-grid-layer>
+            <amp-story-grid-layer template="horizontal">
+              <p>Second page</p>
+              <p>Center</p>
+              <p id="right-2">Click me</p>
+            </amp-story-grid-layer>            
           </amp-story-page>
           <amp-story-bookend layout="nodisplay">
             <script type="application/json">
@@ -118,11 +122,17 @@ config.run('amp-story analytics', () => {
       </amp-analytics>`;
   describes.integration('amp-story analytics', {body, extensions}, env => {
     let browser;
-    beforeEach(() => {
+    let clickAndWait;
+
+    beforeEach(async () => {
       browser = new BrowserController(env.win);
+      clickAndWait = async selector => {
+        browser.click(selector);
+        await browser.wait(1000);
+      };
       env.iframe.style.height = '732px';
       env.iframe.style.width = '412px';
-      browser.waitForElementLayout('amp-analytics');
+      await browser.waitForElementLayout('amp-analytics');
       return browser.waitForElementLayout('amp-story');
     });
 
@@ -135,7 +145,9 @@ config.run('amp-story analytics', () => {
     });
 
     it('should send analytics event when navigating', async () => {
-      browser.click('#page-1 h1');
+      await browser.waitForElementLayout('#page-1[active]');
+      await clickAndWait('#right-1');
+
       await browser.waitForElementLayout('#page-2[active]');
 
       const req = await RequestBank.withdraw();
@@ -144,10 +156,13 @@ config.run('amp-story analytics', () => {
     });
 
     it('should send analytics event when entering bookend', async () => {
-      browser.click('#page-1 h1');
+      await browser.waitForElementLayout('#page-1[active]');
+      await clickAndWait('#right-1');
+
       await browser.waitForElementLayout('#page-2[active]');
-      browser.click('#page-2 h1');
-      await browser.wait(1000);
+      await clickAndWait('#right-2');
+
+      await browser.waitForElementLayout('amp-story-bookend');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
@@ -155,12 +170,14 @@ config.run('amp-story analytics', () => {
     });
 
     it('should send analytics event when exiting bookend', async () => {
-      browser.click('#page-1 h1');
+      await browser.waitForElementLayout('#page-1[active]');
+      await clickAndWait('#right-1');
+
       await browser.waitForElementLayout('#page-2[active]');
-      browser.click('#page-2 h1');
-      await browser.wait(1000);
-      browser.click('amp-story-bookend');
-      await browser.wait(1000);
+      await clickAndWait('#right-2');
+
+      await browser.waitForElementLayout('amp-story-bookend');
+      await clickAndWait('amp-story-bookend');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
