@@ -481,10 +481,13 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
+  const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   let timeString = '(';
-  if (secs === 0) {
+  if (mins > 0) {
+    timeString += mins + ' m ' + secs + '.' + ms + ' s)';
+  } else if (secs === 0) {
     timeString += ms + ' ms)';
   } else {
     timeString += secs + '.' + ms + ' s)';
