@@ -20,7 +20,8 @@ import {parseQueryString} from '../../src/url';
 const config = describe
   .configure()
   .skipEdge()
-  .skipSafari();
+  .skipSafari()
+  .skipSinglePass();
 
 config.run('amp-story analytics', () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
