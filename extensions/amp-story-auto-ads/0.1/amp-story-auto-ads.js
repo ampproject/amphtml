@@ -196,7 +196,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       /** @type {string} */ (this.storeService_.get(
         StateProperty.CURRENT_PAGE_ID
       ));
-    this.isCurrentAdLoaded_ = true;
     this.tryToPlaceAdAfterPage_(pageBeforeId);
     this.navigateToFirstAdPage_();
     this.hasForcedRender_ = true;
@@ -390,7 +389,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     pageElement.getImpl().then(impl => {
       this.ampStory_.addPage(impl);
-      this.timeCurrentPageCreated_ = Date.now();
     });
   }
 

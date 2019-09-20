@@ -98,22 +98,37 @@ export class StoryAdPage {
     /** @private @const {!Document} */
     this.doc_ = this.win_.document;
 
-    /** @private {!Promise} */
+    /** @private @const {!Promise} */
     this.analytics_ = getServicePromiseForDoc(
       storyAutoAdsEl,
       STORY_AD_ANALYTICS
     );
 
-    /** @private @const {?string} */
+    /** @private {?Element} */
+    this.pageElement_ = null;
+
+    /** @private {?Element} */
+    this.adElement_ = null;
+
+    /** @private {?Document} */
+    this.adDoc_ = null;
+
+    /** @private {?string} */
+    this.ctaText_ = null;
+
+    /** @private {?string} */
+    this.ctaUrl_ = null;
+
+    /** @private {?string} */
     this.ampAdExitOutlink_ = null;
 
-    /** @private @const {boolean} */
+    /** @private {boolean} */
     this.loaded_ = false;
 
-    /** @private {!JsonObject} */
+    /** @private @const {!JsonObject} */
     this.a4aVars_ = dict();
 
-    /** @private {!Array<Function>} */
+    /** @private @const {!Array<Function>} */
     this.loadCallbacks_ = [];
   }
 
@@ -157,7 +172,10 @@ export class StoryAdPage {
   toggleVisibility() {
     // TODO(calebcordry): Properly handle visible attribute for custom ads.
     if (this.adDoc_) {
-      toggleAttribute(this.adDoc_.body, Attributes.IFRAME_BODY_VISIBLE);
+      toggleAttribute(
+        dev().assertElement(this.adDoc_.body),
+        Attributes.IFRAME_BODY_VISIBLE
+      );
     }
   }
 
@@ -197,8 +215,6 @@ export class StoryAdPage {
    * @private
    */
   createPageElement_() {
-    this.id_ = `i-amphtml-ad-page-${this.index_}`;
-
     const attributes = dict({
       'ad': '',
       'distance': '2',
@@ -215,12 +231,14 @@ export class StoryAdPage {
    */
   createAdElement_() {
     if (this.config_['type'] === 'fake') {
-      this.config_['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
+      this.config_['id'] = `i-amphtml-demo-${this.index_}`;
     }
     return createElementWithAttributes(this.doc_, 'amp-ad', this.config_);
   }
 
-  /** */
+  /**
+   * Things that need to happen after the created ad is "loaded".
+   */
   whenAdLoaded_() {
     // Ensures the video-manager does not follow the autoplay attribute on
     // amp-video tags, which would play the ad in the background before it is
@@ -246,7 +264,8 @@ export class StoryAdPage {
   }
 
   /**
-   * Validate ad-server response has requirements to build outlink.
+   * Try to create CTA before showing the ad. Will fail if not enough metadata
+   * to create the outlink button.
    * @return {boolean}
    */
   maybeCreateCta() {
@@ -286,7 +305,7 @@ export class StoryAdPage {
     // Store the cta-type as an accesible var for any further pings.
     this.analytics_.then(analytics =>
       analytics.setVar(
-        this.adPagesCreated_, // adIndex
+        this.index_, // adIndex
         AnalyticsVars.CTA_TYPE,
         ctaType
       )
@@ -359,7 +378,10 @@ export class StoryAdPage {
    * @private
    */
   readAmpAdExit_() {
-    const ampAdExit = elementByTag(this.adDoc_, 'amp-ad-exit');
+    const ampAdExit = elementByTag(
+      dev().assertElement(this.adDoc_.body),
+      'amp-ad-exit'
+    );
     if (ampAdExit) {
       try {
         const {children} = ampAdExit;
@@ -399,8 +421,8 @@ export class StoryAdPage {
       return;
     }
 
-    assertHttpsUrl(href, this.element);
-    assertHttpsUrl(src, this.element);
+    assertHttpsUrl(href, dev().assertElement(this.pageElement_));
+    assertHttpsUrl(src, dev().assertElement(this.pageElement_));
 
     const root = createElementWithAttributes(
       this.doc_,
