@@ -182,7 +182,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
+    if (this.getAmpDoc().isVisible()) {
       // amp-analytics tag was just set to display:none. Page is still loaded.
       return false;
     }
@@ -207,7 +207,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     toggle(this.element, false);
 
-    this.iniPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       // Rudimentary "idle" signal.
       .then(() => Services.timerFor(this.win).promise(1))

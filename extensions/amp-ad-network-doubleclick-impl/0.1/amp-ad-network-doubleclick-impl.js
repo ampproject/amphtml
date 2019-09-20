@@ -477,7 +477,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
       ].some(eid => this.experimentIds.indexOf(eid) >= 0);
-    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
@@ -1296,12 +1296,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // setStyles cannot have computed style names, so we must do this by cases.
     if (isRtl) {
       setStyles(this.element, {
-        'z-index': '30',
+        'z-index': '11',
         'margin-right': `${Math.round(newMargin)}px`,
       });
     } else {
       setStyles(this.element, {
-        'z-index': '30',
+        'z-index': '11',
         'margin-left': `${Math.round(newMargin)}px`,
       });
     }
