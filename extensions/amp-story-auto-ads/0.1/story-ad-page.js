@@ -207,6 +207,10 @@ export class StoryAdPage {
       .whenSignal(CommonSignals.INI_LOAD)
       .then(() => this.whenAdLoaded_());
 
+    this.analyticsEvent_(AnalyticsEvents.AD_REQUESTED, {
+      [AnalyticsVars.AD_REQUESTED]: Date.now(),
+    });
+
     return this.pageElement_;
   }
 
@@ -238,6 +242,7 @@ export class StoryAdPage {
 
   /**
    * Things that need to happen after the created ad is "loaded".
+   * @private
    */
   whenAdLoaded_() {
     // Ensures the video-manager does not follow the autoplay attribute on
@@ -406,6 +411,7 @@ export class StoryAdPage {
 
   /**
    * Create attribution if creative contains the appropriate meta tags.
+   * @private
    */
   maybeCreateAttribution_() {
     const href = this.a4aVars_[A4AVarNames.ATTRIBUTION_URL];

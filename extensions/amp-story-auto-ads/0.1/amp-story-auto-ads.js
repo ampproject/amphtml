@@ -39,7 +39,7 @@ import {getServicePromiseForDoc} from '../../../src/service';
 import {lastItem} from '../../../src/utils/array';
 
 /** @const {number} */
-const FIRST_AD_MIN = 2;
+const FIRST_AD_MIN = 7;
 
 /** @const {number} */
 const MIN_INTERVAL = 7;
@@ -206,9 +206,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   navigateToFirstAdPage_() {
     const lastPageElement = lastItem(this.adPages_).getElement();
-    if (!lastPageElement) {
-      return;
-    }
     // Setting distance manually to avoid flash of next page.
     lastPageElement.setAttribute('distance', '1');
     const payload = dict({
@@ -382,10 +379,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adPageIds_[page.getId()] = index;
 
     this.ampStory_.element.appendChild(pageElement);
-    // WIP: move this???
-    this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_REQUESTED, {
-      [AnalyticsVars.AD_REQUESTED]: Date.now(),
-    });
 
     pageElement.getImpl().then(impl => {
       this.ampStory_.addPage(impl);
@@ -439,7 +432,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       // We are switching to an ad.
       const adIndex = this.adPageIds_[pageId];
       // Tell the iframe that it is visible.
-      this.setVisibleAttribute_(lastItem(this.adPages_));
+      this.setVisibleAttribute_(this.adPages_[adIndex - 1]);
       // Fire the view event on the corresponding Ad.
       this.analyticsEvent_(AnalyticsEvents.AD_VIEWED, {
         [AnalyticsVars.AD_VIEWED]: Date.now(),
