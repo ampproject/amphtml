@@ -50,7 +50,7 @@ describes.realWin(
     },
   },
   env => {
-    let win;
+    let win, ampdoc;
     let element;
     let hasSwipeCapability = false;
     let story;
@@ -100,6 +100,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      ampdoc = env.ampdoc;
 
       replaceStateStub = sandbox.stub(win.history, 'replaceState');
       // Required by the bookend code.
@@ -680,9 +681,9 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.viewer_, 'isVisible').returns(false);
+        sandbox.stub(ampdoc, 'isVisible').returns(false);
         const onVisibilityChangedStub = sandbox.stub(
-          story.viewer_,
+          ampdoc,
           'onVisibilityChanged'
         );
 
@@ -702,9 +703,9 @@ describes.realWin(
       it('should play the story when tab becomes active', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.viewer_, 'isVisible').returns(true);
+        sandbox.stub(ampdoc, 'isVisible').returns(true);
         const onVisibilityChangedStub = sandbox.stub(
-          story.viewer_,
+          ampdoc,
           'onVisibilityChanged'
         );
 

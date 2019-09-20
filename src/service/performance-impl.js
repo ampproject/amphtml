@@ -84,6 +84,9 @@ export class Performance {
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = null;
+
     /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
@@ -189,7 +192,7 @@ export class Performance {
     }
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
-    this.onViewerVisibilityChange_ = this.onViewerVisibilityChange_.bind(this);
+    this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
@@ -214,6 +217,7 @@ export class Performance {
    */
   coreServicesAvailable() {
     const {documentElement} = this.win.document;
+    this.ampdoc_ = Services.ampdoc(documentElement);
     this.viewer_ = Services.viewerForDoc(documentElement);
     this.resources_ = Services.resourcesForDoc(documentElement);
 
@@ -221,7 +225,7 @@ export class Performance {
       this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
 
     // This is for redundancy. Call flush on any visibility change.
-    this.viewer_.onVisibilityChanged(this.flush.bind(this));
+    this.ampdoc_.onVisibilityChanged(this.flush.bind(this));
 
     // Does not need to wait for messaging ready since it will be queued
     // if it isn't ready.
@@ -231,7 +235,7 @@ export class Performance {
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
 
-    this.viewer_.whenFirstVisible().then(() => {
+    this.ampdoc_.whenFirstVisible().then(() => {
       this.tick('ofv');
       this.flush();
     });
@@ -245,7 +249,7 @@ export class Performance {
         {capture: true}
       );
 
-      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
+      this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
     }
 
     if (
@@ -260,7 +264,7 @@ export class Performance {
         {capture: true}
       );
 
-      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
+      this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
     }
 
     // We don't check `isPerformanceTrackingOn` here since there are some
@@ -453,6 +457,7 @@ export class Performance {
   /**
    * When the visibility state of the document changes to hidden,
    * send the layout jank score.
+   * @private
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
@@ -471,9 +476,10 @@ export class Performance {
   /**
    * When the viewer visibility state of the document changes to inactive,
    * send the layout jank score.
+   * @private
    */
-  onViewerVisibilityChange_() {
-    if (this.viewer_.getVisibilityState() === VisibilityState.INACTIVE) {
+  onAmpDocVisibilityChange_() {
+    if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
       if (this.win.PerformanceLayoutJank) {
         this.tickLayoutJankScore_();
       }
@@ -581,12 +587,12 @@ export class Performance {
    * @private
    */
   measureUserPerceivedVisualCompletenessTime_() {
-    const didStartInPrerender = !this.viewer_.hasBeenVisible();
+    const didStartInPrerender = !this.ampdoc_.hasBeenVisible();
     let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
-    // This will only be relevant if the viewer is in prerender mode.
+    // This will only be relevant if the ampdoc is in prerender mode.
     // (hasn't been visible yet, ever at this point)
-    this.viewer_.whenFirstVisible().then(() => {
+    this.ampdoc_.whenFirstVisible().then(() => {
       docVisibleTime = this.win.Date.now();
       // Mark this first visible instance in the browser timeline.
       this.mark('visible');
@@ -599,7 +605,7 @@ export class Performance {
             ? this.win.Date.now() - docVisibleTime
             : //  Prerender was complete before visibility.
               0;
-        this.viewer_.whenFirstVisible().then(() => {
+        this.ampdoc_.whenFirstVisible().then(() => {
           // We only tick this if the page eventually becomes visible,
           // since otherwise we heavily skew the metric towards the
           // 0 case, since pre-renders that are never used are highly
@@ -721,7 +727,7 @@ export class Performance {
    */
   tickSinceVisible(label) {
     const now = this.win.Date.now();
-    const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
+    const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }

@@ -122,7 +122,7 @@ describes.sandboxed('cid', {}, () => {
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
     viewer = Services.viewerForDoc(ampdoc);
-    sandbox.stub(viewer, 'whenFirstVisible').callsFake(function() {
+    sandbox.stub(ampdoc, 'whenFirstVisible').callsFake(function() {
       return whenFirstVisible;
     });
     sandbox

@@ -299,7 +299,7 @@ export function googlePageParameters(a4a, startTime) {
     const viewport = Services.viewportForDoc(ampDoc);
     const viewportRect = viewport.getRect();
     const viewportSize = viewport.getSize();
-    const visibilityState = Services.viewerForDoc(ampDoc).getVisibilityState();
+    const visibilityState = ampDoc.getVisibilityState();
     return {
       'is_amp': a4a.isXhrAllowed()
         ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
@@ -626,12 +626,11 @@ export function getCsiAmpAnalyticsConfig() {
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
-  const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
   const vars = /** @type {!JsonObject} */ ({
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
-    'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
+    'viewerLastVisibleTime': ampdoc.getLastVisibleTime() - navStart,
   });
   if (qqid) {
     vars['qqid'] = qqid;

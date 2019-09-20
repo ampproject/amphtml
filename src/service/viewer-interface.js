@@ -102,65 +102,6 @@ export class ViewerInterface {
   isOvertakeHistory() {}
 
   /**
-   * Returns visibility state configured by the viewer.
-   * See {@link isVisible}.
-   * @return {!../visibility-state.VisibilityState}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
-  getVisibilityState() {}
-
-  /**
-   * Whether the AMP document currently visible. The reasons why it might not
-   * be visible include user switching to another tab, browser running the
-   * document in the prerender mode or viewer running the document in the
-   * prerender mode.
-   * @return {boolean}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
-  isVisible() {}
-
-  /**
-   * Whether the AMP document has been ever visible before. Since the visiblity
-   * state of a document can be flipped back and forth we sometimes want to know
-   * if a document has ever been visible.
-   * @return {boolean}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
-  hasBeenVisible() {}
-
-  /**
-   * Returns a Promise that only ever resolved when the current
-   * AMP document first becomes visible.
-   * @return {!Promise}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
-  whenFirstVisible() {}
-
-  /**
-   * Returns a Promise that resolve when current doc becomes visible.
-   * The promise resolves immediately if doc is already visible.
-   * @return {!Promise}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
-  whenNextVisible() {}
-
-  /**
-   * Returns the time when the document has become visible for the first time.
-   * If document has not yet become visible, the returned value is `null`.
-   * @return {?time}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
-  getFirstVisibleTime() {}
-
-  /**
-   * Returns the time when the document has become visible for the last time.
-   * If document has not yet become visible, the returned value is `null`.
-   * @return {?time}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
-  getLastVisibleTime() {}
-
-  /**
    * How much the viewer has requested the runtime to prerender the document.
    * The values are in number of screens.
    * @return {number}
@@ -211,16 +152,6 @@ export class ViewerInterface {
    * @return {!Promise<string>}
    */
   getViewerOrigin() {}
-
-  /**
-   * Adds a "visibilitychange" event listener for viewer events. The
-   * callback can check {@link isVisible} and {@link getPrefetchCount}
-   * methods for more info.
-   * @param {function()} handler
-   * @return {!UnlistenDef}
-   * TODO(#22733): deprecate/remove when ampdoc-fie is launched.
-   */
-  onVisibilityChanged(handler) {}
 
   /**
    * Adds a eventType listener for viewer events.

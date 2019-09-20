@@ -134,6 +134,9 @@ export class AmpForm {
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = Services.ampdoc(this.form_);
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
 
@@ -359,7 +362,7 @@ export class AmpForm {
 
   /** @private */
   installEventHandlers_() {
-    this.viewer_.whenNextVisible().then(() => {
+    this.ampdoc_.whenNextVisible().then(() => {
       const autofocus = this.form_.querySelector('[autofocus]');
       if (autofocus) {
         tryFocus(autofocus);

@@ -477,7 +477,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
       ].some(eid => this.experimentIds.indexOf(eid) >= 0);
-    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())

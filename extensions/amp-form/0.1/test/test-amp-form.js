@@ -543,16 +543,15 @@ describes.repeated(
           button1.setAttribute('autofocus', '');
           new AmpForm(form);
 
-          const viewer = Services.viewerForDoc(env.ampdoc);
           let resolve_ = null;
-          sandbox.stub(viewer, 'whenNextVisible').returns(
+          sandbox.stub(env.ampdoc, 'whenNextVisible').returns(
             new Promise(resolve => {
               resolve_ = resolve;
             })
           );
 
           expect(document.activeElement).to.not.equal(button1);
-          viewer.whenNextVisible().then(() => {
+          env.ampdoc.whenNextVisible().then(() => {
             expect(document.activeElement).to.equal(button1);
           });
           return timer.promise(1).then(() => resolve_());
