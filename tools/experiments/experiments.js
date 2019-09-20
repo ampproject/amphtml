@@ -125,6 +125,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-sidebar-v2',
+    name: 'Updated sidebar component with nested menu and animations',
+  },
+  {
     id: 'ampdoc-fie',
     name: 'Install AmpDoc on FIE level',
     spec: 'https://github.com/ampproject/amphtml/issues/22734',
@@ -270,12 +274,6 @@ const EXPERIMENTS = [
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
-    id: 'custom-elements-v1',
-    name: 'Enable a new custom elements v1 polyfill',
-    spec: 'https://github.com/ampproject/amphtml/pull/17205',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
   },
   {
     id: 'amp-carousel-chrome-scroll-snap',

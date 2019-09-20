@@ -174,7 +174,7 @@ describes.sandboxed('Viewer', {}, () => {
     // windowApi.location.hash = '';
     const viewer = new ViewerImpl(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -188,7 +188,7 @@ describes.sandboxed('Viewer', {}, () => {
     const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -206,7 +206,7 @@ describes.sandboxed('Viewer', {}, () => {
     const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -223,7 +223,7 @@ describes.sandboxed('Viewer', {}, () => {
     const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -246,7 +246,7 @@ describes.sandboxed('Viewer', {}, () => {
     const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -265,7 +265,7 @@ describes.sandboxed('Viewer', {}, () => {
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.getParam('note')).to.equal('ok');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -293,7 +293,7 @@ describes.sandboxed('Viewer', {}, () => {
       'http://www.example.com/?amp_gsa=1&amp_js_v=a0'
     );
     expect(viewer.getParam('click')).to.equal('abc');
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -301,24 +301,20 @@ describes.sandboxed('Viewer', {}, () => {
     );
   });
 
-  it('should configure visibilityState visible by default', () => {
-    expect(viewer.getVisibilityState()).to.equal('visible');
-    expect(viewer.isVisible()).to.equal(true);
+  it('should configure prerenderSize by default', () => {
     expect(viewer.getPrerenderSize()).to.equal(1);
-    expect(viewer.getFirstVisibleTime()).to.equal(0);
-    expect(viewer.getLastVisibleTime()).to.equal(0);
   });
 
   it('should return promise that resolve on visible', function*() {
     const viewer = new ViewerImpl(ampdoc);
-    expect(viewer.isVisible()).to.be.true;
-    let promise = viewer.whenNextVisible();
+    expect(ampdoc.isVisible()).to.be.true;
+    let promise = ampdoc.whenNextVisible();
     yield promise;
     viewer.receiveMessage('visibilitychange', {
       state: 'hidden',
     });
-    promise = viewer.whenNextVisible();
-    expect(viewer.isVisible()).to.be.false;
+    promise = ampdoc.whenNextVisible();
+    expect(ampdoc.isVisible()).to.be.false;
     viewer.receiveMessage('visibilitychange', {
       state: 'visible',
     });
@@ -328,36 +324,36 @@ describes.sandboxed('Viewer', {}, () => {
   it('should initialize firstVisibleTime when doc becomes visible', () => {
     params['prerenderSize'] = '3';
     const viewer = new ViewerImpl(ampdoc);
-    expect(viewer.isVisible()).to.be.true;
-    expect(viewer.getFirstVisibleTime()).to.equal(0);
-    expect(viewer.getLastVisibleTime()).to.equal(0);
+    expect(ampdoc.isVisible()).to.be.true;
+    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getLastVisibleTime()).to.equal(0);
 
     // Becomes invisible.
     clock.tick(1);
     viewer.receiveMessage('visibilitychange', {
       state: 'hidden',
     });
-    expect(viewer.isVisible()).to.be.false;
-    expect(viewer.getFirstVisibleTime()).to.equal(0);
-    expect(viewer.getLastVisibleTime()).to.equal(0);
+    expect(ampdoc.isVisible()).to.be.false;
+    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getLastVisibleTime()).to.equal(0);
 
     // Back to visible.
     clock.tick(1);
     viewer.receiveMessage('visibilitychange', {
       state: 'visible',
     });
-    expect(viewer.isVisible()).to.be.true;
-    expect(viewer.getFirstVisibleTime()).to.equal(0);
-    expect(viewer.getLastVisibleTime()).to.equal(2);
+    expect(ampdoc.isVisible()).to.be.true;
+    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getLastVisibleTime()).to.equal(2);
 
     // Back to invisible again.
     clock.tick(1);
     viewer.receiveMessage('visibilitychange', {
       state: 'hidden',
     });
-    expect(viewer.isVisible()).to.be.false;
-    expect(viewer.getFirstVisibleTime()).to.equal(0);
-    expect(viewer.getLastVisibleTime()).to.equal(2);
+    expect(ampdoc.isVisible()).to.be.false;
+    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getLastVisibleTime()).to.equal(2);
   });
 
   it('should configure prerenderSize', () => {
@@ -501,24 +497,21 @@ describes.sandboxed('Viewer', {}, () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('paused');
     });
 
     it('should receive "paused" visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('paused');
     });
 
     it('should receive "inactive" visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'inactive',
       });
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
     });
 
     it('should parse "hidden" as "prerender" before first visible', () => {
@@ -526,8 +519,7 @@ describes.sandboxed('Viewer', {}, () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'hidden',
       });
-      expect(viewer.getVisibilityState()).to.equal('prerender');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
     });
 
     it('should parse "hidden" as "inactive" after first visible', () => {
@@ -535,8 +527,7 @@ describes.sandboxed('Viewer', {}, () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'hidden',
       });
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
     });
 
     it('should reject unknown values', () => {
@@ -550,30 +541,25 @@ describes.sandboxed('Viewer', {}, () => {
           });
         }).to.throw('Unknown VisibilityState value');
       });
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('paused');
     });
 
     it('should be inactive when the viewer tells us we are inactive', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'inactive',
       });
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
     });
 
     it('should be prerender when the viewer tells us we are prerender', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'prerender',
       });
-      expect(viewer.getVisibilityState()).to.equal('prerender');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('prerender');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
     });
 
     it('should be hidden when the browser document is hidden', () => {
@@ -581,18 +567,15 @@ describes.sandboxed('Viewer', {}, () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'visible',
       });
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       viewer.receiveMessage('visibilitychange', {
         state: 'visible',
       });
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
     });
 
     it(
@@ -603,8 +586,7 @@ describes.sandboxed('Viewer', {}, () => {
         viewer.receiveMessage('visibilitychange', {
           state: 'paused',
         });
-        expect(viewer.getVisibilityState()).to.equal('paused');
-        expect(viewer.isVisible()).to.equal(false);
+        expect(ampdoc.getVisibilityState()).to.equal('paused');
       }
     );
 
@@ -613,58 +595,47 @@ describes.sandboxed('Viewer', {}, () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'visible',
       });
-      expect(viewer.getVisibilityState()).to.equal('visible');
-      expect(viewer.isVisible()).to.equal(true);
+      expect(ampdoc.getVisibilityState()).to.equal('visible');
     });
 
     it('should change visibility on visibilitychange event', () => {
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('visible');
-      expect(viewer.isVisible()).to.equal(true);
+      expect(ampdoc.getVisibilityState()).to.equal('visible');
 
       clock.tick(1);
       viewer.receiveMessage('visibilitychange', {
         state: 'hidden',
       });
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
 
       viewer.receiveMessage('visibilitychange', {
         state: 'inactive',
       });
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
 
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('paused');
 
       viewer.receiveMessage('visibilitychange', {
         state: 'visible',
       });
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('visible');
-      expect(viewer.isVisible()).to.equal(true);
+      expect(ampdoc.getVisibilityState()).to.equal('visible');
     });
   });
 

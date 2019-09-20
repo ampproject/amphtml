@@ -131,6 +131,17 @@
     <input>
   </amp-autocomplete>
 
+  <!-- Valid: amp-component with static data and items=property attribute -->
+  <amp-autocomplete items="property">
+    <input>
+      <script type="application/json"> {} </script>
+  </amp-autocomplete>
+
+  <!-- Valid: amp-component with remote data and items=property attribute -->
+  <amp-autocomplete items="property" src="https://data.com/articles.json?ref=CANONICAL_URL">
+    <input>
+  </amp-autocomplete>
+
   <!-- Valid: amp-component with static data and min-characters attribute -->
   <amp-autocomplete min-characters=3>
     <input>

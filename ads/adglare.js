@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Definitions for the Layout Shift API.
- *
- * Created from
- * @see https://github.com/WICG/layout-instability/blob/master/README.md
- *
- * @todo This should be removed when the definitions are released
- * in closure-compiler.
- *
- * @externs
- */
+import {validateData, writeScript} from '../3p/3p';
 
 /**
- * @constructor
- * @extends {PerformanceEntry}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-function LayoutShift() {}
-/** @type {number} */ LayoutShift.prototype.value;
-/** @type {boolean} */ LayoutShift.prototype.hadRecentInput;
-/** @type {number} */ LayoutShift.prototype.lastInputTime;
+export function adglare(global, data) {
+  validateData(data, ['host', 'zid'], ['keywords']);
+
+  const adglareSpan = global.document.createElement('span');
+  adglareSpan.id = 'zone' + data.zid;
+  global.document.getElementById('c').appendChild(adglareSpan);
+
+  let url =
+    'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
+  if (data.keywords) {
+    url = url + '&keywords=' + data.keywords;
+  }
+
+  writeScript(global, url);
+}
