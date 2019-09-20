@@ -65,7 +65,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     /**
      * @const @private {string}
      */
-    this.loaderUrl_ = 'https://static.apester.com/js/assets/loader.gif';
+    this.loaderUrl_ = 'https://static.apester.com/js/assets/loader_100x100.gif';
     /** @private {boolean}  */
     this.seen_ = false;
     /** @private {?Element}  */
@@ -306,6 +306,49 @@ class AmpApesterMedia extends AMP.BaseElement {
     }
   }
 
+  /**
+   * @param {!JsonObject} companionRawSettings
+   * @return {!JsonObject}
+   */
+  extractCompanionDisplaySettings_(companionRawSettings) {
+    const {settings} = companionRawSettings || {};
+    if (
+      !companionRawSettings ||
+      !companionRawSettings.enabled ||
+      !settings ||
+      settings.bannerAdProvider !== 'gdt'
+    ) {
+      return null;
+    }
+    const {slot, bannerSizes = []} = settings || {};
+    const size = bannerSizes[0] || [0, 0];
+    return {
+      slot,
+      height: size[1] || 0,
+      width: size[0] || 0,
+    };
+  }
+
+  /**
+   * @param {JsonObject} companionSettings
+   * @return {!Element}
+   */
+  constructCompanionAd_(companionSettings) {
+    if (!companionSettings) {
+      return null;
+    }
+    const {width, height, slot} = companionSettings || {};
+    // todo test sizes...
+    const ampAd = this.element.ownerDocument.createElement('amp-ad');
+    ampAd.setAttribute('type', 'doubleclick');
+    ampAd.setAttribute('data-slot', slot);
+    ampAd.setAttribute('width', width);
+    ampAd.setAttribute('height', height);
+    ampAd.classList.add('amp-apester-companion');
+
+    return ampAd;
+  }
+
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -322,10 +365,15 @@ class AmpApesterMedia extends AMP.BaseElement {
         const media = /** @type {JsonObject} */ (this.embedOptions_.playlist
           ? payload[Math.floor(Math.random() * payload.length)]
           : payload);
-
+        const monetizationSettings = media['campaignData'] || {};
+        const companionDisplaySettings = this.extractCompanionDisplaySettings_(
+          monetizationSettings['companionOptions']
+        );
+        const companionDisplayElement = this.constructCompanionAd_(
+          companionDisplaySettings
+        );
         const interactionId = media['interactionId'];
         const usePlayer = media['usePlayer'];
-
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
         const iframe = this.constructIframe_(src);
         this.intersectionObserverApi_ = new IntersectionObserverApi(
@@ -342,6 +390,12 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
+            if (companionDisplayElement) {
+              this.element.parentNode.insertBefore(
+                companionDisplayElement,
+                this.element.nextSibling
+              );
+            }
           })
           .then(() => {
             return this.loadPromise(iframe).then(() => {
