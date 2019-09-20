@@ -16,6 +16,7 @@
 
 import {assertAttributeMutationFormat} from './mutation';
 import {assertHttpsUrl} from '../../../../src/url';
+import {map} from '../../../../src/utils/object';
 import {user} from '../../../../src/log';
 
 const TAG = 'amp-experiment attribute-mutation-default-url';
@@ -41,7 +42,7 @@ export class AttributeMutationDefaultUrl {
   }
 
   /** @override */
-  validate() {
+  parseAndValidate() {
     for (let i = 0; i < this.elements_.length; i++) {
       const element = this.elements_[i];
       if (SUPPORTED_TAG_NAMES.indexOf(element.tagName) < 0) {
@@ -65,10 +66,17 @@ export class AttributeMutationDefaultUrl {
   /** @override */
   mutate() {
     this.elements_.forEach(element => {
-      element.setAttribute(
-        this.mutationRecord_['attributeName'],
-        this.mutationRecord_['value']
-      );
+      // name can be href or src
+      const name = this.mutationRecord_['attributeName'];
+      const value = this.mutationRecord_['value'];
+      element.setAttribute(name, value);
+
+      // Ask AMP element to handle mutations
+      if (typeof element.mutatedAttributesCallback === 'function') {
+        const mutations = map();
+        mutations[name] = value;
+        element.mutatedAttributesCallback(mutations);
+      }
     });
   }
 

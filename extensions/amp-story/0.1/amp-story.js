@@ -655,7 +655,7 @@ export class AmpStory extends AMP.BaseElement {
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
     // visible.
-    if (!Services.viewerForDoc(this.element).hasBeenVisible()) {
+    if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(firstPageEl).then(() =>
         firstPageEl.whenBuilt()
       );
@@ -1142,11 +1142,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return (
-      this.desktopMedia_.matches &&
-      !this.platform_.isBot() &&
-      !isExperimentOn(this.win, 'disable-amp-story-desktop')
-    );
+    return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
   /**

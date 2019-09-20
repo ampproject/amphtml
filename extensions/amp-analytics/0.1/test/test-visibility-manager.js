@@ -78,10 +78,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     clock = sandbox.useFakeTimers();
     clock.tick(1);
 
-    viewer = win.services.viewer.obj;
-    sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
-    viewport = win.services.viewport.obj;
-    startVisibilityHandlerCount = viewer.visibilityObservable_.getHandlerCount();
+    viewer = win.__AMP_SERVICES.viewer.obj;
+    sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
+    viewport = win.__AMP_SERVICES.viewport.obj;
+    startVisibilityHandlerCount = getVisibilityHandlerCount();
 
     root = new VisibilityManagerForDoc(ampdoc);
 
@@ -94,13 +94,17 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     });
   });
 
+  function getVisibilityHandlerCount() {
+    return ampdoc.visibilityStateHandlers_.getHandlerCount();
+  }
+
   it('should initialize correctly backgrounded', () => {
     viewer.setVisibilityState_(VisibilityState.HIDDEN);
     root = new VisibilityManagerForDoc(ampdoc);
 
     expect(root.parent).to.be.null;
     expect(root.ampdoc).to.equal(ampdoc);
-    expect(root.getStartTime()).to.equal(viewer.getFirstVisibleTime());
+    expect(root.getStartTime()).to.equal(ampdoc.getFirstVisibleTime());
     expect(root.isBackgrounded()).to.be.true;
     expect(root.isBackgroundedAtStart()).to.be.true;
     expect(root.children_).to.be.null; // Don't take extra memory.
@@ -116,7 +120,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   it('should initialize correctly foregrounded', () => {
     expect(root.parent).to.be.null;
     expect(root.ampdoc).to.equal(ampdoc);
-    expect(root.getStartTime()).to.equal(viewer.getFirstVisibleTime());
+    expect(root.getStartTime()).to.equal(ampdoc.getFirstVisibleTime());
     expect(root.isBackgrounded()).to.be.false;
     expect(root.isBackgroundedAtStart()).to.be.false;
 
@@ -146,7 +150,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should resolve root layout box for in-a-box', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
     const rootElement = win.document.documentElement;
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
@@ -164,9 +168,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should switch visibility based on viewer for main doc', () => {
-    expect(viewer.visibilityObservable_.getHandlerCount()).equal(
-      startVisibilityHandlerCount + 1
-    );
+    expect(getVisibilityHandlerCount()).equal(startVisibilityHandlerCount + 1);
     expect(root.getRootVisibility()).to.equal(1);
 
     // Go prerender.
@@ -180,11 +182,11 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     // Go visible.
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
     expect(root.getRootVisibility()).to.equal(1);
-    expect(root.getStartTime()).to.equal(viewer.getFirstVisibleTime());
+    expect(root.getStartTime()).to.equal(ampdoc.getFirstVisibleTime());
   });
 
   it('should switch visibility for in-a-box', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
 
     // Check observer is correctly set.
@@ -338,9 +340,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(otherUnsubscribes.callCount).to.equal(2);
 
     // Viewer and viewport have been unsubscribed.
-    expect(viewer.visibilityObservable_.getHandlerCount()).equal(
-      startVisibilityHandlerCount
-    );
+    expect(getVisibilityHandlerCount()).equal(startVisibilityHandlerCount);
 
     // Intersection observer disconnected.
     expect(inOb.disconnected).to.be.true;
@@ -732,7 +732,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
         return {top: 10, left: 11, width: 110, height: 111};
       },
     };
-    const resources = win.services.resources.obj;
+    const resources = win.__AMP_SERVICES.resources.obj;
     sandbox
       .stub(resources, 'getResourceForElementOptional')
       .callsFake(() => resource);
@@ -790,9 +790,9 @@ describes.realWin(
       clock = sandbox.useFakeTimers();
       clock.tick(1);
 
-      viewport = parentWin.services.viewport.obj;
-      viewer = parentWin.services.viewer.obj;
-      sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => 1);
+      viewport = parentWin.__AMP_SERVICES.viewport.obj;
+      viewer = parentWin.__AMP_SERVICES.viewer.obj;
+      sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
 
       parentRoot = new VisibilityManagerForDoc(ampdoc);
       parentWin.IntersectionObserver = IntersectionObserverStub;
@@ -841,7 +841,7 @@ describes.realWin(
       expect(root.getRootVisibility()).to.equal(0);
     });
 
-    it('should initialize correctly foregrounded', () => {
+    it('should initialize correctly in foreground', () => {
       expect(root.parent).to.equal(parentRoot);
       expect(root.ampdoc).to.equal(ampdoc);
       expect(root.getStartTime()).to.equal(embed.getStartTime());
@@ -1019,8 +1019,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    viewer = win.services.viewer.obj;
-    resources = win.services.resources.obj;
+    viewer = win.__AMP_SERVICES.viewer.obj;
+    resources = win.__AMP_SERVICES.resources.obj;
 
     observeSpy = sandbox.stub();
     unobserveSpy = sandbox.stub();
@@ -1055,7 +1055,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
 
     const docState = Services.globalDocumentStateFor(win);
     sandbox.stub(docState, 'isHidden').callsFake(() => false);
-    sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => startTime);
+    sandbox.stub(ampdoc, 'getFirstVisibleTime').callsFake(() => startTime);
 
     ampElement = doc.createElement('amp-img');
     ampElement.id = 'abc';

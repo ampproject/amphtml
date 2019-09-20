@@ -153,30 +153,23 @@ describe('amp-img', () => {
     });
   });
 
-  // TODO(cvializ, #12336): unskip
-  it.skip('should handle attribute mutations', () => {
-    return getImg({
-      src: 'test.jpg',
-      srcset: 'large.jpg 2000w, small.jpg 1000w',
+  it('should handle attribute mutations', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      srcset: SRCSET_STRING,
       width: 300,
       height: 200,
-    }).then(ampImg => {
-      const impl = ampImg.implementation_;
-
-      ampImg.setAttribute('srcset', 'mutated-srcset.jpg 500w');
-      ampImg.setAttribute('src', 'mutated-src.jpg');
-
-      // `srcset` mutation should take precedence over `src` mutation.
-      impl.mutatedAttributesCallback({
-        srcset: 'mutated-srcset.jpg 1000w',
-        src: 'mutated-src.jpg',
-      });
-      expect(impl.img_.getAttribute('src')).to.equal('mutated-srcset.jpg');
-
-      // `src` mutation should override existing `srcset` attribute.
-      impl.mutatedAttributesCallback({src: 'mutated-src.jpg'});
-      expect(impl.img_.getAttribute('src')).to.equal('mutated-src.jpg');
     });
+    const impl = ampImg.implementation_;
+
+    expect(impl.img_.hasAttribute('srcset')).to.be.true;
+
+    ampImg.setAttribute('src', 'foo.jpg');
+    impl.mutatedAttributesCallback({src: 'foo.jpg'});
+
+    expect(impl.img_.getAttribute('src')).to.equal('foo.jpg');
+    // src mutation should override existing srcset attribute.
+    expect(impl.img_.hasAttribute('srcset')).to.be.false;
   });
 
   it('should propagate srcset and sizes', () => {
@@ -508,7 +501,6 @@ describe('amp-img', () => {
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
 
-      impl.mutateElement = fn => fn();
       impl.getViewport = function() {
         return {
           getWidth: () => windowWidth,

@@ -2,8 +2,8 @@
 $category@: ads-analytics
 formats:
   - websites
-  - ads
   - stories
+  - ads
 teaser:
   text: Captures analytics data from an AMP document.
 ---
@@ -49,11 +49,11 @@ Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/docum
 
 ### Sending data to an analytics vendor <a name="analytics-vendors"></a>
 
-AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors]() to see if they’ve integrated their solution with AMP.
+AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/#vendors) to see if they’ve integrated their solution with AMP.
 
 For integrated AMP analytics vendors:
 
-1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics-vendors).
+1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/#vendors).
 2. Determine what data you want to capture and track, and specify those details in the configuration data. See the vendor's documentation for  instructions on how to capture analytics data.
 
 If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to ask for their support. We also encourage you to let us know by [filing an issue](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#report-a-bug) requesting that the vendor be added. See also [Integrating your analytics tools in AMP HTML](../amp-analytics/integrating-analytics.md). Alternatively, work with your vendor to send the data to their specified URL. Learn more in the [Sending data in-house](#sending-data-in-house) section below.
@@ -840,9 +840,9 @@ Referrer policy is only available for `image` transport. If `referrerPolicy: no-
 
 The `linkers` feature is used to enable cross domain ID syncing. `amp-analytics` will use a [configuration object](./linker-id-forwarding.md#format) to create a "linker string" which will be appended to the specified outgoing links on the page as URL param. When a user clicks on one of these links, the destination page will read the linker string from the URL param to perform ID syncing. This is typically used to join user sessions across an AMP proxy domain and publisher domain.
 
-Detials on setting up your linker configuration are outlined in [Linker ID Forwarding](./linker-id-forwarding.md)
+Details on setting up your linker configuration are outlined in [Linker ID Forwarding](./linker-id-forwarding.md)
 
-If you need to ingest this paramter, information on how this parameter is created is illistrated in [Linker ID Receiving](./linker-id-receiving.md).
+If you need to ingest this parameter, information on how this parameter is created is illustrated in [Linker ID Receiving](./linker-id-receiving.md).
 
 #### Cookies
 

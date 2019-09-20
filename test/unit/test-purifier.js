@@ -403,7 +403,7 @@ describe
       });
     });
 
-    describe('purify based on AMP format type', () => {
+    describe('AMP formats', () => {
       it('should blacklist input[type="image"] and input[type="button"] in AMP', () => {
         // Given the AMP format type.
         html.setAttribute('amp', '');
@@ -484,7 +484,7 @@ describe
       });
     });
 
-    describe('purifyTagsForTripleMustache', () => {
+    describe('purifyTagsForTripleMustache()', () => {
       it('should output basic text', () => {
         expect(purifyTagsForTripleMustache('abc')).to.be.equal('abc');
       });
@@ -678,6 +678,19 @@ describe
       });
     });
 
+    describe('structured data', () => {
+      it('[itemprop] global attribute', () => {
+        const h1 = '<h1 itemprop="foo">h1</h1>';
+        expect(purify(h1)).to.equal(h1);
+
+        const span = '<span itemprop="bar">span</span>';
+        expect(purify(span)).to.equal(span);
+
+        const a = '<a itemprop="baz">a</a>';
+        expect(purify(a)).to.equal(a);
+      });
+    });
+
     // Select SVG XSS tests from https://html5sec.org/#svg.
     describe('SVG', () => {
       it('should prevent XSS via <G> tag and onload attribute', () => {
@@ -736,6 +749,27 @@ describe
           '<svg><a xlink:href="?" xmlns:xlink="http://www.w3.org/1999/xlink">' +
             '<circle r="400"></circle></a></svg>'
         );
+      });
+
+      it('should output <use> only if href is relative', () => {
+        const href =
+          '<svg xmlns="http://www.w3.org/2000/svg"><use href="#foo"></use></svg>';
+        expect(purify(href)).to.equal(href);
+
+        const xlink =
+          '<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="#foo"></use></svg>';
+        expect(purify(xlink)).to.equal(xlink);
+
+        expect(
+          purify(
+            '<svg xmlns="http://www.w3.org/2000/svg"><use href="//evil"></svg>'
+          )
+        ).to.equal('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+        expect(
+          purify(
+            '<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="//evil"></svg>'
+          )
+        ).to.equal('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
       });
     });
   });

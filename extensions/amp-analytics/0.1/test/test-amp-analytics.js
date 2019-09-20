@@ -127,7 +127,7 @@ describes.realWin(
       link.setAttribute('href', './test-canonical.html');
       doc.head.appendChild(link);
       cidServiceForDocForTesting(ampdoc);
-      viewer = win.services.viewer.obj;
+      viewer = win.__AMP_SERVICES.viewer.obj;
       ins = instrumentationServiceForDocForTesting(ampdoc);
       installUserNotificationManagerForTesting(ampdoc);
 
@@ -222,7 +222,7 @@ describes.realWin(
         el.setAttribute('trigger', 'immediate');
         el.textContent = config;
         const whenFirstVisibleStub = sandbox
-          .stub(viewer, 'whenFirstVisible')
+          .stub(ampdoc, 'whenFirstVisible')
           .callsFake(() => new Promise(function() {}));
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
@@ -534,6 +534,9 @@ describes.realWin(
       });
 
       it('expands platform vars', () => {
+        sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
@@ -543,7 +546,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html/
+            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/
           );
         });
       });
@@ -679,6 +682,9 @@ describes.realWin(
       });
 
       it('expands url-replacements vars', () => {
+        sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
@@ -697,7 +703,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html&title=Test%20Title/
+            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar&title=Test%20Title/
           );
         });
       });
@@ -1462,7 +1468,7 @@ describes.realWin(
             return Promise.reject();
           });
 
-          sandbox.stub(viewer, 'isVisible').returns(false);
+          sandbox.stub(ampdoc, 'isVisible').returns(false);
           analytics.layoutCallback();
           analytics.resumeCallback();
           analytics.unlayoutCallback();
@@ -1785,7 +1791,7 @@ describes.realWin(
       }
 
       it('does send a hit when parentPostMessage is provided inabox', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.com/bar'},
           'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
@@ -1813,7 +1819,7 @@ describes.realWin(
       });
 
       it('not send when request and parentPostMessage are not provided', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         expectAsyncConsoleError(onAndRequestAttributesInaboxError);
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.com/bar'},
@@ -1826,7 +1832,7 @@ describes.realWin(
       });
 
       it('send when request and parentPostMessage are provided', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         const analytics = getAnalyticsTag({
           'requests': {'foo': 'https://example.com/bar'},
           'triggers': [
@@ -1868,7 +1874,7 @@ describes.realWin(
       });
 
       it('is 0 for inabox', () => {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
           LayoutPriority.CONTENT
         );

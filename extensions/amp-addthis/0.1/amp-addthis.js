@@ -45,6 +45,7 @@ import {
   SHARE_EVENT,
 } from './constants';
 import {ActiveToolsMonitor} from './addthis-utils/monitors/active-tools-monitor';
+import {CSS} from '../../../build/amp-addthis-0.1.css';
 import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
@@ -69,7 +70,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
-
 import {userAssert} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to
@@ -201,7 +201,7 @@ class AmpAddThis extends AMP.BaseElement {
       const viewer = Services.viewerForDoc(ampDoc);
       const loc = parseUrlDeprecated(this.canonicalUrl_);
 
-      viewer
+      ampDoc
         .whenFirstVisible()
         .then(() => viewer.getReferrerUrl())
         .then(referrer => {
@@ -224,6 +224,19 @@ class AmpAddThis extends AMP.BaseElement {
       // Only the component that registers the page view listens for x-frame
       // events.
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
+
+      // Create close button for listing tool
+      if (this.element.getAttribute('data-widget-type') === 'messages') {
+        const closeButton = createElementWithAttributes(
+          this.win.document,
+          'button',
+          dict({
+            'class': 'i-amphtml-addthis-close',
+          })
+        );
+        closeButton.onclick = () => removeElement(this.element);
+        this.element.appendChild(closeButton);
+      }
     }
   }
 
@@ -440,5 +453,5 @@ class AmpAddThis extends AMP.BaseElement {
 }
 
 AMP.extension('amp-addthis', '0.1', AMP => {
-  AMP.registerElement('amp-addthis', AmpAddThis);
+  AMP.registerElement('amp-addthis', AmpAddThis, CSS);
 });

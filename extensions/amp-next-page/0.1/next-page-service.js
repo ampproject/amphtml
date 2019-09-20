@@ -75,7 +75,7 @@ export class NextPageService {
     /** @private {?Element} */
     this.separator_ = null;
 
-    /** @private {?../../../src/service/resources-impl.ResourcesDef} */
+    /** @private {?../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
     /** @private {?MultidocManager} */
@@ -90,7 +90,7 @@ export class NextPageService {
     /** @private {?../../../src/service/navigation.Navigation} */
     this.navigation_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */

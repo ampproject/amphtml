@@ -50,7 +50,7 @@ describes.realWin(
     },
   },
   env => {
-    let win;
+    let win, ampdoc;
     let element;
     let hasSwipeCapability = false;
     let story;
@@ -100,10 +100,12 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      ampdoc = env.ampdoc;
 
       replaceStateStub = sandbox.stub(win.history, 'replaceState');
       // Required by the bookend code.
       win.document.title = 'Story';
+      env.ampdoc.defaultView = env.win;
 
       const viewer = Services.viewerForDoc(env.ampdoc);
       sandbox
@@ -111,6 +113,10 @@ describes.realWin(
         .withArgs('swipe')
         .returns(hasSwipeCapability);
       sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+      registerServiceBuilder(win, 'performance', () => ({
+        isPerformanceTrackingOn: () => false,
+      }));
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
@@ -362,24 +368,6 @@ describes.realWin(
       return story.layoutCallback().then(() => {
         return expect(replaceStateStub).to.have.been.calledWith(
           {ampStoryPageId: firstPageId},
-          ''
-        );
-      });
-    });
-
-    it('should update bookend status in browser history', () => {
-      const pageCount = 1;
-      createPages(story.element, pageCount, ['last-page']);
-
-      sandbox.stub(AmpStoryBookend.prototype, 'build');
-
-      story.buildCallback();
-
-      return story.layoutCallback().then(() => {
-        story.storeService_.dispatch(Action.TOGGLE_BOOKEND, true);
-
-        return expect(replaceStateStub).to.have.been.calledWith(
-          {ampStoryBookendActive: true},
           ''
         );
       });
@@ -693,9 +681,9 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.viewer_, 'isVisible').returns(false);
+        sandbox.stub(ampdoc, 'isVisible').returns(false);
         const onVisibilityChangedStub = sandbox.stub(
-          story.viewer_,
+          ampdoc,
           'onVisibilityChanged'
         );
 
@@ -715,9 +703,9 @@ describes.realWin(
       it('should play the story when tab becomes active', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.viewer_, 'isVisible').returns(true);
+        sandbox.stub(ampdoc, 'isVisible').returns(true);
         const onVisibilityChangedStub = sandbox.stub(
-          story.viewer_,
+          ampdoc,
           'onVisibilityChanged'
         );
 
@@ -1711,29 +1699,6 @@ describes.realWin(
           return expect(replaceStateStub).to.have.been.calledWith({
             ampStoryNavigationPath: ['cover', 'page-1'],
           });
-        });
-      });
-
-      it('should navigate to the correct previous page after navigating away', () => {
-        createPages(story.element, 4, ['cover', 'page-1', 'page-2', 'page-3']);
-
-        return story.layoutCallback().then(() => {
-          const currentLocation = win.location;
-          story
-            .getPageById('cover')
-            .element.setAttribute('advance-to', 'page-3');
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-
-          win.location = 'https://example.com/';
-          win.location = currentLocation;
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 0})
-          );
-
-          expect(story.activePage_.element.id).to.equal('cover');
         });
       });
 

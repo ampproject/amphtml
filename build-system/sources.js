@@ -77,21 +77,29 @@ const CLOSURE_SRC_GLOBS = [
   'build/fake-module/**/*.js',
   'build/patched-module/**/*.js',
   'build/experiments/**/*.js',
+  'build/parsers/**/*.js',
   // A4A has these cross extension deps.
   'extensions/amp-ad-network*/**/*-config.js',
   'extensions/amp-ad/**/*.js',
   'extensions/amp-a4a/**/*.js',
+  // TODO(#24080) Remove this when story ads have full ad network support.
+  // Needed for amp-story-auto-ads to validate amp-ad-exit config.
+  'extensions/amp-ad-exit/**/*.js',
   // Currently needed for crypto.js and visibility.js.
   // Should consider refactoring.
   'extensions/amp-analytics/**/*.js',
   // Needed for WebAnimationService
   'extensions/amp-animation/**/*.js',
+  // Needed for amp-carousel 0.2, amp-inline-gallery, amp-stream-gallery
+  'extensions/amp-base-carousel/**/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
   // Needed to access to Variant interface from other extensions
   'extensions/amp-experiment/**/*.js',
   // Needed to access form impl from other extensions
   'extensions/amp-form/**/*.js',
+  // Needed by amp-facebook-* for the loader logo
+  'extensions/amp-facebook/0.1/facebook-loader.js',
   // Needed to access inputmask impl from other extensions
   'extensions/amp-inputmask/**/*.js',
   // Needed for AccessService

@@ -15,7 +15,7 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('./global-configs/experiments-config.json');
-
+const experimentsConstantBackup = require('./global-configs/experiments-const.json');
 const localPlugin = name =>
   require.resolve(`./babel-plugins/babel-plugin-${name}`);
 
@@ -27,12 +27,13 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
+  getJsonConfigurationPlugin(),
   getReplacePlugin(),
 ];
 
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
-  './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+  './polyfills/domtokenlist': ['installDOMTokenList'],
   './polyfills/fetch': ['installFetch'],
   './polyfills/math-sign': ['installMathSign'],
   './polyfills/object-assign': ['installObjectAssign'],
@@ -85,16 +86,31 @@ function getReplacePlugin() {
 
     // check experiment expiration times
     if (experimentsConfig[experiment]['name'] && !expirationTimestampMs) {
-      throw new Error(`Invalid expiration date for ${experiment}`);
+      if (defineFlag) {
+        throw new Error(`Invalid expiration date for ${experiment}`);
+      }
     } else if (expirationTimestampMs < currentTimestampMs) {
-      throw new Error(
-        `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
-      );
+      if (defineFlag) {
+        throw new Error(
+          `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
+        );
+      }
     }
-
     const experimentDefine =
       experimentsConfig[experiment]['defineExperimentConstant'];
 
+    function flagExists(element) {
+      return element['identifierName'] === experimentDefine;
+    }
+
+    // only add default replacement if it already doesn't exist in array
+    if (experimentDefine && !replacements.some(flagExists)) {
+      replacements.push(createReplacement(experimentDefine, false));
+    }
+  });
+
+  // default each backup experiment constant to false as well
+  Object.keys(experimentsConstantBackup).forEach(experimentDefine => {
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
     }
@@ -111,6 +127,10 @@ function getReplacePlugin() {
 const eliminateIntermediateBundles = () => [
   localPlugin('transform-prune-namespace'),
 ];
+
+function getJsonConfigurationPlugin() {
+  return localPlugin('transform-json-configuration');
+}
 
 /**
  * Resolves babel plugin set to apply before compiling on singlepass.
@@ -141,4 +161,9 @@ function plugins({isEsmBuild, isForTesting, isSinglePass}) {
   return applied;
 }
 
-module.exports = {plugins, eliminateIntermediateBundles, getReplacePlugin};
+module.exports = {
+  plugins,
+  eliminateIntermediateBundles,
+  getReplacePlugin,
+  getJsonConfigurationPlugin,
+};

@@ -318,7 +318,7 @@ export function getParentWindow(win) {
  * @return {!Window}
  */
 export function getTopWindow(win) {
-  return win.__AMP_TOP || win;
+  return win.__AMP_TOP || (win.__AMP_TOP = win);
 }
 
 /**
@@ -512,9 +512,9 @@ function getServicePromiseOrNullInternal(holder, id) {
  * @return {!Object<string,!ServiceHolderDef>}
  */
 function getServices(holder) {
-  let {services} = holder;
+  let services = holder.__AMP_SERVICES;
   if (!services) {
-    services = holder.services = {};
+    services = holder.__AMP_SERVICES = {};
   }
   return services;
 }
@@ -642,8 +642,8 @@ export function adoptServiceForEmbedDoc(ampdoc, id) {
  * @param {string} id of the service.
  */
 export function resetServiceForTesting(holder, id) {
-  if (holder.services) {
-    holder.services[id] = null;
+  if (holder.__AMP_SERVICES) {
+    holder.__AMP_SERVICES[id] = null;
   }
 }
 
@@ -653,7 +653,7 @@ export function resetServiceForTesting(holder, id) {
  * @return {boolean}
  */
 function isServiceRegistered(holder, id) {
-  const service = holder.services && holder.services[id];
+  const service = holder.__AMP_SERVICES && holder.__AMP_SERVICES[id];
   // All registered services must have an implementation or a constructor.
   return !!(service && (service.ctor || service.obj));
 }

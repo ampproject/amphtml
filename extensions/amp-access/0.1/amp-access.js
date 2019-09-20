@@ -83,16 +83,16 @@ export class AccessService {
     /** @private @const {!Promise<!../../../src/service/cid-impl.CidDef>} */
     this.cid_ = Services.cidForDoc(ampdoc);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @private @const {?../../../src/service/performance-impl.Performance} */
@@ -383,7 +383,7 @@ export class AccessService {
   runAuthorization_(opt_disableFallback) {
     this.toggleTopClass_('amp-access-loading', true);
 
-    const authorizations = this.viewer_.whenFirstVisible().then(() => {
+    const authorizations = this.ampdoc.whenFirstVisible().then(() => {
       return Promise.all(
         this.sources_.map(source => this.runOneAuthorization_(source))
       );
@@ -559,11 +559,11 @@ export class AccessService {
     }
     this.reportViewPromise_ = null;
     this.ampdoc.whenReady().then(() => {
-      if (this.viewer_.isVisible()) {
+      if (this.ampdoc.isVisible()) {
         this.reportWhenViewed_(timeToView);
       }
-      this.viewer_.onVisibilityChanged(() => {
-        if (this.viewer_.isVisible()) {
+      this.ampdoc.onVisibilityChanged(() => {
+        if (this.ampdoc.isVisible()) {
           this.reportWhenViewed_(timeToView);
         }
       });
@@ -624,8 +624,8 @@ export class AccessService {
     return new Promise((resolve, reject) => {
       // 1. Document becomes invisible again: cancel.
       unlistenSet.push(
-        this.viewer_.onVisibilityChanged(() => {
-          if (!this.viewer_.isVisible()) {
+        this.ampdoc.onVisibilityChanged(() => {
+          if (!this.ampdoc.isVisible()) {
             reject(cancellation());
           }
         })

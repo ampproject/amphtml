@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const REPPUBLIKA_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const REPPUBLIKA_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://t5.mindtake.com',
     'basePrefix': '/tag/cid/',
@@ -29,3 +31,5 @@ export const REPPUBLIKA_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {REPPUBLIKA_CONFIG};

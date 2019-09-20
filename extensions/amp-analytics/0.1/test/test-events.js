@@ -416,99 +416,6 @@ describes.realWin('Events', {amp: 1}, env => {
     });
   });
 
-  describe('AmpStoryEventTracker', () => {
-    let tracker;
-
-    beforeEach(() => {
-      tracker = root.getTracker('story', AmpStoryEventTracker);
-    });
-
-    it('should initialize', () => {
-      expect(tracker.root).to.equal(root);
-    });
-
-    it('should listen on story events', () => {
-      const analyticsEvent = sandbox.stub();
-
-      const defaultStoryConfig = {
-        'on': 'story-page-visible',
-      };
-
-      const defaultVars = {
-        'storyPageIndex': '0',
-        'storyPageId': 'p4',
-        'storyPageCount': '4',
-      };
-
-      tracker.add(
-        analyticsElement,
-        'story-page-visible',
-        defaultStoryConfig,
-        analyticsEvent
-      );
-
-      const event = new Event('story-page-visible');
-      event.data = defaultVars;
-
-      root.getRoot().dispatchEvent(event);
-
-      expect(analyticsEvent).to.be.calledOnce;
-      expect(analyticsEvent).to.be.calledWith(
-        new AnalyticsEvent(
-          root.getRootElement(),
-          'story-page-visible',
-          defaultVars
-        )
-      );
-    });
-
-    it('should only fire event once when repeat is false', () => {
-      const analyticsEvent = sandbox.stub();
-
-      const defaultStoryConfig = {
-        'on': 'story-page-visible',
-        'storySpec': {
-          'repeat': false,
-        },
-      };
-
-      const defaultVars = {
-        'storyPageIndex': '0',
-        'storyPageId': 'p4',
-        'storyPageCount': '4',
-        'detailsForPage': {'repeated': false},
-      };
-
-      tracker.add(
-        analyticsElement,
-        'story-page-visible',
-        defaultStoryConfig,
-        analyticsEvent
-      );
-
-      const event = new Event('story-page-visible');
-      event.data = defaultVars;
-
-      const rootEl = root.getRoot();
-      rootEl.dispatchEvent(event);
-
-      defaultVars['detailsForPage']['repeated'] = true;
-      event.data = defaultVars;
-
-      // Trigger event second time, with 'repeated'.
-      rootEl.dispatchEvent(event);
-
-      expect(analyticsEvent).to.be.calledOnce;
-      expect(analyticsEvent).to.be.calledWith(
-        new AnalyticsEvent(
-          root.getRootElement(),
-          'story-page-visible',
-          defaultVars
-        )
-      );
-    });
-  });
-
   describe('CustomEventTracker', () => {
     let tracker;
     let clock;
@@ -747,6 +654,152 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(handler.lastCall).to.be.calledWith(
         new AnalyticsEvent(target, 'sandbox-1-event-1', {'order': '4'})
+      );
+    });
+  });
+
+  describe('AmpStoryEventTracker', () => {
+    let tracker;
+    let clock;
+    let getRootElementSpy;
+    let rootTarget;
+
+    beforeEach(() => {
+      clock = sandbox.useFakeTimers();
+      tracker = root.getTracker(AnalyticsEventType.STORY, AmpStoryEventTracker);
+      rootTarget = root.getRootElement();
+      getRootElementSpy = sandbox.spy(root, 'getRootElement');
+    });
+
+    it('should initalize, add listeners, and dispose', () => {
+      expect(tracker.root).to.equal(root);
+      expect(tracker.buffer_).to.exist;
+
+      tracker.dispose();
+      expect(tracker.buffer_).to.not.exist;
+    });
+
+    it('should listen on story events', () => {
+      const handler2 = sandbox.spy();
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+      tracker.add(analyticsElement, 'story-event-2', {}, handler2);
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      expect(getRootElementSpy).to.be.calledTwice;
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.not.been.called;
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.be.calledOnce;
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.be.calledOnce;
+    });
+
+    it('should buffer story events early on', () => {
+      // Events before listeners added.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      expect(tracker.buffer_['story-event-1']).to.have.length(1);
+      expect(tracker.buffer_['story-event-2']).to.have.length(2);
+
+      // Listeners added: immediate events fired.
+      const handler2 = sandbox.spy();
+      const handler3 = sandbox.spy();
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+      tracker.add(analyticsElement, 'story-event-2', {}, handler2);
+      tracker.add(
+        analyticsElement,
+        'story-event-3',
+        {on: 'story-event-3'},
+        handler3
+      );
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.callCount(2);
+      expect(handler3).to.have.not.been.called;
+      expect(tracker.buffer_['story-event-1']).to.have.length(1);
+      expect(tracker.buffer_['story-event-2']).to.have.length(2);
+      expect(tracker.buffer_['story-event-3']).to.be.undefined;
+
+      // Second round of events.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-3'));
+      expect(getRootElementSpy).to.have.callCount(3);
+
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.have.callCount(3);
+      expect(handler3).to.be.calledOnce;
+      expect(tracker.buffer_['story-event-1']).to.have.length(2);
+      expect(tracker.buffer_['story-event-2']).to.have.length(3);
+      expect(tracker.buffer_['story-event-3']).to.have.length(1);
+
+      // Buffering time expires.
+      clock.tick(10001);
+      expect(tracker.buffer_).to.be.undefined;
+
+      // Post-buffering round of events.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-3'));
+
+      expect(handler).to.have.callCount(3);
+      expect(handler2).to.have.callCount(4);
+      expect(handler3).to.have.callCount(2);
+      expect(tracker.buffer_).to.be.undefined;
+    });
+
+    it('should not fire twice from observable and buffer', () => {
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '1'})
+      );
+      tracker.add(target, 'story-event-1', {}, handler);
+
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '2'})
+      );
+
+      expect(handler).to.have.callCount(2);
+      expect(handler.firstCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '1'})
+      );
+      expect(handler.secondCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '2'})
+      );
+    });
+
+    it('should handle all events without duplicate trigger', () => {
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '1'})
+      );
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '2'})
+      );
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '3'})
+      );
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '4'})
+      );
+
+      expect(handler).to.have.callCount(4);
+      expect(handler.firstCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '1'})
+      );
+      expect(handler.secondCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '2'})
+      );
+      expect(handler.thirdCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '3'})
+      );
+      expect(handler.lastCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '4'})
       );
     });
   });
@@ -1920,13 +1973,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     describe('should create correct reportReadyPromise', () => {
       it('with viewer hidden', () => {
-        const stub = sandbox.stub(tracker.root, 'getViewer').callsFake(() => {
-          return {
-            isVisible: () => {
-              return false;
-            },
-          };
-        });
+        const stub = sandbox.stub(ampdoc, 'isVisible').returns(false);
         const promise = tracker.createReportReadyPromiseForDocumentHidden_();
         return promise.then(() => {
           expect(stub).to.be.calledOnce;

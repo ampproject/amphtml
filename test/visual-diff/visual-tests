@@ -32,7 +32,8 @@
   */
   "asset_globs": [
     "examples/visual-tests/**",
-    "examples/amphtml-ads/ads-tag-integration.js"
+    "examples/amphtml-ads/ads-tag-integration.js",
+    "test/fixtures/e2e/amphtml-ads/**"
   ],
 
   /**
@@ -209,8 +210,8 @@
       "name": "AMP Article",
       "loading_complete_selectors": [
         ".article-body",
-        ".ad-one div[placeholder].amp-hidden",
-        ".ad-two div[placeholder].amp-hidden"
+        ".ad-one :not(.i-amphtml-loading-container) + iframe",
+        ".ad-two :not(.i-amphtml-loading-container) + iframe"
       ]
     },
     {
@@ -363,15 +364,14 @@
       ]
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
@@ -469,15 +469,14 @@
       ]
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/478011222#L634
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
@@ -527,15 +526,14 @@
       ]
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (rtl)",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/basic.rtl.html",
@@ -558,15 +556,14 @@
       ]
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (desktop) (rtl)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       // The url here should not matter; this UI should be triggered for all
@@ -729,43 +726,25 @@
       "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-ad.html",
-      "name": "amp-ad: creative",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
+      "url": "examples/visual-tests/amphtml-ads/amp-fie-adchoices.html",
+      "name": "amphtml-ads: friendly iframe adchoices",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/adchoices.js",
       "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-fie-text.html",
-      "name": "amp-ad: friendly iframe text ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
+      "url": "examples/visual-tests/amphtml-ads/amp-inabox-adchoices.html",
+      "name": "amphtml-ads: inabox adchoices",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/adchoices.js",
       "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-fie-image.html",
-      "name": "amp-ad: friendly iframe image ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js",
-      "no_base_test": true
-    },
-    {
-      "url": "examples/visual-tests/amp-ad/amp-inabox-creative.html",
-      "name": "amp-ad: inabox creative",
+      "url": "examples/visual-tests/amphtml-ads/amp-inabox-static.html",
+      "name": "amphtml-ads: inabox static",
       "loading_complete_selectors": [
         ".view", ".activeview"
       ],
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
       "no_base_test": true
     },
-    {
-      "url": "examples/visual-tests/amp-ad/amp-inabox-text.html",
-      "name": "amp-ad: inabox text ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
-      "no_base_test": true
-    },
-    {
-      "url": "examples/visual-tests/amp-ad/amp-inabox-image.html",
-      "name": "amp-ad: inabox image ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js",
-      "no_base_test": true
-    }
   ]
 }

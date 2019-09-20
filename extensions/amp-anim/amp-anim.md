@@ -2,8 +2,8 @@
 $category@: media
 formats:
   - websites
-  - email
   - ads
+  - email
 teaser:
   text: Manages an animated image, typically a GIF.
 ---
@@ -61,9 +61,16 @@ In the future, additional functionality, such as animation playback control, cou
 <table>
   <tr>
     <td width="40%"><strong>src</strong></td>
-    <td>Similar to the <code>src</code> attribute on the <code>img</code> tag. The value must be a URL that
-points to a publicly-cacheable image file. Cache providers may rewrite these
-URLs when ingesting AMP files to point to a cached version of the image.</td>
+    <td>
+        [filter formats="websites, stories, ads"]
+        Similar to the <code>src</code> attribute on the <code>img</code> tag. The value must be a URL that
+        points to a publicly-cacheable image file. Cache providers may rewrite these
+        URLs when ingesting AMP files to point to a cached version of the image.
+        [/filter]
+        [filter formats="email"]
+        Similar to the <code>src</code> attribute on the `img` tag. For emails, the URL must be <code>https</code>. 
+        [/filter]
+    </td>
   </tr>
   <tr>
      <td width="40%"><strong>srcset</strong></td>

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
   EmbeddedComponentState,
@@ -493,13 +494,14 @@ class ManualAdvancement extends AdvancementConfig {
   canShowTooltip_(event, pageRect) {
     let valid = true;
     let tagName;
+    const target = dev().assertElement(event.target);
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
       return false;
     }
 
     return !!closest(
-      dev().assertElement(event.target),
+      target,
       el => {
         tagName = el.tagName.toLowerCase();
 
@@ -554,6 +556,27 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * Check if click should be handled by the affiliate link logic.
+   * @param {!Element} target
+   * @private
+   * @return {boolean}
+   */
+  isHandledByAffiliateLink_(target) {
+    const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
+
+    // do not handle if clicking on expanded affiliate link
+    if (clickedOnLink && target.hasAttribute('expanded')) {
+      return false;
+    }
+
+    const expandedElement = this.storeService_.get(
+      StateProperty.AFFILIATE_LINK_STATE
+    );
+
+    return expandedElement != null || clickedOnLink;
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -574,6 +597,18 @@ class ManualAdvancement extends AdvancementConfig {
         clientX: event.clientX,
         clientY: event.clientY,
       });
+      return;
+    }
+
+    if (this.isHandledByAffiliateLink_(target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
+      if (clickedOnLink) {
+        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);
+      } else {
+        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
+      }
       return;
     }
 
@@ -789,7 +824,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(win.document));
 
     /** @private @const {!Array<!Element>} */

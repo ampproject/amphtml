@@ -297,7 +297,7 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Frame in which the creative renders (friendly if validated AMP, xdomain
      * otherwise).
-     * {?HTMLIframeElement}
+     * @type {?HTMLIFrameElement}
      */
     this.iframe = null;
 
@@ -387,7 +387,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler = new AMP.AmpAdUIHandler(this);
 
     const verifier = signatureVerifierFor(this.win);
-    this.keysetPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.keysetPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
         this.getSigningServiceNames().forEach(signingServiceName => {
@@ -632,7 +632,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.adPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
         checkStillCurrent();
@@ -997,10 +997,10 @@ export class AmpA4A extends AMP.BaseElement {
             this.isRelayoutNeededFlag = true;
             this.getResource().layoutCanceled();
             // Only Require relayout after page visible
-            Services.viewerForDoc(this.getAmpDoc())
+            this.getAmpDoc()
               .whenNextVisible()
               .then(() => {
-                Services.resourcesForDoc(this.getAmpDoc())./*OK*/ requireLayout(
+                Services.ownersForDoc(this.getAmpDoc())./*OK*/ requireLayout(
                   this.element
                 );
               });
@@ -1560,14 +1560,14 @@ export class AmpA4A extends AMP.BaseElement {
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
     mergedAttributes['allow'] = "sync-xhr 'none';";
-    this.iframe = createElementWithAttributes(
+    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
       /** @type {!Document} */ (this.element.ownerDocument),
       'iframe',
       /** @type {!JsonObject} */ (Object.assign(
         mergedAttributes,
         SHARED_IFRAME_PROPERTIES
       ))
-    );
+    ));
     if (this.sandboxHTMLCreativeFrame()) {
       applySandbox(this.iframe);
     }

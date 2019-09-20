@@ -15,7 +15,6 @@
  */
 
 import '../amp-instagram';
-import {Services} from '../../../../src/services';
 
 describes.realWin(
   'amp-instagram',
@@ -32,7 +31,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getIns(
+    async function getIns(
       shortcode,
       opt_responsive,
       opt_beforeLayoutCallback,
@@ -51,7 +50,7 @@ describes.realWin(
         ins.setAttribute('data-captioned', '');
       }
       const visibilityPromise = env.sandbox.stub(
-        Services.viewerForDoc(doc),
+        env.ampdoc,
         'whenFirstVisible'
       );
       visibilityPromise.returns(
@@ -80,15 +79,12 @@ describes.realWin(
         };
       };
       doc.body.appendChild(ins);
-      return ins
-        .build()
-        .then(() => {
-          if (opt_beforeLayoutCallback) {
-            opt_beforeLayoutCallback(ins);
-          }
-          return ins.layoutCallback();
-        })
-        .then(() => ins);
+      await ins.build();
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(ins);
+      }
+      await ins.layoutCallback();
+      return ins;
     }
 
     function testImage(image) {
@@ -118,37 +114,37 @@ describes.realWin(
       expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
     }
 
-    it('renders', () => {
-      return getIns('fBwFP').then(ins => {
-        testIframe(ins.querySelector('iframe'));
-        testImage(ins.querySelector('img'));
-      });
+    it('renders', async () => {
+      const ins = await getIns('fBwFP');
+      testIframe(ins.querySelector('iframe'));
+      testImage(ins.querySelector('img'));
     });
 
-    it('renders captioned', () => {
-      return getIns('fBwFP', undefined, undefined, true).then(ins => {
-        testIframeCaptioned(ins.querySelector('iframe'));
-        testImage(ins.querySelector('img'));
-      });
+    it('renders captioned', async () => {
+      const ins = await getIns('fBwFP', undefined, undefined, true);
+      testIframeCaptioned(ins.querySelector('iframe'));
+      testImage(ins.querySelector('img'));
     });
 
-    it('only sets src on placeholder after prerender', () => {
+    it('only sets src on placeholder after prerender', async () => {
       let becomeVisible;
       const visible = new Promise(resolve => (becomeVisible = resolve));
-      return getIns('fBwFP', undefined, undefined, undefined, visible).then(
-        ins => {
-          expect(ins.querySelector('img').getAttribute('src')).to.be.null;
-          becomeVisible();
-          return visible.then(() => {
-            expect(ins.querySelector('img').getAttribute('src')).to.equal(
-              'https://www.instagram.com/p/fBwFP/media/?size=l'
-            );
-          });
-        }
+      const ins = await getIns(
+        'fBwFP',
+        undefined,
+        undefined,
+        undefined,
+        visible
+      );
+      expect(ins.querySelector('img').getAttribute('src')).to.be.null;
+      becomeVisible();
+      await visible;
+      expect(ins.querySelector('img').getAttribute('src')).to.equal(
+        'https://www.instagram.com/p/fBwFP/media/?size=l'
       );
     });
 
-    it('builds a placeholder image without inserting iframe', () => {
+    it('builds a placeholder image without inserting iframe', async () => {
       return getIns('fBwFP', true, ins => {
         const placeholder = ins.querySelector('[placeholder]');
         const iframe = ins.querySelector('iframe');
@@ -171,23 +167,21 @@ describes.realWin(
       });
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getIns('fBwFP').then(ins => {
-        const placeholder = ins.querySelector('[placeholder]');
-        testIframe(ins.querySelector('iframe'));
-        const obj = ins.implementation_;
-        obj.unlayoutCallback();
-        expect(ins.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
-        expect(obj.iframePromise_).to.be.null;
-        expect(placeholder).to.not.have.display('none');
-      });
+    it('removes iframe after unlayoutCallback', async () => {
+      const ins = await getIns('fBwFP');
+      const placeholder = ins.querySelector('[placeholder]');
+      testIframe(ins.querySelector('iframe'));
+      const obj = ins.implementation_;
+      obj.unlayoutCallback();
+      expect(ins.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.iframePromise_).to.be.null;
+      expect(placeholder).to.not.have.display('none');
     });
 
-    it('renders responsively', () => {
-      return getIns('fBwFP', true).then(ins => {
-        expect(ins.className).to.match(/i-amphtml-layout-responsive/);
-      });
+    it('renders responsively', async () => {
+      const ins = await getIns('fBwFP', true);
+      expect(ins.className).to.match(/i-amphtml-layout-responsive/);
     });
 
     it('requires data-shortcode', () => {
@@ -198,23 +192,19 @@ describes.realWin(
       });
     });
 
-    it('resizes in response to messages from Instagram iframe', () => {
-      return getIns('fBwFP', true).then(ins => {
-        const impl = ins.implementation_;
-        const iframe = ins.querySelector('iframe');
-        const changeHeight = sandbox.spy(impl, 'changeHeight');
-        const newHeight = 977;
-
-        expect(iframe).to.not.be.null;
-
-        sendFakeMessage(ins, iframe, 'MEASURE', {
-          height: newHeight,
-        });
-
-        expect(changeHeight).to.be.calledOnce;
-        // Height minus padding
-        expect(changeHeight.firstCall.args[0]).to.equal(newHeight);
+    it('resizes in response to messages from Instagram iframe', async () => {
+      const ins = await getIns('fBwFP', true);
+      const impl = ins.implementation_;
+      const iframe = ins.querySelector('iframe');
+      const changeHeight = sandbox.spy(impl, 'changeHeight');
+      const newHeight = 977;
+      expect(iframe).to.not.be.null;
+      sendFakeMessage(ins, iframe, 'MEASURE', {
+        height: newHeight,
       });
+      expect(changeHeight).to.be.calledOnce;
+      // Height minus padding
+      expect(changeHeight.firstCall.args[0]).to.equal(newHeight);
     });
 
     function sendFakeMessage(ins, iframe, type, details) {

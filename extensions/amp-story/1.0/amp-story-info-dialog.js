@@ -67,13 +67,13 @@ export class InfoDialog {
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
     /** @private {?Element} */
     this.moreInfoLinkEl_ = null;
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.parentEl_);
   }
 

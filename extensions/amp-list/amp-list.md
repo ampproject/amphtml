@@ -2,8 +2,8 @@
 $category@: dynamic-content
 formats:
   - websites
-  - email
   - stories
+  - email
 teaser:
   text: Dynamically downloads data and creates list items using a template.
 ---
@@ -116,7 +116,7 @@ The request is always made from the client, even if the document was served from
 
 If `<amp-list>` needs more space after loading, it requests the AMP runtime to update its height using the normal AMP flow. If the AMP runtime cannot satisfy the request for the new height, it will display the `overflow` element when available. Notice however, that the typical placement of `<amp-list>` elements at the bottom of the document almost always guarantees that the AMP runtime can resize them.
 
-By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template.
+By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item.
 
 ### XHR batching
 
@@ -127,11 +127,17 @@ In `<amp-list>`, you can use the [`items`](#items-optional) attribute to render 
 
 ### Specifying an overflow
 
-Optionally, the `<amp-list>` element can contain an element with an `overflow` attribute. This element is shown if the AMP Runtime cannot resize the `<amp-list>` element as requested.
+Optionally, the `<amp-list>` component can contain an element with the `overflow` attribute. Add an element with the AMP `overflow` attribute to `amp-list` if the AMP framework is unable to size it as requested. If you include a child element of `amp-list` with the `overflow` attribute, it will appear if one of the following conditions are met:
+
+- The bottom of `amp-list` is below the viewport.
+
+- The bottom of `amp-list` is within 15% of the height of the entire page and within 1000px of the end of the page.
+
+If `amp-list` is outside the viewport, it will be automatically expanded.
 
 *Example: Displaying an overflow when the list needs more space*
 
-In the following example, we display a list of images and titles. Because the `<amp-list>` content requires more space than available, the AMP Runtime displays the overflow element.
+In the following example, we display a list of images and titles. Because the `<amp-list>` content requires more space than available, the AMP framework displays the overflow element.
 
 [example preview="inline" playground="true" imports="amp-list" template="amp-mustache"]
 ```html
@@ -148,14 +154,16 @@ In the following example, we display a list of images and titles. Because the `<
     </div>
   {% endraw %}</template>
   <div overflow
-    class="list-overflow">
+    class="list-overflow"
+    style="background-color:red;">
     See more
   </div>
 </amp-list>
 ```
 [/example]
 
-Here's the CSS for the `overflow`:
+
+AMP applies the following CSS to elements with the `overflow` attribute:
 
 ```css
 .list-overflow[overflow] {

@@ -22,19 +22,20 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {CacheCidApi} from './cache-cid-api';
 import {GoogleCidApi, TokenStatus} from './cid-api';
+import {dev, rethrowAsync, user, userAssert} from '../log';
+import {getCookie, setCookie} from '../cookies';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
+import {parseJson, tryParseJson} from '../json';
+
+import {CacheCidApi} from './cache-cid-api';
 import {Services} from '../services';
 import {ViewerCidApi} from './viewer-cid-api';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
-import {dev, rethrowAsync, user, userAssert} from '../log';
 import {dict} from '../utils/object';
-import {getCookie, setCookie} from '../cookies';
 import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from '../url';
 import {isIframed} from '../dom';
-import {parseJson, tryParseJson} from '../json';
 import {tryResolve} from '../utils/promise';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -185,7 +186,7 @@ class Cid {
     );
     return consent
       .then(() => {
-        return Services.viewerForDoc(this.ampdoc).whenFirstVisible();
+        return this.ampdoc.whenFirstVisible();
       })
       .then(() => {
         // Check if user has globally opted out of CID, we do this after
@@ -415,7 +416,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     return /** @type {!Promise<?string>} */ (Promise.resolve(existingCookie));
   }
 
-  const newCookiePromise = getNewCidForCookie(win)
+  const newCookiePromise = getRandomString64(win)
     // Create new cookie, always prefixed with "amp-", so that we can see from
     // the value whether we created it.
     .then(randomStr => 'amp-' + randomStr);
@@ -648,7 +649,7 @@ function getEntropy(win) {
  * @param {!Window} win
  * @return {!Promise<string>} The cid
  */
-function getNewCidForCookie(win) {
+export function getRandomString64(win) {
   const entropy = getEntropy(win);
   if (typeof entropy == 'string') {
     return Services.cryptoFor(win).sha384Base64(entropy);

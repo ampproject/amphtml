@@ -98,7 +98,7 @@ export class SubscriptionService {
     /** @private {!ViewerTracker} */
     this.viewerTracker_ = new ViewerTracker(ampdoc);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {?Promise} */
@@ -285,7 +285,7 @@ export class SubscriptionService {
     // page to become visible, all others wait for whenFirstVisible()
     const visiblePromise = subscriptionPlatform.isPrerenderSafe()
       ? Promise.resolve()
-      : this.viewer_.whenFirstVisible();
+      : this.ampdoc_.whenFirstVisible();
     return visiblePromise.then(() => {
       return this.timer_
         .timeoutPromise(timeout, subscriptionPlatform.getEntitlements())
@@ -661,6 +661,14 @@ export class SubscriptionService {
       .then(entitlement => {
         return getValueForExpr(entitlement.json(), field);
       });
+  }
+
+  /**
+   * Gets Score Factors for all platforms
+   * @return {!Promise<!JsonObject>}
+   */
+  getScoreFactorStates() {
+    return this.platformStore_.getScoreFactorStates();
   }
 }
 

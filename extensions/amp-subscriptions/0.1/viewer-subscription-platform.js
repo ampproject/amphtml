@@ -51,7 +51,7 @@ export class ViewerSubscriptionPlatform {
       serviceAdapter
     );
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
     this.viewer_.onMessage(
       'subscriptionchange',

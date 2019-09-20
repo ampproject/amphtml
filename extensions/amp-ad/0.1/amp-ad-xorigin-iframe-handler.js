@@ -21,9 +21,12 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
+  isPausable,
   listenFor,
   listenForOncePromise,
+  makePausable,
   postMessageToWindows,
+  setPaused,
 } from '../../../src/iframe-helper';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -57,7 +60,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {?./amp-ad-ui.AmpAdUIHandler} */
     this.uiHandler_ = baseInstance.uiHandler;
 
-    /** @type {?Element} iframe instance */
+    /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
     /** @private {?IntersectionObserver} */
@@ -75,10 +78,7 @@ export class AmpAdXOriginIframeHandler {
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
-
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
     /** @private {boolean} */
@@ -87,7 +87,7 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
-   * @param {!Element} iframe
+   * @param {!HTMLIFrameElement} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @param {boolean=} opt_letCreativeTriggerRenderStart Whether to wait for
    *    render start from the creative, or simply trigger it in here.
@@ -180,7 +180,7 @@ export class AmpAdXOriginIframeHandler {
     );
 
     this.unlisteners_.push(
-      this.viewer_.onVisibilityChanged(() => {
+      this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
         this.sendEmbedInfo_(this.baseInstance_.isInViewport());
       })
     );
@@ -263,6 +263,12 @@ export class AmpAdXOriginIframeHandler {
       // received here as well.
       this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
     });
+
+    // If "pausable-iframe" enabled, try to make the iframe pausable. It doesn't
+    // matter here whether this will succeed or not.
+    if (isExperimentOn(this.win_, 'pausable-iframe')) {
+      makePausable(this.iframe);
+    }
 
     this.element_.appendChild(this.iframe);
     if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
@@ -484,7 +490,7 @@ export class AmpAdXOriginIframeHandler {
       'embed-state',
       dict({
         'inViewport': inViewport,
-        'pageHidden': !this.viewer_.isVisible(),
+        'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
       })
     );
   }
@@ -586,6 +592,27 @@ export class AmpAdXOriginIframeHandler {
       const e = new Error(message);
       e.name = '3pError';
       reportErrorToAnalytics(e, this.baseInstance_.win);
+    }
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isPausable() {
+    return (
+      isExperimentOn(this.win_, 'pausable-iframe') &&
+      !!this.iframe &&
+      isPausable(this.iframe)
+    );
+  }
+
+  /**
+   * See `BaseElement.pauseCallback()` and `BaseElement.resumeCallback()`.
+   * @param {boolean} paused
+   */
+  setPaused(paused) {
+    if (isExperimentOn(this.win_, 'pausable-iframe') && this.iframe) {
+      setPaused(this.iframe, paused);
     }
   }
 }

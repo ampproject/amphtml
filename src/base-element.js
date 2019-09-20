@@ -21,7 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {isExperimentOn} from './experiments';
 import {preconnectForElement} from './preconnect';
 
 /**
@@ -160,19 +159,6 @@ export class BaseElement {
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
-
-    /** @public {?Object} For use by sub classes */
-    this.config = null;
-
-    /**
-     * The time at which this element was scheduled for layout relative to the
-     * epoch. This value will be set to 0 until the this element has been
-     * scheduled.
-     * Note that this value may change over time if the element is enqueued,
-     * then dequeued and re-enqueued by the scheduler.
-     * @public {number}
-     */
-    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -559,21 +545,6 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the element that its activation is requested based on some
-   * user event. Intended to be implemented by actual components.
-   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
-   */
-  activate(unusedInvocation) {}
-
-  /**
-   * Minimum event trust required for activate().
-   * @return {ActionTrust}
-   */
-  activationTrust() {
-    return ActionTrust.HIGH;
-  }
-
-  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
    * and 'error' events.
    * @param {T} element
@@ -657,14 +628,6 @@ export class BaseElement {
   }
 
   /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    return this.win.devicePixelRatio || 1;
-  }
-
-  /**
    * Utility method that propagates attributes from this element
    * to the given element.
    * If `opt_removeMissingAttrs` is true, then also removes any specified
@@ -678,8 +641,9 @@ export class BaseElement {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      if (this.element.hasAttribute(attr)) {
-        element.setAttribute(attr, this.element.getAttribute(attr));
+      const val = this.element.getAttribute(attr);
+      if (null !== val) {
+        element.setAttribute(attr, val);
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
       }
@@ -821,7 +785,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   getViewport() {
     return Services.viewportForDoc(this.getAmpDoc());
@@ -898,13 +862,20 @@ export class BaseElement {
    * The promise is resolved if the height is successfully updated.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @param {?Event=} opt_event
    * @return {!Promise}
    * @public
    */
-  attemptChangeSize(newHeight, newWidth) {
+  attemptChangeSize(newHeight, newWidth, opt_event) {
     return this.element
       .getResources()
-      .attemptChangeSize(this.element, newHeight, newWidth);
+      .attemptChangeSize(
+        this.element,
+        newHeight,
+        newWidth,
+        /* newMargin */ undefined,
+        opt_event
+      );
   }
 
   /**
@@ -1020,21 +991,5 @@ export class BaseElement {
    */
   user() {
     return user(this.element);
-  }
-
-  /**
-   * Declares a child element (or ourselves) as a Layer
-   * @param {!Element=} opt_element
-   * @return {undefined}
-   */
-  declareLayer(opt_element) {
-    devAssert(
-      isExperimentOn(this.win, 'layers'),
-      'Layers must be enabled to declare layer.'
-    );
-    if (opt_element) {
-      devAssert(this.element.contains(opt_element));
-    }
-    return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }

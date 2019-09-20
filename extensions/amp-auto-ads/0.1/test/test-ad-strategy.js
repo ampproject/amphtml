@@ -47,7 +47,7 @@ describes.realWin(
       // Stub whenBuilt to resolve immediately to handle upgrade for AdSense
       // to FF impl.
       sinon
-        .stub(win.BaseCustomElementClass.prototype, 'whenBuilt')
+        .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
     });
 

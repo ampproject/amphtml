@@ -58,21 +58,34 @@ export class MockStoryImpl extends AMP.BaseElement {
 }
 
 /**
- * Adds a fake config as a child of the given story element.
+ * Create amp-story-auto-ads-element with config as a child of the given parent element.
  * @param {!Document} doc
- * @param {!Element} autoAdsEl
+ * @param {!Element} parent
+ * @param {Object=} config
+ * @return {!Element}
  */
-export function addStoryAutoAdsConfig(doc, autoAdsEl, customConfig) {
+export function createStoryAdElementAndConfig(doc, parent, config) {
+  const autoAdsEl = doc.createElement('amp-story-auto-ads');
+  addStoryAutoAdsConfig(autoAdsEl, config);
+  parent.appendChild(autoAdsEl);
+  return autoAdsEl;
+}
+
+/**
+ * Adds a fake config as a child of the given story element.
+ * @param {!Element} parent
+ * @param {Object=} customConfig
+ */
+export function addStoryAutoAdsConfig(parent, customConfig) {
   const config = customConfig || {
-    'ad-attributes': {
-      type: 'doubleclick',
-      'data-slot': '/30497360/a4a/fake_ad_unit',
-    },
+    type: 'doubleclick',
+    'data-slot': '/30497360/a4a/fake_ad_unit',
   };
-  const child = doc.createElement('script');
-  child.setAttribute('type', 'application/json');
-  child./*OK*/ innerText = JSON.stringify(config);
-  autoAdsEl.append(child);
+  parent./*OK*/ innerHTML = `
+    <script type="application/json">
+      { "ad-attributes": ${JSON.stringify(config)} }
+    </script>
+  `;
 }
 
 /**
@@ -106,11 +119,13 @@ export function addStoryPages(doc, storyImpl, numPages = 3) {
  * @param {Array<string>=} additonalSelectors
  */
 export function fireBuildSignals(doc, additonalSelectors = []) {
-  const defaultSelectors = ['amp-ad', '#i-amphtml-ad-page-1'];
+  const defaultSelectors = ['amp-ad', 'amp-story', 'amp-story-page'];
   const selectors = defaultSelectors.concat(additonalSelectors).join(',');
-  doc
-    .querySelectorAll(selectors)
-    .forEach(element => element.signals().signal(CommonSignals.BUILT));
+  doc.querySelectorAll(selectors).forEach(element => {
+    const signals = element.signals();
+    signals.signal(CommonSignals.BUILT);
+    signals.signal(CommonSignals.INI_LOAD);
+  });
 }
 
 /**
@@ -133,6 +148,5 @@ export function insertAdContent(autoAdsImpl, content) {
   const iframe = autoAdsImpl.doc_.createElement('iframe');
   iframe.srcdoc = content;
   autoAdsImpl.lastCreatedAdElement_.appendChild(iframe);
-  autoAdsImpl.lastCreatedAdImpl_.iframe = iframe;
   return autoAdsImpl.loadPromise(iframe);
 }

@@ -30,13 +30,6 @@ limitations under the License.
 
 <table>
   <tr>
-    <td><strong>Availability</strong></td>
-    <td>
-      <a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental#origin-trials">Origin Trial</a><br/>
-      This component is available under Origin Trial. To sign up for an Origin Trial please sign up at bit.ly/amp-script-trial.
-    </td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
       <div>
@@ -67,40 +60,60 @@ limitations under the License.
 
 The `amp-script` component allows you run custom JavaScript to render UI elements, such as a React component.
 
-{% call callout('Important', type='caution') %}
-`amp-script` is in active development and under [experimental availability](https://amp.dev/documentation/guides-and-tutorials/learn/experimental). It's subject to breaking API changes and should not yet be used in production.
-{% endcall %}
-
 ### A simple example
 
-An `amp-script` element can load a JavaScript file from a URL:
+An `amp-script` element can load JavaScript in two ways:
+- Remotely, from a URL to a JavaScript file.
+- Locally, from a `script[type=text/plain][target=amp-script]` element on the page.
+
+#### Load JavaScript from a remote URL
+
+Use the `src` attribute to load remote JavaScript.
 
 ```html
-<!-- Use an remote script via the "src" attribute. -->
 <amp-script layout="container" src="https://example.com/hello-world.js">
   <button>Hello amp-script!</button>
 </amp-script>
 ```
 
-...or reference a local `script` element by `id`:
+If `src` points to a cross-origin URL, then a ["script hash"](#security-features) must also be added to the document head.
+
+#### Load JavaScript from a local element
+
+[tip type="important"]
+Using the `script` attribute is currently invalid. See [#24309](https://github.com/ampproject/amphtml/issues/24309) for details.
+[/tip]
+
+Use the `script` attribute to reference a local `script` element by `id`.
 
 ```html
-<!-- Reference a local script by id via the "script" attribute. -->
-<amp-script layout="container" script="hello-world">
+<!-- Using the "script" attribute also requires adding a "script hash" to the document head. -->
+<head>
+  <meta
+    name="amp-script-src"
+    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG">
+</head>
+
+...
+
+<amp-script width=200 height=50 script="hello-world">
   <button>Hello amp-script!</button>
 </amp-script>
 
+<!-- Also add [target="amp-script"] to the <script> element. -->
 <script id="hello-world" type="text/plain" target="amp-script">
   const btn = document.querySelector('button');
   btn.addEventListener('click', () => {
-    document.body.textContent += 'Hello World!';
+    document.body.textContent = 'Hello World!';
   });
 </script>
 ```
 
-{% call callout('Tip', type='success') %}
-Enable the experiment via `AMP.toggleExperiment('amp-script')` in dev console.
-{% endcall %}
+[tip type="default"]
+`amp-script` elements that have a `script` or cross-origin `src` attribute require a ["script hash"](#security-features). Script hashes are specified in a `<meta name="amp-script-src" content="...">` element in the document head.
+
+A console error will be thrown with the expected `content` value -- you can copy/paste from the error to create the appropriate `<meta>` tag.
+[/tip]
 
 ### How does it work?
 
@@ -127,6 +140,12 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 
 ### Restrictions
 
+#### Allowed APIs
+
+Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet. See the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md) for details.
+
+If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
+
 #### Size of JavaScript code
 
 `amp-script` has the following restrictions on JavaScript file size:
@@ -142,28 +161,46 @@ The rules for mutations are as follows:
 
 1. Mutations are always accepted for five seconds after a user gesture.
 2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
-3. Mutations are always accepted for `amp-script` elements with `[layout!="container"]` and `height < 300px`.
+3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height < 300px`.
 
 #### Security features
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
 
-- Same-origin `src` must have [`Content-Type: application/json`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
-- Cross-origin `src` and local scripts must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string. For example:
+1. Same-origin `src` must have [`Content-Type: application/json`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+2. Cross-origin `src` and `script` must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string.
+
+Example of script hashes:
 
 ```html
 <head>
-  <!-- Script hashes are space-delimited. -->
+  <!--
+    A meta[name="amp-script-src"] element contains all script hashes for
+    <amp-script> elements on the page, delimited by spaces.
+  -->
   <meta
-    name=amp-script-src
-    content="sha384-abc123 sha384-def456">
+    name="amp-script-src"
+    content="
+      sha384-fake_hash_of_remote_js
+      sha384-fake_hash_of_local_script
+    ">
 </head>
 <body>
-  <!-- Cross-origin src requires hash: sha384(example.js) == abc123 -->
-  <amp-script src="cross.origin/example.js" layout=container>
+  <!--
+    A "src" attribute with a cross-origin URL requires adding a script hash.
+
+    If the hash of remote.js's contents is "fake_hash_of_remote_js",
+    we'll add "sha384-fake_hash_of_remote_js" to the <meta> tag above.
+  -->
+  <amp-script src="cross.origin/remote.js" layout=container>
   </amp-script>
 
-  <!-- Local script requires hash: sha384(#myScript) == def456 -->
+  <!--
+    A "script" attribute also requires adding a script hash.
+
+    If the hash of #myScript's text contents is "fake_hash_of_local_script",
+    we'll add "sha384-fake_hash_of_local_script" to the <meta> tag above.
+  -->
   <amp-script script=myScript layout=container>
   </amp-script>
   <script type=text/plain target=amp-script id=myScript>
@@ -171,6 +208,10 @@ Since custom JS run in `amp-script` is not subject to normal [Content Security P
   </script>
 </body>
 ```
+
+[tip type="default"]
+The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
+[/tip]
 
 ## Attributes
 
@@ -192,24 +233,18 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
-## Interested in using amp-script?
+## Errors
 
-We recommend developing against a local build of `amp-script`. This enables dev-only debugging hooks e.g. human-readable `postMessage` events.
+There are several types of runtime errors that may be encountered when using `amp-script`.
 
-See our [Quick Start](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup) guide for setting up your local environment.
+#### "Maximum total script size exceeded (...)"
 
-## FAQ
+`amp-script` limits the size of the JS source that may be used. See [Size of JavaScript code](#size-of-javascript-code) above.
 
-#### Which JavaScript APIs can I use?
+#### "Script hash not found."
 
-Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet.
+Local scripts and cross-origin `src` require adding a special `<meta>` tag to be used. See [Security features](#security-features) above.
 
-See the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md) for details.
+#### "amp-script... was terminated due to illegal mutation"
 
-#### Can you support ____ API?
-
-Our feature timelines are informed by your real-world use cases! Please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
-
-#### I'm getting a "size exceeded" error.
-
-See [Size of JavaScript code](#size-of-javascript-code) above.
+To avoid unexpected content jumping, `amp-script` generally requires user gestures for DOM changes. See [User gestures](#user-gestures) above.

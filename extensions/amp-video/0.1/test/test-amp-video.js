@@ -19,7 +19,6 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {mockServiceForDoc} from '../../../../testing/test-helper';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -43,7 +42,7 @@ describes.realWin(
       return '//someHost/foo.' + filetype.slice(filetype.indexOf('/') + 1); // assumes no optional params
     }
 
-    function getVideo(attributes, children, opt_beforeLayoutCallback) {
+    async function getVideo(attributes, children, opt_beforeLayoutCallback) {
       const v = doc.createElement('amp-video');
       for (const key in attributes) {
         v.setAttribute(key, attributes[key]);
@@ -54,42 +53,41 @@ describes.realWin(
         }
       }
       doc.body.appendChild(v);
-      return v
-        .build()
-        .then(() => {
-          if (opt_beforeLayoutCallback) {
-            opt_beforeLayoutCallback(v);
-          }
-          return v.layoutCallback().then(() => v);
-        })
-        .catch(e => {
-          // Ignore failed to load errors since sources are fake.
-          if (e.toString().indexOf('Failed to load') > -1) {
-            return v;
-          } else {
-            throw e;
-          }
-        });
+      await v.build();
+
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(v);
+      }
+      try {
+        await v.layoutCallback();
+        return v;
+      } catch (e) {
+        // Ignore failed to load errors since sources are fake.
+        if (e.toString().indexOf('Failed to load') > -1) {
+          return v;
+        } else {
+          throw e;
+        }
+      }
     }
 
-    it('should load a video', () => {
-      return getVideo({
+    it('should load a video', async () => {
+      const v = await getVideo({
         src: 'video.mp4',
         width: 160,
         height: 90,
-      }).then(v => {
-        const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
-        v.implementation_.preconnectCallback();
-        preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
-        const video = v.querySelector('video');
-        expect(video.tagName).to.equal('VIDEO');
-        expect(video.getAttribute('src')).to.equal('video.mp4');
-        expect(video.hasAttribute('controls')).to.be.false;
       });
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('src')).to.equal('video.mp4');
+      expect(video.hasAttribute('controls')).to.be.false;
     });
 
-    it('should load a video', () => {
-      return getVideo({
+    it('should load a video', async () => {
+      const v = await getVideo({
         src: 'video.mp4',
         width: 160,
         height: 90,
@@ -98,24 +96,23 @@ describes.realWin(
         'loop': '',
         'crossorigin': '',
         'disableremoteplayback': '',
-      }).then(v => {
-        const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
-        v.implementation_.preconnectCallback();
-        preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
-        const video = v.querySelector('video');
-        expect(video.tagName).to.equal('VIDEO');
-        expect(video.hasAttribute('controls')).to.be.true;
-        expect(video.hasAttribute('loop')).to.be.true;
-        expect(video.hasAttribute('crossorigin')).to.be.true;
-        expect(video.hasAttribute('disableremoteplayback')).to.be.true;
-        // autoplay is never propagated to the video element
-        expect(video.hasAttribute('autoplay')).to.be.false;
-        // muted is a deprecated attribute
-        expect(video.hasAttribute('muted')).to.be.false;
       });
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.hasAttribute('controls')).to.be.true;
+      expect(video.hasAttribute('loop')).to.be.true;
+      expect(video.hasAttribute('crossorigin')).to.be.true;
+      expect(video.hasAttribute('disableremoteplayback')).to.be.true;
+      // autoplay is never propagated to the video element
+      expect(video.hasAttribute('autoplay')).to.be.false;
+      // muted is a deprecated attribute
+      expect(video.hasAttribute('muted')).to.be.false;
     });
 
-    it('should load a video with source children', () => {
+    it('should load a video with source children', async () => {
       const sources = [];
       const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
       for (let i = 0; i < mediatypes.length; i++) {
@@ -125,7 +122,7 @@ describes.realWin(
         source.setAttribute('type', mediatype);
         sources.push(source);
       }
-      return getVideo(
+      const v = await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -136,28 +133,25 @@ describes.realWin(
           'loop': '',
         },
         sources
-      ).then(v => {
-        const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
-        v.implementation_.preconnectCallback();
-        preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
-        const video = v.querySelector('video');
-        // check that the source tags were propogated
-        expect(video.children.length).to.equal(mediatypes.length);
-        for (let i = 0; i < mediatypes.length; i++) {
-          const mediatype = mediatypes[i];
-          expect(video.children.item(i).tagName).to.equal('SOURCE');
-          expect(video.children.item(i).hasAttribute('src')).to.be.true;
-          expect(video.children.item(i).getAttribute('src')).to.equal(
-            getFooVideoSrc(mediatype)
-          );
-          expect(video.children.item(i).getAttribute('type')).to.equal(
-            mediatype
-          );
-        }
-      });
+      );
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      const video = v.querySelector('video');
+      // check that the source tags were propogated
+      expect(video.children.length).to.equal(mediatypes.length);
+      for (let i = 0; i < mediatypes.length; i++) {
+        const mediatype = mediatypes[i];
+        expect(video.children.item(i).tagName).to.equal('SOURCE');
+        expect(video.children.item(i).hasAttribute('src')).to.be.true;
+        expect(video.children.item(i).getAttribute('src')).to.equal(
+          getFooVideoSrc(mediatype)
+        );
+        expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
+      }
     });
 
-    it('should load a video with track children', () => {
+    it('should load a video with track children', async () => {
       const tracks = [];
       const tracktypes = ['captions', 'subtitles', 'descriptions', 'chapters'];
       for (let i = 0; i < tracktypes.length; i++) {
@@ -168,7 +162,7 @@ describes.realWin(
         track.setAttribute('srclang', 'en');
         tracks.push(track);
       }
-      return getVideo(
+      const v = await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -179,26 +173,23 @@ describes.realWin(
           'loop': '',
         },
         tracks
-      ).then(v => {
-        const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
-        v.implementation_.preconnectCallback();
-        preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
-        const video = v.querySelector('video');
-        // check that the source tags were propogated
-        expect(video.children.length).to.equal(tracktypes.length);
-        for (let i = 0; i < tracktypes.length; i++) {
-          const tracktype = tracktypes[i];
-          expect(video.children.item(i).tagName).to.equal('TRACK');
-          expect(video.children.item(i).hasAttribute('src')).to.be.true;
-          expect(video.children.item(i).getAttribute('src')).to.equal(
-            getFooVideoSrc(tracktype)
-          );
-          expect(video.children.item(i).getAttribute('type')).to.equal(
-            tracktype
-          );
-          expect(video.children.item(i).getAttribute('srclang')).to.equal('en');
-        }
-      });
+      );
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
+      const video = v.querySelector('video');
+      // check that the source tags were propogated
+      expect(video.children.length).to.equal(tracktypes.length);
+      for (let i = 0; i < tracktypes.length; i++) {
+        const tracktype = tracktypes[i];
+        expect(video.children.item(i).tagName).to.equal('TRACK');
+        expect(video.children.item(i).hasAttribute('src')).to.be.true;
+        expect(video.children.item(i).getAttribute('src')).to.equal(
+          getFooVideoSrc(tracktype)
+        );
+        expect(video.children.item(i).getAttribute('type')).to.equal(tracktype);
+        expect(video.children.item(i).getAttribute('srclang')).to.equal('en');
+      }
     });
 
     it('should not load a video with http src', () => {
@@ -251,8 +242,8 @@ describes.realWin(
       ).to.be.rejectedWith(/start with/);
     });
 
-    it('should set poster, controls, controlsList in prerender mode', () => {
-      return getVideo(
+    it('should set poster, controls, controlsList in prerender mode', async () => {
+      const v = await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -269,20 +260,19 @@ describes.realWin(
           expect(video.getAttribute('playsinline')).to.exist;
           expect(video.getAttribute('webkit-playsinline')).to.exist;
         }
-      ).then(v => {
-        // Same attributes should still be present in layoutCallback.
-        const video = v.querySelector('video');
-        expect(video.tagName).to.equal('VIDEO');
-        expect(video.getAttribute('poster')).to.equal('img.png');
-        expect(video.getAttribute('controls')).to.exist;
-        expect(video.getAttribute('controlsList')).to.equal(
-          'nofullscreen nodownload noremoteplayback'
-        );
-      });
+      );
+      // Same attributes should still be present in layoutCallback.
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('poster')).to.equal('img.png');
+      expect(video.getAttribute('controls')).to.exist;
+      expect(video.getAttribute('controlsList')).to.equal(
+        'nofullscreen nodownload noremoteplayback'
+      );
     });
 
-    it('should not set poster, src, or preload in build', () => {
-      return getVideo(
+    it('should not set poster, src, or preload in build', async () => {
+      const v = await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -297,17 +287,16 @@ describes.realWin(
           expect(video.hasAttribute('poster')).to.be.false;
           expect(video.hasAttribute('src')).to.be.false;
         }
-      ).then(v => {
-        // Should set appropriate attributes in layoutCallback.
-        const video = v.querySelector('video');
-        expect(video.tagName).to.equal('VIDEO');
-        expect(video.getAttribute('preload')).to.equal('auto');
-        expect(video.getAttribute('poster')).to.equal('img.png');
-      });
+      );
+      // Should set appropriate attributes in layoutCallback.
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('preload')).to.equal('auto');
+      expect(video.getAttribute('poster')).to.equal('img.png');
     });
 
-    it('should remove preload attribute when not provided', () => {
-      return getVideo(
+    it('should remove preload attribute when not provided', async () => {
+      const v = await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -321,16 +310,15 @@ describes.realWin(
           expect(video.hasAttribute('poster')).to.be.false;
           expect(video.hasAttribute('src')).to.be.false;
         }
-      ).then(v => {
-        // Should set appropriate attributes in layoutCallback.
-        const video = v.querySelector('video');
-        expect(video.tagName).to.equal('VIDEO');
-        expect(video.hasAttribute('preload')).to.be.false;
-        expect(video.getAttribute('poster')).to.equal('img.png');
-      });
+      );
+      // Should set appropriate attributes in layoutCallback.
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.hasAttribute('preload')).to.be.false;
+      expect(video.getAttribute('poster')).to.equal('img.png');
     });
 
-    it('should not load a video with source children in prerender mode', () => {
+    it('should not load a video with source children in prerender mode', async () => {
       const sources = [];
       const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
       for (let i = 0; i < mediatypes.length; i++) {
@@ -340,7 +328,7 @@ describes.realWin(
         source.setAttribute('type', mediatype);
         sources.push(source);
       }
-      return getVideo(
+      const v = await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -355,27 +343,24 @@ describes.realWin(
           const video = element.querySelector('video');
           expect(video.children.length).to.equal(0);
         }
-      ).then(v => {
-        // Should add attributes and source children in layoutCallback.
-        const video = v.querySelector('video');
-        // check that the source tags were propogated
-        expect(video.children.length).to.equal(mediatypes.length);
-        for (let i = 0; i < mediatypes.length; i++) {
-          const mediatype = mediatypes[i];
-          expect(video.children.item(i).tagName).to.equal('SOURCE');
-          expect(video.children.item(i).hasAttribute('src')).to.be.true;
-          expect(video.children.item(i).getAttribute('src')).to.equal(
-            getFooVideoSrc(mediatype)
-          );
-          expect(video.children.item(i).getAttribute('type')).to.equal(
-            mediatype
-          );
-        }
-      });
+      );
+      // Should add attributes and source children in layoutCallback.
+      const video = v.querySelector('video');
+      // check that the source tags were propogated
+      expect(video.children.length).to.equal(mediatypes.length);
+      for (let i = 0; i < mediatypes.length; i++) {
+        const mediatype = mediatypes[i];
+        expect(video.children.item(i).tagName).to.equal('SOURCE');
+        expect(video.children.item(i).hasAttribute('src')).to.be.true;
+        expect(video.children.item(i).getAttribute('src')).to.equal(
+          getFooVideoSrc(mediatype)
+        );
+        expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
+      }
     });
 
-    it('should set src and preload in non-prerender mode', () => {
-      return getVideo(
+    it('should set src and preload in non-prerender mode', async () => {
+      const v = await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -390,30 +375,28 @@ describes.realWin(
           expect(video.hasAttribute('poster')).to.be.false;
           expect(video.hasAttribute('src')).to.be.false;
         }
-      ).then(v => {
-        const video = v.querySelector('video');
-        expect(video.tagName).to.equal('VIDEO');
-        expect(video.getAttribute('preload')).to.equal('auto');
-        expect(video.getAttribute('poster')).to.equal('img.png');
-      });
+      );
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('preload')).to.equal('auto');
+      expect(video.getAttribute('poster')).to.equal('img.png');
     });
 
-    it('should pause the video when document inactive', () => {
-      return getVideo({
+    it('should pause the video when document inactive', async () => {
+      const v = await getVideo({
         src: 'video.mp4',
         width: 160,
         height: 90,
-      }).then(v => {
-        const impl = v.implementation_;
-        const video = v.querySelector('video');
-        sandbox.spy(video, 'pause');
-        impl.pauseCallback();
-        expect(video.pause.called).to.be.true;
       });
+      const impl = v.implementation_;
+      const video = v.querySelector('video');
+      sandbox.spy(video, 'pause');
+      impl.pauseCallback();
+      expect(video.pause.called).to.be.true;
     });
 
-    it('should fallback if video element is not supported', () => {
-      return getVideo(
+    it('should fallback if video element is not supported', async () => {
+      const v = await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -425,17 +408,16 @@ describes.realWin(
           sandbox.stub(impl, 'isVideoSupported_').returns(false);
           sandbox.spy(impl, 'toggleFallback');
         }
-      ).then(v => {
-        const impl = v.implementation_;
-        expect(impl.toggleFallback.called).to.be.true;
-        expect(impl.toggleFallback).to.have.been.calledWith(true);
-      });
+      );
+      const impl = v.implementation_;
+      expect(impl.toggleFallback.called).to.be.true;
+      expect(impl.toggleFallback).to.have.been.calledWith(true);
     });
 
-    it('play() should not log promise rejections', () => {
+    it('play() should not log promise rejections', async () => {
       const playPromise = Promise.reject('The play() request was interrupted');
       const catchSpy = sandbox.spy(playPromise, 'catch');
-      return getVideo(
+      await getVideo(
         {
           src: 'video.mp4',
           width: 160,
@@ -447,142 +429,122 @@ describes.realWin(
           sandbox.stub(impl.video_, 'play').returns(playPromise);
           impl.play();
         }
-      ).then(() => {
-        expect(catchSpy.called).to.be.true;
-      });
+      );
+      expect(catchSpy.called).to.be.true;
     });
 
-    it('should propagate ARIA attributes', () => {
-      return getVideo({
+    it('should propagate ARIA attributes', async () => {
+      const v = await getVideo({
         src: 'video.mp4',
         width: 160,
         height: 90,
         'aria-label': 'Hello',
         'aria-labelledby': 'id2',
         'aria-describedby': 'id3',
-      }).then(v => {
-        const video = v.querySelector('video');
-        expect(video.getAttribute('aria-label')).to.equal('Hello');
-        expect(video.getAttribute('aria-labelledby')).to.equal('id2');
-        expect(video.getAttribute('aria-describedby')).to.equal('id3');
       });
+      const video = v.querySelector('video');
+      expect(video.getAttribute('aria-label')).to.equal('Hello');
+      expect(video.getAttribute('aria-labelledby')).to.equal('id2');
+      expect(video.getAttribute('aria-describedby')).to.equal('id3');
     });
 
-    it('should propagate attribute mutations', () => {
-      return getVideo({
+    it('should propagate attribute mutations', async () => {
+      const v = await getVideo({
         src: 'foo.mp4',
         width: 160,
         height: 90,
         controls: '',
         controlsList: '',
-      }).then(v => {
-        const mutations = {
-          src: 'bar.mp4',
-          controls: null,
-          controlsList: 'nodownload nofullscreen',
-        };
-        Object.keys(mutations).forEach(property => {
-          const value = mutations[property];
-          if (value === null) {
-            v.removeAttribute(property);
-          } else {
-            v.setAttribute(property, value);
-          }
-        });
-        v.mutatedAttributesCallback(mutations);
-        const video = v.querySelector('video');
-        expect(video.getAttribute('src')).to.equal('bar.mp4');
-        expect(video.controls).to.be.false;
-        expect(video.getAttribute('controlsList')).to.equal(
-          'nodownload nofullscreen'
-        );
       });
+      const mutations = {
+        src: 'bar.mp4',
+        controls: null,
+        controlsList: 'nodownload nofullscreen',
+      };
+      Object.keys(mutations).forEach(property => {
+        const value = mutations[property];
+        if (value === null) {
+          v.removeAttribute(property);
+        } else {
+          v.setAttribute(property, value);
+        }
+      });
+      v.mutatedAttributesCallback(mutations);
+      const video = v.querySelector('video');
+      expect(video.getAttribute('src')).to.equal('bar.mp4');
+      expect(video.controls).to.be.false;
+      expect(video.getAttribute('controlsList')).to.equal(
+        'nodownload nofullscreen'
+      );
     });
 
-    it('should propagate the object-fit attribute', () => {
-      return getVideo({
+    it('should propagate the object-fit attribute', async () => {
+      const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'cover',
-      }).then(v => {
-        const video = v.querySelector('video');
-        expect(video.style.objectFit).to.equal('cover');
       });
+      const video = v.querySelector('video');
+      expect(video.style.objectFit).to.equal('cover');
     });
 
-    it('should not propagate the object-fit attribute if invalid', () => {
-      return getVideo({
+    it('should not propagate the object-fit attribute if invalid', async () => {
+      const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'foo 80%',
-      }).then(v => {
-        const video = v.querySelector('video');
-        expect(video.style.objectFit).to.be.empty;
       });
+      const video = v.querySelector('video');
+      expect(video.style.objectFit).to.be.empty;
     });
 
-    it('should propagate the object-position attribute', () => {
-      return getVideo({
+    it('should propagate the object-position attribute', async () => {
+      const v = await getVideo({
         src: 'video.mp4',
         'object-position': '20% 80%',
-      }).then(v => {
-        const video = v.querySelector('video');
-        expect(video.style.objectPosition).to.equal('20% 80%');
       });
+      const video = v.querySelector('video');
+      expect(video.style.objectPosition).to.equal('20% 80%');
     });
 
-    it('should not propagate the object-position attribute if invalid', () => {
-      return getVideo({
+    it('should not propagate the object-position attribute if invalid', async () => {
+      const v = await getVideo({
         src: 'video.mp4',
         'object-position': 'url("example.com")',
-      }).then(v => {
-        const video = v.querySelector('video');
-        expect(video.style.objectPosition).to.be.empty;
       });
+      const video = v.querySelector('video');
+      expect(video.style.objectPosition).to.be.empty;
     });
 
     // TODO: unskip the tests in this file #19664
-    it.skip('should forward certain events from video to the amp element', () => {
-      return getVideo({
+    it.skip('should forward certain events from video to the amp element', async () => {
+      const v = await getVideo({
         src: '/examples/av/ForBiggerJoyrides.mp4',
         width: 160,
         height: 90,
-      }).then(v => {
-        const impl = v.implementation_;
-        return Promise.resolve()
-          .then(() => {
-            impl.mute();
-            return listenOncePromise(v, VideoEvents.MUTED);
-          })
-          .then(() => {
-            impl.play();
-            return listenOncePromise(v, VideoEvents.PLAYING);
-          })
-          .then(() => {
-            impl.pause();
-            return listenOncePromise(v, VideoEvents.PAUSE);
-          })
-          .then(() => {
-            impl.unmute();
-            return listenOncePromise(v, VideoEvents.UNMUTED);
-          })
-          .then(() => {
-            // Should not send the unmute event twice if already sent once.
-            const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
-              assert.fail('Should not have dispatch unmute message twice');
-            });
-            v.querySelector('video').dispatchEvent(new Event('volumechange'));
-            const successTimeout = timer.promise(10);
-            return Promise.race([p, successTimeout]);
-          })
-          .then(() => {
-            const video = v.querySelector('video');
-            video.currentTime = video.duration - 0.1;
-            impl.play();
-            // Make sure pause and end are triggered when video ends.
-            const pEnded = listenOncePromise(v, VideoEvents.ENDED);
-            const pPause = listenOncePromise(v, VideoEvents.PAUSE);
-            return Promise.all([pEnded, pPause]);
-          });
       });
+      const impl = v.implementation_;
+      await Promise.resolve();
+      impl.mute();
+      await listenOncePromise(v, VideoEvents.MUTED);
+      impl.play();
+      await listenOncePromise(v, VideoEvents.PLAYING);
+      impl.pause();
+      await listenOncePromise(v, VideoEvents.PAUSE);
+      impl.unmute();
+      await listenOncePromise(v, VideoEvents.UNMUTED);
+      // Should not send the unmute event twice if already sent once.
+      const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
+        assert.fail('Should not have dispatch unmute message twice');
+      });
+      v.querySelector('video').dispatchEvent(new Event('volumechange'));
+      const successTimeout = timer.promise(10);
+      await Promise.race([p, successTimeout]);
+      const video = v.querySelector('video');
+      video.currentTime = video.duration - 0.1;
+      impl.play();
+      // Make sure pause and end are triggered when video ends.
+      const pEnded = listenOncePromise(v, VideoEvents.ENDED);
+      const pPause = listenOncePromise(v, VideoEvents.PAUSE);
+      return Promise.all([pEnded, pPause]);
     });
 
     describe('blurred image placeholder', () => {
@@ -687,18 +649,18 @@ describes.realWin(
       let makeVisible;
       let visiblePromise;
       let video;
-      let viewerMock;
+      let visibilityStubs;
 
       beforeEach(() => {
-        viewerMock = mockServiceForDoc(sandbox, env.ampdoc, 'viewer', [
-          'getVisibilityState',
-          'whenFirstVisible',
-        ]);
-        viewerMock.getVisibilityState.returns(VisibilityState.PRERENDER);
+        visibilityStubs = {
+          getVisibilityState: sandbox.stub(env.ampdoc, 'getVisibilityState'),
+          whenFirstVisible: sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+        };
+        visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
         visiblePromise = new Promise(resolve => {
           makeVisible = resolve;
         });
-        viewerMock.whenFirstVisible.returns(visiblePromise);
+        visibilityStubs.whenFirstVisible.returns(visiblePromise);
       });
 
       describe('should not prerender if no cached sources', () => {
@@ -833,29 +795,28 @@ describes.realWin(
       });
 
       describe.skip('before visible', () => {
-        it('should move cached src to source during prerender', () => {
-          return getVideo({
+        it('should move cached src to source during prerender', async () => {
+          const v = await getVideo({
             'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
             'type': 'video/mp4',
             'amp-orig-src': 'https://example.com/video.mp4',
-          }).then(v => {
-            video = v.querySelector('video');
-            expect(video.hasAttribute('src')).to.be.false;
-            // also make sure removed from amp-video since Stories media-pool
-            // may copy it back from amp-video.
-            expect(v.hasAttribute('src')).to.be.false;
-            expect(v.hasAttribute('type')).to.be.false;
-            const sources = video.querySelectorAll('source');
-            expect(sources.length).to.equal(1);
-            const cachedSource = sources[0];
-            expect(cachedSource.getAttribute('src')).to.equal(
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            expect(cachedSource.getAttribute('type')).to.equal('video/mp4');
           });
+          video = v.querySelector('video');
+          expect(video.hasAttribute('src')).to.be.false;
+          // also make sure removed from amp-video since Stories media-pool
+          // may copy it back from amp-video.
+          expect(v.hasAttribute('src')).to.be.false;
+          expect(v.hasAttribute('type')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(1);
+          const cachedSource = sources[0];
+          expect(cachedSource.getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(cachedSource.getAttribute('type')).to.equal('video/mp4');
         });
 
-        it('should add cached sources to video', () => {
+        it('should add cached sources to video', async () => {
           const s1 = doc.createElement('source');
           s1.setAttribute(
             'src',
@@ -871,25 +832,24 @@ describes.realWin(
           );
           s2.setAttribute('amp-orig-src', 'https://example.com/video2.mp4');
 
-          return getVideo({}, [s1, s2]).then(v => {
-            video = v.querySelector('video');
-            expect(video.hasAttribute('src')).to.be.false;
-            const sources = video.querySelectorAll('source');
-            expect(sources.length).to.equal(2);
-            expect(sources[0].getAttribute('src')).to.equal(
-              'https://example-com.cdn.ampproject.org/m/s/video1.mp4'
-            );
-            expect(sources[0].getAttribute('type')).to.equal('video/mp4');
-            expect(sources[1].getAttribute('src')).to.equal(
-              'https://example-com.cdn.ampproject.org/m/s/video2.mp4'
-            );
-            expect(sources[1].getAttribute('type')).to.be.null;
-            expect(sources[0]).to.equal(s1);
-            expect(sources[1]).to.equal(s2);
-          });
+          const v = await getVideo({}, [s1, s2]);
+          video = v.querySelector('video');
+          expect(video.hasAttribute('src')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(2);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video1.mp4'
+          );
+          expect(sources[0].getAttribute('type')).to.equal('video/mp4');
+          expect(sources[1].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video2.mp4'
+          );
+          expect(sources[1].getAttribute('type')).to.be.null;
+          expect(sources[0]).to.equal(s1);
+          expect(sources[1]).to.equal(s2);
         });
 
-        it('should NOT add non-cached sources to video', () => {
+        it('should NOT add non-cached sources to video', async () => {
           const cached = doc.createElement('source');
           cached.setAttribute(
             'src',
@@ -900,77 +860,69 @@ describes.realWin(
           const noncached = doc.createElement('source');
           noncached.setAttribute('src', 'video.mp4');
 
-          return getVideo({}, [cached, noncached]).then(v => {
-            video = v.querySelector('video');
-            expect(video.hasAttribute('src')).to.be.false;
-            const sources = video.querySelectorAll('source');
-            expect(sources.length).to.equal(1);
-            expect(sources[0].getAttribute('src')).to.equal(
-              'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-            );
-            expect(sources[0]).to.equal(cached);
-          });
+          const v = await getVideo({}, [cached, noncached]);
+          video = v.querySelector('video');
+          expect(video.hasAttribute('src')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(1);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(sources[0]).to.equal(cached);
         });
 
-        it('preload should be set to auto if not specified', () => {
-          return getVideo(
+        it('preload should be set to auto if not specified', async () => {
+          const v = await getVideo(
             {
               'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
               'amp-orig-src': 'https://example.com/video.mp4',
             },
             null
-          ).then(v => {
-            video = v.querySelector('video');
-            expect(video.getAttribute('preload')).to.equal('auto');
-          });
+          );
+          video = v.querySelector('video');
+          expect(video.getAttribute('preload')).to.equal('auto');
         });
 
-        it('preload should not be overwritten if specified', () => {
-          return getVideo(
+        it('preload should not be overwritten if specified', async () => {
+          const v = await getVideo(
             {
               'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
               'amp-orig-src': 'https://example.com/video.mp4',
               'preload': 'none',
             },
             null
-          ).then(v => {
-            video = v.querySelector('video');
-            expect(video.getAttribute('preload')).to.equal('none');
-          });
+          );
+          video = v.querySelector('video');
+          expect(video.getAttribute('preload')).to.equal('none');
         });
       });
 
       describe.skip('after visible', () => {
-        it('should add original source after cache one - single src', () => {
-          let ampVideoElement;
-          return getVideo({
+        it('should add original source after cache one - single src', async () => {
+          const v = await getVideo({
             'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
             'amp-orig-src': 'https://example.com/video.mp4',
-          })
-            .then(v => {
-              ampVideoElement = v;
-              video = v.querySelector('video');
-              makeVisible();
-              return visiblePromise;
-            })
-            .then(() => {
-              expect(video.hasAttribute('src')).to.be.false;
-              // also make sure removed from amp-video since Stories media-pool
-              // may copy it back from amp-video.
-              expect(ampVideoElement.hasAttribute('src')).to.be.false;
-              expect(ampVideoElement.hasAttribute('type')).to.be.false;
-              const sources = video.querySelectorAll('source');
-              expect(sources.length).to.equal(2);
-              expect(sources[0].getAttribute('src')).to.equal(
-                'https://example-com.cdn.ampproject.org/m/s/video.mp4'
-              );
-              expect(sources[1].getAttribute('src')).to.equal(
-                'https://example.com/video.mp4'
-              );
-            });
+          });
+          const ampVideoElement = v;
+          video = v.querySelector('video');
+          makeVisible();
+          visiblePromise;
+          expect(video.hasAttribute('src')).to.be.false;
+          // also make sure removed from amp-video since Stories media-pool
+          // may copy it back from amp-video.
+          expect(ampVideoElement.hasAttribute('src')).to.be.false;
+          expect(ampVideoElement.hasAttribute('type')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(2);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          expect(sources[1].getAttribute('src')).to.equal(
+            'https://example.com/video.mp4'
+          );
         });
 
-        it('should add original source after cache one - multiple source', () => {
+        it('should add original source after cache one - multiple source', async () => {
           const s1 = doc.createElement('source');
           s1.setAttribute(
             'src',
@@ -985,29 +937,25 @@ describes.realWin(
           );
           s2.setAttribute('amp-orig-src', 'https://example.com/video2.mp4');
 
-          return getVideo({}, [s1, s2])
-            .then(v => {
-              video = v.querySelector('video');
-              makeVisible();
-              return visiblePromise;
-            })
-            .then(() => {
-              expect(video.hasAttribute('src')).to.be.false;
-              const sources = video.querySelectorAll('source');
-              expect(sources.length).to.equal(4);
-              expect(sources[0].getAttribute('src')).to.equal(
-                'https://example-com.cdn.ampproject.org/m/s/video1.mp4'
-              );
-              expect(sources[1].getAttribute('src')).to.equal(
-                'https://example.com/video1.mp4'
-              );
-              expect(sources[2].getAttribute('src')).to.equal(
-                'https://example-com.cdn.ampproject.org/m/s/video2.mp4'
-              );
-              expect(sources[3].getAttribute('src')).to.equal(
-                'https://example.com/video2.mp4'
-              );
-            });
+          const v = await getVideo({}, [s1, s2]);
+          video = v.querySelector('video');
+          makeVisible();
+          visiblePromise;
+          expect(video.hasAttribute('src')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(4);
+          expect(sources[0].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video1.mp4'
+          );
+          expect(sources[1].getAttribute('src')).to.equal(
+            'https://example.com/video1.mp4'
+          );
+          expect(sources[2].getAttribute('src')).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video2.mp4'
+          );
+          expect(sources[3].getAttribute('src')).to.equal(
+            'https://example.com/video2.mp4'
+          );
         });
       });
 

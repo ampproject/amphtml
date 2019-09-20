@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {getMode} from '../../../src/mode';
+import {jsonConfiguration} from '../../../src/json';
 
 //////////////////////////////////////////////////////////////////
 //                                                              //
@@ -36,7 +37,7 @@ import {getMode} from '../../../src/mode';
 let RtcVendorDef;
 
 /** @const {!Object<string, RtcVendorDef>} */
-export const RTC_VENDORS = {
+const RTC_VENDORS = jsonConfiguration({
   ////////////////////////////////////////////////////////////////////
   //                                                                //
   //              !!!      IMPORTANT NOTE     !!!                   //
@@ -114,13 +115,21 @@ export const RTC_VENDORS = {
   },
   criteo: {
     url:
-      'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF',
-    macros: ['ZONE_ID', 'NETWORK_ID', 'PUBLISHER_SUB_ID', 'LINE_ITEM_RANGES'],
+      'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF&cst=CONSENT_STATE&cst_str=CONSENT_STRING',
+    macros: [
+      'ZONE_ID',
+      'NETWORK_ID',
+      'PUBLISHER_SUB_ID',
+      'LINE_ITEM_RANGES',
+      'CONSENT_STATE',
+      'CONSENT_STRING',
+    ],
     disableKeyAppend: true,
   },
   navegg: {
-    url: 'https://amp.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
+    url: 'https://usr.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
     macros: ['NVG_ACC'],
+    disableKeyAppend: true,
   },
   sonobi: {
     url:
@@ -141,7 +150,7 @@ export const RTC_VENDORS = {
     macros: ['ADSLOT_ID'],
     disableKeyAppend: true,
   },
-};
+});
 
 // DO NOT MODIFY: Setup for tests
 if (getMode().localDev || getMode().test) {
@@ -157,3 +166,5 @@ if (getMode().localDev || getMode().test) {
     disableKeyAppend: true,
   });
 }
+
+export {RTC_VENDORS};

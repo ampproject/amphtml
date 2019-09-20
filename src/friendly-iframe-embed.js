@@ -40,7 +40,7 @@ import {getExperimentBranch, isExperimentOn} from './experiments';
 import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
+import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
@@ -56,14 +56,7 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
-
-/** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD = [
-  'AMP-AD',
-  'AMP-ANALYTICS',
-  'AMP-PIXEL',
-  'AMP-AD-EXIT',
-];
+import {whenContentIniLoad} from './ini-load';
 
 /**
  * @const {{experiment: string, control: string, branch: string}}
@@ -159,6 +152,8 @@ export function installFriendlyIframeEmbed(
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
+  iframe.setAttribute('marginheight', '0');
+  iframe.setAttribute('marginwidth', '0');
 
   // Pre-load extensions.
   if (spec.extensionIds) {
@@ -420,7 +415,7 @@ export class FriendlyIframeEmbed {
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    this.removeResources_();
     disposeServicesForEmbed(this.win);
     if (this.ampdoc) {
       this.ampdoc.dispose();
@@ -559,7 +554,7 @@ export class FriendlyIframeEmbed {
   }
 
   /**
-   * @return {!./service/resources-impl.ResourcesDef}
+   * @return {!./service/resources-interface.ResourcesInterface}
    * @private
    */
   getResources_() {
@@ -579,6 +574,21 @@ export class FriendlyIframeEmbed {
       task.measure || null,
       task.mutate
     );
+  }
+
+  /**
+   * Removes all resources belonging to the FIE window.
+   * @private
+   */
+  removeResources_() {
+    const resources = this.getResources_();
+    const toRemove = resources
+      .get()
+      .filter(resource => resource.hostWin == this.win);
+    toRemove.forEach(resource => {
+      resources.remove(resource.element);
+      resource.disconnect();
+    });
   }
 
   /**
@@ -840,41 +850,16 @@ export class FriendlyIframeEmbed {
 }
 
 /**
- * Returns the promise that will be resolved when all content elements
- * have been loaded in the initially visible set.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
- * @param {!Window} hostWin
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!Promise}
- */
-export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
-  return Services.resourcesForDoc(elementOrAmpDoc)
-    .getResourcesInRect(hostWin, rect)
-    .then(resources => {
-      const promises = [];
-      resources.forEach(r => {
-        if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
-          promises.push(r.loadedOnce());
-        }
-      });
-      return Promise.all(promises);
-    });
-}
-
-/**
  * Install polyfills in the child window (friendly iframe).
  * @param {!Window} parentWin
  * @param {!Window} childWin
- * @suppress {suspiciousCode}
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
-  installDOMTokenListToggle(childWin);
-  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
-  // is DCE'd from production builds. Note: When the hack is removed, remove the
-  // @suppress {suspiciousCode} annotation at the top of this function.
+  installDOMTokenList(childWin);
   if (
-    (false && isExperimentOn(parentWin, 'custom-elements-v1')) ||
+    // eslint-disable-next-line no-undef
+    CUSTOM_ELEMENTS_V1 ||
     getMode().test
   ) {
     installCustomElements(childWin);

@@ -16,8 +16,9 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {LayoutPriority} from '../../src/layout';
+import {OwnersImpl} from '../../src/service/owners-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
-import {Resources} from '../../src/service/resources-impl';
+import {ResourcesImpl} from '../../src/service/resources-impl';
 import {Services} from '../../src/services';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
@@ -44,9 +45,9 @@ describes.realWin('Resource', {amp: true}, env => {
     const viewer = Services.viewerForDoc(doc);
     sandbox.stub(viewer, 'isRuntimeOn').callsFake(() => false);
     sandbox
-      .stub(Resources.prototype, 'rebuildDomWhenReady_')
+      .stub(ResourcesImpl.prototype, 'rebuildDomWhenReady_')
       .callsFake(() => {});
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resource = new Resource(1, element, resources);
 
     const vsync = Services.vsyncFor(win);
@@ -142,7 +143,7 @@ describes.realWin('Resource', {amp: true}, env => {
     );
   });
 
-  it('should mark as ready for layout if already measured', () => {
+  it('should mark as not ready for layout even if already measured', () => {
     const box = layoutRectLtwh(0, 0, 100, 200);
     elementMock
       .expects('isUpgraded')
@@ -152,15 +153,9 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('build')
       .returns(Promise.resolve())
       .once();
-    elementMock
-      .expects('updateLayoutBox')
-      .withExactArgs(box, true)
-      .once();
-    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.layoutBox_ = box;
     return resource.build().then(() => {
-      expect(stub).to.be.calledOnce;
-      expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
   });
 
@@ -173,9 +168,7 @@ describes.realWin('Resource', {amp: true}, env => {
       .expects('build')
       .returns(Promise.resolve())
       .once();
-    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(false);
     return resource.build().then(() => {
-      expect(stub.calledOnce).to.be.true;
       expect(resource.getState()).to.equal(ResourceState.NOT_LAID_OUT);
     });
   });
@@ -871,6 +864,7 @@ describes.realWin('Resource', {amp: true}, env => {
   describe('Resource set/get ownership', () => {
     let child;
     let parentResource;
+    let owners;
     let resources;
     let grandChild;
     beforeEach(() => {
@@ -906,12 +900,14 @@ describes.realWin('Resource', {amp: true}, env => {
       child.getElementsByClassName = () => {
         return [grandChild];
       };
-      resources = new Resources(new AmpDocSingle(window));
+      const ampdoc = new AmpDocSingle(window);
+      resources = new ResourcesImpl(ampdoc);
+      owners = new OwnersImpl(ampdoc);
       parentResource = new Resource(1, parent, resources);
     });
 
     it('should set resource before Resource created for child element', () => {
-      resources.setOwner(child, parentResource.element);
+      owners.setOwner(child, parentResource.element);
       const childResource = new Resource(1, child, resources);
       expect(childResource.getOwner()).to.equal(parentResource.element);
     });
@@ -919,7 +915,7 @@ describes.realWin('Resource', {amp: true}, env => {
     it('should always get the lastest owner value', () => {
       const childResource = new Resource(1, child, resources);
       expect(childResource.getOwner()).to.be.null;
-      resources.setOwner(childResource.element, parentResource.element);
+      owners.setOwner(childResource.element, parentResource.element);
       expect(childResource.owner_).to.equal(parentResource.element);
       expect(childResource.getOwner()).to.equal(parentResource.element);
     });
@@ -928,7 +924,7 @@ describes.realWin('Resource', {amp: true}, env => {
       const childResource = new Resource(1, child, resources);
       const grandChildResource = new Resource(1, grandChild, resources);
       expect(grandChildResource.getOwner()).to.be.null;
-      resources.setOwner(childResource.element, parentResource.element);
+      owners.setOwner(childResource.element, parentResource.element);
       expect(childResource.getOwner()).to.equal(parentResource.element);
       expect(grandChildResource.getOwner()).to.equal(parentResource.element);
     });
@@ -936,9 +932,9 @@ describes.realWin('Resource', {amp: true}, env => {
     it('should not change owner if it is set via setOwner', () => {
       const childResource = new Resource(1, child, resources);
       const grandChildResource = new Resource(1, grandChild, resources);
-      resources.setOwner(grandChildResource.element, parentResource.element);
+      owners.setOwner(grandChildResource.element, parentResource.element);
       expect(grandChildResource.getOwner()).to.equal(parentResource.element);
-      resources.setOwner(childResource.element, parentResource.element);
+      owners.setOwner(childResource.element, parentResource.element);
       expect(grandChildResource.getOwner()).to.equal(parentResource.element);
     });
   });
@@ -1182,7 +1178,7 @@ describe('Resource idleRenderOutsideViewport', () => {
       viewportCallback: () => {},
       getLayoutPriority: () => LayoutPriority.CONTENT,
     };
-    resources = new Resources(new AmpDocSingle(window));
+    resources = new ResourcesImpl(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     isWithinViewportRatio = sandbox.stub(resource, 'isWithinViewportRatio');
   });
@@ -1219,7 +1215,7 @@ describes.realWin('Resource renderOutsideViewport', {amp: true}, env => {
     element = env.createAmpElement('amp-ad');
     env.win.document.body.appendChild(element);
 
-    resources = new Resources(env.ampdoc);
+    resources = new ResourcesImpl(env.ampdoc);
     resource = new Resource(1, element, resources);
     viewport = Services.viewportForDoc(env.ampdoc);
     renderOutsideViewport = sandbox.stub(element, 'renderOutsideViewport');

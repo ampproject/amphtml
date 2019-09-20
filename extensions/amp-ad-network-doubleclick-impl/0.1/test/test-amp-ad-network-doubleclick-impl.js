@@ -390,8 +390,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         });
         expect(impl.element.style[`margin${dirStr}`]).to.equal(testCase.margin);
-        // We use a fixed '30' value for z-index.
-        expect(impl.element.style.zIndex).to.equal('30');
+        // We use a fixed '11' value for z-index.
+        expect(impl.element.style.zIndex).to.equal('11');
       });
     });
   });
@@ -624,6 +624,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('returns the right URL', () => {
+      const viewer = Services.viewerForDoc(element);
+      // inabox-viewer.getReferrerUrl() returns Promise<string>.
+      sandbox
+        .stub(viewer, 'getReferrerUrl')
+        .returns(Promise.resolve('http://fake.example/?foo=bar'));
+
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       const impl2 = new AmpAdNetworkDoubleclickImpl(element);
       impl.setPageviewStateToken('abc');
@@ -664,7 +670,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)eid=([^&]+%2C)*12345678(%2C[^&]+)*(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
-          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
+          /(\?|&)ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/,
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
           /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
@@ -949,37 +955,37 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
       }));
 
-    it('should include msz/psz/fws if in experiment', () => {
-      sandbox
-        .stub(impl, 'randomlySelectUnsetExperiments_')
-        .returns({flexAdSlots: '21063174'});
-      impl.setPageLevelExperiments();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
-        expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
-        expect(url).to.match(/(\?|&)fws=[0-9]+(&|$)/);
-        expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
-      });
-    });
-
-    it('should not include msz/psz if not in flexAdSlots control', () => {
+    it('should include msz/psz/fws if in holdback control', () => {
       sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')
         .returns({flexAdSlots: '21063173'});
       impl.setPageLevelExperiments();
       return impl.getAdUrl().then(url => {
-        expect(url).to.not.match(/(\?|&)msz=/);
-        expect(url).to.not.match(/(\?|&)psz=/);
-        expect(url).to.not.match(/(\?|&)fws=/);
+        expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)fws=[0-9]+(&|$)/);
         expect(url).to.match(/(=|%2C)21063173(%2C|&|$)/);
       });
     });
 
-    it('should not include msz/psz if not in flexAdSlots experiment', () => {
+    it('should not include msz/psz if not in holdback experiment', () => {
+      sandbox
+        .stub(impl, 'randomlySelectUnsetExperiments_')
+        .returns({flexAdSlots: '21063174'});
+      impl.setPageLevelExperiments();
       return impl.getAdUrl().then(url => {
         expect(url).to.not.match(/(\?|&)msz=/);
         expect(url).to.not.match(/(\?|&)psz=/);
         expect(url).to.not.match(/(\?|&)fws=/);
+        expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
+      });
+    });
+
+    it('should include msz/psz by default', () => {
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)fws=[0-9]+(&|$)/);
         expect(url).to.not.match(/(=|%2C)2106317(3|4)(%2C|&|$)/);
       });
     });
@@ -1733,26 +1739,12 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        sandbox.stub(impl, 'getAmpDoc').returns({});
-        sandbox
-          .stub(Services, 'viewerForDoc')
-          .returns({whenFirstVisible: () => new Deferred().promise});
+        sandbox.stub(impl, 'getAmpDoc').returns({
+          whenFirstVisible: () => new Deferred().promise,
+        });
       });
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
-      });
-
-      it('should set invalid origin fix experiment if on canonical', () => {
-        randomlySelectUnsetExperimentsStub.returns({});
-        impl.setPageLevelExperiments();
-        expect(impl.experimentIds.includes('21060933')).to.be.true;
-      });
-
-      it('should not set invalid origin fix if exp on', () => {
-        toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
-        randomlySelectUnsetExperimentsStub.returns({});
-        impl.setPageLevelExperiments();
-        expect(impl.experimentIds.includes('21060933')).to.be.true;
       });
 
       it('should select SRA experiments', () => {

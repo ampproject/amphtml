@@ -41,8 +41,11 @@ import {
 } from '../../../src/batched-json';
 import {
   childElementByAttr,
+  matches,
   removeChildren,
   scopedQuerySelector,
+  scopedQuerySelectorAll,
+  tryFocus,
 } from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
@@ -63,6 +66,10 @@ import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const TAG = 'amp-list';
+
+/** @const {string} */
+const TABBABLE_ELEMENTS_QUERY =
+  'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"]), audio[controls], video[controls], [contenteditable]:not([contenteditable="false"])';
 
 /**
  * @typedef {{
@@ -87,7 +94,7 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */
@@ -249,6 +256,8 @@ export class AmpList extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     if (placeholder) {
       this.attemptToFit_(placeholder);
+    } else if (this.hasInitialContent_) {
+      this.attemptToFit_(dev().assertElement(this.container_));
     }
 
     this.viewport_.onResize(() => {
@@ -279,12 +288,14 @@ export class AmpList extends AMP.BaseElement {
       listen(
         this.getLoadMoreService_().getLoadMoreFailedClickable(),
         'click',
-        () => this.loadMoreCallback_(/*opt_reload*/ true)
+        () =>
+          this.loadMoreCallback_(/*opt_reload*/ true, /*opt_fromClick*/ true)
       );
       listen(
         this.getLoadMoreService_().getLoadMoreButtonClickable(),
         'click',
-        () => this.loadMoreCallback_()
+        () =>
+          this.loadMoreCallback_(/*opt_reload*/ false, /*opt_fromClick*/ true)
       );
     });
   }
@@ -421,6 +432,12 @@ export class AmpList extends AMP.BaseElement {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');
       }
+      if (
+        !element.hasAttribute('tabindex') &&
+        !this.isTabbable_(dev().assertElement(element))
+      ) {
+        element.setAttribute('tabindex', '0');
+      }
       container.appendChild(element);
     });
   }
@@ -471,6 +488,9 @@ export class AmpList extends AMP.BaseElement {
           });
         }
         removeChildren(dev().assertElement(this.container_));
+        if (this.loadMoreEnabled_) {
+          this.getLoadMoreService_().hideAllLoadMoreElements();
+        }
       });
     }
   }
@@ -1099,10 +1119,11 @@ export class AmpList extends AMP.BaseElement {
    * manually on clicking the load-more-button element. Sets the amp-list
    * src to the bookmarked src and fetches data from it.
    * @param {boolean=} opt_reload
+   * @param {boolean=} opt_fromClick
    * @return {!Promise}
    * @private
    */
-  loadMoreCallback_(opt_reload = false) {
+  loadMoreCallback_(opt_reload = false, opt_fromClick = false) {
     if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
       // Clear url to avoid repeated fetches from same url
@@ -1111,6 +1132,8 @@ export class AmpList extends AMP.BaseElement {
       // Nothing more to load or previous fetch still inflight
       return Promise.resolve();
     }
+    const container = dev().assertElement(this.container_);
+    const lastTabbableChild = this.lastTabbableChild_(container);
     this.mutateElement(() => {
       this.getLoadMoreService_().toggleLoadMoreLoading(true);
     });
@@ -1119,6 +1142,9 @@ export class AmpList extends AMP.BaseElement {
         return this.mutateElement(() => {
           if (this.loadMoreSrc_) {
             this.getLoadMoreService_().toggleLoadMoreLoading(false);
+            if (lastTabbableChild && opt_fromClick) {
+              tryFocus(lastTabbableChild);
+            }
           } else {
             this.getLoadMoreService_().setLoadMoreEnded();
           }
@@ -1256,6 +1282,42 @@ export class AmpList extends AMP.BaseElement {
     } else {
       throw error;
     }
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {?Element}
+   * @private
+   */
+  lastTabbableChild_(element) {
+    const allTabbableChildren = scopedQuerySelectorAll(
+      element,
+      TABBABLE_ELEMENTS_QUERY
+    );
+    return allTabbableChildren
+      ? allTabbableChildren[allTabbableChildren.length - 1]
+      : null;
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {?Element}
+   * @private
+   */
+  firstTabbableChild_(element) {
+    return scopedQuerySelector(element, TABBABLE_ELEMENTS_QUERY);
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  isTabbable_(element) {
+    return (
+      matches(element, TABBABLE_ELEMENTS_QUERY) ||
+      !!this.firstTabbableChild_(element)
+    );
   }
 }
 

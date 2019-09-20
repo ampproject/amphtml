@@ -183,13 +183,12 @@ describes.realWin(
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())
         .then(variantsService => variantsService.getVariants())
         .then(variants => {
+          expect(applyStub).to.be.calledOnce;
           expect(variants).to.jsonEqual({
             'experiment-1': 'variant-a',
             'experiment-2': 'variant-d',
             'experiment-3': null,
           });
-
-          expect(applyStub).to.be.calledOnce;
         });
     });
 
@@ -204,9 +203,7 @@ describes.realWin(
           .stub(applyExperiment, 'applyExperimentToVariant')
           .returns(Promise.resolve());
 
-        sandbox.stub(Services, 'viewerForDoc').returns({
-          getParam: () => true,
-        });
+        sandbox.stub(ampdoc, 'getParam').returns('true');
 
         experiment.buildCallback();
         return Services.variantsForDocOrNull(ampdoc.getHeadNode())

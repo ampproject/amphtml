@@ -177,7 +177,7 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /**
@@ -192,7 +192,7 @@ export class Bind {
     /** @private {?./bind-validator.BindValidator} */
     this.validator_ = null;
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
@@ -200,7 +200,7 @@ export class Bind {
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = this.viewer_
+    this.initializePromise_ = ampdoc
       .whenFirstVisible()
       .then(() => {
         if (opt_win) {
@@ -1355,6 +1355,11 @@ export class Bind {
             // when a child option[selected] attribute changes.
             this.updateSelectForSafari_(element, property, newValue);
           }
+        } else if (typeof newValue === 'object' && newValue !== null) {
+          // If newValue is an object or array (e.g. amp-list[src] binding),
+          // don't bother updating the element since attribute values like
+          // "[Object object]" have no meaning in the DOM.
+          mutated = true;
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
             element,

@@ -19,12 +19,16 @@ import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingIosEmbedShadowRoot_} from './viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
+import {ViewportInterface} from './viewport-interface';
 import {VisibilityState} from '../../visibility-state';
 import {clamp} from '../../utils/math';
-import {closestAncestorElementBySelector, isIframed} from '../../dom';
+import {
+  closestAncestorElementBySelector,
+  getVerticalScrollbarWidth,
+  isIframed,
+} from '../../dom';
 import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
@@ -34,7 +38,6 @@ import {
   getParentWindowFrameElement,
   registerServiceBuilderForDoc,
 } from '../../service';
-import {installLayersServiceForDoc} from '../layers-impl';
 import {isExperimentOn} from '../../experiments';
 import {
   layoutRectFromDomRect,
@@ -47,37 +50,17 @@ import {tryResolve} from '../../utils/promise';
 const TAG_ = 'Viewport';
 
 /**
- * @typedef {{
- *   relayoutAll: boolean,
- *   top: number,
- *   left: number,
- *   width: number,
- *   height: number,
- *   velocity: number
- * }}
- */
-export let ViewportChangedEventDef;
-
-/**
- * @typedef {{
- *   relayoutAll: boolean,
- *   width: number,
- *   height: number
- * }}
- */
-export let ViewportResizedEventDef;
-
-/**
  * This object represents the viewport. It tracks scroll position, resize
  * and other events and notifies interesting parties when viewport has changed
  * and how.
- * @implements {../../service.Disposable}
+ *
+ * @implements {ViewportInterface}
  */
-export class Viewport {
+export class ViewportImpl {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    * @param {!ViewportBindingDef} binding
-   * @param {!../viewer-impl.Viewer} viewer
+   * @param {!../viewer-interface.ViewerInterface} viewer
    */
   constructor(ampdoc, binding, viewer) {
     const {win} = ampdoc;
@@ -94,7 +77,7 @@ export class Viewport {
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
 
-    /** @const {!../viewer-impl.Viewer} */
+    /** @const {!../viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
 
     /**
@@ -138,13 +121,13 @@ export class Viewport {
     /** @private {number} */
     this.scrollCount_ = 0;
 
-    /** @private @const {!Observable<!ViewportChangedEventDef>} */
+    /** @private @const {!Observable<!./viewport-interface.ViewportChangedEventDef>} */
     this.changeObservable_ = new Observable();
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
-    /** @private @const {!Observable} */
+    /** @private @const {!Observable<!./viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
     /** @private {?Element|undefined} */
@@ -152,16 +135,6 @@ export class Viewport {
 
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
-
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(win, 'layers');
-    if (this.useLayers_) {
-      installLayersServiceForDoc(
-        ampdoc,
-        this.binding_.getScrollingElement(),
-        this.binding_.getScrollingElementScrollsLikeViewport()
-      );
-    }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
@@ -188,7 +161,7 @@ export class Viewport {
 
     /** @private {boolean} */
     this.visible_ = false;
-    this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
+    this.ampdoc.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
     // Top-level mode classes.
@@ -235,17 +208,14 @@ export class Viewport {
     this.binding_.disconnect();
   }
 
-  /**
-   * Called before a first AMP element is added to resources. Called in the
-   * mutate context.
-   */
+  /** @override */
   ensureReadyForElements() {
     this.binding_.ensureReadyForElements();
   }
 
   /** @private */
   updateVisibility_() {
-    const visible = this.viewer_.isVisible();
+    const visible = this.ampdoc.isVisible();
     if (visible != this.visible_) {
       this.visible_ = visible;
       if (visible) {
@@ -261,28 +231,12 @@ export class Viewport {
     }
   }
 
-  /**
-   * Returns the top padding mandated by the viewer.
-   * @return {number}
-   */
+  /** @override */
   getPaddingTop() {
     return this.paddingTop_;
   }
 
-  /**
-   * Returns the viewport's top position in the document. This is essentially
-   * the scroll position.
-   * @return {number}
-   * @deprecated Use {@link getScrollTop}
-   */
-  getTop() {
-    return this.getScrollTop();
-  }
-
-  /**
-   * Returns the viewport's vertical scroll position.
-   * @return {number}
-   */
+  /** @override */
   getScrollTop() {
     if (this./*OK*/ scrollTop_ == null) {
       this./*OK*/ scrollTop_ = this.binding_.getScrollTop();
@@ -290,10 +244,7 @@ export class Viewport {
     return this./*OK*/ scrollTop_;
   }
 
-  /**
-   * Returns the viewport's horizontal scroll position.
-   * @return {number}
-   */
+  /** @override */
   getScrollLeft() {
     if (this./*OK*/ scrollLeft_ == null) {
       this./*OK*/ scrollLeft_ = this.binding_.getScrollLeft();
@@ -301,41 +252,20 @@ export class Viewport {
     return this./*OK*/ scrollLeft_;
   }
 
-  /**
-   * Sets the desired scroll position on the viewport.
-   * @param {number} scrollPos
-   */
+  /** @override */
   setScrollTop(scrollPos) {
     this./*OK*/ scrollTop_ = null;
     this.binding_.setScrollTop(scrollPos);
   }
 
-  /**
-   * @return {number} The width of the vertical scrollbar, in pixels.
-   */
-  getVerticalScrollbarWidth() {
-    const {win} = this.ampdoc;
-    const {documentElement} = win.document;
-    const windowWidth = win./*OK*/ innerWidth;
-    const documentWidth = documentElement./*OK*/ clientWidth;
-
-    return windowWidth - documentWidth;
-  }
-
-  /**
-   * Sets the body padding bottom to the specified value.
-   * @param {number} paddingBottom
-   */
+  /** @override */
   updatePaddingBottom(paddingBottom) {
     this.ampdoc.waitForBodyOpen().then(body => {
       setStyle(body, 'borderBottom', `${paddingBottom}px solid transparent`);
     });
   }
 
-  /**
-   * Returns the size of the viewport.
-   * @return {!{width: number, height: number}}
-   */
+  /** @override */
   getSize() {
     if (this.size_) {
       return this.size_;
@@ -343,7 +273,7 @@ export class Viewport {
     this.size_ = this.binding_.getSize();
     if (this.size_.width == 0 || this.size_.height == 0) {
       // Only report when the visibility is "visible" or "prerender".
-      const visibilityState = this.viewer_.getVisibilityState();
+      const visibilityState = this.ampdoc.getVisibilityState();
       if (
         visibilityState == VisibilityState.PRERENDER ||
         visibilityState == VisibilityState.VISIBLE
@@ -356,79 +286,41 @@ export class Viewport {
     return this.size_;
   }
 
-  /**
-   * Returns the height of the viewport.
-   * @return {number}
-   */
+  /** @override */
   getHeight() {
     return this.getSize().height;
   }
 
-  /**
-   * Returns the width of the viewport.
-   * @return {number}
-   */
+  /** @override */
   getWidth() {
     return this.getSize().width;
   }
 
-  /**
-   * Returns the scroll width of the content of the document. Note that this
-   * method is not cached since we there's no indication when it might change.
-   * @return {number}
-   */
+  /** @override */
   getScrollWidth() {
     return this.binding_.getScrollWidth();
   }
 
-  /**
-   * Returns the scroll height of the content of the document, including the
-   * padding top for the viewer header.
-   * The scrollHeight will be the viewport height if there's not enough content
-   * to fill up the viewport.
-   * Note that this method is not cached since we there's no indication when
-   * it might change.
-   * @return {number}
-   */
+  /** @override */
   getScrollHeight() {
     return this.binding_.getScrollHeight();
   }
 
-  /**
-   * Returns the height of the content of the document, including the
-   * padding top for the viewer header.
-   * contentHeight will match scrollHeight in all cases unless the viewport is
-   * taller than the content.
-   * Note that this method is not cached since we there's no indication when
-   * it might change.
-   * @return {number}
-   */
+  /** @override */
   getContentHeight() {
     return this.binding_.getContentHeight();
   }
 
-  /**
-   * Resource manager signals to the viewport that content height is changed
-   * and some action may need to be taken.
-   * @restricted Use is restricted due to potentially very heavy performance
-   *   impact. Can only be called when not actively scrolling.
-   */
+  /** @override */
   contentHeightChanged() {
     this.binding_.contentHeightChanged();
   }
 
-  /**
-   * Returns the rect of the viewport which includes scroll positions and size.
-   * @return {!../../layout-rect.LayoutRectDef}}
-   */
+  /** @override */
   getRect() {
     if (this.rect_ == null) {
-      let scrollTop = 0;
-      let scrollLeft = 0;
-      if (!this.useLayers_) {
-        scrollTop = this.getScrollTop();
-        scrollLeft = this.getScrollLeft();
-      }
+      const scrollTop = this.getScrollTop();
+      const scrollLeft = this.getScrollLeft();
       const size = this.getSize();
       this.rect_ = layoutRectLtwh(
         scrollLeft,
@@ -440,13 +332,7 @@ export class Viewport {
     return this.rect_;
   }
 
-  /**
-   * Returns the rect of the element within the document.
-   * Note that this function should be called in vsync measure. Please consider
-   * using `getLayoutRectAsync` instead.
-   * @param {!Element} el
-   * @return {!../../layout-rect.LayoutRectDef}
-   */
+  /** @override */
   getLayoutRect(el) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
@@ -471,20 +357,8 @@ export class Viewport {
     return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
-  /**
-   * Returns the clientRect of the element.
-   * Note: This method does not taking intersection into account.
-   * TODO(@zhouyx): We may need to return info on the intersectionRect.
-   * @param {!Element} el
-   * @return {!Promise<!../../layout-rect.LayoutRectDef>}
-   */
+  /** @override */
   getClientRectAsync(el) {
-    if (this.useLayers_) {
-      return this.vsync_.measurePromise(() => {
-        return this.getLayoutRect(el);
-      });
-    }
-
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/ getBoundingClientRect();
     });
@@ -507,30 +381,17 @@ export class Viewport {
     });
   }
 
-  /**
-   * Whether the binding supports fix-positioned elements.
-   * @return {boolean}
-   */
+  /** @override */
   supportsPositionFixed() {
     return this.binding_.supportsPositionFixed();
   }
 
-  /**
-   * Whether the element is declared as fixed in any of the user's stylesheets.
-   * Will include any matches, not necessarily currently fixed elements.
-   * @param {!Element} element
-   * @return {boolean}
-   */
+  /** @override */
   isDeclaredFixed(element) {
     return this.fixedLayer_.isDeclaredFixed(element);
   }
 
-  /**
-   * Scrolls element into view much like Element. scrollIntoView does but
-   * in the AMP/Viewer environment.
-   * @param {!Element} element
-   * @return {!Promise}
-   */
+  /** @override */
   scrollIntoView(element) {
     return this.getScrollingContainerFor_(element).then(parent =>
       this.scrollIntoViewInternal_(element, parent)
@@ -543,29 +404,16 @@ export class Viewport {
    */
   scrollIntoViewInternal_(element, parent) {
     const elementTop = this.binding_.getLayoutRect(element).top;
-
-    const newScrollTopPromise = this.useLayers_
-      ? this.getElementScrollTop_(parent).then(
-          scrollTop => elementTop + scrollTop
-        )
-      : tryResolve(() => Math.max(0, elementTop - this.paddingTop_));
+    const newScrollTopPromise = tryResolve(() =>
+      Math.max(0, elementTop - this.paddingTop_)
+    );
 
     newScrollTopPromise.then(newScrollTop =>
       this.setElementScrollTop_(parent, newScrollTop)
     );
   }
 
-  /**
-   * Scrolls element into view much like Element. scrollIntoView does but
-   * in the AMP/Viewer environment. Adds animation for the sccrollIntoView
-   * transition.
-   *
-   * @param {!Element} element
-   * @param {string=} pos (takes one of 'top', 'bottom', 'center')
-   * @param {number=} opt_duration
-   * @param {string=} opt_curve
-   * @return {!Promise}
-   */
+  /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
     devAssert(
       !opt_curve || opt_duration !== undefined,
@@ -583,14 +431,7 @@ export class Viewport {
     );
   }
 
-  /**
-   * @param {!Element} element
-   * @param {!Element} parent Should be scrollable.
-   * @param {string} pos (takes one of 'top', 'bottom', 'center')
-   * @param {number=} opt_duration
-   * @param {string=} opt_curve
-   * @return {!Promise}
-   */
+  /** @override */
   animateScrollWithinParent(element, parent, pos, opt_duration, opt_curve) {
     devAssert(
       !opt_curve || opt_duration !== undefined,
@@ -617,13 +458,8 @@ export class Viewport {
     }
 
     return this.getElementScrollTop_(parent).then(curScrollTop => {
-      let newScrollTop;
-      if (this.useLayers_) {
-        newScrollTop = Math.max(0, elementRect.top + offset + curScrollTop);
-      } else {
-        const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-        newScrollTop = Math.max(0, calculatedScrollTop);
-      }
+      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+      const newScrollTop = Math.max(0, calculatedScrollTop);
       if (newScrollTop == curScrollTop) {
         return;
       }
@@ -716,58 +552,27 @@ export class Viewport {
     return element == this.binding_.getScrollingElement();
   }
 
-  /**
-   * @return {!Element}
-   */
+  /** @override */
   getScrollingElement() {
     return this.binding_.getScrollingElement();
   }
 
-  /**
-   * Registers the handler for ViewportChangedEventDef events.
-   * @param {function(!ViewportChangedEventDef)} handler
-   * @return {!UnlistenDef}
-   */
+  /** @override */
   onChanged(handler) {
     return this.changeObservable_.add(handler);
   }
 
-  /**
-   * Registers the handler for scroll events. These events DO NOT contain
-   * scrolling offset and it's discouraged to read scrolling offset in the
-   * event handler. The primary use case for this handler is to inform that
-   * scrolling might be going on. To get more information {@link onChanged}
-   * handler should be used.
-   * @param {function()} handler
-   * @return {!UnlistenDef}
-   */
+  /** @override */
   onScroll(handler) {
     return this.scrollObservable_.add(handler);
   }
 
-  /**
-   * Registers the handler for ViewportResizedEventDef events.
-   *
-   * Note that there is a known bug in Webkit that causes window.innerWidth
-   * and window.innerHeight values to be incorrect after resize. A temporary
-   * fix is to add a 500 ms delay before computing these values.
-   * Link: https://bugs.webkit.org/show_bug.cgi?id=170595
-   *
-   * @param {function(!ViewportResizedEventDef)} handler
-   * @return {!UnlistenDef}
-   */
+  /** @override */
   onResize(handler) {
     return this.resizeObservable_.add(handler);
   }
 
-  /**
-   * Instruct the viewport to enter lightbox mode.
-   * @param {!Element=} opt_requestingElement Must be provided to be able to
-   *     enter lightbox mode under FIE cases.
-   * @param {!Promise=} opt_onComplete Optional promise that's resolved when
-   *     the caller finishes opening the lightbox e.g. transition animations.
-   * @return {!Promise}
-   */
+  /** @override */
   enterLightboxMode(opt_requestingElement, opt_onComplete) {
     this.viewer_.sendMessage(
       'requestFullOverlay',
@@ -787,12 +592,7 @@ export class Viewport {
     return this.binding_.updateLightboxMode(true);
   }
 
-  /**
-   * Instruct the viewport to leave lightbox mode.
-   * @param {!Element=} opt_requestingElement Must be provided to be able to
-   *     enter lightbox mode under FIE cases.
-   * @return {!Promise}
-   */
+  /** @override */
   leaveLightboxMode(opt_requestingElement) {
     this.viewer_.sendMessage(
       'cancelFullOverlay',
@@ -873,26 +673,19 @@ export class Viewport {
     );
   }
 
-  /**
-   * Instruct the viewport to enter overlay mode.
-   */
+  /** @override */
   enterOverlayMode() {
     this.disableTouchZoom();
     this.disableScroll();
   }
 
-  /**
-   * Instruct the viewport to leave overlay mode.
-   */
+  /** @override */
   leaveOverlayMode() {
     this.resetScroll();
     this.restoreOriginalTouchZoom();
   }
 
-  /**
-   * Disable the scrolling by setting overflow: hidden.
-   * Should only be used for temporarily disabling scroll.
-   */
+  /** @override */
   disableScroll() {
     const {win} = this.ampdoc;
     const {documentElement} = win.document;
@@ -903,7 +696,7 @@ export class Viewport {
     // platforms that have a width-taking scrollbar.
     this.vsync_.measure(() => {
       const existingMargin = computedStyle(win, documentElement).marginRight;
-      const scrollbarWidth = this.getVerticalScrollbarWidth();
+      const scrollbarWidth = getVerticalScrollbarWidth(this.ampdoc.win);
 
       requestedMarginRight = parseInt(existingMargin, 10) + scrollbarWidth;
     });
@@ -914,9 +707,7 @@ export class Viewport {
     });
   }
 
-  /**
-   * Reset the scrolling by removing overflow: hidden.
-   */
+  /** @override */
   resetScroll() {
     const {win} = this.ampdoc;
     const {documentElement} = win.document;
@@ -927,9 +718,7 @@ export class Viewport {
     });
   }
 
-  /**
-   * Resets touch zoom to initial scale of 1.
-   */
+  /** @override */
   resetTouchZoom() {
     const windowHeight = this.ampdoc.win./*OK*/ innerHeight;
     const documentHeight = this.globalDoc_.documentElement./*OK*/ clientHeight;
@@ -946,11 +735,7 @@ export class Viewport {
     }
   }
 
-  /**
-   * Disables touch zoom on this viewport. Returns `true` if any actual
-   * changes have been done.
-   * @return {boolean}
-   */
+  /** @override */
   disableTouchZoom() {
     const viewportMeta = this.getViewportMeta_();
     if (!viewportMeta) {
@@ -966,11 +751,7 @@ export class Viewport {
     return this.setViewportMetaString_(newValue);
   }
 
-  /**
-   * Restores original touch zoom parameters. Returns `true` if any actual
-   * changes have been done.
-   * @return {boolean}
-   */
+  /** @override */
   restoreOriginalTouchZoom() {
     if (this.originalViewportMetaString_ !== undefined) {
       return this.setViewportMetaString_(this.originalViewportMetaString_);
@@ -978,36 +759,17 @@ export class Viewport {
     return false;
   }
 
-  /**
-   * Returns whether the user has scrolled yet.
-   * @return {boolean}
-   */
-  hasScrolled() {
-    return this.scrollCount_ > 0;
-  }
-
-  /**
-   * Updates the fixed layer.
-   */
+  /** @override */
   updateFixedLayer() {
     this.fixedLayer_.update();
   }
 
-  /**
-   * Adds the element to the fixed layer.
-   * @param {!Element} element
-   * @param {boolean=} opt_forceTransfer If set to true , then the element needs
-   *    to be forcefully transferred to the fixed layer.
-   * @return {!Promise}
-   */
+  /** @override */
   addToFixedLayer(element, opt_forceTransfer) {
     return this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
-  /**
-   * Removes the element from the fixed layer.
-   * @param {!Element} element
-   */
+  /** @override */
   removeFromFixedLayer(element) {
     this.fixedLayer_.removeElement(element);
   }
@@ -1355,7 +1117,7 @@ function getDefaultScrollAnimationDuration(scrollTopA, scrollTopB, max = 500) {
 
 /**
  * @param {!../ampdoc-impl.AmpDoc} ampdoc
- * @return {!Viewport}
+ * @return {!ViewportImpl}
  * @private
  */
 function createViewport(ampdoc) {
@@ -1366,20 +1128,11 @@ function createViewport(ampdoc) {
     ampdoc.isSingleDoc() &&
     getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED
   ) {
-    if (
-      isExperimentOn(win, 'ios-embed-sd') &&
-      win.Element.prototype.attachShadow &&
-      // We need the native Shadow DOM support and jumping-fixed-element fix.
-      parseFloat(Services.platformFor(win).getIosVersionString()) >= 12.2
-    ) {
-      binding = new ViewportBindingIosEmbedShadowRoot_(win);
-    } else {
-      binding = new ViewportBindingIosEmbedWrapper_(win);
-    }
+    binding = new ViewportBindingIosEmbedWrapper_(win);
   } else {
     binding = new ViewportBindingNatural_(ampdoc);
   }
-  return new Viewport(ampdoc, binding, viewer);
+  return new ViewportImpl(ampdoc, binding, viewer);
 }
 
 /**
@@ -1404,7 +1157,7 @@ const ViewportType = {
 
 /**
  * @param {!Window} win
- * @param {!../viewer-impl.Viewer} viewer
+ * @param {!../viewer-interface.ViewerInterface} viewer
  * @return {string}
  */
 function getViewportType(win, viewer) {

@@ -134,6 +134,9 @@ export class AmpForm {
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = Services.ampdoc(this.form_);
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
 
@@ -143,10 +146,10 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
 
     /**
@@ -359,7 +362,7 @@ export class AmpForm {
 
   /** @private */
   installEventHandlers_() {
-    this.viewer_.whenNextVisible().then(() => {
+    this.ampdoc_.whenNextVisible().then(() => {
       const autofocus = this.form_.querySelector('[autofocus]');
       if (autofocus) {
         tryFocus(autofocus);
@@ -578,26 +581,48 @@ export class AmpForm {
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
+    // Promises to run before submit without timeout.
+    const requiredActionPromises = [];
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
-      presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      const asyncCall = this.getValueForAsyncInput_(asyncInput);
+      if (
+        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+      ) {
+        requiredActionPromises.push(asyncCall);
+      } else {
+        presubmitPromises.push(asyncCall);
+      }
     });
 
-    return this.waitOnPromisesOrTimeout_(
-      presubmitPromises,
-      SUBMIT_TIMEOUT
-    ).then(
-      () => this.handlePresubmitSuccess_(trust),
-      error => {
-        const detail = dict();
-        if (error && error.message) {
-          detail['error'] = error.message;
-        }
-        return this.handleSubmitFailure_(error, detail);
-      }
+    return Promise.all(requiredActionPromises).then(
+      () => {
+        return this.waitOnPromisesOrTimeout_(
+          presubmitPromises,
+          SUBMIT_TIMEOUT
+        ).then(
+          () => this.handlePresubmitSuccess_(trust),
+          error => this.handlePresubmitError_(error)
+        );
+      },
+      error => this.handlePresubmitError_(error)
     );
+  }
+
+  /**
+   * @private
+   * Handle form error for presubmit async calls
+   * @param {*} error
+   * @return {Promise}
+   */
+  handlePresubmitError_(error) {
+    const detail = dict();
+    if (error && error.message) {
+      detail['error'] = error.message;
+    }
+    return this.handleSubmitFailure_(error, detail);
   }
 
   /**

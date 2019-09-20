@@ -61,7 +61,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */
@@ -112,8 +112,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Since this is a functional component and not visual,
     // layoutCallback is meaningless. We delay the heavy work until
     // we become visible.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    viewer.whenFirstVisible().then(this.init_.bind(this));
+    this.getAmpDoc()
+      .whenFirstVisible()
+      .then(this.init_.bind(this));
 
     this.runOnce_ = this.element.hasAttribute('once');
   }

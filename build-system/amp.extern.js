@@ -69,6 +69,15 @@ FormData.prototype.entries = function () {};
 function JsonObject() {}
 
 /**
+ * @typedef {{
+ *   YOU_MUST_USE: string,
+ *   jsonLiteral: function(),
+ *   TO_MAKE_THIS_TYPE: string,
+ * }}
+ */
+var InternalJsonLiteralTypeDef;
+
+/**
  * Force the dataset property to be handled as a JsonObject.
  * @type {!JsonObject}
  */
@@ -139,7 +148,6 @@ VideoAnalyticsDetailsDef.prototype.width;
 var process = {};
 process.env;
 process.env.NODE_ENV;
-process.env.SERVE_MODE;
 
 /** @type {boolean|undefined} */
 window.IS_AMP_ALT;
@@ -173,10 +181,6 @@ window.context.sourceUrl;
 window.context.startTime;
 window.context.tagName;
 
-
-// Service Holder
-window.services;
-
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
 /* @type {?Object} */
@@ -189,9 +193,12 @@ window.sf_.cfg;
 window.draw3p;
 
 // AMP's globals
-window.AMP_TEST;
-window.AMP_TEST_IFRAME;
-window.AMP_TAG;
+window.__AMP_SERVICES;
+window.__AMP_TEST;
+window.__AMP_TEST_IFRAME;
+window.__AMP_TAG;
+window.__AMP_TOP;
+window.__AMP_PARENT;
 window.AMP = {};
 window.AMP._ = {};
 window.AMP.push;
@@ -217,9 +224,6 @@ window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
 window.AMP.attachShadowDoc;
 window.AMP.attachShadowDocAsStream;
-
-window.__AMP_TOP;
-window.__AMP_PARENT;
 
 /** @constructor */
 function AmpConfigType() {}
@@ -407,6 +411,13 @@ var AmpElement;
 
 /** @return {!Signals} */
 AmpElement.prototype.signals = function() {};
+
+/**
+ * Must be externed to avoid Closure DCE'ing this function on
+ * custom-element.CustomAmpElement.prototype in single-pass compilation.
+ * @return {string}
+ */
+AmpElement.prototype.elementName = function() {};
 
 var Signals = class {};
 /**
@@ -846,3 +857,39 @@ var ampInaboxPositionObserver;
 ampInaboxPositionObserver.observe;
 ampInaboxPositionObserver.getTargetRect;
 ampInaboxPositionObserver.getViewportRect;
+
+
+/**
+ * TODO(dvoytenko): remove FeaturePolicy once it's added in Closure externs.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/FeaturePolicy.
+ * @interface
+ */
+class FeaturePolicy {
+  /**
+   * @return {!Array<string>}
+   */
+  features() {}
+
+  /**
+   * @return {!Array<string>}
+   */
+  allowedFeatures() {}
+
+  /**
+   * @param {string} feature
+   * @param {string=} opt_origin
+   * @return {boolean}
+   */
+  allowsFeature(feature, opt_origin) {}
+
+  /**
+   * @param {string} feature
+   * @return {!Array<string>}
+   */
+  getAllowlistForFeature(feature) {}
+}
+
+/**
+ * @type {?FeaturePolicy}
+ */
+HTMLIFrameElement.prototype.featurePolicy;

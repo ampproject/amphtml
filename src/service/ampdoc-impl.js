@@ -15,23 +15,48 @@
  */
 
 import {Deferred} from '../utils/promise';
+import {Observable} from '../observable';
 import {Signals} from '../utils/signals';
+import {VisibilityState} from '../visibility-state';
+import {
+  addDocumentVisibilityChangeListener,
+  getDocumentVisibilityState,
+  removeDocumentVisibilityChangeListener,
+} from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {isExperimentOn} from '../experiments';
+import {map} from '../utils/object';
+import {parseQueryString} from '../url';
 import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
 
+/** @const {string} */
+const PARAMS_SENTINEL = '__AMP__';
+
 /**
  * @typedef {{
+ *   params: (!Object<string, string>|undefined),
  *   signals: (?Signals|undefined),
+ *   visibilityState: (?VisibilityState|undefined),
  * }}
  */
 export let AmpDocOptions;
+
+/**
+ * Private ampdoc signals.
+ * @enum {string}
+ */
+const AmpDocSignals = {
+  // Signals the document has become visible for the first time.
+  FIRST_VISIBLE: '-ampdoc-first-visible',
+  // Signals when the document becomes visible the next time.
+  NEXT_VISIBLE: '-ampdoc-next-visible',
+};
 
 /**
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
@@ -47,20 +72,26 @@ export class AmpDocService {
   /**
    * @param {!Window} win
    * @param {boolean} isSingleDoc
+   * @param {!Object<string, string>=} opt_initParams
    */
-  constructor(win, isSingleDoc) {
+  constructor(win, isSingleDoc, opt_initParams) {
     /** @const {!Window} */
     this.win = win;
 
     /** @private {?AmpDoc} */
     this.singleDoc_ = null;
     if (isSingleDoc) {
-      this.singleDoc_ = new AmpDocSingle(win);
+      this.singleDoc_ = new AmpDocSingle(win, {
+        params: extractSingleDocParams(win, opt_initParams),
+      });
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
 
     /** @private {boolean} */
     this.ampdocFieExperimentOn_ = isExperimentOn(win, 'ampdoc-fie');
+
+    /** @private {boolean} */
+    this.mightHaveShadowRoots_ = !isSingleDoc;
   }
 
   /**
@@ -149,6 +180,10 @@ export class AmpDocService {
         continue;
       }
 
+      if (!this.mightHaveShadowRoots_) {
+        break;
+      }
+
       // Shadow doc.
       const shadowRoot =
         n.nodeType == /* DOCUMENT */ 9 ? n : getShadowRootNode(n);
@@ -199,21 +234,23 @@ export class AmpDocService {
    * Creates and installs the ampdoc for the shadow root.
    * @param {string} url
    * @param {!ShadowRoot} shadowRoot
+   * @param {!AmpDocOptions=} opt_options
    * @return {!AmpDocShadow}
    * @restricted
    */
-  installShadowDoc(url, shadowRoot) {
+  installShadowDoc(url, shadowRoot, opt_options) {
+    this.mightHaveShadowRoots_ = true;
     devAssert(
       !shadowRoot[AMPDOC_PROP],
       'The shadow root already contains ampdoc'
     );
-    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
+    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot, opt_options);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
 
   /**
-   * Creates and installs the ampdoc for the shadow root.
+   * Creates and installs the ampdoc for the fie root.
    * @param {string} url
    * @param {!Window} childWin
    * @param {!AmpDocOptions=} opt_options
@@ -245,23 +282,76 @@ export class AmpDocService {
 export class AmpDoc {
   /**
    * @param {!Window} win
+   * @param {?AmpDoc} parent
    * @param {!AmpDocOptions=} opt_options
    */
-  constructor(win, opt_options) {
+  constructor(win, parent, opt_options) {
     /** @public @const {!Window} */
     this.win = win;
+
+    /** @public @const {?AmpDoc} */
+    this.parent_ = parent;
 
     /** @private @const */
     this.signals_ = (opt_options && opt_options.signals) || new Signals();
 
+    /** @private {!Object<string, string>} */
+    this.params_ = (opt_options && opt_options.params) || map();
+
     /** @private @const {!Array<string>} */
     this.declaredExtensions_ = [];
+
+    /** @private {?VisibilityState} */
+    this.visibilityStateOverride_ =
+      (opt_options && opt_options.visibilityState) ||
+      (this.params_['visibilityState'] &&
+        dev().assertEnumValue(
+          VisibilityState,
+          this.params_['visibilityState'],
+          'VisibilityState'
+        )) ||
+      null;
+
+    // Start with `null` to be updated by updateVisibilityState_ in the end
+    // of the constructor to ensure the correct "update" logic and promise
+    // resolution.
+    /** @private {?VisibilityState} */
+    this.visibilityState_ = null;
+
+    /** @private @const {!Observable<!VisibilityState>} */
+    this.visibilityStateHandlers_ = new Observable();
+
+    /** @private {?time} */
+    this.lastVisibleTime_ = null;
+
+    /** @private @const {!Array<!UnlistenDef>} */
+    this.unsubsribes_ = [];
+
+    const boundUpdateVisibilityState = this.updateVisibilityState_.bind(this);
+    if (this.parent_) {
+      this.unsubsribes_.push(
+        this.parent_.onVisibilityChanged(boundUpdateVisibilityState)
+      );
+    }
+    addDocumentVisibilityChangeListener(
+      this.win.document,
+      boundUpdateVisibilityState
+    );
+    this.unsubsribes_.push(() =>
+      removeDocumentVisibilityChangeListener(
+        this.win.document,
+        boundUpdateVisibilityState
+      )
+    );
+    this.updateVisibilityState_();
   }
 
   /**
    * Dispose the document.
    */
-  dispose() {}
+  dispose() {
+    this.unsubsribes_.forEach(unsubsribe => unsubsribe());
+  }
 
   /**
    * Whether the runtime in the single-doc mode. Alternative is the shadow-doc
@@ -277,7 +367,7 @@ export class AmpDoc {
    * @return {?AmpDoc}
    */
   getParent() {
-    return null;
+    return this.parent_;
   }
 
   /**
@@ -292,6 +382,17 @@ export class AmpDoc {
   /** @return {!Signals} */
   signals() {
     return this.signals_;
+  }
+
+  /**
+   * Returns the value of a ampdoc's startup parameter with the specified
+   * name or `null` if the parameter wasn't defined at startup time.
+   * @param {string} name
+   * @return {?string}
+   */
+  getParam(name) {
+    const v = this.params_[name];
+    return v == null ? null : v;
   }
 
   /**
@@ -409,6 +510,165 @@ export class AmpDoc {
   contains(node) {
     return this.getRootNode().contains(node);
   }
+
+  /**
+   * @param {!VisibilityState} visibilityState
+   * @restricted
+   */
+  overrideVisibilityState(visibilityState) {
+    if (this.visibilityStateOverride_ != visibilityState) {
+      this.visibilityStateOverride_ = visibilityState;
+      this.updateVisibilityState_();
+    }
+  }
+
+  /** @private */
+  updateVisibilityState_() {
+    // Natural visibility state.
+    const naturalVisibilityState = getDocumentVisibilityState(
+      this.win.document
+    );
+
+    // Parent visibility: pick the first non-visible state.
+    let parentVisibilityState = VisibilityState.VISIBLE;
+    for (let p = this.parent_; p; p = p.getParent()) {
+      if (p.getVisibilityState() != VisibilityState.VISIBLE) {
+        parentVisibilityState = p.getVisibilityState();
+        break;
+      }
+    }
+
+    // Pick the most restricted visibility state.
+    let visibilityState;
+    const visibilityStateOverride =
+      this.visibilityStateOverride_ || VisibilityState.VISIBLE;
+    if (
+      visibilityStateOverride == VisibilityState.VISIBLE &&
+      parentVisibilityState == VisibilityState.VISIBLE &&
+      naturalVisibilityState == VisibilityState.VISIBLE
+    ) {
+      visibilityState = VisibilityState.VISIBLE;
+    } else if (
+      naturalVisibilityState == VisibilityState.HIDDEN &&
+      visibilityStateOverride == VisibilityState.PAUSED
+    ) {
+      // Hidden document state overrides "paused".
+      visibilityState = naturalVisibilityState;
+    } else if (
+      visibilityStateOverride == VisibilityState.PAUSED ||
+      visibilityStateOverride == VisibilityState.INACTIVE
+    ) {
+      visibilityState = visibilityStateOverride;
+    } else if (
+      parentVisibilityState == VisibilityState.PAUSED ||
+      parentVisibilityState == VisibilityState.INACTIVE
+    ) {
+      visibilityState = parentVisibilityState;
+    } else if (
+      visibilityStateOverride == VisibilityState.PRERENDER ||
+      naturalVisibilityState == VisibilityState.PRERENDER ||
+      parentVisibilityState == VisibilityState.PRERENDER
+    ) {
+      visibilityState = VisibilityState.PRERENDER;
+    } else {
+      visibilityState = VisibilityState.HIDDEN;
+    }
+
+    if (this.visibilityState_ != visibilityState) {
+      this.visibilityState_ = visibilityState;
+      if (visibilityState == VisibilityState.VISIBLE) {
+        this.lastVisibleTime_ = Date.now();
+        this.signals_.signal(AmpDocSignals.FIRST_VISIBLE);
+        this.signals_.signal(AmpDocSignals.NEXT_VISIBLE);
+      } else {
+        this.signals_.reset(AmpDocSignals.NEXT_VISIBLE);
+      }
+      this.visibilityStateHandlers_.fire();
+    }
+  }
+
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document first becomes visible.
+   * @return {!Promise}
+   */
+  whenFirstVisible() {
+    return this.signals_
+      .whenSignal(AmpDocSignals.FIRST_VISIBLE)
+      .then(() => undefined);
+  }
+
+  /**
+   * Returns a Promise that resolve when current doc becomes visible.
+   * The promise resolves immediately if doc is already visible.
+   * @return {!Promise}
+   */
+  whenNextVisible() {
+    return this.signals_
+      .whenSignal(AmpDocSignals.NEXT_VISIBLE)
+      .then(() => undefined);
+  }
+
+  /**
+   * Returns the time when the document has become visible for the first time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getFirstVisibleTime() {
+    return /** @type {?number} */ (this.signals_.get(
+      AmpDocSignals.FIRST_VISIBLE
+    ));
+  }
+
+  /**
+   * Returns the time when the document has become visible for the last time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getLastVisibleTime() {
+    return this.lastVisibleTime_;
+  }
+
+  /**
+   * Returns visibility state configured by the viewer.
+   * See {@link isVisible}.
+   * @return {!VisibilityState}
+   */
+  getVisibilityState() {
+    return devAssert(this.visibilityState_);
+  }
+
+  /**
+   * Whether the AMP document currently visible. The reasons why it might not
+   * be visible include user switching to another tab, browser running the
+   * document in the prerender mode or viewer running the document in the
+   * prerender mode.
+   * @return {boolean}
+   */
+  isVisible() {
+    return this.visibilityState_ == VisibilityState.VISIBLE;
+  }
+
+  /**
+   * Whether the AMP document has been ever visible before. Since the visiblity
+   * state of a document can be flipped back and forth we sometimes want to know
+   * if a document has ever been visible.
+   * @return {boolean}
+   */
+  hasBeenVisible() {
+    return this.getLastVisibleTime() != null;
+  }
+
+  /**
+   * Adds a "visibilitychange" event listener for viewer events. The
+   * callback can check {@link isVisible} and {@link getPrefetchCount}
+   * methods for more info.
+   * @param {function(!VisibilityState)} handler
+   * @return {!UnlistenDef}
+   */
+  onVisibilityChanged(handler) {
+    return this.visibilityStateHandlers_.add(handler);
+  }
 }
 
 /**
@@ -422,7 +682,7 @@ export class AmpDocSingle extends AmpDoc {
    * @param {!AmpDocOptions=} opt_options
    */
   constructor(win, opt_options) {
-    super(win, opt_options);
+    super(win, /* parent */ null, opt_options);
 
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body
@@ -436,11 +696,6 @@ export class AmpDocSingle extends AmpDoc {
   /** @override */
   isSingleDoc() {
     return true;
-  }
-
-  /** @override */
-  getParent() {
-    return null;
   }
 
   /** @override */
@@ -497,7 +752,7 @@ export class AmpDocShadow extends AmpDoc {
    * @param {!AmpDocOptions=} opt_options
    */
   constructor(win, url, shadowRoot, opt_options) {
-    super(win, opt_options);
+    super(win, /* parent */ null, opt_options);
     /** @private @const {string} */
     this.url_ = url;
     /** @private @const {!ShadowRoot} */
@@ -529,11 +784,6 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   isSingleDoc() {
     return false;
-  }
-
-  /** @override */
-  getParent() {
-    return null;
   }
 
   /** @override */
@@ -612,13 +862,10 @@ export class AmpDocFie extends AmpDoc {
    * @param {!AmpDocOptions=} opt_options
    */
   constructor(win, url, parent, opt_options) {
-    super(win, opt_options);
+    super(win, parent, opt_options);
 
     /** @private @const {string} */
     this.url_ = url;
-
-    /** @private @const {!AmpDoc} */
-    this.parent_ = parent;
 
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body
@@ -638,11 +885,6 @@ export class AmpDocFie extends AmpDoc {
   /** @override */
   isSingleDoc() {
     return false;
-  }
-
-  /** @override */
-  getParent() {
-    return this.parent_;
   }
 
   /** @override */
@@ -698,15 +940,41 @@ export class AmpDocFie extends AmpDoc {
 }
 
 /**
+ * @param {!Window} win
+ * @param {!Object<string, string>|undefined} initParams
+ * @return {!Object<string, string>}
+ */
+function extractSingleDocParams(win, initParams) {
+  const params = map();
+  if (initParams) {
+    // The initialization params take the highest precedence.
+    Object.assign(params, initParams);
+  } else {
+    // Params can be passed via iframe hash/name with hash taking precedence.
+    if (win.name && win.name.indexOf(PARAMS_SENTINEL) == 0) {
+      Object.assign(
+        params,
+        parseQueryString(win.name.substring(PARAMS_SENTINEL.length))
+      );
+    }
+    if (win.location && win.location.hash) {
+      Object.assign(params, parseQueryString(win.location.hash));
+    }
+  }
+  return params;
+}
+
+/**
  * Install the ampdoc service and immediately configure it for either a
  * single-doc or a shadow-doc mode. The mode cannot be changed after the
  * initial configuration.
  * @param {!Window} win
  * @param {boolean} isSingleDoc
+ * @param {!Object<string, string>=} opt_initParams
  */
-export function installDocService(win, isSingleDoc) {
+export function installDocService(win, isSingleDoc, opt_initParams) {
   registerServiceBuilder(win, 'ampdoc', function() {
-    return new AmpDocService(win, isSingleDoc);
+    return new AmpDocService(win, isSingleDoc, opt_initParams);
   });
 }
 

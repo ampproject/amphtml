@@ -69,10 +69,10 @@ export class AmpExperiment extends AMP.BaseElement {
 
         // All experiments can be disabled by a hash param
         const viewer = Services.viewerForDoc(ampdoc);
-        const override = viewer.getParam(
+        const override = ampdoc.getParam(
           ATTR_PREFIX + 'disable-all-experiments'
         );
-        if (override !== undefined) {
+        if (override != null) {
           variantsService.init(
             Promise.resolve(this.getEmptyExperimentToVariant_(config))
           );
