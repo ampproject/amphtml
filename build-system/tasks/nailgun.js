@@ -35,6 +35,7 @@ const DEFAULT_NAILGUN_PORT = '2113';
 const CHECK_TYPES_NAILGUN_PORT = '2114';
 const DIST_NAILGUN_PORT = '2115';
 const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
+const NAILGUN_STOP_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
@@ -142,16 +143,21 @@ async function stopNailgunServer(port) {
   }
   if (process.platform == 'darwin' || process.platform == 'linux') {
     const stopNailgunServerCmd = `${nailgunRunner} --nailgun-port ${port} ng-stop`;
-    if (exec(stopNailgunServerCmd, {stdio: 'pipe'}).status == 0) {
+    const stopped = exec(stopNailgunServerCmd, {
+      stdio: 'pipe',
+      timeout: NAILGUN_STOP_TIMEOUT_MS,
+    });
+    if (stopped.status == 0) {
       log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
     } else {
       log(
         yellow('WARNING:'),
-        'Could not find a running instance of',
+        'Could not stop',
         cyan('nailgun-server.jar'),
         'on port',
         cyan(port)
       );
+      log(red(stopped.stderr));
     }
   }
 }
