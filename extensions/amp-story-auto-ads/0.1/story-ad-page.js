@@ -71,11 +71,10 @@ const A4AVarNames = {
 
 export class StoryAdPage {
   /**
-   *
-   * @param {*} storyAutoAdsEl
-   * @param {*} config
-   * @param {*} index
-   * @param {*} localization
+   * @param {!Element} storyAutoAdsEl
+   * @param {!JsonObject} config
+   * @param {number} index
+   * @param {!./story-ad-localization.StoryAdLocalization} localization
    */
   constructor(storyAutoAdsEl, config, index, localization) {
     /** @private @const {!JsonObject} */

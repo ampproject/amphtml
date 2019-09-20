@@ -467,6 +467,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   setVisibleAttribute_(adPage) {
     this.mutateElement(() => {
       adPage.toggleVisibility();
+      this.visibleAdPage_ = adPage;
     });
   }
 
@@ -477,6 +478,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.mutateElement(() => {
       if (this.visibleAdPage_) {
         this.visibleAdPage_.toggleVisibility();
+        this.visibleAdPage_ = null;
       }
     });
   }

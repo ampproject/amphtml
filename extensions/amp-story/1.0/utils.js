@@ -262,10 +262,10 @@ export function setHistoryState(win, stateName, value) {
  * @return {*}
  */
 export function getHistoryState(win, stateName) {
-  const {history} = win;
-  if (history && getState(history)) {
-    return getState(history)[stateName];
-  }
+  // const {history} = win;
+  // if (history && getState(history)) {
+  //   return getState(history)[stateName];
+  // }
   return null;
 }
 
