@@ -188,6 +188,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
   );
 
   // TODO(zombifier): The BTF test fails on Safari (#21311).
+  // TODO(powerivq): Flaky on Firefox and Edge too. unskip. (#24657)
   describes.integration(
     'BTF within friendly frame or safe frame',
     {
@@ -217,27 +218,23 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.win.document.body.removeChild(iframe);
       });
 
-      it.configure()
-        .skipSafari()
-        .run(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within friendly frame',
-          () => {
-            writeFriendlyFrame(env.win.document, iframe, adContent);
-            return testAmpComponentsBTF(env.win);
-          }
-        );
+      it.skip(
+        'should layout amp-img, amp-pixel, ' +
+          'amp-analytics within friendly frame',
+        () => {
+          writeFriendlyFrame(env.win.document, iframe, adContent);
+          return testAmpComponentsBTF(env.win);
+        }
+      );
 
-      it.configure()
-        .skipSafari()
-        .run(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within safe frame',
-          () => {
-            writeSafeFrame(env.win.document, iframe, adContent);
-            return testAmpComponentsBTF(env.win);
-          }
-        );
+      it.skip(
+        'should layout amp-img, amp-pixel, ' +
+          'amp-analytics within safe frame',
+        () => {
+          writeSafeFrame(env.win.document, iframe, adContent);
+          return testAmpComponentsBTF(env.win);
+        }
+      );
     }
   );
 });
