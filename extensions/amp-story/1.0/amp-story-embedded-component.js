@@ -290,10 +290,10 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!./variable-service} */
+    /** @private @const {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win_);
 
-    /** @private @const {!./story-analytics} */
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
 
     /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
@@ -1251,7 +1251,7 @@ export class AmpStoryEmbeddedComponent {
 
   /**
    * @visibleForTesting
-   * @return {!Element}
+   * @return {?Element}
    */
   getShadowRootForTesting() {
     return this.shadowRoot_;
