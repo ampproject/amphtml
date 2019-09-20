@@ -203,9 +203,7 @@ describes.realWin(
           .stub(applyExperiment, 'applyExperimentToVariant')
           .returns(Promise.resolve());
 
-        sandbox.stub(Services, 'viewerForDoc').returns({
-          getParam: () => true,
-        });
+        sandbox.stub(ampdoc, 'getParam').returns('true');
 
         experiment.buildCallback();
         return Services.variantsForDocOrNull(ampdoc.getHeadNode())
