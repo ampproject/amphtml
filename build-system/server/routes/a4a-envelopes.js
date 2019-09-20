@@ -31,8 +31,7 @@ app.use(['/inabox', '/inabox-mraid'], (req, res) => {
     template = template.replace(/SOURCE/g, 'AD_URL');
     if (req.baseUrl == '/inabox-mraid') {
       // MRAID does not load amp4ads-host-v0.js
-      template = template
-        .replace('INABOX_ADS_TAG_INTEGRATION', '');
+      template = template.replace('INABOX_ADS_TAG_INTEGRATION', '');
     }
     const url = getInaboxUrl(req);
     res.end(fillTemplate(template, url.href, req.query));
@@ -50,8 +49,9 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
       let url;
       if (req.baseUrl == '/inabox-friendly') {
         url = getInaboxUrl(req, 'inabox-viewport-friendly');
-        template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"')
-            .replace('INABOX_ADS_TAG_INTEGRATION', '');
+        template = template
+          .replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"')
+          .replace('INABOX_ADS_TAG_INTEGRATION', '');
       } else {
         url = getInaboxUrl(req);
         template = template
