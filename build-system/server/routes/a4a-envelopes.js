@@ -17,8 +17,10 @@
 const app = require('express').Router();
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
+const log = require('fancy-log');
 const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
+const {red} = require('ansi-colors');
 
 // In-a-box envelope.
 // Examples:
@@ -62,6 +64,11 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
     })
     .then(result => {
       res.end(result);
+    })
+    .catch(err => {
+      log(red('Error:'), err);
+      res.status(500);
+      res.end();
     });
 });
 
@@ -126,6 +133,7 @@ function requestFromUrl(template, url, query) {
     request(url, (error, response, body) => {
       if (error) {
         reject(error);
+        return;
       }
       if (
         !response.headers['content-type'] ||
