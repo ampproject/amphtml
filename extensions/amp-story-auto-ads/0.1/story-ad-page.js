@@ -50,7 +50,7 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @enum {string} */
-export const Attributes = {
+const PageAttributes = {
   LOADING: 'i-amphtml-loading',
   IFRAME_BODY_VISIBLE: 'amp-story-visible',
 };
@@ -153,7 +153,7 @@ export class StoryAdPage {
   }
 
   /** @return {?Element} */
-  getElement() {
+  getPageElement() {
     return this.pageElement_;
   }
 
@@ -174,7 +174,7 @@ export class StoryAdPage {
     if (this.adDoc_) {
       toggleAttribute(
         dev().assertElement(this.adDoc_.body),
-        Attributes.IFRAME_BODY_VISIBLE
+        PageAttributes.IFRAME_BODY_VISIBLE
       );
     }
   }
@@ -252,7 +252,7 @@ export class StoryAdPage {
 
     // Remove loading attribute once loaded so that desktop CSS will position
     // offscren with all other pages.
-    this.pageElement_.removeAttribute(Attributes.LOADING);
+    this.pageElement_.removeAttribute(PageAttributes.LOADING);
 
     this.analyticsEvent_(AnalyticsEvents.AD_LOADED, {
       [AnalyticsVars.AD_LOADED]: Date.now(),

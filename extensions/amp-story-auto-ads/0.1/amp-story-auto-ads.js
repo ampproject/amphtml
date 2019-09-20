@@ -54,7 +54,7 @@ const AD_TAG = 'amp-ad';
 const MUSTACHE_TAG = 'amp-mustache';
 
 /** @enum {string} */
-const Attributes = {
+export const Attributes = {
   AD_SHOWING: 'ad-showing',
   DESKTOP_PANELS: 'desktop-panels',
   DIR: 'dir',
@@ -205,7 +205,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * Fires event to navigate to ad page once inserted into the story.
    */
   navigateToFirstAdPage_() {
-    const lastPageElement = lastItem(this.adPages_).getElement();
+    const lastPageElement = lastItem(this.adPages_).getPageElement();
     // Setting distance manually to avoid flash of next page.
     lastPageElement.setAttribute('distance', '1');
     const payload = dict({
@@ -357,7 +357,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * build page and start preloading
+   * Create new page containing ad and start preloading.
    * @private
    */
   schedulePage_() {
