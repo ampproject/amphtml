@@ -8,3 +8,4 @@
   - ampproject/wg-infra
   - ampproject/wg-runtime
   - ampproject/wg-performance
+- "**/OWNERS.yaml": "#rcebulko"
