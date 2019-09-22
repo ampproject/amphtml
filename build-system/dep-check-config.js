@@ -788,7 +788,6 @@ exports.rules = [
   // intaker-chat-widget
   {
     filesMatching: 'extensions/**/*-intaker-chat-widget.js',
-    whitelist:
-      'src/sanitizer.js',
+    whitelist: 'src/sanitizer.js',
   },
 ];
