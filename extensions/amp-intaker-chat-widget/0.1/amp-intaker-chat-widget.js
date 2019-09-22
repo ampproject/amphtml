@@ -35,6 +35,9 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     this.dev = false;
     this.qa = false;
     this.xhr = Services.xhrFor(toWin(element.ownerDocument.defaultView));
+    this.platformService = Services.platformFor(this.win);
+    this.isMobile =
+      this.platformService.isAndroid() || this.platformService.isIos();
 
     // /** @const @private {!AmpViewerIntegrationVariableService} */
     // this.variableService_ = new AmpViewerIntegrationVariableService(
@@ -66,16 +69,17 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     // this.viewer = Services.viewerForDoc(this.ampdoc);
 
     new widget().bootstrap({
-      urlHash: this.urlHash,
+      chatUrlHash: this.urlHash,
       CookiesAPI,
       DEV_ENV: this.dev,
-      QA: this.qa,
-      templates,
-      setStyle,
-      toggle,
-      referrer: '',
+      useQA: this.qa,
+      Templates: templates,
+      SetStyle: setStyle,
+      Toggle: toggle,
+      Referrer: '',
       eventHelper,
       postAjax: this.postAjax.bind(this),
+      isMobile: this.isMobile,
     });
   }
 
