@@ -19,11 +19,11 @@ import {CSS} from '../../../build/amp-intaker-chat-widget-0.1.css';
 import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {sanitizeHtml} from '../../../src/sanitizer';
 import {setStyle, toggle} from '../../../src/style';
 import {templates} from './templates';
 import {toWin} from '../../../src/types';
 import {widget} from './widget';
-import {sanitizeHtml} from '../../../src/sanitizer';
 
 export class AmpIntakerChatWidget extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -123,7 +123,9 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
    * @param {Element} container
    */
   createIFrame(container) {
-    const iframe = /** @type {!HTMLIFrameElement} */ (this.win.document.createElement('iframe'));
+    const iframe = /** @type {!HTMLIFrameElement} */ (this.win.document.createElement(
+      'iframe'
+    ));
     iframe.scrolling = 'no';
     iframe.id = 'chatter-bot-iframe';
     container.appendChild(iframe);

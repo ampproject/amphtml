@@ -18,10 +18,9 @@ import {getCookie, setCookie} from '../../../src/cookies';
 import {parseJson} from '../../../src/json';
 
 /**
- * @class
+ * @constructor
  */
 export class CookiesAPI {
-
   /**
    *
    * @param {!Window} win
@@ -48,8 +47,9 @@ export class CookiesAPI {
    */
   getJSON(key) {
     let cookie = getCookie(this.win, key);
-    if (cookie)
+    if (cookie) {
       cookie = parseJson(cookie);
+    }
 
     return cookie;
   }
