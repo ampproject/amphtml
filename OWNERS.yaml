@@ -1,7 +1,7 @@
 - "?cramforce"
 - "?dvoytenko"
 - "?jridgewell"
-- "**/validator-*.{protoascii,html,out}": ampproject/wg-caching
+- "**/validator-*.{protoascii,html,out}": "#ampproject/wg-caching"
 - "*.md": ampproject/wg-outreach
 - "{.*,{{babel,bundles}.config,gulpfile}.js,renovate.json}": ampproject/wg-infra
 - "{package.json,yarn.lock}":
