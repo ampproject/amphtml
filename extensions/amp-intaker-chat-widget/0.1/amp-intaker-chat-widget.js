@@ -23,6 +23,7 @@ import {setStyle, toggle} from '../../../src/style';
 import {templates} from './templates';
 import {toWin} from '../../../src/types';
 import {widget} from './widget';
+import {sanitizeHtml} from '../../../src/sanitizer';
 
 export class AmpIntakerChatWidget extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -80,7 +81,18 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
       eventHelper,
       postAjax: this.postAjax.bind(this),
       isMobile: this.isMobile,
+      sanitizeTemplate: this.sanitizeTemplate.bind(this),
+      createIFrame: this.createIFrame.bind(this),
     });
+  }
+
+  /**
+   *
+   * @param {string} html
+   * @return {string}
+   */
+  sanitizeTemplate(html) {
+    return sanitizeHtml(html, this.win.document);
   }
 
   /**
@@ -104,6 +116,17 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
       .then(result => {
         success(result);
       });
+  }
+
+  /**
+   *
+   * @param {Element} container
+   */
+  createIFrame(container) {
+    const iframe = /** @type {!HTMLIFrameElement} */ (this.win.document.createElement('iframe'));
+    iframe.scrolling = 'no';
+    iframe.id = 'chatter-bot-iframe';
+    container.appendChild(iframe);
   }
 
   // /** @override */

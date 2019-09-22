@@ -93,7 +93,7 @@ Intaker.Widget = function () {
    */
   function addToBody(string) {
     let tmp             = document.createElement('div');
-    tmp./*OK*/innerHTML = string;
+    tmp./*OK*/innerHTML = Intaker.sanitizeTemplate(string);
     document.body.appendChild(tmp.firstChild);
     tmp = null;
   }
@@ -150,7 +150,9 @@ Intaker.Widget = function () {
         frameContainer = document.getElementById(frameContainerId);
         closeBtn       = document.getElementById(closeBtnId);
         restartBtn     = document.getElementById(restartBtnId);
-        frame          = document.getElementById(frameId);
+
+        Intaker.createIFrame(document.getElementById('chatter-bot-frame-wrap'));
+        frame = document.getElementById(frameId);
 
         hideEl(frameContainer);
         closeBtn.addEventListener('click', closeFrame);
@@ -438,7 +440,6 @@ Intaker.Widget = function () {
    */
 
   window.addEventListener('message', function (e) {
-    console.log(e.data);
     const data = Intaker.eventHelper.getData(e)['INTAKER_CHAT_WIDGET'];
     if (data) {
       switch (data.action) {
