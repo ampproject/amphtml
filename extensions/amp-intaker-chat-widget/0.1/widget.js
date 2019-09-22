@@ -13,47 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const Intaker = {};
+let Intaker = {};
 /**
  *
  * @constructor
  */
-Intaker.Widget = function() {
-  Intaker.CookiesAPI = window['CookiesApi'];
-  let chatIsActive = false;
+Intaker.Widget = function () {
+  Intaker.CookiesAPI      = window['CookiesApi'];
+  let chatIsActive        = false;
   let previewChatIsActive = false;
-  const frameId = 'chatter-bot-iframe';
-  const frameContainerId = 'chatter-bot-frame-container';
-  const btnId = 'chatter-bot-launcher';
-  const closeBtnId = 'chatter-bot-widget-close';
-  const restartBtnId = 'chatter-bot-launcher-restart';
-  const INTAKER_CHAT_URL = btoa('INTAKER_CHAT_URL');
-  const INTKER_CHAT_URL = btoa('INTKER_CHAT_URL'); //support for old generated widgets
-  Intaker.chatUrlHash = ''; //window[INTAKER_CHAT_URL] || window[INTKER_CHAT_URL];
-  let url = ''; //atob(chatUrlHash);
-  Intaker.useQA = window['USE_INTAKER_QA'];
+  let frameId             = 'chatter-bot-iframe';
+  let frameContainerId    = 'chatter-bot-frame-container';
+  let btnId               = 'chatter-bot-launcher';
+  let closeBtnId          = 'chatter-bot-widget-close';
+  let restartBtnId        = 'chatter-bot-launcher-restart';
+  let INTAKER_CHAT_URL    = btoa('INTAKER_CHAT_URL');
+  let INTKER_CHAT_URL     = btoa('INTKER_CHAT_URL');//support for old generated widgets
+  Intaker.chatUrlHash     = '';//window[INTAKER_CHAT_URL] || window[INTKER_CHAT_URL];
+  let url                 = '';//atob(chatUrlHash);
+  Intaker.useQA           = window['USE_INTAKER_QA'];
   let frameContainer, closeBtn, restartBtn, lunchBtn, frame;
-  let api = '';
-  const cssUrl =
-    (Intaker.useQA
-      ? 'https://intakerclientqa.azurewebsites.net'
-      : 'https://intaker.co') + '/dist/chat-widget.min.css';
-  let directLink = '';
-  let isDesktop = true;
-  let cookieName = 'INTAKER_CHAT_WIDGET_';
-  const cookieValue = {};
-  const DEFAULT_AVATAR =
-    'https://intaker.blob.core.windows.net/dashboard/a6.png';
-  let dingSound = null;
-  let launcherContainer = null;
-  let isUniqueVisit = false;
-  let externalUrl = '';
-  const originalTitle = document.title || '';
-  let isAMP = false;
-  let platform = null;
-  Intaker.Templates = window['IntakerWidgetTemplates'];
-  let chatUniqueId = null;
-  let manualOpenedChat = false;
+  let api                 = '';
+  let cssUrl              = (Intaker.useQA ? 'https://intakerclientqa.azurewebsites.net' : 'https://intaker.co') + '/dist/chat-widget.min.css';
+  let directLink          = '';
+  let isDesktop           = true;
+  let cookieName          = 'INTAKER_CHAT_WIDGET_';
+  let cookieValue         = {};
+  let DEFAULT_AVATAR      = 'https://intaker.blob.core.windows.net/dashboard/a6.png';
+  let dingSound           = null;
+  let launcherContainer   = null;
+  let isUniqueVisit       = false;
+  let externalUrl         = '';
+  let originalTitle       = document.title || '';
+  let isAMP               = false;
+  let platform            = null;
+  Intaker.Templates       = window['IntakerWidgetTemplates'];
+  let chatUniqueId        = null;
+  let manualOpenedChat    = false;
 
   /**
    *
@@ -82,15 +78,13 @@ Intaker.Widget = function() {
    * @param {string} url
    */
   function loadCss(url) {
-    const link = document.createElement('link');
+    let link   = document.createElement('link');
     // link.id    = 'chatter-bot-css';
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.href = url;
+    link.rel   = 'stylesheet';
+    link.type  = 'text/css';
+    link.href  = url;
     link.media = 'all';
-    (document.getElementsByTagName('head')[0] || document.body).appendChild(
-      link
-    );
+    (document.getElementsByTagName('head')[0] || document.body).appendChild(link);
   }
 
   /**
@@ -98,8 +92,8 @@ Intaker.Widget = function() {
    * @param {string} string
    */
   function addToBody(string) {
-    let tmp = document.createElement('div');
-    tmp./*OK*/ innerHTML = string;
+    let tmp             = document.createElement('div');
+    tmp./*OK*/innerHTML = string;
     document.body.appendChild(tmp.firstChild);
     tmp = null;
   }
@@ -128,10 +122,9 @@ Intaker.Widget = function() {
     if (!isDesktop) {
       if (previewChatIsActive) {
         addClass(frameContainer, 'preview');
-        addClass(launcherContainer, 'preview');
-      } else {
+        addClass(launcherContainer, 'preview')
+      } else
         exitPreview();
-      }
     }
   }
 
@@ -141,28 +134,27 @@ Intaker.Widget = function() {
    */
   function lunch(preview) {
     previewChatIsActive = false;
-    const dt = new Date();
+    let dt              = new Date();
     dt.setMinutes(dt.getMinutes() + 15);
     cookieValue.autoLunch = false;
-    Intaker.CookiesAPI.set(cookieName, cookieValue, {expires: dt});
+    Intaker.CookiesAPI.set(cookieName, cookieValue, { expires: dt });
 
     if (!chatIsActive) {
-      if (preview) {
+      if (preview)
         previewChatIsActive = true;
-      } else {
+      else
         chatIsActive = true;
-      }
 
       if (!frameContainer) {
         addToBody(Intaker.Templates.frame);
         frameContainer = document.getElementById(frameContainerId);
-        closeBtn = document.getElementById(closeBtnId);
-        restartBtn = document.getElementById(restartBtnId);
-        frame = document.getElementById(frameId);
+        closeBtn       = document.getElementById(closeBtnId);
+        restartBtn     = document.getElementById(restartBtnId);
+        frame          = document.getElementById(frameId);
 
         hideEl(frameContainer);
         closeBtn.addEventListener('click', closeFrame);
-        restartBtn.addEventListener('click', function() {
+        restartBtn.addEventListener('click', function () {
           frame.src = url;
         });
         frame.src = url + (preview ? '&preview=true' : '');
@@ -191,17 +183,15 @@ Intaker.Widget = function() {
    * @return {string|null}
    */
   function getDirectLink(url) {
-    const parts = url.split('/');
+    let parts = url.split('/');
     while (true) {
       let name = parts.pop();
       if (name) {
         name = name.trim();
-        if (name.length) {
+        if (name.length)
           return name;
-        }
-      } else {
+      } else
         return null;
-      }
     }
   }
 
@@ -213,32 +203,23 @@ Intaker.Widget = function() {
     // if (Intaker.useQA)
     //   return callback();
 
-    Intaker.postAjax(
-      api + '/api/Chat/CheckCustomerSubscription',
-      /** @type {!JsonObject} */ ({
-        'directLink': directLink,
-        'externalLink': externalUrl,
-      }),
-      function(result) {
-        if (result === 'Paid' || result === 'Trial') {
-          callback();
-        } else {
-          if (console.error) {
-            if (result === 'CustomerNotFound') {
-              console /*OK*/
-                .error('This is not the chat you are looking for.');
-            } else {
-              console /*OK*/
-                .error(
-                  'Intaker Chatter Bot client is expired. Login to your dashboard and upgrade.'
-                );
-              console /*OK*/
-                .error('https://intaker.co/dashboard');
-            }
+    Intaker.postAjax(api + '/api/Chat/CheckCustomerSubscription', /** @type {!JsonObject} */({
+      "directLink"  : directLink,
+      "externalLink": externalUrl
+    }), function (result) {
+      if (result === 'Paid' || result === 'Trial') {
+        callback();
+      } else {
+        if (console.error) {
+          if (result === 'CustomerNotFound')
+            console/*OK*/.error('This is not the chat you are looking for.');
+          else {
+            console/*OK*/.error('Intaker Chatter Bot client is expired. Login to your dashboard and upgrade.');
+            console/*OK*/.error('https://intaker.co/dashboard');
           }
         }
       }
-    );
+    });
   }
 
   /**
@@ -246,22 +227,15 @@ Intaker.Widget = function() {
    * @param {Object} setting
    */
   function injectThemeCss(setting) {
-    const avatar = setting.avatarUrl || DEFAULT_AVATAR;
-    const color = setting.colorPick || '2DC464';
-    const css =
-      '#chatter-bot-launcher-container .chatter-bot-launcher-button {background-image : url(' +
-      avatar +
-      ');}' +
-      '#chatter-bot-launcher {background : #' +
-      color +
-      ';}';
-    const linkElement = document.createElement('link');
+    let avatar      = setting.avatarUrl || DEFAULT_AVATAR;
+    let color       = setting.colorPick || '2DC464';
+    let css         =
+          '#chatter-bot-launcher-container .chatter-bot-launcher-button {background-image : url(' + avatar + ');}' +
+          '#chatter-bot-launcher {background : #' + color + ';}';
+    let linkElement = document.createElement('link');
     linkElement.setAttribute('rel', 'stylesheet');
     linkElement.setAttribute('type', 'text/css');
-    linkElement.setAttribute(
-      'href',
-      'data:text/css;charset=UTF-8,' + encodeURIComponent(css)
-    );
+    linkElement.setAttribute('href', 'data:text/css;charset=UTF-8,' + encodeURIComponent(css));
     document.body.appendChild(linkElement);
   }
 
@@ -270,26 +244,24 @@ Intaker.Widget = function() {
    * @param {function(?): undefined} callback
    */
   function getChatSetting(callback) {
-    Intaker.postAjax(
-      api + '/api/Chat/GetChatSetting',
-      /** @type {!JsonObject} */ ({
-        'directLink': directLink,
-        'externalLink': externalUrl,
-      }),
-      function(result) {
-        injectThemeCss(result);
-        callback(result);
-      }
-    );
+    Intaker.postAjax(api + '/api/Chat/GetChatSetting', /** @type {!JsonObject} */({
+      "directLink"  : directLink,
+      "externalLink": externalUrl
+    }), function (result) {
+      injectThemeCss(result);
+      callback(result);
+    });
   }
 
   /**
    *
    */
   function playDingSound() {
-    const promise = dingSound.play();
+    let promise = dingSound.play();
     if (promise !== undefined) {
-      promise.then(function() {}).catch(function() {});
+      promise.then(function () {
+      }).catch(function () {
+      });
     }
   }
 
@@ -298,8 +270,8 @@ Intaker.Widget = function() {
    */
   function loadDingSound() {
     if (window.Audio) {
-      dingSound = new Audio();
-      dingSound.src = 'https://intaker.co/dist/light.mp3';
+      dingSound     = new Audio();
+      dingSound.src = "https://intaker.co/dist/light.mp3";
       dingSound.load();
     }
   }
@@ -310,22 +282,18 @@ Intaker.Widget = function() {
    * @return {undefined}
    */
   function autoLunch(setting) {
-    const cookie = Intaker.CookiesAPI.getJSON(cookieName);
-    if (cookie && cookie.autoLunch === false && !window.DEV_ENV) {
+    let cookie = Intaker.CookiesAPI.getJSON(cookieName);
+    if (cookie && cookie.autoLunch === false && !window.DEV_ENV)
       return;
-    }
 
     //MINI-WIDGET
     if (!isDesktop && setting.miniPopup) {
-      setTimeout(
-        function() {
-          if (!chatIsActive) {
-            lunch(true);
-            playDingSound();
-          }
-        },
-        window.DEV_ENV ? 100 : 3000
-      );
+      setTimeout(function () {
+        if (!chatIsActive) {
+          lunch(true);
+          playDingSound();
+        }
+      }, window.DEV_ENV ? 100 : 3000);
     }
 
     //ruye mobile fagat age aggresiveLeadGeneration==true hast
@@ -333,7 +301,7 @@ Intaker.Widget = function() {
     //setting.aggresiveLeadGeneration ||
     if (isDesktop) {
       //auto lunch
-      setTimeout(function() {
+      setTimeout(function () {
         if (!chatIsActive) {
           lunch();
           playDingSound();
@@ -347,16 +315,15 @@ Intaker.Widget = function() {
    * @return {boolean}
    */
   function setUniqueVisit() {
-    const cn = cookieName + '_UniqueVisit';
-    const cookie = Intaker.CookiesAPI.get(cn);
+    let cn     = cookieName + '_UniqueVisit';
+    let cookie = Intaker.CookiesAPI.get(cn);
 
-    if (cookie) {
+    if (cookie)
       return false;
-    }
 
-    const dt = new Date();
+    let dt = new Date();
     dt.setMinutes(dt.getMinutes() + 60);
-    Intaker.CookiesAPI.set(cn, 1, {expires: dt});
+    Intaker.CookiesAPI.set(cn, 1, { expires: dt });
 
     return true;
   }
@@ -368,22 +335,19 @@ Intaker.Widget = function() {
   function visitor(openedChat) {
     ///api/Chat/Visitor
 
-    Intaker.postAjax(
-      api + '/api/Chat/Visitor',
-      /** @type {!JsonObject} */ ({
-        'uniqueVisit': isUniqueVisit,
-        'pageName': originalTitle,
-        'pageTitle': originalTitle,
-        'openedChat': openedChat === true,
-        'closedChat': openedChat === false,
-        'userBrowser': platform.name,
-        'browserVersion': platform.version,
-        'customerName': directLink,
-        'Device': navigator.userAgent || navigator.vendor || window.opera,
-        'chatUniqueId': chatUniqueId,
-      }),
-      function() {}
-    );
+    Intaker.postAjax(api + '/api/Chat/Visitor', /** @type {!JsonObject} */({
+      "uniqueVisit"   : isUniqueVisit,
+      "pageName"      : originalTitle,
+      "pageTitle"     : originalTitle,
+      "openedChat"    : openedChat === true,
+      "closedChat"    : openedChat === false,
+      "userBrowser"   : platform.name,
+      "browserVersion": platform.version,
+      "customerName"  : directLink,
+      "Device"        : navigator.userAgent || navigator.vendor || window.opera,
+      "chatUniqueId"  : chatUniqueId,
+    }), function () {
+    });
   }
 
   /**
@@ -399,7 +363,7 @@ Intaker.Widget = function() {
    * @param {Element} el
    */
   function showEl(el) {
-    Intaker.Toggle(el, 'block');
+    Intaker.Toggle(el, 'block')
   }
 
   /**
@@ -415,10 +379,10 @@ Intaker.Widget = function() {
    * @param {Object} [amp]
    * @public
    */
-  this.bootstrap = amp => {
+  this.bootstrap = (amp) => {
     if (amp) {
       isAMP = true;
-      for (const key in amp) {
+      for (let key in amp) {
         Intaker[key] = amp[key];
       }
       // Intaker.chatUrlHash = amp.chatUrlHash;
@@ -432,49 +396,32 @@ Intaker.Widget = function() {
       // Intaker.postAjax    = amp.postAjax;
       // Intaker.isMobile    = amp.isMobile;
 
-      if (amp.DEV_ENV) {
+      if (amp.DEV_ENV)
         window.DEV_ENV = amp.DEV_ENV;
-      }
     } else {
       Intaker.chatUrlHash = window[INTAKER_CHAT_URL] || window[INTKER_CHAT_URL];
     }
 
-    isDesktop = !Intaker.isMobile;
-    url = atob(Intaker.chatUrlHash);
+    isDesktop     = !Intaker.isMobile;
+    url           = atob(Intaker.chatUrlHash);
     cookieName += Intaker.chatUrlHash;
-    directLink = getDirectLink(url);
+    directLink    = getDirectLink(url);
     isUniqueVisit = setUniqueVisit();
-    externalUrl = encodeURI(
-      window.DEV_ENV
-        ? 'https://intakerclientqa.azurewebsites.net'
-        : location.host
-    );
-    url = url.replace('attorney.chat', 'intaker.co/chat');
-    Intaker.useQA &&
-      (url = url.replace(
-        'intaker.co/chat',
-        'intakerclientqa.azurewebsites.net/chat'
-      ));
-    url =
-      url +
-      '?externalUrl=' +
-      externalUrl +
-      '&referrer=' +
-      encodeURI(Intaker.Referrer || '');
-    api = Intaker.useQA
-      ? 'https://intakerapiqa.azurewebsites.net'
-      : 'https://idemanducoreapi20180624025640.azurewebsites.net';
+    externalUrl   = encodeURI(window.DEV_ENV ? 'https://intakerclientqa.azurewebsites.net' : location.host);
+    url           = url.replace('attorney.chat', 'intaker.co/chat');
+    Intaker.useQA && (url = url.replace('intaker.co/chat', 'intakerclientqa.azurewebsites.net/chat'));
+    url = url + '?externalUrl=' + externalUrl + '&referrer=' + encodeURI(Intaker.Referrer || '');
+    api = Intaker.useQA ? 'https://intakerapiqa.azurewebsites.net' : 'https://idemanducoreapi20180624025640.azurewebsites.net';
 
-    authenticate(function() {
+    authenticate(function () {
+
       loadDingSound();
       loadCss('https://fonts.googleapis.com/css?family=Open+Sans:400');
       !window.DEV_ENV && !isAMP && loadCss(cssUrl);
 
-      getChatSetting(function(setting) {
+      getChatSetting(function (setting) {
         addToBody(Intaker.Templates.button);
-        launcherContainer = document.getElementById(
-          'chatter-bot-launcher-container'
-        );
+        launcherContainer = document.getElementById('chatter-bot-launcher-container');
         isDesktop && addClass(launcherContainer, 'chatter-bot-is-desktop');
 
         lunchBtn = document.getElementById(btnId);
@@ -489,7 +436,9 @@ Intaker.Widget = function() {
    *
    * @param {Object} e
    */
-  window.onmessage = function(e) {
+
+  window.addEventListener('message', function (e) {
+    console.log(e.data);
     const data = Intaker.eventHelper.getData(e)['INTAKER_CHAT_WIDGET'];
     if (data) {
       switch (data.action) {
@@ -498,7 +447,7 @@ Intaker.Widget = function() {
           break;
         case 'adjustHeight':
           if (frameContainer) {
-            const h = data.height ? data.height + 10 : 0;
+            let h = data.height ? data.height + 10 : 0;
             Intaker.SetStyle(frameContainer, 'height', h ? h + 'px' : '');
           }
           break;
@@ -511,17 +460,18 @@ Intaker.Widget = function() {
         //   break;
         case 'chatStarted':
           chatUniqueId = data.uniqueId;
-          platform = data.platform;
+          platform     = data.platform;
 
           visitor(manualOpenedChat ? true : null);
           manualOpenedChat = false;
           break;
       }
     }
-  };
+  });
 
   //dummy
   // ajaxSuccessCallback('');
 };
+
 
 export const widget = Intaker.Widget;

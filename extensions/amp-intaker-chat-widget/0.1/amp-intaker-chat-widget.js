@@ -70,7 +70,7 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
 
     new widget().bootstrap({
       chatUrlHash: this.urlHash,
-      CookiesAPI,
+      CookiesAPI: new CookiesAPI(this.win),
       DEV_ENV: this.dev,
       useQA: this.qa,
       Templates: templates,

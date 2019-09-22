@@ -14,25 +14,52 @@
  * limitations under the License.
  */
 
-export const CookiesAPI = {
-  /**
-   * @return {null}
-   */
-  set: () => {
-    return null;
-  },
-  /**
-   *
-   * @return {null}
-   */
-  getJSON: () => {
-    return null;
-  },
+import {getCookie, setCookie} from '../../../src/cookies';
+import {parseJson} from '../../../src/json';
+
+/**
+ * @class
+ */
+export class CookiesAPI {
+
   /**
    *
-   * @return {null}
+   * @param {!Window} win
+   * @constructor
    */
-  get: () => {
-    return null;
-  },
-};
+  constructor(win) {
+    this.win = win;
+  }
+
+  /**
+   *
+   * @param {string} key
+   * @param {string} value
+   * @param {Object} attributes
+   */
+  set(key, value, attributes) {
+    setCookie(this.win, key, JSON.stringify(value), attributes.expires);
+  }
+
+  /**
+   *
+   * @param {string} key
+   * @return {?JsonObject|null|string}
+   */
+  getJSON(key) {
+    let cookie = getCookie(this.win, key);
+    if (cookie)
+      cookie = parseJson(cookie);
+
+    return cookie;
+  }
+
+  /**
+   *
+   * @param {string} key
+   * @return {?string|null}
+   */
+  get(key) {
+    return getCookie(this.win, key);
+  }
+}
