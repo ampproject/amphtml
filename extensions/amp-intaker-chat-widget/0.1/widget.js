@@ -115,7 +115,7 @@ Intaker.Widget = function() {
     removeClass(document.body, 'chatter-bot-body-noscroll');
     removeClass(launcherContainer, 'chatter-bot-frame-container-active');
     hideEl(frameContainer);
-    document.title = originalTitle;
+    // document.title = originalTitle
   }
 
   /**
@@ -133,30 +133,6 @@ Intaker.Widget = function() {
         exitPreview();
       }
     }
-  }
-
-  /**
-   *
-   * @param {string} url
-   * @param {JsonObject} data
-   * @param {function(?): undefined} success
-   * @return {XMLHttpRequest}
-   */
-  function postAjax(url, data, success) {
-    const xhr = window.XMLHttpRequest
-      ? new XMLHttpRequest()
-      : new window.ActiveXObject('Microsoft.XMLHTTP');
-    xhr.open('POST', url);
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState > 3 && xhr.status === 200) {
-        success(xhr.responseText);
-      }
-    };
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Accept', 'application/json');
-    xhr.send(JSON.stringify(data));
-    return xhr;
   }
 
   /**
@@ -258,14 +234,13 @@ Intaker.Widget = function() {
     // if (useQA)
     //   return callback();
 
-    postAjax(
+    Intaker.postAjax(
       api + '/api/Chat/CheckCustomerSubscription',
       /** @type {!JsonObject} */ ({
         'directLink': directLink,
         'externalLink': externalUrl,
       }),
       function(result) {
-        result = Intaker.parseJson(result);
         if (result === 'Paid' || result === 'Trial') {
           callback();
         } else {
@@ -316,14 +291,13 @@ Intaker.Widget = function() {
    * @param {function(?): undefined} callback
    */
   function getChatSetting(callback) {
-    postAjax(
+    Intaker.postAjax(
       api + '/api/Chat/GetChatSetting',
       /** @type {!JsonObject} */ ({
         'directLink': directLink,
         'externalLink': externalUrl,
       }),
       function(result) {
-        result = Intaker.parseJson(result);
         injectThemeCss(result);
         callback(result);
       }
@@ -415,7 +389,7 @@ Intaker.Widget = function() {
   function visitor(openedChat) {
     ///api/Chat/Visitor
 
-    postAjax(
+    Intaker.postAjax(
       api + '/api/Chat/Visitor',
       /** @type {!JsonObject} */ ({
         'uniqueVisit': isUniqueVisit,
@@ -472,8 +446,8 @@ Intaker.Widget = function() {
       Intaker.SetStyle = amp.setStyle;
       Intaker.Toggle = amp.toggle;
       Intaker.Referrer = amp.referrer;
-      Intaker.parseJson = amp.parseJson;
       Intaker.eventHelper = amp.eventHelper;
+      Intaker.postAjax = amp.postAjax;
 
       if (amp.DEV_ENV) {
         window.DEV_ENV = amp.DEV_ENV;
@@ -544,14 +518,13 @@ Intaker.Widget = function() {
             Intaker.SetStyle(frameContainer, 'height', h ? h + 'px' : '');
           }
           break;
-        case 'newMessage':
-          //isFromBot
-          if (data.source === 1) {
-            document.title = '(1) You have a new message - ' + originalTitle;
-          } else {
-            document.title = originalTitle;
-          }
-          break;
+        // case 'newMessage':
+        //   //isFromBot
+        //   if (data.source === 1)
+        //     document.title = "(1) You have a new message - " + originalTitle;
+        //   else
+        //     document.title = originalTitle;
+        //   break;
         case 'chatStarted':
           chatUniqueId = data.uniqueId;
           platform = data.platform;
