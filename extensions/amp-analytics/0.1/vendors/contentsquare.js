@@ -17,21 +17,16 @@
 import {jsonLiteral} from '../../../../src/json';
 
 const CONTENTSQUARE_CONFIG = jsonLiteral({
-  'vars': {
-    'version': 'amp-0.0.1',
-    'csid':
-      '$MATCH(COOKIE(_cs_id), `([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})`, 1)',
-    'uuid': '$IF(${csid}, ${csid}, CLIENT_ID(AMP_CID))',
-  },
   'requests': {
     'base': 'https://c.contentsquare.net',
     'pageview':
       '${base}/pageview?pid=${projectId}' +
-      '&pn=${counter}&hd=${timestamp}' +
+      '&pn=${counter(page_number)}&hd=${timestamp}' +
       '&dw=${screenWidth}&dh=${scrollHeight}' +
       '&sw=${screenWidth}&sh=${screenHeight}' +
       '&dr=${externalReferrer}&url=${ampdocUrl}' +
-      '&la=${browserLanguage}&v=${version}',
+      '&la=${browserLanguage}&v=${version}' +
+      '&sn=${sn}',
   },
   'triggers': {
     'trackPageview': {
@@ -47,12 +42,16 @@ const CONTENTSQUARE_CONFIG = jsonLiteral({
     'xhrpost': false,
     'image': true,
   },
+  'vars': {
+    'version': 'amp-0.0.1',
+    'csid': '$MATCH(COOKIE(_cs_id), `([0-9a-fA-F-]{36})`, 1)',
+    'sn': '$MATCH(COOKIE(_cs_id), `([0-9a-fA-F-]{36}.)([0-9]+)`, 2)',
+    'uuid': '$IF(${csid}, ${csid}, CLIENT_ID(_cs_id))',
+  },
   'cookies': {
-    '_cs_id': {
-      'value': 'CLIENT_ID(AMP_CID)',
-    },
-    '_cs_s': {
-      'value': '1.1',
+    'cookieMaxAge': 341164037, // 13 months in seconds
+    '_cs_amp': {
+      'value': 'CLIENT_ID(amp-cs).COUNTER(page_number)',
     },
   },
 });
