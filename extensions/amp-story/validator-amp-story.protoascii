@@ -54,12 +54,6 @@ tags: {  # <amp-story>
     value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
-    name: "parallax-fx-mode",
-    value: "depth"
-    value: "pop-out"
-    value: "center"
-  }
-  attrs: {
     name: "parallax-fx-nearest-scale",
     value_regex: "[0-9]+([.][0-9]+)?"
   }
@@ -155,12 +149,6 @@ tags: {  # <amp-story-page>
     value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
-    name: "parallax-fx-mode",
-    value: "depth"
-    value: "pop-out"
-    value: "center"
-  }
-  attrs: {
     name: "parallax-fx-nearest-scale",
     value_regex: "[0-9]+([.][0-9]+)?"
   }
@@ -194,6 +182,14 @@ tags: {  # <amp-story-grid-layer>
     name: "position"
     value: "landscape-half-left"
     value: "landscape-half-right"
+  }
+  attrs: {
+    name: "no-parallax-fx"
+    value: ""
+  }
+  attrs: {
+    name: "parallax-fx-origin-layer"
+    value: ""
   }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {

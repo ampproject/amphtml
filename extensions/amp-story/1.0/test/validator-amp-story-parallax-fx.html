@@ -35,7 +35,6 @@
       parallax-fx-farthest-scale="1"
       parallax-fx-nearest-scale="1.3"
       parallax-fx-layer-spacing="3"
-      parallax-fx-mode="depth"
       title="My Story"
       publisher="Me"
       publisher-logo-src="http://me.com/logo.png"
@@ -59,7 +58,7 @@
         <h3 align-items="stretch"></h3>
         <h3 align-self="start"></h3>
       </amp-story-grid-layer>
-      <amp-story-grid-layer template="horizontal">
+      <amp-story-grid-layer template="horizontal" parallax-fx-origin-layer>
         <h1></h1>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -88,9 +87,8 @@
         id="2" 
         parallax-fx-farthest-scale="0.8"
         parallax-fx-nearest-scale="1.1"
-        parallax-fx-layer-spacing="2"
-        parallax-fx-mode="pop-out">
-      <amp-story-grid-layer template="horizontal">
+        parallax-fx-layer-spacing="2">
+      <amp-story-grid-layer template="horizontal" parallax-fx-origin-layer>
         <h5 animate-in="drop">
           <h1>
             <h4 animate-in-delay="anything"></h4>
