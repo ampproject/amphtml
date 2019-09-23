@@ -15,21 +15,15 @@
  */
 
 import {Services} from '../../../src/services';
-import {clamp, mapRange, sum} from '../../../src/utils/math';
-import {
-  computedStyle,
-  resetStyles,
-  setImportantStyles,
-  setStyle,
-  setStyles,
-} from '../../../src/style';
 import {dev} from '../../../src/log';
+import {findIndex} from '../../../src/utils/array';
 import {listen} from '../../../src/event-helper';
+import {mapRange, sum} from '../../../src/utils/math';
+import {resetStyles, setImportantStyles, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const SMOOTHING_PTS = 4;
 const PERSPECTIVE = 1000;
-const MAX_TILT = 15;
 const DEFAULT_LAYER_SPACING = 1;
 const DEFAULT_FARTHEST_SCALE = 1.3;
 const DEFAULT_NEAREST_SCALE = 0.8;
@@ -50,11 +44,11 @@ export class ParallaxManager {
    * @param {!Element} story
    */
   constructor(global, vsync, story) {
-    /** @public {!Window} */
-    this.win = global;
+    /** @private {!Window} */
+    this.win_ = global;
 
-    /** @public @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync = vsync;
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsync;
 
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(global);
@@ -88,13 +82,13 @@ export class ParallaxManager {
 
     if (
       (this.platform_.isIos() || this.platform_.isAndroid()) &&
-      this.win.DeviceOrientationEvent
+      this.win_.DeviceOrientationEvent
     ) {
-      listen(this.win, 'deviceorientation', event => {
+      listen(this.win_, 'deviceorientation', event => {
         this.parallaxOrientationMutate_(event);
       });
     } else {
-      listen(this.win, 'mousemove', event => {
+      listen(this.win_, 'mousemove', event => {
         this.parallaxMouseMutate_(event);
       });
     }
@@ -124,23 +118,9 @@ export class ParallaxManager {
    * @return {!ParallaxPage}
    */
   registerParallaxPage(page) {
-    const parallaxPage = new ParallaxPage(this, page);
+    const parallaxPage = new ParallaxPage(this, this.vsync_, page);
     this.parallaxPages_.push(parallaxPage);
     return parallaxPage;
-  }
-
-  /**
-   * Resets and re-initializes all page styles
-   * @return {!Promise}
-   */
-  refreshAllPageStyles() {
-    return this.parallaxPages_.forEach(page => {
-      if (page.shouldUpdate()) {
-        page.update(this.middleX_, this.middleY_);
-      } else {
-        page.resetStyles();
-      }
-    });
   }
 
   /**
@@ -150,7 +130,7 @@ export class ParallaxManager {
    * @private
    */
   parallaxOrientationMutate_(event) {
-    const window = this.win;
+    const window = this.win_;
     const {screen} = window;
 
     const page = this.parallaxPages_.filter(page => page.shouldUpdate())[0];
@@ -205,13 +185,17 @@ export class ParallaxManager {
     mappedX = mapRange(mappedX, -75, 75, -25, 25);
     mappedY = mapRange(mappedY, -75, 75, -25, 25);
 
-    this.refreshAllPageStyles();
-
-    if (this.middleY_ != 0 && this.middleX_ != 0) {
-      page.update(mappedX, mappedY);
-    } else {
-      page.update(this.middleX_, this.middleY_);
-    }
+    this.parallaxPages_.forEach(page => {
+      if (page.shouldUpdate()) {
+        if (this.middleY_ != 0 && this.middleX_ != 0) {
+          page.update(mappedX, mappedY);
+        } else {
+          page.update(this.middleX_, this.middleY_);
+        }
+      } else {
+        page.resetStyles();
+      }
+    });
   }
 
   /**
@@ -235,20 +219,13 @@ export class ParallaxManager {
     const mappedX = mapRange(percentageX * 100, 0, 100, -25, 25);
     const mappedY = mapRange(percentageY * 100, 0, 100, -25, 25);
 
-    const tiltX = clamp(
-      MAX_TILT / 2 - percentageX * MAX_TILT,
-      -MAX_TILT,
-      MAX_TILT
-    ).toFixed(2);
-    const tiltY = clamp(
-      percentageY * MAX_TILT - MAX_TILT / 2,
-      -MAX_TILT,
-      MAX_TILT
-    ).toFixed(2);
-
-    this.refreshAllPageStyles();
-
-    page.update(mappedX, mappedY, tiltX, tiltY);
+    this.parallaxPages_.forEach(page => {
+      if (page.shouldUpdate()) {
+        page.update(mappedX, mappedY);
+      } else {
+        page.resetStyles();
+      }
+    });
   }
 }
 
@@ -258,26 +235,21 @@ export class ParallaxManager {
 export class ParallaxPage {
   /**
    * @param {!ParallaxManager} manager
+   * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!Element} element The parent page of thi element
    */
-  constructor(manager, element) {
+  constructor(manager, vsync, element) {
     /** @private {!ParallaxManager} */
     this.manager_ = manager;
 
     /** @const {!Element} */
     this.element = element;
 
-    /** @private @const {boolean} */
+    /** @private {boolean} */
     this.initialized_ = false;
 
-    /** @private @const {string} */
-    this.initialTransform_ = '';
-
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = this.manager_.vsync;
-
-    /** @private {!Window} */
-    this.win_ = this.manager_.win;
+    this.vsync_ = vsync;
 
     /** @private @const {number} */
     this.layerSpacing_ = Number(
@@ -303,49 +275,16 @@ export class ParallaxPage {
    * x and y axes
    * @param {number} x The movement of the layer in the x axis
    * @param {number} y The movement of the layer in the y axis
-   * @param {number} tiltX Rotation on the X axis
-   * @param {number} tiltY Rotation on the Y axis
    * @return {!Promise}
    */
-  update(x = 0, y = 0, tiltX = 0, tiltY = 0) {
+  update(x = 0, y = 0) {
     return this.setInitialStyles().then(() => {
       return this.vsync_.mutate(() => {
         setStyles(this.element, {
           perspectiveOrigin: `${Math.round(x * 50)}px ${Math.round(y * 50)}px`,
         });
-        setImportantStyles(this.element, {
-          transform:
-            `rotateX(${tiltY}deg) rotateY(${tiltX}deg) ` +
-            this.initialTransform_,
-          willChange: 'transform',
-        });
       });
     });
-  }
-
-  /**
-   * Re-queries and saves the element's original transform styling
-   * @return {!Promise}
-   */
-  updateInheritedTransforms() {
-    return this.vsync_
-      .mutatePromise(() => {
-        setStyle(this.element, 'transform', null);
-      })
-      .then(() => {
-        return this.vsync_.mutatePromise(() => {
-          this.initialTransform_ = computedStyle(
-            this.win_,
-            this.element
-          ).getPropertyValue('transform');
-        });
-      })
-      .then(() => {
-        setImportantStyles(this.element, {
-          transform: this.initialTransform_,
-          willChange: 'transform',
-        });
-      });
   }
 
   /**
@@ -357,17 +296,10 @@ export class ParallaxPage {
 
     return this.vsync_
       .mutatePromise(() => {
-        resetStyles(this.element, [
-          'transform',
-          'perspectiveOrigin',
-          'perspective',
-        ]);
-        setImportantStyles(this.element, {
-          willChange: 'transform',
-        });
+        resetStyles(this.element, ['perspectiveOrigin', 'perspective']);
 
         layers.forEach(layer => {
-          resetStyles(layer, ['contain', 'overflow', 'transform']);
+          resetStyles(layer, ['contain', 'overflow']);
         });
       })
       .then(() => {
@@ -387,55 +319,51 @@ export class ParallaxPage {
    * @return {!Promise}
    */
   setInitialStyles() {
-    return this.updateInheritedTransforms().then(() => {
-      if (!this.shouldUpdate() || this.initialized_) {
-        return Promise.resolve();
-      }
+    if (!this.shouldUpdate() || this.initialized_) {
+      return Promise.resolve();
+    }
 
-      return this.vsync_.mutate(() => {
-        const layers = this.getLayers();
+    return this.vsync_.mutatePromise(() => {
+      const layers = this.getLayers();
 
-        setStyles(this.element, {
-          perspective: PERSPECTIVE * layers.length + 'px',
-          willChange: 'transform',
-        });
-
-        setImportantStyles(this.element, {
-          transition: 'opacity 350ms cubic-bezier(0.0,0.0,0.2,1)',
-          transform: this.initialTransform_,
-        });
-
-        const originLayerIndex = layers.findIndex(layer =>
-          layer.hasAttribute(ORIGIN_LAYER_ATTR)
-        );
-
-        const layerZIndexOffset =
-          originLayerIndex == -1
-            ? Math.round(layers.length / 2)
-            : originLayerIndex;
-
-        // Loop through the layers in the page and assign a z-index following
-        // DOM order (manual override will be added in the future)
-        layers.forEach((layer, order) => {
-          const translation = `translateZ(${(order - layerZIndexOffset) *
-            this.layerSpacing_ *
-            (PERSPECTIVE / 35)}px)`;
-          const scale = `scale(${mapRange(
-            order,
-            0,
-            layers.length - 1,
-            this.farthestScale_,
-            this.nearestScale_
-          )})`;
-          setImportantStyles(layer, {
-            contain: 'none',
-            overflow: 'visible',
-            transform: `${translation} ${scale}`,
-          });
-        });
-
-        this.initialized_ = true;
+      setStyles(this.element, {
+        perspective: PERSPECTIVE * layers.length + 'px',
       });
+
+      setImportantStyles(this.element, {
+        transition: 'opacity 350ms cubic-bezier(0.0,0.0,0.2,1)',
+      });
+
+      const originLayerIndex = findIndex(layers, layer =>
+        layer.hasAttribute(ORIGIN_LAYER_ATTR)
+      );
+
+      const layerZIndexOffset =
+        originLayerIndex == -1
+          ? Math.round(layers.length / 2)
+          : originLayerIndex;
+
+      // Loop through the layers in the page and assign a z-index following
+      // DOM order (manual override will be added in the future)
+      layers.forEach((layer, order) => {
+        const translation = `translateZ(${(order - layerZIndexOffset) *
+          this.layerSpacing_ *
+          (PERSPECTIVE / 35)}px)`;
+        const scale = `scale(${mapRange(
+          order,
+          0,
+          layers.length - 1,
+          this.farthestScale_,
+          this.nearestScale_
+        )})`;
+        setImportantStyles(layer, {
+          contain: 'none',
+          overflow: 'visible',
+          transform: `${translation} ${scale}`,
+        });
+      });
+
+      this.initialized_ = true;
     });
   }
 

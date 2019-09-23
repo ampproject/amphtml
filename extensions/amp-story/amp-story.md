@@ -223,11 +223,7 @@ Used with the live-story attribute. Time interval (in milliseconds) between chec
 
 ##### parallax-fx [optional]
 
-Enables the tilt-controlled [3D Parallax Effect](#parallax-fx) which uses the device's accelerometer to give the illusion of a 3D space to the story's layers. The effect is only available on mobile devices.
-
-##### parallax-fx-mode [optional]
-
-Used with the `parallax-fx` attribute. Describes the nature of the 3D parallax effect as one of three modes: `pop-out` (where content appears to be popping out of the screen), `depth` (where content appears behind the screen) and `center` (where the middle layer of the story appears at the screen level with content both behind it and above it).
+Enables a [3D Parallax Effect](#parallax-fx) which uses the device's accelerometer (on mobile) or the mouse's relative position to the story page (on desktop) to give the illusion of a 3D space to a story's layers. The effect is tilt-controlled on mobile devices and mouse-controlled on desktop.
 
 ##### parallax-fx-layer-spacing [optional]
 

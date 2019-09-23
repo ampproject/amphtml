@@ -156,11 +156,9 @@ export function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
 
 /**
  * Sums up the values of the given array and returns the result
- * @param {Array<number>} values
+ * @param {!Array<number>} values
  * @return {number}
  */
 export function sum(values) {
-  return values.reduce(function(a, b) {
-    return a + b;
-  });
+  return values.reduce((a, b) => a + b, 0);
 }

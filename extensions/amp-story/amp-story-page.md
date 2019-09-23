@@ -106,7 +106,7 @@ For example:
 
 ##### no-parallax-fx [optional]
 
-Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Disables the tilt-controlled [3D Parallax Effect](amp-story.md#parallax-fx) for the current page.
+Used with the [`parallax-fx`](amp-story.md#parallax-fx) attribute on the story component. Disables the tilt-controlled [3D Parallax Effect](amp-story.md#parallax-fx) for the current page.
 
 ##### parallax-fx-mode [optional]
 

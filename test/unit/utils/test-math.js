@@ -248,5 +248,9 @@ describes.sandboxed('utils/math', {}, () => {
       expect(sum([2, 10, 100])).to.equal(112);
       expect(sum([-3, 2, 44])).to.equal(43);
     });
+
+    it('should sum to 0 for an empty array', () => {
+      expect(sum([])).to.equal(0);
+    });
   });
 });
