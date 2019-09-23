@@ -29,7 +29,6 @@ import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/am
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {installExtensionsService} from '../../src/service/extensions-impl';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -104,7 +103,6 @@ describes.sandboxed('cid', {}, () => {
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
-    installGlobalDocumentStateService(fakeWin);
     ampdoc = Services.ampdocServiceFor(fakeWin).getSingleDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);

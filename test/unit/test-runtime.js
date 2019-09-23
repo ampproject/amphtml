@@ -29,7 +29,6 @@ import {
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
 import {installAmpdocServices} from '../../src/service/core-services';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
@@ -68,7 +67,6 @@ describes.fakeWin(
       const ampdoc = new AmpDocSingle(win);
       ampdocService.getSingleDoc = () => ampdoc;
       ampdocService.getAmpDoc = () => ampdoc;
-      installGlobalDocumentStateService(win);
       installPlatformService(win);
       installTimerService(win);
       vsyncForTesting(win);
