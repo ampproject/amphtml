@@ -5,13 +5,7 @@
   <title>AMP Experiments</title>
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <meta name="robots" content="noindex">
-  <!--
-    TODO(sparhami) Can we make these async? We currently depend on
-    execution order so that the AMP_CONFIG from v0.js does not interfere
-    with the one from the cache-busted v0.js loaded via experiments.js.
-  -->
-  <script defer src="https://cdn.ampproject.org/v0.js"></script>
-  <script defer src="/dist.tools/experiments/experiments.js"></script>
+  <script async src="/dist.tools/experiments/experiments.js"></script>
   <style>
     body {
       max-width: 600px;

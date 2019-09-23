@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
 import {endsWith} from './string';
 import {
   getSourceOrigin,
@@ -211,21 +210,19 @@ function trySetCookie(win, name, value, expirationTime, domain, sameSite) {
 }
 
 /**
- * Gets the cookie string to use for SameSite. This works around an issue where
- * Safari treats an unknown value ("None") as "Strict".
+ * Gets the cookie string to use for SameSite. This only sets the SameSite
+ * value if specified, falling back to the browser default. The default value
+ * is equivalent to SameSite.NONE, but is planned to be set to SameSite.LAX in
+ * Chrome 80.
+ *
+ * Note: In Safari 12, if the value is set to SameSite.NONE, it is treated by
+ * the browser as SameSite.STRICT.
  * @param {Window} win
  * @param {!SameSite|undefined} sameSite
  * @return {string} The string to use when setting the cookie.
  */
 function getSameSiteString(win, sameSite) {
   if (!sameSite) {
-    return '';
-  }
-
-  const platform = Services.platformFor(win);
-  const isWebkit = platform.isIos() || platform.isSafari();
-
-  if (isWebkit && sameSite == SameSite.NONE) {
     return '';
   }
 
