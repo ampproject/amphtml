@@ -89,9 +89,6 @@ export class StoryAdPage {
     /** @private @const {string} */
     this.id_ = `i-amphtml-ad-page-${this.index_}`;
 
-    /** @private @const {number} */
-    this.timeCreated_ = Date.now();
-
     /** @private @const {!Window} */
     this.win_ = storyAutoAdsEl.getAmpDoc().win;
 
@@ -103,6 +100,9 @@ export class StoryAdPage {
       storyAutoAdsEl,
       STORY_AD_ANALYTICS
     );
+
+    /** @private {?number} */
+    this.timeCreated_ = null;
 
     /** @private {?Element} */
     this.pageElement_ = null;
@@ -144,7 +144,7 @@ export class StoryAdPage {
 
   /** @return {boolean} */
   hasTimedOut() {
-    return Date.now() - this.timeCreated_ > TIMEOUT_LIMIT;
+    return this.timeCreated_ && Date.now() - this.timeCreated_ > TIMEOUT_LIMIT;
   }
 
   /** @return {boolean} */
@@ -184,6 +184,7 @@ export class StoryAdPage {
    * @return {!Element}
    */
   build() {
+    this.timeCreated_ = Date.now();
     this.pageElement_ = this.createPageElement_();
     this.adElement_ = this.createAdElement_();
 
