@@ -211,10 +211,13 @@ export class ParallaxManager {
     }
 
     const percentageX =
-      (event.pageX - (page.element.offsetLeft - page.element.offsetWidth / 2)) /
-      page.element.offsetWidth;
+      (event.pageX -
+        (page.element./*REVIEW*/ offsetLeft -
+          page.element./*REVIEW*/ offsetWidth / 2)) /
+      page.element./*REVIEW*/ offsetWidth;
     const percentageY =
-      (event.pageY - page.element.offsetTop) / page.element.offsetHeight;
+      (event.pageY - page.element./*REVIEW*/ offsetTop) /
+      page.element./*REVIEW*/ offsetHeight;
 
     const mappedX = mapRange(percentageX * 100, 0, 100, -25, 25);
     const mappedY = mapRange(percentageY * 100, 0, 100, -25, 25);
