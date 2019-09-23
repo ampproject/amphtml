@@ -17,7 +17,6 @@ import {ActionTrust} from '../../action-constants';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
-  SUBMIT_TIMEOUT_TYPE,
 } from '../../../src/async-input';
 import {PaymentsClient} from '../../../third_party/payjs/src/payjs';
 import {Services} from '../../services';
@@ -108,10 +107,6 @@ const GOOGLE_PAY_LOG_INLINE_PAYMENT_WIDGET_INITIALIZE = 4;
 /** @const {number} */
 const GOOGLE_PAY_TYPE_AMP_INLINE = 8;
 
-/** TODO : export variable to common location */
-/** @const {number} */
-const USER_INPUT_BUFFER_MILLIS = 100;
-
 /** @const {string} */
 const IS_TEST_MODE_ = 'is-test-mode';
 
@@ -151,8 +146,6 @@ export class AmpPaymentGoogleIntegration {
     this.ampdoc_ = ampdoc;
     /** @private {?AmpElement} */
     this.activeElement_ = null;
-    /** @const @private {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(window);
 
     // Iframe
     /** @private {?../../service/action-impl.ActionService} */
@@ -425,8 +418,8 @@ export class AmpPaymentGoogleIntegration {
       'The %s attribute is required for <amp-google-payment-inline-async> %s',
       AsyncInputAttributes.NAME,
       this.activeElement_
-      );
-    this.activeElement_.classList.add(AsyncInputClasses.ASYNC_INPUT); 
+    );
+    this.activeElement_.classList.add(AsyncInputClasses.ASYNC_INPUT);
   }
 
   /**
@@ -514,22 +507,21 @@ export class AmpPaymentGoogleIntegration {
   populatePaymentToken() {
     if (this.iframeRenderWithBottomSheet_) {
       return this.viewer_
-          .sendMessageAwaitResponse(
-            'loadPaymentData',
-            this.getPaymentDataRequest_()
-          )
-          .then(
-            data =>
-              Promise.resolve(JSON.stringify(data)),
-            error => {
-              this.triggerOnPaymentSubmitErrorEvent_(error);
-              user().error(TAG, 'Error on submission: ' + error);
-              return Promise.reject(
-                'loadPaymentData bottom sheet ' +
-                  'cancelled by the user or errored out.'
-              );
-            }
-          );
+        .sendMessageAwaitResponse(
+          'loadPaymentData',
+          this.getPaymentDataRequest_()
+        )
+        .then(
+          data => Promise.resolve(JSON.stringify(data)),
+          error => {
+            this.triggerOnPaymentSubmitErrorEvent_(error);
+            user().error(TAG, 'Error on submission: ' + error);
+            return Promise.reject(
+              'loadPaymentData bottom sheet ' +
+                'cancelled by the user or errored out.'
+            );
+          }
+        );
     } else {
       // If the payment token is not yet present, then we need to fetch it
       // before submitting the form. This will happen if the user decides to use
@@ -541,8 +533,7 @@ export class AmpPaymentGoogleIntegration {
           'getSelectedPaymentData'
         )
         .then(
-          data =>
-            Promise.resolve(JSON.stringify(data)),
+          data => Promise.resolve(JSON.stringify(data)),
           error => {
             this.triggerOnPaymentSubmitErrorEvent_(error);
             user().error(TAG, 'Error on submission: ' + error);

@@ -24,12 +24,12 @@ import {
   SUBMIT_TIMEOUT_TYPE,
 } from '../../../../src/async-input';
 import {Services} from '../../../../src/services';
+import {SsrTemplateHelper} from '../../../../src/ssr-template-helper';
 import {
   mockServiceForDoc,
   mockServiceForDocWithVariables,
 } from '../../../../testing/test-helper';
 import {poll} from '../../../../testing/iframe';
-import {SsrTemplateHelper} from '../../../../src/ssr-template-helper';
 
 /** @const {string} */
 const IFRAME_URL = 'http://example.com/somesubpath';
@@ -183,8 +183,10 @@ describes.realWin(
         },
         '*'
       );
-      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value 
-      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {return true})
+      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value
+      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {
+        return true;
+      });
 
       // expected response for the hidden input
       const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
@@ -295,7 +297,7 @@ describes.realWin(
 
       viewerMock.sendMessageAwaitResponse
         .withArgs('loadPaymentData', sinon.match.any)
-        .callsFake(() => Promise.reject("Load Payment Data Fail"));
+        .callsFake(() => Promise.reject('Load Payment Data Fail'));
 
       // Send intial status event to render using bottom sheet.
       win.postMessage(
@@ -314,8 +316,10 @@ describes.realWin(
         },
         '*'
       );
-      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value 
-      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {return true})
+      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value
+      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {
+        return true;
+      });
 
       return getAmpPaymentGoogleInline().then(gPayInline => {
         const formSubmitted = new Promise((resolve, reject) => {
@@ -378,8 +382,10 @@ describes.realWin(
         },
         '*'
       );
-      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value 
-      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {return true})
+      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value
+      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {
+        return true;
+      });
 
       // expected response for the hidden input
       const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
@@ -921,7 +927,7 @@ describes.realWin(
 
       const inline = doc.createElement('amp-viewer-gpay-inline');
       inline.setAttribute('layout', 'fixed-height');
-      inline.setAttribute('height', '100')
+      inline.setAttribute('height', '100');
       inline.setAttribute('name', PAYMENT_DATA);
       inline.setAttribute('is-test-mode', opt_isTestMode);
       form.appendChild(inline);

@@ -583,7 +583,7 @@ export class AmpForm {
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
-    iterateCursor(asyncInputs, asyncInput => { 
+    iterateCursor(asyncInputs, asyncInput => {
       const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
         asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
@@ -601,7 +601,8 @@ export class AmpForm {
           SUBMIT_TIMEOUT
         ).then(
           () => {
-            return this.handlePresubmitSuccess_(trust)},
+            return this.handlePresubmitSuccess_(trust);
+          },
           error => this.handlePresubmitError_(error)
         );
       },
@@ -672,12 +673,10 @@ export class AmpForm {
    * @return {!Promise}
    */
   handleXhrSubmit_(trust) {
-    user().error(TAG, 'handleXhrSubmit_')
     let p;
     if (this.ssrTemplateHelper_.isSupported()) {
       p = this.handleSsrTemplate_(trust);
     } else {
-      user().error(TAG, 'else--0-')
       this.submittingWithTrust_(trust);
       p = this.doActionXhr_().then(
         response => this.handleXhrSubmitSuccess_(response),
@@ -900,7 +899,6 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response) {
-    user().error(TAG, 'handleXhrSubmitSuccess_')
     const json = /** @type {!Promise<!JsonObject>} */ (response.json());
     return this.handleSubmitSuccess_(json).then(() => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');

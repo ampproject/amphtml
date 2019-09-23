@@ -40,8 +40,7 @@ export class AmpViewerGpayInline extends AMP.BaseElement {
       this.win.document,
       'amp-payment-google-integration'
     );
-    this.paymentsIntegration_.startInlinePayment(
-      this.element);
+    this.paymentsIntegration_.startInlinePayment(this.element);
   }
 
   /** @override */
