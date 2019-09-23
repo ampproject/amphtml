@@ -3,8 +3,9 @@
     "amp-next-page",
     "inabox-viewport-friendly",
     "inabox-no-chunking",
-    "inabox-viewport-lite",
-    "inabox-viewer-lite"
+    "inabox-resources-lite",
+    "inabox-viewer-lite",
+    "inabox-viewport-lite"
   ],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
@@ -32,10 +33,10 @@
   "as-use-attr-for-format": 0.01,
   "blurry-placeholder": 1,
   "chunked-amp": 1,
-  "custom-elements-v1": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "fie-css-cleanup": 1,
+  "fix-inconsistent-responsive-height-selection": 0.01,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
@@ -44,5 +45,6 @@
   "macro-after-long-task": 1,
   "new-loaders": 1,
   "pump-early-frame": 1,
+  "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.01,
   "version-locking": 1
 }

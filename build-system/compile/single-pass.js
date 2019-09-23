@@ -37,6 +37,7 @@ const tempy = require('tempy');
 const terser = require('terser');
 const through = require('through2');
 const {
+  extensionAliasBundles,
   extensionBundles,
   altMainBundles,
   TYPES,
@@ -45,7 +46,6 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
-const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
@@ -456,15 +456,11 @@ function setupBundles(graph) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  if (isTravisBuild()) {
-    // New line after all the compilation progress dots on Travis.
-    console.log('\n');
-  }
   log(
     'Performing single-pass',
     colors.cyan('babel'),
     'transforms in',
-    colors.cyan(graph.tmp)
+    colors.cyan(graph.tmp) + '...'
   );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
@@ -565,6 +561,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
     .then(cleanupWeakModuleFiles)
+    .then(copyAliasedExtensions)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       throw err;
@@ -679,6 +676,19 @@ function postPrepend(extension, prependContents) {
 }
 
 /**
+ * Copies JS for aliased extensions. (CSS is already dropped in place.)
+ */
+function copyAliasedExtensions() {
+  Object.keys(extensionAliasBundles).forEach(aliasedExtension => {
+    const {version, aliasedVersion} = extensionAliasBundles[aliasedExtension];
+    const src = `${aliasedExtension}-${version}.js`;
+    const dest = `${aliasedExtension}-${aliasedVersion}.js`;
+    fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
+    fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
+  });
+}
+
+/**
  * Cleans up the weak module files written out by closure compiler.
  * @return {!Promise}
  */
@@ -689,9 +699,7 @@ function cleanupWeakModuleFiles() {
 }
 
 function compile(flagsArray) {
-  if (isTravisBuild()) {
-    log('Minifying single-pass JS with', colors.cyan('closure-compiler'));
-  }
+  log('Minifying single-pass JS with', colors.cyan('closure-compiler') + '...');
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp

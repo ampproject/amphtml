@@ -70,6 +70,7 @@ import {
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
+import {WindowInterface} from '../../../src/window-interface';
 import {
   createElementWithAttributes,
   isRTL,
@@ -366,12 +367,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
-    if (
-      !isCdnProxy(this.win) &&
-      !isExperimentOn(this.win, 'expDfpInvOrigDeprecated')
-    ) {
-      this.experimentIds.push('21060933');
-    }
     let forcedExperimentId;
     if (urlExperimentId) {
       forcedExperimentId = {
@@ -482,7 +477,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
       ].some(eid => this.experimentIds.indexOf(eid) >= 0);
-    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
@@ -522,7 +517,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           : null,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
-      'u_sd': this.win.devicePixelRatio,
+      'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
     };
@@ -1301,12 +1296,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // setStyles cannot have computed style names, so we must do this by cases.
     if (isRtl) {
       setStyles(this.element, {
-        'z-index': '30',
+        'z-index': '11',
         'margin-right': `${Math.round(newMargin)}px`,
       });
     } else {
       setStyles(this.element, {
-        'z-index': '30',
+        'z-index': '11',
         'margin-left': `${Math.round(newMargin)}px`,
       });
     }

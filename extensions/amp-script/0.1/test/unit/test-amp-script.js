@@ -78,7 +78,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       'alert(1)'
     );
 
-    return script.layoutCallback().should.be.rejectedWith(/Content-Type/);
+    return script.layoutCallback().should.be.rejected;
   });
 
   it('should check sha384(author_js) for cross-origin src', async () => {
@@ -206,86 +206,86 @@ describe('SanitizerImpl', () => {
 
   beforeEach(() => {
     win = new FakeWindow();
-    s = new SanitizerImpl(win, []);
+    s = new SanitizerImpl(win, /* element */ null, []);
     el = win.document.createElement('div');
   });
 
-  describe('changeAttribute', () => {
+  describe('setAttribute', () => {
     it('should remove attributes when value is null', () => {
       el.setAttribute('class', 'foo');
-      s.changeAttribute(el, 'class', null);
+      s.setAttribute(el, 'class', null);
       expect(el.hasAttribute('class')).to.be.false;
     });
 
     it('should set attributes when value is non-null', () => {
-      s.changeAttribute(el, 'class', 'foo');
+      s.setAttribute(el, 'class', 'foo');
       expect(el.getAttribute('class')).to.equal('foo');
     });
 
     it('should be case-insensitive to attribute name', () => {
-      s.changeAttribute(el, 'CLASS', 'foo');
+      s.setAttribute(el, 'CLASS', 'foo');
       expect(el.getAttribute('class')).to.equal('foo');
     });
 
     it('should set a[target] if [href] exists', () => {
       const a = win.document.createElement('a');
-      s.changeAttribute(a, 'href', '/foo.html');
+      s.setAttribute(a, 'href', '/foo.html');
       expect(a.getAttribute('target')).to.equal('_top');
     });
 
     it('should not allow changes to invalid tags', () => {
       const base = win.document.createElement('base');
       // 'href' attribute is allowed but 'base' tag isn't.
-      s.changeAttribute(base, 'href', '/foo.html');
+      s.setAttribute(base, 'href', '/foo.html');
       expect(base.getAttribute('href')).to.be.null;
     });
 
     it('should allow changes to built-in AMP tags except amp-pixel', () => {
       const img = win.document.createElement('amp-img');
-      s.changeAttribute(img, 'src', 'foo.jpg');
+      s.setAttribute(img, 'src', 'foo.jpg');
       expect(img.getAttribute('src')).to.include('foo.jpg');
 
       const layout = win.document.createElement('amp-layout');
-      s.changeAttribute(layout, 'width', '10');
+      s.setAttribute(layout, 'width', '10');
       expect(layout.getAttribute('width')).to.equal('10');
 
       const pixel = win.document.createElement('amp-pixel');
-      s.changeAttribute(pixel, 'src', '/foo/track');
+      s.setAttribute(pixel, 'src', '/foo/track');
       expect(pixel.getAttribute('src')).to.be.null;
     });
 
     it('should not allow changes to other AMP tags', () => {
       const analytics = win.document.createElement('amp-analytics');
-      s.changeAttribute(analytics, 'data-credentials', 'include');
+      s.setAttribute(analytics, 'data-credentials', 'include');
       expect(analytics.getAttribute('data-credentials')).to.be.null;
     });
 
     it('should not allow changes to form elements', () => {
       const form = win.document.createElement('form');
-      s.changeAttribute(form, 'action-xhr', 'https://example.com/post');
+      s.setAttribute(form, 'action-xhr', 'https://example.com/post');
       expect(form.getAttribute('action-xhr')).to.be.null;
 
       const input = win.document.createElement('input');
-      s.changeAttribute(input, 'value', 'foo');
+      s.setAttribute(input, 'value', 'foo');
       expect(input.getAttribute('value')).to.be.null;
     });
 
     it('should allow changes to form elements if sandbox=allow-forms', () => {
-      s = new SanitizerImpl(win, ['allow-forms']);
+      s = new SanitizerImpl(win, /* element */ null, ['allow-forms']);
 
       const form = win.document.createElement('form');
-      s.changeAttribute(form, 'action-xhr', 'https://example.com/post');
+      s.setAttribute(form, 'action-xhr', 'https://example.com/post');
       expect(form.getAttribute('action-xhr')).to.equal(
         'https://example.com/post'
       );
 
       const input = win.document.createElement('input');
-      s.changeAttribute(input, 'value', 'foo');
+      s.setAttribute(input, 'value', 'foo');
       expect(input.getAttribute('value')).to.equal('foo');
     });
   });
 
-  describe('storage', () => {
+  describe('localStorage & sessionStorage', () => {
     it('getStorage()', () => {
       it('should be initially empty', () => {
         expect(s.getStorage(StorageLocation.LOCAL)).to.deep.equal({});
@@ -314,26 +314,26 @@ describe('SanitizerImpl', () => {
       });
     });
 
-    describe('changeStorage()', () => {
+    describe('setStorage()', () => {
       it('should set items', () => {
-        s.changeStorage(StorageLocation.LOCAL, 'x', '1');
+        s.setStorage(StorageLocation.LOCAL, 'x', '1');
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('x')).to.equal('1');
 
-        s.changeStorage(StorageLocation.SESSION, 'y', '2');
+        s.setStorage(StorageLocation.SESSION, 'y', '2');
         expect(win.sessionStorage.length).to.equal(1);
         expect(win.sessionStorage.getItem('y')).to.equal('2');
       });
 
       it('should not set items with amp-* keys', () => {
         allowConsoleError(() => {
-          s.changeStorage(StorageLocation.LOCAL, 'amp-x', '1');
+          s.setStorage(StorageLocation.LOCAL, 'amp-x', '1');
         });
         expect(win.localStorage.length).to.equal(0);
         expect(win.localStorage.getItem('amp-x')).to.be.null;
 
         allowConsoleError(() => {
-          s.changeStorage(StorageLocation.SESSION, 'amp-y', '2');
+          s.setStorage(StorageLocation.SESSION, 'amp-y', '2');
         });
         expect(win.sessionStorage.length).to.equal(0);
         expect(win.sessionStorage.getItem('amp-y')).to.be.null;
@@ -341,12 +341,12 @@ describe('SanitizerImpl', () => {
 
       it('should remove items', () => {
         win.localStorage.setItem('x', '1');
-        s.changeStorage(StorageLocation.LOCAL, 'x', null);
+        s.setStorage(StorageLocation.LOCAL, 'x', null);
         expect(win.localStorage.length).to.equal(0);
         expect(win.localStorage.getItem('x')).to.be.null;
 
         win.sessionStorage.setItem('y', '2');
-        s.changeStorage(StorageLocation.SESSION, 'y', null);
+        s.setStorage(StorageLocation.SESSION, 'y', null);
         expect(win.sessionStorage.length).to.equal(0);
         expect(win.sessionStorage.getItem('y')).to.be.null;
       });
@@ -354,14 +354,14 @@ describe('SanitizerImpl', () => {
       it('should not remove items with amp-* keys', () => {
         win.localStorage.setItem('amp-x', '1');
         allowConsoleError(() => {
-          s.changeStorage(StorageLocation.LOCAL, 'amp-x', null);
+          s.setStorage(StorageLocation.LOCAL, 'amp-x', null);
         });
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('amp-x')).to.equal('1');
 
         win.sessionStorage.setItem('amp-y', '2');
         allowConsoleError(() => {
-          s.changeStorage(StorageLocation.SESSION, 'amp-y', null);
+          s.setStorage(StorageLocation.SESSION, 'amp-y', null);
         });
         expect(win.sessionStorage.length).to.equal(1);
         expect(win.sessionStorage.getItem('amp-y')).to.equal('2');
@@ -370,11 +370,68 @@ describe('SanitizerImpl', () => {
       it('should not support Storage.clear()', () => {
         win.localStorage.setItem('x', '1');
         allowConsoleError(() => {
-          s.changeStorage(StorageLocation.LOCAL, null, null);
+          s.setStorage(StorageLocation.LOCAL, null, null);
         });
         expect(win.localStorage.length).to.equal(1);
         expect(win.localStorage.getItem('x')).to.equal('1');
       });
+    });
+  });
+
+  describe('amp-state', () => {
+    let bind;
+
+    beforeEach(() => {
+      bind = {
+        getStateValue: () => {},
+        setState: () => {},
+      };
+      sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
+    });
+
+    it('AMP.setState(json)', async () => {
+      sandbox.spy(bind, 'setState');
+
+      await s.setStorage(
+        StorageLocation.AMP_STATE,
+        /* key */ null,
+        '{"foo":"bar"}'
+      );
+
+      expect(bind.setState).to.be.calledOnce;
+      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, true, false);
+    });
+
+    it('AMP.setState(not_json)', async () => {
+      sandbox.spy(bind, 'setState');
+
+      await s.setStorage(
+        StorageLocation.AMP_STATE,
+        /* key */ null,
+        '"foo":"bar'
+      );
+
+      expect(bind.setState).to.not.be.called;
+    });
+
+    it('AMP.getState(string)', async () => {
+      sandbox.stub(bind, 'getStateValue').returns('bar');
+
+      const state = await s.getStorage(StorageLocation.AMP_STATE, 'foo');
+      expect(state).to.equal('bar');
+
+      expect(bind.getStateValue).to.be.calledOnce;
+      expect(bind.getStateValue).to.be.calledWithExactly('foo');
+    });
+
+    it('AMP.getState()', async () => {
+      sandbox.stub(bind, 'getStateValue').returns({foo: 'bar'});
+
+      const state = await s.getStorage(StorageLocation.AMP_STATE, '');
+      expect(state).to.deep.equal({foo: 'bar'});
+
+      expect(bind.getStateValue).to.be.calledOnce;
+      expect(bind.getStateValue).to.be.calledWithExactly('.');
     });
   });
 });

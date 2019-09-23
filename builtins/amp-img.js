@@ -103,7 +103,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   onMeasureChanged() {
-    this.maybeGenerateSizes_();
+    this.maybeGenerateSizes_(/* sync */ false);
   }
 
   /** @override */
@@ -175,9 +175,10 @@ export class AmpImg extends BaseElement {
       );
     }
 
+    // It is important to call this before setting `srcset` attribute.
+    this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    this.maybeGenerateSizes_();
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
@@ -187,21 +188,17 @@ export class AmpImg extends BaseElement {
   /**
    * This function automatically generates sizes for amp-imgs without
    * the sizes attribute.
+   * @param {boolean} sync Whether to immediately make the change or schedule
+   *     via mutateElement.
    * @private
    */
-  maybeGenerateSizes_() {
+  maybeGenerateSizes_(sync) {
     if (!this.img_) {
       return;
     }
     // No need to generate sizes if already present.
     const sizes = this.element.getAttribute('sizes');
     if (sizes) {
-      return;
-    }
-    // Auto-sizes are not compatible with intrinsic layout.
-    // See https://github.com/ampproject/amphtml/issues/23453 for context.
-    const layout = this.getLayout();
-    if (layout === Layout.INTRINSIC) {
       return;
     }
     // Sizes is useless without the srcset attribute or if the srcset
@@ -221,16 +218,20 @@ export class AmpImg extends BaseElement {
     const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
     let defaultSize = width + 'px';
 
-    if (layout !== Layout.FIXED) {
+    if (this.getLayout() !== Layout.FIXED) {
       const ratio = Math.round((width * 100) / viewportWidth);
       defaultSize = Math.max(ratio, 100) + 'vw';
     }
 
     const generatedSizes = entry + defaultSize;
 
-    this.mutateElement(() => {
+    if (sync) {
       this.img_.setAttribute('sizes', generatedSizes);
-    });
+    } else {
+      this.mutateElement(() => {
+        this.img_.setAttribute('sizes', generatedSizes);
+      });
+    }
     this.sizesWidth_ = width;
   }
 

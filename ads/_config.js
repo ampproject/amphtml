@@ -125,6 +125,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
 
+  'adglare': {
+    renderStartImplemented: true,
+  },
+
   'adhese': {
     renderStartImplemented: true,
   },
@@ -238,7 +242,7 @@ const adConfig = jsonConfiguration({
 
   'adyoulike': {
     consentHandlingOverride: true,
-    prefetch: 'https://pixels.omnitagjs.com/amp.js',
+    prefetch: 'https://fo-static.omnitagjs.com/amp.js',
     renderStartImplemented: true,
   },
 
@@ -888,6 +892,19 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'shemedia': {
+    prefetch: [
+      'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+      'https://ads.shemedia.com/static/amp.js',
+    ],
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://tpc.googlesyndication.com',
+      'https://ads.blogherads.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'sklik': {
     prefetch: 'https://c.imedia.cz/js/amp.js',
   },
@@ -914,6 +931,12 @@ const adConfig = jsonConfiguration({
   },
 
   'smi2': {
+    renderStartImplemented: true,
+  },
+
+  'smilewanted': {
+    prefetch: 'https://prebid.smilewanted.com/amp/amp.js',
+    preconnect: 'https://static.smilewanted.com',
     renderStartImplemented: true,
   },
 

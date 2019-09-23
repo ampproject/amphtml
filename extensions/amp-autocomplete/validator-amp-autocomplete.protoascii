@@ -65,6 +65,7 @@ tags: {  # <amp-autocomplete>
   }
   attrs: { name: "highlight-user-entry" }
   attrs: { name: "template" }
+  attrs: { name: "items" }
   # amp-bind
   attrs: {
     name: "[src]"

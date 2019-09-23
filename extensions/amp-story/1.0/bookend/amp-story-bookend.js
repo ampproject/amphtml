@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface';
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
+import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
 import {
@@ -34,7 +37,7 @@ import {
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../../src/localized-strings';
 import {Services} from '../../../../src/services';
-import {closest} from '../../../../src/dom';
+import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
@@ -211,6 +214,12 @@ export class AmpStoryBookend extends DraggableDrawer {
 
     /** @private {?ScrollableShareWidget} */
     this.shareWidget_ = null;
+
+    /** @private {!../story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win, this.element);
+
+    /** @const @private {!../variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(this.win);
   }
 
   /**
@@ -530,10 +539,43 @@ export class AmpStoryBookend extends DraggableDrawer {
     const target = dev().assertElement(event.target);
     event[AMP_CUSTOM_LINKER_TARGET] = target;
 
+    this.fireAnalyticsEvent_(target);
+
     if (target.hasAttribute('on')) {
       const actionService = Services.actionServiceForDoc(this.element);
       actionService.trigger(target, 'tap', event, ActionTrust.HIGH);
     }
+  }
+
+  /**
+   * Configures analytics variables and fires analytic event.
+   * @param {!Element} target
+   * @private
+   */
+  fireAnalyticsEvent_(target) {
+    const anchorEl = closestAncestorElementBySelector(target, 'A');
+    if (!anchorEl) {
+      return;
+    }
+
+    const componentData = anchorEl[AMP_STORY_BOOKEND_COMPONENT_DATA];
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_TARGET_HREF,
+      anchorEl.href
+    );
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_COMPONENT_TYPE,
+      componentData.type
+    );
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_COMPONENT_POSITION,
+      componentData.position
+    );
+
+    this.analyticsService_.triggerEvent(AnalyticsEvent.BOOKEND_CLICK);
   }
 
   /**

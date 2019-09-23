@@ -125,6 +125,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-sidebar-v2',
+    name: 'Updated sidebar component with nested menu and animations',
+  },
+  {
     id: 'ampdoc-fie',
     name: 'Install AmpDoc on FIE level',
     spec: 'https://github.com/ampproject/amphtml/issues/22734',
@@ -175,16 +179,6 @@ const EXPERIMENTS = [
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
-  },
-  {
-    id: 'ios-embed-sd',
-    name:
-      'A new iOS embedded viewport model that wraps the body into' +
-      ' shadow root',
-    spec:
-      'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
     id: 'ios-scrollable-iframe',
@@ -282,12 +276,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
   },
   {
-    id: 'custom-elements-v1',
-    name: 'Enable a new custom elements v1 polyfill',
-    spec: 'https://github.com/ampproject/amphtml/pull/17205',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
-  },
-  {
     id: 'amp-carousel-chrome-scroll-snap',
     name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
@@ -375,6 +363,26 @@ const EXPERIMENTS = [
     name: 'Use iframe freezing instead of recreating iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/24110',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
+  },
+  {
+    id: 'adsense-ad-size-optimization',
+    name:
+      'Per publisher server side settings for changing the ad size ' +
+      'to responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/23568',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
+  },
+  {
+    id: 'fix-inconsistent-responsive-height-selection',
+    name: 'Fix inconsistent responsive height selection.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24166',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
+  },
+  {
+    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
+    name: 'Use amp-ad responsive to make amp auto ads responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24168',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
 ];
 

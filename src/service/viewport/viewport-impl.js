@@ -19,7 +19,6 @@ import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
-import {ViewportBindingIosEmbedShadowRoot_} from './viewport-binding-ios-embed-sd';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
@@ -162,7 +161,7 @@ export class ViewportImpl {
 
     /** @private {boolean} */
     this.visible_ = false;
-    this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
+    this.ampdoc.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
     // Top-level mode classes.
@@ -216,7 +215,7 @@ export class ViewportImpl {
 
   /** @private */
   updateVisibility_() {
-    const visible = this.viewer_.isVisible();
+    const visible = this.ampdoc.isVisible();
     if (visible != this.visible_) {
       this.visible_ = visible;
       if (visible) {
@@ -274,7 +273,7 @@ export class ViewportImpl {
     this.size_ = this.binding_.getSize();
     if (this.size_.width == 0 || this.size_.height == 0) {
       // Only report when the visibility is "visible" or "prerender".
-      const visibilityState = this.viewer_.getVisibilityState();
+      const visibilityState = this.ampdoc.getVisibilityState();
       if (
         visibilityState == VisibilityState.PRERENDER ||
         visibilityState == VisibilityState.VISIBLE
@@ -1129,16 +1128,7 @@ function createViewport(ampdoc) {
     ampdoc.isSingleDoc() &&
     getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED
   ) {
-    if (
-      isExperimentOn(win, 'ios-embed-sd') &&
-      win.Element.prototype.attachShadow &&
-      // We need the native Shadow DOM support and jumping-fixed-element fix.
-      parseFloat(Services.platformFor(win).getIosVersionString()) >= 12.2
-    ) {
-      binding = new ViewportBindingIosEmbedShadowRoot_(win);
-    } else {
-      binding = new ViewportBindingIosEmbedWrapper_(win);
-    }
+    binding = new ViewportBindingIosEmbedWrapper_(win);
   } else {
     binding = new ViewportBindingNatural_(ampdoc);
   }
