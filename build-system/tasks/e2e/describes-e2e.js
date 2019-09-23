@@ -410,7 +410,8 @@ function describeEnv(factory) {
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function() {
         this.timeout(SETUP_TIMEOUT);
-        await fixture.setup(env, browserName);
+        const retries = 1;
+        await fixture.setup(env, browserName, retries);
 
         // don't install for CI
         if (!isTravisBuild()) {
@@ -479,34 +480,43 @@ class EndToEndFixture {
   /**
    * @param {!Object} env
    * @param {string} browserName
+   * @param {number} retries
    */
-  async setup(env, browserName) {
-    const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
-    const config = getConfig();
-    const controller = await getController(config, browserName, deviceName);
-    const ampDriver = new AmpDriver(controller);
-    env.controller = controller;
-    env.ampDriver = ampDriver;
+  async setup(env, browserName, retries = 0) {
+    try {
+      const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
+      const config = getConfig();
+      const controller = await getController(config, browserName, deviceName);
+      const ampDriver = new AmpDriver(controller);
+      env.controller = controller;
+      env.ampDriver = ampDriver;
 
-    const {environment} = env;
+      const {environment} = env;
 
-    const url = new URL(testUrl);
-    if (experiments.length > 0) {
-      if (environment.includes('inabox')) {
-        // inabox experiments are toggled at server side using <meta> tag
-        url.searchParams.set('exp', experiments.join(','));
+      const url = new URL(testUrl);
+      if (experiments.length > 0) {
+        if (environment.includes('inabox')) {
+          // inabox experiments are toggled at server side using <meta> tag
+          url.searchParams.set('exp', experiments.join(','));
+        } else {
+          // AMP doc experiments are toggled via cookies
+          await toggleExperiments(ampDriver, url.href, experiments);
+        }
+      }
+
+      if (initialRect) {
+        const {width, height} = initialRect;
+        await controller.setWindowRect({width, height});
+      }
+
+      await ampDriver.navigateToEnvironment(environment, url.href);
+    } catch (ex) {
+      if (retries > 0) {
+        await this.setup(env, browserName, --retries);
       } else {
-        // AMP doc experiments are toggled via cookies
-        await toggleExperiments(ampDriver, url.href, experiments);
+        throw ex;
       }
     }
-
-    if (initialRect) {
-      const {width, height} = initialRect;
-      await controller.setWindowRect({width, height});
-    }
-
-    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
