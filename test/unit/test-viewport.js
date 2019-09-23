@@ -32,7 +32,6 @@ import {
 import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -98,7 +97,6 @@ describes.fakeWin('Viewport', {}, env => {
     installVsyncService(windowApi);
     installPlatformService(windowApi);
     installDocService(windowApi, /* isSingleDoc */ true);
-    installGlobalDocumentStateService(windowApi);
 
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
     installViewerServiceForDoc(ampdoc);
@@ -1452,7 +1450,6 @@ describe('Viewport META', () => {
       installVsyncService(windowApi);
       installPlatformService(windowApi);
       installDocService(windowApi, /* isSingleDoc */ true);
-      installGlobalDocumentStateService(windowApi);
       ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
@@ -1553,7 +1550,6 @@ describe('createViewport', () => {
       it('should bind to "natural" when not iframed', () => {
         win.parent = win;
         installDocService(win, /* isSingleDoc */ true);
-        installGlobalDocumentStateService(win);
         const ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
@@ -1564,7 +1560,6 @@ describe('createViewport', () => {
       it('should bind to "naturual" when iframed', () => {
         win.parent = {};
         installDocService(win, /* isSingleDoc */ true);
-        installGlobalDocumentStateService(win);
         const ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
@@ -1592,7 +1587,6 @@ describe('createViewport', () => {
         installTimerService(win);
         installVsyncService(win);
         installDocService(win, /* isSingleDoc */ true);
-        installGlobalDocumentStateService(win);
         ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         viewer = Services.viewerForDoc(ampDoc);

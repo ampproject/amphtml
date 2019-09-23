@@ -19,7 +19,6 @@ import {ViewerImpl} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {
@@ -112,7 +111,6 @@ describes.sandboxed('Viewer', {}, () => {
         windowApi.location.href = url;
       });
     installDocService(windowApi, /* isSingleDoc */ true);
-    installGlobalDocumentStateService(windowApi);
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
 
     params = {'origin': 'g.com'};
