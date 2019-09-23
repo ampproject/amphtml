@@ -372,20 +372,22 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!Promise}
    */
   maybeInitializeParallaxFx_() {
-    if (this.element.hasAttribute('no-parallax-fx')) {
-      return Promise.resolve();
-    }
+    return Promise.resolve().then(() => {
+      if (this.element.hasAttribute('no-parallax-fx')) {
+        return;
+      }
 
-    const storyEl = dev().assertElement(
-      closestAncestorElementBySelector(this.element, 'amp-story'),
-      'amp-story-page must be a descendant of amp-story.'
-    );
-
-    storyEl.getImpl().then(storyImpl => {
-      const {parallaxManager} = storyImpl;
-      return Promise.resolve().then(() =>
-        parallaxManager.registerParallaxPage(this.element)
+      const storyEl = dev().assertElement(
+        closestAncestorElementBySelector(this.element, 'amp-story'),
+        'amp-story-page must be a descendant of amp-story.'
       );
+
+      return storyEl.getImpl().then(storyImpl => {
+        if (!storyImpl.parallaxManager) {
+          return;
+        }
+        return storyImpl.parallaxManager.registerParallaxPage(this.element);
+      });
     });
   }
 
