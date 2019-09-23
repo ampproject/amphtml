@@ -23,7 +23,6 @@ amp-sidebar {
   max-width: 80vw;
   background-color: #efefef;
   min-width: 45px !important;
-  width: var(--sidebar-width);
   outline: none;
   overflow-x: hidden !important;
   overflow-y: auto !important;

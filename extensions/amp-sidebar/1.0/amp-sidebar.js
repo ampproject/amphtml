@@ -35,8 +35,8 @@ import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
-import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
+import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
@@ -139,7 +139,10 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-sidebar-v2'), 'Experiment is off');
+    userAssert(
+      isExperimentOn(this.win, 'amp-sidebar-v2'),
+      'Turning on the amp-sidebar-v2 experiment is necessary to use the new sidebar component.'
+    );
 
     const {element} = this;
 
@@ -158,9 +161,6 @@ export class AmpSidebar extends AMP.BaseElement {
       );
       element.setAttribute('side', this.side_);
     }
-
-    const width = element.getAttribute('width');
-    setImportantStyles(element, {'--sidebar-width': `${width}px`});
 
     // Get the toolbar attribute from the child navs.
     const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));

@@ -24,8 +24,7 @@ import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'amp-drilldown';
 
-// TODO(stevenye): add unit tests for click handlers and history.
-// https://github.com/ampproject/amphtml/issues/24668
+// TODO(#24668): add unit tests for click handlers and history.
 export class AmpDrilldown extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -48,14 +47,16 @@ export class AmpDrilldown extends AMP.BaseElement {
 
     /** @private {function(!Event)} */
     this.submenuCloseHandler_ = this.handleSubmenuCloseClick_.bind(this);
+
+    /** @private {function(!Event)} */
+    this.keydownHandler_ = this.handleKeyDown_.bind(this);
   }
 
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-sidebar-v2'), 'Experiment is off');
-
-    this.documentElement_.addEventListener('keydown', e =>
-      this.handleKeyDown_(e)
+    userAssert(
+      isExperimentOn(this.win, 'amp-sidebar-v2'),
+      'Turning on the amp-sidebar-v2 experiment is necessary to use the amp-drilldown component.'
     );
   }
 
@@ -92,6 +93,8 @@ export class AmpDrilldown extends AMP.BaseElement {
     closeElements.forEach(element => {
       element.addEventListener('click', this.submenuCloseHandler_);
     });
+
+    this.documentElement_.addEventListener('keydown', this.keydownHandler_);
   }
 
   /**
@@ -110,6 +113,8 @@ export class AmpDrilldown extends AMP.BaseElement {
     closeElements.forEach(element => {
       element.removeEventListener('click', this.submenuCloseHandler_);
     });
+
+    this.documentElement_.removeEventListener('keydown', this.keydownHandler_);
   }
 
   /**
@@ -188,8 +193,7 @@ export class AmpDrilldown extends AMP.BaseElement {
    */
   handleKeyDown_(e) {
     switch (e.key) {
-      // TODO(stevenye): Add support for all arrow keys and for RTL.
-      // https://github.com/ampproject/amphtml/issues/24665
+      // TODO(#24665): Add support for all arrow keys and for RTL.
       case Keys.LEFT_ARROW:
         const submenu = this.currentSubmenu_;
         if (submenu) {
