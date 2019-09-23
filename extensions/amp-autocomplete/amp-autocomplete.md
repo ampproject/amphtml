@@ -79,11 +79,8 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>src (optional)</strong></td>
-    <td>The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec.
-
-    The src attribute may be omitted if the <code>[src]</code> attribute exists.
-
-    If fetching the data at the src URL fails, the <code><amp-autocomplete></code> triggers a fallback.</td>
+    <td>The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec. If fetching the data at the src URL fails, the <code>amp-autocomplete</code> triggers a fallback. The src attribute may be omitted if the <code>[src]</code> attribute exists.
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>filter-expr (optional)</strong></td>
