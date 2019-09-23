@@ -138,7 +138,6 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Setup actions and listeners
     this.setupActions_();
-    this.stopTouchMovePropagation_();
     this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
@@ -630,24 +629,6 @@ class AmpCarousel extends AMP.BaseElement {
     this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
     this.updateCurrentIndex_(index);
     this.updateUi_();
-  }
-
-  /**
-   * Stops touchmove events from propagating up to the viewer. Ideally we would
-   * have a separate piece of logic to not forward touchmoves if they occurred
-   * in a scrollable container instead of stopping propagation entirely for
-   * horizontal and vertical swipes. See:
-   * https://github.com/ampproject/amphtml/issues/4754.
-   * @private
-   */
-  stopTouchMovePropagation_() {
-    this.scrollContainer_.addEventListener(
-      'touchmove',
-      event => event.stopPropagation(),
-      {
-        passive: true,
-      }
-    );
   }
 }
 
