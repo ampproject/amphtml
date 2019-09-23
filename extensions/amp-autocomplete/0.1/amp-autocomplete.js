@@ -347,6 +347,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.setAttribute('autocomplete', 'off');
 
     // Register event handlers.
+    this.inputElement_.addEventListener(
+      'touchstart',
+      () => {
+        this.checkFirstInteractionAndMaybeFetchData_();
+      },
+      {passive: true}
+    );
     this.inputElement_.addEventListener('input', () => {
       this.inputHandler_();
     });
@@ -375,14 +382,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (typeof src === 'string') {
-      return this.getRemoteData_()
-        .catch(e => {
-          this.displayFallback_(e);
-        })
-        .then(remoteData => {
+      return this.getRemoteData_().then(
+        remoteData => {
           this.sourceData_ = remoteData || [];
           this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
-        });
+        },
+        e => {
+          this.displayFallback_(e);
+        }
+      );
     }
     if (typeof src === 'object') {
       this.sourceData_ = src['items'] || [];
@@ -735,19 +743,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   checkFirstInteractionAndMaybeFetchData_() {
-    if (!this.interacted_ && this.element.hasAttribute('src')) {
-      this.interacted_ = true;
-      const remoteDataPromise = this.getRemoteData_().catch(e => {
-        this.displayFallback_(e);
-      });
-      return remoteDataPromise.then(remoteData => {
-        if (remoteData) {
-          this.sourceData_ = remoteData;
-          this.filterDataAndRenderResults_(this.sourceData_);
-        }
-      });
+    if (this.interacted_ || !this.element.hasAttribute('src')) {
+      return Promise.resolve();
     }
-    return Promise.resolve();
+    this.interacted_ = true;
+    return this.getRemoteData_().then(
+      remoteData => {
+        this.sourceData_ = remoteData;
+        this.filterDataAndRenderResults_(this.sourceData_);
+      },
+      e => {
+        this.displayFallback_(e);
+      }
+    );
   }
 
   /**
