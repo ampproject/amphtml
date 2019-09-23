@@ -264,9 +264,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!function(*)} */
     this.mediaPoolRejectFn_ = deferred.reject;
 
-    /** @const {?./parallax-fx.ParallaxPage} */
-    this.parallaxPageRef = null;
-
     /** @private {boolean}  */
     this.prerenderAllowed_ = false;
 
@@ -328,7 +325,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
-    this.maybeInitializeParallaxFx_();
     this.maybeCreateAnimationManager_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_.addAdvanceListener(() =>
@@ -370,10 +366,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
   }
 
-  /** @private */
+  /**
+   * Installs the effect on the page if the there is no opt-out detected
+   * @private
+   * @return {!Promise}
+   */
   maybeInitializeParallaxFx_() {
     if (this.element.hasAttribute('no-parallax-fx')) {
-      return;
+      return Promise.resolve();
     }
 
     const storyEl = dev().assertElement(
@@ -382,9 +382,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
 
     storyEl.getImpl().then(storyImpl => {
-      const {parallaxFxManager} = storyImpl;
-      this.parallaxPageRef = parallaxFxManager.registerParallaxPage(
-        this.element
+      const {parallaxManager} = storyImpl;
+      return Promise.resolve().then(() =>
+        parallaxManager.registerParallaxPage(this.element)
       );
     });
   }
@@ -509,13 +509,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.beforeVisible(),
       this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
-    ]).then(() => {
-      if (this.parallaxPageRef) {
-        return this.parallaxPageRef.update(0, 0);
-      } else {
-        return Promise.resolve();
-      }
-    });
+      this.maybeInitializeParallaxFx_(),
+    ]);
   }
 
   /**

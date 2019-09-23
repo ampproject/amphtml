@@ -321,9 +321,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!MediaPool} */
     this.mediaPool_ = MediaPool.for(this);
 
-    /** @public {?./parallax-fx.ParallaxManager} */
-    this.parallaxFxManager = null;
-
     /** @private {boolean} */
     this.areAccessAuthorizationsCompleted_ = false;
 
@@ -357,6 +354,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
+
+    /** @public {?./parallax-fx.ParallaxManager} */
+    this.parallaxManager = null;
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
@@ -782,7 +782,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // Install parallax handlers if opt-in is detected on a mobile environment
     if (this.element.hasAttribute('parallax-fx')) {
-      this.parallaxFxManager = installParallaxFx(
+      this.parallaxManager = installParallaxFx(
         this.win,
         this.vsync_,
         this.element
