@@ -96,15 +96,9 @@ startupChunk(self.document, function initial() {
         perf.coreServicesAvailable();
         doNotTrackImpression();
         registerIniLoadListener(ampdoc);
-      });
-      startupChunk(self.document, function builtins() {
         // Builtins.
         installBuiltinElements(self);
-      });
-      startupChunk(self.document, function adoptWindow() {
         adopt(self);
-      });
-      startupChunk(self.document, function stub() {
         // Pre-stub already known elements.
         stubElementsForDoc(ampdoc);
       });
