@@ -264,6 +264,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!function(*)} */
     this.mediaPoolRejectFn_ = deferred.reject;
 
+    /** @const {?./parallax-fx.ParallaxPage} */
+    this.parallaxPageRef = null;
+
     /** @private {boolean}  */
     this.prerenderAllowed_ = false;
 
@@ -325,6 +328,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
+    this.maybeInitializeParallaxFx_();
     this.maybeCreateAnimationManager_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_.addAdvanceListener(() =>
@@ -364,6 +368,25 @@ export class AmpStoryPage extends AMP.BaseElement {
       },
       reason => this.mediaPoolRejectFn_(reason)
     );
+  }
+
+  /** @private */
+  maybeInitializeParallaxFx_() {
+    if (this.element.hasAttribute('no-parallax-fx')) {
+      return;
+    }
+
+    const storyEl = dev().assertElement(
+      closestAncestorElementBySelector(this.element, 'amp-story'),
+      'amp-story-page must be a descendant of amp-story.'
+    );
+
+    storyEl.getImpl().then(storyImpl => {
+      const {parallaxFxManager} = storyImpl;
+      this.parallaxPageRef = parallaxFxManager.registerParallaxPage(
+        this.element
+      );
+    });
   }
 
   /**
@@ -481,11 +504,18 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
     );
+
     return Promise.all([
       this.beforeVisible(),
       this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
-    ]);
+    ]).then(() => {
+      if (this.parallaxPageRef) {
+        return this.parallaxPageRef.update(0, 0);
+      } else {
+        return Promise.resolve();
+      }
+    });
   }
 
   /**

@@ -299,10 +299,6 @@ Used with the live-story attribute. Time interval (in milliseconds) between chec
 
 Enables the tilt-controlled [3D Parallax Effect](#parallax-fx) which uses the device's accelerometer to give the illusion of a 3D space to the story's layers. The effect is only available on mobile devices.
 
-##### parallax-fx-mode [optional]
-
-Used with the `parallax-fx` attribute. Describes the nature of the 3D parallax effect as one of three modes: `pop-out` (where content appears to be popping out of the screen), `depth` (where content appears behind the screen) and `center` (where the middle layer of the story appears at the screen level with content both behind it and above it).
-
 ##### parallax-fx-layer-spacing [optional]
 
 Used with the `parallax-fx` attribute. Configures the apparent spacing between the page's layers within the 3D space. Values are numbers without a unit.
@@ -538,10 +534,6 @@ For example:
 
 Used with the [`parallax-fx`](#parallax-fx) attribute on the story component. Disables the tilt-controlled [3D Parallax Effect](#parallax-fx) for the current page.
 
-##### parallax-fx-mode [optional]
-
-Used with the [`parallax-fx`](#parallax-fx) attribute on the story component. Overrides the effect's mode for the current page.
-
 ##### parallax-fx-layer-spacing [optional]
 
 Used with the [`parallax-fx`](#parallax-fx) attribute on the story component. Overrides the layer spacing for the parallax effect on the current page.
@@ -595,6 +587,12 @@ Example:
   <p grid-area="upper-third">Element 3</p>
 </amp-story-grid-layer>
 ```
+
+##### parallax-fx-origin-layer [optional]
+To be used with the `parallax-fx` attribute on `amp-story`, sets the layer as the origin layer (in other words, the layer that appears to be at the surface of the photo for the 3D effect). The origin layer will be fixed (doesn't move when the phone is titled) while other layers will appear to be moving relative to it.
+
+##### no-parallax-fx [optional]
+To be used with the `parallax-fx` attribute on `amp-story`, disables the 3D parallax effect on the layer.
 
 #### Templates
 
@@ -1708,7 +1706,7 @@ A 3D Parallax effect controlled by the device's tilt sensor (accelerometer) can 
 
 Specific pages can opt-out of the effect by setting the `no-parallax-fx` attribute on the `amp-story-page` component.
 
-The effect can be further customized by setting the desired spacing between the layers (`parallax-fx-layer-spacing`), parallax mode (whether to `pop-out`, have a `depth` or be in the `center` through setting `parallax-fx-mode`) or the scaling of the layers using `parallax-fx-farthest-scale` and `parallax-fx-nearest-scale`.
+The effect can be further customized by setting the desired spacing between the layers (`parallax-fx-layer-spacing`), the layer that appears at z-index 0 which is the surface of the phone (by setting `parallax-fx-origin-layer` on that layer) or the scaling of the layers using `parallax-fx-farthest-scale` and `parallax-fx-nearest-scale`.
 
 ## Other components usable in AMP stories
 
