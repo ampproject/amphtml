@@ -503,7 +503,7 @@ export class AmpPaymentGoogleIntegration {
     } else if (event.data.message === 'useIframeContainer') {
       this.iframeRenderWithBottomSheet_ = true;
       this.activeElement_.classList.add(
-        AsyncInputClasses.ASYNC_INCREASE_TIMEOUT
+        AsyncInputClasses.ASYNC_REQUIRED_ACTION
       );
     }
   }
@@ -513,36 +513,7 @@ export class AmpPaymentGoogleIntegration {
    */
   populatePaymentToken() {
     if (this.iframeRenderWithBottomSheet_) {
-      /**
-       * Why race? (3/19/19)
-       *
-       * The implementation of <amp-form> imposes a strict deadline on any async
-       * operations that execute as part of the submit process.
-       *
-       * When the deadline is reached, <amp-form> *will not* terminate the running
-       * async operations, but *will* notify the page that the submit process failed,
-       * returning a generic form error to the page.
-       *
-       * In the case of amp-payment-google, this results in a generic error being
-       * returned to the page, where the third-party merchant will have very little
-       * information about the error or knowledge of how to respond.
-       *
-       * In order to avoid this, amp-payment-google configures amp-form to use a
-       * much-longer timeout, while establishing a shorter timeout of it's own.
-       * It runs its own async work in a Promise.race(...) with the shorter timeout
-       * in order to maintain its own deadline.
-       *
-       * When the shorter timeout is reached, amp-payment-google is able to react
-       * appropriately, by cancelling any current async work and propagating the
-       * error to the enclosing <amp-form>.
-       *
-       * TODO:
-       * Investigate alternative solutions, such as <amp-form> providing an event
-       * to running async-inputs letting them know that they are about to reach
-       * the deadline and allowing them to return errors.
-       */
-      return Promise.race([
-        this.viewer_
+      return this.viewer_
           .sendMessageAwaitResponse(
             'loadPaymentData',
             this.getPaymentDataRequest_()
@@ -558,13 +529,7 @@ export class AmpPaymentGoogleIntegration {
                   'cancelled by the user or errored out.'
               );
             }
-          ),
-        this.timer_
-          .promise(SUBMIT_TIMEOUT_TYPE.INCREASED - USER_INPUT_BUFFER_MILLIS)
-          .then(function() {
-            throw new Error('Timeout retrieving payment token expired.');
-          }),
-      ]);
+          );
     } else {
       // If the payment token is not yet present, then we need to fetch it
       // before submitting the form. This will happen if the user decides to use

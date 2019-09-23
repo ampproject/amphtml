@@ -29,7 +29,7 @@ import {
   mockServiceForDocWithVariables,
 } from '../../../../testing/test-helper';
 import {poll} from '../../../../testing/iframe';
-import {user} from '../../../../src/log';
+import {SsrTemplateHelper} from '../../../../src/ssr-template-helper';
 
 /** @const {string} */
 const IFRAME_URL = 'http://example.com/somesubpath';
@@ -172,7 +172,7 @@ describes.realWin(
       });
     });
 
-    it.only('submits the payment data along with the form', function() {
+    it('submits the payment data along with the form', function() {
       // set ample time for fake call to occur
       this.timeout(TIMEOUT);
       // Send intial status change event for initiating the iframe component.
@@ -183,7 +183,8 @@ describes.realWin(
         },
         '*'
       );
-      user().error('test', 'test start')
+      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value 
+      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {return true})
 
       // expected response for the hidden input
       const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
@@ -203,7 +204,6 @@ describes.realWin(
         // Before the form is submitted, the hidden input doesn't exist
         expect(doc.getElementById(PAYMENT_DATA)).to.equal(null);
         const formSubmitted = new Promise((resolve, reject) => {
-          user().error('test','form submit')
           // constant check's the form's status and waits till the submition sucsessfully finishes
           poll(
             'get form',
@@ -213,7 +213,6 @@ describes.realWin(
             undefined,
             TIMEOUT
           ).then(() => {
-            user().error('polling done')
             // Without this try-catch block, the nested promise swallows up
             // any failed expectations and the test times out instead of
             // failing.
@@ -222,7 +221,6 @@ describes.realWin(
               expect(
                 doc.querySelector('input[name="' + PAYMENT_DATA + '"]').value
               ).to.equal(data);
-              user().error('resolve')
               resolve();
             } catch (e) {
               reject(e);
@@ -233,88 +231,6 @@ describes.realWin(
             return {
               json: () => Promise.resolve('{}'),
             };
-          });
-        });
-
-        const button = doc.getElementById(SUBMIT_BUTTON_ID);
-        button.click();
-
-        return formSubmitted;
-      });
-    });
-
-    it('should not propagate payment token if user input timeout occurs', function() {
-      expectAsyncConsoleError(
-        /Form submission failed: %s Error: Timeout retreiving payment token expired./
-      );
-      this.timeout(SUBMIT_TIMEOUT_TYPE.INCREASED + 100);
-
-      const timerStub = sandbox
-        .stub(timer_, 'promise')
-        .callsFake(function(time) {
-          return new window.Promise(resolve => {
-            // Avoid wrapping in closure if no specific result is
-            // produced.
-            const timerKey = timer_.delay(
-              resolve,
-              time - (SUBMIT_TIMEOUT_TYPE.INCREASED - 50)
-            );
-            if (timerKey == -1) {
-              throw new Error('Failed to schedule timer.');
-            }
-          });
-        });
-
-      viewerMock.sendMessageAwaitResponse
-        .withArgs('loadPaymentData', sinon.match.any)
-        .callsFake(() => {
-          return timer_.promise(SUBMIT_TIMEOUT_TYPE.INCREASED);
-        });
-
-      // Send intial status event to render using bottom sheet.
-      win.postMessage(
-        {
-          message: 'useIframeContainer',
-          data: true,
-        },
-        '*'
-      );
-      // Send intial status change event for initiating the iframe
-      // component.
-      win.postMessage(
-        {
-          message: 'paymentReadyStatusChanged',
-          data: {},
-        },
-        '*'
-      );
-
-      return getAmpPaymentGoogleInline().then(gPayInline => {
-        const formSubmitted = new Promise((resolve, reject) => {
-          poll(
-            'get form',
-            () => {
-              return doc.querySelector('#mainForm.amp-form-submit-error');
-            },
-            undefined,
-            SUBMIT_TIMEOUT_TYPE.INCREASED
-          ).then(() => {
-            timerStub.restore();
-            try {
-              // The timeout for the async call should be increased
-              expect(
-                gPayInline.classList.contains(
-                  AsyncInputClasses.ASYNC_INCREASE_TIMEOUT
-                )
-              ).to.equal(true);
-              // The data is present in the form when it is submitted.
-              expect(
-                doc.querySelector('input[name="' + PAYMENT_DATA + '"]')
-              ).to.equal(null);
-              resolve();
-            } catch (e) {
-              reject(e);
-            }
           });
         });
 
@@ -372,6 +288,70 @@ describes.realWin(
       });
     });
 
+    it('should not propagate payment token if user input fails', function() {
+      expectAsyncConsoleError(
+        /Form submission failed: %s Error: Error retreiving payment token expired./
+      );
+
+      viewerMock.sendMessageAwaitResponse
+        .withArgs('loadPaymentData', sinon.match.any)
+        .callsFake(() => Promise.reject("Load Payment Data Fail"));
+
+      // Send intial status event to render using bottom sheet.
+      win.postMessage(
+        {
+          message: 'useIframeContainer',
+          data: true,
+        },
+        '*'
+      );
+      // Send intial status change event for initiating the iframe
+      // component.
+      win.postMessage(
+        {
+          message: 'paymentReadyStatusChanged',
+          data: {},
+        },
+        '*'
+      );
+      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value 
+      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {return true})
+
+      return getAmpPaymentGoogleInline().then(gPayInline => {
+        const formSubmitted = new Promise((resolve, reject) => {
+          poll(
+            'get form',
+            () => {
+              return doc.querySelector('#mainForm.amp-form-submit-error');
+            },
+            undefined,
+            TIMEOUT
+          ).then(() => {
+            try {
+              // The timeout for the async call should be increased
+              expect(
+                gPayInline.classList.contains(
+                  AsyncInputClasses.ASYNC_REQUIRED_ACTION
+                )
+              ).to.equal(true);
+              // The data is present in the form when it is submitted.
+              expect(
+                doc.querySelector('input[name="' + PAYMENT_DATA + '"]')
+              ).to.equal(null);
+              resolve();
+            } catch (e) {
+              reject(e);
+            }
+          });
+        });
+
+        const button = doc.getElementById(SUBMIT_BUTTON_ID);
+        button.click();
+
+        return formSubmitted;
+      });
+    });
+
     it('should call loadPaymentData on submit when inline disabled', () => {
       viewerMock.sendMessageAwaitResponse
         .withArgs('loadPaymentData', sinon.match.any)
@@ -398,6 +378,8 @@ describes.realWin(
         },
         '*'
       );
+      //Fake isSupported call for ssr helper; in test, helper stalls and does not return value 
+      sandbox.stub(SsrTemplateHelper.prototype, 'isSupported').callsFake(() => {return true})
 
       // expected response for the hidden input
       const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
@@ -425,7 +407,7 @@ describes.realWin(
               // The timeout for the async call should be increased
               expect(
                 gPayInline.classList.contains(
-                  AsyncInputClasses.ASYNC_INCREASE_TIMEOUT
+                  AsyncInputClasses.ASYNC_REQUIRED_ACTION
                 )
               ).to.equal(true);
               // The data is present in the form when it is submitted.
