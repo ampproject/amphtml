@@ -180,7 +180,7 @@ export function getHighestAvailableDomain(win) {
  * @param {string} value
  * @param {time} expirationTime
  * @param {string|undefined} domain
- * @param {!SameSite|undefined} sameSite
+ * @param {!SameSite=} sameSite
  */
 function trySetCookie(win, name, value, expirationTime, domain, sameSite) {
   // We do not allow setting cookies on the domain that contains both
