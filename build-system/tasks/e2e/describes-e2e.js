@@ -35,6 +35,7 @@ const {PuppeteerController} = require('./puppeteer-controller');
 const SUB = ' ';
 const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
+const SETUP_RETRIES = 1;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
@@ -410,8 +411,7 @@ function describeEnv(factory) {
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function() {
         this.timeout(SETUP_TIMEOUT);
-        const retries = 1;
-        await fixture.setup(env, browserName, retries);
+        await fixture.setup(env, browserName, SETUP_RETRIES);
 
         // don't install for CI
         if (!isTravisBuild()) {
