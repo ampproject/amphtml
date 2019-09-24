@@ -157,7 +157,7 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   overrideGlobalScrollTo() {
-    return true;
+    return false;
   }
 
   /** @override */

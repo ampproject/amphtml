@@ -295,7 +295,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   });
 
   it('should require override of the global scrollTo', () => {
-    expect(binding.overrideGlobalScrollTo()).to.be.true;
+    expect(binding.overrideGlobalScrollTo()).to.be.false;
   });
 
   // TODO(#22220): Remove when "ios-fixed-no-transfer" experiment is cleaned up.
