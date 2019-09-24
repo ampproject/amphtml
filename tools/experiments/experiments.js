@@ -249,6 +249,11 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
+    id: 'amp-story-parallax',
+    name: 'Adds a 3D parallax effect (tilt or mouse controlled) to AMP Stories',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24718',
+  },
+  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',

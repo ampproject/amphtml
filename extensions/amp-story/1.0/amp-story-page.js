@@ -379,12 +379,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.element.hasAttribute('no-parallax-fx')) {
       return Promise.resolve();
     }
-    const parallaxManager = this.parallaxService_.getManager();
-
     return Promise.resolve(
-      parallaxManager
-        ? parallaxManager.registerParallaxPage(this.element)
-        : null
+      this.parallaxService_.registerParallaxPage(this.element)
     );
   }
 
