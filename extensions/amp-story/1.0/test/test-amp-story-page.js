@@ -16,6 +16,7 @@
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState} from '../amp-story-page';
+import {AmpStoryParallaxService} from '../amp-story-parallax-service';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
@@ -54,6 +55,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
+
+    const parallaxService = new AmpStoryParallaxService(win, story, null);
+    registerServiceBuilder(win, 'story-parallax', () => parallaxService);
 
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');

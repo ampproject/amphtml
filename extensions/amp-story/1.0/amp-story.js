@@ -109,7 +109,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
-import {installParallaxFx} from './parallax-fx';
+import {getParallaxService} from './amp-story-parallax-service';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -289,6 +289,13 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
 
+    /** @private @const {!./amp-story-parallax-service.AmpStoryParallaxService} */
+    this.parallaxService_ = getParallaxService(
+      this.win,
+      this.element,
+      this.vsync_
+    );
+
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
 
@@ -354,9 +361,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
-
-    /** @public {?./parallax-fx.ParallaxManager} */
-    this.parallaxManager = null;
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
@@ -779,19 +783,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
-
-    // Install parallax handlers if opt-in is detected on a mobile environment
-
-    if (
-      this.element.hasAttribute('parallax-fx') &&
-      !this.win.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      this.parallaxManager = installParallaxFx(
-        this.win,
-        this.vsync_,
-        this.element
-      );
-    }
   }
 
   /** @private */
@@ -1003,6 +994,7 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
+        this.maybeInitializeParallaxEffect_();
       });
 
     // Story is being prerendered: resolve the layoutCallback when the first
@@ -1046,6 +1038,18 @@ export class AmpStory extends AMP.BaseElement {
           }
         });
       });
+    }
+  }
+
+  /**
+   * Initializes the 3D parallax effect if enabled and supported
+   * @private
+   */
+  maybeInitializeParallaxEffect_() {
+    const parallaxManager = this.parallaxService_.getManager();
+    // Install parallax handlers if opt-in is detected
+    if (parallaxManager) {
+      parallaxManager.initializeListeners();
     }
   }
 
