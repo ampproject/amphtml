@@ -17,8 +17,8 @@
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
 import {Deferred} from '../../src/utils/promise';
+import {SameSite, getCookie, setCookie} from '../../src/cookies';
 import {devAssert, initLogConstructor, setReportError} from '../../src/log';
-import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
@@ -559,6 +559,10 @@ function setAmpCanaryCookie_(cookieState) {
     // Set explicit domain, so the cookie gets sent to sub domains.
     domain: location.hostname,
     allowOnProxyOrigin: true,
+    // Make sure the cookie is available for the script loads coming from
+    // other domains. Chrome's default of LAX would otherwise prevent it
+    // from being sent.
+    sameSite: SameSite.NONE,
   };
   setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.
