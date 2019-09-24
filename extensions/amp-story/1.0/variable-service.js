@@ -35,8 +35,6 @@ export const AnalyticsVariable = {
   STORY_PROGRESS: 'storyProgress',
   STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
-  TOOLTIP_TARGET: 'storyTooltipTarget',
-  TOOLTIP_TARGET_ATTRIBUTE: 'storyTooltipTargetAttribute',
 };
 
 /**
@@ -79,8 +77,6 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.STORY_IS_MUTED]: null,
       [AnalyticsVariable.STORY_PREVIOUS_PAGE_ID]: null,
       [AnalyticsVariable.STORY_ADVANCEMENT_MODE]: null,
-      [AnalyticsVariable.TOOLTIP_TARGET]: null,
-      [AnalyticsVariable.TOOLTIP_TARGET_ATTRIBUTE]: null,
     });
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */

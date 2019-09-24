@@ -27,7 +27,6 @@ import {
   AnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -65,7 +64,6 @@ export const EXPANDABLE_COMPONENTS = {
     actionIcon: ActionIcon.EXPAND,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
-    trackingAttribute: 'data-tweetid',
   },
 };
 
@@ -78,7 +76,6 @@ const LAUNCHABLE_COMPONENTS = {
   'a': {
     actionIcon: ActionIcon.LAUNCH,
     selector: 'a[href]:not([affiliate-link-icon])',
-    trackingAttribute: 'href',
   },
 };
 
@@ -290,9 +287,6 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!./variable-service.AmpStoryVariableService} */
-    this.variableService_ = getVariableService(this.win_);
-
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
 
@@ -397,6 +391,7 @@ export class AmpStoryEmbeddedComponent {
       case EmbeddedComponentState.FOCUSED:
         this.state_ = state;
         this.onFocusedStateUpdate_(component);
+        this.tooltipAnalytics_(AnalyticsEvent.TOOLTIP_ENTER);
         break;
       case EmbeddedComponentState.HIDDEN:
         this.state_ = state;
@@ -517,7 +512,7 @@ export class AmpStoryEmbeddedComponent {
     );
     this.tooltip_.addEventListener(
       'click',
-      () => this.tooltipAnalytics_(),
+      () => this.tooltipAnalytics_(AnalyticsEvent.TOOLTIP_CLICK),
       true /** capture */
     );
 
@@ -525,22 +520,12 @@ export class AmpStoryEmbeddedComponent {
   }
 
   /**
-   * Configures analytics variables and fires analytic event.
+   * Fires tooltip analytic events.
+   * @param {!AnalyticsEvent} eventType
    * @private
    */
-  tooltipAnalytics_() {
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.TOOLTIP_TARGET,
-      this.triggeringTarget_.tagName.toLowerCase()
-    );
-
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.TOOLTIP_TARGET_ATTRIBUTE,
-      this.triggeringTarget_.getAttribute(
-        this.getEmbedConfigFor_(this.triggeringTarget_).trackingAttribute
-      )
-    );
-    this.analyticsService_.triggerEvent(AnalyticsEvent.TOOLTIP_CLICK);
+  tooltipAnalytics_(eventType) {
+    this.analyticsService_.triggerEvent(eventType, this.triggeringTarget_);
   }
 
   /**

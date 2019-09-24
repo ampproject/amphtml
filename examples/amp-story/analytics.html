@@ -44,7 +44,7 @@
               "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
               "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
               "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}",
-              "click": "${base}&index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}&tooltipTarget=${storyTooltipTarget}&tooltipTargetAttribute=${storyTooltipTargetAttribute}"
+              "click": "${base}&index=${storyPageIndex}&id=${storyPageId}&bookendTargetHref=${storyBookendTargetHref}&bookendCardType=${storyBookendComponentType}&bookendCardPosition=${storyBookendComponentPosition}&tooltipClickId=${tooltipClickId}&tooltipTargetHref=${tooltipHref}"
             },
             "triggers": {
               "trackAnchorClicks": {
@@ -67,6 +67,13 @@
                 "request": "click",
                 "vars": {
                   "eventId": "clickOnTooltip"
+                }
+              },
+              "trackTooltipEnter": {
+                "on": "story-tooltip-enter",
+                "request": "click",
+                "vars": {
+                  "eventId": "tooltipEnter"
                 }
               },
               "trackPageview": {
@@ -97,7 +104,7 @@
       <amp-story-page id="p1">
         <amp-story-grid-layer template="vertical">
           <h1>Page One</h1>
-          <a href="google.com" role="link" data-tooltip-text="Adios" class="title-small center">Click me!</a>
+          <a href="google.com" data-vars-tooltip-click-id="123" data-vars-tooltip-href="google.com" role="link" data-tooltip-text="Adios" class="title-small center">Click me!</a>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -108,6 +115,8 @@
             height="472"
             layout="responsive"
             data-tweetid="1166723359696130049"
+            data-vars-tooltip-click-id="tweet1"
+            data-vars-tooltip-href="twitter.com"
             interactive>
           </amp-twitter>
         </amp-story-grid-layer>
@@ -118,7 +127,7 @@
           <h1>Page Three</h1>
         </amp-story-grid-layer>
         <amp-story-cta-layer>
-          <a>click me</a>
+          <a href="www.google.com"> click me</a>
         </amp-story-grid-layer>
       </amp-story-page>
 

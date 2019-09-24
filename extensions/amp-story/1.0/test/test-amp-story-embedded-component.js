@@ -238,6 +238,34 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     });
   });
 
+  it('should send data-var specified by publisher in analytics event', () => {
+    const analyticsSpy = sandbox.spy(analyticsService, 'getDetails');
+    addAttributesToElement(clickableEl, {
+      'data-vars-tooltip-id': '1234',
+    });
+    fakePage.appendChild(clickableEl);
+    storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+      element: clickableEl,
+      state: EmbeddedComponentState.FOCUSED,
+    });
+
+    expect(analyticsSpy.returnValues[0]).to.deep.include({tooltipId: '1234'});
+  });
+
+  it('should fire analytics event when entering a tooltip', () => {
+    const analyticsSpy = sandbox.spy(analyticsService, 'triggerEvent');
+    fakePage.appendChild(clickableEl);
+    storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+      element: clickableEl,
+      state: EmbeddedComponentState.FOCUSED,
+    });
+
+    expect(analyticsSpy).to.have.been.calledWith(
+      AnalyticsEvent.TOOLTIP_ENTER,
+      clickableEl
+    );
+  });
+
   it('should fire analytics event when clicking on the tooltip of a link', () => {
     const analyticsSpy = sandbox.spy(analyticsService, 'triggerEvent');
     fakePage.appendChild(clickableEl);
@@ -254,12 +282,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     };
 
     tooltip.click();
-    expect(variableService.get()[AnalyticsVariable.TOOLTIP_TARGET]).to.equal(
-      'a'
-    );
-    expect(
-      variableService.get()[AnalyticsVariable.TOOLTIP_TARGET_ATTRIBUTE]
-    ).to.equal('https://google.com');
+
     expect(analyticsSpy).to.have.been.calledWith(AnalyticsEvent.TOOLTIP_CLICK);
   });
 
@@ -284,12 +307,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     };
 
     tooltip.click();
-    expect(variableService.get()[AnalyticsVariable.TOOLTIP_TARGET]).to.equal(
-      'amp-twitter'
-    );
-    expect(
-      variableService.get()[AnalyticsVariable.TOOLTIP_TARGET_ATTRIBUTE]
-    ).to.equal('1166723359696130049');
+
     expect(analyticsSpy).to.have.been.calledWith(AnalyticsEvent.TOOLTIP_CLICK);
   });
 });

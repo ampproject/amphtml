@@ -15,6 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getVariableService} from './variable-service';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -31,6 +32,7 @@ export const AnalyticsEvent = {
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
   TOOLTIP_CLICK: 'story-tooltip-click',
+  TOOLTIP_ENTER: 'story-tooltip-enter',
 };
 
 /** @enum {string} */
@@ -115,13 +117,32 @@ export class StoryAnalyticsService {
   }
 
   /**
-   * @param {!AnalyticsEvent} eventType
+   * @visibleForTesting
+   * @param {?Element} element
+   * @return {!JsonObject|!Object}
    */
-  triggerEvent(eventType) {
+  getDetails(element) {
+    return element
+      ? getDataParamsFromAttributes(
+          element,
+          /* computeParamNameFunc */ undefined,
+          /^vars(.+)/
+        )
+      : {};
+  }
+
+  /**
+   * @param {!AnalyticsEvent} eventType
+   * @param {?Element} opt_element
+   */
+  triggerEvent(eventType, opt_element = null) {
     triggerAnalyticsEvent(
       this.element_,
       eventType,
-      this.variableService_.get()
+      /** @type {!JsonObject} */ (Object.assign(
+        this.getDetails(opt_element),
+        this.variableService_.get()
+      ))
     );
   }
 }
