@@ -41,7 +41,7 @@ export function getConsent(ampApesterMedia) {
   );
   return Promise.all([consentStatePromise, consentStringPromise]);
 }
-//todo test right behavior
+//todo check right behavior
 /**
  * @param {CONSENT_POLICY_STATE} consentPolicyState
  * @return {number, number, string}

@@ -15,10 +15,11 @@
  */
 
 /**
- * @param {!JsonObject} monetizationSettings
+ * @param {!JsonObject} media
  * @param {AmpApesterMedia} ampApesterMedia
  */
-export function handleCompanionDisplay(monetizationSettings, ampApesterMedia) {
+export function handleCompanionDisplay(media, ampApesterMedia) {
+  const monetizationSettings = media['campaignData'] || {};
   const companionRawSettings = monetizationSettings['companionOptions'] || {};
   const {settings} = companionRawSettings || {};
   if (
