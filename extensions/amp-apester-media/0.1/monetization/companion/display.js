@@ -46,8 +46,8 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @return {!JsonObject}
  */
 function extractCompanionDisplaySettings(companionDisplayRawSettings) {
-  const {slot, bannerSizes = []} = companionDisplayRawSettings || {};
-  const size = bannerSizes[0] || [300, 250];
+  const {slot, bannerSizes = [300, 250]} = companionDisplayRawSettings || {};
+  const size = bannerSizes[0];
   return {
     slot,
     height: size[1],
