@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
@@ -23,11 +24,16 @@ import {dict} from '../../../src/utils/object';
 import {
   extractTags,
   generatePixelURL,
+  getPageUrl,
   getPlatform,
   registerEvent,
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
+import {
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
@@ -224,7 +230,8 @@ class AmpApesterMedia extends AMP.BaseElement {
       });
   }
 
-  /** @param {string} id
+  /**
+   *  @param {string} id
    *  @param {boolean} usePlayer
    *  @return {string}
    * */
@@ -328,17 +335,114 @@ class AmpApesterMedia extends AMP.BaseElement {
       width: size[0] || 0,
     };
   }
+  /**
+   * @return {!JsonObject}
+   * */
+  getConsent_() {
+    const consentStatePromise = getConsentPolicyState(this.element).catch(
+      err => {
+        dev().error(TAG, 'Error determining consent state', err);
+        return CONSENT_POLICY_STATE.UNKNOWN;
+      }
+    );
+    const consentStringPromise = getConsentPolicyInfo(this.getAmpDoc()).catch(
+      err => {
+        dev().error(TAG, 'Error determining consent string', err);
+        return null;
+      }
+    );
+    return Promise.all([consentStatePromise, consentStringPromise]);
+  }
+
+  /**
+   * @param {CONSENT_POLICY_STATE} consentPolicyState
+   * @param {string} gdprString
+   * @return {number, number, string}
+   */
+  getConsentStateValue_(consentPolicyState, gdprString) {
+    switch (consentPolicyState) {
+      case CONSENT_POLICY_STATE.SUFFICIENT:
+        return {gdpr: 1, user_consent: 1, param4: gdprString};
+      case CONSENT_POLICY_STATE.INSUFFICIENT || CONSENT_POLICY_STATE.UNKNOWN:
+        return {gdpr: 1, user_consent: 0, param4: gdprString};
+      case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+        return {gdpr: 0, user_consent: 0, param4: gdprString};
+      default:
+        return {gdpr: 0, user_consent: 0, param4: gdprString};
+    }
+  }
+
+  /**
+   * @param {!JsonObject} interactionModel
+   * @param {?string} campaignId
+   * @return {!JsonObject}
+   */
+  getSrMacros_(interactionModel, campaignId) {
+    return this.getConsent_().then(result => {
+      const {interactionId, publisherId, publisher} = interactionModel;
+      const macros = Object.assign(
+        {
+          param1: interactionId,
+          param2: publisherId,
+          param6: campaignId,
+          page_url: getPageUrl(),
+        },
+        this.getConsentStateValue_(result[0], result[1])
+      );
+      if (publisher && publisher.groupId) {
+        macros.param7 = `apester.com,${publisher.groupId}`;
+        macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
+      }
+      return macros;
+    });
+  }
+
+  /**
+   * @return {!JsonObject}
+   */
+  getCompanionVideoAdSize_() {
+    const adWidth = this.element.clientWidth;
+    const adRatio = 0.6;
+    const adHeight = Math.ceil(adWidth * adRatio);
+    return {width: adWidth, height: adHeight};
+  }
+
+  /**
+   * @param {!JsonObject} companionRawSettings
+   * @return {!JsonObject}
+   */
+  extractCompanionSrSettings_(companionRawSettings) {
+    if (
+      !companionRawSettings ||
+      !companionRawSettings.video ||
+      !companionRawSettings.video.enabled ||
+      !companionRawSettings.video.provide === 'sr'
+    ) {
+      return null;
+    }
+    const res = {};
+    const {video} = companionRawSettings;
+    res.videoTag = video.videoTag;
+    if (video.companion.enabled) {
+      res.location = 'companionAbove';
+    } else if (video.companion_below.enabled) {
+      res.location = 'companionBelow';
+    } else {
+      return null;
+    }
+    res.size = this.getCompanionVideoAdSize_();
+    return res;
+  }
 
   /**
    * @param {JsonObject} companionSettings
    * @return {!Element}
    */
-  constructCompanionAd_(companionSettings) {
+  constructCompanionDisplayAd_(companionSettings) {
     if (!companionSettings) {
       return null;
     }
     const {width, height, slot} = companionSettings || {};
-    // todo test sizes...
     const ampAd = this.element.ownerDocument.createElement('amp-ad');
     ampAd.setAttribute('type', 'doubleclick');
     ampAd.setAttribute('data-slot', slot);
@@ -347,6 +451,32 @@ class AmpApesterMedia extends AMP.BaseElement {
     ampAd.classList.add('amp-apester-companion');
 
     return ampAd;
+  }
+
+  /**
+   * @param {JsonObject} companionSettings
+   * @param {JsonObject} media
+   * @param {string} campaignId
+   * @return {!Element}
+   */
+  constructCompanionSr_(companionSettings, media, campaignId) {
+    if (!companionSettings) {
+      return null;
+    }
+    const {videoTag, size} = companionSettings || {};
+    const ampAd = this.element.ownerDocument.createElement('amp-ad');
+    ampAd.setAttribute('type', 'blade');
+    return this.getSrMacros_(media, campaignId).then(macros => {
+      ampAd.setAttribute('data-blade_player_type', 'bladex');
+      ampAd.setAttribute('servingDomain', 'ssr.streamrail.net');
+      ampAd.setAttribute('width', size.width);
+      ampAd.setAttribute('height', size.height);
+      ampAd.setAttribute('data-blade_macros', JSON.stringify(macros));
+      ampAd.setAttribute('data-blade_player_id', videoTag);
+      ampAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
+      ampAd.classList.add('amp-apester-companion');
+      return ampAd;
+    });
   }
 
   /** @override */
@@ -366,12 +496,36 @@ class AmpApesterMedia extends AMP.BaseElement {
           ? payload[Math.floor(Math.random() * payload.length)]
           : payload);
         const monetizationSettings = media['campaignData'] || {};
+        const companionRawSettings = monetizationSettings['companionOptions'];
+        const companionCampaignOptions =
+          monetizationSettings['companionCampaignOptions'] || {};
         const companionDisplaySettings = this.extractCompanionDisplaySettings_(
-          monetizationSettings['companionOptions']
+          companionRawSettings
         );
-        const companionDisplayElement = this.constructCompanionAd_(
+
+        const companionDisplayElement = this.constructCompanionDisplayAd_(
           companionDisplaySettings
         );
+        const {companionCampaignId} = companionCampaignOptions;
+        const companionSrSettings = this.extractCompanionSrSettings_(
+          companionRawSettings
+        );
+        if (companionSrSettings) {
+          this.constructCompanionSr_(
+            companionSrSettings,
+            media,
+            companionCampaignId
+          ).then(companionVideoSrElement => {
+            const companionSrElement =
+              companionSrSettings.location === 'companionBelow'
+                ? this.element.nextSibling
+                : this.element;
+            this.element.parentNode.insertBefore(
+              companionVideoSrElement,
+              companionSrElement
+            );
+          });
+        }
         const interactionId = media['interactionId'];
         const usePlayer = media['usePlayer'];
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
@@ -390,6 +544,7 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
+
             if (companionDisplayElement) {
               this.element.parentNode.insertBefore(
                 companionDisplayElement,

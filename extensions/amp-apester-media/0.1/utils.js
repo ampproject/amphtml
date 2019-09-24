@@ -205,3 +205,21 @@ export function generatePixelURL(publisherId, affiliateId) {
 
   return `${ampPixelURL}?${qs}`;
 }
+
+/**
+ * @return {string}
+ */
+export function getPageUrl() {
+  const origin =
+    (window.document.location && window.document.location.origin) || '';
+  if (
+    origin.match(
+      /(renderer.stg.apester.com)|(renderer.apester.com)|(renderer.qmerce.com)|(renderer.apester.local.com)|(player.apester.local.com)/
+    )
+  ) {
+    return encodeURIComponent(window.document.referrer);
+  }
+  return encodeURIComponent(
+    `${origin}${window.document.location && window.document.location.pathname}`
+  );
+}
