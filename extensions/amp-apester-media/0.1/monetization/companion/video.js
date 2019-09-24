@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../../../src/services';
-import {getConsent, getConsentStateValue} from '../consent-util';
+import {getConsentData} from '../consent-util';
 
 /**
  * @param {!JsonObject} media
@@ -32,20 +32,22 @@ export function handleCompanionVideo(media, apesterElement) {
     companionRawSettings.video.enabled &&
     companionRawSettings.video.provider === 'sr'
   ) {
-    const companionSrSettings = extractCompanionSrSettings(
-      companionRawSettings,
-      apesterElement
-    );
-    if (companionSrSettings) {
+    const position = getCompanionPosition(companionRawSettings.video);
+    if (position) {
+      const companionSettings = extractCompanionSettings(
+        companionRawSettings.video,
+        apesterElement,
+        position
+      );
       const {companionCampaignId} = companionCampaignOptions;
       constructCompanionSr(
-        companionSrSettings,
+        companionSettings,
         media,
         companionCampaignId,
         apesterElement
       ).then(companionVideoSrElement => {
         const companionSrElement =
-          companionSrSettings.location === 'companionBelow'
+          companionSettings.position === 'companionBelow'
             ? apesterElement.nextSibling
             : apesterElement;
         apesterElement.parentNode.insertBefore(
@@ -56,25 +58,30 @@ export function handleCompanionVideo(media, apesterElement) {
     }
   }
 }
+/**
+ * @param {!JsonObject} video
+ * @return {?string}
+ */
+function getCompanionPosition(video) {
+  if (video.companion.enabled) {
+    return 'companionAbove';
+  } else if (video.companion_below.enabled) {
+    return 'companionBelow';
+  }
+}
 
 /**
- * @param {!JsonObject} companionRawSettings
+ * @param {!JsonObject} video
  * @param {AmpApesterMedia} apesterElement
+ * @param {string} position
  * @return {!JsonObject}
  */
-function extractCompanionSrSettings(companionRawSettings, apesterElement) {
-  const res = {};
-  const {video} = companionRawSettings;
-  res.videoTag = video.videoTag;
-  if (video.companion.enabled) {
-    res.location = 'companionAbove';
-  } else if (video.companion_below.enabled) {
-    res.location = 'companionBelow';
-  } else {
-    return null;
-  }
-  res.size = getCompanionVideoAdSize(apesterElement);
-  return res;
+function extractCompanionSettings(video, apesterElement, position) {
+  return {
+    videoTag: video.videoTag,
+    position,
+    size: getCompanionVideoAdSize(apesterElement),
+  };
 }
 
 /**
@@ -124,24 +131,22 @@ function getCompanionVideoAdSize(apesterElement) {
  * @return {!JsonObject}
  */
 function getSrMacros(interactionModel, campaignId, apesterElement) {
-  return getConsent(apesterElement).then(consentRes => {
+  return getConsentData(apesterElement).then(consentRes => {
     const {interactionId, publisherId, publisher} = interactionModel;
     const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
-    const macros = Object.assign(
-      {
-        param1: interactionId,
-        param2: publisherId,
-        param6: campaignId,
-        page_url: pageUrl,
-      },
-      getConsentStateValue(consentRes[0])
-    );
-    const gdprString = consentRes[1];
-    if (gdprString) {
-      macros.param4 = gdprString;
+    const macros = {
+      param1: interactionId,
+      param2: publisherId,
+      param6: campaignId,
+      page_url: pageUrl,
+      user_consent: consentRes.user_consent,
+      gdpr: consentRes.gdpr,
+    };
+    if (consentRes.gdprString) {
+      macros.param4 = consentRes.gdprString;
     }
     if (publisher && publisher.groupId) {
-      macros.param7 = `apester.com,${publisher.groupId}`;
+      macros.param7 = `apester.com:${publisher.groupId}`;
       macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
     }
     return macros;

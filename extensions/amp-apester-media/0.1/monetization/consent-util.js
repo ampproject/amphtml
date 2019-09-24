@@ -26,7 +26,7 @@ const TAG = 'amp-apester-media';
  * @param {AmpApesterMedia} apesterElement
  * @return {!JsonObject}
  * */
-export function getConsent(apesterElement) {
+export function getConsentData(apesterElement) {
   const consentStatePromise = getConsentPolicyState(apesterElement).catch(
     err => {
       apesterElement.dev().error(TAG, 'Error determining consent state', err);
@@ -39,22 +39,21 @@ export function getConsent(apesterElement) {
       return null;
     }
   );
-  return Promise.all([consentStatePromise, consentStringPromise]);
-}
-//todo check right behavior
-/**
- * @param {CONSENT_POLICY_STATE} consentPolicyState
- * @return {number, number, string}
- */
-export function getConsentStateValue(consentPolicyState) {
-  switch (consentPolicyState) {
-    case CONSENT_POLICY_STATE.SUFFICIENT:
-      return {gdpr: 1, user_consent: 1};
-    case CONSENT_POLICY_STATE.INSUFFICIENT:
-    case CONSENT_POLICY_STATE.UNKNOWN:
-      return {gdpr: 1, user_consent: 0};
-    case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
-    default:
-      return {gdpr: 0, user_consent: 1};
-  }
+  return Promise.all([consentStatePromise, consentStringPromise]).then(
+    consentDataResponse => {
+      const consentStatus = consentDataResponse[0];
+      const gdprString = consentDataResponse[0];
+      //todo check right behavior
+      switch (consentStatus) {
+        case CONSENT_POLICY_STATE.SUFFICIENT:
+          return {gdpr: 1, user_consent: 1, gdprString};
+        case CONSENT_POLICY_STATE.INSUFFICIENT:
+        case CONSENT_POLICY_STATE.UNKNOWN:
+          return {gdpr: 1, user_consent: 0, gdprString};
+        case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
+        default:
+          return {gdpr: 0, user_consent: 1, gdprString};
+      }
+    }
+  );
 }
