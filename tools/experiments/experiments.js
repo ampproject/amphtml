@@ -341,12 +341,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'new-loaders',
-    name: 'New default loaders',
-    spec: 'https://github.com/ampproject/amphtml/issues/20237',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
-  },
-  {
     id: 'macro-after-long-task',
     name:
       'If applicable, convert remaining micro tasks to the next macro ' +

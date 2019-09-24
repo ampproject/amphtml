@@ -199,11 +199,6 @@ export class AmpAdCustom extends AMP.BaseElement {
     return true;
   }
 
-  /** @override */
-  createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholder();
-  }
-
   /**
    * @private getFullUrl_ Get a URL which includes a parameter indicating
    * all slots to be fetched from this web server URL
