@@ -369,6 +369,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PubMatic](../../ads/pubmatic.md)
 - [Pubmine](../../ads/pubmine.md)
 - [PulsePoint](../../ads/pulsepoint.md)
+- [PuffNetwork](../../ads/puffnetwork.md)
 - [Purch](../../ads/purch.md)
 - [Rambler&Co](../../ads/capirs.md)
 - [RbInfoxSg](../../ads/rbinfox.md)
