@@ -46,6 +46,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   ImmutableSet<String> suffixTypes = ImmutableSet.of(
       "dev$$module$src$log().assert()",
       "dev$$module$src$log().fine()",
+      "dev$$module$src$log().info()",
+      "dev$$module$src$log().warn()",
       "dev$$module$src$log().assertElement()",
       "dev$$module$src$log().assertString()",
       "dev$$module$src$log().assertNumber()",
