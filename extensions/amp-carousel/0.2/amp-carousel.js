@@ -106,6 +106,13 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
+
+    /**
+     * Whether or not to skip a slideChange when the index changes. Used to
+     * avoid triggering a slideChange on the initial render.
+     * @private {boolean}
+     */
+    this.skipNextSlideChange_ = true;
   }
 
   /** @override */
@@ -618,6 +625,16 @@ class AmpCarousel extends AMP.BaseElement {
     const detail = getDetail(event);
     const index = detail['index'];
     const actionSource = detail['actionSource'];
+
+    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
+    this.updateCurrentIndex_(index);
+    this.updateUi_();
+
+    if (this.skipNextSlideChange_) {
+      this.skipNextSlideChange_ = false;
+      return;
+    }
+
     const data = dict({'index': index});
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
@@ -626,9 +643,6 @@ class AmpCarousel extends AMP.BaseElement {
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
     this.element.dispatchCustomEvent(name, data);
-    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
-    this.updateCurrentIndex_(index);
-    this.updateUi_();
   }
 }
 
