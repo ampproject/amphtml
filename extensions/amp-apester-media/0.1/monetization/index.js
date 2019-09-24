@@ -19,7 +19,10 @@ import {handleCompanionVideo} from './companion/video';
  * @param {!JsonObject} media
  * @param {AmpApesterMedia} apesterElement
  */
-export function handleCompanionAd(media, apesterElement) {
-  handleCompanionDisplay(media, apesterElement);
-  handleCompanionVideo(media, apesterElement);
+export function handleCompanionAds(media, apesterElement) {
+  const monetizationSettings = media['campaignData'] || {};
+  if (monetizationSettings && !monetizationSettings.disabledAmpCompanionAds) {
+    handleCompanionDisplay(media, apesterElement);
+    handleCompanionVideo(media, apesterElement);
+  }
 }
