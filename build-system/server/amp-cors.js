@@ -24,12 +24,7 @@ const ORIGIN_REGEX = new RegExp(
   '^https?://localhost:8000|^https?://.+\\.localhost:8000'
 );
 
-function assertCors(
-  req,
-  res,
-  opt_validMethods,
-  opt_exposeHeaders
-) {
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
   if (req.query.cors == '0') {
     return;
