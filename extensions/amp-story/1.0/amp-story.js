@@ -290,11 +290,7 @@ export class AmpStory extends AMP.BaseElement {
     this.variableService_ = getVariableService(this.win);
 
     /** @private @const {!./amp-story-parallax-service.AmpStoryParallaxService} */
-    this.parallaxService_ = getParallaxService(
-      this.win,
-      this.element,
-      this.vsync_
-    );
+    this.parallaxService_ = getParallaxService(this.win, this.element);
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
@@ -1007,7 +1003,7 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
-        this.maybeInitializeParallaxEffect_();
+        this.parallaxService_.initializeListeners();
       });
 
     // Story is being prerendered: resolve the layoutCallback when the first
@@ -1051,18 +1047,6 @@ export class AmpStory extends AMP.BaseElement {
           }
         });
       });
-    }
-  }
-
-  /**
-   * Initializes the 3D parallax effect if enabled and supported
-   * @private
-   */
-  maybeInitializeParallaxEffect_() {
-    const parallaxManager = this.parallaxService_.getManager();
-    // Install parallax handlers if opt-in is detected
-    if (parallaxManager) {
-      parallaxManager.initializeListeners();
     }
   }
 

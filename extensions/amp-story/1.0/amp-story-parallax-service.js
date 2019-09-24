@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
+import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {mapRange, sum} from '../../../src/utils/math';
 import {registerServiceBuilder} from '../../../src/service';
@@ -43,18 +44,13 @@ const ORIGIN_LAYER_ATTR = 'parallax-fx-origin-layer';
  * conditions.
  * @param  {!Window} win
  * @param {!Element=} opt_story
- * @param {!../../../src/service/vsync-impl.Vsync=} opt_vsync
  * @return {!AmpStoryParallaxService}
  */
-export const getParallaxService = (win, opt_story, opt_vsync) => {
+export const getParallaxService = (win, opt_story) => {
   let service = Services.storyParallaxService(win);
 
   if (!service) {
-    service = new AmpStoryParallaxService(
-      win,
-      /** @type {!Element} */ (opt_story),
-      /** @type {!../../../src/service/vsync-impl.Vsync} */ (opt_vsync)
-    );
+    service = new AmpStoryParallaxService(win, dev().assertElement(opt_story));
     registerServiceBuilder(win, 'story-parallax', () => service);
   }
 
@@ -68,46 +64,13 @@ export class AmpStoryParallaxService {
   /**
    * @param {!Window} win
    * @param {!Element} story
-   * @param {!../../../src/service/vsync-impl.Vsync} vsync
    */
-  constructor(win, story, vsync) {
-    /** @private @const {?ParallaxManager} */
-    this.manager_ = null;
-
-    if (
-      story.hasAttribute(PARALLAX_FX_ATTR) &&
-      !win.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      this.manager_ = new ParallaxManager(win, story, vsync);
-    }
-  }
-
-  /**
-   * @return {?ParallaxManager}
-   */
-  getManager() {
-    return this.manager_;
-  }
-}
-
-/**
- * Parallax manager.
- */
-export class ParallaxManager {
-  /**
-   * @param {!Window} win
-   * @param {!Element} story
-   * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   */
-  constructor(win, story, vsync) {
+  constructor(win, story) {
     /** @private {!Window} */
-    this.win_ = global;
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsync;
+    this.win_ = win;
 
     /** @private @const {!../../../src/service/platform-impl.Platform} */
-    this.platform_ = Services.platformFor(global);
+    this.platform_ = Services.platformFor(this.win_);
 
     /** @private {!Element} */
     this.story_ = story;
@@ -135,13 +98,19 @@ export class ParallaxManager {
 
     /** @private {string} */
     this.storyNearestScale_ = this.story_.getAttribute(NEAREST_SCALE_ATTR);
-  }
 
+    /** @private {boolean} */
+    this.enabled_ =
+      isExperimentOn(this.win_, 'amp-story-parallax') &&
+      story.hasAttribute(PARALLAX_FX_ATTR) &&
+      !win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
   /**
    * Creates the appropriate listeners (tilt on mobile or mouse on desktop)
    */
   initializeListeners() {
     if (
+      this.enabled_ &&
       (this.platform_.isIos() || this.platform_.isAndroid()) &&
       this.win_.DeviceOrientationEvent
     ) {
@@ -176,12 +145,17 @@ export class ParallaxManager {
   /**
    * Registers a new story page as having a parallax effect
    * @param {!Element} page the page element
-   * @return {!ParallaxPage}
+   * @return {!Promise<?ParallaxPage>}
    */
   registerParallaxPage(page) {
-    const parallaxPage = new ParallaxPage(this, this.vsync_, page);
-    this.parallaxPages_.push(parallaxPage);
-    return parallaxPage;
+    if (!this.enabled_) {
+      return Promise.resolve();
+    }
+    return this.story_.getImpl().then(impl => {
+      const parallaxPage = new ParallaxPage(this, impl.getVsync(), page);
+      this.parallaxPages_.push(parallaxPage);
+      return parallaxPage;
+    });
   }
 
   /**
