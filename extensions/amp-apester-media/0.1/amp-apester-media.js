@@ -356,19 +356,18 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /**
    * @param {CONSENT_POLICY_STATE} consentPolicyState
-   * @param {string} gdprString
    * @return {number, number, string}
    */
-  getConsentStateValue_(consentPolicyState, gdprString) {
+  getConsentStateValue_(consentPolicyState) {
     switch (consentPolicyState) {
       case CONSENT_POLICY_STATE.SUFFICIENT:
-        return {gdpr: 1, user_consent: 1, param4: gdprString};
+        return {gdpr: 1, user_consent: 1};
       case CONSENT_POLICY_STATE.INSUFFICIENT || CONSENT_POLICY_STATE.UNKNOWN:
-        return {gdpr: 1, user_consent: 0, param4: gdprString};
+        return {gdpr: 1, user_consent: 0};
       case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
-        return {gdpr: 0, user_consent: 0, param4: gdprString};
+        return {gdpr: 0, user_consent: 1};
       default:
-        return {gdpr: 0, user_consent: 0, param4: gdprString};
+        return {gdpr: 0, user_consent: 1};
     }
   }
 
@@ -378,7 +377,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   getSrMacros_(interactionModel, campaignId) {
-    return this.getConsent_().then(result => {
+    return this.getConsent_().then(consentRes => {
       const {interactionId, publisherId, publisher} = interactionModel;
       const macros = Object.assign(
         {
@@ -387,8 +386,12 @@ class AmpApesterMedia extends AMP.BaseElement {
           param6: campaignId,
           page_url: getPageUrl(),
         },
-        this.getConsentStateValue_(result[0], result[1])
+        this.getConsentStateValue_(consentRes[0])
       );
+      const gdprString = consentRes[1];
+      if (gdprString) {
+        macros.param4 = gdprString;
+      }
       if (publisher && publisher.groupId) {
         macros.param7 = `apester.com,${publisher.groupId}`;
         macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
