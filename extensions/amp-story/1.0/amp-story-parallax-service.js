@@ -19,6 +19,7 @@ import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {listen} from '../../../src/event-helper';
 import {mapRange, sum} from '../../../src/utils/math';
+import {registerServiceBuilder} from '../../../src/service';
 import {resetStyles, setImportantStyles, setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
@@ -27,23 +28,78 @@ const PERSPECTIVE = 1000;
 const DEFAULT_LAYER_SPACING = 1;
 const DEFAULT_FARTHEST_SCALE = 1.3;
 const DEFAULT_NEAREST_SCALE = 0.8;
+const AMPLIFICATION_FACTOR = 40;
 
 const LAYER_SPACING_ATTR = 'parallax-fx-layer-spacing';
 const NEAREST_SCALE_ATTR = 'parallax-fx-nearest-scale';
 const FARTHEST_SCALE_ATTR = 'parallax-fx-farthest-scale';
+const PARALLAX_FX_ATTR = 'parallax-fx';
 const NO_PARALLAX_FX_ATTR = 'no-parallax-fx';
 const ORIGIN_LAYER_ATTR = 'parallax-fx-origin-layer';
 
 /**
- * Installs parallax handlers
+ * Util function to retrieve the store service. Ensures we can retrieve the
+ * service synchronously from the amp-story codebase without running into race
+ * conditions.
+ * @param  {!Window} win
+ * @param {!Element=} opt_story
+ * @param {!../../../src/service/vsync-impl.Vsync=} opt_vsync
+ * @return {!AmpStoryParallaxService}
+ */
+export const getParallaxService = (win, opt_story, opt_vsync) => {
+  let service = Services.storyParallaxService(win);
+
+  if (!service) {
+    service = new AmpStoryParallaxService(
+      win,
+      /** @type {!Element} */ (opt_story),
+      /** @type {!../../../src/service/vsync-impl.Vsync} */ (opt_vsync)
+    );
+    registerServiceBuilder(win, 'story-parallax', () => service);
+  }
+
+  return service;
+};
+
+/**
+ * Parallax service.
+ */
+export class AmpStoryParallaxService {
+  /**
+   * @param {!Window} win
+   * @param {!Element} story
+   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+   */
+  constructor(win, story, vsync) {
+    /** @private @const {?ParallaxManager} */
+    this.manager_ = null;
+
+    if (
+      story.hasAttribute(PARALLAX_FX_ATTR) &&
+      !win.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      this.manager_ = new ParallaxManager(win, story, vsync);
+    }
+  }
+
+  /**
+   * @return {?ParallaxManager}
+   */
+  getManager() {
+    return this.manager_;
+  }
+}
+
+/**
+ * Parallax manager.
  */
 export class ParallaxManager {
   /**
-   * @param {!Window} global
-   * @param {!../../../src/service/vsync-impl.Vsync} vsync
+   * @param {!Window} win
    * @param {!Element} story
+   * @param {!../../../src/service/vsync-impl.Vsync} vsync
    */
-  constructor(global, vsync, story) {
+  constructor(win, story, vsync) {
     /** @private {!Window} */
     this.win_ = global;
 
@@ -79,7 +135,12 @@ export class ParallaxManager {
 
     /** @private {string} */
     this.storyNearestScale_ = this.story_.getAttribute(NEAREST_SCALE_ATTR);
+  }
 
+  /**
+   * Creates the appropriate listeners (tilt on mobile or mouse on desktop)
+   */
+  initializeListeners() {
     if (
       (this.platform_.isIos() || this.platform_.isAndroid()) &&
       this.win_.DeviceOrientationEvent
@@ -237,12 +298,12 @@ export class ParallaxManager {
  */
 export class ParallaxPage {
   /**
-   * @param {!ParallaxManager} manager
+   * @param {!AmpStoryParallaxService} manager
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
    * @param {!Element} element The parent page of thi element
    */
   constructor(manager, vsync, element) {
-    /** @private {!ParallaxManager} */
+    /** @private {!AmpStoryParallaxService} */
     this.manager_ = manager;
 
     /** @const {!Element} */
@@ -284,7 +345,9 @@ export class ParallaxPage {
     return this.setInitialStyles().then(() => {
       return this.vsync_.mutate(() => {
         setStyles(this.element, {
-          perspectiveOrigin: `${Math.round(x * 50)}px ${Math.round(y * 50)}px`,
+          perspectiveOrigin: `${Math.round(
+            x * AMPLIFICATION_FACTOR
+          )}px ${Math.round(y * AMPLIFICATION_FACTOR)}px`,
         });
       });
     });
@@ -351,7 +414,7 @@ export class ParallaxPage {
       layers.forEach((layer, order) => {
         const translation = `translateZ(${(order - layerZIndexOffset) *
           this.layerSpacing_ *
-          (PERSPECTIVE / 35)}px)`;
+          (PERSPECTIVE / AMPLIFICATION_FACTOR)}px)`;
         const scale = `scale(${mapRange(
           order,
           0,
@@ -387,16 +450,4 @@ export class ParallaxPage {
       .map(layer => dev().assertElement(layer))
       .filter(layer => !layer.hasAttribute(NO_PARALLAX_FX_ATTR));
   }
-}
-
-/**
- * Installs the required observers and listeners for the parallax effect
- * if present on the story.
- * @param {!Window} win
- * @param {!../../../src/service/vsync-impl.Vsync} vsync
- * @param {!Element} story
- * @return {ParallaxManager}
- */
-export function installParallaxFx(win, vsync, story) {
-  return new ParallaxManager(win, vsync, story);
 }

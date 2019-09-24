@@ -72,6 +72,7 @@ import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
+import {getParallaxService} from './amp-story-parallax-service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
@@ -276,6 +277,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
+    /** @private @const {!./amp-story-parallax-service.AmpStoryParallaxService} */
+    this.parallaxService_ = getParallaxService(this.win);
+
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
 
@@ -378,18 +382,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.element.hasAttribute('no-parallax-fx')) {
       return Promise.resolve();
     }
+    const parallaxManager = this.parallaxService_.getManager();
 
-    const storyEl = dev().assertElement(
-      closestAncestorElementBySelector(this.element, 'amp-story'),
-      'amp-story-page must be a descendant of amp-story.'
+    return Promise.resolve(
+      parallaxManager
+        ? parallaxManager.registerParallaxPage(this.element)
+        : null
     );
-
-    return storyEl.getImpl().then(storyImpl => {
-      if (!storyImpl.parallaxManager) {
-        return;
-      }
-      return storyImpl.parallaxManager.registerParallaxPage(this.element);
-    });
   }
 
   /**
