@@ -103,7 +103,7 @@ const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
  * Gets a URL to display a message on amp.dev.
  * @param {string} id
  * @param {!Array} interpolatedParts
- * @return {Array}
+ * @return {!Array}
  */
 function externalMessageUrlParts(id, interpolatedParts) {
   let associatedElementOptional;
