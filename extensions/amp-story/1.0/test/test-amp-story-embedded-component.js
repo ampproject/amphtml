@@ -21,7 +21,6 @@ import {
 } from '../amp-story-store-service';
 import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
-import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {EventType} from '../events';
 import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
@@ -38,7 +37,6 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
   let fakeCover;
   let fakeComponent;
   let analyticsService;
-  let variableService;
 
   beforeEach(() => {
     win = env.win;
@@ -82,7 +80,6 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
 
     storeService = getStoreService(win);
     analyticsService = getAnalyticsService(win);
-    variableService = getVariableService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
   });
 
