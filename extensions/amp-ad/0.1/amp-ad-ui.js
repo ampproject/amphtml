@@ -16,7 +16,6 @@
 
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
-import {isNewLoaderExperimentEnabled} from '../../../src/loader';
 import {isProxyOrigin} from '../../../src/url';
 import {user} from '../../../src/log';
 
@@ -58,19 +57,6 @@ export class AmpAdUIHandler {
         this.baseInstance_.element.appendChild(fallback);
       }
     }
-  }
-
-  /**
-   * Create a default placeholder if not provided.
-   * Should be called in baseElement createPlaceholderCallback.
-   * @return {?Element}
-   */
-  createPlaceholder() {
-    if (isNewLoaderExperimentEnabled(this.element_)) {
-      return null;
-    }
-
-    return this.addDefaultUiComponent_('placeholder');
   }
 
   /**

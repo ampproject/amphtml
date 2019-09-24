@@ -1879,12 +1879,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
-      it('should disable when not measured or too small', () => {
+      it('should disable when not measured', () => {
         stubInA4A(false);
         element.layoutWidth_ = 0;
-        expect(element.isLoadingEnabled_()).to.be.false;
-
-        element.layoutWidth_ = 10;
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
@@ -1949,6 +1946,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should create and turn on', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.toggleLoading(true);
 
         expect(element.loadingContainer_).to.not.be.null;
@@ -1959,21 +1958,25 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should turn on already created', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.prepareLoading_();
         const {
-          loadingContainer_: container,
-          loadingElement_: indicator,
+          loadingContainer_: prevLoadingContainer,
+          loadingElement_: prevLoadingElement_,
         } = element;
         element.toggleLoading(true);
 
-        expect(element.loadingContainer_).to.equal(container);
+        expect(element.loadingContainer_).to.equal(prevLoadingContainer);
         expect(element.loadingContainer_).to.not.have.class('amp-hidden');
-        expect(element.loadingElement_).to.equal(indicator);
+        expect(element.loadingElement_).to.equal(prevLoadingElement_);
         expect(element.loadingElement_).to.have.class('amp-active');
       });
 
       it('should turn off', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.prepareLoading_();
         element.toggleLoading(false);
 
@@ -1985,6 +1988,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should turn off and cleanup', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.prepareLoading_();
         element.toggleLoading(false, {cleanup: true});
 
@@ -1994,6 +1999,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should NOT cleanup if re-used', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.prepareLoading_();
         sandbox
           .stub(element.implementation_, 'isLoadingReused')
@@ -2035,6 +2042,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('should turn on when enters viewport', () => {
         stubInA4A(false);
         const toggle = sandbox.spy(element, 'toggleLoading');
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.viewportCallback(true);
         clock.tick(1000);
         expect(toggle).to.be.calledOnce;
@@ -2054,6 +2063,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
         stubInA4A(false);
         const toggle = sandbox.spy(element, 'toggleLoading');
         element.isInViewport_ = true;
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.updateLayoutBox({top: 0, width: 300});
         expect(toggle).to.be.calledOnce;
         expect(toggle.firstCall.args[0]).to.equal(true);
@@ -2062,6 +2073,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('should create loading when measured if in the top window', () => {
         stubInA4A(false);
         const toggle = sandbox.spy(element, 'toggleLoading');
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.updateLayoutBox({top: 0, width: 300});
         expect(toggle).to.have.not.been.called;
         expect(element.loadingContainer_).to.not.be.null;
