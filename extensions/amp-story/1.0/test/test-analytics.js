@@ -67,9 +67,11 @@ describes.fakeWin('amp-story analytics', {}, env => {
       index: 1,
     });
 
-    expect(trigger).to.have.been.calledWith('story-page-visible');
-    expect(analytics.getVariableDetailsForTesting()).to.deep.include({
-      'detailsForPage': {},
+    expect(trigger).to.have.been.calledOnceWith('story-page-visible');
+    expect(analytics.updateDetails().pageDetails).to.deep.include({
+      'story-page-visible': {
+        'repeated': false,
+      },
     });
   });
 
@@ -92,8 +94,11 @@ describes.fakeWin('amp-story analytics', {}, env => {
     });
 
     expect(trigger).to.have.been.calledWith('story-page-visible');
-    expect(analytics.getVariableDetailsForTesting()).to.deep.include({
-      'detailsForPage': {'repeated': true},
+    expect(trigger).to.have.been.calledThrice;
+    expect(analytics.updateDetails().pageDetails).to.deep.include({
+      'story-page-visible': {
+        'repeated': true,
+      },
     });
   });
 });

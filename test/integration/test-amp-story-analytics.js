@@ -25,8 +25,10 @@ const config = describe
 
 config.run('amp-story analytics', () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];
-  describes.integration('amp-story analytics', {
-    body: `
+  describes.integration(
+    'amp-story analytics',
+    {
+      body: `
     <amp-story standalone supports-landscape>
       <amp-story-page id="page-1">
         <amp-story-grid-layer template="horizontal">
@@ -37,7 +39,7 @@ config.run('amp-story analytics', () => {
       </amp-story-page>
       <amp-story-page id="page-2">
         <amp-story-grid-layer template="horizontal">
-          <p>Second page</p>
+          <p id="left-2">Left side</p>
           <p>Center</p>
           <p id="right-2">Click me</p>
         </amp-story-grid-layer>
@@ -122,140 +124,161 @@ config.run('amp-story analytics', () => {
       }
       </script>
     </amp-analytics>`,
-    extensions
-  }, env => {
-    let browser;
-    let clickAndWait;
+      extensions,
+    },
+    env => {
+      let browser;
+      let clickAndWait;
 
-    beforeEach(async () => {
-      browser = new BrowserController(env.win);
-      clickAndWait = async selector => {
-        browser.click(selector);
+      beforeEach(async () => {
+        browser = new BrowserController(env.win);
+        clickAndWait = async selector => {
+          browser.click(selector);
+          await browser.wait(1000);
+        };
+        env.iframe.style.height = '732px';
+        env.iframe.style.width = '412px';
+        await browser.waitForElementLayout('amp-analytics');
+        return browser.waitForElementLayout('amp-story');
+      });
+
+      it('should send analytics event when landing on a page', async () => {
+        await browser.waitForElementLayout('#page-1[active]');
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['pageVisible']).to.equal('page-1');
+      });
+
+      it('should send analytics event when navigating', async () => {
+        await browser.waitForElementLayout('#page-1[active]');
+        await clickAndWait('#right-1');
+
+        await browser.waitForElementLayout('#page-2[active]');
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['pageVisible']).to.equal('page-2');
+      });
+
+      it('should send analytics event when entering bookend', async () => {
+        await browser.waitForElementLayout('#page-1[active]');
+        await clickAndWait('#right-1');
+
+        await browser.waitForElementLayout('#page-2[active]');
+        await clickAndWait('#right-2');
+
+        await browser.waitForElementLayout('amp-story-bookend');
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['bookendEnter']).to.equal('true');
+      });
+
+      it('should send analytics event when exiting bookend', async () => {
+        await browser.waitForElementLayout('#page-1[active]');
+        await clickAndWait('#right-1');
+
+        await browser.waitForElementLayout('#page-2[active]');
+        await clickAndWait('#right-2');
+
+        await browser.waitForElementLayout('amp-story-bookend');
+        await clickAndWait('amp-story-bookend');
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['bookendExit']).to.equal('true');
+      });
+
+      it('should send same event twice when repeat option is absent in storyspec', async () => {
+        await browser.waitForElementLayout('#page-1[active]');
+        await clickAndWait('#right-1');
+
+        await browser.waitForElementLayout('#page-2[active]');
+        // Go back to page 1.
+        browser.clickAtPosition('#left-2', 10);
         await browser.wait(1000);
-      };
-      env.iframe.style.height = '732px';
-      env.iframe.style.width = '412px';
-      await browser.waitForElementLayout('amp-analytics');
-      return browser.waitForElementLayout('amp-story');
-    });
 
-    it('should send analytics event when landing on a page', async () => {
-      await browser.waitForElementLayout('#page-1[active]');
+        await browser.waitForElementLayout('#page-1[active]');
 
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['pageVisible']).to.equal('page-1');
-    });
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['pageVisible']).to.equal('page-1');
+      });
+    }
+  );
 
-    it('should send analytics event when navigating', async () => {
-      await browser.waitForElementLayout('#page-1[active]');
-      await clickAndWait('#right-1');
-
-      await browser.waitForElementLayout('#page-2[active]');
-
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['pageVisible']).to.equal('page-2');
-    });
-
-    it('should send analytics event when entering bookend', async () => {
-      await browser.waitForElementLayout('#page-1[active]');
-      await clickAndWait('#right-1');
-
-      await browser.waitForElementLayout('#page-2[active]');
-      await clickAndWait('#right-2');
-
-      await browser.waitForElementLayout('amp-story-bookend');
-
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['bookendEnter']).to.equal('true');
-    });
-
-    it('should send analytics event when exiting bookend', async () => {
-      await browser.waitForElementLayout('#page-1[active]');
-      await clickAndWait('#right-1');
-
-      await browser.waitForElementLayout('#page-2[active]');
-      await clickAndWait('#right-2');
-
-      await browser.waitForElementLayout('amp-story-bookend');
-      await clickAndWait('amp-story-bookend');
-
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['bookendExit']).to.equal('true');
-    });
-
-    it('should send same event twice when repeat option is absent in storyspec', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
-      // Go back to page 1.
-      browser.clickAtPosition('#page-2', /** clientX */ 10);
-      await browser.wait(100);
-
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['pageVisible']).to.equal('page-1');
-    });
-  });
-
-  describes.integration('repeat in storySpec', {
-    body: `
-    <amp-story standalone>
-      <amp-analytics>
-        <script type="application/json">
-        {
-          "requests": {
-            "endpoint": "${RequestBank.getUrl()}"
-          },
-          "triggers": {
-            "trackPageview": {
-              "on": "story-page-visible",
-              "request": "endpoint",
-              "storySpec": {
-                "repeat": false
-              },
-              "extraUrlParams": {
-                "pageVisible": "\${storyPageId}"
-              }
-            }
-          },
-          "extraUrlParams": {
-            "pageVisible": "\${storyPageId}"
-          }
-        }
-        </script>
-      </amp-analytics>
+  describes.integration(
+    'repeat in storySpec',
+    {
+      body: `
+    <amp-story standalone supports-landscape>
       <amp-story-page id="page-1">
-        <amp-story-grid-layer template="vertical">
-          <h1>First page</h1>
+        <amp-story-grid-layer template="horizontal">
+          <p>Left side</p>
+          <p>Center</p>
+          <p id="right-1">Click me</p>
         </amp-story-grid-layer>
       </amp-story-page>
       <amp-story-page id="page-2">
-        <amp-story-grid-layer template="vertical">
-          <h1>Second page</h1>
+        <amp-story-grid-layer template="horizontal">
+          <p id="left-2">Left side</p>
+          <p>Center</p>
+          <p id="right-2">Click me</p>
         </amp-story-grid-layer>
       </amp-story-page>
-    </amp-story>`, extensions}, env => {
-    let browser;
-    beforeEach(() => {
-      browser = new BrowserController(env.win);
-      env.iframe.style.height = '732px';
-      env.iframe.style.width = '412px';
-      return browser.waitForElementLayout('amp-story', 20000);
-    });
+    </amp-story>
+    <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "endpoint": "${RequestBank.getUrl()}"
+        },
+        "triggers": {
+          "trackPageview": {
+            "on": "story-page-visible",
+            "request": "endpoint",
+            "storySpec": {
+              "repeat": false
+            },
+            "extraUrlParams": {
+              "pageVisible": "\${storyPageId}"
+            }
+          }
+        },
+        "extraUrlParams": {
+          "pageVisible": "\${storyPageId}"
+        }
+      }
+      </script>
+    </amp-analytics>`,
+      extensions,
+    },
+    env => {
+      let browser;
 
-    it('should not send same analytics event twice when repeat option is present', async () => {
-      browser.click('#page-1');
-      await browser.waitForElementLayout('#page-2', 20000);
-      // Go back to page 1.
-      browser.clickAtPosition('#page-2', /** clientX */ 10);
-      await browser.wait(100);
+      beforeEach(async () => {
+        browser = new BrowserController(env.win);
+        env.iframe.style.height = '732px';
+        env.iframe.style.width = '412px';
+        await browser.waitForElementLayout('amp-analytics');
+        return browser.waitForElementLayout('amp-story');
+      });
 
-      const req = await RequestBank.withdraw();
-      const q = parseQueryString(req.url.substr(1));
-      expect(q['pageVisible']).to.equal('page-2');
-    });
-  });
+      it('should not send same analytics event twice when repeat option is present', async () => {
+        await browser.waitForElementLayout('#page-1[active]');
+        browser.click('#page-1');
+        await browser.wait(1000);
+
+        await browser.waitForElementLayout('#page-2[active]');
+        // Go back to page 1.
+        browser.clickAtPosition('#left-2', 10);
+        await browser.wait(1000);
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['pageVisible']).to.equal('page-2');
+      });
+    }
+  );
 });

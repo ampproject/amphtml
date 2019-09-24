@@ -43,6 +43,20 @@ export const AdvancementMode = {
 };
 
 /**
+ * @typedef {{
+ *  pageId: PageEventCountDef,
+ * }}
+ */
+let EventsPerPageDef;
+
+/**
+ * @typedef {{
+ *  eventType: number,
+ * }}
+ */
+let PageEventCountDef;
+
+/**
  * Util function to retrieve the analytics service. Ensures we can retrieve the
  * service synchronously from the amp-story codebase without running into race
  * conditions.
@@ -79,11 +93,8 @@ export class StoryAnalyticsService {
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(win);
 
-    /** @private {!Object} */
-    this.eventsPerPage_ = map();
-
-    /** @private {!JsonObject} */
-    this.details_ = /** @type {!JsonObject} */ ({});
+    /** @private {EventsPerPageDef} */
+    this.pageEventCount_ = map();
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
@@ -126,42 +137,34 @@ export class StoryAnalyticsService {
    * @param {!StoryAnalyticsEvent} eventType
    */
   triggerEvent(eventType) {
-    this.incrementEventCountForPage_(eventType);
-    triggerAnalyticsEvent(
-      this.element_,
-      eventType,
-      this.getDetails_(eventType)
-    );
+    this.incrementPageEventCount_(eventType);
+    triggerAnalyticsEvent(this.element_, eventType, this.updateDetails());
   }
 
   /**
+   * Updates event details.
    * @visibleForTesting
-   * @return {!Object}
-   */
-  getVariableDetailsForTesting() {
-    return this.details_;
-  }
-
-  /**
-   * Gets details for a given event type.
-   * @param {!StoryAnalyticsEvent} eventType
-   * @private
    * @return {!JsonObject}}
    */
-  getDetails_(eventType) {
-    const details = {};
+  updateDetails() {
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
+    let pageEventDetails = {};
 
-    if (this.eventsPerPage_[pageId][eventType] > 1) {
-      Object.assign(details, {repeated: true});
-    }
+    Object.values(StoryAnalyticsEvent).forEach(type => {
+      if (
+        !this.pageEventCount_[pageId] ||
+        !this.pageEventCount_[pageId][type]
+      ) {
+        return;
+      }
+      pageEventDetails[type] = {
+        repeated: this.pageEventCount_[pageId][type] > 1,
+      };
+    });
+    pageEventDetails = {pageDetails: pageEventDetails};
 
-    this.details_ = /** @type {!JsonObject} */ (Object.assign(
-      {detailsForPage: details},
-      vars
-    ));
-    return this.details_;
+    return /** @type {!JsonObject} */ (Object.assign(pageEventDetails, vars));
   }
 
   /**
@@ -169,13 +172,13 @@ export class StoryAnalyticsService {
    * @param {!StoryAnalyticsEvent} eventType
    * @private
    */
-  incrementEventCountForPage_(eventType) {
+  incrementPageEventCount_(eventType) {
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
 
-    this.eventsPerPage_[pageId] = this.eventsPerPage_[pageId] || {};
-    this.eventsPerPage_[pageId][eventType] =
-      this.eventsPerPage_[pageId][eventType] || 0;
-    this.eventsPerPage_[pageId][eventType]++;
+    this.pageEventCount_[pageId] = this.pageEventCount_[pageId] || {};
+    this.pageEventCount_[pageId][eventType] =
+      this.pageEventCount_[pageId][eventType] || 0;
+    this.pageEventCount_[pageId][eventType]++;
   }
 }
