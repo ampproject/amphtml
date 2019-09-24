@@ -15,44 +15,11 @@
  */
 
 /**
- * @param {AmpApesterMedia} ampApesterMedia
  * @param {!JsonObject} monetizationSettings
- */
-export function handleCompanion(monetizationSettings, ampApesterMedia) {
-  const companionCampaignOptions =
-    monetizationSettings['companionOptions'] || {};
-  handleDisplay(companionCampaignOptions, ampApesterMedia);
-
-  // const companionRawSettings = monetizationSettings['companionOptions'];
-  //   const {companionCampaignId} = companionCampaignOptions;
-  //   const companionSrSettings = this.extractCompanionSrSettings_(
-  //     companionRawSettings
-  //   );
-  //   if (companionSrSettings) {
-  //     this.constructCompanionSr_(
-  //       companionSrSettings,
-  //       media,
-  //       companionCampaignId
-  //     ).then(companionVideoSrElement => {
-  //       const companionSrElement =
-  //         companionSrSettings.location === 'companionBelow'
-  //           ? this.element.nextSibling
-  //           : this.element;
-  //       this.element.parentNode.insertBefore(
-  //         companionVideoSrElement,
-  //         companionSrElement
-  //       );
-  //     });
-  //   }
-  //   const interactionId = media['interactionId'];
-  //   console.log('campaignData:,', campaignData);
-}
-
-/**
- * @param {!JsonObject} companionRawSettings
  * @param {AmpApesterMedia} ampApesterMedia
  */
-function handleDisplay(companionRawSettings, ampApesterMedia) {
+export function handleCompanionDisplay(monetizationSettings, ampApesterMedia) {
+  const companionRawSettings = monetizationSettings['companionOptions'] || {};
   const {settings} = companionRawSettings || {};
   if (
     companionRawSettings &&
