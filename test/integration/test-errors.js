@@ -29,16 +29,18 @@ const t = describe
   // TODO(@cramforce): Find out why it does not work with obfuscated props.
   .skipIfPropertiesObfuscated();
 
-t.run('error page', function() {
+t.run('errors displayed on page on #development mode', function() {
   this.timeout(TIMEOUT);
 
   let fixture;
-  let messages;
+  let messagesById;
 
   beforeEach(async () => {
     // Errors are printed as URLs when `transform-log-messages` is on.
-    // Fetch table to  URL ids for expected messages.
-    messages = await (await fetch('/dist/log-messages.simple.json')).json();
+    // Fetch table to find URL ids for expected messages.
+    messagesById = Object.freeze(
+      await (await fetch('/dist/log-messages.simple.json')).json()
+    );
 
     fixture = await createFixtureIframe(
       'test/fixtures/errors.html',
@@ -55,13 +57,12 @@ t.run('error page', function() {
     );
 
     return poll(
-      'errors to happen',
+      'errors to appear on page',
       () => fixture.doc.querySelectorAll('[error-message]').length >= 2,
-      () =>
-        new Error(
-          'Failed to find errors. HTML\n' +
-            fixture.doc.documentElement./*TEST*/ innerHTML
-        ),
+      () => {
+        const {innerHTML} = fixture.doc.documentElement;
+        return new Error(`Failed to find errors. HTML:\n${innerHTML}`);
+      },
       TIMEOUT - 1000
     );
   });
@@ -73,17 +74,18 @@ t.run('error page', function() {
       return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
     });
 
-  const idsForMessagesThatContain = substr =>
-    Object.keys(messages).filter(id => messages[id].indexOf(substr) > -1);
+  /** Regex disjunction of message URLs that contain substr or substr itself. */
+  const messageOrUrlRe = messageSubstr =>
+    new RegExp(
+      Object.keys(messagesById)
+        .filter(id => messagesById[id].indexOf(messageSubstr) > -1)
+        .map(id => `&id=${id}&`)
+        .concat(messageSubstr)
+        .map(escapeForRe)
+        .join('|')
+    );
 
-  function expectedErrorRe(element) {
-    const substr = element.getAttribute('data-expectederror');
-    const ids = idsForMessagesThatContain(substr);
-    const valids = [substr].concat(ids.map(id => `&id=${id}&`));
-    return new RegExp(valids.map(reEscape).join('|'));
-  }
-
-  const reEscape = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escapeForRe = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   function shouldFail(id) {
     // Skip for issue #110
@@ -91,7 +93,7 @@ t.run('error page', function() {
       .ifChrome()
       .run(`should fail to load #${id}`, () => {
         const e = fixture.doc.getElementById(id);
-        const errorRe = expectedErrorRe(e);
+        const errorRe = messageOrUrlRe(e.getAttribute('data-expectederror'));
         expect(fixture.errors.join('\n')).to.match(errorRe);
         expect(e.getAttribute('error-message')).to.match(errorRe);
         expect(e.className).to.contain('i-amphtml-element-error');

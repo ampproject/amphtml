@@ -100,31 +100,32 @@ export function overrideLogLevel(level) {
 const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
 
 /**
- * Gets a URL to display a message on amp.dev.
+ * Gets an argument set to print a URL containing a message on amp.dev.
+ * The first interpolated element part will be appended to the message to
+ * associate an error to an element in order to display the message on the page
+ * on #development mode.
  * @param {string} id
  * @param {!Array} interpolatedParts
  * @return {!Array}
  */
 function externalMessageUrlParts(id, interpolatedParts) {
-  let associatedElementOptional;
+  let optAssociatedElement;
 
-  const externalUrlMessage = interpolatedParts.reduce((prefix, part) => {
+  const externalMessageUrl = interpolatedParts.reduce((prefix, part) => {
     if (part && part.tagName) {
-      associatedElementOptional = part;
+      optAssociatedElement = part;
     }
     return `${prefix}&s[]=${encodeURIComponent(messagePartToString(part))}`;
-  }, `More info at ${externalMessageUrlPrefix(id)}`);
+  }, `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`);
 
-  if (!associatedElementOptional) {
-    return [externalUrlMessage];
+  const externalMessageUrlMessage = `More info at ${externalMessageUrl}`;
+
+  if (!optAssociatedElement) {
+    return [externalMessageUrlMessage];
   }
 
-  // Hackily force assert to recognize associated element by interpolating it
-  return [`${externalUrlMessage} %s`, associatedElementOptional];
+  return [`${externalMessageUrlMessage} %s`, optAssociatedElement];
 }
-
-const externalMessageUrlPrefix = id =>
-  `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`;
 
 /**
  * URL to simple log messages table JSON file, which contains an Object<string, string>
