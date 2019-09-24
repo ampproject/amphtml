@@ -213,7 +213,12 @@ class InaboxViewportImpl {
   getRect() {
     if (this.rect_ == null) {
       const size = this.getSize();
-      this.rect_ = layoutRectLtwh(0, 0, size.width, size.height);
+      this.rect_ = layoutRectLtwh(
+        this.getScrollLeft(),
+        this.getScrollTop(),
+        size.width,
+        size.height
+      );
     }
     return this.rect_;
   }
