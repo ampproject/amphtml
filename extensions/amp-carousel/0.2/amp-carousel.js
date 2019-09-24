@@ -106,13 +106,6 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
-
-    /**
-     * Whether or not to skip a slideChange when the index changes. Used to
-     * avoid triggering a slideChange on the initial render.
-     * @private {boolean}
-     */
-    this.skipNextSlideChange_ = true;
   }
 
   /** @override */
@@ -517,13 +510,27 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Updates the current index, resuming the current slide and pausing all
-   * others.
+   * Updates the current index, triggering actions and analytics events.
    * @param {number} index
+   * @param {!ActionSource} actionSource
    */
-  updateCurrentIndex_(index) {
+  updateCurrentIndex_(index, actionSource) {
     const prevIndex = this.currentIndex_;
     this.currentIndex_ = index;
+
+    // Ignore the first indexChange, we do not want to trigger any events.
+    if (prevIndex == null) {
+      return;
+    }
+
+    const data = dict({'index': index});
+    const name = 'slideChange';
+    const isHighTrust = this.isHighTrustActionSource_(actionSource);
+    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+
+    const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
+    this.action_.trigger(this.element, name, action, trust);
+    this.element.dispatchCustomEvent(name, data);
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 
@@ -627,22 +634,8 @@ class AmpCarousel extends AMP.BaseElement {
     const actionSource = detail['actionSource'];
 
     this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
-    this.updateCurrentIndex_(index);
+    this.updateCurrentIndex_(index, actionSource);
     this.updateUi_();
-
-    if (this.skipNextSlideChange_) {
-      this.skipNextSlideChange_ = false;
-      return;
-    }
-
-    const data = dict({'index': index});
-    const name = 'slideChange';
-    const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
-
-    const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
-    this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
   }
 }
 
