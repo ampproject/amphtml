@@ -23,19 +23,19 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 
 const TAG = 'amp-apester-media';
 /**
- * @param {AmpApesterMedia} ampApesterMedia
+ * @param {AmpApesterMedia} apesterElement
  * @return {!JsonObject}
  * */
-export function getConsent(ampApesterMedia) {
-  const consentStatePromise = getConsentPolicyState(ampApesterMedia).catch(
+export function getConsent(apesterElement) {
+  const consentStatePromise = getConsentPolicyState(apesterElement).catch(
     err => {
-      ampApesterMedia.dev().error(TAG, 'Error determining consent state', err);
+      apesterElement.dev().error(TAG, 'Error determining consent state', err);
       return CONSENT_POLICY_STATE.UNKNOWN;
     }
   );
-  const consentStringPromise = getConsentPolicyInfo(ampApesterMedia).catch(
+  const consentStringPromise = getConsentPolicyInfo(apesterElement).catch(
     err => {
-      ampApesterMedia.dev().error(TAG, 'Error determining consent string', err);
+      apesterElement.dev().error(TAG, 'Error determining consent string', err);
       return null;
     }
   );

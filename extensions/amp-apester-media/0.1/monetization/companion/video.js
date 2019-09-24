@@ -19,9 +19,9 @@ import {getConsent, getConsentStateValue} from '../consent-util';
 
 /**
  * @param {!JsonObject} media
- * @param {AmpApesterMedia} ampApesterMedia
+ * @param {AmpApesterMedia} apesterElement
  */
-export function handleCompanionVideo(media, ampApesterMedia) {
+export function handleCompanionVideo(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
   const companionCampaignOptions =
     monetizationSettings['companionCampaignOptions'] || {};
@@ -34,7 +34,7 @@ export function handleCompanionVideo(media, ampApesterMedia) {
   ) {
     const companionSrSettings = extractCompanionSrSettings(
       companionRawSettings,
-      ampApesterMedia
+      apesterElement
     );
     if (companionSrSettings) {
       const {companionCampaignId} = companionCampaignOptions;
@@ -42,13 +42,13 @@ export function handleCompanionVideo(media, ampApesterMedia) {
         companionSrSettings,
         media,
         companionCampaignId,
-        ampApesterMedia
+        apesterElement
       ).then(companionVideoSrElement => {
         const companionSrElement =
           companionSrSettings.location === 'companionBelow'
-            ? ampApesterMedia.nextSibling
-            : ampApesterMedia;
-        ampApesterMedia.parentNode.insertBefore(
+            ? apesterElement.nextSibling
+            : apesterElement;
+        apesterElement.parentNode.insertBefore(
           companionVideoSrElement,
           companionSrElement
         );
@@ -59,10 +59,10 @@ export function handleCompanionVideo(media, ampApesterMedia) {
 
 /**
  * @param {!JsonObject} companionRawSettings
- * @param {AmpApesterMedia} ampApesterMedia
+ * @param {AmpApesterMedia} apesterElement
  * @return {!JsonObject}
  */
-function extractCompanionSrSettings(companionRawSettings, ampApesterMedia) {
+function extractCompanionSrSettings(companionRawSettings, apesterElement) {
   const res = {};
   const {video} = companionRawSettings;
   res.videoTag = video.videoTag;
@@ -73,7 +73,7 @@ function extractCompanionSrSettings(companionRawSettings, ampApesterMedia) {
   } else {
     return null;
   }
-  res.size = getCompanionVideoAdSize(ampApesterMedia);
+  res.size = getCompanionVideoAdSize(apesterElement);
   return res;
 }
 
@@ -81,19 +81,19 @@ function extractCompanionSrSettings(companionRawSettings, ampApesterMedia) {
  * @param {JsonObject} companionSettings
  * @param {JsonObject} media
  * @param {string} campaignId
- * @param {AmpApesterMedia} ampApesterMedia
+ * @param {AmpApesterMedia} apesterElement
  * @return {!Element}
  */
 function constructCompanionSr(
   companionSettings,
   media,
   campaignId,
-  ampApesterMedia
+  apesterElement
 ) {
   const {videoTag, size} = companionSettings || {};
-  const ampAd = ampApesterMedia.ownerDocument.createElement('amp-ad');
+  const ampAd = apesterElement.ownerDocument.createElement('amp-ad');
   ampAd.setAttribute('type', 'blade');
-  return getSrMacros(media, campaignId, ampApesterMedia).then(macros => {
+  return getSrMacros(media, campaignId, apesterElement).then(macros => {
     ampAd.setAttribute('data-blade_player_type', 'bladex');
     ampAd.setAttribute('servingDomain', 'ssr.streamrail.net');
     ampAd.setAttribute('width', size.width);
@@ -107,11 +107,11 @@ function constructCompanionSr(
 }
 
 /**
- * @param {AmpApesterMedia} ampApesterMedia
+ * @param {AmpApesterMedia} apesterElement
  * @return {!JsonObject}
  */
-function getCompanionVideoAdSize(ampApesterMedia) {
-  const adWidth = ampApesterMedia.clientWidth;
+function getCompanionVideoAdSize(apesterElement) {
+  const adWidth = apesterElement.clientWidth;
   const adRatio = 0.6;
   const adHeight = Math.ceil(adWidth * adRatio);
   return {width: adWidth, height: adHeight};
@@ -120,13 +120,13 @@ function getCompanionVideoAdSize(ampApesterMedia) {
 /**
  * @param {!JsonObject} interactionModel
  * @param {?string} campaignId
- * @param {AmpApesterMedia} ampApesterMedia
+ * @param {AmpApesterMedia} apesterElement
  * @return {!JsonObject}
  */
-function getSrMacros(interactionModel, campaignId, ampApesterMedia) {
-  return getConsent(ampApesterMedia).then(consentRes => {
+function getSrMacros(interactionModel, campaignId, apesterElement) {
+  return getConsent(apesterElement).then(consentRes => {
     const {interactionId, publisherId, publisher} = interactionModel;
-    const pageUrl = Services.documentInfoForDoc(ampApesterMedia).canonicalUrl;
+    const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
     const macros = Object.assign(
       {
         param1: interactionId,

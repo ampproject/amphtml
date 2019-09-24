@@ -16,9 +16,9 @@
 
 /**
  * @param {!JsonObject} media
- * @param {AmpApesterMedia} ampApesterMedia
+ * @param {AmpApesterMedia} apesterElement
  */
-export function handleCompanionDisplay(media, ampApesterMedia) {
+export function handleCompanionDisplay(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
   const companionRawSettings = monetizationSettings['companionOptions'] || {};
   const {settings} = companionRawSettings || {};
@@ -32,11 +32,11 @@ export function handleCompanionDisplay(media, ampApesterMedia) {
 
     const companionDisplayElement = constructCompanionDisplayAd(
       companionDisplaySettings,
-      ampApesterMedia
+      apesterElement
     );
-    ampApesterMedia.parentNode.insertBefore(
+    apesterElement.parentNode.insertBefore(
       companionDisplayElement,
-      ampApesterMedia.nextSibling
+      apesterElement.nextSibling
     );
   }
 }
@@ -57,12 +57,12 @@ function extractCompanionDisplaySettings(companionDisplayRawSettings) {
 
 /**
  * @param {JsonObject} companionSettings
- * @param {AmpApesterMedia} ampApesterMedia
+ * @param {AmpApesterMedia} apesterElement
  * @return {!Element}
  */
-function constructCompanionDisplayAd(companionSettings, ampApesterMedia) {
+function constructCompanionDisplayAd(companionSettings, apesterElement) {
   const {width, height, slot} = companionSettings || {};
-  const ampAd = ampApesterMedia.ownerDocument.createElement('amp-ad');
+  const ampAd = apesterElement.ownerDocument.createElement('amp-ad');
   ampAd.setAttribute('type', 'doubleclick');
   ampAd.setAttribute('data-slot', slot);
   ampAd.setAttribute('width', width);

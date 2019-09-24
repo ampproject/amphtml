@@ -29,8 +29,8 @@ import {
   setFullscreenOn,
 } from './utils';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {handleCompanionDisplay} from './monetization/companion/display';
-import {handleCompanionVideo} from './monetization/companion/video';
+import {handleCompanionAd} from './monetization/index';
+
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
@@ -343,9 +343,7 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
-
-            handleCompanionDisplay(media, this.element);
-            handleCompanionVideo(media, this.element);
+            handleCompanionAd(media, this.element);
           })
           .then(() => {
             return this.loadPromise(iframe).then(() => {
