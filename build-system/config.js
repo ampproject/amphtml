@@ -41,6 +41,12 @@ const builtRuntimePaths = [
     watched: true,
   },
   {
+    pattern: 'dist/*.json',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+  {
     pattern: 'dist.3p/**/*',
     included: false,
     nocache: false,

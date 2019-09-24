@@ -103,14 +103,28 @@ const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
  * Gets a URL to display a message on amp.dev.
  * @param {string} id
  * @param {!Array} interpolatedParts
- * @return {string}
+ * @return {Array}
  */
-const externalMessageUrl = (id, interpolatedParts) =>
-  interpolatedParts.reduce(
-    (prefix, part) =>
-      `${prefix}&s[]=${encodeURIComponent(messagePartToString(part))}`,
-    `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
-  );
+function externalMessageUrlParts(id, interpolatedParts) {
+  let associatedElementOptional;
+
+  const externalUrlMessage = interpolatedParts.reduce((prefix, part) => {
+    if (part && part.tagName) {
+      associatedElementOptional = part;
+    }
+    return `${prefix}&s[]=${encodeURIComponent(messagePartToString(part))}`;
+  }, `More info at ${externalMessageUrlPrefix(id)}`);
+
+  if (!associatedElementOptional) {
+    return [externalUrlMessage];
+  }
+
+  // Hackily force assert to recognize associated element by interpolating it
+  return [`${externalUrlMessage} %s`, associatedElementOptional];
+}
+
+const externalMessageUrlPrefix = id =>
+  `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`;
 
 /**
  * URL to simple log messages table JSON file, which contains an Object<string, string>
@@ -623,7 +637,7 @@ export class Log {
     if (this.messages_ && id in this.messages_) {
       return [this.messages_[id]].concat(parts);
     }
-    return [`More info at ${externalMessageUrl(id, parts)}`];
+    return externalMessageUrlParts(id, parts);
   }
 
   /**
