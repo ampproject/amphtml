@@ -1937,12 +1937,19 @@ describe('amp-a4a', () => {
       ).to.throw(new RegExp(INVALID_SPSA_RESPONSE));
     });
 
-    it('should throw due to missing outlink', () => {
+    it('should not throw due to missing outlink', () => {
       metaData.ctaType = '0';
       a4a.isSinglePageStoryAd = true;
-      expect(() =>
-        a4a.getAmpAdMetadata(buildCreativeString(metaData))
-      ).to.throw(new RegExp(INVALID_SPSA_RESPONSE));
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
+      const expected = Object.assign(
+        {
+          minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        },
+        metaData
+      );
+      delete expected.ctaType;
+      expect(actual).to.deep.equal(expected);
+      expect(a4a.element.dataset.varsCtatype).to.equal('0');
     });
 
     it('should set appropriate attributes and return metadata object', () => {
