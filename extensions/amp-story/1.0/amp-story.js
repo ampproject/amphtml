@@ -415,6 +415,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStyles_();
     this.initializeListeners_();
     this.initializeListenersForDev_();
+    this.initializePageIds_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -521,6 +522,25 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Initializes page ids by deduplicating them.
+   * @private
+   */
+  initializePageIds_() {
+    const pageEls = this.element.querySelectorAll('amp-story-page');
+    const pageIds = Array.prototype.map.call(pageEls, el => el.id || 'default');
+    for (let i = 0; i < pageIds.length; i++) {
+      let counter = 0;
+      let index;
+      while ((index = pageIds.indexOf(pageIds[i], i + 1)) !== -1) {
+        user().error(TAG, `Duplicate amp-story-page ID ${pageIds[index]}`);
+        const newId = `${pageIds[index]}__${++counter}`;
+        pageEls[index].id = newId;
+        pageIds[index] = newId;
+      }
+    }
+  }
+
+  /**
    * @param {!Element} styleEl
    * @private
    */
@@ -607,6 +627,9 @@ export class AmpStory extends AMP.BaseElement {
   buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
 
+    // TODO(gmajoulet): cache the page ids in the store from the
+    // initializePageIds_ method to remove this block. Requires refactoring in
+    // test-amp-story to avoid console.errors.
     let pageIds;
     if (this.pages_.length) {
       pageIds = this.pages_.map(page => page.element.id);
