@@ -26,6 +26,13 @@ import {userAssert} from './log';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
+/** @enum {string} */
+export const SameSite = {
+  LAX: 'Lax',
+  STRICT: 'Strict',
+  NONE: 'None',
+};
+
 /**
  * Returns the value of the cookie. The cookie access is restricted and must
  * go through the privacy review. Before using this method please file a
@@ -85,24 +92,26 @@ function tryGetDocumentCookie_(win) {
  * @param {time} expirationTime
  * @param {{
  *   highestAvailableDomain:(boolean|undefined),
- *   domain:(string|undefined)
- * }=} opt_options
+ *   domain:(string|undefined),
+ *   sameSite: (!SameSite|undefined),
+ * }=} options
  *     - highestAvailableDomain: If true, set the cookie at the widest domain
  *       scope allowed by the browser. E.g. on example.com if we are currently
  *       on www.example.com.
  *     - domain: Explicit domain to set. domain overrides HigestAvailableDomain
  *     - allowOnProxyOrigin: Allow setting a cookie on the AMP Cache.
+ *     - sameSite: The SameSite value to use when setting the cookie.
  */
-export function setCookie(win, name, value, expirationTime, opt_options) {
-  checkOriginForSettingCookie(win, opt_options, name);
+export function setCookie(win, name, value, expirationTime, options = {}) {
+  checkOriginForSettingCookie(win, options, name);
   let domain = undefined;
   // Respect explicitly set domain over higestAvailabeDomain
-  if (opt_options && opt_options.domain) {
-    domain = opt_options.domain;
-  } else if (opt_options && opt_options.highestAvailableDomain) {
+  if (options.domain) {
+    domain = options.domain;
+  } else if (options.highestAvailableDomain) {
     domain = /** @type {string} */ (getHighestAvailableDomain(win));
   }
-  trySetCookie(win, name, value, expirationTime, domain);
+  trySetCookie(win, name, value, expirationTime, domain, options.sameSite);
 }
 
 /**
@@ -171,8 +180,9 @@ export function getHighestAvailableDomain(win) {
  * @param {string} value
  * @param {time} expirationTime
  * @param {string|undefined} domain
+ * @param {!SameSite=} sameSite
  */
-function trySetCookie(win, name, value, expirationTime, domain) {
+function trySetCookie(win, name, value, expirationTime, domain, sameSite) {
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
   // Note: we need to allow cdn.ampproject.org in order to optin to experiments
@@ -188,7 +198,8 @@ function trySetCookie(win, name, value, expirationTime, domain) {
     '; path=/' +
     (domain ? '; domain=' + domain : '') +
     '; expires=' +
-    new Date(expirationTime).toUTCString();
+    new Date(expirationTime).toUTCString() +
+    getSameSiteString(win, sameSite);
   try {
     win.document.cookie = cookie;
   } catch (ignore) {
@@ -199,15 +210,35 @@ function trySetCookie(win, name, value, expirationTime, domain) {
 }
 
 /**
+ * Gets the cookie string to use for SameSite. This only sets the SameSite
+ * value if specified, falling back to the browser default. The default value
+ * is equivalent to SameSite.NONE, but is planned to be set to SameSite.LAX in
+ * Chrome 80.
+ *
+ * Note: In Safari 12, if the value is set to SameSite.NONE, it is treated by
+ * the browser as SameSite.STRICT.
+ * @param {Window} win
+ * @param {!SameSite|undefined} sameSite
+ * @return {string} The string to use when setting the cookie.
+ */
+function getSameSiteString(win, sameSite) {
+  if (!sameSite) {
+    return '';
+  }
+
+  return `; SameSite=${sameSite}`;
+}
+
+/**
  * Throws if a given cookie should not be set on the given origin.
  * This is a defense-in-depth. Callers should never run into this.
  *
  * @param {!Window} win
- * @param {!Object|undefined} options
+ * @param {!Object} options
  * @param {string} name For the error message.
  */
 function checkOriginForSettingCookie(win, options, name) {
-  if (options && options.allowOnProxyOrigin) {
+  if (options.allowOnProxyOrigin) {
     userAssert(
       !options.highestAvailableDomain,
       'Could not support higestAvailable Domain on proxy origin, ' +
