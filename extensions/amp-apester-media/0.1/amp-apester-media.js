@@ -344,7 +344,7 @@ class AmpApesterMedia extends AMP.BaseElement {
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
 
-            handleCompanionDisplay(media['campaignData'], this.element);
+            handleCompanionDisplay(media, this.element);
             handleCompanionVideo(media, this.element);
           })
           .then(() => {
