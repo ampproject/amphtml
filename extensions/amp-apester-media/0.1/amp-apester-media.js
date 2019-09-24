@@ -35,6 +35,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {handleCompanion} from './monetization/monetization';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
@@ -314,28 +315,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JsonObject} companionRawSettings
-   * @return {!JsonObject}
-   */
-  extractCompanionDisplaySettings_(companionRawSettings) {
-    const {settings} = companionRawSettings || {};
-    if (
-      !companionRawSettings ||
-      !companionRawSettings.enabled ||
-      !settings ||
-      settings.bannerAdProvider !== 'gdt'
-    ) {
-      return null;
-    }
-    const {slot, bannerSizes = []} = settings || {};
-    const size = bannerSizes[0] || [0, 0];
-    return {
-      slot,
-      height: size[1] || 0,
-      width: size[0] || 0,
-    };
-  }
-  /**
    * @return {!JsonObject}
    * */
   getConsent_() {
@@ -353,7 +332,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     );
     return Promise.all([consentStatePromise, consentStringPromise]);
   }
-
+  //todo test right behavior
   /**
    * @param {CONSENT_POLICY_STATE} consentPolicyState
    * @return {number, number, string}
@@ -362,10 +341,10 @@ class AmpApesterMedia extends AMP.BaseElement {
     switch (consentPolicyState) {
       case CONSENT_POLICY_STATE.SUFFICIENT:
         return {gdpr: 1, user_consent: 1};
-      case CONSENT_POLICY_STATE.INSUFFICIENT || CONSENT_POLICY_STATE.UNKNOWN:
+      case CONSENT_POLICY_STATE.INSUFFICIENT:
+      case CONSENT_POLICY_STATE.UNKNOWN:
         return {gdpr: 1, user_consent: 0};
       case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
-        return {gdpr: 0, user_consent: 1};
       default:
         return {gdpr: 0, user_consent: 1};
     }
@@ -419,7 +398,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       !companionRawSettings ||
       !companionRawSettings.video ||
       !companionRawSettings.video.enabled ||
-      !companionRawSettings.video.provide === 'sr'
+      !companionRawSettings.video.provider === 'sr'
     ) {
       return null;
     }
@@ -435,25 +414,6 @@ class AmpApesterMedia extends AMP.BaseElement {
     }
     res.size = this.getCompanionVideoAdSize_();
     return res;
-  }
-
-  /**
-   * @param {JsonObject} companionSettings
-   * @return {!Element}
-   */
-  constructCompanionDisplayAd_(companionSettings) {
-    if (!companionSettings) {
-      return null;
-    }
-    const {width, height, slot} = companionSettings || {};
-    const ampAd = this.element.ownerDocument.createElement('amp-ad');
-    ampAd.setAttribute('type', 'doubleclick');
-    ampAd.setAttribute('data-slot', slot);
-    ampAd.setAttribute('width', width);
-    ampAd.setAttribute('height', height);
-    ampAd.classList.add('amp-apester-companion');
-
-    return ampAd;
   }
 
   /**
@@ -502,13 +462,13 @@ class AmpApesterMedia extends AMP.BaseElement {
         const companionRawSettings = monetizationSettings['companionOptions'];
         const companionCampaignOptions =
           monetizationSettings['companionCampaignOptions'] || {};
-        const companionDisplaySettings = this.extractCompanionDisplaySettings_(
-          companionRawSettings
-        );
+        // const companionDisplaySettings = this.extractCompanionDisplaySettings_(
+        //   companionRawSettings
+        // );
 
-        const companionDisplayElement = this.constructCompanionDisplayAd_(
-          companionDisplaySettings
-        );
+        // const companionDisplayElement = this.constructCompanionDisplayAd_(
+        //   companionDisplaySettings
+        // );
         const {companionCampaignId} = companionCampaignOptions;
         const companionSrSettings = this.extractCompanionSrSettings_(
           companionRawSettings
@@ -548,12 +508,13 @@ class AmpApesterMedia extends AMP.BaseElement {
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
 
-            if (companionDisplayElement) {
-              this.element.parentNode.insertBefore(
-                companionDisplayElement,
-                this.element.nextSibling
-              );
-            }
+            handleCompanion(media['campaignData'], this.element);
+            // if (companionDisplayElement) {
+            //   this.element.parentNode.insertBefore(
+            //     companionDisplayElement,
+            //     this.element.nextSibling
+            //   );
+            // }
           })
           .then(() => {
             return this.loadPromise(iframe).then(() => {
