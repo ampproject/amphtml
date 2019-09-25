@@ -25,7 +25,7 @@ import {installTimerService} from '../../src/service/timer-impl';
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
 
-describes.sandboxed('Extensions', {}, () => {
+describe('Extensions', () => {
   describes.fakeWin('registerExtension', {}, env => {
     let win;
     let extensions;
@@ -602,6 +602,99 @@ describes.sandboxed('Extensions', {}, () => {
       return extensions.loadElementClass('amp-ext').then(elementClass => {
         expect(elementClass).to.equal(ctor);
       });
+    });
+  });
+
+  describes.fakeWin('reloadExtension', {}, env => {
+    let win;
+    let extensions;
+
+    beforeEach(() => {
+      win = env.win;
+      sandbox = env.sandbox;
+
+      sandbox.stub(Services, 'ampdocServiceFor').returns(null);
+      extensions = new Extensions(win);
+      sandbox.stub(extensions, 'preloadExtension');
+    });
+
+    it('should devAssert if script cannot be found', () => {
+      expect(() => {
+        extensions.reloadExtension('amp-list');
+      }).to.throw('Cannot find script for extension: amp-list');
+
+      expect(extensions.preloadExtension).to.not.be.called;
+    });
+
+    it('should ignore inserted scripts', () => {
+      const list = document.createElement('script');
+      list.setAttribute('custom-element', 'amp-list');
+      list.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
+      list.setAttribute('i-amphtml-inserted', '');
+      win.document.head.appendChild(list);
+
+      expect(() => {
+        extensions.reloadExtension('amp-list');
+      }).to.throw('Cannot find script for extension: amp-list');
+
+      expect(list.hasAttribute('custom-element')).to.be.true;
+      expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
+      expect(extensions.preloadExtension).to.not.be.called;
+    });
+
+    it('should support [custom-element] scripts', () => {
+      const list = document.createElement('script');
+      list.setAttribute('custom-element', 'amp-list');
+      list.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
+      win.document.head.appendChild(list);
+
+      extensions.reloadExtension('amp-list');
+
+      expect(list.hasAttribute('custom-element')).to.be.false;
+      expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+        'amp-list'
+      );
+      expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
+    });
+
+    it('should support [custom-template] scripts', () => {
+      const mustache = document.createElement('script');
+      mustache.setAttribute('custom-template', 'amp-mustache');
+      mustache.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-mustache-0.2.js'
+      );
+      win.document.head.appendChild(mustache);
+
+      extensions.reloadExtension('amp-mustache');
+
+      expect(mustache.hasAttribute('custom-template')).to.be.false;
+      expect(mustache.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+        'amp-mustache'
+      );
+      expect(extensions.preloadExtension).to.be.calledWith(
+        'amp-mustache',
+        '0.2'
+      );
+    });
+
+    it('should support no-attribute scripts', () => {
+      const viewer = document.createElement('script');
+      viewer.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js'
+      );
+      win.document.head.appendChild(viewer);
+
+      extensions.reloadExtension('amp-viewer-integration');
+
+      expect(viewer.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+        'amp-viewer-integration'
+      );
+      expect(extensions.preloadExtension).to.be.calledWith(
+        'amp-viewer-integration',
+        '0.1'
+      );
     });
   });
 

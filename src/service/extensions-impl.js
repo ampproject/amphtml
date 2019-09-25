@@ -278,7 +278,7 @@ export class Extensions {
     const modifier = includeInserted ? '' : ':not([i-amphtml-inserted])';
     const {head} = this.win.document;
     const el = head./*OK*/ querySelector(
-      `[${attr}="${extensionId}"]` + modifier
+      `script[${attr}="${extensionId}"]` + modifier
     );
     if (el) {
       const urlParts = parseExtensionUrl(el.src);
@@ -286,10 +286,10 @@ export class Extensions {
     }
     // Some extensions don't have an attribute e.g. amp-viewer-integration.
     const elements = head./*OK*/ querySelectorAll(
-      ':not([custom-template]):not([custom-element])' + modifier
+      'script:not([custom-template]):not([custom-element])' + modifier
     );
     for (let i = 0; i < elements.length; i++) {
-      const el = elements[i];
+      const el = elements.item(i);
       const urlParts = parseExtensionUrl(el.src);
       if (urlParts.extensionId === extensionId) {
         return {el, version: urlParts.extensionVersion};
