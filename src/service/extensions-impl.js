@@ -248,7 +248,7 @@ export class Extensions {
       /* includeInserted */ false
     );
     devAssert(extension, 'Cannot find script for extension: %s', extensionId);
-    const {el, attr, version} = extension;
+    const {el, attr} = extension;
     // "Disconnect" the old script element and extension record.
     const holder = this.extensions_[extensionId];
     if (holder) {
@@ -261,39 +261,33 @@ export class Extensions {
     el.setAttribute('i-amphtml-loaded-new-version', extensionId);
     // TODO(wg-runtime): preloadExtension() calls getExtensionScript_() again
     // to check for existence of the script, which is redundant.
-    return this.preloadExtension(extensionId, version);
+    const urlParts = parseExtensionUrl(el.src);
+    return this.preloadExtension(extensionId, urlParts.extensionVersion);
   }
 
   /**
-   * Returns the extension <script> element/version/attribute for the given
+   * Returns the extension <script> element and attribute for the given
    * extension ID, if it exists. Otherwise, returns null.
    * @param {string} extensionId
    * @param {boolean=} includeInserted If true, includes script elements that
    *   are inserted by the runtime dynamically. Default is true.
-   * @return {?{el: !Element, version: (string|undefined), attr: (string|undefined)}}
+   * @return {?{el: !Element, attr: (string|undefined)}}
    * @private
    */
   getExtensionScript_(extensionId, includeInserted = true) {
     const attr = this.attributeForExtension_(extensionId);
     const modifier = includeInserted ? '' : ':not([i-amphtml-inserted])';
     const {head} = this.win.document;
-    const el = head./*OK*/ querySelector(
+    let el = head./*OK*/ querySelector(
       `script[${attr}="${extensionId}"]` + modifier
     );
     if (el) {
-      const urlParts = parseExtensionUrl(el.src);
-      return {el, version: urlParts.extensionVersion, attr};
+      return {el, attr};
     }
     // Some extensions don't have an attribute e.g. amp-viewer-integration.
-    const elements = head./*OK*/ querySelectorAll(
-      'script:not([custom-template]):not([custom-element])' + modifier
-    );
-    for (let i = 0; i < elements.length; i++) {
-      const el = elements.item(i);
-      const urlParts = parseExtensionUrl(el.src);
-      if (urlParts.extensionId === extensionId) {
-        return {el, version: urlParts.extensionVersion};
-      }
+    el = head./*OK*/ querySelector(`script[src*="${extensionId}-"]` + modifier);
+    if (el) {
+      return {el};
     }
     return null;
   }
