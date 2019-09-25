@@ -51,7 +51,7 @@ function updateBrowsers(config) {
         browsers: [
           'SL_Chrome',
           'SL_Firefox',
-          'SL_Edge_17',
+          'SL_Edge_18',
           'SL_Safari_12',
           'SL_IE_11',
           // TODO(amp-infra): Evaluate and add more platforms here.

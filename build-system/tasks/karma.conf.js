@@ -238,8 +238,8 @@ module.exports = {
       {
         base: 'SauceLabs',
         browserName: 'safari',
-        platform: 'macOS 10.13',
-        version: '12.1',
+        platform: 'macOS 10.14',
+        version: '12.0',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
@@ -252,12 +252,12 @@ module.exports = {
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_Edge_17: Object.assign(
+    SL_Edge_18: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'MicrosoftEdge',
         platform: 'Windows 10',
-        version: '17.17134',
+        version: '18.17763',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
@@ -266,7 +266,7 @@ module.exports = {
         base: 'SauceLabs',
         browserName: 'internet explorer',
         platform: 'Windows 10',
-        version: '11.103',
+        version: '11.285',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
