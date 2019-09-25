@@ -390,8 +390,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         });
         expect(impl.element.style[`margin${dirStr}`]).to.equal(testCase.margin);
-        // We use a fixed '30' value for z-index.
-        expect(impl.element.style.zIndex).to.equal('30');
+        // We use a fixed '11' value for z-index.
+        expect(impl.element.style.zIndex).to.equal('11');
       });
     });
   });
@@ -1739,10 +1739,9 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        sandbox.stub(impl, 'getAmpDoc').returns({});
-        sandbox
-          .stub(Services, 'viewerForDoc')
-          .returns({whenFirstVisible: () => new Deferred().promise});
+        sandbox.stub(impl, 'getAmpDoc').returns({
+          whenFirstVisible: () => new Deferred().promise,
+        });
       });
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);

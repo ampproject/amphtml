@@ -91,12 +91,6 @@
         },
         true
       );
-
-      function toggleExp(name) {
-        const isOn = AMP.isExperimentOn(name);
-        AMP.toggleExperiment(name, !isOn);
-        window.location.reload();
-      }
     </script>
     <script src="https://cdn.ampproject.org/v0.js"></script>
     <script
@@ -326,11 +320,6 @@
       <div>
         - You can change the delay by adding ?{number} (e.g. ?9000) to the Url
       </div>
-    </div>
-    <div class="toolbar">
-      <button onclick="toggleExp('new-loaders')">
-        Toggle New/Old Default Loaders
-      </button>
     </div>
 
     <amp-selector class="tabs-with-flex" role="tablist">

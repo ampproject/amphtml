@@ -497,7 +497,7 @@ function printConfigHelp(command) {
   log(
     green('Building version'),
     cyan(internalRuntimeVersion),
-    green('of the runtime for local testing with the'),
+    green('of the runtime with the'),
     cyan(argv.config === 'canary' ? 'canary' : 'prod'),
     green('AMP config.')
   );

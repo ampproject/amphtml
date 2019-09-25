@@ -813,6 +813,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'puffnetwork': {
+    prefetch: 'https://static.puffnetwork.com/amp_ad.js',
+    renderStartImplemented: true,
+  },
+
   'pulsepoint': {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
@@ -889,6 +894,19 @@ const adConfig = jsonConfiguration({
   },
 
   'sharethrough': {
+    renderStartImplemented: true,
+  },
+
+  'shemedia': {
+    prefetch: [
+      'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+      'https://ads.shemedia.com/static/amp.js',
+    ],
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://tpc.googlesyndication.com',
+      'https://ads.blogherads.com',
+    ],
     renderStartImplemented: true,
   },
 
