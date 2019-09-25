@@ -215,8 +215,6 @@ describes.realWin(
     it('should pause/resume pages when switching pages', async () => {
       createPages(story.element, 2, ['cover', 'page-1']);
       sandbox.stub(story, 'maybePreloadBookend_').returns();
-      let pauseOldPageStub;
-      let resumeNewPageStub;
 
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
@@ -227,8 +225,8 @@ describes.realWin(
       const oldPage = pages[0];
       const newPage = pages[1];
 
-      pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
-      resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+      const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
+      const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
       await story.switchTo_('page-1');
       expect(pauseOldPageStub).to.have.been.calledOnce;
       expect(resumeNewPageStub).to.have.been.calledOnce;
@@ -512,10 +510,9 @@ describes.realWin(
         sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
 
         const coverEl = element.querySelector('amp-story-page');
-        let setStateStub;
 
         const cover = await coverEl.getImpl();
-        setStateStub = sandbox.stub(cover, 'setState');
+        const setStateStub = sandbox.stub(cover, 'setState');
         await story.layoutCallback();
         // These assertions ensure we don't spam the page state. We want to
         // avoid a situation where we set the page to active, then paused,
@@ -552,10 +549,9 @@ describes.realWin(
         sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
 
         const coverEl = element.querySelector('amp-story-page');
-        let setStateStub;
 
         const cover = await coverEl.getImpl();
-        setStateStub = sandbox.stub(cover, 'setState');
+        const setStateStub = sandbox.stub(cover, 'setState');
         await story.layoutCallback();
         await resolver(); // Resolving the consent.
         // These assertions ensure we don't spam the page state. We want to
@@ -592,10 +588,9 @@ describes.realWin(
         sandbox.stub(consent, 'getConsentPolicyState').resolves();
 
         const coverEl = element.querySelector('amp-story-page');
-        let setStateStub;
 
         const cover = await coverEl.getImpl();
-        setStateStub = sandbox.stub(cover, 'setState');
+        const setStateStub = sandbox.stub(cover, 'setState');
         await story.layoutCallback();
         // These assertions ensure we don't spam the page state. We want to
         // avoid a situation where we set the page to active, then paused,
@@ -931,15 +926,12 @@ describes.realWin(
 
           story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
 
-          let coverMuteStub;
-          let firstPageUnmuteStub;
-
           await story.layoutCallback();
-          coverMuteStub = sandbox.stub(
+          const coverMuteStub = sandbox.stub(
             story.getPageById('cover'),
             'muteAllMedia'
           );
-          firstPageUnmuteStub = sandbox.stub(
+          const firstPageUnmuteStub = sandbox.stub(
             story.getPageById('page-1'),
             'unmuteAllMedia'
           );
