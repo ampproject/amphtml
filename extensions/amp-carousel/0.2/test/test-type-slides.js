@@ -201,6 +201,27 @@ describes.realWin(
       });
     });
 
+    describe('slideChange event', () => {
+      it('should not dispatch on initial render', async () => {
+        const eventSpy = sandbox.spy();
+        container.addEventListener('slideChange', eventSpy);
+        await getCarousel({loop: false});
+
+        expect(eventSpy).to.have.not.been.called;
+      });
+
+      it('should dispatch when changing slides', async () => {
+        const eventSpy = sandbox.spy();
+        container.addEventListener('slideChange', eventSpy);
+        const carousel = await getCarousel({loop: false});
+
+        carousel.implementation_.interactionNext();
+        await afterIndexUpdate(carousel);
+
+        expect(eventSpy).to.have.been.calledOnce;
+      });
+    });
+
     describe('goToSlide action', () => {
       it('should propagate high trust', async () => {
         const carousel = await getCarousel({loop: false});

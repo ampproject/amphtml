@@ -680,13 +680,18 @@ export class Carousel {
   }
 
   /**
-   * Updates the resting index as well as firing an event.
+   * Updates the resting index as well as firing an event, if it actually
+   * changed.
    * @param {number} restingIndex The new resting index.
    * @param {ActionSource=} actionSource The actionSource associated with this
    *    change.
    * @private
    */
   updateRestingIndex_(restingIndex, actionSource) {
+    if (this.restingIndex_ == restingIndex) {
+      return;
+    }
+
     this.restingIndex_ = restingIndex;
     this.element_.dispatchEvent(
       createCustomEvent(
