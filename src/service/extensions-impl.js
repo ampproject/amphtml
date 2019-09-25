@@ -242,30 +242,60 @@ export class Extensions {
    * @return {!Promise<!ExtensionDef>}
    */
   reloadExtension(extensionId) {
-    const attribute = isTemplateExtension(extensionId)
-      ? 'custom-template'
-      : 'custom-element';
-    // The :not is an extra prevention of recursion because it will be
-    // added to script tags that go into the code path below.
-    const oldScriptElement = this.win.document.head./*OK*/ querySelector(
-      `[${attribute}="${extensionId}"]:not([i-amphtml-inserted])`
+    // Ignore inserted script elements to prevent recursion.
+    const extension = this.getExtensionScript_(
+      extensionId,
+      /* includeInserted */ false
     );
-    devAssert(
-      oldScriptElement,
-      'Expected to find script for extension: %s',
-      extensionId
-    );
-
+    devAssert(extension, 'Cannot find script for extension: %s', extensionId);
+    const {el, attr, version} = extension;
     // "Disconnect" the old script element and extension record.
     const holder = this.extensions_[extensionId];
     if (holder) {
       devAssert(!holder.loaded && !holder.error);
       delete this.extensions_[extensionId];
     }
-    oldScriptElement.removeAttribute(attribute);
-    oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
-    const urlParts = parseExtensionUrl(oldScriptElement.src);
-    return this.preloadExtension(extensionId, urlParts.extensionVersion);
+    if (attr) {
+      el.removeAttribute(attr);
+    }
+    el.setAttribute('i-amphtml-loaded-new-version', extensionId);
+    // TODO(wg-runtime): preloadExtension() calls getExtensionScript_() again
+    // to check for existence of the script, which is redundant.
+    return this.preloadExtension(extensionId, version);
+  }
+
+  /**
+   * Returns the extension <script> element/version/attribute for the given
+   * extension ID, if it exists. Otherwise, returns null.
+   * @param {string} extensionId
+   * @param {boolean=} includeInserted If true, includes script elements that
+   *   are inserted by the runtime dynamically. Default is true.
+   * @return {?{el: !Element, version: (string|undefined), attr: (string|undefined)}}
+   * @private
+   */
+  getExtensionScript_(extensionId, includeInserted = true) {
+    const attr = this.attributeForExtension_(extensionId);
+    const modifier = includeInserted ? '' : ':not([i-amphtml-inserted])';
+    const {head} = this.win.document;
+    const el = head./*OK*/ querySelector(
+      `[${attr}="${extensionId}"]` + modifier
+    );
+    if (el) {
+      const urlParts = parseExtensionUrl(el.src);
+      return {el, version: urlParts.extensionVersion, attr};
+    }
+    // Some extensions don't have an attribute e.g. amp-viewer-integration.
+    const elements = head./*OK*/ querySelectorAll(
+      ':not([custom-template]):not([custom-element])' + modifier
+    );
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      const urlParts = parseExtensionUrl(el.src);
+      if (urlParts.extensionId === extensionId) {
+        return {el, version: urlParts.extensionVersion};
+      }
+    }
+    return null;
   }
 
   /**
@@ -524,12 +554,7 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const attribute = isTemplateExtension(extensionId)
-        ? 'custom-template'
-        : 'custom-element';
-      const scriptInHead = this.win.document.head./*OK*/ querySelector(
-        `[${attribute}="${extensionId}"]`
-      );
+      const scriptInHead = this.getExtensionScript_(extensionId);
       holder.scriptPresent = !!scriptInHead;
     }
     return !holder.scriptPresent;
@@ -549,7 +574,7 @@ export class Extensions {
       opt_extensionVersion = '';
     } else {
       scriptElement.setAttribute(
-        isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
+        this.attributeForExtension_(extensionId),
         extensionId
       );
     }
@@ -567,6 +592,17 @@ export class Extensions {
     );
     scriptElement.src = scriptSrc;
     return scriptElement;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @return {string}
+   * @private
+   */
+  attributeForExtension_(extensionId) {
+    return isTemplateExtension(extensionId)
+      ? 'custom-template'
+      : 'custom-element';
   }
 }
 
