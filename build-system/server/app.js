@@ -778,7 +778,7 @@ app.get('/iframe/*', (req, res) => {
 });
 
 app.get('/a4a_template/*', (req, res) => {
-  cors.assertCors(req, res, ['GET'], undefined, true);
+  cors.assertCors(req, res, ['GET']);
   const match = /^\/a4a_template\/([a-z-]+)\/(\d+)$/.exec(req.path);
   if (!match) {
     res.status(404);
@@ -870,7 +870,7 @@ app.get(
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
 
-        if (inabox && req.headers.origin && req.query.__amp_source_origin) {
+        if (inabox && req.headers.origin) {
           // Allow CORS requests for A4A.
           cors.enableCors(req, res, req.headers.origin);
         } else {
