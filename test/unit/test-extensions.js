@@ -25,7 +25,7 @@ import {installTimerService} from '../../src/service/timer-impl';
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
 
-describe('Extensions', () => {
+describes.sandboxed('Extensions', {}, () => {
   describes.fakeWin('registerExtension', {}, env => {
     let win;
     let extensions;
