@@ -21,13 +21,8 @@
 export function handleCompanionDisplay(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
   const companionRawSettings = monetizationSettings['companionOptions'] || {};
-  const {settings} = companionRawSettings || {};
-  if (
-    companionRawSettings &&
-    companionRawSettings.enabled &&
-    settings &&
-    settings.bannerAdProvider === 'gdt'
-  ) {
+  const {enabled, settings = {}} = companionRawSettings || {};
+  if (enabled && settings.bannerAdProvider === 'gdt') {
     const companionDisplaySettings = extractCompanionDisplaySettings(settings);
 
     const companionDisplayElement = constructCompanionDisplayAd(
@@ -68,6 +63,6 @@ function constructCompanionDisplayAd(companionSettings, apesterElement) {
   ampAd.setAttribute('width', width);
   ampAd.setAttribute('height', height);
   ampAd.classList.add('amp-apester-companion');
-
+  
   return ampAd;
 }

@@ -27,7 +27,6 @@ export function handleCompanionVideo(media, apesterElement) {
     monetizationSettings['companionCampaignOptions'] || {};
   const companionRawSettings = monetizationSettings['companionOptions'] || {};
   if (
-    companionRawSettings &&
     companionRawSettings.video &&
     companionRawSettings.video.enabled &&
     companionRawSettings.video.provider === 'sr'
