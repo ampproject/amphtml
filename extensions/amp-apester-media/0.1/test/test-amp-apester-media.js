@@ -76,6 +76,9 @@ describes.realWin(
           },
         ],
       };
+      if (attributes && attributes['campaignData']) {
+        regularResponse.payload.campaignData = attributes['campaignData'];
+      }
       const currentResopnse =
         attributes && attributes['data-apester-channel-token']
           ? playlistResponse
@@ -207,5 +210,149 @@ describes.realWin(
         );
       });
     });
+    it('show display ad', () => {
+      const campaignData = createCampaignData(true);
+      return getApester({
+        'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
+        campaignData,
+      }).then(ape => {
+        const iframe = ape.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).not.to.be.null;
+        const displayAd = ape.parentNode.querySelector(
+          'amp-ad[type=doubleclick]'
+        );
+        expect(displayAd).to.not.be.null;
+        expect(displayAd).to.not.be.undefined;
+        expect(ape.nextSibling).to.be.equal(displayAd);
+      });
+    });
+
+    it('show sr ad below', () => {
+      const campaignData = createCampaignData(false, false, true);
+      return getApester({
+        'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
+        campaignData,
+      }).then(ape => {
+        const iframe = ape.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).not.to.be.null;
+        const displayAd = ape.parentNode.querySelector('amp-ad[type=blade]');
+        expect(displayAd).to.not.be.null;
+        expect(displayAd).to.not.be.undefined;
+        expect(ape.nextSibling).to.be.equal(displayAd);
+      });
+    });
+    it('show sr ad above', () => {
+      const campaignData = createCampaignData(false, true, false);
+      return getApester({
+        'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
+        campaignData,
+      }).then(ape => {
+        const iframe = ape.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).not.to.be.null;
+        const srAboveAd = ape.parentNode.querySelector('amp-ad[type=blade]');
+        expect(srAboveAd).to.not.be.null;
+        expect(srAboveAd).to.not.be.undefined;
+        expect(ape.previousSibling).to.be.equal(srAboveAd);
+      });
+    });
+    it('show sr above with display', () => {
+      const campaignData = createCampaignData(true, true, false);
+      return getApester({
+        'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
+        campaignData,
+      }).then(ape => {
+        const iframe = ape.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).not.to.be.null;
+        const displayAd = ape.parentNode.querySelector(
+          'amp-ad[type=doubleclick]'
+        );
+        expect(displayAd).to.not.be.null;
+        expect(displayAd).to.not.be.undefined;
+        expect(ape.nextSibling).to.be.equal(displayAd);
+        const srAboveAd = ape.parentNode.querySelector('amp-ad[type=blade]');
+        expect(srAboveAd).to.not.be.null;
+        expect(srAboveAd).to.not.be.undefined;
+        expect(ape.previousSibling).to.be.equal(srAboveAd);
+      });
+    });
   }
 );
+
+function createCampaignData(display, srAbove, srBelow) {
+  const campaignData = {
+    'companionOptions': {
+      'settings': {
+        'slot': '/57806026/Dev_DT_300x250',
+        'options': {
+          'collapseEmpty': true,
+          'refreshOnClick': 'none',
+          'lockTime': 5000,
+        },
+        'bannerAdProvider': 'gdt',
+        'bannerSizes': [[300, 250]],
+      },
+      'mapping': [
+        {
+          'viewport': [992, 0],
+          'dimensions': [[468, 60], [1, 1]],
+        },
+        {
+          'viewport': [768, 0],
+          'dimensions': [[468, 60], [1, 1]],
+        },
+        {
+          'viewport': [320, 0],
+          'dimensions': [[320, 100], [1, 1]],
+        },
+        {
+          'viewport': [0, 0],
+          'dimensions': [[320, 100], [1, 1]],
+        },
+      ],
+      'enabled': false,
+      'video': {
+        'videoTag': '5d14c0ded1fb9900016a3118',
+        'enabled': false,
+        'floating': {
+          'enabled': false,
+        },
+        'inUnit': {
+          'enabled': false,
+        },
+        'outside': {
+          'enabled': true,
+        },
+        'companion': {
+          'shouldPauseWhenOutOfView': true,
+          'shouldForceViewability': true,
+          'enabled': false,
+        },
+        'companion_below': {
+          'shouldPauseWhenOutOfView': true,
+          'shouldForceViewability': true,
+          'enabled': false,
+        },
+        'provider': 'sr',
+      },
+    },
+    'companionCampaignOptions': {
+      'companionCampaignId': '5d8b267a50bf9482f458d2ca',
+    },
+  };
+  if (display) {
+    campaignData.companionOptions.enabled = true;
+  }
+  if (srAbove) {
+    campaignData.companionOptions.video.enabled = true;
+    campaignData.companionOptions.video.companion.enabled = true;
+  }
+  if (srBelow) {
+    campaignData.companionOptions.video.enabled = true;
+    campaignData.companionOptions.video.companion_below.enabled = true;
+  }
+  return campaignData;
+}
