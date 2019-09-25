@@ -467,7 +467,7 @@ describe('BindExpression', () => {
         evaluate('sin(0.5)');
       }).to.throw(unsupportedFunctionError);
       expect(() => {
-        evaluate('pow(3, 2)');
+        evaluate('trunc(13.37)');
       }).to.throw(unsupportedFunctionError);
 
       // Don't support calling functions with `Math.` prefix.
