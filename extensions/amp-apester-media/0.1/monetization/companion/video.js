@@ -34,6 +34,7 @@ export function handleCompanionVideo(media, apesterElement) {
   ) {
     const position = getCompanionPosition(companionRawSettings.video);
     if (position) {
+      console.log();
       const companionSettings = extractCompanionSettings(
         companionRawSettings.video,
         apesterElement,
