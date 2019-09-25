@@ -1270,74 +1270,111 @@ describe('ValidatorRulesMakeSense', () => {
         namedIdIsUnique[tagSpec.namedId] = 0;
       }
     });
-    // Verify AMP4ADS extensions are whitelisted.
+    // Verify AMP4ADS extensions are approved.
     if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
         (tagSpec.htmlFormat.indexOf(
             amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) {
-      // AMP4ADS Creative Format document is the source of this whitelist.
+      // AMP4ADS format lists approved extensions.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
-      const whitelistedAmp4AdsExtensions = {
-        'amp-accordion': 0,
-        'amp-ad-exit': 0,
-        'amp-analytics': 0,
-        'amp-anim': 0,
-        'amp-animation': 0,
-        'amp-audio': 0,
-        'amp-bind': 0,
-        'amp-carousel': 0,
-        'amp-fit-text': 0,
-        'amp-font': 0,
-        'amp-form': 0,
-        'amp-gwd-animation': 0,
-        'amp-img': 0,
-        'amp-layout': 0,
-        'amp-lightbox': 0,
-        'amp-mraid': 0,
-        'amp-mustache': 0,
-        'amp-pixel': 0,
-        'amp-position-observer': 0,
-        'amp-social-share': 0,
-        'amp-video': 0,
-        'amp-youtube': 0,
+      // Changes to the following map must be approved by the Ads Working
+      // Group, @wg-ads.
+      const approvedAmp4AdsExtensions = {
+        'amp-accordion': ['0.1', 'latest'],
+        'amp-ad-exit': ['0.1', 'latest'],
+        'amp-analytics': ['0.1', 'latest'],
+        'amp-anim': ['0.1', 'latest'],
+        'amp-animation': ['0.1', 'latest'],
+        'amp-audio': ['0.1', 'latest'],
+        'amp-bind': ['0.1', 'latest'],
+        'amp-carousel': ['0.1', '0.2', 'latest'],
+        'amp-fit-text': ['0.1', 'latest'],
+        'amp-font': ['0.1', 'latest'],
+        'amp-form': ['0.1', 'latest'],
+        'amp-gwd-animation': ['0.1', 'latest'],
+        'amp-img': ['0.1', 'latest'],
+        'amp-layout': ['0.1', 'latest'],
+        'amp-lightbox': ['0.1', 'latest'],
+        'amp-mraid': ['0.1', 'latest'],
+        'amp-mustache': ['0.1', '0.2', 'latest'],
+        'amp-pixel': ['0.1', 'latest'],
+        'amp-position-observer': ['0.1', 'latest'],
+        'amp-social-share': ['0.1', 'latest'],
+        'amp-video': ['0.1', 'latest'],
+        'amp-youtube': ['0.1', 'latest'],
       };
+      // Verify extension is approved.
       const extension = tagSpec.extensionSpec.name;
       it(extension + ' has html_format either explicitly or implicitly' +
-          ' set for AMP4ADS but ' + extension + ' is not whitelisted' +
+          ' set for AMP4ADS but ' + extension + ' is not approved' +
           ' for AMP4ADS', () => {
-        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(extension))
+        expect(approvedAmp4AdsExtensions.hasOwnProperty(extension))
             .toBe(true);
       });
+      // Extension is approved. Verify extension version is approved.
+      if (approvedAmp4AdsExtensions.hasOwnProperty(extension)) {
+        for (const version of tagSpec.extensionSpec.version) {
+          it(extension + ' has html_format either explicitly or implicitly' +
+              ' set for AMP4ADS but ' + extension + ' version ' + version +
+              ' is not approved for AMP4ADS. If this version is intended' +
+              ' for AMP4ADS please get approval from @wg-ads and then' +
+              ' update this test. Otherwise remove the version for' +
+              ' AMP4ADS from the tagspec', () => {
+                expect(approvedAmp4AdsExtensions[extension].indexOf(version))
+                    .toBeGreaterThan(-1);
+          });
+        }
+      }
     }
-    // Verify AMP4EMAIL extensions are whitelisted.
+    // Verify AMP4EMAIL extensions and their usage are approved.
     if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
         (tagSpec.htmlFormat.indexOf(
             amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1)) {
-      // AMP4EMAIL format is the source of this whitelist.
-      const whitelistedAmp4EmailExtensions = {
-        'AMP-ACCORDION': 0,
-        'AMP-ANIM': 0,
-        'AMP-BIND-MACRO': 0,
-        'AMP-CAROUSEL': 0,
-        'AMP-FIT-TEXT': 0,
-        'AMP-IMG': 0,
-        'AMP-IMAGE-LIGHTBOX': 0,
-        'AMP-LAYOUT': 0,
-        'AMP-LIGHTBOX': 0,
-        'AMP-LIST': 0,
-        'AMP-SELECTOR': 0,
-        'AMP-SIDEBAR': 0,
-        'AMP-STATE': 0,
-        'AMP-TIMEAGO': 0,
+      // AMP4EMAIL format lists approved extensions.
+      // Changes to the following map must be approved by the AMP4Email
+      // Working Group, @wg-amp4email.
+      const approvedAmp4EmailExtensions = {
+        'AMP-ACCORDION': ['0.1', 'latest'],
+        'AMP-ANIM': ['0.1', 'latest'],
+        'AMP-BIND-MACRO': ['0.1', 'latest'],
+        'AMP-CAROUSEL': ['0.1'],
+        'AMP-FIT-TEXT': ['0.1', 'latest'],
+        'AMP-IMG': ['0.1', 'latest'],
+        'AMP-IMAGE-LIGHTBOX': ['0.1', 'latest'],
+        'AMP-LAYOUT': ['0.1', 'latest'],
+        'AMP-LIGHTBOX': ['0.1', 'latest'],
+        'AMP-LIST': ['0.1', 'latest'],
+        'AMP-SELECTOR': ['0.1', 'latest'],
+        'AMP-SIDEBAR': ['0.1', 'latest'],
+        'AMP-STATE': ['0.1', 'latest'],
+        'AMP-TIMEAGO': ['0.1', 'latest'],
       };
+      // Verify extension and it's usage is approved.
       it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
              ' set for AMP4EMAIL but ' + tagSpec.tagName +
-             ' is not whitelisted' +
-             ' for AMP4EMAIL',
+             ' is not approved for AMP4EMAIL',
       () => {
         expect(
-            whitelistedAmp4EmailExtensions.hasOwnProperty(tagSpec.tagName))
+            approvedAmp4EmailExtensions.hasOwnProperty(tagSpec.tagName))
             .toBe(true);
       });
+      // Extension is approved. Verify extension version is approved.
+      // Only care about SCRIPT tags since only those are versioned.
+      if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
+          approvedAmp4EmailExtensions.hasOwnProperty(
+              tagSpec.extensionSpec.name)) {
+        const extension = tagSpec.extensionSpec.name;
+        for (const version of tagSpec.extensionSpec.version) {
+          it(extension + ' has html_format either explicitly or implicitly' +
+              ' set for AMP4EMAIL but ' + extension + ' version ' + version +
+              ' is not approved for AMP4EMAIL. If this version is intended' +
+              ' for AMP4EMAIL please get approval from @wg-amp4email and' +
+              ' then update this test. Otherwise remove the version for' +
+              ' AMP4EMAIL from the tagspec', () => {
+                expect(approvedAmp4EmailExtensions[extension].indexOf(version))
+                    .toBeGreaterThan(-1);
+          });
+        }
+      }
     }
     // mandatory_parent
     if (tagSpec.mandatoryParent !== null) {
