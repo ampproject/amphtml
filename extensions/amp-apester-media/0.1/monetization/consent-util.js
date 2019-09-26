@@ -46,13 +46,13 @@ export function getConsentData(apesterElement) {
       //todo check right behavior
       switch (consentStatus) {
         case CONSENT_POLICY_STATE.SUFFICIENT:
-          return {gdpr: 1, user_consent: 1, gdprString};
+          return {gdpr: 1, user_consent: 1, param4: gdprString};
         case CONSENT_POLICY_STATE.INSUFFICIENT:
         case CONSENT_POLICY_STATE.UNKNOWN:
-          return {gdpr: 1, user_consent: 0, gdprString};
+          return {gdpr: 1, user_consent: 0, param4: gdprString};
         case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
         default:
-          return {gdpr: 0, user_consent: 0, gdprString};
+          return {};
       }
     }
   );

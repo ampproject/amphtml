@@ -130,22 +130,19 @@ function getCompanionVideoAdSize(apesterElement) {
  * @return {!JsonObject}
  */
 function getSrMacros(interactionModel, campaignId, apesterElement) {
-  return getConsentData(apesterElement).then(consentRes => {
+  return getConsentData(apesterElement).then(consentObj => {
     const {interactionId, publisherId, publisher} = interactionModel;
     const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
-    const macros = {
-      param1: interactionId,
-      param2: publisherId,
-      param6: campaignId,
-      page_url: pageUrl,
-    };
-    if (apesterElement.gdpr === 1) {
-      macros.gdpr = apesterElement.gdpr;
-      macros.user_consent = apesterElement.user_consent;
-    }
-    if (consentRes.gdprString) {
-      macros.param4 = consentRes.gdprString;
-    }
+    const macros = Object.assign(
+      {
+        param1: interactionId,
+        param2: publisherId,
+        param6: campaignId,
+        page_url: pageUrl,
+      },
+      consentObj
+    );
+
     if (publisher && publisher.groupId) {
       macros.param7 = `apester.com:${publisher.groupId}`;
       macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
