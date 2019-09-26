@@ -406,7 +406,7 @@ export class BaseElement {
    * built _and_ laid out will be prioritized.
    * @return {boolean}
    */
-  isRenderBlocking() {
+  isBuildRenderBlocking() {
     return false;
   }
 

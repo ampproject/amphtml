@@ -1018,8 +1018,8 @@ function createBaseCustomElementClass(win) {
      * @return {boolean}
      * @final
      */
-    isRenderBlocking() {
-      return this.implementation_.isRenderBlocking();
+    isBuildRenderBlocking() {
+      return this.implementation_.isBuildRenderBlocking();
     }
 
     /**

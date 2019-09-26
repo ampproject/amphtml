@@ -707,7 +707,7 @@ const forbiddenTerms = {
       'src/inabox/amp-inabox.js',
     ],
   },
-  'isRenderBlocking': {
+  'isBuildRenderBlocking': {
     message:
       'This is a protected API. Please only override it the element is ' +
       'render blocking',

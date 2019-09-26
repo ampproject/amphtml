@@ -656,8 +656,8 @@ export class Resource {
    * Whether this element has render-blocking service.
    * @return {boolean}
    */
-  isRenderBlocking() {
-    return this.element.isRenderBlocking();
+  isBuildRenderBlocking() {
+    return this.element.isBuildRenderBlocking();
   }
 
   /**

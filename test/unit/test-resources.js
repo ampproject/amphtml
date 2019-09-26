@@ -1110,7 +1110,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource1.element.isBuilt = () => false;
     resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
-    resource1.isRenderBlocking = () => false;
+    resource1.isBuildRenderBlocking = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1127,7 +1127,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource1.element.isBuilt = () => false;
     resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
-    resource1.isRenderBlocking = () => true;
+    resource1.isBuildRenderBlocking = () => true;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 

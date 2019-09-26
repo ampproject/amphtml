@@ -41,7 +41,7 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 
   /** @override */
-  isRenderBlocking() {
+  isBuildRenderBlocking() {
     // variantService is render blocking
     return true;
   }
