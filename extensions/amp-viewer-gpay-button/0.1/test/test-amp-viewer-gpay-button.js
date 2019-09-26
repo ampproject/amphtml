@@ -130,7 +130,7 @@ describes.realWin(
           .returns(Promise.reject('initialize payment client fails'));
 
         return getAmpPaymentGoogleButton(true /* isTestMode */).then(
-          gPayButton => {
+          unusedGPaybutton => {
             throw new Error('This should not be called');
           },
           error => {
@@ -187,7 +187,7 @@ describes.realWin(
           .returns(Promise.resolve({'result': false}));
 
         return getAmpPaymentGoogleButton(true /* isTestMode */).then(
-          gPayButton => {
+          unusedGPayButton => {
             throw new Error('This should not be called');
           },
           error => {
@@ -339,7 +339,7 @@ describes.realWin(
         localIsReadyToPayStub.returns(Promise.resolve({'result': false}));
 
         return getAmpPaymentGoogleButton(true /* isTestMode */).then(
-          gPayButton => {
+          unusedGPayButton => {
             throw new Error('This should not be called');
           },
           error => {

@@ -15,14 +15,8 @@
  */
 import '../amp-viewer-gpay-inline';
 
-import {
-  AmpForm,
-  AmpFormService,
-} from '../../../../extensions/amp-form/0.1/amp-form';
-import {
-  AsyncInputClasses,
-  SUBMIT_TIMEOUT_TYPE,
-} from '../../../../src/async-input';
+import {AmpFormService} from '../../../../extensions/amp-form/0.1/amp-form';
+import {AsyncInputClasses} from '../../../../src/async-input';
 import {Services} from '../../../../src/services';
 import {SsrTemplateHelper} from '../../../../src/ssr-template-helper';
 import {
@@ -45,9 +39,6 @@ const PAYMENT_DATA = 'payment-data';
 
 /** @const {string} */
 const PAYMENT_TOKEN = 'fake-payment-token';
-
-/** @const @private {!../../../../src/service/timer-impl.Timer} */
-const timer_ = Services.timerFor(window);
 
 /** @const {int} updated timeout to allow for fake calls*/
 const TIMEOUT = 5000;
@@ -228,7 +219,7 @@ describes.realWin(
               reject(e);
             }
           });
-          xhrMock.fetch.callsFake((url, request) => {
+          xhrMock.fetch.callsFake((unusedUrl, unusedRequest) => {
             // Minimal mocked FetchResponse.
             return {
               json: () => Promise.resolve('{}'),
@@ -425,7 +416,7 @@ describes.realWin(
               reject(e);
             }
           });
-          xhrMock.fetch.callsFake((url, request) => {
+          xhrMock.fetch.callsFake((unusedUrl, unusedRequest) => {
             // Minimal mocked FetchResponse.
             return {
               json: () => Promise.resolve('{}'),
@@ -455,7 +446,6 @@ describes.realWin(
       );
 
       // expected response for the hidden input
-      const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
       return getAmpPaymentGoogleInline().then(gPayInline => {
         sandbox
           .stub(gPayInline.implementation_, 'getValue')
@@ -463,7 +453,7 @@ describes.realWin(
 
         // Before the form is submitted, the hidden input doesn't exist
         expect(doc.getElementById(PAYMENT_DATA)).to.equal(null);
-        const formSubmitted = new Promise((resolve, reject) => {
+        const formSubmitted = new Promise((resolve, unusedReject) => {
           // constant check's the form's status and waits till the submition sucsessfully finishes
           poll(
             'get form',
@@ -496,7 +486,6 @@ describes.realWin(
       );
 
       // expected response for the hidden input
-      const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
       return getAmpPaymentGoogleInline().then(gPayInline => {
         const iframes = gPayInline.getElementsByTagName('iframe');
         iframeMock.sendIframeMessageAwaitResponse
@@ -514,7 +503,7 @@ describes.realWin(
         const actionTriggerCalls = {};
         sandbox
           .stub(actionService, 'trigger')
-          .callsFake(function(target, eventType, event, trust, opt_args) {
+          .callsFake(function(target, eventType, event, unusedTrust, opt_args) {
             actionTriggerCalls[eventType] = event.detail;
           });
 
@@ -575,15 +564,14 @@ describes.realWin(
       );
 
       // expected response for the hidden input
-      const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
-      return getAmpPaymentGoogleInline().then(gPayInline => {
+      return getAmpPaymentGoogleInline().then(unusedGPayInline => {
         const actionService = Services.actionServiceForDoc(
           doc.getElementById('mainForm')
         );
         const actionTriggerCalls = {};
         sandbox
           .stub(actionService, 'trigger')
-          .callsFake(function(target, eventType, event, trust, opt_args) {
+          .callsFake(function(target, eventType, event, unusedTrust, opt_args) {
             actionTriggerCalls[eventType] = event.detail;
           });
 
@@ -627,7 +615,6 @@ describes.realWin(
       );
 
       // expected response for the hidden input
-      const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
       return getAmpPaymentGoogleInline().then(gPayInline => {
         const iframes = gPayInline.getElementsByTagName('iframe');
         iframeMock.sendIframeMessageAwaitResponse
@@ -645,7 +632,7 @@ describes.realWin(
         const actionTriggerCalls = {};
         sandbox
           .stub(actionService, 'trigger')
-          .callsFake(function(target, eventType, event, trust, opt_args) {
+          .callsFake(function(target, eventType, event, unusedTrust, opt_args) {
             actionTriggerCalls[eventType] = event.detail;
           });
 
@@ -706,15 +693,14 @@ describes.realWin(
       );
 
       // expected response for the hidden input
-      const data = '{"paymentMethodToken":{"token":"' + PAYMENT_TOKEN + '"}}';
-      return getAmpPaymentGoogleInline().then(gPayInline => {
+      return getAmpPaymentGoogleInline().then(unusedGPayInline => {
         const actionService = Services.actionServiceForDoc(
           doc.getElementById('mainForm')
         );
         const actionTriggerCalls = {};
         sandbox
           .stub(actionService, 'trigger')
-          .callsFake(function(target, eventType, event, trust, opt_args) {
+          .callsFake(function(target, eventType, event, unusedTrust, opt_args) {
             actionTriggerCalls[eventType] = event.detail;
           });
 
@@ -761,7 +747,7 @@ describes.realWin(
       );
 
       return getAmpPaymentGoogleInline().then(
-        gPayInline => {
+        unusedGPayInline => {
           throw new Error('Should not be called');
         },
         error => {
