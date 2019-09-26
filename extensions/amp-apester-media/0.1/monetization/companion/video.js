@@ -135,15 +135,18 @@ function getSrMacros(interactionModel, campaignId, apesterElement) {
   return getConsentData(apesterElement).then(consentObj => {
     const {interactionId, publisherId, publisher} = interactionModel;
     const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
-    const macros = Object.assign(
-      {
-        param1: interactionId,
-        param2: publisherId,
-        param6: campaignId,
-        page_url: pageUrl,
-      },
-      consentObj
-    );
+    const macros = {
+      param1: interactionId,
+      param2: publisherId,
+      param6: campaignId,
+      page_url: pageUrl,
+    };
+
+    if (consentObj.gdpr) {
+      macros.gdpr = consentObj.gdpr;
+      macros.user_consent = consentObj.user_consent;
+      macros.param4 = consentObj.gdprString;
+    }
 
     if (publisher && publisher.groupId) {
       macros.param7 = `apester.com:${publisher.groupId}`;
