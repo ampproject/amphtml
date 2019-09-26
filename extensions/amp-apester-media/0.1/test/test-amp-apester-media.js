@@ -76,9 +76,7 @@ describes.realWin(
           },
         ],
       };
-      if (attributes && attributes['campaignData']) {
-        regularResponse.payload.campaignData = attributes['campaignData'];
-      }
+
       const currentResopnse =
         attributes && attributes['data-apester-channel-token']
           ? playlistResponse
