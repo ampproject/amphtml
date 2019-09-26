@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ const CONTENTSQUARE_CONFIG = jsonLiteral({
     },
   },
   'extraUrlParams': {
-    'uu': '${uuid}',
+    'uu': 'CLIENT_ID(amp-cs)',
   },
   'transport': {
     'beacon': false,
@@ -44,14 +44,12 @@ const CONTENTSQUARE_CONFIG = jsonLiteral({
   },
   'vars': {
     'version': 'amp-0.0.1',
-    'csid': '$MATCH(COOKIE(_cs_id), `([0-9a-fA-F-]{36})`, 1)',
-    'sn': '$MATCH(COOKIE(_cs_id), `([0-9a-fA-F-]{36}.)([0-9]+)`, 2)',
-    'uuid': '$IF(${csid}, ${csid}, CLIENT_ID(_cs_id))',
+    'uuid': 'CLIENT_ID(amp-cs)',
   },
   'cookies': {
     'cookieMaxAge': 341164037, // 13 months in seconds
     '_cs_amp': {
-      'value': 'CLIENT_ID(amp-cs).COUNTER(page_number)',
+      'value': 'CLIENT_ID(amp-cs).TIMESTAMP',
     },
   },
 });
