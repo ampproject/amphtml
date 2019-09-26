@@ -38,7 +38,7 @@ const TAG = 'navigation';
 const EVENT_TYPE_CLICK = 'click';
 /** @private @const {string} */
 const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
-const VALID_TARGETS = ['_top', '_blank'];
+const VALID_TARGETS = ['_top', '_blank', '_self'];
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -256,7 +256,7 @@ export class Navigation {
     win,
     url,
     opt_requestedBy,
-    {target = '_top', opener = false} = {}
+    {target = '_self', opener = false} = {}
   ) {
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
@@ -294,8 +294,11 @@ export class Navigation {
       }
     }
 
-    // Otherwise, perform normal behavior of navigating the top frame.
-    win.top.location.href = url;
+    if (target === '_self') {
+      win.location.href = url;
+    } else {
+      win.top.location.href = url;
+    }
   }
 
   /**

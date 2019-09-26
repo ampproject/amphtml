@@ -203,7 +203,7 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
 };
 
 /** @const {!Array<string>} */
-export const WHITELISTED_TARGETS = ['_top', '_blank'];
+export const WHITELISTED_TARGETS = ['_top', '_blank', '_self'];
 
 /** @const {!Array<string>} */
 const BLACKLISTED_ATTR_VALUES = Object.freeze([
