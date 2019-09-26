@@ -707,6 +707,19 @@ const forbiddenTerms = {
       'src/inabox/amp-inabox.js',
     ],
   },
+  'isBuildRenderBlocking': {
+    message:
+      'This is a protected API. Please only override it the element is ' +
+      'render blocking',
+    whitelist: [
+      'src/service/resources-impl.js',
+      'src/service/resource.js',
+      'src/custom-element.js',
+      'src/base-element.js',
+      'extensions/amp-experiment/0.1/amp-experiment.js',
+      'extensions/amp-experiment/1.0/amp-experiment.js',
+    ],
+  },
   '^describe[\\.|\\(|$]': {
     message:
       'Top-level "describe" blocks in test files have been deprecated. ' +
