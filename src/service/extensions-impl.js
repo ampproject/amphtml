@@ -285,7 +285,9 @@ export class Extensions {
       return {el, attr};
     }
     // Some extensions don't have an attribute e.g. amp-viewer-integration.
-    el = head./*OK*/ querySelector(`script[src*="/${extensionId}-"]` + modifier);
+    el = head./*OK*/ querySelector(
+      `script[src*="/${extensionId}-"]` + modifier
+    );
     if (el) {
       return {el};
     }
