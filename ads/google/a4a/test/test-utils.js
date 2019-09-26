@@ -282,6 +282,14 @@ describe('Google A4A utils', () => {
         })
       ).to.equal('1');
     });
+    it('should specify that this is experimentA', () => {
+      expect(
+        getAmpRuntimeTypeParameter({
+          AMP_CONFIG: {type: 'experimentA'},
+          location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+        })
+      ).to.equal('10');
+    });
     it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
       expect(
         getAmpRuntimeTypeParameter({
