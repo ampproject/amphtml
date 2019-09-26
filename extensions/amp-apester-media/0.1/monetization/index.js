@@ -21,7 +21,7 @@ import {handleCompanionVideo} from './companion/video';
  * @return {AmpApesterMedia}
  */
 export function handleCompanionAds(media, apesterElement) {
-  const monetizationSettings = media['campaignData'] || {};
+  const monetizationSettings = media['campaignData'];
   if (monetizationSettings && !monetizationSettings.disabledAmpCompanionAds) {
     handleCompanionDisplay(media, apesterElement);
     return handleCompanionVideo(media, apesterElement);
