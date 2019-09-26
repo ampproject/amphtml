@@ -20,6 +20,7 @@ import {getConsentData} from '../consent-util';
 /**
  * @param {!JsonObject} media
  * @param {AmpApesterMedia} apesterElement
+ * @return {AmpApesterMedia}
  */
 export function handleCompanionVideo(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
@@ -39,7 +40,7 @@ export function handleCompanionVideo(media, apesterElement) {
         position
       );
       const {companionCampaignId} = companionCampaignOptions;
-      constructCompanionSr(
+      return constructCompanionSr(
         companionSettings,
         media,
         companionCampaignId,
@@ -53,6 +54,7 @@ export function handleCompanionVideo(media, apesterElement) {
           companionVideoSrElement,
           companionSrElement
         );
+        return apesterElement;
       });
     }
   }

@@ -18,11 +18,14 @@ import {handleCompanionVideo} from './companion/video';
 /**
  * @param {!JsonObject} media
  * @param {AmpApesterMedia} apesterElement
+ * @return {AmpApesterMedia}
  */
 export function handleCompanionAds(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
   if (monetizationSettings && !monetizationSettings.disabledAmpCompanionAds) {
     handleCompanionDisplay(media, apesterElement);
-    handleCompanionVideo(media, apesterElement);
+    return handleCompanionVideo(media, apesterElement);
+  } else {
+    return Promise.resolve(apesterElement);
   }
 }
