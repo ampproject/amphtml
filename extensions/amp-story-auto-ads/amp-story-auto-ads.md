@@ -154,7 +154,7 @@ algorithm will then skip the slot after this page when trying to insert an ad.
 
 ## Analytics
 When using `amp-story-auto-ads` several new [analytics triggers](../../extensions/amp-analytics/amp-analytics.md)
-and [variables] will be availible for your analytics configuration.
+and [variables] will be available for your analytics configuration.
 
 ### Triggers
 Name | Event
