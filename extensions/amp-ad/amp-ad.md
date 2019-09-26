@@ -257,6 +257,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdSpeed](../../ads/adspeed.md)
 - [AdSpirit](../../ads/adspirit.md)
 - [AdStir](../../ads/adstir.md)
+- [AdStyle](../../ads/adstyle.md)
 - [AdTech](../../ads/adtech.md)
 - [AdThrive](../../ads/adthrive.md)
 - [AdUnity](../../ads/adunity.md)
