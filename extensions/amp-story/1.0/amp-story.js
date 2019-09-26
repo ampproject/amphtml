@@ -542,6 +542,7 @@ export class AmpStory extends AMP.BaseElement {
       pageEls[i].id = newId;
       pageIds[i] = newId;
     }
+    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
   }
 
   /**
@@ -630,18 +631,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
-
-    // TODO(gmajoulet): cache the page ids in the store from the
-    // initializePageIds_ method to remove this block. Requires refactoring in
-    // test-amp-story to avoid console.errors.
-    let pageIds;
-    if (this.pages_.length) {
-      pageIds = this.pages_.map(page => page.element.id);
-    } else {
-      const pages = this.element.querySelectorAll('amp-story-page');
-      pageIds = Array.prototype.map.call(pages, el => el.id);
-    }
-    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
 
