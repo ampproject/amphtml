@@ -196,7 +196,7 @@ const adConfig = jsonConfiguration({
   'adstyle': {
     renderStartImplemented: true,
     prefetch: 'https://widgets.ad.style/amp.js',
-    preconnect: ['https://w.ad.style']
+    preconnect: ['https://w.ad.style'],
   },
 
   'adtech': {
