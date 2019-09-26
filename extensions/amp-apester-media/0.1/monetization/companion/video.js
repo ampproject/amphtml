@@ -144,6 +144,7 @@ function getSrMacros(interactionModel, campaignId, apesterElement) {
 
     if (consentObj.gdpr) {
       macros.gdpr = consentObj.gdpr;
+      // eslint-disable-next-line google-camelcase/google-camelcase
       macros.user_consent = consentObj.user_consent;
       macros.param4 = consentObj.gdprString;
     }
