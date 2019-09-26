@@ -137,6 +137,7 @@ The configuration object for `<amp-analytics>` uses the following format:
     request-name: request-value,
     ...
   },
+  "requestOrigin": requestOrigin-value
   "vars": {
     var-name: var-value,
     ...
@@ -153,7 +154,8 @@ The configuration object for `<amp-analytics>` uses the following format:
     "beacon": *boolean*,
     "xhrpost": *boolean*,
     "image": *boolean*,
-  }
+  },
+  "warningMessage": warningMessage-value
 }
 ```
 
@@ -849,6 +851,15 @@ If you need to ingest this parameter, information on how this parameter is creat
 The `cookies` feature supports writing cookies to the origin domain by extracting [`QUERY_PARAM`](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md#query-parameter) and [`LINKER_PARAM`](./linker-id-receiving.md#linker-param) information from the document url. It can be used along with `linkers` features to perform ID syncing from the AMP proxied domain to AMP pages on a publisher's domain.
 
 Details on setting up the `cookies` configuration can be found at [Receiving Linker Params on AMP Pages](./linker-id-receiving.md#receiving-linker-params-on-amp-pages)
+
+#####  Warning Message
+
+The top-level  `warningMessage` property accepts strings and defines the any warnings that developers should be aware of (i.e. config deprecation). If `warningMessage` is declared, the warning message and `type` and/or `config` attributes will be displayed in the console as a developer warning:   
+
+
+```
+Warning from myVendor myVendorUrl.com: This config is deprecated.
+```
 
 ## Validation
 
