@@ -15,6 +15,10 @@
  */
 
 import {Layout} from '../../../src/layout';
+import { dict } from "../../../src/utils/object"
+import { addParamsToUrl } from "../../../src/url"
+import { userAssert } from "../../../src/log"
+import { removeElement } from "../../../src/dom"
 
 export class AmpFlowplayer extends AMP.BaseElement {
 
@@ -23,23 +27,73 @@ export class AmpFlowplayer extends AMP.BaseElement {
     super(element);
 
     /** @private {string} */
-    this.myText_ = 'hello world';
+    this.id_ = null;
 
-    /** @private {?Element} */
-    this.container_ = null;
+    /** @private {string} */
+    this.pid_ = null;
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    const {element} = this;
+
+    this.id_ = userAssert(
+      element.getAttribute('data-id'),
+      'The data-id attribute is required for <amp-jwplayer> %s',
+      element
+    );
+
+    this.pid_ = element.getAttribute('data-pid');
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.RESPONSIVE;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+
+    const queryParams = dict({
+      'id': encodeURIComponent(this.id_) || undefined,
+      'pid': encodeURIComponent(this.pid_) || undefined
+    });
+
+    const baseUrl = "https://ljsp.lwcdn.com/api/video/embed.jsp?";
+    const src = addParamsToUrl(baseUrl, queryParams);
+
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = src;
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+    return this.loadPromise(iframe);
+  }
+
+  /** @override */
+  pauseCallback() {
+    if (this.iframe_ && this.iframe_.contentWindow) {
+      // The /players page can respond to "play" and "pause" commands from the
+      // iframe's parent
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        'pause',
+        'https://content.jwplatform.com'
+      );
+    }
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true; // Call layoutCallback again.
   }
 }
 
