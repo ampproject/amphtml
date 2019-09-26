@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+import { Layout } from '../../../src/layout';
 import { dict } from "../../../src/utils/object"
 import { addParamsToUrl } from "../../../src/url"
 import { userAssert } from "../../../src/log"
@@ -36,13 +36,22 @@ export class AmpFlowplayer extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
+  preconnectCallback(onLayout) {
+    this.preconnect.url('https://ljsp.lwcdn.com', onLayout);
+    this.preconnect.url('https://cdn.flowplayer.com', onLayout);
+  }
+
   /** @override */
   buildCallback() {
     const {element} = this;
 
     this.id_ = userAssert(
       element.getAttribute('data-id'),
-      'The data-id attribute is required for <amp-jwplayer> %s',
+      'The data-id attribute is required for <amp-flowplayer> %s',
       element
     );
 
@@ -68,6 +77,7 @@ export class AmpFlowplayer extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
+    iframe.setAttribute('allow', 'autoplay fullscreen');
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -82,7 +92,7 @@ export class AmpFlowplayer extends AMP.BaseElement {
       // iframe's parent
       this.iframe_.contentWindow./*OK*/ postMessage(
         'pause',
-        'https://content.jwplatform.com'
+        'https://ljsp.lwcdn.com'
       );
     }
   }

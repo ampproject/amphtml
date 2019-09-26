@@ -16,6 +16,6 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-flowplayer layout="responsive" width="150" height="80"></amp-flowplayer>
+|    <amp-flowplayer layout="responsive"></amp-flowplayer>
 |  </body>
 |  </html>

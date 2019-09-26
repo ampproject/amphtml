@@ -15,6 +15,7 @@
  */
 
 import '../amp-flowplayer';
+import { htmlFor } from "../../../../src/static-template"
 
 describes.realWin('amp-flowplayer', {
   amp: {
@@ -23,16 +24,48 @@ describes.realWin('amp-flowplayer', {
 }, env => {
 
   let win;
-  let element;
+  let doc;
 
   beforeEach(() => {
     win = env.win;
-    element = win.document.createElement('amp-flowplayer');
-    win.document.body.appendChild(element);
+    doc = win.document;
   });
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
+  function getFlowplayer(attributes) {
+    const fp = doc.createElement('amp-flowplayer');
+    for (const key in attributes) {
+      fp.setAttribute(key, attributes[key]);
+    }
+    fp.setAttribute('width', '320');
+    fp.setAttribute('height', '180');
+    fp.setAttribute('layout', 'responsive');
+    const html = htmlFor(env.win.document);
+    env.sandbox
+      .stub(env.ampdoc.getHeadNode(), 'querySelector')
+      .withArgs('meta[property="og:title"]')
+      .returns(
+        html`
+          <meta property="og:title" content="title_tag" />
+        `
+      );
+    doc.body.appendChild(fp);
+    return fp.build().then(() => {
+      fp.layoutCallback();
+      return fp;
+    });
+  }
+
+  it('renders', async () => {
+    const fp = await getFlowplayer({
+      'data-id': 'cad9d975-ccae-4757-88a3-a65ebb7419f8',
+      'data-pid': 'cad9d975-ccae-4757-88a3-a65ebb7419f8',
+    });
+    const iframe = fp.querySelector('iframe');
+    expect(iframe).to.not.be.null;
+    expect(iframe.tagName).to.equal('IFRAME');
+    expect(iframe.src).to.equal(
+      'https://ljsp.lwcdn.com/api/video/embed.jsp?id=cad9d975-ccae-4757-88a3-a65ebb7419f8&pid=cad9d975-ccae-4757-88a3-a65ebb7419f8'
+    );
+    expect(iframe.className).to.match(/i-amphtml-fill-content/);
   });
 });

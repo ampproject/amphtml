@@ -1,24 +1,9 @@
-<!--
-  1. Change "category" below to one of:
-       ads-analytics
-       dynamic-content
-       layout
-       media
-       presentation
-       social
-
-  2. Remove any of the "formats" that don't apply.
-     You can also add the "ads" and "stories" formats if they apply.
-
-  3. And remove this comment! (no empty lines before "---")
--->
 ---
-$category: presentation
+$category: media
 formats:
   - websites
-  - email
 teaser:
-  text: FILL THIS IN.
+  text: Displays a Flowplayer embed.
 ---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -41,11 +26,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Displays a <a href="http://www.flowplayer.com">Flowplayer</a> embed</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Experimental</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -53,27 +38,47 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-flowplayer/">Code example for amp-flowplayer</a></td>
   </tr>
 </table>
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+You can use the `amp-flowplayer` to embed <a href="http://www.flowplayer.com">Flowplayer</a> on your website.
+The component requires `data-id`, which is a Flowplayer platform id for the video to be embedded. 
+Additionally you can specify a player id `data-pid` to enable additional features and appearance alterations in the player. 
+
+## Examples
+
+```html
+<amp-flowplayer layout="responsive" data-id="69891ec1-2d90-423c-9892-5a9ee87b6d86" data-pid="6bc18b7d-6643-4fba-aa20-1f8bd814c66d">
+</amp-flowplayer>
+```
+
+```html
+<amp-flowplayer width="400" height="300" data-id="69891ec1-2d90-423c-9892-5a9ee87b6d86" data-pid="6bc18b7d-6643-4fba-aa20-1f8bd814c66d">
+</amp-flowplayer>
+```
 
 ## Attributes
 
-FILL THIS IN. Does this extension allow for properties to configure?
-
 <table>
   <tr>
-    <td width="40%"><strong>data-my-attribute</strong></td>
-    <td>FILL THIS IN. This table <strong>must</strong> be written in HTML.</td>
+    <td width="40%"><strong>data-id</strong></td>
+    <td>Flowplayer platform id for the video to be played</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>data-pid</strong></td>
+    <td>Flowplayer player id for additional features and appearance alterations</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.
+  </td>
 </table>
 
 ## Validation
