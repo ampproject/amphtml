@@ -487,6 +487,54 @@ describes.realWin(
       expect(story.element.getAttribute('orientation')).to.equal('portrait');
     });
 
+    it('should deduplicate amp-story-page ids', async () => {
+      createPages(story.element, 6, [
+        'cover',
+        'page-1',
+        'cover',
+        'page-1',
+        'page-1',
+        'page-2',
+      ]);
+
+      allowConsoleError(() => story.buildCallback());
+      await story.layoutCallback();
+
+      const pages = story.element.querySelectorAll('amp-story-page');
+      const pageIds = Array.prototype.map.call(pages, page => page.id);
+      expect(pageIds).to.deep.equal([
+        'cover',
+        'page-1',
+        'cover__1',
+        'page-1__1',
+        'page-1__2',
+        'page-2',
+      ]);
+    });
+
+    it('should deduplicate amp-story-page ids and cache them', async () => {
+      createPages(story.element, 6, [
+        'cover',
+        'page-1',
+        'cover',
+        'page-1',
+        'page-1',
+        'page-2',
+      ]);
+
+      allowConsoleError(() => story.buildCallback());
+      await story.layoutCallback();
+
+      expect(story.storeService_.get(StateProperty.PAGE_IDS)).to.deep.equal([
+        'cover',
+        'page-1',
+        'cover__1',
+        'page-1__1',
+        'page-1__2',
+        'page-2',
+      ]);
+    });
+
     describe('amp-story consent', () => {
       it('should pause the story if there is a consent', async () => {
         sandbox
