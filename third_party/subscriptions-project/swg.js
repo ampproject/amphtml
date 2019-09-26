@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.69 */
+/** Version: 0.1.22.70 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -71,6 +71,53 @@ const EventOriginator = {
   SWG_SERVER: 4,
   PUBLISHER_CLIENT: 5,
 };
+
+/**
+ * @implements {Message}
+ */
+class AccountCreationRequest {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.complete_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getComplete() {
+    return this.complete_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setComplete(value) {
+    this.complete_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.complete_,  // field 1 - complete
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AccountCreationRequest';
+  }
+}
 
 /**
  * @implements {Message}
@@ -500,6 +547,53 @@ class AnalyticsRequest {
 /**
  * @implements {Message}
  */
+class EntitlementsResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.jwt_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getJwt() {
+    return this.jwt_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setJwt(value) {
+    this.jwt_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.jwt_,  // field 1 - jwt
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EntitlementsResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class EventParams {
  /**
   * @param {!Array=} data
@@ -899,10 +993,12 @@ class ViewSubscriptionsResponse {
 }
 
 const PROTO_MAP = {
+  'AccountCreationRequest': AccountCreationRequest,
   'AlreadySubscribedResponse': AlreadySubscribedResponse,
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
+  'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
@@ -2765,6 +2861,118 @@ var activityPorts_11 = activityPorts.createAbortError;
 var activityPorts_12 = activityPorts.isAbortError;
 
 /**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} opt_message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, opt_message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    const message = opt_message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
+var log_1 = {
+  assert,
+  debugLog,
+  log
+};
+var log_2 = log_1.assert;
+var log_3 = log_1.debugLog;
+var log_4 = log_1.log;
+
+/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2894,6 +3102,7 @@ class ActivityIframePort$1 {
    */
   messageDeprecated(payload) {
     this.iframePort_.message(payload);
+    log_3('WARNING: messageDeprecated() is deprecated');
   }
 
   /**
@@ -2902,6 +3111,7 @@ class ActivityIframePort$1 {
    */
   onMessageDeprecated(callback) {
     this.callbackOriginal_ = callback;
+    log_3('WARNING: use of deprecated API onMessageDeprecated()');
   }
 
   /**
@@ -3041,94 +3251,6 @@ class ActivityPorts$1 {
   getOriginalWebActivityPorts() {
     return this.activityPorts_;
   }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param  {...*} var_args [description]
- */
-function log(var_args) {
-  console.log.apply(console, arguments);
-}
-
-/**
- * Throws an error if the first argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- *
- * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
- *     not evaluate to true.
- * @param {string=} opt_message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTrueish.
- * @template T
- */
-function assert(shouldBeTrueish, opt_message, var_args) {
-  let firstElement;
-  if (!shouldBeTrueish) {
-    const message = opt_message || 'Assertion failed';
-    const splitMessage = message.split('%s');
-    const first = splitMessage.shift();
-    let formatted = first;
-    const messageArray = [];
-    pushIfNonEmpty(messageArray, first);
-    for (let i = 2; i < arguments.length; i++) {
-      const val = arguments[i];
-      if (val && val.tagName) {
-        firstElement = val;
-      }
-      const nextConstant = splitMessage.shift();
-      messageArray.push(val);
-      pushIfNonEmpty(messageArray, nextConstant.trim());
-      formatted += toString(val) + nextConstant;
-    }
-    const e = new Error(formatted);
-    e.fromAssert = true;
-    e.associatedElement = firstElement;
-    e.messageArray = messageArray;
-    throw e;
-  }
-  return shouldBeTrueish;
-}
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
-  }
-}
-
-function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return /** @type {string} */ (val);
 }
 
 /**
@@ -3641,7 +3763,7 @@ function createElement(doc, tagName, attributes, opt_content) {
         element.appendChild(opt_content[i]);
       }
     } else {
-      assert(false, 'Unsupported content: %s', opt_content);
+      log_2(false, 'Unsupported content: %s', opt_content);
     }
   }
   return element;
@@ -4051,7 +4173,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.69',
+    '_client': 'SwG 0.1.22.70',
   });
 }
 
@@ -5430,7 +5552,7 @@ function stringToBytes(str) {
   const bytes = new Uint8Array(str.length);
   for (let i = 0; i < str.length; i++) {
     const charCode = str.charCodeAt(i);
-    assert(charCode <= 255, 'Characters must be in range [0,255]');
+    log_2(charCode <= 255, 'Characters must be in range [0,255]');
     bytes[i] = charCode;
   }
   return bytes;
@@ -6444,7 +6566,6 @@ function defaultConfig() {
  *
  * In other words, Flow = Payments + Account Creation.
  */
-
 /**
  * String values input by the publisher are mapped to the number values.
  * @type {!Object<string, number>}
@@ -6675,14 +6796,22 @@ class PayCompleteFlow {
       feArgs(args),
       /* shouldFadeBody */ true
     );
-    this.activityIframeView_.onMessageDeprecated(data => {
-      if (data['entitlements']) {
-        this.deps_
-          .entitlementsManager()
-          .pushNextEntitlements(/** @type {string} */ (data['entitlements']));
-        return;
-      }
-    });
+
+    if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
+      this.activityIframeView_.on(
+        EntitlementsResponse,
+        this.handleEntitlementsResponse_.bind(this)
+      );
+    } else {
+      this.activityIframeView_.onMessageDeprecated(data => {
+        if (data['entitlements']) {
+          const response = new EntitlementsResponse();
+          response.setJwt(/** @type {string} */ (data['entitlements']));
+          this.handleEntitlementsResponse_(response);
+        }
+      });
+    }
+
     this.activityIframeView_.acceptResult().then(() => {
       // The flow is complete.
       this.dialogManager_.completeView(this.activityIframeView_);
@@ -6692,13 +6821,30 @@ class PayCompleteFlow {
   }
 
   /**
+   * @param {!EntitlementsResponse} response
+   * @private
+   */
+  handleEntitlementsResponse_(response) {
+    const jwt = response.getJwt();
+    if (jwt) {
+      this.deps_.entitlementsManager().pushNextEntitlements(jwt);
+    }
+  }
+
+  /**
    * @return {!Promise}
    */
   complete() {
     this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_ACCOUNT_CREATED, true);
     this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
-      this.activityIframeView_.messageDeprecated({'complete': true});
+      if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
+        const accountCompletionRequest = new AccountCreationRequest();
+        accountCompletionRequest.setComplete(true);
+        this.activityIframeView_.execute(accountCompletionRequest);
+      } else {
+        this.activityIframeView_.messageDeprecated({'complete': true});
+      }
     });
     return this.activityIframeView_
       .acceptResult()
@@ -8971,11 +9117,11 @@ class Xhr {
    */
   fetch_(input, init) {
     // TODO(avimehta): Should the requests go through when page is not visible?
-    assert(typeof input == 'string', 'Only URL supported: %s', input);
+    log_2(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
     const creds = init.credentials;
-    assert(
+    log_2(
       creds === undefined || creds == 'include' || creds == 'omit',
       'Only credentials=include|omit support: %s',
       creds
@@ -9024,7 +9170,7 @@ function normalizeMethod_(method) {
   }
   method = method.toUpperCase();
 
-  assert(
+  log_2(
     allowedMethods_.includes(method),
     'Only one of %s is currently allowed. Got %s',
     allowedMethods_.join(', '),
@@ -9194,7 +9340,7 @@ class FetchResponse {
    * @return {!FetchResponse}
    */
   clone() {
-    assert(!this.bodyUsed, 'Body already used');
+    log_2(!this.bodyUsed, 'Body already used');
     return new FetchResponse(this.xhr_);
   }
 
@@ -9204,7 +9350,7 @@ class FetchResponse {
    * @private
    */
   drainText_() {
-    assert(!this.bodyUsed, 'Body already used');
+    log_2(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     return Promise.resolve(this.xhr_.responseText);
   }
@@ -9234,15 +9380,15 @@ class FetchResponse {
    * @private
    */
   document_() {
-    assert(!this.bodyUsed, 'Body already used');
+    log_2(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    assert(
+    log_2(
       this.xhr_.responseXML,
       'responseXML should exist. Make sure to return ' +
         'Content-Type: text/html header.'
     );
     return /** @type {!Promise<!Document>} */ (Promise.resolve(
-      assert(this.xhr_.responseXML)
+      log_2(this.xhr_.responseXML)
     ));
   }
 
@@ -13603,14 +13749,14 @@ class OffersFlow {
     }
 
     if (feArgsObj['oldSku']) {
-      assert(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
+      log_2(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
 
       // Remove old sku from offers if in list.
       let skuList = feArgsObj['skus'];
       const /** @type {string} */ oldSku = feArgsObj['oldSku'];
       skuList = skuList.filter(sku => sku !== oldSku);
 
-      assert(
+      log_2(
         skuList.length > 0,
         'Sku list only contained offer user already has'
       );
@@ -14357,14 +14503,14 @@ class ClientEventManager {
             return Promise.resolve();
           }
         } catch (e) {
-          log(e);
+          log_4(e);
         }
       }
       for (let listener = 0; listener < this.listeners_.length; listener++) {
         try {
           this.listeners_[listener](event);
         } catch (e) {
-          log(e);
+          log_4(e);
         }
       }
       return Promise.resolve();
@@ -15424,7 +15570,7 @@ class ConfiguredRuntime {
       }
     }
     // Throw error string if it's not null
-    assert(!error, error || undefined);
+    log_2(!error, error || undefined);
     // Assign.
     Object.assign(this.config_, config);
   }
@@ -15478,7 +15624,7 @@ class ConfiguredRuntime {
       const errorMessage =
         'The showOffers() method cannot be used to update a subscription. ' +
         'Use the showUpdateOffers() method instead.';
-      assert(opt_options ? !opt_options['oldSku'] : true, errorMessage);
+      log_2(opt_options ? !opt_options['oldSku'] : true, errorMessage);
       const flow = new OffersFlow(this, opt_options);
       return flow.start();
     });
@@ -15486,7 +15632,7 @@ class ConfiguredRuntime {
 
   /** @override */
   showUpdateOffers(opt_options) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION),
       'Not yet launched!'
     );
@@ -15494,7 +15640,7 @@ class ConfiguredRuntime {
       const errorMessage =
         'The showUpdateOffers() method cannot be used for new subscribers. ' +
         'Use the showOffers() method instead.';
-      assert(opt_options ? !!opt_options['oldSku'] : false, errorMessage);
+      log_2(opt_options ? !!opt_options['oldSku'] : false, errorMessage);
       const flow = new OffersFlow(this, opt_options);
       return flow.start();
     });
@@ -15518,7 +15664,7 @@ class ConfiguredRuntime {
 
   /** @override */
   showContributionOptions(opt_options) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS),
       'Not yet launched!'
     );
@@ -15589,7 +15735,7 @@ class ConfiguredRuntime {
     const errorMessage =
       'The subscribe() method can only take a sku as its parameter; ' +
       'for subscription updates please use the updateSubscription() method';
-    assert(typeof sku === 'string', errorMessage);
+    log_2(typeof sku === 'string', errorMessage);
     return this.documentParsed_.then(() => {
       return new PayStartFlow(this, sku).start();
     });
@@ -15597,14 +15743,14 @@ class ConfiguredRuntime {
 
   /** @override */
   updateSubscription(subscriptionRequest) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION),
       'Not yet launched!'
     );
     const errorMessage =
       'The updateSubscription() method should be used for subscription ' +
       'updates; for new subscriptions please use the subscribe() method';
-    assert(
+    log_2(
       subscriptionRequest ? subscriptionRequest['oldSku'] : false,
       errorMessage
     );
@@ -15620,7 +15766,7 @@ class ConfiguredRuntime {
 
   /** @override */
   contribute(skuOrSubscriptionRequest) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS),
       'Not yet launched!'
     );
@@ -15665,7 +15811,7 @@ class ConfiguredRuntime {
 
   /** @override */
   attachSmartButton(button, optionsOrCallback, opt_callback) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.SMARTBOX),
       'Not yet launched!'
     );

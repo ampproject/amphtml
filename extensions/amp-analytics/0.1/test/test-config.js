@@ -884,7 +884,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   });
 
   describe('deprecated config', () => {
-    it.only('shows the warning when using the deprecated config', () => {
+    it('shows the warning when using the deprecated config', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
         'warningMessage': 'I am a warning',
       };
