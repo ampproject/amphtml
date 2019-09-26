@@ -138,9 +138,11 @@ function getSrMacros(interactionModel, campaignId, apesterElement) {
       param2: publisherId,
       param6: campaignId,
       page_url: pageUrl,
-      user_consent: consentRes.user_consent,
-      gdpr: consentRes.gdpr,
     };
+    if (apesterElement.gdpr === 1) {
+      macros.gdpr = apesterElement.gdpr;
+      macros.user_consent = apesterElement.user_consent;
+    }
     if (consentRes.gdprString) {
       macros.param4 = consentRes.gdprString;
     }

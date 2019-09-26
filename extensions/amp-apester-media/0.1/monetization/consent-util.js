@@ -42,7 +42,7 @@ export function getConsentData(apesterElement) {
   return Promise.all([consentStatePromise, consentStringPromise]).then(
     consentDataResponse => {
       const consentStatus = consentDataResponse[0];
-      const gdprString = consentDataResponse[0];
+      const gdprString = consentDataResponse[1];
       //todo check right behavior
       switch (consentStatus) {
         case CONSENT_POLICY_STATE.SUFFICIENT:
@@ -52,7 +52,7 @@ export function getConsentData(apesterElement) {
           return {gdpr: 1, user_consent: 0, gdprString};
         case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
         default:
-          return {gdpr: 0, user_consent: 1, gdprString};
+          return {gdpr: 0, user_consent: 0, gdprString};
       }
     }
   );
