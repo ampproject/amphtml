@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import {BaseElement} from '../../../../src/base-element';
-// import {Services} from '../../../../src/services';
-// import {Signals} from '../../../../src/utils/signals';
 
 import {handleCompanionAds} from '../monetization/index';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
@@ -28,6 +25,8 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
   let baseElement;
   let docInfo;
   let media;
+  const queryAmpAdBladeType = 'amp-ad[type=blade]';
+  const queryAmpAdDisplayType = 'amp-ad[type=doubleclick]';
 
   beforeEach(() => {
     win = env.win;
@@ -54,20 +53,18 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     media.campaignData = createCampaignData(true);
     handleCompanionAds(media, baseElement);
     const displayAd = baseElement.parentNode.querySelector(
-      'amp-ad[type=doubleclick]'
+      queryAmpAdDisplayType
     );
-    expect(displayAd).to.not.be.null;
-    expect(displayAd).to.not.be.undefined;
+    expect(displayAd).to.exist;
     expect(baseElement.nextSibling).to.be.equal(displayAd);
   });
   it('show sr ad below', () => {
     media.campaignData = createCampaignData(false, false, true);
     return handleCompanionAds(media, baseElement).then(() => {
       const srAdBelow = baseElement.parentNode.querySelector(
-        'amp-ad[type=blade]'
+        queryAmpAdBladeType
       );
-      expect(srAdBelow).to.not.be.null;
-      expect(srAdBelow).to.not.be.undefined;
+      expect(srAdBelow).to.exist;
       expect(baseElement.nextSibling).to.be.equal(srAdBelow);
     });
   });
@@ -75,10 +72,9 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     media.campaignData = createCampaignData(false, true, false);
     return handleCompanionAds(media, baseElement).then(() => {
       const srAboveAd = baseElement.parentNode.querySelector(
-        'amp-ad[type=blade]'
+        queryAmpAdBladeType
       );
-      expect(srAboveAd).to.not.be.null;
-      expect(srAboveAd).to.not.be.undefined;
+      expect(srAboveAd).to.exist;
       expect(baseElement.previousSibling).to.be.equal(srAboveAd);
     });
   });
@@ -86,16 +82,14 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     media.campaignData = createCampaignData(true, true, false);
     return handleCompanionAds(media, baseElement).then(() => {
       const displayAd = baseElement.parentNode.querySelector(
-        'amp-ad[type=doubleclick]'
+        queryAmpAdDisplayType
       );
-      expect(displayAd).to.not.be.null;
-      expect(displayAd).to.not.be.undefined;
+      expect(displayAd).to.exist;
       expect(baseElement.nextSibling).to.be.equal(displayAd);
       const srAboveAd = baseElement.parentNode.querySelector(
-        'amp-ad[type=blade]'
+        queryAmpAdBladeType
       );
-      expect(srAboveAd).to.not.be.null;
-      expect(srAboveAd).to.not.be.undefined;
+      expect(srAboveAd).to.exist;
       expect(baseElement.previousSibling).to.be.equal(srAboveAd);
     });
   });
@@ -103,13 +97,13 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     media.campaignData = createCampaignData(true, true, false, true);
     return handleCompanionAds(media, baseElement).then(() => {
       const displayAd = baseElement.parentNode.querySelector(
-        'amp-ad[type=doubleclick]'
+        queryAmpAdDisplayType
       );
-      expect(displayAd).to.be.null;
+      expect(displayAd).to.not.exist;
       const srAboveAd = baseElement.parentNode.querySelector(
-        'amp-ad[type=blade]'
+        queryAmpAdBladeType
       );
-      expect(srAboveAd).to.be.null;
+      expect(srAboveAd).to.not.exist;
     });
   });
 });
@@ -125,7 +119,6 @@ function createCampaignData(
       'settings': {
         'slot': '/57806026/Dev_DT_300x250',
         'options': {
-          'collapseEmpty': true,
           'refreshOnClick': 'none',
           'lockTime': 5000,
         },
@@ -140,13 +133,9 @@ function createCampaignData(
           'enabled': false,
         },
         'companion': {
-          'shouldPauseWhenOutOfView': true,
-          'shouldForceViewability': true,
           'enabled': false,
         },
         'companion_below': {
-          'shouldPauseWhenOutOfView': true,
-          'shouldForceViewability': true,
           'enabled': false,
         },
         'provider': 'sr',
