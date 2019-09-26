@@ -219,7 +219,7 @@ describes.realWin('media-tasks', {}, () => {
 
   describe('SwapIntoDomTask', () => {
     // TODO(newmuis): Get this test working.
-    it.skip('should replace element in DOM', () => {
+    it.skip('should replace element in DOM', async () => {
       const parent = document.createElement('div');
       const replacedMedia = document.createElement('video');
       parent.appendChild(replacedMedia);
@@ -228,16 +228,15 @@ describes.realWin('media-tasks', {}, () => {
       expect(el.parentElement).to.equal(null);
 
       const task = new SwapIntoDomTask(replacedMedia);
-      return task.execute(el).then(() => {
-        expect(replacedMedia.parentElement).to.equal(null);
-        expect(el.parentElement).to.equal(parent);
-      });
+      await task.execute(el);
+      expect(replacedMedia.parentElement).to.equal(null);
+      expect(el.parentElement).to.equal(parent);
     });
   });
 
   describe('SwapOutOfDomTask', () => {
     // TODO(newmuis): Get this test working.
-    it.skip('should replace element in DOM', () => {
+    it.skip('should replace element in DOM', async () => {
       const placeholderEl = document.createElement('video');
 
       const parent = document.createElement('div');
@@ -247,10 +246,9 @@ describes.realWin('media-tasks', {}, () => {
       expect(placeholderEl.parentElement).to.equal(null);
 
       const task = new SwapOutOfDomTask(placeholderEl);
-      return task.execute(el).then(() => {
-        expect(el.parentElement).to.equal(null);
-        expect(placeholderEl.parentElement).to.equal(parent);
-      });
+      await task.execute(el);
+      expect(el.parentElement).to.equal(null);
+      expect(placeholderEl.parentElement).to.equal(parent);
     });
   });
 });

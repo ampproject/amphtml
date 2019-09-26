@@ -96,17 +96,16 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     }
   );
 
-  it('should show the tooltip on store property update', () => {
+  it('should show the tooltip on store property update', async () => {
     fakePage.appendChild(clickableEl);
 
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before showing tooltip.
-    return timeout(150).then(() => {
-      expect(component.focusedStateOverlay_).to.not.have.class(
-        'i-amphtml-hidden'
-      );
-    });
+    await timeout(150);
+    expect(component.focusedStateOverlay_).to.not.have.class(
+      'i-amphtml-hidden'
+    );
   });
 
   it('should hide the tooltip when switching page', () => {
@@ -166,7 +165,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     }
   );
 
-  it('should append icon when icon attribute is present', () => {
+  it('should append icon when icon attribute is present', async () => {
     addAttributesToElement(clickableEl, {'data-tooltip-icon': '/my-icon'});
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
@@ -176,11 +175,10 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    return timeout(150).then(() => {
-      expect(tooltipIconEl.style['background-image']).to.equal(
-        'url("http://localhost:9876/my-icon")'
-      );
-    });
+    await timeout(150);
+    expect(tooltipIconEl.style['background-image']).to.equal(
+      'url("http://localhost:9876/my-icon")'
+    );
   });
 
   it('should find invalid urls', () => {
@@ -201,7 +199,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     expect(tooltipIconEl.style['background-image']).to.equal('');
   });
 
-  it('should append text when text attribute is present', () => {
+  it('should append text when text attribute is present', async () => {
     addAttributesToElement(clickableEl, {'data-tooltip-text': 'my cool text'});
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
@@ -211,12 +209,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    return timeout(150).then(() => {
-      expect(tooltipTextEl.textContent).to.equal('my cool text');
-    });
+    await timeout(150);
+    expect(tooltipTextEl.textContent).to.equal('my cool text');
   });
 
-  it('should append href url when text attribute is not present', () => {
+  it('should append href url when text attribute is not present', async () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
@@ -225,9 +222,8 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
-    return timeout(150).then(() => {
-      expect(tooltipTextEl.textContent).to.equal('google.com');
-    });
+    await timeout(150);
+    expect(tooltipTextEl.textContent).to.equal('google.com');
   });
 });
 
