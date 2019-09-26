@@ -25,8 +25,10 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
   let baseElement;
   let docInfo;
   let media;
-  const queryAmpAdBladeType = 'amp-ad[type=blade]';
-  const queryAmpAdDisplayType = 'amp-ad[type=doubleclick]';
+  const queryAmpAdBladeSelector = baseElement =>
+    baseElement.parentNode.querySelector('amp-ad[type=blade]');
+  const queryAmpAdDisplaySelector = baseElement =>
+    baseElement.parentNode.querySelector('amp-ad[type=doubleclick]');
 
   beforeEach(() => {
     win = env.win;
@@ -52,18 +54,14 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
   it('show display ad', () => {
     media.campaignData = createCampaignData(true);
     handleCompanionAds(media, baseElement);
-    const displayAd = baseElement.parentNode.querySelector(
-      queryAmpAdDisplayType
-    );
+    const displayAd = queryAmpAdDisplaySelector(baseElement);
     expect(displayAd).to.exist;
     expect(baseElement.nextSibling).to.be.equal(displayAd);
   });
   it('show sr ad below', () => {
     media.campaignData = createCampaignData(false, false, true);
     return handleCompanionAds(media, baseElement).then(() => {
-      const srAdBelow = baseElement.parentNode.querySelector(
-        queryAmpAdBladeType
-      );
+      const srAdBelow = queryAmpAdBladeSelector(baseElement);
       expect(srAdBelow).to.exist;
       expect(baseElement.nextSibling).to.be.equal(srAdBelow);
     });
@@ -71,9 +69,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
   it('show sr ad above', () => {
     media.campaignData = createCampaignData(false, true, false);
     return handleCompanionAds(media, baseElement).then(() => {
-      const srAboveAd = baseElement.parentNode.querySelector(
-        queryAmpAdBladeType
-      );
+      const srAboveAd = queryAmpAdBladeSelector(baseElement);
       expect(srAboveAd).to.exist;
       expect(baseElement.previousSibling).to.be.equal(srAboveAd);
     });
@@ -81,14 +77,10 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
   it('show sr above with display', () => {
     media.campaignData = createCampaignData(true, true, false);
     return handleCompanionAds(media, baseElement).then(() => {
-      const displayAd = baseElement.parentNode.querySelector(
-        queryAmpAdDisplayType
-      );
+      const displayAd = queryAmpAdDisplaySelector(baseElement);
       expect(displayAd).to.exist;
       expect(baseElement.nextSibling).to.be.equal(displayAd);
-      const srAboveAd = baseElement.parentNode.querySelector(
-        queryAmpAdBladeType
-      );
+      const srAboveAd = queryAmpAdBladeSelector(baseElement);
       expect(srAboveAd).to.exist;
       expect(baseElement.previousSibling).to.be.equal(srAboveAd);
     });
@@ -96,13 +88,9 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
   it('dont show ad if disabled amp companion ads', () => {
     media.campaignData = createCampaignData(true, true, false, true);
     return handleCompanionAds(media, baseElement).then(() => {
-      const displayAd = baseElement.parentNode.querySelector(
-        queryAmpAdDisplayType
-      );
+      const displayAd = queryAmpAdDisplaySelector(baseElement);
       expect(displayAd).to.not.exist;
-      const srAboveAd = baseElement.parentNode.querySelector(
-        queryAmpAdBladeType
-      );
+      const srAboveAd = queryAmpAdBladeSelector(baseElement);
       expect(srAboveAd).to.not.exist;
     });
   });
