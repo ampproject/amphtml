@@ -193,7 +193,11 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://ad.ad-stir.com',
   },
 
-  'adstyle': {},
+  'adstyle': {
+    renderStartImplemented: true,
+    prefetch: 'https://widgets.ad.style/amp.js',
+    preconnect: ['https://w.ad.style']
+  },
 
   'adtech': {
     prefetch: 'https://s.aolcdn.com/os/ads/adsWrapper3.js',
