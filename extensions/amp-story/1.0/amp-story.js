@@ -102,7 +102,7 @@ import {
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -531,15 +531,16 @@ export class AmpStory extends AMP.BaseElement {
       pageEls,
       el => el.id || 'default-page'
     );
+    const idsMap = map();
     for (let i = 0; i < pageIds.length; i++) {
-      let counter = 0;
-      let index;
-      while ((index = pageIds.indexOf(pageIds[i], i + 1)) !== -1) {
-        user().error(TAG, `Duplicate amp-story-page ID ${pageIds[index]}`);
-        const newId = `${pageIds[index]}__${++counter}`;
-        pageEls[index].id = newId;
-        pageIds[index] = newId;
+      if (idsMap[pageIds[i]] === undefined) {
+        idsMap[pageIds[i]] = 0;
+        continue;
       }
+      user().error(TAG, `Duplicate amp-story-page ID ${pageIds[i]}`);
+      const newId = `${pageIds[i]}__${++idsMap[pageIds[i]]}`;
+      pageEls[i].id = newId;
+      pageIds[i] = newId;
     }
   }
 
