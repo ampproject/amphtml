@@ -63,6 +63,6 @@ function constructCompanionDisplayAd(companionSettings, apesterElement) {
   ampAd.setAttribute('width', width);
   ampAd.setAttribute('height', height);
   ampAd.classList.add('amp-apester-companion');
-  
+
   return ampAd;
 }
