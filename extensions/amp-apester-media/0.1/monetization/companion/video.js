@@ -139,6 +139,7 @@ function getSrMacros(interactionModel, campaignId, apesterElement) {
       param1: interactionId,
       param2: publisherId,
       param6: campaignId,
+      // eslint-disable-next-line google-camelcase/google-camelcase
       page_url: pageUrl,
     };
 
