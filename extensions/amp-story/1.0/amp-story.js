@@ -527,7 +527,10 @@ export class AmpStory extends AMP.BaseElement {
    */
   initializePageIds_() {
     const pageEls = this.element.querySelectorAll('amp-story-page');
-    const pageIds = Array.prototype.map.call(pageEls, el => el.id || 'default');
+    const pageIds = Array.prototype.map.call(
+      pageEls,
+      el => el.id || 'default-page'
+    );
     for (let i = 0; i < pageIds.length; i++) {
       let counter = 0;
       let index;
