@@ -271,6 +271,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Aniview](../../ads/aniview.md)
 - [AppNexus](../../ads/appnexus.md)
 - [AppVador](../../ads/appvador.md)
+- [AdStyle](../../ads/adstyle.md)
 - [Atomx](../../ads/atomx.md)
 - [Baidu](../../ads/baidu.md)
 - [BeaverAds](../../ads/beaverads.md)
