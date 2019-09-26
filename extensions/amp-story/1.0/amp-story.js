@@ -102,7 +102,7 @@ import {
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -415,6 +415,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStyles_();
     this.initializeListeners_();
     this.initializeListenersForDev_();
+    this.initializePageIds_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -521,6 +522,29 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Initializes page ids by deduplicating them.
+   * @private
+   */
+  initializePageIds_() {
+    const pageEls = this.element.querySelectorAll('amp-story-page');
+    const pageIds = Array.prototype.map.call(
+      pageEls,
+      el => el.id || 'default-page'
+    );
+    const idsMap = map();
+    for (let i = 0; i < pageIds.length; i++) {
+      if (idsMap[pageIds[i]] === undefined) {
+        idsMap[pageIds[i]] = 0;
+        continue;
+      }
+      user().error(TAG, `Duplicate amp-story-page ID ${pageIds[i]}`);
+      const newId = `${pageIds[i]}__${++idsMap[pageIds[i]]}`;
+      pageEls[i].id = newId;
+      pageIds[i] = newId;
+    }
+  }
+
+  /**
    * @param {!Element} styleEl
    * @private
    */
@@ -607,6 +631,9 @@ export class AmpStory extends AMP.BaseElement {
   buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
 
+    // TODO(gmajoulet): cache the page ids in the store from the
+    // initializePageIds_ method to remove this block. Requires refactoring in
+    // test-amp-story to avoid console.errors.
     let pageIds;
     if (this.pages_.length) {
       pageIds = this.pages_.map(page => page.element.id);
