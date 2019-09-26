@@ -653,6 +653,14 @@ export class Resource {
   }
 
   /**
+   * Whether this element has render-blocking service.
+   * @return {boolean}
+   */
+  isBuildRenderBlocking() {
+    return this.element.isBuildRenderBlocking();
+  }
+
+  /**
    * @param {number|boolean} viewport derived from renderOutsideViewport.
    * @return {!Promise} resolves when underlying element is built and within the
    *    viewport range given.
