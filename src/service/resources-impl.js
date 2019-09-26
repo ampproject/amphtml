@@ -478,7 +478,11 @@ export class ResourcesImpl {
    * @private
    */
   buildResourceUnsafe_(resource, schedulePass, force = false) {
-    if (!this.isUnderBuildQuota_() && !force) {
+    if (
+      !this.isUnderBuildQuota_() &&
+      !force &&
+      !resource.isBuildRenderBlocking()
+    ) {
       return null;
     }
     const promise = resource.build();

@@ -399,6 +399,18 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to indicate that it is has
+   * render-blocking service.
+   *
+   * The return value of this function is used to determine if the element
+   * built _and_ laid out will be prioritized.
+   * @return {boolean}
+   */
+  isBuildRenderBlocking() {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
