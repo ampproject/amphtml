@@ -90,6 +90,7 @@ import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
+import {adstyle} from '../ads/adstyle';
 import {adtech} from '../ads/adtech';
 import {adthrive} from '../ads/adthrive';
 import {adunity} from '../ads/adunity';
@@ -285,6 +286,7 @@ const AMP_EMBED_ALLOWED = {
   '1wo': true,
   '24smi': true,
   adsloom: true,
+  adstyle: true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -355,6 +357,7 @@ register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
 register('adstir', adstir);
+register('adstyle', adstyle);
 register('adtech', adtech);
 register('adthrive', adthrive);
 register('adunity', adunity);
