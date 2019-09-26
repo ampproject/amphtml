@@ -63,7 +63,7 @@ describes.realWin(
      * @return {!Array<!Element>}
      */
     function createPages(container, count, opt_ids) {
-      return Array(count)
+      const pages = Array(count)
         .fill(undefined)
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
@@ -71,6 +71,9 @@ describes.realWin(
           container.appendChild(page);
           return page;
         });
+
+      story.storeService_.dispatch(Action.SET_PAGE_IDS, pages.map(el => el.id));
+      return pages;
     }
 
     /**
