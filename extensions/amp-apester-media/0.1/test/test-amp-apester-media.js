@@ -76,7 +76,6 @@ describes.realWin(
           },
         ],
       };
-
       const currentResopnse =
         attributes && attributes['data-apester-channel-token']
           ? playlistResponse
