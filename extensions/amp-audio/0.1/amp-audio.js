@@ -67,6 +67,36 @@ export class AmpAudio extends AMP.BaseElement {
     this.registerAction('pause', this.pause_.bind(this));
   }
 
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const src = mutations['src'];
+    const controlsList = mutations['controlsList'];
+    const loop = mutations['loop'];
+
+    if (src !== undefined || controlsList !== undefined || loop !== undefined) {
+      this.buildAudioElement();
+      this.loadPromise(this.audio_);
+    }
+
+    if (!this.audio_) {
+      return;
+    }
+
+    const artist = mutations['artist'];
+    const title = mutations['title'];
+    const album = mutations['album'];
+    const artwork = mutations['artwork'];
+
+    if (
+      artist !== undefined ||
+      title !== undefined ||
+      album !== undefined ||
+      artwork !== undefined
+    ) {
+      this.updateMetadata_();
+    }
+  }
+
   /**
    * Builds the internal <audio> element
    * @return {*} TODO(#23582): Specify return type
@@ -121,11 +151,19 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const layout = this.getLayout();
-    if (layout !== Layout.NODISPLAY) {
-      this.buildAudioElement();
+    this.buildAudioElement();
+    this.updateMetadata_();
+
+    // Resolve layoutCallback right away if the audio won't preload.
+    if (this.element.getAttribute('preload') === 'none') {
+      return this.audio_;
     }
 
+    return this.loadPromise(this.audio_);
+  }
+
+  /** @private */
+  updateMetadata_() {
     // Gather metadata
     const {document} = this.getAmpDoc().win;
     const artist = this.getElementAttribute_('artist') || '';
@@ -147,13 +185,6 @@ export class AmpAudio extends AMP.BaseElement {
       album,
       artwork: [{src: artwork}],
     };
-
-    // Resolve layoutCallback right away if the audio won't preload.
-    if (this.element.getAttribute('preload') === 'none') {
-      return this.audio_;
-    }
-
-    return this.loadPromise(this.audio_);
   }
 
   /** @override */
