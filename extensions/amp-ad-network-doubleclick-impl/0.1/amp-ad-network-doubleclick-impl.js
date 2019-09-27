@@ -22,7 +22,6 @@
 
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {
-  ADX_ADY_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -398,10 +397,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       [FLEXIBLE_AD_SLOTS_EXP]: {
         isTrafficEligible: () => true,
         branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
-      },
-      [[ADX_ADY_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
       },
       [[FIE_CSS_CLEANUP_EXP.branch]]: {
         isTrafficEligible: () => true,

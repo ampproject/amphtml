@@ -21,7 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
-  ADX_ADY_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
@@ -211,10 +210,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           Number(this.element.getAttribute('width')) > 0 &&
           Number(this.element.getAttribute('height')) > 0,
         branches: ['21062003', '21062004'],
-      },
-      [[ADX_ADY_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
       },
       [[FIE_CSS_CLEANUP_EXP.branch]]: {
         isTrafficEligible: () => true,
