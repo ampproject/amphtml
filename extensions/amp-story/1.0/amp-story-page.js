@@ -507,8 +507,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.beforeVisible(),
       this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
-      this.maybeInitializeParallaxFx_(),
-    ]);
+    ]).then(() => {
+      this.maybeInitializeParallaxFx_();
+    });
   }
 
   /**

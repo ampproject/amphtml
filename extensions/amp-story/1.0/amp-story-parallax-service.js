@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
@@ -39,7 +40,7 @@ const NO_PARALLAX_FX_ATTR = 'no-parallax-fx';
 const ORIGIN_LAYER_ATTR = 'parallax-fx-origin-layer';
 
 /**
- * Util function to retrieve the store service. Ensures we can retrieve the
+ * Util function to retrieve the parallax service. Ensures we can retrieve the
  * service synchronously from the amp-story codebase without running into race
  * conditions.
  * @param  {!Window} win
@@ -245,14 +246,10 @@ export class AmpStoryParallaxService {
       return;
     }
 
-    const percentageX =
-      (event.pageX -
-        (page.element./*REVIEW*/ offsetLeft -
-          page.element./*REVIEW*/ offsetWidth / 2)) /
-      page.element./*REVIEW*/ offsetWidth;
-    const percentageY =
-      (event.pageY - page.element./*REVIEW*/ offsetTop) /
-      page.element./*REVIEW*/ offsetHeight;
+    const box = page.element.getLayoutBox();
+
+    const percentageX = (event.pageX - (box.left - box.width / 2)) / box.width;
+    const percentageY = (event.pageY - box.top) / box.height;
 
     const mappedX = mapRange(percentageX * 100, 0, 100, -25, 25);
     const mappedY = mapRange(percentageY * 100, 0, 100, -25, 25);
@@ -420,8 +417,12 @@ export class ParallaxPage {
    * @return {!Array<!Element>}
    */
   getLayers() {
-    return toArray(this.element.querySelectorAll(`amp-story-grid-layer`))
-      .map(layer => dev().assertElement(layer))
-      .filter(layer => !layer.hasAttribute(NO_PARALLAX_FX_ATTR));
+    return toArray(
+      this.element.querySelectorAll(
+        `amp-story-grid-layer:not([${escapeCssSelectorIdent(
+          NO_PARALLAX_FX_ATTR
+        )}])`
+      )
+    ).map(layer => dev().assertElement(layer));
   }
 }
