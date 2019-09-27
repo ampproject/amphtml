@@ -372,7 +372,9 @@ export class AmpA4A extends AMP.BaseElement {
     return this.isRelayoutNeededFlag;
   }
 
-  /** @override */
+  /** @override
+      @return {!Promise|undefined}
+  */
   buildCallback() {
     this.creativeSize_ = {
       width: this.element.getAttribute('width'),
