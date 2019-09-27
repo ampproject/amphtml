@@ -18,6 +18,7 @@ import {getData} from '../../../../src/event-helper';
 import {parseJson} from '../../../../src/json';
 
 const TAG = 'amp-viewer-messaging';
+const CHANNEL_OPEN_MSG = 'channelOpen';
 export const APP = '__AMPHTML__';
 
 /**
@@ -99,7 +100,8 @@ export class WindowPortEmulator {
    * @param {JsonObject} data
    */
   postMessage(data) {
-    this.target_./*OK*/ postMessage(data, this.origin_);
+    const targetOrigin = this.origin_ === 'null' ? '*' : this.origin_;
+    this.target_./*OK*/ postMessage(data, targetOrigin);
   }
 
   /**
@@ -391,4 +393,40 @@ export class Messaging {
   errorToString_(err) {
     return err ? (err.message ? err.message : String(err)) : 'unknown error';
   }
+}
+
+/**
+ * Performs a handshake and initializes messaging.
+ * @param {!Window} source
+ * @param {!HTMLIFrameElement} iframe
+ * @param {string} origin
+ * @return {!Promise<!Messaging>}
+ */
+export function initMessaging(source, iframe, origin) {
+  const target = iframe.contentWindow;
+  return new Promise(resolve => {
+    const listener = e => {
+      const data = getData(e);
+      if (
+        e.origin === origin &&
+        e.source === target &&
+        data['app'] === APP &&
+        data['name'] === CHANNEL_OPEN_MSG
+      ) {
+        source.removeEventListener('message', listener);
+
+        const port = new WindowPortEmulator(source, origin, target);
+        port.postMessage(
+          /** @type {!AmpViewerMessage} */ ({
+            app: APP,
+            requestid: data['requestid'],
+            type: MessageType.RESPONSE,
+          })
+        );
+
+        resolve(new Messaging(source, port));
+      }
+    };
+    source.addEventListener('message', listener);
+  });
 }
