@@ -20,6 +20,7 @@ import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
 import {stubService} from '../../../../testing/test-helper';
+import {user} from '../../../../src/log';
 
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
   let win;
@@ -878,6 +879,86 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
           'foobar': {},
         },
+      });
+    });
+  });
+
+  describe('warning message', () => {
+    it('shows the warning', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://example.com',
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+        'warningMessage': 'I am a warning',
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+
+    it('does not always show the warning', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://example.com',
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(spy).callCount(0);
+      });
+    });
+
+    it('handles incorrect inputs', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://example.com',
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+        'warningMessage': {
+          'message': 'I am deprecated',
+          'configVersion': '0.1',
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+
+    it('handles remote config', () => {
+      const element = getAnalyticsTag(
+        {},
+        {'config': 'www.vendorConfigLocation.com'}
+      );
+
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+      const xhrStub = stubXhr();
+      xhrStub.returns(
+        Promise.resolve({
+          json: () => {
+            return {
+              'warningMessage':
+                'The config you are working with has been deprecated',
+            };
+          },
+        })
+      );
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(config['warningMessage']).to.be.undefined;
       });
     });
   });

@@ -137,6 +137,7 @@ The configuration object for `<amp-analytics>` uses the following format:
     request-name: request-value,
     ...
   },
+  "requestOrigin": requestOrigin-value,
   "vars": {
     var-name: var-value,
     ...
@@ -153,7 +154,8 @@ The configuration object for `<amp-analytics>` uses the following format:
     "beacon": *boolean*,
     "xhrpost": *boolean*,
     "image": *boolean*,
-  }
+  },
+  "warningMessage": warningMessage-value
 }
 ```
 
@@ -165,7 +167,7 @@ The configuration data may be specified inline or fetched remotely by specifying
 If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
 be merged together such that:
 
-1.  Remote configuration takes precedence over in-line configuration and
+1.  Remote configuration takes precedence over inline configuration and
 2.  Inline configuration takes precedence over vendor configuration.
 
 
@@ -834,6 +836,12 @@ Referrer policy is only available for `image` transport. If `referrerPolicy: no-
   "image": true,
   "referrerPolicy": "no-referrer"
 }
+```
+
+#####  Warning Message
+The top-level  `warningMessage` property accepts strings and defines the any warnings that developers should be aware of (i.e. config deprecation). If `warningMessage` is declared, the warning message and `type` and/or `config` attributes will be displayed in the console as a developer warning:   
+```
+Warning from analytics vendor MyVendor with remote url myVendorUrl.com: This config is deprecated.
 ```
 
 #### Linkers
