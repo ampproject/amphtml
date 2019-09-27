@@ -1110,11 +1110,29 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource1.element.isBuilt = () => false;
     resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
+    resource1.isBuildRenderBlocking = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
     resources.buildOrScheduleBuildForResource_(resource1);
     expect(resource1.build).to.not.be.called;
+  });
+
+  it('should build render blocking resource even if quota is reached', () => {
+    sandbox.stub(resources.ampdoc, 'hasBeenVisible').callsFake(() => false);
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+    resources.buildAttemptsCount_ = 21; // quota is 20
+
+    resource1.element.isBuilt = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
+    resource1.prerenderAllowed = () => true;
+    resource1.isBuildRenderBlocking = () => true;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+
+    resources.buildOrScheduleBuildForResource_(resource1);
+    expect(resource1.build).to.be.called;
   });
 
   it('should layout resource if outside viewport but idle', () => {
