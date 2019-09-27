@@ -23,7 +23,6 @@ import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
-  MAX_HEIGHT_EXP,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
@@ -62,7 +61,6 @@ describes.realWin(
     let win, doc, ampdoc, viewer;
     let impl;
     let element;
-    let isResponsiveStub;
 
     beforeEach(() => {
       win = env.win;
@@ -90,7 +88,6 @@ describes.realWin(
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.win['goog_identity_prom'] = Promise.resolve({});
-      isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
     });
 
     /**
@@ -123,30 +120,38 @@ describes.realWin(
         expect(impl.isValidElement()).to.be.true;
       });
       it('should be valid (responsive)', () => {
-        isResponsiveStub.callsFake(() => true);
+        element.setAttribute('data-auto-format', 'rspv');
         element.setAttribute('data-full-width', 'true');
         element.setAttribute('height', '320');
         element.setAttribute('width', '100vw');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.true;
       });
       it('should NOT be valid (responsive with wrong height)', () => {
-        isResponsiveStub.callsFake(() => true);
+        element.setAttribute('data-auto-format', 'rspv');
         element.setAttribute('data-full-width', 'true');
         element.setAttribute('height', '666');
         element.setAttribute('width', '100vw');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.false;
       });
       it('should NOT be valid (responsive with wrong width)', () => {
-        isResponsiveStub.callsFake(() => true);
+        element.setAttribute('data-auto-format', 'rspv');
         element.setAttribute('data-full-width', 'true');
         element.setAttribute('height', '320');
         element.setAttribute('width', '666');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.false;
       });
       it('should NOT be valid (responsive with missing data-full-width)', () => {
-        isResponsiveStub.callsFake(() => true);
+        element.setAttribute('data-auto-format', 'rspv');
         element.setAttribute('height', '320');
         element.setAttribute('width', '100vw');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.false;
       });
       it('should NOT be valid (impl tag name)', () => {
@@ -161,6 +166,8 @@ describes.realWin(
       it('should NOT be valid (missing ad client)', () => {
         element.setAttribute('data-ad-client', '');
         element.setAttribute('type', 'adsense');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.false;
       });
       it('should be valid (amp-embed)', () => {
@@ -876,6 +883,7 @@ describes.realWin(
       const VIEWPORT_HEIGHT = 667;
 
       let iframe;
+      let didAttemptSizeChange = false;
 
       function constructImpl(config) {
         config.type = 'adsense';
@@ -893,6 +901,14 @@ describes.realWin(
           width: VIEWPORT_WIDTH,
           height: VIEWPORT_HEIGHT,
         });
+        env.sandbox.stub(element, 'getImpl').returns(
+          Promise.resolve({
+            attemptChangeSize: () => {
+              didAttemptSizeChange = true;
+              return Promise.resolve();
+            },
+          })
+        );
         return impl;
       }
 
@@ -902,6 +918,7 @@ describes.realWin(
           height: '150',
         });
         expect(adsense.buildCallback()).to.be.undefined;
+        expect(didAttemptSizeChange).to.be.false;
       });
 
       it('should schedule a resize for responsive', function*() {
@@ -910,52 +927,12 @@ describes.realWin(
           height: '100',
           'data-auto-format': 'rspv',
         });
-        env.sandbox
-          .stub(adsense, 'attemptChangeSize')
-          .returns(Promise.resolve());
 
         const promise = adsense.buildCallback();
         expect(promise).to.exist;
         yield promise;
 
-        expect(adsense.attemptChangeSize).to.be.calledWith(300, VIEWPORT_WIDTH);
-      });
-
-      it('should schedule a resize with the right height for max height responsive experiment', function*() {
-        forceExperimentBranch(
-          impl.win,
-          MAX_HEIGHT_EXP.branch,
-          MAX_HEIGHT_EXP.experiment
-        );
-
-        const adsense = constructImpl({
-          width: '100vw',
-          height: '100',
-          'data-auto-format': 'rspv',
-        });
-        env.sandbox
-          .stub(adsense, 'attemptChangeSize')
-          .returns(Promise.resolve());
-
-        const promise = adsense.buildCallback();
-        expect(promise).to.exist;
-        yield promise;
-
-        expect(adsense.attemptChangeSize).to.be.calledWith(313, VIEWPORT_WIDTH);
-      });
-
-      it('should call divertExperiments after isResponsive', () => {
-        const adsense = constructImpl({
-          width: '320',
-          height: '150',
-        });
-        const isResponsiveSpy = env.sandbox.spy(adsense, 'isResponsive_');
-        const divertExperimentsSpy = env.sandbox.spy(
-          adsense,
-          'divertExperiments'
-        );
-        adsense.buildCallback();
-        expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
+        expect(didAttemptSizeChange).to.be.true;
       });
 
       it('should schedule a resize for matched content responsive', function*() {
@@ -964,18 +941,11 @@ describes.realWin(
           height: '100',
           'data-auto-format': 'mcrspv',
         });
-        env.sandbox
-          .stub(adsense, 'attemptChangeSize')
-          .returns(Promise.resolve());
 
         const promise = adsense.buildCallback();
         expect(promise).to.exist;
         yield promise;
-
-        expect(adsense.attemptChangeSize).to.be.calledWith(
-          1386,
-          VIEWPORT_WIDTH
-        );
+        expect(didAttemptSizeChange).to.be.true;
       });
     });
 
@@ -1079,74 +1049,6 @@ describes.realWin(
           expect(element.style.marginRight).to.be.equal('-109px');
           expect(element.style.marginLeft).to.be.equal('');
         });
-      });
-    });
-
-    describe('#getResponsiveHeightForContext', () => {
-      it('should return 100px height for very small viewports', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'rspv',
-            {width: 100, height: 667},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(100);
-      });
-
-      it('should return 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'rspv',
-            {width: 320, height: 568},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(267);
-      });
-
-      it('should return 300px height for wide viewports without the responsive height fix', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'rspv',
-            {width: 500, height: 667},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(300);
-      });
-
-      it('should return 500px height for wide viewports with the responsive height fix', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'rspv',
-            {width: 1000, height: 1000},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ true
-          )
-        ).to.be.equal(500);
-      });
-
-      it('get matched content responsive height for iPhone 6', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'mcrspv',
-            {width: 375, height: 320},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(1386);
-      });
-
-      it('get matched content responsive height for iPhone 5', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'mcrspv',
-            {width: 320, height: 320},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(1200);
       });
     });
 

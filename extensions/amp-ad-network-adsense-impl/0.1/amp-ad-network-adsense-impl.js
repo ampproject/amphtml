@@ -21,12 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
-  ADSENSE_MCRSPV_TAG,
-  ADSENSE_RSPV_TAG,
-  ADSENSE_RSPV_WHITELISTED_HEIGHT,
-  getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
-import {
   ADX_ADY_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -48,13 +42,13 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
+import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
   addExperimentIdToElement,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle, setStyles} from '../../../src/style';
+import {computedStyle, setStyles} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
@@ -91,15 +85,6 @@ export function resetSharedState() {
 /** @type {string} */
 const FORMAT_EXP = 'as-use-attr-for-format';
 
-/** @const {!{branch: string, control: string, experiment: string}}
-    @visibleForTesting
-*/
-export const MAX_HEIGHT_EXP = {
-  branch: 'fix-inconsistent-responsive-height-selection',
-  control: '368226520',
-  experiment: '368226521',
-};
-
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
@@ -113,6 +98,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * Not initialized until getAdUrl() is called; updated upon each invocation
      * of getAdUrl().
      * @private {?string}
+
      */
     this.uniqueSlotId_ = null;
 
@@ -138,19 +124,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {?string} */
     this.qqid_ = null;
 
-    /**
-     * For full-width responsive ads: whether the element has already been
-     * aligned to the edges of the viewport.
-     * @private {boolean}
-     */
-    this.responsiveAligned_ = false;
-
-    /**
-     * The contents of the data-auto-format attribute, or empty string if the
-     * attribute was not set.
-     * @private {?string}
-     */
-    this.autoFormat_ = null;
+    /** @private {?ResponsiveState}.  */
+    this.responsiveState_ = ResponsiveState.createIfResponsive(element);
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
@@ -172,32 +147,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     this.shouldSandbox_ = false;
   }
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isResponsive_() {
-    return !!this.getRafmtParam_();
-  }
-
-  /**
-   * @return {?number}
-   * @private
-   */
-  getRafmtParam_() {
-    if (this.autoFormat_) {
-      switch (this.autoFormat_) {
-        case ADSENSE_RSPV_TAG:
-          return 13;
-        case ADSENSE_MCRSPV_TAG:
-          return 15;
-        default:
-          return null;
-      }
-    }
-    return null;
-  }
-
   /** @override */
   isValidElement() {
     /**
@@ -207,40 +156,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
      * that it has been verified.
      */
-    if (this.isResponsive_()) {
-      if (!this.element.hasAttribute('data-full-width')) {
-        user().warn(
-          TAG,
-          'Responsive AdSense ad units require the attribute ' +
-            'data-full-width.'
-        );
-        return false;
-      }
-
-      const height = this.element.getAttribute('height');
-      const width = this.element.getAttribute('width');
-      // height is set to 0 by amp-auto-ads to avoid reflow.
-      if (height != 0 && height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
-        user().warn(
-          TAG,
-          `Specified height ${height} in <amp-ad> tag is not equal to the ` +
-            `required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
-            'responsive AdSense ad units.'
-        );
-        return false;
-      }
-      if (width != '100vw') {
-        user().warn(
-          TAG,
-          `Invalid width ${width} for full-width responsive <amp-ad> tag. ` +
-            'Width must be 100vw.'
-        );
-        return false;
-      }
+    if (
+      this.responsiveState_ != null &&
+      !this.responsiveState_.isValidElement()
+    ) {
+      return false;
     }
-    return (
-      !!this.element.getAttribute('data-ad-client') && this.isAmpAdElement()
-    );
+    if (!this.element.getAttribute('data-ad-client')) {
+      return false;
+    }
+    return this.isAmpAdElement();
   }
 
   /** @override */
@@ -256,22 +181,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       .then(() =>
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
       );
-    this.autoFormat_ = this.element.getAttribute('data-auto-format') || '';
 
-    if (this.isResponsive_()) {
-      // Attempt to resize to the correct height. The width should already be
-      // 100vw, but is fixed here so that future resizes of the viewport don't
-      // affect it.
-      const viewportSize = this.getViewport().getSize();
-      return this.attemptChangeSize(
-        AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-          this.autoFormat_,
-          viewportSize,
-          this.element,
-          this.isInResponsiveHeightFixExperimentBranch()
-        ),
-        viewportSize.width
-      ).catch(() => {});
+    if (this.responsiveState_ != null) {
+      return this.responsiveState_.attemptChangeSize();
     }
     // This should happen last, as some diversion criteria rely on some of the
     // preceding logic (specifically responsive logic).
@@ -287,27 +199,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /**
-   * Selects into the inconsistent responsive height fix experiment.
-   * Note that this needs to be done before responsive sizing, so it must
-   * be separate from divertExperiments below.
-   * @return {boolean}
-   */
-  isInResponsiveHeightFixExperimentBranch() {
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [[MAX_HEIGHT_EXP.branch]]: {
-        isTrafficEligible: () => this.isResponsive_(),
-        branches: [[MAX_HEIGHT_EXP.control], [MAX_HEIGHT_EXP.experiment]],
-      },
-    });
-    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
-      addExperimentIdToElement(setExps[expName], this.element)
-    );
-    return setExps[MAX_HEIGHT_EXP.branch] == MAX_HEIGHT_EXP.experiment;
-  }
-
-  /**
    * Selects into experiments based on url fragment and/or page level diversion.
    * @visibleForTesting
    */
@@ -316,7 +207,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         !../../../src/experiments.ExperimentInfo>} */ ({
       [FORMAT_EXP]: {
         isTrafficEligible: () =>
-          !this.isResponsive_() &&
+          !this.responsiveState_ &&
           Number(this.element.getAttribute('width')) > 0 &&
           Number(this.element.getAttribute('height')) > 0,
         branches: ['21062003', '21062004'],
@@ -426,7 +317,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.ifi_,
       'rc': this.fromResumeCallback ? 1 : null,
-      'rafmt': this.getRafmtParam_(),
+      'rafmt':
+        this.responsiveState_ != null
+          ? this.responsiveState_.getRafmtParam()
+          : null,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')
@@ -613,34 +507,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onLayoutMeasure() {
     super.onLayoutMeasure();
-
-    if (this.isResponsive_() && !this.responsiveAligned_) {
-      this.responsiveAligned_ = true;
-
-      const layoutBox = this.getLayoutBox();
-
-      // Nudge into the correct horizontal position by changing side margin.
-      this.getVsync().run(
-        {
-          measure: state => {
-            // Check the parent element because amp-ad is explicitly styled to
-            // have direction: ltr.
-            state.direction = computedStyle(
-              this.win,
-              dev().assertElement(this.element.parentElement)
-            )['direction'];
-          },
-          mutate: state => {
-            if (state.direction == 'rtl') {
-              setStyle(this.element, 'marginRight', layoutBox.left, 'px');
-            } else {
-              setStyle(this.element, 'marginLeft', -layoutBox.left, 'px');
-            }
-          },
-        },
-        {direction: ''}
-      );
-    }
+    this.responsiveState_ && this.responsiveState_.alignToViewport();
   }
 
   /** @override */
@@ -680,42 +547,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return true;
     }
     return false;
-  }
-
-  /**
-   * Calculates the appropriate height for a full-width responsive ad of the
-   * given width.
-   * @param {string} autoFormat
-   * @param {!{width: number, height: number}} viewportSize
-   * @param {!Element} element <amp-ad> added by publisher.
-   * @param {boolean} isInResponsiveHeightFixExperimentBranch
-   * @return {number}
-   * @private
-   */
-  static getResponsiveHeightForContext_(
-    autoFormat,
-    viewportSize,
-    element,
-    isInResponsiveHeightFixExperimentBranch
-  ) {
-    switch (autoFormat) {
-      case ADSENSE_RSPV_TAG:
-        const minHeight = 100;
-        const maxHeight = Math.min(
-          isInResponsiveHeightFixExperimentBranch ? 500 : 300,
-          viewportSize.height
-        );
-        // We aim for a 6:5 aspect ratio.
-        const idealHeight = Math.round(viewportSize.width / 1.2);
-        return clamp(idealHeight, minHeight, maxHeight);
-      case ADSENSE_MCRSPV_TAG:
-        return getMatchedContentResponsiveHeightAndUpdatePubParams(
-          viewportSize.width,
-          element
-        );
-      default:
-        return 0;
-    }
   }
 }
 
