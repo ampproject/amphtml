@@ -112,9 +112,8 @@ exports.getFlags = function(config) {
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
     language_in: config.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
-    language_out: config.esm
-      ? 'ECMASCRIPT_2017'
-      : config.language_out || 'ECMASCRIPT5',
+    language_out: config.esm ? 'NO_TRANSPILE' :
+        (config.language_out || 'ECMASCRIPT5'),
     chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
     process_common_js_modules: true,
