@@ -20,11 +20,10 @@ import {
 } from '../../../src/async-input';
 import {PaymentsClient} from '../../../third_party/payjs/src/payjs';
 import {Services} from '../../services';
-import {closestAncestorElementBySelector, isJsonScriptTag} from '../../dom';
 import {createButtonHelper} from '../../../third_party/payjs/src/button';
 import {createCustomEvent} from '../../event-helper';
-import {formOrNullForElement} from '../../form';
 import {getServiceForDoc} from '../../service';
+import {isJsonScriptTag} from '../../dom';
 import {map} from '../../utils/object';
 import {parseUrlDeprecated} from '../../url';
 import {setStyles} from '../../style';
@@ -113,9 +112,6 @@ const IS_TEST_MODE_ = 'is-test-mode';
 /** @const {string} */
 const RENDER_ONLY_IF_PAYMENT_METHOD_PRESENT_ATTRIBUTE_ =
   'render_only_if_payment_method_present';
-
-/** @const {string} */
-const PAYMENT_DATA_INPUT_ID_ATTRIBUTE_ = 'data-payment-data-input-id';
 
 /** @const {string} */
 const PAYMENT_READY_STATUS_CHANGED = 'paymentReadyStatusChanged';
@@ -219,7 +215,10 @@ export class AmpPaymentGoogleIntegration {
       .then(data => this.renderInlinePayment_(data));
   }
 
-  /** @param {!AmpElement} element */
+  /**
+   * @param {!AmpElement} element
+   * @return {!Promise}
+   */
   startGpayButton(element) {
     this.activeElement_ = element;
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
@@ -427,6 +426,7 @@ export class AmpPaymentGoogleIntegration {
    * from the iframe to the AMP page; the @link {AmpPaymentGoogleInlineService}
    * handles messages which are responses to requests sent by the AMP page.
    *
+   * @param {!Event} event
    * @private
    */
   onMessage_(event) {
@@ -546,6 +546,7 @@ export class AmpPaymentGoogleIntegration {
   /**
    * Triggers the onPaymentSubmitError event listener
    *
+   * @param {!Error} error
    * @private
    */
   triggerOnPaymentSubmitErrorEvent_(error) {
@@ -566,44 +567,15 @@ export class AmpPaymentGoogleIntegration {
   /**
    * Constructs the error detail data for onPaymentSubmitError
    *
-   * @private
+   * @param {!Error} error
    * @return {JSONObject} error
+   * @private
    */
   getOnPaymentSubmitErrorDetails_(error) {
     if (error.statusCode == 'DEVELOPER_ERROR') {
       return {statusCode: error.statusCode, statusMessage: error.statusMessage};
     }
     return {statusCode: error.statusCode};
-  }
-
-  /**
-   * @private
-   * @return {Element}
-   */
-  getPaymentTokenInput_() {
-    const paymentTokenInputId = this.activeElement_.getAttribute(
-      PAYMENT_DATA_INPUT_ID_ATTRIBUTE_
-    );
-    const input = this.ampdoc_.win.document.getElementById(paymentTokenInputId);
-    if (!input) {
-      user().error(
-        TAG,
-        'Document must contain an element with ID ' + paymentTokenInputId
-      );
-    }
-    if (input.nodeName !== 'INPUT') {
-      user().error(
-        TAG,
-        PAYMENT_DATA_INPUT_ID_ATTRIBUTE_ +
-          ' must specify the ID of an ' +
-          '<input> element; #' +
-          paymentTokenInputId +
-          ' is a ' +
-          input.nodeName +
-          '.'
-      );
-    }
-    return input;
   }
 
   /**
@@ -719,8 +691,8 @@ export class AmpPaymentGoogleIntegration {
   }
 
   /**
-   * @potected
    * @return {boolean} if is in test mode
+   * @protected
    */
   isTestMode_() {
     const testModeAttr = this.activeElement_.getAttribute(IS_TEST_MODE_);
@@ -782,13 +754,14 @@ let MessageRequestDataDef;
  * Handles messaging with iframe. This can be mocked in tests.
  */
 export class AmpPaymentGoogleInlineService {
+  /** @constructor */
   constructor() {
     // /** @private {Map<number, MessageRequestDataDef>} */
     this.requestData_ = map();
     /** @private {number} */
     this.nextMessageId_ = 0;
     const service = this;
-    window.addEventListener('message', event => {
+    self.addEventListener('message', event => {
       const request = service.requestData_[event.data.messageId];
       if (
         request &&
