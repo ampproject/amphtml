@@ -770,7 +770,7 @@ function polyfill(win) {
       el = createElement.call(document, def.name);
     }
 
-    // Finally, if the node was already constructed, we need to reset it's
+    // Finally, if the node was already constructed, we need to reset its
     // prototype to the custom element prototype. And if it wasn't already
     // constructed, we created a new node via native createElement, and we need
     // to reset its prototype. Basically always reset the prototype.
