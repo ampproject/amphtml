@@ -15,6 +15,7 @@
  */
 
 import {computedStyle} from '../../../src/style';
+import {dev} from '../../../src/log';
 
 /**
  * Simple implementation of CircularBuffer.
@@ -221,6 +222,9 @@ export function findSentences(win, node, sentences) {
   }
   const scanner = new TextScanner(win, node);
   // Creates a circular buffer with capacity = max(size of sentence).
+  // Don't pass Math.max to reduce directly because reduce passes idx and src
+  // to the callback.
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
   /** @type {!CircularBuffer<!TextPosAndIdxDef>} */
   const buf = new CircularBuffer(
     sentences.map(sen => sen.length).reduce((x, y) => Math.max(x, y))
@@ -274,7 +278,7 @@ export function findSentences(win, node, sentences) {
       }
     }
     // This must not happen.
-    throw new Error('missing valid match');
+    dev().assert(false, 'missing valid match');
   }
   const ret = /** @type {!Array<!TextRangeDef>} */ ([]);
   for (let i = matches.length - 1; i >= 0; i--) {
