@@ -883,8 +883,8 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
   });
 
-  describe('deprecated config', () => {
-    it.only('shows the warning when using the deprecated config', () => {
+  describe('warning message', () => {
+    it('shows the warning', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
         'requestOrigin': 'https://example.com',
         'requests': {'test1': '/test1', 'test2': '/test1/test2'},
@@ -901,18 +901,64 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       });
     });
 
-    it('does not show the warning when using the deprecated config', () => {
+    it('does not always show the warning', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
         'requestOrigin': 'https://example.com',
         'requests': {'test1': '/test1', 'test2': '/test1/test2'},
       };
 
       const element = getAnalyticsTag({}, {'type': '-test-venfor'});
-
-      const spy = sandbox.spy(user);
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
 
       return new AnalyticsConfig(element).loadConfig().then(() => {
         expect(spy).callCount(0);
+      });
+    });
+
+    it('handles incorrect inputs', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://example.com',
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+        'warningMessage': {
+          'message': 'I am deprecated',
+          'configVersion': '0.1',
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+
+    it('handles remote config', () => {
+      const element = getAnalyticsTag(
+        {},
+        {'config': 'www.vendorConfigLocation.com'}
+      );
+
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+      const xhrStub = stubXhr();
+      xhrStub.returns(
+        Promise.resolve({
+          json: () => {
+            return {
+              'warningMessage':
+                'The config you are working with has been deprecated',
+            };
+          },
+        })
+      );
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(config['warningMessage']).to.be.undefined;
       });
     });
   });
