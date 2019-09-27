@@ -774,7 +774,7 @@ function polyfill(win) {
     // prototype to the custom element prototype. And if it wasn't already
     // constructed, we created a new node via native createElement, and we need
     // to reset it's prototype. Basically always reset the prototype.
-    Object.setPrototypeOf(el, constructor.prototype);
+    el.__proto__ = constructor.prototype;
     return el;
   }
   subClass(Object, HTMLElement, HTMLElementPolyfill);
