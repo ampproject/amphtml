@@ -561,7 +561,7 @@ describes.realWin(
         });
       });
 
-      it('expands trigger vars with higher precedencethan config vars', () => {
+      it('expands trigger vars with higher precedence than config vars', () => {
         const analytics = getAnalyticsTag({
           'vars': {
             'var1': 'config1',

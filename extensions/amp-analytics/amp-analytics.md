@@ -165,7 +165,7 @@ The configuration data may be specified inline or fetched remotely by specifying
 If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
 be merged together such that:
 
-1.  Remote configuration takes precedence over in-line configuration and
+1.  Remote configuration takes precedence over inline configuration and
 2.  Inline configuration takes precedence over vendor configuration.
 
 

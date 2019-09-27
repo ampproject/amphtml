@@ -20,6 +20,7 @@ import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
 import {stubService} from '../../../../testing/test-helper';
+import {user} from '../../../../src/log';
 
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
   let win;
@@ -878,6 +879,38 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
           'foobar': {},
         },
+      });
+    });
+  });
+
+  describe('deprecated config', () => {
+    it.only('shows the warning when using the deprecated config', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'warningMessage': 'I am a warning',
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+
+    it('does not show the warning when using the deprecated config', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://example.com',
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      const spy = sandbox.spy(user);
+
+      return new AnalyticsConfig(element).loadConfig().then(() => {
+        expect(spy).callCount(0);
       });
     });
   });

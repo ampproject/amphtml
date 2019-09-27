@@ -68,6 +68,7 @@ export class AnalyticsConfig {
 
     return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
       .then(this.processConfigs_.bind(this))
+      .then(this.checkWarningMessage_.bind(this))
       .then(this.addExperimentParams_.bind(this))
       .then(() => this.config_);
   }
@@ -268,6 +269,47 @@ export class AnalyticsConfig {
           }
         );
     });
+  }
+
+  /**
+   * Check to see if config has warning, display on console and
+   * remove the key.
+   * @private
+   * @return {!Promise<undefined>}
+   */
+  checkWarningMessage_() {
+    if (this.config_['warningMessage']) {
+      const TAG = this.getName_();
+      const formattedMessage = this.getFormattedWarningMessage_();
+      user().warn(TAG, formattedMessage);
+      delete this.config_['warningMessage'];
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * Build the formatted warning message that
+   * displays the vendor type and/or url.
+   * Eg: Warning from ./analytics.config.json: I am deprecated
+   * @private
+   * @return {string}
+   */
+  getFormattedWarningMessage_() {
+    const type = this.element_.getAttribute('type');
+
+    let configUrl = type
+      ? this.getVendorUrl_(type)
+      : this.element_.getAttribute('config');
+
+    if (!type && !configUrl) {
+      configUrl = 'vendor config';
+    }
+
+    const message = `Warning from${type ? ` ${type}` : ''}${
+      configUrl ? ` ${configUrl}` : ''
+    }: ${String(this.config_['warningMessage'])}`;
+
+    return message;
   }
 
   /**
