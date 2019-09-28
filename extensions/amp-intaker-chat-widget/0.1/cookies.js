@@ -41,7 +41,7 @@ export class CookiesAPI {
       this.win,
       key,
       JSON.stringify(value),
-      attributes ? attributes.expires : new Date().getTime() + 30000000
+      attributes ? attributes.expires : Date().now() + 30000000000
     );
   }
 
