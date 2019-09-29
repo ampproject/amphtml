@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 const Intaker = {};
+
 /**
  *
  * @constructor
  */
 Intaker.Widget = function() {
-  Intaker.CookiesAPI = window['CookiesApi'];
   let chatIsActive = false;
   let previewChatIsActive = false;
   const frameId = 'chatter-bot-iframe';
@@ -29,9 +30,7 @@ Intaker.Widget = function() {
   const restartBtnId = 'chatter-bot-launcher-restart';
   const INTAKER_CHAT_URL = btoa('INTAKER_CHAT_URL');
   const INTKER_CHAT_URL = btoa('INTKER_CHAT_URL'); //support for old generated widgets
-  Intaker.chatUrlHash = ''; //window[INTAKER_CHAT_URL] || window[INTKER_CHAT_URL];
   let url = ''; //atob(chatUrlHash);
-  Intaker.useQA = window['USE_INTAKER_QA'];
   let frameContainer, closeBtn, restartBtn, lunchBtn, frame;
   let api = '';
   const cssUrl =
@@ -519,19 +518,6 @@ Intaker.Widget = function() {
   this.bootstrap = amp => {
     if (amp) {
       isAMP = true;
-      for (const key in amp) {
-        Intaker[key] = amp[key];
-      }
-      // Intaker.chatUrlHash = amp.chatUrlHash;
-      // Intaker.CookiesAPI  = amp.CookiesAPI;
-      // Intaker.Templates   = amp.Templates;
-      // Intaker.useQA       = amp.useQA;
-      // Intaker.SetStyle    = amp.SetStyle;
-      // Intaker.Toggle      = amp.Toggle;
-      // Intaker.Referrer    = amp.Referrer;
-      // Intaker.eventHelper = amp.eventHelper;
-      // Intaker.postAjax    = amp.postAjax;
-      // Intaker.isMobile    = amp.isMobile;
 
       if (amp.DEV_ENV) {
         window.DEV_ENV = amp.DEV_ENV;
@@ -586,11 +572,6 @@ Intaker.Widget = function() {
     });
   };
 
-  /**
-   *
-   * @param {Object} e
-   */
-
   window.addEventListener('message', function(e) {
     const data = Intaker.eventHelper.getData(e)['INTAKER_CHAT_WIDGET'];
     if (data) {
@@ -626,4 +607,4 @@ Intaker.Widget = function() {
   // ajaxSuccessCallback('');
 };
 
-export const widget = Intaker.Widget;
+export default Intaker;

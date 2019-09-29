@@ -20,11 +20,10 @@ import {parseJson} from '../../../src/json';
 /**
  * @constructor
  */
-export class CookiesAPI {
+class CookiesAPI {
   /**
    *
    * @param {!Window} win
-   * @constructor
    */
   constructor(win) {
     this.win = win;
@@ -37,12 +36,11 @@ export class CookiesAPI {
    * @param {Object} attributes
    */
   set(key, value, attributes) {
-    setCookie(
-      this.win,
-      key,
-      JSON.stringify(value),
-      attributes ? attributes.expires : Date().now() + 30000000000
-    );
+    const expire = attributes
+      ? attributes.expires * 60000
+      : Date.now() + 30000000000;
+
+    setCookie(this.win, key, JSON.stringify(value), expire);
   }
 
   /**
@@ -68,3 +66,5 @@ export class CookiesAPI {
     return getCookie(this.win, key);
   }
 }
+
+export default CookiesAPI;

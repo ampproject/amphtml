@@ -16,12 +16,12 @@
 
 import * as eventHelper from '../../../src/event-helper';
 import {CSS} from '../../../build/amp-intaker-chat-widget-0.1.css';
-import {CookiesAPI} from './cookies';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {setStyle, toggle} from '../../../src/style';
 import {toWin} from '../../../src/types';
-import {widget} from './widget';
+import CookiesAPI from './cookies';
+import Intaker from './widget';
 
 export class AmpIntakerChatWidget extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -67,32 +67,35 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
     // this.ampdoc = getAmpdoc(this.win.document);
     // this.viewer = Services.viewerForDoc(this.ampdoc);
 
-    new widget().bootstrap({
-      chatUrlHash: this.urlHash,
-      CookiesAPI: new CookiesAPI(this.win),
+    Intaker.chatUrlHash = this.urlHash;
+    Intaker.CookiesAPI = new CookiesAPI(this.win);
+    Intaker.DEV_ENV = this.dev;
+    Intaker.useQA = this.qa;
+    Intaker.SetStyle = setStyle;
+    Intaker.Toggle = toggle;
+    Intaker.Referrer = '';
+    Intaker.eventHelper = eventHelper;
+    Intaker.postAjax = this.postAjax.bind(this);
+    Intaker.isMobile = this.isMobile;
+    new Intaker.Widget().bootstrap({
       DEV_ENV: this.dev,
-      useQA: this.qa,
-      SetStyle: setStyle,
-      Toggle: toggle,
-      Referrer: '',
-      eventHelper,
-      postAjax: this.postAjax.bind(this),
-      isMobile: this.isMobile,
     });
   }
 
   /**
    *
    * @param {string} url
-   * @param {JSONObjectDef} data
+   * @param {JsonObject} data
    * @param {function(?): undefined} success
    */
   postAjax(url, data, success) {
     this.xhr
       .fetch(url, {
+        ampCors: true,
+        bypassInterceptorForDev: false,
         method: 'POST',
         body: JSON.stringify(data),
-        headers: new Headers({
+        headers: /** @type {JsonObject} */ ({
           'X-Requested-With': 'XMLHttpRequest',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -106,8 +109,8 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
 
   // /** @override */
   // upgradeCallback() {
-  //   //If your extension provides different implementations depending on a late runtime condition (e.g. type attribute on the element, platform)
-  // }
+  //   //If your extension provides different implementations depending on a late runtime condition (e.g. type
+  // attribute on the element, platform) }
 
   // /** @override */
   // layoutCallback() {
