@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-const Intaker = {};
+/**
+ *
+ */
+function Intaker() {}
 
 /**
  *

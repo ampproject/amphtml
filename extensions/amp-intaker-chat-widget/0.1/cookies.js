@@ -17,9 +17,6 @@
 import {getCookie, setCookie} from '../../../src/cookies';
 import {parseJson} from '../../../src/json';
 
-/**
- * @constructor
- */
 class CookiesAPI {
   /**
    *
