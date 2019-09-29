@@ -164,6 +164,7 @@ function generateFunctionWhitelist() {
     'log': Math.log,
     'max': Math.max,
     'min': Math.min,
+    'pow': Math.pow,
     'random': Math.random,
     'round': Math.round,
     'sign': Math.sign,
