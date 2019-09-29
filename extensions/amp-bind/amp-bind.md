@@ -312,6 +312,7 @@ null || 'default' // 'default'
       <code>floor</code><br>
       <code>max</code><br>
       <code>min</code><br>
+      <code>pow</code><br>
       <code>random</code><br>
       <code>round</code><br>
       <code>sign</code></td>
