@@ -18,6 +18,7 @@ import * as eventHelper from '../../../src/event-helper';
 import {CSS} from '../../../build/amp-intaker-chat-widget-0.1.css';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {setStyle, toggle} from '../../../src/style';
 import {toWin} from '../../../src/types';
 import CookiesAPI from './cookies';
@@ -90,17 +91,20 @@ export class AmpIntakerChatWidget extends AMP.BaseElement {
    */
   postAjax(url, data, success) {
     this.xhr
-      .fetch(url, {
-        ampCors: true,
-        bypassInterceptorForDev: false,
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: /** @type {JsonObject} */ ({
-          'X-Requested-With': 'XMLHttpRequest',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }),
-      })
+      .fetch(
+        url,
+        /** @type {!FetchInitDef} */
+        dict({
+          'ampCors': true,
+          'method': 'POST',
+          'body': JSON.stringify(data),
+          'headers': dict({
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          }),
+        })
+      )
       .then(res => res.json())
       .then(result => {
         success(result);
