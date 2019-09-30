@@ -41,6 +41,11 @@ describes.realWin(
             return '-90 90';
           }
         },
+        hasAttribute(attr) {
+          if (attr == 'smoothing') {
+            return false;
+          }
+        },
       };
       elem.ownerDocument = {
         defaultView: env.win,

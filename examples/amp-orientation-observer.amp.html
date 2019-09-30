@@ -121,7 +121,7 @@
       <amp-orientation-observer
         beta-range="0 180"
         on="beta:clockAnim1.seekTo(percent=event.percent)"
-        layout="nodisplay">
+        layout="nodisplay" smoothing="5">
       </amp-orientation-observer>
       <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
         <div class="clock-hand rotate-1"></div>
@@ -134,7 +134,7 @@
     <div id="clock-scene-1" class="clock-scene">
       <amp-orientation-observer
         on="gamma:clockAnim2.seekTo(percent=event.percent)"
-        layout="nodisplay">
+        layout="nodisplay" smoothing="5">
       </amp-orientation-observer>
       <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
         <div class="clock-hand rotate-2"></div>
@@ -148,7 +148,7 @@
       <amp-orientation-observer
         alpha-range="0 360"
         on="alpha:clockAnim3.seekTo(percent=event.percent)"
-        layout="nodisplay">
+        layout="nodisplay" smoothing="5">
       </amp-orientation-observer>
       <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
         <div class="clock-hand rotate-3"></div>

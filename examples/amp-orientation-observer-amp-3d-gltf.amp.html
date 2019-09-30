@@ -101,7 +101,7 @@
 
   <main>
     <div>
-      <amp-orientation-observer on="gamma:model.setModelRotation(y=event.percent);" intersection-ratios="1" layout="nodisplay">
+      <amp-orientation-observer on="gamma:model.setModelRotation(y=event.percent);" intersection-ratios="1" layout="nodisplay" smoothing="5">
       </amp-orientation-observer>
       <amp-3d-gltf id="model" layout="fixed" width="320" height="240" alpha="true" antialiasing="true" autoRotate="false" enableZoom="true" src="https://webgears-3d.github.io/3d-gltf-static/m/DamagedHelmet.glb"></amp-3d-gltf>
     </div>
