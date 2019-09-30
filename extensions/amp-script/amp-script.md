@@ -80,10 +80,6 @@ If `src` points to a cross-origin URL, then a ["script hash"](#security-features
 
 #### Load JavaScript from a local element
 
-[tip type="important"]
-Using the `script` attribute is currently invalid. See [#24309](https://github.com/ampproject/amphtml/issues/24309) for details.
-[/tip]
-
 Use the `script` attribute to reference a local `script` element by `id`.
 
 ```html
@@ -167,7 +163,7 @@ The rules for mutations are as follows:
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
 
-1. Same-origin `src` must have [`Content-Type: application/json`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+1. Same-origin `src` must have [`Content-Type: application/javascript`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
 2. Cross-origin `src` and `script` must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string.
 
 Example of script hashes:
@@ -217,9 +213,13 @@ The JavaScript size and script hash requirements can be disabled during developm
 
 **src**
 
-The URL of a JS file that will be executed in the context of this `<amp-script>`.
+For executing remote scripts.
+
+The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript`.
 
 **script**
+
+For executing local scripts.
 
 The `id` of a `script[type=text/plain][target=amp-script]` element whose text content contains JS that will be executed in the context of this `<amp-script>`.
 
@@ -228,6 +228,26 @@ The `id` of a `script[type=text/plain][target=amp-script]` element whose text co
 Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Similar to the `iframe[sandbox]` attribute, the value of the attribute can either be empty to apply all restrictions, or space-separated tokens to lift particular restrictions:
 
 - `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
+
+**max-age (optional)**
+
+Requires the `script` attribute.
+
+The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing.
+
+The value of `max-age` should be chosen carefully:
+
+- A longer `max-age` increases the potential security impact of a [SXG downgrade](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#seccons-downgrades).
+
+- A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
+
+If you don't publish signed exchanges, `max-age` does nothing.
+
+**development (optional, invalid)**
+
+A boolean attribute that disables the JS size and security constraints for a more convenient development experience.
+
+This attribute is not allowed by the AMP Validator and should not be used on pages in production.
 
 **common attributes**
 
