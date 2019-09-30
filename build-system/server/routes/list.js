@@ -175,4 +175,105 @@ router.get('/infinite-scroll-state', function(req, res) {
   res.json(results);
 });
 
+router.get('/ecommerce-nested-menu', function(req, res) {
+  res.json({
+    'menu': [
+      {
+        'title': 'Clothing, Shoes, Jewelry \u0026 Watches',
+        'image': 'https://cdn.orvis.com/images/082119_w_new.jpg',
+        'content': [
+          {
+            'title': 'Clothing, Shoes, Jewelry \u0026 Watches',
+            'content': [
+              'Women',
+              'Men',
+              'Girls',
+              'Boys',
+              'Baby',
+              'Luggage',
+              'Accessories',
+            ],
+          },
+          {'title': 'More to Explore', 'content': ['Our Brands']},
+        ],
+      },
+      {
+        'title': 'Movies, Music \u0026 Games',
+        'image': 'http://dvmedia.in/images/media-corner-banner.jpg',
+        'content': [
+          {
+            'title': 'Movies, Music \u0026 Games',
+            'content': [
+              'Movies \u0026 TV',
+              'Blue-ray',
+              'CDs \u0026 Vinyl',
+              'Digital Music',
+              'Video Games',
+              'Headphones',
+              'Musical Instruments',
+              'Entertainment Collectibles',
+            ],
+          },
+        ],
+      },
+      {
+        'title': 'Sports \u0026 Outdoors',
+        'image': 'http://vivaplex.co.za/wp-content/uploads/2015/06/sports.jpg',
+        'content': [
+          {
+            'title': 'Sports',
+            'content': [
+              'Athletic Clothing',
+              'Exercise \u0026 Fitness',
+              'Hunting \u0026 Fishing',
+              'Team Sports',
+              'Sports Collectibles',
+            ],
+          },
+          {
+            'title': 'Outdoors',
+            'content': [
+              'Camping \u0026 Hiking',
+              'Cycling',
+              'Outdoor Clothing',
+              'Climbing',
+              'Accessories',
+            ],
+          },
+        ],
+      },
+      {
+        'title': 'Home, Garden \u0026 Tools',
+        'image':
+          'https://i.pinimg.com/originals/21/b5/0f/21b50faf0decf0ea59e6030438e03ccc.jpg',
+        'content': [
+          {
+            'title': 'Home, Garden \u0026 Pets',
+            'content': [
+              'Furniture',
+              'Kitchen \u0026 Dining',
+              'Bed \u0026 Bath',
+              'Garden \u0026 Outdoor',
+              'Mattresses',
+              'Lighting',
+              'Appliances',
+              'Pet Supplies',
+            ],
+          },
+          {
+            'title': 'Tools, Home Improvement',
+            'content': [
+              'Home Improvment',
+              'Power \u0026 Hand Tools',
+              'Cookware',
+              'Hardware',
+              'Smart Home',
+            ],
+          },
+        ],
+      },
+    ],
+  });
+});
+
 module.exports = router;
