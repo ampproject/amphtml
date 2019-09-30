@@ -36,7 +36,7 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "fie-css-cleanup": 1,
-  "fix-inconsistent-responsive-height-selection": 0.01,
+  "fix-inconsistent-responsive-height-selection": 0.05,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
