@@ -144,7 +144,9 @@ export class StoryAdPage {
 
   /** @return {boolean} */
   hasTimedOut() {
-    return this.timeCreated_ && Date.now() - this.timeCreated_ > TIMEOUT_LIMIT;
+    return (
+      !!this.timeCreated_ && Date.now() - this.timeCreated_ > TIMEOUT_LIMIT
+    );
   }
 
   /** @return {boolean} */
@@ -176,6 +178,10 @@ export class StoryAdPage {
         dev().assertElement(this.adDoc_.body),
         PageAttributes.IFRAME_BODY_VISIBLE
       );
+      // TODO(#24829) Remove alternate body when we have full ad network support.
+      const alternateBody = this.adDoc_.querySelector('#x-a4a-former-body');
+      alternateBody &&
+        toggleAttribute(alternateBody, PageAttributes.IFRAME_BODY_VISIBLE);
     }
   }
 
@@ -294,7 +300,7 @@ export class StoryAdPage {
     if (!this.ctaUrl_ || !ctaType) {
       user().error(
         TAG,
-        'Both CTA Type & CTA Url are required in ad-server response."'
+        'Both CTA Type & CTA Url are required in ad-server response.'
       );
       return false;
     }
