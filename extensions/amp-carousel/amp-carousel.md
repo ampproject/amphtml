@@ -24,10 +24,6 @@ limitations under the License.
 
 # amp-carousel
 
-{% call callout('Note', type='note') %}
-This is the documentation for `<amp-carousel>` version 0.2. The documentation for version 0.1 is [available on Github](https://github.com/ampproject/amphtml/tree/master/extensions/amp-carousel/0.1/amp-carousel.md).
-{% endcall %}
-
 A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be flexible and performant.
 
 <table>
@@ -221,8 +217,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
 
 ```css
 .amp-carousel-button-prev {
-  left: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff"%3E%3Cpath d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/%3E%3C/svg%3E');
 }
 ```
 
@@ -230,10 +225,11 @@ The visibility of arrows can also be controlled via styling, and a media query c
 
 ```css
 .amp-carousel-button-prev {
-  left: 5%;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff"%3E%3Cpath d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z"  /%3E%3C/svg%3E');
 }
 ```
+
+Note that the SVG content needs to have certain characters, including `<`, `>` and `#` encoded. This can be done using a tool like [SVGO](https://github.com/svg/svgo) or using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
 
 - You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
 
