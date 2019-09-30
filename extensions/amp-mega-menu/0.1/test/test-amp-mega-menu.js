@@ -68,8 +68,10 @@ describes.realWin(
       expect(doc.querySelectorAll(maskClass).length).to.equal(1);
     });
 
-    it('should add appropriate classes for each heading and content element', () => {
+    it('should add correct classes for each menu item, heading and content', () => {
       element.build();
+      const itemClass = '.i-amphtml-mega-menu-item';
+      expect(element.querySelectorAll(itemClass).length).to.equal(3);
       const headingClass = '.i-amphtml-mega-menu-heading';
       expect(element.querySelectorAll(headingClass).length).to.equal(3);
       const contentClass = '.i-amphtml-mega-menu-content';

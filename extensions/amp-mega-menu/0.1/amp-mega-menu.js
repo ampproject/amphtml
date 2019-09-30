@@ -18,6 +18,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-mega-menu-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -52,6 +53,9 @@ export class AmpMegaMenu extends AMP.BaseElement {
     /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
 
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
+
     /** @private {number|string} */
     this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
   }
@@ -67,6 +71,8 @@ export class AmpMegaMenu extends AMP.BaseElement {
       isExperimentOn(this.win, 'amp-mega-menu'),
       'Turning on the amp-mega-menu experiment is necessary to use the amp-mega-menu component.'
     );
+
+    this.action_ = Services.actionServiceForDoc(this.element);
 
     this.registerMenuItems_();
     // items may not be present after build if dynamically rendered via amp-list,
@@ -123,12 +129,17 @@ export class AmpMegaMenu extends AMP.BaseElement {
         scopedQuerySelector(item, '> button') ||
         scopedQuerySelector(item, '> [role=button]');
       heading.classList.add('i-amphtml-mega-menu-heading');
+      // haspopup value not set to menu since content can contain more than links.
       heading.setAttribute('aria-haspopup', 'dialog');
       heading.setAttribute('aria-controls', contentId);
       if (!heading.hasAttribute('tabindex')) {
         heading.setAttribute('tabindex', 0);
       }
       heading.setAttribute('aria-expanded', 'false');
+      userAssert(
+        !this.action_.hasAction(heading, 'tap', item),
+        'amp-mega-menu item headings should not have tap actions registered.'
+      );
       heading.addEventListener('click', e => this.handleHeadingClick_(e));
       heading.addEventListener('keydown', e => this.handleHeadingKeyDown_(e));
     });
@@ -162,8 +173,6 @@ export class AmpMegaMenu extends AMP.BaseElement {
       case Keys.ENTER: /* fallthrough */
       case Keys.SPACE:
         if (event.target == event.currentTarget) {
-          // Only activate if heading element was activated directly.
-          // Do not respond to key presses on its children.
           this.handleHeadingClick_(event);
         }
         return;
