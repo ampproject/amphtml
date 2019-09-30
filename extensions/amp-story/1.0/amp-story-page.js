@@ -25,6 +25,10 @@
  * </code>
  */
 import {
+  AFFILIATE_LINK_SELECTOR,
+  AmpStoryAffiliateLink,
+} from './amp-story-affiliate-link';
+import {
   Action,
   StateProperty,
   UIType,
@@ -32,7 +36,6 @@ import {
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
 import {AmpEvents} from '../../../src/amp-events';
-import {AmpStoryBlingLink, BLING_LINK_SELECTOR} from './amp-story-bling-link';
 import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
@@ -189,7 +192,7 @@ export const NavigationDirection = {
  * animation.
  * @param {!Window} win
  * @param {!Element} page
- * @param {!../../../src/service/resources-impl.ResourcesDef} resources
+ * @param {!../../../src/service/resources-interface.ResourcesInterface} resources
  * @return {function(!Element, ?UnlistenDef)}
  */
 function debounceEmbedResize(win, page, resources) {
@@ -243,7 +246,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
     const deferred = new Deferred();
@@ -586,7 +589,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   findAndPrepareEmbeddedComponents_(forceResize = false) {
     this.addClickShieldToEmbeddedComponents_();
     this.resizeInteractiveEmbeddedComponents_(forceResize);
-    this.addStylesToBlingLinks_();
+    this.buildAffiliateLinks_();
   }
 
   /**
@@ -641,12 +644,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Adds icon and pulse animation to bling links
+   * Initializes affiliate links.
    */
-  addStylesToBlingLinks_() {
-    scopedQuerySelectorAll(this.element, BLING_LINK_SELECTOR).forEach(el => {
-      AmpStoryBlingLink.build(el);
-    });
+  buildAffiliateLinks_() {
+    scopedQuerySelectorAll(this.element, AFFILIATE_LINK_SELECTOR).forEach(
+      el => {
+        const link = new AmpStoryAffiliateLink(this.win, el);
+        link.build();
+      }
+    );
   }
 
   /** @private */
@@ -871,15 +877,26 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   preloadAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      if (this.isBotUserAgent_) {
-        // No-op.
-        return Promise.resolve();
-      } else {
-        return mediaPool.preload(
-          /** @type {!./media-pool.DomElementDef} */ (mediaEl)
-        );
-      }
+      this.preloadMedia_(mediaPool, mediaEl);
     });
+  }
+
+  /**
+   * Preloads the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise<!Element>} Promise that resolves with the preloading element.
+   * @private
+   */
+  preloadMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      // No-op.
+      return Promise.resolve();
+    } else {
+      return mediaPool.preload(
+        /** @type {!./media-pool.DomElementDef} */ (mediaEl)
+      );
+    }
   }
 
   /**
@@ -1387,12 +1404,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.mediaPoolPromise_.then(mediaPool => {
       if (visible) {
-        this.registerMedia_(mediaPool, videoEl).then(() => {
-          this.playMedia_(mediaPool, videoEl);
-          if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-            this.unmuteAllMedia();
-          }
-        });
+        this.registerMedia_(mediaPool, videoEl)
+          .then(() => this.preloadMedia_(mediaPool, videoEl))
+          .then(poolVideoEl => {
+            this.playMedia_(mediaPool, poolVideoEl);
+            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+              this.unmuteAllMedia();
+            }
+          });
       } else {
         this.pauseMedia_(mediaPool, videoEl, true /** rewindToBeginning */);
         this.muteMedia_(mediaPool, videoEl);

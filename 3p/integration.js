@@ -71,6 +71,7 @@ import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
 import {adfox} from '../ads/adfox';
 import {adgeneration} from '../ads/adgeneration';
+import {adglare} from '../ads/adglare';
 import {adhese} from '../ads/adhese';
 import {adincube} from '../ads/adincube';
 import {adition} from '../ads/adition';
@@ -89,6 +90,7 @@ import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
+import {adstyle} from '../ads/adstyle';
 import {adtech} from '../ads/adtech';
 import {adthrive} from '../ads/adthrive';
 import {adunity} from '../ads/adunity';
@@ -206,6 +208,7 @@ import {pubexchange} from '../ads/pubexchange';
 import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
+import {puffnetwork} from '../ads/puffnetwork';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
@@ -223,11 +226,13 @@ import {runative} from '../ads/runative';
 import {sas} from '../ads/sas';
 import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
+import {shemedia} from '../ads/shemedia';
 import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {smi2} from '../ads/smi2';
+import {smilewanted} from '../ads/smilewanted';
 import {sogouad} from '../ads/sogouad';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
@@ -281,6 +286,7 @@ const AMP_EMBED_ALLOWED = {
   '1wo': true,
   '24smi': true,
   adsloom: true,
+  adstyle: true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -332,6 +338,7 @@ register('adbutler', adbutler);
 register('adform', adform);
 register('adfox', adfox);
 register('adgeneration', adgeneration);
+register('adglare', adglare);
 register('adhese', adhese);
 register('adincube', adincube);
 register('adition', adition);
@@ -350,6 +357,7 @@ register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
 register('adstir', adstir);
+register('adstyle', adstyle);
 register('adtech', adtech);
 register('adthrive', adthrive);
 register('adunity', adunity);
@@ -476,6 +484,7 @@ register('pubexchange', pubexchange);
 register('pubguru', pubguru);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
+register('puffnetwork', puffnetwork);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
@@ -494,11 +503,13 @@ register('runative', runative);
 register('sas', sas);
 register('sekindo', sekindo);
 register('sharethrough', sharethrough);
+register('shemedia', shemedia);
 register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('smi2', smi2);
+register('smilewanted', smilewanted);
 register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);

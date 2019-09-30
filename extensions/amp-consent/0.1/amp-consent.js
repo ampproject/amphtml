@@ -536,8 +536,7 @@ export class AmpConsent extends AMP.BaseElement {
         const ampdoc = this.getAmpDoc();
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
-        const viewer = Services.viewerForDoc(ampdoc);
-        return viewer.whenFirstVisible().then(() => {
+        return ampdoc.whenFirstVisible().then(() => {
           return Services.xhrFor(this.win)
             .fetchJson(resolvedHref, init)
             .then(res => res.json());

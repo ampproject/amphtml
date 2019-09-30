@@ -16,6 +16,7 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import * as IniLoad from '../../../../src/ini-load';
 import {
   ADX_ADY_EXP,
   EXPERIMENT_ATTRIBUTE,
@@ -65,7 +66,7 @@ function setupForAdTesting(fixture) {
 // functions.
 function noopMethods(
   impl,
-  doc,
+  ampdoc,
   sandbox,
   pageLayoutBox = {
     top: 11,
@@ -80,7 +81,7 @@ function noopMethods(
   impl.element.build = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
-  sandbox.stub(impl, 'getAmpDoc').returns(doc);
+  sandbox.stub(impl, 'getAmpDoc').returns(ampdoc);
   sandbox.stub(impl, 'getPageLayoutBox').returns(pageLayoutBox);
 }
 
@@ -281,6 +282,14 @@ describe('Google A4A utils', () => {
         })
       ).to.equal('1');
     });
+    it('should specify that this is experimentA', () => {
+      expect(
+        getAmpRuntimeTypeParameter({
+          AMP_CONFIG: {type: 'experimentA'},
+          location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+        })
+      ).to.equal('10');
+    });
     it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
       expect(
         getAmpRuntimeTypeParameter({
@@ -330,7 +339,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
             expect(url1).to.match(/ady=11/);
@@ -351,7 +360,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         const getRect = () => {
           return {'width': 100, 'height': 200};
         };
@@ -384,7 +393,7 @@ describe('Google A4A utils', () => {
           'data-experiment-id': '123,456',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, ['789', '098']).then(url1 => {
             expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
@@ -404,7 +413,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
         return fixture.addElement(elem).then(() => {
@@ -426,7 +435,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url => {
@@ -448,7 +457,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         const createElementStub = sandbox.stub(
           impl.win.document,
           'createElement'
@@ -477,7 +486,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         const createElementStub = sandbox.stub(
           impl.win.document,
           'createElement'
@@ -504,7 +513,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         impl.win.SVGElement = undefined;
         const createElementStub = sandbox.stub(
           impl.win.document,
@@ -534,7 +543,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         sandbox
           .stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
           .returns(new Promise(() => {}));
@@ -563,7 +572,7 @@ describe('Google A4A utils', () => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
@@ -579,7 +588,7 @@ describe('Google A4A utils', () => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox, {
+        noopMethods(impl, fixture.ampdoc, sandbox, {
           top: 0,
           left: 0,
           right: 0,
@@ -901,6 +910,7 @@ describe('Google A4A utils', () => {
   describe('variables for amp-analytics', () => {
     let a4a;
     let sandbox;
+    let ampdoc;
 
     beforeEach(() => {
       sandbox = sinon.sandbox;
@@ -912,7 +922,8 @@ describe('Google A4A utils', () => {
           'type': 'adsense',
           'data-amp-slot-index': '4',
         });
-        element.getAmpDoc = () => fixture.doc;
+        ampdoc = fixture.ampdoc;
+        element.getAmpDoc = () => ampdoc;
         a4a = new MockA4AImpl(element);
       });
     });
@@ -956,9 +967,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should include viewer lastVisibleTime', () => {
-      const getLastVisibleTime = () => 300;
-      const viewerStub = sandbox.stub(Services, 'viewerForDoc');
-      viewerStub.returns({getLastVisibleTime});
+      sandbox.stub(ampdoc, 'getLastVisibleTime').returns(300);
 
       const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
       expect(vars['viewerLastVisibleTime']).to.be.a('number');
@@ -1045,8 +1054,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       createResource({}, 'amp-foo'),
     ];
     sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
@@ -1071,8 +1080,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     );
     ampAdResource.element.createdCallback = true;
     sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
@@ -1102,8 +1111,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     );
     ampAdResource.element.createdCallback = true;
     sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', element =>
       element.getAttribute('foo')
     ).then(result => {

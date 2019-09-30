@@ -3,7 +3,6 @@ $category@: layout
 formats:
   - websites
   - ads
-  - email
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis.
 ---
@@ -26,7 +25,7 @@ limitations under the License.
 # amp-carousel
 
 {% call callout('Note', type='note') %}
-The is the documentation for `<amp-carousel>` version 0.2. The documentation for version 0.1 is [available on Github](https://github.com/ampproject/amphtml/tree/master/extensions/amp-carousel/0.1/amp-carousel.md).
+This is the documentation for `<amp-carousel>` version 0.2. The documentation for version 0.1 is [available on Github](https://github.com/ampproject/amphtml/tree/master/extensions/amp-carousel/0.1/amp-carousel.md).
 {% endcall %}
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be flexible and performant.
@@ -157,7 +156,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
   </tr>
   <tr>
     <td width="40%"><strong>autoplay (optional)</strong></td>
-    <td><p>Advances the slide to the next slide without user interaction.<br>
+    <td><p>Regularly advances to the next slide without user interaction. If the user manually changes slides, then autoplay is stopped.<br>
   If present without a value:</p>
 <ul>
   <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the <code>delay</code> attribute.</li>

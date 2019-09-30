@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {createCustomEvent} from '../event-helper.js';
-import {whenContentIniLoad} from '../friendly-iframe-embed';
+import {whenContentIniLoad} from '../ini-load';
 
 /**
  * Registers ini-load listener that will fire custom 'amp-ini-load' event

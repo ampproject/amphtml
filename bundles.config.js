@@ -146,6 +146,16 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
+  'amp-story-embed.js': {
+    srcDir: './src/',
+    srcFilename: 'amp-story-embed.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      minifiedName: 'amp-story-embed-v0.js',
+      includePolyfills: false,
+    },
+  },
   'amp-inabox-host.js': {
     srcDir: './ads/inabox/',
     srcFilename: 'inabox-host.js',
@@ -787,7 +797,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-sidebar',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -1120,6 +1130,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,
+  },
+  {
+    name: 'amp-minute-media-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
   },
 ];
 

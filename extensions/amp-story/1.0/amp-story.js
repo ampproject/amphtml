@@ -102,7 +102,7 @@ import {
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -419,6 +419,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStyles_();
     this.initializeListeners_();
     this.initializeListenersForDev_();
+    this.initializePageIds_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -525,6 +526,30 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Initializes page ids by deduplicating them.
+   * @private
+   */
+  initializePageIds_() {
+    const pageEls = this.element.querySelectorAll('amp-story-page');
+    const pageIds = Array.prototype.map.call(
+      pageEls,
+      el => el.id || 'default-page'
+    );
+    const idsMap = map();
+    for (let i = 0; i < pageIds.length; i++) {
+      if (idsMap[pageIds[i]] === undefined) {
+        idsMap[pageIds[i]] = 0;
+        continue;
+      }
+      user().error(TAG, `Duplicate amp-story-page ID ${pageIds[i]}`);
+      const newId = `${pageIds[i]}__${++idsMap[pageIds[i]]}`;
+      pageEls[i].id = newId;
+      pageIds[i] = newId;
+    }
+    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
+  }
+
+  /**
    * @param {!Element} styleEl
    * @private
    */
@@ -605,20 +630,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Builds the system layer DOM.
+   * @param {string} initialPageId
    * @private
    */
-  buildSystemLayer_() {
+  buildSystemLayer_(initialPageId) {
     this.updateAudioIcon_();
-
-    let pageIds;
-    if (this.pages_.length) {
-      pageIds = this.pages_.map(page => page.element.id);
-    } else {
-      const pages = this.element.querySelectorAll('amp-story-page');
-      pageIds = Array.prototype.map.call(pages, el => el.id);
-    }
-    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
-    this.element.appendChild(this.systemLayer_.build());
+    this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
 
   /** @private */
@@ -775,7 +792,7 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
-    this.viewer_.onVisibilityChanged(() => this.onVisibilityChanged_());
+    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -923,8 +940,9 @@ export class AmpStory extends AMP.BaseElement {
       this.element.querySelector('amp-story-page'),
       'Story must have at least one page.'
     );
+    const initialPageId = this.getInitialPageId_(firstPageEl);
 
-    this.buildSystemLayer_();
+    this.buildSystemLayer_(initialPageId);
     this.initializeSidebar_();
     this.setThemeColor_();
 
@@ -955,12 +973,7 @@ export class AmpStory extends AMP.BaseElement {
           });
         }
       })
-      .then(() =>
-        this.switchTo_(
-          this.getInitialPageId_(firstPageEl),
-          NavigationDirection.NEXT
-        )
-      )
+      .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
       .then(() => this.updateViewportSizeStyles_())
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
@@ -996,7 +1009,7 @@ export class AmpStory extends AMP.BaseElement {
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
     // visible.
-    if (!this.viewer_.hasBeenVisible()) {
+    if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(firstPageEl).then(() => {
         return Promise.all([
           firstPageEl.whenBuilt(),
@@ -1047,7 +1060,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   getInitialPageId_(firstPageEl) {
     const isActualPage = pageId =>
-      findIndex(this.pages_, page => page.element.id === pageId) >= 0;
+      !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
     const historyPage = /** @type {string} */ (getHistoryState(
       this.win,
       HistoryState.PAGE_ID
@@ -1755,7 +1768,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.viewer_.isVisible() ? this.resumeCallback() : this.pauseCallback();
+    this.getAmpDoc().isVisible() ? this.resumeCallback() : this.pauseCallback();
   }
 
   /**

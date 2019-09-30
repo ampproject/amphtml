@@ -585,7 +585,7 @@ class Registry {
  * @param {!Registry} registry
  */
 function installPatches(win, registry) {
-  const {Document, Element, Node, Object} = win;
+  const {Document, Element, Node, Object, document} = win;
   const docProto = Document.prototype;
   const elProto = Element.prototype;
   const nodeProto = Node.prototype;
@@ -613,7 +613,14 @@ function installPatches(win, registry) {
   // TODO(jridgewell): Can fire adoptedCallback for cross doc imports.
   docProto.importNode = function() {
     const imported = importNode.apply(this, arguments);
-    if (imported) {
+
+    // Only upgrade elements if the document that the nodes were imported into
+    // is _this_ document. If it's another document, then that document's
+    // element registry must do the upgrade.
+    // Eg, when importing from a <template>, the cloned document fragment
+    // should be upgraded. But importing from document into the <template>
+    // should not.
+    if (imported && this === document) {
       registry.upgradeSelf(imported);
       registry.upgrade(imported);
     }
@@ -651,8 +658,14 @@ function installPatches(win, registry) {
   // Patch cloneNode to immediately upgrade custom elements.
   nodeProto.cloneNode = function() {
     const cloned = cloneNode.apply(this, arguments);
-    registry.upgradeSelf(cloned);
-    registry.upgrade(cloned);
+
+    // Only upgrade elements if the cloned node belonged to _this_ document.
+    // Eg, when cloning a <template>'s content, the cloned document fragment
+    // does not belong to this document.
+    if (cloned.ownerDocument === document) {
+      registry.upgradeSelf(cloned);
+      registry.upgrade(cloned);
+    }
     return cloned;
   };
 
@@ -757,11 +770,11 @@ function polyfill(win) {
       el = createElement.call(document, def.name);
     }
 
-    // Finally, if the node was already constructed, we need to reset it's
+    // Finally, if the node was already constructed, we need to reset its
     // prototype to the custom element prototype. And if it wasn't already
     // constructed, we created a new node via native createElement, and we need
-    // to reset it's prototype. Basically always reset the prototype.
-    Object.setPrototypeOf(el, constructor.prototype);
+    // to reset its prototype. Basically always reset the prototype.
+    el.__proto__ = constructor.prototype;
     return el;
   }
   subClass(Object, HTMLElement, HTMLElementPolyfill);
@@ -817,6 +830,7 @@ function subClass(Object, superClass, subClass) {
       value: subClass,
     },
   });
+  subClass.__proto__ = superClass;
 }
 
 /**

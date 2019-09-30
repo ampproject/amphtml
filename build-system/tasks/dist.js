@@ -23,7 +23,6 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
-  compileCoreRuntime,
   compileJs,
   endBuildStep,
   hostname,
@@ -47,7 +46,6 @@ const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
-const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../internal-version');
 
@@ -94,18 +92,9 @@ function transferSrcsToTempDir() {
 }
 
 /**
- * Dist Build
- * @return {!Promise}
+ * Prints a useful help message prior to the gulp dist task
  */
-async function dist() {
-  maybeUpdatePackages();
-  const handlerProcess = createCtrlcHandler('dist');
-  process.env.NODE_ENV = 'production';
-  printNobuildHelp();
-  cleanupBuildDir();
-
-  await prebuild();
-
+function printDistHelp() {
   if (argv.fortesting) {
     let cmd = 'gulp dist --fortesting';
     if (argv.single_pass) {
@@ -114,49 +103,51 @@ async function dist() {
     printConfigHelp(cmd);
   }
   if (argv.single_pass) {
-    if (!isTravisBuild()) {
-      log(
-        green('Building all AMP extensions in'),
-        cyan('single_pass'),
-        green('mode.')
-      );
-    }
+    log(
+      green('Building all AMP extensions in'),
+      cyan('single_pass'),
+      green('mode.')
+    );
   } else {
     parseExtensionFlags();
   }
+}
+
+/**
+ * Dist Build
+ * @return {!Promise}
+ */
+async function dist() {
+  maybeUpdatePackages();
+  const handlerProcess = createCtrlcHandler('dist');
+  process.env.NODE_ENV = 'production';
+  printNobuildHelp();
+  printDistHelp();
+
+  cleanupBuildDir();
+  await prebuild();
   await compileCss();
   await compileJison();
-  await startNailgunServer(distNailgunPort, /* detached */ false);
 
-  // Single pass has its own tmp directory processing. Only do this for
-  // multipass.
-  // We need to execute this after `compileCss` and `compileJison` so that we can copy that
-  // over to the tmp directory.
+  // This is the temp directory processing for multi-pass (single-pass does its
+  // own processing). Executed after `compileCss` and `compileJison` so their
+  // results can be copied too.
   if (!argv.single_pass) {
     transferSrcsToTempDir();
   }
 
-  await Promise.all([
-    compileAllMinifiedJs(),
-    bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true),
-    buildExtensions({minify: true, watch: false}),
-    buildExperiments({minify: true, watch: false}),
-    buildLoginDone('0.1', {minify: true, watch: false}),
-    buildWebPushPublisherFiles({minify: true, watch: false}).then(
-      postBuildWebPushPublisherFilesVersion
-    ),
-    copyCss(),
-    copyParsers(),
-  ]);
-  await compileCoreRuntime(/* watch */ false, /* minify */ true);
+  await copyCss();
+  await copyParsers();
+  await bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true);
 
-  if (isTravisBuild()) {
-    // New line after all the compilation progress dots on Travis.
-    console.log('\n');
-  }
-
+  // Steps that use closure compiler. Small ones before large (parallel) ones.
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+  await buildExperiments({minify: true, watch: false});
+  await buildLoginDone('0.1', {minify: true, watch: false});
+  await buildWebPushPublisherFiles({minify: true, watch: false});
+  await compileAllMinifiedJs();
+  await buildExtensions({minify: true, watch: false});
   await stopNailgunServer(distNailgunPort);
-  await formatExtractedMessages();
 
   if (argv.esm) {
     await Promise.all([
@@ -165,6 +156,9 @@ async function dist() {
       createModuleCompatibleES5Bundle('shadow-v0.js'),
     ]);
   }
+
+  await formatExtractedMessages();
+  await generateFileListing();
 
   return exitCtrlcHandler(handlerProcess);
 }
@@ -218,9 +212,8 @@ function buildLoginDone(version, options) {
  * Build amp-web-push publisher files HTML page.
  *
  * @param {!Object} options
- * @return {!Promise}
  */
-function buildWebPushPublisherFiles(options) {
+async function buildWebPushPublisherFiles(options) {
   const distDir = 'dist/v0';
   const promises = [];
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
@@ -238,7 +231,8 @@ function buildWebPushPublisherFiles(options) {
       promises.push(p);
     });
   });
-  return Promise.all(promises);
+  await Promise.all(promises);
+  await postBuildWebPushPublisherFilesVersion();
 }
 
 async function prebuild() {
@@ -276,6 +270,39 @@ function copyParsers() {
   return fs.copy('build/parsers', 'dist/v0').then(() => {
     endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
+}
+
+/**
+ * Obtain a recursive file listing of a directory
+ * @param {string} dest - Directory to be scanned
+ * @return {Array} - All files found in directory
+ */
+async function walk(dest) {
+  const filelist = [];
+  const files = await fs.readdir(dest);
+
+  for (let i = 0; i < files.length; i++) {
+    const file = `${dest}/${files[i]}`;
+
+    fs.statSync(file).isDirectory()
+      ? Array.prototype.push.apply(filelist, await walk(file))
+      : filelist.push(file);
+  }
+
+  return filelist;
+}
+
+/**
+ * Generate a listing of all files in dist/ and save as dist/files.txt
+ */
+async function generateFileListing() {
+  const startTime = Date.now();
+  const distDir = 'dist';
+  const filesOut = `${distDir}/files.txt`;
+  fs.writeFileSync(filesOut, '');
+  const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
+  fs.writeFileSync(filesOut, files.join('\n'));
+  endBuildStep('Generated', filesOut, startTime);
 }
 
 /**
