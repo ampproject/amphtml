@@ -131,6 +131,7 @@ message AttrSpec {
   enum ValueSet {
     UNKNOWN_VALUESET = 0;  // Never used
     TEMPLATE_IDS = 1;  // <template id> values
+    AMP_SCRIPT_IDS = 2; // <script id> values, referenced by <amp-script>
   }
   optional ValueSet add_value_to_set = 25;
   optional ValueSet value_oneof_set = 26;
