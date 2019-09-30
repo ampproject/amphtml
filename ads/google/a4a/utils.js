@@ -845,6 +845,11 @@ export function getBinaryTypeNumericalCode(type) {
       'control': '1',
       'canary': '2',
       'rc': '3',
+      'experimentA': '10',
+      'experimentB': '11',
+      'experimentC': '12',
+      'nomod': '42',
+      'mod': '43',
     }[type] || null
   );
 }

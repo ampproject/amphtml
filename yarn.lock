@@ -3806,10 +3806,10 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
-codecov@3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/codecov/-/codecov-3.5.0.tgz#3d0748932f9cb41e1ad7f21fa346ef1b2b1bed47"
-  integrity sha512-/OsWOfIHaQIr7aeZ4pY0UC1PZT6kimoKFOFYFNb6wxo3iw12nRrh+mNGH72rnXxNsq6SGfesVPizm/6Q3XqcFQ==
+codecov@3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/codecov/-/codecov-3.6.1.tgz#f39fc49413445555f81f8e3ca5730992843b4517"
+  integrity sha512-IUJB6WG47nWK7o50etF8jBadxdMw7DmoQg05yIljstXFBGB6clOZsIj6iD4P82T2YaIU3qq+FFu8K9pxgkCJDQ==
   dependencies:
     argv "^0.0.2"
     ignore-walk "^3.0.1"
@@ -4943,10 +4943,10 @@ domexception@^1.0.1:
   dependencies:
     webidl-conversions "^4.0.2"
 
-dompurify@1.0.11:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-1.0.11.tgz#fe0f4a40d147f7cebbe31a50a1357539cfc1eb4d"
-  integrity sha512-XywCTXZtc/qCX3iprD1pIklRVk/uhl8BKpkTxr+ZyMVUzSUg7wkQXRBp/euJ5J5moa1QvfpvaPQVP71z1O59dQ==
+dompurify@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.0.2.tgz#42d709484aad6732db053f7db6ededea37376a8f"
+  integrity sha512-ehPzk0IiRtJQkrKqENyGHy/+jJoAmXi50fEb0bsdxzEytdb2mob5QjyQjMAXBGeBCRE+k0/MDD1caBg5X/JLBA==
 
 domutils@^1.7.0:
   version "1.7.0"
@@ -6725,46 +6725,46 @@ glogg@^1.0.0:
   dependencies:
     sparkles "^1.0.0"
 
-google-closure-compiler-java@^20190819.0.0:
-  version "20190819.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-java/-/google-closure-compiler-java-20190819.0.0.tgz#75d4a74a93441c44b2aecfb6e1278f5dd2e0d7d7"
-  integrity sha512-i8KzPJZBEF0aZWSn2vlkH0JCeQGIxBVfQaUwc2fCjPbm/v5YfpZzkj38LoMDbE95BlYsq2cPveHUNC4w85UgGw==
+google-closure-compiler-java@^20190909.0.0:
+  version "20190909.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-java/-/google-closure-compiler-java-20190909.0.0.tgz#de0211e706186631b6e419840559f8026fb08dcf"
+  integrity sha512-Cz58+hW7XxFQ8KHenfP9eH2FqvGJ1ikcSebHihgqAg1Pfy8ZzxWUBZYEwOGqV0Kzcbb1NN79n0UMd2ZNfWb19w==
 
-google-closure-compiler-js@^20190819.0.0:
-  version "20190819.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-js/-/google-closure-compiler-js-20190819.0.0.tgz#f907a4c8e50b034e583d0269fc88e555f84b6582"
-  integrity sha512-c1MrCW2sBsJ5d5judH6YnBPpxbOzts6D7XYa0KN4I97S0LjXzX5cENBlMUqMGGeSdFyjGr5FP0BxGp49k5UKxQ==
+google-closure-compiler-js@^20190909.0.0:
+  version "20190909.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-js/-/google-closure-compiler-js-20190909.0.0.tgz#0738952e17a7041949583ee1304735c56f0f344b"
+  integrity sha512-x8PcAL5H5VxkOJ/jYdAYxwdwbIvClGW7IxzyOH2NMvBNVP6AbpJ24SCODQSA0qhMbCs45JyY3TJ9s2wH2NuzUA==
 
-google-closure-compiler-linux@^20190819.0.0:
-  version "20190819.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20190819.0.0.tgz#9ad56625f84514b8f095bdabd6b6c7ebe8ae1c31"
-  integrity sha512-+ia89Ot4dPyRioLlxvkfYiISwJO+2NV7SY0Zp/KfTt9x+eJaGQ9GRIQage50d1mGkUyPmFfxsdPUePpT1QlpaA==
+google-closure-compiler-linux@^20190909.0.0:
+  version "20190909.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20190909.0.0.tgz#4c447a41da0d7fc317af785b023916ee231eef73"
+  integrity sha512-4mTUVhrkjS4d4LREqOWIwPT4lfbUJAs5nh9gTJ7vHtBxa8aE08ynGPz4zhO9gYpRb3mDVYd7BHA2dvJWtFRiDw==
 
-google-closure-compiler-osx@^20190819.0.0:
-  version "20190819.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20190819.0.0.tgz#57046952a3f520b942a35d2edaf0379b44b0c84c"
-  integrity sha512-woANg+oA2zjFebtdYTA4lLtqbOVO9yE9yy8ibGjt76FNlw0bAyxTO4z2ab4CwUNNpOeRoxZyGt9CejlCmNpxJg==
+google-closure-compiler-osx@^20190909.0.0:
+  version "20190909.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20190909.0.0.tgz#521b2ed7571c054739803d13a7785b764aab6239"
+  integrity sha512-DvIr6gd7BfIpptSfLihEGwCHKlcwssHC+pt1duagRPfmgezp8GeJvAvbZIS/+Ud77zRFz+wcwQWsTvwyZSwklQ==
 
-google-closure-compiler-windows@^20190819.0.0:
-  version "20190819.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-windows/-/google-closure-compiler-windows-20190819.0.0.tgz#acf1246d65aa9e55a7d449e08188458a9da89867"
-  integrity sha512-WglPY706c1oN03KiZF02FUWr/7M0eFoev4CQPncSihfjYXpD5E5PMKJ3ppawhzj60CQ9ceC/Omx7VN7Kp0uOQg==
+google-closure-compiler-windows@^20190909.0.0:
+  version "20190909.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-windows/-/google-closure-compiler-windows-20190909.0.0.tgz#295bb667fe830b71dde6ee88b0af4cd36cf5dbd0"
+  integrity sha512-9N+7ocubt+cNI1q2395ZZ2fQouLeAudLGpYYMLYzNPfrfENvPWX+Zbk7A0gSqUzRLn+tD0SfpRcxmvajw7o2VA==
 
-google-closure-compiler@20190819.0.0:
-  version "20190819.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20190819.0.0.tgz#20a8e06b49d1acc83e2bc64bb0c516ca5235ad57"
-  integrity sha512-5cwcui89TSFrKCa+oH5zq6F0esSHkGbWt1U2LgywakFhe5F27j/0F6NR7QyFYkBf3leDt5kPBvC2Dlc3ZwuFVA==
+google-closure-compiler@20190909.0.0:
+  version "20190909.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20190909.0.0.tgz#d5c6d68380a5234e4645d6e6a45bc5c9badfdfa0"
+  integrity sha512-Mh1IKgp72HBgEeWQ5RDZHGj0w3vhEJsIaWptqSWEr7muinBv/0Xq5g1pxCvXX7LPfSH7vL+1Indzt1OxwfTXwQ==
   dependencies:
     chalk "2.x"
-    google-closure-compiler-java "^20190819.0.0"
-    google-closure-compiler-js "^20190819.0.0"
+    google-closure-compiler-java "^20190909.0.0"
+    google-closure-compiler-js "^20190909.0.0"
     minimist "1.x"
     vinyl "2.x"
     vinyl-sourcemaps-apply "^0.2.0"
   optionalDependencies:
-    google-closure-compiler-linux "^20190819.0.0"
-    google-closure-compiler-osx "^20190819.0.0"
-    google-closure-compiler-windows "^20190819.0.0"
+    google-closure-compiler-linux "^20190909.0.0"
+    google-closure-compiler-osx "^20190909.0.0"
+    google-closure-compiler-windows "^20190909.0.0"
 
 got@^9.6.0:
   version "9.6.0"
@@ -12241,15 +12241,15 @@ react-dates@15.5.3:
     react-with-styles "=2.2.0"
     react-with-styles-interface-css "^3.0.0"
 
-react-dom@16.9.0:
-  version "16.9.0"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.9.0.tgz#5e65527a5e26f22ae3701131bcccaee9fb0d3962"
-  integrity sha512-YFT2rxO9hM70ewk9jq0y6sQk8cL02xm4+IzYBz75CQGlClQQ1Bxq0nhHF6OtSbit+AIahujJgb/CPRibFkMNJQ==
+react-dom@16.10.1:
+  version "16.10.1"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.10.1.tgz#479a6511ba34a429273c213cbc2a9ac4d296dac1"
+  integrity sha512-SmM4ZW0uug0rn95U8uqr52I7UdNf6wdGLeXDmNLfg3y5q5H9eAbdjF5ubQc3bjDyRrvdAB2IKG7X0GzSpnn5Mg==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.15.0"
+    scheduler "^0.16.1"
 
 react-externs@0.13.6:
   version "0.13.6"
@@ -12313,10 +12313,10 @@ react-with-styles@=2.2.0:
     hoist-non-react-statics "^2.3.1"
     prop-types "^15.6.0"
 
-react@16.9.0:
-  version "16.9.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.9.0.tgz#40ba2f9af13bc1a38d75dbf2f4359a5185c4f7aa"
-  integrity sha512-+7LQnFBwkiw+BobzOF6N//BdoNw0ouwmSJTEm9cglOOmsg/TMiFHZLe2sEoN5M7LgJTj9oHH0gxklfnQe66S1w==
+react@16.10.1:
+  version "16.10.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.10.1.tgz#967c1e71a2767dfa699e6ba702a00483e3b0573f"
+  integrity sha512-2bisHwMhxQ3XQz4LiJJwG3360pY965pTl/MRrZYxIBKVj4fOHoDs5aZAkYXGxDRO1Li+SyjTAilQEbOmtQJHzA==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
@@ -13037,10 +13037,10 @@ saxes@^3.1.9:
   dependencies:
     xmlchars "^2.1.1"
 
-scheduler@^0.15.0:
-  version "0.15.0"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.15.0.tgz#6bfcf80ff850b280fed4aeecc6513bc0b4f17f8e"
-  integrity sha512-xAefmSfN6jqAa7Kuq7LIJY0bwAPG3xlCj0HMEBQk1lxYiDKZscY2xJ5U/61ZTrYbmNQbXa+gc7czPkVo11tnCg==
+scheduler@^0.16.1:
+  version "0.16.1"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.16.1.tgz#a6fb6ddec12dc2119176e6eb54ecfe69a9eba8df"
+  integrity sha512-MIuie7SgsqMYOdCXVFZa8SKoNorJZUWHW8dPgto7uEHn1lX3fg2Gu0TzgK8USj76uxV7vB5eRMnZs/cdEHg+cg==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
@@ -14085,10 +14085,10 @@ ternary-stream@^3.0.0:
     merge-stream "^2.0.0"
     through2 "^3.0.1"
 
-terser@4.3.1:
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-4.3.1.tgz#09820bcb3398299c4b48d9a86aefc65127d0ed65"
-  integrity sha512-pnzH6dnFEsR2aa2SJaKb1uSCl3QmIsJ8dEkj0Fky+2AwMMcC9doMqLOQIH6wVTEKaVfKVvLSk5qxPBEZT9mywg==
+terser@4.3.4:
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-4.3.4.tgz#ad91bade95619e3434685d69efa621a5af5f877d"
+  integrity sha512-Kcrn3RiW8NtHBP0ssOAzwa2MsIRQ8lJWiBG/K7JgqPlomA3mtb2DEmp4/hrUA+Jujx+WZ02zqd7GYD+QRBB/2Q==
   dependencies:
     commander "^2.20.0"
     source-map "~0.6.1"

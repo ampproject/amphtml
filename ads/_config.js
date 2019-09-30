@@ -197,6 +197,11 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://ad.ad-stir.com',
   },
 
+  'adstyle': {
+    prefetch: 'https://widgets.ad.style/amp.js',
+    preconnect: ['https://w.ad.style'],
+  },
+
   'adtech': {
     prefetch: 'https://s.aolcdn.com/os/ads/adsWrapper3.js',
     preconnect: ['https://mads.at.atwola.com', 'https://aka-cdn.adtechus.com'],
@@ -810,6 +815,11 @@ const adConfig = jsonConfiguration({
   'pubmine': {
     prefetch: ['https://s.pubmine.com/head.js'],
     preconnect: 'https://delivery.g.switchadhub.com',
+    renderStartImplemented: true,
+  },
+
+  'puffnetwork': {
+    prefetch: 'https://static.puffnetwork.com/amp_ad.js',
     renderStartImplemented: true,
   },
 

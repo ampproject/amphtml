@@ -123,7 +123,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'build-system/dompurify.extern.js',
     'build-system/event-timing.extern.js',
     'build-system/layout-jank.extern.js',
-    'build-system/layout-shift.extern.js',
     'build-system/performance-observer.extern.js',
     'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
