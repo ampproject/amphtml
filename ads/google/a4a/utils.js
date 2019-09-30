@@ -102,13 +102,6 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 /** @const {Object} */
 const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
-/** @const {!{branch: string, control: string, experiment: string}} */
-export const ADX_ADY_EXP = {
-  branch: 'amp-ad-ff-adx-ady',
-  control: '21062398',
-  experiment: '21062593',
-};
-
 /**
  * Returns the value of some navigation timing parameter.
  * Feature detection is used for safety on browsers that do not support the
@@ -197,10 +190,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   let eids = adElement.getAttribute('data-experiment-id');
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
-  }
-  if (new RegExp(`(^|,)${ADX_ADY_EXP.experiment}($|,)`).test(eids)) {
-    slotRect.left = slotRect.left || 1;
-    slotRect.top = slotRect.top || 1;
   }
   return {
     'adf': DomFingerprint.generate(adElement),

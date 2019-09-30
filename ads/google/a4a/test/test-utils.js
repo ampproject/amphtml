@@ -17,8 +17,8 @@
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as IniLoad from '../../../../src/ini-load';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
-  ADX_ADY_EXP,
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
   ValidAdContainerTypes,
@@ -37,7 +37,6 @@ import {
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
@@ -578,38 +577,6 @@ describe('Google A4A utils', () => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
           });
         });
-      });
-    });
-
-    it('should set adx/ady as 1 with experiment enabled', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const {doc} = fixture;
-        doc.win = fixture.win;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox, {
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: 0,
-          height: 0,
-        });
-        return fixture.addElement(elem).then(() =>
-          googleAdUrl(impl, '', Date.now(), [], []).then(url => {
-            expect(url).to.match(/[&?]adx=0[&$]/);
-            expect(url).to.match(/[&?]adx=0[&$]/);
-            elem.setAttribute(
-              'data-experiment-id',
-              `123,${ADX_ADY_EXP.experiment},789`
-            );
-            return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
-              expect(url).to.match(/[&?]adx=1[&$]/);
-              expect(url).to.match(/[&?]adx=1[&$]/);
-            });
-          })
-        );
       });
     });
   });
