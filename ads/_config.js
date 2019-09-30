@@ -906,10 +906,6 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'sharethrough': {
-    renderStartImplemented: true,
-  },
-
   'shemedia': {
     prefetch: [
       'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
