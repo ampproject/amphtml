@@ -269,17 +269,13 @@ export class Extensions {
    * @private
    */
   getExtensionScript_(extensionId, includeInserted = true) {
-    const attr = this.attributeForExtension_(extensionId);
     // Always ignore <script> elements that have a mismatched RTV.
     const modifier =
       ':not([i-amphtml-loaded-new-version])' +
       (includeInserted ? '' : ':not([i-amphtml-inserted])');
-    const {head} = this.win.document;
-    const selectors = [
-      `script[${attr}="${extensionId}"]` + modifier,
-      `script[src*="/${extensionId}-"]` + modifier,
-    ];
-    return head./*OK*/ querySelector(selectors.join(','));
+    return this.win.document.head./*OK*/ querySelector(
+      `script[src*="/${extensionId}-"]` + modifier
+    );
   }
 
   /**
