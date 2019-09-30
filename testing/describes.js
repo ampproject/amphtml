@@ -506,6 +506,7 @@ class IntegrationFixture {
         ? undefined
         : this.spec.extensions.join(',');
     const ampDocType = this.spec.ampdoc || 'single';
+    const style = this.spec.frameStyle;
 
     let url =
       this.spec.amp === false
@@ -527,7 +528,10 @@ class IntegrationFixture {
         src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
       }
 
-      env.iframe = createElementWithAttributes(document, 'iframe', {src});
+      env.iframe = createElementWithAttributes(document, 'iframe', {
+        src,
+        style,
+      });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
         resolve();
