@@ -47,8 +47,10 @@ export class Toast {
     const toast = createElementWithAttributes(
       win.document,
       'div',
-      /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME}),
-      /** @type {!JsonObject} */ ({'role': TOAST_ROLE})
+      /** @type {!JsonObject} */ ({
+        'class': TOAST_CLASSNAME,
+        'role': TOAST_ROLE,
+      })
     );
 
     if (typeof childNodeOrText == 'string') {
