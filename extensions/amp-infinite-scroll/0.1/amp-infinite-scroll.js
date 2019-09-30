@@ -16,6 +16,7 @@
 
 import {Layout} from '../../../src/layout';
 import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
+import {userAssert} from '../../../src/log';
 
 export class AmpInfiniteScroll extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -26,7 +27,8 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     this.container_ = null;
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
-    this.state_ = {};
+    /** @private {?string} */
+    this.nextPageCursor_ = null;
   }
 
   createIntersectionObserver_() {
@@ -44,6 +46,12 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.nextPageCursor_ = userAssert(
+      this.element.getAttribute('next-page'),
+      'The next-page attribute is required for <amp-infinite-scroll> %s',
+      this.element
+    );
+
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(this.container_);
 
@@ -55,27 +63,37 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     });
   }
 
+  processPage_(data) {
+    this.nextPageCursor_ = data.nextPage;
+    if (!this.nextPageCursor_) {
+      this.intersectionObserver_.unobserve(this.container_);
+      return;
+    }
+    const page = new DOMParser().parseFromString(data.page, 'text/html');
+    this.mutateElement(() => {
+      const fragment = document.createDocumentFragment();
+      Array.from(page.body.children).forEach(el => {
+        fragment.appendChild(el);
+      });
+
+      this.element.parentElement.insertBefore(fragment, this.element);
+      this.intersectionObserver_.observe(this.container_);
+    });
+  }
+
+  fetchPage_() {
+    fetch(this.nextPageCursor_)
+      .then(resp => {
+        return resp.json();
+      })
+      .then(this.processPage_.bind(this));
+  }
+
   onIntersect(entries) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        this.state_.page = (this.state_.page || 0) + 1;
         this.intersectionObserver_.unobserve(this.container_);
-        fetch(`http://localhost:3000/next-page/${this.state_.page}`)
-          .then(resp => {
-            return resp.json();
-          })
-          .then(data => {
-            const ht = new DOMParser().parseFromString(data.page, 'text/html');
-            this.mutateElement(() => {
-              const fragment = document.createDocumentFragment();
-              Array.from(ht.body.children).forEach(el => {
-                fragment.appendChild(el);
-              });
-
-              this.element.parentElement.insertBefore(fragment, this.element);
-              this.intersectionObserver_.observe(this.container_);
-            });
-          });
+        this.fetchPage_();
       }
     });
   }

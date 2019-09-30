@@ -16,23 +16,26 @@
 
 import '../amp-infinite-scroll';
 
-describes.realWin('amp-infinite-scroll', {
-  amp: {
-    extensions: ['amp-infinite-scroll'],
+describes.realWin(
+  'amp-infinite-scroll',
+  {
+    amp: {
+      extensions: ['amp-infinite-scroll'],
+    },
   },
-}, env => {
+  env => {
+    let win;
+    let element;
 
-  let win;
-  let element;
+    beforeEach(() => {
+      win = env.win;
+      element = win.document.createElement('amp-infinite-scroll');
+      win.document.body.appendChild(element);
+    });
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-infinite-scroll');
-    win.document.body.appendChild(element);
-  });
-
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
-});
+    it('should have hello world when built', () => {
+      element.build();
+      expect(element.querySelector('div').textContent).to.equal('hello world');
+    });
+  }
+);
