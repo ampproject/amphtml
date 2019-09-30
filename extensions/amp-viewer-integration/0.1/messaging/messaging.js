@@ -41,10 +41,10 @@ export let RequestHandler;
  * @return {?Message}
  */
 export function parseMessage(message) {
-  if (typeof message != 'string') {
+  if (typeof message !== 'string') {
     return /** @type {Message} */ (message);
   }
-  if (message.charAt(0) != '{') {
+  if (message.charAt(0) !== '{') {
     return null;
   }
 
@@ -84,9 +84,9 @@ export class WindowPortEmulator {
   addEventListener(eventType, handler) {
     this.win.addEventListener('message', e => {
       if (
-        e.origin == this.origin_ &&
-        e.source == this.target_ &&
-        e.data['app'] == APP
+        e.origin === this.origin_ &&
+        e.source === this.target_ &&
+        e.data['app'] === APP
       ) {
         handler(e);
       }
@@ -212,9 +212,9 @@ export class Messaging {
     if (!message) {
       return;
     }
-    if (message.type == MessageType.REQUEST) {
+    if (message.type === MessageType.REQUEST) {
       this.handleRequest_(message);
-    } else if (message.type == MessageType.RESPONSE) {
+    } else if (message.type === MessageType.RESPONSE) {
       this.handleResponse_(message);
     }
   }
