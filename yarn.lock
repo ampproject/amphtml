@@ -2703,6 +2703,16 @@ babel-preset-jest@^24.9.0:
     "@babel/plugin-syntax-object-rest-spread" "^7.0.0"
     babel-plugin-jest-hoist "^24.9.0"
 
+babel-preset-modules@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/babel-preset-modules/-/babel-preset-modules-0.0.2.tgz#3ece9871bb022784a76749114e7b8bb109a6ec1e"
+  integrity sha512-YWjLfgPRGrQNPEZITnyIgsMITrPjA4ZvLS6hVyTCYgqymR0+l2P1jTd3lMHZ+hBDqAHDSGGKD20oxUmQvvvubg==
+  dependencies:
+    "@babel/plugin-proposal-unicode-property-regex" "^7.4.4"
+    "@babel/plugin-transform-dotall-regex" "^7.4.4"
+    "@babel/types" "^7.4.4"
+    esutils "^2.0.2"
+
 babel-runtime@^6.22.0, babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"

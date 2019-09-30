@@ -37,10 +37,6 @@ const noModuleTarget = {
     : ['Last 2 versions'],
 };
 
-const moduleTarget = {
-  'esmodules': true,
-};
-
 // eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
   api.cache(true);
@@ -51,14 +47,21 @@ module.exports = function(api) {
   }
   return {
     'presets': [
-      [
-        '@babel/preset-env',
-        {
-          'modules': isDist ? false : 'commonjs',
-          'loose': true,
-          'targets': esm ? moduleTarget : noModuleTarget,
-        },
-      ],
+      esm
+        ? [
+            'babel-preset-modules',
+            {
+              'loose': true,
+            },
+          ]
+        : [
+            '@babel/preset-env',
+            {
+              'modules': isDist ? false : 'commonjs',
+              'loose': true,
+              'targets': noModuleTarget,
+            },
+          ],
     ],
     'compact': false,
     'sourceType': 'module',

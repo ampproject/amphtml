@@ -36,8 +36,8 @@ exports.transpileTs = function(srcDir, srcFilename) {
   const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson(
     {
-      'module': 'ES6',
-      'target': 'ES6',
+      'module': 'esnext',
+      'target': 'esnext',
     },
     srcDir
   );

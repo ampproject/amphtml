@@ -105,14 +105,16 @@ exports.getFlags = function(config) {
     source_map_include_content: !!argv.full_sourcemaps,
     source_map_location_mapping: ['|/'],
     //new_type_inf: true,
-    language_in: 'ES6',
     // By default closure puts all of the public exports on the global, but
     // because of the wrapper modules (to mitigate async loading of scripts)
     // that we add to the js binaries this prevents other js binaries from
     // accessing the symbol, we remedy this by attaching all public exports
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
-    language_out: config.language_out || 'ES5',
+    language_in: config.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+    language_out: config.esm
+      ? 'NO_TRANSPILE'
+      : config.language_out || 'ECMASCRIPT5',
     chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
     process_common_js_modules: true,
@@ -551,6 +553,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .getFlags({
       modules: [entryModule].concat(extensions),
       writeTo: singlePassDest,
+      esm: options.esm,
       define: options.define,
       externs: options.externs,
       hideWarningsFor: options.hideWarningsFor,
