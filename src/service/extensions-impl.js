@@ -243,24 +243,18 @@ export class Extensions {
    */
   reloadExtension(extensionId) {
     // Ignore inserted script elements to prevent recursion.
-    const extension = this.getExtensionScript_(
+    const el = this.getExtensionScript_(
       extensionId,
       /* includeInserted */ false
     );
-    devAssert(extension, 'Cannot find script for extension: %s', extensionId);
-    const {el, attr} = extension;
+    devAssert(el, 'Cannot find script for extension: %s', extensionId);
     // "Disconnect" the old script element and extension record.
     const holder = this.extensions_[extensionId];
     if (holder) {
       devAssert(!holder.loaded && !holder.error);
       delete this.extensions_[extensionId];
     }
-    if (attr) {
-      el.removeAttribute(attr);
-    }
     el.setAttribute('i-amphtml-loaded-new-version', extensionId);
-    // TODO(wg-runtime): preloadExtension() calls getExtensionScript_() again
-    // to check for existence of the script, which is redundant.
     const urlParts = parseExtensionUrl(el.src);
     return this.preloadExtension(extensionId, urlParts.extensionVersion);
   }
@@ -271,27 +265,21 @@ export class Extensions {
    * @param {string} extensionId
    * @param {boolean=} includeInserted If true, includes script elements that
    *   are inserted by the runtime dynamically. Default is true.
-   * @return {?{el: !Element, attr: (string|undefined)}}
+   * @return {?Element}
    * @private
    */
   getExtensionScript_(extensionId, includeInserted = true) {
     const attr = this.attributeForExtension_(extensionId);
-    const modifier = includeInserted ? '' : ':not([i-amphtml-inserted])';
+    // Always ignore <script> elements that have a mismatched RTV.
+    const modifier =
+      ':not([i-amphtml-loaded-new-version])' +
+      (includeInserted ? '' : ':not([i-amphtml-inserted])');
     const {head} = this.win.document;
-    let el = head./*OK*/ querySelector(
-      `script[${attr}="${extensionId}"]` + modifier
-    );
-    if (el) {
-      return {el, attr};
-    }
-    // Some extensions don't have an attribute e.g. amp-viewer-integration.
-    el = head./*OK*/ querySelector(
-      `script[src*="/${extensionId}-"]` + modifier
-    );
-    if (el) {
-      return {el};
-    }
-    return null;
+    const selectors = [
+      `script[${attr}="${extensionId}"]` + modifier,
+      `script[src*="/${extensionId}-"]` + modifier,
+    ];
+    return head./*OK*/ querySelector(selectors.join(','));
   }
 
   /**

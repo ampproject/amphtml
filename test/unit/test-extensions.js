@@ -637,7 +637,6 @@ describes.sandboxed('Extensions', {}, () => {
         extensions.reloadExtension('amp-list');
       }).to.throw('Cannot find script for extension: amp-list');
 
-      expect(list.hasAttribute('custom-element')).to.be.true;
       expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
       expect(extensions.preloadExtension).to.not.be.called;
     });
@@ -650,7 +649,6 @@ describes.sandboxed('Extensions', {}, () => {
 
       extensions.reloadExtension('amp-list');
 
-      expect(list.hasAttribute('custom-element')).to.be.false;
       expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
         'amp-list'
       );
@@ -668,7 +666,6 @@ describes.sandboxed('Extensions', {}, () => {
 
       extensions.reloadExtension('amp-mustache');
 
-      expect(mustache.hasAttribute('custom-template')).to.be.false;
       expect(mustache.getAttribute('i-amphtml-loaded-new-version')).to.equal(
         'amp-mustache'
       );
@@ -790,6 +787,7 @@ describes.sandboxed('Extensions', {}, () => {
       it('should not insert when script exists in head', () => {
         const ampTestScript = doc.createElement('script');
         ampTestScript.setAttribute('custom-element', 'amp-test');
+        ampTestScript.setAttribute('i-amphtml-loaded-new-version', 'amp-test');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
@@ -802,6 +800,13 @@ describes.sandboxed('Extensions', {}, () => {
         extensions.preloadExtension('amp-test');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(2);
+        expect(
+          doc.head.querySelectorAll(
+            '[custom-element="amp-test"]' +
+              ':not([i-amphtml-loaded-new-version])' +
+              '[i-amphtml-inserted]'
+          )
         ).to.have.length(1);
         expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-test']).to.not.exist;
