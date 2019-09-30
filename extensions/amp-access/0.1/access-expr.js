@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {parser} from './access-expr-impl';
-
+import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
 
 /**
  * Evaluates access expression.
  *
  * The grammar is defined in the `access-expr-impl.jison` and compiled using
  * (Jison)[https://zaach.github.io/jison/] parser. The compilation steps are
- * described in the [access-expr-impl.md].
+ * built into the `gulp build` and `gulp dist` tasks.
  *
  * Grammar highlights:
  * - Shorthand truthy expressions are allowed, such as `field`. Truthy value
@@ -34,7 +33,7 @@ import {parser} from './access-expr-impl';
  * - Boolean logic: `X = 1 OR Y = 1`, `X = 1 AND Y = 2`, `NOT X`, `NOT (X = 1)`.
  *
  * @param {string} expr
- * @param {!JSONObjectDef} data
+ * @param {!JsonObject} data
  * @return {boolean}
  */
 export function evaluateAccessExpr(expr, data) {

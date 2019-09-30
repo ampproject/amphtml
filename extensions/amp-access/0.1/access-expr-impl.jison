@@ -13,6 +13,8 @@
 "false"                   return 'FALSE'
 "("                       return '('
 ")"                       return ')'
+"["                       return '['
+"]"                       return ']'
 "|"                       return '|'
 "<="                      return 'LTE'
 "<"                       return 'LT'
@@ -21,10 +23,11 @@
 "!="                      return 'NEQ'
 "=="                      return 'DEQ'
 "="                       return 'EQ'
-[0-9]+("."[0-9]+)?\b      return 'NUMERIC'
+\-?[0-9]+("."[0-9]+)?\b   return 'NUMERIC'
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
 \'[^\']*\'                return 'STRING'
 \"[^\"]*\"                return 'STRING'
+\.                        return 'DOT'
 .                         return 'INVALID'
 <<EOF>>                   return 'EOF'
 /lex
@@ -37,6 +40,7 @@
 %token NUMERIC
 %token TRUE FALSE
 %token NULL
+%token DOT
 %token EOF
 
 
@@ -138,20 +142,41 @@ atom:
 
 /**
  * A field reference.
- * Ex: `field1`.
+ * Ex: `obj.field1`.
  */
 field_ref:
+    field_ref DOT field_name
+      {$$ = Object.prototype.toString.call($1) == '[object Object]' && $1.hasOwnProperty($3) ? $1[$3] : null;}
+  | field_ref '[' string ']'
+      {$$ = Object.prototype.toString.call($1) == '[object Object]' && $1.hasOwnProperty($3) ? $1[$3] : null;}
+  | field_name
+      {$$ = yy[$1] !== undefined ? yy[$1] : null;}
+  ;
+
+/**
+ * A field name.
+ * Ex: `"field1"`.
+ */
+field_name:
     NAME
-      {$$ = yy[yytext] !== undefined ? yy[yytext] : null;}
+      {$$ = yytext;}
+  ;
+
+/**
+ * A string.
+ * Ex: `"A"`, `'A'`.
+ */
+string:
+    STRING
+      {$$ = yytext.substring(1, yytext.length - 1);}
   ;
 
 /**
  * A literal: string, number, boolean (true/false) or null.
- * Ex: `"A"`, `1234`, `TRUE`, `NULL`.
+ * Ex: `"A"`, `'A'`, `1234`, `TRUE`, `NULL`.
  */
 literal:
-    STRING
-      {$$ = yytext.substring(1, yytext.length - 1);}
+    string
   | NUMERIC
       {$$ = Number(yytext);}
   | TRUE

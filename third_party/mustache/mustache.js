@@ -5,16 +5,7 @@
 
 /*global define: false Mustache: true*/
 
-(function defineMustache (global, factory) {
-  if (typeof exports === 'object' && exports && typeof exports.nodeName !== 'string') {
-    factory(exports); // CommonJS
-  } else if (typeof define === 'function' && define.amd) {
-    define(['exports'], factory); // AMD
-  } else {
-    global.Mustache = {};
-    factory(Mustache); // script, wsh, asp
-  }
-}(this, function mustacheFactory (mustache) {
+function mustacheFactory (mustache) {
 
   var objectToString = Object.prototype.toString;
   var isArray = Array.isArray || function isArrayPolyfill (object) {
@@ -214,13 +205,15 @@
           throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
       } else if (type === 'name' || type === '{' || type === '&') {
         nonSpace = true;
-      } else if (type === '=') {
-        // Set the tags for the next time around.
-        // ORIGINAL CODE: compileTags(value);
-        // Fail quitely but do not allow delimiter substitutions. This is
-        // important from the security point of view so that our validators
-        // do not have to parse and interprete all of the mustache's syntax.
       }
+      // ORIGINAL CODE:
+      // else if (type === '=') {
+      //   // Set the tags for the next time around.
+      //   compileTags(value);
+      // }
+      // Fail quitely but do not allow delimiter substitutions. This is
+      // important from the security point of view so that our validators
+      // do not have to parse and interprete all of the mustache's syntax.
     }
 
     // Make sure there are no open sections when we're done.
@@ -638,7 +631,7 @@
 
   // Export the sanitizing function for unescaped values.
   mustache.sanitizeUnescaped = null;
-  mustache.setUnescapedSanitizier = function setUnescapedSanitizier (sanitizeUnescaped) {
+  mustache.setUnescapedSanitizer = function setUnescapedSanitizer(sanitizeUnescaped) {
     mustache.sanitizeUnescaped = sanitizeUnescaped;
   };
 
@@ -647,4 +640,8 @@
   mustache.Context = Context;
   mustache.Writer = Writer;
 
-}));
+};
+
+const Mustache = {};
+mustacheFactory(Mustache);
+export default Mustache;

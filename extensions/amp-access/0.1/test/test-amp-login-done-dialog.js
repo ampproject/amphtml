@@ -15,11 +15,8 @@
  */
 
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
-import * as sinon from 'sinon';
-
 
 describe('LoginDoneDialog', () => {
-
   let sandbox;
   let clock;
   let windowApi;
@@ -30,7 +27,7 @@ describe('LoginDoneDialog', () => {
   let closeButton;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox;
     clock = sandbox.useFakeTimers();
 
     messageListener = undefined;
@@ -38,12 +35,12 @@ describe('LoginDoneDialog', () => {
     windowApi = {
       close: () => {},
       navigator: {
-        language: 'fr-FR'
+        language: 'fr-FR',
       },
       location: {
         hash: '#result1',
         search: '',
-        replace: sandbox.spy()
+        replace: sandbox.spy(),
       },
       addEventListener: (type, callback) => {
         if (type == 'message') {
@@ -74,8 +71,8 @@ describe('LoginDoneDialog', () => {
             return null;
           }
           return {};
-        }
-      }
+        },
+      },
     };
     windowMock = sandbox.mock(windowApi);
     openerMock = sandbox.mock(windowApi.opener);
@@ -85,7 +82,6 @@ describe('LoginDoneDialog', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function succeed() {
@@ -93,190 +89,276 @@ describe('LoginDoneDialog', () => {
       origin: 'http://localhost:8000',
       data: {
         sentinel: 'amp',
-        type: 'result-ack'
-      }
+        type: 'result-ack',
+      },
     });
   }
 
   describe('buildStyles_', () => {
-
     it('should build complete CSS expression', () => {
       windowApi.navigator.language = 'fr-FR';
-      expect(dialog.buildStyles_()).to.equal('[lang="fr"], [lang="fr-FR"] ' +
-          '{display: block}');
+      expect(dialog.buildStyles_()).to.equal(
+        '[lang="fr"], [lang="fr-FR"] {display: block}'
+      );
     });
 
     it('should prioritize query parameter first', () => {
       windowApi.navigator.language = 'fr-FR';
       windowApi.location.search = '?hl=en-US';
-      expect(dialog.buildStyles_()).to.equal('[lang="en"], [lang="en-US"] ' +
-          '{display: block}');
+      expect(dialog.buildStyles_()).to.equal(
+        '[lang="en"], [lang="en-US"] {display: block}'
+      );
     });
 
     it('should fallback to navigator.lang if no DOM nodes exist', () => {
       windowApi.navigator.language = 'fr-FR';
       windowApi.location.search = '?hl=unk';
-      expect(dialog.buildStyles_()).to.equal('[lang="fr"], [lang="fr-FR"] ' +
-          '{display: block}');
+      expect(dialog.buildStyles_()).to.equal(
+        '[lang="fr"], [lang="fr-FR"] {display: block}'
+      );
     });
 
     it('should fallback to navigator.userLang if no DOM nodes exist', () => {
       windowApi.navigator.userLanguage = 'de-DE';
       windowApi.navigator.language = 'unk';
       windowApi.location.search = '?hl=unk';
-      expect(dialog.buildStyles_()).to.equal('[lang="de"], [lang="de-DE"] ' +
-          '{display: block}');
+      expect(dialog.buildStyles_()).to.equal(
+        '[lang="de"], [lang="de-DE"] {display: block}'
+      );
     });
 
     it('should fallback to en-US if no DOM nodes exist', () => {
       windowApi.navigator.userLanguage = 'unk';
       windowApi.navigator.language = 'unk';
       windowApi.location.search = '?hl=unk';
-      expect(dialog.buildStyles_()).to.equal('[lang="en"], [lang="en-US"] ' +
-          '{display: block}');
+      expect(dialog.buildStyles_()).to.equal(
+        '[lang="en"], [lang="en-US"] {display: block}'
+      );
     });
   });
 
-
   describe('buildLangSelector', () => {
-
     it('should enable every prefix', () => {
       expect(buildLangSelector('fr')).to.equal('[lang="fr"]');
-      expect(buildLangSelector('fr-FR')).to
-          .equal('[lang="fr"], [lang="fr-FR"]');
-      expect(buildLangSelector('fr-FR-PR')).to
-          .equal('[lang="fr"], [lang="fr-FR"], [lang="fr-FR-PR"]');
+      expect(buildLangSelector('fr-FR')).to.equal(
+        '[lang="fr"], [lang="fr-FR"]'
+      );
+      expect(buildLangSelector('fr-FR-PR')).to.equal(
+        '[lang="fr"], [lang="fr-FR"], [lang="fr-FR-PR"]'
+      );
     });
 
     it('should normalize prefixes', () => {
-      expect(buildLangSelector('FR-fr')).to
-          .equal('[lang="fr"], [lang="fr-FR"]');
+      expect(buildLangSelector('FR-fr')).to.equal(
+        '[lang="fr"], [lang="fr-FR"]'
+      );
     });
 
     it('should protect form malformed prefixes', () => {
-      expect(buildLangSelector('"fr"')).to
-          .equal('[lang="fr"]');
-      expect(buildLangSelector('\\fr\\')).to
-          .equal('[lang="fr"]');
-      expect(buildLangSelector('f r')).to
-          .equal('[lang="fr"]');
+      expect(buildLangSelector('"fr"')).to.equal('[lang="fr"]');
+      expect(buildLangSelector('\\fr\\')).to.equal('[lang="fr"]');
+      expect(buildLangSelector('f r')).to.equal('[lang="fr"]');
     });
   });
 
-
   describe('postbackOrRedirect_', () => {
-
     it('should post message to opener', () => {
-      openerMock.expects('postMessage')
-          .withExactArgs(
-              sinon.match(arg => {
-                return (arg.sentinel == 'amp' && arg.type == 'result' &&
-                    arg.result == '#result1');
-              }),
-              '*')
-          .once();
+      openerMock
+        .expects('postMessage')
+        .withExactArgs(
+          sinon.match(arg => {
+            return (
+              arg.sentinel == 'amp' &&
+              arg.type == 'result' &&
+              arg.result == '#result1'
+            );
+          }),
+          '*'
+        )
+        .once();
       const promise = dialog.postbackOrRedirect_();
       return Promise.resolve()
-          .then(() => {
-            succeed();
-            return promise;
-          })
-          .then(() => 'SUCCESS', error => 'ERROR ' + error)
-          .then(res => {
-            expect(res).to.equal('SUCCESS');
-            expect(messageListener).to.not.exist;
-          });
+        .then(() => {
+          succeed();
+          return promise;
+        })
+        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(res => {
+          expect(res).to.equal('SUCCESS');
+          expect(messageListener).to.not.exist;
+        });
     });
 
     it('should redirect to url without opener with HTTP', () => {
-      windowApi.location.search = '?url=' +
-          encodeURIComponent('http://acme.com/doc1');
+      windowApi.location.search =
+        '?url=' + encodeURIComponent('http://acme.com/doc1');
       windowApi.opener = null;
-      return dialog.postbackOrRedirect_()
-          .then(() => 'SUCCESS', error => 'ERROR ' + error)
-          .then(res => {
-            expect(res).to.equal('SUCCESS');
-            expect(windowApi.location.replace.callCount).to.equal(1);
-            expect(windowApi.location.replace.firstCall.args[0]).to.equal(
-                'http://acme.com/doc1');
-          });
+      return dialog
+        .postbackOrRedirect_()
+        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(res => {
+          expect(res).to.equal('SUCCESS');
+          expect(windowApi.location.replace).to.be.calledOnce;
+          expect(windowApi.location.replace.firstCall.args[0]).to.equal(
+            'http://acme.com/doc1'
+          );
+        });
+    });
+
+    it('should work around double-encoding of URL on redirect', () => {
+      windowApi.location.search =
+        '?url=' +
+        encodeURIComponent(encodeURIComponent('http://acme.com/doc1'));
+      windowApi.opener = null;
+      return dialog
+        .postbackOrRedirect_()
+        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(res => {
+          expect(res).to.equal('SUCCESS');
+          expect(windowApi.location.replace).to.be.calledOnce;
+          expect(windowApi.location.replace.firstCall.args[0]).to.equal(
+            'http://acme.com/doc1'
+          );
+        });
     });
 
     it('should redirect to url without opener with HTTPS', () => {
-      windowApi.location.search = '?url=' +
-          encodeURIComponent('https://acme.com/doc1');
+      windowApi.location.search =
+        '?url=' + encodeURIComponent('https://acme.com/doc1');
       windowApi.opener = null;
-      return dialog.postbackOrRedirect_()
-          .then(() => 'SUCCESS', error => 'ERROR ' + error)
-          .then(res => {
-            expect(res).to.equal('SUCCESS');
-            expect(windowApi.location.replace.callCount).to.equal(1);
-            expect(windowApi.location.replace.firstCall.args[0]).to.equal(
-                'https://acme.com/doc1');
-          });
+      return dialog
+        .postbackOrRedirect_()
+        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(res => {
+          expect(res).to.equal('SUCCESS');
+          expect(windowApi.location.replace).to.be.calledOnce;
+          expect(windowApi.location.replace.firstCall.args[0]).to.equal(
+            'https://acme.com/doc1'
+          );
+        });
+    });
+
+    it('should work around double-encoding of URL on redirect w/HTTPS', () => {
+      windowApi.location.search =
+        '?url=' +
+        encodeURIComponent(encodeURIComponent('https://acme.com/doc1'));
+      windowApi.opener = null;
+      return dialog
+        .postbackOrRedirect_()
+        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(res => {
+          expect(res).to.equal('SUCCESS');
+          expect(windowApi.location.replace).to.be.calledOnce;
+          expect(windowApi.location.replace.firstCall.args[0]).to.equal(
+            'https://acme.com/doc1'
+          );
+        });
+    });
+
+    it('should fail tripple-encoding of URL', () => {
+      windowApi.location.search =
+        '?url=' +
+        encodeURIComponent(
+          encodeURIComponent(encodeURIComponent('https://acme.com/doc1'))
+        );
+      windowApi.opener = null;
+      allowConsoleError(() => {
+        expect(() => {
+          dialog.postbackOrRedirect_();
+        }).to.throw(/URL must start with/);
+      });
+      expect(windowApi.location.replace).to.have.not.been.called;
     });
 
     it('should fail redirect to url without opener and invalid URL', () => {
-      windowApi.location.search = '?url=' +
-          encodeURIComponent(/*eslint no-script-url: 0*/ 'javascript:alert(1)');
+      windowApi.location.search =
+        '?url=' +
+        encodeURIComponent(/*eslint no-script-url: 0*/ 'javascript:alert(1)');
       windowApi.opener = null;
-      expect(() => {
-        dialog.postbackOrRedirect_();
-      }).to.throw(/URL must start with/);
-      expect(windowApi.location.replace.callCount).to.equal(0);
+      allowConsoleError(() => {
+        expect(() => {
+          dialog.postbackOrRedirect_();
+        }).to.throw(/URL must start with/);
+      });
+      expect(windowApi.location.replace).to.have.not.been.called;
     });
 
     it('should fail without opener and redirect URL', () => {
       windowApi.opener = null;
-      return dialog.postbackOrRedirect_()
-          .then(() => 'SUCCESS', error => 'ERROR ' + error)
-          .then(res => {
-            expect(res).to.match(/No opener or return location available/);
-            expect(messageListener).to.not.exist;
-          });
+      return dialog
+        .postbackOrRedirect_()
+        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(res => {
+          expect(res).to.match(/No opener or return location available/);
+          expect(messageListener).to.not.exist;
+        });
     });
 
     it('should fail with timeout', () => {
-      openerMock.expects('postMessage')
-          .withExactArgs(
-              sinon.match(arg => {
-                return (arg.sentinel == 'amp' && arg.type == 'result' &&
-                    arg.result == '#result1');
-              }),
-              '*')
-          .once();
+      openerMock
+        .expects('postMessage')
+        .withExactArgs(
+          sinon.match(arg => {
+            return (
+              arg.sentinel == 'amp' &&
+              arg.type == 'result' &&
+              arg.result == '#result1'
+            );
+          }),
+          '*'
+        )
+        .once();
       const promise = dialog.postback_();
       return Promise.resolve()
-          .then(() => {
-            clock.tick(10000);
-            return promise;
-          })
-          .then(() => 'SUCCESS', error => 'ERROR ' + error)
-          .then(res => {
-            expect(res).to.match(/Timed out/);
-            expect(messageListener).to.not.exist;
-          });
+        .then(() => {
+          clock.tick(10000);
+          return promise;
+        })
+        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(res => {
+          expect(res).to.match(/Timed out/);
+          expect(messageListener).to.not.exist;
+        });
     });
 
     it('should revert to error mode if window is not closed', () => {
       windowMock.expects('close').once();
       dialog.postbackError_ = sandbox.spy();
       dialog.postbackSuccess_();
-      expect(dialog.postbackError_.callCount).to.equal(0);
+      expect(dialog.postbackError_).to.have.not.been.called;
 
       clock.tick(10000);
-      expect(dialog.postbackError_.callCount).to.equal(1);
+      expect(dialog.postbackError_).to.be.calledOnce;
     });
 
-    it('should configure error mode', () => {
+    it('should configure error mode for "postback"', () => {
       dialog.postbackError_(new Error());
 
-      expect(windowApi.document.documentElement).to.have.class(
-          'amp-postback-error');
+      expect(windowApi.document.documentElement).to.have.class('amp-error');
+      expect(
+        windowApi.document.documentElement.getAttribute('data-error')
+      ).to.equal('postback');
       expect(closeButton.onclick).to.exist;
 
       windowMock.expects('close').once();
       closeButton.onclick();
+    });
+
+    it('should configure error mode for "close"', () => {
+      dialog.postbackError_(new Error());
+
+      expect(windowApi.document.documentElement).to.have.class('amp-error');
+      expect(
+        windowApi.document.documentElement.getAttribute('data-error')
+      ).to.equal('postback');
+      windowMock.expects('close').once();
+      closeButton.onclick();
+
+      clock.tick(3000);
+      expect(windowApi.document.documentElement).to.have.class('amp-error');
+      expect(
+        windowApi.document.documentElement.getAttribute('data-error')
+      ).to.equal('close');
     });
   });
 });

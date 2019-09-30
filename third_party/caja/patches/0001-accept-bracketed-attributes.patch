@@ -1,0 +1,11 @@
+--- a/third_party/caja/html-sanitizer.js
++++ b/third_party/caja/html-sanitizer.js
+@@ -1633,7 +1633,7 @@
+
+   var ATTR_RE = new RegExp(
+     '^\\s*' +
++    '(\\[[-.:\\w]+\\]|[-.:\\w]+)' +             // 1 = Attribute name
+-    '([-.:\\w]+)' +             // 1 = Attribute name
+     '(?:' + (
+       '\\s*(=)\\s*' +           // 2 = Is there a value?
+       '(' + (                   // 3 = Attribute value

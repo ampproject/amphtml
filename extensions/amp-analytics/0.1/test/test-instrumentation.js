@@ -14,77 +14,116 @@
  * limitations under the License.
  */
 
-import {addListener, instrumentationServiceFor} from '../instrumentation.js';
-import {adopt} from '../../../../src/runtime';
-import * as sinon from 'sinon';
+import {AmpDocFie} from '../../../../src/service/ampdoc-impl';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
+import {AnalyticsEventType, CustomEventTracker} from '../events';
+import {InstrumentationService} from '../instrumentation.js';
+import {Services} from '../../../../src/services';
 
-adopt(window);
-
-describe('instrumentation', function() {
-
-  let ins;
+describes.realWin('InstrumentationService', {amp: 1}, env => {
+  let win;
+  let ampdoc;
+  let service;
+  let root;
+  let analyticsElement;
+  let target;
 
   beforeEach(() => {
-    ins = instrumentationServiceFor(window);
+    win = env.win;
+    ampdoc = env.ampdoc;
+    service = new InstrumentationService(ampdoc);
+    root = service.root_;
+
+    analyticsElement = win.document.createElement('amp-analytics');
+    win.document.body.appendChild(analyticsElement);
+
+    target = win.document.createElement('div');
+    win.document.body.appendChild(target);
   });
 
-  it('always fires click listeners when selector is set to *', () => {
-    const el1 = document.createElement('test');
-    const fn1 = sinon.stub();
-    addListener(window, 'click', fn1, '*');
-    ins.onClick_({target: el1});
-    expect(fn1.calledOnce).to.be.true;
+  it('should create and dispose the ampdoc root', () => {
+    expect(root).to.be.ok;
+    expect(root.ampdoc).to.equal(ampdoc);
+    expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
 
-    const el2 = document.createElement('test2');
-    const fn2 = sinon.stub();
-    addListener(window, 'click', fn2, '*');
-    ins.onClick_({target: el2});
-    expect(fn1.calledTwice).to.be.true;
-    expect(fn2.calledOnce).to.be.true;
+    const stub = sandbox.stub(root, 'dispose');
+    service.dispose();
+    expect(stub).to.be.calledOnce;
   });
 
-  it('never fires click listeners when the selector is empty', () => {
-    const el1 = document.createElement('test');
-    const fn1 = sinon.stub();
-    addListener(window, 'click', fn1, '');
-    ins.onClick_({target: el1});
-    expect(fn1.callCount).to.equal(0);
+  it('should trigger a custom event on the ampdoc root', () => {
+    const tracker = root.getTracker(
+      AnalyticsEventType.CUSTOM,
+      CustomEventTracker
+    );
+    const triggerStub = sandbox.stub(tracker, 'trigger');
+    service.triggerEventForTarget(target, 'test-event', {foo: 'bar'});
+    expect(triggerStub).to.be.calledOnce;
 
-    const el2 = document.createElement('test2');
-    const fn2 = sinon.stub();
-    addListener(window, 'click', fn2);
-    ins.onClick_({target: el2});
-    expect(fn1.callCount).to.equal(0);
-    expect(fn2.callCount).to.equal(0);
+    const event = triggerStub.args[0][0];
+    expect(event.target).to.equal(target);
+    expect(event.type).to.equal('test-event');
+    expect(event.vars).to.deep.equal({foo: 'bar'});
   });
-
-  it('only fires on matching elements', () => {
-    const el1 = document.createElement('div');
-
-    const el2 = document.createElement('div');
-    el2.className = 'x';
-
-    const el3 = document.createElement('div');
-    el3.className = 'x';
-    el3.id = 'y';
-
-    const fnClassX = sinon.stub();
-    addListener(window, 'click', fnClassX, '.x');
-
-    const fnIdY = sinon.stub();
-    addListener(window, 'click', fnIdY, '#y');
-
-    ins.onClick_({target: el1});
-    expect(fnClassX.callCount).to.equal(0);
-    expect(fnIdY.callCount).to.equal(0);
-
-    ins.onClick_({target: el2});
-    expect(fnClassX.callCount).to.equal(1);
-    expect(fnIdY.callCount).to.equal(0);
-
-    ins.onClick_({target: el3});
-    expect(fnClassX.callCount).to.equal(2);
-    expect(fnIdY.callCount).to.equal(1);
-  });
-
 });
+
+describes.realWin(
+  'InstrumentationService in FIE',
+  {
+    amp: {ampdoc: 'fie'},
+  },
+  env => {
+    let win;
+    let embed;
+    let ampdoc;
+    let service;
+    let root;
+    let analyticsElement;
+    let target;
+
+    beforeEach(() => {
+      win = env.win;
+      embed = env.embed;
+      ampdoc = env.ampdoc;
+      service = new InstrumentationService(ampdoc);
+      root = service.root_;
+
+      analyticsElement = win.document.createElement('amp-analytics');
+      win.document.body.appendChild(analyticsElement);
+
+      target = win.document.createElement('div');
+      win.document.body.appendChild(target);
+    });
+
+    it('should create and reuse embed root', () => {
+      expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
+      expect(root.ampdoc).to.equal(ampdoc);
+
+      const group1 = service.createAnalyticsGroup(analyticsElement);
+      const embedRoot = group1.root_;
+      expect(embedRoot).to.not.equal(root);
+      expect(embedRoot.ampdoc).to.equal(ampdoc);
+      expect(embedRoot.embed).to.equal(embed);
+
+      // Reuse the previously created instance.
+      const analyticsElement2 = win.document.createElement('amp-analytics');
+      win.document.body.appendChild(analyticsElement2);
+      const group2 = service.createAnalyticsGroup(analyticsElement2);
+      expect(group2.root_).to.equal(embedRoot);
+    });
+
+    it('should create embed root for ampdoc-fie', () => {
+      const parentAmpdoc = ampdoc;
+      ampdoc = new AmpDocFie(win, 'https://example.org', parentAmpdoc);
+      sandbox.stub(Services, 'ampdoc').callsFake(context => {
+        if (context == win.document) {
+          return ampdoc;
+        }
+      });
+      service = new InstrumentationService(ampdoc);
+      root = service.root_;
+      expect(root).to.be.instanceof(EmbedAnalyticsRoot);
+      expect(root.ampdoc).to.equal(ampdoc);
+    });
+  }
+);

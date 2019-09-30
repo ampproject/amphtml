@@ -16,7 +16,7 @@
       background: #46b6ac;
     }
 
-    amp-user-notification button {
+    amp-user-notification .btn {
       border: none;
       border-radius: 2px;
 
@@ -66,11 +66,10 @@
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification1"
-      data-show-if-href="http://localhost:8000/api/show?timestamp=TIMESTAMP"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
+      data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP"
+      data-dismiss-href="https://example.com/api/echo/post">
       This site uses cookies to personalize content.
-      <a href="#learn-more">Learn more.</a>
-     <button on="tap:amp-user-notification1.dismiss">I accept</button>
+     <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
   </amp-user-notification>
 
   <amp-analytics data-consent-notification-id="amp-user-notification1">

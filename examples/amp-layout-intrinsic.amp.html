@@ -1,0 +1,114 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Intrinsic layout example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <style amp-custom>
+    body {
+      padding: 10px;
+    }
+  
+    .floated {
+      max-width: 1000px;
+      float: left;
+      padding: 10px;
+      background: #ccc;
+    }
+  
+    h2 {
+      clear: both
+    }
+  
+    [fallback] {
+      display: block;
+      /* @alternative */
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+    }
+  
+    .spacer {
+      height: 100vh;
+    }
+  
+    p,
+    h1,
+    h2,
+    h3 {
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Intrinsic</h3>
+    <p>Responsive amp elements that are floated behave differently to regular html element like images. Due to the way they
+      are sized they default to 0x0. With
+      <i>intrinsic</i> layout they inflate until they either reach their natural size or hit a CSS constraint like max-width.</p>
+
+    <h2>amp-fit-text</h2>
+    <div class="floated">
+      <amp-fit-text width="600" height="300" layout="intrinsic">
+        Text in an intrinsic
+        <i>amp-fit-text</i>. This text will scale as the page resizes. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        Integer fringilla arcu eu quam cursus cursus. Pellentesque aliquet elit mi. Vestibulum ultrices odio ligula. Fusce
+        quis erat pulvinar, pulvinar augue sed, consequat dolor. Suspendisse non ex at nunc viverra auctor. Quisque egestas
+        id metus vel euismod. Praesent euismod gravida augue nec consectetur. Nulla imperdiet venenatis nibh, in congue ligula
+        lobortis at. Sed et est leo. Vestibulum eget porta quam. Donec sed magna in velit faucibus semper eu vel ipsum. Suspendisse
+        lacus nisl, aliquet semper tellus et, lacinia auctor mauris. Duis in nibh quis diam viverra tempor et quis erat.
+        Aenean nec viverra turpis. Praesent quis lectus id augue ultrices venenatis. Aenean id hendrerit mi.
+      </amp-fit-text>
+    </div>
+    <h2>amp-layout</h2>
+    <div class=floated>
+      <amp-layout layout="intrinsic" width="600" height="300">
+        <div>
+          Text in an intrinsic
+          <i>div</i> using
+          <i>amp-layout</i>. This text will overflow (hidden) when the page resizes. Lorem ipsum dolor sit amet, consectetur
+          adipiscing elit. Integer fringilla arcu eu quam cursus cursus. Pellentesque aliquet elit mi. Vestibulum ultrices
+          odio ligula. Fusce quis erat pulvinar, pulvinar augue sed, consequat dolor. Suspendisse non ex at nunc viverra
+          auctor. Quisque egestas id metus vel euismod. Praesent euismod gravida augue nec consectetur. Nulla imperdiet venenatis
+          nibh, in congue ligula lobortis at. Sed et est leo. Vestibulum eget porta quam. Donec sed magna in velit faucibus
+          semper eu vel ipsum. Suspendisse lacus nisl, aliquet semper tellus et, lacinia auctor mauris. Duis in nibh quis
+          diam viverra tempor et quis erat. Aenean nec viverra turpis. Praesent quis lectus id augue ultrices venenatis.
+          Aenean id hendrerit mi.
+        </div>
+      </amp-layout>
+    </div>
+    <h2>amp-video</h2>
+    <div class=floated>
+      <amp-video id="myVideo" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" width="720"
+        height="405" layout="intrinsic" controls>
+        <div placeholder>
+          This is a placeholder
+        </div>
+        <div fallback>
+          This is a fallback
+        </div>
+      </amp-video>
+
+      <h3>Actions</h3>
+      <button on="tap:myVideo.play">Play</button>
+      <button on="tap:myVideo.pause">Pause</button>
+      <button on="tap:myVideo.mute">Mute</button>
+      <button on="tap:myVideo.unmute">Unmute</button>
+      <button on="tap:myVideo.fullscreen">Fullscreen</button>
+    </div>
+
+    <h2>amp-img</h2>
+    <h3>layout=intrinsic 1280x872 floated</h3>
+    <div class=floated>
+      <amp-img src='./img/clock.jpg' layout=intrinsic width=1280 height=872></amp-img>
+    </div>
+</body>
+
+</html>

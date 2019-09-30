@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,82 +14,430 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {assert} from '../../src/asserts';
-import {getCookie, setCookie} from '../../src/cookies';
+import '../../src/service/timer-impl';
+import {Deferred} from '../../src/utils/promise';
+import {SameSite, getCookie, setCookie} from '../../src/cookies';
+import {devAssert, initLogConstructor, setReportError} from '../../src/log';
+import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '../../src/document-state';
+import {onDocumentReady} from '../../src/document-ready';
+import {parseUrlDeprecated} from '../../src/url';
+//TODO(@cramforce): For type. Replace with forward declaration.
+import {reportError} from '../../src/error';
 
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+initLogConstructor();
+setReportError(reportError);
 
+const COOKIE_MAX_AGE_DAYS = 180; // 6 month
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
 /**
  * @typedef {{
  *   id: string,
  *   name: string,
- *   spec: string
+ *   spec: string,
+ *   cleanupIssue: string,
  * }}
  */
 let ExperimentDef;
 
 /**
- * This experiment is special because it uses a different mechanism that is
+ * These experiments are special because they use a different mechanism that is
  * interpreted by the server to deliver a different version of the AMP
  * JS libraries.
  */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
+const RC_EXPERIMENT_ID = 'rc-channel';
 
+/**
+ * The different states of the AMP_CANARY cookie.
+ */
+const AMP_CANARY_COOKIE = {
+  DISABLED: '0',
+  CANARY: '1',
+  RC: '2',
+};
 
 /** @const {!Array<!ExperimentDef>} */
-const EXPERIMENTS = [
+const CHANNELS = [
   // Canary (Dev Channel)
   {
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'DEVELOPING.md#amp-dev-channel-experimental',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/' +
+      'contributing/release-schedule.md#amp-dev-channel',
   },
-
-  // AMP Access
+  // Release Candidate (RC Channel)
   {
-    id: 'amp-access',
-    name: 'AMP Access',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access-spec.md',
-  },
-
-  // AMP Access Analytics
-  {
-    id: 'amp-access-analytics',
-    name: 'AMP Access Analytics',
-    spec: 'https://github.com/ampproject/amphtml/issues/1556',
-  },
-
-  // Dynamic CSS Classes
-  {
-    id: 'dynamic-css-classes',
-    name: 'Dynamic CSS Classes',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
+    id: RC_EXPERIMENT_ID,
+    name: 'AMP RC Channel (more info)',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/' +
+      'contributing/release-schedule.md#amp-release-candidate-rc-channel',
   },
 ];
 
+/** @const {!Array<!ExperimentDef>} */
+const EXPERIMENTS = [
+  {
+    id: 'alp',
+    name: 'Activates support for measuring incoming clicks.',
+    spec: 'https://github.com/ampproject/amphtml/issues/2934',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
+  },
+  {
+    id: 'amp-access-iframe',
+    name: 'AMP Access iframe prototype (launched)',
+    spec: 'https://github.com/ampproject/amphtml/issues/13287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13287',
+  },
+  {
+    id: 'amp-access-server',
+    name: 'AMP Access server side prototype',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
+    id: 'amp-access-jwt',
+    name: 'AMP Access JWT prototype',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
+    id: 'amp-base-carousel',
+    name: 'AMP extension for a basic, flexible, carousel',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+  },
+  {
+    id: 'amp-google-vrview-image',
+    name: 'AMP VR Viewer for images via Google VRView',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-google-vrview-image/amp-google-vrview-image.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
+  },
+  {
+    id: 'amp-sidebar-v2',
+    name: 'Updated sidebar component with nested menu and animations',
+  },
+  {
+    id: 'ampdoc-fie',
+    name: 'Install AmpDoc on FIE level',
+    spec: 'https://github.com/ampproject/amphtml/issues/22734',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22733',
+  },
+  {
+    id: 'no-auth-in-prerender',
+    name: 'Delay amp-access auth request until doc becomes visible.',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
+  },
+  {
+    id: 'amp-share-tracking',
+    name: 'AMP Share Tracking',
+    spec: 'https://github.com/ampproject/amphtml/issues/3135',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
+  },
+  {
+    id: 'amp-viz-vega',
+    name: 'AMP Visualization using Vega grammar',
+    spec: 'https://github.com/ampproject/amphtml/issues/3991',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
+  },
+  {
+    id: 'cache-service-worker',
+    name: 'AMP Cache Service Worker',
+    spec: 'https://github.com/ampproject/amphtml/issues/1199',
+  },
+  {
+    id: 'amp-lightbox-a4a-proto',
+    name: 'Allows the new lightbox experience to be used in A4A (prototype).',
+    spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
+    id: 'amp-playbuzz',
+    name: 'AMP extension for playbuzz items (launched)',
+    spec: 'https://github.com/ampproject/amphtml/issues/6106',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
+  },
+  {
+    id: 'amp-action-macro',
+    name: 'AMP extension for defining action macros',
+    spec: 'https://github.com/ampproject/amphtml/issues/19494',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
+  },
+  {
+    id: 'ios-fixed-no-transfer',
+    name: 'Remove fixed transfer from iOS 12.2 and up',
+    spec: 'https://github.com/ampproject/amphtml/issues/22220',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
+  },
+  {
+    id: 'ios-scrollable-iframe',
+    name: 'iOS 13 enables iframe scrolling per spec',
+    spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23379',
+  },
+  {
+    id: 'chunked-amp',
+    name: "Split AMP's loading phase into chunks",
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
+  },
+  {
+    id: 'pump-early-frame',
+    name:
+      'If applicable, let the browser paint the current frame before ' +
+      'executing the callback.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
+  },
+  {
+    id: 'version-locking',
+    name:
+      'Force all extensions to have the same release ' +
+      'as the main JS binary',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
+  },
+  {
+    id: 'web-worker',
+    name: 'Web worker for background processing',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+  },
+  {
+    id: 'jank-meter',
+    name: 'Display jank meter',
+  },
+  {
+    id: 'as-use-attr-for-format',
+    name: 'Use slot width/height attribute for AdSense size format',
+  },
+  {
+    id: 'input-debounced',
+    name: 'A debounced input event for AMP actions',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
+    spec: 'https://github.com/ampproject/amphtml/issues/9277',
+  },
+  {
+    id: 'disable-rtc',
+    name: 'Disable AMP RTC',
+    spec: 'https://github.com/ampproject/amphtml/issues/8551',
+  },
+  {
+    id: 'inabox-position-api',
+    name: 'Position API for foreign iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/10995',
+  },
+  {
+    id: 'amp-story',
+    name: 'Visual storytelling in AMP (v0.1)',
+    spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
+  },
+  {
+    id: 'disable-amp-story-default-media',
+    name: 'Removes default media for amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/14535',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14535',
+  },
+  {
+    id: 'amp-story-responsive-units',
+    name: 'Scale pages in amp-story by rewriting responsive units',
+    spec: 'https://github.com/ampproject/amphtml/issues/15955',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
+  },
+  {
+    id: 'amp-next-page',
+    name: 'Document level next page recommendations and infinite scroll',
+    spec: 'https://github.com/ampproject/amphtml/issues/12945',
+  },
+  {
+    id: 'amp-story-branching',
+    name: 'Allow for the go to action, advance to, and fragment parameter URLs',
+    spec: 'https://github.com/ampproject/amphtml/issues/20083',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
+  },
+  {
+    id: 'iframe-messaging',
+    name: 'Enables "postMessage" action on amp-iframe.',
+    spec: 'https://github.com/ampproject/amphtml/issues/9074',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
+  },
+  {
+    id: 'blurry-placeholder',
+    name: 'Enables a blurred image placeholder as an amp-img loads',
+    spec: 'https://github.com/ampproject/amphtml/issues/15146',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
+  },
+  {
+    id: 'amp-carousel-chrome-scroll-snap',
+    name: 'Enables scroll snap on carousel on Chrome browsers',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
+  },
+  {
+    id: 'chrome-animation-worklet',
+    name: 'Opts-in users into using AnimationWorklet',
+    cleanupIssue: 'X',
+  },
+  {
+    id: 'amp-consent-v2',
+    name: 'Enables CMP support to amp-consent component',
+    spec: 'https://github.com/ampproject/amphtml/issues/17742',
+  },
+  {
+    id: 'video-dock',
+    name: 'Enables <amp-video dock>',
+    spec: 'https://github.com/ampproject/amphtml/issues/14061',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
+  },
+  {
+    id: 'amp-list-load-more',
+    name: 'Enables load-more related functionality in amp-list',
+    spec: 'https://github.com/ampproject/amphtml/issues/13575',
+  },
+  {
+    id: 'hidden-mutation-observer',
+    name: "Enables FixedLayer's hidden-attribute mutation observer",
+    spec: 'https://github.com/ampproject/amphtml/issues/17475',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
+  },
+  {
+    id: 'inabox-viewport-friendly',
+    name:
+      'Inabox viewport measures the host window directly if ' +
+      'within friendly iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
+  },
+  {
+    id: 'fie-css-cleanup',
+    name:
+      'Experiment to prevent regression after a major CSS clean up' +
+      ' for AMPHTML Ads in FIE rendering mode',
+    spec: 'https://github.com/ampproject/amphtml/issues/22418',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
+  },
+  {
+    id: 'inabox-no-chunking',
+    name: 'Experiment to disable startup chunking in inabox runtime',
+    spec: 'https://github.com/ampproject/amphtml/issues/23573',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23573',
+  },
+  {
+    id: 'amp-user-location',
+    name:
+      'Expose the browser geolocation API for latitude and longitude ' +
+      'access after user interaction and approval',
+    spec: 'https://github.com/ampproject/amphtml/issues/8929',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
+  },
+  {
+    id: 'untrusted-xhr-interception',
+    name:
+      'Enable "xhrInterceptor" capability for untrusted viewers. ' +
+      'For development use only',
+    spec: 'N/A',
+    cleanupIssue: 'N/A',
+  },
+  {
+    id: 'macro-after-long-task',
+    name:
+      'If applicable, convert remaining micro tasks to the next macro ' +
+      ' tasks if a previous micro task execution took too long',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
+  },
+  {
+    id: 'pausable-iframe',
+    name: 'Use iframe freezing instead of recreating iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24110',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
+  },
+  {
+    id: 'adsense-ad-size-optimization',
+    name:
+      'Per publisher server side settings for changing the ad size ' +
+      'to responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/23568',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
+  },
+  {
+    id: 'fix-inconsistent-responsive-height-selection',
+    name: 'Fix inconsistent responsive height selection.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24166',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
+  },
+  {
+    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
+    name: 'Use amp-ad responsive to make amp auto ads responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24168',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
+  },
+];
+
+if (getMode().localDev) {
+  EXPERIMENTS.forEach(experiment => {
+    devAssert(
+      experiment.cleanupIssue,
+      `experiment ${experiment.name} must have a \`cleanupIssue\` field.`
+    );
+  });
+}
 
 /**
  * Builds the expriments tbale.
  */
 function build() {
-  const table = document.getElementById('experiments-table');
-  EXPERIMENTS.forEach(function(experiment) {
-    table.appendChild(buildExperimentRow(experiment));
+  const {host} = window.location;
+
+  const subdomain = document.getElementById('subdomain');
+  subdomain.textContent = host;
+
+  // #redirect contains UI that generates a subdomain experiments page link
+  // given a "google.com/amp/..." viewer URL.
+  const redirect = document.getElementById('redirect');
+  const input = redirect.querySelector('input');
+  const button = redirect.querySelector('button');
+  const anchor = redirect.querySelector('a');
+  button.addEventListener('click', function() {
+    let urlString = input.value.trim();
+    // Avoid protocol-less urlString from being parsed as a relative URL.
+    const hasProtocol = /^https?:\/\//.test(urlString);
+    if (!hasProtocol) {
+      urlString = 'https://' + urlString;
+    }
+    const url = parseUrlDeprecated(urlString);
+    if (url) {
+      const subdomain = url.hostname.replace(/\./g, '-');
+      const href = `https://${subdomain}.cdn.ampproject.org/experiments.html`;
+      anchor.href = href;
+      anchor.textContent = href;
+    }
   });
+
+  const channelsTable = document.getElementById('channels-table');
+  CHANNELS.forEach(function(experiment) {
+    channelsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  const experimentsTable = document.getElementById('experiments-table');
+  EXPERIMENTS.forEach(function(experiment) {
+    experimentsTable.appendChild(buildExperimentRow(experiment));
+  });
+
+  if (host === 'cdn.ampproject.org') {
+    const experimentsDesc = document.getElementById('experiments-desc');
+    experimentsDesc.setAttribute('hidden', '');
+    experimentsTable.setAttribute('hidden', '');
+  } else {
+    redirect.setAttribute('hidden', '');
+  }
 }
 
-
 /**
- * Builds one row of the experiments table.
+ * Builds one row in the channel or experiments table.
  * @param {!ExperimentDef} experiment
+ * @return {*} TODO(#23582): Specify return type
  */
 function buildExperimentRow(experiment) {
   const tr = document.createElement('tr');
@@ -115,17 +463,23 @@ function buildExperimentRow(experiment) {
   buttonOn.textContent = 'On';
   button.appendChild(buttonOn);
 
+  const buttonDefault = document.createElement('div');
+  buttonDefault.classList.add('default');
+  buttonDefault.textContent = 'Default on';
+  button.appendChild(buttonDefault);
+
   const buttonOff = document.createElement('div');
   buttonOff.classList.add('off');
   buttonOff.textContent = 'Off';
   button.appendChild(buttonOff);
 
-  button.addEventListener('click', toggleExperiment_.bind(null, experiment.id,
-      experiment.name, undefined));
+  button.addEventListener(
+    'click',
+    toggleExperiment_.bind(null, experiment.id, experiment.name, undefined)
+  );
 
   return tr;
 }
-
 
 /**
  * If link is available, builds the anchor. Otherwise, it'd return a basic span.
@@ -146,16 +500,14 @@ function buildLinkMaybe(text, link) {
   return element;
 }
 
-
 /**
  * Updates states of all experiments in the table.
  */
 function update() {
-  EXPERIMENTS.forEach(function(experiment) {
+  CHANNELS.concat(EXPERIMENTS).forEach(function(experiment) {
     updateExperimentRow(experiment);
   });
 }
-
 
 /**
  * Updates the state of a single experiment.
@@ -166,9 +518,12 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  tr.setAttribute('data-on', isExperimentOn_(experiment.id) ? 1 : 0);
+  let state = isExperimentOn_(experiment.id) ? 1 : 0;
+  if (self.AMP_CONFIG[experiment.id]) {
+    state = 'default';
+  }
+  tr.setAttribute('data-on', state);
 }
-
 
 /**
  * Returns whether the experiment is on or off.
@@ -177,30 +532,60 @@ function updateExperimentRow(experiment) {
  */
 function isExperimentOn_(id) {
   if (id == CANARY_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_CANARY') == '1';
+    return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.CANARY;
+  } else if (id == RC_EXPERIMENT_ID) {
+    return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.RC;
   }
-  return isExperimentOn(window, id);
+  return isExperimentOn(window, /*OK*/ id);
 }
 
+/**
+ * Opts in to / out of the "canary" or "rc" runtime types by setting the
+ * AMP_CANARY cookie.
+ * @param {string} cookieState One of AMP_CANARY_COOKIE.{DISABLED|CANARY|RC}
+ */
+function setAmpCanaryCookie_(cookieState) {
+  const validUntil =
+    cookieState != AMP_CANARY_COOKIE.DISABLED
+      ? Date.now() + COOKIE_MAX_AGE_MS
+      : 0;
+  const cookieOptions = {
+    // Set explicit domain, so the cookie gets sent to sub domains.
+    domain: location.hostname,
+    allowOnProxyOrigin: true,
+    // Make sure the cookie is available for the script loads coming from
+    // other domains. Chrome's default of LAX would otherwise prevent it
+    // from being sent.
+    sameSite: SameSite.NONE,
+  };
+  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
+  // Reflect default experiment state.
+  self.location.reload();
+}
 
 /**
  * Toggles the experiment.
  * @param {string} id
+ * @param {string} name
  * @param {boolean=} opt_on
  */
 function toggleExperiment_(id, name, opt_on) {
   const currentlyOn = isExperimentOn_(id);
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
-  const confirmMessage = on ?
-      'Do you really want to activate the AMP experiment' :
-      'Do you really want to deactivate the AMP experiment';
+  const confirmMessage = on
+    ? 'Do you really want to activate the AMP experiment'
+    : 'Do you really want to deactivate the AMP experiment';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = new Date().getTime() +
-          COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-      setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
+      setAmpCanaryCookie_(
+        on ? AMP_CANARY_COOKIE.CANARY : AMP_CANARY_COOKIE.DISABLED
+      );
+    } else if (id == RC_EXPERIMENT_ID) {
+      setAmpCanaryCookie_(
+        on ? AMP_CANARY_COOKIE.RC : AMP_CANARY_COOKIE.DISABLED
+      );
     } else {
       toggleExperiment(window, id, on);
     }
@@ -208,17 +593,18 @@ function toggleExperiment_(id, name, opt_on) {
   });
 }
 
-
 /**
  * Shows confirmation and calls callback if it's approved.
  * @param {string} message
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = assert(document.getElementById('popup-container'));
-  const messageElement = assert(document.getElementById('popup-message'));
-  const confirmButton = assert(document.getElementById('popup-button-ok'));
-  const cancelButton = assert(document.getElementById('popup-button-cancel'));
+  const container = devAssert(document.getElementById('popup-container'));
+  const messageElement = devAssert(document.getElementById('popup-message'));
+  const confirmButton = devAssert(document.getElementById('popup-button-ok'));
+  const cancelButton = devAssert(
+    document.getElementById('popup-button-cancel')
+  );
   const unlistenSet = [];
   const closePopup = affirmative => {
     container.classList.remove('show');
@@ -229,16 +615,49 @@ function showConfirmation_(message, callback) {
   };
 
   messageElement.textContent = message;
-  unlistenSet.push(listenOnce(confirmButton, 'click',
-      () => closePopup(true)));
-  unlistenSet.push(listenOnce(cancelButton, 'click',
-      () => closePopup(false)));
+  unlistenSet.push(listenOnce(confirmButton, 'click', () => closePopup(true)));
+  unlistenSet.push(listenOnce(cancelButton, 'click', () => closePopup(false)));
   container.classList.add('show');
 }
 
+/**
+ * Loads the AMP_CONFIG objects from whatever the v0.js is that the
+ * user has (depends on whether they opted into canary or RC), so that
+ * experiment state can reflect the default activated experiments.
+ * @return {*} TODO(#23582): Specify return type
+ */
+function getAmpConfig() {
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
+  const xhr = new XMLHttpRequest();
+  xhr.addEventListener('load', () => {
+    resolve(xhr.responseText);
+  });
+  xhr.addEventListener('error', () => {
+    reject(new Error(xhr.statusText));
+  });
+  // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+  xhr.open('GET', '/v0.js?' + Math.random(), true);
+  xhr.send(null);
+  return promise
+    .then(text => {
+      const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
+      if (!match) {
+        throw new Error("Can't find AMP_CONFIG in: " + text);
+      }
+      // Setting global var to make standard experiment code just work.
+      return (self.AMP_CONFIG = JSON.parse(match[1]));
+    })
+    .catch(error => {
+      console./*OK*/ error('Error fetching AMP_CONFIG', error);
+      return {};
+    });
+}
 
 // Start up.
-onDocumentReady(document, () => {
-  build();
-  update();
+getAmpConfig().then(() => {
+  onDocumentReady(document, () => {
+    build();
+    update();
+  });
 });

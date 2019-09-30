@@ -19,10 +19,9 @@ Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; qui
 - If you can make it not-iframe-based that is much better. (See e.g. the pinterest embed). We will always ask to do this first. E.g. adding a CORS endpoint to your server might make this possible.
 - Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md).
 - All JS on container page must be open source and bundled with AMP.
-- Direct iframe embeds not using our 3p iframe mechanism (used e.g. for ads) are preferred.
 - JavaScript loaded into iframe should be reasonable with respect to functionality.
 - Use the `sandbox` attribute on iframe if possible.
-- Provide unit and integration tests.
+- Provide unit and [integration tests](#adding-proper-integration-tests).
 - Embeds that require browser plugins, such as Flash, Java, ActiveX, Silverlight, etc. are disallowed unless necessary. Special review required. We cannot currently see a reason why these should be allowed.
 
 ## Ads
@@ -30,12 +29,12 @@ Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; qui
 - We welcome pull requests by all ad networks for inclusion into AMP.
 - All ads and all sub resources must be served from HTTPS.
 - Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md).
-- Direct iframe embeds not using our 3p iframe mechanism (used by most ads) are preferred.
+- For display ads support, always implement amp-ad and instruct your client to use your amp-ad implementation instead of using amp-iframe. Althought amp-iframe will render the ad, ad clicks will break and viewability information is not available.
 - Providing an optional image only zero-iframe embed is appreciated.
 - Support viewability and other metrics/instrumentation as supplied by AMP (via postMessage API)
 - Try to keep overall iframe count at one per ad. Explain why more are needed.
 - Share JS between iframes on the same page.
-- Provide unit and integration tests.
+- Provide unit and [integration tests](#adding-proper-integration-tests).
 - Provide test accounts for inclusion in our open source repository for integration tests.
 
 The following aren't hard requirements, but are performance optimizations we should strive to incorporate. Please provide a timeline as to when you expect to follow these guidelines:
@@ -60,4 +59,11 @@ Review the [ads/README](../ads/README.md) for further details on ad integration.
 - JavaScript can not be involved with the initiation of font loading.
 - Font loading gets controlled (but not initiated) by [`<amp-font>`](https://github.com/ampproject/amphtml/issues/648).
 - AMP by default does not allow inclusion of external stylesheets, but it is happy to whitelist URL prefixes of font providers for font inclusion via link tags. These link tags and their fonts must be served via HTTPS.
-- If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist. AMP proxy sends the appropriate referrer header such as "https://cdn.ampproject.org".
+- If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist. AMP proxy sends the appropriate referrer header such as `https://cdn.ampproject.org` and `https://amp.cloudflare.com`.
+
+# Adding proper integration tests
+You should ensure there are integration tests for your extension. These should be added to the AMP
+repo where it makes sense. In some cases this won't be possible because it relies on bringing up
+third-party infrastructure. In these cases you should maintain testing for the extension on your
+infrastructure against both production AMP and [canary](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-dev-channel).
+Upon any monitored failures, an escalation can be raised in [regular AMP communication channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).

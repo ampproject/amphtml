@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "local/no-global": 2
+  }
+}

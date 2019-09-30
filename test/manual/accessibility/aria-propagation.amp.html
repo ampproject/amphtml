@@ -1,0 +1,62 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>AMP #0</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+    <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org//amp-video-0.1.js"></script>
+    <style amp-custom>
+        body {
+            max-width: 527px;
+            font-family: 'Questrial', Arial;
+        }
+
+        amp-anim {
+            margin: 30px;
+            padding: 30px;
+            border: 10px solid red;
+        }
+    </style>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+<h1>Testing aria attributes propagations</h1>
+
+<amp-anim aria-label="Three white and orange kittens playing in a box" layout="responsive"
+        src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no" width="400" height="300">
+</amp-anim>
+
+<h1 id="flight-of-the-valkyries">Wilhelm Richard Wagner - Flight of the Valkyries</h1>
+<amp-audio width="300" controls aria-labelledby="flight-of-the-valkyries">
+    <source src="/examples/av/audio.mp3" type="audio/mpeg">
+    Your browser does not support the audio tag.
+</amp-audio>
+
+<p id="cupcake-desc">A Chocolate Cupcake with raspberry frosting and raspberry pieces on top</p>
+<amp-img aria-describedby="cupcake-desc"
+        src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=responsive
+         heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
+
+
+<amp-video
+        aria-label="A Google Chromecast ad - For bigger rides"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+        width="358"
+        height="204"
+        layout="responsive"
+        controls>
+    <div placeholder>
+        This is a placeholder
+    </div>
+    <div fallback>
+        This is a fallback
+    </div>
+</amp-video>
+
+</body>
+</html>

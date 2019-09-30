@@ -1,0 +1,13 @@
+URL: https://github.com/hustcc/timeago.js
+License: MIT
+License File: https://github.com/hustcc/timeago.js/blob/v3.0.0/LICENSE
+
+Description:
+Fork of timeago.js from release v3.0.0
+https://github.com/hustcc/timeago.js/tree/v3.0.0
+
+Local Modifications:
+Made formatting changes to ensure code passes AMP validation.
+Removed some functions from timeago.js file that are not required in the AMP
+implementation.
+Included entire locales directory which provide 37 locale options.

@@ -1,0 +1,9 @@
+URL: https://github.com/webcomponents/webcomponentsjs
+License: BSD
+License File: https://github.com/webcomponents/webcomponentsjs/blob/master/LICENSE.md
+
+Description:
+Shadow DOM-related polyfills
+
+Local Modifications:
+Stripped to only perform necessary Shadow CSS polyfilling.

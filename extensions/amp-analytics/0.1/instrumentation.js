@@ -14,174 +14,157 @@
  * limitations under the License.
  */
 
-import {getService} from '../../../src/service';
-import {viewerFor} from '../../../src/viewer';
-import {Observable} from '../../../src/observable';
+import {
+  AmpStoryEventTracker,
+  AnalyticsEvent,
+  AnalyticsEventType,
+  CustomEventTracker,
+  getTrackerKeyName,
+} from './events';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
+import {AnalyticsGroup} from './analytics-group';
+import {Services} from '../../../src/services';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {
+  getParentWindowFrameElement,
+  getServiceForDoc,
+  getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
+
+const PROP = '__AMP_AN_ROOT';
 
 /**
- * This type signifies a callback that gets called when an analytics event that
- * the listener subscribed to fires.
- * @typedef {function(!AnalyticsEvent)}
+ * @implements {../../../src/service.Disposable}
+ * @private
+ * @visibleForTesting
  */
-let AnalyticsEventListenerDef;
-
-/**
- * @param {!Window} window Window object to listen on.
- * @param {!AnalyticsEventType} type Event type to listen to.
- * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
- *          fires.
- * @param {string=} opt_selector If specified, the given listener
- *   should only be called if the event target matches this selector.
- */
-export function addListener(window, type, listener, opt_selector) {
-  return instrumentationServiceFor(window).addListener(
-      type, listener, opt_selector);
-}
-
-/**
- * Events that can result in analytics data to be sent.
- * @const
- * @enum {string}
- */
-export const AnalyticsEventType = {
-  VISIBLE: 'visible',
-  CLICK: 'click'
-};
-
-/**
- * Ignore Most of this class as it has not been thought through yet. It will
- * change completely.
- */
-class AnalyticsEvent {
-
+export class InstrumentationService {
   /**
-   * @param {!AnalyticsEventType} type The type of event.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(type) {
-    this.type = type;
+  constructor(ampdoc) {
+    /** @const */
+    this.ampdoc = ampdoc;
+
+    /** @const */
+    this.root_ = this.findRoot_(ampdoc.getRootNode());
   }
-}
 
-/** @private */
-class InstrumentationService {
-  /**
-   * @param {!Window} window
-   */
-  constructor(window) {
-    /** @const {!Window} */
-    this.win_ = window;
-
-    /** @const {string} */
-    this.TAG_ = "Analytics.Instrumentation";
-
-    /** @const {!Viewer} */
-    this.viewer_ = viewerFor(window);
-
-    /** @private {boolean} */
-    this.clickHandlerRegistered_ = false;
-
-    /** @private {!Observable<Event>} */
-    this.clickObservable_ = new Observable();
+  /** @override */
+  dispose() {
+    this.root_.dispose();
   }
 
   /**
-   * @param {!AnalyticsEventType} eventType The type of event
-   * @param {!AnalyticsEventListenerDef} The callback to call when the event
-   *   occurs.
-   * @param {string=} opt_selector If specified, the given listener
-   *   should only be called if the event target matches this selector.
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
    */
-  addListener(eventType, listener, opt_selector) {
-    if (eventType === AnalyticsEventType.VISIBLE) {
-      if (this.viewer_.isVisible()) {
-        listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-      } else {
-        this.viewer_.onVisibilityChanged(() => {
-          if (this.viewer_.isVisible()) {
-            listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-          }
-        });
-      }
-    } else if (eventType === AnalyticsEventType.CLICK) {
-      if (!opt_selector) {
-        console./*OK*/error(this.TAG_,
-            'Missing required selector on click trigger');
-      } else {
-        this.ensureClickListener_();
-        this.clickObservable_.add(
-            this.createSelectiveListener_(listener, opt_selector));
-      }
+  getAnalyticsRoot(context) {
+    return this.findRoot_(context);
+  }
+
+  /**
+   * @param {!Element} analyticsElement
+   * @return {!AnalyticsGroup}
+   */
+  createAnalyticsGroup(analyticsElement) {
+    const root = this.findRoot_(analyticsElement);
+    return new AnalyticsGroup(root, analyticsElement);
+  }
+
+  /**
+   * @param {string} trackerName
+   * @private
+   */
+  getTrackerClass_(trackerName) {
+    switch (trackerName) {
+      case AnalyticsEventType.STORY:
+        return AmpStoryEventTracker;
+      default:
+        return CustomEventTracker;
     }
   }
 
   /**
-   * Ensure we have a click listener registered on the document.
-   * @private
+   * Triggers the analytics event with the specified type.
+   *
+   * @param {!Element} target
+   * @param {string} eventType
+   * @param {!JsonObject=} opt_vars A map of vars and their values.
    */
-  ensureClickListener_() {
-    if (!this.clickHandlerRegistered_) {
-      this.clickHandlerRegistered_ = true;
-      this.win_.document.documentElement.addEventListener(
-          'click', this.onClick_.bind(this));
+  triggerEventForTarget(target, eventType, opt_vars) {
+    const event = new AnalyticsEvent(target, eventType, opt_vars);
+    const root = this.findRoot_(target);
+    const trackerName = getTrackerKeyName(eventType);
+    const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(
+      trackerName,
+      this.getTrackerClass_(trackerName)
+    ));
+    tracker.trigger(event);
+  }
+
+  /**
+   * @param {!Node} context
+   * @return {!./analytics-root.AnalyticsRoot}
+   */
+  findRoot_(context) {
+    // TODO(#22733): cleanup when ampdoc-fie is launched. Just use
+    // `ampdoc.getParent()`.
+    const ampdoc = Services.ampdoc(context);
+    const frame = getParentWindowFrameElement(context);
+    const embed = frame && getFriendlyIframeEmbedOptional(frame);
+    if (ampdoc == this.ampdoc && !embed && this.root_) {
+      // Main root already exists.
+      return this.root_;
     }
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  onClick_(e) {
-    this.clickObservable_.fire(e);
-  }
-
-  /**
-   * @param {!Function} listener
-   * @param {string} selector
-   * @private
-   */
-  createSelectiveListener_(listener, selector) {
-    return e => {
-      if (selector === '*' || this.matchesSelector_(e.target, selector)) {
-        listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+    return this.getOrCreateRoot_(embed || ampdoc, () => {
+      if (embed) {
+        return new EmbedAnalyticsRoot(ampdoc, embed);
       }
-    };
+      return new AmpdocAnalyticsRoot(ampdoc);
+    });
   }
 
   /**
-   * @param {!Element} el
-   * @param {string} selector
-   * @return {boolean} True if the given element matches the given selector.
-   * @private
+   * @param {!Object} holder
+   * @param {function():!./analytics-root.AnalyticsRoot} factory
+   * @return {!./analytics-root.AnalyticsRoot}
    */
-  matchesSelector_(el, selector) {
-    try {
-      const matcher = el.matches ||
-          el.webkitMatchesSelector ||
-          el.mozMatchesSelector ||
-          el.msMatchesSelector ||
-          el.oMatchesSelector;
-      if (matcher) {
-        return matcher.call(el, selector);
-      }
-      const matches = this.win_.document.querySelectorAll(selector);
-      let i = matches.length;
-      while (i-- > 0 && matches.item(i) != el) {};
-      return i > -1;
-    } catch (selectorError) {
-      console./*OK*/error(this.TAG_, 'Bad query selector.', selector,
-          selectorError);
+  getOrCreateRoot_(holder, factory) {
+    let root = /** @type {?./analytics-root.AnalyticsRoot} */ (holder[PROP]);
+    if (!root) {
+      root = factory();
+      holder[PROP] = root;
     }
-    return false;
+    return root;
   }
 }
 
 /**
- * @param {!Window} window
+ * It's important to resolve instrumentation asynchronously in elements that
+ * depends on it in multi-doc scope. Otherwise an element life-cycle could
+ * resolve way before we have the service available.
+ *
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<InstrumentationService>}
+ */
+export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<InstrumentationService>} */ (getServicePromiseForDoc(
+    elementOrAmpDoc,
+    'amp-analytics-instrumentation'
+  ));
+}
+
+/**
+ * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!InstrumentationService}
  */
-export function instrumentationServiceFor(window) {
-  return getService(window, 'amp-analytics-instrumentation', () => {
-    return new InstrumentationService(window);
-  });
+export function instrumentationServiceForDocForTesting(elementOrAmpDoc) {
+  registerServiceBuilderForDoc(
+    elementOrAmpDoc,
+    'amp-analytics-instrumentation',
+    InstrumentationService
+  );
+  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation');
 }
-
