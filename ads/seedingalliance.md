@@ -19,10 +19,9 @@ limitations under the License.
 ## Example
 ​
 ```html
-<amp-ad 
-	width="300"
-	height="250" 
-	type="seedingalliance" 
+<amp-ad
+	height="250"
+	type="seedingalliance"
 	data-url="https://amp.yoursite.com/amp/">
 </amp-ad>
 ```
