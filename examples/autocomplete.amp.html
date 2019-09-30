@@ -223,6 +223,22 @@
     </div>
     </form>
 
+    <p>items</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="prefix" items="fruit">
+          <input type="text" name="input6c" required>
+          <script type=application/json>
+            { "fruit" : ["apples", "bananas", "pears"] }
+           </script>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input6c}}
+        </template>
+    </div>
+    </form>
+
     <h2>Filters</h2>
     <p>substring</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
@@ -382,9 +398,9 @@
                 </amp-autocomplete>
             </label>
             <label>
-                <span>Favorite state</span>
+                <span>Favorite state, defined item property</span>
                 <amp-autocomplete filter="substring" min-characters="0"
-                    src="autocomplete-states.example.json">
+                    src="autocomplete-states.example.json" items="states">
                     <input type="text" name="favoriteState" required>
                 </amp-autocomplete>
             </label>

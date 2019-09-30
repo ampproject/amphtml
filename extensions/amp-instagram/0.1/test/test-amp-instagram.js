@@ -15,7 +15,6 @@
  */
 
 import '../amp-instagram';
-import {Services} from '../../../../src/services';
 
 describes.realWin(
   'amp-instagram',
@@ -51,7 +50,7 @@ describes.realWin(
         ins.setAttribute('data-captioned', '');
       }
       const visibilityPromise = env.sandbox.stub(
-        Services.viewerForDoc(doc),
+        env.ampdoc,
         'whenFirstVisible'
       );
       visibilityPromise.returns(

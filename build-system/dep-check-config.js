@@ -157,6 +157,7 @@ exports.rules = [
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
+      'ads/google/a4a/utils.js->src/ini-load.js',
       'ads/google/a4a/utils.js->src/layout.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
@@ -241,6 +242,7 @@ exports.rules = [
       // Amp carousel (and friends) depending on base carousel
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/action-source.js',
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/carousel.js',
+      'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
 
       // Facebook components
@@ -315,6 +317,8 @@ exports.rules = [
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
+        'src/service/video-manager-impl.js',
+      'extensions/amp-minute-media-player/0.1/amp-minute-media-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
         'src/service/video-manager-impl.js',

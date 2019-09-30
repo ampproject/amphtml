@@ -28,6 +28,7 @@ import {
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
+import {CarouselEvents} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {clamp, mod} from '../../../src/utils/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
@@ -684,19 +685,26 @@ export class Carousel {
   }
 
   /**
-   * Updates the resting index as well as firing an event.
+   * Updates the resting index as well as firing an event, if it actually
+   * changed.
    * @param {number} restingIndex The new resting index.
+   * @param {ActionSource=} actionSource The actionSource associated with this
+   *    change.
    * @private
    */
-  updateRestingIndex_(restingIndex) {
+  updateRestingIndex_(restingIndex, actionSource) {
+    if (this.restingIndex_ == restingIndex) {
+      return;
+    }
+
     this.restingIndex_ = restingIndex;
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'amp-carousel:indexchange',
+        CarouselEvents.INDEX_CHANGE,
         dict({
           'index': restingIndex,
-          'actionSource': this.actionSource_,
+          'actionSource': actionSource,
         })
       )
     );
@@ -709,7 +717,7 @@ export class Carousel {
    */
   notifyScrollStart() {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'amp-carousel:scrollstart', null)
+      createCustomEvent(this.win_, CarouselEvents.SCROLL_START, null)
     );
   }
 
@@ -720,7 +728,7 @@ export class Carousel {
    */
   notifyScrollPositionChanged_() {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'amp-carousel:scrollpositionchange', null)
+      createCustomEvent(this.win_, CarouselEvents.SCROLL_POSITION_CHANGED, null)
     );
   }
 
@@ -1083,16 +1091,22 @@ export class Carousel {
    * @private
    */
   resetScrollReferencePoint_(force = false) {
-    this.scrolling_ = false;
-    this.runMutate_(() => {
-      this.notifyScrollPositionChanged_();
-    });
+    const {actionSource_} = this;
 
     // Make sure if the user is in the middle of a drag, we do not move
-    // anything.
+    // anything. The touch end will cause us to get called again.
     if (this.touching_) {
       return;
     }
+
+    // Scrolling has stopped, so clear the action source from whatever caused
+    // the scrolling in the first place.
+    this.actionSource_ = undefined;
+    this.scrolling_ = false;
+
+    this.runMutate_(() => {
+      this.notifyScrollPositionChanged_();
+    });
 
     // Check if the resting index we are centered around is the same as where
     // we stopped scrolling. If so, we do not want move anything or fire an
@@ -1116,7 +1130,7 @@ export class Carousel {
     const totalLength = sum(this.getSlideLengths_());
 
     this.runMutate_(() => {
-      this.updateRestingIndex_(this.currentIndex_);
+      this.updateRestingIndex_(this.currentIndex_, actionSource_);
 
       this.resetSlideTransforms_(totalLength);
       this.hideSpacersAndSlides_();

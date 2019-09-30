@@ -23,7 +23,6 @@ import {
   mergeHtmlForTesting,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
-  whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
@@ -349,23 +348,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     });
   });
 
-  it('should uninstall all resources', () => {
-    extensionsMock.expects('preloadExtension').atLeast(1);
-    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
-      url: 'https://acme.org/url1',
-      html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
-    });
-    return embedPromise.then(embed => {
-      expect(installExtensionsInChildWindowStub).to.be.calledOnce;
-      resourcesMock
-        .expects('removeForChildWindow')
-        .withExactArgs(embed.win)
-        .once();
-      embed.destroy();
-    });
-  });
-
   it.skip('should install and dispose services', () => {
     const disposeSpy = sandbox.spy();
     const embedService = {
@@ -541,55 +523,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         expect(embed.signals().get('ini-load')).to.be.ok;
         return embed.whenReady(); // `whenReady` should also be complete.
       });
-  });
-
-  it('should find and await all content elements', () => {
-    function resource(tagName) {
-      const res = {
-        element: {
-          tagName: tagName.toUpperCase(),
-        },
-        loadedComplete: false,
-      };
-      res.loadedOnce = () =>
-        Promise.resolve().then(() => {
-          res.loadedComplete = true;
-        });
-      return res;
-    }
-
-    let content1;
-    let content2;
-    let blacklistedAd;
-    let blacklistedAnalytics;
-    let blacklistedPixel;
-    let blacklistedAmpAdExit;
-
-    const context = document.createElement('div');
-    document.body.appendChild(context);
-    resourcesMock
-      .expects('getResourcesInRect')
-      .withArgs(sinon.match(arg => arg == window))
-      .returns(
-        Promise.resolve([
-          (content1 = resource('amp-img', 0)),
-          (content2 = resource('amp-video', 0)),
-          (blacklistedAd = resource('amp-ad', 0)),
-          (blacklistedAnalytics = resource('amp-analytics', 0)),
-          (blacklistedPixel = resource('amp-pixel', 0)),
-          (blacklistedAmpAdExit = resource('amp-ad-exit', 0)),
-        ])
-      )
-      .once();
-
-    return whenContentIniLoad(context, window).then(() => {
-      expect(content1.loadedComplete).to.be.true;
-      expect(content2.loadedComplete).to.be.true;
-      expect(blacklistedAd.loadedComplete).to.be.false;
-      expect(blacklistedAnalytics.loadedComplete).to.be.false;
-      expect(blacklistedPixel.loadedComplete).to.be.false;
-      expect(blacklistedAmpAdExit.loadedComplete).to.be.false;
-    });
   });
 
   describe('mergeHtml', () => {
