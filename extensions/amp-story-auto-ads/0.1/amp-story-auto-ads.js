@@ -700,7 +700,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const frameDoc = getFrameDoc(friendlyIframeEmbed);
     const {body} = frameDoc;
-    // TODO(#24080) Remove alternate body when we have full ad network support.
+    // TODO(#24829) Remove alternate body when we have full ad network support.
     const alternateBody = body.querySelector('#x-a4a-former-body');
     this.mutateElement(() => {
       body.setAttribute(Attributes.IFRAME_BODY_VISIBLE, '');
@@ -716,7 +716,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   removeVisibleAttribute_() {
     this.mutateElement(() => {
       if (this.visibleAdBody_) {
-        // TODO(#24080) Remove alternate body when we have full ad network support.
+        // TODO(#24829) Remove alternate body when we have full ad network support.
         const alternateBody = this.visibleAdBody_.querySelector(
           '#x-a4a-former-body'
         );
