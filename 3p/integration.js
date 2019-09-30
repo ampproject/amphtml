@@ -90,6 +90,7 @@ import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
+import {adstyle} from '../ads/adstyle';
 import {adtech} from '../ads/adtech';
 import {adthrive} from '../ads/adthrive';
 import {adunity} from '../ads/adunity';
@@ -207,6 +208,7 @@ import {pubexchange} from '../ads/pubexchange';
 import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
+import {puffnetwork} from '../ads/puffnetwork';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
@@ -225,6 +227,7 @@ import {sas} from '../ads/sas';
 import {sekindo} from '../ads/sekindo';
 import {seedingalliance} from '../ads/seedingalliance';
 import {sharethrough} from '../ads/sharethrough';
+import {shemedia} from '../ads/shemedia';
 import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
@@ -284,6 +287,7 @@ const AMP_EMBED_ALLOWED = {
   '1wo': true,
   '24smi': true,
   adsloom: true,
+  adstyle: true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -354,6 +358,7 @@ register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
 register('adstir', adstir);
+register('adstyle', adstyle);
 register('adtech', adtech);
 register('adthrive', adthrive);
 register('adunity', adunity);
@@ -480,6 +485,7 @@ register('pubexchange', pubexchange);
 register('pubguru', pubguru);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
+register('puffnetwork', puffnetwork);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
@@ -499,6 +505,7 @@ register('sas', sas);
 register('seedingalliance', seedingalliance);
 register('sekindo', sekindo);
 register('sharethrough', sharethrough);
+register('shemedia', shemedia);
 register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
@@ -713,7 +720,6 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (window.location.hostname == 'ads.localhost') {
     return;
   }
-    return;
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
