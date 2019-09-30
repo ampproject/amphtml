@@ -51,7 +51,7 @@ describe('AMPHTML ad on AMP Page', () => {
     {
       amp: true,
       extensions: ['amp-ad'],
-      frameStyle: "height: 100vh",
+      frameStyle: 'height: 100vh',
       body: `
   <div style="height: 100vh"></div>
   <amp-ad
@@ -104,7 +104,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
     'BTF',
     {
       amp: false,
-      frameStyle: "height: 100vh",
+      frameStyle: 'height: 100vh',
       body: `
       <div style="height: 100vh"></div>
       <iframe

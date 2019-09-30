@@ -528,7 +528,10 @@ class IntegrationFixture {
         src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
       }
 
-      env.iframe = createElementWithAttributes(document, 'iframe', {src, style});
+      env.iframe = createElementWithAttributes(document, 'iframe', {
+        src,
+        style,
+      });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
         resolve();
