@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import {getData} from '../../../../src/event-helper';
-import {parseJson} from '../../../../src/json';
-
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 export const APP = '__AMPHTML__';
@@ -52,7 +49,7 @@ export function parseMessage(message) {
   }
 
   try {
-    return /** @type {?Message} */ /** @type {?} */ (parseJson(
+    return /** @type {?Message} */ /** @type {?} */ (JSON.parse(
       /** @type {string} */ (message)
     ));
   } catch (e) {
@@ -89,7 +86,7 @@ export class WindowPortEmulator {
       if (
         e.origin == this.origin_ &&
         e.source == this.target_ &&
-        getData(e)['app'] == APP
+        e.data['app'] == APP
       ) {
         handler(e);
       }
@@ -211,7 +208,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    const message = parseMessage(getData(event));
+    const message = parseMessage(event.data);
     if (!message) {
       return;
     }
@@ -406,7 +403,7 @@ export function initMessaging(source, iframe, origin) {
   const target = iframe.contentWindow;
   return new Promise(resolve => {
     const listener = e => {
-      const data = getData(e);
+      const data = e.data;
       if (
         e.origin === origin &&
         e.source === target &&
