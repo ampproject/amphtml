@@ -17,6 +17,7 @@
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as IniLoad from '../../../../src/ini-load';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
@@ -36,7 +37,6 @@ import {
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';

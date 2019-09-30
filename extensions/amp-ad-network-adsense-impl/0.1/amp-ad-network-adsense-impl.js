@@ -20,6 +20,11 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {AdsenseSharedState} from './adsense-shared-state';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
+import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -36,11 +41,6 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
-import {Navigation} from '../../../src/service/navigation';
 import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {

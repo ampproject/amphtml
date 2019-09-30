@@ -22,6 +22,12 @@
 
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
+import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -41,12 +47,6 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
