@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
@@ -124,6 +125,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.opened_ = false;
 
+    /** @private {?Element} */
+    this.drilldownMenu_ = null;
+
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
@@ -135,7 +139,10 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-sidebar-v2'), 'Experiment is off');
+    userAssert(
+      isExperimentOn(this.win, 'amp-sidebar-v2'),
+      'Turning on the amp-sidebar-v2 experiment is necessary to use the new sidebar component.'
+    );
 
     const {element} = this;
 
@@ -164,6 +171,13 @@ export class AmpSidebar extends AMP.BaseElement {
       } catch (e) {
         this.user().error(TAG, 'Failed to instantiate toolbar', e);
       }
+    });
+
+    this.maybeBuildDrilldownMenu_();
+    // Drilldown menu may not be present during buildCallback if it is rendered
+    // dynamically with amp-list, in which case listen for dom update.
+    element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.maybeBuildDrilldownMenu_();
     });
 
     if (this.isIos_) {
@@ -228,6 +242,24 @@ export class AmpSidebar extends AMP.BaseElement {
     );
 
     this.setupGestures_(this.element);
+  }
+
+  /**
+   * Loads the extension for drilldown menu if sidebar contains one and it
+   * has not been installed already.
+   */
+  maybeBuildDrilldownMenu_() {
+    if (this.drilldownMenu_) {
+      return;
+    }
+    const drilldownMenu = this.element.querySelector('amp-drilldown');
+    if (drilldownMenu) {
+      Services.extensionsFor(this.win).installExtensionForDoc(
+        this.getAmpDoc(),
+        'amp-drilldown'
+      );
+      this.drilldownMenu_ = drilldownMenu;
+    }
   }
 
   /**
@@ -411,6 +443,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element,
       this.getRealChildren()
     );
+    if (this.historyId_ != -1) {
+      this.getHistory_().pop(this.historyId_);
+      this.historyId_ = -1;
+    }
     this.triggerEvent_(SidebarEvents.CLOSE);
   }
 
@@ -469,10 +505,6 @@ export class AmpSidebar extends AMP.BaseElement {
     if (immediate) {
       toggle(this.element, /* display */ false);
       toggle(this.getMaskElement_(), /* display */ false);
-    }
-    if (this.historyId_ != -1) {
-      this.getHistory_().pop(this.historyId_);
-      this.historyId_ = -1;
     }
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
       // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
