@@ -18,6 +18,7 @@ import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-stream-gallery-0.1.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
+import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {
   ResponsiveAttributes,
@@ -120,6 +121,9 @@ class AmpStreamGallery extends AMP.BaseElement {
     /** @private {!Array<!Element>} */
     this.slides_ = [];
 
+    /** @private {?number} */
+    this.currentIndex_ = null;
+
     /**
      * Whether or not the user has interacted with the carousel using touch in
      * the past at any point.
@@ -211,15 +215,18 @@ class AmpStreamGallery extends AMP.BaseElement {
    * @private
    */
   setupListeners_() {
-    this.element.addEventListener('amp-carousel:indexchange', event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
-    this.element.addEventListener('amp-carousel:scrollstart', () => {
+    this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
       this.onScrollStarted_();
     });
-    this.element.addEventListener('amp-carousel:scrollpositionchange', () => {
-      this.onScrollPositionChanged_();
-    });
+    this.element.addEventListener(
+      CarouselEvents.SCROLL_POSITION_CHANGED,
+      () => {
+        this.onScrollPositionChanged_();
+      }
+    );
     this.prevArrowSlot_.addEventListener('click', event => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
@@ -702,13 +709,19 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Event} event
-   * @private
+   * Updates the current index, triggering actions and analytics events.
+   * @param {number} index
+   * @param {!ActionSource} actionSource
    */
-  onIndexChanged_(event) {
-    const detail = getDetail(event);
-    const index = detail['index'];
-    const actionSource = detail['actionSource'];
+  updateCurrentIndex_(index, actionSource) {
+    const prevIndex = this.currentIndex_;
+    this.currentIndex_ = index;
+
+    // Ignore the first indexChange, we do not want to trigger any events.
+    if (prevIndex == null) {
+      return;
+    }
+
     const data = dict({'index': index});
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
@@ -717,7 +730,19 @@ class AmpStreamGallery extends AMP.BaseElement {
     const action = createCustomEvent(this.win, `streamGallery.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
     this.element.dispatchCustomEvent(name, data);
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onIndexChanged_(event) {
+    const detail = getDetail(event);
+    const index = detail['index'];
+    const actionSource = detail['actionSource'];
+
     this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
+    this.updateCurrentIndex_(index, actionSource);
     this.updateUi_();
   }
 }
