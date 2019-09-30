@@ -120,6 +120,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-mega-menu',
+    name: 'AMP extension for a mega menu with expandable items',
+  },
+  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
   },
