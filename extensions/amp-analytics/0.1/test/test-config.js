@@ -885,53 +885,56 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
   describe('warning message', () => {
     it('shows the warning', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
-        'requestOrigin': 'https://example.com',
+      ANALYTICS_CONFIG['test-vendor'] = {
         'requests': {'test1': '/test1', 'test2': '/test1/test2'},
         'warningMessage': 'I am a warning',
       };
 
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {},
+        {'type': 'test-vendor', 'id': 'analyticsId'}
+      );
       const usrObj = user();
       const spy = sandbox.spy(usrObj, 'warn');
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          ' test-vendor',
+          '',
+          'I am a warning'
+        );
         expect(config['warningMessage']).to.be.undefined;
       });
     });
 
-    it('does not always show the warning', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
-        'requestOrigin': 'https://example.com',
-        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
-      };
-
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
-      const usrObj = user();
-      const spy = sandbox.spy(usrObj, 'warn');
-
-      return new AnalyticsConfig(element).loadConfig().then(() => {
-        expect(spy).callCount(0);
-      });
-    });
-
     it('handles incorrect inputs', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
-        'requestOrigin': 'https://example.com',
-        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+      ANALYTICS_CONFIG['test-vendor'] = {
+        'requests': {'test1': '/test1', 'test2': '/test2'},
         'warningMessage': {
           'message': 'I am deprecated',
           'configVersion': '0.1',
         },
       };
 
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {},
+        {'type': 'test-vendor', 'id': 'analyticsId'}
+      );
       const usrObj = user();
       const spy = sandbox.spy(usrObj, 'warn');
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          ' test-vendor',
+          '',
+          '[object Object]'
+        );
         expect(config['warningMessage']).to.be.undefined;
       });
     });
@@ -939,7 +942,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     it('handles remote config', () => {
       const element = getAnalyticsTag(
         {},
-        {'config': 'www.vendorConfigLocation.com'}
+        {'config': 'www.vendorConfigLocation.com', 'id': 'analyticsId'}
       );
 
       const usrObj = user();
@@ -958,6 +961,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          '',
+          ' with remote config url www.vendorConfigLocation.com',
+          'The config you are working with has been deprecated'
+        );
         expect(config['warningMessage']).to.be.undefined;
       });
     });
