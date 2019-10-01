@@ -212,6 +212,10 @@ tags: {  # <amp-list>
     value: "no"
     value: "refresh"
   }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
@@ -261,6 +265,10 @@ tags: {  # <amp-list>
   attrs: {
     name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"
+  }
+  attrs: {
+    name: "diffable"
+    value: ""
   }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
