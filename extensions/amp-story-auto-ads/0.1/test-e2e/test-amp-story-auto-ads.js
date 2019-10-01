@@ -43,7 +43,7 @@ describes.endtoend(
       await validateAdOverlay(controller);
       await validateAdAttribution(
         controller,
-        'https://tpc.googlesyndication.com/pagead/images/adchoices/icon.png' // iconUrl
+        '/test/fixtures/e2e/amphtml-ads/resource/icon.png' // iconUrl
       );
       await validateCta(
         controller,
