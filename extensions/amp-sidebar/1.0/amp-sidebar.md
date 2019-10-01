@@ -7,6 +7,7 @@ formats:
   - stories
 teaser:
   text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
+experimental: true
 ---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
@@ -25,6 +26,8 @@ limitations under the License.
 -->
 
 # <a name="amp-sidebar"></a> `amp-sidebar`
+
+Important: This version of sidebar is still under development and should not be used.
 
 [TOC]
 
