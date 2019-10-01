@@ -43,7 +43,8 @@ export function blade(global, data) {
   }`;
   createContainer(containerId);
 
-  global[`_bladeConfig-${containerId}`] = {
+  const bladeConfig = `_bladeConfig-${containerId}`;
+  global[bladeConfig] = {
     playerId: data['blade_player_id'],
     apiKey: data['blade_api_key'],
     version: '1.0',
@@ -51,7 +52,8 @@ export function blade(global, data) {
   };
   const ctx = global.context;
 
-  global[`_bladeOnLoad-${containerId}`] = function(error, player) {
+  const bladeOnLoad = `_bladeOnLoad-${containerId}`;
+  global[bladeOnLoad] = function(error, player) {
     if (error) {
       global.context.noContentAvailable();
       return;
@@ -73,7 +75,7 @@ export function blade(global, data) {
       data['blade_player_id']
     }/player.js?t=${
       data['blade_player_type']
-    }&callback=_bladeOnLoad&config=_bladeConfig&c=${containerId}`,
+    }&callback=${bladeOnLoad}&config=${bladeConfig}&c=${containerId}`,
     undefined,
     () => {
       global.context.noContentAvailable();
