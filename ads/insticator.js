@@ -1,12 +1,25 @@
-// !!!!!!!!!! ---------- AMP EMBED - INSTICATOR ---------- !!!!!!!!!! //
-import { validateData, loadScript } from '../3p/3p';
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+import {loadScript, validateData} from '../3p/3p';
 
-/*
+/**
  * @param {!Window} global
  * @param {!Object} data
-*/
-// ------- AMP EMBED - INSTICATOR EXPORT ------- //
+ */
 export function insticator(global, data) {
   // validate passed data attributes
   validateData(data, ['siteId', 'embedId']);
@@ -19,18 +32,19 @@ export function insticator(global, data) {
 
   // envoke AMP library
   loadScript(global);
-};
-
-
+}
 
 // ------- HELPER VARIABLES ------- //
 // reusable URL references to ads, embed and the library
 // Don't forget to preconnect and prefetch as it's described in the docs
 // https://github.com/ampproject/amphtml/blob/master/ads/README.md
-const url = { content: '//d3lcz8vpax4lo2.cloudfront.net' };
+const url = {content: '//d3lcz8vpax4lo2.cloudfront.net'};
 
-
-// ------- HELPER FUNCTIONS ------- //
+/**
+ * Create HTML template to be populated later
+ * @param {string} embedId The Unique Identifier of this particular Embed
+ * @return {element} HTML template
+ */
 function createTemplate(embedId) {
   const template = document.createElement('template');
   template.innerHTML = `
@@ -43,6 +57,11 @@ function createTemplate(embedId) {
   return template.content;
 }
 
+/**
+ * Generates Ads and Embed
+ * @param {string} siteId Used to grab the ads file
+ * @param {string} embedId Used to grab the unique embed requested
+ */
 function createAdsAndEmbed(siteId, embedId) {
   // helper vars
   const a = window;
@@ -51,26 +70,24 @@ function createAdsAndEmbed(siteId, embedId) {
   const u = `${url.content}/ads-code/${siteId}.js`; // vars from preconnect urls and data attributes on amp-embed tag
 
   // create insticator object on the window
-  'Insticator' in a || (a.Insticator = {
+  'Insticator' in a ||
+    (a.Insticator = {
       ad: {
-          loadAd: function(b) {
-              Insticator.ad.q.push(b)
-          },
-          q: []
+        loadAd: function(b) {
+          this.ad.q.push(b);
+        },
+        q: [],
       },
       helper: {},
       embed: {},
-      version: "4.0",
+      version: '4.0',
       q: [],
       amp: null, // this will get set to window.context which is the AMP API so we can access from our ads code
       load: function(t, o) {
-          Insticator.amp = window.context; // set the Insticator object property amp to window.context which is the AMP API so we can access from our ads code
-          Insticator.q.push({
-              t: t,
-              o: o
-          })
-      }
-  });
+        this.amp = window.context; // set the Insticator object property amp to window.context which is the AMP API so we can access from our ads code
+        this.q.push({t, o});
+      },
+    });
 
   // load ads code
   const b = c.createElement(s);
@@ -80,9 +97,9 @@ function createAdsAndEmbed(siteId, embedId) {
   d.parentNode.insertBefore(b, d);
 
   // execute functions of insticator object on the window (load ads and embed)
-  Insticator.ad.loadAd("div-insticator-ad-1");
-  Insticator.ad.loadAd("div-insticator-ad-2");
-  Insticator.load("em", {id : embedId});
+  this.ad.loadAd('div-insticator-ad-1');
+  this.ad.loadAd('div-insticator-ad-2');
+  this.load('em', {id: embedId});
 
   // now tell AMP runtime to start rendering ads
   window.context.renderStart();
