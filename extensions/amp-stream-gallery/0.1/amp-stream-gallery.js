@@ -42,6 +42,13 @@ const InsetArrowVisibility = {
   ALWAYS: 2,
 };
 
+/** Maps attribute values to enum values. */
+const insetArrowVisibilityMapping = dict({
+  'never': InsetArrowVisibility.NEVER,
+  'auto': InsetArrowVisibility.AUTO,
+  'always': InsetArrowVisibility.ALWAYS,
+});
+
 /**
  * @param {!Element} el The Element to check.
  * @return {boolean} Whether or not the Element is a sizer Element.
@@ -381,12 +388,6 @@ class AmpStreamGallery extends AMP.BaseElement {
     this.carousel_.updateUi();
     this.childLayoutManager_.wasLaidOut();
 
-    // requestAnimationFrame(() => {
-    //   setTimeout(() => {
-    //     this.childLayoutManager_.flushChanges();
-    //   });
-    // });
-
     return Promise.resolve();
   }
 
@@ -653,11 +654,8 @@ class AmpStreamGallery extends AMP.BaseElement {
    */
   updateInsetArrowVisibility_(insetArrowVisibility) {
     this.insetArrowVisibility_ =
-      insetArrowVisibility == 'always'
-        ? InsetArrowVisibility.ALWAYS
-        : insetArrowVisibility == 'never'
-        ? InsetArrowVisibility.NEVER
-        : InsetArrowVisibility.AUTO;
+      insetArrowVisibilityMapping[insetArrowVisibility] ||
+      InsetArrowVisibility.AUTO;
     this.updateUi_();
   }
 
