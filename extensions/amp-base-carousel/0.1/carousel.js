@@ -394,11 +394,11 @@ export class Carousel {
     // If we have a requested index, use that as the reference point. The
     // current index may not be updated yet.This allows calling `advance`
     // multiple times in a row and ending on the correct slide.
-    const index = requestedIndex_ != null ? requestedIndex_ : currentIndex_;
+    const index = requestedIndex_ !== null ? requestedIndex_ : currentIndex_;
     const newIndex = index + delta;
     const endIndex = slides_.length - 1;
-    const atStart = index == 0;
-    const atEnd = index == endIndex;
+    const atStart = index === 0;
+    const atEnd = index === endIndex;
     const passingStart = newIndex < 0;
     const passingEnd = newIndex > endIndex;
 
@@ -480,7 +480,7 @@ export class Carousel {
       return;
     }
 
-    if (index == this.currentIndex_) {
+    if (index === this.currentIndex_) {
       return;
     }
 
@@ -511,7 +511,8 @@ export class Carousel {
    *    either "start" or "cemter".
    */
   updateAlignment(alignment) {
-    this.alignment_ = alignment == 'start' ? Alignment.START : Alignment.CENTER;
+    this.alignment_ =
+      alignment === 'start' ? Alignment.START : Alignment.CENTER;
     this.updateUi();
   }
 
@@ -652,7 +653,7 @@ export class Carousel {
         this.userScrollable_
       );
       this.scrollContainer_.setAttribute('hide-scrollbar', this.hideScrollbar_);
-      this.scrollContainer_.setAttribute('horizontal', this.axis_ == Axis.X);
+      this.scrollContainer_.setAttribute('horizontal', this.axis_ === Axis.X);
       this.scrollContainer_.setAttribute('loop', this.isLooping());
       this.scrollContainer_.setAttribute('snap', this.snap_);
       // TODO(sparhami) Do not use CSS custom property
@@ -693,7 +694,7 @@ export class Carousel {
    * @private
    */
   updateRestingIndex_(restingIndex, actionSource) {
-    if (this.restingIndex_ == restingIndex) {
+    if (this.restingIndex_ === restingIndex) {
       return;
     }
 
@@ -800,8 +801,8 @@ export class Carousel {
   isUserScrolling_() {
     return (
       this.scrolling_ &&
-      (this.actionSource_ == ActionSource.TOUCH ||
-        this.actionSource_ == ActionSource.WHEEL)
+      (this.actionSource_ === ActionSource.TOUCH ||
+        this.actionSource_ === ActionSource.WHEEL)
     );
   }
 
@@ -962,8 +963,8 @@ export class Carousel {
    */
   setChildrenSnapAlign_() {
     const slideCount = this.slides_.length;
-    const startAligned = this.alignment_ == Alignment.START;
-    const oddVisibleCount = mod(this.visibleCount_, 2) == 1;
+    const startAligned = this.alignment_ === Alignment.START;
+    const oddVisibleCount = mod(this.visibleCount_, 2) === 1;
     // For the legacy scroll-snap-coordinate, when center aligning with an odd
     // count, actually use a start coordinate. Otherwise it will snap to the
     // center of the slides near the edge of the container. That is
@@ -979,7 +980,7 @@ export class Carousel {
       // to do the mapping.
       const slideIndex = mod(index, slideCount);
       // If an item is at the start of the group, it gets an aligned.
-      const shouldSnap = mod(slideIndex, this.snapBy_) == 0;
+      const shouldSnap = mod(slideIndex, this.snapBy_) === 0;
 
       setStyles(child, {
         'scroll-snap-align': shouldSnap ? this.alignment_ : 'none',
@@ -1073,7 +1074,7 @@ export class Carousel {
     this.currentElementOffset_ = elementStart - containerStart;
 
     // We did not move at all.
-    if (newIndex == currentIndex_) {
+    if (newIndex === currentIndex_) {
       return;
     }
 
@@ -1113,8 +1114,8 @@ export class Carousel {
     // event. If we have a programmatic scroll request, we still need to move
     // to that index.
     if (
-      this.restingIndex_ == this.currentIndex_ &&
-      this.requestedIndex_ == null &&
+      this.restingIndex_ === this.currentIndex_ &&
+      this.requestedIndex_ === null &&
       !force
     ) {
       return;
@@ -1122,7 +1123,7 @@ export class Carousel {
 
     // We are updating during a programmatic scroll, so go to the correct
     // index.
-    if (this.requestedIndex_ != null) {
+    if (this.requestedIndex_ !== null) {
       this.currentIndex_ = this.requestedIndex_;
       this.requestedIndex_ = null;
     }
@@ -1167,9 +1168,9 @@ export class Carousel {
         : 0;
     const pos = elementStart - offset - containerStart + scrollPos;
 
-    // No scroll will happen, ,ake sure the `ignoreNextScroll_` flag is not
+    // No scroll will happen, make sure the `ignoreNextScroll_` flag is not
     // set.
-    if (scrollPos == pos) {
+    if (scrollPos === pos) {
       return;
     }
 
@@ -1249,7 +1250,7 @@ export class Carousel {
     // TODO(sparhami) The current approach of moving a set number of slides
     // does not work well for the mixed length use case.
     const {alignment_, slides_, visibleCount_} = this;
-    const isStartAligned = alignment_ == Alignment.START;
+    const isStartAligned = alignment_ === Alignment.START;
     // How many slides fit into the current "window" of slides. When center
     // aligning, we can ignore this as we want to have the same amount on both
     // sides.
@@ -1271,7 +1272,7 @@ export class Carousel {
    */
   inLastWindow_(index) {
     const {alignment_, slides_, visibleCount_} = this;
-    const startAligned = alignment_ == Alignment.START;
+    const startAligned = alignment_ === Alignment.START;
     const lastWindowSize = startAligned ? visibleCount_ : visibleCount_ / 2;
 
     return index >= slides_.length - lastWindowSize;
