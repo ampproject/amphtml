@@ -465,15 +465,17 @@ const forbiddenTerms = {
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/services.js',
       'src/service/cid-impl.js',
-      'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
   },
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access-iframe.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-script/0.1/amp-script.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
