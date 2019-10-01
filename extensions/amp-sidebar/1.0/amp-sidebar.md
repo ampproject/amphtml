@@ -80,7 +80,7 @@ for content within the sidebar to be displayed on other parts of the main conten
 
 *Example:*
 
-In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
+In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
 
 ```html
 <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
@@ -97,7 +97,7 @@ In the following example, we use `amp-sidebar` to contain navigation items. Howe
 
 ### Opening and closing the sidebar
 
-To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
+To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
 
 <table>
   <tr>
