@@ -31,12 +31,6 @@ export function insticator(global, data) {
   createAdsAndEmbed(data.siteId, data.embedId);
 }
 
-// ------- HELPER VARIABLES ------- //
-// reusable URL references to ads, embed and the library
-// Don't forget to preconnect and prefetch as it's described in the docs
-// https://github.com/ampproject/amphtml/blob/master/ads/README.md
-const url = {content: '//d3lcz8vpax4lo2.cloudfront.net'};
-
 /**
  * Create HTML template to be populated later
  * @param {string} embedId The Unique Identifier of this particular Embed
@@ -64,7 +58,7 @@ function createAdsAndEmbed(siteId, embedId) {
   const a = window;
   const c = document;
   const s = 'script';
-  const u = `${url.content}/ads-code/${siteId}.js`; // vars from preconnect urls and data attributes on amp-embed tag
+  const u = `//d3lcz8vpax4lo2.cloudfront.net/ads-code/${siteId}.js`; // vars from preconnect urls and data attributes on amp-embed tag
 
   // create insticator object on the window
   'Insticator' in a ||
