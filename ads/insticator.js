@@ -29,9 +29,6 @@ export function insticator(global, data) {
 
   // create ads and embed
   createAdsAndEmbed(data.siteId, data.embedId);
-
-  // envoke AMP library
-  loadScript(global);
 }
 
 // ------- HELPER VARIABLES ------- //
