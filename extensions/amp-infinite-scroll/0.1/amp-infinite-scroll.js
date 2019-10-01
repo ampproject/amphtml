@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
-import {Layout} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
+import {
+  DEFAULT_THRESHOLD,
+  IntersectionObserverPolyfill,
+  nativeIntersectionObserverSupported,
+} from '../../../src/intersection-observer-polyfill';
+import {fetchPolyfill} from '../../../src/polyfills/fetch';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
+import {userAssert} from '../../../src/log';
 
-// @TODO:
-// * Implement fetch and IntersectionObserver polyfills
-// * Implement error handling
-// * Test coverage
-// * Docs for component
 export class AmpInfiniteScroll extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -35,6 +35,8 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     this.intersectionObserver_ = null;
     /** @private {?string} */
     this.nextPageCursor_ = null;
+    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampDoc_ = null;
   }
 
   /** @override */
@@ -48,10 +50,10 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
 
-    const ampDoc = this.getAmpDoc();
+    this.ampDoc_ = this.getAmpDoc();
     const observer = this.createIntersectionObserver_();
 
-    ampDoc.whenReady().then(() => {
+    this.ampDoc_.whenReady().then(() => {
       observer.observe(this.container_);
     });
   }
@@ -68,7 +70,19 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
   }
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
+    return isLayoutSizeDefined(layout);
+  }
+
+  /**
+   * @private
+   * @return {IntersectionObserver|../../../src/intersection-observer-polyfill.IntersectionObserverPolyfill}
+   */
+  getIntersectionObserverImplementation_() {
+    if (nativeIntersectionObserverSupported(this.ampDoc_.win)) {
+      return IntersectionObserver;
+    } else {
+      return IntersectionObserverPolyfill;
+    }
   }
 
   /**
@@ -76,9 +90,10 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
    * @return {IntersectionObserver}
    */
   createIntersectionObserver_() {
+    const ObserverImplementation = this.getIntersectionObserverImplementation_();
     if (!this.intersectionObserver_) {
-      this.intersectionObserver_ = new IntersectionObserver(
-        this.onIntersect_.bind(this),
+      this.intersectionObserver_ = new ObserverImplementation(
+        this.intersectCallback_.bind(this),
         {
           rootMargin: '0px',
           threshold: DEFAULT_THRESHOLD,
@@ -107,23 +122,33 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     this.togglePlaceholder(false);
     this.nextPageCursor_ = data.page ? data.nextPage : null;
     const page = new DOMParser().parseFromString(data.page, 'text/html');
+
     this.mutateElement(() => {
-      const fragment = document.createDocumentFragment();
+      const fragment = this.element.ownerDocument.createDocumentFragment();
       Array.from(page.body.children).forEach(el => {
         fragment.appendChild(el);
       });
       this.element.parentElement.insertBefore(fragment, this.element);
       this.intersectionObserver_.observe(this.container_);
+      // console.log('mutate doc is', this.element.ownerDocument.body);
     });
   }
 
   /**
    * @private
-   * @param {Error} error
    */
-  processError_(error) {
+  processError_() {
     this.togglePlaceholder(false);
-    console.log(error);
+    this.toggleFallback(true);
+  }
+
+  /**
+   * @private
+   * @return {FetchInitDef|../../../src/polyfills/fetchPolyfill.fetchPolyfill}
+   */
+  getFetchImplementation_() {
+    const {win} = this.ampDoc_;
+    return win.fetch || fetchPolyfill;
   }
 
   /**
@@ -131,12 +156,9 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
    * @return {Promise}
    * */
   fetchPage_() {
-    fetch(this.nextPageCursor_)
-      .then(resp => {
-        return resp.json();
-      })
-      .then(this.processPage_.bind(this))
-      .catch(this.processError_.bind(this));
+    this.getFetchImplementation_(this.nextPageCursor_).then(resp => {
+      return resp.json();
+    });
   }
 
   /**
@@ -144,16 +166,27 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
    * @param {IntersectionObserverEntry} entries
    * @private
    * */
-  onIntersect_(entries) {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        this.intersectionObserver_.unobserve(this.container_);
-        if (this.nextPageCursor_) {
-          this.togglePlaceholder(true);
-          this.fetchPage_();
-        }
-      }
-    });
+  intersectCallback_(entries) {
+    const intersectEl = entries.find(entry => entry.isIntersecting);
+    if (intersectEl) {
+      this.fireLoad_();
+    }
+  }
+
+  /**
+   * @private
+   * @return {!Promise}
+   */
+  fireLoad_() {
+    this.intersectionObserver_.unobserve(this.container_);
+    if (this.nextPageCursor_) {
+      this.togglePlaceholder(true);
+      return this.fetchPage_()
+        .then(this.processPage_.bind(this))
+        .catch(this.processError_.bind(this));
+    } else {
+      return Promise.resolve(null);
+    }
   }
 }
 
