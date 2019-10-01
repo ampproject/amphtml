@@ -117,6 +117,7 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
+            'aria-label': 'Info',
             'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
         },
@@ -163,6 +164,7 @@ const TEMPLATE = {
               tag: 'div',
               attrs: dict({
                 'role': 'button',
+                'aria-label': 'Unmute',
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
             },
@@ -170,6 +172,7 @@ const TEMPLATE = {
               tag: 'div',
               attrs: dict({
                 'role': 'button',
+                'aria-label': 'Mute',
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
             },
@@ -179,6 +182,7 @@ const TEMPLATE = {
           tag: 'a',
           attrs: dict({
             'role': 'button',
+            'aria-label': 'Share',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
         },
@@ -186,6 +190,7 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
+            'aria-label': 'Sidebar',
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
         },
