@@ -19,7 +19,11 @@ import {
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
 } from '../../../../ads/google/utils';
-import {MAX_HEIGHT_EXP, ResponsiveState} from '../responsive-state';
+import {
+  AD_SIZE_OPTIMIZATION_EXP,
+  MAX_HEIGHT_EXP,
+  ResponsiveState,
+} from '../responsive-state';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -27,6 +31,8 @@ import {
 } from '../../../../src/dom';
 import {forceExperimentBranch} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
+
+const AD_CLIENT_ID = 'ca-pub-123';
 
 describes.realWin(
   'responsive-state',
@@ -39,8 +45,10 @@ describes.realWin(
     let win, doc;
     let lastSizeChangeAttempt;
     let element;
+    let storageContent;
+    let fakeIframe;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
       doc = win.document;
       const viewport = Services.viewportForDoc(doc);
@@ -56,9 +64,23 @@ describes.realWin(
           vsyncTaskSpec.mutate(vsyncState);
         }
       };
+      const storage = await Services.storageForDoc(doc);
+      storageContent = {};
+      sandbox.stub(storage, 'get').callsFake(key => {
+        return Promise.resolve(storageContent[key]);
+      });
+      sandbox.stub(storage, 'set').callsFake((key, value) => {
+        storageContent[key] = value;
+        return Promise.resolve();
+      });
+      fakeIframe = {
+        contentWindow: window,
+        nodeType: 1,
+        style: {},
+      };
     });
 
-    function createState(attributes) {
+    function createElement(attributes) {
       element = createElementWithAttributes(doc, 'amp-ad', {
         'type': 'adsense',
         'data-ad-client': 'ca-pub-123',
@@ -80,6 +102,11 @@ describes.realWin(
         })
       );
 
+      return element;
+    }
+
+    function createState(attributes) {
+      createElement(attributes);
       return ResponsiveState.createIfResponsive(element);
     }
 
@@ -242,6 +269,221 @@ describes.realWin(
         expect(element.style.marginRight).to.be.equal('50px');
 
         element.parentElement.style.direction = '';
+      });
+    });
+
+    describe('maybeUpgradeToResponsive', () => {
+      it("resolves to null when the appropriate experiment isn't enabled", async () => {
+        const element = createElement({
+          'data-ad-client': AD_CLIENT_ID,
+          'width': '300',
+          'height': '200',
+        });
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+        expect(result).to.be.null;
+      });
+
+      it('resolves to null when the ad unit is responsive already', async () => {
+        forceExperimentBranch(
+          win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+
+        const element = createElement({
+          'data-ad-client': AD_CLIENT_ID,
+          'data-auto-format': [ADSENSE_RSPV_TAG],
+          'data-full-width': '',
+          'height': '500px',
+          'width': '100vw',
+        });
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+        expect(result).to.be.null;
+      });
+
+      it('returns null when the ad unit is not responsive and ad size optimization is not set', async () => {
+        forceExperimentBranch(
+          win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        const element = createElement({
+          'data-ad-client': AD_CLIENT_ID,
+          'height': '200px',
+          'width': '50vw',
+        });
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.be.null;
+      });
+
+      it('returns null when the ad unit is not responsive and ad size optimization is disabled', async () => {
+        forceExperimentBranch(
+          win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        const element = createElement({
+          'data-ad-client': AD_CLIENT_ID,
+          'height': '200px',
+          'width': '50vw',
+        });
+        storageContent[`aas-${AD_CLIENT_ID}`] = false;
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.be.null;
+      });
+
+      it('returns a valid responsive state and upgrades element when the ad unit is not responsive and ad size optimization is enabled', async () => {
+        forceExperimentBranch(
+          win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        const element = createElement({
+          'data-ad-client': AD_CLIENT_ID,
+          'height': '200px',
+          'width': '50vw',
+        });
+        storageContent[`aas-${AD_CLIENT_ID}`] = true;
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.not.be.null;
+        expect(result.isValidElement()).to.be.true;
+        expect(element.getAttribute('height')).to.be.equal(
+          `${ADSENSE_RSPV_WHITELISTED_HEIGHT}`
+        );
+        expect(element.getAttribute('width')).to.be.equal('100vw');
+        expect(element).to.have.attribute('data-full-width');
+        expect(element.getAttribute('data-auto-format')).to.be.equal('rspv');
+      });
+    });
+    describe('maybeAttachSettingsListener', () => {
+      it("doesn't set up a listener if the experiment is not enabled", () => {
+        const element = createElement({
+          'data-ad-client': AD_CLIENT_ID,
+          'height': '200px',
+          'width': '50vw',
+        });
+        const promise = ResponsiveState.maybeAttachSettingsListener(
+          element,
+          fakeIframe,
+          AD_CLIENT_ID
+        );
+        expect(promise).to.be.null;
+      });
+
+      describe('sets up a listener that', () => {
+        let promise;
+
+        beforeEach(() => {
+          forceExperimentBranch(
+            win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.experiment
+          );
+          const element = createElement({
+            'data-ad-client': AD_CLIENT_ID,
+            'height': '200px',
+            'width': '50vw',
+          });
+          promise = ResponsiveState.maybeAttachSettingsListener(
+            element,
+            fakeIframe,
+            AD_CLIENT_ID
+          );
+          expect(promise).to.not.be.null;
+        });
+
+        it('writes opt in data to localstorage', async () => {
+          const data = {
+            'googMsgType': 'adsense-settings',
+            'adClient': AD_CLIENT_ID,
+            'enableAutoAdSize': '1',
+          };
+          win.postMessage(data, '*');
+
+          await promise;
+
+          expect(storageContent).to.deep.equal({[`aas-${AD_CLIENT_ID}`]: true});
+        });
+
+        it('writes opt out data to localstorage', async () => {
+          const data = {
+            'googMsgType': 'adsense-settings',
+            'adClient': AD_CLIENT_ID,
+            'enableAutoAdSize': '0',
+          };
+          win.postMessage(data, '*');
+
+          await promise;
+
+          expect(storageContent).to.deep.equal({
+            [`aas-${AD_CLIENT_ID}`]: false,
+          });
+        });
+
+        it("doesn't write data with the wrong message type", async () => {
+          const badData = {
+            'googMsgType': 'adsense-bettings',
+            'adClient': AD_CLIENT_ID,
+            'enableAutoAdSize': '1',
+          };
+          win.postMessage(badData, '*');
+          const goodData = {
+            'googMsgType': 'adsense-settings',
+            'adClient': AD_CLIENT_ID,
+            'enableAutoAdSize': '0',
+          };
+          win.postMessage(goodData, '*');
+
+          await promise;
+
+          expect(storageContent).to.deep.equal({
+            [`aas-${AD_CLIENT_ID}`]: false,
+          });
+        });
+
+        it("doesn't write data with the wrong client ID", async () => {
+          const badData = {
+            'googMsgType': 'adsense-settings',
+            'adClient': AD_CLIENT_ID + 'i',
+            'enableAutoAdSize': '1',
+          };
+          win.postMessage(badData, '*');
+          const goodData = {
+            'googMsgType': 'adsense-settings',
+            'adClient': AD_CLIENT_ID,
+            'enableAutoAdSize': '0',
+          };
+          win.postMessage(goodData, '*');
+
+          await promise;
+
+          expect(storageContent).to.deep.equal({
+            [`aas-${AD_CLIENT_ID}`]: false,
+          });
+        });
       });
     });
   }
