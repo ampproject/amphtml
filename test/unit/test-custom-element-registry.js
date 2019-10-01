@@ -177,7 +177,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
         head: {
           nodeType: /* ELEMENT */ 1,
           querySelectorAll: selector => {
-            if (selector == 'script[custom-element]') {
+            if (selector == 'script[custom-element],script[custom-template]') {
               return elements;
             }
             return [];

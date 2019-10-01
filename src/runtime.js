@@ -727,6 +727,8 @@ export class MultidocManager {
               const src = n.getAttribute('src');
               const isRuntime =
                 src.indexOf('/amp.js') != -1 || src.indexOf('/v0.js') != -1;
+              // Note: Some extensions don't have [custom-element] or
+              // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
               const versionRe = /-(\d+.\d+)(.max)?\.js$/;
