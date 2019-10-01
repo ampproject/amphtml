@@ -21,10 +21,10 @@ import {toWin} from '../../../src/types';
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';
 
 /**
- * The 'status' role politely announces toast content to screen readers.
+ * The 'alert' role assertively announces toast content to screen readers.
  * @private @const {string}
  * */
-const TOAST_ROLE = 'status';
+const TOAST_ROLE = 'alert';
 
 /**
  * Should be higher than total animation time.
