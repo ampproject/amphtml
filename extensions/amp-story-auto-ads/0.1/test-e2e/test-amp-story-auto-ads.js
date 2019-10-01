@@ -20,7 +20,7 @@ const viewport = {
 };
 
 describes.endtoend(
-  'amp-story-auto-ads',
+  'amp-story-auto-ads:basic',
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/basic.html',
@@ -41,12 +41,62 @@ describes.endtoend(
       const activePage = await controller.findElement('[active]');
       await expect(controller.getElementAttribute(activePage, 'ad')).to.exist;
       await validateAdOverlay(controller);
-      await validateAdAttribution(controller);
-      await validateCta(controller);
+      await validateAdAttribution(
+        controller,
+        '/test/fixtures/e2e/amphtml-ads/resource/icon.png' // iconUrl
+      );
+      await validateCta(
+        controller,
+        'https://www.amp.dev' // ctaUrl
+      );
+
+      await switchToAdFrame(controller);
+      const body = await controller.findElement('body');
+      await expect(controller.getElementAttribute(body, 'amp-story-visible')).to
+        .exist;
+      await controller.switchToParent();
     });
 
     // TODO(ccordry): write test that checks attribution click -- will
     // require additional changes to controller interface.
+  }
+);
+
+describes.endtoend(
+  'amp-story-auto-ads:dv3',
+  {
+    testUrl:
+      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/dv3-request.html',
+    initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
+    environments: ['single', 'viewer-demo'],
+  },
+  env => {
+    let controller;
+
+    beforeEach(() => {
+      controller = env.controller;
+    });
+
+    it('should render correctly', async () => {
+      await clickThroughPages(controller, /* numPages */ 7);
+      const activePage = await controller.findElement('[active]');
+      await expect(controller.getElementAttribute(activePage, 'ad')).to.exist;
+      await validateAdOverlay(controller);
+      await validateAdAttribution(
+        controller,
+        'https://googleads.g.doubleclick.net/pagead/images/mtad/ad_choices_blue.png' // iconUrl
+      );
+      await validateCta(
+        controller,
+        'https://adclick.g.doubleclick.net/pcs/123'
+      );
+
+      switchToAdFrame(controller);
+      const movedBody = await controller.findElement('#x-a4a-former-body');
+      await expect(
+        controller.getElementAttribute(movedBody, 'amp-story-visible')
+      ).to.exist;
+    });
   }
 );
 
@@ -83,7 +133,7 @@ async function validateAdOverlay(controller) {
   await controller.switchToLight();
 }
 
-async function validateCta(controller) {
+async function validateCta(controller, ctaUrl) {
   const ctaButton = await controller.findElement('.i-amphtml-story-ad-link');
   await expect(controller.getElementCssValue(ctaButton, 'visibility')).to.equal(
     'visible'
@@ -92,7 +142,7 @@ async function validateCta(controller) {
     '_blank'
   );
   await expect(controller.getElementAttribute(ctaButton, 'href')).to.equal(
-    'https://www.amp.dev'
+    ctaUrl
   );
   await expect(controller.getElementAttribute(ctaButton, 'role')).to.equal(
     'link'
@@ -109,7 +159,7 @@ async function validateCta(controller) {
   );
 }
 
-async function validateAdAttribution(controller) {
+async function validateAdAttribution(controller, iconUrl) {
   const attributionHost = await controller.findElement(
     '.i-amphtml-attribution-host'
   );
@@ -119,7 +169,7 @@ async function validateAdAttribution(controller) {
     '.i-amphtml-story-ad-attribution'
   );
   await expect(controller.getElementAttribute(attribution, 'src')).to.equal(
-    'https://tpc.googlesyndication.com/pagead/images/adchoices/icon.png'
+    iconUrl
   );
   await expect(
     controller.getElementCssValue(attribution, 'visibility')
@@ -136,4 +186,9 @@ async function validateAdAttribution(controller) {
   });
 
   await controller.switchToLight();
+}
+
+async function switchToAdFrame(controller) {
+  const frame = await controller.findElement('#i-amphtml-ad-page-1 iframe');
+  await controller.switchToFrame(frame);
 }

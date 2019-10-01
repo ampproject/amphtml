@@ -700,8 +700,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const frameDoc = getFrameDoc(friendlyIframeEmbed);
     const {body} = frameDoc;
+    // TODO(#24829) Remove alternate body when we have full ad network support.
+    const alternateBody = body.querySelector('#x-a4a-former-body');
     this.mutateElement(() => {
       body.setAttribute(Attributes.IFRAME_BODY_VISIBLE, '');
+      alternateBody &&
+        alternateBody.setAttribute(Attributes.IFRAME_BODY_VISIBLE, '');
       this.visibleAdBody_ = body;
     });
   }
@@ -712,6 +716,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   removeVisibleAttribute_() {
     this.mutateElement(() => {
       if (this.visibleAdBody_) {
+        // TODO(#24829) Remove alternate body when we have full ad network support.
+        const alternateBody = this.visibleAdBody_.querySelector(
+          '#x-a4a-former-body'
+        );
+        alternateBody &&
+          alternateBody.removeAttribute(Attributes.IFRAME_BODY_VISIBLE);
         this.visibleAdBody_.removeAttribute(Attributes.IFRAME_BODY_VISIBLE);
         this.visibleAdBody_ = null;
       }
