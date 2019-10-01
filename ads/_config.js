@@ -894,9 +894,7 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'seedingalliance': {
-    renderStartImplemented: true,
-  },
+  'seedingalliance': {},
 
   'sekindo': {
     renderStartImplemented: true,

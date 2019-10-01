@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
-
-/** @const {string} */
-const TAG = 'SEEDINGALLIANCE';
+import {writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function seedingalliance(global, data) {
-	loadScript(global, 'https://d.nativendo.de/cds/delivery/init?url=' + encodeURIComponent(data.url), () => {
-		window.context.renderStart();
-	});
+  writeScript(
+    global,
+    'https://d.nativendo.de/cds/delivery/init?url=' +
+      encodeURIComponent(data.url)
+  );
 }
