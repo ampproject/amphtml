@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
 import {DEFAULT_THRESHOLD} from '../../../src/intersection-observer-polyfill';
+import {Layout} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
+import {setStyle} from '../../../src/style';
 
+// @TODO:
+// * Implement fetch and IntersectionObserver polyfills
+// * Implement error handling
+// * Test coverage
+// * Docs for component
 export class AmpInfiniteScroll extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -31,19 +37,6 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     this.nextPageCursor_ = null;
   }
 
-  createIntersectionObserver_() {
-    if (!this.intersectionObserver_) {
-      this.intersectionObserver_ = new IntersectionObserver(
-        this.onIntersect.bind(this),
-        {
-          rootMargin: '0px',
-          threshold: DEFAULT_THRESHOLD,
-        }
-      );
-    }
-    return this.intersectionObserver_;
-  }
-
   /** @override */
   buildCallback() {
     this.nextPageCursor_ = userAssert(
@@ -52,7 +45,7 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
       this.element
     );
 
-    this.container_ = this.element.ownerDocument.createElement('div');
+    this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
 
     const ampDoc = this.getAmpDoc();
@@ -63,46 +56,10 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     });
   }
 
-  processPage_(data) {
-    this.nextPageCursor_ = data.nextPage;
-    if (!this.nextPageCursor_) {
-      this.intersectionObserver_.unobserve(this.container_);
-      return;
-    }
-    const page = new DOMParser().parseFromString(data.page, 'text/html');
-    this.mutateElement(() => {
-      const fragment = document.createDocumentFragment();
-      Array.from(page.body.children).forEach(el => {
-        fragment.appendChild(el);
-      });
-
-      this.element.parentElement.insertBefore(fragment, this.element);
-      this.intersectionObserver_.observe(this.container_);
-    });
-  }
-
-  fetchPage_() {
-    fetch(this.nextPageCursor_)
-      .then(resp => {
-        return resp.json();
-      })
-      .then(this.processPage_.bind(this));
-  }
-
-  onIntersect(entries) {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        this.intersectionObserver_.unobserve(this.container_);
-        this.fetchPage_();
-      }
-    });
-  }
-
   /** @override */
   unlayoutCallback() {
-    removeElement(this.container_);
+    this.removeElement(this.container_);
     this.container_ = null;
-    // Needs to clean up intersectionObserverApi_
     if (this.intersectionObserver_) {
       this.intersectionObserver_.disconnect();
       this.intersectionObserver_ = null;
@@ -112,6 +69,91 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED;
+  }
+
+  /**
+   * @private
+   * @return {IntersectionObserver}
+   */
+  createIntersectionObserver_() {
+    if (!this.intersectionObserver_) {
+      this.intersectionObserver_ = new IntersectionObserver(
+        this.onIntersect_.bind(this),
+        {
+          rootMargin: '0px',
+          threshold: DEFAULT_THRESHOLD,
+        }
+      );
+    }
+    return this.intersectionObserver_;
+  }
+
+  /**
+   * @private
+   * @return {Element}
+   */
+  createContainer_() {
+    const container = this.element.ownerDocument.createElement('div');
+    setStyle(container, 'height', '1px');
+    setStyle(container, 'width', '1px');
+    return container;
+  }
+
+  /**
+   * @private
+   * @param {{page: string, nextPage: string}} data
+   */
+  processPage_(data) {
+    this.togglePlaceholder(false);
+    this.nextPageCursor_ = data.page ? data.nextPage : null;
+    const page = new DOMParser().parseFromString(data.page, 'text/html');
+    this.mutateElement(() => {
+      const fragment = document.createDocumentFragment();
+      Array.from(page.body.children).forEach(el => {
+        fragment.appendChild(el);
+      });
+      this.element.parentElement.insertBefore(fragment, this.element);
+      this.intersectionObserver_.observe(this.container_);
+    });
+  }
+
+  /**
+   * @private
+   * @param {Error} error
+   */
+  processError_(error) {
+    this.togglePlaceholder(false);
+    console.log(error);
+  }
+
+  /**
+   * @private
+   * @return {Promise}
+   * */
+  fetchPage_() {
+    fetch(this.nextPageCursor_)
+      .then(resp => {
+        return resp.json();
+      })
+      .then(this.processPage_.bind(this))
+      .catch(this.processError_.bind(this));
+  }
+
+  /**
+   * @private
+   * @param {IntersectionObserverEntry} entries
+   * @private
+   * */
+  onIntersect_(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        this.intersectionObserver_.unobserve(this.container_);
+        if (this.nextPageCursor_) {
+          this.togglePlaceholder(true);
+          this.fetchPage_();
+        }
+      }
+    });
   }
 }
 

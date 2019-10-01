@@ -30,12 +30,13 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       element = win.document.createElement('amp-infinite-scroll');
+      element.setAttribute('next-page', 'http://something.com');
       win.document.body.appendChild(element);
     });
 
     it('should have hello world when built', () => {
       element.build();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+      expect(element.querySelector('div').textContent).to.equal('');
     });
   }
 );
