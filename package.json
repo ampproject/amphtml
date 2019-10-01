@@ -138,7 +138,7 @@
     "karma-super-dots-reporter": "0.2.0",
     "lazypipe": "1.0.2",
     "lolex": "4.2.0",
-    "magic-string": "0.25.3",
+    "magic-string": "0.25.4",
     "markdown-link-check": "3.7.3",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
