@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -44,7 +44,7 @@ const url = {content: '//d3lcz8vpax4lo2.cloudfront.net'};
  */
 function createTemplate(embedId) {
   const template = document.createElement('template');
-  template.innerHTML = `
+  template./*OK*/innerHTML = `
     <div id="insticator-container">
       <div id="div-insticator-ad-1"></div>
       <div id="insticator-embed" embed-id="${embedId}"></div>
