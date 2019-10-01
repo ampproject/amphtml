@@ -2,7 +2,6 @@
   "allow-doc-opt-in": [
     "amp-next-page",
     "inabox-viewport-friendly",
-    "inabox-no-chunking",
     "inabox-resources-lite",
     "inabox-viewer-lite",
     "inabox-viewport-lite"

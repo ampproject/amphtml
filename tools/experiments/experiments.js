@@ -319,12 +319,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
-    id: 'inabox-no-chunking',
-    name: 'Experiment to disable startup chunking in inabox runtime',
-    spec: 'https://github.com/ampproject/amphtml/issues/23573',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23573',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
