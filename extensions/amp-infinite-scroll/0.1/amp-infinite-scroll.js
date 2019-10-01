@@ -19,7 +19,6 @@ import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../src/intersection-observer-polyfill';
-import {fetchPolyfill} from '../../../src/polyfills/fetch';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
@@ -122,7 +121,6 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     this.togglePlaceholder(false);
     this.nextPageCursor_ = data.page ? data.nextPage : null;
     const page = new DOMParser().parseFromString(data.page, 'text/html');
-
     this.mutateElement(() => {
       const fragment = this.element.ownerDocument.createDocumentFragment();
       Array.from(page.body.children).forEach(el => {
@@ -130,7 +128,6 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
       });
       this.element.parentElement.insertBefore(fragment, this.element);
       this.intersectionObserver_.observe(this.container_);
-      // console.log('mutate doc is', this.element.ownerDocument.body);
     });
   }
 
@@ -144,19 +141,10 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {FetchInitDef|../../../src/polyfills/fetchPolyfill.fetchPolyfill}
-   */
-  getFetchImplementation_() {
-    const {win} = this.ampDoc_;
-    return win.fetch || fetchPolyfill;
-  }
-
-  /**
-   * @private
    * @return {Promise}
    * */
   fetchPage_() {
-    this.getFetchImplementation_(this.nextPageCursor_).then(resp => {
+    return fetch(this.nextPageCursor_).then(resp => {
       return resp.json();
     });
   }
