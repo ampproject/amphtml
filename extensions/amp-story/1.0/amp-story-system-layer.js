@@ -129,6 +129,7 @@ const TEMPLATE = {
             {
               tag: 'div',
               attrs: dict({
+                'role': 'alert',
                 'class': 'i-amphtml-message-container',
               }),
               children: [
