@@ -74,7 +74,7 @@ function createAdsAndEmbed(siteId, embedId) {
     (a.Insticator = {
       ad: {
         loadAd: function(b) {
-          this.ad.q.push(b);
+          a.Insticator.ad.q.push(b);
         },
         q: [],
       },
@@ -84,8 +84,8 @@ function createAdsAndEmbed(siteId, embedId) {
       q: [],
       amp: null, // this will get set to window.context which is the AMP API so we can access from our ads code
       load: function(t, o) {
-        this.amp = window.context; // set the Insticator object property amp to window.context which is the AMP API so we can access from our ads code
-        this.q.push({t, o});
+        a.Insticator.amp = window.context; // set the Insticator object property amp to window.context which is the AMP API so we can access from our ads code
+        a.Insticator.q.push({t, o});
       },
     });
 
@@ -97,9 +97,9 @@ function createAdsAndEmbed(siteId, embedId) {
   d.parentNode.insertBefore(b, d);
 
   // execute functions of insticator object on the window (load ads and embed)
-  this.ad.loadAd('div-insticator-ad-1');
-  this.ad.loadAd('div-insticator-ad-2');
-  this.load('em', {id: embedId});
+  a.Insticator.ad.loadAd('div-insticator-ad-1');
+  a.Insticator.ad.loadAd('div-insticator-ad-2');
+  a.Insticator.load('em', {id: embedId});
 
   // now tell AMP runtime to start rendering ads
   window.context.renderStart();
