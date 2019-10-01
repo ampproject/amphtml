@@ -21,10 +21,6 @@ limitations under the License.
  Creates reusable actions.
  <table>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-action-macro" src="https://cdn.ampproject.org/v0/amp-action-macro-0.1.js">&lt;/script></code></td>
   </tr>
