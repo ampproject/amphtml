@@ -26,7 +26,7 @@ import {
 } from '../../amp-base-carousel/0.1/responsive-attributes';
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -258,7 +258,7 @@ class AmpStreamGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(
+    userAssert(
       isExperimentOn(this.win, 'amp-stream-gallery'),
       'The amp-stream-gallery experiment must be enabled to use the ' +
         'component'
