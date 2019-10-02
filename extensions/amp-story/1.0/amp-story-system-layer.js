@@ -117,7 +117,7 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'aria-label': 'Info',
+            'aria-label': LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
             'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
         },
@@ -164,7 +164,8 @@ const TEMPLATE = {
               tag: 'div',
               attrs: dict({
                 'role': 'button',
-                'aria-label': 'Unmute',
+                'aria-label':
+                  LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
             },
@@ -172,7 +173,8 @@ const TEMPLATE = {
               tag: 'div',
               attrs: dict({
                 'role': 'button',
-                'aria-label': 'Mute',
+                'aria-label':
+                  LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
             },
@@ -182,7 +184,7 @@ const TEMPLATE = {
           tag: 'a',
           attrs: dict({
             'role': 'button',
-            'aria-label': 'Share',
+            'aria-label': LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
         },
@@ -190,7 +192,7 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'aria-label': 'Sidebar',
+            'aria-label': LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
         },
