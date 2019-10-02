@@ -22,51 +22,46 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
+import {removeElement} from '../../../src/dom';
+
+/** @const */
+const TAG = 'amp-infinite-scroll';
+/**@const */
 
 export class AmpInfiniteScroll extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private {?Element} */
-    this.container_ = null;
-    /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
+    /** @private {!Element} */
+    this.container_ = this.createContainer_();
+    /** @private {!IntersectionObserver|!../../../src/intersection-observer-polyfill.IntersectionObserverPolyfill} */
+    this.intersectionObserver_ = this.createIntersectionObserver_();
     /** @private {?string} */
     this.nextPageCursor_ = null;
-    /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.nextPageCursor_ = userAssert(
       this.element.getAttribute('next-page'),
-      'The next-page attribute is required for <amp-infinite-scroll> %s',
+      'The next-page attribute is required for <%s> %s',
+      TAG,
       this.element
     );
-
-    this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
-
-    this.ampDoc_ = this.getAmpDoc();
-    const observer = this.createIntersectionObserver_();
-
-    this.ampDoc_.whenReady().then(() => {
-      observer.observe(this.container_);
-    });
+    this.getAmpDoc()
+      .whenReady()
+      .then(() => this.intersectionObserver_.observe(this.container_));
   }
 
   /** @override */
   unlayoutCallback() {
-    this.removeElement(this.container_);
-    this.container_ = null;
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.disconnect();
-      this.intersectionObserver_ = null;
-    }
+    removeElement(this.container_);
+    this.intersectionObserver_.disconnect();
     return true;
   }
+
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
@@ -74,10 +69,10 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {IntersectionObserver|../../../src/intersection-observer-polyfill.IntersectionObserverPolyfill}
+   * @return {!Function}
    */
   getIntersectionObserverImplementation_() {
-    if (nativeIntersectionObserverSupported(this.ampDoc_.win)) {
+    if (nativeIntersectionObserverSupported(this.win)) {
       return IntersectionObserver;
     } else {
       return IntersectionObserverPolyfill;
@@ -86,7 +81,7 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {IntersectionObserver}
+   * @return {!IntersectionObserver|!../../../src/intersection-observer-polyfill.IntersectionObserverPolyfill}
    */
   createIntersectionObserver_() {
     const ObserverImplementation = this.getIntersectionObserverImplementation_();
@@ -104,7 +99,7 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {Element}
+   * @return {!Element}
    */
   createContainer_() {
     const container = this.element.ownerDocument.createElement('div');
@@ -115,7 +110,7 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
 
   /**
    * @private
-   * @param {{page: string, nextPage: string}} data
+   * @param {!{page: string, nextPage: string}} data
    */
   processPage_(data) {
     this.togglePlaceholder(false);
@@ -123,7 +118,7 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
     const page = new DOMParser().parseFromString(data.page, 'text/html');
     this.mutateElement(() => {
       const fragment = this.element.ownerDocument.createDocumentFragment();
-      Array.from(page.body.children).forEach(el => {
+      Array.prototype.slice.call(page.body.children).forEach(el => {
         fragment.appendChild(el);
       });
       this.element.parentElement.insertBefore(fragment, this.element);
@@ -144,21 +139,19 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
    * @return {Promise}
    * */
   fetchPage_() {
-    return fetch(this.nextPageCursor_).then(resp => {
+    return fetch(this.nextPageCursor_ || '').then(resp => {
       return resp.json();
     });
   }
 
   /**
    * @private
-   * @param {IntersectionObserverEntry} entries
-   * @private
+   * @param {!Array<IntersectionObserverEntry>} entries
    * */
   intersectCallback_(entries) {
-    const intersectEl = entries.find(entry => entry.isIntersecting);
-    if (intersectEl) {
-      this.fireLoad_();
-    }
+    entries.forEach(entry => {
+      entry.isIntersecting && this.fireLoad_();
+    });
   }
 
   /**
@@ -178,6 +171,6 @@ export class AmpInfiniteScroll extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-infinite-scroll', '0.1', AMP => {
-  AMP.registerElement('amp-infinite-scroll', AmpInfiniteScroll);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpInfiniteScroll);
 });
