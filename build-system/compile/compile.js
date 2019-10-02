@@ -163,7 +163,11 @@ function compile(
 
     console /*OK*/
       .assert(typeof entryModuleFilenames == 'string');
-    return singlePassCompile(entryModuleFilenames, compilationOptions);
+    return singlePassCompile(
+      entryModuleFilenames,
+      compilationOptions,
+      timeInfo
+    );
   }
 
   return new Promise(function(resolve, reject) {
