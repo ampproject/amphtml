@@ -40,17 +40,17 @@ const strings = {
       'Label for the unmute button that turns the sound ' +
       'in the story back on',
   },
-  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Sound on',
-    description:
-      'Text that informs users that the sound is on after they ' +
-      'click the unmute button on a page with sound',
-  },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
     string: 'This page has no sound',
     description:
       'Text that informs users that the sound is on after they ' +
       'click the unmute button on a page without sound',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
+    string: 'Sound on',
+    description:
+      'Text that informs users that the sound is on after they ' +
+      'click the unmute button on a page with sound',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'More to read',
@@ -99,21 +99,6 @@ const strings = {
     description:
       'Label for a link to documentation on how AMP links are handled.',
   },
-  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Swipe up',
-    description:
-      'Label for a button to open a drawer containing additional ' +
-      'content via a "swipe up" user gesture.',
-  },
-  [LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO]: {
-    string: 'Video failed to play',
-    description:
-      'Label indicating that the video visible on the page failed to play.',
-  },
-  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Play video',
-    description: 'Label for a button to play the video visible on the page.',
-  },
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
     string: 'Updated',
     description:
@@ -136,6 +121,21 @@ const strings = {
     description:
       'Label for the information button that pulls up ' +
       'relevant information about the story content',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
+    string: 'Swipe up',
+    description:
+      'Label for a button to open a drawer containing additional ' +
+      'content via a "swipe up" user gesture.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO]: {
+    string: 'Video failed to play',
+    description:
+      'Label indicating that the video visible on the page failed to play.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
+    string: 'Play video',
+    description: 'Label for a button to play the video visible on the page.',
   },
   [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
     string: 'Share story',
