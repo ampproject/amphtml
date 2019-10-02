@@ -28,9 +28,11 @@ export function lentainform(global, data) {
 
   document.body.appendChild(scriptRoot);
 
+  const publisherStr = data.publisher.replace(/[^A-z0-9]/g, '');
+
   const url =
-    `https://jsc.lentainform.com/${encodeURIComponent(data.publisher[0])}/` +
-    `${encodeURIComponent(data.publisher[1])}/` +
+    `https://jsc.lentainform.com/${encodeURIComponent(publisherStr[0])}/` +
+    `${encodeURIComponent(publisherStr[1])}/` +
     `${encodeURIComponent(data.publisher)}.` +
     `${encodeURIComponent(data.widget)}.js?t=` +
     Math.floor(Date.now() / 36e5);
