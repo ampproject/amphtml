@@ -79,13 +79,27 @@ function renderSingle(doc, elementDef) {
       )
     : doc.createElement(elementDef.tag);
 
-  if (hasOwn(elementDef, 'localizedStringId')) {
+  const hasLocalizedTextContent = hasOwn(elementDef, 'localizedStringId');
+  const hasLocalizedLabel = hasOwn(elementDef, 'localizedLabelId');
+  if (hasLocalizedTextContent || hasLocalizedLabel) {
     const win = toWin(doc.defaultView);
     Services.localizationServiceForOrNull(win).then(localizationService => {
       devAssert(localizationService, 'Could not retrieve LocalizationService.');
-      el.textContent = localizationService.getLocalizedString(
-        /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
-      );
+
+      if (hasLocalizedTextContent) {
+        el.textContent = localizationService.getLocalizedString(
+          /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
+        );
+      }
+
+      if (hasLocalizedLabel) {
+        el.setAttribute(
+          'aria-label',
+          localizationService.getLocalizedString(
+            /** @type {!LocalizedStringId} */ (elementDef.localizedLabelId)
+          )
+        );
+      }
     });
   }
 

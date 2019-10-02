@@ -117,9 +117,9 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'aria-label': LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
             'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
         },
         {
           tag: 'div',
@@ -164,19 +164,19 @@ const TEMPLATE = {
               tag: 'div',
               attrs: dict({
                 'role': 'button',
-                'aria-label':
-                  LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId:
+                LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
             },
             {
               tag: 'div',
               attrs: dict({
                 'role': 'button',
-                'aria-label':
-                  LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId:
+                LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
             },
           ],
         },
@@ -184,17 +184,17 @@ const TEMPLATE = {
           tag: 'a',
           attrs: dict({
             'role': 'button',
-            'aria-label': LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
         },
         {
           tag: 'div',
           attrs: dict({
             'role': 'button',
-            'aria-label': LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
         },
       ],
     },
