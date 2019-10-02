@@ -1,22 +1,7 @@
-<!--
-  1. Change "category" below to one of:
-       ads-analytics
-       dynamic-content
-       layout
-       media
-       presentation
-       social
-
-  2. Remove any of the "formats" that don't apply.
-     You can also add the "ads" and "stories" formats if they apply.
-
-  3. And remove this comment! (no empty lines before "---")
--->
 ---
 $category: presentation
 formats:
   - websites
-  - email
 teaser:
   text: FILL THIS IN.
 ---
@@ -41,11 +26,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Implements infinite scroll (feed that does automatically load next page once user scrolls down near amp-infinite-scroll visible area)</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Experimental</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -53,26 +38,79 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-infinite-scroll/">Annotated code example for amp-infinite-scroll</a></td>
   </tr>
 </table>
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
+This component implements scroll auto populated page, aka infinite scroll. When user scrolls down the page and hits area of visibility for amp-infinite scroll
+it sends request to URL specified in `next-page` attribute and injects amp markup returned by `next-page` param into page.
 
-## Attributes
+Example:
 
-FILL THIS IN. Does this extension allow for properties to configure?
+```HTML
+    <amp-infinite-scroll
+      layout="fixed"
+      width="500"
+      height="20"
+      next-page="https://someapi.com/page/"
+    >
+      <div placeholder>Loading...</div>
+      <div fallback>Failed to load data, try to reload page</div>
+    </amp-infinite-scroll>
+```
+
+While next page is loading `placeholder` attribute would be shown, if API has failed `fallback` element will be shown, see [Placeholders and Fallbacks docs](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders/)
+
+API Requirements:
+
+API URI passed to `next-page` param should return JSON response containing two mandatory fields: page (AMP HTML page content) and nextPage
+
+Server response example: 
+
+```javascript
+{
+  page: '<span>Next page content</span>'
+  nextPage: 'https://someapi.com/page/2'
+}
+```
 
 <table>
   <tr>
-    <td width="40%"><strong>data-my-attribute</strong></td>
-    <td>FILL THIS IN. This table <strong>must</strong> be written in HTML.</td>
+    <td width="40%"><strong>page <small>(required)</small></strong></td>
+    <td>HTML to be injected into page when amp-infinite-scroll triggers load</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>nextPage <small>(required)</small></strong></td>
+    <td>should be either string that contains next page URI or `null` if current page is last. In this case no further requests would be send and it assumes we've reached end of pages available</td>
+  </tr>
+</table>
+
+
+
+## Attributes
+
+<table>
+  <tr>
+    <td width="40%"><strong>next-page(required)</strong></td>
+    <td>API URI that returns next page data</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>width (required)</strong></td>
+    <td>The width of the amp-infinite-scroll component</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>height (required)</strong></td>
+    <td>The height of the amp-infinite-scroll component</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
