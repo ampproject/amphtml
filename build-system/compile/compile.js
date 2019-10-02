@@ -30,6 +30,7 @@ const {
 } = require('./closure-compile');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
@@ -41,7 +42,8 @@ let inProgress = 0;
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = 1;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  isTravisBuild() && argv.single_pass ? 4 : 1;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
