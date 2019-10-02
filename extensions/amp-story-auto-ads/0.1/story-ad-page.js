@@ -354,7 +354,6 @@ export class StoryAdPage {
     // the appropriate time.
     a.addEventListener('click', () => {
       const vars = {
-        [AnalyticsVars.AD_INDEX]: this.index_,
         [AnalyticsVars.AD_CLICKED]: Date.now(),
       };
       this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
@@ -481,7 +480,7 @@ export class StoryAdPage {
    */
   analyticsEvent_(eventType, vars) {
     this.analytics_.then(analytics =>
-      analytics.fireEvent(this.pageElement_, vars['adIndex'], eventType, vars)
+      analytics.fireEvent(this.pageElement_, this.index_, eventType, vars)
     );
   }
 }

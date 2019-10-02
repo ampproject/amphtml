@@ -237,6 +237,22 @@ describes.realWin(
         });
       });
 
+      it('should fire "story-ad-view" upon ad visible', () => {
+        autoAds.ampStory_ = {
+          element: storyElement,
+          addPage: NOOP,
+        };
+        autoAds.setVisibleAttribute_ = NOOP;
+        autoAds.adPagesCreated_ = 1;
+        const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
+        autoAds.adPageIds_ = {'ad-page-1': 1};
+        autoAds.handleActivePageChange_(1, 'ad-page-1');
+        expect(analyticsStub).to.be.called;
+        expect(analyticsStub).to.have.been.calledWithMatch('story-ad-view', {
+          'viewTime': sinon.match.number,
+        });
+      });
+
       it('should fire "story-ad-exit" upon ad exit', () => {
         autoAds.ampStory_ = {
           element: storyElement,
