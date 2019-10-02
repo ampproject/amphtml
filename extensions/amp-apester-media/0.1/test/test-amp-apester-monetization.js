@@ -51,28 +51,28 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     });
   });
 
-  it('show display ad', async () => {
+  it('Should show a companion display ad', async () => {
     media.campaignData = createCampaignData(true);
     await handleCompanionAds(media, baseElement);
     const displayAd = queryAmpAdDisplaySelector(baseElement);
     expect(displayAd).to.exist;
     expect(baseElement.nextSibling).to.be.equal(displayAd);
   });
-  it('show sr ad below', async () => {
+  it('Should show an SR companion ad below', async () => {
     media.campaignData = createCampaignData(false, false, true);
     await handleCompanionAds(media, baseElement);
     const srAdBelow = queryAmpAdBladeSelector(baseElement);
     expect(srAdBelow).to.exist;
     expect(baseElement.nextSibling).to.be.equal(srAdBelow);
   });
-  it('show sr ad above', async () => {
+  it('Should show an SR companion ad above', async () => {
     media.campaignData = createCampaignData(false, true, false);
-    await handleCompanionAds(media, baseElement)
+    await handleCompanionAds(media, baseElement);
     const srAboveAd = queryAmpAdBladeSelector(baseElement);
     expect(srAboveAd).to.exist;
     expect(baseElement.previousSibling).to.be.equal(srAboveAd);
   });
-  it('show sr above with display', async () => {
+  it('Should show an SR companion above with display companion', async () => {
     media.campaignData = createCampaignData(true, true, false);
     await handleCompanionAds(media, baseElement);
     const displayAd = queryAmpAdDisplaySelector(baseElement);
@@ -82,7 +82,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     expect(srAboveAd).to.exist;
     expect(baseElement.previousSibling).to.be.equal(srAboveAd);
   });
-  it('dont show ad if disabled amp companion ads', async () => {
+  it('Should not show ads if disabled amp companion ads', async () => {
     media.campaignData = createCampaignData(true, true, false, true);
     await handleCompanionAds(media, baseElement);
     const displayAd = queryAmpAdDisplaySelector(baseElement);
