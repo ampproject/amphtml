@@ -369,7 +369,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.localizationService_
     );
 
-    page.registerLoadCallback(() => this.maybeForceAdPlacement_());
+    this.maybeForceAdPlacement_(page);
 
     const pageElement = page.build();
     this.adPages_.push(page);
@@ -388,14 +388,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Development mode forces navigation to ad page for better dev-x.
    * Only do this once to prevent an infinite view->request->navigate loop.
+   * @param {StoryAdPage} page
    */
-  maybeForceAdPlacement_() {
+  maybeForceAdPlacement_(page) {
     if (
       this.element.hasAttribute('development') &&
       this.config_['type'] === 'fake' &&
       !this.hasForcedRender_
     ) {
-      this.forcePlaceAdAfterPage();
+      page.registerLoadCallback(() => this.forcePlaceAdAfterPage());
     }
   }
 
