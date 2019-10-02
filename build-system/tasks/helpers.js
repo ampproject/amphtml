@@ -102,19 +102,21 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
  * Compile JS in minified mode and drop them in dist/.
+ * @return {!Promise}
  */
-async function compileAllMinifiedJs() {
+function compileAllMinifiedJs() {
   log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
-  await compileAllJs(/* watch */ false, /* minify */ true);
+  return compileAllJs(/* watch */ false, /* minify */ true);
 }
 
 /**
  * Compile JS in unminified mode and drop them in dist/.
  * @param {boolean} watch
+ * @return {!Promise}
  */
-async function compileAllUnminifiedJs(watch) {
+function compileAllUnminifiedJs(watch) {
   log('Compiling JS with', cyan('browserify') + '...');
-  await compileAllJs(/* watch */ watch);
+  return compileAllJs(/* watch */ watch);
 }
 
 /**
@@ -171,10 +173,11 @@ async function bootstrapThirdPartyFrames(watch, minify) {
  * and drop them in the dist folder
  * @param {boolean} watch
  * @param {boolean} minify
+ * @return {!Promise}
  */
-async function compileAllJs(watch, minify) {
+function compileAllJs(watch, minify) {
   const startTime = Date.now();
-  await Promise.all([
+  return Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
     doBuildJs(jsBundles, 'amp.js', {
       watch,
@@ -197,12 +200,13 @@ async function compileAllJs(watch, minify) {
     doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
-  ]);
-  endBuildStep(
-    minify ? 'Minified all' : 'Compiled all',
-    'runtime JS files',
-    startTime
-  );
+  ]).then(() => {
+    endBuildStep(
+      minify ? 'Minified all' : 'Compiled all',
+      'runtime JS files',
+      startTime
+    );
+  });
 }
 
 /**
