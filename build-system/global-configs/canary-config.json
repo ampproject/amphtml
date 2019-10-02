@@ -44,6 +44,6 @@
   "ios-scrollable-iframe": 0,
   "macro-after-long-task": 1,
   "pump-early-frame": 1,
-  "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.01,
+  "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
   "version-locking": 1
 }
