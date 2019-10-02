@@ -27,6 +27,7 @@ goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.sortAndUniquify');
 goog.require('amp.validator.subtractDiff');
 goog.require('amp.validator.validateString');
+goog.require('goog.asserts');
 goog.require('goog.uri.utils');
 
 /**
@@ -305,7 +306,7 @@ ValidatorTestCase.prototype.run = function() {
                ' is incorrect, please run `gulp validator --update_tests` to ' +
                'regenerate it based on its corresponding .html file.';
   }
-  assert.fail('', '', message, '');
+  goog.asserts.fail(message);
 };
 
 /**
@@ -343,9 +344,8 @@ describe('ValidatorOutput', () => {
         amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
     const expectedSubstr = 'http://google.com/foo.html:28:3';
     if (observed.indexOf(expectedSubstr) === -1)
-    {assert.fail(
-        '', '', 'expectedSubstr:\n' + expectedSubstr +
-          '\nsaw:\n' + observed, '');}
+    {goog.asserts.fail('expectedSubstr:\n' + expectedSubstr +
+          '\nsaw:\n' + observed);}
   });
 
   it('validate amp format', () => {
