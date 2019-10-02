@@ -222,7 +222,7 @@ describes.realWin(
         el.setAttribute('trigger', 'immediate');
         el.textContent = config;
         const whenFirstVisibleStub = sandbox
-          .stub(viewer, 'whenFirstVisible')
+          .stub(ampdoc, 'whenFirstVisible')
           .callsFake(() => new Promise(function() {}));
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
@@ -1468,7 +1468,7 @@ describes.realWin(
             return Promise.reject();
           });
 
-          sandbox.stub(viewer, 'isVisible').returns(false);
+          sandbox.stub(ampdoc, 'isVisible').returns(false);
           analytics.layoutCallback();
           analytics.resumeCallback();
           analytics.unlayoutCallback();

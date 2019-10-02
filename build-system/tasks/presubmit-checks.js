@@ -214,14 +214,6 @@ const forbiddenTerms = {
       'src/service/crypto-impl.js',
     ],
   },
-  'installGlobalDocumentStateService': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/runtime.js',
-      'src/service/core-services.js',
-      'src/service/document-state.js',
-    ],
-  },
   'installDocService': {
     message: privateServiceFactory,
     whitelist: [
@@ -429,15 +421,6 @@ const forbiddenTerms = {
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
-  // Global documentState service.
-  'globalDocumentStateFor': {
-    message: 'Global document API. In the process of being deprecated.',
-    whitelist: [
-      'src/services.js',
-      'src/service/viewer-impl.js',
-      'src/service/vsync-impl.js',
-    ],
-  },
   'getBaseCid': {
     message: requiresReviewPrivacy,
     whitelist: ['src/service/cid-impl.js', 'src/service/viewer-impl.js'],
@@ -482,15 +465,17 @@ const forbiddenTerms = {
       // https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec
       'src/services.js',
       'src/service/cid-impl.js',
-      'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/responsive-state.js',
       'extensions/amp-app-banner/0.1/amp-app-banner.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
   },
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access-iframe.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-script/0.1/amp-script.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
@@ -722,6 +707,19 @@ const forbiddenTerms = {
       'src/amp-shadow.js',
       'src/style-installer.js',
       'src/inabox/amp-inabox.js',
+    ],
+  },
+  'isBuildRenderBlocking': {
+    message:
+      'This is a protected API. Please only override it the element is ' +
+      'render blocking',
+    whitelist: [
+      'src/service/resources-impl.js',
+      'src/service/resource.js',
+      'src/custom-element.js',
+      'src/base-element.js',
+      'extensions/amp-experiment/0.1/amp-experiment.js',
+      'extensions/amp-experiment/1.0/amp-experiment.js',
     ],
   },
   '^describe[\\.|\\(|$]': {

@@ -37,7 +37,11 @@ class Runner extends RuntimeTestRunner {
       return;
     }
     execOrDie('gulp clean');
-    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    if (argv.compiled) {
+      execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    } else {
+      execOrDie(`gulp build --config ${argv.config}`);
+    }
   }
 }
 

@@ -30,6 +30,23 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    /*
+     * Prerender is allowed because the client_id is only used to calculate
+     * the variant bucket.
+     * In the case where a client_id is first generated
+     * during prerender, the base cid will be stored in the AMP viewer domain.
+     */
+    return true;
+  }
+
+  /** @override */
+  isBuildRenderBlocking() {
+    // variantService is render blocking
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     return getServicePromiseForDoc(this.getAmpDoc(), 'variant').then(
       variantsService => {
