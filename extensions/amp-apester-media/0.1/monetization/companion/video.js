@@ -119,7 +119,7 @@ function constructCompanionSr(
  * @return {!JsonObject}
  */
 function getCompanionVideoAdSize(apesterElement) {
-  const adWidth = apesterElement.clientWidth;
+  const adWidth = apesterElement./*REVIEW*/ clientWidth;
   const adRatio = 0.6;
   const adHeight = Math.ceil(adWidth * adRatio);
   return {width: adWidth, height: adHeight};
