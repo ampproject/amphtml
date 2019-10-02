@@ -1,5 +1,17 @@
 # For an explanation of the OWNERS.yaml rules and syntax, see:
 # https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example.yaml
 
-- ampproject/runtime
-- ampproject/validator
+- ampproject/wg-access-subscriptions
+- ampproject/wg-ads
+- ampproject/wg-amp4email
+- ampproject/wg-analytics
+- ampproject/wg-approvers
+- ampproject/wg-caching
+- ampproject/wg-codeofconduct
+- ampproject/wg-infra
+- ampproject/wg-outreach
+- ampproject/wg-performance
+- ampproject/wg-runtime
+- ampproject/wg-stories
+- ampproject/wg-ui-and-a11y
+- ampproject/wg-viewers
