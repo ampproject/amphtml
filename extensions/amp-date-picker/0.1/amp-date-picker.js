@@ -553,7 +553,9 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.setupListeners_();
 
     if (this.element.contains(this.document_.activeElement)) {
-      this.maybeTransitionWithFocusChange_(this.document_.activeElement);
+      this.maybeTransitionWithFocusChange_(
+        dev().assertElement(this.document_.activeElement)
+      );
     }
 
     // Make sure it's rendered and measured properly. Then if possible, attempt
