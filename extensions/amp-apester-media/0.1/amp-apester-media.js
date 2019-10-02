@@ -29,6 +29,8 @@ import {
   setFullscreenOn,
 } from './utils';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {handleCompanionAds} from './monetization/index';
+
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
@@ -65,7 +67,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     /**
      * @const @private {string}
      */
-    this.loaderUrl_ = 'https://static.apester.com/js/assets/loader.gif';
+    this.loaderUrl_ = 'https://static.apester.com/js/assets/loader_100x100.gif';
     /** @private {boolean}  */
     this.seen_ = false;
     /** @private {?Element}  */
@@ -224,7 +226,8 @@ class AmpApesterMedia extends AMP.BaseElement {
       });
   }
 
-  /** @param {string} id
+  /**
+   *  @param {string} id
    *  @param {boolean} usePlayer
    *  @return {string}
    * */
@@ -322,10 +325,8 @@ class AmpApesterMedia extends AMP.BaseElement {
         const media = /** @type {JsonObject} */ (this.embedOptions_.playlist
           ? payload[Math.floor(Math.random() * payload.length)]
           : payload);
-
         const interactionId = media['interactionId'];
         const usePlayer = media['usePlayer'];
-
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
         const iframe = this.constructIframe_(src);
         this.intersectionObserverApi_ = new IntersectionObserverApi(
@@ -342,6 +343,7 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
+            handleCompanionAds(media, this.element);
           })
           .then(() => {
             return this.loadPromise(iframe).then(() => {
