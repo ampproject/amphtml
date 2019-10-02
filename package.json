@@ -20,7 +20,6 @@
   "dependencies": {
     "@ampproject/animations": "0.2.0",
     "@ampproject/worker-dom": "0.19.0",
-    "babel-preset-modules": "0.0.2",
     "document-register-element": "1.5.0",
     "dompurify": "2.0.2",
     "moment": "2.24.0",
@@ -50,6 +49,7 @@
     "babel-plugin-istanbul": "5.2.0",
     "babel-plugin-minify-replace": "0.5.0",
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.2",
+    "babel-preset-modules": "0.0.2",
     "babelify": "10.0.0",
     "baconipsum": "0.1.2",
     "base62": "2.0.1",
