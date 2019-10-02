@@ -61,14 +61,21 @@ exports.closureCompile = async function(
   entryModuleFilename,
   outputDir,
   outputFilename,
-  options
+  options,
+  timeInfo
 ) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve, reject) {
     function start() {
       inProgress++;
-      compile(entryModuleFilename, outputDir, outputFilename, options).then(
+      compile(
+        entryModuleFilename,
+        outputDir,
+        outputFilename,
+        options,
+        timeInfo
+      ).then(
         function() {
           inProgress--;
           next();
@@ -101,7 +108,13 @@ function cleanupBuildDir() {
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
-function compile(entryModuleFilenames, outputDir, outputFilename, options) {
+function compile(
+  entryModuleFilenames,
+  outputDir,
+  outputFilename,
+  options,
+  timeInfo
+) {
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -360,6 +373,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     } else {
       const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
       const gulpBase = argv.single_pass ? '.' : SRC_TEMP_DIR;
+      timeInfo.startTime = Date.now();
       return gulp
         .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))

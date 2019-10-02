@@ -249,10 +249,10 @@ function appendToCompiledFile(srcFilename, destFilePath) {
  * @return {!Promise}
  */
 function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const startTime = Date.now();
+  const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
   const {minifiedName} = options;
-  return closureCompile(entryPoint, destDir, minifiedName, options)
+  return closureCompile(entryPoint, destDir, minifiedName, options, timeInfo)
     .then(function() {
       const destPath = path.join(destDir, minifiedName);
       appendToCompiledFile(srcFilename, destPath);
@@ -275,7 +275,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         });
         name += ', and all extensions';
       }
-      endBuildStep('Minified', name, startTime);
+      endBuildStep('Minified', name, timeInfo.startTime);
     })
     .then(() => {
       if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
