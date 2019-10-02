@@ -26,6 +26,7 @@ import {isArray, toWin} from '../../../src/types';
  *   attrs: (!JsonObject|undefined),
  *   localizedStringId: (!LocalizedStringId|undefined),
  *   unlocalizedString: (string|undefined),
+ *   localizedLabelId: (!LocalizedStringId|undefined),
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
@@ -93,12 +94,12 @@ function renderSingle(doc, elementDef) {
       }
 
       if (hasLocalizedLabel) {
-        el.setAttribute(
-          'aria-label',
-          localizationService.getLocalizedString(
-            /** @type {!LocalizedStringId} */ (elementDef.localizedLabelId)
-          )
+        const labelString = localizationService.getLocalizedString(
+          /** @type {!LocalizedStringId} */ (elementDef.localizedLabelId)
         );
+        if (labelString) {
+          el.setAttribute('aria-label', labelString);
+        }
       }
     });
   }
