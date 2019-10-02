@@ -30,7 +30,6 @@ const {
   travisPushBranch,
   travisRepoSlug,
 } = require('../travis');
-const {getStdout} = require('../exec');
 const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
@@ -41,25 +40,6 @@ const expectedGitHubRepoSlug = 'ampproject/amphtml';
 const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 
 const {red, cyan, yellow} = colors;
-
-/**
- * Get the gzipped bundle size of the current build.
- *
- * @return {string} the bundle size in KB rounded to 2 decimal points.
- */
-function getGzippedBundleSize() {
-  const cmd = `npx bundlesize -f "${runtimeFile}"`;
-  log('Running', cyan(cmd) + '...');
-  const output = getStdout(cmd).trim();
-
-  const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
-  if (bundleSizeOutputMatches) {
-    const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
-    log('Bundle size', cyan('(gzipped)'), 'is', cyan(`${bundleSize}KB`));
-    return bundleSize;
-  }
-  throw Error('could not infer bundle size from output.');
-}
 
 /**
  * Get the brotli bundle size of the current build.
@@ -114,9 +94,6 @@ async function storeBundleSize() {
       json: true,
       body: {
         token: process.env.BUNDLE_SIZE_TOKEN,
-        // TODO(#21275): replace the gzippedBundleSize value once the
-        // bundle-size app prefers Brotli.
-        gzippedBundleSize: getGzippedBundleSize(),
         brotliBundleSize: getBrotliBundleSize(),
       },
     });
@@ -173,8 +150,6 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
-    // TODO(#21275): remove gzipped reporting within ~1 month.
-    const gzippedBundleSize = getGzippedBundleSize();
     const brotliBundleSize = getBrotliBundleSize();
     const commitHash = gitCommitHash();
     try {
@@ -186,10 +161,7 @@ async function reportBundleSize() {
         json: true,
         body: {
           baseSha,
-          // TODO(#21275): replace the default bundleSize value from the gzipped
-          // to the brotli value, once the bundle-size app prefers those.
-          bundleSize: gzippedBundleSize,
-          gzippedBundleSize,
+          bundleSize: brotliBundleSize,
           brotliBundleSize,
         },
       });
@@ -227,7 +199,6 @@ function getLocalBundleSize() {
       cyan(shortSha(gitCommitHash())) + '.'
     );
   }
-  getGzippedBundleSize();
   getBrotliBundleSize();
 }
 
