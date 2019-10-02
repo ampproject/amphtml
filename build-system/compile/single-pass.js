@@ -548,7 +548,8 @@ function isAltMainBundle(name) {
   });
 }
 
-exports.singlePassCompile = async function(entryModule, options) {
+exports.singlePassCompile = async function(entryModule, options, timeInfo) {
+  timeInfo.startTime = Date.now();
   return exports
     .getFlags({
       modules: [entryModule].concat(extensions),

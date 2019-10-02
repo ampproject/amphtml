@@ -176,6 +176,7 @@ async function bootstrapThirdPartyFrames(watch, minify) {
  * @return {!Promise}
  */
 function compileAllJs(watch, minify) {
+  const startTime = Date.now();
   return Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
     doBuildJs(jsBundles, 'amp.js', {
@@ -199,7 +200,13 @@ function compileAllJs(watch, minify) {
     doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
-  ]);
+  ]).then(() => {
+    endBuildStep(
+      minify ? 'Minified all' : 'Compiled all',
+      'runtime JS files',
+      startTime
+    );
+  });
 }
 
 /**
@@ -242,10 +249,10 @@ function appendToCompiledFile(srcFilename, destFilePath) {
  * @return {!Promise}
  */
 function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const startTime = Date.now();
+  const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
   const {minifiedName} = options;
-  return closureCompile(entryPoint, destDir, minifiedName, options)
+  return closureCompile(entryPoint, destDir, minifiedName, options, timeInfo)
     .then(function() {
       const destPath = path.join(destDir, minifiedName);
       appendToCompiledFile(srcFilename, destPath);
@@ -268,7 +275,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         });
         name += ', and all extensions';
       }
-      endBuildStep('Minified', name, startTime);
+      endBuildStep('Minified', name, timeInfo.startTime);
     })
     .then(() => {
       if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
@@ -478,10 +485,13 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
+  const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   let timeString = '(';
-  if (secs === 0) {
+  if (mins > 0) {
+    timeString += mins + ' m ' + secs + '.' + ms + ' s)';
+  } else if (secs === 0) {
     timeString += ms + ' ms)';
   } else {
     timeString += secs + '.' + ms + ' s)';
