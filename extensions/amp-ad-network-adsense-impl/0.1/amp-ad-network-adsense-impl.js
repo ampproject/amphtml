@@ -20,8 +20,12 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {AdsenseSharedState} from './adsense-shared-state';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
+import {Navigation} from '../../../src/service/navigation';
 import {
-  ADX_ADY_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
@@ -37,11 +41,6 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
-import {Navigation} from '../../../src/service/navigation';
 import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
@@ -173,7 +172,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return getAmpAdRenderOutsideViewport(this.element) || 3;
   }
 
-  /** @override */
+  /** @override
+      @return {!Promise|undefined}.
+  */
   buildCallback() {
     super.buildCallback();
     this.identityTokenPromise_ = this.getAmpDoc()
@@ -182,13 +183,21 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
       );
 
-    if (this.responsiveState_ != null) {
-      return this.responsiveState_.attemptChangeSize();
-    }
-    // This should happen last, as some diversion criteria rely on some of the
-    // preceding logic (specifically responsive logic).
-    this.divertExperiments();
-    this.maybeAddSinglePassExperiment();
+    return ResponsiveState.maybeUpgradeToResponsive(
+      this.element,
+      this.getAdClientId_()
+    ).then(state => {
+      if (state != null) {
+        this.responsiveState_ = state;
+      }
+      if (this.responsiveState_ != null) {
+        return this.responsiveState_.attemptChangeSize();
+      }
+      // This should happen last, as some diversion criteria rely on some of the
+      // preceding logic (specifically responsive logic).
+      this.divertExperiments();
+      this.maybeAddSinglePassExperiment();
+    });
   }
 
   /** @override */
@@ -212,10 +221,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           Number(this.element.getAttribute('height')) > 0,
         branches: ['21062003', '21062004'],
       },
-      [[ADX_ADY_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
-      },
       [[FIE_CSS_CLEANUP_EXP.branch]]: {
         isTrafficEligible: () => true,
         branches: [
@@ -228,6 +233,20 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     Object.keys(setExps).forEach(expName =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
+  }
+
+  /**
+   * @return {string} ad client ID for the current ad unit.
+   * @private
+   */
+  getAdClientId_() {
+    const adClientId = (
+      this.element.getAttribute('data-ad-client') || ''
+    ).toLowerCase();
+    if (!/^ca-/i.test(adClientId)) {
+      return `ca-${adClientId}`;
+    }
+    return adClientId;
   }
 
   /** @override */
@@ -243,12 +262,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
     const global = this.win;
-    let adClientId = this.element.getAttribute('data-ad-client');
-    // Ensure client id format: lower case with 'ca-' prefix.
-    adClientId = adClientId.toLowerCase();
-    if (adClientId.substring(0, 3) != 'ca-') {
-      adClientId = 'ca-' + adClientId;
-    }
+    const adClientId = this.getAdClientId_();
     const adTestOn =
       this.element.getAttribute('data-adtest') ||
       isInManualExperiment(this.element);
@@ -437,6 +451,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
+    if (this.iframe != null) {
+      ResponsiveState.maybeAttachSettingsListener(
+        this.element,
+        this.iframe,
+        this.getAdClientId_()
+      );
+    }
     this.isAmpCreative_ = !!creativeMetaData;
     if (
       creativeMetaData &&

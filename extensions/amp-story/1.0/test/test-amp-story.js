@@ -545,6 +545,7 @@ describes.realWin(
 
         const consentEl = win.document.createElement('amp-consent');
         const storyConsentEl = win.document.createElement('amp-story-consent');
+        storyConsentEl.setAttribute('layout', 'nodisplay');
         consentEl.appendChild(storyConsentEl);
         element.appendChild(consentEl);
 

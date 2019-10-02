@@ -2,7 +2,6 @@
   "allow-doc-opt-in": [
     "amp-next-page",
     "inabox-viewport-friendly",
-    "inabox-no-chunking",
     "inabox-resources-lite",
     "inabox-viewer-lite",
     "inabox-viewport-lite"
@@ -20,6 +19,7 @@
 
   "a4aProfilingRate": 0.01,
   "amp-access-iframe": 1,
+  "amp-action-macro": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-consent-v2": 1,
