@@ -134,6 +134,49 @@ Will be reflected on the page as a new child of the `amp-script` element:
 
 Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/). For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
 
+### State manipulation
+
+`amp-script` supports getting and setting [`amp-state`](https://amp.dev/documentation/components/amp-bind/#initializing-state-with-amp-state) JSON via JavaScript.
+
+This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). These elements can be inside (descendants) or outside (non-descendants) of the `amp-script` element.
+
+[tip type="default"]
+`AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script to be included in the document head.
+[/tip]
+
+```js
+/**
+ * Deep-merges `json` into the current amp-state.
+ * @param {!Object} json A JSON object e.g. must not contain circular references.
+ */
+AMP.setState(json) {}
+
+/**
+ * Asynchronously returns amp-state.
+ * @param {string=} expr An optional JSON expression string e.g. "foo.bar".
+ * @return {!Promise<!Object>}
+ */
+AMP.getState(expr) {}
+```
+
+##### Example with WebSocket and AMP.setState()
+
+```html
+<amp-script width=1 height=1 script="webSocketDemo">
+</amp-script>
+
+<!--
+  <amp-state> doesn't support WebSocket URLs in its "src" attribute,
+  but we can use <amp-script> to work around it. :)
+-->
+<script type="text/plain" target="amp-script" id="webSocketDemo">
+  const socket = new WebSocket('wss://websocket.example');
+  socket.onmessage = e => {
+    AMP.setState({socketData: event.data});
+  };
+</script>
+```
+
 ### Restrictions
 
 #### Allowed APIs
