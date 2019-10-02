@@ -51,7 +51,7 @@ amp4email_feature_tests/no_latest_extensions.html:33:2 The attribute 'src' in ta
 amp4email_feature_tests/no_latest_extensions.html:34:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-sidebar] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-sidebar-latest.js'. (see https://amp.dev/documentation/components/amp-sidebar) [DISALLOWED_HTML]
 |    <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-latest.js"></script>
 >>   ^~~~~~~~~
-amp4email_feature_tests/no_latest_extensions.html:35:2 The attribute 'src' in tag 'amp-timeago extension .js script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-timeago-latest.js'. (see https://amp.dev/documentation/components/amp-timeago) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp4email_feature_tests/no_latest_extensions.html:35:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-timeago] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-timeago-latest.js'. (see https://amp.dev/documentation/components/amp-timeago) [DISALLOWED_HTML]
 |    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 >>   ^~~~~~~~~
 amp4email_feature_tests/no_latest_extensions.html:36:2 The attribute 'src' in tag 'SCRIPT[custom-template=amp-mustache] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-mustache-latest.js'. (see https://amp.dev/documentation/components/amp-mustache) [DISALLOWED_HTML]
