@@ -34,7 +34,7 @@ Important: This version of sidebar is still under development and should not be 
 <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the <code>amp-sidebar-v2</code> experiment to use this component.</div></td>
+    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; activated by the <code>amp-sidebar-v2</code> experiment.</div></td>
   </tr>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -44,7 +44,7 @@ Important: This version of sidebar is still under development and should not be 
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
@@ -97,7 +97,7 @@ In the following example, we use `amp-sidebar` to contain navigation items. Howe
 
 ### Opening and closing the sidebar
 
-To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
+To `toggle`, `open`, or `close` the sidebar when an element is tapped or clicked, set the [`on`](../../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
 
 <table>
   <tr>
