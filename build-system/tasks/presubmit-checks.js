@@ -443,7 +443,7 @@ const forbiddenTerms = {
   'prerenderSafe': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'build-system/amp.extern.js',
+      'build-system/externs/amp.extern.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
       'src/utils/xhr-utils.js',
     ],
@@ -503,7 +503,7 @@ const forbiddenTerms = {
   'getAccessReaderId': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'build-system/amp.extern.js',
+      'build-system/externs/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-access/0.1/access-vars.js',
       'extensions/amp-access-scroll/0.1/scroll-impl.js',
@@ -514,7 +514,7 @@ const forbiddenTerms = {
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'build-system/amp.extern.js',
+      'build-system/externs/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-access/0.1/access-vars.js',
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
@@ -633,7 +633,7 @@ const forbiddenTerms = {
       'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
       'and getMode() to access config',
     whitelist: [
-      'build-system/amp.extern.js',
+      'build-system/externs/amp.extern.js',
       'build-system/server/app.js',
       'build-system/tasks/e2e/index.js',
       'build-system/tasks/firebase.js',

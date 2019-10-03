@@ -133,10 +133,10 @@ function compile(
     'build/patched-module/',
   ];
   const baseExterns = [
-    'build-system/amp.extern.js',
-    'build-system/dompurify.extern.js',
-    'build-system/layout-jank.extern.js',
-    'build-system/performance-observer.extern.js',
+    'build-system/externs/amp.extern.js',
+    'build-system/externs/dompurify.extern.js',
+    'build-system/externs/layout-jank.extern.js',
+    'build-system/externs/performance-observer.extern.js',
     'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -264,7 +264,7 @@ function compile(
     if (options.externs) {
       externs = externs.concat(options.externs);
     }
-    externs.push('build-system/amp.multipass.extern.js');
+    externs.push('build-system/externs/amp.multipass.extern.js');
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
