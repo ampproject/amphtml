@@ -44,7 +44,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     };
     installDocService(win, /* isSingleDoc */ true);
     resetServiceForTesting(win, 'documentInfo');
-    return registerServiceBuilderForDoc(doc, 'documentInfo', function () {
+    return registerServiceBuilderForDoc(doc, 'documentInfo', function() {
       return {
         get: () => docInfo,
       };

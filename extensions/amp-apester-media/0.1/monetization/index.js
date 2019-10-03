@@ -20,11 +20,12 @@ import {handleCompanionVideo} from './companion/video';
  * @param {AmpApesterMedia} apesterElement
  * @return {AmpApesterMedia}
  */
-export async function handleCompanionAds(media, apesterElement) {
+export function handleCompanionAds(media, apesterElement) {
+  // Returning promise for testing purposes only
   const monetizationSettings = media['campaignData'];
   if (monetizationSettings && !monetizationSettings.disabledAmpCompanionAds) {
     handleCompanionDisplay(media, apesterElement);
-    await handleCompanionVideo(media, apesterElement);
+    return handleCompanionVideo(media, apesterElement);
   }
-  return Promise.resolve(); // Returning promise for testing purposes only
+  return Promise.resolve();
 }

@@ -29,7 +29,7 @@ import {
   setFullscreenOn,
 } from './utils';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {handleCompanionAds} from './monetization/index';
+import {handleCompanionAds} from './monetization';
 
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
