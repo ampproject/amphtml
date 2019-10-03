@@ -29,12 +29,12 @@ export function adglare(global, data) {
 
   let url =
     'https://' +
-      data.host +
-      '.engine.adglare.net/?' +
-      data.zid +
-      '&ampad&rnd=' +
-      Date.now() +
-      Math.random();
+    data.host +
+    '.engine.adglare.net/?' +
+    data.zid +
+    '&ampad&rnd=' +
+    Date.now() +
+    Math.random();
   if (data.keywords) {
     url = url + '&keywords=' + data.keywords;
   }
