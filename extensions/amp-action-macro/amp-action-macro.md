@@ -21,16 +21,12 @@ limitations under the License.
  Creates reusable actions.
  <table>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-action-macro" src="https://cdn.ampproject.org/v0/amp-action-macro-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-action-macro.amp.html">amp-action-macro.amp.html</a></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-action-macro.html">amp-action-macro.html</a></td>
   </tr>
 </table>
 
@@ -80,7 +76,7 @@ Used to uniquely identify the action. This is referenced in an action invocation
 
 ##### execute
 
-The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 
 e.g.
 

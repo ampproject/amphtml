@@ -20,7 +20,6 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.repeated(
   'amp-list',
@@ -32,17 +31,18 @@ describes.repeated(
   },
   (name, variant) => {
     describes.realWin(
-      'amp-list component',
+      '<amp-list>',
       {
         amp: {
           ampdoc: 'single',
           extensions: ['amp-list'],
         },
+        runtimeOn: false,
       },
       env => {
         let win, doc, ampdoc, sandbox;
         let element, list, listMock;
-        let resource;
+        let resource, resources;
         let setBindService;
         let ssrTemplateHelper;
         let templates;
@@ -64,16 +64,11 @@ describes.repeated(
           resource = {
             resetPendingChangeSize: sandbox.stub(),
           };
-          const resources = {
+          resources = {
             getResourceForElement: e => (e === element ? resource : null),
           };
 
-          element = doc.createElement('div');
-          element.setAttribute('src', 'https://data.com/list.json');
-          element.getAmpDoc = () => ampdoc;
-          element.getFallback = () => null;
-          element.getPlaceholder = () => null;
-          element.getResources = () => resources;
+          element = createAmpListElement();
 
           const {templateType} = variant;
           const template = doc.createElement(templateType);
@@ -98,10 +93,7 @@ describes.repeated(
             renderTemplate: sandbox.stub(),
           };
 
-          list = new AmpList(element);
-          list.buildCallback();
-          list.ssrTemplateHelper_ = ssrTemplateHelper;
-          listMock = sandbox.mock(list);
+          list = createAmpList(element);
 
           element.style.height = '10px';
           doc.body.appendChild(element);
@@ -111,6 +103,24 @@ describes.repeated(
           // There should only be one mock to verify.
           listMock.verify();
         });
+
+        function createAmpListElement() {
+          const element = doc.createElement('div');
+          element.setAttribute('src', 'https://data.com/list.json');
+          element.getAmpDoc = () => ampdoc;
+          element.getFallback = () => null;
+          element.getPlaceholder = () => null;
+          element.getResources = () => resources;
+          return element;
+        }
+
+        function createAmpList(element) {
+          const list = new AmpList(element);
+          list.buildCallback();
+          list.ssrTemplateHelper_ = ssrTemplateHelper;
+          listMock = sandbox.mock(list);
+          return list;
+        }
 
         const DEFAULT_LIST_OPTS = {
           expr: 'items',
@@ -219,7 +229,7 @@ describes.repeated(
             expect(resource.resetPendingChangeSize).calledOnce;
           });
 
-          it('should attemptChangeHeight the placeholder, if present', () => {
+          it('should attemptChangeHeight placeholder, if present', () => {
             const itemElement = doc.createElement('div');
             const placeholder = doc.createElement('div');
             placeholder.style.height = '1337px';
@@ -461,6 +471,38 @@ describes.repeated(
             });
           });
 
+          it('should set tabbindex only if the list item is not tabbable', () => {
+            // A list item with a no tabindex value or tabbable child
+            const nonTabbableItemElement = doc.createElement('div');
+
+            // A list item with a pre-set tabindex value
+            const tabbableItemElement = doc.createElement('div');
+            tabbableItemElement.setAttribute('tabindex', '4');
+
+            // A list item with a tabbable element (<a href>)
+            const childTabbableItemElement = doc.createElement('div');
+            const childTabbableItemChild = doc.createElement('a');
+            childTabbableItemChild.setAttribute('href', 'https://google.com/');
+            childTabbableItemElement.appendChild(childTabbableItemChild);
+
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [
+              nonTabbableItemElement,
+              tabbableItemElement,
+              childTabbableItemElement,
+            ]);
+
+            return list.layoutCallback().then(() => {
+              expect(nonTabbableItemElement.getAttribute('tabindex')).to.equal(
+                '0'
+              );
+              expect(tabbableItemElement.getAttribute('tabindex')).to.equal(
+                '4'
+              );
+              expect(childTabbableItemElement.getAttribute('tabindex')).to.be
+                .null;
+            });
+          });
+
           it('should not show placeholder on fetch failure', function*() {
             // Stub fetch_() to fail.
             listMock
@@ -500,47 +542,147 @@ describes.repeated(
             );
           });
 
-          describe('DOM diffing', () => {
+          describe('DOM diffing with [diffable]', () => {
+            const newData = [{}];
+
+            function createAmpImg(src) {
+              const img = doc.createElement('amp-img');
+              img.setAttribute('src', src);
+              // The ignore attribute is normally set by amp-mustache.
+              img.setAttribute('i-amphtml-ignore', '');
+              return img;
+            }
+
+            async function renderTwice(first, second) {
+              const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
+                first,
+              ]);
+              await list.layoutCallback().then(() => rendered);
+
+              ssrTemplateHelper.renderTemplate
+                .withArgs(element, newData)
+                .returns(Promise.resolve([second]));
+              await list.mutatedAttributesCallback({src: newData});
+            }
+
             beforeEach(() => {
-              toggleExperiment(win, 'amp-list-diffing', true, true);
+              element.setAttribute('diffable', '');
             });
 
-            it('should keep unchanged elements', function*() {
-              const itemElement = doc.createElement('div');
-              const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
-                itemElement,
-              ]);
-              yield list.layoutCallback().then(() => rendered);
+            it('should keep unchanged elements', async () => {
+              const div = doc.createElement('div');
+              const newDiv = doc.createElement('div');
+              newDiv.setAttribute('class', 'foo');
 
-              const newFetched = [{title: 'Title2'}];
-              const newItemElement = doc.createElement('div');
-              ssrTemplateHelper.renderTemplate
-                .withArgs(element, newFetched)
-                .returns(Promise.resolve([newItemElement]));
-              yield list.mutatedAttributesCallback({src: newFetched});
+              await renderTwice(div, newDiv);
 
-              expect(list.container_.contains(itemElement)).to.be.true;
-              expect(list.container_.contains(newItemElement)).to.be.false;
+              expect(list.container_.contains(div)).to.be.true;
+              expect(list.container_.contains(newDiv)).to.be.false;
+              // Diff algorithm should copy [class] to original div.
+              expect(div.getAttribute('class')).to.equal('foo');
             });
 
-            it('should use i-amphtml-key as a replacement key', function*() {
+            it('should use i-amphtml-key as a replacement key', async () => {
+              const div = doc.createElement('div');
+              div.setAttribute('i-amphtml-key', '1');
+
+              const newDiv = doc.createElement('div');
+              newDiv.setAttribute('i-amphtml-key', '2');
+              newDiv.setAttribute('class', 'foo');
+
+              await renderTwice(div, newDiv);
+
+              expect(list.container_.contains(div)).to.be.false;
+              expect(list.container_.contains(newDiv)).to.be.true;
+              expect(div.hasAttribute('class')).to.be.false;
+            });
+
+            it('should keep amp-img if [src] is the same', async () => {
+              const img = createAmpImg('foo.jpg');
+              img.setAttribute('style', 'width:10px');
+              const newImg = createAmpImg('foo.jpg');
+              newImg.setAttribute('class', 'foo');
+              newImg.setAttribute('style', 'color:red');
+              newImg.setAttribute('should-not', 'be-copied');
+
+              await renderTwice(img, newImg);
+
+              expect(list.container_.contains(img)).to.be.true;
+              expect(list.container_.contains(newImg)).to.be.false;
+              // Only [class] and [style] should be manually diffed.
+              expect(img.classList.contains('foo')).to.be.true;
+              expect(img.getAttribute('style')).to.equal(
+                'width:10px;color:red'
+              );
+              // Other attributes will be lost.
+              expect(img.hasAttribute('should-not')).to.be.false;
+            });
+
+            it('should replace amp-img if [src] changes', async () => {
+              const img = createAmpImg('foo.jpg');
+              const newImg = createAmpImg('bar.png');
+
+              await renderTwice(img, newImg);
+
+              expect(list.container_.contains(img)).to.be.false;
+              expect(list.container_.contains(newImg)).to.be.true;
+            });
+
+            it('should attemptChangeHeight initial content', async () => {
+              const initialContent = doc.createElement('div');
+              initialContent.setAttribute('role', 'list');
+              initialContent.style.height = '1337px';
+
+              // Initial content must be set before buildCallback(), so use
+              // a new test AmpList instance.
+              element = createAmpListElement();
+              element.setAttribute('diffable', '');
+              element.style.height = '10px';
+              element.appendChild(initialContent);
+              doc.body.appendChild(element);
+
+              list = createAmpList(element);
+              // Expect attemptChangeHeight() twice: once to resize to initial
+              // content, once to resize to rendered contents.
+              listMock
+                .expects('attemptChangeHeight')
+                .withExactArgs(1337)
+                .returns(Promise.resolve())
+                .twice();
+
               const itemElement = doc.createElement('div');
-              itemElement.setAttribute('i-amphtml-key', '1');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+              await list.layoutCallback();
+            });
+
+            it('should diff against initial content', async () => {
+              const img = createAmpImg('foo.jpg');
+              img.setAttribute('class', 'i-amphtml-element');
+              const newImg = createAmpImg('foo.jpg'); // Same src.
+              newImg.setAttribute('class', 'bar');
+
+              const initialContent = doc.createElement('div');
+              initialContent.setAttribute('role', 'list');
+              initialContent.appendChild(img);
+
+              // Initial content must be set before buildCallback(), so use
+              // a new test AmpList instance.
+              element = createAmpListElement();
+              element.setAttribute('diffable', '');
+              element.appendChild(initialContent);
+              list = createAmpList(element);
+
               const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
-                itemElement,
+                newImg,
               ]);
-              yield list.layoutCallback().then(() => rendered);
+              await list.layoutCallback().then(() => rendered);
 
-              const newFetched = [{title: 'Title2'}];
-              const newItemElement = doc.createElement('div');
-              newItemElement.setAttribute('i-amphtml-key', '2');
-              ssrTemplateHelper.renderTemplate
-                .withArgs(element, newFetched)
-                .returns(Promise.resolve([newItemElement]));
-              yield list.mutatedAttributesCallback({src: newFetched});
-
-              expect(list.container_.contains(itemElement)).to.be.false;
-              expect(list.container_.contains(newItemElement)).to.be.true;
+              expect(list.container_.contains(img)).to.be.true;
+              expect(list.container_.contains(newImg)).to.be.false;
+              // Internal class names should be preserved.
+              expect(img.getAttribute('class')).to.equal(
+                'i-amphtml-element bar'
+              );
             });
           });
 
@@ -698,7 +840,7 @@ describes.repeated(
 
           beforeEach(() => {
             bind = {
-              scanAndApply: sandbox.stub().returns(Promise.resolve()),
+              rescan: sandbox.stub().returns(Promise.resolve()),
               signals: () => {
                 return {get: unusedName => false};
               },
@@ -824,8 +966,8 @@ describes.repeated(
                 'src': 'https://new.com/list.json',
               });
 
-              expect(bind.scanAndApply).to.be.calledTwice;
-              expect(bind.scanAndApply).to.be.calledWith([], sinon.match.array);
+              expect(bind.rescan).to.be.calledOnce;
+              expect(bind.rescan).to.be.calledWith([], sinon.match.array);
             });
           });
 
@@ -904,11 +1046,24 @@ describes.repeated(
           });
 
           describe('no `binding` attribute', () => {
-            it('should call scanAndApply()', function*() {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
+            it('should rescan()', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {update: true, fast: true}
+              );
+            });
+
+            it('should not rescan() if new children have no bindings', async () => {
+              const child = doc.createElement('div');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.not.be.called;
             });
           });
 
@@ -917,11 +1072,17 @@ describes.repeated(
               element.setAttribute('binding', 'always');
             });
 
-            it('should call scanAndApply()', function*() {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
+            it('should rescan()', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {update: true, fast: true}
+              );
             });
           });
 
@@ -930,24 +1091,35 @@ describes.repeated(
               element.setAttribute('binding', 'refresh');
             });
 
-            it('should not call scanAndApply() before FIRST_MUTATE', function*() {
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.not.have.been.called;
+            it('should rescan() with {update: false} before FIRST_MUTATE', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly([child], [], {
+                update: false,
+                fast: true,
+              });
             });
 
-            it('should call scanAndApply() after FIRST_MUTATE', function*() {
+            it('should rescan() with {update: true} after FIRST_MUTATE', async () => {
               bind.signals = () => {
                 return {get: name => name === 'FIRST_MUTATE'};
               };
-              const output = [doc.createElement('div')];
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.have.been.calledOnce;
-              expect(bind.scanAndApply).calledWithExactly(output, [
-                list.container_,
-              ]);
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {
+                  update: true,
+                  fast: true,
+                }
+              );
             });
           });
 
@@ -956,11 +1128,11 @@ describes.repeated(
               element.setAttribute('binding', 'no');
             });
 
-            it('should not call scanAndApply()', function*() {
+            it('should not rescan()', async () => {
               const output = [doc.createElement('div')];
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
-              yield list.layoutCallback();
-              expect(bind.scanAndApply).to.not.have.been.called;
+              await list.layoutCallback();
+              expect(bind.rescan).to.not.have.been.called;
             });
           });
         }); // with amp-bind

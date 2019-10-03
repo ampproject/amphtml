@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import {
+  Action,
+  ActionStatus,
+  SubscriptionAnalytics,
+  SubscriptionAnalyticsEvents,
+} from '../analytics';
 import {Actions} from '../actions';
-import {SubscriptionAnalytics} from '../analytics';
 import {UrlBuilder} from '../url-builder';
 import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
 
@@ -45,8 +50,9 @@ describes.realWin('Actions', {amp: true}, env => {
     analyticsMock = sandbox.mock(analytics);
     buildSpy = sandbox.spy(Actions.prototype, 'build');
     actions = new Actions(ampdoc, urlBuilder, analytics, {
-      'login': 'https://example.org/login?rid=READER_ID',
-      'subscribe': 'https://example.org/subscribe?rid=READER_ID&a=AUTHDATA(a)',
+      [Action.LOGIN]: 'https://example.org/login?rid=READER_ID',
+      [Action.SUBSCRIBE]:
+        'https://example.org/subscribe?rid=READER_ID&a=AUTHDATA(a)',
     });
     openResolver = null;
     openStub = sandbox.stub(WebLoginDialog.prototype, 'open').callsFake(() => {
@@ -68,10 +74,10 @@ describes.realWin('Actions', {amp: true}, env => {
     return actions.build().then(() => {
       const builtActions = actions.builtActionUrlMap_;
       expect(Object.keys(builtActions)).to.have.length(2);
-      expect(builtActions['login']).to.equal(
+      expect(builtActions[Action.LOGIN]).to.equal(
         'https://example.org/login?rid=RD'
       );
-      expect(builtActions['subscribe']).to.equal(
+      expect(builtActions[Action.SUBSCRIBE]).to.equal(
         'https://example.org/subscribe?rid=RD&a=A'
       );
     });
@@ -80,16 +86,30 @@ describes.realWin('Actions', {amp: true}, env => {
   it('should open the action popup window synchronously', () => {
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.STARTED,
+        }
+      )
       .once();
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-success', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.SUCCESS,
+        }
+      )
       .once();
     return actions
       .build()
       .then(() => {
-        const promise = actions.execute('login');
+        const promise = actions.execute(Action.LOGIN);
         expect(openStub).to.be.calledOnce;
         openResolver('#success=yes');
         return promise;
@@ -103,7 +123,7 @@ describes.realWin('Actions', {amp: true}, env => {
     return actions
       .build()
       .then(() => {
-        const promise = actions.execute('login');
+        const promise = actions.execute(Action.LOGIN);
         expect(openStub).to.be.calledOnce;
         openResolver('#success=true');
         return promise;
@@ -117,7 +137,7 @@ describes.realWin('Actions', {amp: true}, env => {
     return actions
       .build()
       .then(() => {
-        const promise = actions.execute('login');
+        const promise = actions.execute(Action.LOGIN);
         expect(openStub).to.be.calledOnce;
         openResolver('#success=1');
         return promise;
@@ -130,16 +150,30 @@ describes.realWin('Actions', {amp: true}, env => {
   it('should accept success=no', () => {
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.STARTED,
+        }
+      )
       .once();
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-rejected', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.REJECTED,
+        }
+      )
       .once();
     return actions
       .build()
       .then(() => {
-        const promise = actions.execute('login');
+        const promise = actions.execute(Action.LOGIN);
         expect(openStub).to.be.calledOnce;
         openResolver('#success=no');
         return promise;
@@ -153,7 +187,7 @@ describes.realWin('Actions', {amp: true}, env => {
     return actions
       .build()
       .then(() => {
-        const promise = actions.execute('login');
+        const promise = actions.execute(Action.LOGIN);
         expect(openStub).to.be.calledOnce;
         openResolver('');
         return promise;
@@ -165,29 +199,43 @@ describes.realWin('Actions', {amp: true}, env => {
 
   it('should block re-execution of actions for some time', () => {
     return actions.build().then(() => {
-      const promise = actions.execute('login');
+      const promise = actions.execute(Action.LOGIN);
       expect(openStub).to.be.calledOnce;
       // Repeated call is blocked.
-      expect(actions.execute('login')).to.equal(promise);
+      expect(actions.execute(Action.LOGIN)).to.equal(promise);
       // After timeout, the call is allowed.
       clock.tick(1001);
-      expect(actions.execute('login')).to.not.equal(promise);
+      expect(actions.execute(Action.LOGIN)).to.not.equal(promise);
     });
   });
 
   it('should handle failures', () => {
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.STARTED,
+        }
+      )
       .once();
     analyticsMock
       .expects('event')
-      .withExactArgs('subscriptions-action-login-failed', LOCAL_OPTS)
+      .withExactArgs(
+        SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
+        LOCAL_OPTS,
+        {
+          action: Action.LOGIN,
+          status: ActionStatus.FAILED,
+        }
+      )
       .once();
     return actions
       .build()
       .then(() => {
-        const promise = actions.execute('login');
+        const promise = actions.execute(Action.LOGIN);
         expect(openStub).to.be.calledOnce;
         openResolver(Promise.reject(new Error('broken')));
         return promise;
@@ -216,7 +264,7 @@ describes.realWin('Actions', {amp: true}, env => {
   it('should fail before build is complete', () => {
     allowConsoleError(() => {
       expect(() => {
-        actions.execute('login');
+        actions.execute(Action.LOGIN);
       }).to.throw(/Action URL is not ready/);
     });
   });

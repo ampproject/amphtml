@@ -74,15 +74,13 @@ describes.sandboxed('allocateVariant', {}, env => {
         })
       );
 
-    getParamStub = sandbox.stub();
     sandbox
       .stub(Services, 'viewerForDoc')
       .withArgs(ampdoc)
-      .returns({
-        getParam: getParamStub,
-      });
+      .returns({});
 
     sandbox.stub(ampdoc, 'getHeadNode').returns(fakeHead);
+    getParamStub = sandbox.stub(ampdoc, 'getParam').returns(null);
   });
 
   it('should throw for invalid config', () => {

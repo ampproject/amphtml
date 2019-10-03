@@ -23,13 +23,14 @@ const testConfig = require('../../config');
 const {
   createKarmaServer,
   getAdTypes,
-  runTestInBatches,
-  startTestServer,
+  runTestInSauceLabs,
 } = require('./helpers');
+const {app} = require('../../server/test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {reportTestStarted} = require('.././report-test-status');
+const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
 
 /**
@@ -52,6 +53,7 @@ function updateBrowsers(config) {
           'SL_Firefox',
           'SL_Edge_17',
           'SL_Safari_12',
+          'SL_Safari_11',
           'SL_IE_11',
           // TODO(amp-infra): Evaluate and add more platforms here.
           //'SL_Chrome_Android_7',
@@ -156,7 +158,7 @@ function getFiles(testType) {
  */
 function updateReporters(config) {
   if (
-    (argv.testnames || argv.local_changes || argv.files) &&
+    (argv.testnames || argv.local_changes || argv.files || argv.verbose) &&
     !isTravisBuild()
   ) {
     config.reporters = ['mocha'];
@@ -222,20 +224,25 @@ class RuntimeTestConfig {
         'report-config': {lcovonly: {file: `lcov-${testType}.info`}},
       };
 
-      const plugin = [
+      const instanbulPlugin = [
         'istanbul',
         {
           exclude: [
             'ads/**/*.js',
+            'build-system/**/*.js',
+            'extensions/**/test/**/*.js',
             'third_party/**/*.js',
             'test/**/*.js',
-            'extensions/**/test/**/*.js',
             'testing/**/*.js',
           ],
         },
       ];
+      // don't overwrite existing plugins
+      const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
 
-      this.browserify.transform = [['babelify', {plugins: [plugin]}]];
+      this.browserify.transform = [
+        ['babelify', Object.assign({}, this.babelifyConfig, {plugins})],
+      ];
     }
   }
 }
@@ -252,32 +259,30 @@ class RuntimeTestRunner {
   }
 
   async setup() {
-    // TODO(alanorozco): Come up with a more elegant check?
-    global.AMP_TESTING = true;
-    process.env.SERVE_MODE = argv.compiled ? 'compiled' : 'default';
-
     await this.maybeBuild();
-
-    const testServer = startTestServer(this.config.client.testServerPort);
+    await startServer({
+      name: 'AMP Test Server',
+      host: 'localhost',
+      port: this.config.client.testServerPort,
+      middleware: () => [app],
+    });
     const handlerProcess = createCtrlcHandler(`gulp ${this.config.testType}`);
 
-    this.env = new Map()
-      .set('handlerProcess', handlerProcess)
-      .set('testServer', testServer);
+    this.env = new Map().set('handlerProcess', handlerProcess);
   }
 
   async run() {
     reportTestStarted();
 
     if (argv.saucelabs) {
-      this.exitCode = await runTestInBatches(this.config);
+      this.exitCode = await runTestInSauceLabs(this.config);
     } else {
       this.exitCode = await createKarmaServer(this.config);
     }
   }
 
   async teardown() {
-    this.env.get('testServer').emit('kill');
+    stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
 
     if (this.exitCode != 0) {

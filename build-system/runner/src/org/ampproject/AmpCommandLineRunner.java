@@ -15,8 +15,6 @@
  */
 package org.ampproject;
 
-
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
@@ -24,11 +22,8 @@ import com.google.javascript.jscomp.CustomPassExecutionTime;
 import com.google.javascript.jscomp.FlagUsageException;
 import com.google.javascript.jscomp.PropertyRenamingPolicy;
 import com.google.javascript.jscomp.VariableRenamingPolicy;
-import com.google.javascript.rhino.IR;
-import com.google.javascript.rhino.Node;
 
 import java.io.IOException;
-import java.util.Set;
 
 
 /**
@@ -45,8 +40,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
   private boolean is_production_env = true;
 
-  private String amp_version = "";
-
   /**
    * List of string suffixes to eliminate from the AST.
    */
@@ -62,15 +55,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
       "user$$module$src$log().fine()"
       );
 
-
-  ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
-      "IS_MINIFIED",
-      IR.trueNode());
-
-  ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
-      "IS_DEV",
-      IR.falseNode());
-
   protected AmpCommandLineRunner(String[] args) {
     super(args);
   }
@@ -81,10 +65,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
-    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
-        assignmentReplacements, prodAssignmentReplacements, amp_version);
+    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
-    options.setDevirtualizePrototypeMethods(true);
+    options.setDevirtualizeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
     options.optimizeCalls = true;
@@ -92,7 +75,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     // might override a method. In the future this might be doable
     // with using a more complete extern file instead.
     options.setRemoveUnusedPrototypeProperties(false);
-    options.setInlineProperties(false);
     options.setComputeFunctionSideEffects(false);
     // Property renaming. Relies on AmpCodingConvention to be safe.
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
@@ -121,7 +103,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   public static void main(String[] args) {
     AmpCommandLineRunner runner = new AmpCommandLineRunner(args);
 
-    // Scan for TYPECHECK_ONLY string which we pass in as a --define
     for (String arg : args) {
       if (arg.contains("TYPECHECK_ONLY=true")) {
         runner.typecheck_only = true;
@@ -129,8 +110,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.is_production_env = false;
       } else if (arg.contains("PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
-      } else if (arg.contains("VERSION=")) {
-        runner.amp_version = arg.substring(arg.lastIndexOf("=") + 1);
       }
     }
 

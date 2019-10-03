@@ -25,6 +25,7 @@ const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
 const {execOrDie, execScriptAsync} = require('../../exec');
+const {isTravisBuild} = require('../../travis');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
@@ -32,20 +33,22 @@ const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const SLOW_TEST_THRESHOLD_MS = 2500;
-const TEST_RETRIES = 2;
+const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
 let webServerProcess_;
 
 function installPackages_() {
+  log('Running', cyan('yarn'), 'to install packages...');
   execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
 }
 
 function buildRuntime_() {
   execOrDie('gulp clean');
-  execOrDie('gulp dist --fortesting');
+  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
 }
 
 function launchWebServer_() {
+  log('Launching webserver at', cyan(`http://${HOST}:${PORT}`) + '...');
   webServerProcess_ = execScriptAsync(
     `gulp serve --compiled --host ${HOST} --port ${PORT}`,
     {stdio: 'ignore'}
@@ -114,6 +117,7 @@ async function e2e() {
 
   // run tests
   if (!argv.watch) {
+    log('Running tests...');
     const mocha = createMocha_();
 
     // specify tests to run
@@ -166,7 +170,9 @@ e2e.description = 'Runs e2e tests';
 e2e.flags = {
   'browsers':
     '  Run only the specified browser tests. Options are ' +
-    '`chrome`, `firefox`.',
+    '`chrome`, `firefox`, `safari`.',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',

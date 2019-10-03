@@ -26,6 +26,7 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
         1. ```"vars": {}``` for additional default variables.
         1. ```"requests": {}``` for requests that your service will use.
         1. ```"optout":``` if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
+        1. ```"warningMessage":``` if needed. Displays warning information from the vendor (such as deprecation or migration) in the console. 
     1. Import your configuration and include it in ANALYTICS_CONFIG in  [vendors.js](0.1/vendors.js).
     1. If you are using iframe transport, add a new line to ANALYTICS_IFRAME_TRANSPORT_CONFIG in iframe-transport-vendors.js containing ```"*vendor-name*": "*url*"```
     1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
@@ -65,5 +66,5 @@ To take this approach, review the documentation for publishers' integration with
  * [comScore](https://github.com/ampproject/amphtml/pull/1608)
  * [Parsely](https://github.com/ampproject/amphtml/pull/1595)
 * [amp-analytics sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample)
-* [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics) reference documentation
+* [amp-analytics](https://amp.dev/documentation/components/amp-analytics) reference documentation
 * [amp-analytics variables](analytics-vars.md) reference documentation

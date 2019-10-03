@@ -32,7 +32,7 @@ A flying carpet wraps its children in a unique full-screen scrolling container. 
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-fx-flying-carpet/">Annotated code example for amp-fx-flying-carpet</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-fx-flying-carpet/">Annotated code example for amp-fx-flying-carpet</a></td>
   </tr>
 </table>
 
@@ -65,7 +65,7 @@ The following requirements are imposed on `amp-fx-flying-carpet` positioning:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

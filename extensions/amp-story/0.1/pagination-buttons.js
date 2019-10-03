@@ -22,9 +22,9 @@ import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
-let ButtonStateDef;
+let ButtonState_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
 
-/** @const {!Object<string, !ButtonStateDef>} */
+/** @const {!Object<string, !ButtonState_0_1_Def>} */
 const BackButtonStates = {
   CLOSE_BOOKEND: {
     className: 'i-amphtml-story-back-close-bookend',
@@ -38,7 +38,7 @@ const BackButtonStates = {
   },
 };
 
-/** @const {!Object<string, !ButtonStateDef>} */
+/** @const {!Object<string, !ButtonState_0_1_Def>} */
 const ForwardButtonStates = {
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
@@ -91,11 +91,11 @@ function setClassOnHover(hoverEl, targetEl, className) {
 class PaginationButton {
   /**
    * @param {!Document} doc
-   * @param {!ButtonStateDef} initialState
+   * @param {!ButtonState_0_1_Def} initialState
    * @param {!./amp-story-store-service.AmpStoryStoreService} storeService
    */
   constructor(doc, initialState, storeService) {
-    /** @private {!ButtonStateDef} */
+    /** @private {!ButtonState_0_1_Def} */
     this.state_ = initialState;
 
     /** @public @const {!Element} */
@@ -109,7 +109,7 @@ class PaginationButton {
     this.storeService_ = storeService;
   }
 
-  /** @param {!ButtonStateDef} state */
+  /** @param {!ButtonState_0_1_Def} state */
   updateState(state) {
     if (state === this.state_) {
       return;

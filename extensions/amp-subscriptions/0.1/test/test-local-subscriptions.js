@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
-import {SubscriptionAnalytics} from '../analytics';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 
 describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
@@ -28,8 +28,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let getEncryptedDocumentKeyStub;
 
   const actionMap = {
-    'subscribe': 'https://lipsum.com/subscribe',
-    'login': 'https://lipsum.com/login',
+    [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
+    [Action.LOGIN]: 'https://lipsum.com/login',
   };
   const service = 'sample-service';
   const source = 'sample-source';
@@ -56,12 +56,25 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   };
   const authUrl = configAuthUrl.replace('READER_ID', readerId);
   const pingbackUrl = configPingbackUrl.replace('READER_ID', readerId);
+  const fakeScoreStates = {
+    'subscribe.google.com': {
+      'isReadyToPay': 1,
+      'supportsViewer': 1,
+    },
+    'local': {
+      'isReadyToPay': 0,
+      'supportsViewer': 0,
+    },
+  };
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
+    sandbox
+      .stub(serviceAdapter, 'getScoreFactorStates')
+      .callsFake(() => Promise.resolve(fakeScoreStates));
     sandbox
       .stub(serviceAdapter, 'getPageConfig')
       .callsFake(() => new PageConfig('example.org:basic', true));
@@ -183,19 +196,19 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     let actionMap;
     beforeEach(() => {
       actionMap = {
-        'subscribe': 'https://lipsum.com/subscribe',
-        'login': 'https://lipsum.com/login',
+        [Action.SUBSCRIBE]: 'https://lipsum.com/subscribe',
+        [Action.LOGIN]: 'https://lipsum.com/login',
         'other': 'https://lipsum.com/other',
       };
     });
 
     it('should check that login action is present', () => {
-      delete actionMap['login'];
+      delete actionMap[Action.LOGIN];
       expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
     });
 
     it('should check that subscribe action is present', () => {
-      delete actionMap['subscribe'];
+      delete actionMap[Action.SUBSCRIBE];
       expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
     });
 
@@ -217,7 +230,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     let element;
     beforeEach(() => {
       element = document.createElement('div');
-      element.setAttribute('subscriptions-action', 'subscribe');
+      element.setAttribute('subscriptions-action', Action.SUBSCRIBE);
       element.setAttribute('subscriptions-service', 'local');
     });
 
@@ -268,7 +281,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       'should delegate service selection to scoreBasedLogin if no service ' +
         'name is specified for login',
       () => {
-        element.setAttribute('subscriptions-action', 'login');
+        element.setAttribute('subscriptions-action', Action.LOGIN);
         element.removeAttribute('subscriptions-service');
         const platform = {};
         const serviceId = 'serviceId';
@@ -285,7 +298,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         );
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith('login', serviceId);
+        expect(delegateStub).to.be.calledWith(Action.LOGIN, serviceId);
       }
     );
 
@@ -293,7 +306,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       'should delegate service selection to scoreBasedLogin ' +
         'service specified is auto for login',
       () => {
-        element.setAttribute('subscriptions-action', 'login');
+        element.setAttribute('subscriptions-action', Action.LOGIN);
         element.setAttribute('subscriptions-service', 'auto');
         const loginStub = sandbox
           .stub(
@@ -310,12 +323,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         platform.getServiceId = sandbox.stub().callsFake(() => serviceId);
         localSubscriptionPlatform.handleClick_(element);
         expect(loginStub).to.be.called;
-        expect(delegateStub).to.be.calledWith('login', serviceId);
+        expect(delegateStub).to.be.calledWith(Action.LOGIN, serviceId);
       }
     );
 
     it('should NOT delegate for scoreBasedLogin for non-login action', () => {
-      element.setAttribute('subscriptions-action', 'subscribe');
+      element.setAttribute('subscriptions-action', Action.SUBSCRIBE);
       element.setAttribute('subscriptions-service', 'auto');
       const loginStub = sandbox.stub(
         localSubscriptionPlatform.serviceAdapter_,
@@ -335,7 +348,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       localSubscriptionPlatform.handleClick_(element);
       expect(loginStub).to.not.be.called;
       expect(delegateStub).to.not.be.called;
-      expect(executeStub).to.be.calledOnce.calledWith('subscribe');
+      expect(executeStub).to.be.calledOnce.calledWith(Action.SUBSCRIBE);
     });
   });
 
@@ -360,9 +373,35 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         localSubscriptionPlatform.renderer_,
         'render'
       );
+      const stateSub = sandbox
+        .stub(localSubscriptionPlatform, 'createRenderState_')
+        .callsFake(() => Promise.resolve({foo: 'bar'}));
       localSubscriptionPlatform.activate(entitlement);
-      return localSubscriptionPlatform.actions_.build().then(() => {
+      expect(stateSub).to.be.calledOnce;
+      return Promise.resolve().then(() => {
         expect(renderStub).to.be.calledOnce;
+      });
+    });
+
+    it('should build renderState', () => {
+      return expect(
+        localSubscriptionPlatform.createRenderState_(entitlement)
+      ).to.eventually.deep.equal({
+        'source': 'sample-source',
+        'service': '',
+        'granted': true,
+        'grantReason': 'SUBSCRIBER',
+        'data': null,
+        'factors': {
+          'subscribe.google.com': {
+            'isReadyToPay': 1,
+            'supportsViewer': 1,
+          },
+          'local': {
+            'isReadyToPay': 0,
+            'supportsViewer': 0,
+          },
+        },
       });
     });
 
@@ -387,6 +426,20 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
         expect(sendSignalStub.getCall(0).args[1].body).to.equal(
           JSON.stringify(entitlement.jsonForPingback())
+        );
+      });
+    });
+    it('pingback should handle multiple entitlements ', () => {
+      const sendSignalStub = sandbox.stub(
+        localSubscriptionPlatform.xhr_,
+        'sendSignal'
+      );
+
+      return localSubscriptionPlatform.pingback([entitlement]).then(() => {
+        expect(sendSignalStub).to.be.calledOnce;
+        expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
+        expect(sendSignalStub.getCall(0).args[1].body).to.equal(
+          JSON.stringify([entitlement.jsonForPingback()])
         );
       });
     });

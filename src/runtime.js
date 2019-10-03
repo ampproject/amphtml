@@ -20,7 +20,6 @@ import {CommonSignals} from './common-signals';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
-  devAssert,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
@@ -58,7 +57,6 @@ import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
 import {setStyle} from './style';
-import {setViewerVisibilityState} from './service/viewer-impl';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -77,10 +75,10 @@ const TAG = 'runtime';
  */
 function adoptShared(global, callback) {
   // Tests can adopt the same window twice. sigh.
-  if (global.AMP_TAG) {
+  if (global.__AMP_TAG) {
     return Promise.resolve();
   }
-  global.AMP_TAG = true;
+  global.__AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
   /** @const {!Array<function(!Object)|!ExtensionPayload>} */
@@ -327,7 +325,7 @@ export function adopt(global) {
     const {documentElement} = global.document;
 
     const ampdocService = Services.ampdocServiceFor(global);
-    const ampdoc = ampdocService.getAmpDoc();
+    const ampdoc = ampdocService.getSingleDoc();
     global.AMP.ampdoc = ampdoc;
 
     const viewer = Services.viewerForDoc(documentElement);
@@ -418,13 +416,14 @@ export class MultidocManager {
    * Attaches the shadow root and calls the supplied DOM builder.
    * @param {!Element} hostElement
    * @param {string} url
-   * @param {!Object<string, string>|undefined} initParams
+   * @param {!Object<string, string>|undefined} params
    * @param {function(!Object, !ShadowRoot,
    * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
    * @return {!Object}
    * @private
    */
-  attachShadowDoc_(hostElement, url, initParams, builder) {
+  attachShadowDoc_(hostElement, url, params, builder) {
+    params = params || Object.create(null);
     this.purgeShadowRoots_();
 
     setStyle(hostElement, 'visibility', 'hidden');
@@ -440,7 +439,9 @@ export class MultidocManager {
     amp.url = url;
     const {origin} = parseUrlDeprecated(url);
 
-    const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot);
+    const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot, {
+      params,
+    });
     /** @const {!./service/ampdoc-impl.AmpDocShadow} */
     amp.ampdoc = ampdoc;
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
@@ -453,7 +454,7 @@ export class MultidocManager {
       /* opt_isRuntimeCss */ true
     );
     // Instal doc services.
-    installAmpdocServices(ampdoc, initParams || Object.create(null));
+    installAmpdocServices(ampdoc);
 
     const viewer = Services.viewerForDoc(ampdoc);
 
@@ -462,7 +463,7 @@ export class MultidocManager {
      * @param {!VisibilityState} state
      */
     amp['setVisibilityState'] = function(state) {
-      setViewerVisibilityState(viewer, state);
+      ampdoc.overrideVisibilityState(state);
     };
 
     // Messaging pipe.
@@ -641,6 +642,7 @@ export class MultidocManager {
   mergeShadowHead_(ampdoc, shadowRoot, doc) {
     const extensionIds = [];
     if (doc.head) {
+      shadowRoot.AMP.head = doc.head;
       const parentLinks = {};
       const links = childElementsByTag(
         dev().assertElement(this.win.document.head),
@@ -725,6 +727,8 @@ export class MultidocManager {
               const src = n.getAttribute('src');
               const isRuntime =
                 src.indexOf('/amp.js') != -1 || src.indexOf('/v0.js') != -1;
+              // Note: Some extensions don't have [custom-element] or
+              // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
               const versionRe = /-(\d+.\d+)(.max)?\.js$/;
@@ -808,10 +812,7 @@ export class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
-    setViewerVisibilityState(
-      Services.viewerForDoc(ampdoc),
-      VisibilityState.INACTIVE
-    );
+    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
   }
 
@@ -878,22 +879,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (internalRuntimeVersion() == v) {
     return false;
   }
-  // The :not is an extra prevention of recursion because it will be
-  // added to script tags that go into the code path below.
-  const scriptInHead = win.document.head./*OK*/ querySelector(
-    `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`
-  );
-  devAssert(
-    scriptInHead,
-    'Expected to find script for extension: %s',
-    fnOrStruct.n
-  );
-  if (!scriptInHead) {
-    return false;
-  }
-  // Mark the element as being replaced, so that the installExtension code
-  // assumes it as not-present.
-  Services.extensionsFor(win).reloadExtension(fnOrStruct.n, scriptInHead);
+  Services.extensionsFor(win).reloadExtension(fnOrStruct.n);
   return true;
 }
 

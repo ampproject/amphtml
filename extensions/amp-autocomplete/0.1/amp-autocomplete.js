@@ -166,8 +166,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
+
+    /** @private {boolean} */
+    this.interacted_ = false;
   }
 
   /** @override */
@@ -284,16 +287,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const json = tryParseJson(script.textContent, error => {
       throw error;
     });
-    const items = json['items'];
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    const items = getValueForExpr(/**@type {!JsonObject}*/ (json), itemsExpr);
     if (!items) {
       user().warn(
         TAG,
-        'Expected key "items" in data but found nothing. ' +
-          'Rendering empty results.'
+        'Expected key "%s" in data but found nothing. Rendering empty results.',
+        itemsExpr
       );
       return [];
     }
-    return items;
+    return user().assertArray(items);
   }
 
   /**
@@ -305,16 +309,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
-    return batchFetchJsonFor(ampdoc, this.element, 'items', policy).catch(e => {
-      if (e.message === 'Response is undefined.') {
-        user().warn(
-          TAG,
-          'Expected key "items" in data but found nothing. ' +
-            'Rendering empty results.'
-        );
-        return [];
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy).catch(
+      e => {
+        if (e.message === 'Response is undefined.') {
+          user().warn(
+            TAG,
+            'Expected key "%s" in data but found nothing. Rendering empty results.',
+            itemsExpr
+          );
+          return [];
+        }
       }
-    });
+    );
   }
 
   /**
@@ -340,6 +347,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.setAttribute('autocomplete', 'off');
 
     // Register event handlers.
+    this.inputElement_.addEventListener(
+      'touchstart',
+      () => {
+        this.checkFirstInteractionAndMaybeFetchData_();
+      },
+      {passive: true}
+    );
     this.inputElement_.addEventListener('input', () => {
       this.inputHandler_();
     });
@@ -347,7 +361,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.keyDownHandler_(e);
     });
     this.inputElement_.addEventListener('focus', () => {
-      this.toggleResultsHandler_(true);
+      this.checkFirstInteractionAndMaybeFetchData_().then(() => {
+        this.toggleResultsHandler_(true);
+      });
     });
     this.inputElement_.addEventListener('blur', () => {
       this.toggleResultsHandler_(false);
@@ -356,25 +372,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.selectHandler_(e);
     });
 
-    let remoteDataPromise = Promise.resolve();
-    if (this.element.hasAttribute('src')) {
-      if (this.sourceData_) {
-        user().warn(
-          TAG,
-          'Discovered both inline <script> and remote "src"' +
-            ' data. Was providing two datasets intended?'
-        );
-      }
-      remoteDataPromise = this.getRemoteData_().catch(e => {
-        this.displayFallback_(e);
-      });
-    }
-
-    return remoteDataPromise.then(remoteData => {
-      // If both types of data are provided, display remote data.
-      this.sourceData_ = remoteData || this.sourceData_;
-      this.filterDataAndRenderResults_(this.sourceData_);
-    });
+    return this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
   }
 
   /** @override */
@@ -384,14 +382,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (typeof src === 'string') {
-      return this.getRemoteData_()
-        .catch(e => {
-          this.displayFallback_(e);
-        })
-        .then(remoteData => {
+      return this.getRemoteData_().then(
+        remoteData => {
           this.sourceData_ = remoteData || [];
           this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
-        });
+        },
+        e => {
+          this.displayFallback_(e);
+        }
+      );
     }
     if (typeof src === 'object') {
       this.sourceData_ = src['items'] || [];
@@ -734,6 +733,27 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         this.setResultDisplayDirection_(renderAbove);
         this.toggleResults_(display);
+      }
+    );
+  }
+
+  /**
+   * Requests remote data source, if provided, on first user interaction.
+   * @return {!Promise}
+   * @private
+   */
+  checkFirstInteractionAndMaybeFetchData_() {
+    if (this.interacted_ || !this.element.hasAttribute('src')) {
+      return Promise.resolve();
+    }
+    this.interacted_ = true;
+    return this.getRemoteData_().then(
+      remoteData => {
+        this.sourceData_ = remoteData;
+        this.filterDataAndRenderResults_(this.sourceData_);
+      },
+      e => {
+        this.displayFallback_(e);
       }
     );
   }

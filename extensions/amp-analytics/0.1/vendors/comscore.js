@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const COMSCORE_CONFIG = jsonLiteral({
   'vars': {
     'c2': '1000001',
   },
@@ -24,6 +26,7 @@ export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
     'pageview':
       '${base}c1=2' +
       '&c2=${c2}' +
+      '&cs_amp_consent=${consentState}' +
       '&cs_pv=${pageViewId}' +
       '&c12=${clientId(comScore)}' +
       '&rn=${random}' +
@@ -44,3 +47,5 @@ export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {COMSCORE_CONFIG};

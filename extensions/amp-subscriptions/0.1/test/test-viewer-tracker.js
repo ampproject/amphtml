@@ -31,7 +31,7 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
   describe('scheduleView', () => {
     it('should call `reportWhenViewed_`, if viewer is visible', () => {
       const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
-      sandbox.stub(viewTracker.viewer_, 'isVisible').callsFake(() => true);
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
       return viewTracker.scheduleView(2000).then(() => {
         expect(whenViewedStub).to.be.calledOnce;
       });
@@ -40,12 +40,9 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
     it('should call `reportWhenViewed_`, when viewer gets visible', () => {
       let visibleState = false;
       const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
-      const visibilityChangedStub = sandbox.stub(
-        viewTracker.viewer_,
-        'onVisibilityChanged'
-      );
+      const visibilityChangedStub = sandbox.stub(ampdoc, 'onVisibilityChanged');
       const visibilitySandbox = sandbox
-        .stub(viewTracker.viewer_, 'isVisible')
+        .stub(ampdoc, 'isVisible')
         .callsFake(() => visibleState);
 
       const viewPromise = viewTracker.scheduleView(2000);

@@ -15,6 +15,7 @@
  */
 
 import {FakeWindow} from '../../testing/fake-dom';
+import {Services} from '../../src/services';
 import {
   getElementService,
   getElementServiceForDoc,
@@ -409,25 +410,33 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
   let embedWin;
   let nodeInEmbedWin;
   let nodeInTopWin;
+  let frameElement;
   let service;
 
   beforeEach(() => {
     win = env.win;
 
+    frameElement = win.document.createElement('div');
+    win.document.body.appendChild(frameElement);
+
     embedWin = new FakeWindow();
+    embedWin.frameElement = frameElement;
     setParentWindow(embedWin, win);
+
+    Services.ampdocServiceFor(win).installFieDoc(
+      'https://example.org',
+      embedWin
+    );
 
     nodeInEmbedWin = {
       nodeType: Node.ELEMENT_NODE,
-      ownerDocument: {
-        defaultView: embedWin,
-      },
+      ownerDocument: embedWin.document,
+      getRootNode: () => embedWin.document,
     };
     nodeInTopWin = {
       nodeType: Node.ELEMENT_NODE,
-      ownerDocument: {
-        defaultView: win,
-      },
+      ownerDocument: win.document,
+      getRootNode: () => win.document,
     };
 
     service = {name: 'fake-service-object'};

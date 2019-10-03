@@ -15,6 +15,7 @@
  */
 
 import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
+import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
   'amp-story-cta-layer',
@@ -30,6 +31,9 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      registerServiceBuilder(win, 'performance', () => ({
+        isPerformanceTrackingOn: () => false,
+      }));
       const ampStoryCtaLayerEl = win.document.createElement(
         'amp-story-cta-layer'
       );
@@ -37,34 +41,31 @@ describes.realWin(
       ampStoryCtaLayer = new AmpStoryCtaLayer(ampStoryCtaLayerEl);
     });
 
-    it('should build the cta layer', () => {
+    it('should build the cta layer', async () => {
       ampStoryCtaLayer.buildCallback();
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(ampStoryCtaLayer.element).to.have.class('i-amphtml-story-layer');
-      });
+      await ampStoryCtaLayer.layoutCallback();
+      expect(ampStoryCtaLayer.element).to.have.class('i-amphtml-story-layer');
     });
 
-    it('should add or overwrite target attribute to links', () => {
+    it('should add or overwrite target attribute to links', async () => {
       const ctaLink = win.document.createElement('a');
       expect(ctaLink).to.not.have.attribute('target');
 
       ampStoryCtaLayer.element.appendChild(ctaLink);
       ampStoryCtaLayer.buildCallback();
 
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(ctaLink).to.have.attribute('target');
-        expect(ctaLink.getAttribute('target')).to.equal('_blank');
-      });
+      await ampStoryCtaLayer.layoutCallback();
+      expect(ctaLink).to.have.attribute('target');
+      expect(ctaLink.getAttribute('target')).to.equal('_blank');
     });
 
-    it('should not add target attribute to other elements', () => {
+    it('should not add target attribute to other elements', async () => {
       const elem = win.document.createElement('span');
       ampStoryCtaLayer.element.appendChild(elem);
       ampStoryCtaLayer.buildCallback();
 
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(elem).to.not.have.attribute('target');
-      });
+      await ampStoryCtaLayer.layoutCallback();
+      expect(elem).to.not.have.attribute('target');
     });
 
     it('should not allow a cta layer on the first page', () => {
@@ -107,40 +108,37 @@ describes.realWin(
       });
     });
 
-    it('should add or overwrite role attribute to links', () => {
+    it('should add or overwrite role attribute to links', async () => {
       const ctaLink = win.document.createElement('a');
       expect(ctaLink).to.not.have.attribute('role');
 
       ampStoryCtaLayer.element.appendChild(ctaLink);
       ampStoryCtaLayer.buildCallback();
 
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(ctaLink).to.have.attribute('role');
-        expect(ctaLink.getAttribute('role')).to.equal('link');
-      });
+      await ampStoryCtaLayer.layoutCallback();
+      expect(ctaLink).to.have.attribute('role');
+      expect(ctaLink.getAttribute('role')).to.equal('link');
     });
 
-    it('should add or overwrite role attribute to buttons', () => {
+    it('should add or overwrite role attribute to buttons', async () => {
       const ctaButton = win.document.createElement('button');
       expect(ctaButton).to.not.have.attribute('role');
 
       ampStoryCtaLayer.element.appendChild(ctaButton);
       ampStoryCtaLayer.buildCallback();
 
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(ctaButton).to.have.attribute('role');
-        expect(ctaButton.getAttribute('role')).to.equal('button');
-      });
+      await ampStoryCtaLayer.layoutCallback();
+      expect(ctaButton).to.have.attribute('role');
+      expect(ctaButton.getAttribute('role')).to.equal('button');
     });
 
-    it('should not add role attribute to other elements', () => {
+    it('should not add role attribute to other elements', async () => {
       const elem = win.document.createElement('span');
       ampStoryCtaLayer.element.appendChild(elem);
       ampStoryCtaLayer.buildCallback();
 
-      return ampStoryCtaLayer.layoutCallback().then(() => {
-        expect(elem).to.not.have.attribute('role');
-      });
+      await ampStoryCtaLayer.layoutCallback();
+      expect(elem).to.not.have.attribute('role');
     });
   }
 );

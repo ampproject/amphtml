@@ -101,7 +101,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
     const doc = env.win.document;
     // TODO(a4a-cam@): This is necessary in the short term, until A4A is
     // smarter about host document styling.  The issue is that it needs to
