@@ -1,0 +1,86 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <!-- AMP runtime -->
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+    <!-- AMP extensions-->
+    <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+
+    <!-- videojs-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/video.js@7.4.1/dist/video-js.css">
+  	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/videojs-vr@1.5.0/dist/videojs-vr.css">
+
+    <title>My Story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="helloworld.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      .vjs-loading-spinner {
+        display: none !important;
+      }
+
+      .i-amphtml-story-draggable-drawer-content {
+        min-height: 100% !important;
+        position: relative !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone>
+      <amp-story-page id="cover" class="timeline-page">
+        <amp-story-grid-layer template="fill">
+          <!-- <amp-video src="TODO.mp4" layout="fill"></amp-video> -->
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1>NYFW</h1>
+          <h2>Day 1</h2>
+          <h3>Aimee Song</h3>
+          <h4>Song of Style</h4>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-1">
+        <amp-story-grid-layer template="vertical">
+          <h4>Aimee's Beauty Tip</h1>
+          <p>"Use two complementary shades for a trendy ombr&eacute; effect."</p>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment layout="nodisplay">
+          <amp-iframe sandbox="allow-scripts allow-same-origin" layout="fill" src="https://us.laneige.com/two-tone-lipstick"></amp-iframe>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="page-2">
+        <amp-story-grid-layer template="fill">
+          <video muted width="1280" height="720" id="videojs-vr-player" class="video-js vjs-default-skin" playsinline style="pointer-events: none !important;" media-pool-exempt>
+            <source src="./video/P10-360video_720p.mp4" type="video/mp4">
+          </video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" align-content="end">
+          <h1 style="color:white;">three hundred sixty</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+    </amp-story>
+
+    <!-- 360 video-->
+    <script src="https://cdn.jsdelivr.net/npm/video.js@7.4.1/dist/video.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/videojs-vr@1.7.0/dist/videojs-vr.js"></script>
+    <script>
+      (function(window, videojs) {
+        window.vr_eac = videojs('videojs-vr-player').vr({
+          debug: true,
+          forceCardboard: false,
+          motionControls: true,
+          projection: 'EAC',
+        });
+      }(window, window.videojs));
+    </script>
+  </body>
+</html>
