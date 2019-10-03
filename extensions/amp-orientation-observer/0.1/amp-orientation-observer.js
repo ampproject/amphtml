@@ -35,7 +35,7 @@ const DEFAULT_REST_VALUES = {
   'gamma': 0,
 };
 /**
- * @const {Object<string, number>}
+ * @const {Object<string, !Array<number>>}
  */
 const DEFAULT_RANGES = {
   'alpha': [0, 360],
