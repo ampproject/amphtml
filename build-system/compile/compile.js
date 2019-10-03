@@ -336,7 +336,7 @@ function compile(
         'unknownDefines'
       );
       compilerOptions.conformance_configs =
-        'build-system/conformance-config.textproto';
+        'build-system/test-configs/conformance-config.textproto';
     } else {
       compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
       compilerOptions.jscomp_off.push('unknownDefines');

@@ -21,7 +21,7 @@
  * determine which tasks are required to run for pull request builds.
  */
 const colors = require('ansi-colors');
-const config = require('../config');
+const config = require('../test-configs/config');
 const minimatch = require('minimatch');
 const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../git');

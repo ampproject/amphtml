@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
-const config = require('../config');
+const config = require('../test-configs/config');
 const eslint = require('gulp-eslint');
 const eslintIfFixed = require('gulp-eslint-if-fixed');
 const fs = require('fs-extra');

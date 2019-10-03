@@ -19,7 +19,7 @@ const colors = require('ansi-colors');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const path = require('path');
-const srcGlobs = require('../config').presubmitGlobs;
+const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;

@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
-const testConfig = require('../../config');
+const testConfig = require('../../test-configs/config');
 const {
   createKarmaServer,
   getAdTypes,

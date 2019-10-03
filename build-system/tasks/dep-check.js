@@ -18,7 +18,7 @@
 const babelify = require('babelify');
 const BBPromise = require('bluebird');
 const browserify = require('browserify');
-const depCheckConfig = require('../dep-check-config');
+const depCheckConfig = require('../test-configs/dep-check-config');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp');
 const log = require('fancy-log');
@@ -318,7 +318,7 @@ async function depCheck() {
         log(
           yellow('NOTE:'),
           'If a dependency is valid, add it to one of the whitelists in',
-          cyan('build-system/dep-check-config.js')
+          cyan('build-system/test-configs/dep-check-config.js')
         );
         const reason = new Error('Dependency checks failed');
         reason.showStack = false;

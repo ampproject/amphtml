@@ -38,7 +38,7 @@ const {
 const {altMainBundles, jsBundles} = require('../../bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {thirdPartyFrames} = require('../config');
+const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 
 const {green, red, cyan} = colors;

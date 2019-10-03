@@ -21,7 +21,7 @@ const fs = require('fs');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
-const testConfig = require('../../config');
+const testConfig = require('../../test-configs/config');
 
 const {gitDiffNameOnlyMaster} = require('../../git');
 const {green, cyan} = require('ansi-colors');
