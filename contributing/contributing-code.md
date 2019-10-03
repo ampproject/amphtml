@@ -16,8 +16,8 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 - [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your guide or the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
 - [ ] When your code is ready to review, find [people to review and approve your code](#code-review-and-approval).
   - Your code must be reviewed/approved by an Owner for each area your PR affects and a Reviewer.  (It is acceptable and common for one person to fulfill both roles.)
-    - after your PR is created, a bot will automatically find OWNERs that can approve your PR and add them to your PR; you may also view the OWNERS.yaml file in the directories you change (or their parent directories)
-    - choose a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml); it's possible that the OWNERs that were automatically added by the bot are also Reviewers 
+    - after your PR is created, a bot will automatically find Owners that can approve your PR and add them to your PR; you may also view the OWNERS.yaml file in the directories you change (or their parent directories)
+    - choose a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml); it's possible that the Owners that were automatically added by the bot are also Reviewers 
   -  If the Owner that was automatically added is not a Reviewer, or you want to have someone else review and approve your code add them as reviewers on your PR if you are able to do so, otherwise cc them by adding the line "/cc @username" in your PR description/comment.
 
 If your run into any issues finding a Reviewer/Owner or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).  You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
