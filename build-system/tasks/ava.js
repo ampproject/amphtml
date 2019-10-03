@@ -17,7 +17,7 @@
 
 const gulp = require('gulp');
 const gulpAva = require('gulp-ava');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 
 /**
  * Runs ava tests.

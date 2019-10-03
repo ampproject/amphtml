@@ -21,11 +21,11 @@ const fs = require('fs');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
-const testConfig = require('../../config');
+const testConfig = require('../../test-configs/config');
 
-const {gitDiffNameOnlyMaster} = require('../../git');
+const {gitDiffNameOnlyMaster} = require('../../common/git');
 const {green, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestSkipped} = require('../report-test-status');
 
 const EXTENSIONSCSSMAP = 'EXTENSIONS_CSS_MAP';

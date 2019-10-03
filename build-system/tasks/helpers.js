@@ -18,7 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
+const conf = require('../compile/build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
@@ -31,13 +31,15 @@ const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const watchify = require('watchify');
-const wrappers = require('../compile-wrappers');
+const wrappers = require('../compile/compile-wrappers');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {altMainBundles, jsBundles} = require('../../bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
-const {thirdPartyFrames} = require('../config');
-const {transpileTs} = require('../typescript');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const {thirdPartyFrames} = require('../test-configs/config');
+const {transpileTs} = require('../compile/typescript');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));

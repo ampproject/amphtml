@@ -21,10 +21,10 @@
  * determine which tasks are required to run for pull request builds.
  */
 const colors = require('ansi-colors');
-const config = require('../config');
+const config = require('../test-configs/config');
 const minimatch = require('minimatch');
 const path = require('path');
-const {gitDiffNameOnlyMaster} = require('../git');
+const {gitDiffNameOnlyMaster} = require('../common/git');
 
 /**
  * A mapping of functions that match a given file to one or more build targets.
@@ -45,9 +45,9 @@ const targetMatchers = [
     targets: ['BABEL_PLUGIN', 'RUNTIME'], // Test the runtime for babel plugin changes.
     func: file => {
       return (
-        file == 'build-system/internal-version.js' ||
-        file == 'build-system/log-module-metadata.js' ||
-        file == 'build-system/static-template-metadata.js' ||
+        file == 'build-system/babel-plugins/log-module-metadata.js' ||
+        file == 'build-system/babel-plugins/static-template-metadata.js' ||
+        file == 'build-system/compile/internal-version.js' ||
         file == 'build-system/compile/log-messages.js' ||
         file == 'build-system/tasks/babel-plugin-tests.js' ||
         file.startsWith('build-system/babel-plugins/')

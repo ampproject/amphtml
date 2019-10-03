@@ -22,10 +22,13 @@ const {
   printConfigHelp,
   printNobuildHelp,
 } = require('./helpers');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');

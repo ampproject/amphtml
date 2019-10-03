@@ -12,7 +12,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
-    "preinstall": "node ../build-system/check-package-manager.js"
+    "preinstall": "node ../build-system/common/check-package-manager.js"
   },
   "devDependencies": {
     "google-closure-compiler": "20190929.0.0",

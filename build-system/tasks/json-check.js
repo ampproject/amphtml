@@ -19,7 +19,7 @@ const colors = require('ansi-colors');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const through2 = require('through2');
-const {jsonGlobs} = require('../config');
+const {jsonGlobs} = require('../test-configs/config');
 
 const expectedCaches = ['cloudflare', 'google'];
 

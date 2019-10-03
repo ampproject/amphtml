@@ -18,7 +18,7 @@
 const colors = require('ansi-colors');
 const fancyLog = require('fancy-log');
 const sleep = require('sleep-promise');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;

@@ -18,9 +18,9 @@
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const {cyan, green, red} = require('ansi-colors');
-const {getOutput} = require('../exec');
-const {gitCommitHash, gitDiffPath} = require('../git');
-const {isTravisBuild} = require('../travis');
+const {getOutput} = require('../common/exec');
+const {gitCommitHash, gitDiffPath} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
 
 const antExecutable = 'third_party/ant/bin/ant';
 const runnerDir = 'build-system/runner';

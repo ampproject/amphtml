@@ -26,7 +26,7 @@
 'use strict';
 
 const minimist = require('minimist');
-const {isTravisBuild} = require('./build-system/travis');
+const {isTravisBuild} = require('./build-system/common/travis');
 const argv = minimist(process.argv.slice(2));
 
 const isDist = argv._.includes('dist');

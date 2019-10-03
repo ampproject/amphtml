@@ -15,7 +15,7 @@
 # limitations under the license.
 #
 # This file contains the default pre-push hook for AMPHTML. To enable it, run:
-#     "./build-system/enable-git-pre-push.sh"
+#     "./build-system/common/enable-git-pre-push.sh"
 #
 # Note: The checks in this file must not take more than a few seconds to run.
 # Time consuming checks that call gulp build, or run all the tests are

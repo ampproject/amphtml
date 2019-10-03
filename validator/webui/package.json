@@ -12,7 +12,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
-    "preinstall": "node ../../build-system/check-package-manager.js"
+    "preinstall": "node ../../build-system/common/check-package-manager.js"
   },
   "dependencies": {
     "@polymer/font-roboto": "0.0.3",

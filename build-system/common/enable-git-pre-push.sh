@@ -21,9 +21,10 @@
 
 
 SCRIPT=${BASH_SOURCE[0]}
-BUILD_SYSTEM_DIR=$(dirname "$SCRIPT")
+BUILD_SYSTEM_COMMON_DIR=$(dirname "$SCRIPT")
+BUILD_SYSTEM_DIR=$(dirname "$BUILD_SYSTEM_COMMON_DIR")
 AMPHTML_DIR=$(dirname "$BUILD_SYSTEM_DIR")
-PRE_PUSH_SRC="build-system/default-pre-push"
+PRE_PUSH_SRC="build-system/common/default-pre-push"
 GIT_HOOKS_DIR=".git/hooks"
 PRE_PUSH_DEST="$GIT_HOOKS_DIR/pre-push"
 PRE_PUSH_BACKUP="$GIT_HOOKS_DIR/pre-push.backup"

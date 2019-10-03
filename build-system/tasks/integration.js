@@ -24,7 +24,7 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {execOrDie} = require('../exec');
+const {execOrDie} = require('../common/exec');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {

@@ -30,7 +30,7 @@ const {
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
 
 const FILENAME = 'e2e-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));

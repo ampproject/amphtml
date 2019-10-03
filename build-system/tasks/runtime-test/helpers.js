@@ -26,7 +26,7 @@ const {
   reportTestRunComplete,
 } = require('../report-test-status');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {Server} = require('karma');
 
 const BATCHSIZE = 4; // Number of Sauce Lab browsers
