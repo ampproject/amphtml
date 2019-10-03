@@ -22,13 +22,33 @@ import {dict} from '../../../src/utils/object';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
+/**
+ * @const {!Array<string>}
+ */
 const AXES = ['alpha', 'beta', 'gamma'];
+/**
+ * @const {Object<string, number>}
+ */
 const DEFAULT_REST_VALUES = {
-  alpha: 180,
-  beta: 0,
-  gamma: 0,
+  'alpha': 180,
+  'beta': 0,
+  'gamma': 0,
 };
+/**
+ * @const {Object<string, number>}
+ */
+const DEFAULT_RANGES = {
+  'alpha': [0, 360],
+  'beta': [-180, 180],
+  'gamma': [-90, 90],
+};
+/**
+ * @const {number}
+ */
 const DELTA_CONST = 0.1;
+/**
+ * @const {number}
+ */
 const DEFAULT_SMOOTHING_PTS = 4;
 
 export class AmpOrientationObserver extends AMP.BaseElement {
@@ -42,28 +62,16 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {{beta: Array, alpha: Array, gamma: Array}} */
-    this.range_ = {
-      alpha: [0, 360],
-      beta: [-180, 180],
-      gamma: [-90, 90],
-    };
+    /** @private {Object<string, !Array<number>>} */
+    this.range_ = Object.assign({}, DEFAULT_RANGES);
 
-    /** @private {{beta: number, alpha: number, gamma: number}} */
-    this.computedValue_ = {
-      alpha: DEFAULT_REST_VALUES.alpha,
-      beta: DEFAULT_REST_VALUES.beta,
-      gamma: DEFAULT_REST_VALUES.gamma,
-    };
+    /** @private {Object<string, number>} */
+    this.computedValue_ = Object.assign({}, DEFAULT_REST_VALUES);
 
-    /** @private {{beta: number, alpha: number, gamma: number}} */
-    this.restValues_ = {
-      alpha: DEFAULT_REST_VALUES.alpha,
-      beta: DEFAULT_REST_VALUES.beta,
-      gamma: DEFAULT_REST_VALUES.gamma,
-    };
+    /** @private {Object<string, number>} */
+    this.restValues_ = Object.assign({}, DEFAULT_REST_VALUES);
 
-    /** @private {{beta: Array, alpha: Array, gamma: Array}} */
+    /** @private {Object<string, !Array<number>>} */
     this.smoothingPoints_ = {beta: [], alpha: [], gamma: []};
 
     /** @private {?number} */
@@ -112,8 +120,8 @@ export class AmpOrientationObserver extends AMP.BaseElement {
   /**
    * Parses the provided ranges
    * @param {string} rangeName
-   * @param {Array} originalRange
-   * @return {?Array<number>}
+   * @param {!Array<number>} originalRange
+   * @return {!Array<number>}
    * @private
    */
   parseAttributes_(rangeName, originalRange) {
