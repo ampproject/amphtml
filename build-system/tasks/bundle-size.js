@@ -30,8 +30,10 @@ const {
   travisPushBranch,
   travisRepoSlug,
 } = require('../travis');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const runtimeFile = './dist/v0.js';
 const normalizedRtvNumber = '1234567890123';

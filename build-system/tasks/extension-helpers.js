@@ -18,7 +18,7 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const watch = require('gulp-watch');
-const wrappers = require('../compile-wrappers');
+const wrappers = require('../compile/compile-wrappers');
 const {
   extensionAliasBundles,
   extensionBundles,

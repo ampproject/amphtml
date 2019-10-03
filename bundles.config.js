@@ -21,7 +21,7 @@ const log = require('fancy-log');
 
 const {
   VERSION: internalRuntimeVersion,
-} = require('./build-system/internal-version');
+} = require('./build-system/compile/internal-version');
 
 /**
  * @enum {string}

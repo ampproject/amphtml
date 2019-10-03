@@ -15,7 +15,7 @@
  */
 
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
+const conf = require('../compile/build.conf');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -39,7 +39,7 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
@@ -47,7 +47,7 @@ const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {maybeUpdatePackages} = require('./update-packages');
-const {VERSION} = require('../internal-version');
+const {VERSION} = require('../compile/internal-version');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
