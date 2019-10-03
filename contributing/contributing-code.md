@@ -16,9 +16,9 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 - [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your guide or the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
 - [ ] When your code is ready to review, find [people to review and approve your code](#code-review-and-approval).
   - Your code must be reviewed/approved by an Owner for each area your PR affects and a Reviewer.  (It is acceptable and common for one person to fulfill both roles.)
-    - choose an Owner from the OWNERS.yaml file in the directories you change (or their parent directories)
-    - choose a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml)
-  -  Add the Reviewers/Owners as reviewers on your PR if you are able to do so, otherwise cc them by adding the line "/cc @username" in your PR description/comment.
+    - after your PR is created, a bot will automatically find Owners that can approve your PR and add them to your PR; you may also view the OWNERS.yaml file in the directories you change (or their parent directories)
+    - choose a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml); it's possible that the Owners that were automatically added by the bot are also Reviewers 
+  -  If the Owner that was automatically added is not a Reviewer, or you want to have someone else review and approve your code add them as reviewers on your PR if you are able to do so, otherwise cc them by adding the line "/cc @username" in your PR description/comment.
 
 If your run into any issues finding a Reviewer/Owner or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).  You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
@@ -96,7 +96,7 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
   - [Create a Pull Request (PR)](./getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review).
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
-  - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (Your guide can help with this.)
+  - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (A bot will automatically assign Owners that can review your code, and your guide can help find Reviewers if needed.)
   - [Respond to feedback](./getting-started-e2e.md#respond-to-pull-request-comments).
 - After your PR has all of the necessary approvals, your code may be merged into the repository by any Collaborator/Reviewer.  Your guide will typically handle this; reach out to them if your code is not merged soon after it has been approved.
 - To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
@@ -141,6 +141,8 @@ To be merged, all code must be approved by both:
 * At least one [Owner](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) for all areas the PR affects, except those areas in which the code author is an Owner.
 
 It is acceptable for one person to fulfill these requirements, e.g. if an Owner who is also a Reviewer approves the PR it may be merged.
+
+We now have a bot that will automatically assign Owners to a PR once it is created, and it is likely at least one of these Owners will also be a Reviewer.
 
 Once the PR has been approved, anyone with commit rights to the repository may merge the PR, including its author.
 
