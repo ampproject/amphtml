@@ -175,16 +175,14 @@ amp4ads_feature_tests/extensions.html:113:2 Custom JavaScript is not allowed. (s
 >>   ^~~~~~~~~
 amp4ads_feature_tests/extensions.html:115:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-vine-0.1.js"></script>
-|    <script async custom-element="amp-youtube"
-|       src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 |
 |    <script async custom-template="amp-mustache"
 |       src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 |  </head>
 |  <body></body></html>
 >>                    ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:123:19 The extension 'amp-animation' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+amp4ads_feature_tests/extensions.html:121:19 The extension 'amp-animation' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
 >>                    ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:123:19 The extension 'amp-lightbox' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+amp4ads_feature_tests/extensions.html:121:19 The extension 'amp-lightbox' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
 >>                    ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:123:19 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+amp4ads_feature_tests/extensions.html:121:19 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]

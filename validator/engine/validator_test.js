@@ -1300,7 +1300,6 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-position-observer': ['0.1', 'latest'],
         'amp-social-share': ['0.1', 'latest'],
         'amp-video': ['0.1', 'latest'],
-        'amp-youtube': ['0.1', 'latest'],
       };
       // Verify extension is approved.
       const extension = tagSpec.extensionSpec.name;
