@@ -905,7 +905,9 @@ export class AmpForm {
    * @private
    */
   trustForSubmitResponse_() {
-    if (isAmp4Email(this.form_.ownerDocument)) {
+    const doc = this.form_.ownerDocument;
+    if (doc && isAmp4Email(doc)) {
+      // TODO(choumx): Remove this warning before Q1 2020.
       user().warn(
         TAG + ', AMP4EMAIL',
         '"submit-success and "submit-error" are now "low trust" events. ' +
@@ -983,9 +985,7 @@ export class AmpForm {
     user().error(TAG, 'Form submission failed: %s', error);
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
-        const trust = isAmp4Email(this.form_.ownerDocument)
-          ? ActionTrust.LOW
-          : ActionTrust.HIGH;
+        const trust = this.trustForSubmitResponse_();
         this.triggerAction_(FormEvents.SUBMIT_ERROR, json, trust);
         this.dirtinessHandler_.onSubmitError();
       });
