@@ -50,6 +50,10 @@ amp-mega-menu .i-amphtml-mega-menu-item[open] > .i-amphtml-mega-menu-content {
   opacity: 1 !important;
 }
 
+amp-mega-menu .i-amphtml-mega-menu-item:not([open]) .i-amphtml-screen-reader {
+  display: none !important;
+}
+
 .i-amphtml-mega-menu-mask {
   position: fixed !important;
   z-index: -1 !important;

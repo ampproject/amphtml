@@ -17,6 +17,7 @@
 import '../amp-mega-menu';
 import {Keys} from '../../../../src/utils/key-codes';
 import {toggleExperiment} from '../../../../src/experiments';
+import {tryFocus} from '../../../../src/dom';
 
 describes.realWin(
   'amp-mega-menu',
@@ -50,7 +51,7 @@ describes.realWin(
       const items = [1, 2, 3].map(i => {
         return (
           `<button id="heading${i}">Menu Item ${i}</button>` +
-          `<div id="content${i}" role="group">Loreum ipsum</div>`
+          `<div id="content${i}" role="dialog">Loreum ipsum</div>`
         );
       });
 
@@ -80,7 +81,7 @@ describes.realWin(
 
     it('should expand when heading of a collapsed menu item is clicked', () => {
       element.build();
-      const heading = element.querySelector('#heading1');
+      const heading = doc.getElementById('heading1');
       expect(heading.parentNode.hasAttribute('open')).to.be.false;
       expect(heading.getAttribute('aria-expanded')).to.equal('false');
       const clickEvent = new Event('click');
@@ -91,7 +92,7 @@ describes.realWin(
 
     it('should collapse when heading of a expanded menu item is clicked', () => {
       element.build();
-      const heading = element.querySelector('#heading1');
+      const heading = doc.getElementById('heading1');
       element.implementation_.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
@@ -103,8 +104,8 @@ describes.realWin(
 
     it('should collapse an expanded menu item when another heading is clicked', () => {
       element.build();
-      const heading1 = element.querySelector('#heading1');
-      const heading2 = element.querySelector('#heading2');
+      const heading1 = doc.getElementById('heading1');
+      const heading2 = doc.getElementById('heading2');
       element.implementation_.expand_(heading1.parentNode);
       expect(heading1.parentNode.hasAttribute('open')).to.be.true;
       expect(heading1.getAttribute('aria-expanded')).to.equal('true');
@@ -118,7 +119,7 @@ describes.realWin(
 
     it('should collapse any expanded item after clicking outside the component', () => {
       element.build();
-      const heading = element.querySelector('#heading1');
+      const heading = doc.getElementById('heading1');
       element.implementation_.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
@@ -130,8 +131,8 @@ describes.realWin(
 
     it('should not collapse when click is inside the expanded content', () => {
       element.build();
-      const heading = element.querySelector('#heading1');
-      const content = element.querySelector('#content1');
+      const heading = doc.getElementById('heading1');
+      const content = doc.getElementById('content1');
       element.implementation_.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
@@ -143,14 +144,34 @@ describes.realWin(
 
     it('should collapse when ESC key is pressed', () => {
       element.build();
-      const heading = element.querySelector('#heading1');
+      const heading = doc.getElementById('heading1');
       element.implementation_.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
-      const escEvent = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
-      doc.documentElement.dispatchEvent(escEvent);
+      const escKey = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
+      doc.documentElement.dispatchEvent(escKey);
       expect(heading.parentNode.hasAttribute('open')).to.be.false;
       expect(heading.getAttribute('aria-expanded')).to.equal('false');
+    });
+
+    it('should be navigable by left/right arrow keys when a heading has focus', () => {
+      element.build().then(() => {
+        const heading1 = doc.getElementById('heading1');
+        const heading2 = doc.getElementById('heading2');
+        const heading3 = doc.getElementById('heading3');
+        const leftKey = new KeyboardEvent('keydown', {key: Keys.LEFT_ARROW});
+        const rightKey = new KeyboardEvent('keydown', {key: Keys.RIGHT_ARROW});
+        tryFocus(heading1);
+        expect(doc.activeElement).to.equal(heading1);
+        heading1.dispatchEvent(leftKey);
+        expect(doc.activeElement).to.equal(heading3);
+        heading3.dispatchEvent(leftKey);
+        expect(doc.activeElement).to.equal(heading2);
+        heading2.dispatchEvent(rightKey);
+        expect(doc.activeElement).to.equal(heading3);
+        heading3.dispatchEvent(rightKey);
+        expect(doc.activeElement).to.equal(heading1);
+      });
     });
   }
 );
