@@ -41,10 +41,10 @@ export let RequestHandler;
  * @return {?Message}
  */
 export function parseMessage(message) {
-  if (typeof message !== 'string') {
+  if (typeof message != 'string') {
     return /** @type {Message} */ (message);
   }
-  if (message.charAt(0) !== '{') {
+  if (message.charAt(0) != '{') {
     return null;
   }
 
@@ -84,8 +84,8 @@ export class WindowPortEmulator {
   addEventListener(eventType, handler) {
     this.win.addEventListener('message', e => {
       if (
-        e.origin === this.origin_ &&
-        e.source === this.target_ &&
+        e.origin == this.origin_ &&
+        e.source == this.target_ &&
         e.data['app'] === APP
       ) {
         handler(e);
@@ -405,8 +405,8 @@ export function initMessaging(source, iframe, origin) {
     const listener = e => {
       const data = e.data;
       if (
-        e.origin === origin &&
-        e.source === target &&
+        e.origin == origin &&
+        e.source == target &&
         data['app'] === APP &&
         data['name'] === CHANNEL_OPEN_MSG
       ) {
