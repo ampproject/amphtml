@@ -88,10 +88,10 @@ export class AmpFlowplayer extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      // The /players page can respond to "play" and "pause" commands from the
+      // The players iframe can respond to "flowplayer://play" and "flowplayer://pause" commands from the
       // iframe's parent
-      this.iframe_.contentWindow./*OK*/ postMessage(
-        'pause',
+      this.iframe_.contentWindow.postMessage(
+        'flowplayer://pause',
         'https://ljsp.lwcdn.com'
       );
     }
@@ -103,7 +103,7 @@ export class AmpFlowplayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
-    return true; // Call layoutCallback again.
+    return true;
   }
 }
 
