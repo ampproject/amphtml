@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Definitions for the Event Timing API.
- *
- * Created from
- * @see https://wicg.github.io/event-timing/
- *
- * @todo This should be removed when the definitions are released
- * in closure-compiler.
- *
- * @externs
- */
+import {loadScript, validateData} from '../3p/3p';
 
 /**
- * @constructor
-  * @extends {PerformanceEntry}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-function PerformanceEventTiming() {}
-/** @type {number} */ PerformanceEventTiming.prototype.processingStart;
-/** @type {number} */ PerformanceEventTiming.prototype.processingEnd;
-/** @type {boolean} */ PerformanceEventTiming.prototype.cancelable;
+export function shemedia(global, data) {
+  validateData(data, ['slotType', 'boomerangPath']);
+
+  loadScript(global, 'https://ads.shemedia.com/static/amp.js');
+}

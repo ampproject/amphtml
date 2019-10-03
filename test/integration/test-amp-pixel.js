@@ -16,7 +16,6 @@
 
 import {AmpPixel} from '../../builtins/amp-pixel';
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
 
 describe.configure().run('amp-pixel', function() {
@@ -121,10 +120,7 @@ describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
       createElementWithAttributes(env.win.document, 'img', {src})
     );
     env.win.document.body.appendChild(pixelElem);
-    const viewer = Services.viewerForDoc(env.win.document);
-    env.sandbox.stub(viewer, 'whenFirstVisible').callsFake(() => {
-      return Promise.resolve();
-    });
+    env.sandbox.stub(env.ampdoc, 'whenFirstVisible').returns(Promise.resolve());
     const pixel = new AmpPixel(pixelElem);
     pixel.buildCallback();
     expect(pixelElem.querySelectorAll('img').length).to.equal(1);

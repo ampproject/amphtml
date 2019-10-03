@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Definitions for the Layout Shift API.
- *
- * Created from
- * @see https://github.com/WICG/layout-instability/blob/master/README.md
- *
- * @todo This should be removed when the definitions are released
- * in closure-compiler.
- *
- * @externs
- */
+import {writeScript} from '../3p/3p';
 
 /**
- * @constructor
- * @extends {PerformanceEntry}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-function LayoutShift() {}
-/** @type {number} */ LayoutShift.prototype.value;
-/** @type {boolean} */ LayoutShift.prototype.hadRecentInput;
-/** @type {number} */ LayoutShift.prototype.lastInputTime;
+export function seedingalliance(global, data) {
+  writeScript(
+    global,
+    'https://d.nativendo.de/cds/delivery/init?url=' +
+      encodeURIComponent(data.url)
+  );
+}

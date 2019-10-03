@@ -1937,12 +1937,19 @@ describe('amp-a4a', () => {
       ).to.throw(new RegExp(INVALID_SPSA_RESPONSE));
     });
 
-    it('should throw due to missing outlink', () => {
+    it('should not throw due to missing outlink', () => {
       metaData.ctaType = '0';
       a4a.isSinglePageStoryAd = true;
-      expect(() =>
-        a4a.getAmpAdMetadata(buildCreativeString(metaData))
-      ).to.throw(new RegExp(INVALID_SPSA_RESPONSE));
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
+      const expected = Object.assign(
+        {
+          minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        },
+        metaData
+      );
+      delete expected.ctaType;
+      expect(actual).to.deep.equal(expected);
+      expect(a4a.element.dataset.varsCtatype).to.equal('0');
     });
 
     it('should set appropriate attributes and return metadata object', () => {
@@ -2544,7 +2551,7 @@ describe('amp-a4a', () => {
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.adPromise_ = Promise.resolve();
-      a4a.getAmpDoc = () => a4a.win.document;
+      a4a.getAmpDoc = () => fixture.ampdoc;
       a4a.getResource = () => {
         return {
           layoutCanceled: () => {},
@@ -2583,7 +2590,7 @@ describe('amp-a4a', () => {
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.adPromise_ = Promise.resolve();
-      a4a.getAmpDoc = () => a4a.win.document;
+      a4a.getAmpDoc = () => fixture.ampdoc;
       a4a.getResource = () => {
         return {
           layoutCanceled: () => {},
@@ -2622,7 +2629,7 @@ describe('amp-a4a', () => {
       const a4aElement = createA4aElement(fixture.doc);
       const a4a = new MockA4AImpl(a4aElement);
       a4a.adPromise_ = null;
-      a4a.getAmpDoc = () => a4a.win.document;
+      a4a.getAmpDoc = () => fixture.ampdoc;
       a4a.getResource = () => {
         return {
           layoutCanceled: () => {},

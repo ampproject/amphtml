@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {gitCommitFormattedTime} = require('./git');
+const {gitCommitFormattedTime} = require('../common/git');
 
 function getVersion() {
   if (argv.version) {

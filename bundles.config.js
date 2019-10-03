@@ -21,7 +21,7 @@ const log = require('fancy-log');
 
 const {
   VERSION: internalRuntimeVersion,
-} = require('./build-system/internal-version');
+} = require('./build-system/compile/internal-version');
 
 /**
  * @enum {string}
@@ -723,6 +723,13 @@ exports.extensionBundles = [
     name: 'amp-mustache',
     version: ['0.1', '0.2'],
     latestVersion: '0.2',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-drilldown',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {

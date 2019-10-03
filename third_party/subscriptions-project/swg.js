@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.69 */
+/** Version: 0.1.22.72 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -71,6 +71,53 @@ const EventOriginator = {
   SWG_SERVER: 4,
   PUBLISHER_CLIENT: 5,
 };
+
+/**
+ * @implements {Message}
+ */
+class AccountCreationRequest {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.complete_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getComplete() {
+    return this.complete_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setComplete(value) {
+    this.complete_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.complete_,  // field 1 - complete
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AccountCreationRequest';
+  }
+}
 
 /**
  * @implements {Message}
@@ -500,6 +547,53 @@ class AnalyticsRequest {
 /**
  * @implements {Message}
  */
+class EntitlementsResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.jwt_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getJwt() {
+    return this.jwt_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setJwt(value) {
+    this.jwt_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.jwt_,  // field 1 - jwt
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EntitlementsResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class EventParams {
  /**
   * @param {!Array=} data
@@ -899,10 +993,12 @@ class ViewSubscriptionsResponse {
 }
 
 const PROTO_MAP = {
+  'AccountCreationRequest': AccountCreationRequest,
   'AlreadySubscribedResponse': AlreadySubscribedResponse,
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
+  'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
@@ -2765,6 +2861,118 @@ var activityPorts_11 = activityPorts.createAbortError;
 var activityPorts_12 = activityPorts.isAbortError;
 
 /**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} opt_message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, opt_message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    const message = opt_message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
+var log_1 = {
+  assert,
+  debugLog,
+  log
+};
+var log_2 = log_1.assert;
+var log_3 = log_1.debugLog;
+var log_4 = log_1.log;
+
+/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2894,6 +3102,7 @@ class ActivityIframePort$1 {
    */
   messageDeprecated(payload) {
     this.iframePort_.message(payload);
+    log_3('WARNING: messageDeprecated() is deprecated');
   }
 
   /**
@@ -2902,6 +3111,7 @@ class ActivityIframePort$1 {
    */
   onMessageDeprecated(callback) {
     this.callbackOriginal_ = callback;
+    log_3('WARNING: use of deprecated API onMessageDeprecated()');
   }
 
   /**
@@ -3041,94 +3251,6 @@ class ActivityPorts$1 {
   getOriginalWebActivityPorts() {
     return this.activityPorts_;
   }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param  {...*} var_args [description]
- */
-function log(var_args) {
-  console.log.apply(console, arguments);
-}
-
-/**
- * Throws an error if the first argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- *
- * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
- *     not evaluate to true.
- * @param {string=} opt_message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTrueish.
- * @template T
- */
-function assert(shouldBeTrueish, opt_message, var_args) {
-  let firstElement;
-  if (!shouldBeTrueish) {
-    const message = opt_message || 'Assertion failed';
-    const splitMessage = message.split('%s');
-    const first = splitMessage.shift();
-    let formatted = first;
-    const messageArray = [];
-    pushIfNonEmpty(messageArray, first);
-    for (let i = 2; i < arguments.length; i++) {
-      const val = arguments[i];
-      if (val && val.tagName) {
-        firstElement = val;
-      }
-      const nextConstant = splitMessage.shift();
-      messageArray.push(val);
-      pushIfNonEmpty(messageArray, nextConstant.trim());
-      formatted += toString(val) + nextConstant;
-    }
-    const e = new Error(formatted);
-    e.fromAssert = true;
-    e.associatedElement = firstElement;
-    e.messageArray = messageArray;
-    throw e;
-  }
-  return shouldBeTrueish;
-}
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
-  }
-}
-
-function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return /** @type {string} */ (val);
 }
 
 /**
@@ -3641,7 +3763,7 @@ function createElement(doc, tagName, attributes, opt_content) {
         element.appendChild(opt_content[i]);
       }
     } else {
-      assert(false, 'Unsupported content: %s', opt_content);
+      log_2(false, 'Unsupported content: %s', opt_content);
     }
   }
   return element;
@@ -4051,7 +4173,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.69',
+    '_client': 'SwG 0.1.22.72',
   });
 }
 
@@ -4071,340 +4193,6 @@ function cacheParam(cacheKey) {
   const now = Date.now();
   return String(period <= 1 ? now : Math.floor(now / period));
 }
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Whether the specified error is an AbortError type.
- * See https://heycam.github.io/webidl/#aborterror.
- * @param {*} error
- * @return {boolean}
- */
-function isCancelError(error) {
-  return activityPorts_12(error);
-}
-
-/**
- * Creates or emulates a DOMException of AbortError type.
- * See https://heycam.github.io/webidl/#aborterror.
- * @param {!Window} win
- * @param {string=} opt_message
- * @return {!DOMException}
- */
-function createCancelError(win, opt_message) {
-  return activityPorts_11(win, opt_message);
-}
-
-/**
- * A set of error utilities combined in a class to allow easy stubbing in tests.
- */
-class ErrorUtils {
-  /**
-   * @param {!Error} error
-   */
-  static throwAsync(error) {
-    setTimeout(() => {
-      throw error;
-    });
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @fileoverview
- *
- * Client-side experiments in SwG.
- *
- * The experiments can be set in a few different ways:
- *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
- *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
- *     fragment.
- *  3. By `swg.configure({experiments: [array]})` call.
- *
- * The `${experimentsString}` is defined as following:
- *  - experimentString = (experimentSpec,)*
- *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
- *
- * Some examples:
- *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
- *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
- *  - `A:0` - the experiment "A" will be disabled.
- *  - `A:1` - enable the experiment "A" in 1% of impressions.
- *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
- *    control. In this case, 20% of the impressions will be split into two
- *    categories: experiment and control. Notice, a control can be requested
- *    only for the fraction under 20%.
- */
-
-/**
- * @enum {string}
- */
-const Selection = {
-  EXPERIMENT: 'e',
-  CONTROL: 'c',
-};
-
-/**
- * A comma-separated set of experiments.
- * @type {string}
- */
-let experimentsString = '';
-
-/**
- * A parsed map of experiments.
- * @type {?Object<string, boolean>}
- */
-let experimentMap = null;
-
-/**
- * Ensures that the experiments have been initialized and returns them.
- * @param {!Window} win
- * @return {!Object<string, boolean>}
- */
-function getExperiments(win) {
-  if (!experimentMap) {
-    experimentMap = {};
-    let combinedExperimentString = experimentsString;
-    try {
-      const query = parseQueryString$1(win.location.hash);
-      const experimentStringFromHash = query['swg.experiments'];
-      if (experimentStringFromHash) {
-        combinedExperimentString += ',' + experimentStringFromHash;
-      }
-    } catch (e) {
-      // Ignore: experiment parsing cannot block runtime.
-      ErrorUtils.throwAsync(e);
-    }
-
-    // Format:
-    // - experimentString = (experimentSpec,)*
-    combinedExperimentString.split(',').forEach(s => {
-      s = s.trim();
-      if (!s) {
-        return;
-      }
-      try {
-        parseSetExperiment(win, experimentMap, s);
-      } catch (e) {
-        // Ignore: experiment parsing cannot block runtime.
-        ErrorUtils.throwAsync(e);
-      }
-    });
-  }
-  return experimentMap;
-}
-
-/**
- * @param {!Window} win
- * @param {?Object<string, boolean>} experimentMap
- * @param {string} spec
- */
-function parseSetExperiment(win, experimentMap, spec) {
-  // Format:
-  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
-  let experimentId;
-  let fraction;
-  let control = false;
-  const eq = spec.indexOf(':');
-  if (eq == -1) {
-    experimentId = spec;
-    fraction = 100;
-    control = false;
-  } else {
-    experimentId = spec.substring(0, eq).trim();
-    spec = spec.substring(eq + 1);
-    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
-      control = true;
-      spec = spec.substring(0, spec.length - 1);
-    }
-    fraction = parseInt(spec, 10);
-  }
-  if (isNaN(fraction)) {
-    throw new Error('invalid fraction');
-  }
-
-  // Calculate "on"/"off".
-  let on;
-  if (fraction > 99) {
-    // Explicitly "on".
-    on = true;
-  } else if (fraction < 1) {
-    // Explicitly "off".
-    on = false;
-  } else if (win.sessionStorage) {
-    // Fractional and possibly with the control.
-    // Note that:
-    // a. We can't do persistent experiments if storage is not available.
-    // b. We can't run control on more than 20%.
-    control = control && fraction <= 20;
-    try {
-      // Set fraction in the experiment to make it unlaunchable.
-      const storageKey =
-        'subscribe.google.com:e:' +
-        experimentId +
-        ':' +
-        fraction +
-        (control ? 'c' : '');
-      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
-      if (!selection) {
-        // Is experiment/control range?
-        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
-          const inExperiment = control ? win.Math.random() <= 0.5 : true;
-          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
-          win.sessionStorage.setItem(storageKey, selection);
-        }
-      }
-      on = !!selection;
-      if (selection == Selection.CONTROL) {
-        experimentId = 'c-' + experimentId;
-      }
-    } catch (e) {
-      // Ignore: experiment parsing cannot block runtime.
-      on = false;
-      ErrorUtils.throwAsync(e);
-    }
-  } else {
-    on = false;
-  }
-
-  experimentMap[experimentId] = on;
-}
-
-/**
- * @param {?string} s
- * @return {?Selection}
- */
-function parseSelection(s) {
-  // Do a simple if-then to inline the whole Selection enum.
-  return s == Selection.EXPERIMENT
-    ? Selection.EXPERIMENT
-    : s == Selection.CONTROL
-    ? Selection.CONTROL
-    : null;
-}
-
-/**
- * Whether the specified experiment is on or off.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {boolean}
- */
-function isExperimentOn(win, experimentId) {
-  return getExperiments(win)[experimentId] || false;
-}
-
-/**
- * Toggles the experiment on or off. Returns the actual value of the experiment
- * after toggling is done.
- * @param {!Window} win
- * @param {string} experimentId
- * @param {boolean} on
- */
-function setExperiment(win, experimentId, on) {
-  getExperiments(win)[experimentId] = on;
-}
-
-/**
- * @return {!Array<string>}
- */
-function getOnExperiments(win) {
-  const experimentMap = getExperiments(win);
-  const experiments = [];
-  for (const experiment in experimentMap) {
-    if (experimentMap[experiment]) {
-      experiments.push(experiment);
-    }
-  }
-  return experiments;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @enum {string}
- */
-const ExperimentFlags = {
-  /**
-   * Enables GPay API in SwG.
-   * Cleanup issue: #406.
-   */
-  GPAY_API: 'gpay-api',
-
-  /**
-   * Enables GPay native support.
-   * Cleanup issue: #441.
-   */
-  GPAY_NATIVE: 'gpay-native',
-
-  /**
-   * Enables the feature that allows you to replace one subscription
-   * for another in the subscribe() API.
-   */
-  REPLACE_SUBSCRIPTION: 'replace-subscription',
-
-  /**
-   * Enables the contributions feature.
-   */
-  CONTRIBUTIONS: 'contributions',
-
-  /**
-   * Enables the Propensity feature
-   */
-  PROPENSITY: 'propensity',
-
-  /**
-   * Enables the Smartbox feature.
-   */
-  SMARTBOX: 'smartbox',
-
-  /**
-   * Enables using new Activities APIs
-   */
-  HEJIRA: 'hejira',
-};
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4538,17 +4326,7 @@ class SmartSubscriptionButtonApi {
     this.activityPorts_
       .openIframe(this.iframe_, this.src_, this.args_)
       .then(port => {
-        if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
-          port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
-        } else {
-          port.onMessageDeprecated(result => {
-            const smartBoxMessage = new SmartBoxMessage();
-            if (result['clicked']) {
-              smartBoxMessage.setIsClicked(true);
-            }
-            this.handleSmartBoxClick_(smartBoxMessage);
-          });
-        }
+        port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
       });
     return this.iframe_;
   }
@@ -5135,6 +4913,57 @@ class View {
  */
 
 /**
+ * Whether the specified error is an AbortError type.
+ * See https://heycam.github.io/webidl/#aborterror.
+ * @param {*} error
+ * @return {boolean}
+ */
+function isCancelError(error) {
+  return activityPorts_12(error);
+}
+
+/**
+ * Creates or emulates a DOMException of AbortError type.
+ * See https://heycam.github.io/webidl/#aborterror.
+ * @param {!Window} win
+ * @param {string=} opt_message
+ * @return {!DOMException}
+ */
+function createCancelError(win, opt_message) {
+  return activityPorts_11(win, opt_message);
+}
+
+/**
+ * A set of error utilities combined in a class to allow easy stubbing in tests.
+ */
+class ErrorUtils {
+  /**
+   * @param {!Error} error
+   */
+  static throwAsync(error) {
+    setTimeout(() => {
+      throw error;
+    });
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * @param {!../components/activities.ActivityPortDef} port
  * @param {string} requireOrigin
  * @param {boolean} requireOriginVerified
@@ -5430,7 +5259,7 @@ function stringToBytes(str) {
   const bytes = new Uint8Array(str.length);
   for (let i = 0; i < str.length; i++) {
     const charCode = str.charCodeAt(i);
-    assert(charCode <= 255, 'Characters must be in range [0,255]');
+    log_2(charCode <= 255, 'Characters must be in range [0,255]');
     bytes[i] = charCode;
   }
   return bytes;
@@ -6444,7 +6273,6 @@ function defaultConfig() {
  *
  * In other words, Flow = Payments + Account Creation.
  */
-
 /**
  * String values input by the publisher are mapped to the number values.
  * @type {!Object<string, number>}
@@ -6675,14 +6503,12 @@ class PayCompleteFlow {
       feArgs(args),
       /* shouldFadeBody */ true
     );
-    this.activityIframeView_.onMessageDeprecated(data => {
-      if (data['entitlements']) {
-        this.deps_
-          .entitlementsManager()
-          .pushNextEntitlements(/** @type {string} */ (data['entitlements']));
-        return;
-      }
-    });
+
+    this.activityIframeView_.on(
+      EntitlementsResponse,
+      this.handleEntitlementsResponse_.bind(this)
+    );
+
     this.activityIframeView_.acceptResult().then(() => {
       // The flow is complete.
       this.dialogManager_.completeView(this.activityIframeView_);
@@ -6692,13 +6518,26 @@ class PayCompleteFlow {
   }
 
   /**
+   * @param {!EntitlementsResponse} response
+   * @private
+   */
+  handleEntitlementsResponse_(response) {
+    const jwt = response.getJwt();
+    if (jwt) {
+      this.deps_.entitlementsManager().pushNextEntitlements(jwt);
+    }
+  }
+
+  /**
    * @return {!Promise}
    */
   complete() {
     this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_ACCOUNT_CREATED, true);
     this.deps_.entitlementsManager().unblockNextNotification();
     this.readyPromise_.then(() => {
-      this.activityIframeView_.messageDeprecated({'complete': true});
+      const accountCompletionRequest = new AccountCreationRequest();
+      accountCompletionRequest.setComplete(true);
+      this.activityIframeView_.execute(accountCompletionRequest);
     });
     return this.activityIframeView_
       .acceptResult()
@@ -6959,33 +6798,14 @@ class ContributionsFlow {
         .callbacks()
         .triggerFlowCanceled(SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
     });
-    if (isExperimentOn(this.deps_.win(), ExperimentFlags.HEJIRA)) {
-      this.activityIframeView_.on(
-        AlreadySubscribedResponse,
-        this.handleLinkRequest_.bind(this)
-      );
-      this.activityIframeView_.on(
-        SkuSelectedResponse,
-        this.startPayFlow_.bind(this)
-      );
-    } else {
-      // If result is due to OfferSelection, redirect to payments.
-      this.activityIframeView_.onMessageDeprecated(result => {
-        if (result['alreadyMember']) {
-          const alreadySubscribedResponse = new AlreadySubscribedResponse();
-          alreadySubscribedResponse.setLinkRequested(result['linkRequested']);
-          alreadySubscribedResponse.setSubscriberOrMember(true);
-          this.handleLinkRequest_(alreadySubscribedResponse);
-          return;
-        }
-        if (result['sku']) {
-          const skuSelectedResponse = new SkuSelectedResponse();
-          skuSelectedResponse.setSku(result['sku']);
-          this.startPayFlow_(skuSelectedResponse);
-          return;
-        }
-      });
-    }
+    this.activityIframeView_.on(
+      AlreadySubscribedResponse,
+      this.handleLinkRequest_.bind(this)
+    );
+    this.activityIframeView_.on(
+      SkuSelectedResponse,
+      this.startPayFlow_.bind(this)
+    );
 
     return this.dialogManager_.openView(this.activityIframeView_);
   }
@@ -8939,6 +8759,65 @@ function irtpStringToBoolean(value) {
  * limitations under the License.
  */
 
+/**
+ * @enum {string}
+ */
+const ExperimentFlags = {
+  /**
+   * Enables GPay API in SwG.
+   * Cleanup issue: #406.
+   */
+  GPAY_API: 'gpay-api',
+
+  /**
+   * Enables GPay native support.
+   * Cleanup issue: #441.
+   */
+  GPAY_NATIVE: 'gpay-native',
+
+  /**
+   * Enables the feature that allows you to replace one subscription
+   * for another in the subscribe() API.
+   */
+  REPLACE_SUBSCRIPTION: 'replace-subscription',
+
+  /**
+   * Enables the contributions feature.
+   */
+  CONTRIBUTIONS: 'contributions',
+
+  /**
+   * Enables the Propensity feature
+   */
+  PROPENSITY: 'propensity',
+
+  /**
+   * Enables the Smartbox feature.
+   */
+  SMARTBOX: 'smartbox',
+
+  /**
+   * Enables using new Activities APIs
+   */
+  HEJIRA: 'hejira',
+};
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
@@ -8971,11 +8850,11 @@ class Xhr {
    */
   fetch_(input, init) {
     // TODO(avimehta): Should the requests go through when page is not visible?
-    assert(typeof input == 'string', 'Only URL supported: %s', input);
+    log_2(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
     const creds = init.credentials;
-    assert(
+    log_2(
       creds === undefined || creds == 'include' || creds == 'omit',
       'Only credentials=include|omit support: %s',
       creds
@@ -9024,7 +8903,7 @@ function normalizeMethod_(method) {
   }
   method = method.toUpperCase();
 
-  assert(
+  log_2(
     allowedMethods_.includes(method),
     'Only one of %s is currently allowed. Got %s',
     allowedMethods_.join(', '),
@@ -9194,7 +9073,7 @@ class FetchResponse {
    * @return {!FetchResponse}
    */
   clone() {
-    assert(!this.bodyUsed, 'Body already used');
+    log_2(!this.bodyUsed, 'Body already used');
     return new FetchResponse(this.xhr_);
   }
 
@@ -9204,7 +9083,7 @@ class FetchResponse {
    * @private
    */
   drainText_() {
-    assert(!this.bodyUsed, 'Body already used');
+    log_2(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     return Promise.resolve(this.xhr_.responseText);
   }
@@ -9234,15 +9113,15 @@ class FetchResponse {
    * @private
    */
   document_() {
-    assert(!this.bodyUsed, 'Body already used');
+    log_2(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    assert(
+    log_2(
       this.xhr_.responseXML,
       'responseXML should exist. Make sure to return ' +
         'Content-Type: text/html header.'
     );
     return /** @type {!Promise<!Document>} */ (Promise.resolve(
-      assert(this.xhr_.responseXML)
+      log_2(this.xhr_.responseXML)
     ));
   }
 
@@ -9750,17 +9629,7 @@ class LinkSaveFlow {
         } else {
           throw new Error('Neither token or authCode is available');
         }
-        if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
-          this.activityIframeView_.execute(saveRequest);
-        } else {
-          const saveRequestJson = {};
-          if (saveRequest.getAuthCode()) {
-            saveRequestJson['authCode'] = request.authCode;
-          } else if (saveRequest.getToken()) {
-            saveRequestJson['token'] = request.token;
-          }
-          this.activityIframeView_.messageDeprecated(saveRequestJson);
-        }
+        this.activityIframeView_.execute(saveRequest);
       })
       .catch(reason => {
         // The flow is complete.
@@ -9789,20 +9658,10 @@ class LinkSaveFlow {
       /* shouldFadeBody */ false,
       /* hasLoadingIndicator */ true
     );
-    if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
-      this.activityIframeView_.on(
-        LinkingInfoResponse,
-        this.sendLinkSaveToken_.bind(this)
-      );
-    } else {
-      this.activityIframeView_.onMessageDeprecated(data => {
-        const response = new LinkingInfoResponse();
-        if (data['getLinkingInfo']) {
-          response.setRequested(true);
-        }
-        this.sendLinkSaveToken_(response);
-      });
-    }
+    this.activityIframeView_.on(
+      LinkingInfoResponse,
+      this.sendLinkSaveToken_.bind(this)
+    );
 
     this.openPromise_ = this.dialogManager_.openView(
       this.activityIframeView_,
@@ -12917,6 +12776,230 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
+/**
+ * @fileoverview
+ *
+ * Client-side experiments in SwG.
+ *
+ * The experiments can be set in a few different ways:
+ *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
+ *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
+ *     fragment.
+ *  3. By `swg.configure({experiments: [array]})` call.
+ *
+ * The `${experimentsString}` is defined as following:
+ *  - experimentString = (experimentSpec,)*
+ *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+ *
+ * Some examples:
+ *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
+ *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
+ *  - `A:0` - the experiment "A" will be disabled.
+ *  - `A:1` - enable the experiment "A" in 1% of impressions.
+ *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
+ *    control. In this case, 20% of the impressions will be split into two
+ *    categories: experiment and control. Notice, a control can be requested
+ *    only for the fraction under 20%.
+ */
+
+/**
+ * @enum {string}
+ */
+const Selection = {
+  EXPERIMENT: 'e',
+  CONTROL: 'c',
+};
+
+/**
+ * A comma-separated set of experiments.
+ * @type {string}
+ */
+let experimentsString = '';
+
+/**
+ * A parsed map of experiments.
+ * @type {?Object<string, boolean>}
+ */
+let experimentMap = null;
+
+/**
+ * Ensures that the experiments have been initialized and returns them.
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ */
+function getExperiments(win) {
+  if (!experimentMap) {
+    experimentMap = {};
+    let combinedExperimentString = experimentsString;
+    try {
+      const query = parseQueryString$1(win.location.hash);
+      const experimentStringFromHash = query['swg.experiments'];
+      if (experimentStringFromHash) {
+        combinedExperimentString += ',' + experimentStringFromHash;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      ErrorUtils.throwAsync(e);
+    }
+
+    // Format:
+    // - experimentString = (experimentSpec,)*
+    combinedExperimentString.split(',').forEach(s => {
+      s = s.trim();
+      if (!s) {
+        return;
+      }
+      try {
+        parseSetExperiment(win, experimentMap, s);
+      } catch (e) {
+        // Ignore: experiment parsing cannot block runtime.
+        ErrorUtils.throwAsync(e);
+      }
+    });
+  }
+  return experimentMap;
+}
+
+/**
+ * @param {!Window} win
+ * @param {?Object<string, boolean>} experimentMap
+ * @param {string} spec
+ */
+function parseSetExperiment(win, experimentMap, spec) {
+  // Format:
+  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+  let experimentId;
+  let fraction;
+  let control = false;
+  const eq = spec.indexOf(':');
+  if (eq == -1) {
+    experimentId = spec;
+    fraction = 100;
+    control = false;
+  } else {
+    experimentId = spec.substring(0, eq).trim();
+    spec = spec.substring(eq + 1);
+    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
+      control = true;
+      spec = spec.substring(0, spec.length - 1);
+    }
+    fraction = parseInt(spec, 10);
+  }
+  if (isNaN(fraction)) {
+    throw new Error('invalid fraction');
+  }
+
+  // Calculate "on"/"off".
+  let on;
+  if (fraction > 99) {
+    // Explicitly "on".
+    on = true;
+  } else if (fraction < 1) {
+    // Explicitly "off".
+    on = false;
+  } else if (win.sessionStorage) {
+    // Fractional and possibly with the control.
+    // Note that:
+    // a. We can't do persistent experiments if storage is not available.
+    // b. We can't run control on more than 20%.
+    control = control && fraction <= 20;
+    try {
+      // Set fraction in the experiment to make it unlaunchable.
+      const storageKey =
+        'subscribe.google.com:e:' +
+        experimentId +
+        ':' +
+        fraction +
+        (control ? 'c' : '');
+      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
+      if (!selection) {
+        // Is experiment/control range?
+        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
+          const inExperiment = control ? win.Math.random() <= 0.5 : true;
+          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
+          win.sessionStorage.setItem(storageKey, selection);
+        }
+      }
+      on = !!selection;
+      if (selection == Selection.CONTROL) {
+        experimentId = 'c-' + experimentId;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      on = false;
+      ErrorUtils.throwAsync(e);
+    }
+  } else {
+    on = false;
+  }
+
+  experimentMap[experimentId] = on;
+}
+
+/**
+ * @param {?string} s
+ * @return {?Selection}
+ */
+function parseSelection(s) {
+  // Do a simple if-then to inline the whole Selection enum.
+  return s == Selection.EXPERIMENT
+    ? Selection.EXPERIMENT
+    : s == Selection.CONTROL
+    ? Selection.CONTROL
+    : null;
+}
+
+/**
+ * Whether the specified experiment is on or off.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+function isExperimentOn(win, experimentId) {
+  return getExperiments(win)[experimentId] || false;
+}
+
+/**
+ * Toggles the experiment on or off. Returns the actual value of the experiment
+ * after toggling is done.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @param {boolean} on
+ */
+function setExperiment(win, experimentId, on) {
+  getExperiments(win)[experimentId] = on;
+}
+
+/**
+ * @return {!Array<string>}
+ */
+function getOnExperiments(win) {
+  const experimentMap = getExperiments(win);
+  const experiments = [];
+  for (const experiment in experimentMap) {
+    if (experimentMap[experiment]) {
+      experiments.push(experiment);
+    }
+  }
+  return experiments;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const PAY_REQUEST_ID = 'swg-pay';
 const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
 
@@ -13603,14 +13686,14 @@ class OffersFlow {
     }
 
     if (feArgsObj['oldSku']) {
-      assert(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
+      log_2(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
 
       // Remove old sku from offers if in list.
       let skuList = feArgsObj['skus'];
       const /** @type {string} */ oldSku = feArgsObj['oldSku'];
       skuList = skuList.filter(sku => sku !== oldSku);
 
-      assert(
+      log_2(
         skuList.length > 0,
         'Sku list only contained offer user already has'
       );
@@ -13707,52 +13790,18 @@ class OffersFlow {
           .callbacks()
           .triggerFlowCanceled(SubscriptionFlows.SHOW_OFFERS);
       });
-      if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
-        this.activityIframeView_.on(
-          SkuSelectedResponse,
-          this.startPayFlow_.bind(this)
-        );
-        this.activityIframeView_.on(
-          AlreadySubscribedResponse,
-          this.handleLinkRequest_.bind(this)
-        );
-        this.activityIframeView_.on(
-          ViewSubscriptionsResponse,
-          this.startNativeFlow_.bind(this)
-        );
-      } else {
-        // If result is due to OfferSelection, redirect to payments.
-        this.activityIframeView_.onMessageDeprecated(result => {
-          if (result['alreadySubscribed']) {
-            const alreadySubscribedResponse = new AlreadySubscribedResponse();
-            alreadySubscribedResponse.setSubscriberOrMember(true);
-            if (result['linkRequested']) {
-              alreadySubscribedResponse.setLinkRequested(true);
-            }
-            this.handleLinkRequest_(alreadySubscribedResponse);
-            return;
-          }
-          if (result['oldSku']) {
-            const skuSelectedResponse = new SkuSelectedResponse();
-            skuSelectedResponse.setSku(result['sku']);
-            skuSelectedResponse.setOldSku(result['oldSku']);
-            this.startPayFlow_(skuSelectedResponse);
-            return;
-          }
-          if (result['sku']) {
-            const skuSelectedResponse = new SkuSelectedResponse();
-            skuSelectedResponse.setSku(result['sku']);
-            this.startPayFlow_(skuSelectedResponse);
-            return;
-          }
-          if (result['native']) {
-            const viewSubscriptionsResponse = new ViewSubscriptionsResponse();
-            viewSubscriptionsResponse.setNative(true);
-            this.startNativeFlow_(viewSubscriptionsResponse);
-            return;
-          }
-        });
-      }
+      this.activityIframeView_.on(
+        SkuSelectedResponse,
+        this.startPayFlow_.bind(this)
+      );
+      this.activityIframeView_.on(
+        AlreadySubscribedResponse,
+        this.handleLinkRequest_.bind(this)
+      );
+      this.activityIframeView_.on(
+        ViewSubscriptionsResponse,
+        this.startNativeFlow_.bind(this)
+      );
 
       this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_OFFERS);
 
@@ -13816,20 +13865,11 @@ class SubscribeOptionFlow {
         .callbacks()
         .triggerFlowCanceled(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     });
-    if (isExperimentOn(this.deps_.win(), ExperimentFlags.HEJIRA)) {
-      this.activityIframeView_.on(
-        SubscribeResponse,
-        this.maybeOpenOffersFlow_.bind(this)
-      );
-    } else {
-      this.activityIframeView_.onMessageDeprecated(data => {
-        const response = new SubscribeResponse();
-        if (data['subscribe']) {
-          response.setSubscribe(true);
-        }
-        this.maybeOpenOffersFlow_(response);
-      });
-    }
+    this.activityIframeView_.on(
+      SubscribeResponse,
+      this.maybeOpenOffersFlow_.bind(this)
+    );
+
     this.activityIframeView_.acceptResult().then(
       result => {
         const data = result.data;
@@ -13943,22 +13983,11 @@ class AbbrvOfferFlow {
     });
 
     // If the user is already subscribed, trigger login flow
-    if (isExperimentOn(this.win_, ExperimentFlags.HEJIRA)) {
-      this.activityIframeView_.on(
-        AlreadySubscribedResponse,
-        this.handleLinkRequest_.bind(this)
-      );
-    } else {
-      this.activityIframeView_.onMessageDeprecated(data => {
-        if (data['alreadySubscribed']) {
-          const alreadySubscrbiedResponse = new AlreadySubscribedResponse();
-          alreadySubscrbiedResponse.setSubscriberOrMember(true);
-          alreadySubscrbiedResponse.setLinkRequested(data['linkRequested']);
-          this.handleLinkRequest_(alreadySubscrbiedResponse);
-          return;
-        }
-      });
-    }
+    this.activityIframeView_.on(
+      AlreadySubscribedResponse,
+      this.handleLinkRequest_.bind(this)
+    );
+
     // If result is due to requesting offers, redirect to offers flow
     this.activityIframeView_.acceptResult().then(result => {
       if (result.data['viewOffers']) {
@@ -14357,14 +14386,14 @@ class ClientEventManager {
             return Promise.resolve();
           }
         } catch (e) {
-          log(e);
+          log_4(e);
         }
       }
       for (let listener = 0; listener < this.listeners_.length; listener++) {
         try {
           this.listeners_[listener](event);
         } catch (e) {
-          log(e);
+          log_4(e);
         }
       }
       return Promise.resolve();
@@ -15424,7 +15453,7 @@ class ConfiguredRuntime {
       }
     }
     // Throw error string if it's not null
-    assert(!error, error || undefined);
+    log_2(!error, error || undefined);
     // Assign.
     Object.assign(this.config_, config);
   }
@@ -15478,7 +15507,7 @@ class ConfiguredRuntime {
       const errorMessage =
         'The showOffers() method cannot be used to update a subscription. ' +
         'Use the showUpdateOffers() method instead.';
-      assert(opt_options ? !opt_options['oldSku'] : true, errorMessage);
+      log_2(opt_options ? !opt_options['oldSku'] : true, errorMessage);
       const flow = new OffersFlow(this, opt_options);
       return flow.start();
     });
@@ -15486,7 +15515,7 @@ class ConfiguredRuntime {
 
   /** @override */
   showUpdateOffers(opt_options) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION),
       'Not yet launched!'
     );
@@ -15494,7 +15523,7 @@ class ConfiguredRuntime {
       const errorMessage =
         'The showUpdateOffers() method cannot be used for new subscribers. ' +
         'Use the showOffers() method instead.';
-      assert(opt_options ? !!opt_options['oldSku'] : false, errorMessage);
+      log_2(opt_options ? !!opt_options['oldSku'] : false, errorMessage);
       const flow = new OffersFlow(this, opt_options);
       return flow.start();
     });
@@ -15518,7 +15547,7 @@ class ConfiguredRuntime {
 
   /** @override */
   showContributionOptions(opt_options) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS),
       'Not yet launched!'
     );
@@ -15589,7 +15618,7 @@ class ConfiguredRuntime {
     const errorMessage =
       'The subscribe() method can only take a sku as its parameter; ' +
       'for subscription updates please use the updateSubscription() method';
-    assert(typeof sku === 'string', errorMessage);
+    log_2(typeof sku === 'string', errorMessage);
     return this.documentParsed_.then(() => {
       return new PayStartFlow(this, sku).start();
     });
@@ -15597,14 +15626,14 @@ class ConfiguredRuntime {
 
   /** @override */
   updateSubscription(subscriptionRequest) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION),
       'Not yet launched!'
     );
     const errorMessage =
       'The updateSubscription() method should be used for subscription ' +
       'updates; for new subscriptions please use the subscribe() method';
-    assert(
+    log_2(
       subscriptionRequest ? subscriptionRequest['oldSku'] : false,
       errorMessage
     );
@@ -15620,7 +15649,7 @@ class ConfiguredRuntime {
 
   /** @override */
   contribute(skuOrSubscriptionRequest) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS),
       'Not yet launched!'
     );
@@ -15665,7 +15694,7 @@ class ConfiguredRuntime {
 
   /** @override */
   attachSmartButton(button, optionsOrCallback, opt_callback) {
-    assert(
+    log_2(
       isExperimentOn(this.win_, ExperimentFlags.SMARTBOX),
       'Not yet launched!'
     );
