@@ -38,7 +38,7 @@ export function insticator(global, data) {
  */
 function createTemplate(embedId) {
   const template = document.createElement('template');
-  template./*OK*/innerHTML = `
+  template./*OK*/ innerHTML = `
     <div id="insticator-container">
       <div id="div-insticator-ad-1"></div>
       <div id="insticator-embed" embed-id="${embedId}"></div>
