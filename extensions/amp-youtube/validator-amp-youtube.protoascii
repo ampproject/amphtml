@@ -16,7 +16,6 @@
 
 tags: {  # amp-youtube
   html_format: AMP
-  html_format: AMP4ADS
   html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
@@ -30,7 +29,6 @@ tags: {  # amp-youtube
 }
 tags: {  # <amp-youtube>
   html_format: AMP
-  html_format: AMP4ADS
   html_format: ACTIONS
   tag_name: "AMP-YOUTUBE"
   requires_extension: "amp-youtube"
