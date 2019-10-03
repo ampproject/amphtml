@@ -17,9 +17,9 @@
 
 const colors = require('ansi-colors');
 const log = require('fancy-log');
-const {getStderr} = require('../exec');
-const {gitDiffFileMaster} = require('../git');
-const {isTravisBuild} = require('../travis');
+const {getStderr} = require('../common/exec');
+const {gitDiffFileMaster} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
 
 const PACKAGE_JSON_PATHS = [
   'package.json',

@@ -18,8 +18,8 @@
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {exec, execOrDie, getStderr} = require('../exec');
-const {isTravisBuild} = require('../travis');
+const {exec, execOrDie, getStderr} = require('../common/exec');
+const {isTravisBuild} = require('../common/travis');
 
 const yarnExecutable = 'npx yarn';
 

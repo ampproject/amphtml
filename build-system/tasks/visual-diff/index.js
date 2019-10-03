@@ -36,9 +36,9 @@ const {
   gitCommitterEmail,
   gitTravisMasterBaseline,
   shortSha,
-} = require('../../git');
-const {execOrDie, execScriptAsync} = require('../../exec');
-const {isTravisBuild} = require('../../travis');
+} = require('../../common/git');
+const {execOrDie, execScriptAsync} = require('../../common/exec');
+const {isTravisBuild} = require('../../common/travis');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
 
 // optional dependencies for local development (outside of visual diff tests)

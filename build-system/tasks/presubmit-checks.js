@@ -19,7 +19,7 @@ const colors = require('ansi-colors');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const path = require('path');
-const srcGlobs = require('../config').presubmitGlobs;
+const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
@@ -109,9 +109,8 @@ const forbiddenTerms = {
       'If you run against this, use console/*OK*/.[log|error] to ' +
       'whitelist a legit case.',
     whitelist: [
-      'build-system/server/app.js',
-      'build-system/server/amp4test.js',
-      'build-system/check-package-manager.js',
+      'build-system/common/check-package-manager.js',
+      'build-system/compile/single-pass.js',
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
@@ -125,13 +124,14 @@ const forbiddenTerms = {
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/pr-check/yarn-checks.js',
+      'build-system/server/app.js',
+      'build-system/server/amp4test.js',
       'build-system/tasks/build.js',
       'build-system/tasks/check-exact-versions.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
-      'build-system/compile/single-pass.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -443,7 +443,7 @@ const forbiddenTerms = {
   'prerenderSafe': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'build-system/amp.extern.js',
+      'build-system/externs/amp.extern.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
       'src/utils/xhr-utils.js',
     ],
@@ -503,7 +503,7 @@ const forbiddenTerms = {
   'getAccessReaderId': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'build-system/amp.extern.js',
+      'build-system/externs/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-access/0.1/access-vars.js',
       'extensions/amp-access-scroll/0.1/scroll-impl.js',
@@ -514,7 +514,7 @@ const forbiddenTerms = {
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'build-system/amp.extern.js',
+      'build-system/externs/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-access/0.1/access-vars.js',
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
@@ -633,7 +633,7 @@ const forbiddenTerms = {
       'Do not access AMP_CONFIG directly. Use isExperimentOn() ' +
       'and getMode() to access config',
     whitelist: [
-      'build-system/amp.extern.js',
+      'build-system/externs/amp.extern.js',
       'build-system/server/app.js',
       'build-system/tasks/e2e/index.js',
       'build-system/tasks/firebase.js',
@@ -1071,7 +1071,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unless you do weird date math (whitelist), use Date.now().',
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'build-system/build.conf.js',
+      'build-system/compile/build.conf.js',
     ],
   },
   '\\.expandStringSync\\(': {
@@ -1161,10 +1161,10 @@ const forbiddenTermsSrcInclusive = {
   "process\\.env(\\.TRAVIS|\\[\\'TRAVIS)": {
     message:
       'Do not directly use process.env.TRAVIS. Instead, add a ' +
-      'function to build-system/travis.js',
+      'function to build-system/common/travis.js',
     whitelist: [
-      'build-system/check-package-manager.js',
-      'build-system/travis.js',
+      'build-system/common/check-package-manager.js',
+      'build-system/common/travis.js',
     ],
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',

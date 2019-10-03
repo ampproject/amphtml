@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
-const config = require('../config');
+const config = require('../test-configs/config');
 const eslint = require('gulp-eslint');
 const eslintIfFixed = require('gulp-eslint-if-fixed');
 const fs = require('fs-extra');
@@ -26,8 +26,8 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
-const {gitDiffNameOnlyMaster} = require('../git');
-const {isTravisBuild} = require('../travis');
+const {gitDiffNameOnlyMaster} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const isWatching = argv.watch || argv.w || false;

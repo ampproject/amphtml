@@ -25,13 +25,19 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {
+  gitCommitHash,
+  gitTravisMasterBaseline,
+  shortSha,
+} = require('../common/git');
+const {
   isTravisPullRequestBuild,
   isTravisPushBuild,
   travisPushBranch,
   travisRepoSlug,
-} = require('../travis');
-const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+} = require('../common/travis');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 
 const runtimeFile = './dist/v0.js';
 const normalizedRtvNumber = '1234567890123';

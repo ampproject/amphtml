@@ -18,7 +18,7 @@ const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
+const conf = require('./build.conf');
 const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
@@ -49,8 +49,8 @@ const {
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
-const wrappers = require('../compile-wrappers');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const wrappers = require('./compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =

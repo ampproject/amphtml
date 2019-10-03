@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 const argv = require('minimist')(process.argv.slice(2));
-const experimentsConfig = require('./global-configs/experiments-config.json');
-const experimentsConstantBackup = require('./global-configs/experiments-const.json');
+const experimentsConfig = require('../global-configs/experiments-config.json');
+const experimentsConstantBackup = require('../global-configs/experiments-const.json');
 const localPlugin = name =>
-  require.resolve(`./babel-plugins/babel-plugin-${name}`);
+  require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
 const defaultPlugins = [
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.

@@ -20,9 +20,12 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {maybeUpdatePackages} = require('./update-packages');
 

@@ -18,7 +18,7 @@
 const babelify = require('babelify');
 const BBPromise = require('bluebird');
 const browserify = require('browserify');
-const depCheckConfig = require('../dep-check-config');
+const depCheckConfig = require('../test-configs/dep-check-config');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp');
 const log = require('fancy-log');
@@ -26,12 +26,15 @@ const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
 const {compileJison} = require('./compile-jison');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
 const {cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
@@ -318,7 +321,7 @@ async function depCheck() {
         log(
           yellow('NOTE:'),
           'If a dependency is valid, add it to one of the whitelists in',
-          cyan('build-system/dep-check-config.js')
+          cyan('build-system/test-configs/dep-check-config.js')
         );
         const reason = new Error('Dependency checks failed');
         reason.showStack = false;

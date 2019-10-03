@@ -16,8 +16,8 @@
 'use strict';
 
 const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
-const {gitCommitterEmail} = require('../git');
-const {isTravisBuild, travisJobNumber} = require('../travis');
+const {gitCommitterEmail} = require('../common/git');
+const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
 const TEST_SERVER_PORT = 8081;
 

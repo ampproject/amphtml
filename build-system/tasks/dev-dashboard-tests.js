@@ -15,10 +15,10 @@
  */
 'use strict';
 
-const config = require('../config');
+const config = require('../test-configs/config');
 const deglob = require('globs-to-files');
 const Mocha = require('mocha');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 
 /**
  * Run all the dev dashboard tests

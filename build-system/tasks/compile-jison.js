@@ -20,7 +20,7 @@ const glob = require('glob');
 const jison = require('jison');
 const path = require('path');
 const {endBuildStep} = require('./helpers');
-const {jisonPaths} = require('../config');
+const {jisonPaths} = require('../test-configs/config');
 
 // set imports for each parser from directory build/parsers/.
 const imports = new Map([

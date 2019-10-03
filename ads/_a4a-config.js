@@ -51,8 +51,8 @@ export function getA4ARegistry() {
       // TODO: Add new ad network implementation "is enabled" functions here.
       // Note: if you add a function here that requires a new "import", above,
       // you'll probably also need to add a whitelist exception to
-      // build-system/dep-check-config.js in the "filesMatching: 'ads/**/*.js'
-      // rule.
+      // build-system/test-configs/dep-check-config.js in the
+      // "filesMatching: 'ads/**/*.js'" rule.
     });
   }
 

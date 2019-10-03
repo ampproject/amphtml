@@ -19,7 +19,7 @@ const {
   staticTemplateFactories,
   staticTemplateTags,
   staticTemplateFactoryFns,
-} = require('../static-template-metadata');
+} = require('../babel-plugins/static-template-metadata');
 
 module.exports = function(context) {
   function tagCannotBeCalled(node) {

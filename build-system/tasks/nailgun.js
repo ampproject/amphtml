@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 const sleep = require('sleep-promise');
-const {exec, execScriptAsync, getStdout} = require('../exec');
+const {exec, execScriptAsync, getStdout} = require('../common/exec');
 const {green, red, cyan, yellow} = colors;
 const {maybeGenerateRunner} = require('./generate-runner');
 
