@@ -1,7 +1,7 @@
 # Code Ownership and AMP
 
 This document describes the code ownership (OWNERS) model for the AMP open source
-project, and in particular the [AMP HTML GitHub project](https://github.com/ampproject/amphtml).
+project.  This model is used in the [amphtml repository](https://github.com/ampproject/amphtml) and may be used by other AMP repositories as well.
 
 For more information on the overall code contribution process that the OWNERS model is a part of, see the [Contributing code and features](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md) documentation.
 
@@ -42,7 +42,7 @@ owner of its subdirectories.
 
 ## AMP's custom code ownership solution
 
-The AMP project will use a custom open-source web service available on GitHub at
+AMP will use a custom open-source web service available on GitHub at
 [google/github-owners-bot](https://github.com/google/github-owners-bot). This
 will be deployed on [ampproject/amphtml](https://github.com/ampproject/amphtml)
 as a bot, which will update the status of a pull request in response to the

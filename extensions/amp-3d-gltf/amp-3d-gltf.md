@@ -30,12 +30,12 @@ Displays GL Transmission Format (gITF) 3D models.
     <td><code>&lt;script async custom-element="amp-3d-gltf" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-3d-gltf/">amp-3d-gltf example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-3d-gltf/">amp-3d-gltf example</a>.</td>
   </tr>
 </table>
 

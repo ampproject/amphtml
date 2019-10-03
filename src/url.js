@@ -99,7 +99,7 @@ export function getWinOrigin(win) {
 export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = new LruCache(100));
+    cache = self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
   return parseUrlWithA(a, url, opt_nocache ? null : cache);
@@ -159,13 +159,15 @@ export function parseUrlWithA(a, url, opt_cache) {
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
+  let origin;
   if (a.origin && a.origin != 'null') {
-    info.origin = a.origin;
+    origin = a.origin;
   } else if (info.protocol == 'data:' || !info.host) {
-    info.origin = info.href;
+    origin = info.href;
   } else {
-    info.origin = info.protocol + '//' + info.host;
+    origin = info.protocol + '//' + info.host;
   }
+  info.origin = origin;
 
   // Freeze during testing to avoid accidental mutation.
   const frozen = getMode().test && Object.freeze ? Object.freeze(info) : info;
@@ -236,6 +238,7 @@ export function addParamsToUrl(url, params) {
  * exist in current query string.
  * @param {string} url
  * @param {!JsonObject<string, string|!Array<string>>} params
+ * @return {string}
  */
 export function addMissingParamsToUrl(url, params) {
   const location = parseUrlDeprecated(url);

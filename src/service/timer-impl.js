@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-// Requires polyfills in immediate side effect.
-import '../polyfills';
-
+import {getMode} from '../mode';
 import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
 import {reportError} from '../error';
 import {user} from '../log';
 
 const TAG = 'timer';
+let timersForTesting;
 
 /**
  * Helper with all things Timer.
- *
- * @implements {../service.EmbeddableService}
  */
 export class Timer {
   /**
@@ -89,7 +86,14 @@ export class Timer {
         throw e;
       }
     };
-    return this.win.setTimeout(wrapped, opt_delay);
+    const index = this.win.setTimeout(wrapped, opt_delay);
+    if (getMode().test) {
+      if (!timersForTesting) {
+        timersForTesting = [];
+      }
+      timersForTesting.push(index);
+    }
+    return index;
   }
 
   /**
@@ -169,11 +173,6 @@ export class Timer {
       }, delay);
     });
   }
-
-  /** @override @nocollapse */
-  static installInEmbedWindow(embedWin, unusedAmpDoc) {
-    installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
-  }
 }
 
 /**
@@ -181,4 +180,22 @@ export class Timer {
  */
 export function installTimerService(window) {
   registerServiceBuilder(window, TAG, Timer);
+}
+
+/**
+ * @param {!Window} embedWin
+ */
+export function installTimerInEmbedWindow(embedWin) {
+  installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
+}
+
+/**
+ * Cancels all timers scheduled during the current test
+ */
+export function cancelTimersForTesting() {
+  if (!timersForTesting) {
+    return;
+  }
+  timersForTesting.forEach(clearTimeout);
+  timersForTesting = null;
 }

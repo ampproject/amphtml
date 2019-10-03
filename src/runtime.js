@@ -15,16 +15,11 @@
  */
 
 import {BaseElement} from './base-element';
-import {
-  BaseTemplate,
-  installTemplatesService,
-  registerExtendedTemplate,
-} from './service/template-impl';
+import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
-  devAssert,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
@@ -32,6 +27,8 @@ import {
 } from './log';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {
   childElementsByTag,
   isConnectedNode,
@@ -43,41 +40,18 @@ import {
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
-import {cssText} from '../build/css';
 import {disposeServicesForDoc} from './service';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
-import {installActionServiceForDoc} from './service/action-impl';
-import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {
-  installBuiltinElements,
+  installAmpdocServices,
+  installRuntimeServices,
+} from './service/core-services';
+import {
   installExtensionsService,
   stubLegacyElements,
 } from './service/extensions-impl';
-import {installCidService} from './service/cid-impl';
-import {installCryptoService} from './service/crypto-impl';
-import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
-import {installDocumentStateService} from './service/document-state';
-import {installGlobalNavigationHandlerForDoc} from './service/navigation';
-import {installGlobalSubmitListenerForDoc} from './document-submit';
-import {installHiddenObserverForDoc} from './service/hidden-observer-impl';
-import {installHistoryServiceForDoc} from './service/history-impl';
-import {installInputService} from './input';
-import {installPlatformService} from './service/platform-impl';
-import {installResourcesServiceForDoc} from './service/resources-impl';
-import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc} from './style-installer';
-import {installTimerService} from './service/timer-impl';
-import {installUrlForDoc} from './service/url-impl';
-import {installUrlReplacementsServiceForDoc} from './service/url-replacements-impl';
-import {
-  installViewerServiceForDoc,
-  setViewerVisibilityState,
-} from './service/viewer-impl';
-import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
-import {installVsyncService} from './service/vsync-impl';
-import {installXhrService} from './service/xhr-impl';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
@@ -93,52 +67,6 @@ setReportError(reportErrorForWin.bind(null, self));
 const TAG = 'runtime';
 
 /**
- * Install runtime-level services.
- * @param {!Window} global Global scope to adopt.
- */
-export function installRuntimeServices(global) {
-  installCryptoService(global);
-  installBatchedXhrService(global);
-  installDocumentStateService(global);
-  installPlatformService(global);
-  installTemplatesService(global);
-  installTimerService(global);
-  installVsyncService(global);
-  installXhrService(global);
-  installInputService(global);
-}
-
-/**
- * Install ampdoc-level services.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Object<string, string>=} opt_initParams
- */
-export function installAmpdocServices(ampdoc, opt_initParams) {
-  installUrlForDoc(ampdoc);
-  installCidService(ampdoc);
-  installDocumentInfoServiceForDoc(ampdoc);
-  installViewerServiceForDoc(ampdoc, opt_initParams);
-  installViewportServiceForDoc(ampdoc);
-  installHiddenObserverForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installUrlReplacementsServiceForDoc(ampdoc);
-  installActionServiceForDoc(ampdoc);
-  installStandardActionsForDoc(ampdoc);
-  installStorageServiceForDoc(ampdoc);
-  installGlobalNavigationHandlerForDoc(ampdoc);
-  installGlobalSubmitListenerForDoc(ampdoc);
-}
-
-/**
- * Install builtins.
- * @param {!Window} global Global scope to adopt.
- */
-export function installBuiltins(global) {
-  installBuiltinElements(global);
-}
-
-/**
  * Applies the runtime to a given global scope for a single-doc mode. Multi
  * frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
@@ -147,10 +75,10 @@ export function installBuiltins(global) {
  */
 function adoptShared(global, callback) {
   // Tests can adopt the same window twice. sigh.
-  if (global.AMP_TAG) {
+  if (global.__AMP_TAG) {
     return Promise.resolve();
   }
-  global.AMP_TAG = true;
+  global.__AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
   /** @const {!Array<function(!Object)|!ExtensionPayload>} */
@@ -397,7 +325,7 @@ export function adopt(global) {
     const {documentElement} = global.document;
 
     const ampdocService = Services.ampdocServiceFor(global);
-    const ampdoc = ampdocService.getAmpDoc();
+    const ampdoc = ampdocService.getSingleDoc();
     global.AMP.ampdoc = ampdoc;
 
     const viewer = Services.viewerForDoc(documentElement);
@@ -488,13 +416,14 @@ export class MultidocManager {
    * Attaches the shadow root and calls the supplied DOM builder.
    * @param {!Element} hostElement
    * @param {string} url
-   * @param {!Object<string, string>|undefined} initParams
+   * @param {!Object<string, string>|undefined} params
    * @param {function(!Object, !ShadowRoot,
    * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
    * @return {!Object}
    * @private
    */
-  attachShadowDoc_(hostElement, url, initParams, builder) {
+  attachShadowDoc_(hostElement, url, params, builder) {
+    params = params || Object.create(null);
     this.purgeShadowRoots_();
 
     setStyle(hostElement, 'visibility', 'hidden');
@@ -510,7 +439,9 @@ export class MultidocManager {
     amp.url = url;
     const {origin} = parseUrlDeprecated(url);
 
-    const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot);
+    const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot, {
+      params,
+    });
     /** @const {!./service/ampdoc-impl.AmpDocShadow} */
     amp.ampdoc = ampdoc;
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
@@ -518,12 +449,12 @@ export class MultidocManager {
     // Install runtime CSS.
     installStylesForDoc(
       ampdoc,
-      cssText,
+      ampDocCss + ampSharedCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true
     );
     // Instal doc services.
-    installAmpdocServices(ampdoc, initParams || Object.create(null));
+    installAmpdocServices(ampdoc);
 
     const viewer = Services.viewerForDoc(ampdoc);
 
@@ -532,7 +463,7 @@ export class MultidocManager {
      * @param {!VisibilityState} state
      */
     amp['setVisibilityState'] = function(state) {
-      setViewerVisibilityState(viewer, state);
+      ampdoc.overrideVisibilityState(state);
     };
 
     // Messaging pipe.
@@ -711,6 +642,7 @@ export class MultidocManager {
   mergeShadowHead_(ampdoc, shadowRoot, doc) {
     const extensionIds = [];
     if (doc.head) {
+      shadowRoot.AMP.head = doc.head;
       const parentLinks = {};
       const links = childElementsByTag(
         dev().assertElement(this.win.document.head),
@@ -795,6 +727,8 @@ export class MultidocManager {
               const src = n.getAttribute('src');
               const isRuntime =
                 src.indexOf('/amp.js') != -1 || src.indexOf('/v0.js') != -1;
+              // Note: Some extensions don't have [custom-element] or
+              // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
               const versionRe = /-(\d+.\d+)(.max)?\.js$/;
@@ -878,10 +812,7 @@ export class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
-    setViewerVisibilityState(
-      Services.viewerForDoc(ampdoc),
-      VisibilityState.INACTIVE
-    );
+    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
   }
 
@@ -948,22 +879,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (internalRuntimeVersion() == v) {
     return false;
   }
-  // The :not is an extra prevention of recursion because it will be
-  // added to script tags that go into the code path below.
-  const scriptInHead = win.document.head./*OK*/ querySelector(
-    `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`
-  );
-  devAssert(
-    scriptInHead,
-    'Expected to find script for extension: %s',
-    fnOrStruct.n
-  );
-  if (!scriptInHead) {
-    return false;
-  }
-  // Mark the element as being replaced, so that the installExtension code
-  // assumes it as not-present.
-  Services.extensionsFor(win).reloadExtension(fnOrStruct.n, scriptInHead);
+  Services.extensionsFor(win).reloadExtension(fnOrStruct.n);
   return true;
 }
 

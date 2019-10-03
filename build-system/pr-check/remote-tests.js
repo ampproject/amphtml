@@ -36,37 +36,37 @@ const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = cmd => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
     await startSauceConnect(FILENAME);
-    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
-    timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
+    timedExecOrDie('gulp unit --nobuild --saucelabs');
+    timedExecOrDie(
+      'gulp integration --nobuild --compiled --saucelabs --stable'
+    );
+    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs --beta');
 
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
-      !(
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('UNIT_TEST') ||
-        buildTargets.has('INTEGRATION_TEST')
-      )
+      !buildTargets.has('RUNTIME') &&
+      !buildTargets.has('FLAG_CONFIG') &&
+      !buildTargets.has('UNIT_TEST') &&
+      !buildTargets.has('INTEGRATION_TEST')
     ) {
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Remote (Sauce Labs) Tests ') +
-          'because this commit does not affect the runtime, ' +
-          'build system, or integration test files.'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Remote (Sauce Labs) Tests'),
+        'because this commit does not affect the runtime, flag configs,',
+        'unit tests, or integration tests.'
       );
       stopTimer(FILENAME, FILENAME, startTime);
       return;
@@ -75,21 +75,20 @@ async function main() {
     timedExecOrDie('gulp update-packages');
     await startSauceConnect(FILENAME);
 
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
-      buildTargets.has('UNIT_TEST')
-    ) {
-      timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+      timedExecOrDie('gulp unit --nobuild --saucelabs');
     }
 
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
+      buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie(
-        'gulp test --integration --nobuild --compiled --saucelabs'
+        'gulp integration --nobuild --compiled --saucelabs --stable'
+      );
+      timedExecOrDie(
+        'gulp integration --nobuild --compiled --saucelabs --beta'
       );
     }
     stopSauceConnect(FILENAME);

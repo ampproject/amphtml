@@ -310,11 +310,14 @@ describe
       });
     };
 
-    // TODO(choumx): amp-mustache-0.1 is broken on --single_pass.
-    // describes.integration('+ amp-list, amp-mustache:0.1', {
-    //   body: list,
-    //   extensions: ['amp-bind', 'amp-list', 'amp-mustache:0.1'],
-    // }, listTests);
+    describes.integration(
+      '+ amp-list, amp-mustache:0.1',
+      {
+        body: list,
+        extensions: ['amp-bind', 'amp-list', 'amp-mustache:0.1'],
+      },
+      listTests
+    );
 
     describes.integration(
       '+ amp-list, amp-mustache:0.2',

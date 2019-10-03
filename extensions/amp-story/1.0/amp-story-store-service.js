@@ -50,6 +50,7 @@ export const UIType = {
   MOBILE: 0,
   DESKTOP_PANELS: 1, // Default desktop UI.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
 /**
@@ -82,6 +83,7 @@ export let InteractiveComponentDef;
  *    canShowSystemLayerButtons: boolean,
  *    accessState: boolean,
  *    adState: boolean,
+ *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
  *    hasSidebarState: boolean,
@@ -103,7 +105,8 @@ export let InteractiveComponentDef;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    pagesCount: number,
+ *    pageIds: !Array<string>,
+ *    newPageAvailableId: string,
  * }}
  */
 export let State;
@@ -122,6 +125,7 @@ export const StateProperty = {
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   BOOKEND_STATE: 'bookendState',
+  AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
@@ -146,8 +150,9 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
-  PAGES_COUNT: 'pagesCount',
   ADVANCEMENT_MODE: 'advancementMode',
+  PAGE_IDS: 'pageIds',
+  NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
 };
 
 /** @private @const @enum {string} */
@@ -155,11 +160,13 @@ export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
-  SET_PAGES_COUNT: 'setPagesCount',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
+  SET_PAGE_IDS: 'addToPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
+  TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_BOOKEND: 'toggleBookend',
+  TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
@@ -175,6 +182,7 @@ export const Action = {
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
+  ADD_NEW_PAGE_ID: 'addNewPageId',
 };
 
 /**
@@ -183,6 +191,7 @@ export const Action = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
+  [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
     /**
@@ -201,6 +210,10 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_NEW_PAGE_ID:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      }));
     case Action.ADD_TO_ACTIONS_WHITELIST:
       const newActionsWhitelist = [].concat(
         state[StateProperty.ACTIONS_WHITELIST],
@@ -225,6 +238,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.AD_STATE]: !!data,
       }));
+    // Expands or collapses the affiliate link.
+    case Action.TOGGLE_AFFILIATE_LINK:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.AFFILIATE_LINK_STATE]: data,
+      }));
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
       if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
@@ -233,6 +251,10 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.BOOKEND_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      }));
+    case Action.TOGGLE_CAN_SHOW_BOOKEND:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
       }));
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
@@ -304,6 +326,13 @@ const actions = (state, action, data) => {
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
       }));
     case Action.TOGGLE_UI:
+      if (
+        state[StateProperty.UI_STATE] === UIType.VERTICAL &&
+        data !== UIType.VERTICAL
+      ) {
+        dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
+        return state;
+      }
       return /** @type {!State} */ (Object.assign({}, state, {
         // Keep DESKTOP_STATE for compatiblity with v0.1.
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
@@ -322,13 +351,13 @@ const actions = (state, action, data) => {
         [StateProperty.CURRENT_PAGE_ID]: data.id,
         [StateProperty.CURRENT_PAGE_INDEX]: data.index,
       }));
-    case Action.SET_PAGES_COUNT:
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGES_COUNT]: data,
-      }));
     case Action.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ADVANCEMENT_MODE]: data,
+      }));
+    case Action.SET_PAGE_IDS:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_IDS]: data,
       }));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
@@ -433,6 +462,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
+      [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
@@ -458,8 +488,9 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
-      [StateProperty.PAGES_COUNT]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
+      [StateProperty.PAGE_IDS]: [],
+      [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
     });
   }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as applyExperiment from '../apply-experiment';
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
@@ -88,6 +89,21 @@ describes.realWin(
       experiment.element.appendChild(child);
     }
 
+    function stubAllocateVariant(sandbox, config) {
+      const viewer = Services.viewerForDoc(ampdoc);
+      const stub = sandbox.stub(variant, 'allocateVariant');
+      stub
+        .withArgs(ampdoc, viewer, 'experiment-1', config['experiment-1'])
+        .returns(Promise.resolve('variant-a'));
+      stub
+        .withArgs(ampdoc, viewer, 'experiment-2', config['experiment-2'])
+        .returns(Promise.resolve('variant-d'));
+      stub
+        .withArgs(ampdoc, viewer, 'experiment-3', config['experiment-3'])
+        .returns(Promise.resolve(null));
+      return stub;
+    }
+
     it('Rejects because experiment is not enabled', () => {
       toggleExperiment(win, 'amp-experiment-1.0', false);
 
@@ -155,33 +171,53 @@ describes.realWin(
       );
     });
 
-    it('should apply the mutations from the variant', () => {
+    it('should match the variant to the experiment', () => {
       addConfigElement('script');
-      const stub = sandbox.stub(variant, 'allocateVariant');
-      stub
-        .withArgs(ampdoc, 'experiment-1', config['experiment-1'])
-        .returns(Promise.resolve('variant-a'));
-      stub
-        .withArgs(ampdoc, 'experiment-2', config['experiment-2'])
-        .returns(Promise.resolve('variant-d'));
-      stub
-        .withArgs(ampdoc, 'experiment-3', config['experiment-3'])
-        .returns(Promise.resolve(null));
 
-      const applyStub = sandbox.stub(experiment, 'applyMutations_');
+      stubAllocateVariant(sandbox, config);
+      const applyStub = sandbox
+        .stub(applyExperiment, 'applyExperimentToVariant')
+        .returns(Promise.resolve());
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())
         .then(variantsService => variantsService.getVariants())
         .then(variants => {
+          expect(applyStub).to.be.calledOnce;
           expect(variants).to.jsonEqual({
             'experiment-1': 'variant-a',
             'experiment-2': 'variant-d',
             'experiment-3': null,
           });
-
-          expect(applyStub).to.be.calledTwice;
         });
     });
+
+    it(
+      'should not apply any experiments when ' +
+        '_disable_all_experiments_ is enabled',
+      () => {
+        addConfigElement('script');
+
+        stubAllocateVariant(sandbox, config);
+        const applyStub = sandbox
+          .stub(applyExperiment, 'applyExperimentToVariant')
+          .returns(Promise.resolve());
+
+        sandbox.stub(ampdoc, 'getParam').returns('true');
+
+        experiment.buildCallback();
+        return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+          .then(variantsService => variantsService.getVariants())
+          .then(variants => {
+            expect(variants).to.jsonEqual({
+              'experiment-1': null,
+              'experiment-2': null,
+              'experiment-3': null,
+            });
+
+            expect(applyStub).to.not.be.called;
+          });
+      }
+    );
   }
 );

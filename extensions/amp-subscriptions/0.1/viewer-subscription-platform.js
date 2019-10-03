@@ -51,7 +51,7 @@ export class ViewerSubscriptionPlatform {
       serviceAdapter
     );
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
     this.viewer_.onMessage(
       'subscriptionchange',
@@ -217,6 +217,11 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
+  pingbackReturnsAllEntitlements() {
+    return this.platform_.pingbackReturnsAllEntitlements();
+  }
+
+  /** @override */
   pingback(selectedPlatform) {
     this.platform_.pingback(selectedPlatform);
   }
@@ -253,7 +258,9 @@ export class ViewerSubscriptionPlatform {
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
+ * @package
+ * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;

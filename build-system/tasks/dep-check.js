@@ -18,7 +18,6 @@
 const babelify = require('babelify');
 const BBPromise = require('bluebird');
 const browserify = require('browserify');
-const colors = require('ansi-colors');
 const depCheckConfig = require('../dep-check-config');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp');
@@ -27,13 +26,15 @@ const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
+const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
+const {compileJison} = require('./compile-jison');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
+const {cyan, red, yellow} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
-const red = msg => log(colors.red(msg));
 
 /**
  * @typedef {{
@@ -140,8 +141,7 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
           return;
         }
         mustNotDependErrors.push(
-          `${moduleName} must not depend on ${dep}. ` +
-            `Rule: ${JSON.stringify(this.config_)}.`
+          cyan(moduleName) + ' must not depend on ' + cyan(dep)
         );
       }
     });
@@ -205,12 +205,13 @@ function getGraph(entryModule) {
 
   // TODO(erwinm): Try and work this in with `gulp build` so that
   // we're not running browserify twice on travis.
-  const bundler = browserify(entryModule, {debug: true}).transform(babelify, {
-    compact: false,
-    // Transform files in node_modules since deps use ES6 export.
-    // https://github.com/babel/babelify#why-arent-files-in-node_modules-being-transformed
-    global: true,
-  });
+  const bundler = browserify(entryModule, {
+    debug: true,
+    fast: true,
+  }).transform(
+    babelify,
+    Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {compact: false})
+  );
 
   bundler.pipeline.get('deps').push(
     through.obj(function(row, enc, next) {
@@ -276,7 +277,8 @@ function flattenGraph(entryPoints) {
 /**
  * Run Module dependency graph against the rules.
  *
- * @param {!Array<!ModuleDef>} modules
+ * @param {!ModuleDef} modules
+ * @return {boolean}
  */
 function runRules(modules) {
   let errorsFound = false;
@@ -287,8 +289,9 @@ function runRules(modules) {
 
     if (errors.length) {
       errorsFound = true;
-      // Report errors.
-      errors.forEach(red);
+      errors.forEach(error => {
+        log(red('ERROR:'), error);
+      });
     }
   });
   return errorsFound;
@@ -297,6 +300,7 @@ function runRules(modules) {
 async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
   await css();
+  await compileJison();
   if (!isTravisBuild()) {
     log('Checking dependencies...');
   }
@@ -311,7 +315,14 @@ async function depCheck() {
     .then(runRules)
     .then(errorsFound => {
       if (errorsFound) {
-        process.exit(1);
+        log(
+          yellow('NOTE:'),
+          'If a dependency is valid, add it to one of the whitelists in',
+          cyan('build-system/dep-check-config.js')
+        );
+        const reason = new Error('Dependency checks failed');
+        reason.showStack = false;
+        return Promise.reject(reason);
       }
     })
     .then(() => exitCtrlcHandler(handlerProcess));
@@ -338,6 +349,7 @@ function toArrayOrDefault(value, defaultValue) {
  * Flatten array of arrays.
  *
  * @param {!Array<!Array>} arr
+ * @return {!Array}
  */
 function flatten(arr) {
   return [].concat.apply([], arr);

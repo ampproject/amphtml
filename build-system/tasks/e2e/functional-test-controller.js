@@ -57,74 +57,8 @@ const Key = {
   'Enter': 'Enter',
   'Escape': 'Escape',
   'Tab': 'Tab',
+  'CtrlV': 'CtrlV',
 };
-
-/**
- * Allow expectations to await the expected value. Duck-type a real Promise.
- * This class, and its waitForValue member function, are necessary because
- * to behave like a Promise and to wait for the correct value from the
- * Browser Automation Framework, the onFulfilled chains need to propagate into
- * the new values that come from the browser.
- *
- * @template TYPE
- * @extends {Promise}
- */
-class ControllerPromise {
-  /**
-   * @param {function(function(?TYPE):void, function(*):void):void|!Promise<TYPE>} executorOrPromise
-   * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} opt_waitForValue
-   */
-  constructor(executorOrPromise, opt_waitForValue) {
-    this.promise_ =
-      typeof executorOrPromise == 'function'
-        ? new Promise(executorOrPromise)
-        : executorOrPromise;
-
-    /**
-     * Returns a Promise that resolves when the given expected value fulfills
-     * the given condition.
-     * @param {function(TYPE): ?TYPE} condition
-     * @return {!Promise<?TYPE>}
-     */
-    this.waitForValue = opt_waitForValue;
-  }
-
-  /** @override */
-  catch(onRejected) {
-    return new ControllerPromise(
-      this.promise_.catch(onRejected),
-      this.waitForValue
-    );
-  }
-
-  /** @override */
-  finally(onFinally) {
-    return new ControllerPromise(
-      this.promise_.finally(onFinally),
-      this.waitForValue
-    );
-  }
-
-  /** @override */
-  then(opt_onFulfilled, opt_onRejected) {
-    opt_onFulfilled = opt_onFulfilled || (x => x);
-    // Allow this and future `then`s to update the wait value.
-    let wrappedWait = null;
-    if (this.waitForValue) {
-      wrappedWait = (condition, opt_mutate) => {
-        opt_mutate = opt_mutate || (x => x);
-        return this.waitForValue(condition, value =>
-          opt_mutate(opt_onFulfilled(value))
-        );
-      };
-    }
-
-    return new ControllerPromise(
-      this.promise_.then(opt_onFulfilled, opt_onRejected),
-      wrappedWait
-    );
-  }
-}
 
 /** @interface */
 class FunctionalTestController {
@@ -154,6 +88,15 @@ class FunctionalTestController {
   async getTitle() {}
 
   /**
+   * Select the given window.
+   * {@link https://www.w3.org/TR/webdriver1/#dfn-switch-to-window}
+   *
+   * @param {string} unusedString
+   * @return {!Promise}
+   */
+  async switchToWindow(unusedString) {}
+
+  /**
    * Selects the current top-level browsing context or a child browsing context
    * of the current browsing context to use as the current browsing context for
    * subsequent commands.
@@ -175,7 +118,7 @@ class FunctionalTestController {
   async switchToParent() {}
 
   /**
-   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * Selects the body of a subtree inside a ShadowDOM ShadowRoot to use as the current
    * browsing context for subsequent commands.
    * {@link https://github.com/w3c/webdriver/pull/1320}
    * https://github.com/SeleniumHQ/selenium/issues/5869
@@ -184,6 +127,17 @@ class FunctionalTestController {
    * @return {!Promise}
    */
   async switchToShadow(unusedHandle) {}
+
+  /**
+   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise}
+   */
+  async switchToShadowRoot(unusedHandle) {}
 
   /**
    * Selects the main top-level DOM tree to use as the current
@@ -371,6 +325,15 @@ class FunctionalTestController {
   async isElementEnabled(unusedHandle) {}
 
   /**
+   * Return an array of handles consisting of all windows in the browser
+   * session.
+   * {@link https://www.w3.org/TR/webdriver1/#get-window-handles}
+   *
+   * @return {!Promise<Array<string>>}
+   */
+  async getAllWindows() {}
+
+  /**
    * The Set Window Rect command alters the size and the position of the
    * operating system window corresponding to the current top-level browsing
    * context.
@@ -489,7 +452,6 @@ let ScrollToOptionsDef;
 
 module.exports = {
   ElementHandle,
-  ControllerPromise,
   FunctionalTestController,
   Key,
   WindowRectDef,

@@ -44,7 +44,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?../../../src/service/document-info-impl.DocumentInfoDef} */
     this.docInfo_ = null;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
     /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
@@ -123,16 +123,12 @@ export class AmpSkimlinks extends AMP.BaseElement {
   sendImpressionTracking_(beaconData) {
     // Update tracking service with extra info.
     this.trackingService_.setTrackingInfo({guid: beaconData['guid']});
-    const viewer = Services.viewerForDoc(
-      /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
-      (this.ampDoc_)
-    );
     /*
       WARNING: Up to here, the code may have been executed during page
-      pre-rendering. Wait for the page to be visible in the viewer before
+      pre-rendering. Wait for the page to be visible in the doc before
       sending impression tracking.
     */
-    viewer.whenFirstVisible().then(() => {
+    this.ampDoc_.whenFirstVisible().then(() => {
       this.trackingService_.sendImpressionTracking(
         this.skimlinksLinkRewriter_.getAnchorReplacementList()
       );

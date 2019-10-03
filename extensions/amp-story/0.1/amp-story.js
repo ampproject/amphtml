@@ -40,6 +40,7 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage} from './amp-story-page';
+import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryRequestService} from './amp-story-request-service';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './amp-story-bookend';
@@ -78,6 +79,7 @@ import {
   matches,
   removeElement,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {
   computedStyle,
@@ -650,6 +652,15 @@ export class AmpStory extends AMP.BaseElement {
 
     this.validateConsent_();
 
+    // Story is being prerendered: resolve the layoutCallback when the first
+    // page is built. Other pages will only build if the document becomes
+    // visible.
+    if (!this.getAmpDoc().hasBeenVisible()) {
+      return whenUpgradedToCustomElement(firstPageEl).then(() =>
+        firstPageEl.whenBuilt()
+      );
+    }
+
     return storyLayoutPromise;
   }
 
@@ -1131,11 +1142,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return (
-      this.desktopMedia_.matches &&
-      !this.platform_.isBot() &&
-      !isExperimentOn(this.win, 'disable-amp-story-desktop')
-    );
+    return this.desktopMedia_.matches && !this.platform_.isBot();
   }
 
   /**
@@ -1728,4 +1735,5 @@ AMP.extension('amp-story', '0.1', AMP => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
+  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import * as mode from '../../src/mode';
 import {Services} from '../../src/services';
 import {assertSuccess} from '../../src/utils/xhr-utils';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 import {fetchPolyfill} from '../../src/polyfills/fetch';
 import {getCookie} from '../../src/cookies';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
@@ -30,6 +32,7 @@ describe
   .run('XHR', function() {
     let sandbox;
     let ampdocServiceForStub;
+    let ampdoc;
     let ampdocViewerStub;
     let xhrCreated;
     let viewer;
@@ -76,14 +79,17 @@ describe
     beforeEach(() => {
       sandbox = sinon.sandbox;
       ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
-      ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
-      ampdocViewerStub.returns({
+      ampdoc = {
+        getRootNode: () => null,
         whenFirstVisible: () => Promise.resolve(),
-      });
+      };
       ampdocServiceForStub.returns({
         isSingleDoc: () => false,
-        getAmpDoc: () => ampdocViewerStub,
+        getAmpDoc: () => ampdoc,
+        getSingleDoc: () => ampdoc,
       });
+      ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
+      ampdocViewerStub.returns({});
 
       location.href = 'https://acme.com/path';
     });
@@ -245,9 +251,6 @@ describe
                 200,
                 {
                   'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
                 },
                 '{}'
               )
@@ -255,68 +258,19 @@ describe
             return promise;
           });
 
-          it('should deny AMP origin for different origin in response', () => {
-            const promise = xhr.fetchJson('/get');
-            xhrCreated.then(xhr =>
-              xhr.respond(
-                200,
-                {
-                  'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://other.com',
-                },
-                '{}'
-              )
-            );
-            return promise.then(
-              () => {
-                throw new Error('UNREACHABLE');
-              },
-              res => {
-                expect(res).to.match(/Returned AMP-Access-.* is not equal/);
-              }
-            );
-          });
-
-          it('should require AMP origin in response for when request', () => {
-            const promise = xhr.fetchJson('/get');
-            xhrCreated.then(xhr =>
-              xhr.respond(
-                200,
-                {
-                  'Content-Type': 'application/json',
-                },
-                '{}'
-              )
-            );
-            return promise.then(
-              () => {
-                throw new Error('UNREACHABLE');
-              },
-              error => {
-                expect(error.message).to.contain('Response must contain');
-              }
-            );
-          });
-
-          describe('viewer visibility', () => {
+          describe('doc visibility', () => {
             afterEach(() => {
               test.win.fetch.restore();
             });
             it('should not call fetch if view is not visible ', () => {
               const fetchCall = sandbox.spy(test.win, 'fetch');
-              ampdocViewerStub.returns({
-                whenFirstVisible: () => Promise.reject(),
-              });
+              ampdoc.whenFirstVisible = () => Promise.reject();
               xhr.fetchJson('/get', {ampCors: false});
               expect(fetchCall.notCalled).to.be.true;
             });
             it('should call fetch if view is visible ', () => {
               const fetchCall = sandbox.spy(test.win, 'fetch');
-              ampdocViewerStub.returns({
-                whenFirstVisible: () => Promise.resolve(),
-              });
+              ampdoc.whenFirstVisible = () => Promise.resolve();
               const fetch = xhr.fetchJson('/get', {ampCors: false});
               fetch.then(() => {
                 expect(fetchCall.calledOnce).to.be.true;
@@ -420,7 +374,7 @@ describe
           });
         });
 
-        it('should do simple JSON fetch', () => {
+        it.skip('should do simple JSON fetch', () => {
           sandbox.stub(user(), 'assert');
           return xhr
             .fetchJson(`${baseUrl}/get?k=v1`)
@@ -582,9 +536,6 @@ describe
                 200,
                 {
                   'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
                   'X-foo-header': 'foo data',
                   'X-bar-header': 'bar data',
                 },
@@ -701,7 +652,7 @@ describe
       let sendMessageStub;
       function getDefaultResponseOptions() {
         return {
-          headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+          headers: [],
         };
       }
 
@@ -713,9 +664,14 @@ describe
         optedInDoc = window.document.implementation.createHTMLDocument('');
         optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
+        const ampdoc = {
+          getRootNode: () => optedInDoc,
+          whenFirstVisible: () => Promise.resolve(),
+        };
         ampdocServiceForStub.returns({
           isSingleDoc: () => true,
-          getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
         viewer = {
           hasCapability: () => true,
@@ -735,10 +691,23 @@ describe
         };
       });
 
+      afterEach(() => {
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          false
+        );
+      });
+
       it('should not intercept if AMP doc is not single', () => {
+        const ampdoc = {
+          getRootNode: () => optedInDoc,
+          whenFirstVisible: () => Promise.resolve(),
+        };
         ampdocServiceForStub.returns({
           isSingleDoc: () => false,
-          getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -751,9 +720,14 @@ describe
         const nonOptedInDoc = window.document.implementation.createHTMLDocument(
           ''
         );
+        const ampdoc = {
+          getRootNode: () => nonOptedInDoc,
+          whenFirstVisible: () => Promise.resolve(),
+        };
         ampdocServiceForStub.returns({
           isSingleDoc: () => true,
-          getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -802,9 +776,29 @@ describe
           .then(() => expect(sendMessageStub).to.not.have.been.called);
       });
 
-      it('should intercept if viewer untrusted but dev mode', () => {
+      it('should intercept if viewer untrusted but in local dev mode', () => {
         sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-        interceptionEnabledWin.AMP_DEV_MODE = true;
+        sandbox.stub(mode, 'getMode').returns({localDev: true});
+
+        const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+        return xhr
+          .fetch('https://www.some-url.org/some-resource/')
+          .then(() => expect(sendMessageStub).to.have.been.called);
+      });
+
+      it('should intercept if untrusted-xhr-interception experiment enabled', () => {
+        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+        sandbox.stub(mode, 'getMode').returns({localDev: false});
+        sandbox
+          .stub(viewer, 'hasCapability')
+          .withArgs('xhrInterceptor')
+          .returns(true);
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          true
+        );
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -851,7 +845,6 @@ describe
                 init: {
                   headers: {},
                   method: 'GET',
-                  requireAmpResponseSourceOrigin: true,
                 },
               },
             }
@@ -882,7 +875,6 @@ describe
                     },
                     body: '{"a":42,"b":[24,true]}',
                     method: 'POST',
-                    requireAmpResponseSourceOrigin: true,
                   },
                 },
               }
@@ -924,7 +916,6 @@ describe
                     },
                     body: [['a', '42'], ['b', '24'], ['b', 'true']],
                     method: 'POST',
-                    requireAmpResponseSourceOrigin: true,
                   },
                 },
               }
@@ -972,11 +963,7 @@ describe
               init: {
                 status: 242,
                 statusText: 'Magic status',
-                headers: [
-                  ['a', 2],
-                  ['b', false],
-                  ['AMP-Access-Control-Allow-Source-Origin', origin],
-                ],
+                headers: [['a', 2], ['b', false]],
               },
             })
           );
@@ -987,9 +974,6 @@ describe
             .then(response => {
               expect(response.headers.get('a')).to.equal('2');
               expect(response.headers.get('b')).to.equal('false');
-              expect(
-                response.headers.get('Amp-Access-Control-Allow-source-origin')
-              ).to.equal(origin);
               expect(response).to.have.property('ok').that.is.true;
               expect(response)
                 .to.have.property('status')
@@ -1017,11 +1001,7 @@ describe
               init: {
                 status: 242,
                 statusText: 'Magic status',
-                headers: [
-                  ['a', 2],
-                  ['b', false],
-                  ['AMP-Access-Control-Allow-Source-Origin', origin],
-                ],
+                headers: [['a', 2], ['b', false]],
               },
             })
           );
@@ -1032,9 +1012,6 @@ describe
             .then(response => {
               expect(response.headers.get('a')).to.equal('2');
               expect(response.headers.get('b')).to.equal('false');
-              expect(
-                response.headers.get('Amp-Access-Control-Allow-Source-Origin')
-              ).to.equal(origin);
               expect(response).to.have.property('ok').that.is.true;
               expect(response)
                 .to.have.property('status')

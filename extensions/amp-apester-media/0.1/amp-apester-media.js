@@ -215,9 +215,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   queryMedia_() {
     const url = this.buildUrl_();
     return Services.xhrFor(this.win)
-      .fetchJson(url, {
-        requireAmpResponseSourceOrigin: false,
-      })
+      .fetchJson(url, {})
       .then(res => {
         if (res.status === 200) {
           return res.json();
@@ -315,7 +313,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     return this.queryMedia_().then(
       response => {
         if (!response || response['status'] === 204) {
-          dev().error(TAG, 'Display', 'No Content for provided tag');
+          dev().warn(TAG, 'Display', 'No Content for provided tag');
           return this.unlayoutCallback();
         }
         const payload = response['payload'];

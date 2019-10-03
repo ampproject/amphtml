@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const PERMUTIVE_CONFIG = jsonLiteral({
   'vars': {
     'identity': '${clientId(_ga)}',
   },
@@ -31,6 +33,7 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
       '&_ep_geo_info=%24ip_geo_info',
     'engagement': '${track}&e=PageviewEngagement&_ep_engaged_time=5',
     'completion': '${track}&e=PageviewEngagement&_ep_completion=0.25',
+    'custom': '${track}&e=${event}',
   },
   'triggers': {
     'trackPageview': {
@@ -38,7 +41,7 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
       'request': 'pageview',
     },
     'trackEngagement': {
-      'on': 'visible',
+      'on': 'timer',
       'timerSpec': {
         'interval': 5,
         'maxTimerLength': 600,
@@ -71,3 +74,5 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
     'properties.': '_ep_',
   },
 });
+
+export {PERMUTIVE_CONFIG};

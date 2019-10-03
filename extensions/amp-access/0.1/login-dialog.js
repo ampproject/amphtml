@@ -36,7 +36,7 @@ const RETURN_URL_REGEX = new RegExp('RETURN_URL');
  */
 export function createLoginDialog(ampdoc, urlOrPromise) {
   const viewer = Services.viewerForDoc(ampdoc);
-  const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
+  const overrideDialog = parseInt(ampdoc.getParam('dialog'), 10);
   if (overrideDialog) {
     return new ViewerLoginDialog(viewer, urlOrPromise);
   }
@@ -70,11 +70,11 @@ export function getLoginUrl(ampdoc, urlOrPromise) {
  */
 class ViewerLoginDialog {
   /**
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @param {string|!Promise<string>} urlOrPromise
    */
   constructor(viewer, urlOrPromise) {
-    /** @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer = viewer;
 
     /** @const {string|!Promise<string>} */
@@ -122,14 +122,14 @@ class ViewerLoginDialog {
 export class WebLoginDialog {
   /**
    * @param {!Window} win
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @param {string|!Promise<string>} urlOrPromise
    */
   constructor(win, viewer, urlOrPromise) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer = viewer;
 
     /** @const {string|!Promise<string>} */

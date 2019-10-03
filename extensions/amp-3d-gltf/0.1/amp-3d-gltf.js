@@ -16,7 +16,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -146,14 +146,17 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     this.applyFillContent(iframe, true);
     this.iframe_ = iframe;
-    this.unlistenMessage_ = this.listenGltfViewerMessages_();
+    this.unlistenMessage_ = devAssert(this.listenGltfViewerMessages_());
 
     this.element.appendChild(this.iframe_);
 
     return this.willBeLoaded_.promise;
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {function()|undefined}
+   */
   listenGltfViewerMessages_() {
     if (!this.iframe_) {
       return;

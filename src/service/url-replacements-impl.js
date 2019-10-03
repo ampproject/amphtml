@@ -23,9 +23,6 @@ import {
   getTimingDataAsync,
   getTimingDataSync,
 } from './variable-source';
-import {Expander} from './url-expander/expander';
-import {Services} from '../services';
-import {WindowInterface} from '../window-interface';
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
@@ -37,13 +34,16 @@ import {
   removeFragment,
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
-import {getMode} from '../mode';
-import {getTrackImpressionPromise} from '../impression.js';
-import {hasOwn} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+
+import {Expander} from './url-expander/expander';
+import {Services} from '../services';
+import {WindowInterface} from '../window-interface';
+import {getTrackImpressionPromise} from '../impression.js';
+import {hasOwn} from '../utils/object';
 import {internalRuntimeVersion} from '../internal-version';
 import {tryResolve} from '../utils/promise';
 
@@ -118,7 +118,7 @@ export class GlobalVariableSource extends VariableSource {
     const {win} = this.ampdoc;
     const element = this.ampdoc.getHeadNode();
 
-    /** @const {!./viewport/viewport-impl.Viewport} */
+    /** @const {!./viewport/viewport-interface.ViewportInterface} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
     // Returns a random value for cache busters.
@@ -237,6 +237,11 @@ export class GlobalVariableSource extends VariableSource {
     // all the page views a single user is making at a time.
     this.set('PAGE_VIEW_ID', () => this.getDocInfo_().pageViewId);
 
+    // Returns a random string that will be the constant for the duration of
+    // single page view. It should have sufficient entropy to be unique for
+    // all the page views a single user is making at a time.
+    this.setAsync('PAGE_VIEW_ID_64', () => this.getDocInfo_().pageViewId64);
+
     this.setBoth(
       'QUERY_PARAM',
       (param, defaultValue = '') => {
@@ -253,10 +258,9 @@ export class GlobalVariableSource extends VariableSource {
     // Second parameter is an optional default value.
     // For example, if location is 'pub.com/amp.html?x=1#y=2' then
     // FRAGMENT_PARAM(y) returns '2' and FRAGMENT_PARAM(z, 3) returns 3.
-    this.setAsync(
-      'FRAGMENT_PARAM',
-      this.getViewerIntegrationValue_('fragmentParam', 'FRAGMENT_PARAM')
-    );
+    this.set('FRAGMENT_PARAM', (param, defaultValue = '') => {
+      return this.getFragmentParamData_(param, defaultValue);
+    });
 
     // Returns the first item in the ancestorOrigins array, if available.
     this.setAsync(
@@ -278,20 +282,14 @@ export class GlobalVariableSource extends VariableSource {
         if (!clientIds) {
           return null;
         }
-        return clientIds[dev().assertString(scope)];
+        return clientIds[scope];
       },
       (scope, opt_userNotificationId, opt_cookieName) => {
-        user().assertString(
+        userAssert(
           scope,
           'The first argument to CLIENT_ID, the fallback' +
             /*OK*/ ' Cookie name, is required'
         );
-
-        if (getMode().runtime == 'inabox') {
-          return /** @type {!Promise<ResolverReturnDef>} */ (Promise.resolve(
-            null
-          ));
-        }
 
         let consent = Promise.resolve();
 
@@ -308,7 +306,7 @@ export class GlobalVariableSource extends VariableSource {
           .then(cid => {
             return cid.get(
               {
-                scope: dev().assertString(scope),
+                /** @type {string} */ scope,
                 createCookieIfNotPresent: true,
                 cookieName: opt_cookieName,
               },
@@ -393,6 +391,36 @@ export class GlobalVariableSource extends VariableSource {
             GEO_DELIM
           ));
         }, 'AMP_GEO');
+      })
+    );
+
+    // Attempt to returns user location data if available, otherwise null.
+    this.setAsync(
+      'AMP_USER_LOCATION',
+      /** @type {AsyncResolverDef} */ (type => {
+        // Type may be "","lat","lon", and undefined
+        return this.getUserLocation_(userLocationService => {
+          return userLocationService.getReplacementLocation(
+            'AMP_USER_LOCATION',
+            type
+          );
+        }, 'AMP_USER_LOCATION');
+      })
+    );
+
+    // Returns user location data only if available,
+    // and waits for the user to approve.
+    this.setAsync(
+      'AMP_USER_LOCATION_POLL',
+      /** @type {AsyncResolverDef} */ (type => {
+        // Type may be "","lat","lon", and undefined
+        return this.getUserLocation_(userLocationService => {
+          return userLocationService.getReplacementLocation(
+            'AMP_USER_LOCATION_POLL',
+            type,
+            /*opt_poll*/ true
+          );
+        }, 'AMP_USER_LOCATION_POLL');
       })
     );
 
@@ -631,7 +659,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('AMP_VERSION', () => internalRuntimeVersion());
 
     this.set('BACKGROUND_STATE', () => {
-      return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
+      return this.ampdoc.isVisible() ? '0' : '1';
     });
 
     this.setAsync('VIDEO_STATE', (id, property) => {
@@ -743,7 +771,7 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Return the QUERY_PARAM from the current location href
-   * @param {*} param
+   * @param {string} param
    * @param {string} defaultValue
    * @return {string}
    * @private
@@ -758,15 +786,33 @@ export class GlobalVariableSource extends VariableSource {
       removeAmpJsParamsFromUrl(this.ampdoc.win.location.href)
     );
     const params = parseQueryString(url.search);
-    const key = user().assertString(param);
     const {replaceParams} = this.getDocInfo_();
-    if (typeof params[key] !== 'undefined') {
-      return params[key];
+    if (typeof params[param] !== 'undefined') {
+      return params[param];
     }
-    if (replaceParams && typeof replaceParams[key] !== 'undefined') {
-      return /** @type {string} */ (replaceParams[key]);
+    if (replaceParams && typeof replaceParams[param] !== 'undefined') {
+      return /** @type {string} */ (replaceParams[param]);
     }
     return defaultValue;
+  }
+
+  /**
+   * Return the FRAGMENT_PARAM from the original location href
+   * @param {*} param
+   * @param {string} defaultValue
+   * @return {string}
+   * @private
+   */
+  getFragmentParamData_(param, defaultValue) {
+    userAssert(
+      param,
+      'The first argument to FRAGMENT_PARAM, the fragment string ' +
+        'param is required'
+    );
+    userAssert(typeof param == 'string', 'param should be a string');
+    const hash = this.ampdoc.win.location.originalHash;
+    const params = parseQueryString(hash);
+    return params[param] === undefined ? defaultValue : params[param];
   }
 
   /**
@@ -804,6 +850,28 @@ export class GlobalVariableSource extends VariableSource {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
       return getter(geo);
     });
+  }
+
+  /**
+   * Resolves the value via the user location service.
+   * @param {function(Object<string, string>)} getter
+   * @param {string} expr
+   * @return {!Promise<Object<string,(string|Array<string>)>>}
+   * @template T
+   * @private
+   */
+  getUserLocation_(getter, expr) {
+    const element = this.ampdoc.getHeadNode();
+    return Services.userLocationForDocOrNull(element).then(
+      userLocationService => {
+        userAssert(
+          userLocationService,
+          'To use variable %s, amp-user-location should be configured',
+          expr
+        );
+        return getter(userLocationService);
+      }
+    );
   }
 
   /**
@@ -967,15 +1035,17 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
+   * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings, opt_whiteList) {
+  expandUrlAsync(url, opt_bindings, opt_whiteList, opt_noEncode) {
     return /** @type {!Promise<string>} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ undefined,
-      opt_whiteList
+      opt_whiteList,
+      opt_noEncode
     )
       ./*OK*/ expand(url)
       .then(replacement => this.ensureProtocolMatches_(url, replacement)));
@@ -1119,6 +1189,7 @@ export class UrlReplacements {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
       'PAGE_VIEW_ID': true,
+      'PAGE_VIEW_ID_64': true,
       'NAV_TIMING': true,
     };
     const additionalUrlParameters =
@@ -1150,10 +1221,10 @@ export class UrlReplacements {
       if (whitelist) {
         user().warn(
           'URL',
-          'Ignoring link replacement',
-          href,
-          " because the link does not go to the document's" +
-            ' source, canonical, or whitelisted origin.'
+          'Ignoring link replacement %s' +
+            " because the link does not go to the document's" +
+            ' source, canonical, or whitelisted origin.',
+          href
         );
       }
       return (element.href = href);

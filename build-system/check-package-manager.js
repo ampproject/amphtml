@@ -23,7 +23,7 @@
  */
 const fs = require('fs');
 const https = require('https');
-const {getStdout} = require('./exec');
+const {getStdout, getStderr} = require('./exec');
 
 const setupInstructionsUrl =
   'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
@@ -33,8 +33,20 @@ const gulpHelpUrl =
 
 const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
+const pythonExecutable = 'python';
 
-const updatesNeeded = [];
+const wrongGulpPaths = [
+  '/bin/',
+  '/sbin/',
+  '/usr/bin/',
+  '/usr/sbin/',
+  '/usr/local/bin/',
+  '/usr/local/sbin/',
+];
+
+const warningDelaySecs = 10;
+
+const updatesNeeded = new Set();
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {
@@ -123,7 +135,7 @@ function checkNodeVersion() {
               cyan('https://nodejs.org/en/download/package-manager'),
               yellow('for instructions.')
             );
-            updatesNeeded.push('node');
+            updatesNeeded.add('node');
           } else {
             console.log(
               green('Detected'),
@@ -194,7 +206,7 @@ function checkYarnVersion() {
       cyan('https://yarnpkg.com/docs/install'),
       yellow('for instructions.')
     );
-    updatesNeeded.push('yarn');
+    updatesNeeded.add('yarn');
   } else {
     console.log(
       green('Detected'),
@@ -217,11 +229,24 @@ function getYarnStableVersion(infoJson) {
   }
 }
 
-function checkGlobalGulp() {
+function getParentShellPath() {
+  const nodePath = process.env.PATH;
+  const pathSeparator = process.platform == 'win32' ? ';' : ':';
+  // nodejs adds a few extra variables to $PATH, ending with '../../bin/node-gyp-bin'.
+  // See https://github.com/nodejs/node-convergence-archive/blob/master/deps/npm/lib/utils/lifecycle.js#L81-L85
+  return nodePath.split(`node-gyp-bin${pathSeparator}`).pop();
+}
+
+function runGulpChecks() {
   const firstInstall = !fs.existsSync('node_modules');
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
-  const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
+  const defaultGulpPath = getStdout('which gulp', {
+    'env': {'PATH': getParentShellPath()},
+  }).trim();
+  const wrongGulp = wrongGulpPaths.some(path =>
+    defaultGulpPath.startsWith(path)
+  );
   if (globalGulp) {
     console.log(
       yellow('WARNING: Detected a global install of'),
@@ -240,17 +265,29 @@ function checkGlobalGulp() {
       cyan(gulpHelpUrl),
       yellow('for more information.')
     );
-    updatesNeeded.push('gulp');
-  } else if (!globalGulpCli) {
+    updatesNeeded.add('gulp');
+  }
+  if (wrongGulp) {
     console.log(
-      yellow('WARNING: Could not find'),
-      cyan('gulp-cli') + yellow('.')
+      yellow('WARNING: Found'),
+      cyan('gulp'),
+      yellow('in an unexpected location:'),
+      cyan(defaultGulpPath) + yellow('.')
     );
     console.log(
-      yellow('⤷ To install it, run'),
-      cyan('"yarn global add gulp-cli"') + yellow('.')
+      yellow('⤷ To fix this, consider removing'),
+      cyan(defaultGulpPath),
+      yellow('from your default'),
+      cyan('$PATH') + yellow(', or deleting it.')
     );
-  } else if (!firstInstall) {
+    console.log(
+      yellow('⤷ Run'),
+      cyan('"which gulp"'),
+      yellow('for more information.')
+    );
+    updatesNeeded.add('gulp');
+  }
+  if (!firstInstall) {
     const gulpVersions = getStdout(gulpExecutable + ' --version').trim();
     const gulpVersion = gulpVersions.match(/Local version[:]? (.*?)$/);
     if (gulpVersion && gulpVersion.length == 2) {
@@ -272,6 +309,44 @@ function checkGlobalGulp() {
   }
 }
 
+function checkPythonVersion() {
+  // Python prints its version to stderr: https://bugs.python.org/issue18338
+  const pythonVersionResult = getStderr(`${pythonExecutable} --version`).trim();
+  const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
+  if (pythonVersion && pythonVersion.length == 2) {
+    const recommendedVersion = '2.7';
+    const versionNumber = pythonVersion[1];
+    if (versionNumber.startsWith(recommendedVersion)) {
+      console.log(
+        green('Detected'),
+        cyan('python'),
+        green('version'),
+        cyan(versionNumber) + green('.')
+      );
+    } else {
+      console.log(
+        yellow('WARNING: Detected python version'),
+        cyan(versionNumber) +
+          yellow('. Recommended version for AMP development is'),
+        cyan(recommendedVersion) + yellow('.')
+      );
+      console.log(
+        yellow('⤷ To fix this, install the correct version from'),
+        cyan(`https://www.python.org/download/releases/${recommendedVersion}`) +
+          yellow('.')
+      );
+    }
+  } else {
+    console.log(
+      yellow(
+        'WARNING: ' +
+          'Could not determine the local version of python. ' +
+          'AMP development requires python 2.7.'
+      )
+    );
+  }
+}
+
 function main() {
   // Yarn is already used by default on Travis, so there is nothing more to do.
   if (process.env.TRAVIS) {
@@ -279,16 +354,17 @@ function main() {
   }
   ensureYarn();
   return checkNodeVersion().then(() => {
-    checkGlobalGulp();
+    runGulpChecks();
+    checkPythonVersion();
     checkYarnVersion();
-    if (!process.env.TRAVIS && updatesNeeded.length > 0) {
+    if (!process.env.TRAVIS && updatesNeeded.size > 0) {
       console.log(
-        yellow('\nWARNING: Detected missing updates for'),
-        cyan(updatesNeeded.join(', '))
+        yellow('\nWARNING: Detected problems with'),
+        cyan(Array.from(updatesNeeded).join(', '))
       );
       console.log(
         yellow('⤷ Continuing install in'),
-        cyan('5'),
+        cyan(warningDelaySecs),
         yellow('seconds...')
       );
       console.log(
@@ -303,7 +379,7 @@ function main() {
       setTimeout(() => {
         console.log(yellow('\nAttempting to install packages...'));
         resolver();
-      }, 5000);
+      }, warningDelaySecs * 1000);
       return deferred;
     }
   });

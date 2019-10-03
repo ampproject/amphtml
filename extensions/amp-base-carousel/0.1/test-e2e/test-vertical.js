@@ -53,7 +53,6 @@ describes.endtoend(
       // await expect(prop(el, 'scrollHeight'))
       //     .to.equal(carouselHeight * (2 * (SLIDE_COUNT - 1) + 1));
       await waitForCarouselImg(controller, 0);
-      await controller.takeScreenshot('screenshots/vertical/render.png');
     });
 
     // TODO(sparhami): unskip
@@ -79,11 +78,10 @@ describes.endtoend(
       const snappedScrollTop = scrollTop + slideHeight;
       const requestedScrollTop = snappedScrollTop + 1;
 
-      await controller.scroll(el, {top: requestedScrollTop});
+      await controller.scrollTo(el, {top: requestedScrollTop});
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
       await expect(rect(firstSlide)).to.include({y: carouselTop - slideHeight});
-      await controller.takeScreenshot('screenshots/vertical/snapped.png');
     });
 
     describe('looping', () => {
@@ -113,9 +111,6 @@ describes.endtoend(
           y: carouselTop,
           height: slideHeight,
         });
-        await controller.takeScreenshot(
-          'screenshots/vertical/loop-move-forwards-to-end.png'
-        );
       });
 
       // When resting the first few slides should be translated to the bottom.
@@ -144,9 +139,6 @@ describes.endtoend(
           y: carouselTop,
           height: slideHeight,
         });
-        await controller.takeScreenshot(
-          'screenshots/vertical/loop-move-backwards-to-second.png'
-        );
       });
     });
   }

@@ -90,22 +90,21 @@ import {
 import {RequestBank, stubService} from './test-helper';
 import {Services} from '../src/services';
 import {addParamsToUrl} from '../src/url';
-import {
-  adopt,
-  adoptShadowMode,
-  installAmpdocServices,
-  installRuntimeServices,
-} from '../src/runtime';
+import {adopt, adoptShadowMode} from '../src/runtime';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {createAmpElementForTesting} from '../src/custom-element';
 import {createElementWithAttributes} from '../src/dom';
-import {cssText} from '../build/css';
 import {doNotLoadExternalResourcesInTest} from './iframe';
 import {
+  installAmpdocServices,
   installBuiltinElements,
-  installExtensionsService,
-} from '../src/service/extensions-impl';
+  installRuntimeServices,
+} from '../src/service/core-services';
+
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
+import {installExtensionsService} from '../src/service/extensions-impl';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {maybeTrackImpression} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
@@ -348,6 +347,9 @@ function describeEnv(factory) {
       if (spec.retryOnSaucelabs) {
         d = d.retryOnSaucelabs(spec.retryOnSaucelabs);
       }
+      if (spec.ifIe) {
+        d = d.ifIe();
+      }
       d.run(SUB, function() {
         if (spec.timeout) {
           this.timeout(spec.timeout);
@@ -405,6 +407,7 @@ class SandboxFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
+    this.defineProperties_ = [];
   }
 
   /** @override */
@@ -415,11 +418,53 @@ class SandboxFixture {
   /** @override */
   setup(env) {
     env.sandbox = sinon.createSandbox();
+    env.sandbox.defineProperty = this.defineProperty_.bind(this);
+    env.sandbox.deleteProperty = (obj, propertyKey) => {
+      this.defineProperty_(obj, propertyKey, undefined);
+    };
   }
 
   /** @override */
   teardown(env) {
+    this.restoreDefineProperty_();
     env.sandbox.restore();
+  }
+
+  defineProperty_(obj, propertyKey, descriptor) {
+    this.defineProperties_.push({
+      obj,
+      propertyKey,
+      descriptor: Object.getOwnPropertyDescriptor(obj, propertyKey),
+    });
+
+    if (descriptor) {
+      if (descriptor.configurable === false) {
+        throw new Error(
+          `sandbox.defineProperty(${obj.constructor.name},${propertyKey},{configurable=false}); ` +
+            `With configurable=false, you will not be able to restore the property!`
+        );
+      }
+      descriptor.configurable = true;
+      Object.defineProperty(obj, propertyKey, descriptor);
+    } else {
+      delete obj[propertyKey];
+    }
+  }
+
+  restoreDefineProperty_() {
+    this.defineProperties_.forEach(item => {
+      try {
+        if (item.descriptor === undefined) {
+          delete item.obj[item.propertyKey];
+        } else {
+          Object.defineProperty(item.obj, item.propertyKey, item.descriptor);
+        }
+      } catch (e) {
+        throw new Error(
+          `Failed to restore sandbox.defineProperty(${item.obj.constructor.name},${item.propertyKey}); ${e}`
+        );
+      }
+    });
   }
 }
 
@@ -461,6 +506,7 @@ class IntegrationFixture {
         ? undefined
         : this.spec.extensions.join(',');
     const ampDocType = this.spec.ampdoc || 'single';
+    const style = this.spec.frameStyle;
 
     let url =
       this.spec.amp === false
@@ -482,7 +528,10 @@ class IntegrationFixture {
         src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
       }
 
-      env.iframe = createElementWithAttributes(document, 'iframe', {src});
+      env.iframe = createElementWithAttributes(document, 'iframe', {
+        src,
+        style,
+      });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
         resolve();
@@ -569,7 +618,7 @@ class RealWinFixture {
         env.win = win;
 
         // Flag as being a test window.
-        win.AMP_TEST_IFRAME = true;
+        win.__AMP_TEST_IFRAME = true;
         // Set the testLocation on iframe to parent's location since location of
         // the test iframe is about:srcdoc.
         // Unfortunately location object is not configurable, so we have to
@@ -613,7 +662,7 @@ class RealWinFixture {
         resolve();
       };
       iframe.onerror = reject;
-      document.body.appendChild(iframe);
+      document.body.insertBefore(iframe, document.body.firstChild);
     });
   }
 
@@ -664,7 +713,7 @@ class AmpFixture {
     }
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
-    installDocService(win, singleDoc);
+    installDocService(win, singleDoc, spec.params);
     const ampdocService = Services.ampdocServiceFor(win);
     env.ampdocService = ampdocService;
     installExtensionsService(win);
@@ -672,14 +721,14 @@ class AmpFixture {
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
-      win.services.vsync.obj.runScheduledTasks_();
+      win.__AMP_SERVICES.vsync.obj.runScheduledTasks_();
     };
     if (singleDoc) {
       // Install AMP CSS for main runtime, if it hasn't been installed yet.
       completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
-      installAmpdocServices(ampdoc, spec.params);
+      installAmpdocServices(ampdoc);
       adopt(win);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
@@ -836,7 +885,7 @@ class AmpFixture {
  * @param {!Window} win
  */
 function configureAmpTestMode(win) {
-  win.AMP_TEST = true;
+  win.__AMP_TEST = true;
 }
 
 /**
@@ -849,7 +898,7 @@ function installRuntimeStylesPromise(win) {
   }
   const style = document.createElement('style');
   style.setAttribute('amp-runtime', '');
-  style./*OK*/ textContent = cssText;
+  style./*OK*/ textContent = ampDocCss + ampSharedCss;
   win.document.head.appendChild(style);
 }
 

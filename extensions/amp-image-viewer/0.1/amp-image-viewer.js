@@ -28,7 +28,10 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {WindowInterface} from '../../../src/window-interface';
 import {bezierCurve} from '../../../src/curve';
+import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -139,7 +142,10 @@ export class AmpImageViewer extends AMP.BaseElement {
     );
 
     this.sourceAmpImage_ = children[0];
-    this.setAsOwner(this.sourceAmpImage_);
+    Services.ownersForDoc(this.element).setOwner(
+      this.sourceAmpImage_,
+      this.element
+    );
   }
 
   /** @override */
@@ -189,7 +195,7 @@ export class AmpImageViewer extends AMP.BaseElement {
       : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
 
     if (!haveImg) {
-      this.scheduleLayout(ampImg);
+      Services.ownersForDoc(this.element).scheduleLayout(this.element, ampImg);
     }
 
     this.loadPromise_ = laidOutPromise
@@ -417,7 +423,10 @@ export class AmpImageViewer extends AMP.BaseElement {
       this.imageBox_.width * this.maxSeenScale_,
       this.sourceWidth_
     );
-    const src = this.srcset_.select(width, this.getDpr());
+    const src = this.srcset_.select(
+      width,
+      WindowInterface.getDevicePixelRatio()
+    );
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -544,19 +553,6 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
-   * Returns value bound to min and max values +/- extent.
-   * @param {number} v
-   * @param {number} min
-   * @param {number} max
-   * @param {number} extent
-   * @return {number}
-   * @private
-   */
-  boundValue_(v, min, max, extent) {
-    return Math.max(min - extent, Math.min(max + extent, v));
-  }
-
-  /**
    * Returns the scale within the allowed range with possible extent.
    * @param {number} s
    * @param {boolean} allowExtent
@@ -564,7 +560,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundScale_(s, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       s,
       this.minScale_,
       this.maxScale_,
@@ -580,7 +576,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundX_(x, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       x,
       this.minX_,
       this.maxX_,
@@ -596,7 +592,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundY_(y, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       y,
       this.minY_,
       this.maxY_,
@@ -742,7 +738,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (dir == 0) {
       return;
     }
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const dist = magnitude(deltaX, deltaY);
     const newScale = this.startScale_ * (1 + (dir * dist) / 100);
     const deltaCenterX = this.elementBox_.width / 2 - centerClientX;
     const deltaCenterY = this.elementBox_.height / 2 - centerClientY;
@@ -851,9 +847,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   set_(newScale, newPosX, newPosY, animate) {
     const ds = newScale - this.scale_;
-    const dx = newPosX - this.posX_;
-    const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = distance(this.posX_, this.posY_, newPosX, newPosY);
 
     let dur = 0;
     if (animate) {

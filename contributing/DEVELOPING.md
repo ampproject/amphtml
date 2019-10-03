@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Development on AMP HTML
+# Developing in AMP
 
 ## How to get started
 
 Before you start developing in AMP, check out these resources:
-* [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
+* [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP open source project.
   * If you're developing in AMP, you should read the [Contributing code and features](./contributing-code.md) documentation, which includes information on code reviews and approvals.
   * The [Ongoing participation](../CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
   * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on.
@@ -32,7 +32,7 @@ Before you start writing code, consult these resources for guidance and guidelin
  - **Design**: [AMP Design Principles](DESIGN_PRINCIPLES.md)
  - **JavaScript**: [Google JavaScript Code Style Guide](https://google.github.io/styleguide/jsguide.html)
  - **CSS**: [Writing CSS For AMP Runtime](writing-css.md)
-- **Creating new components**: 
+- **Creating new components**:
   - [Instructions and Guidelines for building an AMP component](building-an-amp-extension.md)
   - Learn to create your first component in this [codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/#0)
   - Watch this [YouTube video](https://youtu.be/FJEhQFNKeaQ?list=PLXTOW_XMsIDTDXYO-NAi2OpEH0zyguvqX) to learn about "Building a new AMP component"
@@ -53,7 +53,7 @@ For detailed information on testing, see [TESTING.md](TESTING.md).
   builtins/       - tags built into the core AMP runtime
       *.md        - documentation for use of the builtin
       *.js        - source code for builtin tag
-  contributing/   - docs for people contributing to the AMP Project
+  contributing/   - docs for people contributing to AMP
   css/            - default css
   dist/           - (generated) main JS binaries are created here. This is what
                     gets deployed to cdn.ampproject.org.
@@ -68,7 +68,7 @@ For detailed information on testing, see [TESTING.md](TESTING.md).
   third_party/    - third party code used in AMP
   tools/          - code for AMP related tools
   validator/      - AMP Validator runners and tools
-  
+
 </pre>
 
 ## Supported browsers
@@ -77,7 +77,7 @@ In general we support the 2 latest versions of major browsers like Chrome, Firef
 
 Beyond that the core AMP library and builtin elements should aim for very wide browser support and we accept fixes for all browsers with market share greater than 1 percent.
 
-In particular, we try to maintain "it might not be perfect but isn't broken"-support for IE 11, iOS 8, the Android 4.0 system browser and Chrome 41. 
+In particular, we try to maintain "it might not be perfect but isn't broken"-support for IE 11, iOS 8, the Android 4.0 system browser and Chrome 41.
 
 ## Eng docs
 
@@ -89,7 +89,7 @@ We also recommend scanning the [spec](../spec/). The non-element part should hel
 
 ## Builds and releases
 
-- The [AMP buildcop](buildcop.md) helps ensure that AMP's builds remain green (i.e. everything builds and all of the tests pass).  If you run into issues with builds that seem unrelated to your changes see if the issue is present on [Travis](https://travis-ci.org/ampproject/amphtml/builds) and let the buildcop know.
+- The [AMP buildcop](buildcop.md) helps ensure that AMP's builds remain green (i.e. everything builds and all of the tests pass).  If you run into issues with builds that seem unrelated to your changes see if the issue is present on [Travis](https://travis-ci.org/ampproject/amphtml/builds) and send a message to the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 - Understanding the [AMP release process](release-schedule.md) is useful for understanding when a change in AMP will make it into production and what to do if things go wrong during the rollout of a change.
 
 ## [Code of conduct](../CODE_OF_CONDUCT.md)

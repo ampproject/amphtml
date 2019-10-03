@@ -237,7 +237,6 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
-            requireAmpResponseSourceOrigin: false,
           })
           .returns(Promise.resolve(responseDoc))
           .once();
@@ -273,7 +272,6 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
-            requireAmpResponseSourceOrigin: false,
           })
           .returns(Promise.reject('intentional'))
           .once();
@@ -314,7 +312,6 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
-            requireAmpResponseSourceOrigin: false,
           })
           .returns(new Promise(() => {})) // Never resolved.
           .once();

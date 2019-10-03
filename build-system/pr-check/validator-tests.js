@@ -26,10 +26,12 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
+const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'validator-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -38,40 +40,38 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  if (!runYarnChecks(FILENAME)) {
+    stopTimedJob(FILENAME, startTime);
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp validator');
     timedExecOrDie('gulp validator-webui');
   } else {
     printChangeSummary(FILENAME);
-    let ranTests = false;
-
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
-      buildTargets.has('VALIDATOR')
+      !buildTargets.has('RUNTIME') &&
+      !buildTargets.has('VALIDATOR') &&
+      !buildTargets.has('VALIDATOR_WEBUI')
     ) {
-      timedExecOrDie('gulp validator');
-      ranTests = true;
-    }
-
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
-      buildTargets.has('VALIDATOR_WEBUI')
-    ) {
-      timedExecOrDie('gulp validator-webui');
-      ranTests = true;
-    }
-
-    if (!ranTests) {
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Validator Tests ') +
-          'because this commit does not affect the runtime, build system, ' +
-          'validator, or validator web UI.'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Validator Tests'),
+        'because this commit does not affect the runtime, validator,',
+        'or validator web UI.'
       );
+      stopTimer(FILENAME, FILENAME, startTime);
+      return;
+    }
+
+    if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
+      timedExecOrDie('gulp validator');
+    }
+
+    if (buildTargets.has('VALIDATOR_WEBUI')) {
+      timedExecOrDie('gulp validator-webui');
     }
   }
 

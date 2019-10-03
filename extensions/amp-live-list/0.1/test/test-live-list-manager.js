@@ -17,9 +17,7 @@
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
-  liveListManagerForDoc,
 } from '../live-list-manager';
-import {Services} from '../../../../src/services';
 
 const XHR_BUFFER_SIZE = 2;
 
@@ -31,7 +29,6 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   let liveList;
   let xhrs;
   let clock;
-  let viewer;
   let ready;
   let sandbox;
 
@@ -40,16 +37,17 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+
+    clock = sandbox.useFakeTimers();
+    xhrs = setUpMockXhrs(sandbox);
+
+    manager = new LiveListManager(ampdoc);
     const docReadyPromise = new Promise(resolve => {
       ready = resolve;
     });
-    sandbox
-      .stub(LiveListManager.prototype, 'whenDocReady_')
-      .returns(docReadyPromise);
-    clock = sandbox.useFakeTimers();
-    xhrs = setUpMockXhrs(sandbox);
-    viewer = Services.viewerForDoc(ampdoc);
-    manager = liveListManagerForDoc(ampdoc);
+    sandbox.stub(manager, 'whenDocReady_').returns(docReadyPromise);
+    sandbox.stub(LiveListManager, 'forDoc').returns(Promise.resolve(manager));
+
     liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval').callsFake(() => 5000);
   });
@@ -79,9 +77,8 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     }
 
     buildCallback() {
-      this.manager_ = liveListManagerForDoc(ampdoc);
+      manager.register(this.element.getAttribute('id'), this);
       this.updateTime_ = Number(this.element.getAttribute('data-sort-time'));
-      this.manager_.register(this.element.getAttribute('id'), this);
     }
 
     getInterval() {
@@ -138,7 +135,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should start poller when doc is ready', () => {
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     expect(manager.poller_).to.be.null;
     liveList.buildCallback();
     ready();
@@ -148,7 +145,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it('should not start poller when no live-list is registered', () => {
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     expect(manager.poller_).to.be.null;
     ready();
     return manager.whenDocReady_().then(() => {
@@ -173,7 +170,6 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     () => {
       const customSlot = document.createElement('div');
       customSlot.setAttribute('id', 'custom-slot');
-      customSlot.setAttribute('dynamic-live-list', 'custom-list');
 
       const fromServer = doc.createElement('div');
       fromServer.appendChild(customSlot);
@@ -191,7 +187,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
           'disable-pagination': '',
           'auto-insert': '',
         },
-        'custom-list'
+        'i-amphtml-custom-slot-dynamic-list'
       );
       clientLiveList.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = customSlot.id;
       clientLiveList.buildCallback();
@@ -234,6 +230,105 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(manager.poller_.isRunning()).to.be.false;
     });
   });
+
+  it(
+    'should not poll if live-story-disabled is present and other live-lists ' +
+      'are also disabled',
+    () => {
+      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+      ready();
+      // Important that we set this before build since then is when they register
+      liveList.buildCallback();
+      liveList2.buildCallback();
+      expect(liveList.isEnabled()).to.be.true;
+      expect(liveList2.isEnabled()).to.be.true;
+      return manager.whenDocReady_().then(() => {
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer1 = doc.createElement('div');
+        const fromServer1List1 = doc.createElement('amp-live-list');
+        fromServer1List1.setAttribute('id', 'id-1');
+        const fromServer1List2 = doc.createElement('amp-live-list');
+        fromServer1List2.setAttribute('id', 'id-2');
+        fromServer1List2.setAttribute('live-story-disabled', '');
+        fromServer1.appendChild(fromServer1List1);
+        fromServer1.appendChild(fromServer1List2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.true;
+
+        manager.updateLiveLists_(fromServer1);
+
+        // Still polls since at least one live list can still receive updates.
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer2 = doc.createElement('div');
+        const fromServer2List1 = doc.createElement('amp-live-list');
+        fromServer2List1.setAttribute('id', 'id-1');
+        fromServer2List1.setAttribute('disabled', '');
+        fromServer2.appendChild(fromServer2List1);
+
+        manager.updateLiveLists_(fromServer2);
+
+        expect(liveList.isEnabled()).to.be.false;
+        expect(liveList2.isEnabled()).to.be.false;
+        // At this point nothing can ever turn this back on since we stopped
+        // polling altogether.
+        expect(manager.poller_.isRunning()).to.be.false;
+      });
+    }
+  );
+
+  it(
+    "should poll if at least one amp-live-list's is still active after " +
+      'register and a live-story-disabled attribute is used',
+    () => {
+      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+
+      ready();
+      // Important that we set this before build since then is when they register
+      liveList.buildCallback();
+      liveList2.buildCallback();
+      expect(liveList.isEnabled()).to.be.true;
+      expect(liveList2.isEnabled()).to.be.true;
+      return manager.whenDocReady_().then(() => {
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer1 = doc.createElement('div');
+        const fromServer1List1 = doc.createElement('amp-live-list');
+        fromServer1List1.setAttribute('id', 'id-1');
+        const fromServer1List2 = doc.createElement('amp-live-list');
+        fromServer1List2.setAttribute('id', 'id-2');
+        fromServer1List2.setAttribute('live-story-disabled', '');
+        fromServer1.appendChild(fromServer1List1);
+        fromServer1.appendChild(fromServer1List2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.true;
+
+        manager.updateLiveLists_(fromServer1);
+
+        // Still polls since at least one live list can still receive updates.
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+
+        const fromServer2 = doc.createElement('div');
+        const fromServer2List1 = doc.createElement('amp-live-list');
+        fromServer2List1.setAttribute('id', 'id-1');
+        fromServer2.appendChild(fromServer2List1);
+
+        manager.updateLiveLists_(fromServer2);
+
+        expect(liveList.isEnabled()).to.be.true;
+        expect(liveList2.isEnabled()).to.be.false;
+        expect(manager.poller_.isRunning()).to.be.true;
+      });
+    }
+  );
 
   it(
     "should poll if at least one amp-live-list's is still active after  " +
@@ -460,7 +555,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
   it('should recover after transient 415 response', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
     liveList.buildCallback();
@@ -505,7 +600,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
   });
 
   it(
-    'should stop all polling if viewer is not visible ' +
+    'should stop all polling if ampdoc is not visible ' +
       'and immediately fetch when visible',
     () => {
       ready();
@@ -513,31 +608,21 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(fetchSpy).to.have.not.been.called;
       liveList.buildCallback();
       return manager.whenDocReady_().then(() => {
-        expect(viewer.isVisible()).to.be.true;
+        expect(ampdoc.isVisible()).to.be.true;
         expect(manager.poller_.isRunning()).to.be.true;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'hidden',
-        });
+        ampdoc.overrideVisibilityState('hidden');
         expect(fetchSpy).to.have.not.been.called;
         expect(manager.poller_.isRunning()).to.be.false;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'visible',
-        });
+        ampdoc.overrideVisibilityState('visible');
         expect(fetchSpy).to.be.calledOnce;
         expect(manager.poller_.isRunning()).to.be.true;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'inactive',
-        });
+        ampdoc.overrideVisibilityState('inactive');
         expect(fetchSpy).to.be.calledOnce;
         expect(manager.poller_.isRunning()).to.be.false;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'visible',
-        });
+        ampdoc.overrideVisibilityState('visible');
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.isRunning()).to.be.true;
-        viewer.receiveMessage('visibilitychange', {
-          state: 'prerender',
-        });
+        ampdoc.overrideVisibilityState('prerender');
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.isRunning()).to.be.false;
         clock.tick(20000);
@@ -548,7 +633,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
   it('should fetch with url', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
@@ -573,7 +658,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       'and is transformed',
     () => {
       sandbox.stub(Math, 'random').callsFake(() => 1);
-      sandbox.stub(viewer, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
       manager.url_ = 'https://www.example.com/foo/bar?hello=world#dev=1';
       manager.isTransformed_ = true;
       ready();
@@ -602,7 +687,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       'and is not transformed',
     () => {
       sandbox.stub(Math, 'random').callsFake(() => 1);
-      sandbox.stub(viewer, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
       manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
       manager.isTransformed_ = false;
       manager.location_ =
@@ -646,7 +731,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
 
   it('should add amp_latest_update_time on requests', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
-    sandbox.stub(viewer, 'isVisible').returns(true);
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
     sandbox.stub(liveList, 'update').returns(2500);
     ready();
@@ -698,7 +783,8 @@ describes.realWin(
       doc = win.document;
       ampdoc = env.ampdoc;
       extensions = env.extensions;
-      manager = liveListManagerForDoc(ampdoc);
+      manager = new LiveListManager(ampdoc);
+      sandbox.stub(LiveListManager, 'forDoc').returns(Promise.resolve(manager));
     });
 
     it('should install newly discovered script tags on xhr doc', () => {

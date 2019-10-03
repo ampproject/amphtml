@@ -41,13 +41,15 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render correctly', async () => {
-      const el = await getScrollingElement(controller);
+    // TODO(sparhami): fails on shadow demo
+    it.configure()
+      .skipShadowDemo()
+      .run('should render correctly', async () => {
+        const el = await getScrollingElement(controller);
 
-      await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
-      await waitForCarouselImg(controller, 0);
-      await controller.takeScreenshot('screenshots/render.png');
-    });
+        await expect(prop(el, 'scrollWidth')).to.equal(pageWidth * SLIDE_COUNT);
+        await waitForCarouselImg(controller, 0);
+      });
 
     it('should layout the adjacent slide', async () => {
       // TODO(sparhami) Verify this is on the right of the 0th slide
@@ -67,11 +69,10 @@ describes.endtoend(
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scroll(el, {left: requestedScrollLeft});
+      await controller.scrollTo(el, {left: requestedScrollLeft});
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-      await controller.takeScreenshot('screenshots/snapped.png');
     });
 
     //TODO(sparhami): fails on shadow demo
@@ -107,7 +108,6 @@ describes.endtoend(
             'x': 0,
             'width': 900,
           });
-          await controller.takeScreenshot('screenshots/after-resize.png');
         }
       );
   }

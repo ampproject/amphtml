@@ -1,7 +1,7 @@
 # Contributing Validator Rules for an AMP Extended Component
 
 This doc describes how to create a basic validator ruleset for a new [AMP
-Extended Component](https://www.ampproject.org/docs/reference/components). It
+Extended Component](https://amp.dev/documentation/components/). It
 does not describe every possible validator feature, but rather goes over some
 of the most common rules used when creating a new AMP Extended Component.
 
@@ -457,9 +457,13 @@ Optionally, you may add more than one valid variant and/or invalid examples.
 
 ## Test Output files
 
-For each test file, also add a matching output file which will display the
-validator output for the test case. If you only added valid examples, this file
-should contain a single line:
+After creating your validator html file, You need to create the corresponding `.out` file to act as your test results. These are used to verify if the validator is validating your extension correctly. To do this, navigate to the root of the project, `amphtml/` and run `gulp validator --update_tests`. This should generate a matching `.out` file, and for this example, it would be:
+
+<pre>
+amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat.out</b>
+</pre>
+
+After generating the `.out` file, you should check it's contents that it gives the correct validation results/errors. If you only added valid examples, this file should contain a single line:
 
 ```
 PASS
@@ -470,7 +474,7 @@ following, with errors specific to your test cases.
 
 ```
 FAIL
-amp-iframe/0.1/test/validator-amp-iframe.html:41:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [DISALLOWED_HTML]
+amp-iframe/0.1/test/validator-amp-iframe.html:41:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://amp.dev/documentation/components/amp-iframe) [DISALLOWED_HTML]
 ```
 
 To test your changes, from the `amphtml/validator/` path, run `python build.py`.

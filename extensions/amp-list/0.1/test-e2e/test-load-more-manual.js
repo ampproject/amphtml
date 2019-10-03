@@ -64,8 +64,6 @@ describes.endtoend(
       await expect(
         controller.getElementCssValue(failedIndicator, 'display')
       ).to.equal('none');
-
-      await controller.takeScreenshot('screenshots/amp-list-load-more.png');
     });
 
     it('should load more items on click', async () => {

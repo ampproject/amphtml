@@ -35,21 +35,28 @@ FAIL
 |          <h1>fill</h1>
 |        </amp-story-grid-layer>
 |
+|        <amp-story-page-attachment layout="nodisplay" theme="cat">
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:37:6 The attribute 'theme' in tag 'amp-story-page-attachment' is set to the invalid value 'cat'. [DISALLOWED_HTML]
+|          <h1>Amazing title</h1>
+|          <p>Bacon ipsum dolor cat cat cat.</p>
+|        </amp-story-page-attachment>
+|
 |        <amp-story-page-attachment layout="nodisplay">
 >>       ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-page-attachment-error.html:37:6 Tag 'amp-story-page-attachment', if present, must be the last child of tag 'amp-story-page'. [AMP_TAG_PROBLEM]
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:42:6 Tag 'amp-story-page-attachment', if present, must be the last child of tag 'amp-story-page'. [AMP_TAG_PROBLEM]
 |          <h1>Amazing title</h1>
 |          <p>Bacon ipsum dolor cat cat cat.</p>
 |
 |          <amp-story-grid-layer template="vertical">
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-page-attachment-error.html:41:8 The tag 'amp-story-grid-layer' may not appear as a descendant of tag 'amp-story-page-attachment'. [AMP_TAG_PROBLEM]
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:46:8 The tag 'amp-story-grid-layer' may not appear as a descendant of tag 'amp-story-page-attachment'. [AMP_TAG_PROBLEM]
 |            <h1>fill</h1>
 |          </amp-story-grid-layer>
 |
 |          <amp-story-bookend src="bookendv1.json" layout="nodisplay">
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-page-attachment-error.html:45:8 The tag 'amp-story-bookend' may not appear as a descendant of tag 'amp-story-page-attachment'. [AMP_TAG_PROBLEM]
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:50:8 The tag 'amp-story-bookend' may not appear as a descendant of tag 'amp-story-page-attachment'. [AMP_TAG_PROBLEM]
 |          </amp-story-bookend>
 |
 |          <amp-youtube

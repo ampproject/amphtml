@@ -16,13 +16,20 @@
 
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
-import {NotificationPermission, StorageKeys, TAG, WIDGET_TAG} from './vars';
+import {
+  NotificationPermission,
+  SERVICE_TAG,
+  StorageKeys,
+  TAG,
+  WIDGET_TAG,
+} from './vars';
 import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
@@ -49,6 +56,17 @@ export let ServiceWorkerRegistrationMessage;
  * }}
  */
 export let AmpWebPushConfig;
+
+/**
+ * @param {!Element} element
+ * @return {!Promise<!./web-push-service.WebPushService>}
+ */
+export function webPushServiceForDoc(element) {
+  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (getServicePromiseForDoc(
+    element,
+    SERVICE_TAG
+  ));
+}
 
 /**
  * @fileoverview
@@ -235,6 +253,7 @@ export class WebPushService {
    * Given a URL string, returns the URL without the permission dialog URL query
    * parameter fragment indicating a redirect.
    * @param {string} url
+   * @return {string}
    */
   removePermissionPopupUrlFragmentFromUrl(url) {
     let urlWithoutFragment = url.replace(
@@ -592,7 +611,10 @@ export class WebPushService {
       });
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   updateWidgetVisibilitiesServiceWorkerActivated_() {
     return Services.timerFor(this.ampdoc.win).timeoutPromise(
       5000,
@@ -740,6 +762,7 @@ export class WebPushService {
    * notification permissions when subscribing.
    *
    * @param {Array<?>} result
+   * @return {*} TODO(#23582): Specify return type
    */
   handlePermissionDialogInteraction(result) {
     /*
@@ -768,7 +791,10 @@ export class WebPushService {
     }
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   onPermissionGrantedSubscribe_() {
     return this.subscribeForPushRemotely().then(() => {
       return this.updateWidgetVisibilities();

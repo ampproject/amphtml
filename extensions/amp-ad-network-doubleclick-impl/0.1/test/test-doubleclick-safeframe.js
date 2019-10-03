@@ -58,7 +58,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
     doc = env.win.document;
     setup(ampAdHeight, ampAdWidth, ampAdHeight, ampAdWidth);
   });
@@ -439,6 +439,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should handle cancellation', () => {
+      expectAsyncConsoleError(/cancellation/i, 1);
       sandbox
         ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
         .returns({

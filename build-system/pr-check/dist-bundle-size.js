@@ -24,33 +24,29 @@
 
 const colors = require('ansi-colors');
 const {
-  areValidBuildTargets,
-  determineBuildTargets,
-} = require('./build-targets');
-const {
   printChangeSummary,
+  processAndUploadDistOutput,
   startTimer,
   stopTimer,
+  stopTimedJob,
+  timedExecWithError,
   timedExecOrDie: timedExecOrDieBase,
   uploadDistOutput,
 } = require('./utils');
+const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 const {runYarnChecks} = require('./yarn-checks');
+const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const FILENAME = 'dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
-  if (
-    !runYarnChecks(FILENAME) ||
-    !areValidBuildTargets(buildTargets, FILENAME)
-  ) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+  if (!runYarnChecks(FILENAME)) {
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 
@@ -61,24 +57,35 @@ function main() {
     uploadDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('UNIT_TEST') ||
+      buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('BUILD_SYSTEM') ||
-      buildTargets.has('FLAG_CONFIG')
+      buildTargets.has('E2E_TEST') ||
+      buildTargets.has('VISUAL_DIFF') ||
+      buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --fortesting');
+
+      const process = timedExecWithError('gulp dist --fortesting', FILENAME);
+      if (process.error) {
+        await signalDistUpload('errored');
+        stopTimedJob(FILENAME, startTime);
+        return;
+      }
+
       timedExecOrDie('gulp bundle-size --on_pr_build');
-      uploadDistOutput(FILENAME);
+      await processAndUploadDistOutput(FILENAME);
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
+      await signalDistUpload('skipped');
+
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Dist, Bundle Size ') +
-          'because this commit does not affect the runtime, build system, ' +
-          'test files, or visual diff files'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Dist, Bundle Size'),
+        'because this commit does not affect the runtime, flag configs,',
+        'integration tests, end-to-end tests, or visual diff tests.'
       );
     }
   }

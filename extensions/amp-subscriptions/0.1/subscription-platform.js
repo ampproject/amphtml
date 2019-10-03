@@ -64,6 +64,12 @@ export class SubscriptionPlatform {
   isPingbackEnabled() {}
 
   /**
+   * True if pingback returns all entitlments
+   * @return {boolean}
+   */
+  pingbackReturnsAllEntitlements() {}
+
+  /**
    * Performs the pingback to the subscription platform.
    * @param {!./entitlement.Entitlement} unusedSelectedPlatform
    * @return {!Promise|undefined}
@@ -101,7 +107,9 @@ export class SubscriptionPlatform {
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
+ * @package
+ * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;

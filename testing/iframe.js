@@ -19,9 +19,13 @@ import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FakeLocation} from './fake-dom';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {Services} from '../src/services';
-import {cssText} from '../build/css';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
-import {installAmpdocServices, installRuntimeServices} from '../src/runtime';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+} from '../src/service/core-services';
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
@@ -75,7 +79,6 @@ export function createFixtureIframe(
       [BindEvents.RESCAN_TEMPLATE]: 0,
       [FormEvents.SERVICE_INIT]: 0,
     };
-    const messages = [];
     let html = __html__[fixture] // eslint-disable-line no-undef
       .replace(
         /__TEST_SERVER_PORT__/g,
@@ -92,8 +95,8 @@ export function createFixtureIframe(
     // on that window.
     window.beforeLoad = function(win) {
       // Flag as being a test window.
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       // Set the testLocation on iframe to parent's location since location of
       // the test iframe is about:srcdoc.
       // Unfortunately location object is not configurable, so we have to define
@@ -103,18 +106,7 @@ export function createFixtureIframe(
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
-      win.addEventListener('message', event => {
-        const parsedData = parseMessageData(event.data);
-
-        if (
-          parsedData &&
-          // Either non-3P or 3P variant of the sentinel.
-          (/^amp/.test(parsedData.sentinel) ||
-            /^\d+-\d+$/.test(parsedData.sentinel))
-        ) {
-          messages.push(parsedData);
-        }
-      });
+      const messages = new MessageReceiver(win);
       // Function that returns a promise for when the given event fired at
       // least count times.
       const awaitEvent = (eventName, count) => {
@@ -233,7 +225,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     iframe.srcdoc = '<!doctype><html><head><body><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
-      iframe.contentWindow.AMP_TEST_IFRAME = true;
+      iframe.contentWindow.__AMP_TEST_IFRAME = true;
       iframe.contentWindow.testLocation = new FakeLocation(
         window.location.href,
         iframe.contentWindow
@@ -248,47 +240,51 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
       const ampdoc = Services.ampdocServiceFor(
         iframe.contentWindow
-      ).getAmpDoc();
+      ).getSingleDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
-      installStylesLegacy(iframe.contentWindow.document, cssText, () => {
-        resolve({
-          win: iframe.contentWindow,
-          doc: iframe.contentWindow.document,
-          ampdoc,
-          iframe,
-          addElement: function(element) {
-            const iWin = iframe.contentWindow;
-            const p = onInsert(iWin)
-              .then(() => {
-                return element.build();
-              })
-              .then(() => {
-                if (!element.getPlaceholder()) {
-                  const placeholder = element.createPlaceholder();
-                  if (placeholder) {
-                    element.appendChild(placeholder);
+      installStylesLegacy(
+        iframe.contentWindow.document,
+        ampDocCss + ampSharedCss,
+        () => {
+          resolve({
+            win: iframe.contentWindow,
+            doc: iframe.contentWindow.document,
+            ampdoc,
+            iframe,
+            addElement: function(element) {
+              const iWin = iframe.contentWindow;
+              const p = onInsert(iWin)
+                .then(() => {
+                  return element.build();
+                })
+                .then(() => {
+                  if (!element.getPlaceholder()) {
+                    const placeholder = element.createPlaceholder();
+                    if (placeholder) {
+                      element.appendChild(placeholder);
+                    }
                   }
-                }
-                if (element.layoutCount_ == 0) {
-                  if (opt_beforeLayoutCallback) {
-                    opt_beforeLayoutCallback(element);
+                  if (element.layoutCount_ == 0) {
+                    if (opt_beforeLayoutCallback) {
+                      opt_beforeLayoutCallback(element);
+                    }
+                    return element.layoutCallback().then(() => {
+                      return element;
+                    });
                   }
-                  return element.layoutCallback().then(() => {
-                    return element;
-                  });
-                }
-                return element;
-              });
-            iWin.document.getElementById('parent').appendChild(element);
-            return p;
-          },
-        });
-      });
+                  return element;
+                });
+              iWin.document.getElementById('parent').appendChild(element);
+              return p;
+            },
+          });
+        }
+      );
     };
     iframe.onerror = reject;
     document.body.appendChild(iframe);
@@ -302,8 +298,8 @@ export function createServedIframe(src) {
     iframe.src = src;
     iframe.onload = function() {
       const win = iframe.contentWindow;
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       installRuntimeServices(win);
       resolve({
         win,
@@ -597,14 +593,51 @@ export function maybeSwitchToCompiledJs(html) {
   return html;
 }
 
-/**
- * @param {*} data
- * @return {?}
- * @private
- */
-function parseMessageData(data) {
-  if (typeof data == 'string' && isAmpMessage(data)) {
-    return deserializeMessage(data);
+class MessageReceiver {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    this.events_ = [];
+    win.addEventListener('message', event => {
+      const parsedData = this.parseMessageData_(event.data);
+
+      if (
+        parsedData &&
+        // Either non-3P or 3P variant of the sentinel.
+        (/^amp/.test(parsedData.sentinel) ||
+          /^\d+-\d+$/.test(parsedData.sentinel))
+      ) {
+        this.events_.push({
+          data: parsedData,
+          userActivation: event.userActivation,
+        });
+      }
+    });
   }
-  return data;
+
+  /**
+   * @param {string} type
+   * @returns {?Event}
+   */
+  getFirstMessageEventOfType(type) {
+    for (let i = 0; i < this.events_.length; ++i) {
+      if (this.events_[i].data.type === type) {
+        return this.events_[i];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @param {*} data
+   * @return {?}
+   * @private
+   */
+  parseMessageData_(data) {
+    if (typeof data == 'string' && isAmpMessage(data)) {
+      return deserializeMessage(data);
+    }
+    return data;
+  }
 }

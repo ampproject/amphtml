@@ -17,15 +17,13 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  areValidBuildTargets,
-  determineBuildTargets,
-} = require('../pr-check/build-targets');
-const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExec,
 } = require('../pr-check/utils');
+const {determineBuildTargets} = require('../pr-check/build-targets');
 const {runYarnChecks} = require('../pr-check/yarn-checks');
 
 const FILENAME = 'pr-check.js';
@@ -51,25 +49,36 @@ async function prCheck(cb) {
   };
 
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
-  printChangeSummary(FILENAME);
-
-  if (
-    !runYarnChecks(FILENAME) ||
-    !areValidBuildTargets(buildTargets, FILENAME)
-  ) {
-    failTask();
+  if (!runYarnChecks(FILENAME)) {
+    stopTimedJob(FILENAME, startTime);
+    return;
   }
 
-  runCheck('gulp lint --local-changes');
+  printChangeSummary(FILENAME);
+  const buildTargets = determineBuildTargets(FILENAME);
+  runCheck('gulp lint --local_changes');
   runCheck('gulp presubmit');
-  runCheck('gulp ava');
-  runCheck('gulp babel-plugin-tests');
-  runCheck('gulp caches-json');
-  runCheck('gulp json-syntax');
+  runCheck('gulp check-exact-versions');
+
+  if (buildTargets.has('AVA')) {
+    runCheck('gulp ava');
+  }
+
+  if (buildTargets.has('BABEL_PLUGIN')) {
+    runCheck('gulp babel-plugin-tests');
+  }
+
+  if (buildTargets.has('CACHES_JSON')) {
+    runCheck('gulp caches-json');
+    runCheck('gulp json-syntax');
+  }
 
   if (buildTargets.has('DOCS')) {
     runCheck('gulp check-links');
+  }
+
+  if (buildTargets.has('DEV_DASHBOARD')) {
+    runCheck('gulp dev-dashboard-tests');
   }
 
   if (buildTargets.has('RUNTIME')) {
@@ -78,22 +87,26 @@ async function prCheck(cb) {
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-    runCheck('gulp test --unit --local-changes --headless');
+    runCheck('gulp unit --local_changes --headless');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
     if (!argv.nobuild) {
       runCheck('gulp clean');
       runCheck('gulp dist --fortesting');
     }
-    runCheck('gulp test --nobuild --integration --headless');
+    runCheck('gulp integration --nobuild --compiled --headless');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
     runCheck('gulp validator');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR_WEBUI')) {
+  if (buildTargets.has('VALIDATOR_WEBUI')) {
     runCheck('gulp validator-webui');
   }
 

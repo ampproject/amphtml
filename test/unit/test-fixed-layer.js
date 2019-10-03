@@ -42,6 +42,7 @@ describes.sandboxed('FixedLayer', {}, () => {
   let timer;
 
   beforeEach(() => {
+    documentApi = {};
     allRules = {};
 
     docBody = createElement('docBody');
@@ -65,7 +66,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       element1,
       element3,
     ]);
-    documentApi = {
+    Object.assign(documentApi, {
       styleSheets: [
         // Will be ignored due to being a link.
         {
@@ -164,10 +165,10 @@ describes.sandboxed('FixedLayer', {}, () => {
       },
       documentElement: docElem,
       body: docBody,
-    };
+    });
     documentApi.defaultView.document = documentApi;
     installDocService(documentApi.defaultView, /* isSingleDoc */ true);
-    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getSingleDoc();
     installHiddenObserverForDoc(ampdoc);
     installPlatformService(documentApi.defaultView);
     installTimerService(documentApi.defaultView);
@@ -324,6 +325,16 @@ describes.sandboxed('FixedLayer', {}, () => {
         }
         return Node.DOCUMENT_POSITION_PRECEDING;
       },
+      contains(elem) {
+        let el = elem;
+        while (el) {
+          if (el === this) {
+            return true;
+          }
+          el = el.parentElement;
+        }
+        return false;
+      },
       hasAttribute(name) {
         for (let i = 0; i < this.attributes.length; i++) {
           if (this.attributes[i].name === name) {
@@ -398,6 +409,10 @@ describes.sandboxed('FixedLayer', {}, () => {
         this.firstElementChild = createElement('i-amphtml-fpa');
         toggle(this.firstElementChild, false);
       },
+      getRootNode() {
+        return documentApi;
+      },
+      dispatchEvent() {},
     };
     return elem;
   }
@@ -1199,6 +1214,36 @@ describes.sandboxed('FixedLayer', {}, () => {
               expect(state['F0'].zIndex).to.equal('');
             });
         });
+      });
+
+      it('should ignore descendants of already-tracked elements', () => {
+        const updateStub = sandbox.stub(fixedLayer, 'update');
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        element1.appendChild(element6);
+
+        // Add.
+        fixedLayer.addElement(element6);
+        expect(updateStub).not.to.have.been.called;
+        expect(fixedLayer.elements_).to.have.length(5);
+      });
+
+      it('should replace descendants of tracked elements', () => {
+        const updateStub = sandbox.stub(fixedLayer, 'update');
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        element6.appendChild(element1);
+
+        // Add.
+        fixedLayer.addElement(element6);
+        expect(updateStub).to.be.calledOnce;
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        const fe = fixedLayer.elements_[4];
+        expect(fe.id).to.equal('F5');
+        expect(fe.element).to.equal(element6);
+        expect(fe.selectors).to.deep.equal(['*']);
+        expect(fe.forceTransfer).to.be.undefined;
       });
     });
 

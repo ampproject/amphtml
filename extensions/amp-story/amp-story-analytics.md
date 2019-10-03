@@ -16,6 +16,8 @@ limitations under the License.
 
 # AMP Story and Analytics
 
+This document details triggers associated with AMP Stories. If you're looking for a guide to setting up analytics for your AMP pages, see [this blog post](https://blog.amp.dev/2019/08/28/analytics-for-your-amp-stories/)
+
 ## Story triggers
 
 `amp-story` issues events for changes of state. These events can be reported through the analytics configuration by using triggers.
@@ -50,6 +52,10 @@ Using `amp-analytics` you can re-assign the `story-page-visible` event to behave
 
 Consult your vendor's documentation for more specific details on how to set this up.
 
+### Last page visible trigger (`"on": "story-last-page-visible"`)
+
+The `story-last-page-visible` trigger is fired when the last page in the story is shown to the user. This can be used to measure completion rate.
+
 ### Bookend enter trigger (`"on": "story-bookend-enter"`)
 
 The `story-bookend-enter` trigger is fired when the bookend is shown to the user, after the last page of the current story.
@@ -65,6 +71,14 @@ The `story-audio-muted` trigger is fired when the user initiates an interaction 
 ### Unmute trigger (`"on": "story-audio-unmuted"`)
 
 The `story-audio-unmuted` trigger is fired when the user initiates an interaction to unmute the audio for the current story.
+
+### Page attachment enter trigger (`"on": "story-page-attachment-enter"`)
+
+The `story-page-attachment-enter` trigger is fired when a page attachment is opened by the user.
+
+### Page attachment exit trigger (`"on": "story-page-attachment-exit"`)
+
+The `story-page-attachment-exit` trigger is fired when a page attachment is dismissed by the user.
 
 ## Story variables
 

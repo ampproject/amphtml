@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CarouselEvents} from './carousel-events';
 import {getDetail} from '../../../src/event-helper';
 
 /**
@@ -38,7 +39,7 @@ export class CarouselAccessibility {
    * }} config
    */
   constructor({win, element, scrollContainer, runMutate, stoppable}) {
-    /** @private @const */
+    /** @protected @const */
     this.win_ = win;
 
     /** @private @const */
@@ -69,7 +70,7 @@ export class CarouselAccessibility {
       },
       true
     );
-    element.addEventListener('indexchange', event => {
+    element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
   }

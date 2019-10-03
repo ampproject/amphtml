@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes} from '../../../src/dom';
-import {devAssert, userAssert} from '../../../src/log';
+import {Action, getStoreService} from './amp-story-store-service';
+import {CommonSignals} from '../../../src/common-signals';
+import {Services} from '../../../src/services';
+import {createElementWithAttributes, lastChildElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+import {userAssert} from '../../../src/log';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to
@@ -30,8 +33,17 @@ export class LiveStoryManager {
    * @param {!./amp-story.AmpStory} ampStory
    */
   constructor(ampStory) {
+    /** @private @const {!./amp-story.AmpStory} */
     this.ampStory_ = ampStory;
+
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = this.ampStory_.getAmpDoc();
+
+    /** @private @const {!Element} */
     this.storyEl_ = ampStory.element;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.ampStory_.win);
   }
 
   /**
@@ -39,16 +51,11 @@ export class LiveStoryManager {
    * configuration and appends it to the DOM.
    */
   build() {
-    const listId = userAssert(
-      this.storyEl_.getAttribute('dynamic-live-list'),
-      'amp-story element must contain the dynamic-live-list attribute to ' +
-        'use the live story functionality.'
-    );
     const liveListEl = createElementWithAttributes(
       this.ampStory_.win.document,
       'amp-live-list',
       dict({
-        'id': listId,
+        'id': 'i-amphtml-' + this.storyEl_.id + '-dynamic-list',
         'data-poll-interval':
           this.storyEl_.getAttribute('data-poll-interval') || 15000,
         'sort': 'ascending',
@@ -62,35 +69,30 @@ export class LiveStoryManager {
       'amp-story must contain id to use the live story functionality'
     );
 
-    this.storyEl_.insertBefore(liveListEl, this.storyEl_.firstElementChild);
+    this.ampStory_.element
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => {
+        Services.extensionsFor(this.ampdoc_.win).installExtensionForDoc(
+          this.ampdoc_,
+          'amp-live-list'
+        );
+        this.storyEl_.insertBefore(liveListEl, this.storyEl_.firstElementChild);
+      });
   }
 
   /**
    * Updates the client amp-story with the changes from the server document.
-   *
-   * @param {?EventTarget} updatedStoryEl
-   * @param {!NodeList<!Element>} currentPages
    */
-  update(updatedStoryEl, currentPages) {
-    const newPageEls = devAssert(
-      updatedStoryEl,
-      'No updated story EventTarget was found.'
-    ).querySelectorAll('amp-story-page.amp-live-list-item-new');
-
-    let lastPageEl = currentPages[currentPages.length - 1];
-
-    const pageImplPromises = Array.prototype.map.call(newPageEls, pageEl =>
-      pageEl.getImpl()
+  update() {
+    const lastNewPageEl = lastChildElement(this.storyEl_, page =>
+      page.classList.contains('amp-live-list-item-new')
     );
 
-    Promise.all(pageImplPromises).then(pages => {
-      pages.forEach(page => {
-        // New amp-story-pages are always appended last.
-        this.storyEl_.insertBefore(page.element, lastPageEl.nextElementSibling);
-        this.ampStory_.addPage(page);
-        this.ampStory_.insertPage(lastPageEl.id, page.element.id);
-        lastPageEl = page.element;
-      });
-    });
+    const storyPages = this.storyEl_.querySelectorAll('amp-story-page');
+    const pageIds = Array.prototype.map.call(storyPages, el => el.id);
+
+    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
+    this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, lastNewPageEl.id);
   }
 }

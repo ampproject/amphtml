@@ -257,7 +257,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.buildGetHref_(ampUserId).then(href => {
       const getReq = {
         credentials: 'include',
-        requireAmpResponseSourceOrigin: false,
       };
       return Services.xhrFor(this.win)
         .fetchJson(href, getReq)
@@ -295,7 +294,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     return {
       method: 'POST',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: false,
       body,
       headers: {
         'Content-Type': enctype,
@@ -474,15 +472,12 @@ export class UserNotificationManager {
     /** @private @const {!Object<string,!UserNotificationDeferDef>} */
     this.deferRegistry_ = Object.create(null);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.ampdoc);
-
     /** @private @const {!Promise} */
     this.documentReadyPromise_ = this.ampdoc.whenReady();
 
     /** @private @const {!Promise} */
     this.managerReadyPromise_ = Promise.all([
-      this.viewer_.whenFirstVisible(),
+      this.ampdoc.whenFirstVisible(),
       this.documentReadyPromise_,
     ]);
 

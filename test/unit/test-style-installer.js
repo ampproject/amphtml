@@ -59,14 +59,6 @@ describe('Styles', () => {
       expect(isAnimationNone(doc.body)).to.be.true;
     });
 
-    it('should ignore resources failures for render-start', () => {
-      sandbox.stub(resources, 'renderStarted').callsFake(() => {
-        throw new Error('intentional');
-      });
-      styles.makeBodyVisibleRecovery(doc);
-      expect(ampdoc.signals().get('render-start')).to.be.null;
-    });
-
     it('should wait for render delaying services', () => {
       expect(getStyle(doc.body, 'opacity')).to.equal('');
       expect(getStyle(doc.body, 'visibility')).to.equal('');

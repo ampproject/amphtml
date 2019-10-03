@@ -23,16 +23,14 @@
 
 const colors = require('ansi-colors');
 const {
-  areValidBuildTargets,
-  determineBuildTargets,
-} = require('./build-targets');
-const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
   uploadBuildOutput,
 } = require('./utils');
+const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 const {runYarnChecks} = require('./yarn-checks');
 
@@ -43,13 +41,8 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
-  if (
-    !runYarnChecks(FILENAME) ||
-    !areValidBuildTargets(buildTargets, FILENAME)
-  ) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+  if (!runYarnChecks(FILENAME)) {
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 
@@ -59,23 +52,22 @@ function main() {
     uploadBuildOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('UNIT_TEST') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('BUILD_SYSTEM') ||
       buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('VISUAL_DIFF')
+      buildTargets.has('INTEGRATION_TEST') ||
+      buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');
       uploadBuildOutput(FILENAME);
     } else {
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Build ') +
-          'because this commit does not affect the runtime, build system, ' +
-          'test files, or visual diff files'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Build'),
+        'because this commit does not affect the runtime, flag configs,',
+        'or integration tests.'
       );
     }
   }

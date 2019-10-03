@@ -52,7 +52,7 @@ export class CacheCidApi {
     /** @private {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!./viewer-impl.Viewer} */
+    /** @private {!./viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /** @private {?Promise<?string>} */
@@ -102,6 +102,7 @@ export class CacheCidApi {
     });
 
     // Make the XHR request to the cache endpoint.
+    const timeoutMessage = 'fetchCidTimeout';
     return this.timer_
       .timeoutPromise(
         TIMEOUT_,
@@ -111,7 +112,8 @@ export class CacheCidApi {
           credentials: 'include',
           mode: 'cors',
           body: payload,
-        })
+        }),
+        timeoutMessage
       )
       .then(res => {
         return res.json().then(response => {
@@ -134,7 +136,12 @@ export class CacheCidApi {
             dev().error(TAG_, JSON.stringify(res));
           });
         } else {
-          dev().error(TAG_, e);
+          const isTimeout = e && e.message == timeoutMessage;
+          if (isTimeout) {
+            dev().expectedError(TAG_, e);
+          } else {
+            dev().error(TAG_, e);
+          }
         }
         return null;
       });

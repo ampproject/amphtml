@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
-import {Variants, allocateVariant} from './variant';
+import {Services} from '../../../src/services';
+import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
   installOriginExperimentsForDoc,
@@ -24,7 +27,6 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
-import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
 
@@ -32,6 +34,23 @@ export class AmpExperiment extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    /*
+     * Prerender is allowed because the client_id is only used to calculate
+     * the variant bucket.
+     * In the case where a client_id is first generated
+     * during prerender, the base cid will be stored in the AMP viewer domain.
+     */
+    return true;
+  }
+
+  /** @override */
+  isBuildRenderBlocking() {
+    // variantService is render blocking
+    return true;
   }
 
   /** @override */
@@ -45,34 +64,82 @@ export class AmpExperiment extends AMP.BaseElement {
       const variantsService = responses[0];
       const enabled = responses[1];
 
-      if (!enabled) {
-        user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
-
-        // Ensure downstream consumers don't wait for the promise forever.
-        variantsService.init(Promise.resolve({}));
-
-        return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
-      }
+      let config = dict({});
 
       try {
-        const config = this.getConfig_();
-        const results = Object.create(null);
+        config = this.getConfig_();
+
+        if (!enabled) {
+          user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
+
+          // Ensure downstream consumers don't wait for the promise forever.
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
+
+          return Promise.reject(
+            'Experiment amp-experiment-1.0 is not enabled.'
+          );
+        }
+
+        const ampdoc = this.getAmpDoc();
+
+        // All experiments can be disabled by a hash param
+        const viewer = Services.viewerForDoc(ampdoc);
+        const override = ampdoc.getParam(
+          ATTR_PREFIX + 'disable-all-experiments'
+        );
+        if (override != null) {
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
+          return;
+        }
+
+        const experimentToVariant = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
-            this.getAmpDoc(),
+            ampdoc,
+            viewer,
             experimentName,
             config[experimentName]
           ).then(variantName => {
-            results[experimentName] = variantName;
+            experimentToVariant[experimentName] = variantName;
           });
         });
 
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
-          .then(() => results)
-          .then(this.applyExperimentVariants_.bind(this, config));
+          .then(() => {
+            const ampdoc = this.getAmpDoc();
+            const applyExperimentsPromise = applyExperimentToVariant(
+              ampdoc,
+              config,
+              experimentToVariant
+            );
 
-        variantsService.init(experimentVariants);
+            const experimentToVariantPromise = applyExperimentsPromise.then(
+              () => experimentToVariant
+            );
+            variantsService.init(experimentToVariantPromise);
+            return experimentToVariantPromise;
+          })
+          .catch(e => {
+            // Ensure downstream consumers don't wait for the promise forever.
+            variantsService.init(
+              Promise.resolve(this.getEmptyExperimentToVariant_(config))
+            );
+            throw e;
+          });
+
+        /**
+         * Returning the experimentVariants promise here
+         * So that the buildCallback that is waiting for
+         * the parent promise, will wait for this promise as well.
+         * And wait for the variants to be applied before finishing
+         * our buildCallback.
+         */
+        return experimentVariants;
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
         variantsService.init(Promise.resolve({}));
@@ -108,68 +175,23 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.'
     );
 
-    return /** @type {!JsonObject} */ (devAssert(
-      parseJson(children[0].textContent)
-    ));
+    return devAssert(parseJson(children[0].textContent));
   }
 
   /**
-   * Passes the given experiment and variant pairs to the correct handler,
-   * to apply the experiment to the document.
-   * Experiment with no variant assigned (null) will be skipped.
-   *
-   * For example, the `experimentToVariant` object looks like:
-   * {
-   *   'appliedExperimentName': 'chosenVariantName',
-   *   'anotherAppliedExperimentName': 'chosenVariantName'
-   * }
-   * Which is a simplified version of the config and
-   * represents what variant of each experiment
-   * should be applied.
-   *
+   * Function to return an empty experiment to variant
+   * Object. This is useful for type checking in analytics
+   * and disabling all experiments manually.
    * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experimentToVariant
-   * @return {!Promise<!Object<string, ?string>>} a promise of the original
-   *     param passed in
-   * @private
+   * @return {!Object<string, ?string>}
    */
-  applyExperimentVariants_(config, experimentToVariant) {
-    const appliedExperimentToVariantPromises = [];
-
-    for (const experimentName in experimentToVariant) {
-      const variantName = experimentToVariant[experimentName];
-      if (variantName) {
-        const variantObject = config[experimentName]['variants'][variantName];
-        appliedExperimentToVariantPromises.push(
-          this.applyMutations_(experimentName, variantObject)
-        );
-      }
-    }
-
-    return Promise.all(appliedExperimentToVariantPromises).then(
-      () => experimentToVariant
-    );
-  }
-
-  /**
-   * Passes the given experimentName and variantObject pairs
-   * to the mutation service to be applied to the document.
-   * @param {string} experimentName
-   * @param {!JsonObject} variantObject
-   * @return {!Promise}
-   * @private
-   */
-  applyMutations_(experimentName, variantObject) {
-    const doc = this.getAmpDoc();
-    return doc.whenReady().then(() => {
-      // Parse / Validate all of our mutations
-      const mutationOperations = variantObject['mutations'].map(mutation =>
-        parseMutation(mutation, this.win.document)
-      );
-
-      // Apply our mutations
-      mutationOperations.forEach(mutationOperation => mutationOperation());
+  getEmptyExperimentToVariant_(config) {
+    const experimentToVariant = Object.create(null);
+    Object.keys(config).map(experimentName => {
+      experimentToVariant[experimentName] = null;
     });
+
+    return experimentToVariant;
   }
 
   /**

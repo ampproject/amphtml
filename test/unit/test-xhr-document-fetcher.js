@@ -29,12 +29,11 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
   beforeEach(() => {
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
-    ampdocViewerStub.returns({
-      whenFirstVisible: () => Promise.resolve(),
-    });
+    ampdocViewerStub.returns({});
     ampdocServiceForStub.returns({
       isSingleDoc: () => false,
-      getAmpDoc: () => ampdocViewerStub,
+      getAmpDoc: () => null,
+      getSingleDoc: () => null,
     });
   });
 
@@ -58,9 +57,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           200,
           {
             'Content-Type': 'text/xml',
-            'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html><body>Foo</body></html>'
         );
@@ -75,7 +71,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           400,
           {
             'Content-Type': 'text/xml',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html></html>'
         )
@@ -92,9 +87,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           415,
           {
             'Content-Type': 'text/xml',
-            'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html></html>'
         )
@@ -111,9 +103,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           415,
           {
             'Content-Type': 'text/xml',
-            'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html></html>'
         )
@@ -130,9 +119,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           200,
           {
             'Content-Type': 'application/json',
-            'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '{"hello": "world"}'
         )
@@ -152,9 +138,14 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
       setupMockXhr();
       optedInDoc = window.document.implementation.createHTMLDocument('');
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
+      const ampdoc = {
+        getRootNode: () => optedInDoc,
+        whenFirstVisible: () => Promise.resolve(),
+      };
       ampdocServiceForStub.returns({
         isSingleDoc: () => true,
-        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+        getAmpDoc: () => ampdoc,
+        getSingleDoc: () => ampdoc,
       });
       viewer = {
         hasCapability: () => true,
@@ -177,7 +168,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     }
     function getDefaultResponseOptions() {
       return {
-        headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+        headers: [],
       };
     }
     it('should return correct document response', () => {
@@ -185,7 +176,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
         Promise.resolve({
           body: '<html><body>Foo</body></html>',
           init: {
-            headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+            headers: [],
           },
         })
       );

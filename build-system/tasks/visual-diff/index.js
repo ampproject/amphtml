@@ -134,13 +134,12 @@ function setPercyTargetCommit() {
  *     and reachable.
  */
 async function launchWebServer() {
+  const stdio = argv.webserver_debug
+    ? ['ignore', process.stdout, process.stderr]
+    : 'ignore';
   webServerProcess_ = execScriptAsync(
-    `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
-    {
-      stdio: argv.webserver_debug
-        ? ['ignore', process.stdout, process.stderr]
-        : 'ignore',
-    }
+    `gulp serve --compiled --host ${HOST} --port ${PORT}`,
+    {stdio}
   );
 
   webServerProcess_.on('close', code => {
@@ -222,6 +221,7 @@ async function launchBrowser() {
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {JsonObject} viewport optional viewport size object with numeric
  *     fields `width` and `height`.
+ * @return {!Promise<!Puppeteer.Page>}
  */
 async function newPage(browser, viewport = null) {
   log('verbose', 'Creating new tab');
@@ -242,7 +242,8 @@ async function newPage(browser, viewport = null) {
     );
 
     if (
-      requestUrl.hostname == HOST ||
+      requestUrl.protocol === 'data:' ||
+      requestUrl.hostname === HOST ||
       requestUrl.hostname.endsWith(`.${HOST}`)
     ) {
       return interceptedRequest.continue();
@@ -437,9 +438,10 @@ async function generateSnapshots(percy, webpages) {
   // no interactions, and each test that has in interactive tests file should
   // load those tests here.
   for (const webpage of webpages) {
-    webpage.tests_ = {
-      '': async () => {},
-    };
+    webpage.tests_ = {};
+    if (!webpage.no_base_test) {
+      webpage.tests_[''] = async () => {};
+    }
     if (webpage.interactive_tests) {
       try {
         Object.assign(
@@ -718,14 +720,9 @@ async function snapshotWebpages(percy, browser, webpages) {
  * Enables debugging if requested via command line.
  */
 function setDebuggingLevel() {
-  process.env.WEBSERVER_QUIET = '--quiet';
-
   if (argv.debug) {
     argv['chrome_debug'] = true;
     argv['webserver_debug'] = true;
-  }
-  if (argv.webserver_debug) {
-    process.env.WEBSERVER_QUIET = '';
   }
 }
 
@@ -760,6 +757,7 @@ async function createEmptyBuild() {
 
 /**
  * Runs the AMP visual diff tests.
+ * @return {!Promise}
  */
 async function visualDiff() {
   ensureOrBuildAmpRuntimeInTestMode_();
@@ -773,11 +771,8 @@ async function visualDiff() {
     argv.grep = RegExp(argv.grep);
   }
 
-  try {
-    await performVisualTests();
-  } finally {
-    return await cleanup_();
-  }
+  await performVisualTests();
+  return await cleanup_();
 }
 
 /**
@@ -826,20 +821,21 @@ async function performVisualTests() {
 async function ensureOrBuildAmpRuntimeInTestMode_() {
   if (argv.nobuild) {
     const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
-      fs.readFileSync('dist/amp.js', 'utf8')
+      fs.readFileSync('dist/v0.js', 'utf8')
     );
     if (!isInTestMode) {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp build --fortesting'),
+        colors.cyan('gulp dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    execOrDie('gulp build --fortesting');
+    execOrDie('gulp clean');
+    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
   }
 }
 
@@ -882,9 +878,11 @@ visualDiff.description = 'Runs the AMP visual diff tests.';
 visualDiff.flags = {
   'master': '  Includes a blank snapshot (baseline for skipped builds)',
   'empty': '  Creates a dummy Percy build with only a blank snapshot',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'chrome_debug': '  Prints debug info from Chrome',
   'webserver_debug': '  Prints debug info from the local gulp webserver',
-  'debug': '  Prints all the above debug info',
+  'debug': '  Prints debug info from Chrome and the local gulp webserver',
   'grep': '  Runs tests that match the pattern',
   'percy_project': '  Override the PERCY_PROJECT environment variable',
   'percy_token': '  Override the PERCY_TOKEN environment variable',

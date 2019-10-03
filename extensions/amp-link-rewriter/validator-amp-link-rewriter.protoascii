@@ -33,15 +33,12 @@ tags: {  # amp-link-rewriter (json)
   requires_extension: "amp-link-rewriter"
   mandatory_parent: "AMP-LINK-REWRITER"
   attrs: {
-    name: "nonce"
-    disabled_by: "transformed"
-  }
-  attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "nonce-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"

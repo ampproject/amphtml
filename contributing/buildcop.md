@@ -2,7 +2,9 @@
 
 The AMP buildcop is responsible for ensuring that the [master build](https://travis-ci.org/ampproject/amphtml/branches) remains green.  The AMP buildcop responsibility rotates between members of the community.
 
-If the build has been red for some time, please send a note to the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack if the issue is not already reported.
+Make sure you are a member of the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN) channel on Slack while you are buildcop.
+- If the build has been red for some time, please send a note to the #contributing channel if the issue is not already reported.
+- Pay attention for reports of issues with the build that the community may send to this channel.  (You may want to enable notifications for this channel while you are buildcop to make this easier.)
 
 ## Buildcop Tasks
 
@@ -27,4 +29,4 @@ If the build has been red for some time, please send a note to the [#contributin
         *   If there are diffs that look like flakes, click “Approve” on the Percy build to unblock the PR (and ping @danielrozenberg as an FYI).
     4.  Approve and merge the PR.
 3.  Report and triage any failing tests on *beta* browsers:
-    1.  Check recent [master builds](https://travis-ci.org/ampproject/amphtml/branches) on Travis, even the green ones. Look for the `gulp test ... --saucelabs` task in the logs and check for any failing tests under the *beta* test batch(es). Create issues for those tests.
+    1.  Check recent [master builds](https://travis-ci.org/ampproject/amphtml/branches) on Travis, even the green ones. Look for the `gulp [unit|integration] ... --saucelabs` task in the logs and check for any failing tests under the *beta* test batch(es). Create issues for those tests.

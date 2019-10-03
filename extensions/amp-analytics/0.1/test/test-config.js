@@ -20,6 +20,7 @@ import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
 import {stubService} from '../../../../testing/test-helper';
+import {user} from '../../../../src/log';
 
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
   let win;
@@ -34,6 +35,97 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
   afterEach(() => {
     delete ANALYTICS_CONFIG['-test-venfor'];
+  });
+
+  describe('handles top level fields correctly', () => {
+    it('propogates requestOrigin into each request object', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://example.com',
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: 'https://example.com',
+            baseUrl: '/test1',
+          },
+          'test2': {
+            origin: 'https://example.com',
+            baseUrl: '/test1/test2',
+          },
+        });
+      });
+    });
+
+    it('does not overwrite existing origin in request object', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://toplevel.com',
+        'requests': {
+          'test1': {
+            origin: 'https://nested.com',
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: 'https://nested.com',
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
+
+    it('handles empty string request origin', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': '',
+        'requests': {
+          'test1': {
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: '',
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
+
+    it('handles undefined request origin', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': undefined,
+        'requests': {
+          'test1': {
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: undefined,
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
   });
 
   describe('merges requests correctly', () => {
@@ -412,9 +504,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
-        expect(xhrStub).to.be.calledWith('//config1', {
-          requireAmpResponseSourceOrigin: false,
-        });
+        expect(xhrStub).to.be.calledWith('//config1', {});
         expect(config['vars']['title']).to.equal('remote');
         // iframe transport from remote config is ignored
         expect(config['transport']['iframe']).to.be.undefined;
@@ -465,7 +555,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(xhrStub).to.be.calledWith('//config1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: false,
         });
         expect(config['vars']['title']).to.equal('remote');
       });
@@ -507,7 +596,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
 
         expect(config['requests']['foo']).to.deep.equal({
@@ -561,7 +649,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -604,7 +691,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -640,7 +726,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -681,7 +766,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -720,7 +804,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
 
         expect(config['requests']['foo']).to.deep.equal({
@@ -796,6 +879,96 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
           'foobar': {},
         },
+      });
+    });
+  });
+
+  describe('warning message', () => {
+    it('shows the warning', () => {
+      ANALYTICS_CONFIG['test-vendor'] = {
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+        'warningMessage': 'I am a warning',
+      };
+
+      const element = getAnalyticsTag(
+        {},
+        {'type': 'test-vendor', 'id': 'analyticsId'}
+      );
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          ' test-vendor',
+          '',
+          'I am a warning'
+        );
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+
+    it('handles incorrect inputs', () => {
+      ANALYTICS_CONFIG['test-vendor'] = {
+        'requests': {'test1': '/test1', 'test2': '/test2'},
+        'warningMessage': {
+          'message': 'I am deprecated',
+          'configVersion': '0.1',
+        },
+      };
+
+      const element = getAnalyticsTag(
+        {},
+        {'type': 'test-vendor', 'id': 'analyticsId'}
+      );
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          ' test-vendor',
+          '',
+          '[object Object]'
+        );
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+
+    it('handles remote config', () => {
+      const element = getAnalyticsTag(
+        {},
+        {'config': 'www.vendorConfigLocation.com', 'id': 'analyticsId'}
+      );
+
+      const usrObj = user();
+      const spy = sandbox.spy(usrObj, 'warn');
+      const xhrStub = stubXhr();
+      xhrStub.returns(
+        Promise.resolve({
+          json: () => {
+            return {
+              'warningMessage':
+                'The config you are working with has been deprecated',
+            };
+          },
+        })
+      );
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          '',
+          ' with remote config url www.vendorConfigLocation.com',
+          'The config you are working with has been deprecated'
+        );
+        expect(config['warningMessage']).to.be.undefined;
       });
     });
   });

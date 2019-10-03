@@ -93,7 +93,6 @@ describes.fakeWin(
             'credentials': undefined,
             'headers': undefined,
             'method': 'GET',
-            'requireAmpResponseSourceOrigin': false,
             'ampCors': true,
           },
         };
@@ -126,7 +125,6 @@ describes.fakeWin(
               'credentials': undefined,
               'headers': undefined,
               'method': 'GET',
-              'requireAmpResponseSourceOrigin': false,
             },
             'input': 'https://www.abracadabra.org/some-json',
           },

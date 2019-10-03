@@ -261,7 +261,6 @@ describes.realWin(
                 return (
                   init.method == 'POST' &&
                   init.credentials == 'include' &&
-                  init.requireAmpResponseSourceOrigin == undefined &&
                   init.body == '' &&
                   init.headers['Content-Type'] ==
                     'application/x-www-form-urlencoded'
@@ -290,7 +289,6 @@ describes.realWin(
                 return (
                   init.method == 'POST' &&
                   init.credentials == 'include' &&
-                  init.requireAmpResponseSourceOrigin == undefined &&
                   init.body == '' &&
                   init.headers['Content-Type'] ==
                     'application/x-www-form-urlencoded'

@@ -21,6 +21,12 @@ import {toWin} from '../../../src/types';
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';
 
 /**
+ * The 'alert' role assertively announces toast content to screen readers.
+ * @private @const {string}
+ * */
+const TOAST_ROLE = 'alert';
+
+/**
  * Should be higher than total animation time.
  * @private @const {number}
  */
@@ -41,7 +47,10 @@ export class Toast {
     const toast = createElementWithAttributes(
       win.document,
       'div',
-      /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME})
+      /** @type {!JsonObject} */ ({
+        'class': TOAST_CLASSNAME,
+        'role': TOAST_ROLE,
+      })
     );
 
     if (typeof childNodeOrText == 'string') {

@@ -1,3 +1,11 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - stories
+teaser:
+  text: Creates an iframe and displays a Gist from GitHub
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,12 +32,12 @@ Displays a <a href="https://gist.github.com/">GitHub Gist</a>.
     <td><code>&lt;script async custom-element="amp-gist" src="https://cdn.ampproject.org/v0/amp-gist-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fixed-height</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-gist/">Annotated code example for amp-gist</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-gist/">Annotated code example for amp-gist</a></td>
   </tr>
 </table>
 

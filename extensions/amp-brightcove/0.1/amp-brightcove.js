@@ -220,6 +220,7 @@ class AmpBrightcove extends AMP.BaseElement {
         'ended': VideoEvents.ENDED,
         'ads-ad-started': VideoEvents.AD_START,
         'ads-ad-ended': VideoEvents.AD_END,
+        'loadedmetadata': VideoEvents.LOADEDMETADATA,
       })
     ) {
       return;

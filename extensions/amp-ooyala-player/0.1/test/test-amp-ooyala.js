@@ -95,8 +95,8 @@ describes.realWin(
         const playerIframe = player.querySelector('iframe');
         expect(playerIframe).to.not.be.null;
         expect(playerIframe.src).to.equal(
-          'https://player.ooyala.com/static/v4/sandbox/' +
-            'amp_iframe/skin-plugin/amp_iframe.html' +
+          'https://player.ooyala.com/static/v4/production/latest/' +
+            'skin-plugin/amp_iframe.html' +
             '?pcode=5zb2wxOlZcNCe_HVT3a6cawW298X' +
             '&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
             '&pbid=6440813504804d76ba35c8c787a4b33c'

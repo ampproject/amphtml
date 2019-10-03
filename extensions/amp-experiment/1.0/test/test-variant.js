@@ -24,6 +24,7 @@ describes.sandboxed('allocateVariant', {}, env => {
   let ampdoc;
   let getCidStub;
   let uniformStub;
+  let fakeViewer;
   let getParamStub;
   let getNotificationStub;
 
@@ -74,47 +75,42 @@ describes.sandboxed('allocateVariant', {}, env => {
         })
       );
 
-    getParamStub = sandbox.stub();
-    sandbox
-      .stub(Services, 'viewerForDoc')
-      .withArgs(ampdoc)
-      .returns({
-        getParam: getParamStub,
-      });
+    fakeViewer = {};
 
     sandbox.stub(ampdoc, 'getHeadNode').returns(fakeHead);
+    getParamStub = sandbox.stub(ampdoc, 'getParam').returns('true');
   });
 
   it('should throw for invalid config', () => {
     expect(() => {
-      allocateVariant(ampdoc, 'name', null);
+      allocateVariant(ampdoc, fakeViewer, 'name', null);
     }).to.throw();
 
     expect(() => {
-      allocateVariant(ampdoc, 'name', undefined);
+      allocateVariant(ampdoc, fakeViewer, 'name', undefined);
     }).to.throw();
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {});
+        allocateVariant(ampdoc, fakeViewer, 'name', {});
       }).to.throw(/Missing variants/);
     });
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {variants: 52});
+        allocateVariant(ampdoc, fakeViewer, 'name', {variants: 52});
       }).to.throw(/Missing variants/);
     });
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {variants: {}});
+        allocateVariant(ampdoc, fakeViewer, 'name', {variants: {}});
       }).to.throw(/Missing variants/);
     });
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {
+        allocateVariant(ampdoc, fakeViewer, 'name', {
           variants: {
             'invalid_char_%_in_name': 1,
           },
@@ -124,7 +120,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {
+        allocateVariant(ampdoc, fakeViewer, 'name', {
           variants: {
             'variant_1': {
               weight: 51,
@@ -141,7 +137,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {
+        allocateVariant(ampdoc, fakeViewer, 'name', {
           variants: {
             'negative_percentage': {
               weight: -1,
@@ -154,7 +150,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {
+        allocateVariant(ampdoc, fakeViewer, 'name', {
           variants: {
             'too_big_percentage': {
               weight: 101,
@@ -167,7 +163,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {
+        allocateVariant(ampdoc, fakeViewer, 'name', {
           variants: {
             'non_number_percentage': {
               weight: '50',
@@ -180,7 +176,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'invalid_name!', {
+        allocateVariant(ampdoc, fakeViewer, 'invalid_name!', {
           variants: {
             'variant_1': {
               weight: 50,
@@ -193,7 +189,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, '', {
+        allocateVariant(ampdoc, fakeViewer, '', {
           variants: {
             'variant_1': {
               weight: 50,
@@ -206,7 +202,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {
+        allocateVariant(ampdoc, fakeViewer, 'name', {
           group: 'invalid_group_name!',
           variants: {
             'variant_1': {
@@ -222,7 +218,7 @@ describes.sandboxed('allocateVariant', {}, env => {
   it('should check that mutations exist', () => {
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {
+        allocateVariant(ampdoc, fakeViewer, 'name', {
           variants: {
             'variant_1': {
               weight: 50,
@@ -233,10 +229,10 @@ describes.sandboxed('allocateVariant', {}, env => {
     });
   });
 
-  it('should check that has at least one mutation', () => {
+  it('should allow variants with no mutations', () => {
     allowConsoleError(() => {
       expect(() => {
-        allocateVariant(ampdoc, 'name', {
+        allocateVariant(ampdoc, fakeViewer, 'name', {
           variants: {
             'variant_1': {
               weight: 50,
@@ -244,13 +240,13 @@ describes.sandboxed('allocateVariant', {}, env => {
             },
           },
         });
-      }).to.throw(/one mutation/);
+      }).to.not.throw();
     });
   });
 
   it('should work around float rounding error', () => {
     expect(() => {
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         variants: {
           'a': {
             weight: 50.1,
@@ -276,7 +272,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
   it('should work in non-sticky mode', () => {
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         sticky: false,
         variants: {
           '-Variant_1': {
@@ -294,7 +290,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
   it('should allocate variant in name order', () => {
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         sticky: false,
         variants: {
           '-Variant_2': {
@@ -312,7 +308,7 @@ describes.sandboxed('allocateVariant', {}, env => {
 
   it("can have no variant allocated if variants don't add up to 100", () => {
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         sticky: false,
         variants: {
           '-Variant_1': {
@@ -335,7 +331,7 @@ describes.sandboxed('allocateVariant', {}, env => {
   it('allow variant override from URL fragment', () => {
     getParamStub.withArgs('amp-x-Name').returns('-Variant_1');
     return expect(
-      allocateVariant(ampdoc, 'Name', {
+      allocateVariant(ampdoc, fakeViewer, 'Name', {
         sticky: false,
         variants: {
           '-Variant_1': {
@@ -354,7 +350,7 @@ describes.sandboxed('allocateVariant', {}, env => {
   it('variant override should ignore non-existed variant name', () => {
     getParamStub.withArgs('amp-x-name').returns('-Variant_3');
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         sticky: false,
         variants: {
           '-Variant_1': {
@@ -379,7 +375,7 @@ describes.sandboxed('allocateVariant', {}, env => {
       .returns(Promise.resolve('123abc'));
     uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         variants: {
           '-Variant_1': {
             weight: 50,
@@ -403,7 +399,7 @@ describes.sandboxed('allocateVariant', {}, env => {
       .returns(Promise.resolve('123abc'));
     uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         cidScope: 'custom-scope',
         variants: {
           '-Variant_1': {
@@ -428,7 +424,7 @@ describes.sandboxed('allocateVariant', {}, env => {
       .returns(Promise.resolve('123abc'));
     uniformStub.withArgs('custom-group:123abc').returns(Promise.resolve(0.4));
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         group: 'custom-group',
         variants: {
           '-Variant_1': {
@@ -461,7 +457,7 @@ describes.sandboxed('allocateVariant', {}, env => {
       .returns(Promise.resolve('123abc'));
     uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         consentNotificationId: 'notif-1',
         variants: {
           '-Variant_1': {
@@ -481,7 +477,7 @@ describes.sandboxed('allocateVariant', {}, env => {
     getNotificationStub.withArgs('notif-1').returns(Promise.resolve(null));
 
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         consentNotificationId: 'notif-1',
         variants: {
           '-Variant_1': {
@@ -509,7 +505,7 @@ describes.sandboxed('allocateVariant', {}, env => {
     getCidStub.returns(Promise.resolve('123abc'));
     uniformStub.returns(Promise.resolve(0.4));
     return expect(
-      allocateVariant(ampdoc, 'name', {
+      allocateVariant(ampdoc, fakeViewer, 'name', {
         consentNotificationId: 'notif-1',
         variants: {
           '-Variant_1': {

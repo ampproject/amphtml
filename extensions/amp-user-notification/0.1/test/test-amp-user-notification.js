@@ -19,13 +19,12 @@ import {
   UserNotificationManager,
 } from '../amp-user-notification';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {Services} from '../../../../src/services';
+import {macroTask} from '../../../../testing/yield';
 import {
-  getServiceForDoc,
-  getServicePromiseForDoc,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {macroTask} from '../../../../testing/yield';
 
 describes.realWin(
   'amp-user-notification',
@@ -51,8 +50,6 @@ describes.realWin(
         'data-dismiss-href': 'https://www.ampproject.org/post/here',
         'layout': 'nodisplay',
       };
-      const storage = getServiceForDoc(ampdoc, 'storage');
-      storageMock = sandbox.mock(storage);
 
       resetServiceForTesting(win, 'geo');
       registerServiceBuilder(win, 'geo', function() {
@@ -64,11 +61,17 @@ describes.realWin(
         });
       });
 
-      return getServicePromiseForDoc(ampdoc, 'userNotificationManager').then(
-        manager => {
-          sandbox.stub(manager, 'registerUserNotification');
-        }
-      );
+      const el = ampdoc.getHeadNode();
+      return Promise.all([
+        Services.userNotificationManagerForDoc(el),
+        Services.storageForDoc(el),
+      ]).then(services => {
+        const userNotificationManager = services[0];
+        sandbox.stub(userNotificationManager, 'registerUserNotification');
+
+        const storage = services[1];
+        storageMock = sandbox.mock(storage);
+      });
     });
 
     function getUserNotification(attrs = {}) {

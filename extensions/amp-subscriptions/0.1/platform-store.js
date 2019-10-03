@@ -243,6 +243,56 @@ export class PlatformStore {
   }
 
   /**
+   * Get scoreFactor states for each platform
+   * @return {!Promise<!JsonObject>}
+   *
+   * return value looks somethinglike this
+   * {
+   *   'subscribe.google.com': {
+   *     isReadyToPay: 1,
+   *     supportsViewer: 1,
+   *   },
+   *   local: {
+   *     isReadyToPay: 0,
+   *     supportsViewer: 0,
+   *   },
+   * }
+   */
+  getScoreFactorStates() {
+    const states = dict({});
+    return Promise.all(
+      this.serviceIds_.map(platformId => {
+        states[platformId] = dict();
+        return Promise.all(
+          Object.values(SubscriptionsScoreFactor).map(scoreFactor =>
+            this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
+              factorValue => {
+                states[platformId][scoreFactor] = factorValue;
+              }
+            )
+          )
+        );
+      })
+    ).then(() => states);
+  }
+
+  /**
+   * Return a score factor for a platform once it's resolved
+   * @param {string} serviceId
+   * @param {string} scoreFactor
+   * @return {!Promise<number>}
+   * @private
+   */
+  getScoreFactorPromiseFor_(serviceId, scoreFactor) {
+    // Make sure the platform is ready
+    return this.getEntitlementPromiseFor(serviceId).then(() => {
+      return this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(
+        scoreFactor
+      );
+    });
+  }
+
+  /**
    * @return {!Promise<boolean>}
    */
   getGrantStatus() {
@@ -337,10 +387,9 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @private
    * @return {!Promise<!Array<!./entitlement.Entitlement>>}
    */
-  getAllPlatformsEntitlements_() {
+  getAllPlatformsEntitlements() {
     if (this.allResolvedPromise_) {
       return this.allResolvedPromise_.promise;
     }
@@ -383,7 +432,7 @@ export class PlatformStore {
    * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatform() {
-    return this.getAllPlatformsEntitlements_().then(() => {
+    return this.getAllPlatformsEntitlements().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs
       // waiting for all entitlement.
       return this.selectApplicablePlatform_();
@@ -523,10 +572,9 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatformForFactor_(factor) {
-    /** @type {!Array<!PlatformWeightDef>} */
     const platformWeights = this.getAvailablePlatforms().map(platform => {
       const factorValue = platform.getSupportedScoreFactor(factor);
-      const weight = (typeof factorValue == 'number') ? factorValue : 0;
+      const weight = typeof factorValue == 'number' ? factorValue : 0;
       return {platform, weight};
     });
     return this.rankPlatformsByWeight_(platformWeights);
