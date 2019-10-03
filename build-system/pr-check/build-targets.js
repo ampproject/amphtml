@@ -24,7 +24,7 @@ const colors = require('ansi-colors');
 const config = require('../test-configs/config');
 const minimatch = require('minimatch');
 const path = require('path');
-const {gitDiffNameOnlyMaster} = require('../git');
+const {gitDiffNameOnlyMaster} = require('../common/git');
 
 /**
  * A mapping of functions that match a given file to one or more build targets.

@@ -26,8 +26,8 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
-const {gitDiffNameOnlyMaster} = require('../git');
-const {isTravisBuild} = require('../travis');
+const {gitDiffNameOnlyMaster} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const isWatching = argv.watch || argv.w || false;

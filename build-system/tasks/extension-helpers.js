@@ -26,7 +26,7 @@ const {
 } = require('../../bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
 const {endBuildStep} = require('./helpers');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
 const {vendorConfigs} = require('./vendor-configs');
 

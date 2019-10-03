@@ -30,7 +30,7 @@ const {
 } = require('./closure-compile');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');

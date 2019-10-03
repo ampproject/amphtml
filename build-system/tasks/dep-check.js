@@ -26,12 +26,15 @@ const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
 const {compileJison} = require('./compile-jison');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
 const {cyan, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);

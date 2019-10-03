@@ -32,6 +32,10 @@ const {
   toPromise,
 } = require('./helpers');
 const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
+const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
 const {
@@ -44,7 +48,6 @@ const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {maybeUpdatePackages} = require('./update-packages');
 const {VERSION} = require('../compile/internal-version');

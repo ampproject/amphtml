@@ -24,8 +24,8 @@ const log = require('fancy-log');
 const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
-const {execOrDie, execScriptAsync} = require('../../exec');
-const {isTravisBuild} = require('../../travis');
+const {execOrDie, execScriptAsync} = require('../../common/exec');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
