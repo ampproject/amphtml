@@ -62,6 +62,7 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -398,7 +399,11 @@ export class AmpForm {
             if (errors.length) {
               this.setState_(FormState.VERIFY_ERROR);
               this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
-                this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
+                this.triggerAction_(
+                  FormEvents.VERIFY_ERROR,
+                  errors,
+                  ActionTrust.HIGH
+                );
               });
             } else {
               this.setState_(FormState.INITIAL);
@@ -661,7 +666,7 @@ export class AmpForm {
       return Promise.resolve();
     }
     this.setState_(FormState.VERIFYING);
-    this.triggerAction_(FormEvents.VERIFY, null);
+    this.triggerAction_(FormEvents.VERIFY, /* detail */ null, ActionTrust.HIGH);
 
     return this.doVarSubs_(this.getVarSubsFields_()).then(() =>
       this.doVerifyXhr_()
@@ -895,6 +900,23 @@ export class AmpForm {
   }
 
   /**
+   * Returns the action trust for submit-success and submit-error events.
+   * @return {!ActionTrust}
+   * @private
+   */
+  trustForSubmitResponse_() {
+    if (isAmp4Email(this.form_.ownerDocument)) {
+      user().warn(
+        TAG + ', AMP4EMAIL',
+        '"submit-success and "submit-error" are now "low trust" events. ' +
+          'See https://github.com/ampproject/amphtml/issues/24894.'
+      );
+      return ActionTrust.LOW;
+    }
+    return ActionTrust.HIGH;
+  }
+
+  /**
    * @param {!Response} response
    * @return {!Promise}
    * @private
@@ -918,7 +940,8 @@ export class AmpForm {
       json => {
         this.setState_(FormState.SUBMIT_SUCCESS);
         this.renderTemplate_(json || {}).then(() => {
-          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
+          const trust = this.trustForSubmitResponse_();
+          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json, trust);
           this.dirtinessHandler_.onSubmitSuccess();
         });
       },
@@ -960,7 +983,10 @@ export class AmpForm {
     user().error(TAG, 'Form submission failed: %s', error);
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
+        const trust = isAmp4Email(this.form_.ownerDocument)
+          ? ActionTrust.LOW
+          : ActionTrust.HIGH;
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, json, trust);
         this.dirtinessHandler_.onSubmitError();
       });
     });
@@ -1077,18 +1103,19 @@ export class AmpForm {
   }
 
   /**
-   * Triggers either a submit-success or submit-error action with response data.
+   * Triggers an action e.g. submit success/error with response data.
    * @param {!FormEvents} name
    * @param {?JsonObject|!Array<{message: string, name: string}>} detail
+   * @param {!ActionTrust} trust
    * @private
    */
-  triggerAction_(name, detail) {
+  triggerAction_(name, detail, trust) {
     const event = createCustomEvent(
       this.win_,
       `${TAG}.${name}`,
       dict({'response': detail})
     );
-    this.actions_.trigger(this.form_, name, event, ActionTrust.HIGH);
+    this.actions_.trigger(this.form_, name, event, trust);
   }
 
   /**

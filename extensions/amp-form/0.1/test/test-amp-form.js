@@ -1342,6 +1342,31 @@ describes.repeated(
           });
         });
 
+        it('should trigger low-trust submit-* events in AMP4EMAIL', async () => {
+          const form = getForm();
+          form.ownerDocument.documentElement.setAttribute('amp4email', '');
+
+          const actions = {
+            installActionHandler: () => {},
+            trigger: sandbox.spy(),
+          };
+          sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+
+          sandbox.stub(Services, 'xhrFor').returns({
+            fetch: () => Promise.resolve({json: () => Promise.resolve()}),
+          });
+
+          const ampForm = await getAmpForm(form);
+          await ampForm.handleSubmitEvent_(new Event('fake_submit'));
+
+          expect(actions.trigger).to.be.calledWith(
+            form,
+            'submit-success',
+            /* CustomEvent */ sinon.match.has('detail'),
+            ActionTrust.LOW
+          );
+        });
+
         it('should manage form state classes (submitting, success)', () => {
           return getAmpForm(getForm()).then(ampForm => {
             let fetchResolver;
