@@ -25,16 +25,16 @@ export function insticator(global, data) {
   validateData(data, ['siteId', 'embedId']);
 
   // create insticator markup
-  global.document.getElementById('c').appendChild(createTemplate(data.embedId));
+  global.document.getElementById('c').appendChild(createTemplate(data['embedId']));
 
   // create ads and embed
-  createAdsAndEmbed(data.siteId, data.embedId);
+  createAdsAndEmbed(data['siteId'], data['embedId']);
 }
 
 /**
  * Create HTML template to be populated later
  * @param {string} embedId The Unique Identifier of this particular Embed
- * @return {element} HTML template
+ * @return {Element} HTML template
  */
 function createTemplate(embedId) {
   const template = document.createElement('template');
