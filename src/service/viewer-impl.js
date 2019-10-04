@@ -422,6 +422,86 @@ export class ViewerImpl {
   }
 
   /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  getVisibilityState() {
+    return this.ampdoc.getVisibilityState();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  isVisible() {
+    return this.ampdoc.isVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  hasBeenVisible() {
+    return this.ampdoc.hasBeenVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  whenFirstVisible() {
+    return this.ampdoc.whenFirstVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  whenNextVisible() {
+    return this.ampdoc.whenNextVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  getFirstVisibleTime() {
+    return this.ampdoc.getFirstVisibleTime();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  getLastVisibleTime() {
+    return this.ampdoc.getLastVisibleTime();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  onVisibilityChanged(handler) {
+    return this.ampdoc.onVisibilityChanged(handler);
+  }
+
+  /**
    * Sets the viewer defined visibility state.
    * @param {?string|undefined} state
    * @private
