@@ -15,7 +15,7 @@
  */
 
 import {computedStyle} from '../../../src/style';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 
 /**
  * Simple implementation of CircularBuffer.
@@ -278,7 +278,7 @@ export function findSentences(win, node, sentences) {
       }
     }
     // This must not happen.
-    dev().assert(false, 'missing valid match');
+    devAssert(false, 'missing valid match');
   }
   const ret = /** @type {!Array<!TextRangeDef>} */ ([]);
   for (let i = matches.length - 1; i >= 0; i--) {
