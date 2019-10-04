@@ -240,7 +240,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.win.document.body.removeChild(iframe);
       });
 
-      it.skip(
+      it(
         'should layout amp-img, amp-pixel, ' +
           'amp-analytics within friendly frame',
         () => {
@@ -249,7 +249,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         }
       );
 
-      it.skip(
+      it(
         'should layout amp-img, amp-pixel, ' +
           'amp-analytics within safe frame',
         () => {
