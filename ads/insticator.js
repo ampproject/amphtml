@@ -25,7 +25,7 @@ export function insticator(global, data) {
   validateData(data, ['siteId', 'embedId']);
 
   // create insticator markup
-  global.document.getElementById('c').appendChild(createTemplate(data.embedId));
+  global.document.getElementById('c').appendChild(createTemplate(data[embedId]));
 
   // create ads and embed
   createAdsAndEmbed(data[siteId], data[embedId]);
