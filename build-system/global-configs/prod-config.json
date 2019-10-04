@@ -2,7 +2,6 @@
   "allow-doc-opt-in": [
     "amp-next-page",
     "inabox-viewport-friendly",
-    "inabox-no-chunking",
     "inabox-resources-lite",
     "inabox-viewer-lite",
     "inabox-viewport-lite"
@@ -19,7 +18,9 @@
   "canary": 0,
 
   "a4aProfilingRate": 0.01,
+  "adsense-ad-size-optimization": 0.01,
   "amp-access-iframe": 1,
+  "amp-action-macro": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-consent-v2": 1,
@@ -34,7 +35,7 @@
   "chunked-amp": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "fix-inconsistent-responsive-height-selection": 0.01,
+  "fix-inconsistent-responsive-height-selection": 0.05,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
@@ -42,6 +43,6 @@
   "ios-scrollable-iframe": 0,
   "macro-after-long-task": 0,
   "pump-early-frame": 1,
-  "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.01,
+  "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
   "version-locking": 1
 }

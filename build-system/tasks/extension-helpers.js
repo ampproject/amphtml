@@ -18,14 +18,15 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const watch = require('gulp-watch');
-const wrappers = require('../compile-wrappers');
+const wrappers = require('../compile/compile-wrappers');
 const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
 } = require('../../bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
-const {isTravisBuild} = require('../travis');
+const {endBuildStep} = require('./helpers');
+const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
 const {vendorConfigs} = require('./vendor-configs');
 
@@ -302,6 +303,7 @@ function dedupe(arr) {
  * @return {!Promise}
  */
 async function buildExtensions(options) {
+  const startTime = Date.now();
   maybeInitializeExtensions(extensions, /* includeLatest */ false);
   const extensionsToBuild = getExtensionsToBuild();
   const results = [];
@@ -314,6 +316,13 @@ async function buildExtensions(options) {
     }
   }
   await Promise.all(results);
+  if (!options.compileOnlyCss && !argv.single_pass) {
+    endBuildStep(
+      options.minify ? 'Minified all' : 'Compiled all',
+      'extensions',
+      startTime
+    );
+  }
 }
 
 /**
