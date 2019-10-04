@@ -28,18 +28,18 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('simple animation', async () => {
+    it('transparency animation should pause and restart', async () => {
       const cancelBtn = await controller.findElement('#cancelBtn');
       await controller.click(cancelBtn);
 
       const elem = await controller.findElement('#image');
-      await expect(controller.getElementCssValue(elem, 'opacity')).to.be.equal(
+      await expect(controller.getElementCssValue(elem, 'opacity')).to.equal(
         '1'
       );
 
       const restartBtn = await controller.findElement('#restartBtn');
       await controller.click(restartBtn);
-      await expect(controller.getElementCssValue(elem, 'opacity')).to.be.equal(
+      await expect(controller.getElementCssValue(elem, 'opacity')).to.equal(
         '0'
       );
     });
