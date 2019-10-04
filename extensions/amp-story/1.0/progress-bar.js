@@ -470,7 +470,7 @@ export class ProgressBar {
    * @param {string} segmentId The index to assert validity
    * @private
    */
-  assertVaildSegmentId_(segmentId) {
+  assertValidSegmentId_(segmentId) {
     devAssert(
       hasOwn(this.segmentIdMap_, segmentId),
       'Invalid segment-id passed to progress-bar'
@@ -487,7 +487,7 @@ export class ProgressBar {
    */
   updateProgress(segmentId, progress, updateAllSegments = false) {
     this.segmentsAddedPromise_.then(() => {
-      this.assertVaildSegmentId_(segmentId);
+      this.assertValidSegmentId_(segmentId);
       const segmentIndex = this.segmentIdMap_[segmentId];
 
       this.updateProgressByIndex_(segmentIndex, progress);
