@@ -1797,6 +1797,53 @@ describe('Resources changeSize', () => {
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
+    it('should NOT change size via activation if has not been active', () => {
+      viewportMock
+        .expects('getContentHeight')
+        .returns(10000)
+        .atLeast(0);
+      const event = {
+        userActivation: {
+          hasBeenActive: false,
+        },
+      };
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        event,
+        false
+      );
+      resources.mutateWork_();
+      expect(resource1.changeSize).to.not.be.called;
+      expect(overflowCallbackSpy).to.be.calledOnce.calledWith(true);
+    });
+
+    it('should change size via activation if has been active', () => {
+      viewportMock
+        .expects('getContentHeight')
+        .returns(10000)
+        .atLeast(0);
+      const event = {
+        userActivation: {
+          hasBeenActive: true,
+        },
+      };
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        event,
+        false
+      );
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce.calledWith(false);
+    });
+
     it('should change size when below the viewport', () => {
       resource1.layoutBox_ = {
         top: 10,

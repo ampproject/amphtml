@@ -26,9 +26,9 @@ import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
-import {dev, devAssert, user} from '../log';
+import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
-import {getSourceUrl, isProxyOrigin} from '../url';
+import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
@@ -969,23 +969,13 @@ export class ResourcesImpl {
         } else if (request.force || !this.visible_) {
           // 2. An immediate execution requested or the document is hidden.
           resize = true;
-        } else if (this.activeHistory_.hasDescendantsOf(resource.element)) {
+        } else if (
+          this.activeHistory_.hasDescendantsOf(resource.element) ||
+          (event && event.userActivation && event.userActivation.hasBeenActive)
+        ) {
           // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-          if (
-            isProxyOrigin(this.win.location) &&
-            event &&
-            event.userActivation
-          ) {
-            // Report false positives.
-            // TODO(#23926): cleanup once user activation for resize is
-            // implemented.
-            user().expectedError(TAG_, 'RESIZE_APPROVE');
-            if (!event.userActivation.hasBeenActive) {
-              user().expectedError(TAG_, 'RESIZE_APPROVE_NOT_ACTIVE');
-            }
-          }
         } else if (
           topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
           (topMarginDiff == 0 &&
