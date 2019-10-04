@@ -28,7 +28,7 @@ export function insticator(global, data) {
   global.document.getElementById('c').appendChild(createTemplate(data.embedId));
 
   // create ads and embed
-  createAdsAndEmbed(data.siteId, data.embedId);
+  createAdsAndEmbed(data[siteId], data[embedId]);
 }
 
 /**
