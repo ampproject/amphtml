@@ -28,7 +28,13 @@ export function adglare(global, data) {
   global.document.getElementById('c').appendChild(adglareSpan);
 
   let url =
-    'https://' + data.host + '.engine.adglare.net/?' + data.zid + '&amp';
+    'https://' +
+    data.host +
+    '.engine.adglare.net/?' +
+    data.zid +
+    '&ampad&rnd=' +
+    Date.now() +
+    Math.random();
   if (data.keywords) {
     url = url + '&keywords=' + data.keywords;
   }
