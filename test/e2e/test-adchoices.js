@@ -27,14 +27,18 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('interactions', async () => {
+    it('info panel shows up and leads to why page', async () => {
       const infoDiv = await controller.findElement('#spv1');
-      await expect(controller.getElementCssValue(infoDiv, 'top')).to.be.equal('-250px');
+      await expect(controller.getElementCssValue(infoDiv, 'top')).to.equal(
+        '-250px'
+      );
 
       const infoBtn = await controller.findElement('#cbb');
       await controller.click(infoBtn);
 
-      await expect(controller.getElementCssValue(infoDiv, 'top')).to.be.equal('0px');
+      await expect(controller.getElementCssValue(infoDiv, 'top')).to.equal(
+        '0px'
+      );
 
       const whyBtn = await controller.findElement('a#sbtn');
       await controller.click(whyBtn);
