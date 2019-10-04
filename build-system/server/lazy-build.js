@@ -19,7 +19,7 @@ const {
   getExtensionsToBuild,
 } = require('../tasks/extension-helpers');
 const {doBuildJs} = require('../tasks/helpers');
-const {jsBundles} = require('../../bundles.config');
+const {jsBundles} = require('../compile/bundles.config');
 
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);

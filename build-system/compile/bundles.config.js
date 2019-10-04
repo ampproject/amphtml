@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 'use strict';
-/* global exports, process, require */
 
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 
-const {
-  VERSION: internalRuntimeVersion,
-} = require('./build-system/compile/internal-version');
+const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 /**
  * @enum {string}

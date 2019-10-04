@@ -135,7 +135,7 @@
     "notice/notice": [2,
       {
         "mustMatch": "Copyright 20\\d{2} The AMP HTML Authors\\.",
-        "templateFile": "LICENSE-TEMPLATE.txt",
+        "templateFile": "build-system/common/LICENSE-TEMPLATE.txt",
         "messages": {
           "whenFailedToMatch": "Missing or incorrect license header"
         }

@@ -41,7 +41,7 @@ const {
   extensionBundles,
   altMainBundles,
   TYPES,
-} = require('../../bundles.config');
+} = require('./bundles.config');
 const {
   gulpClosureCompile,
   handleSinglePassCompilerError,

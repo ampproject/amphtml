@@ -98,7 +98,7 @@ For each identifier:
     prefetching intermediary, and therefore its subresource URLs needn't be (but
     may be) rewritten.
  4. Otherwise, if the identifier is an `id` from the list in
-    [caches.json](../caches.json), then the SXG should have its subresource URLs
+    [caches.json](../build-system/global-configs/caches.json), then the SXG should have its subresource URLs
     rewritten. That `id`'s corresponding `cacheDomain` indicates the
     fully-qualified domain name that forms the basis for the URL rewrites.
  5. Otherwise, the identifier is invalid and cannot be satisfied. The server
