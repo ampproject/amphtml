@@ -19,10 +19,11 @@ import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../src/intersection-observer-polyfill';
+
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-infinite-scroll';
