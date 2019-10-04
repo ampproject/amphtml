@@ -5,7 +5,7 @@ FAIL
 |    <meta charset="utf-8">
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-|    <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js"></script>
+|    <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>
 |    <title>My Story</title>
 |    <meta name="description" content="Get started with amp-story">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -21,141 +21,59 @@ FAIL
 |                  {
 |                    "background-color-test": {
 |                      "variants": {
-|                        "yellow": {
-|                          "weight": 50,
-|                          "mutations": [
-|                            {
-|                              "type": "attributes",
-|                              "target": "h1",
-|                              "attributeName": "style",
-|                              "value": "background-color: #FFFF00"
-|                            }
-|                          ]
-|                        },
-|                        "red": {
-|                          "weight": 50,
-|                          "mutations": [
-|                            {
-|                              "type": "attributes",
-|                              "target": "h1",
-|                              "attributeName": "style",
-|                              "value": "background-color: #FF0000"
-|                            }
-|                          ]
+|                        "yellow": 49,
+|                        "red": 49
 |                        }
 |                      }
 |                    }
-|                  }
 |              </script>
 |          </amp-experiment>
 |
-|          <!-- bare script invalid under amp-story-grid-layer -->
+|          <!-- Invalid: bare script not allowed as a child of amp-story-grid-layer -->
 |          <script type="application/json">
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment.html:52:8 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
-|              {
-|                "background-color-test": {
-|                  "variants": {
-|                    "yellow": {
-|                      "weight": 50,
-|                      "mutations": [
-|                        {
-|                          "type": "attributes",
-|                          "target": "h1",
-|                          "attributeName": "style",
-|                          "value": "background-color: #FFFF00"
-|                        }
-|                      ]
-|                    },
-|                    "red": {
-|                      "weight": 50,
-|                      "mutations": [
-|                        {
-|                          "type": "attributes",
-|                          "target": "h1",
-|                          "attributeName": "style",
-|                          "value": "background-color: #FF0000"
-|                        }
-|                      ]
-|                    }
+amp-story/1.0/test/validator-amp-story-amp-experiment.html:32:8 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+|            {
+|              "background-color-test": {
+|                "variants": {
+|                  "yellow": 49,
+|                  "red": 49
 |                  }
 |                }
 |              }
 |          </script>
 |        </amp-story-grid-layer>
 |
-|          <!-- amp-experiment invalid under amp-story-page -->
-|          <amp-experiment>
->>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment.html:85:8 Tag 'amp-experiment' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment']. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
-|              <script type="application/json">
-|                  {
-|                  "background-color-test": {
-|                      "variants": {
-|                      "yellow": {
-|                          "weight": 50,
-|                          "mutations": [
-|                          {
-|                              "type": "attributes",
-|                              "target": "h1",
-|                              "attributeName": "style",
-|                              "value": "background-color: #FFFF00"
-|                          }
-|                          ]
-|                      },
-|                      "red": {
-|                          "weight": 50,
-|                          "mutations": [
-|                          {
-|                              "type": "attributes",
-|                              "target": "h1",
-|                              "attributeName": "style",
-|                              "value": "background-color: #FF0000"
-|                          }
-|                          ]
-|                      }
-|                      }
+|        <!-- Invalid: amp-experiment not allowed as a child of amp-story-page -->
+|        <amp-experiment>
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-amp-experiment.html:45:6 Tag 'amp-experiment' is disallowed as child of tag 'amp-story-page'. Child tag must be one of ['amp-analytics', 'amp-pixel', 'amp-story-cta-layer', 'amp-story-grid-layer', 'amp-story-page-attachment']. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
+|            <script type="application/json">
+|              {
+|                "background-color-test": {
+|                  "variants": {
+|                    "yellow": 49,
+|                    "red": 49
+|                    }
 |                  }
-|                  }
-|              </script>
-|          </amp-experiment>
+|                }
+|            </script>
+|        </amp-experiment>
 |
-|        <amp-story-cta-layer>
-|          <a href="http://www.google.com" class="button"> Call to action!</a>
-|        </amp-story-cta-layer>
 |      </amp-story-page>
-|      <!-- amp-experiment invalid under amp-story -->
+|
+|      <!-- Invalid: amp-experiment not allowed as a child of amp-story -->
 |      <amp-experiment>
 >>     ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment.html:123:4 Tag 'amp-experiment' is disallowed as child of tag 'amp-story'. Child tag must be one of ['amp-analytics', 'amp-consent', 'amp-geo', 'amp-pixel', 'amp-sidebar', 'amp-story-access', 'amp-story-auto-ads', 'amp-story-bookend', 'amp-story-page']. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/1.0/test/validator-amp-story-amp-experiment.html:61:4 Tag 'amp-experiment' is disallowed as child of tag 'amp-story'. Child tag must be one of ['amp-analytics', 'amp-consent', 'amp-geo', 'amp-pixel', 'amp-sidebar', 'amp-story-access', 'amp-story-auto-ads', 'amp-story-bookend', 'amp-story-page']. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
 |          <script type="application/json">
-|              {
+|            {
 |              "background-color-test": {
-|                  "variants": {
-|                  "yellow": {
-|                      "weight": 50,
-|                      "mutations": [
-|                      {
-|                          "type": "attributes",
-|                          "target": "h1",
-|                          "attributeName": "style",
-|                          "value": "background-color: #FFFF00"
-|                      }
-|                      ]
-|                  },
-|                  "red": {
-|                      "weight": 50,
-|                      "mutations": [
-|                      {
-|                          "type": "attributes",
-|                          "target": "h1",
-|                          "attributeName": "style",
-|                          "value": "background-color: #FF0000"
-|                      }
-|                      ]
+|                "variants": {
+|                  "yellow": 49,
+|                  "red": 49
 |                  }
-|                  }
-|              }
+|                }
 |              }
 |          </script>
 |      </amp-experiment>
