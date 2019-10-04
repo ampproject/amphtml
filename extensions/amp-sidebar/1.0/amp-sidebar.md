@@ -7,6 +7,7 @@ formats:
   - stories
 teaser:
   text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
+experimental: true
 ---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
@@ -26,9 +27,15 @@ limitations under the License.
 
 # <a name="amp-sidebar"></a> `amp-sidebar`
 
+Important: This version of sidebar is still under development and should not be used.
+
 [TOC]
 
 <table>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; activated by the <code>amp-sidebar-v2</code> experiment.</div></td>
+  </tr>
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>
@@ -37,7 +44,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
@@ -73,7 +80,7 @@ for content within the sidebar to be displayed on other parts of the main conten
 
 *Example:*
 
-In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
+In the following example, we use `amp-sidebar` to contain navigation items. However, The second and fourth item, Nav Item 2 and Nav Item 4, are assigned to element id that is on the page. By using the [`on`](../../../spec/amp-actions-and-events.md) attribute, we can scroll smoothly to the element, using the element id and `scrollTo`.
 
 ```html
 <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
@@ -90,7 +97,7 @@ In the following example, we use `amp-sidebar` to contain navigation items. Howe
 
 ### Opening and closing the sidebar
 
-To toggle, open, or close the sidebar when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
+To `toggle`, `open`, or `close` the sidebar when an element is tapped or clicked, set the [`on`](../../../spec/amp-actions-and-events.md) action attribute on the element, and specify one of the following action methods:
 
 <table>
   <tr>
