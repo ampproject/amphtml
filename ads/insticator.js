@@ -34,7 +34,7 @@ export function insticator(global, data) {
 /**
  * Create HTML template to be populated later
  * @param {string} embedId The Unique Identifier of this particular Embed
- * @return {element} HTML template
+ * @return {Element} HTML template
  */
 function createTemplate(embedId) {
   const template = document.createElement('template');
