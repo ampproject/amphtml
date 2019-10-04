@@ -20,7 +20,6 @@ import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
 import {isBlockedByConsent} from '../error';
-import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -131,7 +130,7 @@ export class Resource {
   /**
    * @param {number} id
    * @param {!AmpElement} element
-   * @param {!./resources-impl.ResourcesDef} resources
+   * @param {!./resources-interface.ResourcesInterface} resources
    */
   constructor(id, element, resources) {
     element[RESOURCE_PROP_] = this;
@@ -148,7 +147,7 @@ export class Resource {
     /** @const {!Window} */
     this.hostWin = toWin(element.ownerDocument.defaultView);
 
-    /** @const @private {!./resources-impl.ResourcesDef} */
+    /** @const @private {!./resources-interface.ResourcesInterface} */
     this.resources_ = resources;
 
     /** @const @private {boolean} */
@@ -212,15 +211,6 @@ export class Resource {
 
     /** @private {?Function} */
     this.loadPromiseResolve_ = deferred.resolve;
-
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
-
-    /** @private @const {boolean} */
-    this.useLayersPrioritization_ = isExperimentOn(
-      this.hostWin,
-      'layers-prioritization'
-    );
   }
 
   /**
@@ -448,12 +438,9 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
+    // TODO
     const oldBox = this.layoutBox_;
-    if (this.useLayers_) {
-      this.measureViaLayers_();
-    } else {
-      this.measureViaResources_();
-    }
+    this.measureViaResources_();
     const box = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -519,41 +506,18 @@ export class Resource {
     }
   }
 
-  /** Use layers for measurement */
-  measureViaLayers_() {
-    const {element} = this;
-    const layers = element.getLayers();
-    /**
-     * TODO(jridgewell): This force remeasure shouldn't be necessary. We
-     * essentially have 3 phases of measurements:
-     * 1. Initial measurements during page load, where we're not mutating
-     * 2. Remeasurements after page load, where we might have mutated (but
-     *    really shouldn't, it's a bug we haven't fixed yet)
-     * 3. Mutation remeasurements
-     *
-     * We can optimize the initial measurements by not forcing remeasure. But
-     * for both 2 and 3, we need for force it.
-     */
-    layers.remeasure(element, /* opt_force */ true);
-    this.layoutBox_ = this.getPageLayoutBox();
-  }
-
   /**
    * Completes collapse: ensures that the element is `display:none` and
    * updates layout box.
    */
   completeCollapse() {
     toggle(this.element, false);
-    if (this.useLayers_) {
-      this.layoutBox_ = layoutRectLtwh(0, 0, 0, 0);
-    } else {
-      this.layoutBox_ = layoutRectLtwh(
-        this.layoutBox_.left,
-        this.layoutBox_.top,
-        0,
-        0
-      );
-    }
+    this.layoutBox_ = layoutRectLtwh(
+      this.layoutBox_.left,
+      this.layoutBox_.top,
+      0,
+      0
+    );
     this.isFixed_ = false;
     this.element.updateLayoutBox(this.getLayoutBox());
     const owner = this.getOwner();
@@ -600,16 +564,6 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
-    if (this.useLayers_) {
-      // TODO(jridgewell): transition all callers to position and/or size calls
-      // directly.
-      const {element} = this;
-      const layers = element.getLayers();
-      const pos = layers.getScrolledPosition(element);
-      const size = layers.getSize(element);
-      return layoutRectLtwh(pos.left, pos.top, size.width, size.height);
-    }
-
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
@@ -627,14 +581,6 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getPageLayoutBox() {
-    if (this.useLayers_) {
-      const {element} = this;
-      const layers = element.getLayers();
-      const pos = layers.getOffsetPosition(element);
-      const size = layers.getSize(element);
-      return layoutRectLtwh(pos.left, pos.top, size.width, size.height);
-    }
-
     return this.layoutBox_;
   }
 
@@ -707,6 +653,14 @@ export class Resource {
   }
 
   /**
+   * Whether this element has render-blocking service.
+   * @return {boolean}
+   */
+  isBuildRenderBlocking() {
+    return this.element.isBuildRenderBlocking();
+  }
+
+  /**
    * @param {number|boolean} viewport derived from renderOutsideViewport.
    * @return {!Promise} resolves when underlying element is built and within the
    *    viewport range given.
@@ -749,15 +703,6 @@ export class Resource {
 
   /** @return {!ViewportRatioDef} */
   getDistanceViewportRatio() {
-    if (this.useLayers_ && this.useLayersPrioritization_) {
-      const {element} = this;
-      return {
-        distance: element
-          .getLayers()
-          .iterateAncestry(element, this.layersDistanceRatio_),
-      };
-    }
-
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewport = Services.viewportForDoc(this.element);
@@ -811,33 +756,10 @@ export class Resource {
     }
     const {distance, scrollPenalty, viewportHeight} =
       opt_viewportRatio || this.getDistanceViewportRatio();
-    if (this.useLayers_ && this.useLayersPrioritization_) {
-      return dev().assertNumber(distance) < multiplier;
-    }
     if (typeof distance == 'boolean') {
       return distance;
     }
     return distance < (viewportHeight * multiplier) / scrollPenalty;
-  }
-
-  /**
-   * Calculates the layout's viewport distance ratio, using an iterative
-   * calculation based on tree depth and number of layer scrolls it would take
-   * to view the element.
-   *
-   * @param {number|undefined} currentScore
-   * @param {!./layers-impl.LayoutElement} layout
-   * @param {number} depth
-   * @return {number}
-   */
-  layersDistanceRatio_(currentScore, layout, depth) {
-    currentScore = currentScore || 0;
-    const depthPenalty = 1 + depth / 10;
-    const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
-    const distance =
-      layout.getHorizontalViewportsFromParent() +
-      layout.getVerticalViewportsFromParent();
-    return currentScore + nonActivePenalty * depthPenalty * distance;
   }
 
   /**

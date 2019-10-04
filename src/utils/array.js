@@ -108,3 +108,14 @@ export function pushIfNotExist(array, item) {
     array.push(item);
   }
 }
+
+/**
+ * Returns the last item in an array.
+ *
+ * @param {Array<T>} array
+ * @template T
+ * @return {?T}
+ */
+export function lastItem(array) {
+  return array[array.length - 1];
+}

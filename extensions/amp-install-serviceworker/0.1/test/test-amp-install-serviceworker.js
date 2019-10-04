@@ -499,7 +499,7 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      viewer = win.services.viewer.obj;
+      viewer = win.__AMP_SERVICES.viewer.obj;
       stubUrlService(sandbox);
       element = win.document.createElement('amp-install-serviceworker');
       element.setAttribute('src', 'https://example.com/sw.js');
@@ -638,7 +638,7 @@ describes.fakeWin(
         expect(preloadStub).to.not.be.called;
         return loadPromise(win)
           .then(() => {
-            return viewer.whenFirstVisible();
+            return ampdoc.whenFirstVisible();
           })
           .then(() => {
             expect(preloadStub).to.be.calledOnce;

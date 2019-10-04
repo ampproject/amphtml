@@ -33,17 +33,11 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
     sandbox = sinon.sandbox;
 
     viewer = {
-      getParam: param => {
-        if (param == 'dialog') {
-          return '1';
-        }
-        return null;
-      },
       sendMessageAwaitResponse: () => {},
     };
 
     windowApi = {
-      services: {
+      __AMP_SERVICES: {
         'viewer': {obj: viewer},
       },
       screen: {width: 1000, height: 1000},
@@ -67,6 +61,12 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
     windowApi.document.defaultView = windowApi;
     installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
+    sandbox.stub(ampdoc, 'getParam').callsFake(param => {
+      if (param == 'dialog') {
+        return '1';
+      }
+      return null;
+    });
   });
 
   afterEach(() => {
@@ -170,11 +170,10 @@ describes.sandboxed('WebLoginDialog', {}, () => {
     clock = sandbox.useFakeTimers();
 
     viewer = {
-      getParam: () => null,
       getResolvedViewerUrl: () => 'http://localhost:8000/test-login-dialog',
     };
     const windowObj = {
-      services: {
+      __AMP_SERVICES: {
         'viewer': {obj: viewer},
       },
       open: () => {},
@@ -206,6 +205,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
     windowMock = sandbox.mock(windowApi);
     installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
+    sandbox.stub(ampdoc, 'getParam').returns(null);
 
     dialogUrl = null;
     dialog = {

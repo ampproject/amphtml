@@ -134,6 +134,9 @@ export class AmpForm {
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = Services.ampdoc(this.form_);
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
 
@@ -143,10 +146,10 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
 
     /**
@@ -359,7 +362,7 @@ export class AmpForm {
 
   /** @private */
   installEventHandlers_() {
-    this.viewer_.whenNextVisible().then(() => {
+    this.ampdoc_.whenNextVisible().then(() => {
       const autofocus = this.form_.querySelector('[autofocus]');
       if (autofocus) {
         tryFocus(autofocus);

@@ -51,6 +51,7 @@ describe('AMPHTML ad on AMP Page', () => {
     {
       amp: true,
       extensions: ['amp-ad'],
+      frameStyle: 'height: 100vh',
       body: `
   <div style="height: 100vh"></div>
   <amp-ad
@@ -65,13 +66,6 @@ describe('AMPHTML ad on AMP Page', () => {
       `,
     },
     env => {
-      beforeEach(() => {
-        // TODO: This happens after the test page is fully rendered, so there's
-        // a split second where the test iframe is not yet resized; that's
-        // enough to trigger viewability on Safari. Fix this to unskip
-        env.iframe.style.height = '100vh';
-      });
-
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
         return testAmpComponentsBTF(env.win);
@@ -110,6 +104,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
     'BTF',
     {
       amp: false,
+      frameStyle: 'height: 100vh',
       body: `
       <div style="height: 100vh"></div>
       <iframe
@@ -121,13 +116,6 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       `,
     },
     env => {
-      beforeEach(() => {
-        // TODO: This happens after the test page is fully rendered, so there's
-        // a split second where the test iframe is not yet resized; that's
-        // enough to trigger viewability on Safari. Fix this to unskip
-        env.iframe.style.height = '100vh';
-      });
-
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
@@ -188,6 +176,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
   );
 
   // TODO(zombifier): The BTF test fails on Safari (#21311).
+  // TODO(powerivq): Flaky on Firefox and Edge too. unskip. (#24657)
   describes.integration(
     'BTF within friendly frame or safe frame',
     {
@@ -217,27 +206,23 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
         env.win.document.body.removeChild(iframe);
       });
 
-      it.configure()
-        .skipSafari()
-        .run(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within friendly frame',
-          () => {
-            writeFriendlyFrame(env.win.document, iframe, adContent);
-            return testAmpComponentsBTF(env.win);
-          }
-        );
+      it.skip(
+        'should layout amp-img, amp-pixel, ' +
+          'amp-analytics within friendly frame',
+        () => {
+          writeFriendlyFrame(env.win.document, iframe, adContent);
+          return testAmpComponentsBTF(env.win);
+        }
+      );
 
-      it.configure()
-        .skipSafari()
-        .run(
-          'should layout amp-img, amp-pixel, ' +
-            'amp-analytics within safe frame',
-          () => {
-            writeSafeFrame(env.win.document, iframe, adContent);
-            return testAmpComponentsBTF(env.win);
-          }
-        );
+      it.skip(
+        'should layout amp-img, amp-pixel, ' +
+          'amp-analytics within safe frame',
+        () => {
+          writeSafeFrame(env.win.document, iframe, adContent);
+          return testAmpComponentsBTF(env.win);
+        }
+      );
     }
   );
 });

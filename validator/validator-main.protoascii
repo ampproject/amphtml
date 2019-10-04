@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 945
+spec_file_revision: 960
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -1116,6 +1116,40 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
 }
+# This variant of <style amp-custom> is designed to help developers see how
+# close they are to the byte limit, even if the page is passing. By changing
+# the attribute to <style amp-custom-length-check>, this tagspec will be used
+# to match errors. It cannot pass however as it has a cdata.max_bytes set to
+# -1. As a result, it will always fail and report the length found in the
+# tag's cdata. This is a small hack, and may be deleted in the future if there
+# are problems maintaining it. Deleting this tagspec will of course never
+# break any valid AMP documents as if it matches, the page will be invalid.
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  disabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "style amp-custom-length-check"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom-length-check"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    # This will always cause the tagspec matching to fail.
+    max_bytes: -1
+  }
+}
 # For transformed AMP non-data URLs are not counted against the total byte
 # limit for <style amp-custom>. This is done by setting url_bytes_included
 # to false for CdataSpec below.
@@ -1985,7 +2019,6 @@ tags: {
     name: "type"
     value_casei: "text/html"
   }
-  attr_lists: "name-attr"
 }
 
 # 4.5.2 The em element
@@ -5346,7 +5379,7 @@ attr_lists: {
     name: "id"
     mandatory: true
     # When updating this blacklisted_value_regex, also update the entry for
-    # "id" in $GLOBAL_ATTRS.
+    # "id" in $GLOBAL_ATTRS and "id" in "amp-script extension local script".
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -6378,7 +6411,7 @@ attr_lists: {
   attrs: {
     name: "id"
     # When updating this blacklisted_value_regex, also update for
-    # mandatory-id-attr.
+    # mandatory-id-attr and validator-amp-mustache.protoascii.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -6877,6 +6910,10 @@ error_specificity {
   specificity: 120
 }
 error_specificity {
+  code: VALUE_SET_MISMATCH
+  specificity: 121
+}
+error_specificity {
   code: DEV_MODE_ONLY
   # This should always trump any other error. It is asserting
   # that the developer intends for this tag to be an error but
@@ -7347,6 +7384,11 @@ error_formats {
 error_formats {
   code: DOCUMENT_SIZE_LIMIT_EXCEEDED
   format: "Document exceeded %1 bytes limit. Actual size %2 bytes."
+}
+error_formats {
+  code: VALUE_SET_MISMATCH
+  format: "Attribute '%1' in tag '%2' contains a value that does not match any "
+          "other tags on the page."
 }
 error_formats {
   code: DEV_MODE_ONLY

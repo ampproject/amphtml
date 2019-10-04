@@ -12,11 +12,11 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
-    "preinstall": "node ../build-system/check-package-manager.js"
+    "preinstall": "node ../build-system/common/check-package-manager.js"
   },
   "devDependencies": {
-    "google-closure-compiler": "20190729.0.0",
-    "google-closure-library": "20190729.0.0",
-    "jasmine": "3.4.0"
+    "google-closure-compiler": "20190929.0.0",
+    "google-closure-library": "20190929.0.0",
+    "jasmine": "3.5.0"
   }
 }

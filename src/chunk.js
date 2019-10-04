@@ -54,18 +54,18 @@ function chunkServiceForDoc(elementOrAmpDoc) {
  * time to do other things) and may even be further delayed until
  * there is time.
  *
- * @param {!Document} document
+ * @param {!Document|!./service/ampdoc-impl.AmpDoc} doc
  * @param {function(?IdleDeadline)} fn
  * @param {boolean=} opt_makesBodyVisible Pass true if this service makes
  *     the body visible. This is relevant because it may influence the
  *     task scheduling strategy.
  */
-export function startupChunk(document, fn, opt_makesBodyVisible) {
+export function startupChunk(doc, fn, opt_makesBodyVisible) {
   if (deactivated) {
     resolved.then(fn);
     return;
   }
-  const service = chunkServiceForDoc(document.documentElement);
+  const service = chunkServiceForDoc(doc.documentElement || doc);
   service.runForStartup(fn);
   if (opt_makesBodyVisible) {
     service.runForStartup(() => {
@@ -230,8 +230,8 @@ class Task {
    * @protected
    */
   useRequestIdleCallback_() {
-    // By default, always use requestIdleCallback.
-    return true;
+    // By default, never use requestIdleCallback.
+    return false;
   }
 }
 
@@ -247,9 +247,6 @@ class StartupTask extends Task {
    */
   constructor(fn, win, chunks) {
     super(fn);
-
-    /** @private @const */
-    this.win_ = win;
 
     /** @private @const */
     this.chunks_ = chunks;
@@ -270,11 +267,10 @@ class StartupTask extends Task {
 
   /** @override */
   useRequestIdleCallback_() {
-    // We only start using requestIdleCallback when the viewer has
+    // We only start using requestIdleCallback when the core runtime has
     // been initialized. Otherwise we risk starving ourselves
-    // before we get into a state where the viewer can tell us
-    // that we are visible.
-    return !!this.chunks_.viewer;
+    // before the render-critical work is done.
+    return this.chunks_.coreReady_;
   }
 
   /**
@@ -282,16 +278,7 @@ class StartupTask extends Task {
    * @private
    */
   isVisible_() {
-    // Ask the viewer first.
-    if (this.chunks_.viewer) {
-      return this.chunks_.viewer.isVisible();
-    }
-    // There is no viewer yet. Lets try to guess whether we are visible.
-    if (this.win_.document.hidden) {
-      return false;
-    }
-    // Viewers send a URL param if we are not visible.
-    return !/visibilityState=(hidden|prerender)/.test(this.win_.location.hash);
+    return this.chunks_.ampdoc.isVisible();
   }
 }
 
@@ -303,6 +290,8 @@ class Chunks {
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
+    /** @protected @const {!./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampDoc;
     /** @private @const {!Window} */
     this.win_ = ampDoc.win;
     /** @private @const {!PriorityQueue<Task>} */
@@ -335,17 +324,18 @@ class Chunks {
       }
     });
 
-    /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
-    this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
-    /**  @protected {?./service/viewer-impl.Viewer} */
-    this.viewer = null;
-    this.viewerPromise_.then(viewer => {
-      this.viewer = viewer;
-      viewer.onVisibilityChanged(() => {
-        if (viewer.isVisible()) {
-          this.schedule_();
-        }
-      });
+    /** @protected {boolean} */
+    this.coreReady_ = false;
+    Services.viewerPromiseForDoc(ampDoc).then(() => {
+      // Once the viewer has been resolved, most of core runtime has been
+      // initialized as well.
+      this.coreReady_ = true;
+    });
+
+    ampDoc.onVisibilityChanged(() => {
+      if (ampDoc.isVisible()) {
+        this.schedule_();
+      }
     });
   }
 

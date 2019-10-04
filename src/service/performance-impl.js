@@ -21,8 +21,10 @@ import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
 import {isCanary} from '../experiments';
+import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
+import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
 /**
@@ -34,9 +36,6 @@ const QUEUE_LIMIT = 50;
 
 /** @const {string} */
 const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
-
-/** @const {string} */
-const BEFORE_UNLOAD_EVENT = 'beforeunload';
 
 /**
  * Fields:
@@ -85,10 +84,13 @@ export class Performance {
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
-    /** @private {?./viewer-impl.Viewer} */
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = null;
+
+    /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private {?./resources-impl.ResourcesDef} */
+    /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
     /** @private {boolean} */
@@ -145,10 +147,7 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPIv76_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
+    this.supportsLayoutInstabilityAPIv76_ = false;
 
     /**
      * Whether the user agent supports the Layout Instability API that shipped
@@ -156,15 +155,44 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPIv77_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
+    this.supportsLayoutInstabilityAPIv77_ = false;
+
+    /**
+     * Whether the user agent supports the Event Timing API that shipped
+     * with Chrome 76.
+     *
+     * @private {boolean}
+     */
+    this.supportsEventTimingAPIv76_ = false;
+    /**
+     * Whether the user agent supports the Event Timing API that shipped
+     * with Chrome 77.
+     *
+     * @private {boolean}
+     */
+    this.supportsEventTimingAPIv77_ = false;
+
+    const {PerformanceObserver} = this.win;
+    if (PerformanceObserver) {
+      const {supportedEntryTypes} = PerformanceObserver;
+      if (supportedEntryTypes) {
+        this.supportsLayoutInstabilityAPIv76_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'layoutShift'
+        );
+        this.supportsLayoutInstabilityAPIv77_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'layout-shift'
+        );
+        this.supportsEventTimingAPIv76_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'firstInput'
+        );
+        this.supportsEventTimingAPIv77_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'first-input'
+        );
+      }
+    }
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
-    this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
-    this.boundTickLayoutShiftScore_ = this.tickLayoutShiftScore_.bind(this);
-    this.onViewerVisibilityChange_ = this.onViewerVisibilityChange_.bind(this);
+    this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
@@ -189,6 +217,7 @@ export class Performance {
    */
   coreServicesAvailable() {
     const {documentElement} = this.win.document;
+    this.ampdoc_ = Services.ampdoc(documentElement);
     this.viewer_ = Services.viewerForDoc(documentElement);
     this.resources_ = Services.resourcesForDoc(documentElement);
 
@@ -196,7 +225,7 @@ export class Performance {
       this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
 
     // This is for redundancy. Call flush on any visibility change.
-    this.viewer_.onVisibilityChanged(this.flush.bind(this));
+    this.ampdoc_.onVisibilityChanged(this.flush.bind(this));
 
     // Does not need to wait for messaging ready since it will be queued
     // if it isn't ready.
@@ -206,7 +235,7 @@ export class Performance {
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
 
-    this.viewer_.whenFirstVisible().then(() => {
+    this.ampdoc_.whenFirstVisible().then(() => {
       this.tick('ofv');
       this.flush();
     });
@@ -220,19 +249,7 @@ export class Performance {
         {capture: true}
       );
 
-      // Safari does not reliably fire the `pagehide` or `visibilitychange`
-      // events when closing a tab, so we have to use `beforeunload`.
-      // See https://bugs.webkit.org/show_bug.cgi?id=151234
-      const platform = Services.platformFor(this.win);
-      if (platform.isSafari()) {
-        // TODO(#23634): Remove, explain or adjust the usage of the unload listener
-        this.win.addEventListener(
-          BEFORE_UNLOAD_EVENT,
-          this.boundTickLayoutJankScore_
-        );
-      }
-
-      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
+      this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
     }
 
     if (
@@ -247,18 +264,7 @@ export class Performance {
         {capture: true}
       );
 
-      // Safari does not reliably fire the `pagehide` or `visibilitychange`
-      // events when closing a tab, so we have to use `beforeunload`.
-      // See https://bugs.webkit.org/show_bug.cgi?id=151234
-      const platform = Services.platformFor(this.win);
-      if (platform.isSafari()) {
-        this.win.addEventListener(
-          BEFORE_UNLOAD_EVENT,
-          this.boundTickLayoutShiftScore_
-        );
-      }
-
-      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
+      this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
     }
 
     // We don't check `isPerformanceTrackingOn` here since there are some
@@ -269,18 +275,36 @@ export class Performance {
       return Promise.resolve();
     }
 
-    return channelPromise.then(() => {
-      this.isMessagingReady_ = true;
+    return channelPromise
+      .then(() => {
+        // Tick the "messaging ready" signal.
+        this.tickDelta('msr', this.win.Date.now() - this.initTime_);
 
-      // Tick the "messaging ready" signal.
-      this.tickDelta('msr', this.win.Date.now() - this.initTime_);
+        return this.maybeAddStoryExperimentId_();
+      })
+      .then(() => {
+        this.isMessagingReady_ = true;
 
-      // Forward all queued ticks to the viewer since messaging
-      // is now ready.
-      this.flushQueuedTicks_();
+        // Forward all queued ticks to the viewer since messaging
+        // is now ready.
+        this.flushQueuedTicks_();
 
-      // Send all csi ticks through.
-      this.flush();
+        // Send all csi ticks through.
+        this.flush();
+      });
+  }
+
+  /**
+   * Add a story experiment ID in order to slice the data for amp-story.
+   * @return {!Promise}
+   * @private
+   */
+  maybeAddStoryExperimentId_() {
+    const ampdoc = Services.ampdocServiceFor(this.win).getSingleDoc();
+    return isStoryDocument(ampdoc).then(isStory => {
+      if (isStory) {
+        this.addEnabledExperiment('story');
+      }
     });
   }
 
@@ -317,7 +341,11 @@ export class Performance {
       ) {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
-      } else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
+      } else if (
+        (entry.entryType === 'firstInput' ||
+          entry.entryType === 'first-input') &&
+        !recordedFirstInputDelay
+      ) {
         this.tickDelta('fid', entry.processingStart - entry.startTime);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layoutJank') {
@@ -342,12 +370,23 @@ export class Performance {
       entryTypesToObserve.push('paint');
     }
 
-    if (this.win.PerformanceEventTiming) {
+    if (this.supportsEventTimingAPIv76_) {
       // Programmatically read once as currently PerformanceObserver does not
       // report past entries as of Chrome 61.
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance.getEntriesByType('firstInput').forEach(processEntry);
       entryTypesToObserve.push('firstInput');
+    }
+
+    if (this.supportsEventTimingAPIv77_) {
+      // It's preferred to read first input delay entries that already occurred
+      // through the `buffered: true` flag, so create a separate
+      // PerformanceObserver to read this metric.
+      const firstInputObserver = new this.win.PerformanceObserver(list => {
+        list.getEntries().forEach(processEntry);
+        this.flush();
+      });
+      firstInputObserver.observe({type: 'first-input', buffered: true});
     }
 
     if (this.win.PerformanceLayoutJank) {
@@ -418,6 +457,7 @@ export class Performance {
   /**
    * When the visibility state of the document changes to hidden,
    * send the layout jank score.
+   * @private
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
@@ -436,9 +476,10 @@ export class Performance {
   /**
    * When the viewer visibility state of the document changes to inactive,
    * send the layout jank score.
+   * @private
    */
-  onViewerVisibilityChange_() {
-    if (this.viewer_.getVisibilityState() === VisibilityState.INACTIVE) {
+  onAmpDocVisibilityChange_() {
+    if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
       if (this.win.PerformanceLayoutJank) {
         this.tickLayoutJankScore_();
       }
@@ -479,10 +520,6 @@ export class Performance {
         this.boundOnVisibilityChange_,
         {capture: true}
       );
-      this.win.removeEventListener(
-        BEFORE_UNLOAD_EVENT,
-        this.boundTickLayoutJankScore_
-      );
     }
   }
 
@@ -513,10 +550,6 @@ export class Performance {
         VISIBILITY_CHANGE_EVENT,
         this.boundOnVisibilityChange_,
         {capture: true}
-      );
-      this.win.removeEventListener(
-        BEFORE_UNLOAD_EVENT,
-        this.boundTickLayoutShiftScore_
       );
     }
   }
@@ -554,12 +587,12 @@ export class Performance {
    * @private
    */
   measureUserPerceivedVisualCompletenessTime_() {
-    const didStartInPrerender = !this.viewer_.hasBeenVisible();
+    const didStartInPrerender = !this.ampdoc_.hasBeenVisible();
     let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
-    // This will only be relevant if the viewer is in prerender mode.
+    // This will only be relevant if the ampdoc is in prerender mode.
     // (hasn't been visible yet, ever at this point)
-    this.viewer_.whenFirstVisible().then(() => {
+    this.ampdoc_.whenFirstVisible().then(() => {
       docVisibleTime = this.win.Date.now();
       // Mark this first visible instance in the browser timeline.
       this.mark('visible');
@@ -572,7 +605,7 @@ export class Performance {
             ? this.win.Date.now() - docVisibleTime
             : //  Prerender was complete before visibility.
               0;
-        this.viewer_.whenFirstVisible().then(() => {
+        this.ampdoc_.whenFirstVisible().then(() => {
           // We only tick this if the page eventually becomes visible,
           // since otherwise we heavily skew the metric towards the
           // 0 case, since pre-renders that are never used are highly
@@ -605,9 +638,14 @@ export class Performance {
     const {documentElement} = this.win.document;
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
-    return this.resources_
-      .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
-      .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+    return this.resources_.whenFirstPass().then(() => {
+      return whenContentIniLoad(
+        documentElement,
+        this.win,
+        rect,
+        /* isInPrerender */ true
+      );
+    });
   }
 
   /**
@@ -689,7 +727,7 @@ export class Performance {
    */
   tickSinceVisible(label) {
     const now = this.win.Date.now();
-    const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
+    const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }

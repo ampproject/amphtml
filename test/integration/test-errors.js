@@ -27,8 +27,7 @@ const t = describe
   .configure()
   .retryOnSaucelabs()
   // TODO(@cramforce): Find out why it does not work with obfuscated props.
-  .skipIfPropertiesObfuscated()
-  .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+  .skipIfPropertiesObfuscated();
 
 t.run('error page', function() {
   this.timeout(TIMEOUT);

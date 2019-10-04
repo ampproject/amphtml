@@ -20,7 +20,7 @@ You can view the translations provided for each language in [this spreadsheet](h
 
 # Adding new strings (English)
 
-1. Add a new string ID in [`LocalizedStringId`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/1.0/localization.js#L32).  Keep the `LocalizedStringId` list in alphabetical order, and make sure your ID's name is clear about what it represents semantically.
+1. Add a new string ID in [`LocalizedStringId`](https://github.com/ampproject/amphtml/blob/master/src/localized-strings.js#L31).  Keep the `LocalizedStringId` list in alphabetical order, and make sure your ID's name is clear about what it represents semantically.
 2. Open the [`en.js` file](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/1.0/_locales/en.js)
 3. Add a new object key with the `LocalizedStringId` as the key, and an object containing the string and its description as its value.  For example:
 

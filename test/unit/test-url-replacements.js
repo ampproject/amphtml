@@ -63,6 +63,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      iframe.win.__AMP_SERVICES.documentInfo = null;
       installDocumentInfoServiceForDoc(iframe.ampdoc);
       resetScheduledElementForTesting(iframe.win, 'amp-analytics');
       resetScheduledElementForTesting(iframe.win, 'amp-experiment');
@@ -187,7 +188,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
           array[15] = 15;
         },
       },
-      services: {
+      __AMP_SERVICES: {
         'viewport': {obj: {}},
         'cid': {
           promise: Promise.resolve({
@@ -209,6 +210,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     };
     installDocService(win, /* isSingleDoc */ true);
     const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
+    win.__AMP_SERVICES.documentInfo = null;
     installDocumentInfoServiceForDoc(ampdoc);
     win.ampdoc = ampdoc;
     installUrlReplacementsServiceForDoc(ampdoc);
@@ -274,15 +276,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
     });
 
-  it.configure()
-    .skipFirefox()
-    .run('should replace DOCUMENT_REFERRER', () => {
-      return expandUrlAsync('?ref=DOCUMENT_REFERRER').then(res => {
-        expect(res).to.equal(
-          '?ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html'
-        );
-      });
-    });
+  it('should replace DOCUMENT_REFERRER', async () => {
+    const replacements = await getReplacements();
+    sandbox
+      .stub(viewerService, 'getReferrerUrl')
+      .returns('http://fake.example/?foo=bar');
+    const res = await replacements.expandUrlAsync('?ref=DOCUMENT_REFERRER');
+    expect(res).to.equal('?ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar');
+  });
 
   it('should replace EXTERNAL_REFERRER', () => {
     const windowInterface = mockWindowInterface(sandbox);
@@ -921,9 +922,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 0', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
-      obj: {isVisible: () => true},
-    };
+    const {ampdoc} = win;
+    sandbox.stub(ampdoc, 'isVisible').returns(true);
     return Services.urlReplacementsForDoc(win.document.documentElement)
       .expandUrlAsync('?sh=BACKGROUND_STATE')
       .then(res => {
@@ -933,9 +933,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace BACKGROUND_STATE with 1', () => {
     const win = getFakeWindow();
-    win.services.viewer = {
-      obj: {isVisible: () => false},
-    };
+    const {ampdoc} = win;
+    sandbox.stub(ampdoc, 'isVisible').returns(false);
     return Services.urlReplacementsForDoc(win.document.documentElement)
       .expandUrlAsync('?sh=BACKGROUND_STATE')
       .then(res => {

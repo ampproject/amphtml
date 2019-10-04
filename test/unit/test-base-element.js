@@ -40,7 +40,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should delegate update priority to resources', () => {
-    const resources = win.services.resources.obj;
+    const resources = win.__AMP_SERVICES.resources.obj;
     customElement.getResources = () => resources;
     const updateLayoutPriorityStub = sandbox.stub(
       resources,
@@ -171,7 +171,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should return correct layoutBox', () => {
-    const resources = win.services.resources.obj;
+    const resources = win.__AMP_SERVICES.resources.obj;
     customElement.getResources = () => resources;
     const resource = new Resource(1, customElement, resources);
     sandbox
@@ -191,7 +191,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
   it('should return true for inabox experiment renderOutsideViewport', () => {
     expect(element.renderOutsideViewport()).to.eql(3);
     // Should be true with inabox
-    env.win.AMP_MODE.runtime = 'inabox';
+    env.win.__AMP_MODE.runtime = 'inabox';
     expect(element.renderOutsideViewport()).to.be.true;
   });
 

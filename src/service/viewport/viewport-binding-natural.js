@@ -22,7 +22,6 @@ import {
 } from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
-import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
 
 const TAG_ = 'Viewport';
@@ -57,19 +56,35 @@ export class ViewportBindingNatural_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
+    /**
+     * See `handleScrollEvent_` for details.
+     * @private @const {boolean}
+     */
+    this.resetScrollX_ = this.platform_.isIos() && this.win.parent !== this.win;
+
     /** @const {function()} */
-    this.boundScrollEventListener_ = () => {
-      this.scrollObservable_.fire();
-    };
+    this.boundScrollEventListener_ = this.handleScrollEvent_.bind(this);
 
     // eslint-disable-next-line jsdoc/require-returns
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
-
     dev().fine(TAG_, 'initialized natural viewport');
+  }
+
+  /** @private */
+  handleScrollEvent_() {
+    if (
+      this.resetScrollX_ &&
+      this.getScrollingElement()./*OK*/ scrollLeft > 0
+    ) {
+      // In the iframed iOS Safari case the `touch-action` and
+      // `overscroll-behavior` are not observed which leads to the overscroll
+      // bugs on the horizontal axis. The solution is to reset the horizontal
+      // scrolling in this case. See b/140131460 for more details.
+      this.getScrollingElement()./*OK*/ scrollLeft = 0;
+    }
+    this.scrollObservable_.fire();
   }
 
   /** @override */
@@ -243,10 +258,6 @@ export class ViewportBindingNatural_ {
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const b = el./*OK*/ getBoundingClientRect();
-    if (this.useLayers_) {
-      return layoutRectLtwh(b.left, b.top, b.width, b.height);
-    }
-
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

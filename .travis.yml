@@ -1,9 +1,9 @@
 language: node_js
 dist: xenial
 node_js:
-  - "lts/*"
+  - 'lts/*'
 python:
-  - "2.7"
+  - '2.7'
 notifications:
   email:
     recipients:
@@ -40,51 +40,70 @@ addons:
     # but should not resolve in tests.
     - fonts.googleapis.com
 stages:
-  - build
-  - test
+  - name: build
+  - name: test
+  - name: experiment
+    if: type = push
 jobs:
   include:
     - stage: build
-      name: "Build"
+      name: 'Build'
       script:
         - unbuffer node build-system/pr-check/build.js
     - stage: build
-      name: "Checks"
+      name: 'Checks'
       script:
         - unbuffer node build-system/pr-check/checks.js
     - stage: build
-      name: "Validator Tests"
+      name: 'Validator Tests'
       script:
         - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: "Dist, Bundle Size"
+      name: 'Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
     - stage: test
-      name: "Single Pass Tests"
+      name: 'Single Pass Tests'
       script:
         - unbuffer node build-system/pr-check/single-pass-tests.js
     - stage: test
-      name: "Visual Diff Tests"
+      name: 'Visual Diff Tests'
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
+      env:
+        - CACHE_NAME=VISUALDIFFJOB
     - stage: test
-      name: "Local Tests"
+      name: 'Local Tests'
       script:
         - unbuffer node build-system/pr-check/local-tests.js
     - stage: test
-      name: "Remote (Sauce Labs) Tests"
+      name: 'Remote (Sauce Labs) Tests'
       script:
         - unbuffer node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
         - ps -ef
     - stage: test
-      name: "End to End Tests"
+      name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
-      after_script:
-        - ps -ef
+      env:
+        - CACHE_NAME=E2EJOB
+    - stage: experiment
+      name: "Experiment A Tests"
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
+    - stage: experiment
+      name: "Experiment B Tests"
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
+    - stage: experiment
+      name: "Experiment C Tests"
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
+before_cache:
+  # do not store cache for pr builds
+  - if [[ $TRAVIS_EVENT_TYPE == pull_request ]]; then exit $TRAVIS_TEST_RESULT ; fi
 cache:
   directories:
     - node_modules

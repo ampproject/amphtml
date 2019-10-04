@@ -21,7 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {isExperimentOn} from './experiments';
 import {preconnectForElement} from './preconnect';
 
 /**
@@ -129,10 +128,11 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.multipass.extern.js, this is so closure compiler doesn't
-    reuse the same symbol it would use in the core compilation unit for the
-    private property in the extensions compilation unit's private properties.
-     */
+    build-system/externs/amp.multipass.extern.js. This is so closure compiler
+    doesn't reuse the same symbol it would use in the core compilation unit for
+    the private property in the extensions compilation unit's private
+    properties.
+    */
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -160,19 +160,6 @@ export class BaseElement {
 
     /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectForElement(this.element);
-
-    /** @public {?Object} For use by sub classes */
-    this.config = null;
-
-    /**
-     * The time at which this element was scheduled for layout relative to the
-     * epoch. This value will be set to 0 until the this element has been
-     * scheduled.
-     * Note that this value may change over time if the element is enqueued,
-     * then dequeued and re-enqueued by the scheduler.
-     * @public {number}
-     */
-    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -413,6 +400,18 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to indicate that it is has
+   * render-blocking service.
+   *
+   * The return value of this function is used to determine if the element
+   * built _and_ laid out will be prioritized.
+   * @return {boolean}
+   */
+  isBuildRenderBlocking() {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
@@ -559,21 +558,6 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the element that its activation is requested based on some
-   * user event. Intended to be implemented by actual components.
-   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
-   */
-  activate(unusedInvocation) {}
-
-  /**
-   * Minimum event trust required for activate().
-   * @return {ActionTrust}
-   */
-  activationTrust() {
-    return ActionTrust.HIGH;
-  }
-
-  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
    * and 'error' events.
    * @param {T} element
@@ -654,14 +638,6 @@ export class BaseElement {
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
     }
-  }
-
-  /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    return this.win.devicePixelRatio || 1;
   }
 
   /**
@@ -1028,21 +1004,5 @@ export class BaseElement {
    */
   user() {
     return user(this.element);
-  }
-
-  /**
-   * Declares a child element (or ourselves) as a Layer
-   * @param {!Element=} opt_element
-   * @return {undefined}
-   */
-  declareLayer(opt_element) {
-    devAssert(
-      isExperimentOn(this.win, 'layers'),
-      'Layers must be enabled to declare layer.'
-    );
-    if (opt_element) {
-      devAssert(this.element.contains(opt_element));
-    }
-    return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }

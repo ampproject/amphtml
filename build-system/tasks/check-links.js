@@ -21,9 +21,12 @@ const fs = require('fs-extra');
 const log = require('fancy-log');
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
-const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
+const {
+  gitDiffAddedNameOnlyMaster,
+  gitDiffNameOnlyMaster,
+} = require('../common/git');
 const {green, magenta, red, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 /**

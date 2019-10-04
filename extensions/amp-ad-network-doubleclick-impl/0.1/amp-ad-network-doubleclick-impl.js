@@ -22,7 +22,12 @@
 
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {
-  ADX_ADY_EXP,
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
+import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -42,12 +47,6 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
@@ -70,6 +69,7 @@ import {
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
+import {WindowInterface} from '../../../src/window-interface';
 import {
   createElementWithAttributes,
   isRTL,
@@ -366,12 +366,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
-    if (
-      !isCdnProxy(this.win) &&
-      !isExperimentOn(this.win, 'expDfpInvOrigDeprecated')
-    ) {
-      this.experimentIds.push('21060933');
-    }
     let forcedExperimentId;
     if (urlExperimentId) {
       forcedExperimentId = {
@@ -403,10 +397,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       [FLEXIBLE_AD_SLOTS_EXP]: {
         isTrafficEligible: () => true,
         branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
-      },
-      [[ADX_ADY_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
       },
       [[FIE_CSS_CLEANUP_EXP.branch]]: {
         isTrafficEligible: () => true,
@@ -482,7 +472,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
       ].some(eid => this.experimentIds.indexOf(eid) >= 0);
-    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
@@ -522,7 +512,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           : null,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
-      'u_sd': this.win.devicePixelRatio,
+      'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
     };
@@ -1063,7 +1053,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       devAssert(this.iframe);
       Navigation.installAnchorClickInterceptor(
         this.getAmpDoc(),
-        this.iframe.contentWindow
+        devAssert(this.iframe.contentWindow)
       );
     }
     if (this.ampAnalyticsConfig_) {
@@ -1301,12 +1291,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // setStyles cannot have computed style names, so we must do this by cases.
     if (isRtl) {
       setStyles(this.element, {
-        'z-index': '30',
+        'z-index': '11',
         'margin-right': `${Math.round(newMargin)}px`,
       });
     } else {
       setStyles(this.element, {
-        'z-index': '30',
+        'z-index': '11',
         'margin-left': `${Math.round(newMargin)}px`,
       });
     }

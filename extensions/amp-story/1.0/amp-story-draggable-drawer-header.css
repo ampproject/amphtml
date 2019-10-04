@@ -32,15 +32,17 @@
 
 .i-amphtml-story-page-attachment-close-button {
   display: block !important;
-  margin: 8px !important;
+  padding: 8px !important;
   height: 24px !important;
   width: 24px !important;
+  background-origin: content-box !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(0, 0, 0, 0.54)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+  background-repeat: no-repeat !important;
   color: rgba(0, 0, 0, 0.87) !important;
   cursor: pointer !important;
 }
 
-.i-amphtml-story-page-attachment-theme-dark .i-amphtml-story-page-attachment-close-button {
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-close-button {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.54)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
 }
 
@@ -59,7 +61,7 @@
 
 /** Overrides. */
 
-.i-amphtml-story-page-attachment-theme-dark .i-amphtml-story-page-attachment-title {
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-page-attachment-title {
   color: #fff !important;
 }
 

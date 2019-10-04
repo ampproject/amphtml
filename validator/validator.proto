@@ -75,7 +75,7 @@ message CssDeclaration {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 25
+// NEXT AVAILABLE TAG: 27
 message AttrSpec {
   // If provided, the Type Identifier(s) that either enable or disable
   // this AttrSpec. If a Type Identifier is in enabled_by then this
@@ -118,6 +118,23 @@ message AttrSpec {
   // validates against a list of properties (see PropertySpec).
   optional PropertySpecList value_properties = 11;
   // } end oneof
+
+  // These two fields specify that values from one AttrSpec refer to values from
+  // another AttrSpec elsewhere on the page; validator will verify the
+  // references are not "dangling". These references may appear before or after
+  // their referents.
+  //
+  // For example, in the "id" AttrSpec in the "template" TagSpec, we have:
+  //   add_value_to_set: TEMPLATE_IDS
+  // and in any "template" AttrSpec, we have:
+  //   value_oneof_set: TEMPLATE_IDS
+  enum ValueSet {
+    UNKNOWN_VALUESET = 0;  // Never used
+    TEMPLATE_IDS = 1;  // <template id> values
+    AMP_SCRIPT_IDS = 2; // <script id> values, referenced by <amp-script>
+  }
+  optional ValueSet add_value_to_set = 25;
+  optional ValueSet value_oneof_set = 26;
 
   optional AttrTriggerSpec trigger = 16;
 
@@ -247,7 +264,7 @@ message CssSpec {
 // NEXT AVAILABLE TAG: 10
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
-  optional int32 max_bytes = 1 [default = -1];
+  optional int32 max_bytes = 1 [default = -2];
   // If false, bytes inside URLs are not included in the byte calculation for
   // max_bytes. This is used for handling signed exchange transformations which
   // can potentially take the number of bytes over the 50,000 byte limit due
@@ -729,7 +746,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 110
+  // NEXT AVAILABLE TAG: 111
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -804,6 +821,7 @@ message ValidationError {
     INVALID_UTF8 = 96;
     DOCUMENT_SIZE_LIMIT_EXCEEDED = 108;
     DEV_MODE_ONLY = 109;
+    VALUE_SET_MISMATCH = 110;
 
     CSS_SYNTAX_INVALID_AT_RULE = 29;
     CSS_SYNTAX_STRAY_TRAILING_BACKSLASH = 38;
@@ -877,6 +895,27 @@ message ErrorFormat {
   optional string format = 2;
 }
 
+// A value to be added to a particular ValueSet, as found when scanning the
+// document (i.e. AttrSpec.add_value_to_set).
+message ValueSetProvision {
+  // The collection to add the attribute value to.
+  optional AttrSpec.ValueSet set = 1;
+  // The value of the attribute itself.
+  optional string value = 2;
+}
+// A requirement that a particular value appears in a particular ValueSet (i.e.
+// AttrSpec.value_oneof_set). All the provisions and requirements are collected
+// until the document has been fully scanned, and then compared to ensure that
+// all requirements are met. This allows provisions to appear after (or even
+// alongside) requirements.
+message ValueSetRequirement {
+  // The provision that is required.
+  optional ValueSetProvision provision = 1;
+  // The error that will appear if the requirement is not met. This includes the
+  // line/col of the attribute that makes the requirement.
+  optional ValidationError error_if_unsatisfied = 2;
+}
+
 // The validation result provided by Validator instances (see Validator::Result
 // in validator.h). To render such a proto see RenderValidationResult.
 message ValidationResult {
@@ -901,6 +940,14 @@ message ValidationResult {
   // type that has yet to be defined. These are declared on the HTML tag and
   // parsed by the Validator Engine.
   repeated string type_identifier = 5;
+  // The set of provisions from all matching AttrSpecs in this TagSpec match.
+  // If the TagSpec is selected, these will be added to the final set of
+  // provisions.
+  repeated ValueSetProvision value_set_provisions = 7;
+  // The set of requirements from all matching AttrSpecs in this TagSpec match.
+  // If the TagSpec is selected, these will be added to the final set of
+  // requirements.
+  repeated ValueSetRequirement value_set_requirements = 8;
 }
 
 // Information about the validator returned by ValidatorFactory

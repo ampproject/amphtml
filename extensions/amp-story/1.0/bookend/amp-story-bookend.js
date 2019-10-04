@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface';
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
+import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
 import {
@@ -34,7 +37,7 @@ import {
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../../src/localized-strings';
 import {Services} from '../../../../src/services';
-import {closest} from '../../../../src/dom';
+import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
@@ -211,6 +214,12 @@ export class AmpStoryBookend extends DraggableDrawer {
 
     /** @private {?ScrollableShareWidget} */
     this.shareWidget_ = null;
+
+    /** @private {!../story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win, this.element);
+
+    /** @const @private {!../variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(this.win);
   }
 
   /**
@@ -288,7 +297,13 @@ export class AmpStoryBookend extends DraggableDrawer {
   initializeListeners_() {
     super.initializeListeners_();
 
-    this.element.addEventListener('click', event => this.onClick_(event));
+    this.element.addEventListener('click', event =>
+      this.onOuterShadowClick_(event)
+    );
+
+    this.getShadowRoot().addEventListener('click', event => {
+      this.onInnerShadowClick_(event);
+    });
 
     this.replayButton_.addEventListener('click', event =>
       this.onReplayButtonClick_(event)
@@ -502,23 +517,29 @@ export class AmpStoryBookend extends DraggableDrawer {
   }
 
   /**
-   * Handles click events on the bookend:
-   *   - Closes bookend if tapping outside usable area
-   *   - Forwards AMP actions
+   * Reacts to clicks outside the shadow root.
    * @param {!Event} event
    * @private
    */
-  onClick_(event) {
+  onOuterShadowClick_(event) {
     const target = dev().assertElement(event.target);
-    if (this.elementOutsideUsableArea_(target)) {
+    if (this.elementOutsideBookend_(target)) {
       event.stopPropagation();
       this.storeService_.dispatch(Action.TOGGLE_BOOKEND, false);
       return;
     }
+  }
 
-    // Pass custom target so that linker can see it, otherwise it would see
-    // the entire shadow DOM tree and not know what target to choose.
+  /**
+   * Reacts to clicks inside the shadow root.
+   * @param {!Event} event
+   * @private
+   */
+  onInnerShadowClick_(event) {
+    const target = dev().assertElement(event.target);
     event[AMP_CUSTOM_LINKER_TARGET] = target;
+
+    this.fireAnalyticsEvent_(target);
 
     if (target.hasAttribute('on')) {
       const actionService = Services.actionServiceForDoc(this.element);
@@ -527,11 +548,43 @@ export class AmpStoryBookend extends DraggableDrawer {
   }
 
   /**
+   * Configures analytics variables and fires analytic event.
+   * @param {!Element} target
+   * @private
+   */
+  fireAnalyticsEvent_(target) {
+    const anchorEl = closestAncestorElementBySelector(target, 'A');
+    if (!anchorEl) {
+      return;
+    }
+
+    const componentData = anchorEl[AMP_STORY_BOOKEND_COMPONENT_DATA];
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_TARGET_HREF,
+      anchorEl.href
+    );
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_COMPONENT_TYPE,
+      componentData.type
+    );
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.BOOKEND_COMPONENT_POSITION,
+      componentData.position
+    );
+
+    this.analyticsService_.triggerEvent(AnalyticsEvent.BOOKEND_CLICK);
+  }
+
+  /**
+   * Returns true if element is outside the bookend.
    * @param {!Element} el
    * @return {boolean}
    * @private
    */
-  elementOutsideUsableArea_(el) {
+  elementOutsideBookend_(el) {
     return !closest(el, el => el === this.shadowHost_);
   }
 
@@ -569,6 +622,10 @@ export class AmpStoryBookend extends DraggableDrawer {
    */
   renderComponents_(components) {
     dev().assertElement(this.bookendEl_, 'Error rendering amp-story-bookend.');
+
+    if (!components.length) {
+      return Promise.resolve();
+    }
 
     return Services.localizationServiceForOrNull(this.win)
       .then(localizationService => {

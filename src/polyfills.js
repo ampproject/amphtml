@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/** @fileoverview @suppress {suspiciousCode} */
+/** @fileoverview */
 
 import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
@@ -28,7 +28,6 @@ import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
-import {isExperimentOn} from './experiments';
 
 installFetch(self);
 installMathSign(self);
@@ -43,13 +42,10 @@ if (self.document) {
   installDocContains(self);
   installGetBoundingClientRect(self);
 
-  // isExperimentOn() must be called after Object.assign polyfill is installed.
-  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
-  // is DCE'd from production builds. Note: When the hack is removed, remove the
-  // @suppress {suspiciousCode} annotation at the top of this file.
   // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
   if (
-    (false && isExperimentOn(self, 'custom-elements-v1')) ||
+    // eslint-disable-next-line no-undef
+    CUSTOM_ELEMENTS_V1 ||
     (getMode().test && !getMode().testIe)
   ) {
     installCustomElements(self);

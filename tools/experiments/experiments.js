@@ -17,8 +17,8 @@
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
 import {Deferred} from '../../src/utils/promise';
+import {SameSite, getCookie, setCookie} from '../../src/cookies';
 import {devAssert, initLogConstructor, setReportError} from '../../src/log';
-import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
@@ -37,7 +37,8 @@ const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
  * @typedef {{
  *   id: string,
  *   name: string,
- *   spec: string
+ *   spec: string,
+ *   cleanupIssue: string,
  * }}
  */
 let ExperimentDef;
@@ -111,17 +112,16 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
-    id: 'amp-lightbox-gallery-base-carousel',
-    name: 'Uses amp-base-carousel in amp-lightbox-gallery',
-    spec: 'https://github.com/ampproject/amphtml/issues/21568',
-  },
-  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-google-vrview-image/amp-google-vrview-image.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
+  },
+  {
+    id: 'amp-sidebar-v2',
+    name: 'Updated sidebar component with nested menu and animations',
   },
   {
     id: 'ampdoc-fie',
@@ -174,16 +174,6 @@ const EXPERIMENTS = [
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
-  },
-  {
-    id: 'ios-embed-sd',
-    name:
-      'A new iOS embedded viewport model that wraps the body into' +
-      ' shadow root',
-    spec:
-      'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-      '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
     id: 'ios-scrollable-iframe',
@@ -246,12 +236,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14357',
   },
   {
-    id: 'disable-amp-story-desktop',
-    name: 'Disables responsive desktop experience for the amp-story component',
-    spec: 'https://github.com/ampproject/amphtml/issues/11714',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
-  },
-  {
     id: 'disable-amp-story-default-media',
     name: 'Removes default media for amp-story',
     spec: 'https://github.com/ampproject/amphtml/issues/14535',
@@ -281,22 +265,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'layers',
-    name: 'Enables the new Layers position/measurement system',
-    spec: 'https://github.com/ampproject/amphtml/issues/3434',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15158',
-  },
-  {
     id: 'blurry-placeholder',
     name: 'Enables a blurred image placeholder as an amp-img loads',
     spec: 'https://github.com/ampproject/amphtml/issues/15146',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
-    id: 'custom-elements-v1',
-    name: 'Enable a new custom elements v1 polyfill',
-    spec: 'https://github.com/ampproject/amphtml/pull/17205',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17243',
   },
   {
     id: 'amp-carousel-chrome-scroll-snap',
@@ -347,20 +319,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
-    id: 'inabox-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in inabox rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
-  },
-  {
-    id: 'inabox-no-chunking',
-    name: 'Experiment to disable startup chunking in inabox runtime',
-    spec: 'https://github.com/ampproject/amphtml/issues/23573',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23573',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
@@ -377,17 +335,37 @@ const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'new-loaders',
-    name: 'New default loaders',
-    spec: 'https://github.com/ampproject/amphtml/issues/20237',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
-  },
-  {
     id: 'macro-after-long-task',
     name:
       'If applicable, convert remaining micro tasks to the next macro ' +
       ' tasks if a previous micro task execution took too long',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
+  },
+  {
+    id: 'pausable-iframe',
+    name: 'Use iframe freezing instead of recreating iframes.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24110',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
+  },
+  {
+    id: 'adsense-ad-size-optimization',
+    name:
+      'Per publisher server side settings for changing the ad size ' +
+      'to responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/23568',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
+  },
+  {
+    id: 'fix-inconsistent-responsive-height-selection',
+    name: 'Fix inconsistent responsive height selection.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24166',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
+  },
+  {
+    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
+    name: 'Use amp-ad responsive to make amp auto ads responsive.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24168',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
 ];
 
@@ -569,6 +547,10 @@ function setAmpCanaryCookie_(cookieState) {
     // Set explicit domain, so the cookie gets sent to sub domains.
     domain: location.hostname,
     allowOnProxyOrigin: true,
+    // Make sure the cookie is available for the script loads coming from
+    // other domains. Chrome's default of LAX would otherwise prevent it
+    // from being sent.
+    sameSite: SameSite.NONE,
   };
   setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.

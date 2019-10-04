@@ -119,6 +119,7 @@ const TEMPLATE = {
             'role': 'button',
             'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
         },
         {
           tag: 'div',
@@ -129,6 +130,7 @@ const TEMPLATE = {
             {
               tag: 'div',
               attrs: dict({
+                'role': 'alert',
                 'class': 'i-amphtml-message-container',
               }),
               children: [
@@ -164,6 +166,8 @@ const TEMPLATE = {
                 'role': 'button',
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId:
+                LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
             },
             {
               tag: 'div',
@@ -171,6 +175,8 @@ const TEMPLATE = {
                 'role': 'button',
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId:
+                LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
             },
           ],
         },
@@ -180,6 +186,7 @@ const TEMPLATE = {
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
         },
         {
           tag: 'div',
@@ -187,6 +194,7 @@ const TEMPLATE = {
             'role': 'button',
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
         },
       ],
     },
@@ -235,7 +243,7 @@ export class SystemLayer {
     this.buttonsContainer_ = null;
 
     /** @private @const {!ProgressBar} */
-    this.progressBar_ = ProgressBar.create(win);
+    this.progressBar_ = ProgressBar.create(win, this.parentEl_);
 
     /** @private {!DevelopmentModeLog} */
     this.developerLog_ = DevelopmentModeLog.create(win);
@@ -258,8 +266,9 @@ export class SystemLayer {
 
   /**
    * @return {!Element}
+   * @param {string} initialPageId
    */
-  build() {
+  build(initialPageId) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -278,7 +287,7 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(),
+      this.progressBar_.build(initialPageId),
       this.systemLayerEl_.firstChild
     );
 

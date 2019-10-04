@@ -25,6 +25,7 @@ import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
 import {getPlacementsFromConfigObj} from './placement';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -32,6 +33,14 @@ const TAG = 'amp-auto-ads';
 
 /** @const */
 const AD_TAG = 'amp-ad';
+
+/** @const {!{branch: string, control: string, experiment: string}}
+ */
+export const RESPONSIVE_SIZING_EXP = {
+  branch: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
+  control: '368226530',
+  experiment: '368226531',
+};
 
 export class AmpAutoAds extends AMP.BaseElement {
   /** @override */
@@ -52,8 +61,10 @@ export class AmpAutoAds extends AMP.BaseElement {
       AD_TAG
     );
 
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    const whenVisible = viewer.whenFirstVisible();
+    const whenVisible = this.getAmpDoc().whenFirstVisible();
+    const responsiveSizingBranch = this.getUseResponsiveForResponsiveExperimentBranch(
+      adNetwork.isResponsiveEnabled()
+    );
 
     whenVisible
       .then(() => {
@@ -69,7 +80,11 @@ export class AmpAutoAds extends AMP.BaseElement {
           return;
         }
 
-        const placements = getPlacementsFromConfigObj(ampdoc, configObj);
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          configObj,
+          responsiveSizingBranch
+        );
         const attributes = /** @type {!JsonObject} */ (Object.assign(
           adNetwork.getAttributes(),
           getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
@@ -92,6 +107,27 @@ export class AmpAutoAds extends AMP.BaseElement {
         ));
         new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
       });
+  }
+
+  /**
+   * Selects into the use responsive ads for sizing in auto ads experiment branch.
+   * @param {boolean} isResponsiveEnabled
+   * @return {?string} id of selected branch, if any.
+   */
+  getUseResponsiveForResponsiveExperimentBranch(isResponsiveEnabled) {
+    const experimentInfoMap = /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [[RESPONSIVE_SIZING_EXP.branch]]: {
+        isTrafficEligible: () => isResponsiveEnabled,
+        branches: [
+          [RESPONSIVE_SIZING_EXP.control],
+          [RESPONSIVE_SIZING_EXP.experiment],
+        ],
+      },
+    });
+    return randomlySelectUnsetExperiments(this.win, experimentInfoMap)[
+      RESPONSIVE_SIZING_EXP.branch
+    ];
   }
 
   /** @override */
