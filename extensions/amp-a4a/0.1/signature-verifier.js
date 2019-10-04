@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {dev, devAssert, user} from '../../../src/log';
 import {isArray} from '../../../src/types';
+import {dict} from '../../../src/utils/object';
 
 /** @visibleForTesting */
 export const AMP_SIGNATURE_HEADER = 'AMP-Fast-Fetch-Signature';
@@ -336,7 +337,7 @@ export class SignatureVerifier {
           );
           return response.json().then(
             jsonResponse => {
-              const jwkSet = /** @type {!JsonObject} @forcejsonobjectcast */ (jsonResponse);
+              const jwkSet = dict(/** @type {!Object} @forcejsonobjectcast */ (jsonResponse));
               // This is supposed to be a JSON Web Key Set, as defined in
               // Section 5 of RFC 7517. However, the signing service could
               // misbehave and send an arbitrary JSON value, so we have to

@@ -356,7 +356,7 @@ export class Placement {
    * @private
    */
   createResponsiveAdElement_(baseAttributes) {
-    const attributes = /** @type {!JsonObject} */ (Object.assign(
+    const attributes = jsonObjectAssign(
       dict({
         'width': '100vw',
         'height': '0',
@@ -367,7 +367,7 @@ export class Placement {
       }),
       baseAttributes,
       this.attributes_
-    ));
+    );
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',

@@ -49,7 +49,8 @@ export function map(opt_initial) {
 export function dict(opt_initial) {
   // We do not copy. The linter enforces that the passed in object is a literal
   // and thus the caller cannot have a reference to it.
-  return /** @type {!JsonObject} */ (opt_initial || {});
+  return /** @type {!JsonObject} */ (
+    opt_initial ? Object.assign(map(), opt_initial) : map());
 }
 
 /**
