@@ -1434,7 +1434,7 @@ export class AnalyticsPercentageTracker {
     const duration = video.getDuration();
 
     // Livestreams or videos with no duration information available.
-    if (!duration || isNaN(duration) || duration <= 0) {
+    if (!duration || isNaN(duration) || duration <= 1) {
       return false;
     }
 
