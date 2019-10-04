@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-  <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js"></script>
+  <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>
   <title>My Story</title>
   <meta name="description" content="Get started with amp-story">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -20,135 +20,53 @@
                 {
                   "background-color-test": {
                     "variants": {
-                      "yellow": {
-                        "weight": 50,
-                        "mutations": [
-                          {
-                            "type": "attributes",
-                            "target": "h1",
-                            "attributeName": "style",
-                            "value": "background-color: #FFFF00"
-                          }
-                        ]
-                      },
-                      "red": {
-                        "weight": 50,
-                        "mutations": [
-                          {
-                            "type": "attributes",
-                            "target": "h1",
-                            "attributeName": "style",
-                            "value": "background-color: #FF0000"
-                          }
-                        ]
+                      "yellow": 49,
+                      "red": 49
                       }
                     }
                   }
-                }
             </script>
         </amp-experiment>
 
-        <!-- bare script invalid under amp-story-grid-layer -->
+        <!-- Invalid: bare script not allowed as a child of amp-story-grid-layer -->
         <script type="application/json">
-            {
-              "background-color-test": {
-                "variants": {
-                  "yellow": {
-                    "weight": 50,
-                    "mutations": [
-                      {
-                        "type": "attributes",
-                        "target": "h1",
-                        "attributeName": "style",
-                        "value": "background-color: #FFFF00"
-                      }
-                    ]
-                  },
-                  "red": {
-                    "weight": 50,
-                    "mutations": [
-                      {
-                        "type": "attributes",
-                        "target": "h1",
-                        "attributeName": "style",
-                        "value": "background-color: #FF0000"
-                      }
-                    ]
-                  }
+          {
+            "background-color-test": {
+              "variants": {
+                "yellow": 49,
+                "red": 49
                 }
               }
             }
         </script>
       </amp-story-grid-layer>
 
-        <!-- amp-experiment invalid under amp-story-page -->
-        <amp-experiment>
-            <script type="application/json">
-                {
-                "background-color-test": {
-                    "variants": {
-                    "yellow": {
-                        "weight": 50,
-                        "mutations": [
-                        {
-                            "type": "attributes",
-                            "target": "h1",
-                            "attributeName": "style",
-                            "value": "background-color: #FFFF00"
-                        }
-                        ]
-                    },
-                    "red": {
-                        "weight": 50,
-                        "mutations": [
-                        {
-                            "type": "attributes",
-                            "target": "h1",
-                            "attributeName": "style",
-                            "value": "background-color: #FF0000"
-                        }
-                        ]
-                    }
-                    }
+      <!-- Invalid: amp-experiment not allowed as a child of amp-story-page -->
+      <amp-experiment>
+          <script type="application/json">
+            {
+              "background-color-test": {
+                "variants": {
+                  "yellow": 49,
+                  "red": 49
+                  }
                 }
-                }
-            </script>
-        </amp-experiment>
+              }
+          </script>
+      </amp-experiment>
 
-      <amp-story-cta-layer>
-        <a href="http://www.google.com" class="button"> Call to action!</a>
-      </amp-story-cta-layer>
     </amp-story-page>
-    <!-- amp-experiment invalid under amp-story -->
+
+    <!-- Invalid: amp-experiment not allowed as a child of amp-story -->
     <amp-experiment>
         <script type="application/json">
-            {
+          {
             "background-color-test": {
-                "variants": {
-                "yellow": {
-                    "weight": 50,
-                    "mutations": [
-                    {
-                        "type": "attributes",
-                        "target": "h1",
-                        "attributeName": "style",
-                        "value": "background-color: #FFFF00"
-                    }
-                    ]
-                },
-                "red": {
-                    "weight": 50,
-                    "mutations": [
-                    {
-                        "type": "attributes",
-                        "target": "h1",
-                        "attributeName": "style",
-                        "value": "background-color: #FF0000"
-                    }
-                    ]
+              "variants": {
+                "yellow": 49,
+                "red": 49
                 }
-                }
-            }
+              }
             }
         </script>
     </amp-experiment>
