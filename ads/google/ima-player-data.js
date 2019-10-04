@@ -23,7 +23,7 @@ export class ImaPlayerData {
     this.currentTime = 0;
 
     /* {!Number} */
-    this.duration = NaN;
+    this.duration = 1;
 
     /* {!Array} */
     this.playedRanges = [];
