@@ -600,9 +600,7 @@ export class AmpForm {
           presubmitPromises,
           SUBMIT_TIMEOUT
         ).then(
-          () => {
-            return this.handlePresubmitSuccess_(trust);
-          },
+          () => this.handlePresubmitSuccess_(trust),
           error => this.handlePresubmitError_(error)
         );
       },

@@ -19,7 +19,6 @@ import {
 } from '../../../src/service/payments/amp-payment-google';
 import {CSS} from '../../../build/amp-viewer-gpay-inline-0.1.css';
 import {getServiceForDoc} from '../../../src/service';
-import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const {string} */
 const TAG = 'amp-viewer-gpay-inline';
@@ -50,7 +49,7 @@ export class AmpViewerGpayInline extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return layout == Layout.RESPONSIVE;
   }
 
   /** @override */

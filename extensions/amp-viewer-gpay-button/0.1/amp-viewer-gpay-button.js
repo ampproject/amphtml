@@ -20,6 +20,9 @@ import {getServiceForDoc} from '../../../src/service';
 /** @const {string} */
 const TAG = 'amp-viewer-gpay-button';
 
+/**
+ * The implementation of `amp-viewer-gpay-button` component.
+ */
 class AmpViewerGpayButton extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -28,7 +31,7 @@ class AmpViewerGpayButton extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(unusedLayout) {
-    return true;
+    return layout == Layout.RESPONSIVE;
   }
 
   /** @override */
