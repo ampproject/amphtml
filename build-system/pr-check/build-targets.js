@@ -58,7 +58,8 @@ const targetMatchers = [
     targets: ['CACHES_JSON'],
     func: file => {
       return (
-        file == 'build-system/tasks/json-check.js' || file == 'caches.json'
+        file == 'build-system/tasks/json-check.js' ||
+        file == 'build-system/global-configs/caches.json'
       );
     },
   },

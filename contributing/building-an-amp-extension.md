@@ -745,8 +745,8 @@ Also consider contributing to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to bundles.config.js to tell it about your extension, its files and
-its examples. You will need to add an entry in the `extensionBundles` array.
+changes to [`build-system/compile/bundles.config.js`](../build-system/compile/bundles.config.js) to tell it about your
+extension, its files and its examples. You will need to add an entry in the `extensionBundles` array.
 
 ```javascript
 exports.extensionBundles = [

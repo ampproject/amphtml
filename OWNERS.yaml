@@ -6,7 +6,7 @@
 - "?jridgewell"
 - "**/validator-*.{protoascii,html,out}": "#ampproject/wg-caching"
 - "*.md": ampproject/wg-outreach
-- "{.*,{{babel,bundles}.config,gulpfile}.js,renovate.json}": ampproject/wg-infra
+- "{.*,babel.config.js,gulpfile.js}": ampproject/wg-infra
 - "{package.json,yarn.lock}":
   - ampproject/wg-infra
   - ampproject/wg-runtime
@@ -20,7 +20,7 @@
 # use is complete.
 
 # Though this gives me the ability to approve changes to owners files, I do not
-# currently have merge access; the owners check is currently non-blocking; and 
+# currently have merge access; the owners check is currently non-blocking; and
 # I run and maintain the owners bot application.
 
 # TODO(#24685): Remove this once most owners files have been update and/or the
