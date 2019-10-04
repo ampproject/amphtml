@@ -407,7 +407,7 @@ export class ActionService {
    * @param {ActionHandlerDef} handler
    * @param {ActionTrust} minTrust
    */
-  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.HIGH) {
+  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.DEFAULT) {
     this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 

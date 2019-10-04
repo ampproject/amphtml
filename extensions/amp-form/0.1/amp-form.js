@@ -326,15 +326,19 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return null;
-    }
     if (invocation.method == 'submit') {
-      return this.whenDependenciesReady_().then(() => {
-        return this.handleSubmitAction_(invocation);
-      });
+      // Most actions only require DEFAULT trust, but require HIGH trust
+      // for "submit" to prevent submission loops. This works since submit-*
+      // events are DEFAULT trust (currently only on AMP4EMAIL).
+      if (invocation.satisfiesTrust(ActionTrust.HIGH)) {
+        return this.whenDependenciesReady_().then(() => {
+          return this.handleSubmitAction_(invocation);
+        });
+      }
     } else if (invocation.method === 'clear') {
-      this.handleClearAction_();
+      if (invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+        this.handleClearAction_();
+      }
     }
     return null;
   }
@@ -910,10 +914,10 @@ export class AmpForm {
       // TODO(choumx): Remove this warning before Q1 2020.
       user().warn(
         TAG + ', AMP4EMAIL',
-        '"submit-success and "submit-error" are now "low trust" events. ' +
+        '"submit-success and "submit-error" are no longer "high trust". ' +
           'See https://github.com/ampproject/amphtml/issues/24894.'
       );
-      return ActionTrust.LOW;
+      return ActionTrust.DEFAULT;
     }
     return ActionTrust.HIGH;
   }

@@ -310,7 +310,7 @@ class AmpCarousel extends AMP.BaseElement {
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust == ActionTrust.HIGH
+    return trust >= ActionTrust.DEFAULT
       ? ActionSource.GENERIC_HIGH_TRUST
       : ActionSource.GENERIC_LOW_TRUST;
   }

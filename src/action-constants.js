@@ -40,6 +40,19 @@ export const DEFAULT_ACTION = 'activate';
  * @enum {number}
  */
 export const ActionTrust = {
+  /**
+   * Actions/events that are triggered without a user gesture, or triggered
+   * by a user gesture with weak intent e.g. scroll.
+   */
   LOW: 1,
+  /**
+   * Actions/events that are triggered nearly immediately (up to a few seconds)
+   * after a user gesture with strong intent e.g. tap or swipe.
+   */
+  DEFAULT: 10,
+  /**
+   * Actions/events that are triggered immediately after a user gesture with
+   * strong intent e.g. tap or swipe.
+   */
   HIGH: 100,
 };

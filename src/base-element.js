@@ -587,7 +587,7 @@ export class BaseElement {
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.initActionMap_();
     this.actionMap_[alias] = {handler, minTrust};
   }
@@ -602,7 +602,7 @@ export class BaseElement {
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.HIGH
+    minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
       !this.defaultActionAlias_,

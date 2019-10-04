@@ -51,8 +51,8 @@ export class AmpTruncateText extends AMP.BaseElement {
    * @private
    */
   setupActions_() {
-    this.registerAction('expand', () => this.expand_(), ActionTrust.HIGH);
-    this.registerAction('collapse', () => this.collapse_(), ActionTrust.HIGH);
+    this.registerAction('expand', () => this.expand_());
+    this.registerAction('collapse', () => this.collapse_());
   }
 
   /** @param {!AmpElement} element */
