@@ -470,6 +470,8 @@ export class AmpIframe extends AMP.BaseElement {
       /*opt_allowOpaqueOrigin*/ true
     );
 
+    addEventListener('message', this.listenForPymMessage_.bind(this));
+
     if (this.isClickToPlay_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
@@ -488,6 +490,36 @@ export class AmpIframe extends AMP.BaseElement {
         }, 1000);
       }
     });
+  }
+
+  /**
+   * Listen for Pym.js messages for 'height' and 'width'.
+   *
+   * @see http://blog.apps.npr.org/pym.js/
+   * @param {MessageEvent} event
+   * @private
+   */
+  listenForPymMessage_(event) {
+    if (
+      !this.iframe_ ||
+      event.source !== this.iframe_.contentWindow ||
+      typeof event.data !== 'string' ||
+      'pym' !== event.data.substr(0, 3)
+    ) {
+      return;
+    }
+
+    // The format of the message takes the form of `pym${id}xPYMx${type}xPYMx${message}`.
+    // The id is unnecessary for integration with amp-iframe; the possible types include
+    // 'height', 'width', 'parentPositionInfo', 'navigateTo', and  'scrollToChildPos'.
+    // Only the 'height' and 'width' messages are currently supported.
+    // See <https://github.com/nprapps/pym.js/blob/57feb68/src/pym.js#L85-L102>
+    const args = event.data.split(/xPYMx/).splice(2);
+    if ('height' === args[0]) {
+      this.updateSize_(parseInt(args[1], 10), undefined);
+    } else if ('width' === args[0]) {
+      this.updateSize_(undefined, parseInt(args[1], 10));
+    }
   }
 
   /** @override */
