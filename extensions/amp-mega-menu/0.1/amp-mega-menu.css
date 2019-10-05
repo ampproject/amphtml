@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-header {
-  z-index: 1000 !important;
-  position: relative;
-}
-
 amp-mega-menu {
   z-index: 1000 !important;
   white-space: nowrap !important;
@@ -52,6 +47,11 @@ amp-mega-menu .i-amphtml-mega-menu-item[open] > .i-amphtml-mega-menu-content {
 
 amp-mega-menu .i-amphtml-mega-menu-item:not([open]) .i-amphtml-screen-reader {
   display: none !important;
+}
+
+.i-amphtml-mega-menu-mask-parent {
+  z-index: 1000 !important;
+  position: relative;
 }
 
 .i-amphtml-mega-menu-mask {

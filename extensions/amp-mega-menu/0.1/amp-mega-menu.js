@@ -31,8 +31,17 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/types';
 
+/** @const {string} */
 const TAG = 'amp-mega-menu';
 
+/** @const {string} */
+const SCREEN_READER_CLOSE_LABEL = 'Close the mega menu';
+
+/**
+ * A mega menu component suitable for displaying large collections of links on
+ * desktop/tablets. An amp-list can be nested inside this component to enable
+ * template rendering via dynamically fetched data.
+ */
 export class AmpMegaMenu extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -60,23 +69,27 @@ export class AmpMegaMenu extends AMP.BaseElement {
     this.action_ = null;
 
     /** @private {number|string} */
-    this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
+    this.prefix_ = element.id || Math.floor(Math.random() * 100);
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout === Layout.FIXED_HEIGHT;
   }
 
   /** @override */
   buildCallback() {
+    // TODO(#24898): remove this assert when cleaning up experiment post launch.
     userAssert(
       isExperimentOn(this.win, 'amp-mega-menu'),
       'Turning on the amp-mega-menu experiment is necessary to use the amp-mega-menu component.'
     );
 
     this.action_ = Services.actionServiceForDoc(this.element);
+  }
 
+  /** @override */
+  layoutCallback() {
     this.registerMenuItems_();
     // items may not be present after build if dynamically rendered via amp-list,
     // in which case register them after DOM update instead.
@@ -90,23 +103,32 @@ export class AmpMegaMenu extends AMP.BaseElement {
     // append mask to header so that all children of header appear above the mask
     const maskParent =
       closestAncestorElementBySelector(this.element, 'header') || this.element;
+    maskParent.classList.add('i-amphtml-mega-menu-mask-parent');
     maskParent.appendChild(mask);
     this.maskElement_ = mask;
 
     this.documentElement_.addEventListener('click', () => this.collapse_());
     this.documentElement_.addEventListener('keydown', event => {
       // Collapse mega menu on ESC.
-      if (event.key == Keys.ESCAPE) {
-        if (this.collapse_()) {
-          event.preventDefault();
-        }
+      if (event.key === Keys.ESCAPE && this.collapse_()) {
+        event.preventDefault();
       }
     });
+
+    return Promise.resolve();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    // Ensure that menu is closed when hidden via media query.
+    this.collapse_();
+    return false;
   }
 
   /**
    * Find all expandable menu items under this mega menu and add appropriate
    * classes, attributes and event listeners to its children.
+   * @private
    */
   registerMenuItems_() {
     this.items_ = toArray(scopedQuerySelectorAll(this.element, 'nav > * > li'));
@@ -128,44 +150,56 @@ export class AmpMegaMenu extends AMP.BaseElement {
       ) {
         return;
       }
-      item.classList.add('i-amphtml-mega-menu-item');
-      this.itemCount_++;
-
-      content.classList.add('i-amphtml-mega-menu-content');
-      content.setAttribute('aria-modal', 'false');
-      let contentId = content.getAttribute('id');
-      if (!contentId) {
-        // For accessibility, we need to make sure that each item has a unique ID.
-        // If ID is absent, we use a random number to ensure uniqueness.
-        contentId = this.prefix_ + '_AMP_content_' + this.itemCount_;
-        content.setAttribute('id', contentId);
-      }
-      content.insertBefore(
-        this.createScreenReaderCloseButton(),
-        content.firstChild
-      );
-      // prevent click event listener on document from closing the menu
-      content.addEventListener('click', e => e.stopPropagation());
-
-      heading.classList.add('i-amphtml-mega-menu-heading');
-      // haspopup value not set to menu since content can contain more than links.
-      heading.setAttribute('aria-haspopup', 'dialog');
-      heading.setAttribute('aria-controls', contentId);
-      if (!heading.hasAttribute('tabindex')) {
-        heading.setAttribute('tabindex', 0);
-      }
-      heading.setAttribute('aria-expanded', 'false');
-      heading.addEventListener('click', e => this.handleHeadingClick_(e));
-      // prevent focus on mousedown so that there's no sudden shift in focus
-      // when the content container opens.
-      heading.addEventListener('mousedown', e => e.preventDefault());
-      heading.addEventListener('keydown', e => this.handleHeadingKeyDown_(e));
+      this.registerMenuItem_(item, heading, content);
     });
+  }
+
+  /**
+   * Register the given menu item, along with its heading and content elements.
+   * @param {!Element} item
+   * @param {!Element} heading
+   * @param {!Element} content
+   * @private
+   */
+  registerMenuItem_(item, heading, content) {
+    item.classList.add('i-amphtml-mega-menu-item');
+    this.itemCount_++;
+
+    content.classList.add('i-amphtml-mega-menu-content');
+    content.setAttribute('aria-modal', 'false');
+    let contentId = content.getAttribute('id');
+    if (!contentId) {
+      // For accessibility, we need to make sure that each item has a unique ID.
+      // If ID is absent, we use a random number to ensure uniqueness.
+      contentId = this.prefix_ + '_AMP_content_' + this.itemCount_;
+      content.setAttribute('id', contentId);
+    }
+    content.insertBefore(
+      this.createScreenReaderCloseButton_(),
+      content.firstChild
+    );
+    // prevent click event listener on document from closing the menu
+    content.addEventListener('click', e => e.stopPropagation());
+
+    heading.classList.add('i-amphtml-mega-menu-heading');
+    // haspopup value not set to menu since content can contain more than links.
+    heading.setAttribute('aria-haspopup', 'dialog');
+    heading.setAttribute('aria-controls', contentId);
+    if (!heading.hasAttribute('tabindex')) {
+      heading.setAttribute('tabindex', 0);
+    }
+    heading.setAttribute('aria-expanded', 'false');
+    heading.addEventListener('click', e => this.handleHeadingClick_(e));
+    // prevent focus on mousedown so that there's no sudden shift in focus
+    // when the content container opens.
+    heading.addEventListener('mousedown', e => e.preventDefault());
+    heading.addEventListener('keydown', e => this.handleHeadingKeyDown_(e));
   }
 
   /**
    * Handler for item heading's on-click event to expand/collapse its content.
    * @param {!Event} event click event.
+   * @private
    */
   handleHeadingClick_(event) {
     event.preventDefault();
@@ -180,6 +214,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /**
    * Handler for key presses on an item heading.
    * @param {!Event} event keydown event.
+   * @private
    */
   handleHeadingKeyDown_(event) {
     if (event.defaultPrevented) {
@@ -203,6 +238,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /**
    * Handler for arrow key presses to navigate between menu items.
    * @param {!Event} event keydown event.
+   * @private
    */
   handleNavigationKeyDown_(event) {
     const item = dev().assertElement(event.target.parentElement);
@@ -226,6 +262,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /**
    * Expand the given item to show its menu content.
    * @param {!Element} item
+   * @private
    */
   expand_(item) {
     this.mutateElement(() => {
@@ -249,6 +286,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   /**
    * Collapse any expanded item inside the mega menu.
    * @return {?Element} the item that was previously expanded, if any.
+   * @private
    */
   collapse_() {
     if (!this.expandedItem_) {
@@ -273,6 +311,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * Return the heading of given menu item.
    * @param {!Element} item
    * @return {!Element}
+   * @private
    */
   getItemHeading_(item) {
     const heading = scopedQuerySelector(item, '> .i-amphtml-mega-menu-heading');
@@ -283,6 +322,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * Return the expandable content of given menu item.
    * @param {!Element} item
    * @return {!Element}
+   * @private
    */
   getItemContent_(item) {
     const content = scopedQuerySelector(item, '> .i-amphtml-mega-menu-content');
@@ -293,11 +333,12 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * Creates an "invisible" close button for screen readers to collapse the
    * mega menu.
    * @return {!Element}
+   * @private
    */
-  createScreenReaderCloseButton() {
+  createScreenReaderCloseButton_() {
     const ariaLabel =
       this.element.getAttribute('data-close-button-aria-label') ||
-      'Close the mega menu';
+      SCREEN_READER_CLOSE_LABEL;
 
     // Invisible close button at the end of menu content for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');

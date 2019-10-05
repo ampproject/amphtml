@@ -16,6 +16,7 @@
 
 import '../amp-mega-menu';
 import {Keys} from '../../../../src/utils/key-codes';
+import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
 import {tryFocus} from '../../../../src/dom';
 
@@ -36,6 +37,7 @@ describes.realWin(
       element = getAmpMegaMenu();
       doc.body.appendChild(element);
 
+      // TODO(#24898): remove this toggle when cleaning up experiment post launch.
       toggleExperiment(win, 'amp-mega-menu', true);
     });
 
@@ -43,34 +45,38 @@ describes.realWin(
       const element = doc.createElement('amp-mega-menu');
       element.setAttribute('layout', 'fixed-height');
       element.setAttribute('height', '10');
-      const nav = doc.createElement('nav');
-      const ul = doc.createElement('ul');
+      const nav = htmlFor(doc)`
+        <nav>
+          <ul>
+            <li>
+              <button id="heading1">Menu Item 1</button>
+              <div id="content1" role="dialog">Loreum ipsum</div>
+            </li>
+            <li>
+              <button id="heading2">Menu Item 2</button>
+              <div id="content2" role="dialog">Loreum ipsum</div>
+            </li>
+            <li>
+              <button id="heading3">Menu Item 3</button>
+              <div id="content3" role="dialog">Loreum ipsum</div>
+            </li>
+          </ul>
+        </nav>
+      `;
       element.appendChild(nav);
-      nav.appendChild(ul);
-
-      const items = [1, 2, 3].map(i => {
-        return (
-          `<button id="heading${i}">Menu Item ${i}</button>` +
-          `<div id="content${i}" role="dialog">Loreum ipsum</div>`
-        );
-      });
-
-      for (let i = 0; i < items.length; i++) {
-        const li = doc.createElement('li');
-        li.innerHTML = items[i];
-        ul.appendChild(li);
-      }
       return element;
     }
 
-    it('should create a single mask element in DOM', () => {
-      element.build();
+    it('should create a single mask element in DOM', async () => {
+      await element.build();
+      await element.layoutCallback();
       const maskClass = '.i-amphtml-mega-menu-mask';
       expect(doc.querySelectorAll(maskClass).length).to.equal(1);
     });
 
-    it('should add correct classes for each menu item, heading and content', () => {
-      element.build();
+    it('should add correct classes for each menu item, heading and content', async () => {
+      await element.build();
+      await element.layoutCallback();
       const itemClass = '.i-amphtml-mega-menu-item';
       expect(element.querySelectorAll(itemClass).length).to.equal(3);
       const headingClass = '.i-amphtml-mega-menu-heading';
@@ -79,8 +85,9 @@ describes.realWin(
       expect(element.querySelectorAll(contentClass).length).to.equal(3);
     });
 
-    it('should expand when heading of a collapsed menu item is clicked', () => {
-      element.build();
+    it('should expand when heading of a collapsed menu item is clicked', async () => {
+      await element.build();
+      await element.layoutCallback();
       const heading = doc.getElementById('heading1');
       expect(heading.parentNode.hasAttribute('open')).to.be.false;
       expect(heading.getAttribute('aria-expanded')).to.equal('false');
@@ -90,8 +97,9 @@ describes.realWin(
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
     });
 
-    it('should collapse when heading of a expanded menu item is clicked', () => {
-      element.build();
+    it('should collapse when heading of a expanded menu item is clicked', async () => {
+      await element.build();
+      await element.layoutCallback();
       const heading = doc.getElementById('heading1');
       element.implementation_.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
@@ -102,8 +110,9 @@ describes.realWin(
       expect(heading.getAttribute('aria-expanded')).to.equal('false');
     });
 
-    it('should collapse an expanded menu item when another heading is clicked', () => {
-      element.build();
+    it('should collapse an expanded menu item when another heading is clicked', async () => {
+      await element.build();
+      await element.layoutCallback();
       const heading1 = doc.getElementById('heading1');
       const heading2 = doc.getElementById('heading2');
       element.implementation_.expand_(heading1.parentNode);
@@ -117,8 +126,9 @@ describes.realWin(
       expect(heading2.getAttribute('aria-expanded')).to.equal('true');
     });
 
-    it('should collapse any expanded item after clicking outside the component', () => {
-      element.build();
+    it('should collapse any expanded item after clicking outside the component', async () => {
+      await element.build();
+      await element.layoutCallback();
       const heading = doc.getElementById('heading1');
       element.implementation_.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
@@ -129,8 +139,9 @@ describes.realWin(
       expect(heading.getAttribute('aria-expanded')).to.equal('false');
     });
 
-    it('should not collapse when click is inside the expanded content', () => {
-      element.build();
+    it('should not collapse when click is inside the expanded content', async () => {
+      await element.build();
+      await element.layoutCallback();
       const heading = doc.getElementById('heading1');
       const content = doc.getElementById('content1');
       element.implementation_.expand_(heading.parentNode);
@@ -142,8 +153,21 @@ describes.realWin(
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
     });
 
-    it('should collapse when ESC key is pressed', () => {
-      element.build();
+    it('should collapse any expanded item on component unlayout', async () => {
+      await element.build();
+      await element.layoutCallback();
+      const heading = doc.getElementById('heading1');
+      element.implementation_.expand_(heading.parentNode);
+      expect(heading.parentNode.hasAttribute('open')).to.be.true;
+      expect(heading.getAttribute('aria-expanded')).to.equal('true');
+      await element.unlayoutCallback();
+      expect(heading.parentNode.hasAttribute('open')).to.be.false;
+      expect(heading.getAttribute('aria-expanded')).to.equal('false');
+    });
+
+    it('should collapse when ESC key is pressed', async () => {
+      await element.build();
+      await element.layoutCallback();
       const heading = doc.getElementById('heading1');
       element.implementation_.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
@@ -154,24 +178,24 @@ describes.realWin(
       expect(heading.getAttribute('aria-expanded')).to.equal('false');
     });
 
-    it('should be navigable by left/right arrow keys when a heading has focus', () => {
-      element.build().then(() => {
-        const heading1 = doc.getElementById('heading1');
-        const heading2 = doc.getElementById('heading2');
-        const heading3 = doc.getElementById('heading3');
-        const leftKey = new KeyboardEvent('keydown', {key: Keys.LEFT_ARROW});
-        const rightKey = new KeyboardEvent('keydown', {key: Keys.RIGHT_ARROW});
-        tryFocus(heading1);
-        expect(doc.activeElement).to.equal(heading1);
-        heading1.dispatchEvent(leftKey);
-        expect(doc.activeElement).to.equal(heading3);
-        heading3.dispatchEvent(leftKey);
-        expect(doc.activeElement).to.equal(heading2);
-        heading2.dispatchEvent(rightKey);
-        expect(doc.activeElement).to.equal(heading3);
-        heading3.dispatchEvent(rightKey);
-        expect(doc.activeElement).to.equal(heading1);
-      });
+    it('should be navigable by left/right arrow keys when a heading has focus', async () => {
+      await element.build();
+      await element.layoutCallback();
+      const heading1 = doc.getElementById('heading1');
+      const heading2 = doc.getElementById('heading2');
+      const heading3 = doc.getElementById('heading3');
+      const leftKey = new KeyboardEvent('keydown', {key: Keys.LEFT_ARROW});
+      const rightKey = new KeyboardEvent('keydown', {key: Keys.RIGHT_ARROW});
+      tryFocus(heading1);
+      expect(doc.activeElement).to.equal(heading1);
+      heading1.dispatchEvent(leftKey);
+      expect(doc.activeElement).to.equal(heading3);
+      heading3.dispatchEvent(leftKey);
+      expect(doc.activeElement).to.equal(heading2);
+      heading2.dispatchEvent(rightKey);
+      expect(doc.activeElement).to.equal(heading3);
+      heading3.dispatchEvent(rightKey);
+      expect(doc.activeElement).to.equal(heading1);
     });
   }
 );
