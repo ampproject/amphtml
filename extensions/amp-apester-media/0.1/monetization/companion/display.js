@@ -24,7 +24,7 @@ export function handleCompanionDisplay(media, apesterElement) {
   const {enabled, settings = {}} = companionRawSettings || {};
   if (enabled && settings['bannerAdProvider'] === 'gdt') {
     const slot = settings['slot'];
-    const bannerSizes = settings['bannerSizes'] || [300, 250];
+    const bannerSizes = settings['bannerSizes'] || [[300, 250]];
     const size = {width: bannerSizes[0][0], height: bannerSizes[0][1]};
     constructCompanionDisplayAd(slot, size, apesterElement);
   }
