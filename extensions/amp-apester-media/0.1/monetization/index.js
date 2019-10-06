@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {getConsentData} from './consent-util';
 import {handleCompanionDisplay} from './companion/display';
 import {handleCompanionVideo} from './companion/video';
 /**
  * @param {!JsonObject} media
- * @param {AmpApesterMedia} apesterElement
- * @return {AmpApesterMedia}
+ * @param {AmpElement} apesterElement
+ * @return {Promise}
  */
 export function handleCompanionAds(media, apesterElement) {
-  // Returning promise for testing purposes only
   const monetizationSettings = media['campaignData'];
   if (monetizationSettings && !monetizationSettings.disabledAmpCompanionAds) {
-    handleCompanionDisplay(media, apesterElement);
-    return handleCompanionVideo(media, apesterElement);
+    return getConsentData(apesterElement).then(consentData => {
+      handleCompanionDisplay(media, apesterElement);
+      handleCompanionVideo(media, apesterElement, consentData);
+    });
   }
   return Promise.resolve();
 }
