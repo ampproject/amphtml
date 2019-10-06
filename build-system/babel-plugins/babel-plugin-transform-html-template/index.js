@@ -17,7 +17,7 @@
 const {
   staticTemplateTags,
   staticTemplateFactoryFns,
-} = require('../../static-template-metadata');
+} = require('../static-template-metadata');
 const {minify} = require('html-minifier');
 
 const INSERTED_TEMPLATES = new Map();
