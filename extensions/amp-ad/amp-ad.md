@@ -384,6 +384,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Rubicon Project](../../ads/rubicon.md)
 - [RUNative](../../ads/runative.md)
 - [SAS CI 360 Match](../../ads/sas.md)
+- [Seeding Alliance](../../ads/seedingalliance.md)
 - [Sekindo](../../ads/sekindo.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [SHE Media](../../ads/shemedia.md)
