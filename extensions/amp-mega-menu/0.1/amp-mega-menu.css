@@ -19,7 +19,7 @@ amp-mega-menu {
   white-space: nowrap !important;
 }
 
-amp-mega-menu.i-amphtml-layout-size-defined {
+amp-mega-menu.i-amphtml-layout-size-defined[open] {
   overflow: visible !important;
 }
 

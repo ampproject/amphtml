@@ -28,6 +28,7 @@ import {
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {mod} from '../../../src/utils/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/types';
 
@@ -35,7 +36,7 @@ import {toArray} from '../../../src/types';
 const TAG = 'amp-mega-menu';
 
 /** @const {string} */
-const SCREEN_READER_CLOSE_LABEL = 'Close the mega menu';
+const ARIA_LABEL_CLOSE = 'Close the mega menu';
 
 /**
  * A mega menu component suitable for displaying large collections of links on
@@ -251,10 +252,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
         dir = -dir;
       }
       // If user navigates one past the beginning or end, wrap around.
-      let newIndex = (index + dir) % this.items_.length;
-      if (newIndex < 0) {
-        newIndex += this.items_.length;
-      }
+      const newIndex = mod(index + dir, this.items_.length);
       tryFocus(this.getItemHeading_(this.items_[newIndex]));
     }
   }
@@ -273,6 +271,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
       content.setAttribute('aria-modal', 'true');
     });
     item.setAttribute('open', '');
+    this.element.setAttribute('open', '');
     this.maskElement_.setAttribute('open', '');
     const heading = this.getItemHeading_(item);
     heading.setAttribute('aria-expanded', 'true');
@@ -299,6 +298,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
       content.setAttribute('aria-modal', 'false');
     });
     item.removeAttribute('open');
+    this.element.removeAttribute('open');
     this.maskElement_.removeAttribute('open');
     const heading = this.getItemHeading_(item);
     heading.setAttribute('aria-expanded', 'false');
@@ -338,7 +338,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
   createScreenReaderCloseButton_() {
     const ariaLabel =
       this.element.getAttribute('data-close-button-aria-label') ||
-      SCREEN_READER_CLOSE_LABEL;
+      ARIA_LABEL_CLOSE;
 
     // Invisible close button at the end of menu content for screen-readers.
     const screenReaderCloseButton = this.document_.createElement('button');
