@@ -22,10 +22,11 @@ import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {
   ResponsiveAttributes,
+  getResponsiveAttributeValue,
 } from '../../amp-base-carousel/0.1/responsive-attributes';
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -285,8 +286,10 @@ class AmpStreamGallery extends AMP.BaseElement {
     this.carousel_.updateSnap(false);
     // This is not correct, we really get the computed style of the element
     // and check the direction, but that will force a style calculation.
-    this.carousel_.updateForwards(!isRTL(devAssert(this.element.ownerDocument)));
- 
+    this.carousel_.updateForwards(
+      !isRTL(devAssert(this.element.ownerDocument))
+    );
+
     // Handle the initial set of attributes
     toArray(this.element.attributes).forEach(attr => {
       this.attributeMutated_(attr.name, attr.value);
