@@ -4,10 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        { name: 'itaykinnrot' },
-        { name: 'ampproject/wg-ui-and-a11y' }
-      ]
+      owners: [{ name: 'itaykinnrot' }, { name: 'ampproject/wg-ui-and-a11y' }]
     }
   ]
 }

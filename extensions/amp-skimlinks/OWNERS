@@ -4,11 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        { name: 'slocka' },
-        { name: 'lepunk' },
-        { name: 'choumx' }
-      ]
+      owners: [{ name: 'slocka' }, { name: 'lepunk' }, { name: 'choumx' }]
     }
   ]
 }

@@ -208,6 +208,13 @@
         "process": false,
         "require": false
       }
+    },
+    {
+      "files": ["**/OWNERS"],
+      "rules": {
+        "notice/notice": 0,
+        "no-lone-blocks": 0
+      }
     }
   ]
 }
