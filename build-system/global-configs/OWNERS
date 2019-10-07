@@ -5,8 +5,10 @@
   rules: [
     {
       owners: [
-        { name: 'lannka' },
-        { name: 'jeffkaufman' }
+        {
+          name: 'ampproject/wg-approvers',
+          requestReviews: false
+        }
       ]
     }
   ]
