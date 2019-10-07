@@ -4,10 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        { name: 'ampproject/wg-analytics' },
-        { name: 'avimehta' }
-      ]
+      owners: [{ name: 'ampproject/wg-analytics' }, { name: 'avimehta' }]
     }
   ]
 }
