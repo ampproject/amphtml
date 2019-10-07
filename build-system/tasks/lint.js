@@ -167,12 +167,11 @@ function runLinter(stream, options) {
  * @return {!Array<string>}
  */
 function lintableFilesChanged() {
+  const lintableFiles = deglob.sync(config.lintGlobs);
   return gitDiffNameOnlyMaster().filter(function(file) {
     return (
       fs.existsSync(file) &&
-      deglob
-        .sync(config.lintGlobs)
-        .some(lintableFile => lintableFile.endsWith(file))
+      lintableFiles.some(lintableFile => lintableFile.endsWith(file))
     );
   });
 }
