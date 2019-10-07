@@ -202,6 +202,24 @@ describe('amp-img', () => {
     });
   });
 
+  it('should handle removal of data-* attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'data-pin-img': '/examples/img/x-icon.png',
+      'data-some-value': 'hello-world',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-pin-img')).to.equal(
+        '/examples/img/x-icon.png'
+      );
+      expect(img.getAttribute('data-some-value')).to.equal('hello-world');
+      ampImg.removeAttribute('data-some-value');
+      const impl = ampImg.implementation_;
+      impl.mutatedAttributesCallback({});
+      expect(img.hasAttribute('data-some-value')).to.be.false;
+    });
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
