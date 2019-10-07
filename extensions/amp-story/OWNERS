@@ -5,8 +5,15 @@
   rules: [
     {
       owners: [
-        { name: 'lannka' },
-        { name: 'jeffkaufman' }
+        {
+          name: 'gmajoulet',
+          notify: true
+        },
+        {
+          name: 'newmuis',
+          notify: true
+        },
+        { name: 'enriqe' }
       ]
     }
   ]

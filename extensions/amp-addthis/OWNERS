@@ -5,8 +5,10 @@
   rules: [
     {
       owners: [
-        { name: 'lannka' },
-        { name: 'jeffkaufman' }
+        { name: 'taojing10' },
+        { name: 'dmvjs' },
+        { name: 'pjcunnin' },
+        { name: 'matthinegardner' }
       ]
     }
   ]
