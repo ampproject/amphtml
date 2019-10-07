@@ -34,8 +34,8 @@ tags: {  # amp-anim
   spec_name: "amp-anim extension .js script (AMP4EMAIL)"
   extension_spec: {
     name: "amp-anim"
+    # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }

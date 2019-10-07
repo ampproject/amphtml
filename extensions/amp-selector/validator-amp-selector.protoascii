@@ -32,8 +32,8 @@ tags: {
   spec_name: "SCRIPT[custom-element=amp-selector] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-selector"
+    # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
-    version: "latest"
     requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
