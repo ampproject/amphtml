@@ -390,8 +390,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         });
         expect(impl.element.style[`margin${dirStr}`]).to.equal(testCase.margin);
-        // We use a fixed '30' value for z-index.
-        expect(impl.element.style.zIndex).to.equal('30');
+        // We use a fixed '11' value for z-index.
+        expect(impl.element.style.zIndex).to.equal('11');
       });
     });
   });
@@ -624,6 +624,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('returns the right URL', () => {
+      const viewer = Services.viewerForDoc(element);
+      // inabox-viewer.getReferrerUrl() returns Promise<string>.
+      sandbox
+        .stub(viewer, 'getReferrerUrl')
+        .returns(Promise.resolve('http://fake.example/?foo=bar'));
+
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       const impl2 = new AmpAdNetworkDoubleclickImpl(element);
       impl.setPageviewStateToken('abc');
@@ -664,7 +670,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)eid=([^&]+%2C)*12345678(%2C[^&]+)*(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
-          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
+          /(\?|&)ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/,
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
           /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
@@ -1733,10 +1739,9 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        sandbox.stub(impl, 'getAmpDoc').returns({});
-        sandbox
-          .stub(Services, 'viewerForDoc')
-          .returns({whenFirstVisible: () => new Deferred().promise});
+        sandbox.stub(impl, 'getAmpDoc').returns({
+          whenFirstVisible: () => new Deferred().promise,
+        });
       });
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);

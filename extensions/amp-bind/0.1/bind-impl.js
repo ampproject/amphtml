@@ -200,7 +200,7 @@ export class Bind {
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = this.viewer_
+    this.initializePromise_ = ampdoc
       .whenFirstVisible()
       .then(() => {
         if (opt_win) {
@@ -1134,7 +1134,7 @@ export class Bind {
       // Useful for rendering amp-list with amp-bind state via [src].
       if (
         newValue === undefined ||
-        deepEquals(newValue, previousResult, /* depth */ 10)
+        deepEquals(newValue, previousResult, /* depth */ 20)
       ) {
       } else {
         boundProperty.previousResult = newValue;

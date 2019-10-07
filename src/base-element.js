@@ -128,10 +128,11 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.multipass.extern.js, this is so closure compiler doesn't
-    reuse the same symbol it would use in the core compilation unit for the
-    private property in the extensions compilation unit's private properties.
-     */
+    build-system/externs/amp.multipass.extern.js. This is so closure compiler
+    doesn't reuse the same symbol it would use in the core compilation unit for
+    the private property in the extensions compilation unit's private
+    properties.
+    */
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -399,6 +400,18 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to indicate that it is has
+   * render-blocking service.
+   *
+   * The return value of this function is used to determine if the element
+   * built _and_ laid out will be prioritized.
+   * @return {boolean}
+   */
+  isBuildRenderBlocking() {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
@@ -625,14 +638,6 @@ export class BaseElement {
     if (invocation.satisfiesTrust(minTrust)) {
       return handler(invocation);
     }
-  }
-
-  /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    return this.win.devicePixelRatio || 1;
   }
 
   /**

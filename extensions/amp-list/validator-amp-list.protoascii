@@ -64,6 +64,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "refresh"
   }
   attrs: { name: "credentials" }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: {
     name: "load-more"
@@ -208,6 +212,10 @@ tags: {  # <amp-list>
     value: "no"
     value: "refresh"
   }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
@@ -257,6 +265,10 @@ tags: {  # <amp-list>
   attrs: {
     name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"
+  }
+  attrs: {
+    name: "diffable"
+    value: ""
   }
   attrs: { name: "items" }
   attrs: { name: "max-items" }

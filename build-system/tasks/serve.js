@@ -28,7 +28,7 @@ const {
   preBuildCoreRuntime,
   preBuildSomeExtensions,
 } = require('../server/lazy-build');
-const {createCtrlcHandler} = require('../ctrlcHandler');
+const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {getServeMode} = require('../server/app-utils');
 
