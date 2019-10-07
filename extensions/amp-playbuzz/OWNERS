@@ -4,10 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        { name: 'buzzdan' },
-        { name: 'ampproject/wg-ui-and-a11y' }
-      ]
+      owners: [{ name: 'buzzdan' }, { name: 'ampproject/wg-ui-and-a11y' }]
     }
   ]
 }
