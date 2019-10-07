@@ -192,11 +192,13 @@ export class AmpImg extends BaseElement {
    * backing `img` element.
    */
   propagateDataset_() {
-    for (const key in this.img_.dataset) {
-      delete this.img_.dataset[key];
+    const ampImgDataset = this.element.dataset;
+    const imgDataset = this.img_.dataset;
+    for (const key in imgDataset) {
+      delete imgDataset[key];
     }
-    for (const key in this.element.dataset) {
-      this.img_.dataset[key] = this.element.dataset[key];
+    for (const key in ampImgDataset) {
+      imgDataset[key] = ampImgDataset[key];
     }
   }
 
