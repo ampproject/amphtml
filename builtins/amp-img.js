@@ -178,15 +178,22 @@ export class AmpImg extends BaseElement {
     // It is important to call this before setting `srcset` attribute.
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
-    // Propagate dataset key/value pairs.
-    for (const key in this.element.dataset) {
-      this.img_.dataset[key] = this.element.dataset[key];
-    }
+    this.propagateDataset_();
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
     this.element.appendChild(this.img_);
+  }
+
+  /**
+   * Propagate the dataset key/value pairs in the `amp-img` element to the
+   * backing `img` element.
+   */
+  propagateDataset_() {
+    for (const key in this.element.dataset) {
+      this.img_.dataset[key] = this.element.dataset[key];
+    }
   }
 
   /**
