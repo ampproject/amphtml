@@ -97,6 +97,7 @@ export class AmpImg extends BaseElement {
         this.img_,
         /* opt_removeMissingAttrs */ true
       );
+      this.propagateDataset_();
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
   }
@@ -191,6 +192,9 @@ export class AmpImg extends BaseElement {
    * backing `img` element.
    */
   propagateDataset_() {
+    for (const key in this.img_.dataset) {
+      delete this.img_.dataset[key];
+    }
     for (const key in this.element.dataset) {
       this.img_.dataset[key] = this.element.dataset[key];
     }
