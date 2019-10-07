@@ -153,7 +153,10 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.buildAudioElement();
+    const layout = this.getLayout();
+    if (layout !== Layout.NODISPLAY) {
+      this.buildAudioElement();
+    }
     this.updateMetadata_();
 
     // Resolve layoutCallback right away if the audio won't preload.
