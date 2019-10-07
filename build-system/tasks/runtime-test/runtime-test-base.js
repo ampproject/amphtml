@@ -19,16 +19,19 @@ const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
-const testConfig = require('../../config');
+const testConfig = require('../../test-configs/config');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../../common/ctrlcHandler');
 const {
   createKarmaServer,
   getAdTypes,
   runTestInSauceLabs,
 } = require('./helpers');
 const {app} = require('../../server/test-server');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
