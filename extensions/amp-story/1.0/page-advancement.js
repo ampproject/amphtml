@@ -1049,6 +1049,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
           #${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (!elements.length) {
+        if (autoAdvanceStr) {
+          user().warn(
+            'AMP-STORY-PAGE',
+            `Element with ID ${rootEl.id} has no media element ` +
+              'supported for automatic advancement.'
+          );
+        }
         return null;
       }
 

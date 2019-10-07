@@ -1440,6 +1440,8 @@ export class AmpStory extends AMP.BaseElement {
           this.storeService_.dispatch(Action.TOGGLE_AD, false);
           removeAttributeInMutate(this, Attributes.AD_SHOWING);
 
+          // Start progress bar update for pages that are not ads or auto-
+          // advance.
           if (
             targetPage.getAdvancementType() !== AdvancementType.MEDIA_BASED &&
             targetPage.getAdvancementType() !== AdvancementType.TIME_BASED
