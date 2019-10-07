@@ -23,23 +23,34 @@ import {
  * @const {!LocalizedStringBundleDef}
  */
 const strings = {
+  [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL]: {
+    string: 'Mute story',
+    description:
+      'Label for the mute button that turns off the sound in the story',
+  },
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Sound off',
     description:
       'Text that informs users that the sound is off after they ' +
       'click the mute button',
   },
-  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Sound on',
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL]: {
+    string: 'Unmute story',
     description:
-      'Text that informs users that the sound is on after they ' +
-      'click the unmute button on a page with sound',
+      'Label for the unmute button that turns the sound ' +
+      'in the story back on',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
     string: 'This page has no sound',
     description:
       'Text that informs users that the sound is on after they ' +
       'click the unmute button on a page without sound',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
+    string: 'Sound on',
+    description:
+      'Text that informs users that the sound is on after they ' +
+      'click the unmute button on a page with sound',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'More to read',
@@ -88,16 +99,6 @@ const strings = {
     description:
       'Label for a link to documentation on how AMP links are handled.',
   },
-  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Swipe up',
-    description:
-      'Label for a button to open a drawer containing additional ' +
-      'content via a "swipe up" user gesture.',
-  },
-  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Play video',
-    description: 'Label for a button to play the video visible on the page.',
-  },
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
     string: 'Updated',
     description:
@@ -114,6 +115,33 @@ const strings = {
     description:
       'Label indicating that users can navigate to the previous ' +
       'page, in the amp-story hint UI.',
+  },
+  [LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL]: {
+    string: 'Story information',
+    description:
+      'Label for the information button that pulls up ' +
+      'relevant information about the story content',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
+    string: 'Swipe up',
+    description:
+      'Label for a button to open a drawer containing additional ' +
+      'content via a "swipe up" user gesture.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO]: {
+    string: 'Video failed to play',
+    description:
+      'Label indicating that the video visible on the page failed to play.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
+    string: 'Play video',
+    description: 'Label for a button to play the video visible on the page.',
+  },
+  [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
+    string: 'Share story',
+    description:
+      'Label for the share button that pulls up a panel ' +
+      'of options for sharing the story',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL]: {
     string: 'Share starting from this page',
@@ -196,6 +224,12 @@ const strings = {
     string: 'WhatsApp',
     description:
       'Button label for the share target that shares a link via WhatsApp.',
+  },
+  [LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL]: {
+    string: 'Toggle story menu',
+    description:
+      'Label for the sidebar button that pulls up a menu ' +
+      'of options for interacting with the story',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
     string: 'Expand Tweet',

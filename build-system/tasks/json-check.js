@@ -19,15 +19,19 @@ const colors = require('ansi-colors');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const through2 = require('through2');
-const {jsonGlobs} = require('../config');
+const {jsonGlobs} = require('../test-configs/config');
 
 const expectedCaches = ['cloudflare', 'google'];
 
+const cachesJsonPath = 'build-system/global-configs/caches.json';
+
 /**
- * Fail if caches.json is missing some expected caches.
+ * Fail if build-system/global-configs/caches.json is missing some expected
+ * caches.
+ * @return {!Promise}
  */
 async function cachesJson() {
-  return gulp.src(['caches.json']).pipe(
+  return gulp.src([cachesJsonPath]).pipe(
     through2.obj(function(file) {
       let obj;
       try {
@@ -35,7 +39,7 @@ async function cachesJson() {
       } catch (e) {
         log(
           colors.yellow(
-            'Could not parse caches.json. ' +
+            `Could not parse ${cachesJsonPath}. ` +
               'This is most likely a fatal error that ' +
               'will be found by checkValidJson'
           )
@@ -49,7 +53,9 @@ async function cachesJson() {
       for (const cache of expectedCaches) {
         if (!foundCaches.includes(cache)) {
           log(
-            colors.red('Missing expected cache "' + cache + '" in caches.json')
+            colors.red(
+              'Missing expected cache "' + cache + `" in ${cachesJsonPath}`
+            )
           );
           process.exitCode = 1;
         }
@@ -60,6 +66,7 @@ async function cachesJson() {
 
 /**
  * Fail if JSON files are valid.
+ * @return {!Promise}
  */
 async function jsonSyntax() {
   let hasError = false;

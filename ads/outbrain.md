@@ -18,6 +18,8 @@ limitations under the License.
 
 ## Example installation of the Outbrain widget
 
+The examples below must be accompanied by AMP-enabled widgets delivered by Outbrain’s Account Management Team, do not directly install this code with existing widgets.
+
 ### Basic
 
 ```html
@@ -28,34 +30,49 @@ limitations under the License.
 </amp-embed>
 ```
 
-The above code must be accompanied by AMP-enabled widgets delivered by Outbrain’s Account Management Team, do not directly install this code with existing widgets.
+### Sticky Ad
+
+```html
+<amp-sticky-ad layout="nodisplay">
+  <amp-ad width="300" height="100"
+    type="outbrain"
+    data-widgetids="AMP_1">
+  </amp-ad>
+</amp-sticky-ad>
+```
+Note that `<amp-sticky-ad />` component requires the following script to be included in the page:
+```html
+<script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js"></script>
+```
+See [AMP documentation](https://amp.dev/documentation/components/amp-sticky-ad) for more information regarding `<amp-sticky-ad />` component.
 
 ## Configuration
 
-For details on the configuration semantics, please contact Outbrain’s Account Management Team.
+For details on the configuration semantics, please contact Outbrain’s Account Management Team.\
+These configurations are relevant for both `<amp-ad />` and `<amp-embed />`.
 
 ### Required parameters
 
-- `widgetIds`: Widget Id/s Provided by Account Manager.
+- `data-widgetIds`: Widget Id/s Provided by Account Manager.
 
 ### Optional parameters
 
-- `htmlURL`: The URL of the standard html version of the page.
-- `ampURL`: The URL of the AMP version of the page.
-- `styleFile`: Provide publisher an option to pass CSS file in order to inherit the design for the AMP displayed widget. **Consult with Account Manager regarding CSS options**.
+- `data-htmlURL`: The URL of the standard html version of the page.
+- `data-ampURL`: The URL of the AMP version of the page.
+- `data-styleFile`: Provide publisher an option to pass CSS file in order to inherit the design for the AMP displayed widget. **Consult with Account Manager regarding CSS options**.
 
 ### User Consent
 
 The widget will check for user consent to decide whether personalized or non-personalized recommendations should be displayed.
 
-The following rules will be apllied:
+The following rules will be applied:
 
 * CONSENT_POLICY_STATE.SUFFICIENT - Show personalized recommendations
 * CONSENT_POLICY_STATE.INSUFFICIENT - Show non-personalized recommendations only
 * CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED - Show personalized recommendations
 * CONSENT_POLICY_STATE.UNKNOWN - Show non-personalized recommendations only
 
-## Troubleshooting 
+## Troubleshooting
 
 ### Widget is cut off
 

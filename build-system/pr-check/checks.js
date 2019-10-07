@@ -26,10 +26,11 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runYarnChecks} = require('./yarn-checks');
 
@@ -37,16 +38,16 @@ const FILENAME = 'checks.js';
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
     timedExecOrDie('gulp presubmit');
     timedExecOrDie('gulp ava');
@@ -58,16 +59,11 @@ function main() {
     timedExecOrDie('gulp check-types');
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    if (!determineBuildTargets(buildTargets, FILENAME)) {
-      stopTimer(FILENAME, FILENAME, startTime);
-      process.exitCode = 1;
-      return;
-    }
-
-    reportAllExpectedTests(buildTargets);
+    const buildTargets = determineBuildTargets(FILENAME);
+    await reportAllExpectedTests(buildTargets);
     timedExecOrDie('gulp update-packages');
 
+    timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
     timedExecOrDie('gulp presubmit');
 

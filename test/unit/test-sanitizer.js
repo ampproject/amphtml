@@ -23,9 +23,7 @@ describe('Caja-based', () => {
   beforeEach(() => {
     html = document.createElement('html');
     const documentEl = {documentElement: html};
-    sanitize = (html, opt_diffing = false) => {
-      return sanitizeHtml(html, documentEl, opt_diffing);
-    };
+    sanitize = html => sanitizeHtml(html, documentEl);
   });
 
   runSanitizerTests();
@@ -375,23 +373,6 @@ function runSanitizerTests() {
       );
     });
 
-    it('should output "i-amphtml-key" attribute if diffing is enabled', () => {
-      // Elements with bindings should have i-amphtml-key="<number>".
-      expect(sanitize('<p [text]="foo"></p>', true)).to.match(
-        /<p \[text\]="foo" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>/
-      );
-      // AMP elements should have i-amphtml-key="<number>".
-      expect(sanitize('<amp-img></amp-img>', true)).to.match(
-        /<amp-img i-amphtml-key="(\d+)"><\/amp-img>/
-      );
-      // AMP elements with bindings should have i-amphtml-key="<number>".
-      expect(sanitize('<amp-img [text]="foo"></amp-img>', true)).to.match(
-        /<amp-img \[text\]="foo" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/amp-img>/
-      );
-      // Other elements should NOT have i-amphtml-key-set.
-      expect(sanitize('<p></p>', true)).to.equal('<p></p>');
-    });
-
     it('should sanitize invalid attributes', () => {
       allowConsoleError(() => {
         expect(sanitize('<input type="button">')).to.equal('<input>');
@@ -427,6 +408,30 @@ function runSanitizerTests() {
           '<amp-anim></amp-anim>'
         );
       });
+    });
+
+    it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
+      html.setAttribute('amp4email', '');
+      allowConsoleError(() => {
+        expect(sanitize('<amp-analytics>')).to.equal('');
+        expect(sanitize('<amp-iframe>')).to.equal('');
+        expect(sanitize('<amp-list>')).to.equal('');
+        expect(sanitize('<amp-pixel>')).to.equal('');
+        expect(sanitize('<amp-twitter>')).to.equal('');
+        expect(sanitize('<amp-video>')).to.equal('');
+        expect(sanitize('<amp-youtube>')).to.equal('');
+      });
+
+      expect(sanitize('<amp-accordion>')).to.equal('<amp-accordion>');
+      expect(sanitize('<amp-anim>')).to.equal('<amp-anim>');
+      expect(sanitize('<amp-bind-macro>')).to.equal('<amp-bind-macro>');
+      expect(sanitize('<amp-carousel>')).to.equal('<amp-carousel>');
+      expect(sanitize('<amp-fit-text>')).to.equal('<amp-fit-text>');
+      expect(sanitize('<amp-img>')).to.equal('<amp-img>');
+      expect(sanitize('<amp-layout>')).to.equal('<amp-layout>');
+      expect(sanitize('<amp-selector>')).to.equal('<amp-selector>');
+      expect(sanitize('<amp-sidebar>')).to.equal('<amp-sidebar>');
+      expect(sanitize('<amp-timeago>')).to.equal('<amp-timeago>');
     });
   });
 

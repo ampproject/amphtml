@@ -205,6 +205,26 @@ describe('BindExpression', () => {
       expect(evaluate('+"1"')).to.equal(1);
     });
 
+    it('should parse special characters', () => {
+      expect(evaluate('"\\n"')).to.equal('\n');
+      expect(evaluate('"\\t"')).to.equal('\t');
+      expect(evaluate('"\\u041f"')).to.equal('\u041f');
+
+      // Single quote strings should be handled.
+      expect(evaluate("'\\n'")).to.equal('\n');
+      expect(evaluate("'\\t'")).to.equal('\t');
+      expect(evaluate("'\\u041f'")).to.equal('\u041f');
+
+      // Escaping special chars should work.
+      expect(evaluate('"\\\\n"')).to.equal('\\n');
+      expect(evaluate('"\\\\t"')).to.equal('\\t');
+      expect(evaluate('"\\\\u041f"')).to.equal('\\u041f');
+
+      // Double quotes inside the string should be escaped.
+      expect(evaluate('\'a"b"c\'')).to.equal('a"b"c');
+      expect(evaluate('\'a"\\n"c\'')).to.equal('a"\n"c');
+    });
+
     it('whitelisted functions', () => {
       expect(evaluate('"abc".charAt(0)')).to.equal('a');
       expect(evaluate('"abc".charCodeAt(0)')).to.equal(97);
@@ -429,6 +449,7 @@ describe('BindExpression', () => {
       expect(evaluate('max(0, 1)')).to.equal(1);
       expect(evaluate('min(0, 1)')).to.equal(0);
       expect(evaluate('round(0.6)')).to.equal(1);
+      expect(evaluate('pow(2, 2)')).to.equal(4);
       expect(evaluate('sqrt(4)')).to.equal(2);
       expect(evaluate('log(20.2)')).to.equal(3.005682604407159);
       const r = evaluate('random()');
@@ -446,7 +467,7 @@ describe('BindExpression', () => {
         evaluate('sin(0.5)');
       }).to.throw(unsupportedFunctionError);
       expect(() => {
-        evaluate('pow(3, 2)');
+        evaluate('trunc(13.37)');
       }).to.throw(unsupportedFunctionError);
 
       // Don't support calling functions with `Math.` prefix.
@@ -794,6 +815,11 @@ describe('BindExpression', () => {
     it('known issue: single parameters with parentheses are ambiguous', () => {
       // Single parameters in parentheses are ambiguous to the parser.
       expect(() => evaluate('[1, 2, 3].map((x) => x * x)')).to.throw();
+    });
+
+    it('return a non-primitive', () => {
+      expect(evaluate('[0].map(x => ({a: x + 1}))')).to.deep.equal([{a: 1}]);
+      expect(evaluate('[0].map(x => [x, x+1])')).to.deep.equal([[0, 1]]);
     });
 
     it('Array#map()', () => {

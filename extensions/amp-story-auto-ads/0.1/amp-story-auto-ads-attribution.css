@@ -15,28 +15,9 @@
  */
 
 .i-amphtml-story-ad-attribution {
-  color: #FFFFFF !important;
-  font-size: 18px !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-weight: bold !important;
-  letter-spacing: 0.5px !important;
-  margin: 0 0 0 16px !important;
-  opacity: 0 !important;
-  padding: 0 !important;
-  visibility: hidden !important;
-}
-
-:host-context([dir=rtl]) .i-amphtml-story-ad-attribution {
-  margin-left: 0px !important;
-  margin-right: 16px !important;
-}
-
-:host-context([ad-showing][desktop]:not([supports-landscape])) .i-amphtml-story-ad-attribution {
-  /* Have to wait for page to slide in. */
-  transition: opacity 0.1s linear 0.3s;
-}
-
-:host-context([ad-showing]) .i-amphtml-story-ad-attribution {
-  visibility: visible !important;
-  opacity: 1 !important;
+  position: absolute;
+  bottom: 0 !important;
+  max-height: 15px !important;
+  /* 1 greater than cta layer. */
+  z-index: 4 !important;
 }

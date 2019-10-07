@@ -23,6 +23,7 @@ import {InactiveElementFilter} from './inactive-element';
  * @param {string} name
  * @param {!../config.FilterConfig} spec
  * @param {!../amp-ad-exit.AmpAdExit} adExitInstance
+ * @return {!./filter.Filter|undefined}
  */
 export function createFilter(name, spec, adExitInstance) {
   switch (spec.type) {

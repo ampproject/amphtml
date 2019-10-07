@@ -120,9 +120,11 @@ describe('reportErrorToServerOrViewer', () => {
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
 
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+    const ampdoc = {getRootNode: () => optedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+      getAmpDoc: () => ampdoc,
+      getSingleDoc: () => ampdoc,
     });
 
     viewer = {
@@ -151,9 +153,11 @@ describe('reportErrorToServerOrViewer', () => {
 
   it('should report to server if AMP doc is not opted in', () => {
     const nonOptedInDoc = window.document.implementation.createHTMLDocument('');
+    const ampdoc = {getRootNode: () => nonOptedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+      getAmpDoc: () => ampdoc,
+      getSingleDoc: () => ampdoc,
     });
     return reportErrorToServerOrViewer(win, data).then(() => {
       expect(createXhr).to.be.calledOnce;
@@ -194,6 +198,7 @@ describe('reportErrorToServerOrViewer', () => {
         expect(data['a']).to.not.be.undefined;
         expect(data['s']).to.not.be.undefined;
         expect(data['el']).to.not.be.undefined;
+        expect(data['ex']).to.not.be.undefined;
         expect(data['v']).to.not.be.undefined;
         expect(data['jse']).to.not.be.undefined;
       });
@@ -211,7 +216,7 @@ describe('getErrorReportData', () => {
     sandbox = sinon.sandbox;
     nextRandomNumber = 0;
     sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
-    self.AMP_MODE = undefined;
+    self.__AMP_MODE = undefined;
   });
 
   afterEach(() => {
@@ -773,7 +778,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept string and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('error');
@@ -785,7 +790,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept number and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError(101);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('101');
@@ -797,7 +802,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept null and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('Unknown error');
@@ -876,7 +881,6 @@ describes.fakeWin('user error reporting', {amp: true}, env => {
     sandbox = env.sandbox;
     win = env.win;
     analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
-    toggleExperiment(win, 'user-error-reporting', true);
   });
 
   it('should trigger triggerAnalyticsEvent with correct arguments', () => {

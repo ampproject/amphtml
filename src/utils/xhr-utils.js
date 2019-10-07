@@ -27,6 +27,7 @@ import {
 } from '../url';
 import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
+import {isExperimentOn} from '../experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';
 
 /** @private @const {!Array<string>} */
@@ -198,26 +199,35 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
     return Promise.resolve();
   }
+
+  const whenUnblocked = init.prerenderSafe
+    ? Promise.resolve()
+    : ampdocSingle.whenFirstVisible();
   const viewer = Services.viewerForDoc(ampdocSingle);
-  const whenFirstVisible = viewer.whenFirstVisible();
-  if (
-    isProxyOrigin(input) ||
-    !viewer.hasCapability('xhrInterceptor') ||
-    (init.bypassInterceptorForDev && getMode(win).localDev)
-  ) {
-    return whenFirstVisible;
+  const urlIsProxy = isProxyOrigin(input);
+  const viewerCanIntercept = viewer.hasCapability('xhrInterceptor');
+  const interceptorDisabledForLocalDev =
+    init.bypassInterceptorForDev && getMode(win).localDev;
+  if (urlIsProxy || !viewerCanIntercept || interceptorDisabledForLocalDev) {
+    return whenUnblocked;
   }
+
   const htmlElement = ampdocSingle.getRootNode().documentElement;
   const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
   if (!docOptedIn) {
-    return whenFirstVisible;
+    return whenUnblocked;
   }
-  return whenFirstVisible
-    .then(() => {
-      return viewer.isTrustedViewer();
-    })
+
+  return whenUnblocked
+    .then(() => viewer.isTrustedViewer())
     .then(viewerTrusted => {
-      if (!viewerTrusted && !getMode(win).localDev) {
+      if (
+        !(
+          viewerTrusted ||
+          getMode(win).localDev ||
+          isExperimentOn(win, 'untrusted-xhr-interception')
+        )
+      ) {
         return;
       }
       const messagePayload = dict({
@@ -235,6 +245,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
  * @param {string} input
  * @param {!FetchInitDef} init The options of the XHR which may get
  * intercepted.
+ * @return {string}
  */
 export function setupInput(win, input, init) {
   devAssert(typeof input == 'string', 'Only URL supported: %s', input);
@@ -352,6 +363,7 @@ function normalizeMethod_(method) {
 /**
  * If 415 or in the 5xx range.
  * @param {number} status
+ * @return {boolean}
  */
 function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);

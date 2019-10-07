@@ -74,10 +74,10 @@ export function getElementServiceIfAvailable(win, id, extension, opt_element) {
  */
 function isElementScheduled(win, elementName) {
   // Set in custom-element.js
-  if (!win.ampExtendedElements) {
+  if (!win.__AMP_EXTENDED_ELEMENTS) {
     return false;
   }
-  return !!win.ampExtendedElements[elementName];
+  return !!win.__AMP_EXTENDED_ELEMENTS[elementName];
 }
 
 /**
@@ -196,21 +196,29 @@ function assertService(service, id, extension) {
 }
 
 /**
- * Get list of all the extension JS files
+ * Get list of all the extension JS files.
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @return {!Array<string>}
  */
 export function extensionScriptsInNode(head) {
-  // ampdoc.getHeadNode() can return null
+  // ampdoc.getHeadNode() can return null.
   if (!head) {
     return [];
   }
-  const scripts = [];
-  const list = head.querySelectorAll('script[custom-element]');
+  const scripts = {};
+  // Note: Some extensions don't have [custom-element] or [custom-template]
+  // e.g. amp-viewer-integration.
+  const list = head.querySelectorAll(
+    'script[custom-element],script[custom-template]'
+  );
   for (let i = 0; i < list.length; i++) {
-    scripts.push(list[i].getAttribute('custom-element'));
+    const script = list[i];
+    const name =
+      script.getAttribute('custom-element') ||
+      script.getAttribute('custom-template');
+    scripts[name] = true;
   }
-  return scripts;
+  return Object.keys(scripts);
 }
 
 /**
@@ -231,6 +239,7 @@ export function isExtensionScriptInNode(ampdoc, extensionId) {
  * installation.
  * @param {HTMLHeadElement|Element|ShadowRoot} head
  * @param {string} extensionId
+ * @return {boolean}
  * @private
  */
 function extensionScriptInNode(head, extensionId) {

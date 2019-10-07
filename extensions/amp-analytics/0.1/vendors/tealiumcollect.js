@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const TEALIUMCOLLECT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -29,7 +31,7 @@ export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://collect.tealiumiq.com',
     'base':
-      '${host}/event?${tealium}&' +
+      '${host}/event/?${tealium}&' +
       '${dom1}&${dom2}&${datetime}&' +
       'tealium_event=${tealium_event}&' +
       'amp_version=${ampVersion}&' +
@@ -66,3 +68,5 @@ export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {TEALIUMCOLLECT_CONFIG};

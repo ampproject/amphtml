@@ -46,7 +46,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private {!../vsync-impl.Vsync} */
+    /** @protected {!../vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(win);
 
     const doc = this.win.document;
@@ -69,11 +69,9 @@ export class ViewportBindingIosEmbedWrapper_ {
     /** @const {function()} */
     this.boundScrollEventListener_ = this.onScrolled_.bind(this);
 
+    // eslint-disable-next-line jsdoc/require-returns
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
-
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     /** @private {number} */
     this.paddingTop_ = 0;
@@ -277,10 +275,6 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const b = el./*OK*/ getBoundingClientRect();
-    if (this.useLayers_) {
-      return layoutRectLtwh(b.left, b.top, b.width, b.height);
-    }
-
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

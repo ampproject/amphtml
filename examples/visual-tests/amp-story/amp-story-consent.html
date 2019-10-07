@@ -33,7 +33,7 @@
     </style>
     <script>
       // TODO(#17108): Remove this when getMode().test is set.
-      AMP_TEST = true;
+      __AMP_TEST = true;
     </script>
   </head>
 
@@ -49,7 +49,7 @@
             {
               "consents": {
                 "myConsent": {
-                  "checkConsentHref": "https://ampbyexample.com/samples_templates/consent/getConsent",
+                  "checkConsentHref": "http://localhost:8000/get-consent-v1",
                   "promptUI": "consentUI"
                 }
               }

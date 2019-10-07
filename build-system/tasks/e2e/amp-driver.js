@@ -19,7 +19,16 @@ const AmpdocEnvironment = {
   SINGLE: 'single',
   VIEWER_DEMO: 'viewer-demo',
   SHADOW_DEMO: 'shadow-demo',
+
+  // AMPHTML ads environments
+  A4A_FIE: 'a4a-fie',
+  A4A_INABOX: 'a4a-inabox',
+  A4A_INABOX_FRIENDLY: 'a4a-inabox-friendly',
+  A4A_INABOX_SAFEFRAME: 'a4a-inabox-safeframe',
 };
+
+/** @const {string} */
+const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
@@ -64,6 +73,54 @@ const EnvironmentBehaviorMap = {
       return `http://localhost:8000/pwa#href=${url}`;
     },
   },
+
+  [AmpdocEnvironment.A4A_FIE]: {
+    async ready(controller) {
+      return controller
+        .findElement('amp-ad > iframe')
+        .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return url.replace(HOST, HOST + '/a4a');
+    },
+  },
+
+  [AmpdocEnvironment.A4A_INABOX]: {
+    async ready(controller) {
+      return controller
+        .findElement('#inabox-frame')
+        .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return url.replace(HOST, HOST + '/inabox');
+    },
+  },
+
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
+    async ready(controller) {
+      return controller
+        .findElement('#inabox-frame')
+        .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return url.replace(HOST, HOST + '/inabox-friendly');
+    },
+  },
+
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
+    async ready(controller) {
+      return controller
+        .findElement('#inabox-frame')
+        .then(frame => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      return url.replace(HOST, HOST + '/inabox-safeframe');
+    },
+  },
 };
 
 /**
@@ -105,7 +162,18 @@ class AmpDriver {
   async navigateToEnvironment(environment, url) {
     const ampEnv = EnvironmentBehaviorMap[environment];
     await this.controller_.navigateTo(ampEnv.url(url));
-    await ampEnv.ready(this.controller_);
+
+    try {
+      await ampEnv.ready(this.controller_);
+    } catch (e) {
+      // Take a snapshot of current DOM for debugging.
+      const documentElement = await this.controller_.getDocumentElement();
+      const html = await this.controller_.getElementProperty(
+        documentElement,
+        'innerHTML'
+      );
+      throw new Error(e.message + '\n' + html);
+    }
   }
 }
 

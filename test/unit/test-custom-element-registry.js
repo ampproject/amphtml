@@ -27,7 +27,6 @@ import {
   upgradeOrRegisterElement,
 } from '../../src/service/custom-element-registry';
 import {createElementWithAttributes} from '../../src/dom';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 
 describes.realWin('CustomElement register', {amp: true}, env => {
   class ConcreteElement extends BaseElement {}
@@ -90,14 +89,14 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
     stubElementsForDoc(ampdoc);
     expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
-    expect(win.ampExtendedElements['amp-element2']).to.equal(ElementStub);
+    expect(win.__AMP_EXTENDED_ELEMENTS['amp-element2']).to.equal(ElementStub);
   });
 
   it('should install pre-stubbed element extension', () => {
     const stub = sandbox.stub(extensions, 'installExtensionForDoc');
 
     stubElementIfNotKnown(win, 'amp-element2');
-    expect(win.ampExtendedElements['amp-element2']).to.equal(ElementStub);
+    expect(win.__AMP_EXTENDED_ELEMENTS['amp-element2']).to.equal(ElementStub);
     expect(ampdoc.declaresExtension('amp-element2')).to.be.false;
     expect(stub).to.not.be.called;
 
@@ -112,7 +111,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     const stub = sandbox.stub(extensions, 'installExtensionForDoc');
 
     stubElementIfNotKnown(win, 'amp-element2');
-    expect(win.ampExtendedElements['amp-element2']).to.equal(ElementStub);
+    expect(win.__AMP_EXTENDED_ELEMENTS['amp-element2']).to.equal(ElementStub);
     expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
     expect(stub).to.not.be.called;
 
@@ -125,7 +124,9 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     const stub = sandbox.stub(extensions, 'installExtensionForDoc');
 
     registerElement(win, 'amp-element1', ConcreteElement);
-    expect(win.ampExtendedElements['amp-element1']).to.equal(ConcreteElement);
+    expect(win.__AMP_EXTENDED_ELEMENTS['amp-element1']).to.equal(
+      ConcreteElement
+    );
     expect(ampdoc.declaresExtension('amp-element1')).to.be.true;
     expect(stub).to.not.be.called;
 
@@ -176,7 +177,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
         head: {
           nodeType: /* ELEMENT */ 1,
           querySelectorAll: selector => {
-            if (selector == 'script[custom-element]') {
+            if (selector == 'script[custom-element],script[custom-template]') {
               return elements;
             }
             return [];
@@ -201,13 +202,11 @@ describes.realWin('CustomElement register', {amp: true}, env => {
           create: proto => Object.create(proto),
         },
         HTMLElement,
-        ampExtendedElements: {},
+        __AMP_EXTENDED_ELEMENTS: {},
       };
       doc.defaultView = win;
 
       ampdoc = new AmpDocSingle(win);
-
-      installGlobalDocumentStateService(win);
     });
 
     afterEach(() => {
@@ -218,9 +217,9 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     it('should be stub elements when body available', () => {
       stubElementsForDoc(ampdoc);
 
-      expect(win.ampExtendedElements).to.exist;
-      expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
+      expect(win.__AMP_EXTENDED_ELEMENTS).to.exist;
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test2']).to.be.undefined;
       expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
     });
@@ -230,9 +229,9 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
       stubElementsForDoc(ampdoc);
 
-      expect(win.ampExtendedElements).to.exist;
-      expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
+      expect(win.__AMP_EXTENDED_ELEMENTS).to.exist;
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test2']).to.be.undefined;
       expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
 
@@ -250,8 +249,8 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       // Body available. Stub again.
       doc.body = {};
       stubElementsForDoc(ampdoc);
-      expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(win.ampExtendedElements['amp-test2']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test2']).to.equal(ElementStub);
       expect(doc.registerElement).to.have.callCount(2);
       expect(doc.registerElement.getCall(1).args[0]).to.equal('amp-test2');
     });
@@ -260,8 +259,8 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       // First stub is allowed.
       stubElementIfNotKnown(win, 'amp-test1');
 
-      expect(win.ampExtendedElements).to.exist;
-      expect(win.ampExtendedElements['amp-test1']).to.equal(ElementStub);
+      expect(win.__AMP_EXTENDED_ELEMENTS).to.exist;
+      expect(win.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(ElementStub);
       expect(doc.registerElement).to.be.calledOnce;
       expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
 
@@ -277,7 +276,9 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       const childWin = {Object, HTMLElement, document: {registerElement}};
 
       copyElementToChildWindow(win, childWin, 'amp-test1');
-      expect(childWin.ampExtendedElements['amp-test1']).to.equal(ElementStub);
+      expect(childWin.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(
+        ElementStub
+      );
       const firstCallCount = registerElement.callCount;
       expect(firstCallCount).to.equal(1);
       expect(registerElement.getCall(firstCallCount - 1).args[0]).to.equal(
@@ -285,7 +286,9 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       );
 
       copyElementToChildWindow(win, childWin, 'amp-test2');
-      expect(childWin.ampExtendedElements['amp-test1']).to.equal(ElementStub);
+      expect(childWin.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(
+        ElementStub
+      );
       expect(registerElement.callCount).to.be.above(firstCallCount);
       expect(
         registerElement.getCall(registerElement.callCount - 1).args[0]

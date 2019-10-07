@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {startsWith} from './string';
+import {includes, startsWith} from './string';
 import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
@@ -214,8 +214,30 @@ export function rootNodeFor(node) {
     return node.getRootNode() || node;
   }
   let n;
-  for (n = node; !!n.parentNode; n = n.parentNode) {}
+  // Check isShadowRoot() is only needed for the polyfill case.
+  for (n = node; !!n.parentNode && !isShadowRoot(n); n = n.parentNode) {}
   return n;
+}
+
+/**
+ * Determines if value is actually a `ShadowRoot` node.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isShadowRoot(value) {
+  // TODO(#22733): remove in preference to dom's `rootNodeFor`.
+  if (!value) {
+    return false;
+  }
+  // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
+  // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
+  if (value.tagName == 'I-AMPHTML-SHADOW-ROOT') {
+    return true;
+  }
+  return (
+    value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
+    Object.prototype.toString.call(value) === '[object ShadowRoot]'
+  );
 }
 
 /**
@@ -626,7 +648,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   }
 
   // Then try with `_top` target.
-  if (!res && target != '_top') {
+  if (!res && target != '_top' && !includes(opt_features || '', 'noopener')) {
     res = win.open(url, '_top');
   }
   return res;
@@ -889,4 +911,15 @@ export function toggleAttribute(element, name, forced) {
   }
 
   return enabled;
+}
+
+/**
+ * @param {!Window} win
+ * @return {number} The width of the vertical scrollbar, in pixels.
+ */
+export function getVerticalScrollbarWidth(win) {
+  const {documentElement} = win.document;
+  const windowWidth = win./*OK*/ innerWidth;
+  const documentWidth = documentElement./*OK*/ clientWidth;
+  return windowWidth - documentWidth;
 }

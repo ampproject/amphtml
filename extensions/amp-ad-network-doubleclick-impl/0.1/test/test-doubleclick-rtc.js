@@ -32,7 +32,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    env.win.AMP_MODE.test = true;
+    env.win.__AMP_MODE.test = true;
     const doc = env.win.document;
     // TODO(a4a-cam@): This is necessary in the short term, until A4A is
     // smarter about host document styling.  The issue is that it needs to
@@ -406,7 +406,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
-      Object.defineProperty(env.win.document, 'referrer', {
+      sandbox.defineProperty(env.win.document, 'referrer', {
         value: 'https://www.google.com/',
       });
       const docInfo = Services.documentInfoForDoc(element);

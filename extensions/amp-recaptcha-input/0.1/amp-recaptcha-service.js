@@ -168,6 +168,7 @@ export class AmpRecaptchaService {
    * Function to create our recaptcha boostrap iframe.
    * Should be assigned to this.iframeLoadPromise_
    * @private
+   * @return {?Promise}
    */
   initialize_() {
     return this.createRecaptchaFrame_().then(iframe => {

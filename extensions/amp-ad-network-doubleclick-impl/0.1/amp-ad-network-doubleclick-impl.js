@@ -22,14 +22,18 @@
 
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {
-  ADX_ADY_EXP,
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
+import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
-  getContainerWidth,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -43,14 +47,13 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
+import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
+import {
+  FlexibleAdSlotDataTypeDef,
+  getFlexibleAdSlotData,
+} from './flexible-ad-slot-utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Navigation} from '../../../src/service/navigation';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
@@ -66,7 +69,12 @@ import {
   serializeTargeting,
   sraBlockCallbackHandler,
 } from './sra-utils';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {WindowInterface} from '../../../src/window-interface';
+import {
+  createElementWithAttributes,
+  isRTL,
+  removeElement,
+} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
@@ -154,10 +162,10 @@ let TroubleshootDataDef;
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
 
-/**
- * @typedef
- * {({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)}
- */
+/** @typedef {{width: number, height: number}} */
+let SizeDef;
+
+/** @typedef {(SizeDef|../../../src/layout-rect.LayoutRectDef)} */
 let LayoutRectOrDimsDef;
 
 /** @final */
@@ -285,7 +293,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.shouldSandbox_ = false;
 
     /** @private {boolean} */
-    this.sendFlexibleAdSlotParams_ = false;
+    this.sendFlexibleAdSlotParams_ = true;
+
+    /**
+     * Set after the ad request is built.
+     * @private {?FlexibleAdSlotDataTypeDef}
+     */
+    this.flexibleAdSlotData_ = null;
   }
 
   /**
@@ -352,12 +366,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
-    if (
-      !isCdnProxy(this.win) &&
-      !isExperimentOn(this.win, 'expDfpInvOrigDeprecated')
-    ) {
-      this.experimentIds.push('21060933');
-    }
     let forcedExperimentId;
     if (urlExperimentId) {
       forcedExperimentId = {
@@ -390,9 +398,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
       },
-      [[ADX_ADY_EXP.branch]]: {
+      [[FIE_CSS_CLEANUP_EXP.branch]]: {
         isTrafficEligible: () => true,
-        branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
+        branches: [
+          [FIE_CSS_CLEANUP_EXP.control],
+          [FIE_CSS_CLEANUP_EXP.experiment],
+        ],
       },
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -400,10 +411,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       expName => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
     if (
-      setExps[FLEXIBLE_AD_SLOTS_EXP] &&
       setExps[FLEXIBLE_AD_SLOTS_EXP] == FLEXIBLE_AD_SLOTS_BRANCHES.EXPERIMENT
     ) {
-      this.sendFlexibleAdSlotParams_ = true;
+      this.sendFlexibleAdSlotParams_ = false;
     }
   }
 
@@ -462,7 +472,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
       ].some(eid => this.experimentIds.indexOf(eid) >= 0);
-    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
@@ -502,7 +512,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           : null,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
-      'u_sd': this.win.devicePixelRatio,
+      'u_sd': WindowInterface.getDevicePixelRatio(),
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
       'psts': tokens.length ? tokens : null,
     };
@@ -523,21 +533,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const pageLayoutBox = this.isSinglePageStoryAd
       ? this.element.getPageLayoutBox()
       : null;
-    let psz = null;
     let msz = null;
+    let psz = null;
+    let fws = null;
     if (this.sendFlexibleAdSlotParams_) {
-      const parentWidth = getContainerWidth(
+      this.flexibleAdSlotData_ = getFlexibleAdSlotData(
         this.win,
         this.element.parentElement
       );
-      let slotWidth = getContainerWidth(
-        this.win,
-        this.element,
-        1 /* maxDepth */
-      );
-      slotWidth = slotWidth == -1 ? parentWidth : slotWidth;
+      const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
+      // If slotWidth is -1, that means its width must be determined by its
+      // parent container, and so should have the same value as parentWidth.
+      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
       psz = `${parentWidth}x-1`;
-      msz = `${slotWidth}x-1`;
+      fws = fwSignal ? fwSignal : '0';
     }
     return Object.assign(
       {
@@ -559,6 +568,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // disallowed in AMP.
         'msz': msz,
         'psz': psz,
+        'fws': fws,
         'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
@@ -679,6 +689,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Merges all of the rtcResponses into the JSON targeting and
    * category exclusions.
    * @param {?Array<!rtcResponseDef>} rtcResponseArray
+   * @return {?Object|undefined}
    * @private
    */
   mergeRtcResponses_(rtcResponseArray) {
@@ -877,15 +888,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Returns the width and height of the slot as defined by the width and height
    * attributes, or the dimensions as computed by
    * getIntersectionElementLayoutBox.
-   * @return {{width: number, height: number}|../../../src/layout-rect.LayoutRectDef}
+   * @return {!LayoutRectOrDimsDef}
    */
   getSlotSize() {
-    const width = Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('height'));
+    const {width, height} = this.getDeclaredSlotSize_();
     return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
         this.getIntersectionElementLayoutBox();
+  }
+
+  /**
+   * Returns the width and height, as defined by the slot element's width and
+   * height attributes.
+   * @return {!SizeDef}
+   */
+  getDeclaredSlotSize_() {
+    const width = Number(this.element.getAttribute('width'));
+    const height = Number(this.element.getAttribute('height'));
+    return {width, height};
   }
 
   /**
@@ -1032,7 +1053,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       devAssert(this.iframe);
       Navigation.installAnchorClickInterceptor(
         this.getAmpDoc(),
-        this.iframe.contentWindow
+        devAssert(this.iframe.contentWindow)
       );
     }
     if (this.ampAnalyticsConfig_) {
@@ -1164,6 +1185,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.reattemptToExpandFluidCreative_ = false;
           })
           .catch(() => {
+            user().warn(
+              TAG,
+              'Attempt to change size failed on fluid ' +
+                'creative. Will re-attempt when slot is out of the viewport.'
+            );
             this.reattemptToExpandFluidCreative_ = true;
             this.setCssPosition_('absolute');
           });
@@ -1201,22 +1227,78 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /**
    * Attempts to resize the ad, if the returned size is smaller than the primary
    * dimensions.
-   * @param {number} width
-   * @param {number} height
+   * @param {number} newWidth
+   * @param {number} newHeight
    * @private
    */
-  handleResize_(width, height) {
-    const pWidth = this.element.getAttribute('width');
-    const pHeight = this.element.getAttribute('height');
-    // We want to resize only if neither returned dimension is larger than its
-    // primary counterpart, and if at least one of the returned dimensions
-    // differ from its primary counterpart.
+  handleResize_(newWidth, newHeight) {
+    const isFluidRequestAndFixedResponse = !!(
+      this.isFluidRequest_ &&
+      newWidth &&
+      newHeight
+    );
+    const {width, height} = this.getDeclaredSlotSize_();
+    const returnedSizeDifferent = newWidth != width || newHeight != height;
+    const heightNotIncreased = newHeight <= height;
     if (
-      (this.isFluidRequest_ && width && height) ||
-      ((width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight))
+      isFluidRequestAndFixedResponse ||
+      (returnedSizeDifferent && heightNotIncreased)
     ) {
-      this.attemptChangeSize(height, width).catch(() => {});
+      this.attemptChangeSize(newHeight, newWidth).catch(() => {});
+      if (newWidth > width) {
+        this.adjustSlotPostExpansion_(newWidth);
+      }
+    }
+  }
+
+  /**
+   * Ensures that slot is properly centered after being expanded.
+   * @param {number} newWidth The new width of the slot.
+   * @private
+   */
+  adjustSlotPostExpansion_(newWidth) {
+    if (
+      !devAssert(
+        this.flexibleAdSlotData_,
+        'Attempted to expand slot without flexible ad slot data.'
+      )
+    ) {
+      return;
+    }
+    const isRtl = isRTL(this.win.document);
+    const dirStr = isRtl ? 'Right' : 'Left';
+    // Guaranteed to be set after exiting if/else.
+    let /** ?number */ newMargin = null;
+    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
+    if (newWidth <= parentWidth) {
+      // Must center creative within its parent container
+      const parentPadding = parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
+      const parentBorder =
+        parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
+      const whitespace = (this.flexibleAdSlotData_.parentWidth - newWidth) / 2;
+      newMargin = whitespace - parentPadding - parentBorder;
+    } else {
+      // Must center creative within the viewport
+      const viewportWidth = this.getViewport().getRect().width;
+      const pageLayoutBox = this.element.getPageLayoutBox();
+      const whitespace = (viewportWidth - newWidth) / 2;
+      if (isRtl) {
+        newMargin = pageLayoutBox.right + whitespace - viewportWidth;
+      } else {
+        newMargin = -(pageLayoutBox.left - whitespace);
+      }
+    }
+    // setStyles cannot have computed style names, so we must do this by cases.
+    if (isRtl) {
+      setStyles(this.element, {
+        'z-index': '11',
+        'margin-right': `${Math.round(newMargin)}px`,
+      });
+    } else {
+      setStyles(this.element, {
+        'z-index': '11',
+        'margin-left': `${Math.round(newMargin)}px`,
+      });
     }
   }
 

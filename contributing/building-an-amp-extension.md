@@ -358,7 +358,7 @@ owners.
 this.cells_ = this.getRealChildren();
 
 this.cells_.forEach(cell => {
-  this.setAsOwner(cell);
+  Services.ownersForDoc(this.element).setOwner(cell, this.element);
   cell.style.display = 'inline-block';
   this.container_.appendChild(cell);
 });
@@ -372,12 +372,13 @@ forward/backward in the slides and then calls `scheduleLayout` for the
 current slide when the user moves to it.
 
 ```javascript
-  this.updateInViewport(oldSlide, false);
-  this.updateInViewport(newSlide, true);
-  this.scheduleLayout(newSlide);
+  const owners = Services.ownersForDoc(this.element);
+  owners.updateInViewport(this.element, oldSlide, false);
+  owners.updateInViewport(this.element, newSlide, true);
+  owners.scheduleLayout(this.element, newSlide);
   this.setControlsState();
-  this.schedulePause(oldSlide);
-  this.schedulePreload(nextSlide);
+  owners.schedulePause(this.element, oldSlide);
+  owners.schedulePreload(this.element, nextSlide);
 ```
 
 It's important to understand that the parent/owner element is
@@ -744,8 +745,8 @@ Also consider contributing to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to bundles.config.js to tell it about your extension, its files and
-its examples. You will need to add an entry in the `extensionBundles` array.
+changes to [`build-system/compile/bundles.config.js`](../build-system/compile/bundles.config.js) to tell it about your
+extension, its files and its examples. You will need to add an entry in the `extensionBundles` array.
 
 ```javascript
 exports.extensionBundles = [

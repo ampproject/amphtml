@@ -165,12 +165,18 @@ function actionTypeHandler(win, grecaptcha, data) {
           );
         },
         function(err) {
-          user().error(TAG, '%s', err.message);
+          let message =
+            'There was an error running ' +
+            'execute() on the reCAPTCHA script.';
+          if (err) {
+            message = err.toString();
+          }
+          user().error(TAG, '%s', message);
           iframeMessagingClient./*OK*/ sendMessage(
             'amp-recaptcha-error',
             dict({
               'id': data.id,
-              'error': err.message,
+              'error': message,
             })
           );
         }

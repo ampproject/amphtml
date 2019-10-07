@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const RAKAM_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const RAKAM_CONFIG = jsonLiteral({
   'vars': {
     'deviceId': 'CLIENT_ID(rakam_device_id)',
   },
@@ -38,3 +40,5 @@ export const RAKAM_CONFIG = /** @type {!JsonObject} */ ({
       'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
   },
 });
+
+export {RAKAM_CONFIG};

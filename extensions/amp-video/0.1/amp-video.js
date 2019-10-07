@@ -55,16 +55,15 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controls',
   'crossorigin',
   'disableremoteplayback',
-  'poster',
   'controlsList',
 ];
 
 /**
- * @note Do not propagate `autoplay`. Autoplay behavior is managed by
+ * Do not propagate `autoplay`. Autoplay behavior is managed by
  *       video manager since amp-video implements the VideoInterface.
  * @private {!Array<string>}
  */
-const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'preload'];
+const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'poster', 'preload'];
 
 /** @private {!Array<string>} */
 const ATTRS_TO_PROPAGATE = ATTRS_TO_PROPAGATE_ON_BUILD.concat(
@@ -209,10 +208,7 @@ class AmpVideo extends AMP.BaseElement {
     this.applyFillContent(this.video_, true);
     propagateObjectFitStyles(this.element, this.video_);
 
-    this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
-
-    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
     // Gather metadata
     const artist = element.getAttribute('artist');
@@ -308,19 +304,23 @@ class AmpVideo extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
 
+    this.createPosterForAndroidBug_();
+    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
+
     this.propagateCachedSources_();
 
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
+    if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      viewer.whenFirstVisible().then(() => {
-        this.propagateLayoutChildren_();
-      });
+      this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.propagateLayoutChildren_();
+        });
     } else {
       this.propagateLayoutChildren_();
     }

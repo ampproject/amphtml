@@ -63,13 +63,13 @@ export class InfoDialog {
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
     /** @private {?Element} */
     this.moreInfoLinkEl_ = null;
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer} */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.parentEl_);
   }
 
@@ -194,6 +194,7 @@ export class InfoDialog {
 
   /**
    * Sets the heading on the dialog.
+   * @return {*} TODO(#23582): Specify return type
    */
   setHeading_() {
     const label = this.localizationService_.getLocalizedString(
@@ -211,6 +212,7 @@ export class InfoDialog {
   /**
    * @param {string} pageUrl The URL to the canonical version of the current
    *     document.
+   * @return {*} TODO(#23582): Specify return type
    */
   setPageLink_(pageUrl) {
     const linkEl = dev().assertElement(
@@ -229,6 +231,7 @@ export class InfoDialog {
   /**
    * @param {?string} moreInfoUrl The URL to the "more info" page, if there is
    * one.
+   * @return {*} TODO(#23582): Specify return type
    */
   setMoreInfoLinkUrl_(moreInfoUrl) {
     if (!moreInfoUrl) {

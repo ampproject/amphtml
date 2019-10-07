@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-const gulp = require('gulp');
+const argv = require('minimist')(process.argv.slice(2));
+const log = require('fancy-log');
 const {
-  buildAlp,
-  buildExaminer,
-  buildWebWorker,
-  compileAllUnminifiedTargets,
-  compileJs,
+  bootstrapThirdPartyFrames,
+  compileAllUnminifiedJs,
   printConfigHelp,
   printNobuildHelp,
 } = require('./helpers');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {compileJison} = require('./compile-jison');
+const {cyan, green} = require('ansi-colors');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {serve} = require('./serve');
@@ -38,7 +41,7 @@ const {serve} = require('./serve');
 async function watch() {
   maybeUpdatePackages();
   createCtrlcHandler('watch');
-  return performBuild(true);
+  return performBuild(/* watch */ true);
 }
 
 /**
@@ -48,7 +51,41 @@ async function watch() {
 async function build() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
-  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
+  await performBuild();
+  return exitCtrlcHandler(handlerProcess);
+}
+
+/**
+ * Prints a useful help message prior to the default gulp task
+ */
+function printDefaultTaskHelp() {
+  log(green('Running the default ') + cyan('gulp ') + green('task.'));
+  const defaultTaskMessage =
+    green('⤷ JS and extensions will be ') +
+    green(
+      argv.eager_build
+        ? 'built after server startup.'
+        : 'lazily built when requested from the server.'
+    );
+  log(defaultTaskMessage);
+  if (!argv.eager_build) {
+    const eagerBuildMessage =
+      green('⤷ Use ') +
+      cyan('--eager_build ') +
+      green('to build JS and extensions after server startup.');
+    log(eagerBuildMessage);
+  }
+}
+
+/**
+ * Performs the pre-requisite build steps for gulp, gulp build, and gulp watch
+ * @param {boolean} watch
+ * @return {!Promise}
+ */
+async function performPrerequisiteSteps(watch) {
+  await compileCss(watch);
+  await compileJison();
+  await bootstrapThirdPartyFrames(watch);
 }
 
 /**
@@ -61,30 +98,32 @@ async function performBuild(watch) {
   printNobuildHelp();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
-  return compileCss(watch).then(() => {
-    return Promise.all([
-      polyfillsForTests(),
-      buildAlp({watch}),
-      buildExaminer({watch}),
-      buildWebWorker({watch}),
-      buildExtensions({watch}),
-      compileAllUnminifiedTargets(watch),
-    ]);
-  });
-}
-
-/**
- * Compile the polyfills script and drop it in the build folder
- * @return {!Promise}
- */
-function polyfillsForTests() {
-  return compileJs('./src/', 'polyfills.js', './build/');
+  await performPrerequisiteSteps(watch);
+  await compileAllUnminifiedJs(watch);
+  await buildExtensions({watch});
 }
 
 /**
  * The default task run when `gulp` is executed
+ * @return {!Promise}
  */
-const defaultTask = gulp.series(watch, serve);
+async function defaultTask() {
+  maybeUpdatePackages();
+  createCtrlcHandler('gulp');
+  process.env.NODE_ENV = 'development';
+  printConfigHelp('gulp');
+  printDefaultTaskHelp();
+  parseExtensionFlags(/* preBuild */ !argv.eager_build);
+  await performPrerequisiteSteps(/* watch */ true);
+  await serve();
+  if (!argv.eager_build) {
+    log(green('JS and extensions will be lazily built when requested...'));
+  } else {
+    log(green('Building JS and extensions...'));
+    await compileAllUnminifiedJs(/* watch */ true);
+    await buildExtensions({watch: true});
+  }
+}
 
 module.exports = {
   build,
@@ -104,24 +143,19 @@ build.flags = {
 
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
-  with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_inabox_lite: '  Also watch and build the amp-inabox-lite.js binary.',
-  with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  with_video_iframe_integration:
-    '  Also watch and build the video-iframe-integration.js binary.',
+  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
 };
 
-defaultTask.description = 'Runs "watch" and then "serve"';
+defaultTask.description =
+  'Starts the dev server and lazily builds JS and extensions when requested';
 defaultTask.flags = {
-  with_inabox: '  Also watch and build the amp-inabox.js binary.',
-  with_inabox_lite: '  Also watch and build the amp-inabox-lite.js binary.',
-  with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  with_video_iframe_integration:
-    '  Also watch and build the video-iframe-integration.js binary.',
+  eager_build:
+    '  Starts the dev server and builds JS and extensions after server startup',
+  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',

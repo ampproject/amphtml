@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const MEDIARITHMICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const MEDIARITHMICS_CONFIG = jsonLiteral({
   'vars': {
     'domain': 'events.mediarithmics.com',
     'url': 'SOURCE_URL',
@@ -42,3 +44,5 @@ export const MEDIARITHMICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {MEDIARITHMICS_CONFIG};

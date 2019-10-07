@@ -106,18 +106,25 @@ class AmpInstagram extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    const image = this.win.document.createElement('amp-img');
-    image.setAttribute('noprerender', '');
+    const image = this.win.document.createElement('img');
+
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
-    image.setAttribute(
-      'src',
-      'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) +
-        '/media/?size=l'
-    );
-    image.setAttribute('layout', 'fill');
+    this.getAmpDoc()
+      .whenFirstVisible()
+      .then(() => {
+        image.setAttribute(
+          'src',
+          'https://www.instagram.com/p/' +
+            encodeURIComponent(this.shortcode_) +
+            '/media/?size=l'
+        );
+      });
     image.setAttribute('referrerpolicy', 'origin');
+    setStyles(image, {
+      'overflow': 'hidden',
+      'max-width': '100%',
+    });
 
     this.propagateAttributes(['alt'], image);
     /*
@@ -127,15 +134,13 @@ class AmpInstagram extends AMP.BaseElement {
       this.element.classList.add('amp-instagram-default-framing');
     }
 
-    // This makes the non-iframe image appear in the exact same spot
-    // where it will be inside of the iframe.
-    setStyles(image, {
-      'top': '0 px',
-      'bottom': '0 px',
-      'left': '0 px',
-      'right': '0 px',
-    });
     placeholder.appendChild(image);
+    // Must be kept in-sync with the amp-instagram style in ampdoc.css.
+    // This value is the height of the header of the plugin. Makes the
+    // placeholder start at the right spot.
+    setStyles(placeholder, {
+      'marginTop': '54px',
+    });
     return placeholder;
   }
 
@@ -168,7 +173,7 @@ class AmpInstagram extends AMP.BaseElement {
       encodeURIComponent(this.shortcode_) +
       '/embed/' +
       this.captioned_ +
-      '?cr=1&v=9';
+      '?cr=1&v=12';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     setStyles(iframe, {

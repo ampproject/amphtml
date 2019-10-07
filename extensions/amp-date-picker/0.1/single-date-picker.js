@@ -100,15 +100,27 @@ function createSingleDatePickerBase() {
  * @return {function(new:React.Component, !JsonObject)} A class with a preset focused prop
  */
 function withFocusedTrueHack(WrappedComponent) {
-  const React = requireExternal('react');
+  const react = requireExternal('react');
 
-  class FocusedTrueHack extends React.Component {
-    /** @override */
-    render() {
-      const props = Object.assign({}, this.props, dict({'focused': true}));
-      return React.createElement(WrappedComponent, props);
-    }
+  /**
+   * Creates an instance of FocusedTrueHack.
+   * @param {!JsonObject} props
+   * @struct
+   * @constructor
+   * @extends {React.Component}
+   */
+  function FocusedTrueHack(props) {
+    react.Component.call(this, props);
   }
+
+  FocusedTrueHack.prototype = Object.create(react.Component.prototype);
+  FocusedTrueHack.prototype.constructor = FocusedTrueHack;
+
+  /** @override */
+  FocusedTrueHack.prototype.render = function() {
+    const props = Object.assign({}, this.props, dict({'focused': true}));
+    return react.createElement(WrappedComponent, props);
+  };
 
   return FocusedTrueHack;
 }

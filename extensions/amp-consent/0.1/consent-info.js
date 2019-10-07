@@ -103,6 +103,7 @@ export function hasDirtyBit(consentInfo) {
  * Return the new consent state value based on stored state and new state
  * @param {!CONSENT_ITEM_STATE} newState
  * @param {!CONSENT_ITEM_STATE} previousState
+ * @return {!CONSENT_ITEM_STATE}
  */
 export function recalculateConsentStateValue(newState, previousState) {
   if (!isEnumValue(CONSENT_ITEM_STATE, newState)) {
@@ -239,6 +240,7 @@ export function constructConsentInfo(
 /**
  * Helper function to convert stored value to CONSENT_ITEM_STATE value
  * @param {*} value
+ * @return {!CONSENT_ITEM_STATE}
  */
 function convertValueToState(value) {
   if (value === true || value === 1) {

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const WEBTREKK_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const WEBTREKK_CONFIG = jsonLiteral({
   'requests': {
     'trackURL': 'https://${trackDomain}/${trackId}/wt',
     'parameterPrefix':
@@ -55,3 +57,5 @@ export const WEBTREKK_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {WEBTREKK_CONFIG};

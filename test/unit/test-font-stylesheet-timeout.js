@@ -15,7 +15,6 @@
  */
 
 import {fontStylesheetTimeout} from '../../src/font-stylesheet-timeout';
-import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin(
   'font-stylesheet-timeout',
@@ -29,20 +28,22 @@ describes.realWin(
       .run('font-stylesheet-timeout', () => {
         let clock;
         let win;
+        let sandbox;
         let readyState;
         let responseStart;
         beforeEach(() => {
-          clock = env.sandbox.useFakeTimers();
+          sandbox = env.sandbox;
+          clock = sandbox.useFakeTimers();
           win = env.win;
           win.setTimeout = self.setTimeout;
           readyState = 'interactive';
           responseStart = 0;
-          Object.defineProperty(win.document, 'readyState', {
+          sandbox.defineProperty(win.document, 'readyState', {
             get() {
               return readyState;
             },
           });
-          Object.defineProperty(win.performance.timing, 'responseStart', {
+          sandbox.defineProperty(win.performance.timing, 'responseStart', {
             get() {
               return responseStart;
             },
@@ -102,7 +103,7 @@ describes.realWin(
           const after = win.document.querySelector('link[rel="stylesheet"]');
           expect(after).to.equal(link);
           expect(after.href).to.equal(link.href);
-          expect(after.media).to.equal('not-matching');
+          expect(after.media).to.equal('print');
           after.href = immediatelyLoadingHref('/* make-it-load */');
           return new Promise(resolve => {
             after.addEventListener('load', () => {
@@ -197,7 +198,7 @@ describes.realWin(
               null,
             ];
             let index = 0;
-            Object.defineProperty(win.document, 'fonts', {
+            sandbox.defineProperty(win.document, 'fonts', {
               get: () => {
                 return {
                   values: () => {
@@ -210,14 +211,6 @@ describes.realWin(
                 };
               },
             });
-            toggleExperiment(win, 'font-display-swap', true);
-          });
-
-          it('should not do anything with experiment off', () => {
-            toggleExperiment(win, 'font-display-swap', false);
-            fontStylesheetTimeout(win);
-            clock.tick(250);
-            expect(fonts[1].display).to.equal('auto');
           });
 
           it('should not change loaded fonts', () => {

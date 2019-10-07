@@ -70,9 +70,12 @@ describes.realWin(
         });
       }
 
-      async function createElement(content, {width, height}) {
+      async function createElement(
+        content,
+        {width, height, layout = 'fixed', container = doc.body}
+      ) {
         const element = win.document.createElement('amp-truncate-text');
-        element.setAttribute('layout', 'fixed');
+        element.setAttribute('layout', layout);
         element.setAttribute('width', width);
         element.setAttribute('height', height);
         setStyles(element, {
@@ -80,7 +83,7 @@ describes.realWin(
           lineHeight: '1.3',
         });
         element.innerHTML = content;
-        doc.body.appendChild(element);
+        container.appendChild(element);
         await element.build();
         await element.layoutCallback();
         await afterMutationAndClamp();
@@ -285,7 +288,7 @@ describes.realWin(
             const element = await createElement(
               `
             ${loremText}
-            <button slot="expand" style="padding: 2px">
+            <button slot="collapsed" style="padding: 2px">
               See more
             </button>
             world
@@ -310,7 +313,7 @@ describes.realWin(
             const element = await createElement(
               `
             Hello world
-            <button slot="expand" style="padding: 2px">
+            <button slot="collapsed" style="padding: 2px">
               See more
             </button>
           `,
@@ -330,7 +333,7 @@ describes.realWin(
             const element = await createElement(
               `
             ${loremText}
-            <button slot="expand" style="padding: 6px">
+            <button slot="collapsed" style="padding: 6px">
               See more
             </button>
             world
@@ -360,15 +363,15 @@ describes.realWin(
             const element = await createElement(
               `
             ${loremText}
-            <span slot="expand">See more</span>
-            <span slot="collapse">See more</span>
+            <span slot="collapsed">See more</span>
+            <span slot="expanded">See more</span>
           `,
               {
                 width: 150,
                 height: 26,
               }
             );
-            const collapseEl = element.querySelector('[slot="collapse"]');
+            const collapseEl = element.querySelector('[slot="expanded"]');
 
             expect(collapseEl.offsetHeight).to.equal(0);
             expect(collapseEl.offsetWidth).to.equal(0);
@@ -378,16 +381,16 @@ describes.realWin(
             const element = await createElement(
               `
             ${loremText}
-            <span slot="expand">See more</span>
-            <span slot="collapse">See more</span>
+            <span slot="collapsed">See more</span>
+            <span slot="expanded">See more</span>
           `,
               {
                 width: 150,
                 height: 26,
               }
             );
-            const expandEl = element.querySelector('[slot="expand"]');
-            const collapseEl = element.querySelector('[slot="collapse"]');
+            const expandEl = element.querySelector('[slot="collapsed"]');
+            const collapseEl = element.querySelector('[slot="expanded"]');
 
             expandEl.click();
             await afterMutationAndClamp();
@@ -398,20 +401,54 @@ describes.realWin(
             expect(collapseEl.offsetWidth).to.be.gt(0);
           });
 
+          it('should hide any sizer element when expanded', async () => {
+            const element = await createElement(
+              `
+              ${loremText}
+              <span slot="collapsed">See more</span>
+              <span slot="expanded">See more</span>
+            `,
+              {
+                layout: 'responsive',
+                width: 150,
+                height: 26,
+              }
+            );
+            element.style.width = '150px';
+
+            const expandEl = element.querySelector('[slot="collapsed"]');
+            const sizer = element.querySelector('i-amphtml-sizer');
+
+            expect(sizer.getBoundingClientRect()).to.include({
+              width: 150,
+              height: 26,
+            });
+
+            expandEl.click();
+            await afterMutationAndClamp();
+
+            expect(sizer.getBoundingClientRect()).to.include({
+              width: 0,
+              height: 0,
+            });
+            expect(element.scrollHeight).to.be.gt(26);
+            expect(element.scrollHeight).to.equal(element.offsetHeight);
+          });
+
           it('should collapse when clicking the collapse element', async () => {
             const element = await createElement(
               `
             ${loremText}
-            <span slot="expand">See more</span>
-            <span slot="collapse">See more</span>
+            <span slot="collapsed">See more</span>
+            <span slot="expanded">See more</span>
           `,
               {
                 width: 150,
                 height: 26,
               }
             );
-            const expandEl = element.querySelector('[slot="expand"]');
-            const collapseEl = element.querySelector('[slot="collapse"]');
+            const expandEl = element.querySelector('[slot="collapsed"]');
+            const collapseEl = element.querySelector('[slot="expanded"]');
 
             expandEl.click();
             await afterMutationAndClamp();
@@ -422,6 +459,170 @@ describes.realWin(
             expect(element.scrollHeight).to.equal(26);
             expect(collapseEl.offsetHeight).to.equal(0);
             expect(collapseEl.offsetWidth).to.equal(0);
+          });
+        });
+
+        describe('persistent slot', () => {
+          it('should show when overflowing', async () => {
+            const element = await createElement(
+              `
+            ${loremText}
+            <span slot="persistent">See more</span>
+          `,
+              {
+                width: 150,
+                height: 26,
+              }
+            );
+            const persistentEl = element.querySelector('[slot="persistent"]');
+
+            expect(persistentEl.offsetHeight).to.be.gt(0);
+            expect(persistentEl.offsetWidth).to.be.gt(0);
+          });
+
+          it('should show when not overflowing', async () => {
+            const element = await createElement(
+              `
+            Foo
+            <span slot="persistent">See more</span>
+          `,
+              {
+                width: 150,
+                height: 26,
+              }
+            );
+            const persistentEl = element.querySelector('[slot="persistent"]');
+
+            expect(persistentEl.offsetHeight).to.be.gt(0);
+            expect(persistentEl.offsetWidth).to.be.gt(0);
+          });
+        });
+
+        describe('custom expand', () => {
+          it('should not expand inline when using an anchor tag', async () => {
+            const element = await createElement(
+              `
+            ${loremText}
+            <a href="#" slot="collapsed">See <span>more</span></a>
+          `,
+              {
+                width: 150,
+                height: 26,
+              }
+            );
+            const expandSpan = element.querySelector('[slot="collapsed"] span');
+
+            expandSpan.click();
+            await afterMutationAndClamp();
+
+            expect(element.offsetHeight).to.equal(26);
+          });
+
+          it('should not expand when component is within an anchor', async () => {
+            const container = win.document.createElement('a');
+            container.href = '#';
+            doc.body.appendChild(container);
+            const element = await createElement(
+              `
+            ${loremText}
+            <span slot="collapsed">See more</span>
+          `,
+              {
+                width: 150,
+                height: 26,
+                container,
+              }
+            );
+            const expandSpan = element.querySelector('[slot="collapsed"]');
+
+            expandSpan.click();
+            await afterMutationAndClamp();
+
+            expect(element.offsetHeight).to.equal(26);
+          });
+
+          it('should not expand inline when using a tap action', async () => {
+            const element = await createElement(
+              `
+            ${loremText}
+            <button slot="collapsed" on="tap:foo.scrollTo">See more</button>
+          `,
+              {
+                width: 150,
+                height: 26,
+              }
+            );
+            element.id = 'foo';
+            const expandSpan = element.querySelector('[slot="collapsed"]');
+
+            expandSpan.click();
+            await afterMutationAndClamp();
+
+            expect(element.offsetHeight).to.equal(26);
+          });
+
+          it('should not expand inline when a parent has a tap action', async () => {
+            const element = await createElement(
+              `
+            ${loremText}
+            <button slot="collapsed" on="tap:foo.scrollTo">See <span>more</span></button>
+          `,
+              {
+                width: 150,
+                height: 26,
+              }
+            );
+            element.id = 'foo';
+            const expandSpan = element.querySelector('[slot="collapsed"] span');
+
+            expandSpan.click();
+            await afterMutationAndClamp();
+
+            expect(element.offsetHeight).to.equal(26);
+          });
+
+          it('should not expand inline when using a child tap action', async () => {
+            const element = await createElement(
+              `
+            ${loremText}
+            <button slot="collapsed">See <span on="tap:foo.scrollTo">more</span></button>
+          `,
+              {
+                width: 150,
+                height: 26,
+              }
+            );
+            element.id = 'foo';
+            const expandSpan = element.querySelector('[slot="collapsed"] span');
+
+            expandSpan.click();
+            await afterMutationAndClamp();
+
+            expect(element.offsetHeight).to.equal(26);
+          });
+
+          it('should not expand when a component ancestor has a tap action', async () => {
+            const container = win.document.createElement('div');
+            container.setAttribute('on', 'tap:foo.scrollTo');
+            container.id = 'foo';
+            doc.body.appendChild(container);
+            const element = await createElement(
+              `
+            ${loremText}
+            <span slot="collapsed">See more</span>
+          `,
+              {
+                width: 150,
+                height: 26,
+                container,
+              }
+            );
+            const expandSpan = element.querySelector('[slot="collapsed"]');
+
+            expandSpan.click();
+            await afterMutationAndClamp();
+
+            expect(element.offsetHeight).to.equal(26);
           });
         });
       });

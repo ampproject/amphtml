@@ -2,8 +2,8 @@
 $category@: media
 formats:
   - websites
-  - ads
   - stories
+  - ads
 teaser:
   text: Replaces the HTML5 audio tag.
 ---
@@ -33,12 +33,12 @@ A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> c
     <td><code>&lt;script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js">&lt;/script></code></td>
   </tr>
    <tr>
-     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
      <td>fixed, fixed-height, nodisplay</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-audio/">Annotated code example for amp-audio</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-audio/">Annotated code example for amp-audio</a></td>
   </tr>
 </table>
 
@@ -115,7 +115,7 @@ it is ready.</td>
   </tr>
   <tr>
     <td width="40%"><strong>title</strong></td>
-    <td>(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the audio's name displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.</td>
+    <td>(string) part of the [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes), doubles as the audio's name displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.</td>
   </tr>
 </table>
 
@@ -129,6 +129,40 @@ Example:
   album="Amazing album">
   <source type="audio/mpeg" src="foo.mp3">
 </amp-audio>
+```
+
+## Analytics
+AMP audio analytics gathers data about how users interact with audios in AMP documents. AMP audio extension issues analytics events during their lifecycle. These events can be reported through the analytics configuration using `audio-*` triggers. `audio-play` and `audio-pause` are the two analytics events supported now.
+
+See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
+
+
+### Audio play trigger (`"on": "audio-play"`)
+
+The `audio-play` trigger is fired when the audio begins playing from a user clicking play or from autoplay beginning or resuming. Use these configurations to fire a request for this event.
+
+```javascript
+"triggers": {
+  "audioPlay": {
+    "on": "audio-play",
+    "request": "event",
+    "selector": "#audio1"
+  }
+}
+```
+
+### Audio pause trigger (`"on": "audio-pause"`)
+
+The `audio-pause` trigger is fired when the audio stops playing from a user clicking pause, from autoplay pausing, or from the audio reaching the end. Use these configurations to fire a request for this event.
+
+```javascript
+"triggers": {
+  "audioPause": {
+    "on": "audio-pause",
+    "request": "event",
+    "selector": "#audio1"
+  }
+}
 ```
 
 ## Validation

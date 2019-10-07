@@ -16,6 +16,7 @@
 
 import {hasOwn} from '../../utils/object';
 import {rethrowAsync, user, userAssert} from '../../log';
+import {trimStart} from '../../string';
 import {tryResolve} from '../../utils/promise';
 
 /** @private @const {string} */
@@ -150,7 +151,7 @@ export class Expander {
           // Collect any chars that may be prefixing the macro, if we are in
           // a nested context trim the args.
           if (builder.trim().length) {
-            results.push(numOfPendingCalls ? builder.trimStart() : builder);
+            results.push(numOfPendingCalls ? trimStart(builder) : builder);
           }
 
           // If we know we are at the start of a macro, we figure out how to
@@ -291,15 +292,18 @@ export class Expander {
    *    the FOO binding opt_args will be [[Result of BAR, Result of BAR], [123]].
    *    This structure is so that the outer array will have the correct number of
    *    arguments, but we still can resolve each macro separately.
+   * @return {string|!Promise<string>}
    */
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;
     let binding;
-    if (hasOwn(bindingInfo, 'prioritized')) {
+    if (bindingInfo.prioritized != undefined) {
+      // Has to explicity check for undefined because bindingInfo.priorityized
+      // could not be a function but a false value. For example {FOO: 0}
       // If a binding is passed in through the bindings argument it always takes
       // precedence.
       binding = bindingInfo.prioritized;
-    } else if (this.sync_ && hasOwn(bindingInfo, 'sync')) {
+    } else if (this.sync_ && bindingInfo.sync != undefined) {
       // Use the sync resolution if avaliable when called synchronously.
       binding = bindingInfo.sync;
     } else if (this.sync_) {
@@ -440,6 +444,7 @@ export class Expander {
    * This will cast all arguments to string before calling the macro.
    *  [[Result of BAR, Result of BAR], 123]. => ['resultresult', '123']
    * @param {Array<!Array>|undefined} argsArray
+   * @return {Array<string>|undefined}
    */
   processArgsSync_(argsArray) {
     if (!argsArray) {

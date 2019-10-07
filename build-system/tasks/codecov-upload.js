@@ -23,9 +23,9 @@ const {
   isTravisPullRequestBuild,
   travisCommitSha,
   travisPullRequestSha,
-} = require('../travis');
-const {getStdout} = require('../exec');
-const {shortSha} = require('../git');
+} = require('../common/travis');
+const {getStdout} = require('../common/exec');
+const {shortSha} = require('../common/git');
 
 const {green, yellow, cyan} = colors;
 

@@ -31,12 +31,12 @@ Provides an approximate country-level geolocation interface.
     <td><code>&lt;script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
     <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-geo/">amp-geo example</a>.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-geo/">amp-geo example</a>.</td>
   </tr>
 </table>
 
@@ -227,7 +227,7 @@ The `amp-geo` JavaScript file is served with a 30-minute cache lifetime (`Cache-
 
 The `amp-geo` component supports pre-rendering. If the document is served from the publisher origin and it already contains a class matching `amp-iso-country-*` `amp-geo` respects that value. `amp-geo` will use the supplied country and configuration to supply data to cooperating AMP extensions (e.g., `amp-consent`). If a pre-rendered country code is detected, the document will not be modified by  `amp-geo` to add classes for country group or `amp-state`.
 
-However, if the document is served via one of the [AMP caches](https://github.com/ampproject/amphtml/blob/master/caches.json), `amp-geo` removes and replaces any supplied geolocation classes and, if the `AmpBind` configuration key is true, updates `<amp-state id="ampGeo">` accordingly. This allows publishers to use their own geolocation code when the document is served directly from their origin while retaining dynamic configuration when served from a cache.
+However, if the document is served via one of the [AMP caches](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/caches.json), `amp-geo` removes and replaces any supplied geolocation classes and, if the `AmpBind` configuration key is true, updates `<amp-state id="ampGeo">` accordingly. This allows publishers to use their own geolocation code when the document is served directly from their origin while retaining dynamic configuration when served from a cache.
 
 Caches that wish to pre-render `amp-geo` should [open an issue](https://github.com/ampproject/amphtml/issues/new) requesting to be removed from the pre-render override.
 
@@ -241,7 +241,7 @@ The string `{{AMP_ISO_COUNTRY_HOTPATCH}}` must be replaced at serving time with 
 
 ### Debugging
 
-Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Dev Channel](https://www.ampproject.org/docs/reference/experimental) or who are testing locally (i.e., `amp-geo.js` is served in development mode via [`gulp serve`](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md)).
+Adding `#amp-geo=XX` to the document url forces the country to appear as the country `XX`. This allows you to test without having to VPN to a country. For security reasons, to prevent sharing of geo-spoofing urls, this feature is only available to users who have enabled the [Dev Channel](https://amp.dev/documentation/guides-and-tutorials/learn/experimental) or who are testing locally (i.e., `amp-geo.js` is served in development mode via [`gulp serve`](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md)).
 
 **Note:** Debugging in DevChannel may not work in Safari due to [ITP](https://webkit.org/blog/8311/intelligent-tracking-prevention-2-0/).
 
