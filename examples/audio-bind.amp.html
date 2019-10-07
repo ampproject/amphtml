@@ -12,15 +12,26 @@
   <style amp-custom>
   </style>
 </head>
-<body>      
+<body>
+  <amp-state id="source">
+    <script type="application/json">
+      "av/audio.mp3"
+    </script>
+  </amp-state>
+  <amp-state id="artist">
+    <script type="application/json">
+      "Example Artist"
+    </script>
+  </amp-state>
   <amp-audio id="audio"
     width="auto" height="50"
     src="av/audio.mp3"
     [src]="source"
+    artist="Example Artist"
     [artist]="artist"
     layout="fixed-height">
   </amp-audio>
-  <button on="tap:AMP.setState({source: 'av/ForBiggerJoyrides.mp4'})">Change src</button>
+  <button on="tap:AMP.setState({source: 'https://ccrma.stanford.edu/~jos/mp3/bachfugue.mp3'})">Change src</button>
   <button on="tap:AMP.setState({artist: 'The AMP Team'})">Set artist (Media Session)</button>
   <button on="tap:audio.play">Play</button>
   <button on="tap:audio.pause">Pause</button>

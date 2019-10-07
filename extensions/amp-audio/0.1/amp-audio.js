@@ -69,17 +69,19 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
+    if (!this.audio_) {
+      return;
+    }
+
     const src = mutations['src'];
     const controlsList = mutations['controlsList'];
     const loop = mutations['loop'];
 
     if (src !== undefined || controlsList !== undefined || loop !== undefined) {
-      this.buildAudioElement();
-      this.loadPromise(this.audio_);
-    }
-
-    if (!this.audio_) {
-      return;
+      if (src !== undefined) {
+        assertHttpsUrl(src, this.element);
+      }
+      this.propagateAttributes(['src', 'loop', 'controlsList'], this.audio_);
     }
 
     const artist = mutations['artist'];
