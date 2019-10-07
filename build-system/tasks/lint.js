@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../test-configs/config');
+const deglob = require('globs-to-files');
 const eslint = require('gulp-eslint');
 const eslintIfFixed = require('gulp-eslint-if-fixed');
 const fs = require('fs-extra');
@@ -161,13 +162,16 @@ function runLinter(stream, options) {
 }
 
 /**
- * Extracts the list of JS files in this PR from the commit log.
+ * Extracts the list of lintable files in this PR from the commit log.
  *
  * @return {!Array<string>}
  */
-function jsFilesChanged() {
+function lintableFilesChanged() {
   return gitDiffNameOnlyMaster().filter(function(file) {
-    return fs.existsSync(file) && path.extname(file) == '.js';
+    return (
+      fs.existsSync(file) &&
+      (path.extname(file) == '.js' || path.basename(file) == 'OWNERS')
+    );
   });
 }
 
@@ -189,20 +193,20 @@ function eslintRulesChanged() {
 }
 
 /**
- * Sets the list of files to be linted.
+ * Gets the list of files to be linted.
  *
  * @param {!Array<string>} files
+ * @return {!Array<string>}
  */
-function setFilesToLint(files) {
-  config.lintGlobs = config.lintGlobs
-    .filter(e => e !== '**/*.js')
-    .concat(files);
+function getFilesToLint(files) {
+  const filesToLint = deglob.sync(files);
   if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
-    files.forEach(file => {
-      log(colors.cyan(file));
+    filesToLint.forEach(file => {
+      log(colors.cyan(path.relative(rootDir, file)));
     });
   }
+  return filesToLint;
 }
 
 /**
@@ -214,17 +218,18 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
+  let filesToLint = config.lintGlobs;
   if (argv.files) {
-    setFilesToLint(argv.files.split(','));
+    filesToLint = getFilesToLint(argv.files.split(','));
   } else if (!eslintRulesChanged() && argv.local_changes) {
-    const jsFiles = jsFilesChanged();
-    if (jsFiles.length == 0) {
-      log(colors.green('INFO: ') + 'No JS files in this PR');
+    const lintableFiles = lintableFilesChanged();
+    if (lintableFiles.length == 0) {
+      log(colors.green('INFO: ') + 'No JS or OWNERS files in this PR');
       return Promise.resolve();
     }
-    setFilesToLint(jsFiles);
+    filesToLint = getFilesToLint(lintableFiles);
   }
-  const stream = initializeStream(config.lintGlobs, {base: rootDir});
+  const stream = initializeStream(filesToLint, {base: rootDir});
   return runLinter(stream, options);
 }
 
