@@ -22,7 +22,7 @@
     "amphtml-validator": "index.js"
   },
   "scripts": {
-    "preinstall": "node ../../build-system/check-package-manager.js"
+    "preinstall": "node ../../build-system/common/check-package-manager.js"
   },
   "dependencies": {
     "colors": "1.2.5",
