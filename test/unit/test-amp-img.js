@@ -188,6 +188,16 @@ describe('amp-img', () => {
     });
   });
 
+  it('should propagata data-* attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'data-pin-img': '/examples/img/x-icon.png',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-pin-img')).to.equal('/examples/img/x-icon.png');
+    });
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
