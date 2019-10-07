@@ -23,12 +23,14 @@ const {jsonGlobs} = require('../config');
 
 const expectedCaches = ['cloudflare', 'google'];
 
+const cachesJsonPath = 'build-system/global-configs/caches.json';
+
 /**
  * Fail if caches.json is missing some expected caches.
  * @return {!Promise}
  */
 async function cachesJson() {
-  return gulp.src(['caches.json']).pipe(
+  return gulp.src([cachesJsonPath]).pipe(
     through2.obj(function(file) {
       let obj;
       try {
