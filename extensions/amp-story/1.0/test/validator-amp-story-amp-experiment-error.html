@@ -27,8 +27,49 @@
                   }
             </script>
         </amp-experiment>
+
+        <!-- Invalid: bare script not allowed as a child of amp-story-grid-layer -->
+        <script type="application/json">
+          {
+            "background-color-test": {
+              "variants": {
+                "yellow": 49,
+                "red": 49
+                }
+              }
+            }
+        </script>
       </amp-story-grid-layer>
+
+      <!-- Invalid: amp-experiment not allowed as a child of amp-story-page -->
+      <amp-experiment>
+          <script type="application/json">
+            {
+              "background-color-test": {
+                "variants": {
+                  "yellow": 49,
+                  "red": 49
+                  }
+                }
+              }
+          </script>
+      </amp-experiment>
+
     </amp-story-page>
+
+    <!-- Invalid: amp-experiment not allowed as a child of amp-story -->
+    <amp-experiment>
+        <script type="application/json">
+          {
+            "background-color-test": {
+              "variants": {
+                "yellow": 49,
+                "red": 49
+                }
+              }
+            }
+        </script>
+    </amp-experiment>
   </amp-story>
 </body>
 </html>
