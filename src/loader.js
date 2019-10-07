@@ -37,6 +37,13 @@ function getLoaderServicePromise(ampDoc, element) {
 }
 
 /**
+ * Restore loaderServicePromise to its initial state.
+ */
+function unsetLoaderPromise() {
+  loaderServicePromise = null;
+}
+
+/**
  * Creates a default "loading indicator" element based on the new design.
  *
  * Please see https://github.com/ampproject/amphtml/issues/20237 for details,
@@ -68,7 +75,8 @@ export function createLoaderElement(
       loaderRoot,
       initDelay,
       elementWidth,
-      elementHeight
+      elementHeight,
+      unsetLoaderPromise
     );
   });
 
