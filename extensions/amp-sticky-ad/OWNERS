@@ -5,8 +5,7 @@
   rules: [
     {
       owners: [
-        { name: 'lannka' },
-        { name: 'jeffkaufman' }
+        { name: 'zhouyx' }
       ]
     }
   ]

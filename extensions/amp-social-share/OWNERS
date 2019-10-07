@@ -5,8 +5,9 @@
   rules: [
     {
       owners: [
-        { name: 'lannka' },
-        { name: 'jeffkaufman' }
+        { name: 'ampproject/wg-ui-and-a11y' },
+        { name: 'ithinkihaveacat' },
+        { name: 'ryancopley' }
       ]
     }
   ]
