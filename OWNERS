@@ -19,6 +19,7 @@
         }
       ]
     },
+
     {
       pattern: '**/validator-*.{protoascii,html,out}',
       owners: [
@@ -28,18 +29,21 @@
         }
       ]
     },
+
     {
       pattern: '*.md',
       owners: [
         { name: 'ampproject/wg-outreach' }
       ]
     },
+
     {
       pattern: '{.*,babel.config.js,gulpfile.js}',
       owners: [
         { name: 'ampproject/wg-infra' }
       ]
     },
+
     {
       pattern: '{package.json,yarn.lock}',
       owners: [
@@ -48,8 +52,22 @@
         { name: 'ampproject/wg-performance' }
       ]
     },
+
     {
-      pattern: '**/OWNERS.yaml',
+      // The below rule will be here only temporarily during the transition
+      // period while many owners files are being updated as contributors and
+      // teams notice which files are out of date. The "notify" option means the
+      // owners bot will tag me on any PR that touches an owners file. This will
+      // allow me to verify syntax and semantics of all updates until the syntax
+      // check API for Travis to use is complete.
+
+      // Though this gives me the ability to approve changes to owners files,
+      // I do not currently have merge access; the owners check is currently
+      // non-blocking; and I run and maintain the owners bot application.
+
+      // TODO(#24685): Remove this once most owners files have been updated
+      // and/or the Travis check is implemented.
+      pattern: '**/{OWNERS.yaml,OWNERS}',
       owners: [
         {
           name: 'rcebulko',
