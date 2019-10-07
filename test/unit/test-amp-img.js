@@ -192,9 +192,13 @@ describe('amp-img', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
       'data-pin-img': '/examples/img/x-icon.png',
+      'data-some-value': 'hello-world',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
-      expect(img.getAttribute('data-pin-img')).to.equal('/examples/img/x-icon.png');
+      expect(img.getAttribute('data-pin-img')).to.equal(
+        '/examples/img/x-icon.png'
+      );
+      expect(img.getAttribute('data-some-value')).to.equal('hello-world');
     });
   });
 

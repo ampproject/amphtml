@@ -21,7 +21,6 @@ import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
-import {camelCaseToDash} from '../src/string';
 import {registerElement} from '../src/service/custom-element-registry';
 
 /** @const {string} */
@@ -178,10 +177,11 @@ export class AmpImg extends BaseElement {
 
     // It is important to call this before setting `srcset` attribute.
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
-    const datasetKeys = Object.keys(this.element.dataset)
-        .map(key => `data-${camelCaseToDash(key)}`);
-    console.log(datasetKeys);
-    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE.concat(datasetKeys), this.img_);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    // Propagate dataset key/value pairs.
+    for (const key in this.element.dataset) {
+      this.img_.dataset[key] = this.element.dataset[key];
+    }
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
