@@ -32,16 +32,12 @@
 
     {
       pattern: '*.md',
-      owners: [
-        { name: 'ampproject/wg-outreach' }
-      ]
+      owners: [{ name: 'ampproject/wg-outreach' }]
     },
 
     {
       pattern: '{.*,babel.config.js,gulpfile.js}',
-      owners: [
-        { name: 'ampproject/wg-infra' }
-      ]
+      owners: [{ name: 'ampproject/wg-infra' }]
     },
 
     {
