@@ -170,7 +170,9 @@ function lintableFilesChanged() {
   return gitDiffNameOnlyMaster().filter(function(file) {
     return (
       fs.existsSync(file) &&
-      (path.extname(file) == '.js' || path.basename(file) == 'OWNERS')
+      deglob
+        .sync(config.lintGlobs)
+        .some(lintableFile => lintableFile.endsWith(file))
     );
   });
 }
