@@ -64,6 +64,15 @@ export const TapNavigationDirection = {
   'PREVIOUS': 2,
 };
 
+/** @const @enum */
+export const AdvancementType = {
+  'BASE': 1,
+  'MANUAL': 2,
+  'TIME_BASED': 3,
+  'MEDIA_BASED': 4,
+  'MULTIPLE': 5,
+};
+
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
  * tracking its internal state when started/stopped, and listeners will never be
@@ -137,6 +146,14 @@ export class AdvancementConfig {
    */
   stop(unusedCanResume) {
     this.isRunning_ = false;
+  }
+
+  /**
+   * Returns advancement type
+   * @return {AdvancementType}
+   */
+  getType() {
+    return AdvancementType.BASE;
   }
 
   /**
@@ -223,6 +240,13 @@ export class AdvancementConfig {
 
     return new AdvancementConfig();
   }
+
+  /**
+   * @override
+   */
+  getType() {
+    return AdvancementType.MULTIPLE;
+  }
 }
 
 /**
@@ -305,6 +329,13 @@ class ManualAdvancement extends AdvancementConfig {
       this.maybePerformNavigation_.bind(this),
       true
     );
+  }
+
+  /**
+   * @override
+   */
+  getType() {
+    return AdvancementType.MANUAL;
   }
 
   /**
@@ -715,6 +746,13 @@ class TimeBasedAdvancement extends AdvancementConfig {
       : null;
   }
 
+  /**
+   * @override
+   */
+  getType() {
+    return AdvancementType.TIME_BASED;
+  }
+
   /** @override */
   getProgress() {
     if (this.startTimeMs_ === null) {
@@ -967,6 +1005,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
   stop() {
     super.stop();
     this.unlistenFns_.forEach(fn => fn());
+  }
+
+  /**
+   * @override
+   */
+  getType() {
+    return AdvancementType.MEDIA_BASED;
   }
 
   /** @override */
