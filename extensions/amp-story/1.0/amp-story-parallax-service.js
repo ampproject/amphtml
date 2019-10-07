@@ -45,12 +45,12 @@ const ORIGIN_LAYER_ATTR = 'parallax-fx-origin-layer';
  * conditions.
  * @param  {!Window} win
  * @param {!Element=} opt_story
- * @return {!AmpStoryParallaxService}
+ * @return {?AmpStoryParallaxService}
  */
 export const getParallaxService = (win, opt_story) => {
   let service = Services.storyParallaxService(win);
 
-  if (!service) {
+  if (!service && opt_story) {
     service = new AmpStoryParallaxService(win, dev().assertElement(opt_story));
     registerServiceBuilder(win, 'story-parallax', () => service);
   }
@@ -419,6 +419,8 @@ export class ParallaxPage {
   getLayers() {
     return toArray(
       this.element.querySelectorAll(
+        // TODO(wassgha): Determine exact behavior of excluded layers
+        // (should they still be given depth but no animation?)
         `amp-story-grid-layer:not([${escapeCssSelectorIdent(
           NO_PARALLAX_FX_ATTR
         )}])`

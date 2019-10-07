@@ -289,7 +289,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
 
-    /** @private @const {!./amp-story-parallax-service.AmpStoryParallaxService} */
+    /** @private @const {?./amp-story-parallax-service.AmpStoryParallaxService} */
     this.parallaxService_ = getParallaxService(this.win, this.element);
 
     /** @private {?./amp-story-page.AmpStoryPage} */
@@ -1003,7 +1003,7 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
-        this.parallaxService_.initializeListeners();
+        this.parallaxService_ && this.parallaxService_.initializeListeners();
       });
 
     // Story is being prerendered: resolve the layoutCallback when the first

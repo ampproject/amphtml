@@ -277,7 +277,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
-    /** @private @const {!./amp-story-parallax-service.AmpStoryParallaxService} */
+    /** @private @const {?./amp-story-parallax-service.AmpStoryParallaxService} */
     this.parallaxService_ = getParallaxService(this.win);
 
     /** @private {!Array<function()>} */
@@ -383,7 +383,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return Promise.resolve();
     }
     return Promise.resolve(
-      this.parallaxService_.registerParallaxPage(this.element)
+      this.parallaxService_ &&
+        this.parallaxService_.registerParallaxPage(this.element)
     );
   }
 
