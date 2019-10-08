@@ -919,6 +919,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-wordpress-embed',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-position-observer',
     version: '0.1',
     latestVersion: '0.1',
