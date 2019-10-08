@@ -4,7 +4,12 @@
 {
   rules: [
     {
-      owners: [{ name: 'aghassemi' }, { name: 'camelburrito' }]
+      owners: [
+        { name: 'aghassemi' },
+        { name: 'camelburrito' },
+        { name: 'kristoferbaxter' },
+        { name: 'sparhami' }
+      ]
     }
   ]
 }
