@@ -1,0 +1,135 @@
+:host {
+  --amp-igp-max-dots-width-percentage: 0.6;
+  --amp-igp-dot-width: 10;
+  --amp-igp-dot-max-spacing: 12;
+  --amp-igp-dot-min-spacing: 8;
+
+  font-size: 12px;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1;
+  color: #fff;
+}
+
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.pagination-dots {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  max-width: calc(100% * var(--amp-igp-max-dots-width-percentage));
+  margin: auto;
+  overflow-x: auto;
+}
+
+.pagination-dot-container {
+  display: flex;
+  width: calc(
+    1px * var(--amp-igp-dot-max-spacing) +
+    1px * var(--amp-igp-dot-width));
+  min-width: calc(
+    1px * var(--amp-igp-dot-min-spacing) +
+    1px * var(--amp-igp-dot-width));
+  justify-content: center;
+}
+
+.pagination-dot {
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.pagination-dot-progress {
+  position: absolute;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  opacity: 0; /** For no custom property support */
+  opacity: calc(1 - var(--percentage-falloff));
+}
+
+[amp-inline-gallery-pagination-dot-active="true"] .pagination-dot-progress {
+  opacity: 1; /** For no custom property support */
+  opacity: calc(1 - var(--percentage-falloff));
+}
+
+.pagination-dot,
+.pagination-dot-progress {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.pagination-numbers {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px;
+}
+
+.pagination-dots[hidden],
+.pagination-numbers[hidden] {
+  display: none;
+}
+
+:host([inset]) {
+  position: absolute !important;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--amp-caption-margin-top) + var(--amp-caption-height, 0));
+  display: flex !important;
+}
+
+:host([inset]) .pagination-dots,
+:host([inset]) .pagination-numbers {
+  margin: 18px;
+  border-radius: 12px;
+  /**
+   * Instead of using a plain background color, we use a backdrop -ilter to
+   * make the effective background partially dependent on the current
+   * backdrop (e.g. the image on a carousel slide). This allows the pagination
+   * backgroud to be distinguishable on very dark backgrounds, while still
+   * having it be semi-transparent.
+   *
+   * This can be harder to distinguish on middle greys. For this current
+   * current configuration, hsl(0, 0%, 31%) to hsl(0, 0%, 35%) can appear quite
+   * close to the background color.
+   *
+   * The blur here is used for averaging the backdrop color, so that sharp
+   * contrasts (e.g. edge of sky and landscape) do not cause immediate shifts
+   * in the container color.
+   *
+   * The greyscale is used to have the container slightly tinted by the inverse
+   * color, but also not be too tinted.
+   */
+  backdrop-filter: blur(18px) invert(1) grayscale(0.6) brightness(0.9) opacity(0.6);
+  /**
+   * Note: we always ad some darkening using background-color, since we do not
+   * change the dot color. As the dots are currently children of the container,
+   * we cannot use a backdrop-filter on them to invert the color  again. We
+   * would need to put them in a different subtree (and duplicate them for
+   * sizing of the dots container), and then position them on top of this container.
+   */
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+:host([inset]) .pagination-dots {
+  padding: 6px 4px;
+  align-self: center;
+}
+
+:host([inset]) .pagination-numbers {
+  padding: 6px 8px;
+  align-self: flex-end;
+}
+
+:host([inset]) .pagination-dot {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+:host([inset]) .pagination-dot-progress {
+  background-color: currentColor;
+}
