@@ -158,7 +158,9 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     switch (data['message']) {
       case 'height':
         if (typeof data['value'] === 'number') {
-          const newHeight = data['value'];
+          // Make sure the new height is between 200px and 1000px.
+          // This replicates a constraint in WordPress's wp.receiveEmbedMessage() function.
+          const newHeight = Math.min(Math.max(data['value'], 200), 1000);
           this.attemptChangeSize(newHeight, undefined).then(
             () => {
               this./*OK*/ changeHeight(newHeight);
@@ -168,14 +170,35 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
         }
         break;
       case 'link':
+        // Only follow a link message for the currently-active iframe if the link is for the same origin.
+        // This replicates a constraint in WordPress's wp.receiveEmbedMessage() function.
         if (
           document.activeElement &&
-          document.activeElement.contentWindow === event.source
+          document.activeElement.contentWindow === event.source &&
+          typeof data['value'] === 'string' &&
+          this.hasSameOrigin_(data['value'])
         ) {
-          window.location.href = data['value'];
+          const embeddedUrl = new URL(this.url_);
+          const requestedUrl = new URL(data['value']);
+          if (embeddedUrl.origin === requestedUrl.origin) {
+            window.top.location.href = requestedUrl.href;
+          }
         }
         break;
     }
+  }
+
+  /**
+   * Check if the supplied URL has the same origin as the embedded iframe.
+   *
+   * @param {string} url
+   * @return {boolean}
+   * @private
+   */
+  hasSameOrigin_(url) {
+    const embeddedUrl = new URL(this.url_);
+    const checkedUrl = new URL(url);
+    return embeddedUrl.origin === checkedUrl.origin;
   }
 
   /**
