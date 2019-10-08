@@ -35,7 +35,7 @@ import {addParamToUrl} from '../../../src/url';
 // import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
-import {user} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /** @type {number}  */
 let count = 0;
@@ -68,11 +68,9 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
     this.handleMessageEvent_ = this.handleMessageEvent_.bind(this);
 
-    this.url_ = user().assert(
-      el.getAttribute('data-url'),
-      'The data-url attribute is required for %s',
-      el
-    );
+    this.url_ = el.getAttribute('data-url');
+
+    userAssert(this.url_, 'The data-url attribute is required for %s', el);
   }
 
   /**
