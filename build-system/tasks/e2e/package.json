@@ -9,6 +9,6 @@
     "chromedriver": "76.0.1",
     "puppeteer": "1.20.0",
     "geckodriver": "1.18.0",
-    "selenium-webdriver": "4.0.0-alpha.5"
+    "selenium-webdriver": "4.0.0-alpha.4"
   }
 }
