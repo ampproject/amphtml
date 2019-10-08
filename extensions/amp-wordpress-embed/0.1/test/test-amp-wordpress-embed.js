@@ -33,6 +33,9 @@ describes.realWin(
 
     function getIns(url) {
       const ins = doc.createElement('amp-wordpress-embed');
+      const overflowEl = doc.createElement('button');
+      overflowEl.setAttribute('overflow', '');
+      ins.appendChild(overflowEl);
       ins.setAttribute('data-url', url);
       ins.setAttribute('height', '241');
       doc.body.appendChild(ins);
