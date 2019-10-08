@@ -9,14 +9,8 @@
     {
       pattern: '**/*-player.{js,md}',
       owners: [
-        {
-          name: 'alanorozco',
-          notify: true
-        },
-        {
-          name: 'wassgha',
-          notify: true
-        }
+        { name: 'alanorozco', notify: true },
+        { name: 'wassgha', notify: true }
       ]
     }
   ]
