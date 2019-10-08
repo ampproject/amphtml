@@ -105,7 +105,6 @@ For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may no
 
 ## References
 
-* [Cloudflare AMP Cache](https://amp.cloudflare.com/)
 * [Google AMP Cache](https://developers.google.com/amp/cache/)
   * [Google AMP Cache Overview](https://developers.google.com/amp/cache/overview)
   * The [Google AMP Cache](https://developers.google.com/amp/cache/) is a proxy-based content delivery network for delivering all valid AMP documents.

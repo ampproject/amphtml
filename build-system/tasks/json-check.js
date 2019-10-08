@@ -21,7 +21,7 @@ const log = require('fancy-log');
 const through2 = require('through2');
 const {jsonGlobs} = require('../test-configs/config');
 
-const expectedCaches = ['cloudflare', 'google'];
+const expectedCaches = ['google'];
 
 const cachesJsonPath = 'build-system/global-configs/caches.json';
 

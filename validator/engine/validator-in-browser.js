@@ -52,8 +52,8 @@ function getUrl(url) {
  */
 amp.validator.isAmpCacheUrl = function(url) {
   return (
-    url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 || // lgtm [js/incomplete-url-substring-sanitization]
-    url.toLowerCase().indexOf('amp.cloudflare.com') !== -1); // lgtm [js/incomplete-url-substring-sanitization]
+    url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 // lgtm [js/incomplete-url-substring-sanitization]
+  );
 };
 
 /**
