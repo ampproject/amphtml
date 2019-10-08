@@ -4,7 +4,7 @@
     "environment": "INABOX",
     "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
     "issue": "",
-    "expirationDateUTC": "2019-10-08",
+    "expirationDateUTC": "2019-11-08",
     "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
   },
   "experimentB": {
@@ -12,7 +12,7 @@
     "environment": "INABOX",
     "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=_RTVEXP_INABOX_LITE",
     "issue": "https://github.com/ampproject/amphtml/issues/22867",
-    "expirationDateUTC": "2019-10-10",
+    "expirationDateUTC": "2019-11-10",
     "defineExperimentConstant": "_RTVEXP_INABOX_LITE"
   },
   "experimentC": {
