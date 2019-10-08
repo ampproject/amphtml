@@ -73,7 +73,9 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.url_, opt_onLayout);
+    if (this.url_) {
+      this.preconnect.url(this.url_, opt_onLayout);
+    }
   }
 
   /** @override */
@@ -91,14 +93,17 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
       this.element
     );
 
-    const url = addParamToUrl(this.url_, 'embed', 'true');
+    if (!this.url_) {
+      return;
+    }
 
+    const url = addParamToUrl(this.url_, 'embed', 'true');
     const frame = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (frame);
     frame.setAttribute('frameborder', 0);
     frame.setAttribute('scrolling', 'no');
     // Note that allow-same-origin cannot be used for sake of same-origin post embeds.
     frame.setAttribute('sandbox', 'allow-scripts');
-    this.iframe_ = frame;
     this.applyFillContent(frame);
 
     frame.name = 'amp_wordpress_embed' + count++;
@@ -125,20 +130,23 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
    * @private
    */
   handleMessageEvent_(event) {
+    if (!this.iframe_ || event.source !== this.iframe_.contentWindow) {
+      return;
+    }
+    const data = getData(event);
+
     if (
-      !this.iframe_ ||
-      event.source !== this.iframe_.contentWindow ||
-      'undefined' === typeof event.data.message ||
-      'undefined' === typeof event.data.value
+      'undefined' === typeof data['message'] ||
+      'undefined' === typeof data['value']
     ) {
       return;
     }
 
-    switch (event.data.message) {
+    switch (data['message']) {
       case 'height':
-        if (typeof event.data.value === 'number') {
-          const newHeight = event.data.value;
-          this.attemptChangeSize(newHeight).then(
+        if (typeof data['value'] === 'number') {
+          const newHeight = data['value'];
+          this.attemptChangeSize(newHeight, undefined).then(
             () => {
               this./*OK*/ changeHeight(newHeight);
             },
@@ -151,7 +159,7 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
           document.activeElement &&
           document.activeElement.contentWindow === event.source
         ) {
-          window.location.href = event.data.value;
+          window.location.href = data['value'];
         }
         break;
     }
