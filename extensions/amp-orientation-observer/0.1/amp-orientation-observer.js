@@ -22,10 +22,33 @@ import {dict} from '../../../src/utils/object';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
-const DEFAULT_REST_ALPHA = 180;
-const DEFAULT_REST_BETA = 0;
-const DEFAULT_REST_GAMMA = 0;
+/**
+ * @const {!Array<string>}
+ */
+const AXES = ['alpha', 'beta', 'gamma'];
+/**
+ * @const {Object<string, number>}
+ */
+const DEFAULT_REST_VALUES = {
+  'alpha': 180,
+  'beta': 0,
+  'gamma': 0,
+};
+/**
+ * @const {Object<string, !Array<number>>}
+ */
+const DEFAULT_RANGES = {
+  'alpha': [0, 360],
+  'beta': [-180, 180],
+  'gamma': [-90, 90],
+};
+/**
+ * @const {number}
+ */
 const DELTA_CONST = 0.1;
+/**
+ * @const {number}
+ */
 const DEFAULT_SMOOTHING_PTS = 4;
 
 export class AmpOrientationObserver extends AMP.BaseElement {
@@ -39,46 +62,20 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {Array<number>} */
-    this.alphaRange_ = [0, 360];
+    /** @private {Object<string, !Array<number>>} */
+    this.range_ = Object.assign({}, DEFAULT_RANGES);
 
-    /** @private {Array<number>} */
-    this.betaRange_ = [-180, 180];
+    /** @private {Object<string, number>} */
+    this.computedValue_ = Object.assign({}, DEFAULT_REST_VALUES);
 
-    /** @private {Array<number>} */
-    this.gammaRange_ = [-90, 90];
+    /** @private {Object<string, number>} */
+    this.restValues_ = Object.assign({}, DEFAULT_REST_VALUES);
 
-    /** @private {number} */
-    this.alphaValue_ = DEFAULT_REST_ALPHA;
-
-    /** @private {number} */
-    this.betaValue_ = DEFAULT_REST_BETA;
-
-    /** @private {number} */
-    this.gammaValue_ = DEFAULT_REST_GAMMA;
-
-    /** @private {number} */
-    this.restAlphaValue_ = DEFAULT_REST_ALPHA;
-
-    /** @private {number} */
-    this.restBetaValue_ = DEFAULT_REST_BETA;
-
-    /** @private {number} */
-    this.restGammaValue_ = DEFAULT_REST_GAMMA;
-
-    /** @private {Array} */
-    this.alphaSmoothingPoints_ = [];
-
-    /** @private {Array} */
-    this.betaSmoothingPoints_ = [];
-
-    /** @private {Array} */
-    this.gammaSmoothingPoints_ = [];
+    /** @private {Object<string, !Array<number>>} */
+    this.smoothingPoints_ = {beta: [], alpha: [], gamma: []};
 
     /** @private {?number} */
-    this.smoothing_ = this.element.hasAttribute('smoothing')
-      ? Number(this.element.getAttribute('smoothing')) || DEFAULT_SMOOTHING_PTS
-      : null;
+    this.smoothing_ = null;
   }
 
   /** @override */
@@ -100,9 +97,17 @@ export class AmpOrientationObserver extends AMP.BaseElement {
         '`window.DeviceOrientationEvent`'
     );
 
-    this.alphaRange_ = this.parseAttributes_('alpha-range', this.alphaRange_);
-    this.betaRange_ = this.parseAttributes_('beta-range', this.betaRange_);
-    this.gammaRange_ = this.parseAttributes_('gamma-range', this.gammaRange_);
+    AXES.forEach(axis => {
+      this.range_[axis] = this.parseAttributes_(
+        `${axis}-range`,
+        this.range_[axis]
+      );
+    });
+
+    this.smoothing_ = this.element.hasAttribute('smoothing')
+      ? Number(this.element.getAttribute('smoothing')) || DEFAULT_SMOOTHING_PTS
+      : null;
+
     this.win.addEventListener(
       'deviceorientation',
       event => {
@@ -115,8 +120,8 @@ export class AmpOrientationObserver extends AMP.BaseElement {
   /**
    * Parses the provided ranges
    * @param {string} rangeName
-   * @param {Array} originalRange
-   * @return {?Array<number>}
+   * @param {!Array<number>} originalRange
+   * @return {!Array<number>}
    * @private
    */
   parseAttributes_(rangeName, originalRange) {
@@ -157,97 +162,54 @@ export class AmpOrientationObserver extends AMP.BaseElement {
         beta = -beta;
       }
 
-      if (Math.abs(alpha - this.alphaValue_) > DELTA_CONST) {
-        if (this.smoothing_) {
-          this.alphaValue_ = this.smoothedAlphaValue_(
-            /** @type {number} */ (alpha)
-          );
-        } else {
-          this.alphaValue_ = /** @type {number} */ (alpha);
-        }
-        this.triggerEvent_('alpha', this.alphaValue_, this.alphaRange_);
-      }
-      if (Math.abs(beta - this.betaValue_) > DELTA_CONST) {
-        if (this.smoothing_) {
-          this.betaValue_ = this.smoothedBetaValue_(
-            /** @type {number} */ (beta)
-          );
-        } else {
-          this.betaValue_ = /** @type {number} */ (beta);
-        }
-        this.triggerEvent_('beta', this.betaValue_, this.betaRange_);
-      }
-      if (Math.abs(gamma - this.gammaValue_) > DELTA_CONST) {
-        if (this.smoothing_) {
-          this.gammaValue_ = this.smoothedGammaValue_(
-            /** @type {number} */ (gamma)
-          );
-        } else {
-          this.gammaValue_ = /** @type {number} */ (gamma);
-        }
-        this.triggerEvent_('gamma', this.gammaValue_, this.gammaRange_);
-      }
-    }
-  }
+      const currentValue = {
+        alpha,
+        beta,
+        gamma,
+      };
 
-  /**
-   * Calculates a moving average over previous values of the alpha value
-   * @param {number} alpha
-   * @return {number}
-   */
-  smoothedAlphaValue_(alpha) {
-    if (this.alphaSmoothingPoints_.length > this.smoothing_) {
-      this.alphaSmoothingPoints_.shift();
+      AXES.forEach(axis => {
+        if (
+          Math.abs(currentValue[axis] - this.computedValue_[axis]) > DELTA_CONST
+        ) {
+          if (this.smoothing_) {
+            this.computedValue_[axis] = this.smoothedValue_(
+              axis,
+              /** @type {number} */ (currentValue[axis])
+            );
+          } else {
+            this.computedValue_[axis] =
+              /** @type {number} */ (currentValue[axis]);
+          }
+          this.triggerEvent_(
+            axis,
+            this.computedValue_[axis],
+            this.range_[axis]
+          );
+        }
+      });
     }
-    this.alphaSmoothingPoints_.push(alpha);
-    const avgAlpha = sum(this.alphaSmoothingPoints_) / this.smoothing_;
-    if (
-      this.alphaSmoothingPoints_.length > this.smoothing_ &&
-      this.restAlphaValue_ == DEFAULT_REST_ALPHA
-    ) {
-      this.restAlphaValue_ = avgAlpha;
-    }
-    return avgAlpha - this.restAlphaValue_;
   }
 
   /**
    * Calculates a moving average over previous values of the beta value
-   * @param {number} beta
+   * @param {string} axis
+   * @param {number} value
    * @return {number}
    */
-  smoothedBetaValue_(beta) {
-    if (this.betaSmoothingPoints_.length > this.smoothing_) {
-      this.betaSmoothingPoints_.shift();
+  smoothedValue_(axis, value) {
+    if (this.smoothingPoints_[axis].length > this.smoothing_) {
+      this.smoothingPoints_[axis].shift();
     }
-    this.betaSmoothingPoints_.push(beta);
-    const avgBeta = sum(this.betaSmoothingPoints_) / this.smoothing_;
+    this.smoothingPoints_[axis].push(value);
+    const avg = sum(this.smoothingPoints_[axis]) / this.smoothing_;
     if (
-      this.betaSmoothingPoints_.length > this.smoothing_ &&
-      this.restBetaValue_ == DEFAULT_REST_BETA
+      this.smoothingPoints_[axis].length > this.smoothing_ &&
+      this.restValues_[axis] == DEFAULT_REST_VALUES[axis]
     ) {
-      this.restBetaValue_ = avgBeta;
+      this.restValues_[axis] = avg;
     }
-    return avgBeta - this.restBetaValue_;
-  }
-
-  /**
-   * Calculates a moving average over previous values of the gamma value
-   * @param {number} gamma
-   * @return {number}
-   */
-  smoothedGammaValue_(gamma) {
-    if (this.gammaSmoothingPoints_.length > this.smoothing_) {
-      this.gammaSmoothingPoints_.shift();
-    }
-    this.gammaSmoothingPoints_.push(gamma);
-    const avgGamma = sum(this.betaSmoothingPoints_) / this.smoothing_;
-    if (
-      this.gammaSmoothingPoints_.length > this.smoothing_ &&
-      this.restGammaValue_ == DEFAULT_REST_BETA
-    ) {
-      this.restGammaValue_ = avgGamma;
-    }
-    return avgGamma - this.restGammaValue_;
+    return avg - this.restValues_[axis];
   }
 
   /**
