@@ -87,7 +87,6 @@ import {
   childElements,
   childNodes,
   closest,
-  closestAncestorElementBySelector,
   createElementWithAttributes,
   isRTL,
   scopedQuerySelectorAll,
@@ -104,16 +103,17 @@ import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
+import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
-import {startsWith} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -441,36 +441,21 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
-        const {args, caller} = invocation;
-
-        if (args) {
-          this.storeService_.dispatch(
-            Action.SET_ADVANCEMENT_MODE,
-            AdvancementMode.GO_TO_PAGE
-          );
-
-          if (
-            closestAncestorElementBySelector(
-              dev().assertElement(caller),
-              'AMP-SIDEBAR'
-            )
-          ) {
-            const pageId = args['id'];
-            Services.historyForDoc(this.getAmpDoc())
-              .goBack()
-              .then(() => {
-                this.win.requestAnimationFrame(() => {
-                  if (this.isActualPage_(pageId)) {
-                    this.switchTo_(pageId, NavigationDirection.NEXT).then(() =>
-                      this.closeOpacityMask_()
-                    );
-                  }
-                });
-              });
-          } else {
-            this.switchTo_(args['id'], NavigationDirection.NEXT);
-          }
+        const {args} = invocation;
+        if (!args) {
+          return;
         }
+        this.storeService_.dispatch(
+          Action.SET_ADVANCEMENT_MODE,
+          AdvancementMode.GO_TO_PAGE
+        );
+        // If open, closes the sidebar before navigating.
+        const promise = this.storeService_.get(StateProperty.SIDEBAR_STATE)
+          ? Services.historyForDoc(this.getAmpDoc()).goBack()
+          : Promise.resolve();
+        promise.then(() =>
+          this.switchTo_(args['id'], NavigationDirection.NEXT)
+        );
       });
     }
   }
@@ -817,18 +802,23 @@ export class AmpStory extends AMP.BaseElement {
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.win.addEventListener('hashchange', () => {
         const maybePageId = parseQueryString(this.win.location.hash)['page'];
-        if (this.isActualPage_(maybePageId)) {
-          this.switchTo_(maybePageId, NavigationDirection.NEXT).then(() => {
-            this.closeOpacityMask_();
-          });
-          // Remove the fragment parameter from the URL
-          const {history} = this.win;
-          history.pushState(
-            /* data */ '',
-            /* title */ this.win.document.title,
-            /* URL */ this.win.location.pathname
-          );
+        if (!maybePageId || !this.isActualPage_(maybePageId)) {
+          return;
         }
+        this.switchTo_(maybePageId, NavigationDirection.NEXT);
+        // Removes the page 'hash' parameter from the URL.
+        let href = this.win.location.href.replace(
+          new RegExp(`page=${maybePageId}&?`),
+          ''
+        );
+        if (endsWith(href, '#')) {
+          href = href.slice(0, -1);
+        }
+        this.win.history.replaceState(
+          (this.win.history && getState(this.win.history)) || {} /** data */,
+          this.win.document.title /** title */,
+          href /** URL */
+        );
       });
     }
 
@@ -1096,8 +1086,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const isActualPage = pageId =>
-      !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
     const historyPage = /** @type {string} */ (getHistoryState(
       this.win,
       HistoryState.PAGE_ID
@@ -1105,16 +1093,29 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
-      if (maybePageId && isActualPage(maybePageId)) {
+      if (maybePageId && this.isActualPage_(maybePageId)) {
         return maybePageId;
       }
     }
 
-    if (historyPage && isActualPage(historyPage)) {
+    if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
     }
 
     return firstPageEl.id;
+  }
+
+  /**
+   * Checks if the amp-story-page for a given ID exists.
+   * Note: the `this.pages_` array might not be defined yet.
+   * @param {string} pageId
+   * @return {boolean}
+   * @private
+   */
+  isActualPage_(pageId) {
+    // TODO(gmajoulet): check from the cached pages array if available, and use
+    // the querySelector as a fallback.
+    return !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
   }
 
   /**
@@ -2567,29 +2568,6 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    if (isExperimentOn(this.win, 'amp-story-branching')) {
-      const linkEls = Array.prototype.slice.call(
-        this.sidebar_.querySelectorAll('a')
-      );
-
-      linkEls.forEach(linkEl => {
-        const url = linkEl.getAttribute('href');
-        // Handles both anchor links (#page=someId) and absolute links; click
-        // handler should not be added to absolute links from same domain but
-        // different story.
-        if (
-          url.indexOf('#page=') >= 0 &&
-          (startsWith(url, '#') || url.indexOf(this.win.location.pathname) >= 0)
-        ) {
-          linkEl.addEventListener('click', () => {
-            // Do not prevent default; in safari, preventing default and
-            // appending a hash to a URL without a preceding slash fails.
-            this.win.location.hash = url.slice(url.search('#(.*)'));
-          });
-        }
-      });
-    }
-
     this.mutateElement(() => {
       this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
     });
@@ -2597,15 +2575,12 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeOpacityMask_();
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR, !!this.sidebar_);
 
-    const sidebarActions = [
+    const actions = [
       {tagOrTarget: 'AMP-SIDEBAR', method: 'open'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
     ];
-    this.storeService_.dispatch(
-      Action.ADD_TO_ACTIONS_WHITELIST,
-      sidebarActions
-    );
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
   }
 
   /**

@@ -14,7 +14,7 @@
     <style amp-custom>
       amp-story-page {
         background: white;
-        color: white;
+        color: rgba(0, 0, 0, 0.87);
         font-family: sans-serif;
       }
       .i-amphtml-story-spinner-container {
@@ -26,8 +26,8 @@
         text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
       }
       amp-sidebar {
-        font-size: 2rem;
-        background-color: black;
+        font-size: 18px;
+        background-color: #fff;
       }
       amp-sidebar div {
         border: 3px solid green;
@@ -46,9 +46,9 @@
         <button id="close-button" on="tap:sidebar1.close">Close</button>
         <ul>
           <li><span><a href="http://google.com">Out item 1</a></span></li>
-          <li><span><a href="/examples/visual-tests/amp-story/amp-story-sidebar.html#page=page-2">Absolute fragment link</a></span></li>
+          <li><span><a href="/examples/visual-tests/amp-story/amp-story-sidebar.html#page=page-2&foo=bar">Absolute fragment link</a></span></li>
           <li><a href="/examples/visual-tests/amp-story/amp-story-tooltip.html#page=page-2">Link to another story using fragment</a></li>
-          <li><a href="#page=page-3">In Link Hash</a></li>
+          <li><a href="#page=page-3&foo=bar">In Link Hash</a></li>
           <li on="tap:story.goToPage(id=page-3)">In Link Action</li>
           <li>Nav item 5</li>
           <li>Nav item 6</li>
