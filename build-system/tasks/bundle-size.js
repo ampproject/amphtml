@@ -95,12 +95,15 @@ async function storeBundleSize() {
     const response = await requestPost({
       uri: url.resolve(
         bundleSizeAppBaseUrl,
-        path.join('commit', commitHash, 'store')
+        path.join('commit', commitHash, 'store.json')
       ),
       json: true,
       body: {
         token: process.env.BUNDLE_SIZE_TOKEN,
-        brotliBundleSize: getBrotliBundleSize(),
+        // TODO(#20843, danielrozenberg): add extensions and other runtimes.
+        bundleSizes: {
+          'dist/v0.js': getBrotliBundleSize(),
+        },
       },
     });
     if (response.statusCode < 200 || response.statusCode >= 300) {
