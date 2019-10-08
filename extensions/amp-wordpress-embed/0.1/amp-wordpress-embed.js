@@ -123,16 +123,25 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     };
 
     // @todo Figure out right way to do this with listenFor or whatever is the right way to do it.
-    // @todo Add link message.
     // Triggered by sendEmbedMessage inside the iframe.
     window.addEventListener('message', event => {
       if (
-        event.source === frame.contentWindow &&
-        'height' === event.data.message &&
-        event.data.value &&
-        typeof event.data.value === 'number'
+        event.source !== frame.contentWindow ||
+        'undefined' === typeof event.data.message ||
+        'undefined' === typeof event.data.value
       ) {
-        this./*OK*/ changeHeight(event.data.value);
+        return;
+      }
+
+      switch (event.data.message) {
+        case 'height':
+          if (typeof event.data.value === 'number') {
+            this./*OK*/ changeHeight(event.data.value);
+          }
+          break;
+        case 'link':
+          window.location.href = event.data.value;
+          break;
       }
     });
     // listenFor(frame, 'height', data => {
