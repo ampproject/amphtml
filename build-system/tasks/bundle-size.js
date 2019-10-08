@@ -95,7 +95,7 @@ async function storeBundleSize() {
     const response = await requestPost({
       uri: url.resolve(
         bundleSizeAppBaseUrl,
-        path.join('commit', commitHash, 'store.json')
+        path.join('commit', commitHash, 'store')
       ),
       json: true,
       body: {
