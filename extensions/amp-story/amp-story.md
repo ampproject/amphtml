@@ -174,51 +174,51 @@ The `amp-story` component represents an entire story.  The component itself  imp
 ### Attributes
 
 <table>
-  <tr id="standalone">
+  <tr id="attributes-standalone">
     <td width="40%"><strong>standalone [required]</strong></td>
     <td>Identifies that the AMP document is a story.</td>
   </tr>
-  <tr id="title">
+  <tr id="attributes-title">
     <td width="40%"><strong>title [required]</strong></td>
     <td>The title of the story.</td>
   </tr>
-  <tr id="publisher">
+  <tr id="attributes-publisher">
     <td width="40%"><strong>publisher [required]</strong></td>
     <td>The name of the story's publisher.</td>
   </tr>
-  <tr id="publisher-logo-src">
+  <tr id="attributes-publisher-logo-src">
     <td width="40%"><strong>publisher-logo-src [required]</strong></td>
     <td>A URL to the story publisher's logo in square format (1x1 aspect ratio). For example <code>publisher-logo-src="https://example.com/logo/1x1.png"</code>, where 1x1.png is a 96x96 px logo.</td>
   </tr>
-  <tr id="poster-portrait-src">
+  <tr id="attributes-poster-portrait-src">
     <td width="40%"><strong>poster-portrait-src [required]</strong></td>
     <td>A URL to the <a href="#posters">story poster</a> in portrait format (3x4 aspect ratio).</td>
   </tr>
-  <tr id="poster-square-src">
+  <tr id="attributes-poster-square-src">
     <td width="40%"><strong>poster-square-src [required]</strong></td>
     <td>A URL to the <a href="#posters">story poster</a> in square format (1x1 aspect ratio).</td>
   </tr>
-  <tr id="poster-landscape-src">
+  <tr id="attributes-poster-landscape-src">
     <td width="40%"><strong>poster-landscape-src [required]</strong></td>
     <td>A URL to the <a href="#posters">story poster</a> in landscape format (4x3 aspect ratio).</td>
   </tr>
-  <tr id="supports-landscape">
+  <tr id="attributes-supports-landscape">
     <td width="40%"><strong>supports-landscape [optional]</strong></td>
     <td>Enables landscape orientation support on mobile devices and a full bleed landscape experience on desktop devices.</td>
   </tr>
-  <tr id="background-audio">
+  <tr id="attributes-background-audio">
     <td width="40%"><strong>background-audio [optional]</strong></td>
     <td>A URL to an audio file that plays throughout the story.</td>
   </tr>
-  <tr id="live-story">
+  <tr id="attributes-live-story">
     <td width="40%"><strong>live-story [optional]</strong></td>
     <td>Enables the <a href="#Live-story">Live story</a> functionality.</td>
   </tr>
-  <tr id="live-story-disabled">
+  <tr id="attributes-live-story-disabled">
     <td width="40%"><strong>live-story-disabled [optional]</strong></td>
     <td>Disables the <a href="#Live-story">Live story</a> functionality.</td>
   </tr>
-  <tr id="data-poll-interval">
+  <tr id="attributes-data-poll-interval">
     <td width="40%"><strong>data-poll-interval [optional]</strong></td>
     <td>Used with the <code>live-story</code> attribute. Time interval (in milliseconds) between checks for new content. If no <code>data-poll-interval</code> is provided it with default to the 15000 millisecond minimum. A value under 15000 milliseconds is invalid.</td>
   </tr>
@@ -340,7 +340,7 @@ In most implementations for live blogs, content is either pushed by the server t
 
 This means that publishers of stories do not need to set up a JSON endpoint or push mechanism for this functionality to work.
 
-Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](#data-poll-interval) attribute.
+Content is updated by publishing to the same URL with valid `<amp-story>` markup. The content is pulled into the user's client instance during the next poll. Poll intervals are configurable using the [`data-poll-interval`](#attributes-data-poll-interval) attribute.
 
 #### Stop polling
 
@@ -350,8 +350,8 @@ As long as the `live-story` attribute is present on the `<amp-story>` element, t
 
 * Specify an `id` on the `<amp-story>` element.
 * Add the `live-story` attribute to the `<amp-story>` element.
-* [Optional] Add the [`data-poll-interval`](#data-poll-interval) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
-* [Optional] When finishing the live broadcast, add the [`live-story-disabled`](#live-story-disabled) attribute to the `<amp-story>` element to disable the polling.
+* [Optional] Add the [`data-poll-interval`](#attributes-data-poll-interval) attribute to the `<amp-story>` element to specify a time interval for checking for new updates.
+* [Optional] When finishing the live broadcast, add the [`live-story-disabled`](#attributes-live-story-disabled) attribute to the `<amp-story>` element to disable the polling.
 * On each `<amp-story-page>`:
   * Specify a `data-sort-time` attribute with a valid value. This is a timestamp used for sorting the pages. Higher timestamps will be inserted after older page entries. We recommend using [Unix time](https://www.unixtimestamp.com/).
 
