@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,6 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
     const frame = this.element.ownerDocument.createElement('iframe');
     frame.setAttribute('frameborder', 0);
-    frame.setAttribute('allowfullscreen', '');
     frame.setAttribute('scrolling', 'no');
     // Note that allow-same-origin cannot be used for sake of same-origin post embeds.
     frame.setAttribute('sandbox', 'allow-scripts');
