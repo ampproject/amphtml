@@ -66,6 +66,8 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
     this.placeholder_ = this.getPlaceholder();
 
+    this.handleMessageEvent_ = this.handleMessageEvent_.bind(this);
+
     this.url_ = user().assert(
       el.getAttribute('data-url'),
       'The data-url attribute is required for %s',
@@ -124,31 +126,7 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
     // @todo Figure out right way to do this with listenFor or whatever is the right way to do it.
     // Triggered by sendEmbedMessage inside the iframe.
-    window.addEventListener('message', event => {
-      if (
-        event.source !== frame.contentWindow ||
-        'undefined' === typeof event.data.message ||
-        'undefined' === typeof event.data.value
-      ) {
-        return;
-      }
-
-      switch (event.data.message) {
-        case 'height':
-          if (typeof event.data.value === 'number') {
-            this./*OK*/ changeHeight(event.data.value);
-          }
-          break;
-        case 'link':
-          if (
-            document.activeElement &&
-            document.activeElement.contentWindow === event.source
-          ) {
-            window.location.href = event.data.value;
-          }
-          break;
-      }
-    });
+    addEventListener('message', this.handleMessageEvent_);
     // listenFor(frame, 'height', data => {
     //   this./*OK*/changeHeight(data['value']);
     // }, /* opt_is3P */true);
@@ -159,9 +137,43 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
   }
 
   /**
+   * Handle message event.
+   *
+   * @param {MessageEvent} event
+   * @private
+   */
+  handleMessageEvent_(event) {
+    if (
+      !this.iframe_ ||
+      event.source !== this.iframe_.contentWindow ||
+      'undefined' === typeof event.data.message ||
+      'undefined' === typeof event.data.value
+    ) {
+      return;
+    }
+
+    switch (event.data.message) {
+      case 'height':
+        if (typeof event.data.value === 'number') {
+          this./*OK*/ changeHeight(event.data.value);
+        }
+        break;
+      case 'link':
+        if (
+          document.activeElement &&
+          document.activeElement.contentWindow === event.source
+        ) {
+          window.location.href = event.data.value;
+        }
+        break;
+    }
+  }
+
+  /**
    * @override
    */
   unlayoutCallback() {
+    removeEventListener('message', this.handleMessageEvent_);
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {
