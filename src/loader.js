@@ -16,9 +16,6 @@
 
 import {Services} from './services';
 
-/** @type {?Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>} */
-let loaderServicePromise = null;
-
 /**
  * Gets a Promise for the LoaderService, initiating a request to download the
  * code.
@@ -27,13 +24,9 @@ let loaderServicePromise = null;
  * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
  */
 function getLoaderServicePromise(ampDoc, element) {
-  if (!loaderServicePromise) {
-    loaderServicePromise = Services.extensionsFor(ampDoc.win)
-      .installExtensionForDoc(ampDoc, 'amp-loader')
-      .then(() => Services.loaderServiceForDoc(element));
-  }
-
-  return loaderServicePromise;
+  return Services.extensionsFor(ampDoc.win)
+    .installExtensionForDoc(ampDoc, 'amp-loader')
+    .then(() => Services.loaderServiceForDoc(element));
 }
 
 /**
