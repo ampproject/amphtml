@@ -73,21 +73,23 @@ describes.realWin(
 
       // Create encrypted content in the document body.
       const crypt1 = win.document.createElement('script');
-      crypt1.setAttribute('encrypted', '');
+      crypt1.setAttribute('ciphertext', '');
       crypt1.setAttribute('type', 'application/octet-stream');
       crypt1.textContent = encryptedContent;
       cryptoSection1 = win.document.createElement('section');
       cryptoSection1.setAttribute('subscriptions-section', 'content');
+      cryptoSection1.setAttribute('encrypted', '');
       cryptoSection1.appendChild(crypt1);
       win.document.body.appendChild(cryptoSection1);
 
       // Create encrypted content in the document body.
       const crypt2 = win.document.createElement('script');
-      crypt2.setAttribute('encrypted', '');
+      crypt2.setAttribute('ciphertext', '');
       crypt2.setAttribute('type', 'application/octet-stream');
       crypt2.textContent = encryptedContent;
       cryptoSection2 = win.document.createElement('section');
       cryptoSection2.setAttribute('subscriptions-section', 'content');
+      cryptoSection2.setAttribute('encrypted', '');
       cryptoSection2.appendChild(crypt2);
       win.document.body.appendChild(cryptoSection2);
 
