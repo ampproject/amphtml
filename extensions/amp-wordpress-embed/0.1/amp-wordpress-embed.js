@@ -28,23 +28,22 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {addParamToUrl} from '../../../src/url';
-import {createFrameFor} from '../../../src/iframe-video';
-import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
 import {Services} from '../../../src/services';
+import {addParamToUrl} from '../../../src/url';
+// import {createFrameFor} from '../../../src/iframe-video';
+// import {htmlFor} from '../../../src/static-template';
+// import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
+import {user} from '../../../src/log';
 
 /** @type {number}  */
 let count = 0;
 
 /** @type {number}  */
-let trackingIframeTimeout = 5000;
+const trackingIframeTimeout = 5000;
 
 export class AmpWordPressEmbed extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -68,8 +67,10 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     this.placeholder_ = this.getPlaceholder();
 
     this.url_ = user().assert(
-        el.getAttribute('data-url'),
-        'The data-url attribute is required for %s', el);
+      el.getAttribute('data-url'),
+      'The data-url attribute is required for %s',
+      el
+    );
   }
 
   /**
@@ -82,7 +83,7 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout === Layout.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -111,11 +112,13 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
-        Services.timerFor(this.win).promise(trackingIframeTimeout).then(() => {
-          removeElement(frame);
-          this.element.setAttribute('amp-removed', '');
-          this.iframe_ = null;
-        });
+        Services.timerFor(this.win)
+          .promise(trackingIframeTimeout)
+          .then(() => {
+            removeElement(frame);
+            this.element.setAttribute('amp-removed', '');
+            this.iframe_ = null;
+          });
       }
     };
 
@@ -123,10 +126,13 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     // @todo Add link message.
     // Triggered by sendEmbedMessage inside the iframe.
     window.addEventListener('message', event => {
-      if (event.source === frame.contentWindow &&
+      if (
+        event.source === frame.contentWindow &&
         'height' === event.data.message &&
-        event.data.value && typeof event.data.value === 'number') {
-        this./*OK*/changeHeight(event.data.value);
+        event.data.value &&
+        typeof event.data.value === 'number'
+      ) {
+        this./*OK*/ changeHeight(event.data.value);
       }
     });
     // listenFor(frame, 'height', data => {
