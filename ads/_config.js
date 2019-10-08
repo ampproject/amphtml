@@ -1027,6 +1027,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'tracdelight': {
+    prefetch: 'https://scripts.tracdelight.io/amp.js',
+    renderStartImplemented: true,
+  },
+
   'triplelift': {},
 
   'trugaze': {
