@@ -140,7 +140,12 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
           }
           break;
         case 'link':
-          window.location.href = event.data.value;
+          if (
+            document.activeElement &&
+            document.activeElement.contentWindow === event.source
+          ) {
+            window.location.href = event.data.value;
+          }
           break;
       }
     });
