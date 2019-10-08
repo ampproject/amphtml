@@ -16,37 +16,44 @@
 
 import '../amp-wordpress-embed';
 
-
-describes.realWin('amp-wordpress-embed', {
-  amp: {
-    extensions: ['amp-wordpress-embed'],
+describes.realWin(
+  'amp-wordpress-embed',
+  {
+    amp: {
+      extensions: ['amp-wordpress-embed'],
+    },
   },
-}, env => {
-  let win, doc;
+  env => {
+    let win, doc;
 
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-  });
-
-  function getIns(url) {
-    const ins = doc.createElement('amp-wordpress-embed');
-    ins.setAttribute('data-url', url);
-    ins.setAttribute('height', '241');
-    doc.body.appendChild(ins);
-    return ins.build().then(() => ins.layoutCallback()).then(() => ins);
-  }
-
-  it('renders responsively', () => {
-    return getIns('https://wordpress.example.com/post').then(ins => {
-      const iframe = ins.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
     });
-  });
 
-  it('Rejects because data-url is missing', () => {
-    expect(getIns('')).to.be.rejectedWith(
-        /The data-url attribute is required for/);
-  });
-});
+    function getIns(url) {
+      const ins = doc.createElement('amp-wordpress-embed');
+      ins.setAttribute('data-url', url);
+      ins.setAttribute('height', '241');
+      doc.body.appendChild(ins);
+      return ins
+        .build()
+        .then(() => ins.layoutCallback())
+        .then(() => ins);
+    }
+
+    it('renders responsively', () => {
+      return getIns('https://wordpress.example.com/post').then(ins => {
+        const iframe = ins.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.className).to.match(/i-amphtml-fill-content/);
+      });
+    });
+
+    it('Rejects because data-url is missing', () => {
+      expect(getIns('')).to.be.rejectedWith(
+        /The data-url attribute is required for/
+      );
+    });
+  }
+);
