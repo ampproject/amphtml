@@ -35,7 +35,7 @@ import {addParamToUrl} from '../../../src/url';
 // import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @type {number}  */
 let count = 0;
@@ -89,6 +89,12 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const {element: el} = this;
+
+    userAssert(
+      this.getOverflowElement(),
+      'Overflow element must be defined for amp-wordpress-embed: %s',
+      this.element
+    );
 
     const url = addParamToUrl(this.url_, 'embed', 'true');
 
@@ -153,7 +159,13 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     switch (event.data.message) {
       case 'height':
         if (typeof event.data.value === 'number') {
-          this./*OK*/ changeHeight(event.data.value);
+          const newHeight = event.data.value;
+          this.attemptChangeSize(newHeight).then(
+            () => {
+              this./*OK*/ changeHeight(newHeight);
+            },
+            () => {}
+          );
         }
         break;
       case 'link':
