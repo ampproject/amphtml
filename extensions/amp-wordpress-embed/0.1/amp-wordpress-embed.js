@@ -55,8 +55,6 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // @todo Need to support placeholder.
-
     const {element: el} = this;
 
     this.placeholder_ = this.getPlaceholder();
@@ -124,6 +122,21 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
   }
 
   /**
+   * Makes the iframe visible.
+   * @private
+   */
+  activateIframe_() {
+    if (this.placeholder_) {
+      this.getVsync().mutate(() => {
+        if (this.iframe_) {
+          setStyle(this.iframe_, 'zIndex', 0);
+          this.togglePlaceholder(false);
+        }
+      });
+    }
+  }
+
+  /**
    * Handle message event.
    *
    * @param {MessageEvent} event
@@ -178,21 +191,6 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
       this.iframe_ = null;
     }
     return true;
-  }
-
-  /**
-   * Makes the iframe visible.
-   * @private
-   */
-  activateIframe_() {
-    if (this.placeholder_) {
-      this.getVsync().mutate(() => {
-        if (this.iframe_) {
-          setStyle(this.iframe_, 'zIndex', 0);
-          this.togglePlaceholder(false);
-        }
-      });
-    }
   }
 }
 
