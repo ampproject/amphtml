@@ -30,18 +30,13 @@
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-// import {createFrameFor} from '../../../src/iframe-video';
-// import {htmlFor} from '../../../src/static-template';
-// import {listenFor} from '../../../src/iframe-helper';
+import {getData} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @type {number}  */
 let count = 0;
-
-/** @type {number}  */
-const trackingIframeTimeout = 5000;
 
 export class AmpWordPressEmbed extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -113,27 +108,10 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
       // Chrome does not reflect the iframe readystate.
       frame.readyState = 'complete';
       this.activateIframe_();
-
-      if (this.isTrackingFrame_) {
-        // Prevent this iframe from ever being recreated.
-        this.iframeSrc = null;
-
-        Services.timerFor(this.win)
-          .promise(trackingIframeTimeout)
-          .then(() => {
-            removeElement(frame);
-            this.element.setAttribute('amp-removed', '');
-            this.iframe_ = null;
-          });
-      }
     };
 
-    // @todo Figure out right way to do this with listenFor or whatever is the right way to do it.
     // Triggered by sendEmbedMessage inside the iframe.
     addEventListener('message', this.handleMessageEvent_);
-    // listenFor(frame, 'height', data => {
-    //   this./*OK*/changeHeight(data['value']);
-    // }, /* opt_is3P */true);
 
     this.element.appendChild(frame);
 
