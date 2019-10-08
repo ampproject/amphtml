@@ -197,16 +197,16 @@ function karmaBrowserStart_(browser) {
 async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
-  // Set test status to "error" if browser_complete shows zero tests (#16851).
-  // Sometimes, Sauce labs can follow this up with another successful status, in
-  // which case the error status will be replaced by a pass / fail status.
+  // Initially we were reporting an error with reportTestErrored() when zero tests were detected (see #16851),
+  // but since Karma sometimes returns a transient, recoverable state, we will
+  // print a warning without reporting an error to the github test status. (see #24957)
   if (result.total == 0) {
     log(
       yellow('WARNING:'),
       'Received a status with zero tests:',
       cyan(JSON.stringify(result))
     );
-    await reportTestErrored();
+
     return;
   }
   // Print a summary for each browser as soon as tests complete.
