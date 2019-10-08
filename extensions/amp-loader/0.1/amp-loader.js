@@ -391,15 +391,13 @@ export class LoaderService {
    * @param {number} initDelay
    * @param {number} elementWidth
    * @param {number} elementHeight
-   * @param {function} unsetLoaderPromise
    */
   initializeLoader(
     element,
     loaderRoot,
     initDelay,
     elementWidth,
-    elementHeight,
-    unsetLoaderPromise
+    elementHeight
   ) {
     // Cap the loader delay so that the loader appears immediately, rather than
     // starting part way through the animation.
@@ -412,18 +410,9 @@ export class LoaderService {
     );
     lb.build();
 
-    this.unsetLoaderPromise_ = unsetLoaderPromise;
-
     setImportantStyles(element, {
       '--loader-delay-offset': `${loaderDelay}ms`,
     });
-  }
-
-  /**
-   * Unset loaderServicePromise when dispose is called on service
-   */
-  dispose() {
-    this.unsetLoaderPromise_();
   }
 }
 
