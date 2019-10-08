@@ -983,6 +983,7 @@ function supportsFullscreenViaApi(video) {
   // TODO(alanorozco): Determine this via a flag in the component itself.
   return !!{
     'amp-dailymotion': true,
+    'amp-empower': true,
     'amp-ima-video': true,
   }[video.tagName.toLowerCase()];
 }

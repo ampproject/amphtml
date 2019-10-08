@@ -802,6 +802,7 @@ descendant_tag_list {
   tag: "AMP-DAILYMOTION"
   tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-EMBEDLY-CARD"
+  tag: "AMP-EMPOWER"
   tag: "AMP-FACEBOOK"
   tag: "AMP-FACEBOOK-COMMENTS"
   tag: "AMP-FACEBOOK-LIKE"

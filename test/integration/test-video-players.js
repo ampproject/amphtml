@@ -134,3 +134,11 @@ describe.skip('amp-delight-player', () => {
     return video;
   });
 });
+
+describe.skip('amp-empower', () => {
+  runVideoPlayerIntegrationTests(fixture => {
+    const video = fixture.doc.createElement('amp-empower');
+    video.setAttribute('data-video', 'c2abd452-453d-47e6-ab96-3796f98857d0');
+    return video;
+  });
+});

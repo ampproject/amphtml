@@ -109,6 +109,7 @@ Story page attachments allow the same HTML elements as AMP Story along with addi
   <li><code>&lt;amp-dailymotion></code></li>
   <li><code>&lt;amp-date-countdown></code></li>
   <li><code>&lt;amp-embedly-card></code></li>
+  <li><code>&lt;amp-empower></code></li>
   <li><code>&lt;amp-facebook></code></li>
   <li><code>&lt;amp-facebook-comments></code></li>
   <li><code>&lt;amp-facebook-like></code></li>

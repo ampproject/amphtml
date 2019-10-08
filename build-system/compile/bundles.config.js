@@ -506,6 +506,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-empower',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-experiment',
     version: ['0.1', '1.0'],
     latestVersion: '0.1',

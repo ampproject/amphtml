@@ -76,6 +76,7 @@ describe('Layout', () => {
       'AMP-VIMEO',
       'AMP-BRIGHTCOVE',
       'AMP-DAILYMOTION',
+      'AMP-EMPOWER',
     ];
     elementsValidTagNames.forEach(function(tag) {
       el.tagName = tag;

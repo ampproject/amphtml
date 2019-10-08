@@ -12,6 +12,7 @@ These players include:
 - [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
 - [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
 - [amp-dailymotion](https://amp.dev/documentation/components/amp-dailymotion)
+- [amp-empower](https://amp.dev/documentation/components/amp-empower)
 - [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
 - [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
 - [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
@@ -48,7 +49,7 @@ For an example, visit [AMP By Example](https://amp.dev/documentation/examples/co
 
 attribute: **`dock`**
 
-This attribute is currently only supported for `amp-brightcove`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
+This attribute is currently only supported for `amp-brightcove`, `amp-dailymotion`, `amp-delight-player`, `amp-empower`, `amp-ima-video`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
 
 If this attribute is present and the video is playing manually, the video will
 be "minimized" and fixed to a corner when the user scrolls out of the video
@@ -76,7 +77,7 @@ For more details, see [documentation on the docking extension itself.](https://a
 
 attribute: **`rotate-to-fullscreen`**
 
-This attribute is currently only supported for `amp-video`, `amp-ima-video` and `amp-dailymotion`.
+This attribute is currently only supported for `amp-empower`, `amp-video`, `amp-ima-video` and `amp-dailymotion`.
 
 If this attribute is present and a video is playing manually (i.e. user initiated playback, or tapped on the video after autoplay), the video displays fullscreen after the user rotates their device into landscape mode, provided that the video is visible.
 
