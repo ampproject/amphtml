@@ -192,15 +192,15 @@ The `amp-story` component represents an entire story.  The component itself  imp
   </tr>
   <tr id="attributes-poster-portrait-src">
     <td width="40%"><strong>poster-portrait-src [required]</strong></td>
-    <td>A URL to the <a href="#posters">story poster</a> in portrait format (3x4 aspect ratio).</td>
+    <td>A URL to the <a href="#poster-guidelines">story poster</a> in portrait format (3x4 aspect ratio).</td>
   </tr>
   <tr id="attributes-poster-square-src">
     <td width="40%"><strong>poster-square-src [required]</strong></td>
-    <td>A URL to the <a href="#posters">story poster</a> in square format (1x1 aspect ratio).</td>
+    <td>A URL to the <a href="#poster-guidelines">story poster</a> in square format (1x1 aspect ratio).</td>
   </tr>
   <tr id="attributes-poster-landscape-src">
     <td width="40%"><strong>poster-landscape-src [required]</strong></td>
-    <td>A URL to the <a href="#posters">story poster</a> in landscape format (4x3 aspect ratio).</td>
+    <td>A URL to the <a href="#poster-guidelines">story poster</a> in landscape format (4x3 aspect ratio).</td>
   </tr>
   <tr id="attributes-supports-landscape">
     <td width="40%"><strong>supports-landscape [optional]</strong></td>
@@ -212,11 +212,11 @@ The `amp-story` component represents an entire story.  The component itself  imp
   </tr>
   <tr id="attributes-live-story">
     <td width="40%"><strong>live-story [optional]</strong></td>
-    <td>Enables the <a href="#Live-story">Live story</a> functionality.</td>
+    <td>Enables the <a href="#live-story">Live story</a> functionality.</td>
   </tr>
   <tr id="attributes-live-story-disabled">
     <td width="40%"><strong>live-story-disabled [optional]</strong></td>
-    <td>Disables the <a href="#Live-story">Live story</a> functionality.</td>
+    <td>Disables the <a href="#live-story">Live story</a> functionality.</td>
   </tr>
   <tr id="attributes-data-poll-interval">
     <td width="40%"><strong>data-poll-interval [optional]</strong></td>
@@ -280,9 +280,9 @@ These guidelines apply to the publisher logo image:
 - The background should not be transparent.
 - Use one logo per brand that is consistent across AMP stories.
 
-#### Poster guidelines (for `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src`)
+#### Poster guidelines
 
-These guidelines apply to the story poster image(s):
+These guidelines apply to the `poster-portrait-src`, `poster-landscape-src`, and `poster-square-src` story poster image(s):
 
 - The poster image should be representative of the entire AMP story.
 - The poster image should be visible to the user when the AMP story begins. To accommodate sizing, cropping or minor styling changes or preview purposes, the image file URL used in the metadata does not need to be an exact match to the URL on the first page of the story.
