@@ -403,6 +403,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [TcsEmotion](../../ads/tcsemotion.md)
 - [Teads](../../ads/teads.md)
 - [torimochi](../../ads/torimochi.md)
+- [Tracdelight](../../ads/tracdelight.md)
 - [TripleLift](../../ads/triplelift.md)
 - [Trugaze](../../ads/trugaze.md)
 - [UZOU](../../ads/uzou.md)
