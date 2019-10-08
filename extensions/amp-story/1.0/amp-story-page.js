@@ -1648,7 +1648,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Returns AdvancementType for the page
-   * @return {AdvancementType}
+   * @return {./page-advancement.AdvancementType}
    */
   getAdvancementType() {
     return this.advancement_.getType();
