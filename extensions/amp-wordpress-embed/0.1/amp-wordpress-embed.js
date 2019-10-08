@@ -96,7 +96,8 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     frame.setAttribute('frameborder', 0);
     frame.setAttribute('allowfullscreen', '');
     frame.setAttribute('scrolling', 'no');
-    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    // Note that allow-same-origin cannot be used for sake of same-origin post embeds.
+    frame.setAttribute('sandbox', 'allow-scripts');
     this.iframe_ = frame;
     this.applyFillContent(frame);
 
