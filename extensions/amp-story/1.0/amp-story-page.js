@@ -1123,6 +1123,17 @@ export class AmpStoryPage extends AMP.BaseElement {
       return this.element.getAttribute('i-amphtml-return-to');
     }
 
+    const navigationPath = this.storeService_.get(
+      StateProperty.NAVIGATION_PATH
+    );
+    const previousPageId = navigationPath[navigationPath.length - 2];
+
+    if (previousPageId) {
+      return previousPageId;
+    }
+
+    // If the page was loaded with a `#page=foo` hash, it could have no
+    // navigation path but still a previous page in the DOM.
     const previousElement = this.element.previousElementSibling;
     if (previousElement && previousElement.tagName.toLowerCase() === TAG) {
       return previousElement.id;
