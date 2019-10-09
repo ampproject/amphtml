@@ -15,6 +15,36 @@
     .with-background {
       background-color: #eee;
     }
+
+    .gallery .slide img {
+      object-fit: cover;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .white {
+      background-color: white;
+    }
+
+    .grey {
+      background-color: hsla(0, 0%, 33%);
+    }
+
+    .black {
+      background-color: black;
+    }
+
+    .checkered {
+      background-image:
+          linear-gradient(45deg, #666 25%, transparent 25%),
+          linear-gradient(-45deg, #666 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #666 75%),
+          linear-gradient(-45deg, transparent 75%, #666 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
   </style>
 </head>
 <body>
@@ -23,7 +53,17 @@
     Some content above the carousel.
   </div>
   <amp-inline-gallery layout="container">
-    <amp-base-carousel layout="responsive" width="3.6" height="2" snap-align="center" loop="true" visible-count="1.2">
+    <amp-base-carousel class="gallery" layout="responsive" width="3.6" height="2" snap-align="center" loop="true" visible-count="1.2">
+      <amp-img class="slide" src="./img/sander-dewerte--jcP3xbN88w-unsplash-small.jpg" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="./img/ivars-krutainis-jTJ9-4ESzU4-unsplash-small.jpg" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="./img/ola-gronlund--MuvLw5G6x8-unsplash-small.jpg" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="./img/alan-jones-OQsxdghBKrU-unsplash-small.jpg" layout="flex-item"></amp-img>
+      <div class="flex">
+        <div class="white" style="flex: 3;"></div>
+        <div class="grey" style="flex: 1;"></div>
+        <div class="black" style="flex: 3;"></div>
+      </div>
+      <div class="checkered"></div>
       <amp-img src="../amp-base-carousel/img/redgradient.png" layout="flex-item"></amp-img>
       <amp-img src="../amp-base-carousel/img/greengradient.png" layout="flex-item"></amp-img>
       <amp-img src="../amp-base-carousel/img/bluegradient.png" layout="flex-item"></amp-img>
