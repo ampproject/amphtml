@@ -543,6 +543,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'insticator': {
+    preconnect: 'https://d3lcz8vpax4lo2.cloudfront.net', // can also be array if more than one URL needed
+    renderStartImplemented: true,
+  },
+
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     renderStartImplemented: true,

@@ -318,6 +318,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Imonomy](../../ads/imonomy.md)
 - [Imedia](../../ads/imedia.md)
 - [Improve Digital](../../ads/improvedigital.md)
+- [Insticator](../../ads/insticator.md)
 - [Index Exchange](../../ads/ix.md)
 - [Industrybrains](../../ads/industrybrains.md)
 - [InMobi](../../ads/inmobi.md)
