@@ -1,3 +1,5 @@
+
+<!--
 # Instructions:
 
 - Pick a meaningful title for your pull request. (Use sentence case.)
@@ -15,7 +17,7 @@
 - Improve performance by B
 - Improve accessibility by C
 
-# Emojis for categorizing pull requests (copy-paste into description):
+# Emojis for categorizing pull requests (copy-paste emoji into description):
 
 ✨ New feature
 🐛 Bug fix
@@ -30,3 +32,4 @@
 ⏪ Reverting a previous change
 ♻️ Refactoring
 🚮 Deleting code
+-->
