@@ -247,7 +247,7 @@ export class AmpStory extends AMP.BaseElement {
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
     /** @private @const {!AdvancementConfig} */
-    this.advancement_ = AdvancementConfig.forElement(this);
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     this.advancement_.start();
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
