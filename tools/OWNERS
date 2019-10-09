@@ -5,10 +5,9 @@
   rules: [
     {
       owners: [
-        { name: 'aghassemi' },
-        { name: 'choumx' },
-        { name: 'erwinmombay' },
-        { name: 'rsimha' }
+        { name: 'ampproject/wg-infra' },
+        { name: 'ampproject/runtime' },
+        { name: 'ampproject/performance' }
       ]
     }
   ]

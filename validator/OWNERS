@@ -4,9 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        { name: 'ampproject/wg-caching' }
-      ]
+      owners: [{ name: 'ampproject/wg-caching' }]
     }
   ]
 }
