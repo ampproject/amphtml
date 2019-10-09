@@ -174,6 +174,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Content Load Time](#content-load-time) | `CONTENT_LOAD_TIME`  | `${contentLoadTime}` |
 | [Domain Lookup Time](#domain-lookup-time) | `DOMAIN_LOOKUP_TIME` | `${domainLookupTime}` |
 | [DOM Interactive Time](#dom-interactive-time) | `DOM_INTERACTIVE_TIME` | `${domInteractiveTime}` |
+| [First Contentful Paint](#first-contentful-paint) | `FIRST_CONTENTFUL_PAINT` | `${firstContentfulPaint}` |
 | [Navigation Redirect Count](#navigation-redirect-count) | `NAV_REDIRECT_COUNT` | `${navRedirectCount}` |
 | [Navigation Timing ](#navigation-timing) | `NAV_TIMING` | `${navTiming}` |
 | [Navigation Type](#navigation-type) | `NAV_TYPE` | `${navType}` |
@@ -647,6 +648,13 @@ Provides all the parameters that are defined in the [`extraUrlParams`](../extens
 * **platform variable**: N/A
 * **amp-analytics variable**: `${extraUrlParams}`
   * Example value: `foo=bar&baz=something`
+
+#### First Contentful Paint
+
+Provides the time from navigation to the time when the browser renders the first bit of content from the DOM.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${firstContentfulPaint}`
 
 #### First Seen Time
 
