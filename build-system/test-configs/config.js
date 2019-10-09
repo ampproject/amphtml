@@ -102,7 +102,6 @@ const jisonPaths = ['extensions/**/*.jison'];
 
 const lintGlobs = [
   '**/*.js',
-  '**/OWNERS',
   // To ignore a file / directory, add it to .eslintignore.
 ];
 

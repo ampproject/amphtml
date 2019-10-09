@@ -225,7 +225,7 @@ function lint() {
   } else if (!eslintRulesChanged() && argv.local_changes) {
     const lintableFiles = lintableFilesChanged();
     if (lintableFiles.length == 0) {
-      log(colors.green('INFO: ') + 'No JS or OWNERS files in this PR');
+      log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
     }
     filesToLint = getFilesToLint(lintableFiles);
