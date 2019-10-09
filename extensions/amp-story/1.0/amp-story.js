@@ -282,9 +282,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.adPages_ = [];
 
-    /** @private {Array<string>} */
-    this.storyNavigationPath_ = [];
-
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
 
@@ -951,9 +948,7 @@ export class AmpStory extends AMP.BaseElement {
           page.setState(PageState.NOT_ACTIVE);
           this.upgradeCtaAnchorTagsForTracking_(page, index);
         });
-        if (isExperimentOn(this.win, 'amp-story-branching')) {
-          this.initializeStoryNavigationPath_();
-        }
+        this.initializeStoryNavigationPath_();
       })
       .then(() => this.initializeBookend_())
       .then(() => {
@@ -1346,10 +1341,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId, direction) {
-    const targetPage = isExperimentOn(this.win, 'amp-story-branching')
-      ? this.updateStoryNavigationPath_(targetPageId, direction)
-      : this.getPageById(targetPageId);
-
+    const targetPage = this.getPageById(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
     // Step out if trying to navigate to the currently active page.
@@ -1378,6 +1370,9 @@ export class AmpStory extends AMP.BaseElement {
 
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
+    if (!targetPage.isAd()) {
+      this.updateNavigationPath_(targetPageId, direction);
+    }
 
     // Each step will run in a requestAnimationFrame, and wait for the next
     // frame before executing the following step.
@@ -1502,40 +1497,32 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Update the story level stack and check for navigation adherence
-   * to the path a user takes.
+   * Updates the story navigation stack and checks for navigation adherence to
+   * the path a user takes.
    * @param {string} targetPageId
-   * @param {string} direction
-   * @return {!./amp-story-page.AmpStoryPage}
+   * @param {!NavigationDirection} direction
    * @private
    */
-  updateStoryNavigationPath_(targetPageId, direction) {
+  updateNavigationPath_(targetPageId, direction) {
+    const navigationPath = /** @type {!Array<string>} */ (this.storeService_.get(
+      StateProperty.NAVIGATION_PATH
+    ));
+
     if (direction === NavigationDirection.PREVIOUS) {
-      this.storyNavigationPath_.pop();
-      if (this.storyNavigationPath_.length > 0) {
-        const pathPrevious = this.storyNavigationPath_[
-          this.storyNavigationPath_.length - 1
-        ];
-        if (pathPrevious !== targetPageId) {
-          return this.getPageById(pathPrevious);
-        }
-      }
-    } else if (direction === NavigationDirection.NEXT) {
-      const topOfStack = this.storyNavigationPath_[
-        this.storyNavigationPath_.length - 1
-      ];
-      // If the user navigates the away from the page, the top of storyStack
-      // will be the same as ampStoryPageId in the history state.
-      if (targetPageId !== topOfStack) {
-        this.storyNavigationPath_.push(targetPageId);
-      }
+      navigationPath.pop();
     }
-    setHistoryState(
-      this.win,
-      HistoryState.NAVIGATION_PATH,
-      this.storyNavigationPath_
-    );
-    return this.getPageById(targetPageId);
+
+    // Ensures the pageId is not at the top of the stack already, which can
+    // happen on initial page load (e.g. reloading a page).
+    if (
+      direction === NavigationDirection.NEXT &&
+      navigationPath[navigationPath.length - 1] !== targetPageId
+    ) {
+      navigationPath.push(targetPageId);
+    }
+
+    this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, navigationPath);
+    setHistoryState(this.win, HistoryState.NAVIGATION_PATH, navigationPath);
   }
 
   /**
@@ -2136,10 +2123,13 @@ export class AmpStory extends AMP.BaseElement {
       }
       // There may be other 1 skip away pages due to branching.
       if (isExperimentOn(this.win, 'amp-story-branching')) {
-        const indexInStack = this.storyNavigationPath_.indexOf(
+        const navigationPath = this.storeService_.get(
+          StateProperty.NAVIGATION_PATH
+        );
+        const indexInStack = navigationPath.indexOf(
           this.activePage_.element.id
         );
-        const maybePrev = this.storyNavigationPath_[indexInStack - 1];
+        const maybePrev = navigationPath[indexInStack - 1];
         if (indexInStack > 0 && pageId === this.activePage_.element.id) {
           if (!pagesByDistance[1]) {
             pagesByDistance[1] = [];
@@ -2545,13 +2535,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeStoryNavigationPath_() {
-    const historyNavigationPath = getHistoryState(
-      this.win,
-      HistoryState.NAVIGATION_PATH
+    this.storeService_.dispatch(
+      Action.SET_NAVIGATION_PATH,
+      getHistoryState(this.win, HistoryState.NAVIGATION_PATH) || []
     );
-    if (historyNavigationPath) {
-      this.storyNavigationPath_ = /** @type {!Array<string>} */ (historyNavigationPath);
-    }
   }
 
   /** @private */
@@ -2559,7 +2546,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.storeService_.get(StateProperty.BOOKEND_STATE)) {
       this.hideBookend_();
     }
-    this.storyNavigationPath_.length = 0;
+    this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, []);
     const switchPromise = this.switchTo_(
       dev().assertElement(this.pages_[0].element).id,
       NavigationDirection.NEXT
