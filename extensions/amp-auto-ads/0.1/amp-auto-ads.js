@@ -25,8 +25,8 @@ import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
 import {getPlacementsFromConfigObj} from './placement';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {jsonObjectAssign} from '../../../src/utils/object';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const */
