@@ -20,6 +20,8 @@ import {computedStyle, setImportantStyles} from '../../../src/style.js';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
+import {scopedQuerySelectorAll} from '../../../src/dom';
+import {toArray} from '../../../src/types';
 
 /**
  * Returns a number falling off from one to zero, based on a distance
@@ -42,8 +44,13 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     sr.innerHTML = `
       <style>${CSS}</style>
       <div class="pagination-container">
-        <div class="pagination-dots" aria-hidden="true" hidden></div>
+        <div class="pagination-dots" aria-hidden="true" hidden>
+          <div class="pagination-backdrop"></div>
+          <div class="pagination-background"></div>
+        </div>
         <div class="pagination-numbers" hidden>
+          <div class="pagination-backdrop"></div>
+          <div class="pagination-background"></div>
           <span class="pagination-index"></span>
           &nbsp;/&nbsp;
           <span class="pagination-total"></span>
@@ -169,12 +176,27 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Array<!Element>}
+   */
+  getDots_() {
+    return toArray(
+      scopedQuerySelectorAll(
+        this.paginationDots_,
+        '> .pagination-dot-container'
+      )
+    );
+  }
+
+  /**
    *
    * @param {*} dotCount
    */
   createDots_(dotCount) {
-    this.paginationDots_.innerHTML = '';
-    for (let i = 0; i < dotCount; i++) {
+    const dots = this.getDots_();
+    for (let i = dotCount; i < dots.length; i++) {
+      this.paginationDots_.removeChild(dots[i]);
+    }
+    for (let i = dots.length; i < dotCount; i++) {
       this.paginationDots_.appendChild(this.createPaginationDot_(i));
     }
   }
@@ -186,9 +208,9 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
    */
   updateDots_(index, offset) {
     const position = index - offset;
-    const allDots = Array.from(this.paginationDots_.children);
+    const dots = this.getDots_();
 
-    allDots.forEach((dot, i) => {
+    dots.forEach((dot, i) => {
       const distance = i - position;
       const percentage = Math.max(1 - Math.abs(distance), 0);
       const percentageFalloff = exponentialFalloff(percentage, -0.5);
@@ -233,7 +255,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   handleIndexChangeUpdate_(event) {
     const detail = getDetail(event);
     const index = detail['index'];
-    const total = 5;
+    const total = detail['total'];
 
     this.updateTotal_(total);
 
@@ -245,7 +267,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
       }
     });
 
-    Array.from(this.paginationDots_.children).forEach((dot, i) => {
+    this.getDots_().forEach((dot, i) => {
       dot.setAttribute('amp-inline-gallery-pagination-dot-active', i === index);
     });
   }

@@ -699,8 +699,10 @@ export class Carousel {
         CarouselEvents.INDEX_CHANGE,
         dict({
           'index': restingIndex,
+          'total': this.slides_.length,
           'actionSource': actionSource,
-        })
+        }),
+        {bubbles: true}
       )
     );
   }

@@ -83,10 +83,17 @@
   display: flex !important;
 }
 
-:host([inset]) .pagination-dots,
-:host([inset]) .pagination-numbers {
-  margin: 18px;
+:host([inset]) .pagination-backdrop,
+:host([inset]) .pagination-background {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   border-radius: 12px;
+}
+
+:host([inset]) .pagination-backdrop {
   /**
    * Instead of using a plain background color, we use a backdrop -ilter to
    * make the effective background partially dependent on the current
@@ -105,15 +112,27 @@
    * The greyscale is used to have the container slightly tinted by the inverse
    * color, but also not be too tinted.
    */
-  backdrop-filter: blur(18px) invert(1) grayscale(0.6) brightness(0.9) opacity(0.6);
-  /**
-   * Note: we always ad some darkening using background-color, since we do not
+   backdrop-filter: blur(18px) invert(1) grayscale(0.6) brightness(0.9);
+   /**
+    * Note: we use a opacity rather than a filter function due to a bug in
+    * Chrome.
+    */
+   opacity: 0.6;
+}
+
+:host([inset]) .pagination-background {
+/**
+   * Note: we always add some darkening using background-color, since we do not
    * change the dot color. As the dots are currently children of the container,
    * we cannot use a backdrop-filter on them to invert the color  again. We
    * would need to put them in a different subtree (and duplicate them for
    * sizing of the dots container), and then position them on top of this container.
    */
-  background-color: rgba(0, 0, 0, 0.3);
+   background-color: rgba(0, 0, 0, 0.3);
+}
+
+:host([inset]) .pagination-container {
+  margin: 18px;
 }
 
 :host([inset]) .pagination-dots {
