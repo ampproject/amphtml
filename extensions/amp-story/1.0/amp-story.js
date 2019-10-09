@@ -1498,7 +1498,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Updates the story navigation stack and checks for navigation adherence to
-   * to the path a user takes.
+   * the path a user takes.
    * @param {string} targetPageId
    * @param {!NavigationDirection} direction
    * @private
@@ -1512,8 +1512,8 @@ export class AmpStory extends AMP.BaseElement {
       navigationPath.pop();
     }
 
-    // Ensures the pageId is not at the top of the stack already, which could
-    // happen when reloading a page.
+    // Ensures the pageId is not at the top of the stack already, which can
+    // happen on initial page load (e.g. reloading a page).
     if (
       direction === NavigationDirection.NEXT &&
       navigationPath[navigationPath.length - 1] !== targetPageId
