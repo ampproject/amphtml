@@ -4,19 +4,16 @@
 {
   rules: [
     {
-      owners: [{ name: 'aghassemi' }]
+      owners: [
+        { name: 'ampproject/wg-ui-and-a11y' },
+        { name: 'aghassemi', requestReviews: false }
+      ]
     },
     {
       pattern: '**/*-player.{js,md}',
       owners: [
-        {
-          name: 'alanorozco',
-          notify: true
-        },
-        {
-          name: 'wassgha',
-          notify: true
-        }
+        { name: 'alanorozco', notify: true },
+        { name: 'wassgha', notify: true }
       ]
     }
   ]
