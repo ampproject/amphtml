@@ -22,10 +22,6 @@ module.exports = function(context) {
         if (node.arguments[0]) {
           const arg1 = node.arguments[0];
           if (arg1.type !== 'ObjectExpression') {
-            // Allow escape hatch to force into JsonObject.
-            if (hasForceJsonObjectCastAnnotation(arg1)) {
-              return;
-            }
             context.report({
               node,
               message:
@@ -61,9 +57,4 @@ function checkNode(node, context) {
       checkNode(elem, context);
     });
   }
-}
-function hasForceJsonObjectCastAnnotation(node) {
-  return node.leadingComments && node.leadingComments.some(comment => {
-    return /@forcejsonobjectcast/.test(comment.value);
-  });
 }
