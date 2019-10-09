@@ -975,6 +975,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-quiz',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-recaptcha-input',
     version: '0.1',
     latestVersion: '0.1',
