@@ -144,6 +144,7 @@ function generateFunctionWhitelist() {
       'concat': String.prototype.concat,
       'indexOf': String.prototype.indexOf,
       'lastIndexOf': String.prototype.lastIndexOf,
+      'replace': String.prototype.replace,
       'slice': String.prototype.slice,
       'split': String.prototype.split,
       'substr': String.prototype.substr,
