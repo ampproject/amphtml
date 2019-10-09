@@ -651,30 +651,6 @@ class ParsedTagSpec {
     sortAndUniquify(this.mandatoryOneofs_);
     sortAndUniquify(this.mandatoryAnyofs_);
     sortAndUniquify(this.mandatoryAttrIds_);
-
-    if (tagSpec.extensionSpec !== null) {
-      this.expandExtensionSpec();
-    }
-  }
-
-  /**
-   * Called on a TagSpec which contains an ExtensionSpec, expands several
-   * fields in the tag spec.
-   */
-  expandExtensionSpec() {
-    const {extensionSpec} = this.spec_;
-    if (this.spec_.specName === null)
-    {this.spec_.specName = extensionSpec.name + ' extension .js script';}
-    this.spec_.mandatoryParent = 'HEAD';
-    if (this.spec_.extensionSpec.deprecatedAllowDuplicates)
-    {this.spec_.uniqueWarning = true;}
-    else
-    {this.spec_.unique = true;}
-
-    if (amp.validator.VALIDATE_CSS) {
-      this.spec_.cdata = new amp.validator.CdataSpec();
-      this.spec_.cdata.whitespaceOnly = true;
-    }
   }
 
   /**
@@ -2695,8 +2671,8 @@ class Context {
    * @private
    */
   recordValidatedFromTagSpec_(parsedTagSpec) {
-    if (!this.tagspecsValidated_.hasOwnProperty(parsedTagSpec.id()))
-    {this.tagspecsValidated_[parsedTagSpec.id()] = true;}
+    if (parsedTagSpec.shouldRecordTagspecValidated())
+      this.tagspecsValidated_[parsedTagSpec.id()] = true;
   }
 
   /**
@@ -5045,6 +5021,30 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
     this.typeIdentifiers_['data-ampdevmode'] = 0;
+
+    // For every tagspec that contains an ExtensionSpec, we add several TagSpec
+    // fields corresponding to the data found in the ExtensionSpec.
+    this.expandExtensionSpec_ = function() {
+      const numTags = this.rules_.tags.length;
+      for (let tagSpecId = 0; tagSpecId < numTags; ++tagSpecId) {
+        let tagSpec = this.rules_.tags[tagSpecId];
+        if (tagSpec.extensionSpec == null) continue;
+        if (tagSpec.specName === null)
+          tagSpec.specName =
+              tagSpec.extensionSpec.name + ' extension .js script';
+        tagSpec.mandatoryParent = 'HEAD';
+        if (tagSpec.extensionSpec.deprecatedAllowDuplicates)
+          tagSpec.uniqueWarning = true;
+        else
+          tagSpec.unique = true;
+
+        if (amp.validator.VALIDATE_CSS) {
+          tagSpec.cdata = new amp.validator.CdataSpec();
+          tagSpec.cdata.whitespaceOnly = true;
+        }
+      }
+    };
+    this.expandExtensionSpec_();
 
     /**
      * @type {function(!amp.validator.TagSpec) : boolean}
