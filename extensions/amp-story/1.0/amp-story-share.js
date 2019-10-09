@@ -15,7 +15,6 @@
  */
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {Toast} from './toast';
 import {
   copyTextToClipboard,
@@ -226,9 +225,6 @@ export class ShareWidget {
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, storyEl);
-
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win);
   }
 
   /**
@@ -292,8 +288,6 @@ export class ShareWidget {
    * @private
    */
   copyUrlToClipboard_() {
-    const currentPageId = this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
-
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
