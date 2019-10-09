@@ -187,91 +187,41 @@ export class AdvancementConfig {
   }
 
   /**
-   * Provides an AdvancementConfig object for the specified amp-story-page.
-   * @param {!./amp-story-page.AmpStoryPage|!./amp-story.AmpStory} element
-   * @return {!AdvancementConfig | !ManualAdvancement | !MultipleAdvancementConfig}
+   * Provides an AdvancementConfig object for the specified amp-story or
+   * amp-story-page.
+   * @param {!Window} win
+   * @param {!Element} element
+   * @return {!AdvancementConfig|!ManualAdvancement|!TimeBasedAdvancement|!MediaBasedAdvancement}
    */
-  static forElement(element) {
-    const rootEl = element.element;
-    const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
-    const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
-    const supportedAdvancementModes = [
-      ManualAdvancement.fromElement(win, rootEl),
-      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
-      MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
-    ].filter(x => x !== null);
-
-    if (supportedAdvancementModes.length === 0) {
-      return new AdvancementConfig();
+  static forElement(win, element) {
+    const manualAdvancement = ManualAdvancement.fromElement(win, element);
+    if (manualAdvancement) {
+      return manualAdvancement;
     }
 
-    if (supportedAdvancementModes.length === 1) {
-      return supportedAdvancementModes[0];
+    const autoAdvanceStr = element.getAttribute('auto-advance-after');
+
+    if (autoAdvanceStr) {
+      const timeBasedAdvancement = TimeBasedAdvancement.fromAutoAdvanceString(
+        autoAdvanceStr,
+        win,
+        element
+      );
+      if (timeBasedAdvancement) {
+        return timeBasedAdvancement;
+      }
+
+      const mediaBasedAdvancement = MediaBasedAdvancement.fromAutoAdvanceString(
+        autoAdvanceStr,
+        win,
+        element
+      );
+      if (mediaBasedAdvancement) {
+        return mediaBasedAdvancement;
+      }
     }
 
-    return new MultipleAdvancementConfig(supportedAdvancementModes);
-  }
-}
-
-/**
- * An AdvancementConfig implementation that composes multiple other
- * AdvancementConfig implementations by simply delegating all of its calls to
- * an array of underlying advancement modes.
- */
-class MultipleAdvancementConfig extends AdvancementConfig {
-  /**
-   * @param {!Array<!AdvancementConfig>} advancementModes A list of
-   *     AdvancementConfigs to which all calls should be delegated.
-   */
-  constructor(advancementModes) {
-    super();
-
-    /** @private @const {!Array<!AdvancementConfig>} */
-    this.advancementModes_ = advancementModes;
-  }
-
-  /** @override */
-  addProgressListener(progressListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addProgressListener(progressListener);
-    });
-  }
-
-  /** @override */
-  addOnTapNavigationListener(onTapNavigationListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addOnTapNavigationListener(onTapNavigationListener);
-    });
-  }
-
-  /** @override */
-  addAdvanceListener(advanceListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addAdvanceListener(advanceListener);
-    });
-  }
-
-  /** @override */
-  addPreviousListener(previousListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addPreviousListener(previousListener);
-    });
-  }
-
-  /** @override */
-  start() {
-    super.start();
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.start();
-    });
-  }
-
-  /** @override */
-  stop(canResume = false) {
-    super.stop();
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.stop(canResume);
-    });
+    return new AdvancementConfig();
   }
 }
 
@@ -666,15 +616,15 @@ class ManualAdvancement extends AdvancementConfig {
   /**
    * Gets an instance of ManualAdvancement based on the HTML tag of the element.
    * @param {!Window} win
-   * @param {!Element} rootEl
-   * @return {?AdvancementConfig} An AdvancementConfig, only if the rootEl is
+   * @param {!Element} element
+   * @return {?AdvancementConfig} An AdvancementConfig, only if the element is
    *                              an amp-story tag.
    */
-  static fromElement(win, rootEl) {
-    if (rootEl.tagName.toLowerCase() !== 'amp-story') {
+  static fromElement(win, element) {
+    if (element.tagName.toLowerCase() !== 'amp-story') {
       return null;
     }
-    return new ManualAdvancement(win, rootEl);
+    return new ManualAdvancement(win, element);
   }
 }
 
@@ -783,12 +733,12 @@ class TimeBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
-   * @param {!Element} rootEl
+   * @param {!Element} element
    * @return {?AdvancementConfig} An AdvancementConfig, if time-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     if (!autoAdvanceStr) {
       return null;
     }
@@ -798,7 +748,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
       return null;
     }
 
-    return new TimeBasedAdvancement(win, Number(delayMs), rootEl);
+    return new TimeBasedAdvancement(win, Number(delayMs), element);
   }
 }
 
@@ -1042,14 +992,14 @@ class MediaBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
-   * @param {!Element} rootEl
+   * @param {!Element} element
    * @return {?AdvancementConfig} An AdvancementConfig, if media-element-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     try {
-      const elements = rootEl.querySelectorAll(
+      const elements = element.querySelectorAll(
         `[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
           #${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
