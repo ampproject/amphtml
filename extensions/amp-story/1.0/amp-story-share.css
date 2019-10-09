@@ -167,22 +167,3 @@
   font-size: 11px !important;
   text-align: center !important;
 }
-
-.i-amphtml-story-page-share {
-  display: flex !important;
-  margin: 0 24px 12px !important;
-  align-items: center !important;
-}
-
-.i-amphtml-story-page-share-input {
-  height: 18px !important;
-  width: 18px !important;
-  margin: 0 !important;
-}
-
-.i-amphtml-story-page-share-label {
-  color: rgba(0, 0, 0, 0.87) !important;
-  margin-left: 8px !important;
-  font-family: 'Roboto', regular !important;
-  font-size: 13px !important;
-}
