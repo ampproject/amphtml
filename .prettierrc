@@ -2,13 +2,5 @@
   "bracketSpacing": false,
   "singleQuote": true,
   "trailingComma": "es5",
-  "quoteProps": "preserve",
-  "overrides": [{
-    "files": "OWNERS",
-    "options": {
-      "parser": "json5",
-      "bracketSpacing": true,
-      "trailingComma": "none"
-    }
-  }]
+  "quoteProps": "preserve"
 }
