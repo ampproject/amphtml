@@ -293,6 +293,7 @@ null || 'default' // 'default'
       <code>concat</code><br>
       <code>indexOf</code><br>
       <code>lastIndexOf</code><br>
+      <code>replace</code><br>
       <code>slice</code><br>
       <code>split</code><br>
       <code>substr</code><br>
