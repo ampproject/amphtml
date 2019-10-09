@@ -31,6 +31,7 @@ import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
 import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
+import {startsWith} from '../string';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -116,6 +117,28 @@ export class AmpDocService {
   }
 
   /**
+   * @param {!Node} node
+   * @return {?AmpDoc}
+   */
+  getCachedAmpDocReference_(node) {
+    const cached = node.ampdoc_;
+
+    if (!cached) {
+      return null;
+    }
+
+    // Note: We need to check that this is a custom AMP element. The `<form>`
+    // element has behavior where child fields with `name` get added as
+    // properties to the Element, which could have a naming conflict with
+    // the renamed property for `ampDoc_` here.
+    if (node.tagName && !startsWith(node.tagName, 'AMP-')) {
+      return null;
+    }
+
+    return cached;
+  }
+
+  /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
    * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
    * instance is returned, unless specfically looking for a closer `AmpDoc`.
@@ -135,8 +158,10 @@ export class AmpDocService {
         // for the closest AmpDoc, the element might have a reference to the
         // global AmpDoc, which we do not want. This occurs when using
         // <amp-next-page>.
-        if (n.ampdoc_) {
-          return n.ampdoc_;
+
+        const cachedAmpDoc = this.getCachedAmpDocReference_(node);
+        if (cachedAmpDoc) {
+          return cachedAmpDoc;
         }
 
         // Root note: it's either a document, or a shadow document.
@@ -169,8 +194,9 @@ export class AmpDocService {
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
-      if (n.ampdoc_) {
-        return n.ampdoc_;
+      const cachedAmpDoc = this.getCachedAmpDocReference_(node);
+      if (cachedAmpDoc) {
+        return cachedAmpDoc;
       }
 
       // Traverse the boundary of a friendly iframe.

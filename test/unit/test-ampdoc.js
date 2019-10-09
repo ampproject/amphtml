@@ -92,6 +92,17 @@ describes.sandboxed('AmpDocService', {}, () => {
       expect(service.getSingleDoc()).to.be.instanceOf(AmpDocSingle);
     });
 
+    it('should not return a conflicting value on a form', () => {
+      const node = document.createElement('form');
+      // Note: Instead of actually creating an input element with a name that
+      // conflicts, just set this directly in case the test is ever run in
+      // an compiled environment.
+      node.ampDoc_ = 5;
+
+      const ampDoc = service.getAmpDocIfAvailable(node);
+      expect(ampDoc).to.equal(service.getSingleDoc());
+    });
+
     it('should always yield the single document', () => {
       expect(() => service.getAmpDoc(null)).to.throw;
       expect(service.getAmpDoc(document)).to.equal(service.getSingleDoc());
@@ -162,7 +173,7 @@ describes.sandboxed('AmpDocService', {}, () => {
 
     beforeEach(() => {
       service = new AmpDocService(window, /* isSingleDoc */ false);
-      content = document.createElement('span');
+      content = document.createElement('amp-img');
       host = document.createElement('div');
       setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
@@ -299,7 +310,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     beforeEach(() => {
       toggleExperiment(window, 'ampdoc-fie', true);
       service = new AmpDocService(window, /* isSingleDoc */ true);
-      content = document.createElement('span');
+      content = document.createElement('amp-img');
       host = document.createElement('div');
       setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
