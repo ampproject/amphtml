@@ -103,6 +103,16 @@ describes.sandboxed('AmpDocService', {}, () => {
       expect(ampDoc).to.equal(service.getSingleDoc());
     });
 
+    it('should not return a conflicting value on a document fragment', () => {
+      // This is a stand-in for testing a document, without actually modifying
+      // the document to keep the test side-effect free.
+      const frag = document.createDocumentFragment();
+      frag.ampDoc_ = 5;
+
+      const ampDoc = service.getAmpDocIfAvailable(frag);
+      expect(ampDoc).to.equal(service.getSingleDoc());
+    });
+
     it('should always yield the single document', () => {
       expect(() => service.getAmpDoc(null)).to.throw;
       expect(service.getAmpDoc(document)).to.equal(service.getSingleDoc());

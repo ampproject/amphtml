@@ -131,7 +131,7 @@ export class AmpDocService {
     // element has behavior where child fields with `name` get added as
     // properties to the Element, which could have a naming conflict with
     // the renamed property for `ampDoc_` here.
-    if (node.tagName && !startsWith(node.tagName, 'AMP-')) {
+    if (!node.tagName || !startsWith(node.tagName, 'AMP-')) {
       return null;
     }
 
