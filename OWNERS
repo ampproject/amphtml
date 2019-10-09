@@ -2,6 +2,7 @@
 // https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
 
 {
+  reviewerTeam: 'ampproject/reviewers-amphtml',
   rules: [
     {
       owners: [
