@@ -30,7 +30,7 @@
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
-import {getData} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
@@ -46,6 +46,9 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
+    /** @private {?Function} */
+    this.unlisten_ = null;
+
     /** @private {?string} */
     this.url_ = null;
 
@@ -58,8 +61,6 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
     const {element: el} = this;
 
     this.placeholder_ = this.getPlaceholder();
-
-    this.handleMessageEvent_ = this.handleMessageEvent_.bind(this);
 
     this.url_ = el.getAttribute('data-url');
 
@@ -113,8 +114,12 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
       this.activateIframe_();
     };
 
-    // Triggered by sendEmbedMessage inside the iframe.
-    addEventListener('message', this.handleMessageEvent_);
+    // Listen for messages sent by wp.sendEmbedMessage() inside the WordPress iframe.
+    this.unlisten_ = listen(
+      window,
+      'message',
+      this.handleMessageEvent_.bind(this)
+    );
 
     this.element.appendChild(frame);
 
@@ -205,7 +210,10 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
    * @override
    */
   unlayoutCallback() {
-    removeEventListener('message', this.handleMessageEvent_);
+    if (this.unlisten_) {
+      this.unlisten_();
+      this.unlisten_ = null;
+    }
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {
