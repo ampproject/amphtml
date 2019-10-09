@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.72 */
+/** Version: 0.1.22.74 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4156,12 +4156,22 @@ function adsUrl(url) {
  * @return {string} The complete URL.
  */
 function feUrl(url, prefix = '') {
-  return feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+  // Add cache param.
+  url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+
+  // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
+  const query = parseQueryString$1(self.location.hash);
+  const boqJsMode = query['swg.boqjsmode'];
+  if (boqJsMode !== undefined) {
+    url = addQueryParam(url, 'jsmode', boqJsMode);
+  }
+
+  return url;
 }
 
 /**
  * @param {string} url FE URL.
- * @return {string} The complete URL including cache params.
+ * @return {string} The complete URL including cache param.
  */
 function feCached(url) {
   return addQueryParam(url, '_', cacheParam('hr1'));
@@ -4173,7 +4183,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.72',
+    '_client': 'SwG 0.1.22.74',
   });
 }
 
@@ -7699,7 +7709,9 @@ class Dialog {
       animating = Promise.resolve();
     }
     return animating.then(() => {
-      this.doc_.getBody().removeChild(this.iframe_.getElement());
+      const iframeEl = this.iframe_.getElement();
+      iframeEl.parentNode.removeChild(iframeEl);
+
       this.removePaddingToHtml_();
       this.graypane_.destroy();
     });
@@ -10705,6 +10717,16 @@ const PublicErrorCode = {
 };
 
 /**
+ * The presentation mode of the buy flow
+ *
+ * @enum {number}
+ */
+const BuyFlowMode = {
+  PAY_WITH_GOOGLE: 5,
+  SUBSCRIBE_WITH_GOOGLE: 6,
+};
+
+/**
  * Iframe used for logging and prefetching.
  *
  * @type {?Element}
@@ -11085,6 +11107,10 @@ function apiV2DoesMerchantSupportSpecifiedCardType(
  * message.
  */
 function validateSecureContext() {
+  if (window.location.hostname.endsWith(Constants.TRUSTED_DOMAIN)) {
+    // This is for local development.
+    return null;
+  }
   if (window.isSecureContext === undefined) {
     // Browser not support isSecureContext, figure out a way to validate this
     // for the unsupported browser.
@@ -12392,6 +12418,9 @@ class PaymentsAsyncClient {
         opt_useIframe, opt_activities,
         paymentOptions['i'] && paymentOptions['i']['redirectKey']);
 
+    /** @private {number} */
+    this.buyFlowMode_ = BuyFlowMode.PAY_WITH_GOOGLE;
+
     const paymentRequestSupported = chromeSupportsPaymentRequest();
     // TODO: Remove the temporary hack that disable payments
     // request for inline flow.
@@ -12610,11 +12639,15 @@ class PaymentsAsyncClient {
     });
     const errorMessage = validateSecureContext() ||
         validatePaymentDataRequest(paymentDataRequest);
+    this.buyFlowMode_ = paymentDataRequest && paymentDataRequest.swg ?
+        BuyFlowMode.SUBSCRIBE_WITH_GOOGLE :
+        BuyFlowMode.PAY_WITH_GOOGLE;
     if (errorMessage) {
       this.onPaymentResponse_(new Promise((resolve, reject) => {
         PayFrameHelper.postMessage({
           'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
           'error': PublicErrorCode.DEVELOPER_ERROR,
+          'buyFlowMode': this.buyFlowMode_,
         });
         PaymentsAsyncClient.logDevErrorToConsole_(
             'loadPaymentData', errorMessage);
@@ -12720,12 +12753,14 @@ class PaymentsAsyncClient {
             PayFrameHelper.postMessage({
               'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
               'error': /** @type {!PublicErrorCode} */ (result['errorCode']),
+              'buyFlowMode': this.buyFlowMode_,
             });
           } else {
             // If user closes window we don't get a error code
             PayFrameHelper.postMessage({
               'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
               'error': PublicErrorCode.BUYER_CANCEL,
+              'buyFlowMode': this.buyFlowMode_,
             });
           }
         });
