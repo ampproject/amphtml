@@ -41,13 +41,23 @@ limitations under the License.
 
 This extension creates an iframe and displays the [excerpt](https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/) of a WordPress post. 
 
+As with [resizable iframes](https://amp.dev/documentation/components/amp-iframe/#iframe-resizing), you must provide an `overflow` button which is displayed to the user when the iframe loads in or above the current viewport, allowing the user to explicitly allow resizing the iframe (to avoid content shifting).
+
+You should also provide a placeholder `blockquote` that contains a link to the original post with its linked title. 
+
 #### Example: Embedding a WordPress post
 
 ```html
 <amp-wordpress-embed
-    data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
-    layout="fixed-height"
-    height="240">
+  layout="fixed-height"
+  height="200"
+  title="“New Embeds Feature in WordPress 4.4” — Make WordPress Core"
+  data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
+>
+  <blockquote placeholder>
+    <a href="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/">New Embeds Feature in WordPress 4.4</a>
+  </blockquote>
+  <button overflow>Expand</button>
 </amp-wordpress-embed>
 ```
 
@@ -63,7 +73,7 @@ Currently only supports `fixed-height`.
 
 ##### height (required)
 
-The initial height of the WordPress post embed in pixels.
+The initial height of the WordPress post embed in pixels. This should be set to 200, the minimum height for a WordPress embed. When the iframe loads, WordPress sends a message to request the height of the iframe to increase to fit the contents of the embedded window.
 
 ## Validation
 See [amp-wordpress-embed rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-wordpress-embed/validator-amp-wordpress-embed.protoascii) in the AMP validator specification.
