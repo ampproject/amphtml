@@ -86,10 +86,10 @@ export function ownProperty(obj, key) {
  *
  * @param {!Object} target
  * @param {!Object} source
- * @param {number=} depth the maximum merge depth. if exceeded, object.assign
+ * @param {number=} depth The maximum merge depth. if exceeded, object.assign
  *                       will be used instead.
  * @return {!Object}
- * @throws {error} if source contains a circular reference.
+ * @throws {Error} If source contains a circular reference.
  * note: only nested objects are deep-merged, primitives and arrays are not.
  */
 export function deepMerge(target, source, depth = 10) {
