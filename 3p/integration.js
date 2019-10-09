@@ -157,6 +157,7 @@ import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
+import {insticator} from '../ads/insticator';
 import {invibes} from '../ads/invibes';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
@@ -295,6 +296,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   forkmedia: true,
   idealmedia: true,
+  insticator: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
@@ -432,6 +434,7 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
+register('insticator', insticator);
 register('invibes', invibes);
 register('ix', ix);
 register('jubna', jubna);
