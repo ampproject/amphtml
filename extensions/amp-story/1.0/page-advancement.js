@@ -191,7 +191,7 @@ export class AdvancementConfig {
    * amp-story-page.
    * @param {!Window} win
    * @param {!Element} element
-   * @return {!ManualAdvancement|!TimeBasedAdvancement|!MediaBasedAdvancement}
+   * @return {!AdvancementConfig|!ManualAdvancement|!TimeBasedAdvancement|!MediaBasedAdvancement}
    */
   static forElement(win, element) {
     const manualAdvancement = ManualAdvancement.fromElement(win, element);
