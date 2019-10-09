@@ -18,3 +18,6 @@ extensions/amp-a4a/0.1/test/testdata/**
 testing/local-amp-chrome-extension/**
 third_party/**
 validator/**
+
+# Lint all OWNERS files
+!**/OWNERS
