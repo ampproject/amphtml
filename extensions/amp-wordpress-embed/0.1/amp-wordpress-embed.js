@@ -65,7 +65,7 @@ import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
-/** @type {number}  */
+/** @type {number} */
 let count = 0;
 
 export class AmpWordPressEmbed extends AMP.BaseElement {
@@ -174,7 +174,7 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
   /**
    * Handle message event.
    *
-   * @param {MessageEvent} event
+   * @param {Event|MessageEvent} event
    * @private
    */
   handleMessageEvent_(event) {
@@ -213,11 +213,7 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
           typeof data['value'] === 'string' &&
           this.hasSameOrigin_(data['value'])
         ) {
-          const embeddedUrl = new URL(this.url_);
-          const requestedUrl = new URL(data['value']);
-          if (embeddedUrl.origin === requestedUrl.origin) {
-            window.top.location.href = requestedUrl.href;
-          }
+          window.top.location.href = data['value'];
         }
         break;
     }
@@ -231,7 +227,7 @@ export class AmpWordPressEmbed extends AMP.BaseElement {
    * @private
    */
   hasSameOrigin_(url) {
-    const embeddedUrl = new URL(this.url_);
+    const embeddedUrl = new URL(/** @type {string} */ (this.url_));
     const checkedUrl = new URL(url);
     return embeddedUrl.origin === checkedUrl.origin;
   }
