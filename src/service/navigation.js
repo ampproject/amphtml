@@ -257,7 +257,7 @@ export class Navigation {
     win,
     url,
     opt_requestedBy,
-    {target = '_self', opener = false} = {}
+    {target = '_top', opener = false} = {}
   ) {
     url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
