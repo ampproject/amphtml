@@ -117,6 +117,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
           aria-hidden="true"
           hidden
         >
+          <div class="i-amphtml-inline-gallery-pagination-frosting"></div>
           <div class="i-amphtml-inline-gallery-pagination-backdrop"></div>
           <div class="i-amphtml-inline-gallery-pagination-background"></div>
         </div>

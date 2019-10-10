@@ -85,10 +85,12 @@ amp-inline-gallery-pagination[inset] {
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-container {
   margin: 18px;
+  height: 24px;
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdrop,
-amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-background {
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-background,
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-frosting {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -96,6 +98,15 @@ amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backgr
   right: 0;
   z-index: -1;
   border-radius: 12px;
+}
+
+
+amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-frosting {
+  /**
+   * Add a frosted glass effect to the pagination dots background. The backdrop
+   * and background elements will apply a darkening on top of the blurring.
+   */
+  backdrop-filter: blur(2px);
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdrop {
@@ -117,7 +128,7 @@ amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdr
    * The greyscale is used to have the container slightly tinted by the inverse
    * color, but also not be too tinted.
    */
-   backdrop-filter: blur(18px) invert(1) grayscale(0.6) brightness(0.9);
+   backdrop-filter: blur(12px) invert(1) grayscale(0.6) brightness(0.9);
    /**
     * Note: we use a opacity rather than a filter function due to a bug in
     * Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=991656.
@@ -129,19 +140,20 @@ amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdr
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-background {
-/**
+  /**
    * Note: we always add some darkening using background-color, since we do not
-   * change the dot color.
+   * change the dot color. Note that this applies on top of the backdrop based
+   * color, rather than affecting it.
    */
    background-color: rgba(0, 0, 0, 0.3);
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-dots {
-  padding: 6px 4px;
+  padding: 0 4px;
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-numbers {
-  padding: 6px 8px;
+  padding: 0 8px;
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-dot {
