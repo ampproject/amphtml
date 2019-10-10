@@ -75,12 +75,18 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.appendChild(this.createDom_());
-    this.paginationDots_ = this.element.querySelector('.pagination-dots');
-    this.paginationNumbersEl_ = this.element.querySelector(
-      '.pagination-numbers'
+    this.paginationDots_ = this.element.querySelector(
+      '.i-amphtml-inline-gallery-pagination-dots'
     );
-    this.paginationIndexEl_ = this.element.querySelector('.pagination-index');
-    this.paginationTotalEl_ = this.element.querySelector('.pagination-total');
+    this.paginationNumbersEl_ = this.element.querySelector(
+      '.i-amphtml-inline-gallery-pagination-numbers'
+    );
+    this.paginationIndexEl_ = this.element.querySelector(
+      '.i-amphtml-inline-gallery-pagination-index'
+    );
+    this.paginationTotalEl_ = this.element.querySelector(
+      '.i-amphtml-inline-gallery-pagination-total'
+    );
 
     this.element.addEventListener('offsetchange-update', event => {
       this.handleOffsetChangeUpdate_(event);
@@ -105,17 +111,21 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   createDom_() {
     const html = htmlFor(this.element);
     return html`
-      <div class="pagination-container">
-        <div class="pagination-dots" aria-hidden="true" hidden>
-          <div class="pagination-backdrop"></div>
-          <div class="pagination-background"></div>
+      <div class="i-amphtml-inline-gallery-pagination-container">
+        <div
+          class="i-amphtml-inline-gallery-pagination-dots"
+          aria-hidden="true"
+          hidden
+        >
+          <div class="i-amphtml-inline-gallery-pagination-backdrop"></div>
+          <div class="i-amphtml-inline-gallery-pagination-background"></div>
         </div>
-        <div class="pagination-numbers" hidden>
-          <div class="pagination-backdrop"></div>
-          <div class="pagination-background"></div>
-          <span class="pagination-index"></span>
+        <div class="i-amphtml-inline-gallery-pagination-numbers" hidden>
+          <div class="i-amphtml-inline-gallery-pagination-backdrop"></div>
+          <div class="i-amphtml-inline-gallery-pagination-background"></div>
+          <span class="i-amphtml-inline-gallery-pagination-index"></span>
           &nbsp;/&nbsp;
-          <span class="pagination-total"></span>
+          <span class="i-amphtml-inline-gallery-pagination-total"></span>
         </div>
       </div>
     `;
@@ -128,9 +138,9 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   createPaginationDot_(index) {
     const html = htmlFor(this.element);
     const content = html`
-      <div class="pagination-dot-container">
-        <div class="pagination-dot">
-          <div class="pagination-dot-progress"></div>
+      <div class="i-amphtml-inline-gallery-pagination-dot-container">
+        <div class="i-amphtml-inline-gallery-pagination-dot">
+          <div class="i-amphtml-inline-gallery-pagination-dot-progress"></div>
         </div>
       </div>
     `;
@@ -175,12 +185,10 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     this.total_ = total;
     this.useDots_ = useDots;
 
-    this.mutateElement(() => {
-      this.paginationDots_.hidden = !useDots;
-      this.paginationNumbersEl_.hidden = useDots;
-      this.paginationTotalEl_.textContent = total;
-      this.createDots_(dotCount);
-    });
+    this.paginationDots_.hidden = !useDots;
+    this.paginationNumbersEl_.hidden = useDots;
+    this.paginationTotalEl_.textContent = total;
+    this.createDots_(dotCount);
   }
 
   /**
@@ -190,7 +198,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     return toArray(
       scopedQuerySelectorAll(
         this.paginationDots_,
-        '> .pagination-dot-container'
+        '> .i-amphtml-inline-gallery-pagination-dot-container'
       )
     );
   }
@@ -226,7 +234,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
       // Apply a class to style dots when custom properties are not supported.
       if (offset == 0) {
         dot.setAttribute(
-          'amp-inline-gallery-pagination-dot-active',
+          'i-amphtml-inline-gallery-pagination-dot-active',
           i === index
         );
       }
@@ -248,14 +256,10 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
    * @param {number} offset
    */
   updateProgress(total, index, offset) {
-    this.updateTotal_(total);
-
     this.mutateElement(() => {
-      if (this.useDots_) {
-        this.updateDots_(index, offset);
-      } else {
-        this.updateIndex_(index);
-      }
+      this.updateTotal_(total);
+      this.updateDots_(index, offset);
+      this.updateIndex_(index);
     });
   }
 
