@@ -625,17 +625,19 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Event} event
    */
   onIndexChanged_(event) {
-    if (this.type_ == CarouselType.CAROUSEL) {
-      return;
-    }
-
     const detail = getDetail(event);
     const index = detail['index'];
     const actionSource = detail['actionSource'];
 
     this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
-    this.updateCurrentIndex_(index, actionSource);
     this.updateUi_();
+
+    // Do not fire events, analytics for type="carousel".
+    if (this.type_ == CarouselType.CAROUSEL) {
+      return;
+    }
+
+    this.updateCurrentIndex_(index, actionSource);
   }
 }
 
