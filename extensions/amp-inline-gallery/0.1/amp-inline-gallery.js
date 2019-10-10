@@ -18,9 +18,18 @@ import {CSS as AmpInlineGalleryCSS} from '../../../build/amp-inline-gallery-0.1.
 import {AmpInlineGalleryPagination} from './amp-inline-gallery-pagination';
 import {CSS as AmpInlineGalleryPaginationCSS} from '../../../build/amp-inline-gallery-pagination-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
+import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {toArray} from '../../../src/types';
+import {getDetail} from '../../../src/event-helper';
+import {iterateCursor, scopedQuerySelectorAll} from '../../../src/dom';
+
+/**
+ * The selector of children to update the progress on as the gallery's carousel
+ * changes position.
+ */
+const CHILDREN_FOR_PROGRESS_SELECTOR = 'amp-inline-gallery-pagination';
+
+const CAROUSEL_SELECTOR = 'amp-base-carousel';
 
 class AmpInlineGallery extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -36,7 +45,7 @@ class AmpInlineGallery extends AMP.BaseElement {
     this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChange_(event);
     });
-    this.element.addEventListener('goToSlide', event => {
+    this.element.addEventListener(InlineGalleryEvents.GO_TO_SLIDE, event => {
       this.onGoToSlide_(event);
     });
   }
@@ -47,23 +56,32 @@ class AmpInlineGallery extends AMP.BaseElement {
   }
 
   /**
-   *
-   * @param {string} name
-   * @param {!JsonObject} detail
+   * @param {number} total
+   * @param {number} index
+   * @param {number} offset
    * @private
    */
-  dispatchOnChildren_(name, detail) {
-    toArray(this.element.children).forEach(child => {
-      child.dispatchEvent(createCustomEvent(this.win, name, detail));
-    });
+  updateProgress_(total, index, offset) {
+    iterateCursor(
+      scopedQuerySelectorAll(this.element, CHILDREN_FOR_PROGRESS_SELECTOR),
+      el => {
+        el.getImpl().then(pagination => {
+          pagination.updateProgress(total, index, offset);
+        });
+      }
+    );
   }
+
   /**
    * @param {!Event} event
    * @private
    */
   onIndexChange_(event) {
     const detail = getDetail(event);
-    this.dispatchOnChildren_('indexchange-update', detail);
+    const total = detail['total'];
+    const index = detail['index'];
+
+    this.updateProgress_(total, index, 0);
   }
 
   /**
@@ -72,7 +90,11 @@ class AmpInlineGallery extends AMP.BaseElement {
    */
   onOffsetChange_(event) {
     const detail = getDetail(event);
-    this.dispatchOnChildren_('offsetchange-update', detail);
+    const total = detail['total'];
+    const index = detail['index'];
+    const offset = detail['offset'];
+
+    this.updateProgress_(total, index, offset);
   }
 
   /**
@@ -81,7 +103,16 @@ class AmpInlineGallery extends AMP.BaseElement {
    */
   onGoToSlide_(event) {
     const detail = getDetail(event);
-    this.dispatchOnChildren_('goToSlide', detail);
+    const index = detail['index'];
+
+    iterateCursor(
+      scopedQuerySelectorAll(this.element, CAROUSEL_SELECTOR),
+      el => {
+        el.getImpl().then(carousel => {
+          carousel.goToSlide(index, {smoothScroll: true});
+        });
+      }
+    );
   }
 }
 

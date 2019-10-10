@@ -64,8 +64,8 @@ amp-inline-gallery-pagination {
   align-self: flex-end;
   z-index: 0;
   display: flex;
-  justify-content: flex-end;
-  padding: 6px;
+  align-items: center;
+  height: 100%;
 }
 
 .i-amphtml-inline-gallery-pagination-dots[hidden],
@@ -79,7 +79,7 @@ amp-inline-gallery-pagination[inset] {
   left: 0;
   right: 0;
   bottom: 0;
-  bottom: calc(var(--amp-caption-margin-top) + var(--amp-caption-height, 0));
+  bottom: var(--amp-caption-height, 0);
   display: flex !important;
 }
 
@@ -106,7 +106,7 @@ amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-frosti
    * Add a frosted glass effect to the pagination dots background. The backdrop
    * and background elements will apply a darkening on top of the blurring.
    */
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(1px);
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdrop {

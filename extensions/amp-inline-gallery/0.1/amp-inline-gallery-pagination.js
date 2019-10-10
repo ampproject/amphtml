@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelectorAll} from '../../../src/dom';
@@ -55,11 +56,23 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {number} */
     this.total_ = 0;
 
+    /** @private {?boolean} */
     this.useDots_ = null;
 
+    /** @private {?Element} */
     this.paginationDots_ = null;
+
+    /** @private {?Element} */
+    this.paginationNumbersEl_ = null;
+
+    /** @private {?Element} */
+    this.paginationIndexEl_ = null;
+
+    /** @private {?Element} */
+    this.paginationTotalEl_ = null;
   }
 
   /** @override */
@@ -75,6 +88,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.appendChild(this.createDom_());
+
     this.paginationDots_ = this.element.querySelector(
       '.i-amphtml-inline-gallery-pagination-dots'
     );
@@ -87,13 +101,6 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     this.paginationTotalEl_ = this.element.querySelector(
       '.i-amphtml-inline-gallery-pagination-total'
     );
-
-    this.element.addEventListener('offsetchange-update', event => {
-      this.handleOffsetChangeUpdate_(event);
-    });
-    this.element.addEventListener('indexchange-update', event => {
-      this.handleIndexChangeUpdate_(event);
-    });
   }
 
   /**
@@ -107,21 +114,22 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
 
   /**
    * @return {!Element}
+   * @private
    */
   createDom_() {
     const html = htmlFor(this.element);
     return html`
-      <div class="i-amphtml-inline-gallery-pagination-container">
-        <div
-          class="i-amphtml-inline-gallery-pagination-dots"
-          aria-hidden="true"
-          hidden
-        >
+      <div
+        class="i-amphtml-inline-gallery-pagination-container"
+        aria-hidden="true"
+      >
+        <div class="i-amphtml-inline-gallery-pagination-dots" hidden>
           <div class="i-amphtml-inline-gallery-pagination-frosting"></div>
           <div class="i-amphtml-inline-gallery-pagination-backdrop"></div>
           <div class="i-amphtml-inline-gallery-pagination-background"></div>
         </div>
         <div class="i-amphtml-inline-gallery-pagination-numbers" hidden>
+          <div class="i-amphtml-inline-gallery-pagination-frosting"></div>
           <div class="i-amphtml-inline-gallery-pagination-backdrop"></div>
           <div class="i-amphtml-inline-gallery-pagination-background"></div>
           <span class="i-amphtml-inline-gallery-pagination-index"></span>
@@ -135,6 +143,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   /**
    * @param {number} index
    * @return {!Element}
+   * @private
    */
   createPaginationDot_(index) {
     const html = htmlFor(this.element);
@@ -149,7 +158,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     content.onclick = () => {
       const event = createCustomEvent(
         this.win,
-        'goToSlide',
+        InlineGalleryEvents.GO_TO_SLIDE,
         dict({
           'index': index,
         }),
@@ -164,14 +173,19 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
+   * Updates the total number of slides, switching between dots mode / numbers
+   * mode depending on the available space.
    * @param {number} total
    * @param {boolean} force
+   * @private
    */
   updateTotal_(total, force = false) {
     if (total == this.total_ && !force) {
       return;
     }
 
+    // Figure out if the number of dots needed to represent the slides will fit
+    // within the available space.
     const dotWidthTotal = total * dotWidth;
     const dotSpacingTotal = (total + 1) * dotMinSpacing;
     const {width} = this.getLayoutBox();
@@ -186,6 +200,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     this.total_ = total;
     this.useDots_ = useDots;
 
+    // Update the UI for both dots / numbers.
     this.paginationDots_.hidden = !useDots;
     this.paginationNumbersEl_.hidden = useDots;
     this.paginationTotalEl_.textContent = total;
@@ -194,6 +209,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
 
   /**
    * @return {!Array<!Element>}
+   * @private
    */
   getDots_() {
     return toArray(
@@ -205,7 +221,9 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
+   * Creates the correct number of dots, removing any extras.
    * @param {number} dotCount
+   * @private
    */
   createDots_(dotCount) {
     const dots = this.getDots_();
@@ -218,9 +236,10 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
-   *
+   * Updates all the dots, if there are any (not using numbers).
    * @param {number} index
    * @param {number} offset
+   * @private
    */
   updateDots_(index, offset) {
     this.getDots_().forEach((dot, i) => {
@@ -243,10 +262,11 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
-   *
+   * Updates the progress numbers display.
    * @param {number} index
+   * @private
    */
-  updateIndex_(index) {
+  updateNumbers_(index) {
     this.paginationIndexEl_.textContent = index + 1;
   }
 
@@ -260,30 +280,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     this.mutateElement(() => {
       this.updateTotal_(total);
       this.updateDots_(index, offset);
-      this.updateIndex_(index);
+      this.updateNumbers_(index);
     });
-  }
-
-  /**
-   * @param {!Event} event
-   */
-  handleOffsetChangeUpdate_(event) {
-    const detail = getDetail(event);
-    const total = detail['total'];
-    const index = detail['index'];
-    const offset = detail['offset'];
-
-    this.updateProgress(total, index, offset);
-  }
-
-  /**
-   * @param {!Event} event
-   */
-  handleIndexChangeUpdate_(event) {
-    const detail = getDetail(event);
-    const index = detail['index'];
-    const total = detail['total'];
-
-    this.updateProgress(total, index, 0);
   }
 }

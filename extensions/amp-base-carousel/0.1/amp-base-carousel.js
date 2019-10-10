@@ -33,7 +33,6 @@ import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {toArray} from '../../../src/types';
 
@@ -247,8 +246,8 @@ class AmpCarousel extends AMP.BaseElement {
    * Moves the Carousel to a given index.
    * @param {number} index
    */
-  goToSlide(index) {
-    this.carousel_.goToSlide(index, {smoothScroll: false});
+  goToSlide(index, {smoothScroll = false, actionSource} = {}) {
+    this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 
   /**
@@ -428,12 +427,5 @@ class AmpCarousel extends AMP.BaseElement {
 }
 
 AMP.extension('amp-base-carousel', '0.1', AMP => {
-  if (
-    !isExperimentOn(AMP.win, 'amp-base-carousel') &&
-    !isExperimentOn(AMP.win, 'amp-lightbox-gallery-base-carousel')
-  ) {
-    return;
-  }
-
   AMP.registerElement('amp-base-carousel', AmpCarousel, CSS);
 });
