@@ -30,6 +30,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {isAmphtml} from '../format';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -269,6 +270,13 @@ export class Navigation {
       VALID_TARGETS.includes(target),
       `Target '${target}' not supported.`
     );
+
+    if (target === '_self') {
+      userAssert(
+        !isAmphtml(win.document),
+        'Target _self is not supported on valid AMP documents.'
+      );
+    }
 
     // Resolve navigateTos relative to the source URL, not the proxy URL.
     url = urlService.getSourceUrl(url);
