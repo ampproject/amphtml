@@ -1,9 +1,4 @@
-:host {
-  --amp-igp-max-dots-width-percentage: 0.6;
-  --amp-igp-dot-width: 10;
-  --amp-igp-dot-max-spacing: 12;
-  --amp-igp-dot-min-spacing: 8;
-
+amp-inline-gallery-pagination {
   font-size: 12px;
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1;
@@ -19,13 +14,12 @@
 
 .pagination-dots {
   position: relative;
-  z-index: 0;
   align-self: center;
+  z-index: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-  max-width: calc(100% * var(--amp-igp-max-dots-width-percentage));
 }
 
 .pagination-dot-container {
@@ -62,8 +56,8 @@
 
 .pagination-numbers {
   position: relative;
-  z-index: 0;
   align-self: flex-end;
+  z-index: 0;
   display: flex;
   justify-content: flex-end;
   padding: 6px;
@@ -79,7 +73,7 @@
 }
 
 /** Inset pagination styling. */
-:host([inset]) {
+amp-inline-gallery-pagination[inset] {
   position: absolute !important;
   left: 0;
   right: 0;
@@ -88,12 +82,12 @@
   display: flex !important;
 }
 
-:host([inset]) .pagination-container {
+amp-inline-gallery-pagination[inset] .pagination-container {
   margin: 18px;
 }
 
-:host([inset]) .pagination-backdrop,
-:host([inset]) .pagination-background {
+amp-inline-gallery-pagination[inset] .pagination-backdrop,
+amp-inline-gallery-pagination[inset] .pagination-background {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -103,7 +97,7 @@
   border-radius: 12px;
 }
 
-:host([inset]) .pagination-backdrop {
+amp-inline-gallery-pagination[inset] .pagination-backdrop {
   /**
    * Instead of using a plain background color, we use a backdrop-filter to
    * make the effective background partially dependent on the current
@@ -125,37 +119,36 @@
    backdrop-filter: blur(18px) invert(1) grayscale(0.6) brightness(0.9);
    /**
     * Note: we use a opacity rather than a filter function due to a bug in
-    * Chrome.
+    * Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=991656.
+    * Otherwise, we could use the opacity function and combine this with the
+    * pagination-background class as the background of the pagination container
+    * rather than needing two separate Elements for it.
     */
    opacity: 0.6;
 }
 
-:host([inset]) .pagination-background {
+amp-inline-gallery-pagination[inset] .pagination-background {
 /**
    * Note: we always add some darkening using background-color, since we do not
-   * change the dot color. As the dots are currently children of the container,
-   * we cannot use a backdrop-filter on them to invert the color  again. We
-   * would need to put them in a different subtree (and duplicate them for
-   * sizing of the dots container), and then position them on top of this container.
+   * change the dot color.
    */
    background-color: rgba(0, 0, 0, 0.3);
 }
 
-
-:host([inset]) .pagination-dots {
+amp-inline-gallery-pagination[inset] .pagination-dots {
   padding: 6px 4px;
   align-self: center;
 }
 
-:host([inset]) .pagination-numbers {
+amp-inline-gallery-pagination[inset] .pagination-numbers {
   padding: 6px 8px;
   align-self: flex-end;
 }
 
-:host([inset]) .pagination-dot {
+amp-inline-gallery-pagination[inset] .pagination-dot {
   background-color: rgba(255, 255, 255, 0.35);
 }
 
-:host([inset]) .pagination-dot-progress {
+amp-inline-gallery-pagination[inset] .pagination-dot-progress {
   background-color: #fff;
 }

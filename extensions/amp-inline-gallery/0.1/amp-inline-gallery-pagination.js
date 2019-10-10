@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-inline-gallery-pagination-0.1.css';
 import {Layout} from '../../../src/layout';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
@@ -52,31 +51,6 @@ function exponentialFalloff(percentage, power) {
 }
 
 export class AmpInlineGalleryPagination extends AMP.BaseElement {
-  /**
-   * @return {!ShadowRoot}
-   * @private
-   */
-  createShadowRoot_() {
-    const sr = this.element.attachShadow({mode: 'open'});
-    sr.innerHTML = `
-      <style>${CSS}</style>
-      <div class="pagination-container">
-        <div class="pagination-dots" aria-hidden="true" hidden>
-          <div class="pagination-backdrop"></div>
-          <div class="pagination-background"></div>
-        </div>
-        <div class="pagination-numbers" hidden>
-          <div class="pagination-backdrop"></div>
-          <div class="pagination-background"></div>
-          <span class="pagination-index"></span>
-          &nbsp;/&nbsp;
-          <span class="pagination-total"></span>
-        </div>
-      </div>
-    `;
-    return sr;
-  }
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -100,11 +74,13 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const sr = this.createShadowRoot_();
-    this.paginationDots_ = sr.querySelector('.pagination-dots');
-    this.paginationNumbersEl_ = sr.querySelector('.pagination-numbers');
-    this.paginationIndexEl_ = sr.querySelector('.pagination-index');
-    this.paginationTotalEl_ = sr.querySelector('.pagination-total');
+    this.element.appendChild(this.createDom_());
+    this.paginationDots_ = this.element.querySelector('.pagination-dots');
+    this.paginationNumbersEl_ = this.element.querySelector(
+      '.pagination-numbers'
+    );
+    this.paginationIndexEl_ = this.element.querySelector('.pagination-index');
+    this.paginationTotalEl_ = this.element.querySelector('.pagination-total');
 
     this.element.addEventListener('offsetchange-update', event => {
       this.handleOffsetChangeUpdate_(event);
@@ -118,7 +94,31 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
    * @override
    */
   layoutCallback() {
+    // Since we have `isRelayoutNeeded`, this will potentially change between
+    // dots and numbers depending on the available space on resize.
     this.updateTotal_(this.total_, true);
+  }
+
+  /**
+   * @return {!Element}
+   */
+  createDom_() {
+    const html = htmlFor(this.element);
+    return html`
+      <div class="pagination-container">
+        <div class="pagination-dots" aria-hidden="true" hidden>
+          <div class="pagination-backdrop"></div>
+          <div class="pagination-background"></div>
+        </div>
+        <div class="pagination-numbers" hidden>
+          <div class="pagination-backdrop"></div>
+          <div class="pagination-background"></div>
+          <span class="pagination-index"></span>
+          &nbsp;/&nbsp;
+          <span class="pagination-total"></span>
+        </div>
+      </div>
+    `;
   }
 
   /**
@@ -153,9 +153,8 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
-   *
-   * @param {*} total
-   * @param {*} force
+   * @param {number} total
+   * @param {boolean} force
    */
   updateTotal_(total, force = false) {
     if (total == this.total_ && !force) {

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {CSS as AmpInlineGalleryCSS} from '../../../build/amp-inline-gallery-0.1.css';
 import {AmpInlineGalleryPagination} from './amp-inline-gallery-pagination';
-import {CSS} from '../../../build/amp-inline-gallery-0.1.css';
+import {CSS as AmpInlineGalleryPaginationCSS} from '../../../build/amp-inline-gallery-pagination-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {Layout} from '../../../src/layout';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
@@ -87,8 +88,13 @@ class AmpInlineGallery extends AMP.BaseElement {
 AMP.extension('amp-inline-gallery', '0.1', AMP => {
   AMP.registerElement(
     'amp-inline-gallery-pagination',
-    AmpInlineGalleryPagination
+    AmpInlineGalleryPagination,
+    AmpInlineGalleryPaginationCSS
   );
 
-  AMP.registerElement('amp-inline-gallery', AmpInlineGallery, CSS);
+  AMP.registerElement(
+    'amp-inline-gallery',
+    AmpInlineGallery,
+    AmpInlineGalleryCSS
+  );
 });
