@@ -1,24 +1,10 @@
-<!--
-  1. Change "category" below to one of:
-       ads-analytics
-       dynamic-content
-       layout
-       media
-       presentation
-       social
-
-  2. Remove any of the "formats" that don't apply.
-     You can also add the "ads" and "stories" formats if they apply.
-
-  3. And remove this comment! (no empty lines before "---")
--->
 ---
-$category: presentation
+$category: development
 formats:
   - websites
   - email
 teaser:
-  text: FILL THIS IN.
+  text: Warns developers potentially unused CSS selectors.
 ---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -41,38 +27,23 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Warns developers potentially unused CSS selectors.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Experimental</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-css-validator" src="https://cdn.ampproject.org/v0/amp-css-validator-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-</table>
-
-## Behavior
-
-FILL THIS IN. What does this extension do?
-
-## Attributes
-
-FILL THIS IN. Does this extension allow for properties to configure?
-
-<table>
-  <tr>
-    <td width="40%"><strong>data-my-attribute</strong></td>
-    <td>FILL THIS IN. This table <strong>must</strong> be written in HTML.</td>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td>
+      <ul>
+        <li><a href="https://github.com/ampproject/amphtml/tree/master/examples/amp-css-validator.amp.html">Unannotated code samples</a></li>
+      </ul>
+    </td>
   </tr>
 </table>
 
