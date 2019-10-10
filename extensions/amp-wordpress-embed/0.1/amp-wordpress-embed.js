@@ -22,7 +22,14 @@
  * <amp-wordpress-embed
  *   layout="fixed-height"
  *   data-url="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/"
- *   height="200">
+ *   height="200"
+ * >
+ *   <blockquote placeholder>
+ *     <a href="https://make.wordpress.org/core/2015/10/28/new-embeds-feature-in-wordpress-4-4/">
+ *       New Embeds Feature in WordPress 4.4
+ *     </a>
+ *   </blockquote>
+ *   <button overflow>Expand</button>
  * </amp-wordpress-embed>
  * </code>
  */
