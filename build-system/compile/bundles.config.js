@@ -143,9 +143,9 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
-  'amp-story-embed.js': {
+  'amp-story-embed-v0.js': {
     srcDir: './src/',
-    srcFilename: 'amp-story-embed.js',
+    srcFilename: 'amp-story-embed-manager.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
@@ -896,6 +896,12 @@ exports.extensionBundles = [
         'amp-story-auto-ads-attribution',
       ],
     },
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-story-embed',
+    version: '0.1',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
