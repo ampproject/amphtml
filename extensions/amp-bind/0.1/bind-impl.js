@@ -357,6 +357,29 @@ export class Bind {
   }
 
   /**
+   * Merges a global state object into the current state.
+   * @param {!JsonObject} state
+   * @return {!Promise<boolean>}
+   */
+  setStateAndUpdateHistory(state) {
+    // Sanitize and copy state
+    const stateCopy = this.copyJsonObject_(state);
+    if (!stateCopy) {
+      return Promise.resolve(false);
+    }
+    dev().info(TAG, 'setStateUpdateHistory:', stateCopy);
+    this.setStatePromise_ = this.setState(stateCopy)
+      .then(() => this.getDataForHistory_())
+      .then(data => {
+        // Don't bother calling History.replace with empty data.
+        if (data) {
+          this.history_.replace(data);
+        }
+      });
+    return this.setStatePromise_;
+  }
+
+  /**
    * Same as setStateWithExpression() except also pushes new history.
    * Popping the new history stack entry will restore the values of variables
    * in `expression`.
@@ -506,6 +529,21 @@ export class Bind {
       return this.sendBindingsToWorker_(bindings);
     } else {
       return Promise.resolve();
+    }
+  }
+
+  /**
+   * Returns a copy of the global state for a given field-based expression,
+   * e.g. "foo.bar.baz".
+   * @param {string} expr
+   * @return {Object|Array|string|undefined}
+   */
+  getStateCopy(expr) {
+    const value = (expr && getValueForExpr(this.state_, expr)) || undefined;
+    if (isObject(value) || isArray(value)) {
+      return this.copyJsonObject_(value);
+    } else if (typeof value === 'string') {
+      return value;
     }
   }
 

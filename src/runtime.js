@@ -513,6 +513,34 @@ export class MultidocManager {
       amp.resources = Services.resourcesForDoc(ampdoc);
     }
 
+    amp['bind'] = {
+      /**
+       * Expose amp-bind getState
+       * @param {string} name - Name of state or deep state
+       * @return {Promise<Array|Object|Array|string|undefined>} - Resolves to
+       * a copy of the value of a state
+       */
+      getState: name => {
+        return Services.bindForDocOrNull(shadowRoot).then(bind => {
+          return bind && bind.getStateCopy(name);
+        });
+      },
+
+      /**
+       * Expose amp-bind setState
+       * @param {Object|string} state - State to be set
+       * @return {Promise<boolean>} - Resolves to state write success status
+       */
+      setState: state => {
+        return Services.bindForDocOrNull(shadowRoot).then(bind => {
+          return (
+            (bind && bind.setStateAndUpdateHistory(state)) ||
+            Promise.resolve(false)
+          );
+        });
+      },
+    };
+
     // Start building the shadow doc DOM.
     builder(amp, shadowRoot, ampdoc).then(() => {
       // Document is ready.
