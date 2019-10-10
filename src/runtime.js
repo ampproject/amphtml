@@ -529,13 +529,12 @@ export class MultidocManager {
       /**
        * Expose amp-bind setState
        * @param {Object|string} state - State to be set
-       * @return {Promise<boolean>} - Resolves to state write success status
+       * @return {Promise} - Resolves after state and history have been updated
        */
       setState: state => {
         return Services.bindForDocOrNull(shadowRoot).then(bind => {
           return (
-            (bind && bind.setStateAndUpdateHistory(state)) ||
-            Promise.resolve(false)
+            (bind && bind.setStateAndUpdateHistory(state)) || Promise.resolve()
           );
         });
       },

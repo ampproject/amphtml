@@ -359,13 +359,13 @@ export class Bind {
   /**
    * Merges a global state object into the current state.
    * @param {!JsonObject} state
-   * @return {!Promise<boolean>}
+   * @return {!Promise}
    */
   setStateAndUpdateHistory(state) {
     // Sanitize and copy state
     const stateCopy = this.copyJsonObject_(state);
     if (!stateCopy) {
-      return Promise.resolve(false);
+      return Promise.resolve();
     }
     dev().info(TAG, 'setStateUpdateHistory:', stateCopy);
     this.setStatePromise_ = this.setState(stateCopy)
