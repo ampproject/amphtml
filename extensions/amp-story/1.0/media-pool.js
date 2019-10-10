@@ -279,7 +279,10 @@ export class MediaPool {
         const sources = this.getDefaultSource_(type);
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
-        this.enqueueMediaElementTask_(mediaEl, new UpdateSourcesTask(sources));
+        this.enqueueMediaElementTask_(
+          mediaEl,
+          new UpdateSourcesTask(this.win_, sources)
+        );
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
         // is returned.  If so, we should adjust the pool size/distribution
         // between media types.
@@ -545,7 +548,7 @@ export class MediaPool {
         this.maybeResetAmpMedia_(ampMediaForDomEl);
         this.enqueueMediaElementTask_(
           poolMediaEl,
-          new UpdateSourcesTask(sources)
+          new UpdateSourcesTask(this.win_, sources)
         );
         this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
       },
@@ -588,7 +591,7 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new UpdateSourcesTask(defaultSources)
+      new UpdateSourcesTask(this.win_, defaultSources)
     );
   }
 
@@ -750,7 +753,7 @@ export class MediaPool {
 
     // This media element has not yet been registered.
     placeholderEl.id = id;
-    const sources = Sources.removeFrom(placeholderEl);
+    const sources = Sources.removeFrom(this.win_, placeholderEl);
     this.sources_[id] = sources;
     this.placeholderEls_[id] = placeholderEl;
 
