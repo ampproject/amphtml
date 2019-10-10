@@ -17,6 +17,29 @@
 /**
  * @fileoverview Embeds a WordPress Post
  *
+ * The messages being sent by WordPress have event data consisting of an object with keys for 'message' and 'value'.
+ * The 'message' can be either 'height' or 'link'.
+ *
+ * The 'height' message event data looks like this:
+ *
+ * <code>
+ * {"message":"height", "value":356}
+ * </code>
+ *
+ * WordPress enforces a minimum height of 200px and a maximum height of 1000px.
+ *
+ * The 'link' message event data looks like this:
+ *
+ * <code>
+ * {"message":"link", "value":"https://wordpress.org/news/2017/11/tipton/"}
+ * </code>
+ *
+ * WordPress will only navigate the user to the URL in such a message if it is the same origin as the URL of the
+ * WordPress post being embedded and if the iframe is currently active.
+ *
+ * @see https://core.trac.wordpress.org/browser/tags/5.2.3/src/js/_enqueues/lib/embed-template.js
+ * @see https://core.trac.wordpress.org/browser/tags/5.2.3/src/js/_enqueues/wp/embed.js
+ *
  * Example:
  * <code>
  * <amp-wordpress-embed

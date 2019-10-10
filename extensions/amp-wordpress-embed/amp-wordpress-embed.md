@@ -26,7 +26,7 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-wordpress-embed" src="https://cdn.ampproject.org/v0/amp-wordpress-embed-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout/">Supported Layouts</a></strong></td>
     <td>fixed-height</td>
   </tr>
   <!-- <tr>
@@ -65,7 +65,7 @@ You should also provide a placeholder `blockquote` that contains a link to the o
 
 ##### data-url (required)
 
-The URL of the post to embed.
+The URL (permalink) of the WordPress post to embed. The component will automatically add `?embed=true` to the URL.
 
 ##### layout (required)
 
