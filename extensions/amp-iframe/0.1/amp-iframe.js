@@ -19,7 +19,7 @@ import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfi
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {createCustomEvent, getData} from '../../../src/event-helper';
+import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
@@ -102,6 +102,9 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {string} */
     this.sandbox_ = '';
+
+    /** @private {Function} */
+    this.unlisten_ = null;
 
     /**
      * The source of the iframe. May change to null for tracking iframes
@@ -470,7 +473,12 @@ export class AmpIframe extends AMP.BaseElement {
       /*opt_allowOpaqueOrigin*/ true
     );
 
-    addEventListener('message', this.listenForPymMessage_.bind(this));
+    // Listen for resize messages sent by Pym.js.
+    this.unlisten_ = listen(
+      window,
+      'message',
+      this.listenForPymMessage_.bind(this)
+    );
 
     if (this.isClickToPlay_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
@@ -560,6 +568,10 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
+    if (this.unlisten_) {
+      this.unlisten_();
+      this.unlisten_ = null;
+    }
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {
