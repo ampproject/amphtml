@@ -157,6 +157,7 @@ import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
+import {insticator} from '../ads/insticator';
 import {invibes} from '../ads/invibes';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
@@ -247,6 +248,7 @@ import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
 import {torimochi} from '../ads/torimochi';
+import {tracdelight} from '../ads/tracdelight';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
 import {uas} from '../ads/uas';
@@ -294,6 +296,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   forkmedia: true,
   idealmedia: true,
+  insticator: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
@@ -431,6 +434,7 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
+register('insticator', insticator);
 register('invibes', invibes);
 register('ix', ix);
 register('jubna', jubna);
@@ -524,6 +528,7 @@ register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
 register('torimochi', torimochi);
+register('tracdelight', tracdelight);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);

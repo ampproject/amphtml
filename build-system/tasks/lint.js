@@ -167,10 +167,11 @@ function runLinter(stream, options) {
  * @return {!Array<string>}
  */
 function lintableFilesChanged() {
+  const lintableFiles = deglob.sync(config.lintGlobs);
   return gitDiffNameOnlyMaster().filter(function(file) {
     return (
       fs.existsSync(file) &&
-      (path.extname(file) == '.js' || path.basename(file) == 'OWNERS')
+      lintableFiles.some(lintableFile => lintableFile.endsWith(file))
     );
   });
 }
@@ -224,7 +225,7 @@ function lint() {
   } else if (!eslintRulesChanged() && argv.local_changes) {
     const lintableFiles = lintableFilesChanged();
     if (lintableFiles.length == 0) {
-      log(colors.green('INFO: ') + 'No JS or OWNERS files in this PR');
+      log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
     }
     filesToLint = getFilesToLint(lintableFiles);
