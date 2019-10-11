@@ -520,7 +520,7 @@ export class MultidocManager {
       /**
        * Expose amp-bind getState
        * @param {string} name - Name of state or deep state
-       * @return {Promise<(Object|Array|string|undefined)>} - Resolves to
+       * @return {Promise<(?JsonObject|string|undefined)>} - Resolves to
        * a copy of the value of a state
        */
       getState: name => {
@@ -531,7 +531,7 @@ export class MultidocManager {
 
       /**
        * Expose amp-bind setState
-       * @param {(Object|string)} state - State to be set
+       * @param {!JsonObject} state - State to be set
        * @return {Promise} - Resolves after state and history have been updated
        */
       setState: state => {
