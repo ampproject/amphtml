@@ -106,7 +106,7 @@ amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-frosti
    * Add a frosted glass effect to the pagination dots background. The backdrop
    * and background elements will apply a darkening on top of the blurring.
    */
-  backdrop-filter: blur(1px);
+  backdrop-filter: blur(3px);
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdrop {
@@ -128,7 +128,7 @@ amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdr
    * The greyscale is used to have the container slightly tinted by the inverse
    * color, but also not be too tinted.
    */
-   backdrop-filter: blur(12px) invert(1) grayscale(0.6) brightness(0.9);
+   backdrop-filter: blur(12px) invert(1) grayscale(0.6) brightness(0.8);
    /**
     * Note: we use a opacity rather than a filter function due to a bug in
     * Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=991656.
@@ -136,7 +136,7 @@ amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdr
     * i-amphtml-inline-gallery-pagination-background class as the background of the pagination container
     * rather than needing two separate Elements for it.
     */
-   opacity: 0.6;
+   opacity: 0.5;
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-background {
