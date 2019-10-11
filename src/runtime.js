@@ -59,6 +59,7 @@ import {reportErrorForWin} from './error';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
+import {toArray} from './types';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -814,6 +815,14 @@ export class MultidocManager {
     const {ampdoc} = amp;
     ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
+    const ampBody = ampdoc.getBody();
+    if (ampBody) {
+      toArray(ampBody.getElementsByTagName('img')).forEach(img => {
+        if (!img.complete) {
+          img.src = '';
+        }
+      });
+    }
   }
 
   /**
