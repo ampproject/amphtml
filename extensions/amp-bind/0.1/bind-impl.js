@@ -357,7 +357,7 @@ export class Bind {
   }
 
   /**
-   * Merges a global state object into the current state.
+   * Merges a state object into the current global state.
    * @param {!JsonObject} state
    * @return {!Promise}
    */
@@ -536,7 +536,7 @@ export class Bind {
    * Returns a copy of the global state for a given field-based expression,
    * e.g. "foo.bar.baz".
    * @param {string} expr
-   * @return {Object|Array|string|undefined}
+   * @return {(Object|Array|string|undefined)}
    */
   getStateCopy(expr) {
     const value = (expr && getValueForExpr(this.state_, expr)) || undefined;
