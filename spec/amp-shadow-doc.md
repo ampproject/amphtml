@@ -94,6 +94,8 @@ Both `AMP.attachShadowDoc` and `AMP.attachShadowDocAsStream` return a `ShadowDoc
 - `shadowDoc.setVisibilityState()` - changes the visibility state of the AMP document.
 - `shadowDoc.postMessage()` and `shadowDoc.onMessage()` - can be used to message with the AMP document.
 - `shadowDoc.close()` - closes the AMP document and frees the resources.
+- `shadowDoc.bind.getState(expr)` - Get an `amp-bind` state from the AMP document using expression syntax
+- `shadowDoc.bind.setState(obj)` - Deep merge an object into the AMP document's global `amp-bind` state
 
 
 ## Shadow DOM API and polyfills
