@@ -359,14 +359,17 @@ export class Bind {
   /**
    * Merges a state object into the current global state, or parses a state
    * expression and merges it into the global state.
-   * @param {!JsonObject|string} state
+   * @param {(!JsonObject|string)} state
    * @return {!Promise}
    */
   setStateAndUpdateHistory(state) {
     // Support expressions
     if (typeof state === 'string') {
       // Emulate UIEvent 'click'
-      return this.pushStateWithExpression(state, {event: 1});
+      return this.pushStateWithExpression(
+        state,
+        /** @type {!JsonObject} */ ({event: 1})
+      );
     }
     // Sanitize and copy state
     const stateCopy = this.copyJsonObject_(state);
