@@ -36,7 +36,7 @@ import {toArray} from '../../../src/types';
 const TAG = 'amp-mega-menu';
 
 /** @const {string} */
-const ARIA_LABEL_CLOSE = 'Close the mega menu';
+const ARIA_LABEL_CLOSE = 'Close the menu';
 
 /**
  * A mega menu component suitable for displaying large collections of links on
