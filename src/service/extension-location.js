@@ -29,18 +29,42 @@ import {urls} from '../config';
 let ExtensionInfoDef;
 
 /**
+ * Dynamic AMP components
+ */
+const AMP_DYNAMIC_COMPONENTS = ['amp-geo'];
+
+/**
+ * Determine whether an extension is a dynamic AMP component
+ * @param {string} extensionId
+ * @return {boolean}
+ */
+function isDynamicComponent(extensionId) {
+  return (
+    Boolean(extensionId) && AMP_DYNAMIC_COMPONENTS.indexOf(extensionId) >= 0
+  );
+}
+
+/**
  * Calculate the base url for any scripts.
  * @param {!Location} location The window's location
  * @param {boolean=} opt_isLocalDev
+ * @param {boolean=} opt_useDefaultCdn
  * @return {string}
  */
-export function calculateScriptBaseUrl(location, opt_isLocalDev) {
+export function calculateScriptBaseUrl(
+  location,
+  opt_isLocalDev,
+  opt_useDefaultCdn
+) {
   if (opt_isLocalDev) {
     let prefix = `${location.protocol}//${location.host}`;
     if (location.protocol == 'about:') {
       prefix = '';
     }
     return `${prefix}/dist`;
+  }
+  if (opt_useDefaultCdn) {
+    return urls.defaultCdn;
   }
   return urls.cdn;
 }
@@ -68,7 +92,9 @@ export function calculateExtensionScriptUrl(
   opt_extensionVersion,
   opt_isLocalDev
 ) {
-  const base = calculateScriptBaseUrl(location, opt_isLocalDev);
+  const useDefaultCdn =
+    urls.useDefaultCdnForDynamicComponents && isDynamicComponent(extensionId);
+  const base = calculateScriptBaseUrl(location, opt_isLocalDev, useDefaultCdn);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
     opt_extensionVersion = '0.1';
@@ -76,6 +102,9 @@ export function calculateExtensionScriptUrl(
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
+  if (urls.cdn !== urls.defaultCdn && !useDefaultCdn) {
+    return `${base}/v0/${extensionId}${extensionVersion}.js`;
+  }
   const spPath = getSinglePassExperimentPath();
   return `${base}/rtv/${rtv}/${spPath}v0/${extensionId}${extensionVersion}.js`;
 }
@@ -96,7 +125,7 @@ export function calculateEntryPointScriptUrl(
   opt_rtv
 ) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
-  if (opt_rtv) {
+  if (opt_rtv && urls.cdn === urls.defaultCdn) {
     const spPath = getSinglePassExperimentPath();
     return `${base}/rtv/${getMode().rtvVersion}/${spPath}${entryPoint}.js`;
   }

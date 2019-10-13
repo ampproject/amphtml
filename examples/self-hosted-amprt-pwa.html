@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <title>Self-hosted PWA test</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script>
+    window.AMP_CONFIG = {
+      cdnUrl: 'https://android.cmphys.com/temp/amprt',
+      useDefaultCdnForDynamicComponents: true
+    };
+  </script>
+  <script async src="https://android.cmphys.com/temp/amprt/shadow-v0.js"></script>
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="shadowHost"></div>
+  <script>
+    (window.AMP = window.AMP || []).push(function(AMP) {
+        const page = /[?&]page=opt/.test(location.search) ? '-opt' : '-amp';
+        const url = location.href.replace('-pwa', page);
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.responseType = 'document';
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+              const hostElement = document.querySelector('#shadowHost');
+              window.shadowDoc = AMP.attachShadowDoc(hostElement, xhr.response, url);
+            }
+          }
+        };
+        xhr.send();
+    });
+  </script>
+</body>
+</html>
