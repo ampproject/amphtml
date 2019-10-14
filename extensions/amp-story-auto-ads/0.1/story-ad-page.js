@@ -235,10 +235,7 @@ export class StoryAdPage {
       this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
 
     if (!ctaUrl || !ctaType) {
-      user().error(
-        TAG,
-        'Both CTA Type & CTA Url are required in ad-server response.'
-      );
+      user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
       return false;
     }
 
