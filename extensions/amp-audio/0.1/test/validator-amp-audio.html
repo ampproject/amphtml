@@ -40,5 +40,15 @@
   <amp-audio width="400" height="300"
              controlsList="nofullscreen nodownload noremoteplayback foobar">
   </amp-audio>
+
+  <!-- Valid: Media Session attributes -->
+  <amp-audio width="400" height="300"
+             title="Hello" artist="World" artwork="example.jpg">
+    </amp-audio>
+
+  <!-- Valid: Most attributes are bindable -->
+  <amp-audio width="400" height="300"
+             [title]="Hello" [artist]="World" [artwork]="example.jpg">
+    </amp-audio>
 </body>
 </html>
