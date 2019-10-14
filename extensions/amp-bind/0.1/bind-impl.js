@@ -542,7 +542,7 @@ export class Bind {
    * @return {(?JsonObject|string|undefined)}
    */
   getState(expr) {
-    const value = (expr && getValueForExpr(this.state_, expr)) || undefined;
+    const value = expr ? getValueForExpr(this.state_, expr) : undefined;
     if (isObject(value) || isArray(value)) {
       return this.copyJsonObject_(/** @type {JsonObject} */ (value));
     } else if (typeof value === 'string') {
