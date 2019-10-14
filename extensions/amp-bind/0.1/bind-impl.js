@@ -343,41 +343,35 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    dev().info(TAG, 'setState:', expression);
-    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
-      .then(result => this.setState(result))
-      .then(() => this.getDataForHistory_())
-      .then(data => {
-        // Don't bother calling History.replace with empty data.
-        if (data) {
-          this.history_.replace(data);
-        }
-      });
-    return this.setStatePromise_;
+    return this.evaluateExpression_(expression, scope).then(result =>
+      this.setStateAndUpdateHistory_(result)
+    );
   }
 
   /**
-   * Merges a state object into the current global state, or parses a state
-   * expression and merges it into the global state.
-   * @param {(!JsonObject|string)} state
+   * Sanitizes a state object and merges the resulting object into the current
+   * state.
+   * @param {!JsonObject} state
    * @return {!Promise}
    */
-  setStateAndUpdateHistory(state) {
-    // Support expressions
-    if (typeof state === 'string') {
-      // Emulate UIEvent 'click'
-      return this.pushStateWithExpression(
-        state,
-        /** @type {!JsonObject} */ ({event: 1})
-      );
-    }
+  setStateWithObject(state) {
     // Sanitize and copy state
-    const stateCopy = this.copyJsonObject_(state);
-    if (!stateCopy) {
-      return Promise.resolve();
+    const result = this.copyJsonObject_(state);
+    if (!result) {
+      return Promise.reject('Invalid state');
     }
-    dev().info(TAG, 'setState:', stateCopy);
-    this.setStatePromise_ = this.setState(stateCopy)
+    return this.setStateAndUpdateHistory_(result);
+  }
+
+  /**
+   * Merges a state object into the current global state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   * @private
+   */
+  setStateAndUpdateHistory_(state) {
+    dev().info(TAG, 'setState:', state);
+    this.setStatePromise_ = this.setState(state)
       .then(() => this.getDataForHistory_())
       .then(data => {
         // Don't bother calling History.replace with empty data.
@@ -543,11 +537,11 @@ export class Bind {
 
   /**
    * Returns a copy of the global state for a given field-based expression,
-   * e.g. "foo.bar.baz".
+   * e.g. "foo.bar".
    * @param {string} expr
    * @return {(?JsonObject|string|undefined)}
    */
-  getStateCopy(expr) {
+  getState(expr) {
     const value = (expr && getValueForExpr(this.state_, expr)) || undefined;
     if (isObject(value) || isArray(value)) {
       return this.copyJsonObject_(/** @type {JsonObject} */ (value));

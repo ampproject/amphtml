@@ -53,6 +53,7 @@ import {
 } from './service/extensions-impl';
 import {installStylesForDoc} from './style-installer';
 import {internalRuntimeVersion} from './internal-version';
+import {isArray, isObject} from './types';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
@@ -514,33 +515,40 @@ export class MultidocManager {
     }
 
     /**
-     * Expose amp-bind methods
+     * Expose amp-bind getState
+     * @param {string} name - Name of state or deep state
+     * @return {Promise<(?JsonObject|string|undefined)>} - Resolves to
+     * a copy of the value of a state
      */
-    amp['bind'] = {
-      /**
-       * Expose amp-bind getState
-       * @param {string} name - Name of state or deep state
-       * @return {Promise<(?JsonObject|string|undefined)>} - Resolves to
-       * a copy of the value of a state
-       */
-      getState: name => {
-        return Services.bindForDocOrNull(shadowRoot).then(bind => {
-          return bind && bind.getStateCopy(name);
-        });
-      },
+    amp['getState'] = name => {
+      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+        if (!bind) {
+          return Promise.reject('amp-bind is not available in this document');
+        }
+        return bind.getState(name);
+      });
+    };
 
-      /**
-       * Expose amp-bind setState
-       * @param {!JsonObject} state - State to be set
-       * @return {Promise} - Resolves after state and history have been updated
-       */
-      setState: state => {
-        return Services.bindForDocOrNull(shadowRoot).then(bind => {
-          return (
-            (bind && bind.setStateAndUpdateHistory(state)) || Promise.resolve()
-          );
-        });
-      },
+    /**
+     * Expose amp-bind setState
+     * @param {(!JsonObject|string)} state - State to be set
+     * @return {Promise} - Resolves after state and history have been updated
+     */
+    amp['setState'] = state => {
+      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+        if (!bind) {
+          return Promise.reject('amp-bind is not available in this document');
+        }
+        if (typeof state === 'string') {
+          // Emulate UIEvent 'click'
+          return bind.setStateWithExpression(/** @type {string} */ (state), {
+            event: 1,
+          });
+        } else if (isObject(state) || isArray(state)) {
+          return bind.setStateWithObject(/** @type {!JsonObject} */ (state));
+        }
+        return Promise.reject('Invalid state');
+      });
     };
 
     // Start building the shadow doc DOM.
