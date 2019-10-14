@@ -31,7 +31,7 @@ describes.endtoend(
       return controller.getElementProperty(elem, 'paused');
     }
 
-    it('play control', async () => {
+    it('control buttons should manipulate video box behavior', async () => {
       const videoElem = await controller.findElement('#myVideo video');
       // Wait until video starts to play
       await expect(isPaused(videoElem)).to.be.false;

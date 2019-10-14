@@ -954,7 +954,10 @@ const forbiddenTermsSrcInclusive = {
   '\\.scrollBy\\(': bannedTermsHelpString,
   '\\.scrollIntoView\\(': bannedTermsHelpString,
   '\\.scrollIntoViewIfNeeded\\(': bannedTermsHelpString,
-  '\\.scrollTo\\(': bannedTermsHelpString,
+  '\\.scrollTo\\(': {
+    message: bannedTermsHelpString,
+    whitelist: ['build-system/tasks/e2e/amp-driver.js'],
+  },
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
   '\\.scheduleUnlayout\\(': bannedTermsHelpString,
