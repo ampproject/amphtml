@@ -61,6 +61,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
   it('should not mark an event as repeated the first time it fires', () => {
     const trigger = sandbox.spy(analytics, 'triggerEvent');
+    const details = sandbox.spy(analytics, 'updateDetails');
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -68,10 +69,19 @@ describes.fakeWin('amp-story analytics', {}, env => {
     });
 
     expect(trigger).to.have.been.calledOnceWith('story-page-visible');
-    expect(analytics.updateDetails().pageDetails).to.deep.include({
-      'story-page-visible': {
-        'repeated': false,
-      },
+
+    expect(details).to.have.returned({
+      pageDetails: {},
+      storyAdvancementMode: null,
+      storyBookendComponentPosition: null,
+      storyBookendComponentType: null,
+      storyBookendTargetHref: null,
+      storyIsMuted: null,
+      storyPageCount: null,
+      storyPageId: 'test-page',
+      storyPageIndex: 1,
+      storyPreviousPageId: null,
+      storyProgress: null,
     });
   });
 
@@ -95,10 +105,10 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
     expect(trigger).to.have.been.calledWith('story-page-visible');
     expect(trigger).to.have.been.calledThrice;
-    expect(analytics.updateDetails().pageDetails).to.deep.include({
-      'story-page-visible': {
-        'repeated': true,
-      },
+    expect(
+      analytics.updateDetails('story-page-visible').pageDetails
+    ).to.deep.include({
+      'repeated': true,
     });
   });
 });

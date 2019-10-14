@@ -817,7 +817,7 @@ describes.realWin('Events', {amp: 1}, env => {
           'storyPageIndex': '0',
           'storyPageId': 'p4',
           'storyPageCount': '4',
-          'pageDetails': {'story-page-visible': {'repeated': false}},
+          'pageDetails': {'repeated': false},
         };
 
         tracker.add(
@@ -842,7 +842,7 @@ describes.realWin('Events', {amp: 1}, env => {
         'storyPageIndex': '0',
         'storyPageId': 'p4',
         'storyPageCount': '4',
-        'pageDetails': {'story-page-visible': {'repeated': true}},
+        'pageDetails': {'repeated': true},
       };
 
       tracker.add(target, 'story-page-visible', storyAnalyticsConfig, handler);

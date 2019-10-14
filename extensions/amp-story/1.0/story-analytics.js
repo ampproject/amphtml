@@ -138,32 +138,30 @@ export class StoryAnalyticsService {
    */
   triggerEvent(eventType) {
     this.incrementPageEventCount_(eventType);
-    triggerAnalyticsEvent(this.element_, eventType, this.updateDetails());
+    triggerAnalyticsEvent(
+      this.element_,
+      eventType,
+      this.updateDetails(eventType)
+    );
   }
 
   /**
    * Updates event details.
+   * @param {!StoryAnalyticsEvent} eventType
    * @visibleForTesting
    * @return {!JsonObject}}
    */
-  updateDetails() {
+  updateDetails(eventType) {
+    const details = {};
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
+
+    if (this.pageEventCount_[pageId][eventType] > 1) {
+      details.repeated = true;
+    }
+
     let pageEventDetails = {};
-
-    Object.values(StoryAnalyticsEvent).forEach(type => {
-      if (
-        !this.pageEventCount_[pageId] ||
-        !this.pageEventCount_[pageId][type]
-      ) {
-        return;
-      }
-      pageEventDetails[type] = {
-        repeated: this.pageEventCount_[pageId][type] > 1,
-      };
-    });
-    pageEventDetails = {pageDetails: pageEventDetails};
-
+    pageEventDetails = {pageDetails: details};
     return /** @type {!JsonObject} */ (Object.assign(pageEventDetails, vars));
   }
 

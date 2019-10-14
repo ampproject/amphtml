@@ -452,12 +452,13 @@ export class AmpStoryEventTracker extends CustomEventTracker {
   fireListener_(event, rootTarget, config, listener) {
     const type = event['type'];
     const vars = event['vars'];
+
     const storySpec = config['storySpec'] || {};
     const repeat =
       storySpec['repeat'] === undefined ? true : storySpec['repeat'];
     const pageDetails = vars['pageDetails'];
 
-    if (repeat === false && pageDetails[type]['repeated']) {
+    if (repeat === false && pageDetails['repeated']) {
       return;
     }
 
