@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.74 */
+/** Version: 0.1.22.75 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4183,7 +4183,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.74',
+    '_client': 'SwG 0.1.22.75',
   });
 }
 
@@ -7628,6 +7628,9 @@ class Dialog {
 
     /** @private {?./view.View} */
     this.previousProgressView_ = null;
+
+    /** @private {boolean} */
+    this.useFixedLayer_ = false;
   }
 
   /**
@@ -7655,13 +7658,21 @@ class Dialog {
     } else {
       this.show_();
     }
-    return this.doc_
-      .addToFixedLayer(iframe.getElement())
-      .then(() => iframe.whenReady())
-      .then(() => {
+
+    if (this.useFixedLayer_) {
+      return this.doc_
+        .addToFixedLayer(iframe.getElement())
+        .then(() => iframe.whenReady())
+        .then(() => {
+          this.buildIframe_();
+          return this;
+        });
+    } else {
+      return iframe.whenReady().then(() => {
         this.buildIframe_();
         return this;
       });
+    }
   }
 
   /**
