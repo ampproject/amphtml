@@ -61,7 +61,6 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
   it('should not mark an event as repeated the first time it fires', () => {
     const trigger = sandbox.spy(analytics, 'triggerEvent');
-    const details = sandbox.spy(analytics, 'updateDetails');
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -70,19 +69,8 @@ describes.fakeWin('amp-story analytics', {}, env => {
 
     expect(trigger).to.have.been.calledOnceWith('story-page-visible');
 
-    expect(details).to.have.returned({
-      pageDetails: {},
-      storyAdvancementMode: null,
-      storyBookendComponentPosition: null,
-      storyBookendComponentType: null,
-      storyBookendTargetHref: null,
-      storyIsMuted: null,
-      storyPageCount: null,
-      storyPageId: 'test-page',
-      storyPageIndex: 1,
-      storyPreviousPageId: null,
-      storyProgress: null,
-    });
+    const details = analytics.updateDetails('story-page-visible');
+    expect(details.pageDetails).to.deep.equal({});
   });
 
   it('should mark event as repeated when fired more than once', () => {
