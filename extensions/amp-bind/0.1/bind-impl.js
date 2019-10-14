@@ -539,15 +539,14 @@ export class Bind {
    * Returns a copy of the global state for a given field-based expression,
    * e.g. "foo.bar".
    * @param {string} expr
-   * @return {(?JsonObject|string|undefined)}
+   * @return {*}
    */
   getState(expr) {
     const value = expr ? getValueForExpr(this.state_, expr) : undefined;
     if (isObject(value) || isArray(value)) {
       return this.copyJsonObject_(/** @type {JsonObject} */ (value));
-    } else if (typeof value === 'string') {
-      return value;
     }
+    return value;
   }
 
   /**

@@ -517,8 +517,7 @@ export class MultidocManager {
     /**
      * Expose amp-bind getState
      * @param {string} name - Name of state or deep state
-     * @return {Promise<(?JsonObject|string|undefined)>} - Resolves to
-     * a copy of the value of a state
+     * @return {Promise<*>} - Resolves to a copy of the value of a state
      */
     amp['getState'] = name => {
       return Services.bindForDocOrNull(shadowRoot).then(bind => {
