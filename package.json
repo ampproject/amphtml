@@ -115,7 +115,7 @@
     "jest-dot-reporter": "1.0.10",
     "jest-silent-reporter": "0.1.2",
     "jison": "0.4.18",
-    "jsdom": "15.1.1",
+    "jsdom": "15.2.0",
     "json-stable-stringify": "1.0.1",
     "json5": "2.1.1",
     "karma": "4.3.0",
