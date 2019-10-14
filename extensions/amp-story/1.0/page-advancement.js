@@ -64,15 +64,6 @@ export const TapNavigationDirection = {
   'PREVIOUS': 2,
 };
 
-/** @const @enum */
-export const AdvancementType = {
-  'BASE': 1,
-  'MANUAL': 2,
-  'TIME_BASED': 3,
-  'MEDIA_BASED': 4,
-  'MULTIPLE': 5,
-};
-
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
  * tracking its internal state when started/stopped, and listeners will never be
@@ -149,11 +140,11 @@ export class AdvancementConfig {
   }
 
   /**
-   * Returns advancement type
-   * @return {AdvancementType}
+   * Returns whether the advancement configuration will automatically advance
+   * @return {boolean}
    */
-  getType() {
-    return AdvancementType.BASE;
+  isAutoAdvance() {
+    return false;
   }
 
   /**
@@ -239,13 +230,6 @@ export class AdvancementConfig {
     }
 
     return new AdvancementConfig();
-  }
-
-  /**
-   * @override
-   */
-  getType() {
-    return AdvancementType.MULTIPLE;
   }
 }
 
@@ -334,8 +318,8 @@ class ManualAdvancement extends AdvancementConfig {
   /**
    * @override
    */
-  getType() {
-    return AdvancementType.MANUAL;
+  isAutoAdvance() {
+    return false;
   }
 
   /**
@@ -749,8 +733,8 @@ class TimeBasedAdvancement extends AdvancementConfig {
   /**
    * @override
    */
-  getType() {
-    return AdvancementType.TIME_BASED;
+  isAutoAdvance() {
+    return true;
   }
 
   /** @override */
@@ -1010,8 +994,8 @@ class MediaBasedAdvancement extends AdvancementConfig {
   /**
    * @override
    */
-  getType() {
-    return AdvancementType.MEDIA_BASED;
+  isAutoAdvance() {
+    return true;
   }
 
   /** @override */
@@ -1052,7 +1036,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
         if (autoAdvanceStr) {
           user().warn(
             'AMP-STORY-PAGE',
-            `Element with ID ${rootEl.id} has no media element ` +
+            `Element with ID ${element.id} has no media element ` +
               'supported for automatic advancement.'
           );
         }

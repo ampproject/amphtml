@@ -1647,10 +1647,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Returns AdvancementType for the page
-   * @return {./page-advancement.AdvancementType}
+   * Returns whether the page will automatically advance
+   * @return {boolean}
    */
-  getAdvancementType() {
-    return this.advancement_.getType();
+  isAutoAdvance() {
+    return this.advancement_.isAutoAdvance();
   }
 }

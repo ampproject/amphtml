@@ -36,11 +36,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
-import {
-  AdvancementConfig,
-  AdvancementType,
-  TapNavigationDirection,
-} from './page-advancement';
+import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
   AnalyticsEvent,
@@ -1442,10 +1438,7 @@ export class AmpStory extends AMP.BaseElement {
 
           // Start progress bar update for pages that are not ads or auto-
           // advance.
-          if (
-            targetPage.getAdvancementType() !== AdvancementType.MEDIA_BASED &&
-            targetPage.getAdvancementType() !== AdvancementType.TIME_BASED
-          ) {
+          if (!targetPage.isAutoAdvance()) {
             this.systemLayer_.updateProgress(
               targetPageId,
               this.advancement_.getProgress()
