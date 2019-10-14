@@ -695,7 +695,7 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 
 ##### Timer trigger
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
-  - `timerSpec` Specification for triggers of type `timer`. The unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
+  - `timerSpec` Specification for triggers of type `timer`. Unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. An addtional request will be triggered when the `maxTimerLength` has been reached. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true
