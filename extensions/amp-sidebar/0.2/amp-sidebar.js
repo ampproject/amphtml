@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
-import {CSS} from '../../../build/amp-sidebar-1.0.css';
+import {CSS} from '../../../build/amp-sidebar-0.2.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
@@ -34,7 +34,6 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
-import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -107,9 +106,6 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.isSafari_ = platform.isSafari();
 
-    /** @private {number} */
-    this.historyId_ = -1;
-
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
 
@@ -126,7 +122,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.opened_ = false;
 
     /** @private {?Element} */
-    this.drilldownMenu_ = null;
+    this.nestedMenu_ = null;
 
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
@@ -139,11 +135,11 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // TODO(#25022): remove this assert when cleaning up experiment post launch.
     userAssert(
       isExperimentOn(this.win, 'amp-sidebar-v2'),
       'Turning on the amp-sidebar-v2 experiment is necessary to use the new sidebar component.'
     );
-
     const {element} = this;
 
     element.classList.add('i-amphtml-overlay');
@@ -173,11 +169,11 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
 
-    this.maybeBuildDrilldownMenu_();
-    // Drilldown menu may not be present during buildCallback if it is rendered
+    this.maybeBuildNestedMenu_();
+    // Nested menu may not be present during buildCallback if it is rendered
     // dynamically with amp-list, in which case listen for dom update.
     element.addEventListener(AmpEvents.DOM_UPDATE, () => {
-      this.maybeBuildDrilldownMenu_();
+      this.maybeBuildNestedMenu_();
     });
 
     if (this.isIos_) {
@@ -185,8 +181,9 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     if (!element.hasAttribute('role')) {
-      element.setAttribute('role', 'menu');
+      element.setAttribute('role', 'dialog');
     }
+    element.setAttribute('aria-modal', 'false');
     // Make sidebar programmatically focusable and focus on `open` for a11y.
     element.tabIndex = -1;
 
@@ -222,20 +219,7 @@ export class AmpSidebar extends AMP.BaseElement {
           'A'
         );
         if (target && target.href) {
-          const tgtLoc = Services.urlForDoc(element).parse(target.href);
-          const currentHref = this.getAmpDoc().win.location.href;
-          // Important: Only close sidebar (and hence pop sidebar history entry)
-          // when navigating locally, Chrome might cancel navigation request
-          // due to after-navigation history manipulation inside a timer callback.
-          // See this issue for more details:
-          // https://github.com/ampproject/amphtml/issues/6585
-          if (removeFragment(target.href) != removeFragment(currentHref)) {
-            return;
-          }
-
-          if (tgtLoc.hash) {
-            this.close_();
-          }
+          this.close_();
         }
       },
       true
@@ -245,20 +229,20 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Loads the extension for drilldown menu if sidebar contains one and it
+   * Loads the extension for nested menu if sidebar contains one and it
    * has not been installed already.
    */
-  maybeBuildDrilldownMenu_() {
-    if (this.drilldownMenu_) {
+  maybeBuildNestedMenu_() {
+    if (this.nestedMenu_) {
       return;
     }
-    const drilldownMenu = this.element.querySelector('amp-drilldown');
-    if (drilldownMenu) {
+    const nestedMenu = this.element.querySelector('amp-nested-menu');
+    if (nestedMenu) {
       Services.extensionsFor(this.win).installExtensionForDoc(
         this.getAmpDoc(),
-        'amp-drilldown'
+        'amp-nested-menu'
       );
-      this.drilldownMenu_ = drilldownMenu;
+      this.nestedMenu_ = nestedMenu;
     }
   }
 
@@ -380,6 +364,7 @@ export class AmpSidebar extends AMP.BaseElement {
       // Wait for mutateElement, so that the element has been transfered to the
       // fixed layer. This is needed to hide the correct elements.
       setModalAsOpen(this.element);
+      this.element.setAttribute('aria-modal', 'true');
     });
 
     if (this.isIos_ && this.isSafari_) {
@@ -424,6 +409,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.getMaskElement_().removeAttribute('i-amphtml-sidebar-opened');
     this.mutateElement(() => {
       setModalAsClosed(this.element);
+      this.element.setAttribute('aria-modal', 'false');
     });
     this.element.removeAttribute('open');
     this.element.removeAttribute('i-amphtml-sidebar-opened');
@@ -443,10 +429,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element,
       this.getRealChildren()
     );
-    if (this.historyId_ != -1) {
-      this.getHistory_().pop(this.historyId_);
-      this.historyId_ = -1;
-    }
     this.triggerEvent_(SidebarEvents.CLOSE);
   }
 
@@ -462,11 +444,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.opened_ = true;
     this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForOpening_());
-    this.getHistory_()
-      .push(this.close_.bind(this))
-      .then(historyId => {
-        this.historyId_ = historyId;
-      });
     if (opt_invocation) {
       this.openerElement_ = opt_invocation.caller;
       this.initialScrollTop_ = this.viewport_.getScrollTop();
@@ -635,14 +612,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * @private
-   * @return {!../../../src/service/history-impl.History}
-   */
-  getHistory_() {
-    return Services.historyForDoc(this.getAmpDoc());
-  }
-
-  /**
    * @param {string} name
    * @private
    */
@@ -662,6 +631,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-sidebar', '1.0', AMP => {
+AMP.extension('amp-sidebar', '0.2', AMP => {
   AMP.registerElement('amp-sidebar', AmpSidebar, CSS);
 });

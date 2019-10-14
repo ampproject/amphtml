@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-drilldown-0.1.css';
+import {CSS} from '../../../build/amp-nested-menu-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {closestAncestorElementBySelector, tryFocus} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {toArray} from '../../../src/types';
 
-const TAG = 'amp-drilldown';
+const TAG = 'amp-nested-menu';
+
+/** @private @const {number} */
+const ANIMATION_TIMEOUT = 350;
 
 // TODO(#24668): add unit tests for click handlers and history.
-export class AmpDrilldown extends AMP.BaseElement {
+export class AmpNestedMenu extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -36,11 +40,20 @@ export class AmpDrilldown extends AMP.BaseElement {
     /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
 
-    /** @private {Array} */
-    this.historyIds_ = [];
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
 
     /** @private {?Element} */
     this.currentSubmenu_ = null;
+
+    /** @private {?Array<!Element>} */
+    this.submenuElements_ = null;
+
+    /** @private {?Array<!Element>} */
+    this.submenuOpenElements_ = null;
+
+    /** @private {?Array<!Element>} */
+    this.submenuCloseElements_ = null;
 
     /** @private {function(!Event)} */
     this.submenuOpenHandler_ = this.handleSubmenuOpenClick_.bind(this);
@@ -54,10 +67,39 @@ export class AmpDrilldown extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // TODO(#25022): remove this assert when cleaning up experiment post launch.
     userAssert(
       isExperimentOn(this.win, 'amp-sidebar-v2'),
-      'Turning on the amp-sidebar-v2 experiment is necessary to use the amp-drilldown component.'
+      `Turning on the amp-sidebar-v2 experiment is necessary to use the ${TAG} component.`
     );
+
+    this.action_ = Services.actionServiceForDoc(this.element);
+
+    this.submenuElements_ = toArray(
+      this.element.querySelectorAll('[amp-nested-submenu]')
+    );
+    this.submenuElements_.forEach(submenu => {
+      // Make submenus programmatically focusable for a11y.
+      submenu.tabIndex = -1;
+    });
+    this.submenuOpenElements_ = toArray(
+      this.element.querySelectorAll('[amp-nested-submenu-open]')
+    );
+    this.submenuCloseElements_ = toArray(
+      this.element.querySelectorAll('[amp-nested-submenu-close]')
+    );
+    this.submenuOpenElements_
+      .concat(this.submenuCloseElements_)
+      .forEach(element => {
+        if (!element.hasAttribute('tabindex')) {
+          element.setAttribute('tabindex', 0);
+        }
+        element.setAttribute('role', 'button');
+        userAssert(
+          this.action_.hasAction(element, 'tap') == false,
+          'submenu open/close buttons should not have tap actions registered.'
+        );
+      });
   }
 
   /** @override */
@@ -81,16 +123,10 @@ export class AmpDrilldown extends AMP.BaseElement {
    * Add event listeners on submenu open/close elements.
    */
   registerEventListeners_() {
-    const openElements = this.element.querySelectorAll(
-      '[amp-drilldown-submenu-open]'
-    );
-    openElements.forEach(element => {
+    this.submenuOpenElements_.forEach(element => {
       element.addEventListener('click', this.submenuOpenHandler_);
     });
-    const closeElements = this.element.querySelectorAll(
-      '[amp-drilldown-submenu-close]'
-    );
-    closeElements.forEach(element => {
+    this.submenuCloseElements_.forEach(element => {
       element.addEventListener('click', this.submenuCloseHandler_);
     });
 
@@ -101,16 +137,10 @@ export class AmpDrilldown extends AMP.BaseElement {
    * Remove listeners on all submenu open/close elements.
    */
   unregisterEventListeners_() {
-    const openElements = this.element.querySelectorAll(
-      '[amp-drilldown-submenu-open]'
-    );
-    openElements.forEach(element => {
+    this.submenuOpenElements_.forEach(element => {
       element.removeEventListener('click', this.submenuOpenHandler_);
     });
-    const closeElements = this.element.querySelectorAll(
-      '[amp-drilldown-submenu-close]'
-    );
-    closeElements.forEach(element => {
+    this.submenuCloseElements_.forEach(element => {
       element.removeEventListener('click', this.submenuCloseHandler_);
     });
 
@@ -124,7 +154,7 @@ export class AmpDrilldown extends AMP.BaseElement {
   handleSubmenuOpenClick_(e) {
     const submenuOpen = dev().assertElement(e.target);
     const submenu = submenuOpen.parentElement.querySelector(
-      '[amp-drilldown-submenu]'
+      '[amp-nested-submenu]'
     );
     if (submenu) {
       this.open_(submenu);
@@ -143,12 +173,11 @@ export class AmpDrilldown extends AMP.BaseElement {
     if (submenuParent) {
       submenuParent.setAttribute('child-open', '');
       submenu.setAttribute('open', '');
-      this.getHistory_()
-        .push(() => this.close_(submenu))
-        .then(historyId => {
-          this.historyIds_.push(historyId);
-        });
       this.currentSubmenu_ = submenu;
+      // move focus to close element after submenu fully opens.
+      Services.timerFor(this.win).delay(() => {
+        tryFocus(submenu.querySelector('[amp-nested-submenu-close]'));
+      }, ANIMATION_TIMEOUT);
     }
   }
 
@@ -160,7 +189,7 @@ export class AmpDrilldown extends AMP.BaseElement {
     const submenuClose = dev().assertElement(e.target);
     const submenu = closestAncestorElementBySelector(
       submenuClose,
-      '[amp-drilldown-submenu]'
+      '[amp-nested-submenu]'
     );
     if (submenu) {
       this.close_(submenu);
@@ -179,11 +208,13 @@ export class AmpDrilldown extends AMP.BaseElement {
     if (submenuParent) {
       submenuParent.removeAttribute('child-open');
       submenu.removeAttribute('open');
-      if (this.historyIds_.length > 0) {
-        const lastHistoryId = this.historyIds_.pop();
-        this.getHistory_().pop(lastHistoryId);
-      }
       this.currentSubmenu_ = submenuParent;
+      // move focus back to open element after submenu fully closes.
+      Services.timerFor(this.win).delay(() => {
+        tryFocus(
+          submenu.parentElement.querySelector('[amp-nested-submenu-open]')
+        );
+      }, ANIMATION_TIMEOUT);
     }
   }
 
@@ -217,20 +248,11 @@ export class AmpDrilldown extends AMP.BaseElement {
   getParentMenu_(submenu) {
     return closestAncestorElementBySelector(
       dev().assertElement(submenu.parentElement),
-      'amp-drilldown,[amp-drilldown-submenu]'
+      'amp-nested-menu,[amp-nested-submenu]'
     );
-  }
-
-  /**
-   * Returns the history for the ampdoc.
-   * @return {!../../../src/service/history-impl.History}
-   * @private
-   */
-  getHistory_() {
-    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpDrilldown, CSS);
+  AMP.registerElement(TAG, AmpNestedMenu, CSS);
 });

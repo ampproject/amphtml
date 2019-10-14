@@ -127,6 +127,7 @@ const EXPERIMENTS = [
   {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25022',
   },
   {
     id: 'ampdoc-fie',
