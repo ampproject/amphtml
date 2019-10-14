@@ -111,12 +111,6 @@ export class StoryAdPage {
     this.adDoc_ = null;
 
     /** @private {?string} */
-    this.ctaText_ = null;
-
-    /** @private {?string} */
-    this.ctaUrl_ = null;
-
-    /** @private {?string} */
     this.ampAdExitOutlink_ = null;
 
     /** @private {boolean} */
@@ -285,7 +279,7 @@ export class StoryAdPage {
     }
 
     // If making a CTA layer we need a button name & outlink url.
-    this.ctaUrl_ =
+    const ctaUrl =
       this.ampAdExitOutlink_ ||
       this.a4aVars_[A4AVarNames.CTA_URL] ||
       this.adElement_.getAttribute(DataAttrs.CTA_URL);
@@ -294,7 +288,7 @@ export class StoryAdPage {
       this.a4aVars_[A4AVarNames.CTA_TYPE] ||
       this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
 
-    if (!this.ctaUrl_ || !ctaType) {
+    if (!ctaUrl || !ctaType) {
       user().error(
         TAG,
         'Both CTA Type & CTA Url are required in ad-server response.'
@@ -303,10 +297,10 @@ export class StoryAdPage {
     }
 
     const ctaLocalizedStringId = CtaTypes[ctaType];
-    this.ctaText_ = this.localizationService_.getLocalizedString(
+    const ctaText = this.localizationService_.getLocalizedString(
       ctaLocalizedStringId
     );
-    if (!this.ctaText_) {
+    if (!ctaText) {
       user().error(TAG, 'invalid "CTA Type" in ad response');
       return false;
     }
@@ -322,14 +316,16 @@ export class StoryAdPage {
 
     this.maybeCreateAttribution_();
 
-    return this.createCtaLayer_();
+    return this.createCtaLayer_(ctaUrl, ctaText);
   }
 
   /**
    * Create layer to contain outlink button.
+   * @param {string} ctaUrl
+   * @param {string} ctaText
    * @return {boolean}
    */
-  createCtaLayer_() {
+  createCtaLayer_(ctaUrl, ctaText) {
     // TODO(ccordry): Move button to shadow root.
     const a = this.doc_.createElement('a');
     a.className = 'i-amphtml-story-ad-link';
@@ -339,8 +335,8 @@ export class StoryAdPage {
       opactiy: '0',
       transform: 'scale(0)',
     });
-    a.href = this.ctaUrl_;
-    a.textContent = this.ctaText_;
+    a.href = ctaUrl;
+    a.textContent = ctaText;
 
     if (a.protocol !== 'https:' && a.protocol !== 'http:') {
       user().warn(TAG, 'CTA url is not valid. Ad was discarded');
