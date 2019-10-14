@@ -363,7 +363,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   schedulePage_() {
     const index = ++this.adPagesCreated_;
     const page = new StoryAdPage(
-      this.element,
+      this.getAmpDoc(),
       this.config_,
       index,
       this.localizationService_

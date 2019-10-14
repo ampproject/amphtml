@@ -71,12 +71,12 @@ const A4AVarNames = {
 
 export class StoryAdPage {
   /**
-   * @param {!Element} storyAutoAdsEl
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} config
    * @param {number} index
    * @param {!./story-ad-localization.StoryAdLocalization} localization
    */
-  constructor(storyAutoAdsEl, config, index, localization) {
+  constructor(ampdoc, config, index, localization) {
     /** @private @const {!JsonObject} */
     this.config_ = config;
 
@@ -90,16 +90,13 @@ export class StoryAdPage {
     this.id_ = `i-amphtml-ad-page-${this.index_}`;
 
     /** @private @const {!Window} */
-    this.win_ = storyAutoAdsEl.getAmpDoc().win;
+    this.win_ = ampdoc.win;
 
     /** @private @const {!Document} */
     this.doc_ = this.win_.document;
 
     /** @private @const {!Promise} */
-    this.analytics_ = getServicePromiseForDoc(
-      storyAutoAdsEl,
-      STORY_AD_ANALYTICS
-    );
+    this.analytics_ = getServicePromiseForDoc(ampdoc, STORY_AD_ANALYTICS);
 
     /** @private {?number} */
     this.timeCreated_ = null;

@@ -36,7 +36,7 @@ const pageImplMock = {
   delegateVideoAutoplay: NOOP,
 };
 
-describes.realWin('amp-story-auto-ads', {amp: true}, env => {
+describes.realWin('story-ad-page', {amp: true}, env => {
   let win;
   let doc;
   let storyAutoAdsEl;
@@ -49,7 +49,7 @@ describes.realWin('amp-story-auto-ads', {amp: true}, env => {
     doc.body.appendChild(storyAutoAdsEl);
     storyAutoAdsEl.getAmpDoc = () => env.ampdoc;
     storyAdPage = new StoryAdPage(
-      storyAutoAdsEl,
+      storyAutoAdsEl.getAmpDoc(),
       baseConfig,
       1, // index
       new StoryAdLocalization(win)
@@ -386,7 +386,7 @@ describes.realWin('amp-story-auto-ads', {amp: true}, env => {
       fireEventStub = sandbox.stub(storyAnalytics, 'fireEvent');
       sandbox.stub(service, 'getServicePromiseForDoc').resolves(storyAnalytics);
       storyAdPage = new StoryAdPage(
-        storyAutoAdsEl,
+        storyAutoAdsEl.getAmpDoc(),
         baseConfig,
         1, // index
         new StoryAdLocalization(win)
