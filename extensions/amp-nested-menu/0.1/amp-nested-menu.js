@@ -18,7 +18,11 @@ import {CSS} from '../../../build/amp-nested-menu-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector, tryFocus} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelector,
+  tryFocus,
+} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
@@ -28,7 +32,6 @@ const TAG = 'amp-nested-menu';
 /** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
 
-// TODO(#24668): add unit tests for click handlers and history.
 export class AmpNestedMenu extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -152,10 +155,8 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @param {Event} e
    */
   handleSubmenuOpenClick_(e) {
-    const submenuOpen = dev().assertElement(e.target);
-    const submenu = submenuOpen.parentElement.querySelector(
-      '[amp-nested-submenu]'
-    );
+    const submenuParent = dev().assertElement(e.currentTarget.parentElement);
+    const submenu = scopedQuerySelector(submenuParent, '>[amp-nested-submenu]');
     if (submenu) {
       this.open_(submenu);
     }
@@ -169,14 +170,17 @@ export class AmpNestedMenu extends AMP.BaseElement {
     if (submenu.hasAttribute('open')) {
       return;
     }
-    const submenuParent = this.getParentMenu_(submenu);
-    if (submenuParent) {
-      submenuParent.setAttribute('child-open', '');
+    const parentMenu = this.getParentMenu_(submenu);
+    if (parentMenu) {
+      parentMenu.setAttribute('child-open', '');
       submenu.setAttribute('open', '');
       this.currentSubmenu_ = submenu;
       // move focus to close element after submenu fully opens.
       Services.timerFor(this.win).delay(() => {
-        tryFocus(submenu.querySelector('[amp-nested-submenu-close]'));
+        const submenuClose = dev().assertElement(
+          submenu.querySelector('[amp-nested-submenu-close]')
+        );
+        tryFocus(submenuClose);
       }, ANIMATION_TIMEOUT);
     }
   }
@@ -186,7 +190,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @param {Event} e
    */
   handleSubmenuCloseClick_(e) {
-    const submenuClose = dev().assertElement(e.target);
+    const submenuClose = dev().assertElement(e.currentTarget);
     const submenu = closestAncestorElementBySelector(
       submenuClose,
       '[amp-nested-submenu]'
@@ -204,16 +208,18 @@ export class AmpNestedMenu extends AMP.BaseElement {
     if (!submenu.hasAttribute('open')) {
       return;
     }
-    const submenuParent = this.getParentMenu_(submenu);
-    if (submenuParent) {
-      submenuParent.removeAttribute('child-open');
+    const parentMenu = this.getParentMenu_(submenu);
+    if (parentMenu) {
+      parentMenu.removeAttribute('child-open');
       submenu.removeAttribute('open');
-      this.currentSubmenu_ = submenuParent;
+      this.currentSubmenu_ = parentMenu;
       // move focus back to open element after submenu fully closes.
       Services.timerFor(this.win).delay(() => {
-        tryFocus(
-          submenu.parentElement.querySelector('[amp-nested-submenu-open]')
+        const submenuParent = dev().assertElement(submenu.parentElement);
+        const submenuOpen = dev().assertElement(
+          scopedQuerySelector(submenuParent, '>[amp-nested-submenu-open]')
         );
+        tryFocus(submenuOpen);
       }, ANIMATION_TIMEOUT);
     }
   }
