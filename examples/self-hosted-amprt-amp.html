@@ -1,0 +1,81 @@
+<!doctype html>
+<html ⚡ i-amphtml-version="011910071803120">
+<head>
+  <title>Self-hosted AMP test</title>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://www/">
+  <script async src="https://android.cmphys.com/temp/amprt/v0.js"></script>
+  <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://android.cmphys.com/temp/amprt/v0/amp-form-0.1.js"></script>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="amp-config-urls.cdn" value="https://android.cmphys.com/temp/amprt">
+  <meta name="amp-config-urls.useDefaultCdnForDynamicComponents" value="true" data-type="boolean">
+  <meta name="amp-config-test-undefined" value="does not matter" data-type="undefined">
+  <meta name="amp-config-test-null" value="does not matter" data-type="null">
+  <meta name="amp-config-test-string" value="some string" data-type="string">
+  <meta name="amp-config-test-boolean" value="false" data-type="boolean">
+  <meta name="amp-config-test-regex" value="/some\s{3}\/match[.,?&amp;]/ig" data-type="regex">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body {
+      margin: 0;
+      padding: 8px;
+      font-family: sans-serif;
+    }
+    .geo-text,
+    body[class*="amp-geo"] .nogeo-text {
+      display: none;
+    }
+    .nogeo-text,
+    body[class*="amp-geo"] .geo-text {
+      display: block;
+    }
+    h3 {
+      margin-bottom: 0.5em;
+    }
+    p, ul {
+      margin: 0;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 0.5em;
+      margin-bottom: 0.5em;
+    }
+    li {
+      margin-top: 0.5em;
+    }
+  </style>
+</head>
+<body>
+  <h2>Self-hosted AMP runtime test</h2>
+
+  <h3>amp-geo</h3>
+  <p class="geo-text"><code>amp-geo</code> class successfully added to body.</p>
+  <p class="nogeo-text"><code>amp-geo</code> <strong>did not</strong> add a class to the body.</p>
+
+  <h3>amp-img</h3>
+  <p><amp-img layout="fixed" width="320" height="214" src="https://android.cmphys.com/temp/img/goldfish.jpg"></amp-img></p>
+
+  <h3>amp-form</h3>
+  <form method="GET" target="_top" action="self-hosted-amprt-pwa.html">
+    <p>View in PWA:</p>
+    <ul>
+        <li><label><input name="page" type="radio" value="amp"> Standard AMP</label></li>
+        <li><label><input name="page" type="radio" value="opt"> Optimized AMP</label></li>
+    </ul>
+    <button type="submit">Submit</button>
+  </form>
+
+  <h3>View as AMP (non-PWA):</h3>
+  <ul>
+    <li><a href="self-hosted-amprt-amp.html">Standard AMP page</a></li>
+    <li><a href="self-hosted-amprt-opt.html">Optimized AMP page</a></li>
+  </ul>
+
+  <amp-geo layout=nodisplay>
+    <script type="application/json">
+      { "ISOCountryGroups": { "isus": [ "us" ] } }
+    </script>
+  </amp-geo>
+</body>
+</html>
