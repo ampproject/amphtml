@@ -121,6 +121,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    // TODO(#25047): unregister event listeners.
     // Ensure that menu is closed when hidden via media query.
     this.collapse_();
     return false;
