@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RequestBank} from '../../../../testing/request-bank';
+import {RequestBankE2E} from '../../../../build-system/tasks/e2e/request-bank';
 
 describes.endtoend(
   'amp-ad-exit',
@@ -28,7 +28,7 @@ describes.endtoend(
 
     beforeEach(() => {
       controller = env.controller;
-      requestBank = new RequestBank('http://localhost:8000', 'ampadexit');
+      requestBank = new RequestBankE2E('http://localhost:8000', 'ampadexit');
     });
 
     afterEach(() => {

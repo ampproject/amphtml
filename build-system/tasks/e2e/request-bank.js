@@ -18,9 +18,10 @@ import requestPromise from 'request-promise';
 
 /**
  * A server side temporary request storage which is useful for testing
- * browser sent HTTP requests.
+ * browser sent HTTP requests. This class is expected to be ran in NodeJS.
+ * See testing/test-helper.js for the implementation for running within Karma.
  */
-export class RequestBank {
+export class RequestBankE2E {
   /**
    * @param {string} homeUrl The URL of the dev server.
    * @param {?string} bankId The unique identifier of a specific instance to
@@ -28,7 +29,7 @@ export class RequestBank {
    */
   constructor(homeUrl, bankId) {
     /** @private {string} */
-    this.homeUrl_ = homeUrl;
+    this.homeUrl_ = homeUrl || 'http://localhost:8000';
 
     /** @private {string} */
     this.bankId_ = bankId || (Date.now() + Math.random()).toString(32);
@@ -60,11 +61,18 @@ export class RequestBank {
     return this.fetch_(url).then(body => JSON.parse(body));
   }
 
+  /**
+   * @return {Promise<JsonObject>}
+   */
   tearDown() {
     const url = `${this.homeUrl_}/amp4test/request-bank/${this.bankId_}/teardown/`;
     return this.fetch_(url);
   }
 
+  /**
+   * @param {string} url
+   * @return {Promise<JsonObject>}
+   */
   fetch_(url) {
     return requestPromise.get({
       url,
