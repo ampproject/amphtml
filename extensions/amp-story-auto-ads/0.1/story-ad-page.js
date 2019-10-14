@@ -213,6 +213,59 @@ export class StoryAdPage {
   }
 
   /**
+   * Try to create CTA (Click-To-Action) before showing the ad. Will fail if
+   * not enough metadata to create the outlink button.
+   * @return {boolean}
+   */
+  maybeCreateCta() {
+    // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
+    if (this.adDoc_) {
+      this.extractA4AVars_();
+      this.readAmpAdExit_();
+    }
+
+    // If making a CTA layer we need a button name & outlink url.
+    const ctaUrl =
+      this.ampAdExitOutlink_ ||
+      this.a4aVars_[A4AVarNames.CTA_URL] ||
+      this.adElement_.getAttribute(DataAttrs.CTA_URL);
+
+    const ctaType =
+      this.a4aVars_[A4AVarNames.CTA_TYPE] ||
+      this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
+
+    if (!ctaUrl || !ctaType) {
+      user().error(
+        TAG,
+        'Both CTA Type & CTA Url are required in ad-server response.'
+      );
+      return false;
+    }
+
+    const ctaLocalizedStringId = CtaTypes[ctaType];
+    const ctaText = this.localizationService_.getLocalizedString(
+      ctaLocalizedStringId
+    );
+    if (!ctaText) {
+      user().error(TAG, 'invalid "CTA Type" in ad response');
+      return false;
+    }
+
+    // Store the cta-type as an accesible var for any further pings.
+    this.analytics_.then(analytics =>
+      analytics.setVar(
+        this.index_, // adIndex
+        AnalyticsVars.CTA_TYPE,
+        ctaType
+      )
+    );
+
+    this.maybeCreateAttribution_();
+
+    return this.createCtaLayer_(ctaUrl, ctaText);
+  }
+
+  /**
    * @return {!Element}
    * @private
    */
@@ -264,59 +317,6 @@ export class StoryAdPage {
     this.loaded_ = true;
 
     this.loadCallbacks_.forEach(cb => cb());
-  }
-
-  /**
-   * Try to create CTA before showing the ad. Will fail if not enough metadata
-   * to create the outlink button.
-   * @return {boolean}
-   */
-  maybeCreateCta() {
-    // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
-    if (this.adDoc_) {
-      this.extractA4AVars_();
-      this.readAmpAdExit_();
-    }
-
-    // If making a CTA layer we need a button name & outlink url.
-    const ctaUrl =
-      this.ampAdExitOutlink_ ||
-      this.a4aVars_[A4AVarNames.CTA_URL] ||
-      this.adElement_.getAttribute(DataAttrs.CTA_URL);
-
-    const ctaType =
-      this.a4aVars_[A4AVarNames.CTA_TYPE] ||
-      this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
-
-    if (!ctaUrl || !ctaType) {
-      user().error(
-        TAG,
-        'Both CTA Type & CTA Url are required in ad-server response.'
-      );
-      return false;
-    }
-
-    const ctaLocalizedStringId = CtaTypes[ctaType];
-    const ctaText = this.localizationService_.getLocalizedString(
-      ctaLocalizedStringId
-    );
-    if (!ctaText) {
-      user().error(TAG, 'invalid "CTA Type" in ad response');
-      return false;
-    }
-
-    // Store the cta-type as an accesible var for any further pings.
-    this.analytics_.then(analytics =>
-      analytics.setVar(
-        this.index_, // adIndex
-        AnalyticsVars.CTA_TYPE,
-        ctaType
-      )
-    );
-
-    this.maybeCreateAttribution_();
-
-    return this.createCtaLayer_(ctaUrl, ctaText);
   }
 
   /**
