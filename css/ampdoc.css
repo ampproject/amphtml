@@ -300,7 +300,7 @@ amp-story-page {
 }
 
 amp-story .amp-active > div {
-  display: none;
+  display: none !important;
 }
 
 /**
