@@ -25,10 +25,12 @@ export function conative(global, data) {
 
   data.domain = data.domain || null;
   data.adslot = data.adslot || null;
+  data.preview = data.preview || null;
 
   window.dmConativeData = window.dmConativeData || {};
   window.dmConativeData.domain = window.dmConativeData.domain || data.domain;
   window.dmConativeData.adslot = window.dmConativeData.adslot || data.adslot;
+  window.dmConativeData.preview = window.dmConativeData.preview || data.preview;
   window.dmConativeData.visibility = window.dmConativeData.visibility || 0;
 
   window.context.observeIntersection(function(changes) {

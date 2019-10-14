@@ -42,3 +42,7 @@ For configuration details and to generate your tags, please contact https://www.
 
 - `data-domain`
 - `data-adslot`
+
+### Optional parameters
+
+- `data-preview`
