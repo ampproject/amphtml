@@ -18,7 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const brotliSize = require('brotli-size');
-const colors = require('ansi-colors');
+const deglob = require('globs-to-files');
 const fs = require('fs');
 const log = require('fancy-log');
 const path = require('path');
@@ -38,31 +38,40 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
+const {cyan, green, red, yellow} = require('ansi-colors');
 
-const runtimeFile = './dist/v0.js';
+const fileGlobs = ['dist/*.js', 'dist/v0/*-?.?.js'];
 const normalizedRtvNumber = '1234567890123';
 
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
 const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 
-const {red, cyan, yellow} = colors;
-
 /**
- * Get the brotli bundle size of the current build.
+ * Get the brotli bundle sizes of the current build.
  *
- * @return {string} the bundle size in KB rounded to 2 decimal points.
+ * @return {Map<string, number>} the bundle size in KB rounded to 2 decimal
+ *   points.
  */
-function getBrotliBundleSize() {
+function getBrotliBundleSizes() {
   // Brotli compressed size fluctuates because of changes in the RTV number, so
   // normalize this across pull requests by replacing that RTV with a constant.
-  const normalizedFileContents = fs
-    .readFileSync(runtimeFile, 'utf8')
-    .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
-  const bundleSize = parseFloat(
-    (brotliSize.sync(normalizedFileContents) / 1024).toFixed(2)
-  );
-  log('Bundle size', cyan('(brotli)'), 'is', cyan(`${bundleSize}KB`));
-  return bundleSize;
+  const bundleSizes = {};
+
+  log(cyan('brotli'), 'bundle sizes are:');
+  for (const filePath of deglob.sync(fileGlobs)) {
+    const normalizedFileContents = fs
+      .readFileSync(filePath, 'utf8')
+      .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
+
+    const relativeFilePath = path.relative('.', filePath);
+    const bundleSize = parseFloat(
+      (brotliSize.sync(normalizedFileContents) / 1024).toFixed(2)
+    );
+    log(' ', cyan(relativeFilePath) + ':', green(`${bundleSize}KB`));
+    bundleSizes[relativeFilePath] = bundleSize;
+  }
+
+  return bundleSizes;
 }
 
 /**
@@ -100,10 +109,7 @@ async function storeBundleSize() {
       json: true,
       body: {
         token: process.env.BUNDLE_SIZE_TOKEN,
-        // TODO(#20843, danielrozenberg): add extensions and other runtimes.
-        bundleSizes: {
-          'dist/v0.js': getBrotliBundleSize(),
-        },
+        bundleSizes: getBrotliBundleSizes(),
       },
     });
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -159,19 +165,17 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
-    const brotliBundleSize = getBrotliBundleSize();
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
         uri: url.resolve(
           bundleSizeAppBaseUrl,
-          path.join('commit', commitHash, 'report')
+          path.join('commit', commitHash, 'report.json')
         ),
         json: true,
         body: {
           baseSha,
-          bundleSize: brotliBundleSize,
-          brotliBundleSize,
+          bundleSizes: getBrotliBundleSizes(),
         },
       });
       if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -196,9 +200,10 @@ async function reportBundleSize() {
 }
 
 function getLocalBundleSize() {
-  if (!fs.existsSync(runtimeFile)) {
-    log('Could not find', cyan(runtimeFile) + '.');
+  if (deglob.sync(fileGlobs).length === 0) {
+    log('Could not find runtime files.');
     log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
+    process.exitCode = 1;
     return;
   } else {
     log(
@@ -208,7 +213,7 @@ function getLocalBundleSize() {
       cyan(shortSha(gitCommitHash())) + '.'
     );
   }
-  getBrotliBundleSize();
+  getBrotliBundleSizes();
 }
 
 async function bundleSize() {
