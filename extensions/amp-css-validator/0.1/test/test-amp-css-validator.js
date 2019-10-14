@@ -15,6 +15,7 @@
  */
 
 import '../amp-css-validator';
+import * as mode from '../../../../src/mode';
 
 describes.realWin(
   'amp-css-validator',
@@ -26,9 +27,12 @@ describes.realWin(
   env => {
     let win;
     let element;
+    let modeStub;
 
     beforeEach(() => {
       win = env.win;
+      modeStub = sandbox.stub(mode, 'getMode');
+      modeStub.returns({development: true});
     });
 
     function buildAmpCssValidator() {
@@ -41,7 +45,6 @@ describes.realWin(
     }
 
     it('should warn unused styles', () => {
-      win = env.win;
       const style = win.document.createElement('style');
       const unusedStyleElement = win.document.createElement('div');
       style.setAttribute('amp-custom', '');
@@ -55,7 +58,6 @@ describes.realWin(
     });
 
     it('should not warn used styles', () => {
-      win = env.win;
       const style = win.document.createElement('style');
       const usedStyleElement = win.document.createElement('div');
       usedStyleElement.setAttribute('class', 'amp-used-style');

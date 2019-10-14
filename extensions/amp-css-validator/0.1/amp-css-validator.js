@@ -15,6 +15,7 @@
  */
 
 import {devAssert, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {iterateCursor} from '../../../src/dom';
 import {whenDocumentComplete} from '../../../src/document-ready';
 
@@ -26,18 +27,20 @@ export class AmpCssValidator extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const doc = devAssert(this.element.ownerDocument);
-    whenDocumentComplete(doc).then(() => {
-      const {styleSheets} = doc;
-      if (!styleSheets) {
-        return;
-      }
-      iterateCursor(styleSheets, styleSheet => {
-        if (styleSheet.ownerNode.hasAttribute('amp-custom')) {
-          this.findStyleRule_(styleSheet.rules);
+    if (getMode().development) {
+      const doc = devAssert(this.element.ownerDocument);
+      whenDocumentComplete(doc).then(() => {
+        const {styleSheets} = doc;
+        if (!styleSheets) {
+          return;
         }
+        iterateCursor(styleSheets, styleSheet => {
+          if (styleSheet.ownerNode.hasAttribute('amp-custom')) {
+            this.findStyleRule_(styleSheet.rules);
+          }
+        });
       });
-    });
+    }
   }
 
   /**
