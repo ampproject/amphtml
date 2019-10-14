@@ -43,6 +43,14 @@ attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  # <amp-bind>
+  attrs: { name: "[album]" }
+  attrs: { name: "[artist]" }
+  attrs: { name: "[artwork]" }
+  attrs: { name: "[controlslist]" }
+  attrs: { name: "[loop]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[title]" }
 }
 tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   html_format: AMP
