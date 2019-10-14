@@ -117,25 +117,19 @@ export class AmpDocService {
   }
 
   /**
+   * If the node is an AMP custom element, retrieves the AmpDoc reference.
    * @param {!Node} node
-   * @return {?AmpDoc}
+   * @return {?AmpDoc} The AmpDoc reference, if one exists.
    */
-  getCachedAmpDocReference_(node) {
-    const cached = node.ampdoc_;
-
-    if (!cached) {
+  getCustomElementAmpDocReference_(node) {
+    // We can only look up the AmpDoc from a custom element if it has been
+    // attached at some point. If it is not a custom element, one or both of
+    // these checks should fail.
+    if (!node.everAttached || typeof node.getAmpDoc !== 'function') {
       return null;
     }
 
-    // Note: We need to check that this is a custom AMP element. The `<form>`
-    // element has behavior where child fields with `name` get added as
-    // properties to the Element, which could have a naming conflict with
-    // the renamed property for `ampDoc_` here.
-    if (!node.tagName || !startsWith(node.tagName, 'AMP-')) {
-      return null;
-    }
-
-    return cached;
+    return node.getAmpDoc();
   }
 
   /**
@@ -159,7 +153,7 @@ export class AmpDocService {
         // global AmpDoc, which we do not want. This occurs when using
         // <amp-next-page>.
 
-        const cachedAmpDoc = this.getCachedAmpDocReference_(node);
+        const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
         if (cachedAmpDoc) {
           return cachedAmpDoc;
         }
@@ -194,7 +188,7 @@ export class AmpDocService {
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
-      const cachedAmpDoc = this.getCachedAmpDocReference_(node);
+      const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
       if (cachedAmpDoc) {
         return cachedAmpDoc;
       }

@@ -97,7 +97,7 @@ describes.sandboxed('AmpDocService', {}, () => {
       // Note: Instead of actually creating an input element with a name that
       // conflicts, just set this directly in case the test is ever run in
       // an compiled environment.
-      node.ampDoc_ = 5;
+      node.getAmpDoc = 5;
 
       const ampDoc = service.getAmpDocIfAvailable(node);
       expect(ampDoc).to.equal(service.getSingleDoc());
@@ -107,7 +107,7 @@ describes.sandboxed('AmpDocService', {}, () => {
       // This is a stand-in for testing a document, without actually modifying
       // the document to keep the test side-effect free.
       const frag = document.createDocumentFragment();
-      frag.ampDoc_ = 5;
+      frag.getAmpDoc = 5;
 
       const ampDoc = service.getAmpDocIfAvailable(frag);
       expect(ampDoc).to.equal(service.getSingleDoc());
@@ -210,7 +210,8 @@ describes.sandboxed('AmpDocService', {}, () => {
 
     it('should yield custom-element shadow-doc when exists', () => {
       const ampDoc = {};
-      content.ampdoc_ = ampDoc;
+      content.everAttached = true;
+      content.getAmpDoc = () => ampDoc;
       host.appendChild(content);
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
@@ -226,11 +227,12 @@ describes.sandboxed('AmpDocService', {}, () => {
 
       // Override via custom element.
       const ampDoc2 = {};
-      content.ampdoc_ = ampDoc2;
+      content.everAttached = true;
+      content.getAmpDoc = () => ampDoc2;
       expect(service.getAmpDoc(content)).to.equal(ampDoc2);
 
       // Fallback to cached version when custom element returns null.
-      content.ampdoc_ = null;
+      content.getAmpDoc = () => null;
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
@@ -348,7 +350,8 @@ describes.sandboxed('AmpDocService', {}, () => {
 
     it('should yield custom-element doc when exists', () => {
       const ampDoc = {};
-      content.ampdoc_ = ampDoc;
+      content.everAttached = true;
+      content.getAmpDoc = () => ampDoc;
       host.appendChild(content);
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
@@ -364,11 +367,12 @@ describes.sandboxed('AmpDocService', {}, () => {
 
       // Override via custom element.
       const ampDoc2 = {};
-      content.ampdoc_ = ampDoc2;
+      content.everAttached = true;
+      content.getAmpDoc = () => ampDoc2;
       expect(service.getAmpDoc(content)).to.equal(ampDoc2);
 
       // Fallback to cached version when custom element returns null.
-      content.ampdoc_ = null;
+      content.getAmpDoc = () => null;
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
