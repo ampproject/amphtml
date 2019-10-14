@@ -541,9 +541,10 @@ export class MultidocManager {
         }
         if (typeof state === 'string') {
           // Emulate UIEvent 'click'
-          return bind.setStateWithExpression(/** @type {string} */ (state), {
-            event: 1,
-          });
+          return bind.setStateWithExpression(
+            /** @type {string} */ (state),
+            /** @type {!JsonObject} */ ({event: 1})
+          );
         } else if (isObject(state) || isArray(state)) {
           return bind.setStateWithObject(/** @type {!JsonObject} */ (state));
         }
