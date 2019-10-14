@@ -90,6 +90,7 @@ import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
+import {adstyle} from '../ads/adstyle';
 import {adtech} from '../ads/adtech';
 import {adthrive} from '../ads/adthrive';
 import {adunity} from '../ads/adunity';
@@ -156,6 +157,7 @@ import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
+import {insticator} from '../ads/insticator';
 import {invibes} from '../ads/invibes';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
@@ -207,6 +209,7 @@ import {pubexchange} from '../ads/pubexchange';
 import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
+import {puffnetwork} from '../ads/puffnetwork';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
@@ -222,8 +225,10 @@ import {rnetplus} from '../ads/rnetplus';
 import {rubicon} from '../ads/rubicon';
 import {runative} from '../ads/runative';
 import {sas} from '../ads/sas';
+import {seedingalliance} from '../ads/seedingalliance';
 import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
+import {shemedia} from '../ads/shemedia';
 import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
@@ -243,6 +248,7 @@ import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
 import {torimochi} from '../ads/torimochi';
+import {tracdelight} from '../ads/tracdelight';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
 import {uas} from '../ads/uas';
@@ -283,12 +289,14 @@ const AMP_EMBED_ALLOWED = {
   '1wo': true,
   '24smi': true,
   adsloom: true,
+  adstyle: true,
   bringhub: true,
   dable: true,
   engageya: true,
   epeex: true,
   forkmedia: true,
   idealmedia: true,
+  insticator: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
@@ -353,6 +361,7 @@ register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
 register('adstir', adstir);
+register('adstyle', adstyle);
 register('adtech', adtech);
 register('adthrive', adthrive);
 register('adunity', adunity);
@@ -425,6 +434,7 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
+register('insticator', insticator);
 register('invibes', invibes);
 register('ix', ix);
 register('jubna', jubna);
@@ -479,6 +489,7 @@ register('pubexchange', pubexchange);
 register('pubguru', pubguru);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
+register('puffnetwork', puffnetwork);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
@@ -495,8 +506,10 @@ register('rnetplus', rnetplus);
 register('rubicon', rubicon);
 register('runative', runative);
 register('sas', sas);
+register('seedingalliance', seedingalliance);
 register('sekindo', sekindo);
 register('sharethrough', sharethrough);
+register('shemedia', shemedia);
 register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
@@ -515,6 +528,7 @@ register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
 register('torimochi', torimochi);
+register('tracdelight', tracdelight);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);

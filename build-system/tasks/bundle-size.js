@@ -25,13 +25,19 @@ const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
 const {
+  gitCommitHash,
+  gitTravisMasterBaseline,
+  shortSha,
+} = require('../common/git');
+const {
   isTravisPullRequestBuild,
   isTravisPushBuild,
+  travisPushBranch,
   travisRepoSlug,
-} = require('../travis');
-const {getStdout} = require('../exec');
-const {gitCommitHash, gitTravisMasterBaseline, shortSha} = require('../git');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+} = require('../common/travis');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
 
 const runtimeFile = './dist/v0.js';
 const normalizedRtvNumber = '1234567890123';
@@ -40,25 +46,6 @@ const expectedGitHubRepoSlug = 'ampproject/amphtml';
 const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 
 const {red, cyan, yellow} = colors;
-
-/**
- * Get the gzipped bundle size of the current build.
- *
- * @return {string} the bundle size in KB rounded to 2 decimal points.
- */
-function getGzippedBundleSize() {
-  const cmd = `npx bundlesize -f "${runtimeFile}"`;
-  log('Running', cyan(cmd) + '...');
-  const output = getStdout(cmd).trim();
-
-  const bundleSizeOutputMatches = output.match(/PASS .*: (\d+.?\d*KB) .*/);
-  if (bundleSizeOutputMatches) {
-    const bundleSize = parseFloat(bundleSizeOutputMatches[1]);
-    log('Bundle size', cyan('(gzipped)'), 'is', cyan(`${bundleSize}KB`));
-    return bundleSize;
-  }
-  throw Error('could not infer bundle size from output.');
-}
 
 /**
  * Get the brotli bundle size of the current build.
@@ -83,11 +70,11 @@ function getBrotliBundleSize() {
  * repository to the passed value.
  */
 async function storeBundleSize() {
-  if (!isTravisPushBuild()) {
+  if (!isTravisPushBuild() || travisPushBranch() !== 'master') {
     log(
       yellow('Skipping'),
       cyan('--on_push_build') + ':',
-      'this action can only be performed on `push` builds on Travis'
+      'this action can only be performed on `master` push builds on Travis'
     );
     return;
   }
@@ -113,10 +100,10 @@ async function storeBundleSize() {
       json: true,
       body: {
         token: process.env.BUNDLE_SIZE_TOKEN,
-        // TODO(#21275): replace the gzippedBundleSize value once the
-        // bundle-size app prefers Brotli.
-        gzippedBundleSize: getGzippedBundleSize(),
-        brotliBundleSize: getBrotliBundleSize(),
+        // TODO(#20843, danielrozenberg): add extensions and other runtimes.
+        bundleSizes: {
+          'dist/v0.js': getBrotliBundleSize(),
+        },
       },
     });
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -172,8 +159,6 @@ async function skipBundleSize() {
 async function reportBundleSize() {
   if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
-    // TODO(#21275): remove gzipped reporting within ~1 month.
-    const gzippedBundleSize = getGzippedBundleSize();
     const brotliBundleSize = getBrotliBundleSize();
     const commitHash = gitCommitHash();
     try {
@@ -185,10 +170,7 @@ async function reportBundleSize() {
         json: true,
         body: {
           baseSha,
-          // TODO(#21275): replace the default bundleSize value from the gzipped
-          // to the brotli value, once the bundle-size app prefers those.
-          bundleSize: gzippedBundleSize,
-          gzippedBundleSize,
+          bundleSize: brotliBundleSize,
           brotliBundleSize,
         },
       });
@@ -226,7 +208,6 @@ function getLocalBundleSize() {
       cyan(shortSha(gitCommitHash())) + '.'
     );
   }
-  getGzippedBundleSize();
   getBrotliBundleSize();
 }
 

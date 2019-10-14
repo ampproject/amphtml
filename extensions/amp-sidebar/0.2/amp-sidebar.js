@@ -429,6 +429,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element,
       this.getRealChildren()
     );
+    if (this.historyId_ != -1) {
+      this.getHistory_().pop(this.historyId_);
+      this.historyId_ = -1;
+    }
     this.triggerEvent_(SidebarEvents.CLOSE);
   }
 

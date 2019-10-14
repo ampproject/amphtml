@@ -107,7 +107,13 @@ Learn more about using `amp-img` from these resources:
 
 **src**
 
+[filter formats="websites, stories, ads"]
 This attribute is similar to the `src` attribute on the `img` tag. The value must be a URL that points to a publicly-cacheable image file. Cache providers may rewrite these URLs when ingesting AMP files to point to a cached version of the image.
+[/filter]
+
+[filter formats="email"]
+This attribute is similar to the `src` attribute on the `img` tag. For emails, the URL must be `https`. 
+[/filter]
 
 **srcset**
 

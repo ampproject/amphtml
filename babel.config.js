@@ -26,7 +26,7 @@
 'use strict';
 
 const minimist = require('minimist');
-const {isTravisBuild} = require('./build-system/travis');
+const {isTravisBuild} = require('./build-system/common/travis');
 const argv = minimist(process.argv.slice(2));
 
 const isDist = argv._.includes('dist');
@@ -35,10 +35,6 @@ const noModuleTarget = {
   'browsers': isTravisBuild()
     ? ['Last 2 versions', 'safari >= 9']
     : ['Last 2 versions'],
-};
-
-const moduleTarget = {
-  'esmodules': true,
 };
 
 // eslint-disable-next-line local/no-module-exports
@@ -51,14 +47,21 @@ module.exports = function(api) {
   }
   return {
     'presets': [
-      [
-        '@babel/preset-env',
-        {
-          'modules': isDist ? false : 'commonjs',
-          'loose': true,
-          'targets': esm ? moduleTarget : noModuleTarget,
-        },
-      ],
+      esm
+        ? [
+            'babel-preset-modules',
+            {
+              'loose': true,
+            },
+          ]
+        : [
+            '@babel/preset-env',
+            {
+              'modules': isDist ? false : 'commonjs',
+              'loose': true,
+              'targets': noModuleTarget,
+            },
+          ],
     ],
     'compact': false,
     'sourceType': 'module',

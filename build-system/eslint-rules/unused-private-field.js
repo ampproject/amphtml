@@ -214,7 +214,9 @@ module.exports = {
 
         const {name} = node.property;
         const {declared} = current();
-        declared.set(name, node.parent);
+        if (!declared.has(name)) {
+          declared.set(name, node.parent);
+        }
       },
 
       'ClassBody MemberExpression': function(node) {

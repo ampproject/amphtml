@@ -16,15 +16,40 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
+import {clamp, sum} from '../../../src/utils/math';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-orientation-observer';
-const DEVICE_REST_ORIENTATION_ALPHA_VALUE = 180;
-const DEVICE_REST_ORIENTATION_BETA_VALUE = 0;
-const DEVICE_REST_ORIENTATION_GAMMA_VALUE = 0;
+/**
+ * @const {!Array<string>}
+ */
+const AXES = ['alpha', 'beta', 'gamma'];
+/**
+ * @const {Object<string, number>}
+ */
+const DEFAULT_REST_VALUES = {
+  'alpha': 180,
+  'beta': 0,
+  'gamma': 0,
+};
+/**
+ * @const {Object<string, !Array<number>>}
+ */
+const DEFAULT_RANGES = {
+  'alpha': [0, 360],
+  'beta': [-180, 180],
+  'gamma': [-90, 90],
+};
+/**
+ * @const {number}
+ */
 const DELTA_CONST = 0.1;
+/**
+ * @const {number}
+ */
+const DEFAULT_SMOOTHING_PTS = 4;
 
 export class AmpOrientationObserver extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -37,23 +62,20 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {Array<number>} */
-    this.alphaRange_ = [0, 360];
+    /** @private {Object<string, !Array<number>>} */
+    this.range_ = Object.assign({}, DEFAULT_RANGES);
 
-    /** @private {Array<number>} */
-    this.betaRange_ = [-180, 180];
+    /** @private {Object<string, number>} */
+    this.computedValue_ = Object.assign({}, DEFAULT_REST_VALUES);
 
-    /** @private {Array<number>} */
-    this.gammaRange_ = [-90, 90];
+    /** @private {Object<string, number>} */
+    this.restValues_ = Object.assign({}, DEFAULT_REST_VALUES);
 
-    /** @private {number} */
-    this.alphaValue_ = DEVICE_REST_ORIENTATION_ALPHA_VALUE;
+    /** @private {Object<string, !Array<number>>} */
+    this.smoothingPoints_ = {beta: [], alpha: [], gamma: []};
 
-    /** @private {number} */
-    this.betaValue_ = DEVICE_REST_ORIENTATION_BETA_VALUE;
-
-    /** @private {number} */
-    this.gammaValue_ = DEVICE_REST_ORIENTATION_GAMMA_VALUE;
+    /** @private {?number} */
+    this.smoothing_ = null;
   }
 
   /** @override */
@@ -62,8 +84,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     // layoutCallback is meaningless. We delay the heavy work until
     // we become visible.
     this.action_ = Services.actionServiceForDoc(this.element);
-    const viewer = Services.viewerForDoc(this.ampdoc_);
-    viewer.whenFirstVisible().then(this.init_.bind(this));
+    this.ampdoc_.whenFirstVisible().then(this.init_.bind(this));
   }
 
   /**
@@ -76,9 +97,17 @@ export class AmpOrientationObserver extends AMP.BaseElement {
         '`window.DeviceOrientationEvent`'
     );
 
-    this.alphaRange_ = this.parseAttributes_('alpha-range', this.alphaRange_);
-    this.betaRange_ = this.parseAttributes_('beta-range', this.betaRange_);
-    this.gammaRange_ = this.parseAttributes_('gamma-range', this.gammaRange_);
+    AXES.forEach(axis => {
+      this.range_[axis] = this.parseAttributes_(
+        `${axis}-range`,
+        this.range_[axis]
+      );
+    });
+
+    this.smoothing_ = this.element.hasAttribute('smoothing')
+      ? Number(this.element.getAttribute('smoothing')) || DEFAULT_SMOOTHING_PTS
+      : null;
+
     this.win.addEventListener(
       'deviceorientation',
       event => {
@@ -91,8 +120,8 @@ export class AmpOrientationObserver extends AMP.BaseElement {
   /**
    * Parses the provided ranges
    * @param {string} rangeName
-   * @param {Array} originalRange
-   * @return {?Array<number>}
+   * @param {!Array<number>} originalRange
+   * @return {!Array<number>}
    * @private
    */
   parseAttributes_(rangeName, originalRange) {
@@ -110,26 +139,84 @@ export class AmpOrientationObserver extends AMP.BaseElement {
    */
   deviceOrientationHandler_(event) {
     if (event instanceof DeviceOrientationEvent) {
-      if (Math.abs(event.alpha - this.alphaValue_) > DELTA_CONST) {
-        this.alphaValue_ = /** @type {number} */ (event.alpha);
-        this.triggerEvent_('alpha', this.alphaValue_, this.alphaRange_);
+      const {screen} = this.win;
+
+      const {alpha} = event;
+      let {gamma, beta} = event;
+
+      // Detect the implementation of orientation angle
+      const angle =
+        'orientation' in screen ? screen.orientation.angle : screen.orientation;
+
+      // Reverse gamma/beta if the device is in landscape
+      if (this.win.orientation == 90 || this.win.orientation == -90) {
+        const tmp = gamma;
+        gamma = beta;
+        beta = tmp;
       }
-      if (Math.abs(event.beta - this.betaValue_) > DELTA_CONST) {
-        this.betaValue_ = /** @type {number} */ (event.beta);
-        this.triggerEvent_('beta', this.betaValue_, this.betaRange_);
+
+      // Flip signs of the angles if the phone is in 'reverse landscape' or
+      // 'reverse portrait'
+      if (angle < 0) {
+        gamma = -gamma;
+        beta = -beta;
       }
-      if (Math.abs(event.gamma - this.gammaValue_) > DELTA_CONST) {
-        this.gammaValue_ = /** @type {number} */ (event.gamma);
-        this.triggerEvent_('gamma', this.gammaValue_, this.gammaRange_);
-      }
+
+      const currentValue = {
+        alpha,
+        beta,
+        gamma,
+      };
+
+      AXES.forEach(axis => {
+        if (
+          Math.abs(currentValue[axis] - this.computedValue_[axis]) > DELTA_CONST
+        ) {
+          if (this.smoothing_) {
+            this.computedValue_[axis] = this.smoothedValue_(
+              axis,
+              /** @type {number} */ (currentValue[axis])
+            );
+          } else {
+            this.computedValue_[axis] =
+              /** @type {number} */ (currentValue[axis]);
+          }
+          this.triggerEvent_(
+            axis,
+            this.computedValue_[axis],
+            this.range_[axis]
+          );
+        }
+      });
     }
   }
 
   /**
+   * Calculates a moving average over previous values of the beta value
+   * @param {string} axis
+   * @param {number} value
+   * @return {number}
+   */
+  smoothedValue_(axis, value) {
+    if (this.smoothingPoints_[axis].length > this.smoothing_) {
+      this.smoothingPoints_[axis].shift();
+    }
+    this.smoothingPoints_[axis].push(value);
+    const avg = sum(this.smoothingPoints_[axis]) / this.smoothing_;
+    if (
+      this.smoothingPoints_[axis].length > this.smoothing_ &&
+      this.restValues_[axis] == DEFAULT_REST_VALUES[axis]
+    ) {
+      this.restValues_[axis] = avg;
+    }
+    return avg - this.restValues_[axis];
+  }
+
+  /**
    * Dispatches the event to signify change in the device orientation
-   * along alpha axis.
+   * along a certain axis.
    * @param {string} eventName
-   * @param {?number} eventValue
+   * @param {number} eventValue
    * @param {Array} eventRange
    * @private
    */
@@ -142,7 +229,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       this.win,
       `${TAG}.${eventName}`,
       dict({
-        'angle': eventValue.toFixed(),
+        'angle': clamp(eventValue, eventRange[0], eventRange[1]).toFixed(),
         'percent': percentValue / (eventRange[1] - eventRange[0]),
       })
     );
