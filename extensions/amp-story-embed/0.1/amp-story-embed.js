@@ -22,14 +22,17 @@ export class AmpStoryEmbed extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    this.embedManager_ = new AmpStoryEmbedManager(
-      element.ownerDocument,
-      element
-    );
+    /** @private {?AmpStoryEmbedManager} */
+    this.embedManager_ = null;
   }
 
   /** @override */
   buildCallback() {
+    this.embedManager_ = new AmpStoryEmbedManager(
+      this.element.ownerDocument,
+      this.element
+    );
+
     this.embedManager_.build();
   }
 

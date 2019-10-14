@@ -58,8 +58,8 @@ export class AmpStoryEmbedManager {
     /** @private {!Document} */
     this.doc_ = doc;
 
-    /** @private {!Array<!HTMLAnchorElement>} */
-    this.stories_ = Array.prototype.slice.call(hostEl.querySelectorAll('a'));
+    /** @private {?Array<!HTMLAnchorElement>} */
+    this.stories_;
 
     /** @private {?Element} */
     this.rootEl_;
@@ -70,6 +70,10 @@ export class AmpStoryEmbedManager {
 
   /** @public */
   build() {
+    this.stories_ = Array.prototype.slice.call(
+      this.hostEl_.querySelectorAll('a')
+    );
+
     this.initializeShadowRoot_();
 
     // TODO: Build all child iframes.
