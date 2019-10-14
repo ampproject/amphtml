@@ -794,9 +794,11 @@ export class MultidocManager {
       // Broadcast message asynchronously.
       const viewer = Services.viewerForDoc(shadowRoot.AMP.ampdoc);
       this.timer_.delay(() => {
-        // TODO: receive message needs !JsonObject type but broadcast here
-        // can be anything. Ask @dvoytenko what we can do here.
-        viewer.receiveMessage('broadcast', data, /* awaitResponse */ false);
+        viewer.receiveMessage(
+          'broadcast',
+          /** @type {!JsonObject} */ (data),
+          /* awaitResponse */ false
+        );
       }, 0);
     });
   }
