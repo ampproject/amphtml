@@ -6,7 +6,8 @@
     {
       owners: [
         { name: 'ampproject/wg-infra' },
-        { name: 'rsimha', notify: true }
+        { name: 'rsimha', notify: true },
+        { name: 'danielrozenberg', notify: true }
       ]
     }
   ]
