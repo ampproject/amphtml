@@ -59,7 +59,7 @@ export const urls = {
    */
   trustedViewerHosts: [
     /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
-    /(^|\.)gmail\.dev$/,
+    /(^|\.)gmail\.(com|dev)$/,
   ],
 };
 
