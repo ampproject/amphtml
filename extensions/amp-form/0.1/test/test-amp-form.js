@@ -1342,7 +1342,7 @@ describes.repeated(
           });
         });
 
-        it('should trigger low-trust submit-* events in AMP4EMAIL', async () => {
+        it('should degrade trust across submit-* in AMP4EMAIL', async () => {
           const form = getForm();
           form.ownerDocument.documentElement.setAttribute('amp4email', '');
 
@@ -1359,11 +1359,26 @@ describes.repeated(
           const ampForm = await getAmpForm(form);
           await ampForm.handleSubmitEvent_(new Event('fake_submit'));
 
-          expect(actions.trigger).to.be.calledWith(
+          // 1x 'submit' and 1x 'submit-success'.
+          expect(actions.trigger.callCount).to.equal(2);
+          expect(actions.trigger.getCall(1)).to.be.calledWith(
             form,
             'submit-success',
             /* CustomEvent */ sinon.match.has('detail'),
-            ActionTrust.LOW
+            ActionTrust.DEFAULT // Expect: ActionTrust.HIGH - 1
+          );
+
+          await ampForm.handleSubmitAction_({
+            method: 'submit',
+            trust: ActionTrust.DEFAULT,
+          });
+
+          expect(actions.trigger.callCount).to.equal(4);
+          expect(actions.trigger.getCall(3)).to.be.calledWith(
+            form,
+            'submit-success',
+            /* CustomEvent */ sinon.match.has('detail'),
+            ActionTrust.LOW // Expect: ActionTrust.DEFAULT - 1
           );
         });
 

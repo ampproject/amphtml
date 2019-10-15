@@ -28,12 +28,14 @@
  */
 export const RAW_OBJECT_ARGS_KEY = '__AMP_OBJECT_STRING__';
 
-/** @const {string} Identifier for an element's default action. */
+/**
+ * Identifier for an element's default action.
+ *
+ * @const {string}
+ */
 export const DEFAULT_ACTION = 'activate';
 
 /**
- * Trust level of an action.
- *
  * Corresponds to degree of user intent, i.e. events triggered with strong
  * user intent have high trust.
  *
@@ -41,18 +43,27 @@ export const DEFAULT_ACTION = 'activate';
  */
 export const ActionTrust = {
   /**
-   * Actions/events that are triggered without a user gesture, or triggered
-   * by a user gesture with weak intent e.g. scroll.
+   * Events that are triggered without a user gesture, or triggered by a user
+   * gesture with weak intent (e.g. scroll) are "low trust".
+   *
+   * Actions that have low impact on the page's visual state should require
+   * "low trust" (e.g. pausing a video).
    */
   LOW: 1,
   /**
-   * Actions/events that are triggered nearly immediately (up to a few seconds)
-   * after a user gesture with strong intent e.g. tap or swipe.
+   * Events that are triggered nearly immediately (up to a few seconds) after
+   * a user gesture with strong intent (e.g. tap or swipe) are "default trust".
+   *
+   * Actions that can modify the page's visual state (e.g. content jumping)
+   * should require "default trust". This is the default required trust level
+   * for actions.
    */
   DEFAULT: 2,
   /**
-   * Actions/events that are triggered immediately after a user gesture with
-   * strong intent e.g. tap or swipe.
+   * Events that are triggered immediately after a user gesture with
+   * strong intent (e.g. tap or swipe) are "high trust".
+   *
+   * There are no actions yet that require high trust.
    */
   HIGH: 3,
 };

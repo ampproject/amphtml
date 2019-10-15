@@ -326,21 +326,16 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    if (invocation.method == 'submit') {
-      // Most actions only require DEFAULT trust, but require HIGH trust
-      // for "submit" to prevent submission loops. This works since submit-*
-      // events are DEFAULT trust (currently only on AMP4EMAIL).
-      if (invocation.satisfiesTrust(ActionTrust.HIGH)) {
-        return this.whenDependenciesReady_().then(() => {
-          return this.handleSubmitAction_(invocation);
-        });
-      }
-    } else if (invocation.method === 'clear') {
-      if (invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
-        this.handleClearAction_();
-      }
+    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+      return null;
     }
-    return null;
+    if (invocation.method == 'submit') {
+      return this.whenDependenciesReady_().then(() => {
+        return this.handleSubmitAction_(invocation);
+      });
+    } else if (invocation.method === 'clear') {
+      this.handleClearAction_();
+    }
   }
 
   /**
@@ -465,7 +460,7 @@ export class AmpForm {
     if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
       return Promise.resolve(null);
     }
-    // `submit` has the same trust level as the AMP Action that caused it.
+    // "submit" has the same trust level as the action that caused it.
     return this.submit_(invocation.trust, null);
   }
 
