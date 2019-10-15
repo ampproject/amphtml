@@ -299,7 +299,7 @@ amp-story-page {
   background-color: #757575;
 }
 
-amp-story .i-amphtml-loader {
+amp-story .amp-active > div {
   display: none !important;
 }
 
