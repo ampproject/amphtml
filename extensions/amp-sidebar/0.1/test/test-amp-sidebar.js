@@ -482,13 +482,8 @@ describes.realWin(
           if (eventObj.initEvent) {
             eventObj.initEvent('click', true, true);
           }
-          sandbox.stub(sidebarElement, 'getAmpDoc').returns({
-            win: {
-              location: {
-                href: window.location.href,
-              },
-            },
-          });
+          const ampDoc = sidebarElement.getAmpDoc();
+          sandbox.stub(ampDoc, 'getUrl').returns(window.location.href);
           anchor.dispatchEvent
             ? anchor.dispatchEvent(eventObj)
             : anchor.fireEvent('onkeydown', eventObj);
@@ -519,16 +514,8 @@ describes.realWin(
           if (eventObj.initEvent) {
             eventObj.initEvent('click', true, true);
           }
-          sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
-            return {
-              win: {
-                location: {
-                  // Mocking navigating from example.com -> localhost:9876
-                  href: 'http://example.com',
-                },
-              },
-            };
-          });
+          const ampDoc = sidebarElement.getAmpDoc();
+          sandbox.stub(ampDoc, 'getUrl').returns('http://example.com');
           anchor.dispatchEvent
             ? anchor.dispatchEvent(eventObj)
             : anchor.fireEvent('onkeydown', eventObj);
@@ -559,17 +546,10 @@ describes.realWin(
           if (eventObj.initEvent) {
             eventObj.initEvent('click', true, true);
           }
-          sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
-            return {
-              win: {
-                location: {
-                  // Mocking navigating from
-                  // /context.html?old=context -> /context.html
-                  href: 'http://localhost:9876/context.html?old=context',
-                },
-              },
-            };
-          });
+          const ampDoc = sidebarElement.getAmpDoc();
+          sandbox
+            .stub(ampDoc, 'getUrl')
+            .returns('http://localhost:9876/context.html?old=context');
           anchor.dispatchEvent
             ? anchor.dispatchEvent(eventObj)
             : anchor.fireEvent('onkeydown', eventObj);
