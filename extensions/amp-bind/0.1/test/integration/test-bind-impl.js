@@ -947,7 +947,7 @@ describe
             mystate: {mykey: 'myval'},
           });
           return promise.then(() => {
-            expect(element.textContent).to.equal('2');
+            expect(element.textContent).to.equal('myval');
           });
         });
 
