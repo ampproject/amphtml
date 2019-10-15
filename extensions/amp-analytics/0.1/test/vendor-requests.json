@@ -161,7 +161,8 @@
     "pageview": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=!h&d=!h&url=!url&k=!key&ts=!time&ch=!channel&sid=!uid&at=!agentType&ref=_document_referrer_&aid=!aid&loc=1&ct=1&cat=!cat&scat=!scat&ac=1&tg=!tags&ctids=!catIds&pts=!pagePublishTime&auth=!author&pos=!position&iBeatField=!ibeatFields&cid=_client_id_"
   },
   "infonline": {
-    "pageview": "!url?st=!st&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_"
+    "pageview": "!url?st=!st&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=pageview",
+    "event": "!url?st=!st&ev=!ev&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=event"
   },
   "iplabel": {
     "collectorUrl": "m.col.ip-label.net",
