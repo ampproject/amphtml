@@ -31,7 +31,6 @@ import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
 import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {startsWith} from '../string';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
