@@ -76,7 +76,7 @@ const targetMatchers = [
         return false;
       }
       return (
-        file == 'build-system/tasks/json-check.js' ||
+        file == 'build-system/tasks/caches-json.js' ||
         file == 'build-system/global-configs/caches.json'
       );
     },

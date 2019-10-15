@@ -57,6 +57,7 @@ async function prCheck(cb) {
   printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets(FILENAME);
   runCheck('gulp lint --local_changes');
+  runCheck('gulp prettify');
   runCheck('gulp presubmit');
   runCheck('gulp check-exact-versions');
 
@@ -70,7 +71,6 @@ async function prCheck(cb) {
 
   if (buildTargets.has('CACHES_JSON')) {
     runCheck('gulp caches-json');
-    runCheck('gulp json-syntax');
   }
 
   if (buildTargets.has('DOCS')) {
