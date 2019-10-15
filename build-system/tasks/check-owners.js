@@ -38,7 +38,9 @@ const PrettierResult = {
 };
 
 /**
- * Checks and optionally fixes the formatting in OWNERS files using Prettier.
+ * Checks OWNERS files for formatting (and optionally fixes them) with Prettier.
+ * Coming up: Check for correctness using the amp-github-apps API. See
+ * https://github.com/ampproject/amp-github-apps/issues/281.
  * The cumulative result is returned to the `gulp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
  */
@@ -48,7 +50,8 @@ async function checkOwners() {
   );
   filesToCheck.forEach(file => {
     const relativePath = path.relative(rootDir, file);
-    checkFile(relativePath);
+    checkFormatting(relativePath);
+    // TODO(ampproject/amp-github-apps #281): Add a check for correctness.
   });
   if (process.exitCode == 1) {
     log(red('ERROR:'), 'Found errors in one or more', cyan('OWNERS'), 'files.');
@@ -70,10 +73,10 @@ async function checkOwners() {
 }
 
 /**
- * Fixes a single OWNERS file
+ * Fixes the formatting of a single OWNERS file
  * @param {string} file
  */
-function fixFile(file) {
+function fixFormatting(file) {
   const fixCmd = `${prettierCmd} --write ${file}`;
   const fixResult = getOutput(fixCmd);
   if (fixResult.status == PrettierResult.SUCCESS) {
@@ -86,10 +89,10 @@ function fixFile(file) {
 }
 
 /**
- * Checks and optionally fixes a single OWNERS file.
+ * Checks and optionally fixes the formatting of a single OWNERS file.
  * @param {string} file
  */
-function checkFile(file) {
+function checkFormatting(file) {
   if (!file.endsWith('OWNERS')) {
     log(red('ERROR:'), cyan(file), 'is not an', cyan('OWNERS'), 'file.');
     process.exitCode = 1;
@@ -103,7 +106,7 @@ function checkFile(file) {
     }
   } else if (checkResult.status == PrettierResult.FAILURE) {
     if (argv.fix) {
-      fixFile(file);
+      fixFormatting(file);
     } else {
       log(red('FAILURE:'), 'Found errors in', cyan(file));
       process.exitCode = 1;
