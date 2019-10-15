@@ -32,10 +32,10 @@ describes.endtoend(
     // https://travis-ci.org/ampproject/amphtml/jobs/598248437#L2053-L2063
     it('Subscription offers should render correctly', async () => {
       const btn = await controller.findElement('#swg_button');
-      await expect(controller.getElementRect(btn)).to.include({
-        width: 300,
-        right: 300,
-      });
+      // Wait for button to become interactable
+      await expect(controller.getElementCssValue(btn, 'visibility')).to.equal(
+        'visible'
+      );
       await controller.click(btn);
 
       // Switch to SwG's outer iFrame
