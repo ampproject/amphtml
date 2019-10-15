@@ -539,10 +539,9 @@ export class MultidocManager {
           return Promise.reject('amp-bind is not available in this document');
         }
         if (typeof state === 'string') {
-          // Emulate UIEvent 'click'
           return bind.setStateWithExpression(
             /** @type {string} */ (state),
-            /** @type {!JsonObject} */ ({event: 1})
+            /** @type {!JsonObject} */ ({})
           );
         } else if (isObject(state) || isArray(state)) {
           return bind.setStateWithObject(/** @type {!JsonObject} */ (state));
