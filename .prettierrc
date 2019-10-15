@@ -9,7 +9,13 @@
       "options": {"parser": "json5"}
     },
     {
-      "files": [".eslintrc", ".prettierrc", ".renovaterc.json", "*.json"],
+      "files": [
+        ".eslintrc",
+        ".prettierrc",
+        ".renovaterc.json",
+        ".vscode/settings.json",
+        "*.json"
+      ],
       "options": {"parser": "json"}
     },
     {

@@ -1,0 +1,18 @@
+{
+  "eslint.autoFixOnSave": true,
+  "files.associations": {
+    "OWNERS": "json5",
+    ".eslintrc": "json",
+    ".prettierrc": "json",
+    ".renovaterc.json": "json",
+    ".vscode/settings.json": "json",
+    ".codecov.yml": "yaml",
+    ".lando.yml": "yaml",
+    ".lgtm.yml": "yaml",
+    ".travis.yml": "yaml"
+  },
+  "[js]": {"editor.formatOnSave": false},
+  "[yaml]": {"editor.formatOnSave": true},
+  "[json]": {"editor.formatOnSave": true},
+  "[json5]": {"editor.formatOnSave": true}
+}
