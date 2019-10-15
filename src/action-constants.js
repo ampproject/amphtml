@@ -49,10 +49,10 @@ export const ActionTrust = {
    * Actions/events that are triggered nearly immediately (up to a few seconds)
    * after a user gesture with strong intent e.g. tap or swipe.
    */
-  DEFAULT: 10,
+  DEFAULT: 2,
   /**
    * Actions/events that are triggered immediately after a user gesture with
    * strong intent e.g. tap or swipe.
    */
-  HIGH: 100,
+  HIGH: 3,
 };

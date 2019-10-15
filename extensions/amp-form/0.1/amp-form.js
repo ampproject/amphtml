@@ -678,9 +678,9 @@ export class AmpForm {
   }
 
   /**
-   * @private
    * @param {ActionTrust} trust
    * @return {!Promise}
+   * @private
    */
   handleXhrSubmit_(trust) {
     let p;
@@ -689,8 +689,8 @@ export class AmpForm {
     } else {
       this.submittingWithTrust_(trust);
       p = this.doActionXhr_().then(
-        response => this.handleXhrSubmitSuccess_(response),
-        error => this.handleXhrSubmitFailure_(error)
+        response => this.handleXhrSubmitSuccess_(response, trust),
+        error => this.handleXhrSubmitFailure_(error, trust)
       );
     }
     if (getMode().test) {
@@ -744,13 +744,14 @@ export class AmpForm {
         );
       })
       .then(
-        response => this.handleSsrTemplateSuccess_(response),
+        response =>
+          this.handleSubmitSuccess_(tryResolve(() => response), trust),
         error => {
           const detail = dict();
           if (error && error.message) {
             detail['error'] = error.message;
           }
-          return this.handleSubmitFailure_(error, detail);
+          return this.handleSubmitFailure_(error, detail, trust);
         }
       );
   }
@@ -775,16 +776,6 @@ export class AmpForm {
       errorTemplate = this.templates_.maybeFindTemplate(errorContainer);
     }
     return {successTemplate, errorTemplate};
-  }
-
-  /**
-   * Transition the form to the submit success state.
-   * @param {!JsonObject} response
-   * @return {!Promise}
-   * @private
-   */
-  handleSsrTemplateSuccess_(response) {
-    return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 
   /**
@@ -905,10 +896,11 @@ export class AmpForm {
 
   /**
    * Returns the action trust for submit-success and submit-error events.
+   * @param {!ActionTrust} incomingTrust
    * @return {!ActionTrust}
    * @private
    */
-  trustForSubmitResponse_() {
+  trustForSubmitResponse_(incomingTrust) {
     const doc = this.form_.ownerDocument;
     if (doc && isAmp4Email(doc)) {
       // TODO(choumx): Remove this warning before Q1 2020.
@@ -917,19 +909,20 @@ export class AmpForm {
         '"submit-success and "submit-error" are no longer "high trust". ' +
           'See https://github.com/ampproject/amphtml/issues/24894.'
       );
-      return ActionTrust.DEFAULT;
+      return incomingTrust - 1;
     }
     return ActionTrust.HIGH;
   }
 
   /**
    * @param {!Response} response
+   * @param {!ActionTrust} incomingTrust
    * @return {!Promise}
    * @private
    */
-  handleXhrSubmitSuccess_(response) {
+  handleXhrSubmitSuccess_(response, incomingTrust) {
     const json = /** @type {!Promise<!JsonObject>} */ (response.json());
-    return this.handleSubmitSuccess_(json).then(() => {
+    return this.handleSubmitSuccess_(json, incomingTrust).then(() => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.maybeHandleRedirect_(response);
     });
@@ -938,16 +931,17 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!Promise<!JsonObject>} jsonPromise
+   * @param {!ActionTrust} incomingTrust
    * @return {!Promise}
-   * @private visible for testing
+   * @private
    */
-  handleSubmitSuccess_(jsonPromise) {
+  handleSubmitSuccess_(jsonPromise, incomingTrust) {
     return jsonPromise.then(
       json => {
         this.setState_(FormState.SUBMIT_SUCCESS);
         this.renderTemplate_(json || {}).then(() => {
-          const trust = this.trustForSubmitResponse_();
-          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json, trust);
+          const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
+          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json, outgoingTrust);
           this.dirtinessHandler_.onSubmitSuccess();
         });
       },
@@ -959,10 +953,11 @@ export class AmpForm {
 
   /**
    * @param {*} e
+   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
-  handleXhrSubmitFailure_(e) {
+  handleXhrSubmitFailure_(e, incomingTrust) {
     let promise;
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
@@ -972,7 +967,7 @@ export class AmpForm {
     }
     return promise.then(responseJson => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
-      this.handleSubmitFailure_(e, responseJson);
+      this.handleSubmitFailure_(e, responseJson, incomingTrust);
       this.maybeHandleRedirect_(e.response);
     });
   }
@@ -981,16 +976,17 @@ export class AmpForm {
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
+   * @param {!ActionTrust} incomingTrust
    * @return {!Promise}
    * @private
    */
-  handleSubmitFailure_(error, json) {
+  handleSubmitFailure_(error, json, incomingTrust) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
-        const trust = this.trustForSubmitResponse_();
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, json, trust);
+        const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, json, outgoingTrust);
         this.dirtinessHandler_.onSubmitError();
       });
     });
