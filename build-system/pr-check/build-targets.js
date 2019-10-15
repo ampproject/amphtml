@@ -31,7 +31,7 @@ const {gitDiffNameOnlyMaster} = require('../common/git');
  * @param {string} file
  * @return {boolean}
  */
-function isOWnersFile(file) {
+function isOwnersFile(file) {
   return file.endsWith('OWNERS');
 }
 
@@ -42,7 +42,7 @@ const targetMatchers = [
   {
     targets: ['AVA'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
@@ -56,7 +56,7 @@ const targetMatchers = [
   {
     targets: ['BABEL_PLUGIN', 'RUNTIME'], // Test the runtime for babel plugin changes.
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
@@ -72,7 +72,7 @@ const targetMatchers = [
   {
     targets: ['CACHES_JSON'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
@@ -84,7 +84,7 @@ const targetMatchers = [
   {
     targets: ['DEV_DASHBOARD'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
@@ -97,7 +97,7 @@ const targetMatchers = [
   {
     targets: ['DOCS'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
@@ -109,7 +109,7 @@ const targetMatchers = [
   {
     targets: ['E2E_TEST'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
@@ -123,7 +123,7 @@ const targetMatchers = [
   {
     targets: ['FLAG_CONFIG'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return file.startsWith('build-system/global-configs/');
@@ -132,7 +132,7 @@ const targetMatchers = [
   {
     targets: ['INTEGRATION_TEST'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
@@ -148,13 +148,13 @@ const targetMatchers = [
   {
     targets: ['OWNERS'],
     func: file => {
-      return isOWnersFile(file) || file == 'build-system/tasks/check-owners.js';
+      return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
     },
   },
   {
     targets: ['UNIT_TEST'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
@@ -169,7 +169,7 @@ const targetMatchers = [
   {
     targets: ['VALIDATOR'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       if (file.startsWith('validator/webui/')) {
@@ -200,7 +200,7 @@ const targetMatchers = [
   {
     targets: ['VALIDATOR_WEBUI'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return file.startsWith('validator/webui/');
@@ -209,7 +209,7 @@ const targetMatchers = [
   {
     targets: ['VISUAL_DIFF'],
     func: file => {
-      if (isOWnersFile(file)) {
+      if (isOwnersFile(file)) {
         return false;
       }
       return (
