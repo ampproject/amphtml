@@ -25,8 +25,7 @@ const {highlight} = require('cli-highlight');
 const {isTravisBuild} = require('../common/travis');
 
 const rootDir = path.dirname(path.dirname(__dirname));
-const prettierCmd =
-  'node_modules/.bin/prettier --parser json5 --config .prettierrc';
+const prettierCmd = 'node_modules/.bin/prettier';
 
 /**
  * Prettier exit codes. See https://prettier.io/docs/en/cli.html#exit-codes
