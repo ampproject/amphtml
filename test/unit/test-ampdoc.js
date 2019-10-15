@@ -92,6 +92,27 @@ describes.sandboxed('AmpDocService', {}, () => {
       expect(service.getSingleDoc()).to.be.instanceOf(AmpDocSingle);
     });
 
+    it('should not return a conflicting value on a form', () => {
+      const node = document.createElement('form');
+      // Note: Instead of actually creating an input element with a name that
+      // conflicts, just set this directly in case the test is ever run in
+      // an compiled environment.
+      node.getAmpDoc = 5;
+
+      const ampDoc = service.getAmpDocIfAvailable(node);
+      expect(ampDoc).to.equal(service.getSingleDoc());
+    });
+
+    it('should not return a conflicting value on a document fragment', () => {
+      // This is a stand-in for testing a document, without actually modifying
+      // the document to keep the test side-effect free.
+      const frag = document.createDocumentFragment();
+      frag.getAmpDoc = 5;
+
+      const ampDoc = service.getAmpDocIfAvailable(frag);
+      expect(ampDoc).to.equal(service.getSingleDoc());
+    });
+
     it('should always yield the single document', () => {
       expect(() => service.getAmpDoc(null)).to.throw;
       expect(service.getAmpDoc(document)).to.equal(service.getSingleDoc());
@@ -162,7 +183,7 @@ describes.sandboxed('AmpDocService', {}, () => {
 
     beforeEach(() => {
       service = new AmpDocService(window, /* isSingleDoc */ false);
-      content = document.createElement('span');
+      content = document.createElement('amp-img');
       host = document.createElement('div');
       setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
@@ -189,7 +210,8 @@ describes.sandboxed('AmpDocService', {}, () => {
 
     it('should yield custom-element shadow-doc when exists', () => {
       const ampDoc = {};
-      content.ampdoc_ = ampDoc;
+      content.everAttached = true;
+      content.getAmpDoc = () => ampDoc;
       host.appendChild(content);
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
@@ -205,11 +227,12 @@ describes.sandboxed('AmpDocService', {}, () => {
 
       // Override via custom element.
       const ampDoc2 = {};
-      content.ampdoc_ = ampDoc2;
+      content.everAttached = true;
+      content.getAmpDoc = () => ampDoc2;
       expect(service.getAmpDoc(content)).to.equal(ampDoc2);
 
       // Fallback to cached version when custom element returns null.
-      content.ampdoc_ = null;
+      content.getAmpDoc = () => null;
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
@@ -299,7 +322,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     beforeEach(() => {
       toggleExperiment(window, 'ampdoc-fie', true);
       service = new AmpDocService(window, /* isSingleDoc */ true);
-      content = document.createElement('span');
+      content = document.createElement('amp-img');
       host = document.createElement('div');
       setShadowDomSupportedVersionForTesting(undefined);
       if (isShadowDomSupported()) {
@@ -327,7 +350,8 @@ describes.sandboxed('AmpDocService', {}, () => {
 
     it('should yield custom-element doc when exists', () => {
       const ampDoc = {};
-      content.ampdoc_ = ampDoc;
+      content.everAttached = true;
+      content.getAmpDoc = () => ampDoc;
       host.appendChild(content);
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
@@ -343,11 +367,12 @@ describes.sandboxed('AmpDocService', {}, () => {
 
       // Override via custom element.
       const ampDoc2 = {};
-      content.ampdoc_ = ampDoc2;
+      content.everAttached = true;
+      content.getAmpDoc = () => ampDoc2;
       expect(service.getAmpDoc(content)).to.equal(ampDoc2);
 
       // Fallback to cached version when custom element returns null.
-      content.ampdoc_ = null;
+      content.getAmpDoc = () => null;
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
