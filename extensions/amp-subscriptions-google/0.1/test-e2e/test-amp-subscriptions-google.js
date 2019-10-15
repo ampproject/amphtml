@@ -28,11 +28,9 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    // TODO(chenshay): This is failling in Chrome with "ElementNotInteractableError":
-    // https://travis-ci.org/ampproject/amphtml/jobs/598248437#L2053-L2063
     it('Subscription offers should render correctly', async () => {
       const btn = await controller.findElement('#swg_button');
-      // Wait for button to render
+      // Wait for button to be rendered and ready to click
       await expect(controller.getElementRect(btn)).to.include({
         width: 240,
         height: 40,
