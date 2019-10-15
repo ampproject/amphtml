@@ -814,7 +814,6 @@ export class MultidocManager {
     const {ampdoc} = amp;
     ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
-    this.haltLoadingImages_(ampdoc);
   }
 
   /**
@@ -825,25 +824,6 @@ export class MultidocManager {
     const index = this.shadowRoots_.indexOf(shadowRoot);
     if (index != -1) {
       this.shadowRoots_.splice(index, 1);
-    }
-  }
-
-  /**
-   * Find all incomplete images and unset their srcs, freeing up network
-   * resources.
-   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
-   * @private
-   */
-  haltLoadingImages_(ampdoc) {
-    const ampBody = ampdoc.getBody();
-    const imgs = ampBody && ampBody.getElementsByTagName('img');
-    for (let i = 0; imgs && i < imgs.length; i++) {
-      if (!imgs[i].complete) {
-        // Opt for tiny dataURI image instead of empty src to prevent the
-        // viewer from detecting a load error.
-        imgs[i].src =
-          'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
-      }
     }
   }
 
