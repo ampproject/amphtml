@@ -28,11 +28,13 @@ export function idealmedia(global, data) {
 
   document.body.appendChild(scriptRoot);
 
-  const publisherStr = data.publisher.replace(/[^A-z0-9]/g, '');
+  function getResourceFilePath(publisher) {
+    const publisherStr = publisher.replace(/[^A-z0-9]/g, '');
+    return `${publisherStr[0]}/${publisherStr[1])}`;
+  }
 
   const url =
-    `https://jsc.idealmedia.io/${encodeURIComponent(publisherStr[0])}/` +
-    `${encodeURIComponent(publisherStr[1])}/` +
+    `https://jsc.idealmedia.io/${getResourceFilePath(data.publisher)}/` +
     `${encodeURIComponent(data.publisher)}.` +
     `${encodeURIComponent(data.widget)}.js?t=` +
     Math.floor(Date.now() / 36e5);
