@@ -30,7 +30,7 @@ export function idealmedia(global, data) {
 
   function getResourceFilePath(publisher) {
     const publisherStr = publisher.replace(/[^A-z0-9]/g, '');
-    return `${publisherStr[0]}/${publisherStr[1])}`;
+    return `${publisherStr[0]}/${publisherStr[1]}`;
   }
 
   const url =
