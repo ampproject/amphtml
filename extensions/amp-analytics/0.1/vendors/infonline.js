@@ -31,7 +31,19 @@ const INFONLINE_CONFIG = jsonLiteral({
       '&cp=${cp}' +
       '&ps=${ps}' +
       '&host=${canonicalHost}' +
-      '&path=${canonicalPath}',
+      '&path=${canonicalPath}' +
+      '&type=pageview',
+    'event':
+      '${url}?st=${st}' +
+      '&ev=${ev}' +
+      '&sv=${sv}' +
+      '&ap=${ap}' +
+      '&co=${co}' +
+      '&cp=${cp}' +
+      '&ps=${ps}' +
+      '&host=${canonicalHost}' +
+      '&path=${canonicalPath}' +
+      '&type=event',
   },
   'triggers': {
     'pageview': {
