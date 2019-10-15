@@ -30,8 +30,12 @@ describes.endtoend(
 
     // TODO(chenshay): This is failling in Chrome with "ElementNotInteractableError":
     // https://travis-ci.org/ampproject/amphtml/jobs/598248437#L2053-L2063
-    it.skip('Subscription offers should render correctly', async () => {
+    it('Subscription offers should render correctly', async () => {
       const btn = await controller.findElement('#swg_button');
+      await expect(controller.getElementRect(btn)).to.include({
+        width: 300,
+        right: 300,
+      });
       await controller.click(btn);
 
       // Switch to SwG's outer iFrame
