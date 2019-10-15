@@ -223,7 +223,7 @@ export class AmpSidebar extends AMP.BaseElement {
         );
         if (target && target.href) {
           const tgtLoc = Services.urlForDoc(element).parse(target.href);
-          const currentHref = this.getAmpDoc().win.location.href;
+          const currentHref = this.getAmpDoc().getUrl();
           // Important: Only close sidebar (and hence pop sidebar history entry)
           // when navigating locally, Chrome might cancel navigation request
           // due to after-navigation history manipulation inside a timer callback.

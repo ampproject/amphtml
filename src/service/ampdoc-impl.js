@@ -116,6 +116,22 @@ export class AmpDocService {
   }
 
   /**
+   * If the node is an AMP custom element, retrieves the AmpDoc reference.
+   * @param {!Node} node
+   * @return {?AmpDoc} The AmpDoc reference, if one exists.
+   */
+  getCustomElementAmpDocReference_(node) {
+    // We can only look up the AmpDoc from a custom element if it has been
+    // attached at some point. If it is not a custom element, one or both of
+    // these checks should fail.
+    if (!node.everAttached || typeof node.getAmpDoc !== 'function') {
+      return null;
+    }
+
+    return node.getAmpDoc();
+  }
+
+  /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
    * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
    * instance is returned, unless specfically looking for a closer `AmpDoc`.
@@ -135,8 +151,10 @@ export class AmpDocService {
         // for the closest AmpDoc, the element might have a reference to the
         // global AmpDoc, which we do not want. This occurs when using
         // <amp-next-page>.
-        if (n.ampdoc_) {
-          return n.ampdoc_;
+
+        const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
+        if (cachedAmpDoc) {
+          return cachedAmpDoc;
         }
 
         // Root note: it's either a document, or a shadow document.
@@ -169,8 +187,9 @@ export class AmpDocService {
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
-      if (n.ampdoc_) {
-        return n.ampdoc_;
+      const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
+      if (cachedAmpDoc) {
+        return cachedAmpDoc;
       }
 
       // Traverse the boundary of a friendly iframe.
