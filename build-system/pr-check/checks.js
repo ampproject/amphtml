@@ -55,6 +55,7 @@ async function main() {
     timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dev-dashboard-tests');
+    timedExecOrDie('gulp check-owners');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   } else {
@@ -87,6 +88,10 @@ async function main() {
 
     if (buildTargets.has('DEV_DASHBOARD')) {
       timedExecOrDie('gulp dev-dashboard-tests');
+    }
+
+    if (buildTargets.has('OWNERS')) {
+      timedExecOrDie('gulp check-owners');
     }
 
     if (buildTargets.has('RUNTIME')) {
