@@ -15,6 +15,7 @@
  */
 
 import {getMode} from '../mode';
+import {isDynamicComponent} from '../dynamic-components';
 import {urls} from '../config';
 
 /**
@@ -27,22 +28,6 @@ import {urls} from '../config';
  * @private
  */
 let ExtensionInfoDef;
-
-/**
- * Dynamic AMP components
- */
-const AMP_DYNAMIC_COMPONENTS = ['amp-geo'];
-
-/**
- * Determine whether an extension is a dynamic AMP component
- * @param {string} extensionId
- * @return {boolean}
- */
-function isDynamicComponent(extensionId) {
-  return (
-    Boolean(extensionId) && AMP_DYNAMIC_COMPONENTS.indexOf(extensionId) >= 0
-  );
-}
 
 /**
  * Calculate the base url for any scripts.
@@ -95,18 +80,18 @@ export function calculateExtensionScriptUrl(
   const useDefaultCdn =
     urls.useDefaultCdnForDynamicComponents && isDynamicComponent(extensionId);
   const base = calculateScriptBaseUrl(location, opt_isLocalDev, useDefaultCdn);
-  const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
     opt_extensionVersion = '0.1';
   }
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  if (urls.cdn !== urls.defaultCdn && !useDefaultCdn) {
-    return `${base}/v0/${extensionId}${extensionVersion}.js`;
-  }
   const spPath = getSinglePassExperimentPath();
-  return `${base}/rtv/${rtv}/${spPath}v0/${extensionId}${extensionVersion}.js`;
+  const extensionPath = `${spPath}v0/${extensionId}${extensionVersion}.js`;
+  if (urls.cdn !== urls.defaultCdn && !useDefaultCdn) {
+    return `${base}/${extensionPath}`;
+  }
+  return `${base}/rtv/${getMode().rtvVersion}/${extensionPath}`;
 }
 
 /**
@@ -124,10 +109,16 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
-  const base = calculateScriptBaseUrl(location, isLocalDev);
-  if (opt_rtv && urls.cdn === urls.defaultCdn) {
+  const base = calculateScriptBaseUrl(location, isLocalDev, false);
+  if (opt_rtv || urls.cdn !== urls.defaultCdn) {
     const spPath = getSinglePassExperimentPath();
-    return `${base}/rtv/${getMode().rtvVersion}/${spPath}${entryPoint}.js`;
+    const entryPointPath = `${spPath}${entryPoint}.js`;
+    if (urls.cdn !== urls.defaultCdn) {
+      return `${base}/${entryPointPath}`;
+    }
+    if (opt_rtv) {
+      return `${base}/rtv/${getMode().rtvVersion}/${entryPointPath}`;
+    }
   }
   return `${base}/${entryPoint}.js`;
 }
