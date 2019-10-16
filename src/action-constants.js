@@ -67,3 +67,18 @@ export const ActionTrust = {
    */
   HIGH: 3,
 };
+
+/**
+ * @param {!ActionTrust} actionTrust
+ * @return {string}
+ */
+export function actionTrustToString(actionTrust) {
+  switch (actionTrust) {
+    case ActionTrust.LOW:
+      return 'low';
+    case ActionTrust.DEFAULT:
+      return 'default';
+    case ActionTrust.HIGH:
+      return 'high';
+  }
+}

@@ -18,6 +18,7 @@ import {
   ActionTrust,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
+  actionTrustToString,
 } from '../action-constants';
 import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
@@ -213,10 +214,11 @@ export class ActionInvocation {
       return false;
     }
     if (this.trust < minimumTrust) {
+      const t = actionTrustToString(this.trust);
       user().error(
         TAG_,
-        `"${this.actionEventType}" is not allowed to invoke ` +
-          `"${this.tagOrTarget}.${this.method}".`
+        `"${this.actionEventType}" event with "${t}" trust is not allowed to ` +
+          `invoke "${this.tagOrTarget.toLowerCase()}.${this.method}".`
       );
       return false;
     }
