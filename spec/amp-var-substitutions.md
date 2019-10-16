@@ -921,7 +921,7 @@ Pulls a value from the provided query string parameter.
 * **platform variable**: `QUERY_PARAM`
   *  Example: <br>
   ```html
-  <amp-pixel src="https://foo.com/pixel?bar=QUERY_PARAM(baz,biz)"</amp-pixel>
+  <amp-pixel src="https://foo.com/pixel?bar=QUERY_PARAM(baz,biz)"></amp-pixel>
   ```
   If a `baz` query string parameter is provided, the corresponding value is inserted into the pixel src; otherwise, the default `biz` is used.
 * **amp-analytics variable**: `${queryParam}`
