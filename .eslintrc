@@ -15,7 +15,7 @@
     "es6": true,
     "browser": true
   },
- "parserOptions": {
+  "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module"
   },
@@ -33,7 +33,7 @@
         "file": "fileoverview",
         "returns": "return"
       },
-      "allowOverrideWithoutParam" : true
+      "allowOverrideWithoutParam": true
     }
   },
   "rules": {
@@ -43,25 +43,28 @@
     "curly": 2,
     "google-camelcase/google-camelcase": 2,
     "jsdoc/check-param-names": 2,
-    "jsdoc/check-tag-names": [2, {
-      "definedTags": [
-        "closurePrimitive",
-        "deprecated",
-        "dict",
-        "export",
-        "final",
-        "nocollapse",
-        "noinline",
-        "package",
-        "record",
-        "restricted",
-        "struct",
-        "suppress",
-        "template",
-        "visibleForTesting"
-      ]
-    }],
-    "jsdoc/check-types": [2, { "noDefaults": true }],
+    "jsdoc/check-tag-names": [
+      2,
+      {
+        "definedTags": [
+          "closurePrimitive",
+          "deprecated",
+          "dict",
+          "export",
+          "final",
+          "nocollapse",
+          "noinline",
+          "package",
+          "record",
+          "restricted",
+          "struct",
+          "suppress",
+          "template",
+          "visibleForTesting"
+        ]
+      }
+    ],
+    "jsdoc/check-types": [2, {"noDefaults": true}],
     "jsdoc/require-param": 2,
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,
@@ -111,7 +114,7 @@
     "no-eval": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
-    "no-implicit-coercion": [2, { "boolean": false }],
+    "no-implicit-coercion": [2, {"boolean": false}],
     "no-implied-eval": 2,
     "no-iterator": 2,
     "no-lone-blocks": 2,
@@ -123,16 +126,23 @@
     "no-sequences": 2,
     "no-throw-literal": 2,
     "no-unused-expressions": 0,
-    "no-unused-vars": [2, {
-      "argsIgnorePattern": "^(var_args$|opt_|unused)",
-      "varsIgnorePattern": "(AmpElement|Def|Interface)$"
-    }],
+    "no-unused-vars": [
+      2,
+      {
+        "argsIgnorePattern": "^(var_args$|opt_|unused)",
+        "varsIgnorePattern": "(AmpElement|Def|Interface)$"
+      }
+    ],
     "no-useless-call": 2,
     "no-useless-concat": 2,
     "no-undef": 2,
     "no-var": 2,
-    "no-warning-comments": [2, { "terms": ["do not submit"], "location": "anywhere" }],
-    "notice/notice": [2,
+    "no-warning-comments": [
+      2,
+      {"terms": ["do not submit"], "location": "anywhere"}
+    ],
+    "notice/notice": [
+      2,
       {
         "mustMatch": "Copyright 20\\d{2} The AMP HTML Authors\\.",
         "templateFile": "build-system/common/LICENSE-TEMPLATE.txt",
@@ -141,24 +151,30 @@
         }
       }
     ],
-    "object-shorthand": [2, "properties", { "avoidQuotes": true }],
+    "object-shorthand": [2, "properties", {"avoidQuotes": true}],
     "prefer-const": 2,
     "prettier/prettier": 2,
     "radix": 2,
-    "require-jsdoc": [2, {
-      "require": {
-        "FunctionDeclaration": true,
-        "MethodDefinition": true,
-        "ClassDeclaration": false,
-        "ArrowFunctionExpression": false,
-        "FunctionExpression": false
+    "require-jsdoc": [
+      2,
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": false,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+        }
       }
-    }],
-    "sort-imports-es6-autofix/sort-imports-es6": [2, {
-      "ignoreCase": false,
-      "ignoreMemberSort": false,
-      "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
-    }],
+    ],
+    "sort-imports-es6-autofix/sort-imports-es6": [
+      2,
+      {
+        "ignoreCase": false,
+        "ignoreMemberSort": false,
+        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+      }
+    ],
     "sort-requires/sort-requires": 2
   },
   "overrides": [
