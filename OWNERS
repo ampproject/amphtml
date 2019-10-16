@@ -16,8 +16,8 @@
       owners: [{ name: 'ampproject/wg-caching', notify: true }]
     },
     {
-      pattern: '*.md',
-      owners: [{ name: 'ampproject/wg-outreach' }]
+      pattern: '**/*.md',
+      owners: [{ name: 'mrjoro' }, { name: 'ampproject/wg-outreach' }]
     },
     {
       pattern: '{.*,babel.config.js,gulpfile.js}',
@@ -46,7 +46,10 @@
       // TODO(#24685): Remove this once most owners files have been updated
       // and/or the Travis check is implemented.
       pattern: '**/{OWNERS.yaml,OWNERS}',
-      owners: [{ name: 'rcebulko', notify: true }]
+      owners: [
+        { name: 'rcebulko', notify: true },
+        { name: 'mrjoro', requestReviews: false }
+      ]
     }
   ]
 }
