@@ -360,6 +360,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  'conative': {
+    renderStartImplemented: true,
+  },
+
   'connatix': {
     renderStartImplemented: true,
   },
