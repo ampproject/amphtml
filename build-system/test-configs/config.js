@@ -139,10 +139,12 @@ const presubmitGlobs = [
   '!firebase/**/*.*',
 ];
 
-const jsonGlobs = [
-  '**/*.json',
-  '!{node_modules,build,dist,dist.3p,dist.tools,' +
-    'third_party,build-system}/**/*.*',
+const prettifyGlobs = [
+  '**/OWNERS',
+  '.prettierrc',
+  'build-system/global-configs/caches.json',
+  // TODO(rsimha): Fix and check other json files, dotfiles, etc.
+  '!{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -170,22 +172,27 @@ const thirdPartyFrames = [
   },
 ];
 
+/**
+ * File types to ignore while auto-generating a changelog for a new release.
+ */
+const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
+
 /** @const  */
 module.exports = {
-  testPaths,
   a4aTestPaths,
   chaiAsPromised,
-  commonUnitTestPaths,
+  changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
-  unitTestPaths,
-  unitTestOnSaucePaths,
-  integrationTestPaths,
-  e2eTestPaths,
-  lintGlobs,
+  commonUnitTestPaths,
   devDashboardTestPaths,
+  e2eTestPaths,
+  integrationTestPaths,
   jisonPaths,
-  thirdPartyFrames,
-  jsonGlobs,
+  lintGlobs,
   presubmitGlobs,
-  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
+  prettifyGlobs,
+  testPaths,
+  thirdPartyFrames,
+  unitTestOnSaucePaths,
+  unitTestPaths,
 };

@@ -128,10 +128,12 @@ const forbiddenTerms = {
       'build-system/server/amp4test.js',
       'build-system/tasks/build.js',
       'build-system/tasks/check-exact-versions.js',
+      'build-system/tasks/check-owners.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
+      'build-system/tasks/prettify.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
