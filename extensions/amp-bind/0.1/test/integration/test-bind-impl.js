@@ -111,6 +111,37 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
 /**
  * @param {!Object} env
  * @param {!Bind} bind
+ * @param {!JsonObject} state
+ * @return {!Promise}
+ */
+function onBindReadyAndSetStateWithObject(env, bind, state) {
+  return bind
+    .initializePromiseForTesting()
+    .then(() => {
+      return bind.setStateWithObject(state);
+    })
+    .then(() => {
+      env.flushVsync();
+      return bind.setStatePromiseForTesting();
+    });
+}
+
+/**
+ * @param {!Object} env
+ * @param {!Bind} bind
+ * @param {string} name
+ * @return {!Promise}
+ */
+function onBindReadyAndGetState(env, bind, name) {
+  return bind.initializePromiseForTesting().then(() => {
+    env.flushVsync();
+    return bind.getState(name);
+  });
+}
+
+/**
+ * @param {!Object} env
+ * @param {!Bind} bind
  * @param {!Array<!Element>} added
  * @param {!Array<!Element>} removed
  * @param {!BindRescanOptions=} options
@@ -898,6 +929,34 @@ describe
                 });
               });
             });
+          });
+        });
+
+        it('should support setting object state in setStateWithObject()', () => {
+          const element = createElement(
+            env,
+            container,
+            '[text]="mystate.mykey"'
+          );
+          expect(element.textContent).to.equal('');
+          const promise = onBindReadyAndSetStateWithObject(env, bind, {
+            mystate: {mykey: 'myval'},
+          });
+          return promise.then(() => {
+            expect(element.textContent).to.equal('myval');
+          });
+        });
+
+        it('should support getting state with getState()', () => {
+          const promise = onBindReadyAndSetStateWithObject(env, bind, {
+            mystate: {mykey: 'myval'},
+          });
+          return promise.then(() => {
+            return onBindReadyAndGetState(env, bind, 'mystate.mykey').then(
+              result => {
+                expect(result).to.equal('myval');
+              }
+            );
           });
         });
 
