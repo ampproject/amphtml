@@ -16,7 +16,7 @@
 
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -28,6 +28,10 @@ import {userAssert} from '../../../src/log';
 export const SERVICE_ID = 'liveListManager';
 
 const TRANSFORMED_PREFIX = 'google;v=';
+
+// Maxiumum random number used as a query parameter.
+// Cannot use Number.MAX_SAFE_INTEGER due to IE Compatibility.
+const AMP_LIVE_LIST_MAX_RANDOM_NUMBER = 9007199254740991;
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to
@@ -147,11 +151,14 @@ export class LiveListManager {
   fetchDocument_() {
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
-      url = addParamToUrl(
-        url,
-        'amp_latest_update_time',
-        String(this.latestUpdateTime_)
-      );
+      url = addParamsToUrl(url, {
+        'amp_latest_update_time': String(this.latestUpdateTime_),
+        // AMP Caches do not always evict entries from their caches.
+        // A random number from the max safe range without BigInts helps add confidence the document is fresh.
+        'amp_random': String(
+          Math.floor(Math.random() * AMP_LIVE_LIST_MAX_RANDOM_NUMBER)
+        ),
+      });
     }
 
     if (this.isTransformed_) {
