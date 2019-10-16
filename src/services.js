@@ -481,19 +481,6 @@ export class Services {
   }
 
   /**
-   * Version of the story parallax service depends on which version of amp-story
-   * the publisher is loading. They all have the same implementation.
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-parallax-service.AmpStoryParallaxService>}
-   */
-  static storyParallaxServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-parallax-service.AmpStoryParallaxService>} */
-      (getElementServiceIfAvailable(win, 'story-parallax', 'amp-story'))
-    );
-  }
-
-  /**
    * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/amp-story-parallax-service.AmpStoryParallaxService}
    */
