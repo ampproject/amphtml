@@ -69,8 +69,7 @@ function prettify() {
         if (!argv.fix) {
           log(
             yellow('NOTE 1:'),
-            'You may be able to automatically fix some of these warnings ' +
-              '/ errors by running',
+            'You may be able to automatically fix some errors by running',
             cyan('gulp prettify --fix'),
             'from your local branch.'
           );

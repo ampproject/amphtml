@@ -33,23 +33,23 @@ const {isTravisBuild} = require('../common/travis');
 const rootDir = path.dirname(path.dirname(__dirname));
 
 /**
- * Checks OWNERS files for correctness using the amp-github-apps API.
+ * Checks OWNERS files for correctness using the owners bot API.
  * The cumulative result is returned to the `gulp` process via process.exitCode
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
   const filesToCheck = deglob.sync(['**/OWNERS']);
-  filesToCheck.forEach(file => {
+  filesToCheck.forEach(async file => {
     const relativePath = path.relative(rootDir, file);
-    checkFile(relativePath);
+    await checkFile(relativePath);
   });
 }
 
 /**
- * Checks and optionally fixes the formatting of a single OWNERS file.
+ * Checks a single OWNERS file using the owners bot API.
  * @param {string} file
  */
-function checkFile(file) {
+async function checkFile(file) {
   if (!file.endsWith('OWNERS')) {
     log(red('ERROR:'), cyan(file), 'is not an', cyan('OWNERS'), 'file.');
     process.exitCode = 1;
@@ -60,11 +60,12 @@ function checkFile(file) {
   // owners-bot parsing API.
   // See https://github.com/ampproject/amp-github-apps/issues/281.
   const contents = fs.readFileSync(file, 'utf8').toString();
-  if (JSON5.parse(contents)) {
+  try {
+    JSON5.parse(contents);
     if (!isTravisBuild()) {
       log(green('SUCCESS:'), 'No errors in', cyan(file));
     }
-  } else {
+  } catch {
     log(red('FAILURE:'), 'Found errors in', cyan(file));
     process.exitCode = 1;
   }
