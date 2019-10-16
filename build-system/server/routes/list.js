@@ -180,7 +180,7 @@ router.get('/ecommerce-nested-menu', function(req, res) {
     'menu': [
       {
         'title': 'Clothing, Shoes, Jewelry \u0026 Watches',
-        'image': 'https://cdn.orvis.com/images/082119_w_new.jpg',
+        'image': 'https://picsum.photos/id/535/367/267',
         'content': [
           {
             'title': 'Clothing, Shoes, Jewelry \u0026 Watches',
@@ -199,7 +199,7 @@ router.get('/ecommerce-nested-menu', function(req, res) {
       },
       {
         'title': 'Movies, Music \u0026 Games',
-        'image': 'http://dvmedia.in/images/media-corner-banner.jpg',
+        'image': 'https://picsum.photos/id/452/367/267',
         'content': [
           {
             'title': 'Movies, Music \u0026 Games',
@@ -218,7 +218,7 @@ router.get('/ecommerce-nested-menu', function(req, res) {
       },
       {
         'title': 'Sports \u0026 Outdoors',
-        'image': 'http://vivaplex.co.za/wp-content/uploads/2015/06/sports.jpg',
+        'image': 'https://picsum.photos/id/469/367/267',
         'content': [
           {
             'title': 'Sports',
@@ -244,8 +244,7 @@ router.get('/ecommerce-nested-menu', function(req, res) {
       },
       {
         'title': 'Home, Garden \u0026 Tools',
-        'image':
-          'https://i.pinimg.com/originals/21/b5/0f/21b50faf0decf0ea59e6030438e03ccc.jpg',
+        'image': 'https://picsum.photos/id/491/367/267',
         'content': [
           {
             'title': 'Home, Garden \u0026 Pets',
