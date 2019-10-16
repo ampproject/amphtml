@@ -14,9 +14,11 @@
     },
     {
       "files": ".prettierrc",
-      "options": {
-        "parser": "json"
-      }
+      "options": {"parser": "json"}
+    },
+    {
+      "files": [".codecov.yml", ".lando.yml", ".lgtm.yml", ".travis.yml"],
+      "options": {"parser": "yaml"}
     }
   ]
 }
