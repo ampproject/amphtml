@@ -39,9 +39,9 @@ const rootDir = path.dirname(path.dirname(__dirname));
  */
 async function checkOwners() {
   const filesToCheck = deglob.sync(['**/OWNERS']);
-  filesToCheck.forEach(async file => {
+  filesToCheck.forEach(file => {
     const relativePath = path.relative(rootDir, file);
-    await checkFile(relativePath);
+    checkFile(relativePath);
   });
 }
 
@@ -49,7 +49,7 @@ async function checkOwners() {
  * Checks a single OWNERS file using the owners bot API.
  * @param {string} file
  */
-async function checkFile(file) {
+function checkFile(file) {
   if (!file.endsWith('OWNERS')) {
     log(red('ERROR:'), cyan(file), 'is not an', cyan('OWNERS'), 'file.');
     process.exitCode = 1;
