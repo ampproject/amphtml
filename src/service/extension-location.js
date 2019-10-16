@@ -15,7 +15,7 @@
  */
 
 import {getMode} from '../mode';
-import {isDynamicComponent} from '../dynamic-components';
+import {isCacheModifiedExtension} from '../cache-modified-extensions';
 import {urls} from '../config';
 
 /**
@@ -78,7 +78,8 @@ export function calculateExtensionScriptUrl(
   opt_isLocalDev
 ) {
   const useDefaultCdn =
-    urls.useDefaultCdnForDynamicComponents && isDynamicComponent(extensionId);
+    isCacheModifiedExtension(extensionId) &&
+    !urls.cdnSupportsCacheModifiedExtensions;
   const base = calculateScriptBaseUrl(location, opt_isLocalDev, useDefaultCdn);
   if (opt_extensionVersion == null) {
     opt_extensionVersion = '0.1';

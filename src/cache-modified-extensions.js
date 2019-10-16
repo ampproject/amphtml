@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,19 @@
  */
 
 /**
- * Dynamic AMP components - documented at spec/amp-cache-guidelines.md under
+ * Cache modified extensions - documented at spec/amp-cache-guidelines.md under
  * headline "Guidelines: Adding a new cache to the AMP ecosystem"
  */
-const AMP_DYNAMIC_COMPONENTS = ['amp-geo'];
+const CACHE_MODIFIED_EXTENSIONS = ['amp-geo'];
 
 /**
- * Determine whether an extension is a dynamic AMP component
+ * Get status of whether an extension is modified by the cache when served
  * @param {string} extensionId
  * @return {boolean}
  */
-export function isDynamicComponent(extensionId) {
+export function isCacheModifiedExtension(extensionId) {
   return (
-    Boolean(extensionId) && AMP_DYNAMIC_COMPONENTS.indexOf(extensionId) >= 0
+    Boolean(extensionId) &&
+    CACHE_MODIFIED_EXTENSIONS.some(id => id === extensionId.toLowerCase())
   );
 }
