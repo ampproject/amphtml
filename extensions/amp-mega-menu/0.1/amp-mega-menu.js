@@ -176,10 +176,12 @@ export class AmpMegaMenu extends AMP.BaseElement {
       contentId = this.prefix_ + '_AMP_content_' + this.itemCount_;
       content.setAttribute('id', contentId);
     }
+    // add invisible close buttons at the start and end of each content element.
     content.insertBefore(
       this.createScreenReaderCloseButton_(),
       content.firstChild
     );
+    content.appendChild(this.createScreenReaderCloseButton_());
     // prevent click event listener on document from closing the menu
     content.addEventListener('click', e => e.stopPropagation());
 
@@ -346,13 +348,6 @@ export class AmpMegaMenu extends AMP.BaseElement {
 
     screenReaderCloseButton.textContent = ariaLabel;
     screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
-    // This is for screen-readers only, should not get a tab stop. Note that
-    // screen readers can still swipe / navigate to this element, it just will
-    // not be reachable via the tab button. Note that for desktop, hitting esc
-    // to close is also an option.
-    // We do not want this in the tab order since it is not really "visible"
-    // and would be confusing to tab to if not using a screen reader.
-    screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => this.collapse_());
 
     return screenReaderCloseButton;
