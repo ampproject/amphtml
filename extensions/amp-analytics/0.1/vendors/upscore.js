@@ -50,7 +50,7 @@ const UPSCORE_CONFIG = jsonLiteral({
       '${videoBase}&e=video_start&${videoTime}&video_name=${video_name}&video_thumb=${video_thumbnail}',
     'video-pause': '${videoBase}&e=video_pause&${videoTime}',
     'video-stop': '${videoBase}&e=video_stop&${videoTime}',
-    'video-info': '${videoBase}&e=video_position&${videoTime}'
+    'video-info': '${videoBase}&e=video_position&${videoTime}',
   },
   'triggers': {
     'initHit': {
