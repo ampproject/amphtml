@@ -7,13 +7,13 @@ This document outlines the configuration options that will determine in which co
 
 
 #### Format
-```javascript
+```json
 "linkers": {
-  <paramName>: {
-    ids: <Object>,
-    proxyOnly: <boolean>,
-    destinationDomains: <Array<string>>,
-    enabled: <boolean>
+  "<paramName>": {
+    "ids": <Object>,
+    "proxyOnly": <boolean>,
+    "destinationDomains": <Array<string>>,
+    "enabled": <boolean>
   }
 }
 ```
@@ -35,7 +35,7 @@ The most common use case is simply enabling this feature for an analytics provid
     {
       ... // Optional preexisting configuration.
       "linkers" : {
-        enabled: true
+        "enabled": true
       }
     }
   </script>
@@ -45,15 +45,15 @@ The most common use case is simply enabling this feature for an analytics provid
 #### Advanced
 An example of a config that grants more granular control may look like the example below:
 
-```javascript
+```json
 "linkers": {
   "linker1" : {
     "ids" : {
       "cid": "CLIENT_ID(_ga)",
-      "uid" "QUERY_PARAM(uid)",
+      "uid" "QUERY_PARAM(uid)"
     },
     "proxyOnly" : false,
-    "enabled": true,
+    "enabled": true
   }
 }
 ```
@@ -92,7 +92,7 @@ It is important to note that wildcard matching will respect the `.` and not deco
 Some items in the configuration objects have default values. However, you may override these values at the `amp-analytics` element level to suit your use case. The values will be merged and the more specific configuration will take precedence over their parents. Keep in mind these defaults are set only for the `linkers` object in which they are defined. If you have multiple `amp-analytics` elements on your page you will need to set the configuration for each top level linkers object you wish to enable.
 
 Example:
-```javascript
+```json
 "linkers": {
   "enabled": true, // This enables all child linkers contained in this object.
   "proxyOnly" : false,
@@ -102,7 +102,7 @@ Example:
     }
   },
   "linker2" : {
-    "proxyOnly": true
+    "proxyOnly": true,
     "ids" : {
       "gid": "CLIENT_ID(foo)"
     }
