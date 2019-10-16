@@ -29,6 +29,7 @@ const path = require('path');
 const watch = require('gulp-watch');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
+const {logOnSameLine} = require('../common/utils');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const isWatching = argv.watch || argv.w || false;
@@ -55,19 +56,6 @@ function initializeStream(globs, streamOptions) {
     stream = stream.pipe(watcher());
   }
   return stream;
-}
-
-/**
- * Logs a message on the same line to indicate progress
- * @param {string} message
- */
-function logOnSameLine(message) {
-  if (!isTravisBuild() && process.stdout.isTTY) {
-    process.stdout.moveCursor(0, -1);
-    process.stdout.cursorTo(0);
-    process.stdout.clearLine();
-  }
-  log(message);
 }
 
 /**
