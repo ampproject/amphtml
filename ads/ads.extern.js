@@ -377,6 +377,11 @@ data.zone;
 // distroscale.js
 data.tid;
 
+// empower.js
+data.category;
+data.site;
+data.zone;
+
 // eplanning.js
 data.epl_si;
 data.epl_isv;
