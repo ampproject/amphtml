@@ -299,6 +299,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [DynAd](../../ads/dynad.md)
 - [eADV](../../ads/eadv.md)
 - [E-Planning](../../ads/eplanning.md)
+- [Empower](../../ads/empower.md)
 - [Ezoic](../../ads/ezoic.md)
 - [Felmat](../../ads/felmat.md)
 - [FlexOneELEPHANT](../../ads/f1e.md)
