@@ -343,9 +343,35 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    dev().info(TAG, 'setState:', expression);
-    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
-      .then(result => this.setState(result))
+    return this.evaluateExpression_(expression, scope).then(result =>
+      this.setStateAndUpdateHistory_(result)
+    );
+  }
+
+  /**
+   * Sanitizes a state object and merges the resulting object into the current
+   * state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   */
+  setStateWithObject(state) {
+    // Sanitize and copy state
+    const result = this.copyJsonObject_(state);
+    if (!result) {
+      return Promise.reject('Invalid state');
+    }
+    return this.setStateAndUpdateHistory_(result);
+  }
+
+  /**
+   * Merges a state object into the current global state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   * @private
+   */
+  setStateAndUpdateHistory_(state) {
+    dev().info(TAG, 'setState:', state);
+    this.setStatePromise_ = this.setState(state)
       .then(() => this.getDataForHistory_())
       .then(data => {
         // Don't bother calling History.replace with empty data.
@@ -507,6 +533,20 @@ export class Bind {
     } else {
       return Promise.resolve();
     }
+  }
+
+  /**
+   * Returns a copy of the global state for a given field-based expression,
+   * e.g. "foo.bar".
+   * @param {string} expr
+   * @return {*}
+   */
+  getState(expr) {
+    const value = expr ? getValueForExpr(this.state_, expr) : undefined;
+    if (isObject(value) || isArray(value)) {
+      return this.copyJsonObject_(/** @type {JsonObject} */ (value));
+    }
+    return value;
   }
 
   /**
