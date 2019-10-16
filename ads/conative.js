@@ -21,7 +21,7 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function conative(global, data) {
-  validateData(data, ['domain', 'adslot', 'height']);
+  validateData(data, ['domain', 'adslot', 'height'], ['preview']);
 
   data.domain = data.domain || null;
   data.adslot = data.adslot || null;
