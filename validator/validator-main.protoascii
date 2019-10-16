@@ -692,23 +692,6 @@ tags: {
   attrs: {
     name: "name"
     mandatory: true
-    value_casei: "amp-script-src"
-    dispatch_key: NAME_VALUE_DISPATCH
-  }
-}
-# AMP metadata, name=amp-config-urls-cdn
-tags: {
-  html_format: AMP
-  tag_name: "META"
-  spec_name: "meta name=amp-config-urls-cdn"
-  mandatory_parent: "HEAD"
-  attrs: {
-    name: "content"
-    mandatory: true
-  }
-  attrs: {
-    name: "name"
-    mandatory: true
     value: "amp-config-urls-cdn"
     dispatch_key: NAME_VALUE_DISPATCH
   }
