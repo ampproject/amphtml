@@ -86,13 +86,13 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
      - [Has good test coverage](./TESTING.md)
      - [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
      - [Provides good documentation](./building-an-amp-extension.md#documenting-your-element)
-     - [Passes the presubmit checks (no lint and type check errors, tests are passing)](../build-system/enable-git-pre-push.sh#L17-L20)
+     - [Passes the presubmit checks (no lint and type check errors, tests are passing)](../build-system/common/enable-git-pre-push.sh#L17-L20)
      - [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
      - [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
 - Send your code for review.
   - [Sign the Contributor License Agreement](#contributor-license-agreement) if you have not already done so.
   - [Pull the latest changes from the amphtml repo](./getting-started-e2e.md#pull-the-latest-changes-from-the-amphtml-repository) and resolve any conflicts.
-  - Run the **pre push** check, which is a tool that helps catch any issues before you submit your code. To enable the git pre-push hook, see [`enable-git-pre-push.sh`](../build-system/enable-git-pre-push.sh#L17-L20).
+  - Run the **pre push** check, which is a tool that helps catch any issues before you submit your code. To enable the git pre-push hook, see [`enable-git-pre-push.sh`](../build-system/common/enable-git-pre-push.sh#L17-L20).
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
   - [Create a Pull Request (PR)](./getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review).
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
