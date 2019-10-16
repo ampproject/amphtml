@@ -47,14 +47,8 @@
       // and/or the Travis check is implemented.
       pattern: '**/{OWNERS.yaml,OWNERS}',
       owners: [
-        {
-          name: 'rcebulko',
-          notify: true
-        },
-        {
-          name: 'mrjoro',
-          requestReviews: false
-        }
+        { name: 'rcebulko', notify: true },
+        { name: 'mrjoro', requestReviews: false }
       ]
     }
   ]
