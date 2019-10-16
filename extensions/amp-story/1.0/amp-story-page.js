@@ -1645,4 +1645,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.element.setAttribute('aria-labelledby', descriptionElId);
     }
   }
+
+  /**
+   * Returns whether the page will automatically advance
+   * @return {boolean}
+   */
+  isAutoAdvance() {
+    return this.advancement_.isAutoAdvance();
+  }
 }

@@ -140,6 +140,14 @@ export class AdvancementConfig {
   }
 
   /**
+   * Returns whether the advancement configuration will automatically advance
+   * @return {boolean}
+   */
+  isAutoAdvance() {
+    return false;
+  }
+
+  /**
    * @return {boolean}
    * @protected
    */
@@ -305,6 +313,13 @@ class ManualAdvancement extends AdvancementConfig {
       this.maybePerformNavigation_.bind(this),
       true
     );
+  }
+
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return false;
   }
 
   /**
@@ -715,6 +730,13 @@ class TimeBasedAdvancement extends AdvancementConfig {
       : null;
   }
 
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return true;
+  }
+
   /** @override */
   getProgress() {
     if (this.startTimeMs_ === null) {
@@ -969,6 +991,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
     this.unlistenFns_.forEach(fn => fn());
   }
 
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return true;
+  }
+
   /** @override */
   getProgress() {
     if (this.isVideoInterfaceVideo_()) {
@@ -1004,6 +1033,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
           #${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (!elements.length) {
+        if (autoAdvanceStr) {
+          user().warn(
+            'AMP-STORY-PAGE',
+            `Element with ID ${element.id} has no media element ` +
+              'supported for automatic advancement.'
+          );
+        }
         return null;
       }
 
