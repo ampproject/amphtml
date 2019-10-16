@@ -16,7 +16,7 @@
       owners: [{ name: 'ampproject/wg-caching', notify: true }]
     },
     {
-      pattern: '*.md',
+      pattern: '**/*.md',
       owners: [{ name: 'ampproject/wg-outreach' }]
     },
     {
