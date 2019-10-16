@@ -896,15 +896,25 @@ export class AmpForm {
    * @private
    */
   trustForSubmitResponse_(incomingTrust) {
+    const seeIssue = 'See https://github.com/ampproject/amphtml/issues/24894.';
     const doc = this.form_.ownerDocument;
     if (doc && isAmp4Email(doc)) {
       // TODO(choumx): Remove this warning before Q1 2020.
       user().warn(
         TAG + ', AMP4EMAIL',
         '"submit-success and "submit-error" are no longer "high trust". ' +
-          'See https://github.com/ampproject/amphtml/issues/24894.'
+          seeIssue
       );
       return incomingTrust - 1;
+    } else {
+      // TODO(choumx): Remove this expected error before Q1 2020.
+      if (incomingTrust <= ActionTrust.LOW) {
+        dev().expectedError(
+          TAG,
+          'AMP may eventually drop support for recusrive form submissions.' +
+            seeIssue
+        );
+      }
     }
     return ActionTrust.HIGH;
   }
