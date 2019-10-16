@@ -17,7 +17,8 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
-const config = require('../config');
+const config = require('../test-configs/config');
+const deglob = require('globs-to-files');
 const eslint = require('gulp-eslint');
 const eslintIfFixed = require('gulp-eslint-if-fixed');
 const fs = require('fs-extra');
@@ -26,8 +27,9 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
-const {gitDiffNameOnlyMaster} = require('../git');
-const {isTravisBuild} = require('../travis');
+const {gitDiffNameOnlyMaster} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
+const {logOnSameLine} = require('../common/utils');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const isWatching = argv.watch || argv.w || false;
@@ -54,19 +56,6 @@ function initializeStream(globs, streamOptions) {
     stream = stream.pipe(watcher());
   }
   return stream;
-}
-
-/**
- * Logs a message on the same line to indicate progress
- * @param {string} message
- */
-function logOnSameLine(message) {
-  if (!isTravisBuild() && process.stdout.isTTY) {
-    process.stdout.moveCursor(0, -1);
-    process.stdout.cursorTo(0);
-    process.stdout.clearLine();
-  }
-  log(message);
 }
 
 /**
@@ -161,13 +150,17 @@ function runLinter(stream, options) {
 }
 
 /**
- * Extracts the list of JS files in this PR from the commit log.
+ * Extracts the list of lintable files in this PR from the commit log.
  *
  * @return {!Array<string>}
  */
-function jsFilesChanged() {
+function lintableFilesChanged() {
+  const lintableFiles = deglob.sync(config.lintGlobs);
   return gitDiffNameOnlyMaster().filter(function(file) {
-    return fs.existsSync(file) && path.extname(file) == '.js';
+    return (
+      fs.existsSync(file) &&
+      lintableFiles.some(lintableFile => lintableFile.endsWith(file))
+    );
   });
 }
 
@@ -189,20 +182,20 @@ function eslintRulesChanged() {
 }
 
 /**
- * Sets the list of files to be linted.
+ * Gets the list of files to be linted.
  *
  * @param {!Array<string>} files
+ * @return {!Array<string>}
  */
-function setFilesToLint(files) {
-  config.lintGlobs = config.lintGlobs
-    .filter(e => e !== '**/*.js')
-    .concat(files);
+function getFilesToLint(files) {
+  const filesToLint = deglob.sync(files);
   if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
-    files.forEach(file => {
-      log(colors.cyan(file));
+    filesToLint.forEach(file => {
+      log(colors.cyan(path.relative(rootDir, file)));
     });
   }
+  return filesToLint;
 }
 
 /**
@@ -214,17 +207,18 @@ function lint() {
   if (argv.fix) {
     options.fix = true;
   }
+  let filesToLint = config.lintGlobs;
   if (argv.files) {
-    setFilesToLint(argv.files.split(','));
+    filesToLint = getFilesToLint(argv.files.split(','));
   } else if (!eslintRulesChanged() && argv.local_changes) {
-    const jsFiles = jsFilesChanged();
-    if (jsFiles.length == 0) {
+    const lintableFiles = lintableFilesChanged();
+    if (lintableFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
     }
-    setFilesToLint(jsFiles);
+    filesToLint = getFilesToLint(lintableFiles);
   }
-  const stream = initializeStream(config.lintGlobs, {base: rootDir});
+  const stream = initializeStream(filesToLint, {base: rootDir});
   return runLinter(stream, options);
 }
 

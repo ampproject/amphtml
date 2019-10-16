@@ -124,6 +124,7 @@ PASS
 |          <option>distroscale</option>
 |          <option>dotandads</option>
 |          <option>doubleclick</option>
+|          <option>empower</option>
 |          <option>eplanning</option>
 |          <option>ezoic</option>
 |          <option>f1e</option>
@@ -681,6 +682,13 @@ PASS
 |        data-epl_sec="AMP_TEST"
 |        data-epl_kvs='{"target1":"food", "target2":"cars"}'
 |        data-epl_e="AMP_TEST">
+|    </amp-ad>
+|
+|    <h2>Empower</h2>
+|    <amp-ad width="300" height="250"
+|        type="empower"
+|        data-site="example"
+|        data-zone="123456">
 |    </amp-ad>
 |
 |    <h2>Ezoic</h2>

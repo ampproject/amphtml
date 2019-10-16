@@ -28,7 +28,7 @@ const {
   preBuildCoreRuntime,
   preBuildSomeExtensions,
 } = require('../server/lazy-build');
-const {createCtrlcHandler} = require('../ctrlcHandler');
+const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {getServeMode} = require('../server/app-utils');
 
@@ -68,7 +68,7 @@ function getMiddleware() {
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
   }
-  if (!argv._.includes('serve') && !argv.eager_build) {
+  if (!argv._.includes('serve')) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
   }
@@ -134,7 +134,7 @@ function restartServer() {
  * Initiates pre-build steps requested via command line args.
  */
 function initiatePreBuildSteps() {
-  if (!argv._.includes('serve') && !argv.eager_build) {
+  if (!argv._.includes('serve')) {
     preBuildCoreRuntime();
     if (argv.extensions || argv.extensions_from) {
       preBuildSomeExtensions();

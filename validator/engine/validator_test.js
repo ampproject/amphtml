@@ -27,6 +27,7 @@ goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.sortAndUniquify');
 goog.require('amp.validator.subtractDiff');
 goog.require('amp.validator.validateString');
+goog.require('goog.asserts');
 goog.require('goog.uri.utils');
 
 /**
@@ -305,7 +306,7 @@ ValidatorTestCase.prototype.run = function() {
                ' is incorrect, please run `gulp validator --update_tests` to ' +
                'regenerate it based on its corresponding .html file.';
   }
-  assert.fail('', '', message, '');
+  goog.asserts.fail(message);
 };
 
 /**
@@ -343,9 +344,8 @@ describe('ValidatorOutput', () => {
         amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
     const expectedSubstr = 'http://google.com/foo.html:28:3';
     if (observed.indexOf(expectedSubstr) === -1)
-    {assert.fail(
-        '', '', 'expectedSubstr:\n' + expectedSubstr +
-          '\nsaw:\n' + observed, '');}
+    {goog.asserts.fail('expectedSubstr:\n' + expectedSubstr +
+          '\nsaw:\n' + observed);}
   });
 
   it('validate amp format', () => {
@@ -1300,7 +1300,6 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-position-observer': ['0.1', 'latest'],
         'amp-social-share': ['0.1', 'latest'],
         'amp-video': ['0.1', 'latest'],
-        'amp-youtube': ['0.1', 'latest'],
       };
       // Verify extension is approved.
       const extension = tagSpec.extensionSpec.name;
@@ -1333,20 +1332,20 @@ describe('ValidatorRulesMakeSense', () => {
       // Changes to the following map must be approved by the AMP4Email
       // Working Group, @wg-amp4email.
       const approvedAmp4EmailExtensions = {
-        'AMP-ACCORDION': ['0.1', 'latest'],
-        'AMP-ANIM': ['0.1', 'latest'],
-        'AMP-BIND-MACRO': ['0.1', 'latest'],
+        'AMP-ACCORDION': ['0.1'],
+        'AMP-ANIM': ['0.1'],
+        'AMP-BIND-MACRO': ['0.1'],
         'AMP-CAROUSEL': ['0.1'],
-        'AMP-FIT-TEXT': ['0.1', 'latest'],
-        'AMP-IMG': ['0.1', 'latest'],
-        'AMP-IMAGE-LIGHTBOX': ['0.1', 'latest'],
-        'AMP-LAYOUT': ['0.1', 'latest'],
-        'AMP-LIGHTBOX': ['0.1', 'latest'],
-        'AMP-LIST': ['0.1', 'latest'],
-        'AMP-SELECTOR': ['0.1', 'latest'],
-        'AMP-SIDEBAR': ['0.1', 'latest'],
-        'AMP-STATE': ['0.1', 'latest'],
-        'AMP-TIMEAGO': ['0.1', 'latest'],
+        'AMP-FIT-TEXT': ['0.1'],
+        'AMP-IMG': ['0.1'],
+        'AMP-IMAGE-LIGHTBOX': ['0.1'],
+        'AMP-LAYOUT': ['0.1'],
+        'AMP-LIGHTBOX': ['0.1'],
+        'AMP-LIST': ['0.1'],
+        'AMP-SELECTOR': ['0.1'],
+        'AMP-SIDEBAR': ['0.1'],
+        'AMP-STATE': ['0.1'],
+        'AMP-TIMEAGO': ['0.1'],
       };
       // Verify extension and it's usage is approved.
       it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
@@ -1464,15 +1463,13 @@ describe('ValidatorRulesMakeSense', () => {
       it('extension must have a name field value', () => {
         expect(extensionSpec.name).toBeDefined();
       });
-      // TODO(b/139732703): remove the guard when AMP4EMAIL supports
-      // amp-carousel 0.2.
-      if (extensionSpec.name !== 'amp-carousel' ||
-          !tagSpec.htmlFormat.includes(
+      // AMP4EMAIL extensions must support at least one version.
+      if (tagSpec.htmlFormat.includes(
               amp.validator.HtmlFormat.Code.AMP4EMAIL)) {
-        it('extension ' + extensionSpec.name + ' must have at least two ' +
-               'versions, latest and a numeric version, e.g `1.0`',
+        it('extension ' + extensionSpec.name + ' must have at least one ' +
+               'version',
            () => {
-             expect(extensionSpec.version.length).toBeGreaterThan(1);
+             expect(extensionSpec.version.length).toBeGreaterThan(0);
            });
       }
       it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
