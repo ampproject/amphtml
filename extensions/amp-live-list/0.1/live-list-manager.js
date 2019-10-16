@@ -17,6 +17,7 @@
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -153,7 +154,7 @@ export class LiveListManager {
     if (this.latestUpdateTime_ > 0) {
       url = addParamsToUrl(
         url,
-        /** @type {JsonObject} */ ({
+        dict({
           'amp_latest_update_time': String(this.latestUpdateTime_),
           // AMP Caches do not always evict entries from their caches.
           // A random number from the max safe range without BigInts helps add confidence the document is fresh.
