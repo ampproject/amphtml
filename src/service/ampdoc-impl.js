@@ -23,25 +23,22 @@ import {
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
-import {config} from '../config';
 import {dev, devAssert} from '../log';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {isExperimentOn} from '../experiments';
-import {isObject, toArray} from '../types';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
 import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
+import {toArray} from '../types';
+import {urls} from '../config';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
 
 /** @const {string} */
 const PARAMS_SENTINEL = '__AMP__';
-
-/** @const {string} */
-const TAG = 'ampdoc-impl';
 
 /**
  * @typedef {{
@@ -89,7 +86,7 @@ export class AmpDocService {
       this.singleDoc_ = new AmpDocSingle(win, {
         params: extractSingleDocParams(win, opt_initParams),
       });
-      importMetaConfig(win);
+      importMetaConfigUrls(win);
       win.document[AMPDOC_PROP] = this.singleDoc_;
     }
 
@@ -990,102 +987,32 @@ function extractSingleDocParams(win, initParams) {
 }
 
 /**
- * Parse meta config name to identify corresponding AMP.config property and
- * return its parent object and key name.
- * @param {string} name
- * @return {?Object<string, (!Object|string)>}
- *
- * Very limited expression support is allowed in name: dot.
- * Sample names and their corresponding config items:
- *  amp-config-var1       --> AMP.config.var1
- *  amp-config-urls.var1  --> AMP.config.urls.var1
- */
-function getConfigPropertyByMetaName(name) {
-  if (!name) {
-    return null;
-  }
-  let obj = config;
-  const path = name.split('.');
-  while (isObject(obj) && path.length > 1) {
-    obj = obj[path.shift()];
-  }
-  if (isObject(obj) && path[0]) {
-    return {
-      'obj': obj,
-      'key': path[0],
-    };
-  }
-  return null;
-}
-
-/**
- * Cast string meta value to specified type
- * @param {string} value
- * @param {string} type
- * @return {(null|undefined|string|boolean|RegExp)}
- *
- * Throws on failure to cast.
- */
-function getMetaValue(value, type) {
-  switch (type) {
-    case 'null':
-      return null;
-    case 'undefined':
-      return undefined;
-    case 'string':
-      return value;
-    case 'boolean':
-      const trimValue = value.trim();
-      const bValue =
-        trimValue === 'true' ? true : trimValue === 'false' ? false : undefined;
-      if (typeof bValue === 'boolean') {
-        return bValue;
-      }
-      throw dev().createError('Invalid boolean string');
-    case 'regex':
-      const reMatch = /^\/(.+)\/([gimsuy]*)$/.exec(value.trim());
-      if (reMatch) {
-        return new RegExp(reMatch[1], reMatch[2]);
-      }
-      throw dev().createError('Invalid regex string: ' + value);
-    default:
-      break;
-  }
-  throw dev().createError('Unrecognized value and/or type.');
-}
-
-/**
- * Support limited updates to AMP.config via <meta name="amp-config-"> tags
+ * Support limited updates to AMP.config.urls via <meta name="amp-config-urls-">
  * @param {!Window} win
  *
- * TODO: Do we need a white list? These config updates run well after the
- * runtime has initialized; they must not introduce conflicts in components that
- * have already referenced the config value.
- *
- * Limited expression support is allowed in names. Data attribute 'data-type'
- * can be used to cast values from string to other types. Supported types
- * currently include null, undefined, string, boolean, regex.
+ * Whitelisted for update: cdn, cdnSupportsCacheModifiedExtensions
  */
-function importMetaConfig(win) {
-  const metaTags = win.document.head.querySelectorAll(
-    'meta[name^="amp-config-"]'
+function importMetaConfigUrls(win) {
+  const head = win.document && win.document.head;
+  if (!head) {
+    return;
+  }
+  toArray(head.querySelectorAll('meta[name^="amp-config-urls-"]')).forEach(
+    tag => {
+      const name = tag.getAttribute('name').replace('amp-config-urls-', '');
+      if (name === 'cdn') {
+        const content = tag.getAttribute('content');
+        if (content) {
+          urls.cdn = content;
+        }
+      } else if (name === 'cdnSupportsCacheModifiedExtensions') {
+        const content = tag.getAttribute('content');
+        if (content === 'false') {
+          urls.cdnSupportsCacheModifiedExtensions = false;
+        }
+      }
+    }
   );
-  toArray(metaTags).forEach(tag => {
-    const nameExpression = tag.getAttribute('name').replace('amp-config-', '');
-    const configItem = getConfigPropertyByMetaName(nameExpression);
-    if (!configItem) {
-      return;
-    }
-    const valueType = tag.getAttribute('data-type') || 'string';
-    try {
-      configItem.obj[configItem.key] = getMetaValue(
-        tag.getAttribute('value') || '',
-        valueType
-      );
-    } catch (e) {
-      dev().error(TAG, e);
-    }
-  });
 }
 
 /**

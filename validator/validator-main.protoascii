@@ -679,6 +679,58 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
+# AMP metadata, name=amp-config-urls-cdn
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-config-urls-cdn"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-script-src"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
+# AMP metadata, name=amp-config-urls-cdn
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-config-urls-cdn"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value: "amp-config-urls-cdn"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
+# AMP metadata, name=amp-config-urls-cdnSupportsCacheModifiedExtensions
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-config-urls-cdnSupportsCacheModifiedExtensions"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "false"
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value: "amp-config-urls-cdnSupportsCacheModifiedExtensions"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
 # AMP4ADS metadata, name=amp4ads-id
 # https://github.com/ampproject/amphtml/issues/7730
 tags: {
