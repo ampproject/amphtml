@@ -401,7 +401,7 @@ export class AmpForm {
                 this.triggerAction_(
                   FormEvents.VERIFY_ERROR,
                   errors,
-                  ActionTrust.HIGH
+                  ActionTrust.DEFAULT // DEFAULT because async after gesture.
                 );
               });
             } else {
