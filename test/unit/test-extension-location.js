@@ -82,23 +82,6 @@ describes.sandboxed('Extension Location', {}, () => {
         'http://localhost:8000/dist/rtv/123/v0/no-version.js'
       );
     });
-
-    it('should handles single pass experiment', () => {
-      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
-      const script = calculateExtensionScriptUrl(
-        {
-          pathname: 'examples/ads.amp.html',
-          host: 'localhost:8000',
-          protocol: 'http:',
-        },
-        'no-version',
-        /* version is empty but defined */ '',
-        true
-      );
-      expect(script).to.equal(
-        'http://localhost:8000/dist/rtv/123/sp/v0/no-version.js'
-      );
-    });
   });
 
   describe('get correct entry point source', () => {
@@ -151,21 +134,6 @@ describes.sandboxed('Extension Location', {}, () => {
         /* opt_rtv */ true
       );
       expect(script).to.equal('https://cdn.ampproject.org/rtv/123/ww.js');
-    });
-
-    it('should handle single pass experiment', () => {
-      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
-      const script = calculateEntryPointScriptUrl(
-        {
-          pathname: 'examples/ads.amp.html',
-          host: 'localhost:8000',
-          protocol: 'http:',
-        },
-        'ww',
-        /* isLocalDev */ false,
-        /* opt_rtv */ true
-      );
-      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/sp/ww.js');
     });
   });
 
