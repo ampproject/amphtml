@@ -28,6 +28,11 @@ export function idealmedia(global, data) {
 
   document.body.appendChild(scriptRoot);
 
+  /**
+   * Returns path for provided js filename
+   * @param {string} publisher The first number.
+   * @returns {string} Path to provided filename.
+   */
   function getResourceFilePath(publisher) {
     const publisherStr = publisher.replace(/[^A-z0-9]/g, '');
     return `${publisherStr[0]}/${publisherStr[1]}`;
