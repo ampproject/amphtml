@@ -1110,11 +1110,29 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource1.element.isBuilt = () => false;
     resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
+    resource1.isBuildRenderBlocking = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
     resources.buildOrScheduleBuildForResource_(resource1);
     expect(resource1.build).to.not.be.called;
+  });
+
+  it('should build render blocking resource even if quota is reached', () => {
+    sandbox.stub(resources.ampdoc, 'hasBeenVisible').callsFake(() => false);
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+    resources.buildAttemptsCount_ = 21; // quota is 20
+
+    resource1.element.isBuilt = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
+    resource1.prerenderAllowed = () => true;
+    resource1.isBuildRenderBlocking = () => true;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+
+    resources.buildOrScheduleBuildForResource_(resource1);
+    expect(resource1.build).to.be.called;
   });
 
   it('should layout resource if outside viewport but idle', () => {
@@ -1777,6 +1795,53 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize).to.be.calledOnce;
       expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
+
+    it('should NOT change size via activation if has not been active', () => {
+      viewportMock
+        .expects('getContentHeight')
+        .returns(10000)
+        .atLeast(0);
+      const event = {
+        userActivation: {
+          hasBeenActive: false,
+        },
+      };
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        event,
+        false
+      );
+      resources.mutateWork_();
+      expect(resource1.changeSize).to.not.be.called;
+      expect(overflowCallbackSpy).to.be.calledOnce.calledWith(true);
+    });
+
+    it('should change size via activation if has been active', () => {
+      viewportMock
+        .expects('getContentHeight')
+        .returns(10000)
+        .atLeast(0);
+      const event = {
+        userActivation: {
+          hasBeenActive: true,
+        },
+      };
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        event,
+        false
+      );
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce.calledWith(false);
     });
 
     it('should change size when below the viewport', () => {

@@ -153,7 +153,7 @@ The configuration object for `<amp-analytics>` uses the following format:
     "beacon": *boolean*,
     "xhrpost": *boolean*,
     "image": *boolean*,
-  }
+  },
 }
 ```
 
@@ -165,7 +165,7 @@ The configuration data may be specified inline or fetched remotely by specifying
 If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
 be merged together such that:
 
-1.  Remote configuration takes precedence over in-line configuration and
+1.  Remote configuration takes precedence over inline configuration and
 2.  Inline configuration takes precedence over vendor configuration.
 
 
@@ -695,7 +695,7 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 
 ##### Timer trigger
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
-  - `timerSpec` Specification for triggers of type `timer`. The unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
+  - `timerSpec` Specification for triggers of type `timer`. Unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. An addtional request will be triggered when the `maxTimerLength` has been reached. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true

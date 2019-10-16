@@ -540,7 +540,9 @@ describes.fakeWin(
       toggleExperiment(win, 'version-locking', true);
       function addExisting(index) {
         const s = document.createElement('script');
-        s.setAttribute('custom-element', 'amp-test-element' + index);
+        const name = 'amp-test-element' + index;
+        s.setAttribute('custom-element', name);
+        s.setAttribute('src', `/${name}-0.1.js`);
         win.document.head.appendChild(s);
         return s;
       }
@@ -621,9 +623,6 @@ describes.fakeWin(
       yield waitNext(promise);
       expect(progress).to.equal('134');
       expect(queueExtensions).to.have.length(0);
-      expect(s1.getAttribute('custom-element')).to.be.null;
-      expect(s2.getAttribute('custom-element')).to.be.null;
-      expect(s3.getAttribute('custom-element')).to.be.null;
       expect(s1.getAttribute('i-amphtml-loaded-new-version')).to.equal(
         'amp-test-element1'
       );

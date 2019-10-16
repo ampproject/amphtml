@@ -1014,6 +1014,15 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Whether the element has render-blocking service.
+     * @return {boolean}
+     * @final
+     */
+    isBuildRenderBlocking() {
+      return this.implementation_.isBuildRenderBlocking();
+    }
+
+    /**
      * Creates a placeholder for the element.
      * @return {?Element}
      * @final

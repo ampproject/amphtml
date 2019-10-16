@@ -73,7 +73,7 @@ export class CryptoHandler {
     this.decryptionPromise_ = this.ampdoc_.whenReady().then(() => {
       const encryptedSections = this.ampdoc_
         .getRootNode()
-        .querySelectorAll('script[encrypted]');
+        .querySelectorAll('script[ciphertext]');
       const promises = [];
       iterateCursor(encryptedSections, encryptedSection => {
         promises.push(
