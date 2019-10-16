@@ -146,6 +146,7 @@ const prettifyGlobs = [
   '.travis.yml',
   '**/.eslintrc',
   '.prettierrc',
+  '.renovaterc.json',
   'build-system/global-configs/caches.json',
   '**/OWNERS',
   // TODO(rsimha): Fix and check other json files, dotfiles, etc.
