@@ -6,11 +6,7 @@
   "overrides": [
     {
       "files": "OWNERS",
-      "options": {
-        "parser": "json5",
-        "bracketSpacing": true,
-        "trailingComma": "none"
-      }
+      "options": {"parser": "json5"}
     },
     {
       "files": [".eslintrc", ".prettierrc", ".renovaterc.json"],
