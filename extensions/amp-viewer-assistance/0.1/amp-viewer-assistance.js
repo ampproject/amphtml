@@ -175,7 +175,7 @@ export class AmpViewerAssistance {
             this.assistanceElement_,
             'signedIn',
             null,
-            ActionTrust.HIGH
+            ActionTrust.DEFAULT // DEFAULT because async after gesture.
           );
         } else {
           this.setIdTokenStatus_(/*available=*/ false);
