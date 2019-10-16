@@ -422,6 +422,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'empower': {
+    prefetch: 'https://cdn.empower.net/sdk/amp-ad.min.js',
+    renderStartImplemented: true,
+  },
+
   'engageya': {},
 
   'epeex': {},
