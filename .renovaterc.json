@@ -1,11 +1,7 @@
 {
-  "extends": [
-    "config:base"
-  ],
+  "extends": ["config:base"],
   "node": {
-    "supportPolicy": [
-      "lts_active"
-    ]
+    "supportPolicy": ["lts_active"]
   },
   "statusCheckVerify": true,
   "commitMessagePrefix": "📦",

@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{ name: 'kushal' }, { name: 'dbow' }, { name: 'junoatscroll' }]
-    }
-  ]
+      owners: [{name: 'kushal'}, {name: 'dbow'}, {name: 'junoatscroll'}],
+    },
+  ],
 }

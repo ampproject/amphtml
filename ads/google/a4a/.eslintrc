@@ -1,5 +1,5 @@
 {
   "rules": {
-    "local/no-style-display": 2,
+    "local/no-style-display": 2
   }
 }
