@@ -142,7 +142,8 @@ const presubmitGlobs = [
 const prettifyGlobs = [
   '**/OWNERS',
   '.prettierrc',
-  // TODO(rsimha): Fix json files and add dotfiles, etc.
+  'build-system/global-configs/caches.json',
+  // TODO(rsimha): Fix and check other json files, dotfiles, etc.
   '!{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
