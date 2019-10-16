@@ -286,6 +286,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Cedato](../../ads/cedato.md)
 - [Colombia](../../ads/colombia.md)
 - [Connatix](../../ads/connatix.md)
+- [Conative](../../ads/conative.md)
 - [Content.ad](../../ads/contentad.md)
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
