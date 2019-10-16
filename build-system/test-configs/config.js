@@ -147,7 +147,7 @@ const prettifyGlobs = [
   '**/.eslintrc',
   '.prettierrc',
   '.renovaterc.json',
-  'build-system/global-configs/caches.json',
+  '**/*.json',
   '**/OWNERS',
   // TODO(rsimha): Fix and check other json files, dotfiles, etc.
   '!{node_modules,build,dist,dist.3p,dist.tools}/**',

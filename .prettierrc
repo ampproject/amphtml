@@ -9,7 +9,7 @@
       "options": {"parser": "json5"}
     },
     {
-      "files": [".eslintrc", ".prettierrc", ".renovaterc.json"],
+      "files": [".eslintrc", ".prettierrc", ".renovaterc.json", "*.json"],
       "options": {"parser": "json"}
     },
     {

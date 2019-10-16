@@ -1,27 +1,28 @@
 {
-  "padding": {"top":0, "bottom":0, "left":0, "right":0},
+  "padding": {"top": 0, "bottom": 0, "left": 0, "right": 0},
 
   "signals": [
     {
-      "name": "hover", "init": null,
+      "name": "hover",
+      "init": null,
       "streams": [
-        { "type": "symbol:mouseover",
-          "expr": "datum._id" },
-        { "type": "window:mouseup, symbol:mouseout", "expr": "null" }
+        {"type": "symbol:mouseover", "expr": "datum._id"},
+        {"type": "window:mouseup, symbol:mouseout", "expr": "null"}
       ]
     },
     {
-      "name": "grab", "init": null,
+      "name": "grab",
+      "init": null,
       "streams": [
-        { "type": "symbol:touchstart, symbol:mousedown",
-          "expr": "datum._id" },
-        { "type": "touchend, window:mouseup", "expr": "null" }
+        {"type": "symbol:touchstart, symbol:mousedown", "expr": "datum._id"},
+        {"type": "touchend, window:mouseup", "expr": "null"}
       ]
     },
     {
-      "name": "active", "init": null,
+      "name": "active",
+      "init": null,
       "streams": [
-        { "type": "hover, grab", "expr": "{id: grab || hover}" },
+        {"type": "hover, grab", "expr": "{id: grab || hover}"},
         {
           "type": "symbol:touchmove, [symbol:mousedown, window:mouseup] > window:mousemove",
           "expr": "{x: eventX(), y: eventY(), id: grab, update: true}"
@@ -29,19 +30,17 @@
       ]
     },
     {
-      "name": "dblclick", "init": null, "verbose": true,
-      "streams": [
-        { "type": "symbol:dblclick", "expr": "datum._id" }
-      ]
+      "name": "dblclick",
+      "init": null,
+      "verbose": true,
+      "streams": [{"type": "symbol:dblclick", "expr": "datum._id"}]
     }
   ],
 
   "data": [
     {
       "name": "fixed",
-      "modify": [
-        {"type": "toggle", "signal": "dblclick", "field": "id"}
-      ]
+      "modify": [{"type": "toggle", "signal": "dblclick", "field": "id"}]
     },
     {
       "name": "edges",
@@ -73,10 +72,13 @@
       "from": {
         "data": "edges",
         "transform": [
-          { "type": "lookup", "on": "nodes",
+          {
+            "type": "lookup",
+            "on": "nodes",
             "keys": ["source", "target"],
-            "as":   ["_source", "_target"] },
-          { "type": "linkpath", "shape": "line" }
+            "as": ["_source", "_target"]
+          },
+          {"type": "linkpath", "shape": "line"}
         ]
       },
       "properties": {
@@ -99,9 +101,8 @@
           "x": {"field": "layout_x"},
           "y": {"field": "layout_y"},
           "stroke": [
-            { "test": "indata('fixed', datum._id, 'id')",
-              "value": "firebrick" },
-            { "value": "steelblue" }
+            {"test": "indata('fixed', datum._id, 'id')", "value": "firebrick"},
+            {"value": "steelblue"}
           ]
         }
       }
