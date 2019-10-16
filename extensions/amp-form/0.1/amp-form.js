@@ -911,7 +911,7 @@ export class AmpForm {
       if (incomingTrust <= ActionTrust.LOW) {
         dev().expectedError(
           TAG,
-          'AMP may eventually drop support for recusrive form submissions.' +
+          'AMP may eventually drop support for recursive form submissions.' +
             seeIssue
         );
       }

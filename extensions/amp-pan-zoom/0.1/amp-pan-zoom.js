@@ -764,7 +764,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   triggerTransformEnd_(scale, x, y) {
-    const transformEndEvent = createCustomEvent(
+    const event = createCustomEvent(
       this.win,
       `${TAG}.transformEnd`,
       dict({
@@ -773,12 +773,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         'y': y,
       })
     );
-    this.action_.trigger(
-      this.element,
-      'transformEnd',
-      transformEndEvent,
-      ActionTrust.HIGH
-    );
+    this.action_.trigger(this.element, 'transformEnd', event, ActionTrust.HIGH);
     this.element.dispatchCustomEvent('transformEnd');
   }
 
