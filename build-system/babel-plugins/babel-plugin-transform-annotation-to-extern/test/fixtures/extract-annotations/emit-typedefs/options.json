@@ -1,5 +1,10 @@
 {
-  "plugins": [["../../../../../babel-plugin-transform-annotation-to-extern", {
-    "emitTypedefs": true
-  }]]
+  "plugins": [
+    [
+      "../../../../../babel-plugin-transform-annotation-to-extern",
+      {
+        "emitTypedefs": true
+      }
+    ]
+  ]
 }

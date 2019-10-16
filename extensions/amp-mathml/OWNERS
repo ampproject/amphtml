@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{ name: 'adamsilverstein' }]
-    }
-  ]
+      owners: [{name: 'adamsilverstein'}],
+    },
+  ],
 }

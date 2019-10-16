@@ -5,12 +5,12 @@
   rules: [
     {
       owners: [
-        { name: 'ampproject/wg-infra' },
-        { name: 'ampproject/wg-runtime' },
-        { name: 'ampproject/wg-performance' },
-        { name: 'erwinmombay', notify: true },
-        { name: 'jridgewell', notify: true }
-      ]
-    }
-  ]
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-runtime'},
+        {name: 'ampproject/wg-performance'},
+        {name: 'erwinmombay', notify: true},
+        {name: 'jridgewell', notify: true},
+      ],
+    },
+  ],
 }

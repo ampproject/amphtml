@@ -140,11 +140,16 @@ const presubmitGlobs = [
 ];
 
 const prettifyGlobs = [
-  '**/OWNERS',
+  '.codecov.yml',
+  '.lando.yml',
+  '.lgtm.yml',
+  '.travis.yml',
+  '**/.eslintrc',
   '.prettierrc',
-  'build-system/global-configs/caches.json',
-  // TODO(rsimha): Fix and check other json files, dotfiles, etc.
-  '!{node_modules,build,dist,dist.3p,dist.tools}/**',
+  '.renovaterc.json',
+  '**/*.json',
+  '**/OWNERS',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**

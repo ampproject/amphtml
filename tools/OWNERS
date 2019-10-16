@@ -5,10 +5,10 @@
   rules: [
     {
       owners: [
-        { name: 'ampproject/wg-infra' },
-        { name: 'ampproject/runtime' },
-        { name: 'ampproject/performance' }
-      ]
-    }
-  ]
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/runtime'},
+        {name: 'ampproject/performance'},
+      ],
+    },
+  ],
 }
