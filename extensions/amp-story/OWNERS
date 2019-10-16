@@ -7,14 +7,14 @@
       owners: [
         {
           name: 'gmajoulet',
-          notify: true
+          notify: true,
         },
         {
           name: 'newmuis',
-          notify: true
+          notify: true,
         },
-        { name: 'enriqe' }
-      ]
-    }
-  ]
+        {name: 'enriqe'},
+      ],
+    },
+  ],
 }

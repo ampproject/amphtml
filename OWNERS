@@ -6,30 +6,30 @@
   rules: [
     {
       owners: [
-        { name: 'cramforce', requestReviews: false },
-        { name: 'dvoytenko', requestReviews: false },
-        { name: 'jridgewell', requestReviews: false }
-      ]
+        {name: 'cramforce', requestReviews: false},
+        {name: 'dvoytenko', requestReviews: false},
+        {name: 'jridgewell', requestReviews: false},
+      ],
     },
     {
       pattern: '**/validator-*.{protoascii,html,out}',
-      owners: [{ name: 'ampproject/wg-caching', notify: true }]
+      owners: [{name: 'ampproject/wg-caching', notify: true}],
     },
     {
       pattern: '**/*.md',
-      owners: [{ name: 'mrjoro' }, { name: 'ampproject/wg-outreach' }]
+      owners: [{name: 'mrjoro'}, {name: 'ampproject/wg-outreach'}],
     },
     {
       pattern: '{.*,babel.config.js,gulpfile.js}',
-      owners: [{ name: 'ampproject/wg-infra' }]
+      owners: [{name: 'ampproject/wg-infra'}],
     },
     {
       pattern: '{package.json,yarn.lock}',
       owners: [
-        { name: 'ampproject/wg-infra' },
-        { name: 'ampproject/wg-runtime' },
-        { name: 'ampproject/wg-performance' }
-      ]
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-runtime'},
+        {name: 'ampproject/wg-performance'},
+      ],
     },
     {
       // The below rule will be here only temporarily during the transition
@@ -47,9 +47,9 @@
       // and/or the Travis check is implemented.
       pattern: '**/{OWNERS.yaml,OWNERS}',
       owners: [
-        { name: 'rcebulko', notify: true },
-        { name: 'mrjoro', requestReviews: false }
-      ]
-    }
-  ]
+        {name: 'rcebulko', notify: true},
+        {name: 'mrjoro', requestReviews: false},
+      ],
+    },
+  ],
 }
