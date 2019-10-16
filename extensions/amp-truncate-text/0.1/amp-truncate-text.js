@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
 import {Services} from '../../../src/services';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
