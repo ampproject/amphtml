@@ -1438,10 +1438,7 @@ export class AmpStory extends AMP.BaseElement {
 
           // Start progress bar update for pages that are not ads or auto-
           // advance.
-          const isAutoAdvance = targetPage.element.hasAttribute(
-            Attributes.AUTO_ADVANCE_AFTER
-          );
-          if (!isAutoAdvance) {
+          if (!targetPage.isAutoAdvance()) {
             this.systemLayer_.updateProgress(
               targetPageId,
               this.advancement_.getProgress()
