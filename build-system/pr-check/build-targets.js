@@ -27,12 +27,24 @@ const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 
 /**
+ * Checks if the given file is an OWNERS file
+ * @param {string} file
+ * @return {boolean}
+ */
+function isOwnersFile(file) {
+  return file.endsWith('OWNERS');
+}
+
+/**
  * A mapping of functions that match a given file to one or more build targets.
  */
 const targetMatchers = [
   {
     targets: ['AVA'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
         file == 'build-system/tasks/ava.js' ||
         file.startsWith('build-system/tasks/csvify-size/') ||
@@ -44,6 +56,9 @@ const targetMatchers = [
   {
     targets: ['BABEL_PLUGIN', 'RUNTIME'], // Test the runtime for babel plugin changes.
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
         file == 'build-system/babel-plugins/log-module-metadata.js' ||
         file == 'build-system/babel-plugins/static-template-metadata.js' ||
@@ -57,8 +72,11 @@ const targetMatchers = [
   {
     targets: ['CACHES_JSON'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
-        file == 'build-system/tasks/json-check.js' ||
+        file == 'build-system/tasks/caches-json.js' ||
         file == 'build-system/global-configs/caches.json'
       );
     },
@@ -66,6 +84,9 @@ const targetMatchers = [
   {
     targets: ['DEV_DASHBOARD'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
         file == 'build-system/tasks/dev-dashboard-tests.js' ||
         file == 'build-system/server/app.js' ||
@@ -76,6 +97,9 @@ const targetMatchers = [
   {
     targets: ['DOCS'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
         file == 'build-system/tasks/check-links.js' ||
         (path.extname(file) == '.md' && !file.startsWith('examples/'))
@@ -85,6 +109,9 @@ const targetMatchers = [
   {
     targets: ['E2E_TEST'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
         file.startsWith('build-system/tasks/e2e/') ||
         config.e2eTestPaths.some(pattern => {
@@ -96,12 +123,18 @@ const targetMatchers = [
   {
     targets: ['FLAG_CONFIG'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return file.startsWith('build-system/global-configs/');
     },
   },
   {
     targets: ['INTEGRATION_TEST'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
         file == 'build-system/tasks/integration.js' ||
         (file.startsWith('build-system/tasks/runtime-test/') &&
@@ -113,8 +146,17 @@ const targetMatchers = [
     },
   },
   {
+    targets: ['OWNERS'],
+    func: file => {
+      return isOwnersFile(file) || file == 'build-system/tasks/check-owners.js';
+    },
+  },
+  {
     targets: ['UNIT_TEST'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
         file == 'build-system/tasks/unit.js' ||
         file.startsWith('build-system/tasks/runtime-test/') ||
@@ -127,6 +169,9 @@ const targetMatchers = [
   {
     targets: ['VALIDATOR'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       if (file.startsWith('validator/webui/')) {
         return false;
       }
@@ -155,12 +200,18 @@ const targetMatchers = [
   {
     targets: ['VALIDATOR_WEBUI'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return file.startsWith('validator/webui/');
     },
   },
   {
     targets: ['VISUAL_DIFF'],
     func: file => {
+      if (isOwnersFile(file)) {
+        return false;
+      }
       return (
         file.startsWith('build-system/tasks/visual-diff/') ||
         file.startsWith('examples/visual-tests/') ||

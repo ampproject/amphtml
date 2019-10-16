@@ -108,6 +108,7 @@
     "gulp-regexp-sourcemaps": "1.0.1",
     "gulp-rename": "1.4.0",
     "gulp-sourcemaps": "2.6.5",
+    "gulp-tap": "2.0.0",
     "gulp-watch": "5.0.1",
     "gzip-size": "5.1.1",
     "html-minifier": "4.0.0",

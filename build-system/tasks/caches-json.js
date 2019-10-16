@@ -19,7 +19,6 @@ const colors = require('ansi-colors');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const through2 = require('through2');
-const {jsonGlobs} = require('../test-configs/config');
 
 const expectedCaches = ['cloudflare', 'google'];
 
@@ -64,37 +63,9 @@ async function cachesJson() {
   );
 }
 
-/**
- * Fail if JSON files are valid.
- * @return {!Promise}
- */
-async function jsonSyntax() {
-  let hasError = false;
-  return gulp
-    .src(jsonGlobs)
-    .pipe(
-      through2.obj(function(file) {
-        try {
-          JSON.parse(file.contents.toString());
-        } catch (e) {
-          log(
-            colors.red('Invalid JSON in ' + file.relative + ': ' + e.message)
-          );
-          hasError = true;
-        }
-      })
-    )
-    .on('end', function() {
-      if (hasError) {
-        process.exit(1);
-      }
-    });
-}
-
 module.exports = {
   cachesJson,
-  jsonSyntax,
 };
 
-cachesJson.description = 'Check that some expected caches are included.';
-jsonSyntax.description = 'Check that JSON files are valid JSON.';
+cachesJson.description =
+  'Check that some expected caches are included in caches.json.';
