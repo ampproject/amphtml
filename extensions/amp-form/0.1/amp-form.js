@@ -900,7 +900,7 @@ export class AmpForm {
     if (incomingTrust <= ActionTrust.DEFAULT) {
       dev().expectedError(
         TAG,
-        'Recursive form submissions are intended to be deprecated.' +
+        'Recursive form submissions are intended to be deprecated. ' +
           'See https://github.com/ampproject/amphtml/issues/24894.'
       );
     }
