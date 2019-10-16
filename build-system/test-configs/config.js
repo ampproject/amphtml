@@ -149,7 +149,7 @@ const prettifyGlobs = [
   '.renovaterc.json',
   '**/*.json',
   '**/OWNERS',
-  '!{node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
