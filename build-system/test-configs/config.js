@@ -144,6 +144,7 @@ const prettifyGlobs = [
   '.lando.yml',
   '.lgtm.yml',
   '.travis.yml',
+  '**/.eslintrc',
   '.prettierrc',
   'build-system/global-configs/caches.json',
   '**/OWNERS',

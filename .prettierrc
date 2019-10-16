@@ -13,7 +13,7 @@
       }
     },
     {
-      "files": ".prettierrc",
+      "files": [".eslintrc", ".prettierrc"],
       "options": {"parser": "json"}
     },
     {
