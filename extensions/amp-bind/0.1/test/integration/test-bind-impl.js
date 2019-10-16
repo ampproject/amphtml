@@ -133,14 +133,10 @@ function onBindReadyAndSetStateWithObject(env, bind, state) {
  * @return {!Promise}
  */
 function onBindReadyAndGetState(env, bind, name) {
-  return bind
-    .initializePromiseForTesting()
-    .then(() => {
-      return bind.getState(name);
-    })
-    .then(() => {
-      env.flushVsync();
-    });
+  return bind.initializePromiseForTesting().then(() => {
+    env.flushVsync();
+    return bind.getState(name);
+  });
 }
 
 /**
@@ -956,9 +952,11 @@ describe
             mystate: {mykey: 'myval'},
           });
           return promise.then(() => {
-            return onBindReadyAndGetState('mystate.mykey').then(result => {
-              expect(result).to.equal('myval');
-            });
+            return onBindReadyAndGetState(env, bind, 'mystate.mykey').then(
+              result => {
+                expect(result).to.equal('myval');
+              }
+            );
           });
         });
 
