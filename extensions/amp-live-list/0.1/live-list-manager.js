@@ -151,14 +151,17 @@ export class LiveListManager {
   fetchDocument_() {
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
-      url = addParamsToUrl(url, {
-        'amp_latest_update_time': String(this.latestUpdateTime_),
-        // AMP Caches do not always evict entries from their caches.
-        // A random number from the max safe range without BigInts helps add confidence the document is fresh.
-        'amp_random': String(
-          Math.floor(Math.random() * AMP_LIVE_LIST_MAX_RANDOM_NUMBER)
-        ),
-      });
+      url = addParamsToUrl(
+        url,
+        /** @type {JsonObject} */ ({
+          'amp_latest_update_time': String(this.latestUpdateTime_),
+          // AMP Caches do not always evict entries from their caches.
+          // A random number from the max safe range without BigInts helps add confidence the document is fresh.
+          'amp_random': String(
+            Math.floor(Math.random() * AMP_LIVE_LIST_MAX_RANDOM_NUMBER)
+          ),
+        })
+      );
     }
 
     if (this.isTransformed_) {
