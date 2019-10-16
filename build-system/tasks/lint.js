@@ -230,6 +230,7 @@ lint.description = 'Validates against Google Closure Linter';
 lint.flags = {
   'watch': '  Watches for changes in files, validates against the linter',
   'fix': '  Fixes simple lint errors (spacing etc)',
+  'files': '  Lints just the specified files',
   'local_changes': '  Lints just the files changed in the local branch',
   'quiet': '  Suppress warnings from outputting',
 };

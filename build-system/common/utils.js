@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+const gulp = require('gulp');
 const log = require('fancy-log');
+const tap = require('gulp-tap');
 const {isTravisBuild} = require('../common/travis');
 
 /**
  * Logs a message on the same line to indicate progress
+ *
  * @param {string} message
  */
 function logOnSameLine(message) {
@@ -30,6 +33,31 @@ function logOnSameLine(message) {
   log(message);
 }
 
+/**
+ * Converts an array of globs to a list of matching files using gulp.src, which
+ * can handle negative globs.
+ *
+ * @param {!Array<string>} globs
+ * @return {!Array<string>}
+ */
+async function globsToFiles(globs) {
+  return await new Promise(resolve => {
+    const files = [];
+    gulp
+      .src(globs, {buffer: false, read: false})
+      .pipe(
+        tap(file => {
+          files.push(file.path);
+        })
+      )
+      .pipe(gulp.dest('.'))
+      .on('end', () => {
+        resolve(files);
+      });
+  });
+}
+
 module.exports = {
   logOnSameLine,
+  globsToFiles,
 };

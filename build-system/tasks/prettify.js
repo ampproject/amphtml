@@ -23,15 +23,16 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp');
+const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
-const tap = require('gulp-tap');
 const {getOutput} = require('../common/exec');
+const {gitDiffNameOnlyMaster} = require('../common/git');
+const {globsToFiles, logOnSameLine} = require('../common/utils');
 const {green, cyan, red, yellow} = require('ansi-colors');
 const {highlight} = require('cli-highlight');
 const {isTravisBuild} = require('../common/travis');
-const {logOnSameLine} = require('../common/utils');
+const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
@@ -48,43 +49,88 @@ const PrettierResult = {
 };
 
 /**
- * Checks files for formatting (and optionally fixes them) with Prettier.
- * Returns the cumulative result to the `gulp` process via  process.exitCode so
- * that all files can be checked / fixed.
+ * Extracts the list of prettifiable files in this PR from the commit log.
  *
- * @return {!Promise}
+ * @return {!Array<string>}
  */
-function prettify() {
-  const filesToCheck = argv.files ? argv.files.split(',') : prettifyGlobs;
-  return gulp
-    .src(filesToCheck)
-    .pipe(
-      tap(file => {
-        checkFile(path.relative(rootDir, file.path));
-      })
-    )
-    .on('finish', () => {
-      if (process.exitCode == 1) {
-        logOnSameLine(red('ERROR: ') + 'Found errors in one or more files.');
-        if (!argv.fix) {
-          log(
-            yellow('NOTE 1:'),
-            'You may be able to automatically fix some errors by running',
-            cyan('gulp prettify --fix'),
-            'from your local branch.'
-          );
-          log(
-            yellow('NOTE 2:'),
-            'Since this is a destructive operation (that edits your files',
-            'in-place), make sure you commit before running the command.'
-          );
-        }
-      } else {
-        if (!isTravisBuild()) {
-          logOnSameLine(green('SUCCESS: ') + 'No formatting errors found.');
-        }
-      }
+async function getFilesChanged() {
+  const allFiles = await globsToFiles(prettifyGlobs);
+  return gitDiffNameOnlyMaster().filter(changedFile => {
+    return (
+      fs.existsSync(changedFile) &&
+      allFiles.some(file => file.endsWith(changedFile))
+    );
+  });
+}
+
+/**
+ * Logs the list of files that will be checked.
+ *
+ * @param {!Array<string>} files
+ */
+function logFiles(files) {
+  if (!isTravisBuild()) {
+    log(green('INFO: ') + 'Prettifying the following files:');
+    files.forEach(file => {
+      log(cyan(path.relative(rootDir, file)));
     });
+  }
+}
+
+/**
+ * Checks files for formatting (and optionally fixes them) with Prettier.
+ */
+async function prettify() {
+  maybeUpdatePackages();
+  let filesToCheck = await globsToFiles(prettifyGlobs);
+  if (argv.files) {
+    filesToCheck = await globsToFiles(argv.files.split(','));
+    logFiles(filesToCheck);
+  } else if (argv.local_changes) {
+    filesToCheck = await getFilesChanged();
+    if (filesToCheck.length == 0) {
+      log(green('INFO: ') + 'No prettifiable files in this PR');
+      return;
+    } else {
+      logFiles(filesToCheck);
+    }
+  }
+  runPrettify(filesToCheck);
+}
+
+/**
+ * Runs prettier on the given list of files. Returns the cumulative result to
+ * the `gulp` process via  process.exitCode so all files can be checked / fixed.
+ *
+ * @param {!Array<string>} filesToCheck
+ */
+function runPrettify(filesToCheck) {
+  if (!isTravisBuild()) {
+    log(green('Starting checks...'));
+  }
+  filesToCheck.forEach(file => {
+    checkFile(path.relative(rootDir, file));
+  });
+  if (process.exitCode == 1) {
+    logOnSameLine(red('ERROR: ') + 'Found errors in one or more files.');
+    if (!argv.fix) {
+      log(
+        yellow('NOTE 1:'),
+        'You may be able to automatically fix some errors by running',
+        cyan('gulp prettify --local_changes --fix'),
+        'from your local branch.'
+      );
+      log(
+        yellow('NOTE 2:'),
+        'Since this is a destructive operation (that edits your files',
+        'in-place), make sure you commit before running the command.'
+      );
+    }
+  } else {
+    if (!isTravisBuild()) {
+      logOnSameLine(green('SUCCESS: ') + 'No formatting errors found.');
+    }
+  }
 }
 
 /**
@@ -139,5 +185,6 @@ prettify.description =
   'Checks several non-JS files in the repo for formatting using prettier';
 prettify.flags = {
   'files': '  Checks only the specified files',
+  'local_changes': '  Checks just the files changed in the local branch',
   'fix': '  Fixes formatting errors',
 };
