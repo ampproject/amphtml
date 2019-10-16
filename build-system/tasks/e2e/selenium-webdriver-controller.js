@@ -37,6 +37,7 @@ const KeyToSeleniumMap = {
   [Key.Enter]: SeleniumKey.ENTER,
   [Key.Escape]: SeleniumKey.ESCAPE,
   [Key.Tab]: SeleniumKey.TAB,
+  [Key.CtrlV]: SeleniumKey.chord(SeleniumKey.CONTROL, 'v'),
 };
 
 /**
@@ -260,6 +261,17 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * @return {!ControllerPromise<string>}
+   * @override
+   */
+  getCurrentUrl() {
+    return new ControllerPromise(
+      this.driver.getCurrentUrl(),
+      this.getWaitFn_(() => this.driver.getCurrentUrl())
+    );
+  }
+
+  /**
    * @param {string} location
    * @return {!Promise}
    * @override
@@ -406,6 +418,13 @@ class SeleniumWebDriverController {
       webElement.isEnabled(),
       this.getWaitFn_(() => webElement.isEnabled())
     );
+  }
+  /**
+   * @return {!Promise<Array<string>>}
+   * @override
+   */
+  async getAllWindows() {
+    return await this.driver.getAllWindowHandles();
   }
 
   /**
@@ -587,6 +606,15 @@ class SeleniumWebDriverController {
     const webElement = handle.getElement();
     const imageString = await webElement.takeScreenshot();
     fs.writeFile(path, imageString, 'base64', function() {});
+  }
+
+  /**
+   * @param {string} handle
+   * @return {!Promise}
+   * @override
+   */
+  async switchToWindow(handle) {
+    await this.driver.switchTo().window(handle);
   }
 
   /**

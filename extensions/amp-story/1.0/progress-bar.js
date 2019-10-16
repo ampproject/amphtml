@@ -51,7 +51,7 @@ let ELLIPSE_WIDTH_PX = 2;
  * Size in pixels of the total side margins of a segment.
  * @const {number}
  */
-const SEGMENTS_MARGIN_PX = 2;
+const SEGMENTS_MARGIN_PX = 4;
 
 /**
  * Maximum number of segments that can be shown at a time before collapsing
@@ -97,7 +97,7 @@ export class ProgressBar {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = Services.ampdocServiceFor(this.win_).getSingleDoc();
 
-    /** @private @const {!../../../src/service/resources-impl.ResourcesDef} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(this.ampdoc_);
 
     /** @private {!Object<string, number>} */
@@ -197,7 +197,7 @@ export class ProgressBar {
     );
 
     Services.viewportForDoc(this.ampdoc_).onResize(
-      debounce(this.win_, () => this.onResize_(), 900)
+      debounce(this.win_, () => this.onResize_(), 30)
     );
 
     this.segmentsAddedPromise_.then(() => {
@@ -470,7 +470,7 @@ export class ProgressBar {
    * @param {string} segmentId The index to assert validity
    * @private
    */
-  assertVaildSegmentId_(segmentId) {
+  assertValidSegmentId_(segmentId) {
     devAssert(
       hasOwn(this.segmentIdMap_, segmentId),
       'Invalid segment-id passed to progress-bar'
@@ -487,7 +487,7 @@ export class ProgressBar {
    */
   updateProgress(segmentId, progress, updateAllSegments = false) {
     this.segmentsAddedPromise_.then(() => {
-      this.assertVaildSegmentId_(segmentId);
+      this.assertValidSegmentId_(segmentId);
       const segmentIndex = this.segmentIdMap_[segmentId];
 
       this.updateProgressByIndex_(segmentIndex, progress);

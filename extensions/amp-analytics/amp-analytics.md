@@ -49,11 +49,11 @@ Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/docum
 
 ### Sending data to an analytics vendor <a name="analytics-vendors"></a>
 
-AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors]() to see if they’ve integrated their solution with AMP.
+AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/#vendors) to see if they’ve integrated their solution with AMP.
 
 For integrated AMP analytics vendors:
 
-1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics-vendors).
+1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/configure-analytics/analytics-vendors/#vendors).
 2. Determine what data you want to capture and track, and specify those details in the configuration data. See the vendor's documentation for  instructions on how to capture analytics data.
 
 If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to ask for their support. We also encourage you to let us know by [filing an issue](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#report-a-bug) requesting that the vendor be added. See also [Integrating your analytics tools in AMP HTML](../amp-analytics/integrating-analytics.md). Alternatively, work with your vendor to send the data to their specified URL. Learn more in the [Sending data in-house](#sending-data-in-house) section below.
@@ -153,7 +153,7 @@ The configuration object for `<amp-analytics>` uses the following format:
     "beacon": *boolean*,
     "xhrpost": *boolean*,
     "image": *boolean*,
-  }
+  },
 }
 ```
 
@@ -165,7 +165,7 @@ The configuration data may be specified inline or fetched remotely by specifying
 If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
 be merged together such that:
 
-1.  Remote configuration takes precedence over in-line configuration and
+1.  Remote configuration takes precedence over inline configuration and
 2.  Inline configuration takes precedence over vendor configuration.
 
 
@@ -695,7 +695,7 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 
 ##### Timer trigger
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
-  - `timerSpec` Specification for triggers of type `timer`. The unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
+  - `timerSpec` Specification for triggers of type `timer`. Unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. An addtional request will be triggered when the `maxTimerLength` has been reached. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true

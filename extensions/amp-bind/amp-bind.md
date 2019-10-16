@@ -293,6 +293,7 @@ null || 'default' // 'default'
       <code>concat</code><br>
       <code>indexOf</code><br>
       <code>lastIndexOf</code><br>
+      <code>replace</code><br>
       <code>slice</code><br>
       <code>split</code><br>
       <code>substr</code><br>
@@ -312,6 +313,7 @@ null || 'default' // 'default'
       <code>floor</code><br>
       <code>max</code><br>
       <code>min</code><br>
+      <code>pow</code><br>
       <code>random</code><br>
       <code>round</code><br>
       <code>sign</code></td>

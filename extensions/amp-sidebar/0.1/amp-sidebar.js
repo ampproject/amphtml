@@ -168,10 +168,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
-    // The element is always closed by default, so update the aria state to
-    // match.
-    element.setAttribute('aria-hidden', 'true');
-
     if (!element.hasAttribute('role')) {
       element.setAttribute('role', 'menu');
     }
@@ -211,7 +207,7 @@ export class AmpSidebar extends AMP.BaseElement {
         );
         if (target && target.href) {
           const tgtLoc = Services.urlForDoc(element).parse(target.href);
-          const currentHref = this.getAmpDoc().win.location.href;
+          const currentHref = this.getAmpDoc().getUrl();
           // Important: Only close sidebar (and hence pop sidebar history entry)
           // when navigating locally, Chrome might cancel navigation request
           // due to after-navigation history manipulation inside a timer callback.
@@ -359,7 +355,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element./*OK*/ scrollTop = 1;
     this.element.setAttribute('open', '');
     this.getMaskElement_().setAttribute('open', '');
-    this.element.setAttribute('aria-hidden', 'false');
     this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
     handleAutoscroll(this.getAmpDoc(), this.element);
   }
@@ -398,7 +393,6 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     this.element.removeAttribute('open');
     this.element.removeAttribute('i-amphtml-sidebar-opened');
-    this.element.setAttribute('aria-hidden', 'true');
     this.setUpdateFn_(
       () => this.updateForClosed_(),
       immediate ? 0 : ANIMATION_TIMEOUT

@@ -659,7 +659,7 @@ export class GlobalVariableSource extends VariableSource {
     this.set('AMP_VERSION', () => internalRuntimeVersion());
 
     this.set('BACKGROUND_STATE', () => {
-      return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
+      return this.ampdoc.isVisible() ? '0' : '1';
     });
 
     this.setAsync('VIDEO_STATE', (id, property) => {

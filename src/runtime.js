@@ -20,7 +20,6 @@ import {CommonSignals} from './common-signals';
 import {
   LogLevel, // eslint-disable-line no-unused-vars
   dev,
-  devAssert,
   initLogConstructor,
   overrideLogLevel,
   setReportError,
@@ -728,6 +727,8 @@ export class MultidocManager {
               const src = n.getAttribute('src');
               const isRuntime =
                 src.indexOf('/amp.js') != -1 || src.indexOf('/v0.js') != -1;
+              // Note: Some extensions don't have [custom-element] or
+              // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
               const versionRe = /-(\d+.\d+)(.max)?\.js$/;
@@ -878,22 +879,7 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (internalRuntimeVersion() == v) {
     return false;
   }
-  // The :not is an extra prevention of recursion because it will be
-  // added to script tags that go into the code path below.
-  const scriptInHead = win.document.head./*OK*/ querySelector(
-    `[custom-element="${fnOrStruct.n}"]:not([i-amphtml-inserted])`
-  );
-  devAssert(
-    scriptInHead,
-    'Expected to find script for extension: %s',
-    fnOrStruct.n
-  );
-  if (!scriptInHead) {
-    return false;
-  }
-  // Mark the element as being replaced, so that the installExtension code
-  // assumes it as not-present.
-  Services.extensionsFor(win).reloadExtension(fnOrStruct.n, scriptInHead);
+  Services.extensionsFor(win).reloadExtension(fnOrStruct.n);
   return true;
 }
 

@@ -372,7 +372,9 @@ export class AmpA4A extends AMP.BaseElement {
     return this.isRelayoutNeededFlag;
   }
 
-  /** @override */
+  /** @override
+      @return {!Promise|undefined}
+  */
   buildCallback() {
     this.creativeSize_ = {
       width: this.element.getAttribute('width'),
@@ -387,7 +389,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler = new AMP.AmpAdUIHandler(this);
 
     const verifier = signatureVerifierFor(this.win);
-    this.keysetPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.keysetPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
         this.getSigningServiceNames().forEach(signingServiceName => {
@@ -632,7 +634,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.adPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
         checkStillCurrent();
@@ -997,7 +999,7 @@ export class AmpA4A extends AMP.BaseElement {
             this.isRelayoutNeededFlag = true;
             this.getResource().layoutCanceled();
             // Only Require relayout after page visible
-            Services.viewerForDoc(this.getAmpDoc())
+            this.getAmpDoc()
               .whenNextVisible()
               .then(() => {
                 Services.ownersForDoc(this.getAmpDoc())./*OK*/ requireLayout(
@@ -1216,11 +1218,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
-  }
-
-  /** @override */
-  createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholder();
   }
 
   /**
@@ -1795,7 +1792,10 @@ export class AmpA4A extends AMP.BaseElement {
         metaData.images = metaDataObj['images'].splice(0, 5);
       }
       if (this.isSinglePageStoryAd) {
-        if (!metaDataObj['ctaUrl'] || !metaDataObj['ctaType']) {
+        // CTA Type is a required meta tag. CTA Url can come from meta tag, or
+        // (temporarily) amp-ad-exit config.
+        // TODO(#24080): maybe rerequire cta url?
+        if (!metaDataObj['ctaType']) {
           throw new Error(INVALID_SPSA_RESPONSE);
         }
         this.element.setAttribute('data-vars-ctatype', metaDataObj['ctaType']);

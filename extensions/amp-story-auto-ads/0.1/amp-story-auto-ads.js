@@ -23,6 +23,7 @@ import {
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {CtaTypes, StoryAdLocalization} from './story-ad-localization';
+import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {Services} from '../../../src/services';
 import {
   StateProperty,
@@ -45,6 +46,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {lastItem} from '../../../src/utils/array';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 
@@ -93,7 +95,7 @@ const A4AVarNames = {
   CTA_URL: 'cta-url',
 };
 
-/** @const */
+/** @enum {number} */
 const AD_STATE = {
   PENDING: 0,
   INSERTED: 1,
@@ -168,6 +170,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {!./story-ad-localization.StoryAdLocalization} */
     this.localizationService_ = new StoryAdLocalization(this.win);
+
+    /** @private {boolean} */
+    this.hasForcedRender_ = false;
   }
 
   /** @override */
@@ -223,14 +228,36 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
-   * Force this extension to behave as if ad is about to be shown.
-   * Used for testing but should be extended to force an ad to show in a real story.
-   * @param {string} pageBeforeAdId
+   * Force an immediate ad placement without waiting for ad being loaded,
+   * and then navigate to the ad page.
+   * @param {string=} pageBeforeAdId
    * @visibleForTesting
    */
-  forceRender(pageBeforeAdId) {
+  forcePlaceAdAfterPage(pageBeforeAdId) {
+    const pageBeforeId =
+      pageBeforeAdId ||
+      /** @type {string} */ (this.storeService_.get(
+        StateProperty.CURRENT_PAGE_ID
+      ));
     this.isCurrentAdLoaded_ = true;
-    this.tryToPlaceAdAfterPage_(pageBeforeAdId);
+    this.tryToPlaceAdAfterPage_(pageBeforeId);
+    this.navigateToFirstAdPage_();
+    this.hasForcedRender_ = true;
+  }
+
+  /**
+   * Fires event to navigate to ad page once inserted into the story.
+   */
+  navigateToFirstAdPage_() {
+    // Setting distance manually to avoid flash of next page.
+    const lastPage = lastItem(this.adPageEls_);
+    lastPage.setAttribute('distance', '1');
+    const payload = dict({
+      'targetPageId': 'i-amphtml-ad-page-1',
+      'direction': 'next',
+    });
+    const eventInit = {bubbles: true};
+    dispatch(this.win, lastPage, EventType.SWITCH_PAGE, payload, eventInit);
   }
 
   /**
@@ -424,13 +451,23 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
         // remove loading attribute once loaded so that desktop CSS will position
         // offscren with all other pages
-        const currentPageEl = this.adPageEls_[this.adPageEls_.length - 1];
+        const currentPageEl = lastItem(this.adPageEls_);
         currentPageEl.removeAttribute(Attributes.LOADING);
 
         this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_LOADED, {
           [AnalyticsVars.AD_LOADED]: Date.now(),
         });
         this.isCurrentAdLoaded_ = true;
+
+        // Development mode forces navigation to ad page for better dev-x.
+        // Only do this once to prevent an infinite view->request->navigate loop.
+        if (
+          this.element.hasAttribute('development') &&
+          this.config_['type'] === 'fake' &&
+          !this.hasForcedRender_
+        ) {
+          this.forcePlaceAdAfterPage();
+        }
       });
 
     return ampStoryAdPage;
@@ -663,8 +700,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const frameDoc = getFrameDoc(friendlyIframeEmbed);
     const {body} = frameDoc;
+    // TODO(#24829) Remove alternate body when we have full ad network support.
+    const alternateBody = body.querySelector('#x-a4a-former-body');
     this.mutateElement(() => {
       body.setAttribute(Attributes.IFRAME_BODY_VISIBLE, '');
+      alternateBody &&
+        alternateBody.setAttribute(Attributes.IFRAME_BODY_VISIBLE, '');
       this.visibleAdBody_ = body;
     });
   }
@@ -675,6 +716,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   removeVisibleAttribute_() {
     this.mutateElement(() => {
       if (this.visibleAdBody_) {
+        // TODO(#24829) Remove alternate body when we have full ad network support.
+        const alternateBody = this.visibleAdBody_.querySelector(
+          '#x-a4a-former-body'
+        );
+        alternateBody &&
+          alternateBody.removeAttribute(Attributes.IFRAME_BODY_VISIBLE);
         this.visibleAdBody_.removeAttribute(Attributes.IFRAME_BODY_VISIBLE);
         this.visibleAdBody_ = null;
       }
@@ -729,11 +776,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Place ad based on user config
    * @param {string} pageBeforeAdId
-   * @return {*} TODO(#23582): Specify return type
+   * @return {AD_STATE}
    * @private
    */
   tryToPlaceAdAfterPage_(pageBeforeAdId) {
-    const nextAdPageEl = this.adPageEls_[this.adPageEls_.length - 1];
+    const nextAdPageEl = lastItem(this.adPageEls_);
     if (!this.isCurrentAdLoaded_ && this.adTimedOut_()) {
       // timeout fail
       return AD_STATE.FAILED;

@@ -57,6 +57,7 @@ const Key = {
   'Enter': 'Enter',
   'Escape': 'Escape',
   'Tab': 'Tab',
+  'CtrlV': 'CtrlV',
 };
 
 /** @interface */
@@ -85,6 +86,15 @@ class FunctionalTestController {
    * @return {!ControllerPromise<string>}
    */
   async getTitle() {}
+
+  /**
+   * Select the given window.
+   * {@link https://www.w3.org/TR/webdriver1/#dfn-switch-to-window}
+   *
+   * @param {string} unusedString
+   * @return {!Promise}
+   */
+  async switchToWindow(unusedString) {}
 
   /**
    * Selects the current top-level browsing context or a child browsing context
@@ -313,6 +323,15 @@ class FunctionalTestController {
    * @return {!ControllerPromise<boolean>}
    */
   async isElementEnabled(unusedHandle) {}
+
+  /**
+   * Return an array of handles consisting of all windows in the browser
+   * session.
+   * {@link https://www.w3.org/TR/webdriver1/#get-window-handles}
+   *
+   * @return {!Promise<Array<string>>}
+   */
+  async getAllWindows() {}
 
   /**
    * The Set Window Rect command alters the size and the position of the

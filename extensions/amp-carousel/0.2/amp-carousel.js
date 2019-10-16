@@ -18,6 +18,7 @@ import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
+import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
 import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
@@ -65,6 +66,9 @@ class AmpCarousel extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private @const {boolean} */
+    this.isIos_ = Services.platformFor(this.win).isIos();
 
     /** @private {?Carousel} */
     this.carousel_ = null;
@@ -134,13 +138,18 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Setup actions and listeners
     this.setupActions_();
-    this.stopTouchMovePropagation_();
-    this.element.addEventListener('indexchange', event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
-    this.element.addEventListener('scrollpositionchange', () => {
-      this.onScrollPositionChanged_();
+    this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
+      this.onScrollStarted_();
     });
+    this.element.addEventListener(
+      CarouselEvents.SCROLL_POSITION_CHANGED,
+      () => {
+        this.onScrollPositionChanged_();
+      }
+    );
     this.prevButton_.addEventListener('click', () => this.interactionPrev());
     this.nextButton_.addEventListener('click', () => this.interactionNext());
 
@@ -148,6 +157,10 @@ class AmpCarousel extends AMP.BaseElement {
     this.childLayoutManager_ = new ChildLayoutManager({
       ampElement: this,
       intersectionElement: this.scrollContainer_,
+      // For iOS, we queue changes until scrolling stops, which we detect
+      // ~200ms after it actually stops. Load items earlier so they have time
+      // to load.
+      nearbyMarginInPercent: this.isIos_ ? 200 : 100,
       viewportIntersectionCallback: (child, isIntersecting) => {
         if (isIntersecting) {
           owners.scheduleResume(this.element, child);
@@ -156,6 +169,10 @@ class AmpCarousel extends AMP.BaseElement {
         }
       },
     });
+    // For iOS, we cannot trigger layout during scrolling or the UI will
+    // flicker, so tell the layout to simply queue the changes, which we
+    // flush after scrolling stops.
+    this.childLayoutManager_.setQueueChanges(this.isIos_);
 
     this.childLayoutManager_.updateChildren(this.slides_);
     this.carousel_.updateSlides(this.slides_);
@@ -493,13 +510,27 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Updates the current index, resuming the current slide and pausing all
-   * others.
+   * Updates the current index, triggering actions and analytics events.
    * @param {number} index
+   * @param {!ActionSource} actionSource
    */
-  updateCurrentIndex_(index) {
+  updateCurrentIndex_(index, actionSource) {
     const prevIndex = this.currentIndex_;
     this.currentIndex_ = index;
+
+    // Ignore the first indexChange, we do not want to trigger any events.
+    if (prevIndex == null) {
+      return;
+    }
+
+    const data = dict({'index': index});
+    const name = 'slideChange';
+    const isHighTrust = this.isHighTrustActionSource_(actionSource);
+    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+
+    const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
+    this.action_.trigger(this.element, name, action, trust);
+    this.element.dispatchCustomEvent(name, data);
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 
@@ -569,9 +600,23 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Update the UI (buttons) for the new scroll position.
+   * Starts queuing all intersection based changes when scrolling starts, to
+   * prevent paint flickering on iOS.
+   */
+  onScrollStarted_() {
+    this.childLayoutManager_.setQueueChanges(this.isIos_);
+  }
+
+  /**
+   * Update the UI (buttons) for the new scroll position. This occurs when
+   * scrolling has settled.
    */
   onScrollPositionChanged_() {
+    // Now that scrolling has settled, flush any layout changes for iOS since
+    // it will not cause flickering.
+    this.childLayoutManager_.flushChanges();
+    this.childLayoutManager_.setQueueChanges(false);
+
     this.updateUi_();
   }
 
@@ -580,41 +625,19 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Event} event
    */
   onIndexChanged_(event) {
+    const detail = getDetail(event);
+    const index = detail['index'];
+    const actionSource = detail['actionSource'];
+
+    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
+    this.updateUi_();
+
+    // Do not fire events, analytics for type="carousel".
     if (this.type_ == CarouselType.CAROUSEL) {
       return;
     }
 
-    const detail = getDetail(event);
-    const index = detail['index'];
-    const actionSource = detail['actionSource'];
-    const data = dict({'index': index});
-    const name = 'slideChange';
-    const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
-
-    const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
-    this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
-    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
-    this.updateCurrentIndex_(index);
-  }
-
-  /**
-   * Stops touchmove events from propagating up to the viewer. Ideally we would
-   * have a separate piece of logic to not forward touchmoves if they occurred
-   * in a scrollable container instead of stopping propagation entirely for
-   * horizontal and vertical swipes. See:
-   * https://github.com/ampproject/amphtml/issues/4754.
-   * @private
-   */
-  stopTouchMovePropagation_() {
-    this.scrollContainer_.addEventListener(
-      'touchmove',
-      event => event.stopPropagation(),
-      {
-        passive: true,
-      }
-    );
+    this.updateCurrentIndex_(index, actionSource);
   }
 }
 

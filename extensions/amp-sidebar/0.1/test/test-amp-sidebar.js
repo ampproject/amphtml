@@ -235,7 +235,7 @@ describes.realWin(
         impl.open_();
         await impl.mutateElement(() => {});
         expect(sidebarElement.hasAttribute('open')).to.be.true;
-        expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+        expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
         expect(sidebarElement.getAttribute('role')).to.equal('menu');
 
         expect(historyPushSpy).to.be.calledOnce;
@@ -308,7 +308,7 @@ describes.realWin(
         impl.openOrCloseTimeOut_ = 10;
         impl.close_();
         expect(sidebarElement.hasAttribute('open')).to.be.false;
-        expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+        expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
         clock.tick(600);
         expect(sidebarElement).to.have.display('none');
         expect(owners.schedulePause).to.be.calledOnce;
@@ -336,13 +336,13 @@ describes.realWin(
         owners.schedulePause = sandbox.spy();
 
         expect(sidebarElement.hasAttribute('open')).to.be.false;
-        expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+        expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
         expect(sidebarElement.getAttribute('role')).to.equal('menu');
         expect(doc.activeElement).to.not.equal(screenReaderCloseButton);
         impl.toggle_();
         await impl.mutateElement(() => {});
         expect(sidebarElement.hasAttribute('open')).to.be.true;
-        expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+        expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
         clock.tick(600);
         expect(doc.activeElement).to.equal(screenReaderCloseButton);
         expect(sidebarElement).to.not.have.display('none');
@@ -350,7 +350,7 @@ describes.realWin(
         impl.toggle_();
         await impl.mutateElement(() => {});
         expect(sidebarElement.hasAttribute('open')).to.be.false;
-        expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+        expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
         clock.tick(600);
         expect(sidebarElement).to.have.display('none');
         expect(owners.schedulePause).to.be.calledOnce;
@@ -368,7 +368,7 @@ describes.realWin(
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           impl.open_();
           expect(sidebarElement.hasAttribute('open')).to.be.true;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
             ? doc.createEventObject()
             : doc.createEvent('Events');
@@ -382,7 +382,7 @@ describes.realWin(
             ? el.dispatchEvent(eventObj)
             : el.fireEvent('onkeydown', eventObj);
           expect(sidebarElement.hasAttribute('open')).to.be.false;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           clock.tick(600);
           expect(sidebarElement).to.have.display('none');
           expect(owners.schedulePause).to.be.calledOnce;
@@ -475,25 +475,20 @@ describes.realWin(
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           impl.open_();
           expect(sidebarElement.hasAttribute('open')).to.be.true;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
             ? doc.createEventObject()
             : doc.createEvent('Events');
           if (eventObj.initEvent) {
             eventObj.initEvent('click', true, true);
           }
-          sandbox.stub(sidebarElement, 'getAmpDoc').returns({
-            win: {
-              location: {
-                href: window.location.href,
-              },
-            },
-          });
+          const ampDoc = sidebarElement.getAmpDoc();
+          sandbox.stub(ampDoc, 'getUrl').returns(window.location.href);
           anchor.dispatchEvent
             ? anchor.dispatchEvent(eventObj)
             : anchor.fireEvent('onkeydown', eventObj);
           expect(sidebarElement.hasAttribute('open')).to.be.false;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           clock.tick(600);
           expect(sidebarElement).to.have.display('none');
           expect(owners.schedulePause).to.be.calledOnce;
@@ -512,28 +507,20 @@ describes.realWin(
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           impl.open_();
           expect(sidebarElement.hasAttribute('open')).to.be.true;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
             ? doc.createEventObject()
             : doc.createEvent('Events');
           if (eventObj.initEvent) {
             eventObj.initEvent('click', true, true);
           }
-          sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
-            return {
-              win: {
-                location: {
-                  // Mocking navigating from example.com -> localhost:9876
-                  href: 'http://example.com',
-                },
-              },
-            };
-          });
+          const ampDoc = sidebarElement.getAmpDoc();
+          sandbox.stub(ampDoc, 'getUrl').returns('http://example.com');
           anchor.dispatchEvent
             ? anchor.dispatchEvent(eventObj)
             : anchor.fireEvent('onkeydown', eventObj);
           expect(sidebarElement.hasAttribute('open')).to.be.true;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           expect(sidebarElement).to.not.have.display('');
           expect(owners.schedulePause).to.have.not.been.called;
         });
@@ -552,29 +539,22 @@ describes.realWin(
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           impl.open_();
           expect(sidebarElement.hasAttribute('open')).to.be.true;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
             ? doc.createEventObject()
             : doc.createEvent('Events');
           if (eventObj.initEvent) {
             eventObj.initEvent('click', true, true);
           }
-          sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
-            return {
-              win: {
-                location: {
-                  // Mocking navigating from
-                  // /context.html?old=context -> /context.html
-                  href: 'http://localhost:9876/context.html?old=context',
-                },
-              },
-            };
-          });
+          const ampDoc = sidebarElement.getAmpDoc();
+          sandbox
+            .stub(ampDoc, 'getUrl')
+            .returns('http://localhost:9876/context.html?old=context');
           anchor.dispatchEvent
             ? anchor.dispatchEvent(eventObj)
             : anchor.fireEvent('onkeydown', eventObj);
           expect(sidebarElement.hasAttribute('open')).to.be.true;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           expect(sidebarElement).to.not.have.display('');
           expect(owners.schedulePause).to.have.not.been.called;
         });
@@ -592,7 +572,7 @@ describes.realWin(
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           impl.open_();
           expect(sidebarElement.hasAttribute('open')).to.be.true;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
             ? doc.createEventObject()
             : doc.createEvent('Events');
@@ -603,7 +583,7 @@ describes.realWin(
             ? li.dispatchEvent(eventObj)
             : li.fireEvent('onkeydown', eventObj);
           expect(sidebarElement.hasAttribute('open')).to.be.true;
-          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           expect(sidebarElement).to.not.have.display('');
           expect(owners.schedulePause).to.have.not.been.called;
         });

@@ -213,7 +213,12 @@ class InaboxViewportImpl {
   getRect() {
     if (this.rect_ == null) {
       const size = this.getSize();
-      this.rect_ = layoutRectLtwh(0, 0, size.width, size.height);
+      this.rect_ = layoutRectLtwh(
+        this.getScrollLeft(),
+        this.getScrollTop(),
+        size.width,
+        size.height
+      );
     }
     return this.rect_;
   }
@@ -832,7 +837,9 @@ export function installInaboxViewportService(ampdoc) {
     ampdoc,
     'viewport',
     function() {
-      return isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
+      // eslint-disable-next-line no-undef
+      return _RTVEXP_INABOX_LITE ||
+        isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
         ? new InaboxViewportImpl(ampdoc, binding)
         : new ViewportImpl(ampdoc, binding, Services.viewerForDoc(ampdoc));
     },
