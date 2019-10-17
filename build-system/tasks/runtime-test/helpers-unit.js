@@ -189,11 +189,9 @@ function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   // for a set of source files.
   function getTestsFor(srcFiles) {
     const allUnitTests = globby.sync(unitTestPaths);
-    return allUnitTests
-      .filter(testFile => {
-        return shouldRunTest(testFile, srcFiles);
-      })
-      .map(fullPath => path.relative(ROOT_DIR, fullPath));
+    return allUnitTests.filter(testFile => {
+      return shouldRunTest(testFile, srcFiles);
+    });
   }
 
   filesChanged.forEach(file => {

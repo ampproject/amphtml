@@ -26,11 +26,8 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const JSON5 = require('json5');
 const log = require('fancy-log');
-const path = require('path');
 const {cyan, red, green} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
-
-const rootDir = path.dirname(path.dirname(__dirname));
 
 /**
  * Checks OWNERS files for correctness using the owners bot API.
@@ -39,10 +36,7 @@ const rootDir = path.dirname(path.dirname(__dirname));
  */
 async function checkOwners() {
   const filesToCheck = globby.sync(['**/OWNERS']);
-  filesToCheck.forEach(file => {
-    const relativePath = path.relative(rootDir, file);
-    checkFile(relativePath);
-  });
+  filesToCheck.forEach(checkFile);
 }
 
 /**

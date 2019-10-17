@@ -87,7 +87,7 @@ function transferSrcsToTempDir() {
       retainLines: true,
       compact: false,
     });
-    const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
+    const name = `${SRC_TEMP_DIR}/${file}`;
     fs.outputFileSync(name, code);
     process.stdout.write('.');
   });

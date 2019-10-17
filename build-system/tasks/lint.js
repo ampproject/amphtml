@@ -176,7 +176,7 @@ function getFilesToLint(files) {
   if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
     filesToLint.forEach(file => {
-      log(colors.cyan(path.relative(rootDir, file)));
+      log(colors.cyan(file));
     });
   }
   return filesToLint;
