@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const connect = require('gulp-connect');
-const deglob = require('globs-to-files');
+const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
 const morgan = require('morgan');
@@ -35,7 +35,7 @@ const {getServeMode} = require('../server/app-utils');
 // Used for logging during server start / stop.
 let url = '';
 
-const serverFiles = deglob.sync(['build-system/server/**']);
+const serverFiles = globby.sync(['build-system/server/**']);
 
 /**
  * Logs the server's mode (based on command line arguments).
@@ -68,7 +68,7 @@ function getMiddleware() {
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
   }
-  if (!argv._.includes('serve') && !argv.eager_build) {
+  if (!argv._.includes('serve')) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
   }
@@ -134,7 +134,7 @@ function restartServer() {
  * Initiates pre-build steps requested via command line args.
  */
 function initiatePreBuildSteps() {
-  if (!argv._.includes('serve') && !argv.eager_build) {
+  if (!argv._.includes('serve')) {
     preBuildCoreRuntime();
     if (argv.extensions || argv.extensions_from) {
       preBuildSomeExtensions();
