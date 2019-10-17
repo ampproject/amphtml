@@ -82,7 +82,7 @@ function logFiles(files) {
  */
 async function prettify() {
   maybeUpdatePackages();
-  let filesToCheck = await globsToFiles(prettifyGlobs);
+  let filesToCheck;
   if (argv.files) {
     filesToCheck = await globsToFiles(argv.files.split(','));
     logFiles(filesToCheck);
@@ -94,6 +94,8 @@ async function prettify() {
     } else {
       logFiles(filesToCheck);
     }
+  } else {
+    filesToCheck = await globsToFiles(prettifyGlobs);
   }
   runPrettify(filesToCheck);
 }
