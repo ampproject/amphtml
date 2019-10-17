@@ -25,7 +25,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const log = require('fancy-log');
-const path = require('path');
 const {getFilesChanged, logOnSameLine} = require('../common/utils');
 const {getOutput} = require('../common/exec');
 const {green, cyan, red, yellow} = require('ansi-colors');
@@ -34,7 +33,6 @@ const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
-const rootDir = path.dirname(path.dirname(__dirname));
 const prettierCmd = 'node_modules/.bin/prettier';
 
 /**
@@ -56,7 +54,7 @@ function logFiles(files) {
   if (!isTravisBuild()) {
     log(green('INFO: ') + 'Prettifying the following files:');
     files.forEach(file => {
-      log(cyan(path.relative(rootDir, file)));
+      log(cyan(file));
     });
   }
 }
@@ -94,9 +92,7 @@ function runPrettify(filesToCheck) {
   if (!isTravisBuild()) {
     log(green('Starting checks...'));
   }
-  filesToCheck.forEach(file => {
-    checkFile(path.relative(rootDir, file));
-  });
+  filesToCheck.forEach(checkFile);
   if (process.exitCode == 1) {
     logOnSameLine(red('ERROR: ') + 'Found errors in one or more files.');
     if (!argv.fix) {
