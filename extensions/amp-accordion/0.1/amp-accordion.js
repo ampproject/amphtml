@@ -303,18 +303,18 @@ class AmpAccordion extends AMP.BaseElement {
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
-        this.animateExpand_(section);
+        this.animateExpand_(section, trust);
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach(sectionIter => {
             if (sectionIter != section) {
-              this.animateCollapse_(sectionIter);
+              this.animateCollapse_(sectionIter, trust);
               sectionIter.children[0].setAttribute('aria-expanded', 'false');
             }
           });
         }
       } else {
         header.setAttribute('aria-expanded', 'false');
-        this.animateCollapse_(section);
+        this.animateCollapse_(section, trust);
       }
     } else {
       // Toggle without animation
@@ -518,7 +518,7 @@ class AmpAccordion extends AMP.BaseElement {
     event.preventDefault();
     const header = dev().assertElement(event.currentTarget);
     const section = dev().assertElement(header.parentElement);
-    this.toggle_(section, trust, /* opt_forceExpand */ false);
+    this.toggle_(section, trust);
   }
 
   /**
@@ -611,6 +611,14 @@ class AmpAccordion extends AMP.BaseElement {
         this.toggle_(sectionEl, trust, /* opt_forceExpand */ toExpand);
       }
     });
+  }
+
+  /**
+   * @return {?../../../src/service/action-impl.ActionService}
+   * @visibleForTesting
+   */
+  getActionServiceForTesting() {
+    return this.action_;
   }
 }
 
