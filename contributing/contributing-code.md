@@ -137,7 +137,7 @@ All code in AMP must be reviewed and approved before it is merged.  Reviewers/Co
 
 To be merged, all code must be approved by both:
 
-* At least one [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml) who is not the author.  If the author is a Reviewer, a [Collaborator](https://github.com/orgs/ampproject/teams/reviewers-amphtml) may fulfill this requirement instead.
+* At least one [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml) who is not the author.  If the author is a Reviewer, a [Collaborator](https://github.com/orgs/ampproject/teams/collaborators-amphtml) may fulfill this requirement instead.
 * At least one [Owner](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS&s=indexed) for all areas the PR affects, except those areas in which the code author is an Owner.
 
 It is acceptable for one person to fulfill these requirements, e.g. if an Owner who is also a Reviewer approves the PR it may be merged.
