@@ -43,9 +43,8 @@ t.run('errors displayed on page on #development mode', function() {
         await (await fetch('/dist/log-messages.simple.json')).json()
       );
     } catch (_) {
-      // we might be coverage testing, in which case we're using binaries
-      // created with `gulp build`, which don't go through the babel transform
-      // that outputs this file.
+      // We might be using binaries created with `gulp build`, which don't go
+      // through the transform that outputs the table we're attempting to read.
     }
 
     fixture = await createFixtureIframe(
