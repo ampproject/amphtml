@@ -40,7 +40,7 @@ import {
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
-import {disposeServicesForDoc} from './service';
+import {disposeServicesForDoc, getServicePromiseForDoc} from './service';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
 import {
@@ -509,6 +509,15 @@ export class MultidocManager {
       this.closeShadowRoot_(shadowRoot);
     };
 
+    /**
+     * Closes the document, resolving when visibility changes and services have
+     * been cleand up. The document can no longer be activated again.
+     * @return {Promise}
+     */
+    amp['closeAsync'] = () => {
+      return this.closeShadowRootAsync_(shadowRoot);
+    };
+
     if (getMode().development) {
       amp.toggleRuntime = viewer.toggleRuntime.bind(viewer);
       amp.resources = Services.resourcesForDoc(ampdoc);
@@ -866,12 +875,20 @@ export class MultidocManager {
 
   /**
    * @param {!ShadowRoot} shadowRoot
+   * @return {Promise}
    * @private
    */
   closeShadowRootAsync_(shadowRoot) {
-    this.timer_.delay(() => {
+    const closePromise = new Promise(resolve => {
+      const {ampdoc} = shadowRoot.AMP;
+      getServicePromiseForDoc(ampdoc, 'resources').then(resources => {
+        return resources ? resources.onNextPass(resolve) : resolve();
+      });
       this.closeShadowRoot_(shadowRoot);
-    }, 0);
+    });
+    // Delay for queued pass after visibility change is 10ms
+    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 15));
+    return Promise.race([closePromise, timeoutPromise]);
   }
 
   /** @private */
