@@ -21,6 +21,7 @@ const path = require('path');
 const {build} = require('./build');
 const {clean} = require('./clean');
 const {dist} = require('./dist');
+const {enableLocalTesting} = require('./helpers');
 
 async function walk(dest) {
   const filelist = [];
@@ -47,21 +48,6 @@ async function copyAndReplaceUrls(src, dest) {
   await Promise.all(promises);
 }
 
-/**
- * Adds the Firebase host to the prepended AMP_CONFIG in order to make ads
- * work on deployed demos.
- * @param {string} filePath
- */
-async function modifyThirdPartyUrl(filePath) {
-  const data = await fs.readFile(filePath, 'utf8');
-  const result = data.replace(
-    'self.AMP_CONFIG={',
-    // eslint-disable-next-line prettier/prettier
-    'self.AMP_CONFIG={"thirdPartyUrl":location.origin,"thirdPartyFrameRegex": "^.*\.firebaseapp\.com$",'
-  );
-  await fs.writeFile(filePath, result, 'utf8');
-}
-
 async function firebase() {
   if (!argv.nobuild) {
     await clean();
@@ -80,6 +66,7 @@ async function firebase() {
     });
     await replaceUrls('firebase/index.html');
   } else {
+    log(colors.green('Copying test/manual and examples folders.'));
     await Promise.all([
       copyAndReplaceUrls('test/manual', 'firebase/manual'),
       copyAndReplaceUrls('examples', 'firebase/examples'),
@@ -90,9 +77,13 @@ async function firebase() {
     fs.copy('dist', 'firebase/dist', {overwrite: true}),
     fs.copy('dist.3p/current', 'firebase/dist.3p/current', {overwrite: true}),
   ]);
+
+  if (argv.fortesting) {
+    enableLocalTesting('firebase/dist.3p/current/integration.js');
+    enableLocalTesting('firebase/dist/amp.js');
+  }
+
   await Promise.all([
-    modifyThirdPartyUrl('firebase/dist/amp.js'),
-    modifyThirdPartyUrl('firebase/dist.3p/current/integration.js'),
     fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js', {
       overwrite: true,
     }),
@@ -128,4 +119,6 @@ firebase.flags = {
   'file': 'File to deploy to firebase as index.html',
   'min': 'Source from minified files',
   'nobuild': 'Skips the gulp build|dist step.',
+  'fortesting':
+    'Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
 };
