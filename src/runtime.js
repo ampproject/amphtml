@@ -40,7 +40,7 @@ import {
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
-import {disposeServicesForDoc, getServicePromiseForDoc} from './service';
+import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
 import {
@@ -883,10 +883,15 @@ export class MultidocManager {
       15, // Delay for queued pass after visibility change is 10ms
       new this.win.Promise(resolve => {
         const {ampdoc} = shadowRoot.AMP;
-        getServicePromiseForDoc(ampdoc, 'resources').then(resources => {
-          return resources ? resources.onNextPass(resolve) : resolve();
+        getServicePromiseOrNullForDoc(ampdoc, 'resources').then(resources => {
+          if (resources) {
+            resources.onNextPass(resolve);
+            this.closeShadowRoot_(shadowRoot);
+          } else {
+            this.closeShadowRoot_(shadowRoot);
+            resolve();
+          }
         });
-        this.closeShadowRoot_(shadowRoot);
       }),
       undefined,
       true
