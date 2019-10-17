@@ -22,6 +22,7 @@ import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
+import {removeElement} from '../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -287,6 +288,8 @@ export class AmpImg extends BaseElement {
     if (!img.complete) {
       img.src =
         'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+      removeElement(img);
+      this.img_ = null;
     }
 
     return true;
