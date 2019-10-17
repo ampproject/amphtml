@@ -291,7 +291,11 @@ class AmpCarousel extends AMP.BaseElement {
       <button
         class="i-amphtml-base-carousel-next"
         aria-label="Next item in carousel"
-      ></button>
+      >
+        <div class="i-amphtml-base-carousel-arrow-frosting"></div>
+        <div class="i-amphtml-base-carousel-arrow-backdrop"></div>
+        <div class="i-amphtml-base-carousel-arrow-background"></div>
+      </button>
     `;
   }
 
@@ -305,7 +309,11 @@ class AmpCarousel extends AMP.BaseElement {
       <button
         class="i-amphtml-base-carousel-prev"
         aria-label="Previous item in carousel"
-      ></button>
+      >
+        <div class="i-amphtml-base-carousel-arrow-frosting"></div>
+        <div class="i-amphtml-base-carousel-arrow-backdrop"></div>
+        <div class="i-amphtml-base-carousel-arrow-background"></div>
+      </button>
     `;
   }
 
