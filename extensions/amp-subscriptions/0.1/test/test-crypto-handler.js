@@ -69,7 +69,7 @@ describes.realWin(
       const keyScript = win.document.createElement('script');
       keyScript.setAttribute('cryptokeys', '');
       keyScript.setAttribute('type', 'application/json');
-      keyScript.setAttribute('sha_256_hash', decryptedDocKeyHash);
+      keyScript.setAttribute('sha-256-hash', decryptedDocKeyHash);
       keyScript.textContent = JSON.stringify(encryptedKeys);
       win.document.head.appendChild(keyScript);
 
