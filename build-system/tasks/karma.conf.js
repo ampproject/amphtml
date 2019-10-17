@@ -16,8 +16,8 @@
 'use strict';
 
 const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
-const {gitCommitterEmail} = require('../git');
-const {isTravisBuild, travisJobNumber} = require('../travis');
+const {gitCommitterEmail} = require('../common/git');
+const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
 const TEST_SERVER_PORT = 8081;
 
@@ -157,10 +157,14 @@ module.exports = {
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
-      flags: ['--no-sandbox --remote-debugging-port=9222'].concat(
-        COMMON_CHROME_FLAGS
-      ),
+      flags: [
+        // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+        '--no-sandbox',
+        '--remote-debugging-port=9222',
+        // https://github.com/karma-runner/karma-chrome-launcher/issues/175
+        "--proxy-server='direct://'",
+        '--proxy-bypass-list=*',
+      ].concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
@@ -252,21 +256,19 @@ module.exports = {
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_Edge_17: Object.assign(
+    SL_Edge: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'MicrosoftEdge',
         platform: 'Windows 10',
-        version: '17.17134',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_IE_11: Object.assign(
+    SL_IE: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'internet explorer',
         platform: 'Windows 10',
-        version: '11.103',
       },
       SAUCE_TIMEOUT_CONFIG
     ),

@@ -102,13 +102,6 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 /** @const {Object} */
 const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
-/** @const {!{branch: string, control: string, experiment: string}} */
-export const ADX_ADY_EXP = {
-  branch: 'amp-ad-ff-adx-ady',
-  control: '21062398',
-  experiment: '21062593',
-};
-
 /**
  * Returns the value of some navigation timing parameter.
  * Feature detection is used for safety on browsers that do not support the
@@ -197,10 +190,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   let eids = adElement.getAttribute('data-experiment-id');
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
-  }
-  if (new RegExp(`(^|,)${ADX_ADY_EXP.experiment}($|,)`).test(eids)) {
-    slotRect.left = slotRect.left || 1;
-    slotRect.top = slotRect.top || 1;
   }
   return {
     'adf': DomFingerprint.generate(adElement),
@@ -299,7 +288,7 @@ export function googlePageParameters(a4a, startTime) {
     const viewport = Services.viewportForDoc(ampDoc);
     const viewportRect = viewport.getRect();
     const viewportSize = viewport.getSize();
-    const visibilityState = Services.viewerForDoc(ampDoc).getVisibilityState();
+    const visibilityState = ampDoc.getVisibilityState();
     return {
       'is_amp': a4a.isXhrAllowed()
         ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
@@ -626,12 +615,11 @@ export function getCsiAmpAnalyticsConfig() {
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
-  const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
   const vars = /** @type {!JsonObject} */ ({
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
-    'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
+    'viewerLastVisibleTime': ampdoc.getLastVisibleTime() - navStart,
   });
   if (qqid) {
     vars['qqid'] = qqid;
@@ -846,6 +834,11 @@ export function getBinaryTypeNumericalCode(type) {
       'control': '1',
       'canary': '2',
       'rc': '3',
+      'experimentA': '10',
+      'experimentB': '11',
+      'experimentC': '12',
+      'nomod': '42',
+      'mod': '43',
     }[type] || null
   );
 }

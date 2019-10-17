@@ -19,8 +19,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
-const {gitCommitHash} = require('../git');
-const {travisJobUrl, isTravisPullRequestBuild} = require('../travis');
+const {gitCommitHash} = require('../common/git');
+const {travisJobUrl, isTravisPullRequestBuild} = require('../common/travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -30,10 +30,15 @@ const IS_GULP_E2E = argv._[0] === 'e2e';
 
 const IS_LOCAL_CHANGES = !!argv.local_changes;
 const IS_SAUCELABS = !!argv.saucelabs;
+const IS_SAUCELABS_STABLE = !!argv.saucelabs && !!argv.stable;
+const IS_SAUCELABS_BETA = !!argv.saucelabs && !!argv.beta;
 const IS_SINGLE_PASS = !!argv.single_pass;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  ['integration', ['local', 'single-pass', 'saucelabs']],
+  [
+    'integration',
+    ['local', 'single-pass', 'saucelabs-beta', 'saucelabs-stable'],
+  ],
   ['unit', ['local', 'local-changes', 'saucelabs']],
   ['e2e', ['local']],
 ]);
@@ -61,7 +66,11 @@ function inferTestType() {
     return `${type}/local-changes`;
   }
 
-  if (IS_SAUCELABS) {
+  if (IS_SAUCELABS_BETA) {
+    return `${type}/saucelabs-beta`;
+  } else if (IS_SAUCELABS_STABLE) {
+    return `${type}/saucelabs-stable`;
+  } else if (IS_SAUCELABS) {
     return `${type}/saucelabs`;
   }
 

@@ -16,9 +16,9 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 - [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your guide or the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
 - [ ] When your code is ready to review, find [people to review and approve your code](#code-review-and-approval).
   - Your code must be reviewed/approved by an Owner for each area your PR affects and a Reviewer.  (It is acceptable and common for one person to fulfill both roles.)
-    - choose an Owner from the OWNERS.yaml file in the directories you change (or their parent directories)
-    - choose a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml)
-  -  Add the Reviewers/Owners as reviewers on your PR if you are able to do so, otherwise cc them by adding the line "/cc @username" in your PR description/comment.
+    - after your PR is created, a bot will automatically find Owners that can approve your PR and add them to your PR; you may also view the OWNERS file in the directories you change (or their parent directories)
+    - choose a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml); it's possible that the Owners that were automatically added by the bot are also Reviewers 
+  -  If the Owner that was automatically added is not a Reviewer, or you want to have someone else review and approve your code add them as reviewers on your PR if you are able to do so, otherwise cc them by adding the line "/cc @username" in your PR description/comment.
 
 If your run into any issues finding a Reviewer/Owner or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).  You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
@@ -53,7 +53,7 @@ A guide is required if you are making a substantial change to AMP, but is option
 
 To find a guide:
 - The [Working Group](https://github.com/ampproject/meta/blob/master/working-groups/README.md) that is most responsible for the area you are changing may document how to find a guide from that Working Group.  If they do not, reach out to the facilitator of the WG (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue by adding "/cc @username" in the issue body or comment).
-- If there is no obvious Working Group responsible for the area you are changing but you know what part of the codebase your change will be in, reach out to one of the people in the OWNERS.yaml files for the areas you're changing (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue).
+- If there is no obvious Working Group responsible for the area you are changing but you know what part of the codebase your change will be in, reach out to one of the people in the OWNERS files for the areas you're changing (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue).
 - If you're still not sure who your guide should be, ask for a guide on [Slack](https://bit.ly/amp-slack-signup) in the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
 - If you can't find a guide after going through these routes or the guides you find aren't responsive, reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
@@ -86,17 +86,17 @@ Once you have found a guide, make sure to @-mention them on any issues / PRs rel
      - [Has good test coverage](./TESTING.md)
      - [Follows the style and design guidelines](./DEVELOPING.md#guidelines--style)
      - [Provides good documentation](./building-an-amp-extension.md#documenting-your-element)
-     - [Passes the presubmit checks (no lint and type check errors, tests are passing)](../build-system/enable-git-pre-push.sh#L17-L20)
+     - [Passes the presubmit checks (no lint and type check errors, tests are passing)](../build-system/common/enable-git-pre-push.sh#L17-L20)
      - [Includes validation rules and tests, if relevant](./building-an-amp-extension.md#allowing-proper-validations)
      - [Provides an example, if relevant](./building-an-amp-extension.md#example-of-using-your-extension)
 - Send your code for review.
   - [Sign the Contributor License Agreement](#contributor-license-agreement) if you have not already done so.
   - [Pull the latest changes from the amphtml repo](./getting-started-e2e.md#pull-the-latest-changes-from-the-amphtml-repository) and resolve any conflicts.
-  - Run the **pre push** check, which is a tool that helps catch any issues before you submit your code. To enable the git pre-push hook, see [`enable-git-pre-push.sh`](../build-system/enable-git-pre-push.sh#L17-L20).
+  - Run the **pre push** check, which is a tool that helps catch any issues before you submit your code. To enable the git pre-push hook, see [`enable-git-pre-push.sh`](../build-system/common/enable-git-pre-push.sh#L17-L20).
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
   - [Create a Pull Request (PR)](./getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review).
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
-  - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (Your guide can help with this.)
+  - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (A bot will automatically assign Owners that can review your code, and your guide can help find Reviewers if needed.)
   - [Respond to feedback](./getting-started-e2e.md#respond-to-pull-request-comments).
 - After your PR has all of the necessary approvals, your code may be merged into the repository by any Collaborator/Reviewer.  Your guide will typically handle this; reach out to them if your code is not merged soon after it has been approved.
 - To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
@@ -137,10 +137,12 @@ All code in AMP must be reviewed and approved before it is merged.  Reviewers/Co
 
 To be merged, all code must be approved by both:
 
-* At least one [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml) who is not the author.  If the author is a Reviewer, a [Collaborator](https://github.com/orgs/ampproject/teams/reviewers-amphtml) may fulfill this requirement instead.
-* At least one [Owner](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) for all areas the PR affects, except those areas in which the code author is an Owner.
+* At least one [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml) who is not the author.  If the author is a Reviewer, a [Collaborator](https://github.com/orgs/ampproject/teams/collaborators-amphtml) may fulfill this requirement instead.
+* At least one [Owner](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS&s=indexed) for all areas the PR affects, except those areas in which the code author is an Owner.
 
 It is acceptable for one person to fulfill these requirements, e.g. if an Owner who is also a Reviewer approves the PR it may be merged.
+
+We now have a bot that will automatically assign Owners to a PR once it is created, and it is likely at least one of these Owners will also be a Reviewer.
 
 Once the PR has been approved, anyone with commit rights to the repository may merge the PR, including its author.
 
@@ -166,5 +168,5 @@ These guidelines are specific to the amphtml repository.  Other ampproject repos
     * Demonstrated expertise in the area in which they are an Owner.
     * Any GitHub user (including those who are not Reviewers or Collaborators) may be an Owner.
     * When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
-    * Owners of an area may approve other Owners at or below their area of expertise following the normal PR process.  To request becoming an Owner create a PR adding yourself to the appropriate OWNERS.yaml file and assign/cc a current Owner for that directory.
-  * The list of Owners for a directory can be found in the [OWNERS.yaml](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) file in the directory or a parent directory.
+    * Owners of an area may approve other Owners at or below their area of expertise following the normal PR process.  To request becoming an Owner create a PR adding yourself to the appropriate OWNERS file and assign/cc a current Owner for that directory.
+  * The list of Owners for a directory can be found in the [OWNERS](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3A"OWNERS"&s=indexed) file in the directory or a parent directory.

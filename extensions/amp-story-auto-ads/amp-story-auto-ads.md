@@ -28,7 +28,7 @@ Dynamically inserts ads into a Story.
 <table>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
@@ -154,7 +154,7 @@ algorithm will then skip the slot after this page when trying to insert an ad.
 
 ## Analytics
 When using `amp-story-auto-ads` several new [analytics triggers](../../extensions/amp-analytics/amp-analytics.md)
-and [variables] will be availible for your analytics configuration.
+and [variables] will be available for your analytics configuration.
 
 ### Triggers
 Name | Event

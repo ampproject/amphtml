@@ -58,15 +58,25 @@ amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'loop' in tag 'am
 |    <amp-video rotate-to-fullscreen layout=fill width=300 height=500
 |      loop preload="metadata" controls></amp-video>
 |
+|    <!-- Valid: Media Session Attributes -->
+|    <amp-video layout=fill width=300 height=500 
+|      title="Hello" artist="World" artwork="example.jpg" poster="example.jpg"
+|      ></amp-video>
+|
+|    <!-- Valid: Most attributes are bindable -->
+|    <amp-video layout=fill width=300 height=500 
+|      [title]="Hello" [artist]="World" [artwork]="example.jpg" [poster]="example.jpg"
+|      ></amp-video>
+|
 |    <!-- Invalid: `dock` without `amp-video-docking` extension. -->
 |    <amp-video dock layout=fill width=300 height=500 controls></amp-video>
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:57:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-video/0.1/test/validator-amp-video.html:67:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |
 |    <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
 |    <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:60:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video) [DISALLOWED_HTML]
+amp-video/0.1/test/validator-amp-video.html:70:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video) [DISALLOWED_HTML]
 |      loop preload="metadata" controls></amp-video>
 |  </body>
 |  </html>

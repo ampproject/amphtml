@@ -17,8 +17,8 @@
 import '../../src/polyfills';
 import '../../src/service/timer-impl';
 import {Deferred} from '../../src/utils/promise';
+import {SameSite, getCookie, setCookie} from '../../src/cookies';
 import {devAssert, initLogConstructor, setReportError} from '../../src/log';
-import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
@@ -112,17 +112,18 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
-    id: 'amp-lightbox-gallery-base-carousel',
-    name: 'Uses amp-base-carousel in amp-lightbox-gallery',
-    spec: 'https://github.com/ampproject/amphtml/issues/21568',
-  },
-  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-google-vrview-image/amp-google-vrview-image.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
+  },
+  {
+    id: 'amp-mega-menu',
+    name: 'AMP extension for a mega menu with expandable items',
+    spec: 'https://github.com/ampproject/amphtml/issues/24814',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
   },
   {
     id: 'amp-sidebar-v2',
@@ -324,12 +325,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
-    id: 'inabox-no-chunking',
-    name: 'Experiment to disable startup chunking in inabox runtime',
-    spec: 'https://github.com/ampproject/amphtml/issues/23573',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23573',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
@@ -344,12 +339,6 @@ const EXPERIMENTS = [
       'For development use only',
     spec: 'N/A',
     cleanupIssue: 'N/A',
-  },
-  {
-    id: 'new-loaders',
-    name: 'New default loaders',
-    spec: 'https://github.com/ampproject/amphtml/issues/20237',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
   },
   {
     id: 'macro-after-long-task',
@@ -564,6 +553,10 @@ function setAmpCanaryCookie_(cookieState) {
     // Set explicit domain, so the cookie gets sent to sub domains.
     domain: location.hostname,
     allowOnProxyOrigin: true,
+    // Make sure the cookie is available for the script loads coming from
+    // other domains. Chrome's default of LAX would otherwise prevent it
+    // from being sent.
+    sameSite: SameSite.NONE,
   };
   setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.

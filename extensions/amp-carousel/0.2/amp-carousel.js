@@ -138,7 +138,6 @@ class AmpCarousel extends AMP.BaseElement {
 
     // Setup actions and listeners
     this.setupActions_();
-    this.stopTouchMovePropagation_();
     this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
@@ -511,13 +510,27 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Updates the current index, resuming the current slide and pausing all
-   * others.
+   * Updates the current index, triggering actions and analytics events.
    * @param {number} index
+   * @param {!ActionSource} actionSource
    */
-  updateCurrentIndex_(index) {
+  updateCurrentIndex_(index, actionSource) {
     const prevIndex = this.currentIndex_;
     this.currentIndex_ = index;
+
+    // Ignore the first indexChange, we do not want to trigger any events.
+    if (prevIndex == null) {
+      return;
+    }
+
+    const data = dict({'index': index});
+    const name = 'slideChange';
+    const isHighTrust = this.isHighTrustActionSource_(actionSource);
+    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+
+    const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
+    this.action_.trigger(this.element, name, action, trust);
+    this.element.dispatchCustomEvent(name, data);
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 
@@ -612,42 +625,19 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Event} event
    */
   onIndexChanged_(event) {
+    const detail = getDetail(event);
+    const index = detail['index'];
+    const actionSource = detail['actionSource'];
+
+    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
+    this.updateUi_();
+
+    // Do not fire events, analytics for type="carousel".
     if (this.type_ == CarouselType.CAROUSEL) {
       return;
     }
 
-    const detail = getDetail(event);
-    const index = detail['index'];
-    const actionSource = detail['actionSource'];
-    const data = dict({'index': index});
-    const name = 'slideChange';
-    const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
-
-    const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
-    this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
-    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
-    this.updateCurrentIndex_(index);
-    this.updateUi_();
-  }
-
-  /**
-   * Stops touchmove events from propagating up to the viewer. Ideally we would
-   * have a separate piece of logic to not forward touchmoves if they occurred
-   * in a scrollable container instead of stopping propagation entirely for
-   * horizontal and vertical swipes. See:
-   * https://github.com/ampproject/amphtml/issues/4754.
-   * @private
-   */
-  stopTouchMovePropagation_() {
-    this.scrollContainer_.addEventListener(
-      'touchmove',
-      event => event.stopPropagation(),
-      {
-        passive: true,
-      }
-    );
+    this.updateCurrentIndex_(index, actionSource);
   }
 }
 

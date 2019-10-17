@@ -1,10 +1,6 @@
 {
-  "plugins": [
-    "eslint-plugin"
-  ],
-  "extends": [
-    "plugin:eslint-plugin/recommended"
-  ],
+  "plugins": ["eslint-plugin"],
+  "extends": ["plugin:eslint-plugin/recommended"],
   "rules": {
     "jsdoc/check-param-names": 0,
     "jsdoc/check-tag-names": 0,

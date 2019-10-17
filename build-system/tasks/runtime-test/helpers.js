@@ -20,14 +20,13 @@ const fs = require('fs');
 const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
-
 const {
   reportTestErrored,
   reportTestFinished,
   reportTestRunComplete,
 } = require('../report-test-status');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {Server} = require('karma');
 
 const BATCHSIZE = 4; // Number of Sauce Lab browsers
@@ -195,18 +194,20 @@ function karmaBrowserStart_(browser) {
  * @param {Object} browser
  * @private
  */
-function karmaBrowserComplete_(browser) {
+async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
-  // Prevent cases where Karma detects zero tests and still passes. #16851.
+  // Initially we were reporting an error with reportTestErrored() when zero tests were detected (see #16851),
+  // but since Karma sometimes returns a transient, recoverable state, we will
+  // print a warning without reporting an error to the github test status. (see #24957)
   if (result.total == 0) {
-    log(red('ERROR: Zero tests detected by Karma.'));
-    log(red(JSON.stringify(result)));
-    reportTestErrored().finally(() => {
-      if (!argv.watch) {
-        process.exit(1);
-      }
-    });
+    log(
+      yellow('WARNING:'),
+      'Received a status with zero tests:',
+      cyan(JSON.stringify(result))
+    );
+
+    return;
   }
   // Print a summary for each browser as soon as tests complete.
   let message =
@@ -265,7 +266,7 @@ async function runTestInSauceLabs(config) {
 
   if (argv.beta) {
     config.browsers = browsers.beta;
-    const betaExitCode = await createKarmaServer(config, () => {});
+    const betaExitCode = await createKarmaServer(config, reportTestRunComplete);
     if (betaExitCode != 0) {
       log(
         yellow('Some tests have failed on'),
@@ -300,14 +301,22 @@ async function runTestInSauceLabs(config) {
  */
 async function runTestInBatches_(config, browsers) {
   let errored = false;
-  let totalStableSuccess = 0;
-  let totalStableFailed = 0;
+  let totalSuccess = 0;
+  let totalFailed = 0;
   const partialTestRunCompleteFn = async (browsers, results) => {
     if (results.error) {
       errored = true;
     } else {
-      totalStableSuccess += results.success;
-      totalStableFailed += results.failed;
+      totalSuccess += results.success;
+      totalFailed += results.failed;
+    }
+  };
+
+  const reportResults = async () => {
+    if (errored) {
+      await reportTestErrored();
+    } else {
+      await reportTestFinished(totalSuccess, totalFailed);
     }
   };
 
@@ -318,12 +327,8 @@ async function runTestInBatches_(config, browsers) {
       config,
       partialTestRunCompleteFn
     );
-    if (errored) {
-      await reportTestErrored();
-    } else {
-      await reportTestFinished(totalStableSuccess, totalStableFailed);
-    }
     if (allBatchesExitCodes || errored) {
+      await reportResults();
       log(
         yellow('Some tests have failed on'),
         cyan('stable'),
@@ -340,7 +345,7 @@ async function runTestInBatches_(config, browsers) {
       'beta',
       browsers.beta,
       config,
-      /* runCompleteFn */ () => {}
+      partialTestRunCompleteFn
     );
     if (allBatchesExitCodes) {
       log(
@@ -356,6 +361,7 @@ async function runTestInBatches_(config, browsers) {
     }
   }
 
+  await reportResults();
   return 0;
 }
 

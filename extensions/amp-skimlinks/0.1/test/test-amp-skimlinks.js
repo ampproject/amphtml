@@ -369,12 +369,9 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          const fakeViewer = {
-            whenFirstVisible: env.sandbox
-              .stub()
-              .returns(isVisibleDefer.promise),
-          };
-          helpers.mockServiceGetter('viewerForDoc', fakeViewer);
+          sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(isVisibleDefer.promise);
 
           return ampSkimlinks.onPageScanned_().then(() => {
             const stub = ampSkimlinks.trackingService_.sendImpressionTracking;

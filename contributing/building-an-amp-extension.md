@@ -57,7 +57,7 @@ The directory structure is below:
 ├── validator-amp-my-element.protoascii  # Validator rules (req'd)
 ├── amp-my-element.md                    # Element's main documentation (req'd)
 └── More documentation in .md files (optional)
-└── OWNERS.yaml # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/CODE_OWNERSHIP.md) (req'd)
+└── OWNERS # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/CODE_OWNERSHIP.md) (req'd)
 
 ```
 In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
@@ -745,8 +745,8 @@ Also consider contributing to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to bundles.config.js to tell it about your extension, its files and
-its examples. You will need to add an entry in the `extensionBundles` array.
+changes to [`build-system/compile/bundles.config.js`](../build-system/compile/bundles.config.js) to tell it about your
+extension, its files and its examples. You will need to add an entry in the `extensionBundles` array.
 
 ```javascript
 exports.extensionBundles = [
