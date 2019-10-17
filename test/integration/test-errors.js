@@ -38,9 +38,15 @@ t.run('errors displayed on page on #development mode', function() {
   beforeEach(async () => {
     // Errors are printed as URLs when `transform-log-messages` is on.
     // Fetch table to find URL ids for expected messages.
-    messagesById = Object.freeze(
-      await (await fetch('/dist/log-messages.simple.json')).json()
-    );
+    try {
+      messagesById = Object.freeze(
+        await (await fetch('/dist/log-messages.simple.json')).json()
+      );
+    } catch (_) {
+      // we might be coverage testing, in which case we're using binaries
+      // created with `gulp build`, which don't go through the babel transform
+      // that outputs this file.
+    }
 
     fixture = await createFixtureIframe(
       'test/fixtures/errors.html',
