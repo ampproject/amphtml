@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+const fs = require('fs-extra');
+const globby = require('globby');
 const log = require('fancy-log');
+const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
 
 /**
  * Logs a message on the same line to indicate progress
+ *
  * @param {string} message
  */
 function logOnSameLine(message) {
@@ -30,6 +34,24 @@ function logOnSameLine(message) {
   log(message);
 }
 
+/**
+ * Gets the list of files changed on the current branch that match the given
+ * array of glob patterns
+ *
+ * @param {!Array<string>} globs
+ * @return {!Array<string>}
+ */
+function getFilesChanged(globs) {
+  const allFiles = globby.sync(globs);
+  return gitDiffNameOnlyMaster().filter(changedFile => {
+    return (
+      fs.existsSync(changedFile) &&
+      allFiles.some(file => file.endsWith(changedFile))
+    );
+  });
+}
+
 module.exports = {
+  getFilesChanged,
   logOnSameLine,
 };
