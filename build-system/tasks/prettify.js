@@ -23,12 +23,11 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs-extra');
+const globby = require('globby');
 const log = require('fancy-log');
 const path = require('path');
+const {getFilesChanged, logOnSameLine} = require('../common/utils');
 const {getOutput} = require('../common/exec');
-const {gitDiffNameOnlyMaster} = require('../common/git');
-const {globsToFiles, logOnSameLine} = require('../common/utils');
 const {green, cyan, red, yellow} = require('ansi-colors');
 const {highlight} = require('cli-highlight');
 const {isTravisBuild} = require('../common/travis');
@@ -47,21 +46,6 @@ const PrettierResult = {
   FAILURE: 1,
   ERROR: 2,
 };
-
-/**
- * Extracts the list of prettifiable files in this PR from the commit log.
- *
- * @return {!Array<string>}
- */
-async function getFilesChanged() {
-  const allFiles = await globsToFiles(prettifyGlobs);
-  return gitDiffNameOnlyMaster().filter(changedFile => {
-    return (
-      fs.existsSync(changedFile) &&
-      allFiles.some(file => file.endsWith(changedFile))
-    );
-  });
-}
 
 /**
  * Logs the list of files that will be checked.
@@ -84,10 +68,10 @@ async function prettify() {
   maybeUpdatePackages();
   let filesToCheck;
   if (argv.files) {
-    filesToCheck = await globsToFiles(argv.files.split(','));
+    filesToCheck = globby.sync(argv.files.split(','));
     logFiles(filesToCheck);
   } else if (argv.local_changes) {
-    filesToCheck = await getFilesChanged();
+    filesToCheck = getFilesChanged(prettifyGlobs);
     if (filesToCheck.length == 0) {
       log(green('INFO: ') + 'No prettifiable files in this PR');
       return;
@@ -95,7 +79,7 @@ async function prettify() {
       logFiles(filesToCheck);
     }
   } else {
-    filesToCheck = await globsToFiles(prettifyGlobs);
+    filesToCheck = globby.sync(prettifyGlobs);
   }
   runPrettify(filesToCheck);
 }

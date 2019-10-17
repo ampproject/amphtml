@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-const gulp = require('gulp');
+const fs = require('fs-extra');
+const globby = require('globby');
 const log = require('fancy-log');
-const tap = require('gulp-tap');
+const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
 
 /**
@@ -34,30 +35,23 @@ function logOnSameLine(message) {
 }
 
 /**
- * Converts an array of globs to a list of matching files using gulp.src, which
- * can handle negative globs.
+ * Gets the list of files changed on the current branch that match the given
+ * array of glob patterns
  *
  * @param {!Array<string>} globs
  * @return {!Array<string>}
  */
-async function globsToFiles(globs) {
-  return await new Promise(resolve => {
-    const files = [];
-    gulp
-      .src(globs, {buffer: false, read: false})
-      .pipe(
-        tap(file => {
-          files.push(file.path);
-        })
-      )
-      .pipe(gulp.dest('.'))
-      .on('end', () => {
-        resolve(files);
-      });
+function getFilesChanged(globs) {
+  const allFiles = globby.sync(globs);
+  return gitDiffNameOnlyMaster().filter(changedFile => {
+    return (
+      fs.existsSync(changedFile) &&
+      allFiles.some(file => file.endsWith(changedFile))
+    );
   });
 }
 
 module.exports = {
+  getFilesChanged,
   logOnSameLine,
-  globsToFiles,
 };
