@@ -108,7 +108,7 @@ const BABELIFY_GLOBAL_TRANSFORM = {
  */
 const BABELIFY_PLUGINS = {
   plugins: conf.plugins({
-    isSinglePass: argv.single_pass,
+    isSinglePass: false,
     isEsmBuild: argv.esm,
     isForTesting: argv.fortesting,
   }),
