@@ -193,6 +193,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.key == Keys.ESCAPE) {
+        // Keypress is high trust.
         if (this.close_(ActionTrust.HIGH)) {
           event.preventDefault();
         }
@@ -461,7 +462,7 @@ export class AmpSidebar extends AMP.BaseElement {
   /**
    * Reveals the sidebar.
    * @param {!ActionTrust} trust
-   * @param {!Element} openerElement
+   * @param {?Element} openerElement
    * @private
    */
   open_(trust, openerElement) {
@@ -477,8 +478,10 @@ export class AmpSidebar extends AMP.BaseElement {
         this.historyId_ = historyId;
       });
 
-    this.openerElement_ = openerElement;
-    this.initialScrollTop_ = this.viewport_.getScrollTop();
+    if (openerElement) {
+      this.openerElement_ = openerElement;
+      this.initialScrollTop_ = this.viewport_.getScrollTop();
+    }
   }
 
   /**
