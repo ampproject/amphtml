@@ -56,11 +56,15 @@ Command                                                                 | Descri
 `gulp dist --noextensions`                                              | Builds production binaries without building any extensions.
 `gulp dist --fortesting`                                                | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.)
 `gulp dist --fortesting --config=<config>`                              | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.)
-`gulp lint`                                                             | Validates against the ESLint linter.
+`gulp lint`                                                             | Validates JS files against the ESLint linter.
 `gulp lint --watch`                                                     | Watches for changes in files, and validates against the ESLint linter.
 `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.
 `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided. Can be used with `--fix`.
 `gulp lint --local_changes`                                             | Lints just the files changed in the local branch. Can be used with `--fix`.
+`gulp prettify`                                                         | Validates non-JS files using Prettier.
+`gulp prettify --fix`                                                   | Fixes simple formatting errors automatically.
+`gulp prettify --files=<files-path-glob>`                               | Checks just the files provided. Can be used with `--fix`.
+`gulp prettify --local_changes`                                         | Checks just the files changed in the local branch. Can be used with `--fix`.
 `gulp build`                                                            | Builds the AMP library.
 `gulp build --extensions=amp-foo,amp-bar`                               | Builds the AMP library, with only the listed extensions.
 `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
