@@ -82,11 +82,9 @@ export class CryptoHandler {
     return crypto.subtle.digest('SHA-256', docKeyUint8).then(val => {
       const hashArray = Array.from(new Uint8Array(val));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      console.log(hashHex);
       if (hashHex != this.shaKeyHash_) {
         return Promise.reject(new Error('Invalid Document Key'));
       }
-      console.log('Woohoo!');
       if (this.decryptionPromise_) {
         return this.decryptionPromise_;
       }
