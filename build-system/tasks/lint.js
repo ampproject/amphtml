@@ -21,15 +21,14 @@ const config = require('../test-configs/config');
 const deglob = require('globs-to-files');
 const eslint = require('gulp-eslint');
 const eslintIfFixed = require('gulp-eslint-if-fixed');
-const fs = require('fs-extra');
 const gulp = require('gulp');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
+const {getFilesChanged, logOnSameLine} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
-const {logOnSameLine} = require('../common/utils');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const isWatching = argv.watch || argv.w || false;
@@ -150,21 +149,6 @@ function runLinter(stream, options) {
 }
 
 /**
- * Extracts the list of lintable files in this PR from the commit log.
- *
- * @return {!Array<string>}
- */
-function lintableFilesChanged() {
-  const lintableFiles = deglob.sync(config.lintGlobs);
-  return gitDiffNameOnlyMaster().filter(function(file) {
-    return (
-      fs.existsSync(file) &&
-      lintableFiles.some(lintableFile => lintableFile.endsWith(file))
-    );
-  });
-}
-
-/**
  * Checks if there are eslint rule changes, in which case we must lint all
  * files.
  *
@@ -211,7 +195,7 @@ function lint() {
   if (argv.files) {
     filesToLint = getFilesToLint(argv.files.split(','));
   } else if (!eslintRulesChanged() && argv.local_changes) {
-    const lintableFiles = lintableFilesChanged();
+    const lintableFiles = getFilesChanged(config.lintGlobs);
     if (lintableFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR');
       return Promise.resolve();
@@ -230,6 +214,7 @@ lint.description = 'Validates against Google Closure Linter';
 lint.flags = {
   'watch': '  Watches for changes in files, validates against the linter',
   'fix': '  Fixes simple lint errors (spacing etc)',
+  'files': '  Lints just the specified files',
   'local_changes': '  Lints just the files changed in the local branch',
   'quiet': '  Suppress warnings from outputting',
 };
