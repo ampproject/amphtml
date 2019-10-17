@@ -79,8 +79,10 @@ async function firebase() {
   ]);
 
   if (argv.fortesting) {
-    enableLocalTesting('firebase/dist.3p/current/integration.js');
-    enableLocalTesting('firebase/dist/amp.js');
+    await Promise.all([
+      enableLocalTesting('firebase/dist.3p/current/integration.js'),
+      enableLocalTesting('firebase/dist/amp.js'),
+    ]);
   }
 
   await Promise.all([
