@@ -70,7 +70,7 @@ The response requires a couple of custom headers:
 ## Ads tag
 
 The `amp-ad-custom` extension can be used to quickly declare ad slots, using key-value pairs set on data attributes to form the ad request. An example slot might look like:
-
+```
 <amp-ad-custom width=320 height=50
   src="http://www.my-ad-network.com"
   data-request-param-{param_1}="{val_1}"
@@ -78,7 +78,7 @@ The `amp-ad-custom` extension can be used to quickly declare ad slots, using key
   . . .
   data-request-param-{param_N}="{val_N}">
 </amp-ad-custom>
-
+```
 And the resultant ad request URL would be: `http://www.my-ad-network.com?{param_1}={val_1}&{param_2}={val_2}&...&{param_N}={val_N}`.
 
 
