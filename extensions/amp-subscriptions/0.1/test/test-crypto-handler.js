@@ -48,6 +48,7 @@ describes.realWin(
     const encryptedKey =
       "ENCRYPT({'accessRequirements': ['googleAccessRequirements:123'], 'key':'0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ='})";
     const decryptedDocKey = '0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ=';
+    const decryptedDocKeyHash = '5903f44139fd3d88414b0d29c986fd0ca1572eb214e3a0d56201d06ed753c39e';
     const encryptedKeys = {
       'local': encryptedKey,
       'google.com': encryptedKey,
@@ -68,6 +69,7 @@ describes.realWin(
       const keyScript = win.document.createElement('script');
       keyScript.setAttribute('cryptokeys', '');
       keyScript.setAttribute('type', 'application/json');
+      keyScript.setAttribute('sha_256_hash', decryptedDocKeyHash);
       keyScript.textContent = JSON.stringify(encryptedKeys);
       win.document.head.appendChild(keyScript);
 

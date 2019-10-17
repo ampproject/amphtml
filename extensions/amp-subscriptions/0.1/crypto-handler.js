@@ -31,11 +31,21 @@ export class CryptoHandler {
     /** @private {?Promise} */
     this.decryptionPromise_ = null;
 
+    const parsedEncryptedKeys = this.ampdoc_
+      .getRootNode()
+      .querySelector('script[cryptokeys]');
+    
     /** @private {?string} */
-    this.shaKeyHash_ = null;
+    if (parsedEncryptedKeys && parsedEncryptedKeys.hasAttribute('sha_256_hash')) {
+      this.shaKeyHash_ = parsedEncryptedKeys.getAttribute('sha_256_hash');
+    } else {
+      this.shaKeyHash_ = null;
+    }
 
     /** @type {?JsonObject} */
-    this.encryptedKeys_ = this.validateAndRetrieveCryptoKeys();
+    this.encryptedKeys_ =
+      (parsedEncryptedKeys && tryParseJson(parsedEncryptedKeys.textContent)) ||
+      null;
   }
 
   /**
@@ -44,21 +54,6 @@ export class CryptoHandler {
    */
   getEncryptedKeys() {
     return this.encryptedKeys_;
-  }
-
-  /**
-   * Retrieves the cryptokeys script from the ampdoc or null if 
-   * not found or invalid. 
-   */
-  validateAndRetrieveCryptoKeys() {
-    const parsedEncryptedKeys = this.ampdoc_
-      .getRootNode()
-      .querySelector('script[cryptokeys]');
-    if (!parsedEncryptedKeys || !parsedEncryptedKeys.hasAttribute('sha_256_hash')) {
-      return null;
-    }
-    this.shaKeyHash_ = parsedEncryptedKeys.getAttribute('sha_256_hash');
-    return tryParseJson(parsedEncryptedKeys.textContent) || null
   }
 
   /**
@@ -80,13 +75,18 @@ export class CryptoHandler {
    * @return {!Promise}
    */
   tryToDecryptDocument(decryptedDocumentKey) {
+    if (!this.shaKeyHash_) {
+      return Promise.reject(new Error('Missing Document Key Hash'));
+    }
     const docKeyUint8 = new TextEncoder().encode(decryptedDocumentKey);       
-    crypto.subtle.digest('SHA-256', docKeyUint8).then((val) => {
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');1
+    return crypto.subtle.digest('SHA-256', docKeyUint8).then(val => {
+      const hashArray = Array.from(new Uint8Array(val));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      console.log(hashHex);
       if (hashHex != this.shaKeyHash_) {
         return Promise.reject(new Error('Invalid Document Key'));
       }
+      console.log('Woohoo!');
       if (this.decryptionPromise_) {
         return this.decryptionPromise_;
       }
@@ -108,7 +108,7 @@ export class CryptoHandler {
         return Promise.all(promises);
       });
       return this.decryptionPromise_;
-    }, (reason) => { return Promise.reject(reason) });
+    });
   }
 
   /**
