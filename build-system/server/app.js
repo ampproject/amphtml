@@ -411,6 +411,35 @@ app.use('/form/autocomplete/error', (req, res) => {
   res(500);
 });
 
+const mentionNames = [
+  'Harry Potter',
+  'Albus Dumbledore',
+  'Voldemort',
+  'Severus Snape',
+  'Sirius Black',
+  'Hermione Granger',
+  'Ron Weasley',
+  'Draco Malfoy',
+  'Neville Longbottom',
+  'Rubeus Hagrid',
+  'Dobby',
+  'Bellatrix Lestrange',
+  'Minerva McGonagall',
+];
+
+app.use('/form/mention/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: mentionNames});
+  } else {
+    const lowerCaseQuery = query.toLowerCase().trim();
+    const filtered = mentionNames.filter(l =>
+      l.toLowerCase().includes(lowerCaseQuery)
+    );
+    res.json({items: filtered});
+  }
+});
+
 app.use('/form/verify-search-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();

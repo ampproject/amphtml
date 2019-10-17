@@ -20,7 +20,7 @@ amp-autocomplete > input {
   font-family: sans-serif; /* default-ui-font-stack */
 }
 
-amp-autocomplete > input {
+amp-autocomplete > input, amp-autocomplete > [contenteditable] {
   border-radius: 4px; /* default-ui-border-radius */
   box-sizing: border-box;
 }

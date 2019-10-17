@@ -22,6 +22,10 @@
     input[name=favoriteState] {
       width: 2em;
     }
+    input[type=submit] {
+      display: block;
+      margin-top: 10px;
+    }
     .out-of-stock {
       text-align: right;
       text-transform: uppercase;
@@ -37,12 +41,35 @@
       color: red;
       text-decoration: underline;
     }
+    .wide {
+      width: 50vw;
+    }
+    .autocomplete-selected {
+      color: blue;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-    <h1>Autocomplete</h1>
+  <h1>Autocomplete</h1>
+  <h2>Inline</h2>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete inline="@" filter="none" name="inlineInput" class="wide" min-characters="0"
+          src-base="/form/mention/query" src-query-param="q" on="select:AMP.setState({inlineInputSelect: event.value})">
+          <noscript><input required></noscript>
+          <div contenteditable="true"></div>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+      <div submit-success>
+          <template type="amp-mustache">
+              Success! {{inlineInput}}
+          </template>
+      </div>
+    </form>
+    <p [text]="'Hello ' + inlineInputSelect">Hello World</p>
+    
     <h2>Select Event</h2>
-  <p>min-characters = 0, partial red underline</p>
+    <p>min-characters = 0, partial red underline</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
     <amp-autocomplete id="select-example" filter="substring" min-characters="0" highlight-user-entry
       src="autocomplete-cities.example.json" on="select:AMP.setState({inputSelect: event.value})">
