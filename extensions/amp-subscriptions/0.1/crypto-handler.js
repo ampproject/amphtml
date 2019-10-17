@@ -36,8 +36,8 @@ export class CryptoHandler {
       .querySelector('script[cryptokeys]');
     
     /** @private {?string} */
-    if (parsedEncryptedKeys && parsedEncryptedKeys.hasAttribute('sha_256_hash')) {
-      this.shaKeyHash_ = parsedEncryptedKeys.getAttribute('sha_256_hash');
+    if (parsedEncryptedKeys && parsedEncryptedKeys.hasAttribute('sha-256-hash')) {
+      this.shaKeyHash_ = parsedEncryptedKeys.getAttribute('sha-256-hash');
     } else {
       this.shaKeyHash_ = null;
     }
