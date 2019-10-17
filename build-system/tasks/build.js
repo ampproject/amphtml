@@ -52,7 +52,6 @@ async function build() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
   await performBuild();
-  await formatExtractedMessages();
   return exitCtrlcHandler(handlerProcess);
 }
 
@@ -92,6 +91,7 @@ async function performBuild(watch) {
   await performPrerequisiteSteps(watch);
   await compileAllUnminifiedJs(watch);
   await buildExtensions({watch});
+  await formatExtractedMessages();
 }
 
 /**
