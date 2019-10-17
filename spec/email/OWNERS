@@ -3,8 +3,8 @@
 
 {
   rules: [
-    owners: [
-      { name: "ampproject/wg-amp4email" }
-    ],
+    {
+      owners: [{name: 'ampproject/wg-amp4email'}],
+    },
   ],
 }
