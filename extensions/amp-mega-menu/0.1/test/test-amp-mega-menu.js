@@ -28,11 +28,12 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc, element;
+    let win, doc, element, sandbox;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      sandbox = env.sandbox;
 
       element = getAmpMegaMenu();
       doc.body.appendChild(element);
@@ -53,12 +54,11 @@ describes.realWin(
               <div id="content1" role="dialog">Loreum ipsum</div>
             </li>
             <li>
-              <button id="heading2">Menu Item 2</button>
+              <div id="heading2" role="button">Menu Item 2</div>
               <div id="content2" role="dialog">Loreum ipsum</div>
             </li>
             <li>
               <button id="heading3">Menu Item 3</button>
-              <div id="content3" role="dialog">Loreum ipsum</div>
             </li>
           </ul>
         </nav>
@@ -82,7 +82,42 @@ describes.realWin(
       const headingClass = '.i-amphtml-mega-menu-heading';
       expect(element.querySelectorAll(headingClass).length).to.equal(3);
       const contentClass = '.i-amphtml-mega-menu-content';
-      expect(element.querySelectorAll(contentClass).length).to.equal(3);
+      expect(element.querySelectorAll(contentClass).length).to.equal(2);
+    });
+
+    it('should add event listeners on component layout', async () => {
+      await element.build();
+      const impl = element.implementation_;
+      const heading = doc.getElementById('heading1');
+      const listenersSpy = sandbox.spy(impl, 'registerMenuItemListeners_');
+      await element.layoutCallback();
+      expect(listenersSpy).to.be.calledOnce;
+      const clickEvent = new Event('click');
+      const headingClickSpy = sandbox.spy(impl, 'shouldHandleClick_');
+      heading.dispatchEvent(clickEvent);
+      expect(headingClickSpy).to.be.calledOnce;
+      const keydownEvent = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
+      const documentKeyDownSpy = sandbox.spy(impl, 'collapse_');
+      doc.documentElement.dispatchEvent(keydownEvent);
+      expect(documentKeyDownSpy).to.be.calledOnce;
+    });
+
+    it('should remove event listeners on component unlayout', async () => {
+      await element.build();
+      await element.layoutCallback();
+      const impl = element.implementation_;
+      const heading = doc.getElementById('heading1');
+      const unlistenersSpy = sandbox.spy(impl, 'unregisterMenuItemListeners_');
+      await element.unlayoutCallback();
+      expect(unlistenersSpy).to.be.calledOnce;
+      const clickEvent = new Event('click');
+      const headingClickSpy = sandbox.spy(impl, 'shouldHandleClick_');
+      heading.dispatchEvent(clickEvent);
+      expect(headingClickSpy).to.not.be.called;
+      const keydownEvent = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
+      const documentKeyDownSpy = sandbox.spy(impl, 'collapse_');
+      doc.documentElement.dispatchEvent(keydownEvent);
+      expect(documentKeyDownSpy).to.not.be.called;
     });
 
     it('should expand when heading of a collapsed menu item is clicked', async () => {
