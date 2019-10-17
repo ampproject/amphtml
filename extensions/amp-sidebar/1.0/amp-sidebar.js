@@ -211,13 +211,19 @@ export class AmpSidebar extends AMP.BaseElement {
     // readers.
     element.appendChild(this.createScreenReaderCloseButton());
 
-    this.registerDefaultAction(invocation => this.open_(invocation), 'open');
-    this.registerAction('close', invocation => this.close_(invocation.trust));
+    this.registerDefaultAction(invocation => {
+      const {trust, caller} = invocation;
+      this.open_(trust, caller);
+    }, 'open');
+    this.registerAction('close', invocation => {
+      this.close_(invocation.trust);
+    });
     this.registerAction('toggle', invocation => {
+      const {trust, caller} = invocation;
       if (this.opened_) {
-        this.close_(invocation.trust);
+        this.close_(trust);
       } else {
-        this.open_(invocation);
+        this.open_(trust, caller);
       }
     });
 
@@ -240,6 +246,7 @@ export class AmpSidebar extends AMP.BaseElement {
             return;
           }
           if (tgtLoc.hash) {
+            // Click gesture is high trust.
             this.close_(ActionTrust.HIGH);
           }
         }
@@ -320,6 +327,7 @@ export class AmpSidebar extends AMP.BaseElement {
     // and would be confusing to tab to if not using a screen reader.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
+      // Click gesture is high trust.
       this.close_(ActionTrust.HIGH);
     });
 
@@ -452,15 +460,15 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Reveals the sidebar.
-   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @param {!ActionTrust} trust
+   * @param {!Element} openerElement
    * @private
    */
-  open_(invocation) {
+  open_(trust, openerElement) {
     if (this.opened_) {
       return;
     }
     this.opened_ = true;
-    const {caller, trust} = invocation;
     this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForOpening_(trust));
     this.getHistory_()
@@ -468,10 +476,9 @@ export class AmpSidebar extends AMP.BaseElement {
       .then(historyId => {
         this.historyId_ = historyId;
       });
-    if (invocation) {
-      this.openerElement_ = caller;
-      this.initialScrollTop_ = this.viewport_.getScrollTop();
-    }
+
+    this.openerElement_ = openerElement;
+    this.initialScrollTop_ = this.viewport_.getScrollTop();
   }
 
   /**
@@ -586,6 +593,7 @@ export class AmpSidebar extends AMP.BaseElement {
       const mask = this.document_.createElement('div');
       mask.classList.add('i-amphtml-sidebar-mask');
       mask.addEventListener('click', () => {
+        // Click gesture is high trust.
         this.close_(ActionTrust.HIGH);
       });
       this.getAmpDoc()
