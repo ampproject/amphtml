@@ -119,8 +119,8 @@ describes.realWin(
       it('should decrypt the content correctly', () => {
         return cryptoHandler
           .decryptDocumentContent_(encryptedContent, decryptedDocKey)
-          .then(decryptedContent => {
-            expect(decryptedContent).to.equal(decryptedContent);
+          .then(actualContent => {
+            expect(actualContent).to.equal(decryptedContent);
           });
       });
     });
@@ -131,6 +131,15 @@ describes.realWin(
         return cryptoHandler.tryToDecryptDocument(decryptedDocKey).then(() => {
           expect(cryptoSection1.textContent).to.equal(decryptedContent);
           expect(cryptoSection2.textContent).to.equal(decryptedContent);
+        });
+      });
+
+      it('should fail due to key hashes being unequal', () => {
+        const fakeDocKey = '0nasdf234ikn23r09jijfakefake923r42aQ=';
+        return cryptoHandler.tryToDecryptDocument(fakeDocKey).then(() => {
+          throw new Error('Promise should have rejected.');
+        }, reason => {
+            expect(() => { throw reason; }).to.throw('Invalid Document Key');
         });
       });
     });
