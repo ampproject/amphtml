@@ -54,10 +54,10 @@ function updateBrowsers(config) {
         browsers: [
           'SL_Chrome',
           'SL_Firefox',
-          'SL_Edge_17',
+          'SL_Edge',
           'SL_Safari_12',
           'SL_Safari_11',
-          'SL_IE_11',
+          'SL_IE',
           // TODO(amp-infra): Evaluate and add more platforms here.
           //'SL_Chrome_Android_7',
           //'SL_iOS_11',
@@ -213,8 +213,7 @@ class RuntimeTestConfig {
       mochaTimeout: this.client.mocha.timeout,
       propertiesObfuscated: !!argv.single_pass,
       testServerPort: this.client.testServerPort,
-      testOnIe:
-        this.browsers.includes('IE') || this.browsers.includes('SL_IE_11'),
+      testOnIe: this.browsers.includes('IE') || this.browsers.includes('SL_IE'),
     };
 
     if (argv.coverage && this.testType != 'a4a') {
