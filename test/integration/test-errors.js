@@ -33,7 +33,7 @@ t.run('errors displayed on page on #development mode', function() {
   this.timeout(TIMEOUT);
 
   let fixture;
-  let messagesById;
+  let messagesById = {};
 
   beforeEach(async () => {
     // Errors are printed as URLs when `transform-log-messages` is on.
