@@ -47,6 +47,11 @@ async function copyAndReplaceUrls(src, dest) {
   await Promise.all(promises);
 }
 
+/**
+ * Adds the Firebase host to the prepended AMP_CONFIG in order to make ads
+ * work on deployed demos.
+ * @param {string} filePath
+ */
 async function modifyThirdPartyUrl(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
   const result = data.replace(
