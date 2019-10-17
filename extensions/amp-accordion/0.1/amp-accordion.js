@@ -511,14 +511,14 @@ class AmpAccordion extends AMP.BaseElement {
   /**
    * Handles accordion header activation, through clicks or enter/space presses.
    * @param {!Event} event 'click' or 'keydown' event.
-   * @param {!ActionTrust} trust
    * @private
    */
-  onHeaderPicked_(event, trust) {
+  onHeaderPicked_(event) {
     event.preventDefault();
     const header = dev().assertElement(event.currentTarget);
     const section = dev().assertElement(header.parentElement);
-    this.toggle_(section, trust);
+    // Click or keypress gestures are high trust.
+    this.toggle_(section, ActionTrust.HIGH);
   }
 
   /**
