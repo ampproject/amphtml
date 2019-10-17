@@ -70,9 +70,9 @@ Any change in AMP requires the approval of at least one owner of the code the ch
 modifies, but this is a subset of the required approvals before a change may be merged.
 See the [code contribution process](./contributing-code.md) for more details.
 
-## Criteria for being listed as an owner in an `OWNERS.yaml` file
+## Criteria for being listed as an owner in an `OWNERS` file
 
-The `OWNERS.yaml` file for each directory will typically list the creator(s) of
+The `OWNERS` file for each directory will typically list the creator(s) of
 the component or extension it contains, along with those who are most familiar
-with the directory contents.  To be added to an OWNERS.yaml file create a PR and
+with the directory contents.  To be added to an OWNERS file create a PR and
 go through the normal [code contribution process](./contributing-code.md).
