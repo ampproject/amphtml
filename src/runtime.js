@@ -872,6 +872,11 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (typeof fnOrStruct == 'function') {
     return false;
   }
+  // If self-hosted runtime, it's up to the cache maintainer to ensure version
+  // alignment between runtime and components.
+  if (config.urls.cdn !== config.urls.defaultCdn) {
+    return false;
+  }
   const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
