@@ -29,6 +29,7 @@ const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('ansi-colors');
+const {formatExtractedMessages} = require('../compile/log-messages');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {serve} = require('./serve');
@@ -51,6 +52,7 @@ async function build() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
   await performBuild();
+  await formatExtractedMessages();
   return exitCtrlcHandler(handlerProcess);
 }
 

@@ -15,7 +15,7 @@
  */
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {cyan} = require('colors');
+const {cyan, yellow} = require('colors');
 
 const pathPrefix = 'dist/log-messages';
 
@@ -33,8 +33,14 @@ const formats = {
   [`${pathPrefix}.simple.json`]: ({message}) => message,
 };
 
-/** @return {!Promise<!Array<!Object>>} */
-const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
+/** @return {?Promise<!Array<!Object>>} */
+async function extractedItems() {
+  try {
+    return Object.values(await fs.readJson(extractedPath));
+  } catch (_) {
+    return null;
+  }
+}
 
 /**
  * Format extracted messages table in multiple outputs, keyed by id.
@@ -42,14 +48,18 @@ const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
  */
 async function formatExtractedMessages() {
   const items = await extractedItems();
-  return Promise.all(
+  if (!items) {
+    log(yellow('Skipped formatting log message table'));
+    return;
+  }
+  await Promise.all(
     Object.entries(formats).map(async ([path, format]) => {
       const formatted = {};
       items.forEach(item => (formatted[item.id] = format(item)));
       await fs.outputJson(path, formatted);
-      log('Formatted', cyan(path));
     })
   );
+  log('Formatted', cyan(Object.keys(formats).join(', ')));
 }
 
 module.exports = {extractedPath, formatExtractedMessages};

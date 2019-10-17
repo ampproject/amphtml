@@ -19,6 +19,7 @@ const {
   getExtensionsToBuild,
 } = require('../tasks/extension-helpers');
 const {doBuildJs} = require('../tasks/helpers');
+const {formatExtractedMessages} = require('../compile/log-messages');
 const {jsBundles} = require('../compile/bundles.config');
 
 const extensionBundles = {};
@@ -88,6 +89,7 @@ exports.lazyBuildExtensions = async function(req, res, next) {
 exports.lazyBuildJs = async function(req, res, next) {
   const matcher = /\/.*\/([^\/]*\.js)/;
   await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
+  await formatExtractedMessages();
 };
 
 /**
