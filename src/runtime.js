@@ -879,16 +879,18 @@ export class MultidocManager {
    * @private
    */
   closeShadowRootAsync_(shadowRoot) {
-    const closePromise = new Promise(resolve => {
-      const {ampdoc} = shadowRoot.AMP;
-      getServicePromiseForDoc(ampdoc, 'resources').then(resources => {
-        return resources ? resources.onNextPass(resolve) : resolve();
-      });
-      this.closeShadowRoot_(shadowRoot);
-    });
-    // Delay for queued pass after visibility change is 10ms
-    const timeoutPromise = new Promise(resolve => setTimeout(resolve, 15));
-    return Promise.race([closePromise, timeoutPromise]);
+    return this.timer_.timeoutPromise(
+      15, // Delay for queued pass after visibility change is 10ms
+      new this.win.Promise(resolve => {
+        const {ampdoc} = shadowRoot.AMP;
+        getServicePromiseForDoc(ampdoc, 'resources').then(resources => {
+          return resources ? resources.onNextPass(resolve) : resolve();
+        });
+        this.closeShadowRoot_(shadowRoot);
+      }),
+      undefined,
+      true
+    );
   }
 
   /** @private */
