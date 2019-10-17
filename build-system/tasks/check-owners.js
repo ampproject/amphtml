@@ -22,8 +22,8 @@
 
 'use strict';
 
-const deglob = require('globs-to-files');
 const fs = require('fs-extra');
+const globby = require('globby');
 const JSON5 = require('json5');
 const log = require('fancy-log');
 const path = require('path');
@@ -38,7 +38,7 @@ const rootDir = path.dirname(path.dirname(__dirname));
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
-  const filesToCheck = deglob.sync(['**/OWNERS']);
+  const filesToCheck = globby.sync(['**/OWNERS']);
   filesToCheck.forEach(file => {
     const relativePath = path.relative(rootDir, file);
     checkFile(relativePath);
