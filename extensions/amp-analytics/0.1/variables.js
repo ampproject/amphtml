@@ -211,6 +211,25 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+
+    // Was set async before
+    this.register_('FIRST_CONTENTFUL_PAINT', () => {
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc_.win).getFirstContentfulPaint()
+      );
+    });
+
+    this.register_('FIRST_VIEWPORT_READY', () => {
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc_.win).getFirstViewportReady()
+      );
+    });
+
+    this.register_('MAKE_BODY_VISIBLE', () => {
+      return tryResolve(() =>
+        Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible()
+      );
+    });
   }
 
   /**

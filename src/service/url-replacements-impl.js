@@ -45,7 +45,6 @@ import {WindowInterface} from '../window-interface';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
 import {internalRuntimeVersion} from '../internal-version';
-import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -682,24 +681,6 @@ export class GlobalVariableSource extends VariableSource {
       'STORY_PAGE_ID',
       this.getStoryValue_('pageId', 'STORY_PAGE_ID')
     );
-
-    this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getFirstContentfulPaint()
-      );
-    });
-
-    this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getFirstViewportReady()
-      );
-    });
-
-    this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getMakeBodyVisible()
-      );
-    });
 
     this.setAsync('AMP_STATE', key => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
