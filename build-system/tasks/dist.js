@@ -56,7 +56,7 @@ const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
-const deglob = require('globs-to-files');
+const globby = require('globby');
 
 const WEB_PUSH_PUBLISHER_FILES = [
   'amp-web-push-helper-frame',
@@ -72,7 +72,7 @@ function transferSrcsToTempDir() {
     'transforms in',
     colors.cyan(SRC_TEMP_DIR)
   );
-  const files = deglob.sync(BABEL_SRC_GLOBS);
+  const files = globby.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
     if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
       fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
@@ -87,7 +87,7 @@ function transferSrcsToTempDir() {
       retainLines: true,
       compact: false,
     });
-    const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
+    const name = `${SRC_TEMP_DIR}/${file}`;
     fs.outputFileSync(name, code);
     process.stdout.write('.');
   });

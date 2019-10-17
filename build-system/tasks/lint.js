@@ -18,9 +18,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../test-configs/config');
-const deglob = require('globs-to-files');
 const eslint = require('gulp-eslint');
 const eslintIfFixed = require('gulp-eslint-if-fixed');
+const globby = require('globby');
 const gulp = require('gulp');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
@@ -172,11 +172,11 @@ function eslintRulesChanged() {
  * @return {!Array<string>}
  */
 function getFilesToLint(files) {
-  const filesToLint = deglob.sync(files);
+  const filesToLint = globby.sync(files);
   if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
     filesToLint.forEach(file => {
-      log(colors.cyan(path.relative(rootDir, file)));
+      log(colors.cyan(file));
     });
   }
   return filesToLint;
