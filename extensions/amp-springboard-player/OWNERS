@@ -5,9 +5,9 @@
   rules: [
     {
       owners: [
-        { name: 'em-predragmilosevic' },
-        { name: 'ampproject/wg-ui-and-a11y' }
-      ]
-    }
-  ]
+        {name: 'em-predragmilosevic'},
+        {name: 'ampproject/wg-ui-and-a11y'},
+      ],
+    },
+  ],
 }
