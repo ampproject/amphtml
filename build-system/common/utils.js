@@ -44,10 +44,7 @@ function logOnSameLine(message) {
 function getFilesChanged(globs) {
   const allFiles = globby.sync(globs);
   return gitDiffNameOnlyMaster().filter(changedFile => {
-    return (
-      fs.existsSync(changedFile) &&
-      allFiles.some(file => file.endsWith(changedFile))
-    );
+    return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
 }
 

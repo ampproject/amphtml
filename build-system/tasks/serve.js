@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const connect = require('gulp-connect');
-const deglob = require('globs-to-files');
+const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
 const morgan = require('morgan');
@@ -35,7 +35,7 @@ const {getServeMode} = require('../server/app-utils');
 // Used for logging during server start / stop.
 let url = '';
 
-const serverFiles = deglob.sync(['build-system/server/**']);
+const serverFiles = globby.sync(['build-system/server/**']);
 
 /**
  * Logs the server's mode (based on command line arguments).
