@@ -139,10 +139,17 @@ const presubmitGlobs = [
   '!firebase/**/*.*',
 ];
 
-const jsonGlobs = [
+const prettifyGlobs = [
+  '.codecov.yml',
+  '.lando.yml',
+  '.lgtm.yml',
+  '.travis.yml',
+  '**/.eslintrc',
+  '.prettierrc',
+  '.renovaterc.json',
   '**/*.json',
-  '!{node_modules,build,dist,dist.3p,dist.tools,' +
-    'third_party,build-system}/**/*.*',
+  '**/OWNERS',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -170,22 +177,27 @@ const thirdPartyFrames = [
   },
 ];
 
+/**
+ * File types to ignore while auto-generating a changelog for a new release.
+ */
+const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
+
 /** @const  */
 module.exports = {
-  testPaths,
   a4aTestPaths,
   chaiAsPromised,
-  commonUnitTestPaths,
+  changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
-  unitTestPaths,
-  unitTestOnSaucePaths,
-  integrationTestPaths,
-  e2eTestPaths,
-  lintGlobs,
+  commonUnitTestPaths,
   devDashboardTestPaths,
+  e2eTestPaths,
+  integrationTestPaths,
   jisonPaths,
-  thirdPartyFrames,
-  jsonGlobs,
+  lintGlobs,
   presubmitGlobs,
-  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
+  prettifyGlobs,
+  testPaths,
+  thirdPartyFrames,
+  unitTestOnSaucePaths,
+  unitTestPaths,
 };
