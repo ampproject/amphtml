@@ -75,6 +75,7 @@ const UNMINIFIED_TARGETS = [
   'amp-inabox.js',
   'amp-shadow.js',
   'amp.js',
+  'integration.js',
 ];
 
 /**
