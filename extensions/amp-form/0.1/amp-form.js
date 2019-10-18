@@ -102,7 +102,7 @@ const SUBMIT_TIMEOUT = 10000;
 
 /** When submit-error tmpl is rendered on server side,
  *  it is passed back in response with response.init.status > 300. */
-const SUBMIT_ERROR_CODE_THRESHOLD = 300;
+const SUBMIT_ERROR_STATUS_THRESHOLD = 300;
 
 export class AmpForm {
   /**
@@ -782,7 +782,7 @@ export class AmpForm {
     if (
       response.init &&
       response.init.status &&
-      response.init.status > SUBMIT_ERROR_CODE_THRESHOLD
+      response.init.status > SUBMIT_ERROR_STATUS_THRESHOLD
     ) {
       return this.handleSubmitFailure_(response.init.status, response);
     }
