@@ -130,8 +130,8 @@ message AttrSpec {
   //   value_oneof_set: TEMPLATE_IDS
   enum ValueSet {
     UNKNOWN_VALUESET = 0;  // Never used
-    TEMPLATE_IDS = 1;  // <template id> values
-    AMP_SCRIPT_IDS = 2; // <script id> values, referenced by <amp-script>
+    TEMPLATE_IDS = 1;      // <template id> values
+    AMP_SCRIPT_IDS = 2;    // <script id> values, referenced by <amp-script>
   }
   optional ValueSet add_value_to_set = 25;
   optional ValueSet value_oneof_set = 26;
@@ -685,50 +685,6 @@ message ValidatorRules {
   // reserved 2, 5, 11, 12, 14;
 }
 
-// We categorize error messages into higher-level groups. This makes it
-// easier to create error statistics across a site and give advice based
-// on the most common problems for a set of pages.
-message ErrorCategory {
-  enum Code {
-    UNKNOWN = 0;
-    // Errors for which no other category applies are classified as GENERIC.
-    GENERIC = 1;
-    // Disallowed common HTML tags for which there are corresponding
-    // AMP tags. E.g., 'img', 'video', 'audio', 'iframe' -> 'amp-img',
-    // 'amp-video', 'amp-audio', 'amp-iframe'.
-    DISALLOWED_HTML_WITH_AMP_EQUIVALENT = 2;
-    // Disallowed HTML for which no AMP equivalent exists.
-    DISALLOWED_HTML = 3;
-    // Something is wrong with the author stylesheet, that is, the style
-    // tag identified with 'amp-custom'. This includes CSS
-    // syntax errors as well as blacklisted CSS features.
-    AUTHOR_STYLESHEET_PROBLEM = 4;
-    // AMP HTML requires specific tags to be present. This includes
-    // the invocation of the AMP engine, specific style boilerplate,
-    // a viewport declaration, etc.
-    MANDATORY_AMP_TAG_MISSING_OR_INCORRECT = 5;
-    // AMP HTML tags (amp-img, amp-video, amp-brightcove, etc.) require
-    // specific attributes, attribute values, etc. Something went wrong
-    // with an amp- tag.
-    AMP_TAG_PROBLEM = 6;
-    // We found something wrong with a script tag. Only specific, whitelisted
-    // Javascript inclusions are allowed.
-    CUSTOM_JAVASCRIPT_DISALLOWED = 7;
-    // AMP supports layout specifications, such as width and height of
-    // a given AMP element, and responsiveness.
-    // https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
-    AMP_LAYOUT_PROBLEM = 8;
-    // AMP supports the HTML template tag (e.g. within amp-list) and interprets
-    // Mustache syntax within such templates. To help with debugging, the AMP
-    // Validator generates errors for misplaced Mustache template syntax.
-    // https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md
-    AMP_HTML_TEMPLATE_PROBLEM = 9;
-    // This is currently still allowed but may soon be disallowed. Usually
-    // a recommendation for a replacement is rendered as part of the error.
-    DEPRECATION = 10;
-  }
-}
-
 // We record validation errors in a structured form, so that they can be
 // worked with in code - e.g., to provide translated messages.
 // In the Javascript implementation (validator.js), you may find
@@ -866,10 +822,6 @@ message ValidationError {
   optional int32 col = 3;
   optional string spec_url = 5;
   repeated string params = 7;
-  // This field is not populated by default. See
-  // amp.validator.categorizeError and
-  // amp.validator.annotateWithErrorCategories if you need this.
-  optional ErrorCategory.Code category = 8;
 
   // Used only in JavaScript, if an error is emitted for a specific HTML tag and
   // if that HTML tag has an attribute named data-amp-report-test, this string
@@ -879,7 +831,7 @@ message ValidationError {
   optional string data_amp_report_test_value = 9;
 
   // Deprecated fields, do not reuse.
-  // reserved 4;
+  // reserved 4, 8;
 }
 
 // Used in the verbose validator to select between multiple generated error

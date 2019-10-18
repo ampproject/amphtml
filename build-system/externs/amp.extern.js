@@ -538,7 +538,7 @@ grecaptcha.execute;
 // Validator
 var amp;
 amp.validator;
-amp.validator.validateUrlAndLog = function(string, doc, filter) {}
+amp.validator.validateUrlAndLog = function(string, doc) {}
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).

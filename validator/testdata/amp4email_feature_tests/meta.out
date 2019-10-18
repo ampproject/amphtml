@@ -26,10 +26,10 @@ FAIL
 |    <meta name="email.contentIds" content="foobar42">
 |    <meta name="amp-allowed-url-macros" content="">
 >>   ^~~~~~~~~
-amp4email_feature_tests/meta.html:26:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-allowed-url-macros'. [DISALLOWED_HTML]
+amp4email_feature_tests/meta.html:26:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-allowed-url-macros'.
 |    <meta name="amp-action-whitelist" content="a,b,c,d,e">
 >>   ^~~~~~~~~
-amp4email_feature_tests/meta.html:27:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-action-whitelist'. [DISALLOWED_HTML]
+amp4email_feature_tests/meta.html:27:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-action-whitelist'.
 |    <style amp4email-boilerplate>body{visibility:hidden}</style>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>

@@ -52,18 +52,18 @@ FAIL
 |            <h1>invalid animation value + empty animation value</h1>
 |            <div animate-in="invalid animation value"
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-error.html:52:10 The attribute 'animate-in' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-error.html:52:10 The attribute 'animate-in' may not appear in tag 'div'.
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-error.html:52:10 The attribute 'animate-in-duration' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-error.html:52:10 The attribute 'animate-in-duration' may not appear in tag 'div'.
 >>           ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-error.html:52:10 The attribute 'grid-area' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-error.html:52:10 The attribute 'grid-area' may not appear in tag 'div'.
 |                 animate-in-duration="2s"
 |                 grid-area="middle-third">
 |              <div class="square"
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-error.html:55:12 The attribute 'animate-in' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-error.html:55:12 The attribute 'animate-in' may not appear in tag 'div'.
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-error.html:55:12 The attribute 'animate-in-duration' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-error.html:55:12 The attribute 'animate-in-duration' may not appear in tag 'div'.
 |                   animate-in-duration="2s"
 |                   animate-in="">
 |              </div>

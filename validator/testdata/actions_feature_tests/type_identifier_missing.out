@@ -21,7 +21,7 @@ FAIL
 |  <!doctype html>
 |  <html ⚡>
 >> ^~~~~~~~~
-actions_feature_tests/type_identifier_missing.html:21:0 The mandatory attribute 'actions' is missing in tag 'html'. [DISALLOWED_HTML]
+actions_feature_tests/type_identifier_missing.html:21:0 The mandatory attribute 'actions' is missing in tag 'html'.
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">

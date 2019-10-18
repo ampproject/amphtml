@@ -33,4 +33,4 @@ FAIL
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp-video-docking/0.1/test/validator-amp-video-docking-no-player.html:33:6 The extension 'amp-video-docking' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+amp-video-docking/0.1/test/validator-amp-video-docking-no-player.html:33:6 The extension 'amp-video-docking' was found on this page, but is unused. Please remove this extension.

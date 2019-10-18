@@ -34,6 +34,6 @@ FAIL
 |    Hello, world.
 |    <div style="replace_inline_style"></div>
 >>   ^~~~~~~~~
-transformed_feature_tests/css_length.html:34:2 CSS syntax error in tag 'div' - incomplete declaration. [GENERIC]
+transformed_feature_tests/css_length.html:34:2 CSS syntax error in tag 'div' - incomplete declaration.
 |  </body>
 |  </html>
