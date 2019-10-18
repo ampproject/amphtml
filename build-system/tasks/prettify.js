@@ -77,7 +77,7 @@ async function prettify() {
       logFiles(filesToCheck);
     }
   } else {
-    filesToCheck = globby.sync(prettifyGlobs);
+    filesToCheck = globby.sync(prettifyGlobs, {dot: true});
   }
   runPrettify(filesToCheck);
 }
@@ -106,6 +106,13 @@ function runPrettify(filesToCheck) {
         yellow('NOTE 2:'),
         'Since this is a destructive operation (that edits your files',
         'in-place), make sure you commit before running the command.'
+      );
+      log(
+        yellow('NOTE 3:'),
+        'For more information, read',
+        cyan(
+          'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style'
+        )
       );
     }
   } else {
