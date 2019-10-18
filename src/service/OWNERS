@@ -4,10 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'dvoytenko'}, {name: 'ampproject/wg-runtime'}],
-    },
-    {
-      pattern: '{iframe-video.js,mediasession-helper.js,video-*.js}',
+      pattern: 'video-*.js',
       owners: [{name: 'ampproject/wg-ui-and-a11y'}],
     },
   ],
