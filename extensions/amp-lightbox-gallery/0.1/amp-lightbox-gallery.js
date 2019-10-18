@@ -633,6 +633,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @param {!SwipeDef} data
    */
   swipeGesture_(data) {
+    // Check if the carousel has been cleared out due to close. It is unclear
+    // how this is happening, but there are errors where the carousel is null
+    // at this point.
+    if (!this.carousel_) {
+      return;
+    }
+
     if (data.first) {
       const {sourceElement} = this.getCurrentElement_();
       const parentCarousel = this.getSourceElementParentCarousel_(
