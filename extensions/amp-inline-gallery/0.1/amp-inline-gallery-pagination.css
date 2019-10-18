@@ -28,6 +28,8 @@ amp-inline-gallery-pagination {
  * are added.
  */
 .i-amphtml-inline-gallery-pagination-dot-container {
+  position: relative;
+  z-index: 1;
   display: flex;
   width: 22px;
   min-width: 18px;
@@ -96,7 +98,6 @@ amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-frosti
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: -1;
   border-radius: 12px;
 }
 
