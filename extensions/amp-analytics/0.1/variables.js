@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AsyncResolverDef} from '../../../src/service/variable-source';
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
@@ -211,6 +212,14 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+
+    this.register_('STORY_PAGE_INDEX', () => {
+      this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX');
+    });
+
+    this.register_('STORY_PAGE_ID', () => {
+      this.getStoryValue_('pageId', 'STORY_PAGE_ID');
+    });
   }
 
   /**
@@ -225,6 +234,27 @@ export class VariableService {
     };
     const merged = Object.assign({}, this.macros_, elementMacros);
     return /** @type {!JsonObject} */ (merged);
+  }
+
+  /**
+   * Resolves the value via amp-story's service.
+   * @param {string} property
+   * @param {string} name
+   * @return {!AsyncResolverDef}
+   * @private
+   */
+  getStoryValue_(property, name) {
+    return () => {
+      const service = Services.storyVariableServiceForOrNull(this.ampdoc_.win);
+      return service.then(storyVariables => {
+        userAssert(
+          storyVariables,
+          'To use variable %s amp-story should be configured',
+          name
+        );
+        return storyVariables[property];
+      });
+    };
   }
 
   /**

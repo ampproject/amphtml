@@ -673,16 +673,6 @@ export class GlobalVariableSource extends VariableSource {
         .then(details => (details ? details[property] : ''));
     });
 
-    this.setAsync(
-      'STORY_PAGE_INDEX',
-      this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX')
-    );
-
-    this.setAsync(
-      'STORY_PAGE_ID',
-      this.getStoryValue_('pageId', 'STORY_PAGE_ID')
-    );
-
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
       return tryResolve(() =>
         Services.performanceFor(win).getFirstContentfulPaint()
@@ -896,27 +886,6 @@ export class GlobalVariableSource extends VariableSource {
       );
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
-  }
-
-  /**
-   * Resolves the value via amp-story's service.
-   * @param {string} property
-   * @param {string} name
-   * @return {!AsyncResolverDef}
-   * @private
-   */
-  getStoryValue_(property, name) {
-    return () => {
-      const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
-      return service.then(storyVariables => {
-        userAssert(
-          storyVariables,
-          'To use variable %s amp-story should be configured',
-          name
-        );
-        return storyVariables[property];
-      });
-    };
   }
 
   /**
