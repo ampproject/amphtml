@@ -100,6 +100,10 @@ const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
  */
 const SUBMIT_TIMEOUT = 10000;
 
+/** When submit-error tmpl is rendered on server side,
+ *  it is passed back in response with response.init.status > 300. */
+const SUBMIT_ERROR_CODE_THRESHOLD = 300;
+
 export class AmpForm {
   /**
    * Adds functionality to the passed form element and listens to submit event.
@@ -735,7 +739,7 @@ export class AmpForm {
         );
       })
       .then(
-        response => this.handleSsrTemplateSuccess_(response),
+        response => this.handleSsrTemplateResponse_(response),
         error => {
           const detail = dict();
           if (error && error.message) {
@@ -769,12 +773,19 @@ export class AmpForm {
   }
 
   /**
-   * Transition the form to the submit success state.
+   * Transition the form to the submit-success or submit-error state depending on the response status.
    * @param {!JsonObject} response
    * @return {!Promise}
    * @private
    */
-  handleSsrTemplateSuccess_(response) {
+  handleSsrTemplateResponse_(response) {
+    if (
+      response.init &&
+      response.init.status &&
+      response.init.status > SUBMIT_ERROR_CODE_THRESHOLD
+    ) {
+      return this.handleSubmitFailure_(response.init.status, response);
+    }
     return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 
