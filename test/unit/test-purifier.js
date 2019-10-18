@@ -224,7 +224,7 @@ describe
               '<a target="other">other</a>'
           )
         ).to.equal(
-          '<a target="_top">_self</a>' +
+          '<a target="_self">_self</a>' +
             '<a target="_top">_parent</a>' +
             '<a target="_top">_other</a>' +
             '<a target="_top">_OTHER</a>' +
