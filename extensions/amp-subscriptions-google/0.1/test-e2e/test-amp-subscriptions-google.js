@@ -32,6 +32,7 @@ describes.endtoend(
     // https://travis-ci.org/ampproject/amphtml/jobs/598248437#L2053-L2063
     it.skip('Subscription offers should render correctly', async () => {
       const btn = await controller.findElement('#swg_button');
+      await expect(btn).to.exist;
       await controller.click(btn);
 
       // Switch to SwG's outer iFrame
