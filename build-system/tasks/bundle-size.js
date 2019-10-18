@@ -18,8 +18,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const brotliSize = require('brotli-size');
-const deglob = require('globs-to-files');
 const fs = require('fs');
+const globby = require('globby');
 const log = require('fancy-log');
 const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
@@ -58,7 +58,7 @@ function getBrotliBundleSizes() {
   const bundleSizes = {};
 
   log(cyan('brotli'), 'bundle sizes are:');
-  for (const filePath of deglob.sync(fileGlobs)) {
+  for (const filePath of globby.sync(fileGlobs)) {
     const normalizedFileContents = fs
       .readFileSync(filePath, 'utf8')
       .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
@@ -200,7 +200,7 @@ async function reportBundleSize() {
 }
 
 function getLocalBundleSize() {
-  if (deglob.sync(fileGlobs).length === 0) {
+  if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
     log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
     process.exitCode = 1;

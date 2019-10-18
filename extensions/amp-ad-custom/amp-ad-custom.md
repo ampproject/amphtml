@@ -28,9 +28,9 @@ For any ad network to serve AMPHTML template ads, the integration consists of 3 
 Ad network creates ad templates in AMP format and hosts them on their own domain similar to canonical AMP pages. 
 
 For example, adnetwork.com could host a template at the following URL:
-`https://adexample.com/amp_template_1.html`
+`https://adnetwork.com/amp_template_1.html`
 The corresponding AMP proxy URL is:
-`https://adexample-com.cdn.ampproject.org/ad/s/adnetwork.com/amp_template_1.html.`
+`https://adnetwork-com.cdn.ampproject.org/ad/s/adnetwork.com/amp_template_1.html.`
 
 The ad network's domain name (origin) serves as a namespace, and the URL path serves as its ID.
 
