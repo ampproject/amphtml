@@ -77,7 +77,7 @@ async function prettify() {
       logFiles(filesToCheck);
     }
   } else {
-    filesToCheck = globby.sync(prettifyGlobs);
+    filesToCheck = globby.sync(prettifyGlobs, {dot: true});
   }
   runPrettify(filesToCheck);
 }
