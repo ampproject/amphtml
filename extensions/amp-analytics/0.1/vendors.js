@@ -43,6 +43,7 @@ import {CLICKY_CONFIG} from './vendors/clicky';
 import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
 import {COMSCORE_CONFIG} from './vendors/comscore';
 import {CXENSE_CONFIG} from './vendors/cxense';
+import {DEEPBI_CONFIG} from './vendors/deepbi';
 import {DYNATRACE_CONFIG} from './vendors/dynatrace';
 import {EPICA_CONFIG} from './vendors/epica';
 import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics';
@@ -203,6 +204,7 @@ export const ANALYTICS_CONFIG =
         'colanalytics': includeJsonLiteral(COLANALYTICS_CONFIG),
         'comscore': includeJsonLiteral(COMSCORE_CONFIG),
         'cxense': includeJsonLiteral(CXENSE_CONFIG),
+        'deepbi': includeJsonLiteral(DEEPBI_CONFIG),
         'dynatrace': includeJsonLiteral(DYNATRACE_CONFIG),
         'epica': includeJsonLiteral(EPICA_CONFIG),
         'euleriananalytics': includeJsonLiteral(EULERIANANALYTICS_CONFIG),
