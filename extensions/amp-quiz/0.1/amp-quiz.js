@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-// import {CSS} from './amp-quiz.css';
+import {createShadowRootWithStyle} from '../../amp-story/0.1/utils';
+import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
-// TODO: A TEMP UNTIL I FIGURE OUT AMP CSS
-// TODO: DO THIS PROPERLY WITH GRID
-const STYLE_TEXT = `
-.amp-quiz-container {
+const css = `
+.i-amp-quiz-container {
   font-family: "helvetica neue";
   font-weight: 400;
   background: #AAA;
@@ -30,13 +29,13 @@ const STYLE_TEXT = `
   border-radius: 3px;
 }
 
-.amp-quiz-head-container {
+.i-amp-quiz-head-container {
   height: 20%;
   display: grid;
   justify-items: center;
 }
 
-.amp-quiz-option-container {
+.i-amp-quiz-option-container {
   height: 80%;
   display: grid;
   padding-left: 5%;
@@ -44,7 +43,7 @@ const STYLE_TEXT = `
   background-color: inherit;
 }
 
-.amp-quiz-option {
+.i-amp-quiz-option {
   height: 50%;
   display: grid;
   align-items: center;
@@ -53,23 +52,26 @@ const STYLE_TEXT = `
   background-color: inherit;
 }
 
-.amp-quiz-option-selected[correct]{
-  background-color: green;
+.i-amp-quiz-option-selected[correct]::before {
+  content: 'c';
 }
 
-.amp-quiz-option-selected:not([correct]){
+.i-amp-quiz-option-selected:not([correct]) {
   background-color: red;
 }
 
-.amp-quiz-option-not-selected {
-  filter: brightness(50%);
+.i-amp-quiz-option-selected:not([correct])::before {
+  content: 'x';
 }
 
-.amp-quiz-option-not-selected[correct] {
+.i-amp-quiz-option-post-selection:not(i-amp-quiz-option-selected) {
+  filter: brightness(80%);
+}
+
+.i-amp-quiz-option-post-selection[correct] {
   background-color: green;
 }`;
 
-// TODO: CONFIGURE TO LOOK LIKE NORMAL AMP
 export class AmpQuiz extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
@@ -77,32 +79,47 @@ export class AmpQuiz extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {string} */
-    // this.myText_ = this.element.getAttribute('text');
+    /** @private {?HTMLElement} */
+    this.shadowElement_ = null;
 
-    /** @private {?Element} */
-    this.container_ = null;
-
-    /** @private {?Array<Node>} */
-    this.options_ = null;
-
-    /** @private {?Node} */
-    this.stylesheetTag_ = null;
-
-    /** @private {string} */
-    this.stylesheet_ = STYLE_TEXT;
+    /** @private {?ShadowRoot} */
+    this.shadowRoot_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.container_ = this.win.document.createElement('div');
-    this.element.appendChild(this.container_);
-    // this.applyFillContent(this.container_, /* replacedContent */ true);
-    // TODO: ATTACH A SURFACE LEVEL CLASS
-    // TODO: ATTACH A STYLESHEET
-    this.stylesheetTag_ = this.win.document.createElement('style');
-    this.stylesheetTag_.innerHTML = this.stylesheet_;
-    this.element.prepend(this.stylesheetTag_);
+    const html = htmlFor(this.element);
+    this.shadowElement_ = html`
+      <div class="i-amp-quiz-container">
+        <div class="i-amp-quiz-head-container">
+          <div><slot name="prompt">prompt</slot></div>
+        </div>
+        <div class="i-amp-quiz-option-container">
+          <div class="i-amp-quiz-option" correct>
+            <slot name="option1">opt1</slot>
+          </div>
+          <div class="i-amp-quiz-option"><slot name="option2">opt2</slot></div>
+          <div class="i-amp-quiz-option"><slot name="option3">opt3</slot></div>
+          <div class="i-amp-quiz-option"><slot name="option4">opt4</slot></div>
+        </div>
+      </div>
+    `;
+
+    this.shadowRoot_ = createShadowRootWithStyle(
+      this.element,
+      this.shadowElement_,
+      css
+    );
+
+    // TODO: FIND A MORE JS-Y WAY TO DO THIS LOL
+    this.attachContent_(e => {
+      console.log('error!', e);
+      throw new Error(e);
+    });
+    this.attachOptionHandlers_();
+
+    // // TODO: ATTACH A SURFACE LEVEL CLASS
+    // // TODO: ATTACH A STYLESHEET NORMALLY
   }
 
   /** @override */
@@ -110,33 +127,52 @@ export class AmpQuiz extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  layoutCallback() {
-    // TODO: GRAB QUIZ OPTIONS
-    this.attachOptions_();
-    console.log(this.options_);
-    console.log(this.element);
+  /** @private
+   * @param {Function} handleError
+   */
+  attachContent_(handleError) {
+    // TODO: OPTIMIZE THIS ISH
+    // AND TEST FOR THE EDGE CASES
+    // grab content
+    const prompt = this.element.children[0];
+    if (!(prompt instanceof HTMLHeadingElement)) {
+      handleError('Heading missing');
+    }
+
+    const options = Array.from(this.element.querySelectorAll('option'));
+    if (options.length < 2 || options.length > 4) {
+      handleError('Improper number of options');
+    }
+
+    prompt.setAttribute('slot', 'prompt');
+
+    let i = 0;
+    options.forEach(option => {
+      option.setAttribute('slot', `option${++i}`);
+    });
+    // check constraints
   }
 
   /** @private */
-  attachOptions_() {
-    this.options_ = Array.from(
-      this.element.querySelectorAll('.amp-quiz-option')
+  attachOptionHandlers_() {
+    const options = Array.from(
+      this.shadowRoot_.querySelectorAll('.i-amp-quiz-option')
     );
+
     // attach listeners
-    this.options_.forEach(option => {
+    options.forEach(option => {
       option.addEventListener('click', () => {
         // CHANGE STYLES ON OTHER STORIES
         // add an overall style then override it!
-        this.options_.forEach(o => {
+        options.forEach(o => {
           o.setAttribute(
             'class',
-            `amp-quiz-option amp-quiz-option-not-selected`
+            `i-amp-quiz-option i-amp-quiz-option-post-selection`
           );
         });
         option.setAttribute(
           'class',
-          `amp-quiz-option amp-quiz-option-selected`
+          `i-amp-quiz-option i-amp-quiz-option-post-selection i-amp-quiz-option-selected`
         );
       });
     });
