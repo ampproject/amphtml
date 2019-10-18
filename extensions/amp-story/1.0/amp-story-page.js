@@ -1126,10 +1126,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     const navigationPath = this.storeService_.get(
       StateProperty.NAVIGATION_PATH
     );
-    // Navigation path is a complete list of the navigation history, including
-    // the currently active page. The previous page is the next to last element
-    // of that array.
-    const previousPageId = navigationPath[navigationPath.length - 2];
+
+    const pagePathIndex = navigationPath.lastIndexOf(this.element.id);
+    const previousPageId = navigationPath[pagePathIndex - 1];
 
     if (previousPageId) {
       return previousPageId;
