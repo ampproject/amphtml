@@ -70,7 +70,7 @@ function prettify() {
     filesToCheck = getFilesChanged(prettifyGlobs);
     if (filesToCheck.length == 0) {
       log(green('INFO: ') + 'No prettifiable files in this PR');
-      return;
+      return Promise.resolve();
     } else {
       logFiles(filesToCheck);
     }
