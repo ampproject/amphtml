@@ -14,7 +14,7 @@
     <style amp-custom>
       amp-story-page {
         background: white;
-        color: white;
+        color: rgba(0, 0, 0, 0.87);
         font-family: sans-serif;
       }
       .i-amphtml-story-spinner-container {
@@ -26,8 +26,8 @@
         text-shadow: 3px 3px rgba(0, 0, 0, 0.5);
       }
       amp-sidebar {
-        font-size: 2rem;
-        background-color: black;
+        font-size: 18px;
+        background-color: #fff;
       }
       amp-sidebar div {
         border: 3px solid green;
@@ -37,30 +37,29 @@
   </head>
 
   <body>
-    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
+    <amp-story id="story" standalone publisher="AMP Team" title="Visual Diff Test"
         publisher-logo-src="/examples/visual-tests/photos/120.png"
         poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
         poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
         poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg">
-      <amp-sidebar id="sidebar1" layout="nodisplay">
-        <div>
-          <button id="close-button" on="tap:sidebar1.close"> close </button>
-          <ul>
-            <li>Nav item 1</li>
-            <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
-            <li>Nav item 3</li>
-            <li><a href="#idFour" on="tap:idFour.scrollTo">Nav item 4</a></li>
-            <li>Nav item 5</li>
-            <li>Nav item 6</li>
-          </ul>
-        </div>
+      <amp-sidebar id="sidebar1" layout="nodisplay" >
+        <button id="close-button" on="tap:sidebar1.close">Close</button>
+        <ul>
+          <li><span><a href="http://google.com">Out item 1</a></span></li>
+          <li><span><a href="/examples/visual-tests/amp-story/amp-story-sidebar.html#page=page-2&foo=bar">Absolute fragment link</a></span></li>
+          <li><a href="/examples/visual-tests/amp-story/amp-story-tooltip.html#page=page-2">Link to another story using fragment</a></li>
+          <li><a href="#page=page-3&foo=bar">In Link Hash</a></li>
+          <li on="tap:story.goToPage(id=page-3)">In Link Action</li>
+          <li>Nav item 5</li>
+          <li>Nav item 6</li>
+        </ul>
       </amp-sidebar>
       <amp-story-page id="cover">
         <amp-story-grid-layer template="fill">
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
-          <p>Page one of two</p>
+          <p>Page one of three</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -69,10 +68,18 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
-          <p>Page two of two</p>
+          <p>Page two of three</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+        <amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world">Hello world!</h1>
+          <p>Page three of three</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
     </amp-story>
   </body>
-
