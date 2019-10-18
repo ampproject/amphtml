@@ -1762,7 +1762,7 @@ describes.realWin(
       });
     });
 
-    describe('parentPostMessage in inabox case', () => {
+    describe('parentPostMessage', () => {
       let postMessageSpy;
 
       function waitForParentPostMessage(opt_max) {
@@ -1796,6 +1796,18 @@ describes.realWin(
           'requests': {'foo': 'https://example.com/bar'},
           'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
         });
+        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        return waitForNoSendRequest(analytics).then(() => {
+          return waitForParentPostMessage();
+        });
+      });
+
+      it('does send a hit when parentPostMessage is provided for FIE', function() {
+        const analytics = getAnalyticsTag({
+          'requests': {'foo': 'https://example.com/bar'},
+          'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
+        });
+        analytics.element.classList.add('i-amphtml-fie');
         postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForNoSendRequest(analytics).then(() => {
           return waitForParentPostMessage();
