@@ -16,6 +16,7 @@
 
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
+const HANDSHAKE_POLL_MSG = 'handshake-poll';
 export const APP = '__AMPHTML__';
 
 /**
@@ -115,6 +116,80 @@ export class WindowPortEmulator {
  * ampdoc and Bob is the viewer.
  */
 export class Messaging {
+  /**
+   * Performs a handshake and initializes messaging.
+   * @param {!Window} source
+   * @param {!HTMLIFrameElement} iframe
+   * @param {number} opt_interval
+   * @return {!Promise<!Messaging>}
+   */
+  static initiateHandshake(source, iframe, opt_interval) {
+    opt_interval = opt_interval || 1000;
+    const target = iframe.contentWindow;
+    return new Promise(resolve => {
+      const interval = setInterval(() => {
+        const channel = new MessageChannel();
+        const message = {
+          app: APP,
+          name: HANDSHAKE_POLL_MSG,
+        };
+        target.postMessage(message, '*', [channel.port2]);
+
+        const port = channel.port1;
+        const listener = e => {
+          const data = e.data;
+          if (
+            data['app'] === APP &&
+            data['name'] === CHANNEL_OPEN_MSG
+          ) {
+            clearInterval(interval);
+            port.removeEventListener('message', listener);
+            port.postMessage({
+              app: APP,
+              requestid: data['requestid'],
+              type: MessageType.RESPONSE,
+            });
+            resolve(new Messaging(source, port));
+          }
+        };
+        port.addEventListener('message', listener);
+        port.start();
+      }, opt_interval);
+    });
+  }
+
+  /**
+   * Waits for handshake from iframe and initializes messaging.
+   * @param {!Window} source
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} origin
+   * @return {!Promise<!Messaging>}
+   */
+  static waitForHandshake(source, iframe, origin) {
+    const target = iframe.contentWindow;
+    return new Promise(resolve => {
+      const listener = e => {
+        const data = e.data;
+        if (
+          e.origin == origin &&
+          (!e.source || e.source == target) &&
+          data['app'] === APP &&
+          data['name'] === CHANNEL_OPEN_MSG
+        ) {
+          source.removeEventListener('message', listener);
+          const port = new WindowPortEmulator(source, origin, target);
+          port.postMessage({
+            app: APP,
+            requestid: data['requestid'],
+            type: MessageType.RESPONSE,
+          });
+          resolve(new Messaging(source, port));
+        }
+      };
+      source.addEventListener('message', listener);
+    });
+  }
+
   /**
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
@@ -390,40 +465,4 @@ export class Messaging {
   errorToString_(err) {
     return err ? (err.message ? err.message : String(err)) : 'unknown error';
   }
-}
-
-/**
- * Performs a handshake and initializes messaging.
- * @param {!Window} source
- * @param {!HTMLIFrameElement} iframe
- * @param {string} origin
- * @return {!Promise<!Messaging>}
- */
-export function initMessaging(source, iframe, origin) {
-  const target = iframe.contentWindow;
-  return new Promise(resolve => {
-    const listener = e => {
-      const data = e.data;
-      if (
-        e.origin == origin &&
-        e.source == target &&
-        data['app'] === APP &&
-        data['name'] === CHANNEL_OPEN_MSG
-      ) {
-        source.removeEventListener('message', listener);
-
-        const port = new WindowPortEmulator(source, origin, target);
-        port.postMessage(
-          /** @type {!AmpViewerMessage} */ ({
-            app: APP,
-            requestid: data['requestid'],
-            type: MessageType.RESPONSE,
-          })
-        );
-
-        resolve(new Messaging(source, port));
-      }
-    };
-    source.addEventListener('message', listener);
-  });
 }
