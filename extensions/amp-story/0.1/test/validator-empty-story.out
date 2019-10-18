@@ -30,7 +30,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-empty-story.html:30:2 The attribute 'src' in tag 'amp-story extension .js script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-story-0.1.js'. (see https://amp.dev/documentation/components/amp-story) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-story/0.1/test/validator-empty-story.html:30:2 The attribute 'src' in tag 'amp-story extension .js script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-story-0.1.js'. (see https://amp.dev/documentation/components/amp-story)
 |  </head>
 |  <body>
 |    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg">
@@ -39,4 +39,4 @@ amp-story/0.1/test/validator-empty-story.html:30:2 The attribute 'src' in tag 'a
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp-story/0.1/test/validator-empty-story.html:37:6 The tag 'amp-story-page' is missing or incorrect, but required by 'amp-story'. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-empty-story.html:37:6 The tag 'amp-story-page' is missing or incorrect, but required by 'amp-story'. (see https://amp.dev/documentation/components/amp-story)

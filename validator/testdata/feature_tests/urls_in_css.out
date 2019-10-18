@@ -32,7 +32,7 @@ FAIL
 |        font-family: 'Roboto', sans-serif;
 |        src: url('<link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700' rel='stylesheet' type='text/css'>');
 >>            ^~~~~~~~~
-feature_tests/urls_in_css.html:32:11 CSS syntax error in tag 'style amp-custom' - bad url. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/urls_in_css.html:32:11 CSS syntax error in tag 'style amp-custom' - bad url.
 |      }
 |    </style>
 |  </head>

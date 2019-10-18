@@ -42,22 +42,22 @@ FAIL
 |    <!-- Still produces an error -->
 |    <faketag></faketag>
 >>   ^~~~~~~~~
-feature_tests/no_dev_mode.html:42:2 The tag 'faketag' is disallowed. [DISALLOWED_HTML]
+feature_tests/no_dev_mode.html:42:2 The tag 'faketag' is disallowed.
 |    <anotherfaketag></anotherfaketag>
 >>   ^~~~~~~~~
-feature_tests/no_dev_mode.html:43:2 The tag 'anotherfaketag' is disallowed. [DISALLOWED_HTML]
+feature_tests/no_dev_mode.html:43:2 The tag 'anotherfaketag' is disallowed.
 |
 |    <!-- Tagged with data-ampdevmode, but not dev mode in html tag. -->
 |    <faketag data-ampdevmode></faketag>
 >>   ^~~~~~~~~
-feature_tests/no_dev_mode.html:46:2 The tag 'faketag' is disallowed. [DISALLOWED_HTML]
+feature_tests/no_dev_mode.html:46:2 The tag 'faketag' is disallowed.
 |
 |    <faketag data-ampdevmode>
 >>   ^~~~~~~~~
-feature_tests/no_dev_mode.html:48:2 The tag 'faketag' is disallowed. [DISALLOWED_HTML]
+feature_tests/no_dev_mode.html:48:2 The tag 'faketag' is disallowed.
 |      <anotherfaketag></anotherfaketag>
 >>     ^~~~~~~~~
-feature_tests/no_dev_mode.html:49:4 The tag 'anotherfaketag' is disallowed. [DISALLOWED_HTML]
+feature_tests/no_dev_mode.html:49:4 The tag 'anotherfaketag' is disallowed.
 |    </faketag>
 |
 |    <amp-autocomplete data-ampdevmode></amp-autocomplete>

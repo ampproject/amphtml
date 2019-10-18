@@ -81,11 +81,9 @@ amp.validator.validateInBrowser = function(opt_doc) {
  * https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
  * @param {string} url
  * @param {!Document=} opt_doc
- * @param {string=} opt_errorCategoryFilter
  * @export
  */
-amp.validator.validateUrlAndLog = function(
-  url, opt_doc, opt_errorCategoryFilter) {
+amp.validator.validateUrlAndLog = function(url, opt_doc) {
   if (amp.validator.isAmpCacheUrl(url)) {
     console.error(
         'Attempting to validate an AMP cache URL. Please use ' +
@@ -109,8 +107,7 @@ amp.validator.validateUrlAndLog = function(
           const browserResult = amp.validator.validateInBrowser(opt_doc);
           validationResult.mergeFrom(browserResult);
         }
-        validationResult.outputToTerminal(
-            url, undefined, opt_errorCategoryFilter);
+        validationResult.outputToTerminal(url, undefined);
       },
       function(reason) { // Failure
         console.error(reason);
