@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.75 */
+/** Version: 0.1.22.76 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4183,7 +4183,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.75',
+    '_client': 'SwG 0.1.22.76',
   });
 }
 
@@ -14689,16 +14689,6 @@ class AnalyticsService {
       request.setParams(event.additionalParameters);
     } // Ignore event.additionalParameters.  It may have data we shouldn't log.
     return request;
-  }
-
-  /**
-   * Handles the message received by the port.
-   * @param {function(!Object<string, string|boolean>)} callback
-   */
-  onMessage(callback) {
-    this.lastAction_ = this.start_().then(port => {
-      port.onMessageDeprecated(callback);
-    });
   }
 
   /**
