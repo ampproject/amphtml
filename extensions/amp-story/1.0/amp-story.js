@@ -103,12 +103,14 @@ import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
+import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -437,13 +439,20 @@ export class AmpStory extends AMP.BaseElement {
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
-        if (args) {
-          this.storeService_.dispatch(
-            Action.SET_ADVANCEMENT_MODE,
-            AdvancementMode.GO_TO_PAGE
-          );
-          this.switchTo_(args['id'], NavigationDirection.NEXT);
+        if (!args) {
+          return;
         }
+        this.storeService_.dispatch(
+          Action.SET_ADVANCEMENT_MODE,
+          AdvancementMode.GO_TO_PAGE
+        );
+        // If open, closes the sidebar before navigating.
+        const promise = this.storeService_.get(StateProperty.SIDEBAR_STATE)
+          ? Services.historyForDoc(this.getAmpDoc()).goBack()
+          : Promise.resolve();
+        promise.then(() =>
+          this.switchTo_(args['id'], NavigationDirection.NEXT)
+        );
       });
     }
   }
@@ -787,6 +796,29 @@ export class AmpStory extends AMP.BaseElement {
 
     this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
 
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      this.win.addEventListener('hashchange', () => {
+        const maybePageId = parseQueryString(this.win.location.hash)['page'];
+        if (!maybePageId || !this.isActualPage_(maybePageId)) {
+          return;
+        }
+        this.switchTo_(maybePageId, NavigationDirection.NEXT);
+        // Removes the page 'hash' parameter from the URL.
+        let href = this.win.location.href.replace(
+          new RegExp(`page=${maybePageId}&?`),
+          ''
+        );
+        if (endsWith(href, '#')) {
+          href = href.slice(0, -1);
+        }
+        this.win.history.replaceState(
+          (this.win.history && getState(this.win.history)) || {} /** data */,
+          this.win.document.title /** title */,
+          href /** URL */
+        );
+      });
+    }
+
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
   }
@@ -1049,8 +1081,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const isActualPage = pageId =>
-      !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
     const historyPage = /** @type {string} */ (getHistoryState(
       this.win,
       HistoryState.PAGE_ID
@@ -1058,16 +1088,29 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
-      if (maybePageId && isActualPage(maybePageId)) {
+      if (maybePageId && this.isActualPage_(maybePageId)) {
         return maybePageId;
       }
     }
 
-    if (historyPage && isActualPage(historyPage)) {
+    if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
     }
 
     return firstPageEl.id;
+  }
+
+  /**
+   * Checks if the amp-story-page for a given ID exists.
+   * Note: the `this.pages_` array might not be defined yet.
+   * @param {string} pageId
+   * @return {boolean}
+   * @private
+   */
+  isActualPage_(pageId) {
+    // TODO(gmajoulet): check from the cached pages array if available, and use
+    // the querySelector as a fallback.
+    return !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
   }
 
   /**
