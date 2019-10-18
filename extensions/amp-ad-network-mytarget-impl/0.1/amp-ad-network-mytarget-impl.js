@@ -34,7 +34,7 @@ const MYTARGET_XORIGIN_MODE = 'nameframe';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
- * through a source URL and parse HTML markup from json response. 
+ * through a source URL and parse HTML markup from json response.
  * This is then given to A4A to render via crossdomain frame.
  */
 export class AmpAdNetworkMyTargetImpl extends AmpA4A {
@@ -48,15 +48,11 @@ export class AmpAdNetworkMyTargetImpl extends AmpA4A {
     const slot = this.element.getAttribute('data-ad-slot');
     const query = this.element.getAttribute('data-ad-query');
 
-    return (
-      MYTARGET_BASE_URL_ + 
-      '?q=' + slot + 
-      (query ? '&' + query : '')
-    );
+    return MYTARGET_BASE_URL_ + '?q=' + slot + (query ? '&' + query : '');
   }
 
   /** @override */
-  getNonAmpCreativeRenderingMethod(headerValue) {
+  getNonAmpCreativeRenderingMethod() {
     return MYTARGET_XORIGIN_MODE;
   }
 
@@ -72,31 +68,29 @@ export class AmpAdNetworkMyTargetImpl extends AmpA4A {
         headers,
       } = /** @type {{status: number, headers: !Headers}} */ (response);
 
-      return response.json()
-        .then(
-          responseJson => {
-            let creativeBody = responseJson &&
-              responseJson[0] &&
-              responseJson[0].html &&
-              responseJson[0].html.trim();
+      return response
+        .json()
+        .then(responseJson => {
+          const creativeBody =
+            responseJson &&
+            responseJson[0] &&
+            responseJson[0].html &&
+            responseJson[0].html.trim();
 
-            return creativeBody
-              ? new Response(creativeBody, {status, headers})
-              : null;
-          })
-        .catch(e => null);
+          return creativeBody
+            ? new Response(creativeBody, {status, headers})
+            : null;
+        })
+        .catch(() => null);
     });
   }
 
   /** @override */
-  onNetworkFailure(error, adUrl) {
+  onNetworkFailure() {
     return {frameGetDisabled: true};
   }
 }
 
 AMP.extension('amp-ad-network-mytarget-impl', '0.1', AMP => {
-  AMP.registerElement(
-    'amp-ad-network-mytarget-impl',
-    AmpAdNetworkMyTargetImpl
-  );
+  AMP.registerElement('amp-ad-network-mytarget-impl', AmpAdNetworkMyTargetImpl);
 });

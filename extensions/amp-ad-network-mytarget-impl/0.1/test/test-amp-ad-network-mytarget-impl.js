@@ -84,10 +84,7 @@ describes.realWin(
       doc = win.document;
       mytargetImplElem = doc.createElement('amp-ad');
       mytargetImplElem.setAttribute('type', 'mytarget');
-      mytargetImplElem.setAttribute(
-        'data-ad-slot',
-        '197378'
-      );
+      mytargetImplElem.setAttribute('data-ad-slot', '197378');
       mytargetImplElem.setAttribute('data-use-a4a', 'true');
       sandbox
         .stub(AmpAdNetworkMyTargetImpl.prototype, 'getSigningServiceNames')
@@ -102,9 +99,7 @@ describes.realWin(
         expect(mytargetImpl.isValidElement()).to.be.true;
       });
       it('should NOT be valid (impl tag name)', () => {
-        mytargetImplElem = doc.createElement(
-          'amp-ad-network-mytarget-impl'
-        );
+        mytargetImplElem = doc.createElement('amp-ad-network-mytarget-impl');
         mytargetImplElem.setAttribute('type', 'triplelift');
         mytargetImpl = new AmpAdNetworkMyTargetImpl(mytargetImplElem);
         expect(mytargetImpl.isValidElement()).to.be.false;
@@ -129,10 +124,7 @@ describes.realWin(
 
     describe('#getAdUrl with query parameters', () => {
       it('should add query parameters', () => {
-        mytargetImplElem.setAttribute(
-          'data-ad-query',
-          'preview=1'
-        );
+        mytargetImplElem.setAttribute('data-ad-query', 'preview=1');
         mytargetImpl = new AmpAdNetworkMyTargetImpl(mytargetImplElem);
         expect(mytargetImpl.getAdUrl()).to.equal(
           'https://ad.mail.ru/adp/?q=197378&preview=1'

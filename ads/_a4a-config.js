@@ -17,8 +17,8 @@
 import {cloudflareIsA4AEnabled} from '../extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config';
 import {gmosspIsA4AEnabled} from '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
 import {map} from '../src/utils/object';
-import {tripleliftIsA4AEnabled} from '../extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config';
 import {myTargetIsA4AEnabled} from '../extensions/amp-ad-network-mytarget-impl/0.1/mytarget-a4a-config';
+import {tripleliftIsA4AEnabled} from '../extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
