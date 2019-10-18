@@ -33,7 +33,7 @@ const formats = {
   [`${pathPrefix}.simple.json`]: ({message}) => message,
 };
 
-/** @return {?Promise<!Array<!Object>>} */
+/** @return {!Promise<?Array<!Object>>} */
 async function extractedItems() {
   try {
     return Object.values(await fs.readJson(extractedPath));
