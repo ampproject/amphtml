@@ -53,6 +53,12 @@ class AmpCarousel extends AMP.BaseElement {
     /** @private @const */
     this.responsiveAttributes_ = this.getAttributeConfig_();
 
+    /** @private @const {boolean} */
+    this.isIos_ = Services.platformFor(this.win).isIos();
+
+    /** @private {?Element} */
+    this.scrollContainer_ = null;
+
     /** @private {?Carousel} */
     this.carousel_ = null;
 
@@ -188,6 +194,7 @@ class AmpCarousel extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.childLayoutManager_.wasUnlaidOut();
+    return true;
   }
 
   /** @override */
@@ -202,7 +209,6 @@ class AmpCarousel extends AMP.BaseElement {
   /**
    * Moves the Carousel to a given index.
    * @param {number} index
-   * @return {!Promise<undefined>}
    */
   goToSlide(index) {
     this.carousel_.goToSlide(index, {smoothScroll: false});
@@ -247,11 +253,6 @@ class AmpCarousel extends AMP.BaseElement {
     // Create the DOM, get references to elements.
     element.appendChild(this.renderContainerDom_());
     this.scrollContainer_ = element.querySelector('.i-amphtml-carousel-scroll');
-    this.slidesContainer_ = element.querySelector(
-      '.i-amphtml-stream-gallery-slides'
-    );
-
-    this.content_ = element.querySelector('.i-amphtml-carousel-content');
     this.prevArrowSlot_ = this.element.querySelector(
       '.i-amphtml-base-carousel-arrow-prev-slot'
     );
@@ -334,7 +335,7 @@ class AmpCarousel extends AMP.BaseElement {
     const owners = Services.ownersForDoc(this.element);
     this.childLayoutManager_ = new ChildLayoutManager({
       ampElement: this,
-      intersectionElement: this.scrollContainer_,
+      intersectionElement: dev().assertElement(this.scrollContainer_),
       // For iOS, we queue changes until scrolling stops, which we detect
       // ~200ms after it actually stops. Load items earlier so they have time
       // to load.
