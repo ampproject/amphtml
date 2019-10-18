@@ -352,15 +352,46 @@ Note that you *can* add changes into an existing commit but that opens up some a
 
 ## Code quality and style
 
-AMP uses [Eslint](https://eslint.org/) to ensure code quality and [Prettier](https://prettier.io/) to standardize code style. For easy development, here are two recommendations:
-- Use a code editor with Eslint support to make sure that your code satisfies all of AMP's quality and style rules. [Here](https://eslint.org/docs/user-guide/integrations#editors) is a list of editors with Eslint extension support.
-- Set your editor to automatically fix Eslint errors in your code on save.
+AMP uses the following tools for code quality and style:
+- [Eslint](https://eslint.org/) is used to ensure the code quality of JS files.
+    - Default rules can be found in [.eslintrc](../.eslintrc) files across the repo.
+    - Custom rules can be found in [build-system/eslint-rules/](../build-system/eslint-rules/index.js).
+- [Prettier](https://prettier.io/) is used to standardize the code style and formatting of JS files and several non-JS files.
+    - Default and file-specific rules can be found in [.prettierrc](../.prettierrc).
 
-For example, if you use [Visual Studio Code](https://code.visualstudio.com/), you can install its [Eslint plugin](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint), and enable the `eslint.autoFixOnSave` setting.
+To easily ensure code quality and style during development, here are some recommendations:
+- Use a code editor with Eslint and Prettier support.
+- [Here](https://eslint.org/docs/user-guide/integrations#editors) is a list of editors with Eslint extension support.
+- [Here](https://prettier.io/docs/en/editors.html) is a list of editors with Prettier extension support.
+- Set your editor to automatically format your code on save.
 
-Alternatively, you can manually fix lint errors in your code by running:
+### Workflow for Visual Studio Code
+
+Several AMP developers use [Visual Studio Code](https://code.visualstudio.com/). Here is the recommended workflow to automatically fix your code as you edit it:
+
+#### To automatically fix JS files on save
+
+- Install the [Eslint plugin](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
+- The `eslint.autoFixOnSave` setting is already enabled for the project in [.vscode/settings.json](../.vscode/settings.json), and will cause all JS files to automatically get formatted on save.
+
+#### To automatically fix non-JS files on save
+
+- Install the [Prettier plugin](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
+- Install the [JSON5 syntax plugin](https://marketplace.visualstudio.com/items?itemName=mrmlnc.vscode-json5). (Used by `OWNERS` files. VS Code does not natively support it.)
+- Language and file level settings are already enabled for the project in [.vscode/settings.json](../.vscode/settings.json), and will cause several non-JS files to automatically get formatted on save.
+
+### Manually fixing code
+
+Alternatively, you can manually fix most quality and style errors in your code by running these two commands before pushing commits to your GitHub branch. (These commands edit your files in-place, so make sure you commit before running them.)
+
+For JS files:
 ```
 gulp lint --local_changes --fix
+```
+
+For non-JS files:
+```
+gulp prettify --local_changes --fix
 ```
 
 # Testing your changes
