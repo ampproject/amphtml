@@ -102,6 +102,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?./linker-manager.LinkerManager} */
     this.linkerManager_ = null;
+
+    /** @private {?boolean} */
+    this.isInFie_ = null;
   }
 
   /** @override */
@@ -241,6 +244,23 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} whether parent post messages are allowed.
+   *
+   * <p>Parent post messages are only allowed for ads.
+   *
+   * @private
+   */
+  allowParentPostMessage_() {
+    if (this.isInabox_) {
+      return true;
+    }
+    if (this.isInFie_ == null) {
+      this.isInFie_ = isInFie(this.element);
+    }
+    return this.isInFie_;
+  }
+
+  /**
    * Registers triggers.
    * @return {!Promise|undefined}
    * @private
@@ -298,9 +318,11 @@ export class AmpAnalytics extends AMP.BaseElement {
         }
         const hasRequestOrPostMessage =
           trigger['request'] ||
-          (trigger['parentPostMessage'] && this.isInabox_);
+          (trigger['parentPostMessage'] && this.allowParentPostMessage_());
         if (!trigger['on'] || !hasRequestOrPostMessage) {
-          const errorMsgSeg = this.isInabox_ ? '/"parentPostMessage"' : '';
+          const errorMsgSeg = this.allowParentPostMessage_()
+            ? '/"parentPostMessage"'
+            : '';
           this.user().error(
             TAG,
             '"on" and "request"' +
@@ -576,7 +598,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     const request = this.requests_[requestName];
-    const hasPostMessage = this.isInabox_ && trigger['parentPostMessage'];
+    const hasPostMessage =
+      this.allowParentPostMessage_() && trigger['parentPostMessage'];
 
     if (requestName != undefined && !request) {
       const TAG = this.getName_();
@@ -621,8 +644,8 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expandAndPostMessage_(trigger, event) {
     const msg = trigger['parentPostMessage'];
-    if (!msg || !this.isInabox_) {
-      // Only send message in inabox runtime with parentPostMessage specified.
+    if (!msg || !this.allowParentPostMessage_()) {
+      // Only send message for AMP ad with parentPostMessage specified.
       return;
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
@@ -635,7 +658,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.element
     ).then(message => {
       if (isIframed(this.win)) {
-        // Only post message with explict `parentPostMessage` to inabox host
+        // Only post message with explict `parentPostMessage`
         this.win.parent./*OK*/ postMessage(message, '*');
       }
     });
