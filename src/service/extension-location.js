@@ -55,15 +55,6 @@ export function calculateScriptBaseUrl(
 }
 
 /**
- * Calculates if we need a single pass folder or not.
- *
- * @return {string}
- */
-function getSinglePassExperimentPath() {
-  return getMode().singlePassType ? `${getMode().singlePassType}/` : '';
-}
-
-/**
  * Calculate script url for an extension.
  * @param {!Location} location The window's location
  * @param {string} extensionId
@@ -87,12 +78,11 @@ export function calculateExtensionScriptUrl(
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  const spPath = getSinglePassExperimentPath();
-  const extensionPath = `${spPath}v0/${extensionId}${extensionVersion}.js`;
-  if (urls.cdn !== urls.defaultCdn && !useDefaultCdn) {
-    return `${base}/${extensionPath}`;
+  let extensionPath = `v0/${extensionId}${extensionVersion}.js`;
+  if (urls.cdn === urls.defaultCdn || useDefaultCdn) {
+    extensionPath = `rtv/${getMode().rtvVersion}/${extensionPath}`;
   }
-  return `${base}/rtv/${getMode().rtvVersion}/${extensionPath}`;
+  return `${base}/${extensionPath}`;
 }
 
 /**
@@ -111,17 +101,11 @@ export function calculateEntryPointScriptUrl(
   opt_rtv
 ) {
   const base = calculateScriptBaseUrl(location, isLocalDev, false);
-  if (opt_rtv || urls.cdn !== urls.defaultCdn) {
-    const spPath = getSinglePassExperimentPath();
-    const entryPointPath = `${spPath}${entryPoint}.js`;
-    if (urls.cdn !== urls.defaultCdn) {
-      return `${base}/${entryPointPath}`;
-    }
-    if (opt_rtv) {
-      return `${base}/rtv/${getMode().rtvVersion}/${entryPointPath}`;
-    }
+  let entryPointPath = `${entryPoint}.js`;
+  if (urls.cdn === urls.defaultCdn && opt_rtv) {
+    entryPointPath = `rtv/${getMode().rtvVersion}/${entryPointPath}`;
   }
-  return `${base}/${entryPoint}.js`;
+  return `${base}/${entryPointPath}`;
 }
 
 /**
