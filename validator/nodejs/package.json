@@ -21,9 +21,6 @@
   "bin": {
     "amphtml-validator": "index.js"
   },
-  "scripts": {
-    "preinstall": "node ../../build-system/common/check-package-manager.js"
-  },
   "dependencies": {
     "colors": "1.2.5",
     "commander": "2.15.1",
