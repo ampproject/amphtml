@@ -337,6 +337,16 @@ After deploying, you can access your project publically at its hosting URL `http
 
 Additionally, you can create multiple projects and switch between them in the CLI using `firebase use your-project-name`.
 
+#### Testing Ads
+Testing ads in deployed demos requires whitelisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
+
+```
+export AMP_TESTING_HOST="my-project.firebaseapp.com"
+gulp firebase --fortesting
+firebase deploy
+```
+This will write "my-project.firebaseapp.com" as a third party url to relevant attributes in `AMP_CONFIG`, which is prepended to `amp.js` and `integration.js` files in the firebase folder. If you're curious about how this is done, feel free to inspect `build-system/tasks/firebase.js`.
+
 ## End-to-End Tests
 
 You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon.
