@@ -26,6 +26,7 @@ const COMSCORE_CONFIG = jsonLiteral({
     'pageview':
       '${base}c1=2' +
       '&c2=${c2}' +
+      '&cs_ucfr=$IF($EQUALS(${consentState}, sufficient), 1)$IF($EQUALS(${consentState}, insufficient), 0)$IF($EQUALS(${consentState}, ), )' +
       '&cs_amp_consent=${consentState}' +
       '&cs_pv=${pageViewId}' +
       '&c12=${clientId(comScore)}' +
