@@ -311,9 +311,19 @@ describes.repeated(
               );
               fetchAndRenderTemplate
                 .onFirstCall()
-                .returns(Promise.resolve({html: '<div>much success</div>'}))
+                .returns(
+                  Promise.resolve({
+                    init: {status: 200},
+                    html: '<div>much success</div>',
+                  })
+                )
                 .onSecondCall()
-                .returns(Promise.resolve({html: '<div>much success</div>'}));
+                .returns(
+                  Promise.resolve({
+                    init: {status: 200},
+                    html: '<div>much success</div>',
+                  })
+                );
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
@@ -467,9 +477,17 @@ describes.repeated(
               );
               fetchAndRenderTemplate
                 .onFirstCall()
-                .returns(Promise.resolve({html: renderedTemplate}))
+                .returns(
+                  Promise.resolve({
+                    html: renderedTemplate,
+                  })
+                )
                 .onSecondCall()
-                .returns(Promise.resolve({html: template}));
+                .returns(
+                  Promise.resolve({
+                    html: template,
+                  })
+                );
 
               const renderTemplate = sandbox.spy(ampForm, 'renderTemplate_');
 

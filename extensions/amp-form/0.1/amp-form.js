@@ -775,13 +775,13 @@ export class AmpForm {
    * @private
    */
   handleSsrTemplateResponse_(response) {
-    if (
-      response['init'] &&
-      response['init']['status'] &&
-      response['init']['status'] >= 300
-    ) {
-      /** HTTP status codes of 300+ mean redirects and errors. */
-      return this.handleSubmitFailure_(response['init']['status'], response);
+    const init = response['init'];
+    if (init) {
+      const status = init['status'];
+      if (status >= 300) {
+        /** HTTP status codes of 300+ mean redirects and errors. */
+        return this.handleSubmitFailure_(status, response);
+      }
     }
     return this.handleSubmitSuccess_(tryResolve(() => response));
   }
