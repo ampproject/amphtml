@@ -259,6 +259,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20128',
   },
   {
+    id: 'amp-story-embed',
+    name: 'Allow for stories to be embedded in other (AMP and non-AMP) pages',
+    spec: 'https://github.com/ampproject/amphtml/issues/24539',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25037',
+  },
+  {
     id: 'iframe-messaging',
     name: 'Enables "postMessage" action on amp-iframe.',
     spec: 'https://github.com/ampproject/amphtml/issues/9074',

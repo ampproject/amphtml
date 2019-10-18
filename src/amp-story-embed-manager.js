@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 
 /** @enum {string} */
@@ -42,11 +42,12 @@ const isAMP = self.AMP && self.AMP.ampdoc;
  */
 export class AmpStoryEmbedManager {
   /**
+   * @param {!Window} win
    * @param {!Document} doc
    * @param {!Element} hostEl
    * @constructor
    */
-  constructor(doc, hostEl) {
+  constructor(win, doc, hostEl) {
     console./*OK*/ assert(
       hostEl.childElementCount > 0,
       'Missing configuration.'
@@ -66,10 +67,19 @@ export class AmpStoryEmbedManager {
 
     /** @private {?HTMLIframeElement} */
     this.iframeEl_;
+
+    this.isAmpStoryEmbedExperimentEnabled_ = isExperimentOn(
+      win,
+      'amp-story-embed'
+    );
   }
 
   /** @public */
   build() {
+    if (!this.isAmpStoryEmbedExperimentEnabled_) {
+      return;
+    }
+
     this.stories_ = Array.prototype.slice.call(
       this.hostEl_.querySelectorAll('a')
     );
@@ -134,6 +144,10 @@ export class AmpStoryEmbedManager {
    * @public
    */
   layout() {
+    if (!this.isAmpStoryEmbedExperimentEnabled_) {
+      return;
+    }
+
     // TODO: Layout all child iframes.
     return this.layoutIframe_(0);
   }
