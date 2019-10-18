@@ -4,7 +4,8 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/wg-outreach'}, {name: 'ampproject/wg-infra'}],
+      pattern: 'video-*.js',
+      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
     },
   ],
 }
