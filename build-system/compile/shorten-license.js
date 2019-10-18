@@ -64,11 +64,7 @@ const BSD_SHORT = [
 
 const LICENSES = [[MIT_FULL, MIT_SHORT], [POLYMER_BSD_FULL, BSD_SHORT]];
 
-const PATHS = [
-  'third_party/webcomponentsjs/ShadowCSS.js',
-  'node_modules/document-register-element/build/' +
-    'document-register-element.patched.js',
-];
+const PATHS = ['third_party/webcomponentsjs/ShadowCSS.js'];
 
 /**
  * We can replace full-text of standard licenses with a pre-approved shorten
