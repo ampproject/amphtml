@@ -22,11 +22,10 @@ const css = `
 .i-amp-quiz-container {
   font-family: "helvetica neue";
   font-weight: 400;
-  background: #AAA;
+  background: #6666FF;
   width: auto;
   height: 80%;
-  padding: 10%;
-  border-radius: 3px;
+  border-radius: 10px;
 }
 
 .i-amp-quiz-head-container {
@@ -36,18 +35,18 @@ const css = `
 }
 
 .i-amp-quiz-option-container {
-  height: 80%;
+  height: 90%;
+  width: 100%;
   display: grid;
-  padding-left: 5%;
-  padding-right: 5%;
-  background-color: inherit;
+  background-color: white;
+  border-radius: 10px;
 }
 
 .i-amp-quiz-option {
-  height: 50%;
+  height: 100%;
   display: grid;
   align-items: center;
-  border-radius: 3px;
+  border-radius: 10px;;
   padding-left: 5%;
   background-color: inherit;
 }
@@ -95,9 +94,7 @@ export class AmpQuiz extends AMP.BaseElement {
           <div><slot name="prompt">prompt</slot></div>
         </div>
         <div class="i-amp-quiz-option-container">
-          <div class="i-amp-quiz-option" correct>
-            <slot name="option1">opt1</slot>
-          </div>
+          <div class="i-amp-quiz-option"><slot name="option1">opt1</slot></div>
           <div class="i-amp-quiz-option"><slot name="option2">opt2</slot></div>
           <div class="i-amp-quiz-option"><slot name="option3">opt3</slot></div>
           <div class="i-amp-quiz-option"><slot name="option4">opt4</slot></div>
@@ -144,11 +141,21 @@ export class AmpQuiz extends AMP.BaseElement {
       handleError('Improper number of options');
     }
 
+    // TODO: FIX CSS SETUP!
+
     prompt.setAttribute('slot', 'prompt');
 
     let i = 0;
     options.forEach(option => {
       option.setAttribute('slot', `option${++i}`);
+      // TODO: MANUALLY PASS THROUGH CORRECT
+      // TODO: FIX THIS SO IT WORKS WITH THE CSS
+      if (option.hasAttribute('correct')) {
+        this.shadowRoot_
+          // eslint-disable-next-line local/query-selector
+          .querySelector(`[name=${option.slot}]`)
+          .setAttribute('correct', 'correct');
+      }
     });
     // check constraints
   }
