@@ -42,11 +42,11 @@ FAIL
 |    <!-- Invalid: amp-user-location without id -->
 |    <amp-user-location layout="nodisplay"></amp-user-location>
 >>   ^~~~~~~~~
-amp-user-location/0.1/test/validator-amp-user-location.html:42:2 The mandatory attribute 'id' is missing in tag 'amp-user-location'. (see https://amp.dev/documentation/components/amp-user-location) [AMP_TAG_PROBLEM]
+amp-user-location/0.1/test/validator-amp-user-location.html:42:2 The mandatory attribute 'id' is missing in tag 'amp-user-location'. (see https://amp.dev/documentation/components/amp-user-location)
 |    <!-- Invalid: amp-user-location with layout responsive -->
 |    <amp-user-location id="location" layout="responsive"></amp-user-location>
 >>   ^~~~~~~~~
-amp-user-location/0.1/test/validator-amp-user-location.html:44:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-user-location'. (see https://amp.dev/documentation/components/amp-user-location) [AMP_LAYOUT_PROBLEM]
+amp-user-location/0.1/test/validator-amp-user-location.html:44:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-user-location'. (see https://amp.dev/documentation/components/amp-user-location)
 |
 |  </body>
 |  </html>
