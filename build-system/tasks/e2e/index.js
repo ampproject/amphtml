@@ -22,6 +22,7 @@ const config = require('../../test-configs/config');
 const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
+const path = require('path');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
 const {execOrDie, execScriptAsync} = require('../../common/exec');
@@ -148,13 +149,13 @@ async function e2e() {
     const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
     const watcher = watch(filesToWatch);
     log('Watching', cyan(filesToWatch), 'for changes...');
-    watcher.on('change', ({path}) => {
-      log('Detected a change in', cyan(path));
+    watcher.on('change', file => {
+      log('Detected a change in', cyan(file));
       log('Running tests...');
       // clear file from node require cache if running test again
-      delete require.cache[path];
+      delete require.cache[path.resolve(file)];
       const mocha = createMocha_();
-      mocha.files = [path];
+      mocha.files = [file];
       mocha.run();
     });
   }
