@@ -21,7 +21,6 @@ import {parseQueryString_} from './url-parse-query-string';
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   filter: (string|undefined),
  *   minified: boolean,
  *   lite: boolean,
  *   test: boolean,
@@ -105,9 +104,6 @@ function getMode_(win) {
       ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
-    // Allows filtering validation errors by error category. For the
-    // available categories, see ErrorCategory in validator/validator.proto.
-    filter: hashQuery['filter'],
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     // amp-user-location override
