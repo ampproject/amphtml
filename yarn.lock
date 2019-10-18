@@ -6244,6 +6244,16 @@ gulp-nop@0.0.3:
     gulp-util "~2.2.14"
     through "~2.3.4"
 
+gulp-prettier@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/gulp-prettier/-/gulp-prettier-2.1.0.tgz#6e7b2a12395315fb9e1ebd4ea9ed9514410aec15"
+  integrity sha512-6PvGPX+x0d1+PbP7tHF42o6zWzxCXqouTnpwZV1GjF47/wAgWBfPU1E6/6d4uAGM+NhmwWdKvIVumL3wMZZxDg==
+  dependencies:
+    plugin-error "^1.0.1"
+    prettier "^1.5.3"
+    safe-buffer "^5.1.2"
+    through2 "^3.0.0"
+
 gulp-regexp-sourcemaps@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/gulp-regexp-sourcemaps/-/gulp-regexp-sourcemaps-1.0.1.tgz#a8812244852c10950683a948e1c0dad0b1249979"
@@ -10770,7 +10780,7 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@1.18.2:
+prettier@1.18.2, prettier@^1.5.3:
   version "1.18.2"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.18.2.tgz#6823e7c5900017b4bd3acf46fe9ac4b4d7bda9ea"
   integrity sha512-OeHeMc0JhFE9idD4ZdtNibzY0+TPHSpSSb9h8FqtP+YnoZZ1sl8Vc9b1sasjfymH3SonAF4QcA2+mzHPhMvIiw==
