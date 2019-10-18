@@ -156,6 +156,7 @@ const prettifyGlobs = [
   '.vscode/settings.json',
   '**/*.json',
   '**/OWNERS',
+  '**/*.md',
   '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
