@@ -1127,7 +1127,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       StateProperty.NAVIGATION_PATH
     );
 
-    const currentPageIndex = navigationPath.indexOf(this.element.id);
+    const currentPageIndex = navigationPath.lastIndexOf(this.element.id);
     const previousPageId = navigationPath[currentPageIndex - 1];
 
     if (previousPageId) {
