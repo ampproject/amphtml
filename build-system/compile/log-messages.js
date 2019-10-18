@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 const fs = require('fs-extra');
-const log = require('fancy-log');
-const {cyan, yellow} = require('colors');
+const {endBuildStep} = require('../tasks/helpers');
 
 const pathPrefix = 'dist/log-messages';
 
@@ -49,17 +48,16 @@ async function extractedItems() {
 async function formatExtractedMessages() {
   const items = await extractedItems();
   if (!items) {
-    log(yellow('Skipped formatting log message table'));
     return;
   }
-  await Promise.all(
-    Object.entries(formats).map(async ([path, format]) => {
-      const formatted = {};
-      items.forEach(item => (formatted[item.id] = format(item)));
-      await fs.outputJson(path, formatted);
-    })
-  );
-  log('Formatted', cyan(Object.keys(formats).join(', ')));
+  const startTime = Date.now();
+  for (const path in formats) {
+    const format = formats[path];
+    const formatted = {};
+    items.forEach(item => (formatted[item.id] = format(item)));
+    await fs.outputJson(path, formatted);
+  }
+  endBuildStep('Formatted', Object.keys(formats).join(', '), startTime);
 }
 
 module.exports = {extractedPath, formatExtractedMessages};
