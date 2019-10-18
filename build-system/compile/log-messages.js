@@ -15,22 +15,7 @@
  */
 const fs = require('fs-extra');
 const {endBuildStep} = require('../tasks/helpers');
-
-const pathPrefix = 'dist/log-messages';
-
-/**
- * Source of truth for extracted messages during build, but should not be
- * deployed. Shaped `{message: {id, message, ...}}`.
- */
-const extractedPath = `${pathPrefix}.by-message.json`;
-
-const formats = {
-  // Consumed by logging server. Format may allow further fields.
-  [`${pathPrefix}.json`]: ({id: unused, ...other}) => other,
-
-  // Consumed by runtime function in `#development`.
-  [`${pathPrefix}.simple.json`]: ({message}) => message,
-};
+const {extractedPath, formats} = require('./log-messages-formats');
 
 /** @return {!Promise<?Array<!Object>>} */
 async function extractedItems() {
