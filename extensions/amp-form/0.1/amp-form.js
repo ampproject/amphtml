@@ -100,9 +100,6 @@ const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
  */
 const SUBMIT_TIMEOUT = 10000;
 
-/** HTTP status codes of 300+ mean redirects and errors. */
-const SUBMIT_ERROR_STATUS_THRESHOLD = 300;
-
 export class AmpForm {
   /**
    * Adds functionality to the passed form element and listens to submit event.
@@ -781,8 +778,9 @@ export class AmpForm {
     if (
       response['init'] &&
       response['init']['status'] &&
-      response['init']['status'] > SUBMIT_ERROR_STATUS_THRESHOLD
+      response['init']['status'] >= 300
     ) {
+      /** HTTP status codes of 300+ mean redirects and errors. */
       return this.handleSubmitFailure_(response['init']['status'], response);
     }
     return this.handleSubmitSuccess_(tryResolve(() => response));
