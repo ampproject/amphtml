@@ -76,37 +76,46 @@ export class CryptoHandler {
    */
   tryToDecryptDocument(decryptedDocumentKey) {
     if (!this.shaKeyHash_) {
-      return Promise.reject(new Error('Missing Document Key Hash'));
+      return this.tryToDecryptDocumentImpl_(decryptedDocumentKey);
     }
-    const docKeyUint8 = new TextEncoder().encode(decryptedDocumentKey);       
+    const docKeyUint8 = new TextEncoder().encode(decryptedDocumentKey);
     return crypto.subtle.digest('SHA-256', docKeyUint8).then(val => {
       const hashArray = Array.from(new Uint8Array(val));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       if (hashHex != this.shaKeyHash_) {
         return Promise.reject(new Error('Invalid Document Key'));
       }
-      if (this.decryptionPromise_) {
-        return this.decryptionPromise_;
-      }
-      this.decryptionPromise_ = this.ampdoc_.whenReady().then(() => {
-        const encryptedSections = this.ampdoc_
-          .getRootNode()
-          .querySelectorAll('script[ciphertext]');
-        const promises = [];
-        iterateCursor(encryptedSections, encryptedSection => {
-          promises.push(
-            this.decryptDocumentContent_(
-              encryptedSection.textContent,
-              decryptedDocumentKey
-            ).then(decryptedContent => {
-              encryptedSection./*OK*/ outerHTML = decryptedContent;
-            })
-          );
-        });
-        return Promise.all(promises);
-      });
-      return this.decryptionPromise_;
+      return this.tryToDecryptDocumentImpl_(decryptedDocumentKey);
     });
+  }
+
+  /**
+   * @private
+   * @param {string} decryptedDocumentKey
+   * @return {!Promise}
+   */
+  tryToDecryptDocumentImpl_(decryptedDocumentKey) {
+    if (this.decryptionPromise_) {
+      return this.decryptionPromise_;
+    }
+    this.decryptionPromise_ = this.ampdoc_.whenReady().then(() => {
+      const encryptedSections = this.ampdoc_
+        .getRootNode()
+        .querySelectorAll('script[ciphertext]');
+      const promises = [];
+      iterateCursor(encryptedSections, encryptedSection => {
+        promises.push(
+          this.decryptDocumentContent_(
+            encryptedSection.textContent,
+            decryptedDocumentKey
+          ).then(decryptedContent => {
+            encryptedSection./*OK*/ outerHTML = decryptedContent;
+          })
+        );
+      });
+      return Promise.all(promises);
+    });
+    return this.decryptionPromise_;
   }
 
   /**

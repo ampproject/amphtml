@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CryptoHandler} from '../crypto-handler';
+import { CryptoHandler } from '../crypto-handler';
 
 describes.realWin(
   'crypto handler',
@@ -69,7 +69,6 @@ describes.realWin(
       const keyScript = win.document.createElement('script');
       keyScript.setAttribute('cryptokeys', '');
       keyScript.setAttribute('type', 'application/json');
-      keyScript.setAttribute('sha-256-hash', decryptedDocKeyHash);
       keyScript.textContent = JSON.stringify(encryptedKeys);
       win.document.head.appendChild(keyScript);
 
@@ -94,21 +93,22 @@ describes.realWin(
       cryptoSection2.setAttribute('encrypted', '');
       cryptoSection2.appendChild(crypt2);
       win.document.body.appendChild(cryptoSection2);
-
-      cryptoHandler = new CryptoHandler(ampdoc);
     });
 
     describe('getEncryptedDocumentKey', () => {
       it('should return null when there are no keys', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return expect(cryptoHandler.getEncryptedDocumentKey()).to.be.null;
       });
 
       it('should return null when call doesnt match keys', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return expect(cryptoHandler.getEncryptedDocumentKey('doesntExist')).to
           .be.null;
       });
 
       it('should return expected value to a matching key', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return expect(cryptoHandler.getEncryptedDocumentKey('local')).to.equal(
           encryptedKey
         );
@@ -117,6 +117,7 @@ describes.realWin(
 
     describe('decryptDocumentContent_', () => {
       it('should decrypt the content correctly', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return cryptoHandler
           .decryptDocumentContent_(encryptedContent, decryptedDocKey)
           .then(actualContent => {
@@ -128,6 +129,17 @@ describes.realWin(
     describe('tryToDecryptDocument', () => {
       // eslint-disable-next-line max-len
       it('should replace the encrypted content with decrypted content in multiple sections', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
+        return cryptoHandler.tryToDecryptDocument(decryptedDocKey).then(() => {
+          expect(cryptoSection1.textContent).to.equal(decryptedContent);
+          expect(cryptoSection2.textContent).to.equal(decryptedContent);
+        });
+      });
+
+      it('should replace the encrypted content with decrypted content in multiple sections with SHA256 hash', () => {
+        win.document.querySelector('script[cryptokeys]')
+          .setAttribute('sha-256-hash', decryptedDocKeyHash);
+        cryptoHandler = new CryptoHandler(ampdoc);
         return cryptoHandler.tryToDecryptDocument(decryptedDocKey).then(() => {
           expect(cryptoSection1.textContent).to.equal(decryptedContent);
           expect(cryptoSection2.textContent).to.equal(decryptedContent);
@@ -135,11 +147,14 @@ describes.realWin(
       });
 
       it('should fail due to key hashes being unequal', () => {
+        win.document.querySelector('script[cryptokeys]')
+          .setAttribute('sha-256-hash', decryptedDocKeyHash);
+        cryptoHandler = new CryptoHandler(ampdoc);
         const fakeDocKey = '0nasdf234ikn23r09jijfakefake923r42aQ=';
         return cryptoHandler.tryToDecryptDocument(fakeDocKey).then(() => {
           throw new Error('Promise should have rejected.');
         }, reason => {
-            expect(() => { throw reason; }).to.throw('Invalid Document Key');
+          expect(() => { throw reason; }).to.throw('Invalid Document Key');
         });
       });
     });
