@@ -779,11 +779,11 @@ export class AmpForm {
    */
   handleSsrTemplateResponse_(response) {
     if (
-      response.init &&
-      response.init.status &&
-      response.init.status > SUBMIT_ERROR_STATUS_THRESHOLD
+      response['init'] &&
+      response['init']['status'] &&
+      response['init']['status'] > SUBMIT_ERROR_STATUS_THRESHOLD
     ) {
-      return this.handleSubmitFailure_(response.init.status, response);
+      return this.handleSubmitFailure_(response['init']['status'], response);
     }
     return this.handleSubmitSuccess_(tryResolve(() => response));
   }
