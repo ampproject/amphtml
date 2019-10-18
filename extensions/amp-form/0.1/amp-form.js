@@ -100,8 +100,7 @@ const REDIRECT_TO_HEADER = 'AMP-Redirect-To';
  */
 const SUBMIT_TIMEOUT = 10000;
 
-/** When submit-error tmpl is rendered on server side,
- *  it is passed back in response with response.init.status > 300. */
+/** HTTP status codes of 300+ mean redirects and errors. */
 const SUBMIT_ERROR_STATUS_THRESHOLD = 300;
 
 export class AmpForm {
