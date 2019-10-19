@@ -51,6 +51,10 @@ exports.shortenLicense = function() {
     return replace(regex, tuple[1], 'shorten-license');
   });
 
+  // Pumpify requires at least 2 streams
+  if (streams.length === 1) {
+    return streams[0];
+  }
   return pumpify.obj(streams);
 };
 
