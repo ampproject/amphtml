@@ -680,7 +680,8 @@ function installPatches(win, registry) {
   if (!innerHTMLDesc) {
     // Sigh... IE11 puts innerHTML desciptor on HTMLElement. But, we've
     // replaced HTMLElement with a polyfill wrapper, so have to get its proto.
-    innerHTMLProto = win.HTMLElement.prototype.__proto__;
+    innerHTMLProto =
+      /** @type {!Object} */ (win.HTMLElement.prototype.__proto__);
     innerHTMLDesc = Object.getOwnPropertyDescriptor(
       innerHTMLProto,
       'innerHTML'
