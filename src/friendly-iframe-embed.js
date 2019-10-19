@@ -37,12 +37,10 @@ import {
 } from './service';
 import {escapeHtml} from './dom';
 import {getExperimentBranch, isExperimentOn} from './experiments';
-import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
-import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
@@ -857,15 +855,7 @@ export class FriendlyIframeEmbed {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenList(childWin);
-  if (
-    // eslint-disable-next-line no-undef
-    CUSTOM_ELEMENTS_V1 ||
-    getMode().test
-  ) {
-    installCustomElements(childWin);
-  } else {
-    installRegisterElement(childWin, 'auto');
-  }
+  installCustomElements(childWin);
 }
 
 /**

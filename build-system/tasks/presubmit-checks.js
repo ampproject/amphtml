@@ -85,10 +85,6 @@ const forbiddenTerms = {
       'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
       'for a list of alternatives.',
   },
-  'document-register-element.node': {
-    message: 'Use `document-register-element.patched` instead',
-    whitelist: ['build-system/tasks/update-packages.js'],
-  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
