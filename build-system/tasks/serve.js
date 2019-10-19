@@ -136,9 +136,7 @@ function restartServer() {
 function initiatePreBuildSteps() {
   if (!argv._.includes('serve')) {
     preBuildSomeRuntimeFiles();
-    if (argv.extensions || argv.extensions_from) {
-      preBuildSomeExtensions();
-    }
+    preBuildSomeExtensions();
   }
 }
 
