@@ -672,13 +672,26 @@ function installPatches(win, registry) {
   // Patch the innerHTML setter to immediately upgrade custom elements.
   // Note, this could technically fire connectedCallbacks if this node was
   // connected, but we leave that to the Mutation Observer.
-  const innerHTMLDesc = Object.getOwnPropertyDescriptor(elProto, 'innerHTML');
+  let innerHTMLProto = elProto;
+  let innerHTMLDesc = Object.getOwnPropertyDescriptor(
+    innerHTMLProto,
+    'innerHTML'
+  );
+  if (!innerHTMLDesc) {
+    // Sigh... IE11 puts innerHTML desciptor on HTMLElement. But, we've
+    // replaced HTMLElement with a polyfill wrapper, so have to get its proto.
+    innerHTMLProto = win.HTMLElement.prototype.__proto__;
+    innerHTMLDesc = Object.getOwnPropertyDescriptor(
+      innerHTMLProto,
+      'innerHTML'
+    );
+  }
   const innerHTMLSetter = innerHTMLDesc.set;
   innerHTMLDesc.set = function(html) {
     innerHTMLSetter.call(this, html);
     registry.upgrade(this);
   };
-  Object.defineProperty(elProto, 'innerHTML', innerHTMLDesc);
+  Object.defineProperty(innerHTMLProto, 'innerHTML', innerHTMLDesc);
 }
 
 /**
