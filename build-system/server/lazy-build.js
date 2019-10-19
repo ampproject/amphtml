@@ -91,11 +91,12 @@ exports.lazyBuildJs = async function(req, res, next) {
 };
 
 /**
- * Pre-builds the core runtime and returns immediately so that the user can
+ * Pre-builds some runtime files and returns immediately so that the user can
  * start using the webserver.
  */
-exports.preBuildCoreRuntime = function() {
+exports.preBuildSomeRuntimeFiles = function() {
   build(jsBundles, 'amp.js', doBuildJs);
+  build(jsBundles, 'ww.max.js', doBuildJs);
 };
 
 /**

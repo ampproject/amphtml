@@ -25,7 +25,7 @@ const watch = require('gulp-watch');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
-  preBuildCoreRuntime,
+  preBuildSomeRuntimeFiles,
   preBuildSomeExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
@@ -135,7 +135,7 @@ function restartServer() {
  */
 function initiatePreBuildSteps() {
   if (!argv._.includes('serve')) {
-    preBuildCoreRuntime();
+    preBuildSomeRuntimeFiles();
     if (argv.extensions || argv.extensions_from) {
       preBuildSomeExtensions();
     }
