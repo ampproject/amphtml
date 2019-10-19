@@ -4323,11 +4323,6 @@ doctrine@3.0.0, doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-document-register-element@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/document-register-element/-/document-register-element-1.5.0.tgz#a91bc20afd9340d50cdb6a493afaf10932c12e00"
-  integrity sha1-qRvCCv2TQNUM22pJOvrxCTLBLgA=
-
 dom-serialize@^2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/dom-serialize/-/dom-serialize-2.2.1.tgz#562ae8999f44be5ea3076f5419dcd59eb43ac95b"
