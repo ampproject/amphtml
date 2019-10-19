@@ -170,7 +170,6 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       elements = [];
 
       doc = {
-        registerElement: sandbox.spy(),
         documentElement: {
           ownerDocument: doc,
         },
@@ -198,6 +197,9 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
       win = {
         document: doc,
+        customElements: {
+          define: sandbox.spy(),
+        },
         Object: {
           create: proto => Object.create(proto),
         },
@@ -220,8 +222,8 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       expect(win.__AMP_EXTENDED_ELEMENTS).to.exist;
       expect(win.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(ElementStub);
       expect(win.__AMP_EXTENDED_ELEMENTS['amp-test2']).to.be.undefined;
-      expect(doc.registerElement).to.be.calledOnce;
-      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
+      expect(win.customElements.define).to.be.calledOnce;
+      expect(win.customElements.define.firstCall.args[0]).to.equal('amp-test1');
     });
 
     it('should repeat stubbing when body is not available', () => {
@@ -232,8 +234,8 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       expect(win.__AMP_EXTENDED_ELEMENTS).to.exist;
       expect(win.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(ElementStub);
       expect(win.__AMP_EXTENDED_ELEMENTS['amp-test2']).to.be.undefined;
-      expect(doc.registerElement).to.be.calledOnce;
-      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
+      expect(win.customElements.define).to.be.calledOnce;
+      expect(win.customElements.define.firstCall.args[0]).to.equal('amp-test1');
 
       // Add more elements
       const elem2 = {
@@ -251,8 +253,10 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       stubElementsForDoc(ampdoc);
       expect(win.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(ElementStub);
       expect(win.__AMP_EXTENDED_ELEMENTS['amp-test2']).to.equal(ElementStub);
-      expect(doc.registerElement).to.have.callCount(2);
-      expect(doc.registerElement.getCall(1).args[0]).to.equal('amp-test2');
+      expect(win.customElements.define).to.have.callCount(2);
+      expect(win.customElements.define.getCall(1).args[0]).to.equal(
+        'amp-test2'
+      );
     });
 
     it('should stub element when not stubbed yet', () => {
@@ -261,38 +265,40 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
       expect(win.__AMP_EXTENDED_ELEMENTS).to.exist;
       expect(win.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(ElementStub);
-      expect(doc.registerElement).to.be.calledOnce;
-      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
+      expect(win.customElements.define).to.be.calledOnce;
+      expect(win.customElements.define.firstCall.args[0]).to.equal('amp-test1');
 
       // Second stub is ignored.
       stubElementIfNotKnown(win, 'amp-test1');
-      expect(doc.registerElement).to.be.calledOnce;
+      expect(win.customElements.define).to.be.calledOnce;
     });
 
     it('should copy or stub element definitions in a child window', () => {
       stubElementIfNotKnown(win, 'amp-test1');
 
-      const registerElement = sandbox.spy();
-      const childWin = {Object, HTMLElement, document: {registerElement}};
+      const define = sandbox.spy();
+      const childWin = {
+        Object,
+        HTMLElement,
+        customElements: {define},
+      };
 
       copyElementToChildWindow(win, childWin, 'amp-test1');
       expect(childWin.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(
         ElementStub
       );
-      const firstCallCount = registerElement.callCount;
+      const firstCallCount = define.callCount;
       expect(firstCallCount).to.equal(1);
-      expect(registerElement.getCall(firstCallCount - 1).args[0]).to.equal(
-        'amp-test1'
-      );
+      expect(define.getCall(firstCallCount - 1).args[0]).to.equal('amp-test1');
 
       copyElementToChildWindow(win, childWin, 'amp-test2');
       expect(childWin.__AMP_EXTENDED_ELEMENTS['amp-test1']).to.equal(
         ElementStub
       );
-      expect(registerElement.callCount).to.be.above(firstCallCount);
-      expect(
-        registerElement.getCall(registerElement.callCount - 1).args[0]
-      ).to.equal('amp-test2');
+      expect(define.callCount).to.be.above(firstCallCount);
+      expect(define.getCall(define.callCount - 1).args[0]).to.equal(
+        'amp-test2'
+      );
     });
   });
 });

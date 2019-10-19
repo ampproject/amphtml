@@ -16,7 +16,6 @@
 
 /** @fileoverview */
 
-import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -27,7 +26,6 @@ import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
-import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 
 installFetch(self);
 installMathSign(self);
@@ -41,17 +39,7 @@ if (self.document) {
   installDOMTokenList(self);
   installDocContains(self);
   installGetBoundingClientRect(self);
-
-  // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
-  if (
-    // eslint-disable-next-line no-undef
-    CUSTOM_ELEMENTS_V1 ||
-    (getMode().test && !getMode().testIe)
-  ) {
-    installCustomElements(self);
-  } else {
-    installRegisterElement(self, 'auto');
-  }
+  installCustomElements(self);
 }
 
 // TODO(#18268, erwinm): For whatever reason imports to modules that have no
