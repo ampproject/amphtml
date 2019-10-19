@@ -852,14 +852,15 @@ function subClass(Object, superClass, subClass) {
 export function install(win, opt_ctor) {
   // Don't install in no-DOM environments e.g. worker.
   const shouldInstall = win.document;
-  if (!shouldInstall || isPatched(win)) {
+  const hasCE = hasCustomElements(win);
+  if (!shouldInstall || (hasCE && isPatched(win))) {
     return;
   }
 
   let install = true;
   let installWrapper = false;
 
-  if (opt_ctor && hasCustomElements(win)) {
+  if (opt_ctor && hasCE) {
     // If ctor is constructable without new, it's a function. That means it was
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.
