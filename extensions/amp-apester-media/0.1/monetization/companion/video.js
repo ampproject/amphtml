@@ -27,27 +27,31 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
   const companionCampaignOptions =
     monetizationSettings['companionCampaignOptions'] || {};
   const companionRawSettings = monetizationSettings['companionOptions'] || {};
-  if (
-    companionRawSettings.video &&
-    companionRawSettings.video.enabled &&
-    companionRawSettings.video.provider === 'sr'
-  ) {
-    const position = getCompanionPosition(companionRawSettings.video);
-    if (position && position !== 'floating') {
-      const macros = getSrMacros(
-        media,
-        companionCampaignOptions['companionCampaignId'],
-        apesterElement,
-        consentObj
-      );
+  if (!companionRawSettings.video) {
+    return Promise.resolve();
+  }
+  if (!companionRawSettings.video.enabled) {
+    return Promise.resolve();
+  }
+  if (!companionRawSettings.video.provider === 'sr') {
+    return Promise.resolve();
+  }
 
-      constructCompanionSrElement(
-        companionRawSettings['video']['videoTag'],
-        position,
-        /** @type {!JsonObject} */ (macros),
-        apesterElement
-      );
-    }
+  const position = getCompanionPosition(companionRawSettings.video);
+  if (position && position !== 'floating') {
+    const macros = getSrMacros(
+      media,
+      companionCampaignOptions['companionCampaignId'],
+      apesterElement,
+      consentObj
+    );
+
+    constructCompanionSrElement(
+      companionRawSettings['video']['videoTag'],
+      position,
+      /** @type {!JsonObject} */ (macros),
+      apesterElement
+    );
   }
   return Promise.resolve();
 }
