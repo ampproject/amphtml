@@ -15,12 +15,14 @@
  */
 
 import {Services} from '../../../../../src/services';
-import {getConsentData} from '../consent-util';
 
 /**
  * @param {!JsonObject} media
+ * @param {AmpElement} apesterElement
  * @param {!JsonObject} consentObj
+ * @return {Promise}
  */
+export function handleCompanionVideo(media, apesterElement, consentObj) {
   const monetizationSettings = media['campaignData'] || {};
   const companionCampaignOptions =
     monetizationSettings['companionCampaignOptions'] || {};
