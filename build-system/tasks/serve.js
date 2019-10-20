@@ -25,8 +25,8 @@ const watch = require('gulp-watch');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
-  preBuildCoreRuntime,
-  preBuildSomeExtensions,
+  preBuildRuntimeFiles,
+  preBuildExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
@@ -131,14 +131,12 @@ function restartServer() {
 }
 
 /**
- * Initiates pre-build steps requested via command line args.
+ * Performs pre-build steps requested via command line args.
  */
-function initiatePreBuildSteps() {
+async function performPreBuildSteps() {
   if (!argv._.includes('serve')) {
-    preBuildCoreRuntime();
-    if (argv.extensions || argv.extensions_from) {
-      preBuildSomeExtensions();
-    }
+    await preBuildRuntimeFiles();
+    await preBuildExtensions();
   }
 }
 
@@ -150,7 +148,7 @@ async function serve() {
   logServeMode();
   watch(serverFiles, restartServer);
   await startServer();
-  initiatePreBuildSteps();
+  await performPreBuildSteps();
 }
 
 module.exports = {
