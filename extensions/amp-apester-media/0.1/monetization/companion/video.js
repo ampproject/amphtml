@@ -62,9 +62,11 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
 function getCompanionPosition(video) {
   if (video['companion']['enabled']) {
     return 'above';
-  } else if (video['companion_below']['enabled']) {
+  }
+  if (video['companion_below']['enabled']) {
     return 'below';
-  } else if (video['floating']['enabled']) {
+  }
+  if (video['floating']['enabled']) {
     return 'floating';
   }
   return '';
