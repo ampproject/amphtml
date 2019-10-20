@@ -38,6 +38,7 @@ const {
 const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
+const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 
@@ -513,13 +514,15 @@ function printConfigHelp(command) {
     cyan(argv.config === 'canary' ? 'canary' : 'prod'),
     green('AMP config.')
   );
-  log(
-    green('⤷ Use'),
-    cyan('--config={canary|prod}'),
-    green('with your'),
-    cyan(command),
-    green('command to specify which config to apply.')
-  );
+  if (!isTravisBuild()) {
+    log(
+      green('⤷ Use'),
+      cyan('--config={canary|prod}'),
+      green('with your'),
+      cyan(command),
+      green('command to specify which config to apply.')
+    );
+  }
 }
 
 /**
