@@ -29,9 +29,6 @@ export class ViewerTracker {
     /** @private */
     this.ampdoc_ = ampdoc;
 
-    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
-
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
@@ -50,11 +47,11 @@ export class ViewerTracker {
     this.reportViewPromise_ = null;
     return this.ampdoc_.whenReady().then(() => {
       return new Promise(resolve => {
-        if (this.viewer_.isVisible()) {
+        if (this.ampdoc_.isVisible()) {
           resolve();
         }
-        this.viewer_.onVisibilityChanged(() => {
-          if (this.viewer_.isVisible()) {
+        this.ampdoc_.onVisibilityChanged(() => {
+          if (this.ampdoc_.isVisible()) {
             resolve();
           }
         });
@@ -102,8 +99,8 @@ export class ViewerTracker {
     return new Promise((resolve, reject) => {
       // 1. Document becomes invisible again: cancel.
       unlistenSet.push(
-        this.viewer_.onVisibilityChanged(() => {
-          if (!this.viewer_.isVisible()) {
+        this.ampdoc_.onVisibilityChanged(() => {
+          if (!this.ampdoc_.isVisible()) {
             reject(cancellation());
           }
         })

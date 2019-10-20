@@ -19,7 +19,6 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {mockServiceForDoc} from '../../../../testing/test-helper';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -650,18 +649,18 @@ describes.realWin(
       let makeVisible;
       let visiblePromise;
       let video;
-      let viewerMock;
+      let visibilityStubs;
 
       beforeEach(() => {
-        viewerMock = mockServiceForDoc(sandbox, env.ampdoc, 'viewer', [
-          'getVisibilityState',
-          'whenFirstVisible',
-        ]);
-        viewerMock.getVisibilityState.returns(VisibilityState.PRERENDER);
+        visibilityStubs = {
+          getVisibilityState: sandbox.stub(env.ampdoc, 'getVisibilityState'),
+          whenFirstVisible: sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+        };
+        visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
         visiblePromise = new Promise(resolve => {
           makeVisible = resolve;
         });
-        viewerMock.whenFirstVisible.returns(visiblePromise);
+        visibilityStubs.whenFirstVisible.returns(visiblePromise);
       });
 
       describe('should not prerender if no cached sources', () => {

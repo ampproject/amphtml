@@ -330,7 +330,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     }
   );
 
-  it('should forward the correct target when clicking on an element', () => {
+  it('should forward the correct target when clicking on an element', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -357,22 +357,21 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     win.document.addEventListener('click', clickSpy);
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const ctaLinks = bookend.bookendEl_.querySelector(
-        '.i-amphtml-story-bookend-cta-link-wrapper'
-      );
-      ctaLinks.children[0].onclick = function(e) {
-        e.preventDefault(); // Make the test not actually navigate.
-      };
-      ctaLinks.children[0].click();
+    await bookend.loadConfigAndMaybeRenderBookend();
+    const ctaLinks = bookend.bookendEl_.querySelector(
+      '.i-amphtml-story-bookend-cta-link-wrapper'
+    );
+    ctaLinks.children[0].onclick = function(e) {
+      e.preventDefault(); // Make the test not actually navigate.
+    };
+    ctaLinks.children[0].click();
 
-      expect(clickSpy.getCall(0).args[0]).to.contain({
-        '__AMP_CUSTOM_LINKER_TARGET__': ctaLinks.children[0],
-      });
+    expect(clickSpy.getCall(0).args[0]).to.contain({
+      '__AMP_CUSTOM_LINKER_TARGET__': ctaLinks.children[0],
     });
   });
 
-  it('should fire analytics event when clicking on a link', () => {
+  it('should fire analytics event when clicking on a link', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -398,31 +397,28 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     const analyticsSpy = sandbox.spy(analytics, 'triggerEvent');
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const ctaLinks = bookend.bookendEl_.querySelector(
-        '.i-amphtml-story-bookend-cta-link-wrapper'
-      );
-      ctaLinks.children[0].onclick = function(e) {
-        e.preventDefault(); // Make the test not actually navigate.
-      };
-      ctaLinks.children[0].click();
+    await bookend.loadConfigAndMaybeRenderBookend();
+    const ctaLinks = bookend.bookendEl_.querySelector(
+      '.i-amphtml-story-bookend-cta-link-wrapper'
+    );
+    ctaLinks.children[0].onclick = function(e) {
+      e.preventDefault(); // Make the test not actually navigate.
+    };
+    ctaLinks.children[0].click();
 
-      expect(analyticsSpy).to.have.been.calledWith(
-        AnalyticsEvent.BOOKEND_CLICK
-      );
-      expect(
-        analyticsVariables.get()[AnalyticsVariable.BOOKEND_TARGET_HREF]
-      ).to.equal('http://localhost:9876/google.com');
-      expect(
-        analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_TYPE]
-      ).to.equal('cta-link');
-      expect(
-        analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_POSITION]
-      ).to.equal(1);
-    });
+    expect(analyticsSpy).to.have.been.calledWith(AnalyticsEvent.BOOKEND_CLICK);
+    expect(
+      analyticsVariables.get()[AnalyticsVariable.BOOKEND_TARGET_HREF]
+    ).to.equal('http://localhost:9876/google.com');
+    expect(
+      analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_TYPE]
+    ).to.equal('cta-link');
+    expect(
+      analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_POSITION]
+    ).to.equal(1);
   });
 
-  it('should not fire analytics event when clicking non-clickable components', () => {
+  it('should not fire analytics event when clicking non-clickable components', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -447,15 +443,14 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     const analyticsSpy = sandbox.spy(analytics, 'triggerEvent');
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const textEl = bookend.bookendEl_.querySelector(
-        '.i-amphtml-story-bookend-text'
-      );
+    await bookend.loadConfigAndMaybeRenderBookend();
+    const textEl = bookend.bookendEl_.querySelector(
+      '.i-amphtml-story-bookend-text'
+    );
 
-      textEl.click();
+    textEl.click();
 
-      expect(analyticsSpy).to.not.have.been.called;
-    });
+    expect(analyticsSpy).to.not.have.been.called;
   });
 
   it(

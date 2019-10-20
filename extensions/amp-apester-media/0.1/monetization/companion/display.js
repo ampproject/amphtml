@@ -16,47 +16,27 @@
 
 /**
  * @param {!JsonObject} media
- * @param {AmpApesterMedia} apesterElement
+ * @param {AmpElement} apesterElement
  */
 export function handleCompanionDisplay(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
   const companionRawSettings = monetizationSettings['companionOptions'] || {};
   const {enabled, settings = {}} = companionRawSettings || {};
-  if (enabled && settings.bannerAdProvider === 'gdt') {
-    const companionDisplaySettings = extractCompanionDisplaySettings(settings);
-
-    const companionDisplayElement = constructCompanionDisplayAd(
-      companionDisplaySettings,
-      apesterElement
-    );
-    apesterElement.parentNode.insertBefore(
-      companionDisplayElement,
-      apesterElement.nextSibling
-    );
+  if (enabled && settings['bannerAdProvider'] === 'gdt') {
+    const slot = settings['slot'];
+    const bannerSizes = settings['bannerSizes'] || [[300, 250]];
+    const size = {width: bannerSizes[0][0], height: bannerSizes[0][1]};
+    constructCompanionDisplayAd(slot, size, apesterElement);
   }
 }
 
 /**
- * @param {!JsonObject} companionDisplayRawSettings
- * @return {!JsonObject}
+ * @param {string} slot
+ * @param {{width: number, height:number}} size
+ * @param {AmpElement} apesterElement
  */
-function extractCompanionDisplaySettings(companionDisplayRawSettings) {
-  const {slot, bannerSizes = [300, 250]} = companionDisplayRawSettings || {};
-  const size = bannerSizes[0];
-  return {
-    slot,
-    height: size[1],
-    width: size[0],
-  };
-}
-
-/**
- * @param {JsonObject} companionSettings
- * @param {AmpApesterMedia} apesterElement
- * @return {!Element}
- */
-function constructCompanionDisplayAd(companionSettings, apesterElement) {
-  const {width, height, slot} = companionSettings || {};
+function constructCompanionDisplayAd(slot, size, apesterElement) {
+  const {width, height} = size;
   const ampAd = apesterElement.ownerDocument.createElement('amp-ad');
   ampAd.setAttribute('type', 'doubleclick');
   ampAd.setAttribute('data-slot', slot);
@@ -64,5 +44,5 @@ function constructCompanionDisplayAd(companionSettings, apesterElement) {
   ampAd.setAttribute('height', height);
   ampAd.classList.add('amp-apester-companion');
 
-  return ampAd;
+  apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
 }

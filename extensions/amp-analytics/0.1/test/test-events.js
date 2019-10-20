@@ -1973,13 +1973,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     describe('should create correct reportReadyPromise', () => {
       it('with viewer hidden', () => {
-        const stub = sandbox.stub(tracker.root, 'getViewer').callsFake(() => {
-          return {
-            isVisible: () => {
-              return false;
-            },
-          };
-        });
+        const stub = sandbox.stub(ampdoc, 'isVisible').returns(false);
         const promise = tracker.createReportReadyPromiseForDocumentHidden_();
         return promise.then(() => {
           expect(stub).to.be.calledOnce;

@@ -19,10 +19,8 @@ import {getConsentData} from '../consent-util';
 
 /**
  * @param {!JsonObject} media
- * @param {AmpApesterMedia} apesterElement
- * @return {AmpApesterMedia}
+ * @param {!JsonObject} consentObj
  */
-export function handleCompanionVideo(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
   const companionCampaignOptions =
     monetizationSettings['companionCampaignOptions'] || {};
@@ -33,93 +31,75 @@ export function handleCompanionVideo(media, apesterElement) {
     companionRawSettings.video.provider === 'sr'
   ) {
     const position = getCompanionPosition(companionRawSettings.video);
-    if (position) {
-      const companionSettings = extractCompanionSettings(
-        companionRawSettings.video,
-        apesterElement,
-        position
-      );
-      const {companionCampaignId} = companionCampaignOptions;
-      return constructCompanionSr(
-        companionSettings,
+    if (position && position !== 'floating') {
+      const macros = getSrMacros(
         media,
-        companionCampaignId,
+        companionCampaignOptions['companionCampaignId'],
+        apesterElement,
+        consentObj
+      );
+
+      constructCompanionSrElement(
+        companionRawSettings['video']['videoTag'],
+        position,
+        /** @type {!JsonObject} */ (macros),
         apesterElement
-      ).then(companionVideoSrElement => {
-        const companionSrElement =
-          companionSettings.position === 'companionBelow'
-            ? apesterElement.nextSibling
-            : apesterElement;
-        apesterElement.parentNode.insertBefore(
-          companionVideoSrElement,
-          companionSrElement
-        );
-        return apesterElement;
-      });
+      );
     }
   }
+  return Promise.resolve();
 }
 /**
  * @param {!JsonObject} video
- * @return {?string}
+ * @return {string}
  */
 function getCompanionPosition(video) {
-  if (video.companion.enabled) {
-    return 'companionAbove';
-  } else if (video.companion_below.enabled) {
-    return 'companionBelow';
+  if (video['companion']['enabled']) {
+    return 'above';
+  } else if (video['companion_below']['enabled']) {
+    return 'below';
+  } else if (video['floating']['enabled']) {
+    return 'floating';
   }
+  return '';
 }
 
 /**
- * @param {!JsonObject} video
- * @param {AmpApesterMedia} apesterElement
+ * @param {string} videoTag
  * @param {string} position
- * @return {!JsonObject}
+ * @param {!JsonObject} macros
+ * @param {AmpElement} apesterElement
  */
-function extractCompanionSettings(video, apesterElement, position) {
-  return {
-    videoTag: video.videoTag,
-    position,
-    size: getCompanionVideoAdSize(apesterElement),
-  };
-}
-
-/**
- * @param {JsonObject} companionSettings
- * @param {JsonObject} media
- * @param {string} campaignId
- * @param {AmpApesterMedia} apesterElement
- * @return {!Element}
- */
-function constructCompanionSr(
-  companionSettings,
-  media,
-  campaignId,
+function constructCompanionSrElement(
+  videoTag,
+  position,
+  macros,
   apesterElement
 ) {
-  const {videoTag, size} = companionSettings || {};
+  const size = getCompanionVideoAdSize(apesterElement);
   const ampAd = apesterElement.ownerDocument.createElement('amp-ad');
   ampAd.setAttribute('type', 'blade');
-  return getSrMacros(media, campaignId, apesterElement).then(macros => {
-    ampAd.setAttribute('data-blade_player_type', 'bladex');
-    ampAd.setAttribute('servingDomain', 'ssr.streamrail.net');
-    ampAd.setAttribute('width', size.width);
-    ampAd.setAttribute('height', size.height);
-    ampAd.setAttribute('data-blade_macros', JSON.stringify(macros));
-    ampAd.setAttribute('data-blade_player_id', videoTag);
-    ampAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
-    ampAd.classList.add('amp-apester-companion');
-    return ampAd;
-  });
+  ampAd.setAttribute('data-blade_player_type', 'bladex');
+  ampAd.setAttribute('servingDomain', 'ssr.streamrail.net');
+  ampAd.setAttribute('width', size.width);
+  ampAd.setAttribute('height', size.height);
+  ampAd.setAttribute('data-blade_macros', JSON.stringify(macros));
+  ampAd.setAttribute('data-blade_player_id', videoTag);
+  ampAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
+  ampAd.classList.add('amp-apester-companion');
+
+  const relativeElement =
+    position === 'below' ? apesterElement.nextSibling : apesterElement;
+
+  apesterElement.parentNode.insertBefore(ampAd, relativeElement);
 }
 
 /**
- * @param {AmpApesterMedia} apesterElement
- * @return {!JsonObject}
+ * @param {AmpElement} apesterElement
+ * @return {{height: number, width: number}}
  */
 function getCompanionVideoAdSize(apesterElement) {
-  const adWidth = apesterElement.clientWidth;
+  const adWidth = apesterElement./*REVIEW*/ clientWidth;
   const adRatio = 0.6;
   const adHeight = Math.ceil(adWidth * adRatio);
   return {width: adWidth, height: adHeight};
@@ -128,32 +108,42 @@ function getCompanionVideoAdSize(apesterElement) {
 /**
  * @param {!JsonObject} interactionModel
  * @param {?string} campaignId
- * @param {AmpApesterMedia} apesterElement
- * @return {!JsonObject}
+ * @param {AmpElement} apesterElement
+ * @param {!JsonObject} consentObj
+ * @return {{
+ * gdpr: ?number,
+ * page_url: string,
+ * param1: string,
+ * param2: ?string,
+ * param4: ?string,
+ * param6: ?string,
+ * param7: ?string,
+ * schain: ?string,
+ * user_consent: ?string
+ * }}
  */
-function getSrMacros(interactionModel, campaignId, apesterElement) {
-  return getConsentData(apesterElement).then(consentObj => {
-    const {interactionId, publisherId, publisher} = interactionModel;
-    const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
-    const macros = {
-      param1: interactionId,
-      param2: publisherId,
-      param6: campaignId,
-      // eslint-disable-next-line google-camelcase/google-camelcase
-      page_url: pageUrl,
-    };
+function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
+  const interactionId = interactionModel['interactionId'];
+  const publisherId = interactionModel['publisherId'];
+  const publisher = interactionModel['publisher'];
 
-    if (consentObj.gdpr) {
-      macros.gdpr = consentObj.gdpr;
-      // eslint-disable-next-line google-camelcase/google-camelcase
-      macros.user_consent = consentObj.user_consent;
-      macros.param4 = consentObj.gdprString;
-    }
+  const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
+  const macros = {
+    param1: interactionId,
+    param2: publisherId,
+    param6: campaignId,
+    page_url: pageUrl, // eslint-disable-line google-camelcase/google-camelcase
+  };
 
-    if (publisher && publisher.groupId) {
-      macros.param7 = `apester.com:${publisher.groupId}`;
-      macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
-    }
-    return macros;
-  });
+  if (consentObj['gdpr']) {
+    macros.gdpr = consentObj['gdpr'];
+    macros.user_consent = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
+    macros.param4 = consentObj['gdprString'];
+  }
+
+  if (publisher && publisher.groupId) {
+    macros.param7 = `apester.com:${publisher.groupId}`;
+    macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
+  }
+  return macros;
 }

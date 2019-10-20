@@ -51,48 +51,44 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     });
   });
 
-  it('show display ad', () => {
+  it('Should show a companion display ad', async () => {
     media.campaignData = createCampaignData(true);
-    handleCompanionAds(media, baseElement);
+    await handleCompanionAds(media, baseElement);
     const displayAd = queryAmpAdDisplaySelector(baseElement);
     expect(displayAd).to.exist;
     expect(baseElement.nextSibling).to.be.equal(displayAd);
   });
-  it('show sr ad below', () => {
+  it('Should show an SR companion ad below', async () => {
     media.campaignData = createCampaignData(false, false, true);
-    return handleCompanionAds(media, baseElement).then(() => {
-      const srAdBelow = queryAmpAdBladeSelector(baseElement);
-      expect(srAdBelow).to.exist;
-      expect(baseElement.nextSibling).to.be.equal(srAdBelow);
-    });
+    await handleCompanionAds(media, baseElement);
+    const srAdBelow = queryAmpAdBladeSelector(baseElement);
+    expect(srAdBelow).to.exist;
+    expect(baseElement.nextSibling).to.be.equal(srAdBelow);
   });
-  it('show sr ad above', () => {
+  it('Should show an SR companion ad above', async () => {
     media.campaignData = createCampaignData(false, true, false);
-    return handleCompanionAds(media, baseElement).then(() => {
-      const srAboveAd = queryAmpAdBladeSelector(baseElement);
-      expect(srAboveAd).to.exist;
-      expect(baseElement.previousSibling).to.be.equal(srAboveAd);
-    });
+    await handleCompanionAds(media, baseElement);
+    const srAboveAd = queryAmpAdBladeSelector(baseElement);
+    expect(srAboveAd).to.exist;
+    expect(baseElement.previousSibling).to.be.equal(srAboveAd);
   });
-  it('show sr above with display', () => {
+  it('Should show an SR companion above with display companion', async () => {
     media.campaignData = createCampaignData(true, true, false);
-    return handleCompanionAds(media, baseElement).then(() => {
-      const displayAd = queryAmpAdDisplaySelector(baseElement);
-      expect(displayAd).to.exist;
-      expect(baseElement.nextSibling).to.be.equal(displayAd);
-      const srAboveAd = queryAmpAdBladeSelector(baseElement);
-      expect(srAboveAd).to.exist;
-      expect(baseElement.previousSibling).to.be.equal(srAboveAd);
-    });
+    await handleCompanionAds(media, baseElement);
+    const displayAd = queryAmpAdDisplaySelector(baseElement);
+    expect(displayAd).to.exist;
+    expect(baseElement.nextSibling).to.be.equal(displayAd);
+    const srAboveAd = queryAmpAdBladeSelector(baseElement);
+    expect(srAboveAd).to.exist;
+    expect(baseElement.previousSibling).to.be.equal(srAboveAd);
   });
-  it('dont show ad if disabled amp companion ads', () => {
+  it('Should not show ads if disabled amp companion ads', async () => {
     media.campaignData = createCampaignData(true, true, false, true);
-    return handleCompanionAds(media, baseElement).then(() => {
-      const displayAd = queryAmpAdDisplaySelector(baseElement);
-      expect(displayAd).to.not.exist;
-      const srAboveAd = queryAmpAdBladeSelector(baseElement);
-      expect(srAboveAd).to.not.exist;
-    });
+    await handleCompanionAds(media, baseElement);
+    const displayAd = queryAmpAdDisplaySelector(baseElement);
+    expect(displayAd).to.not.exist;
+    const srAboveAd = queryAmpAdBladeSelector(baseElement);
+    expect(srAboveAd).to.not.exist;
   });
 });
 
