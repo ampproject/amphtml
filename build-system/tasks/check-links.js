@@ -133,7 +133,7 @@ function isLinkToFileIntroducedByPR(link) {
  * @param {string} markdown Original markdown.
  * @return {string} Markdown after filtering out whitelisted links.
  */
-function filterWhitelistedLinks(markdown) {
+function filterAllowedLinks(markdown) {
   let filteredMarkdown = markdown;
 
   // localhost links optionally preceded by ( or [ (not served on Travis)
@@ -151,7 +151,7 @@ function filterWhitelistedLinks(markdown) {
   // Links inside a <pre> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<pre>([^]*?)<\/pre>/g, '');
 
-  // After all whitelisting is done, clean up any remaining empty blocks bounded
+  // After allow-listing is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block
   // and confuse the link extractor.
   filteredMarkdown = filteredMarkdown.replace(/\ \`\`\ /g, '');
@@ -166,13 +166,18 @@ function filterWhitelistedLinks(markdown) {
  * @param {string} markdownFile Path of markdown file, relative to src root.
  * @return {Promise} Used to wait until the async link checker is done.
  */
-function runLinkChecker(markdownFile) {
+async function runLinkChecker(markdownFile) {
+  // The extension generator markdown template has placeholder links that can't
+  // be checked.
+  if (/doc-template\.md$/.test(markdownFile)) {
+    return;
+  }
   // Skip files that were deleted by the PR.
   if (!fs.existsSync(markdownFile)) {
-    return Promise.resolve();
+    return;
   }
-  const markdown = fs.readFileSync(markdownFile).toString();
-  const filteredMarkdown = filterWhitelistedLinks(markdown);
+  const markdown = (await fs.readFile(markdownFile)).toString();
+  const filteredMarkdown = filterAllowedLinks(markdown);
   const opts = {
     baseUrl: 'file://' + path.dirname(path.resolve(markdownFile)),
   };
