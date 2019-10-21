@@ -73,8 +73,7 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
 
 .i-amphtml-base-carousel-arrow-backdrop,
 .i-amphtml-base-carousel-arrow-background,
-.i-amphtml-base-carousel-arrow-frosting,
-.i-amphtml-base-carousel-arrow > svg {
+.i-amphtml-base-carousel-arrow-frosting {
   position: absolute;
   top: 0;
   left: 0;
@@ -149,8 +148,12 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
 
 .i-amphtml-base-carousel-arrow {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 40px;
   height: 40px;
+  padding: 0;
   margin: 12px;
   background-color: transparent;
   border: none;
@@ -172,6 +175,13 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
 .i-amphtml-base-carousel-arrow:active {
   stroke: #222;
   transition-duration: 0ms;
+}
+
+.i-amphtml-base-carousel-arrow-icon {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 
 amp-base-carousel .i-amphtml-carousel-slotted > .i-amphtml-replaced-content {

@@ -295,7 +295,7 @@ class AmpCarousel extends AMP.BaseElement {
         <div class="i-amphtml-base-carousel-arrow-frosting"></div>
         <div class="i-amphtml-base-carousel-arrow-backdrop"></div>
         <div class="i-amphtml-base-carousel-arrow-background"></div>
-        <svg viewBox="0 0 24 24">
+        <svg class="i-amphtml-base-carousel-arrow-icon" viewBox="0 0 24 24">
           <path
             d="M10,7.4 L14.6,12 L10,16.6"
             fill="none"
@@ -322,7 +322,7 @@ class AmpCarousel extends AMP.BaseElement {
         <div class="i-amphtml-base-carousel-arrow-frosting"></div>
         <div class="i-amphtml-base-carousel-arrow-backdrop"></div>
         <div class="i-amphtml-base-carousel-arrow-background"></div>
-        <svg viewBox="0 0 24 24">
+        <svg class="i-amphtml-base-carousel-arrow-icon" viewBox="0 0 24 24">
           <path
             d="M14,7.4 L9.4,12 L14,16.6"
             fill="none"
