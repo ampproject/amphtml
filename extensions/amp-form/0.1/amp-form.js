@@ -735,7 +735,7 @@ export class AmpForm {
         );
       })
       .then(
-        response => this.handleSsrTemplateSuccess_(response),
+        response => this.handleSsrTemplateResponse_(response),
         error => {
           const detail = dict();
           if (error && error.message) {
@@ -769,12 +769,20 @@ export class AmpForm {
   }
 
   /**
-   * Transition the form to the submit success state.
+   * Transition the form to the submit-success or submit-error state depending on the response status.
    * @param {!JsonObject} response
    * @return {!Promise}
    * @private
    */
-  handleSsrTemplateSuccess_(response) {
+  handleSsrTemplateResponse_(response) {
+    const init = response['init'];
+    if (init) {
+      const status = init['status'];
+      if (status >= 300) {
+        /** HTTP status codes of 300+ mean redirects and errors. */
+        return this.handleSubmitFailure_(status, response);
+      }
+    }
     return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 
