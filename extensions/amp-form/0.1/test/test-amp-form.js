@@ -270,7 +270,7 @@ describes.repeated(
             });
           });
 
-          it('should server side render templates if enabled', () => {
+          it('should server side render submit-success template if enabled', () => {
             sandbox.spy(xhrUtils, 'setupInput');
             sandbox.spy(xhrUtils, 'setupAMPCors');
             sandbox.stub(xhrUtils, 'fromStructuredCloneable');
@@ -311,25 +311,128 @@ describes.repeated(
               );
               fetchAndRenderTemplate
                 .onFirstCall()
-                .returns(Promise.resolve({html: '<div>much success</div>'}))
+                .returns(
+                  Promise.resolve({
+                    init: {status: 200},
+                    html: '<div>much success</div>',
+                  })
+                )
                 .onSecondCall()
-                .returns(Promise.resolve({html: '<div>much success</div>'}));
+                .returns(
+                  Promise.resolve({
+                    init: {status: 200},
+                    html: '<div>much success</div>',
+                  })
+                );
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
               );
-              return whenCalled(fetchAndRenderTemplate).then(() => {
-                expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate).to
-                  .have.been.called;
-                expect(
-                  ampForm.ssrTemplateHelper_.fetchAndRenderTemplate
-                ).to.have.been.calledWith(
-                  form,
-                  sinon.match.object,
-                  sinon.match.object
+              return whenCalled(fetchAndRenderTemplate)
+                .then(() => {
+                  expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate).to
+                    .have.been.called;
+                  expect(
+                    ampForm.ssrTemplateHelper_.fetchAndRenderTemplate
+                  ).to.have.been.calledWith(
+                    form,
+                    sinon.match.object,
+                    sinon.match.object
+                  );
+                  return handleSubmitEventPromise;
+                })
+                .then(() => {
+                  expect(ampForm.state_).to.equal('submit-success');
+                  expect(form.className).to.not.contain('amp-form-submitting');
+                  expect(form.className).to.contain('amp-form-submit-success');
+                  expect(form.className).not.to.contain(
+                    'amp-form-submit-error'
+                  );
+                });
+            });
+          });
+
+          it('should server side render submit-error template if enabled', () => {
+            sandbox.spy(xhrUtils, 'setupInput');
+            sandbox.spy(xhrUtils, 'setupAMPCors');
+            sandbox.stub(xhrUtils, 'fromStructuredCloneable');
+
+            return getSsrAmpFormPromise.then(ampForm => {
+              const form = ampForm.form_;
+              const template = createElement('template');
+              template.setAttribute('type', 'amp-mustache');
+              template.content.appendChild(createTextNode('Some {{template}}'));
+              form.id = 'registration';
+              const event = {
+                stopImmediatePropagation: sandbox.spy(),
+                target: form,
+                preventDefault: sandbox.spy(),
+              };
+              const errorTemplateContainer = createElement('div');
+              errorTemplateContainer.setAttribute('submit-error', '');
+              errorTemplateContainer.appendChild(template);
+
+              form.appendChild(errorTemplateContainer);
+
+              form.xhrAction_ = 'https://www.xhr-action.org';
+
+              sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse').returns(
+                Promise.resolve({
+                  data: {
+                    html: '<div>much error</div>',
+                  },
+                })
+              );
+              const renderedTemplate = createElement('div');
+              renderedTemplate.innerText = 'much error';
+              sandbox
+                .stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
+                .returns(template);
+
+              const fetchAndRenderTemplate = sandbox.stub(
+                ampForm.ssrTemplateHelper_,
+                'fetchAndRenderTemplate'
+              );
+              fetchAndRenderTemplate
+                .onFirstCall()
+                .returns(
+                  Promise.resolve({
+                    init: {status: 404},
+                    html: '<div>much error</div>',
+                  })
+                )
+                .onSecondCall()
+                .returns(
+                  Promise.resolve({
+                    init: {status: 404},
+                    html: '<div>much error</div>',
+                  })
                 );
-                return handleSubmitEventPromise;
-              });
+
+              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
+                event
+              );
+              return whenCalled(fetchAndRenderTemplate)
+                .then(() => {
+                  expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate).to
+                    .have.been.called;
+                  expect(
+                    ampForm.ssrTemplateHelper_.fetchAndRenderTemplate
+                  ).to.have.been.calledWith(
+                    form,
+                    sinon.match.object,
+                    sinon.match.object
+                  );
+                  return handleSubmitEventPromise;
+                })
+                .then(() => {
+                  expect(ampForm.state_).to.equal('submit-error');
+                  expect(form.className).to.not.contain('amp-form-submitting');
+                  expect(form.className).to.not.contain(
+                    'amp-form-submit-success'
+                  );
+                  expect(form.className).to.contain('amp-form-submit-error');
+                });
             });
           });
 
@@ -374,9 +477,17 @@ describes.repeated(
               );
               fetchAndRenderTemplate
                 .onFirstCall()
-                .returns(Promise.resolve({html: renderedTemplate}))
+                .returns(
+                  Promise.resolve({
+                    html: renderedTemplate,
+                  })
+                )
                 .onSecondCall()
-                .returns(Promise.resolve({html: template}));
+                .returns(
+                  Promise.resolve({
+                    html: template,
+                  })
+                );
 
               const renderTemplate = sandbox.spy(ampForm, 'renderTemplate_');
 
