@@ -207,15 +207,13 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, opt_bindings, toEqual = true) {
+    function check(input, output, opt_bindings) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
       );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
-      return toEqual
-        ? expect(expanded).to.eventually.equal(output)
-        : expect(expanded).to.eventually.match(output);
+      return expect(expanded).to.eventually.equal(output);
     }
 
     it('handles consecutive macros in inner arguments', () => {
@@ -462,7 +460,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
             return 1;
           },
         });
-        return check('FIRST_CONTENTFUL_PAINT', /^\d+$/, false);
+        return check('FIRST_CONTENTFUL_PAINT', '1');
       });
 
       it('should replace FIRST_VIEWPORT_READY', () => {
@@ -471,7 +469,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
             return 1;
           },
         });
-        return check('FIRST_VIEWPORT_READY', /^\d+$/, false);
+        return check('FIRST_VIEWPORT_READY', '1');
       });
 
       it('should replace MAKE_BODY_VISIBLE', () => {
@@ -480,7 +478,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
             return 1;
           },
         });
-        return check('MAKE_BODY_VISIBLE', /^\d+$/, false);
+        return check('MAKE_BODY_VISIBLE', '1');
       });
     });
   });
