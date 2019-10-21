@@ -13,6 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @fileoverview This file contains experiment configurations that are
+ * used in experiment.js. If you are launching a new feature, you should
+ * add an experiment block below including a descriptive id string, a
+ * description of the experiment, a link to the issue referencing the bug
+ * fixed or feature implemented by your experiment, as well as a cleanup
+ * issue to remove your experiment once completed.
+ */
 /** @const {!Array<!ExperimentDef>} */
 export const EXPERIMENTS = [
   {
