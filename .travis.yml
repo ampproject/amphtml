@@ -1,7 +1,7 @@
 language: node_js
 dist: xenial
 node_js:
-  - 'lts/*'
+  - '10'
 python:
   - '2.7'
 notifications:
