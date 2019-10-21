@@ -31,7 +31,7 @@ FAIL
 |  </head>
 |  <body class="foo">
 >> ^~~~~~~~~
-feature_tests/multiple_body_tags.html:31:0 The tag 'BODY' appears more than once in the document. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/multiple_body_tags.html:31:0 The tag 'BODY' appears more than once in the document.
 |    <body class="bar" style="background-color:red"></body>
 |  </body>
 |  </html>

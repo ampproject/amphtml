@@ -6,5 +6,9 @@
     {
       owners: [{name: 'dvoytenko'}, {name: 'ampproject/wg-runtime'}],
     },
+    {
+      pattern: '{iframe-video,mediasession-helper,video-*}.js',
+      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+    },
   ],
 }

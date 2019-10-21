@@ -24,28 +24,22 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
+const gulp = require('gulp');
 const log = require('fancy-log');
 const path = require('path');
+const prettier = require('gulp-prettier');
 const {getFilesChanged, logOnSameLine} = require('../common/utils');
-const {getOutput} = require('../common/exec');
 const {green, cyan, red, yellow} = require('ansi-colors');
-const {highlight} = require('cli-highlight');
 const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
-const prettierCmd = 'node_modules/.bin/prettier';
 
-/**
- * Prettier exit codes. See https://prettier.io/docs/en/cli.html#exit-codes
- * @enum {number}
- */
-const PrettierResult = {
-  SUCCESS: 0,
-  FAILURE: 1,
-  ERROR: 2,
-};
+// Message header printed by gulp-prettier before the list of files with errors.
+// See https://github.com/bhargavrpatel/gulp-prettier/blob/master/index.js#L90
+const header =
+  'Code style issues found in the following file(s). Forgot to run Prettier?';
 
 /**
  * Logs the list of files that will be checked.
@@ -56,15 +50,17 @@ function logFiles(files) {
   if (!isTravisBuild()) {
     log(green('INFO: ') + 'Prettifying the following files:');
     files.forEach(file => {
-      log(cyan(path.relative(rootDir, file)));
+      log(cyan(file));
     });
   }
 }
 
 /**
  * Checks files for formatting (and optionally fixes them) with Prettier.
+ *
+ * @return {!Promise}
  */
-async function prettify() {
+function prettify() {
   maybeUpdatePackages();
   let filesToCheck;
   if (argv.files) {
@@ -74,32 +70,40 @@ async function prettify() {
     filesToCheck = getFilesChanged(prettifyGlobs);
     if (filesToCheck.length == 0) {
       log(green('INFO: ') + 'No prettifiable files in this PR');
-      return;
+      return Promise.resolve();
     } else {
       logFiles(filesToCheck);
     }
   } else {
-    filesToCheck = globby.sync(prettifyGlobs);
+    filesToCheck = globby.sync(prettifyGlobs, {dot: true});
   }
-  runPrettify(filesToCheck);
+  return runPrettify(filesToCheck);
 }
 
 /**
- * Runs prettier on the given list of files. Returns the cumulative result to
- * the `gulp` process via  process.exitCode so all files can be checked / fixed.
+ * Runs prettier on the given list of files with gulp-prettier.
  *
  * @param {!Array<string>} filesToCheck
+ * @return {!Promise}
  */
 function runPrettify(filesToCheck) {
   if (!isTravisBuild()) {
     log(green('Starting checks...'));
   }
-  filesToCheck.forEach(file => {
-    checkFile(path.relative(rootDir, file));
-  });
-  if (process.exitCode == 1) {
-    logOnSameLine(red('ERROR: ') + 'Found errors in one or more files.');
-    if (!argv.fix) {
+  return new Promise((resolve, reject) => {
+    const onData = data => {
+      if (!isTravisBuild()) {
+        logOnSameLine(green('Checked: ') + path.relative(rootDir, data.path));
+      }
+    };
+
+    const rejectWithReason = reasonText => {
+      const reason = new Error(reasonText);
+      reason.showStack = false;
+      reject(reason);
+    };
+
+    const printFixMessages = () => {
       log(
         yellow('NOTE 1:'),
         'You may be able to automatically fix some errors by running',
@@ -111,56 +115,60 @@ function runPrettify(filesToCheck) {
         'Since this is a destructive operation (that edits your files',
         'in-place), make sure you commit before running the command.'
       );
-    }
-  } else {
-    if (!isTravisBuild()) {
-      logOnSameLine(green('SUCCESS: ') + 'No formatting errors found.');
-    }
-  }
-}
+      log(
+        yellow('NOTE 3:'),
+        'For more information, read',
+        cyan(
+          'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style\n'
+        )
+      );
+    };
 
-/**
- * Fixes the formatting of a single file
- * @param {string} file
- */
-function fixFile(file) {
-  const fixCmd = `${prettierCmd} --write ${file}`;
-  const fixResult = getOutput(fixCmd);
-  if (fixResult.status == PrettierResult.SUCCESS) {
-    logOnSameLine(green('Fixed: ') + file + '\n');
-  } else {
-    logOnSameLine(red('Could not fix: ') + file);
-    console.log(highlight(fixResult.stderr, {ignoreIllegals: true}), '\n');
-    process.exitCode = 1;
-  }
-}
+    const onError = error => {
+      if (error.message.startsWith(header)) {
+        const filesWithErrors = error.message
+          .replace(header, '')
+          .trim()
+          .split('\n');
+        const reason = 'Found formatting errors in one or more files';
+        logOnSameLine(red('ERROR: ') + reason + ':');
+        filesWithErrors.forEach(file => {
+          log(cyan(file));
+        });
+        printFixMessages();
+        rejectWithReason(reason);
+      } else {
+        const reason = 'Found an unrecoverable error';
+        logOnSameLine(red('ERROR: ') + reason + ':');
+        log(error.message);
+        rejectWithReason(reason);
+      }
+    };
 
-/**
- * Checks and optionally fixes the formatting of a single file.
- * @param {string} file
- */
-function checkFile(file) {
-  const checkCmd = `${prettierCmd} --list-different ${file}`;
-  const checkResult = getOutput(checkCmd);
-  if (checkResult.status == PrettierResult.SUCCESS) {
-    if (!isTravisBuild()) {
-      logOnSameLine(green('Checked: ') + file);
-    }
-  } else if (checkResult.status == PrettierResult.FAILURE) {
+    const onFinish = () => {
+      if (!isTravisBuild()) {
+        logOnSameLine('Checked ' + cyan(filesToCheck.length) + ' file(s)');
+      }
+      resolve();
+    };
+
     if (argv.fix) {
-      fixFile(file);
+      return gulp
+        .src(filesToCheck)
+        .pipe(prettier())
+        .on('data', onData)
+        .on('error', onError)
+        .pipe(gulp.dest(file => file.base))
+        .on('finish', onFinish);
     } else {
-      logOnSameLine(red('Found errors in: ') + file + '\n');
-      process.exitCode = 1;
+      return gulp
+        .src(filesToCheck)
+        .pipe(prettier.check())
+        .on('data', onData)
+        .on('error', onError)
+        .on('finish', onFinish);
     }
-  } else {
-    logOnSameLine(red('Could not parse: ') + file);
-    console.log(
-      highlight(checkResult.stderr.trim(), {ignoreIllegals: true}),
-      '\n'
-    );
-    process.exitCode = 1;
-  }
+  });
 }
 
 module.exports = {
