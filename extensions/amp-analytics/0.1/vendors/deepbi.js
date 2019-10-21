@@ -22,7 +22,8 @@ const DEEPBI_CONFIG = jsonLiteral({
     'endpoint': 'api.deep.bi',
   },
   'requests': {
-    'base': 'https://${endpoint}/v1/pixel/${datasetKey}/p.gif?accessKey=${accessKey}&gdpr=${gdpr}&page_href=${sourceUrl}&referrer_href=${documentReferrer}&page_title=${title}&amp=true',
+    'base':
+      'https://${endpoint}/v1/pixel/${datasetKey}/p.gif?accessKey=${accessKey}&gdpr=${gdpr}&page_href=${sourceUrl}&referrer_href=${documentReferrer}&page_title=${title}&amp=true',
     'pageview': '${base}&event_type=page-open',
     'event': '${base}&event_type=event',
   },
