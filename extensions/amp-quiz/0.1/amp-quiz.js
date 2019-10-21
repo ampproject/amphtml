@@ -14,62 +14,12 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-quiz-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/0.1/utils';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
-const css = `
-.i-amp-quiz-container {
-  font-family: "helvetica neue";
-  font-weight: 400;
-  background: #6666FF;
-  width: auto;
-  height: 80%;
-  border-radius: 10px;
-}
-
-.i-amp-quiz-head-container {
-  height: 20%;
-  display: grid;
-  justify-items: center;
-}
-
-.i-amp-quiz-option-container {
-  height: 90%;
-  width: 100%;
-  display: grid;
-  background-color: white;
-  border-radius: 10px;
-}
-
-.i-amp-quiz-option {
-  height: 100%;
-  display: grid;
-  align-items: center;
-  border-radius: 10px;;
-  padding-left: 5%;
-  background-color: inherit;
-}
-
-.i-amp-quiz-option-selected[correct]::before {
-  content: 'c';
-}
-
-.i-amp-quiz-option-selected:not([correct]) {
-  background-color: red;
-}
-
-.i-amp-quiz-option-selected:not([correct])::before {
-  content: 'x';
-}
-
-.i-amp-quiz-option-post-selection:not(i-amp-quiz-option-selected) {
-  filter: brightness(80%);
-}
-
-.i-amp-quiz-option-post-selection[correct] {
-  background-color: green;
-}`;
+// TODO: FIGURE OUT HOW TO IMPORT POPPINS
 
 export class AmpQuiz extends AMP.BaseElement {
   /**
@@ -94,10 +44,10 @@ export class AmpQuiz extends AMP.BaseElement {
           <div><slot name="prompt">prompt</slot></div>
         </div>
         <div class="i-amp-quiz-option-container">
-          <div class="i-amp-quiz-option"><slot name="option1">opt1</slot></div>
-          <div class="i-amp-quiz-option"><slot name="option2">opt2</slot></div>
-          <div class="i-amp-quiz-option"><slot name="option3">opt3</slot></div>
-          <div class="i-amp-quiz-option"><slot name="option4">opt4</slot></div>
+          <slot class="i-amp-quiz-option" name="option1"></slot>
+          <slot class="i-amp-quiz-option" name="option2"></slot>
+          <slot class="i-amp-quiz-option" name="option3"></slot>
+          <slot class="i-amp-quiz-option" name="option4"></slot>
         </div>
       </div>
     `;
@@ -105,7 +55,7 @@ export class AmpQuiz extends AMP.BaseElement {
     this.shadowRoot_ = createShadowRootWithStyle(
       this.element,
       this.shadowElement_,
-      css
+      CSS
     );
 
     // TODO: FIND A MORE JS-Y WAY TO DO THIS LOL

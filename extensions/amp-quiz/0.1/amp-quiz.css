@@ -1,58 +1,52 @@
-.amp-quiz-container {
-    font-family: "helvetica neue";
+@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+
+.i-amp-quiz-container {
+    font-family: 'Poppins-bold', sans-serif;
     font-weight: 400;
-    background: #AAA;
-    width: auto;
+    background: #005AF0;
     height: 80%;
-    padding: 10%;
-    border-radius: 3px;
+    border-radius: 10px;
 }
 
-.amp-quiz-head-container {
-    height: 20%;
+.i-amp-quiz-head-container {
     display: grid;
     justify-items: center;
 }
 
-.amp-quiz-option-container {
-    height: 80%;
+.i-amp-quiz-option-container {
+    height: 90%;
     display: grid;
-    padding-left: 5%;
-    padding-right: 5%;
-    background-color: inherit;
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;
+    padding-bottom: 0px;
 }
 
-.amp-quiz-option {
-    height: 50%;
-    display: grid;
+.i-amp-quiz-option {
+    display: inline-grid;
     align-items: center;
-    border-radius: 3px;
+    border-radius: 10px;
     padding-left: 5%;
     background-color: inherit;
+    margin-bottom: 10px;
 }
 
-.amp-quiz-option-selected[correct] {
-    background-color: green;
-}
-
-.amp-quiz-option-selected[correct]::before {
+.i-amp-quiz-option-selected[correct]::before {
     content: 'c';
 }
 
-.amp-quiz-option-selected:not([correct]) {
+.i-amp-quiz-option-selected:not([correct]) {
     background-color: red;
 }
 
-.amp-quiz-option-selected:not([correct])::before {
+.i-amp-quiz-option-selected:not([correct])::before {
     content: 'x';
 }
 
-.amp-quiz-option-not-selected {
-    filter: brightness(50%);
+.i-amp-quiz-option-post-selection:not(i-amp-quiz-option-selected) {
+    filter: brightness(80%);
 }
 
-.amp-quiz-option-not-selected[correct] {
+.i-amp-quiz-option-post-selection[correct] {
     background-color: green;
 }
-
-/*# sourceURL=/extensions/amp-quiz/0.1/amp-quiz.css*/

@@ -978,6 +978,10 @@ exports.extensionBundles = [
     name: 'amp-quiz',
     version: '0.1',
     latestVersion: '0.1',
+    options: {
+      hasCss: true,
+      cssBinaries: ['amp-quiz'],
+    },
     type: TYPES.MISC,
   },
   {
