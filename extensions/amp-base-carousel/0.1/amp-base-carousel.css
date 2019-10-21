@@ -132,8 +132,14 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
    transition: 200ms background-color;
 }
 
-:hover > .i-amphtml-base-carousel-arrow-background {
-   background-color: rgba(255, 255, 255, 0.6);
+/**
+ * Only do hover state for devices that support it to workaround iOS showing
+ * the hover state after you click a button.
+ */
+@media (hover: hover) {
+  :hover > .i-amphtml-base-carousel-arrow-background {
+    background-color: rgba(255, 255, 255, 0.6);
+  }
 }
 
 :active > .i-amphtml-base-carousel-arrow-background {
@@ -153,12 +159,18 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
   transition: 200ms stroke;
 }
 
-.i-amphtml-base-carousel-arrow:hover,
-.i-amphtml-base-carousel-arrow:active {
-  stroke: #222;
+/**
+ * Only do hover state for devices that support it to workaround iOS showing
+ * the hover state after you click a button.
+ */
+ @media (hover: hover) {
+  .i-amphtml-base-carousel-arrow:hover {
+    stroke: #222;
+  }
 }
 
 .i-amphtml-base-carousel-arrow:active {
+  stroke: #222;
   transition-duration: 0ms;
 }
 
