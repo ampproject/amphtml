@@ -21,6 +21,8 @@ import {
   randomlySelectUnsetExperiments,
 } from './experiments';
 
+// TODO(#22733): Remove this file once "ampdoc-fie" is cleaned up.
+
 const EXPERIMENT_ID = 'ampdoc-fie';
 
 /**
