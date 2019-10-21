@@ -112,49 +112,15 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('id', contentId);
       }
 
-      this.registerAction('toggle', invocation => {
-        if (invocation.args) {
-          const sectionId = invocation.args['section'];
-          let sectionEl = this.getAmpDoc().getElementById(sectionId);
-          sectionEl = user().assertElement(sectionEl);
-          userAssert(sectionEl, 'No element found with id: %s', sectionId);
-          this.toggle_(sectionEl);
-        } else {
-          for (let i = 0; i < this.sections_.length; i++) {
-            this.toggle_(this.sections_[i]);
-          }
-        }
-      });
-      this.registerAction('expand', invocation => {
-        if (invocation.args) {
-          const sectionId = invocation.args['section'];
-          let sectionEl = this.getAmpDoc().getElementById(sectionId);
-          sectionEl = user().assertElement(sectionEl);
-          userAssert(sectionEl, 'No element found with id: %s', sectionId);
-          this.expand_(sectionEl);
-        } else {
-          for (let i = 0; i < this.sections_.length; i++) {
-            this.expand_(this.sections_[i]);
-          }
-        }
-      });
-      this.registerAction('collapse', invocation => {
-        if (invocation.args) {
-          const sectionId = invocation.args['section'];
-          let sectionEl = this.getAmpDoc().getElementById(sectionId);
-          sectionEl = user().assertElement(sectionEl);
-          userAssert(sectionEl, 'No element found with id: %s', sectionId);
-          this.collapse_(sectionEl);
-        } else {
-          for (let i = 0; i < this.sections_.length; i++) {
-            this.collapse_(this.sections_[i]);
-          }
-        }
-      });
+      this.registerAction('toggle', i => this.handleAction_(i));
+      this.registerAction('expand', i => this.handleAction_(i));
+      this.registerAction('collapse', i => this.handleAction_(i));
 
       // Listen for mutations on the 'data-expand' attribute.
       const expandObserver = new this.win.MutationObserver(mutations => {
-        this.toggleExpandMutations_(mutations);
+        // [data-expand] mutations can only be triggered by high trust actions
+        // i.e. AMP.setState.
+        this.toggleExpandMutations_(mutations, ActionTrust.HIGH);
       });
       expandObserver.observe(section, {
         attributes: true,
@@ -195,6 +161,33 @@ class AmpAccordion extends AMP.BaseElement {
       header.addEventListener('click', this.clickHandler_.bind(this));
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
     });
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  handleAction_(invocation) {
+    const {method, args, trust} = invocation;
+
+    let toExpand = undefined;
+    if (method === 'expand') {
+      toExpand = true;
+    } else if (method === 'collapse') {
+      toExpand = false;
+    }
+
+    if (args) {
+      const sectionId = args['section'];
+      let sectionEl = this.getAmpDoc().getElementById(sectionId);
+      sectionEl = user().assertElement(sectionEl);
+      userAssert(sectionEl, 'No element found with id: %s', sectionId);
+      this.toggle_(sectionEl, trust, toExpand);
+    } else {
+      for (let i = 0; i < this.sections_.length; i++) {
+        this.toggle_(this.sections_[i], trust, toExpand);
+      }
+    }
   }
 
   /**
@@ -265,14 +258,15 @@ class AmpAccordion extends AMP.BaseElement {
    * Triggers event given name
    * @param {string} name
    * @param {!Element} section
+   * @param {!ActionTrust} trust
    */
-  triggerEvent_(name, section) {
+  triggerEvent_(name, section, trust) {
     const event = createCustomEvent(
       this.win,
       `accordionSection.${name}`,
       dict({})
     );
-    this.action_.trigger(section, name, event, ActionTrust.HIGH);
+    this.action_.trigger(section, name, event, trust);
 
     this.element.dispatchCustomEvent(name);
   }
@@ -280,10 +274,11 @@ class AmpAccordion extends AMP.BaseElement {
   /**
    * Toggles section between expanded or collapsed.
    * @param {!Element} section
-   * @param {boolean=} opt_forceExpand
+   * @param {!ActionTrust} trust
+   * @param {(boolean|undefined)=} opt_forceExpand
    * @private
    */
-  toggle_(section, opt_forceExpand) {
+  toggle_(section, trust, opt_forceExpand) {
     const sectionComponents = section.children;
     const header = sectionComponents[0];
     const content = sectionComponents[1];
@@ -308,24 +303,24 @@ class AmpAccordion extends AMP.BaseElement {
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
-        this.animateExpand_(section);
+        this.animateExpand_(section, trust);
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach(sectionIter => {
             if (sectionIter != section) {
-              this.animateCollapse_(sectionIter);
+              this.animateCollapse_(sectionIter, trust);
               sectionIter.children[0].setAttribute('aria-expanded', 'false');
             }
           });
         }
       } else {
         header.setAttribute('aria-expanded', 'false');
-        this.animateCollapse_(section);
+        this.animateCollapse_(section, trust);
       }
     } else {
       // Toggle without animation
       this.mutateElement(() => {
         if (toExpand) {
-          this.triggerEvent_('expand', section);
+          this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
           header.setAttribute('aria-expanded', 'true');
           // if expand-single-section is set, only allow one <section> to be
@@ -334,7 +329,7 @@ class AmpAccordion extends AMP.BaseElement {
             this.sections_.forEach(sectionIter => {
               if (sectionIter != section) {
                 if (sectionIter.hasAttribute('expanded')) {
-                  this.triggerEvent_('collapse', sectionIter);
+                  this.triggerEvent_('collapse', sectionIter, trust);
                   sectionIter.removeAttribute('expanded');
                 }
                 sectionIter.children[0].setAttribute('aria-expanded', 'false');
@@ -342,7 +337,7 @@ class AmpAccordion extends AMP.BaseElement {
             });
           }
         } else {
-          this.triggerEvent_('collapse', section);
+          this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
           header.setAttribute('aria-expanded', 'false');
         }
@@ -354,10 +349,11 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * @param {!Element} section
+   * @param {!ActionTrust} trust
    * @return {!Promise}
    * @private
    */
-  animateExpand_(section) {
+  animateExpand_(section, trust) {
     let sectionWidth;
     let headerHeight;
     let contentHeight;
@@ -379,7 +375,7 @@ class AmpAccordion extends AMP.BaseElement {
           'opacity': '0',
         });
         if (!section.hasAttribute('expanded')) {
-          this.triggerEvent_('expand', section);
+          this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
         }
       }
@@ -445,10 +441,11 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * @param {!Element} section
+   * @param {!ActionTrust} trust
    * @return {!Promise}
    * @private
    */
-  animateCollapse_(section) {
+  animateCollapse_(section, trust) {
     let sectionHeight;
     let headerHeight;
     let duration;
@@ -480,7 +477,7 @@ class AmpAccordion extends AMP.BaseElement {
       ).thenAlways(() => {
         return this.mutateElement(() => {
           if (section.hasAttribute('expanded')) {
-            this.triggerEvent_('collapse', section);
+            this.triggerEvent_('collapse', section, trust);
             section.removeAttribute('expanded');
           }
           setStyles(section, {
@@ -512,24 +509,6 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * Force expands the accordion.
-   * @param {!Element} section
-   * @private
-   */
-  expand_(section) {
-    this.toggle_(section, true);
-  }
-
-  /**
-   * Force collapses the accordion.
-   * @param {!Element} section
-   * @private
-   */
-  collapse_(section) {
-    this.toggle_(section, false);
-  }
-
-  /**
    * Handles accordion header activation, through clicks or enter/space presses.
    * @param {!Event} event 'click' or 'keydown' event.
    * @private
@@ -538,7 +517,8 @@ class AmpAccordion extends AMP.BaseElement {
     event.preventDefault();
     const header = dev().assertElement(event.currentTarget);
     const section = dev().assertElement(header.parentElement);
-    this.toggle_(section);
+    // Click or keypress gestures are high trust.
+    this.toggle_(section, ActionTrust.HIGH);
   }
 
   /**
@@ -620,16 +600,25 @@ class AmpAccordion extends AMP.BaseElement {
   /**
    * Callback function to execute when mutations are observed on "data-expand".
    * @param {!Array<!MutationRecord>} mutations
+   * @param {!ActionTrust} trust
    */
-  toggleExpandMutations_(mutations) {
+  toggleExpandMutations_(mutations, trust) {
     mutations.forEach(mutation => {
       const sectionEl = dev().assertElement(mutation.target);
       const toExpand = sectionEl.hasAttribute('data-expand');
       const isExpanded = sectionEl.hasAttribute('expanded');
       if (isExpanded !== toExpand) {
-        this.toggle_(sectionEl, toExpand);
+        this.toggle_(sectionEl, trust, /* opt_forceExpand */ toExpand);
       }
     });
+  }
+
+  /**
+   * @return {?../../../src/service/action-impl.ActionService}
+   * @visibleForTesting
+   */
+  getActionServiceForTesting() {
+    return this.action_;
   }
 }
 
