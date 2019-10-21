@@ -127,8 +127,11 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
    * change the dot color. Note that this applies on top of the backdrop based
    * color, rather than affecting it.
    */
-   background-color: rgba(0, 0, 0, 0.3);
-   transition: 200ms background-color;
+  background-color: rgba(0, 0, 0, 0.3);
+  box-shadow:
+      0 0 0px 1px rgba(0, 0, 0, 0.08) inset,
+      0 1px 4px 1px rgba(0, 0, 0, 0.2);
+  transition: 200ms background-color;
 }
 
 /**
@@ -137,12 +140,12 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
  */
 @media (hover: hover) {
   :hover > .i-amphtml-base-carousel-arrow-background {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.8);
   }
 }
 
 :active > .i-amphtml-base-carousel-arrow-background {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 1.0);
   transition-duration: 0ms;
 }
 
@@ -151,8 +154,8 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   margin: 12px;
   background-color: transparent;
@@ -180,8 +183,8 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
 .i-amphtml-base-carousel-arrow-icon {
   position: relative;
   z-index: 1;
-  width: 100%;
-  height: 100%;
+  width: 24px;
+  height: 24px;
 }
 
 amp-base-carousel .i-amphtml-carousel-slotted > .i-amphtml-replaced-content {

@@ -24,10 +24,9 @@ import {setImportantStyles} from '../../../src/style.js';
 import {toArray} from '../../../src/types';
 
 /**
- * The max percentage of the gallery width the pagination dots should take
- * before being turned into a number count.
+ * The maximum number of dots to show before converting to a count.
  */
-const MAX_WIDTH_PERCENTAGE = 0.6;
+const MAX_DOT_COUNT = 8;
 
 /**
  * The width of a single dot. This should match the value in CSS.
@@ -76,11 +75,6 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /** @override */
-  isRelayoutNeeded() {
-    return true;
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED_HEIGHT;
   }
@@ -104,15 +98,6 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
-   * @override
-   */
-  layoutCallback() {
-    // Since we have `isRelayoutNeeded`, this will potentially change between
-    // dots and numbers depending on the available space on resize.
-    this.updateTotal_(this.total_, true);
-  }
-
-  /**
    * @return {!Element}
    * @private
    */
@@ -132,9 +117,11 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
           <div class="i-amphtml-inline-gallery-pagination-frosting"></div>
           <div class="i-amphtml-inline-gallery-pagination-backdrop"></div>
           <div class="i-amphtml-inline-gallery-pagination-background"></div>
-          <span class="i-amphtml-inline-gallery-pagination-index"></span>
-          &nbsp;/&nbsp;
-          <span class="i-amphtml-inline-gallery-pagination-total"></span>
+          <div class="i-amphtml-inline-gallery-pagination-count">
+            <span class="i-amphtml-inline-gallery-pagination-index"></span>
+            <span> / </span>
+            <span class="i-amphtml-inline-gallery-pagination-total"></span>
+          </div>
         </div>
       </div>
     `;
@@ -184,13 +171,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
       return;
     }
 
-    // Figure out if the number of dots needed to represent the slides will fit
-    // within the available space.
-    const dotWidthTotal = total * dotWidth;
-    const dotSpacingTotal = (total + 1) * dotMinSpacing;
-    const {width} = this.getLayoutBox();
-    const useDots =
-      width * MAX_WIDTH_PERCENTAGE > dotWidthTotal + dotSpacingTotal;
+    const useDots = total <= MAX_DOT_COUNT;
     const dotCount = useDots ? total : 0;
 
     if (total === this.total_ && useDots === this.useDots_) {
@@ -271,7 +252,6 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
-   *
    * @param {number} total
    * @param {number} index
    * @param {number} offset

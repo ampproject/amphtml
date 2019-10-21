@@ -31,8 +31,8 @@ amp-inline-gallery-pagination {
   position: relative;
   z-index: 1;
   display: flex;
-  width: 22px;
-  min-width: 18px;
+  width: 16px;
+  min-width: 14px;
   justify-content: center;
 }
 
@@ -56,8 +56,8 @@ amp-inline-gallery-pagination {
 
 .i-amphtml-inline-gallery-pagination-dot,
 .i-amphtml-inline-gallery-pagination-dot-progress {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
 }
 
@@ -68,6 +68,10 @@ amp-inline-gallery-pagination {
   display: flex;
   align-items: center;
   height: 100%;
+}
+
+.i-amphtml-inline-gallery-pagination-count {
+  z-index: 1;
 }
 
 .i-amphtml-inline-gallery-pagination-dots[hidden],
@@ -87,7 +91,7 @@ amp-inline-gallery-pagination[inset] {
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-container {
   margin: 18px;
-  height: 24px;
+  height: 20px;
 }
 
 amp-inline-gallery-pagination[inset] .i-amphtml-inline-gallery-pagination-backdrop,
