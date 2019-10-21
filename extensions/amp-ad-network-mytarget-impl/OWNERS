@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/a4a'}, {name: 'mailru'}],
+      owners: [{name: 'ampproject/a4a'}, {name: 'vfedoseev'}],
     },
   ],
 }
