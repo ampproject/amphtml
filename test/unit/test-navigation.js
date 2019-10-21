@@ -69,7 +69,7 @@ describes.sandboxed('Navigation', {}, () => {
 
         decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
 
-        handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
+        handleNavSpy = sandbox.spy(handler, 'handleNavigation_');
 
         handleCustomProtocolSpy = sandbox.spy(
           handler,
