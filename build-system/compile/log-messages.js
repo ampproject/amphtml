@@ -18,13 +18,8 @@ const {endBuildStep} = require('../tasks/helpers');
 const {extractedPath, formats} = require('./log-messages-formats');
 
 /** @return {!Promise<?Array<!Object>>} */
-async function extractedItems() {
-  try {
-    return Object.values(await fs.readJson(extractedPath));
-  } catch (_) {
-    return null;
-  }
-}
+const extractedItems = () =>
+  fs.readJson(extractedPath).then(Object.values, () => null);
 
 /**
  * Format extracted messages table in multiple outputs, keyed by id.
