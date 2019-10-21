@@ -213,7 +213,6 @@ class RuntimeTestConfig {
       mochaTimeout: this.client.mocha.timeout,
       propertiesObfuscated: !!argv.single_pass,
       testServerPort: this.client.testServerPort,
-      testOnIe: this.browsers.includes('IE') || this.browsers.includes('SL_IE'),
     };
 
     if (argv.coverage && this.testType != 'a4a') {
