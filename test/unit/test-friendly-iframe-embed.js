@@ -38,7 +38,7 @@ import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '../../src/service/custom-element-registry';
-import {toggleExperiment} from '../../src/experiments';
+import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 import {updateFieModeForTesting} from '../../src/service/ampdoc-impl';
 
 describes.realWin('friendly-iframe-embed', {amp: true}, env => {
@@ -83,7 +83,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     resourcesMock.verify();
     ampdocServiceMock.verify();
     setSrcdocSupportedForTesting(undefined);
-    toggleExperiment(window, 'ampdoc-fie', false);
+    toggleAmpdocFieForTesting(window, false);
     sandbox.restore();
   });
 
@@ -170,7 +170,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
   });
 
   it('should create ampdoc and install extensions', () => {
-    toggleExperiment(window, 'ampdoc-fie', true);
+    toggleAmpdocFieForTesting(window, true);
 
     // AmpDoc is created.
     const ampdocSignals = new Signals();
@@ -235,7 +235,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
   });
 
   it('should create ampdoc and install extensions with host', () => {
-    toggleExperiment(window, 'ampdoc-fie', true);
+    toggleAmpdocFieForTesting(window, true);
 
     // host.
     const hostSignals = new Signals();
@@ -373,7 +373,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
   });
 
   it('should dispose ampdoc', () => {
-    toggleExperiment(window, 'ampdoc-fie', true);
+    toggleAmpdocFieForTesting(window, true);
 
     // AmpDoc is created.
     const ampdocSignals = new Signals();
@@ -1326,7 +1326,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
 
   beforeEach(() => {
     parentWin = env.win;
-    toggleExperiment(parentWin, 'ampdoc-fie', true);
+    toggleAmpdocFieForTesting(parentWin, true);
     resetScheduledElementForTesting(parentWin, 'amp-test');
     installExtensionsService(parentWin);
     extensions = Services.extensionsFor(parentWin);
@@ -1368,7 +1368,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
   });
 
   afterEach(() => {
-    toggleExperiment(parentWin, 'ampdoc-fie', false);
+    toggleAmpdocFieForTesting(parentWin, false);
     if (iframe.parentElement) {
       iframe.parentElement.removeChild(iframe);
     }

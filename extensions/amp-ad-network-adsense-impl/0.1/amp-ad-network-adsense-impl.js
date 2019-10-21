@@ -20,6 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
@@ -213,22 +214,25 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   divertExperiments() {
     const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [FORMAT_EXP]: {
-        isTrafficEligible: () =>
-          !this.responsiveState_ &&
-          Number(this.element.getAttribute('width')) > 0 &&
-          Number(this.element.getAttribute('height')) > 0,
-        branches: ['21062003', '21062004'],
+        !../../../src/experiments.ExperimentInfo>} */ (Object.assign(
+      {
+        [FORMAT_EXP]: {
+          isTrafficEligible: () =>
+            !this.responsiveState_ &&
+            Number(this.element.getAttribute('width')) > 0 &&
+            Number(this.element.getAttribute('height')) > 0,
+          branches: ['21062003', '21062004'],
+        },
+        [[FIE_CSS_CLEANUP_EXP.branch]]: {
+          isTrafficEligible: () => true,
+          branches: [
+            [FIE_CSS_CLEANUP_EXP.control],
+            [FIE_CSS_CLEANUP_EXP.experiment],
+          ],
+        },
       },
-      [[FIE_CSS_CLEANUP_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_CSS_CLEANUP_EXP.control],
-          [FIE_CSS_CLEANUP_EXP.experiment],
-        ],
-      },
-    });
+      AMPDOC_FIE_EXPERIMENT_INFO_MAP
+    ));
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
       addExperimentIdToElement(setExps[expName], this.element)
