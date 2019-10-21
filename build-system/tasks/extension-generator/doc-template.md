@@ -30,7 +30,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 # \`${name}\`
+
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -53,15 +55,22 @@ limitations under the License.
     <td>FILL THIS IN</td>
   </tr>
 </table>
+
 ## Behavior
+
 FILL THIS IN. What does this extension do?
+
 ## Attributes
+
 FILL THIS IN. Does this extension allow for properties to configure?
+
 <table>
   <tr>
     <td width="40%"><strong>data-my-attribute</strong></td>
     <td>FILL THIS IN. This table <strong>must</strong> be written in HTML.</td>
   </tr>
 </table>
+
 ## Validation
+
 See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
