@@ -16,6 +16,7 @@
 
 import '../amp-sidebar';
 import * as lolex from 'lolex';
+import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
@@ -145,6 +146,11 @@ describes.realWin(
       });
     }
 
+    /** Helper for invoking open/close/toggle actions on amp-sidebar. */
+    function execute(impl, method, trust = ActionTrust.HIGH) {
+      impl.executeAction({method, trust, satisfiesTrust: min => trust >= min});
+    }
+
     describe('amp-sidebar', () => {
       it('should apply overlay class', () => {
         return getAmpSidebar().then(sidebarElement => {
@@ -182,7 +188,7 @@ describes.realWin(
       it('should create mask element in DOM', () => {
         return getAmpSidebar({'stubHistory': true}).then(sidebarElement => {
           const impl = sidebarElement.implementation_;
-          impl.open_();
+          execute(impl, 'open');
           expect(
             doc.querySelectorAll('.i-amphtml-sidebar-mask').length
           ).to.equal(1);
@@ -232,7 +238,7 @@ describes.realWin(
 
         impl.openOrCloseTimeOut_ = 10;
 
-        impl.open_();
+        execute(impl, 'open');
         await impl.mutateElement(() => {});
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
@@ -250,7 +256,7 @@ describes.realWin(
 
         // second call to open_() should be a no-op and not increase call
         // counts.
-        impl.open_();
+        execute(impl, 'open');
         await impl.mutateElement(() => {});
         expect(owners.scheduleLayout).to.be.calledOnce;
         expect(historyPushSpy).to.be.calledOnce;
@@ -261,9 +267,9 @@ describes.realWin(
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
         const impl = sidebarElement.implementation_;
 
-        impl.open_();
+        execute(impl, 'open');
         expect(getModalStackLength()).to.equal(1);
-        impl.open_();
+        execute(impl, 'open');
         expect(getModalStackLength()).to.equal(1);
       });
 
@@ -271,10 +277,10 @@ describes.realWin(
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
         const impl = sidebarElement.implementation_;
 
-        impl.open_();
-        impl.close_();
+        execute(impl, 'open');
+        execute(impl, 'close');
         // If this was not ignored, it would throw an error.
-        impl.close_();
+        execute(impl, 'close');
       });
 
       it('should close sidebar on button click', async () => {
@@ -302,11 +308,11 @@ describes.realWin(
         };
         impl.historyId_ = 100;
 
-        impl.open_();
+        execute(impl, 'open');
         await impl.mutateElement(() => {});
 
         impl.openOrCloseTimeOut_ = 10;
-        impl.close_();
+        execute(impl, 'close');
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
         clock.tick(600);
@@ -317,7 +323,7 @@ describes.realWin(
 
         // second call to close_() should be a no-op and not increase call
         // counts.
-        impl.close_();
+        execute(impl, 'close');
         expect(owners.schedulePause).to.be.calledOnce;
         expect(historyPopSpy).to.be.calledOnce;
       });
@@ -339,7 +345,9 @@ describes.realWin(
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
         expect(sidebarElement.getAttribute('role')).to.equal('menu');
         expect(doc.activeElement).to.not.equal(screenReaderCloseButton);
-        impl.toggle_();
+
+        execute(impl, 'toggle');
+
         await impl.mutateElement(() => {});
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
@@ -347,7 +355,9 @@ describes.realWin(
         expect(doc.activeElement).to.equal(screenReaderCloseButton);
         expect(sidebarElement).to.not.have.display('none');
         expect(owners.scheduleLayout).to.be.calledOnce;
-        impl.toggle_();
+
+        execute(impl, 'toggle');
+
         await impl.mutateElement(() => {});
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
@@ -366,7 +376,7 @@ describes.realWin(
           owners.schedulePause = sandbox.spy();
 
           expect(sidebarElement.hasAttribute('open')).to.be.false;
-          impl.open_();
+          execute(impl, 'open');
           expect(sidebarElement.hasAttribute('open')).to.be.true;
           expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
@@ -403,22 +413,30 @@ describes.realWin(
           clock.tick(600);
           expect(owners.schedulePause).to.have.not.been.called;
           expect(owners.scheduleResume).to.have.not.been.called;
-          impl.toggle_();
+
+          execute(impl, 'toggle');
+
           expect(sidebarElement.hasAttribute('open')).to.be.true;
           clock.tick(600);
           expect(owners.schedulePause).to.have.not.been.called;
           expect(owners.scheduleResume).to.be.calledOnce;
-          impl.toggle_();
+
+          execute(impl, 'toggle');
+
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           clock.tick(600);
           expect(owners.schedulePause).to.be.calledOnce;
           expect(owners.scheduleResume).to.be.calledOnce;
-          impl.toggle_();
+
+          execute(impl, 'toggle');
+
           expect(sidebarElement.hasAttribute('open')).to.be.true;
           clock.tick(600);
           expect(owners.schedulePause).to.be.calledOnce;
           expect(owners.scheduleResume).to.have.callCount(2);
-          impl.toggle_();
+
+          execute(impl, 'toggle');
+
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           clock.tick(600);
           expect(owners.schedulePause).to.have.callCount(2);
@@ -453,7 +471,7 @@ describes.realWin(
             'compensateIosBottombar_'
           );
           const initalChildrenCount = sidebarElement.children.length;
-          impl.open_();
+          execute(impl, 'open');
           expect(compensateIosBottombarSpy).to.be.calledOnce;
           // 10 lis + one top padding element inserted
           expect(sidebarElement.children.length).to.equal(
@@ -473,7 +491,7 @@ describes.realWin(
           });
           owners.schedulePause = sandbox.spy();
           expect(sidebarElement.hasAttribute('open')).to.be.false;
-          impl.open_();
+          execute(impl, 'open');
           expect(sidebarElement.hasAttribute('open')).to.be.true;
           expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
@@ -505,7 +523,7 @@ describes.realWin(
             callback();
           });
           expect(sidebarElement.hasAttribute('open')).to.be.false;
-          impl.open_();
+          execute(impl, 'open');
           expect(sidebarElement.hasAttribute('open')).to.be.true;
           expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
@@ -537,7 +555,7 @@ describes.realWin(
             callback();
           });
           expect(sidebarElement.hasAttribute('open')).to.be.false;
-          impl.open_();
+          execute(impl, 'open');
           expect(sidebarElement.hasAttribute('open')).to.be.true;
           expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
@@ -570,7 +588,7 @@ describes.realWin(
             callback();
           });
           expect(sidebarElement.hasAttribute('open')).to.be.false;
-          impl.open_();
+          execute(impl, 'open');
           expect(sidebarElement.hasAttribute('open')).to.be.true;
           expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
           const eventObj = doc.createEventObject
@@ -598,13 +616,23 @@ describes.realWin(
           });
           owners.scheduleLayout = sandbox.stub();
 
-          impl.open_();
+          execute(impl, 'open', /* trust */ 123);
           expect(triggerSpy).to.be.calledOnce;
-          expect(triggerSpy).to.be.calledWith(impl.element, 'sidebarOpen');
+          expect(triggerSpy).to.be.calledWith(
+            impl.element,
+            'sidebarOpen',
+            sinon.match.any,
+            /* trust */ 123
+          );
 
-          impl.close_();
+          execute(impl, 'close', /* trust */ 456);
           expect(triggerSpy).to.be.calledTwice;
-          expect(triggerSpy).to.be.calledWith(impl.element, 'sidebarClose');
+          expect(triggerSpy).to.be.calledWith(
+            impl.element,
+            'sidebarClose',
+            sinon.match.any,
+            /* trust */ 456
+          );
         });
       });
     });
