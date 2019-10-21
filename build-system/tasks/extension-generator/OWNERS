@@ -5,9 +5,12 @@
   rules: [
     {
       owners: [
-        {name: 'ampproject/wg-ui-and-a11y', requestReviews: false},
-        {name: 'ampproject/wg-infra', requestReviews: false},
+        // Outreach group maintains extension boilerplate/template.
         {name: 'ampproject/wg-outreach', requestReviews: false},
+
+        // Most new extensions are reviewed by this group. It's in their
+        // interest to maintain the extension generator.
+        {name: 'ampproject/wg-ui-and-a11y', requestReviews: false},
       ],
     },
   ],
