@@ -855,7 +855,9 @@ export class FriendlyIframeEmbed {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenList(childWin);
-  installCustomElements(childWin);
+  // The anonymous class parameter allows us to detect native classes vs
+  // transpiled classes.
+  installCustomElements(childWin, class {});
 }
 
 /**

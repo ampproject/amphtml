@@ -645,7 +645,9 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win);
+          // The anonymous class parameter allows us to detect native classes
+          // vs transpiled classes.
+          installCustomElements(win, class {});
         }
 
         // Intercept event listeners
