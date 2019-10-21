@@ -78,19 +78,10 @@ export class AmpMegaMenu extends AMP.BaseElement {
     this.domUpdateHandler_ = this.registerMenuItems_.bind(this);
 
     /** @private {function(!Event)} */
-    this.documentClickHandler_ = this.handleDocumentClick_.bind(this);
+    this.rootClickHandler_ = this.handleRootClick_.bind(this);
 
     /** @private {function(!Event)} */
-    this.documentKeyDownHandler_ = this.handleDocumentKeyDown_.bind(this);
-
-    /** @private {function(!Event)} */
-    this.headingClickHandler_ = this.handleHeadingClick_.bind(this);
-
-    /** @private {function(!Event)} */
-    this.headingKeyDownHandler_ = this.handleHeadingKeyDown_.bind(this);
-
-    /** @private {function(!Event)} */
-    this.ariaCloseClickHandler_ = this.collapse_.bind(this);
+    this.rootKeyDownHandler_ = this.handleRootKeyDown_.bind(this);
   }
 
   /** @override */
@@ -117,23 +108,8 @@ export class AmpMegaMenu extends AMP.BaseElement {
     this.element.addEventListener(AmpEvents.DOM_UPDATE, this.domUpdateHandler_);
 
     if (!this.maskElement_) {
-      const mask = this.document_.createElement('div');
-      mask.classList.add('i-amphtml-mega-menu-mask');
-      mask.setAttribute('aria-hidden', 'true');
-      // append mask to header so that all children of header appear above the mask
-      const maskParent =
-        closestAncestorElementBySelector(this.element, 'header') ||
-        this.element;
-      maskParent.classList.add('i-amphtml-mega-menu-mask-parent');
-      maskParent.appendChild(mask);
-      this.maskElement_ = mask;
+      this.maskElement_ = this.createMaskElement_();
     }
-
-    this.documentElement_.addEventListener('click', this.documentClickHandler_);
-    this.documentElement_.addEventListener(
-      'keydown',
-      this.documentKeyDownHandler_
-    );
 
     return Promise.resolve();
   }
@@ -144,18 +120,27 @@ export class AmpMegaMenu extends AMP.BaseElement {
       AmpEvents.DOM_UPDATE,
       this.domUpdateHandler_
     );
-    this.documentElement_.removeEventListener(
-      'click',
-      this.documentClickHandler_
-    );
-    this.documentElement_.removeEventListener(
-      'keydown',
-      this.documentKeyDownHandler_
-    );
-    this.unregisterMenuItemListeners_();
     // Ensure that menu is closed when hidden via media query.
     this.collapse_();
     return true;
+  }
+
+  /**
+   * Create a new mask element and append it to the header if present,
+   * otherwise to the component itself.
+   * @return {!Element} the mask that was created.
+   * @private
+   */
+  createMaskElement_() {
+    const mask = this.document_.createElement('div');
+    mask.classList.add('i-amphtml-mega-menu-mask');
+    mask.setAttribute('aria-hidden', 'true');
+    // append mask to header so that all children of header appear above the mask
+    const maskParent =
+      closestAncestorElementBySelector(this.element, 'header') || this.element;
+    maskParent.classList.add('i-amphtml-mega-menu-mask-parent');
+    maskParent.appendChild(mask);
+    return mask;
   }
 
   /**
@@ -164,27 +149,24 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * @private
    */
   registerMenuItems_() {
-    // remove existing event listeners and re-add them at the end.
-    this.unregisterMenuItemListeners_();
-    this.items_ = toArray(
-      scopedQuerySelectorAll(this.element, 'nav > * > li')
-    ).filter(item => {
-      // skip if the item has already been registered.
+    this.items_ = [];
+    const items = toArray(scopedQuerySelectorAll(this.element, 'nav > * > li'));
+    items.forEach(item => {
+      // check if the item has already been registered.
       if (item.classList.contains('i-amphtml-mega-menu-item')) {
-        return true;
+        this.items_.push(item);
+        return;
       }
       const heading =
         scopedQuerySelector(item, '> button') ||
         scopedQuerySelector(item, '> [role=button]');
       const content = scopedQuerySelector(item, '> [role=dialog]');
+      // register item only if heading element is present.
       if (heading) {
         this.registerMenuItem_(item, heading, content);
-        return true;
+        this.items_.push(item);
       }
-      // do not register item or add it to items if heading is missing.
-      return false;
     });
-    this.registerMenuItemListeners_();
   }
 
   /**
@@ -202,6 +184,8 @@ export class AmpMegaMenu extends AMP.BaseElement {
     if (!heading.hasAttribute('tabindex')) {
       heading.setAttribute('tabindex', 0);
     }
+    heading.addEventListener('click', e => this.handleHeadingClick_(e));
+    heading.addEventListener('keydown', e => this.handleHeadingKeyDown_(e));
 
     // Skip if item does not have a submenu or its heading already has tap action.
     if (!content || this.action_.hasAction(heading, 'tap', item)) {
@@ -230,44 +214,12 @@ export class AmpMegaMenu extends AMP.BaseElement {
   }
 
   /**
-   * Add event listeners to all registered menu items.
-   * @private
-   */
-  registerMenuItemListeners_() {
-    this.items_.forEach(item => {
-      const heading = this.getItemHeading_(item);
-      heading.addEventListener('click', this.headingClickHandler_);
-      heading.addEventListener('keydown', this.headingKeyDownHandler_);
-    });
-    const closeBtns = this.element.querySelectorAll('.i-amphtml-screen-reader');
-    closeBtns.forEach(button => {
-      button.addEventListener('click', this.ariaCloseClickHandler_);
-    });
-  }
-
-  /**
-   * Remove all event listeners previously registered on menu items.
-   * @private
-   */
-  unregisterMenuItemListeners_() {
-    this.items_.forEach(item => {
-      const heading = this.getItemHeading_(item);
-      heading.removeEventListener('click', this.headingClickHandler_);
-      heading.removeEventListener('keydown', this.headingKeyDownHandler_);
-    });
-    const closeBtns = this.element.querySelectorAll('.i-amphtml-screen-reader');
-    closeBtns.forEach(button => {
-      button.removeEventListener('click', this.ariaCloseClickHandler_);
-    });
-  }
-
-  /**
    * Handle click event on document element to collapse mega menu if opened;
    * do nothing if click is inside the expanded content element.
    * @param {!Event} event click event.
    * @private
    */
-  handleDocumentClick_(event) {
+  handleRootClick_(event) {
     const target = dev().assertElement(event.target);
     if (
       this.expandedItem_ &&
@@ -285,7 +237,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * @param {!Event} event keydown event.
    * @private
    */
-  handleDocumentKeyDown_(event) {
+  handleRootKeyDown_(event) {
     if (event.key === Keys.ESCAPE && this.collapse_()) {
       event.preventDefault();
     }
@@ -297,14 +249,15 @@ export class AmpMegaMenu extends AMP.BaseElement {
    * @private
    */
   handleHeadingClick_(event) {
-    if (this.shouldHandleClick_(event)) {
-      event.preventDefault();
-      event.stopPropagation();
-      const item = dev().assertElement(event.currentTarget.parentElement);
-      const previousItem = this.collapse_();
-      if (item != previousItem) {
-        this.expand_(item);
-      }
+    if (!this.shouldHandleClick_(event)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    const item = dev().assertElement(event.currentTarget.parentElement);
+    const previousItem = this.collapse_();
+    if (item != previousItem) {
+      this.expand_(item);
     }
   }
 
@@ -320,10 +273,15 @@ export class AmpMegaMenu extends AMP.BaseElement {
     const target = dev().assertElement(event.target);
     const currentTarget = dev().assertElement(event.currentTarget);
     const hasAnchor = !!closest(target, e => e.tagName == 'A', currentTarget);
+    if (hasAnchor) {
+      return false;
+    }
     const hasTapAction = this.action_.hasAction(target, 'tap', currentTarget);
+    if (hasTapAction) {
+      return false;
+    }
     // do not handle click if heading has no associated content element.
-    const hasExpandableContent = currentTarget.hasAttribute('aria-controls');
-    return !hasAnchor && !hasTapAction && hasExpandableContent;
+    return currentTarget.hasAttribute('aria-haspopup');
   }
 
   /**
@@ -393,6 +351,9 @@ export class AmpMegaMenu extends AMP.BaseElement {
       item.querySelector('.i-amphtml-screen-reader')
     );
     tryFocus(screenReaderCloseButton);
+    // add event listeners on the html element for closing the menu
+    this.documentElement_.addEventListener('click', this.rootClickHandler_);
+    this.documentElement_.addEventListener('keydown', this.rootKeyDownHandler_);
     this.expandedItem_ = item;
   }
 
@@ -420,6 +381,12 @@ export class AmpMegaMenu extends AMP.BaseElement {
     if (item.contains(this.document_.activeElement)) {
       tryFocus(heading);
     }
+    // remove event listeners on the html element
+    this.documentElement_.removeEventListener('click', this.rootClickHandler_);
+    this.documentElement_.removeEventListener(
+      'keydown',
+      this.rootKeyDownHandler_
+    );
     this.expandedItem_ = null;
     return item;
   }
@@ -462,6 +429,7 @@ export class AmpMegaMenu extends AMP.BaseElement {
 
     screenReaderCloseButton.textContent = ariaLabel;
     screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
+    screenReaderCloseButton.addEventListener('click', () => this.collapse_());
 
     return screenReaderCloseButton;
   }

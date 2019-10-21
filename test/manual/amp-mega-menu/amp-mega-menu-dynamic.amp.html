@@ -41,7 +41,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-mega-menu" src="https://cdn.ampproject.org/v0/amp-mega-menu-0.1.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-  <script async custom-element="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
   <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
@@ -80,46 +80,6 @@
                 </div>
               </li>
               {{/menu}}
-              <li>
-                <h4 class="heading" role="button">Subscribe</h4>
-                <div class="content" role="dialog">
-                  <amp-embed type="taboola"
-                    width="480"
-                    height="480"
-                    layout="fixed"
-                    data-publisher="amp-demo"
-                    data-mode="thumbnails-a"
-                    data-placement="Ads Example"
-                    data-article="auto">
-                  </amp-embed>
-                  <p>Use the form below to subscribe to our <a href="https://amp.dev/" target="_blank" rel="noopener noreferrer">weekly newsletter</a>.</p>
-                  <form
-                    method="get"
-                    action="/form/search-html/get"
-                    action-xhr="/form/search-json/get"
-                    target="_top">
-                    <fieldset>
-                      <label>
-                        <span>Name:</span>
-                        <input type="text" name="name" required>
-                      </label>
-                      <br>
-                      <label>
-                        <span>Email:</span>
-                        <input type="email" name="email" required>
-                      </label>
-                      <br>
-                      <input type="submit" value="Subscribe">
-                    </fieldset>
-                    <div submit-success>
-                        Subscription successful!
-                    </div>
-                    <div submit-error>
-                        Subscription failed!
-                    </div>
-                  </form>
-                </div>
-              </li>
             </ul>
           </nav>
         </template>

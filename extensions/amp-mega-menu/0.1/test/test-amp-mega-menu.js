@@ -85,41 +85,6 @@ describes.realWin(
       expect(element.querySelectorAll(contentClass).length).to.equal(2);
     });
 
-    it('should add event listeners on component layout', async () => {
-      await element.build();
-      const impl = element.implementation_;
-      const heading = doc.getElementById('heading1');
-      const listenersSpy = sandbox.spy(impl, 'registerMenuItemListeners_');
-      await element.layoutCallback();
-      expect(listenersSpy).to.be.calledOnce;
-      const clickEvent = new Event('click');
-      const headingClickSpy = sandbox.spy(impl, 'shouldHandleClick_');
-      heading.dispatchEvent(clickEvent);
-      expect(headingClickSpy).to.be.calledOnce;
-      const keydownEvent = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
-      const documentKeyDownSpy = sandbox.spy(impl, 'collapse_');
-      doc.documentElement.dispatchEvent(keydownEvent);
-      expect(documentKeyDownSpy).to.be.calledOnce;
-    });
-
-    it('should remove event listeners on component unlayout', async () => {
-      await element.build();
-      await element.layoutCallback();
-      const impl = element.implementation_;
-      const heading = doc.getElementById('heading1');
-      const unlistenersSpy = sandbox.spy(impl, 'unregisterMenuItemListeners_');
-      await element.unlayoutCallback();
-      expect(unlistenersSpy).to.be.calledOnce;
-      const clickEvent = new Event('click');
-      const headingClickSpy = sandbox.spy(impl, 'shouldHandleClick_');
-      heading.dispatchEvent(clickEvent);
-      expect(headingClickSpy).to.not.be.called;
-      const keydownEvent = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
-      const documentKeyDownSpy = sandbox.spy(impl, 'collapse_');
-      doc.documentElement.dispatchEvent(keydownEvent);
-      expect(documentKeyDownSpy).to.not.be.called;
-    });
-
     it('should expand when heading of a collapsed menu item is clicked', async () => {
       await element.build();
       await element.layoutCallback();
@@ -231,6 +196,21 @@ describes.realWin(
       expect(doc.activeElement).to.equal(heading3);
       heading3.dispatchEvent(rightKey);
       expect(doc.activeElement).to.equal(heading1);
+    });
+
+    it('should remove event listeners on root element when menu is closed', async () => {
+      await element.build();
+      await element.layoutCallback();
+      await element.unlayoutCallback();
+      const impl = element.implementation_;
+      const clickEvent = new Event('click');
+      const rootClickSpy = sandbox.spy(impl, 'handleRootClick_');
+      doc.documentElement.dispatchEvent(clickEvent);
+      expect(rootClickSpy).to.not.be.called;
+      const keydownEvent = new KeyboardEvent('keydown');
+      const rootKeyDownSpy = sandbox.spy(impl, 'handleRootKeyDown_');
+      doc.documentElement.dispatchEvent(keydownEvent);
+      expect(rootKeyDownSpy).to.not.be.called;
     });
   }
 );
