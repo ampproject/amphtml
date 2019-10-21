@@ -16,8 +16,10 @@
 
 import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {iterateCursor} from '../../../src/dom';
+import {padStart} from '../../../src/string';
+import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
 export class CryptoHandler {
   /**
@@ -34,12 +36,14 @@ export class CryptoHandler {
     const parsedEncryptedKeys = this.ampdoc_
       .getRootNode()
       .querySelector('script[cryptokeys]');
-    
+
     /** @private {?string} */
-    if (parsedEncryptedKeys && parsedEncryptedKeys.hasAttribute('sha-256-hash')) {
+    this.shaKeyHash_ = null;
+    if (
+      parsedEncryptedKeys &&
+      parsedEncryptedKeys.hasAttribute('sha-256-hash')
+    ) {
       this.shaKeyHash_ = parsedEncryptedKeys.getAttribute('sha-256-hash');
-    } else {
-      this.shaKeyHash_ = null;
     }
 
     /** @type {?JsonObject} */
@@ -78,10 +82,12 @@ export class CryptoHandler {
     if (!this.shaKeyHash_) {
       return this.tryToDecryptDocumentImpl_(decryptedDocumentKey);
     }
-    const docKeyUint8 = new TextEncoder().encode(decryptedDocumentKey);
+    const docKeyUint8 = utf8Encode(decryptedDocumentKey);
     return crypto.subtle.digest('SHA-256', docKeyUint8).then(val => {
-      const hashArray = Array.from(new Uint8Array(val));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const hashArray = toArray(new Uint8Array(val));
+      const hashHex = hashArray
+        .map(b => padStart(b.toString(16), 2, '0'))
+        .join('');
       if (hashHex != this.shaKeyHash_) {
         return Promise.reject(new Error('Invalid Document Key'));
       }

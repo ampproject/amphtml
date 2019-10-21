@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CryptoHandler } from '../crypto-handler';
+import {CryptoHandler} from '../crypto-handler';
 
 describes.realWin(
   'crypto handler',
@@ -48,7 +48,8 @@ describes.realWin(
     const encryptedKey =
       "ENCRYPT({'accessRequirements': ['googleAccessRequirements:123'], 'key':'0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ='})";
     const decryptedDocKey = '0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ=';
-    const decryptedDocKeyHash = '5903f44139fd3d88414b0d29c986fd0ca1572eb214e3a0d56201d06ed753c39e';
+    const decryptedDocKeyHash =
+      '5903f44139fd3d88414b0d29c986fd0ca1572eb214e3a0d56201d06ed753c39e';
     const encryptedKeys = {
       'local': encryptedKey,
       'google.com': encryptedKey,
@@ -137,7 +138,8 @@ describes.realWin(
       });
 
       it('should replace the encrypted content with decrypted content in multiple sections with SHA256 hash', () => {
-        win.document.querySelector('script[cryptokeys]')
+        win.document
+          .querySelector('script[cryptokeys]')
           .setAttribute('sha-256-hash', decryptedDocKeyHash);
         cryptoHandler = new CryptoHandler(ampdoc);
         return cryptoHandler.tryToDecryptDocument(decryptedDocKey).then(() => {
@@ -147,15 +149,21 @@ describes.realWin(
       });
 
       it('should fail due to key hashes being unequal', () => {
-        win.document.querySelector('script[cryptokeys]')
+        win.document
+          .querySelector('script[cryptokeys]')
           .setAttribute('sha-256-hash', decryptedDocKeyHash);
         cryptoHandler = new CryptoHandler(ampdoc);
         const fakeDocKey = '0nasdf234ikn23r09jijfakefake923r42aQ=';
-        return cryptoHandler.tryToDecryptDocument(fakeDocKey).then(() => {
-          throw new Error('Promise should have rejected.');
-        }, reason => {
-          expect(() => { throw reason; }).to.throw('Invalid Document Key');
-        });
+        return cryptoHandler.tryToDecryptDocument(fakeDocKey).then(
+          () => {
+            throw new Error('Promise should have rejected.');
+          },
+          reason => {
+            expect(() => {
+              throw reason;
+            }).to.throw('Invalid Document Key');
+          }
+        );
       });
     });
   }
