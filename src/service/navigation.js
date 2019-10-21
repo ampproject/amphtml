@@ -30,6 +30,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {isExperimentOn} from '../experiments';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -548,6 +549,25 @@ export class Navigation {
         if (targetAttr != '_top' && targetAttr != '_blank') {
           element.setAttribute('target', '_blank');
         }
+      }
+
+      // Safari 13: Remove viewer's query params (e.g. amp_js_v, usqp) to prevent
+      // Document.referrer from being reduced to eTLD+1 (e.g. ampproject.org).
+      const platform = Services.platformFor(this.ampdoc.win);
+      const viewer = Services.viewerForDoc(element);
+      if (
+        isExperimentOn(
+          this.ampdoc.win,
+          'remove-viewer-query-params-on-navigate'
+        ) &&
+        location.search &&
+        platform.isSafari() &&
+        platform.getMajorVersion() >= 13 &&
+        viewer.isProxyOrigin() &&
+        viewer.isEmbedded()
+      ) {
+        const noSearch = `${location.origin}${location.pathname}${location.hash}`;
+        this.ampdoc.win.history.replaceState({}, '', noSearch);
       }
     }
   }

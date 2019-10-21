@@ -373,6 +373,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/24168',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
+  {
+    id: 'remove-viewer-query-params-on-navigate',
+    name: 'Removes query params from viewer iframe on navigation.',
+    spec: 'https://github.com/ampproject/amphtml/issues/25179',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
+  },
 ];
 
 if (getMode().localDev) {
