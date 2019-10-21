@@ -103,7 +103,6 @@ function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
   del.sync('build/parsers');
-  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');

@@ -139,12 +139,24 @@ const presubmitGlobs = [
   '!firebase/**/*.*',
 ];
 
+/**
+ * List of non-JS files to be checked by `gulp prettify` (using prettier).
+ * NOTE: When you add a new filename / glob to this list:
+ * 1. Make sure its formatting options are specified in .prettierrc
+ * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
+ */
 const prettifyGlobs = [
-  '**/OWNERS',
+  '.codecov.yml',
+  '.lando.yml',
+  '.lgtm.yml',
+  '.travis.yml',
+  '**/.eslintrc',
   '.prettierrc',
-  'build-system/global-configs/caches.json',
-  // TODO(rsimha): Fix and check other json files, dotfiles, etc.
-  '!{node_modules,build,dist,dist.3p,dist.tools}/**',
+  '.renovaterc.json',
+  '.vscode/settings.json',
+  '**/*.json',
+  '**/OWNERS',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
