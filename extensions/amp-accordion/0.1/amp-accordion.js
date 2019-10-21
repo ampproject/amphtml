@@ -164,7 +164,7 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /**
-   * @param {*} invocation
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
   handleAction_(invocation) {
