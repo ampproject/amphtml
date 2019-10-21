@@ -137,16 +137,12 @@ export class Messaging {
 
         const port = channel.port1;
         const listener = e => {
-          const data = e.data;
-          if (
-            data['app'] === APP &&
-            data['name'] === CHANNEL_OPEN_MSG
-          ) {
+          if (e.data['app'] === APP && e.data['name'] === CHANNEL_OPEN_MSG) {
             clearInterval(interval);
             port.removeEventListener('message', listener);
             port.postMessage({
               app: APP,
-              requestid: data['requestid'],
+              requestid: e.data['requestid'],
               type: MessageType.RESPONSE,
             });
             resolve(new Messaging(source, port));
@@ -169,18 +165,17 @@ export class Messaging {
     const target = iframe.contentWindow;
     return new Promise(resolve => {
       const listener = e => {
-        const data = e.data;
         if (
           e.origin == origin &&
           (!e.source || e.source == target) &&
-          data['app'] === APP &&
-          data['name'] === CHANNEL_OPEN_MSG
+          e.data['app'] === APP &&
+          e.data['name'] === CHANNEL_OPEN_MSG
         ) {
           source.removeEventListener('message', listener);
           const port = new WindowPortEmulator(source, origin, target);
           port.postMessage({
             app: APP,
-            requestid: data['requestid'],
+            requestid: e.data['requestid'],
             type: MessageType.RESPONSE,
           });
           resolve(new Messaging(source, port));
