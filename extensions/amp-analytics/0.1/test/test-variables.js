@@ -207,13 +207,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, opt_bindings) {
+    function check(input, output, opt_bindings, toEqual = true) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
       );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
-      return expect(expanded).to.eventually.equal(output);
+      return toEqual
+        ? expect(expanded).to.eventually.equal(output)
+        : expect(expanded).to.eventually.match(output);
     }
 
     it('handles consecutive macros in inner arguments', () => {
@@ -452,6 +454,33 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
           /Third argument in MATCH macro must be a number >= 0/
         );
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
+      });
+
+      it('should replace FIRST_CONTENTFUL_PAINT', () => {
+        sandbox.stub(Services, 'performanceFor').returns({
+          getFirstContentfulPaint() {
+            return 1;
+          },
+        });
+        return check('FIRST_CONTENTFUL_PAINT', /^\d+$/, false);
+      });
+
+      it('should replace FIRST_VIEWPORT_READY', () => {
+        sandbox.stub(Services, 'performanceFor').returns({
+          getFirstViewportReady() {
+            return 1;
+          },
+        });
+        return check('FIRST_VIEWPORT_READY', /^\d+$/, false);
+      });
+
+      it('should replace MAKE_BODY_VISIBLE', () => {
+        sandbox.stub(Services, 'performanceFor').returns({
+          getMakeBodyVisible() {
+            return 1;
+          },
+        });
+        return check('MAKE_BODY_VISIBLE', /^\d+$/, false);
       });
     });
   });

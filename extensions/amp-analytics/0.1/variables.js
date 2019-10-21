@@ -247,6 +247,9 @@ export class VariableService {
   }
 
   /**
+   * TODO (micajuineho): If we add new synchronous macros, we
+   * will need to split this method and getMacros into sync and
+   * async version (currently all macros are async).
    * @param {string} name
    * @param {*} macro
    */
