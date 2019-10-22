@@ -92,7 +92,7 @@
     "globby": "10.0.1",
     "google-closure-compiler": "20190929.0.0",
     "gulp": "4.0.2",
-    "gulp-ava": "2.0.0",
+    "gulp-ava": "3.0.0",
     "gulp-connect": "5.7.0",
     "gulp-eslint": "6.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
