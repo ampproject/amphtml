@@ -260,14 +260,17 @@ describes.fakeWin(
           {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'http://fakelink2.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
         ];
 
@@ -284,14 +287,17 @@ describes.fakeWin(
           {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'http://fakelink2.example/',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
         ];
 
@@ -316,10 +322,12 @@ describes.fakeWin(
           {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
         ];
 
@@ -373,14 +381,17 @@ describes.fakeWin(
           {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'http://fakelink2.example/',
             'exclusive_match_requested': false,
+            'link_source': 'linkmate',
           },
           {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
+            'link_source': 'linkmate',
           },
         ];
 

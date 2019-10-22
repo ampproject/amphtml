@@ -148,6 +148,7 @@ export class Linkmate {
         const linkObj = {
           'raw_url': link,
           'exclusive_match_requested': exclusive,
+          'link_source': 'linkmate',
         };
 
         postLinks.push(linkObj);
