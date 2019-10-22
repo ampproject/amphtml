@@ -12,7 +12,7 @@
     },
     {
       pattern: 'experiment-config.js',
-      owners: [{name: 'ampproject/reviewers-amphtml'}],
+      owners: [{name: 'ampproject/working-groups'}],
     },
   ],
 }
