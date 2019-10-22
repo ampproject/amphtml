@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {getData} from '../../../../src/event-helper';
+import {parseJson} from '../../../../src/json';
+
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 const HANDSHAKE_POLL_MSG = 'handshake-poll';
@@ -50,7 +53,7 @@ export function parseMessage(message) {
   }
 
   try {
-    return /** @type {?Message} */ /** @type {?} */ (JSON.parse(
+    return /** @type {?Message} */ /** @type {?} */ (parseJson(
       /** @type {string} */ (message)
     ));
   } catch (e) {
@@ -84,10 +87,11 @@ export class WindowPortEmulator {
    */
   addEventListener(eventType, handler) {
     this.win.addEventListener('message', e => {
+      const data = getData(e);
       if (
         e.origin == this.origin_ &&
         e.source == this.target_ &&
-        e.data['app'] === APP
+        data['app'] === APP
       ) {
         handler(e);
       }
@@ -129,20 +133,21 @@ export class Messaging {
     return new Promise(resolve => {
       const interval = setInterval(() => {
         const channel = new MessageChannel();
-        const message = {
+        const pollMessage = /** @type {JsonObject} */ ({
           app: APP,
           name: HANDSHAKE_POLL_MSG,
-        };
-        target./*OK*/ postMessage(message, '*', [channel.port2]);
+        });
+        target./*OK*/ postMessage(pollMessage, '*', [channel.port2]);
 
         const port = channel.port1;
         const listener = e => {
-          if (e.data['app'] === APP && e.data['name'] === CHANNEL_OPEN_MSG) {
+          const data = getData(e);
+          if (data['app'] === APP && data['name'] === CHANNEL_OPEN_MSG) {
             clearInterval(interval);
             port.removeEventListener('message', listener);
             port./*OK*/ postMessage({
               app: APP,
-              requestid: e.data['requestid'],
+              requestid: data['requestid'],
               type: MessageType.RESPONSE,
             });
             resolve(new Messaging(source, port));
@@ -162,22 +167,25 @@ export class Messaging {
    * @return {!Promise<!Messaging>}
    */
   static waitForHandshake(source, iframe, origin) {
-    const target = iframe.contentWindow;
+    const target = /** @type {!Window} */ (iframe.contentWindow);
     return new Promise(resolve => {
       const listener = e => {
+        const data = getData(e);
         if (
           e.origin == origin &&
           (!e.source || e.source == target) &&
-          e.data['app'] === APP &&
-          e.data['name'] === CHANNEL_OPEN_MSG
+          data['app'] === APP &&
+          data['name'] === CHANNEL_OPEN_MSG
         ) {
           source.removeEventListener('message', listener);
           const port = new WindowPortEmulator(source, origin, target);
-          port./*OK*/ postMessage({
-            app: APP,
-            requestid: e.data['requestid'],
-            type: MessageType.RESPONSE,
-          });
+          port./*OK*/ postMessage(
+            /** @type {JsonObject} */ ({
+              app: APP,
+              requestid: data['requestid'],
+              type: MessageType.RESPONSE,
+            })
+          );
           resolve(new Messaging(source, port));
         }
       };
@@ -278,7 +286,7 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    const message = parseMessage(event.data);
+    const message = parseMessage(getData(event));
     if (!message) {
       return;
     }
