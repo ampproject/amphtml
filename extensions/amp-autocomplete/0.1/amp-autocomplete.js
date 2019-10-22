@@ -24,7 +24,7 @@ import {
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {childElementsByTag, removeChildren, tryFocus} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, getData} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {hasOwn, map, ownProperty} from '../../../src/utils/object';
@@ -144,7 +144,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /**
      * The reference to the input[hidden] appended as a child.
-     * @private {?HTMLElement}
+     * @private {?Element}
      */
     this.hiddenInput_ = null;
 
@@ -548,37 +548,55 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   inputHandler_(event) {
+    let inlinePromise = Promise.resolve();
+
+    // If the input is the first entry in the field.
+    const firstEntry =
+      !this.inline_ &&
+      this.userInput_.length === 0 &&
+      this.inputElement_.value.length === 1;
+    this.userInput_ = this.inputElement_.value;
+
     if (this.inline_) {
       if (this.detectBackspace_) {
-        this.deleteTextElementIfSpan_();
+        const span = this.textElementIsSpan_();
+        if (span) {
+          return this.mutateElement(() => {
+            this.deleteSpanElement_(dev().assertElement(span));
+          });
+        }
       }
 
       this.updateHiddenInput_();
-
-      this.triggered_ = event.data === this.trigger_;
+      this.triggered_ = getData(event) === this.trigger_;
       if (!this.triggered_ && !this.menuTriggered_) {
         return Promise.resolve();
       }
       let hadResultsBeforeThisInput = false;
-      if (this.menuData_ && this.userInput_ != '') {
+      if (this.sourceData_ && this.userInput_ != '') {
         hadResultsBeforeThisInput = true;
       }
 
       const {textContent} = this.inputElement_.lastChild || this.inputElement_;
       const triggerLoc = textContent.lastIndexOf(this.trigger_);
       if (triggerLoc == -1) {
-        this.clearAllItems_();
-        return Promise.resolve();
+        return this.mutateElement(() => {
+          this.clearAllItems_();
+        });
       }
       this.userInput_ = textContent.slice(triggerLoc + 1);
-
-      return this.getRemoteData_().then(menuData => {
-        this.menuData_ = menuData || [];
-        this.menuTriggered_ = this.menuData_.length;
+      inlinePromise = this.getRemoteData_().then(sourceData => {
+        this.sourceData_ = sourceData || [];
+        this.menuTriggered_ = this.sourceData_.length;
         if (!this.menuTriggered_ && hadResultsBeforeThisInput) {
           this.triggered_ = false;
         }
-        this.filterDataAndRenderResults_(this.menuData_, this.userInput_);
+      });
+    }
+
+    return inlinePromise.then(() => {
+      return this.mutateElement(() => {
+        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
         this.toggleResults_(true);
         if (this.suggestFirst_) {
           if (!this.detectBackspace_ || firstEntry) {
@@ -588,21 +606,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.detectBackspace_ = false;
         }
       });
-    }
-    // If the input is the first entry in the field.
-    const firstEntry =
-      this.userInput_.length === 0 && this.inputElement_.value.length === 1;
-    this.userInput_ = this.inputElement_.value;
-    return this.mutateElement(() => {
-      this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
-      this.toggleResults_(true);
-      if (this.suggestFirst_) {
-        if (!this.detectBackspace_ || firstEntry) {
-          this.updateActiveItem_(1);
-        }
-        // Reset flag.
-        this.detectBackspace_ = false;
-      }
     });
   }
 
@@ -626,7 +629,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Intercept pasted items to be inserted as plain/text in the contenteditable.
    * @param {!Event} event
-   * @return {!Promise}
    * @private
    */
   pasteHandler_(event) {
@@ -647,23 +649,35 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Detects if the cursor is within an autocomplete-selected element.
-   * If so, delete the whole thing as one unit.
+   * If the cursor is within an autocomplete-selected element, returns that element.
    * @private
+   * @return {?Element}
    */
-  deleteTextElementIfSpan_() {
+  textElementIsSpan_() {
     const selectionElement = this.win.getSelection().getRangeAt(0)
       .startContainer.parentElement;
     if (!selectionElement.classList.contains('autocomplete-selected')) {
+      return null;
+    }
+    return selectionElement;
+  }
+
+  /**
+   * Deletes the given span element from the input element.
+   * @param {!Element} span
+   * @private
+   */
+  deleteSpanElement_(span) {
+    if (span.parentNode !== this.inputElement_) {
       return;
     }
-    selectionElement.remove();
+    this.inputElement_.removeChild(span);
     // Prevent leaving styling behind in an empty content field.
     if (
       !this.inputElement_.children.length &&
       !this.inputElement_.textContent
     ) {
-      this.inputElement_.lastChild.remove();
+      this.inputElement_.removeChild(this.inputElement_.lastChild);
     }
     this.detectBackspace_ = false;
     this.triggered_ = false;
@@ -1014,39 +1028,40 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const selectedValue = (this.inputElement_.value = this.userInput_ =
       element.getAttribute('data-value') || element.textContent);
 
-    if (this.inline_) {
-      this.menuTriggered_ = this.triggered = false;
-      const {textContent} = this.inputElement_.lastChild;
-
-      const triggerLoc = textContent.lastIndexOf(this.trigger_);
-      const postLoc = triggerLoc + 1 + this.userInput_.length;
-      this.inputElement_.lastChild.textContent = textContent.slice(
-        0,
-        triggerLoc
-      );
-      const span = this.element.ownerDocument.createElement('span');
-      span.classList.add('autocomplete-selected');
-      span.appendChild(
-        this.element.ownerDocument.createTextNode(this.trigger_ + selectedValue)
-      );
-      const postText = document.createTextNode(
-        textContent.slice(postLoc) + '\u00A0'
-      );
-
-      this.inputElement_.appendChild(span);
-      this.inputElement_.appendChild(postText);
-
-      tryFocus(this.inputElement_);
-      const selection = this.win.getSelection();
-      const range = document.createRange();
-
-      range.setStart(postText, 1);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
     this.fireSelectEvent_(selectedValue);
     this.clearAllItems_();
     this.toggleResults_(false);
+
+    if (!this.inline_) {
+      return;
+    }
+
+    // Logic for inserting the selected value for inline autocomplete.
+    this.menuTriggered_ = false;
+    const {textContent} = this.inputElement_.lastChild;
+
+    const triggerLoc = textContent.lastIndexOf(this.trigger_);
+    const postLoc = triggerLoc + 1 + this.userInput_.length;
+    this.inputElement_.lastChild.textContent = textContent.slice(0, triggerLoc);
+    const span = this.element.ownerDocument.createElement('span');
+    span.classList.add('autocomplete-selected');
+    span.appendChild(
+      this.element.ownerDocument.createTextNode(this.trigger_ + selectedValue)
+    );
+    const postText = document.createTextNode(
+      textContent.slice(postLoc) + '\u00A0'
+    );
+
+    this.inputElement_.appendChild(span);
+    this.inputElement_.appendChild(postText);
+
+    tryFocus(this.inputElement_);
+    const selection = this.win.getSelection();
+    const range = document.createRange();
+
+    range.setStart(postText, 1);
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 
   /**
@@ -1216,7 +1231,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.ENTER:
         if (
           this.resultsShowing_() &&
-          (!this.submitOnEnter_ || (this.inline_ && this.activeElement_))
+          ((!this.submitOnEnter_ && !this.inline_) ||
+            (this.inline_ && this.activeElement_))
         ) {
           event.preventDefault();
         }
