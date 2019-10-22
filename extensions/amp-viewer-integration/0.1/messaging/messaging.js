@@ -145,12 +145,9 @@ export class Messaging {
           if (data['app'] === APP && data['name'] === CHANNEL_OPEN_MSG) {
             clearInterval(interval);
             port.removeEventListener('message', listener);
-            port./*OK*/ postMessage({
-              app: APP,
-              requestid: data['requestid'],
-              type: MessageType.RESPONSE,
-            });
-            resolve(new Messaging(source, port));
+            const messaging = new Messaging(source, port);
+            messaging.sendResponse_(data['requestid'], CHANNEL_OPEN_MSG, null);
+            resolve(messaging);
           }
         };
         port.addEventListener('message', listener);
@@ -179,14 +176,9 @@ export class Messaging {
         ) {
           source.removeEventListener('message', listener);
           const port = new WindowPortEmulator(source, origin, target);
-          port./*OK*/ postMessage(
-            /** @type {JsonObject} */ ({
-              app: APP,
-              requestid: data['requestid'],
-              type: MessageType.RESPONSE,
-            })
-          );
-          resolve(new Messaging(source, port));
+          const messaging = new Messaging(source, port);
+          messaging.sendResponse_(data['requestid'], CHANNEL_OPEN_MSG, null);
+          resolve(messaging);
         }
       };
       source.addEventListener('message', listener);
