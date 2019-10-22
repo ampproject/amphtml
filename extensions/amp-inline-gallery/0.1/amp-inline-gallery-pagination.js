@@ -29,17 +29,6 @@ import {toArray} from '../../../src/types';
 const MAX_DOT_COUNT = 8;
 
 /**
- * The width of a single dot. This should match the value in CSS.
- */
-const dotWidth = 10;
-
-/**
- * The minimum spacing between two dots. This plus dotWidth should match the
- * min-width of the dot container in CSS.
- */
-const dotMinSpacing = 8;
-
-/**
  * Returns a number falling off from one to zero, based on a distance
  * progress percentage and a power to decay at.
  * @param {number} percentage
