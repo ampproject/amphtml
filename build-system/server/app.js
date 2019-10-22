@@ -412,19 +412,19 @@ app.use('/form/autocomplete/error', (req, res) => {
 });
 
 const mentionNames = [
-  'Harry Potter',
-  'Albus Dumbledore',
-  'Voldemort',
-  'Severus Snape',
-  'Sirius Black',
-  'Hermione Granger',
-  'Ron Weasley',
-  'Draco Malfoy',
-  'Neville Longbottom',
-  'Rubeus Hagrid',
-  'Dobby',
-  'Bellatrix Lestrange',
-  'Minerva McGonagall',
+  'harrypotter@hogwarts.edu',
+  'albusdumbledore@hogwarts.edu',
+  'voldemort@deatheater.org',
+  'severussnape@hogwarts.edu',
+  'siriusblack@hogwarts.edu',
+  'hermionegranger@hogwarts.edu',
+  'ronweasley@hogwarts.edu',
+  'dracomalfoy@hogwarts.edu',
+  'nevillelongbottom@hogwarts.edu',
+  'rubeushagrid@hogwarts.edu',
+  'dobby@hogwarts.edu',
+  'bellatrixlestrange@deatheater.org',
+  'minervamcGonagall@hogwarts.edu',
 ];
 
 app.use('/form/mention/query', (req, res) => {
@@ -434,7 +434,7 @@ app.use('/form/mention/query', (req, res) => {
   } else {
     const lowerCaseQuery = query.toLowerCase().trim();
     const filtered = mentionNames.filter(l =>
-      l.toLowerCase().includes(lowerCaseQuery)
+      l.toLowerCase().startsWith(lowerCaseQuery)
     );
     res.json({items: filtered});
   }

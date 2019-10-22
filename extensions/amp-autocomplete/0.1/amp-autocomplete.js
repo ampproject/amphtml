@@ -23,7 +23,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {childElementsByTag, removeChildren} from '../../../src/dom';
+import {childElementsByTag, removeChildren, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -131,6 +131,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.trigger_ = '';
 
     /**
+     * Whether the trigger_ value above has been detected via user input.
+     * For use when "inline_" is true.
+     */
+    this.triggered_ = false;
+
+    /**
+     * Whether autocomplete suggestions are displaying for the triggered user input.
+     * For use when "inline_" is true.
+     */
+    this.menuTriggered_ = false;
+
+    /**
      * The reference to the input[hidden] appended as a child.
      * @private {?HTMLElement}
      */
@@ -143,16 +155,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.form_ = null;
 
     /**
-     * The value of the "src-base" attribute on amp-autocomplete.
+     * The base value obtained from the "src" attribute on amp-autocomplete.
+     * Used for creating static network endpoints. See generateSrc_.
      * @private {string}
      */
     this.srcBase_ = '';
 
     /**
-     * The value of the "src-query-param" attribute on amp-autocomplete.
+     * The value of the "query" attribute on amp-autocomplete.
      * @private {string}
      */
-    this.srcQueryParam_ = '';
+    this.query_ = '';
 
     /**
      * The index of the active suggested item.
@@ -229,10 +242,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.inputElement_ = /** @type {!HTMLInputElement} */ (editElements[0]);
       this.hiddenInput_ = this.element.ownerDocument.createElement('input');
       toggle(this.hiddenInput_, false);
-      if (this.element.hasAttribute('name')) {
+      if (this.element.hasAttribute('data-name')) {
         this.hiddenInput_.setAttribute(
           'name',
-          this.element.getAttribute('name')
+          this.element.getAttribute('data-name')
         );
       }
       this.element.appendChild(this.hiddenInput_);
@@ -252,30 +265,26 @@ export class AmpAutocomplete extends AMP.BaseElement {
       }
     }
 
-    if (this.element.hasAttribute('src-base')) {
+    if (this.element.hasAttribute('query')) {
       userAssert(
-        isExperimentOn(this.win, 'amp-autocomplete'),
-        `Experiment ${TAG} is not turned on for "src-base" and "src-query-param" attrs.`
+        this.element.hasAttribute('src'),
+        'Expected a value for attribute "src" when using attribute "query',
+        TAG
       );
-      this.srcBase_ = this.element.getAttribute('src-base');
-      userAssert(
-        this.element.hasAttribute('src-query-param'),
-        'Expected a value for attribute "src-query-param" when using "src-base"'
+      this.srcBase_ = this.element.getAttribute('src');
+      this.query_ = this.element.getAttribute('query');
+    }
+    const jsonScript = this.element.querySelector(
+      'script[type="application/json"]'
+    );
+    if (jsonScript) {
+      this.sourceData_ = this.getInlineData_(jsonScript);
+    } else if (!this.element.hasAttribute('src')) {
+      user().warn(
+        TAG,
+        'Expected a <script type="application/json"> child or ' +
+          'a URL specified in "src".'
       );
-      this.srcQueryParam_ = this.element.getAttribute('src-query-param');
-    } else {
-      const jsonScript = this.element.querySelector(
-        'script[type="application/json"]'
-      );
-      if (jsonScript) {
-        this.sourceData_ = this.getInlineData_(jsonScript);
-      } else if (!this.element.hasAttribute('src')) {
-        user().warn(
-          TAG,
-          'Expected a <script type="application/json"> child or ' +
-            'a URL specified in "src".'
-        );
-      }
     }
 
     this.inputElement_.setAttribute('dir', 'auto');
@@ -326,20 +335,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
     if (this.element.hasAttribute('suggest-first')) {
-      if (this.filter_ === FilterType.PREFIX) {
-        this.suggestFirst_ = true;
-      } else {
-        user().error(
-          TAG,
-          '"suggest-first" requires "filter" to be prefix.' +
-            ' Unexpected "filter" type: ' +
-            this.filter_
-        );
-      }
+      this.suggestFirst_ =
+        this.filter_ === FilterType.PREFIX ||
+        (this.inline_ && this.filter_ === FilterType.NONE);
+      userAssert(
+        this.suggestFirst_,
+        '"suggest-first" requires "filter" to equal "prefix". ' +
+          'If "inline" is present, "filter" can also equal "none".' +
+          ' Unexpected "filter" type: ' +
+          this.filter_
+      );
     }
-    this.suggestFirst_ =
-      this.element.hasAttribute('suggest-first') &&
-      this.filter_ === FilterType.PREFIX;
     this.highlightUserEntry_ = this.element.hasAttribute(
       'highlight-user-entry'
     );
@@ -410,7 +416,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   generateSrc_(opt_input = '') {
-    return this.srcBase_ + '?' + this.srcQueryParam_ + '=' + opt_input;
+    return this.srcBase_ + '?' + this.query_ + '=' + opt_input;
   }
 
   /**
@@ -460,6 +466,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.container_.addEventListener('mousedown', e => {
       this.selectHandler_(e);
     });
+    if (this.inline_) {
+      this.inputElement_.addEventListener('paste', e => {
+        this.pasteHandler_(e);
+      });
+    }
 
     return this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
   }
@@ -538,11 +549,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   inputHandler_(event) {
     if (this.inline_) {
-      this.updateHiddenInput_();
-
       if (this.detectBackspace_) {
         this.deleteTextElementIfSpan_();
       }
+
+      this.updateHiddenInput_();
 
       this.triggered_ = event.data === this.trigger_;
       if (!this.triggered_ && !this.menuTriggered_) {
@@ -569,6 +580,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         this.filterDataAndRenderResults_(this.menuData_, this.userInput_);
         this.toggleResults_(true);
+        if (this.suggestFirst_) {
+          if (!this.detectBackspace_ || firstEntry) {
+            this.updateActiveItem_(1);
+          }
+          // Reset flag.
+          this.detectBackspace_ = false;
+        }
       });
     }
     // If the input is the first entry in the field.
@@ -606,6 +624,29 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
+   * Intercept pasted items to be inserted as plain/text in the contenteditable.
+   * @param {!Event} event
+   * @return {!Promise}
+   * @private
+   */
+  pasteHandler_(event) {
+    // cancel paste
+    event.preventDefault();
+
+    // get text representation of clipboard
+    const text = (event.originalEvent || event).clipboardData.getData(
+      'text/plain'
+    );
+
+    try {
+      // insert text manually
+      document.execCommand('insertHTML', false, text);
+    } catch (e) {
+      // do nothing
+    }
+  }
+
+  /**
    * Detects if the cursor is within an autocomplete-selected element.
    * If so, delete the whole thing as one unit.
    * @private
@@ -617,7 +658,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return;
     }
     selectionElement.remove();
-    if (!this.inputElement_.children.length) {
+    // Prevent leaving styling behind in an empty content field.
+    if (
+      !this.inputElement_.children.length &&
+      !this.inputElement_.textContent
+    ) {
       this.inputElement_.lastChild.remove();
     }
     this.detectBackspace_ = false;
@@ -991,7 +1036,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.inputElement_.appendChild(span);
       this.inputElement_.appendChild(postText);
 
-      this.inputElement_.focus();
+      tryFocus(this.inputElement_);
       const selection = this.win.getSelection();
       const range = document.createRange();
 
@@ -1042,7 +1087,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
 
     // Highlight if suggest-first is present.
-    if (this.suggestFirst_) {
+    if (this.suggestFirst_ && !this.inline_) {
       this.inputElement_.setSelectionRange(
         this.userInput_.length,
         this.inputElement_.value.length
@@ -1169,16 +1214,23 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
-        if ((this.resultsShowing_() && !this.submitOnEnter_) || this.inline_) {
+        if (
+          this.resultsShowing_() &&
+          (!this.submitOnEnter_ || (this.inline_ && this.activeElement_))
+        ) {
           event.preventDefault();
         }
-        if (this.suggestFirst_) {
+        if (this.suggestFirst_ && !this.inline_) {
           const inputLength = this.inputElement_.value.length;
           this.inputElement_.setSelectionRange(inputLength, inputLength);
         }
         return this.mutateElement(() => {
           if (this.activeElement_) {
             this.selectItem_(this.activeElement_);
+            if (this.inline_) {
+              this.updateHiddenInput_();
+              this.triggered_ = false;
+            }
             this.resetActiveElement_();
           } else {
             this.toggleResults_(false);
