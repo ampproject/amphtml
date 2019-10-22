@@ -12,10 +12,6 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <style amp-custom>
-    .with-background {
-      background-color: #eee;
-    }
-
     .gallery .slide img {
       object-fit: cover;
     }
@@ -49,11 +45,8 @@
 </head>
 <body>
   <h1>A pagination-only inline gallery</h1>
-  <div class="with-background">
-    Some content above the carousel.
-  </div>
   <amp-inline-gallery layout="container">
-    <amp-base-carousel class="gallery" layout="responsive" width="3.6" height="2" snap-align="center" loop="true" visible-count="1.2">
+    <amp-base-carousel class="gallery" layout="responsive" width="3" height="2" snap-align="center" loop="false">
       <amp-img class="slide" src="./img/sander-dewerte--jcP3xbN88w-unsplash-small.jpg" layout="flex-item"></amp-img>
       <amp-img class="slide" src="./img/ivars-krutainis-jTJ9-4ESzU4-unsplash-small.jpg" layout="flex-item"></amp-img>
       <amp-img class="slide" src="./img/ola-gronlund--MuvLw5G6x8-unsplash-small.jpg" layout="flex-item"></amp-img>
@@ -68,8 +61,14 @@
     <amp-inline-gallery-pagination layout="nodisplay" inset>
     </amp-inline-gallery-pagination>
   </amp-inline-gallery>
-  <div class="with-background">
-    Some content below the carousel.
-  </div>
+  <h2>Config</h2>
+  <ul>
+    <li>
+      Non-looping
+    </li>
+    <li>
+      Inset pagination dots
+    </li>
+  </ul>
 </body>
 </html>
