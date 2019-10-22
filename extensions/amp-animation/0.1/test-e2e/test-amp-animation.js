@@ -19,7 +19,8 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-animation/simple.html',
-    environments: 'ampdoc-amp4ads-preset',
+    // TODO(powerivq): Reenable for all environments
+    environments: 'amp4ads-preset',
   },
   env => {
     let controller;
