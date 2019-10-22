@@ -36,7 +36,10 @@ A clear and concise description of any alternative solutions or features you've 
 <!--
 Add any other information that may help people understand your I2I.
 -->
-
+## Launch tracker
+<!--
+Add a link to the launch tracker for this work here. Template and instructions can be found here: bit.ly/amp-launch-tracker
+-->
 
 <!--
 Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md for help in finding a reviewer.
