@@ -24,31 +24,63 @@ export function videonow(global, data) {
   const mandatoryAttributes = ['pid', 'width', 'height'];
   const optionalAttributes = ['kind', 'src'];
 
+  const gn = global && global.name;
+  if (gn) {
+    const p = JSON.parse(gn);
+    const href =
+      p &&
+      p.attributes &&
+      p.attributes._context &&
+      p.attributes._context.location &&
+      p.attributes._context.location.href;
+
+    if (href) {
+      const vnDataStorageKey = 'videonow-config';
+      const logLevelString = /[?&]vn_debug\b(?:=(\d+))?/.exec(href);
+      const moduleString = /[?&]vn_module=(.*?)[$&\n]/.exec(href);
+      const logLevel = (logLevelString && logLevelString[1]) || null;
+      const vnModule = (moduleString && moduleString[1]) || null;
+
+      if (logLevel !== null && global.localStorage) {
+        const data = JSON.parse(
+          global.localStorage.getItem(vnDataStorageKey) || '{}'
+        );
+        data['logLevel'] = logLevel;
+        global.localStorage.setItem(vnDataStorageKey, JSON.stringify(data));
+      }
+      if (vnModule && global.sessionStorage) {
+        const data = JSON.parse(
+          global.sessionStorage.getItem(vnDataStorageKey) || '{}'
+        );
+        data['vnModule'] = vnModule;
+        global.sessionStorage.setItem(vnDataStorageKey, JSON.stringify(data));
+      }
+    }
+  }
   validateData(data, mandatoryAttributes, optionalAttributes);
 
   const profileId = data.pid || 1;
-  const kind = data.type || 'prod';
 
   // production version by default
   let script =
     (data.src && decodeURI(data.src)) ||
-    'https://static.videonow.ru/vn_init.js?amp=1&profileId=' + profileId;
+    'https://cdn.videonow.ru/vn_init_module.js';
 
-  if (kind === 'local') {
-    script =
-      'https://localhost:8085/vn_init.js?amp=1' +
-      '?profileId=' +
-      profileId +
-      '&url=' +
-      encodeURIComponent('https://localhost:8085/init');
-  } else if (kind === 'dev') {
-    script =
-      'https://static.videonow.ru/dev/vn_init_module.js' +
-      '?amp=1&profileId=' +
-      profileId +
-      '&url=' +
-      encodeURIComponent('https://data.videonow.ru/?init');
-  }
+  script = addParam(script, 'amp', 1);
+  script = addParam(script, 'profileId', profileId);
 
   loadScript(global, script);
+}
+
+/**
+ * @param {string} script
+ * @param {string} name
+ * @param {string|number}value
+ * @return {string}
+ */
+function addParam(script, name, value) {
+  if (script.indexOf(name) < 0) {
+    script += (~script.indexOf('?') ? '&' : '?') + name + '=' + value;
+  }
+  return script;
 }
