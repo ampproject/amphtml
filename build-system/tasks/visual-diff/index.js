@@ -810,11 +810,24 @@ async function cleanup_() {
   if (browser_) {
     await browser_.close();
   }
+
+  const processesExited = [];
   for (const subprocess of [percyAgentProcess_, webServerProcess_]) {
     if (subprocess && !subprocess.killed) {
+      let resolver;
+      processesExited.push(
+        new Promise(resolverIn => {
+          resolver = resolverIn;
+        })
+      );
+      subprocess.on('exit', () => {
+        resolver();
+      });
+
       // Explicitly exit the processes by "Ctrl+C"-ing them.
       await subprocess.kill('SIGINT');
     }
+    await Promise.all(processesExited);
   }
 }
 
