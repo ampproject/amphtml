@@ -1,6 +1,6 @@
 ---
 name: Intent-to-implement (I2I)
-about: Proposes a significant change/update to AMP. See https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md.
+about: Proposes a significant change/update to AMP. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md.
 title: 'I2I: <your feature/change>'
 labels: INTENT TO IMPLEMENT
 assignees: ''
