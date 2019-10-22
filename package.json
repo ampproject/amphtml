@@ -104,7 +104,7 @@
     "gulp-jsonlint": "1.3.1",
     "gulp-jsonminify": "1.1.0",
     "gulp-nop": "0.0.3",
-    "gulp-prettier": "2.1.0",
+    "gulp-prettier": "2.2.0",
     "gulp-regexp-sourcemaps": "1.0.1",
     "gulp-rename": "1.4.0",
     "gulp-sourcemaps": "2.6.5",
