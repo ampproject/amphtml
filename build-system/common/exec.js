@@ -21,7 +21,7 @@
 
 const childProcess = require('child_process');
 
-const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/sh';
+const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
 const shellFlag = process.platform == 'win32' ? '/C' : '-c';
 
 /**
