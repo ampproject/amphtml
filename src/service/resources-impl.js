@@ -36,6 +36,7 @@ import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
 import {startupChunk} from '../chunk';
+import {throttle} from '../utils/rate-limit';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -257,7 +258,10 @@ export class ResourcesImpl {
 
     this.rebuildDomWhenReady_();
 
-    listen(this.win.document, 'scroll', e => this.scrolled_(e), {
+    /** @private @const */
+    this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 10);
+
+    listen(this.win.document, 'scroll', this.throttledScroll_, {
       capture: true,
       passive: true,
     });
