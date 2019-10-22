@@ -10,5 +10,9 @@
         {name: 'ampproject/wg-performance'},
       ],
     },
+    {
+      pattern: 'experiment-config.js',
+      owners: [{name: 'ampproject/working-groups'}],
+    },
   ],
 }
