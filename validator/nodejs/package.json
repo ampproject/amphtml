@@ -1,6 +1,6 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
   "keywords": [
     "AMP",
