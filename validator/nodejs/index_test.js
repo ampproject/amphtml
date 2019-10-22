@@ -135,7 +135,7 @@ it('rejects a specific file that is known to have errors', function(done) {
           if (error.specUrl) {
             out += ' (see ' + error.specUrl + ')';
           }
-          out += ' [' + error.category + ']\n';
+          out += '\n';
         }
 
         expect(out).toBe(severalErrorsOut);
@@ -187,8 +187,7 @@ it('emits text if --format=text is specified on command line', function(done) {
           .split('\n')
           .filter(isErrorLine)
           .splice(1) // trim 1st line
-          .join('\n')
-          .replace(/ \[[A-Z_]+\]/g, ''); // trim error categories
+          .join('\n');
   execFile(
       process.execPath,
       [
@@ -246,8 +245,7 @@ it('supports AMP4ADS with --html_format command line option', function(done) {
           .split('\n')
           .filter(isErrorLine)
           .splice(1) // trim 1st line
-          .join('\n')
-          .replace(/ \[[A-Z_]+\]/g, ''); // trim error categories
+          .join('\n');
   execFile(
       process.execPath,
       [

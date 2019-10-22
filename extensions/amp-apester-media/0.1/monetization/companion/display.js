@@ -21,10 +21,12 @@
 export function handleCompanionDisplay(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
   const companionRawSettings = monetizationSettings['companionOptions'] || {};
-  const {enabled, settings = {}} = companionRawSettings || {};
-  if (enabled && settings['bannerAdProvider'] === 'gdt') {
+  const {enabled, settings = {}} = companionRawSettings;
+  const allowedAdProvider = 'gdt';
+  if (enabled && settings['bannerAdProvider'] === allowedAdProvider) {
     const slot = settings['slot'];
-    const bannerSizes = settings['bannerSizes'] || [[300, 250]];
+    const defaultBannerSizes = [[300, 250]];
+    const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
     const size = {width: bannerSizes[0][0], height: bannerSizes[0][1]};
     constructCompanionDisplayAd(slot, size, apesterElement);
   }

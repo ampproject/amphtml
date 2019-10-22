@@ -5,6 +5,4 @@
   rules: [
     {
       owners: [{ name: 'OmriKeret' }, { name: 'ampproject/wg-ui-and-a11y' }]
-    }
-  ]
 }

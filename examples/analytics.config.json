@@ -12,6 +12,5 @@
       "request": "event"
     }
   },
-  "transport" : {"beacon": true, "xhrpost": false}
+  "transport": {"beacon": true, "xhrpost": false}
 }
-

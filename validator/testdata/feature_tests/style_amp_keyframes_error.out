@@ -33,44 +33,44 @@ FAIL
 |    <style amp-keyframes>
 |      amp-img { opacity: 0 } /* this should fail because it's not an @rule */
 >>     ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:33:4 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'amp-img' must be located inside of a keyframe. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:33:4 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'amp-img' must be located inside of a keyframe.
 |      a.underlined {} /* selector is not @rule and should fail */
 >>     ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:34:4 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'a.underlined' must be located inside of a keyframe. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:34:4 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'a.underlined' must be located inside of a keyframe.
 |      @font-face {} /* this should fail because it's not an allowed @rule */
 >>     ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:35:4 CSS syntax error in tag 'style[amp-keyframes]' - saw invalid at rule '@font-face'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:35:4 CSS syntax error in tag 'style[amp-keyframes]' - saw invalid at rule '@font-face'.
 |      @supports (offset-distance: 0) {
 |        amp-carousel {} /* this should fail because it's not allowed content inside the @supports */
 >>       ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:37:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'amp-carousel' must be located inside of a keyframe. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:37:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'amp-carousel' must be located inside of a keyframe.
 |      }
 |      @media (min-width: 300px) {
 |        /* this should fail because css style rules are only allowed inside keyframes */
 |        from {transform: translateX(-100%);}
 >>       ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:41:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'from' must be located inside of a keyframe. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:41:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'from' must be located inside of a keyframe.
 |        to {transform: translateX(100%);} /* this should fail because it's a css style rule */
 >>       ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:42:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'to' must be located inside of a keyframe. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:42:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'to' must be located inside of a keyframe.
 |      }
 |      @media (min-width: 300px) {
 |        /* this should fail because css style rules are only allowed inside keyframes */
 |        100% {transform: translateX(-100%);}
 >>       ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:46:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule '100' must be located inside of a keyframe. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:46:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule '100' must be located inside of a keyframe.
 |      }
 |      @keyframes anim1 {
 |        /* this should fail because the only allowed properties are
 |         * [opacity, transform, visibility, offset-distance] */
 |        100% {thisshouldfail: translateX(100%);}
 >>             ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:51:12 CSS syntax error in tag 'style[amp-keyframes]' - invalid property 'thisshouldfail'. The only allowed properties are '['animation-timing-function', 'offset-distance', 'opacity', 'transform', 'visibility']'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:51:12 CSS syntax error in tag 'style[amp-keyframes]' - invalid property 'thisshouldfail'. The only allowed properties are '['animation-timing-function', 'offset-distance', 'opacity', 'transform', 'visibility']'.
 |      }
 |      @keyframes anim2 {
 |        @keyframes anim1 {
 >>       ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:54:6 CSS syntax error in tag 'style[amp-keyframes]' - keyframe inside keyframe is not allowed. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:54:6 CSS syntax error in tag 'style[amp-keyframes]' - keyframe inside keyframe is not allowed.
 |          /* this should fail because you cannot have a keyframe inside of another keyframe */
 |          100% {visibility: visible}
 |        }
@@ -78,12 +78,12 @@ feature_tests/style_amp_keyframes_error.html:54:6 CSS syntax error in tag 'style
 |      @keyframes anim1 {
 |        100% {} /* this should fail because it makes no sense */
 >>       ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:60:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule '100' has no declarations. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:60:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule '100' has no declarations.
 |      }
 |      @keyframes anim1 {
 |        a {} /* this should fail because it makes no sense */
 >>       ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:63:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'a' has no declarations. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:63:6 CSS syntax error in tag 'style[amp-keyframes]' - qualified rule 'a' has no declarations.
 |      }
 |    </style>
 |  </body>
