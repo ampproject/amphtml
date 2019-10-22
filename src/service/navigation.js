@@ -31,6 +31,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isExperimentOn} from '../experiments';
+import {removeAmpJsParamsFromUrl} from '../url';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -566,6 +567,14 @@ export class Navigation {
         viewer.isProxyOrigin() &&
         viewer.isEmbedded()
       ) {
+        const unknownParams = removeAmpJsParamsFromUrl(currentLocation.href);
+        if (unknownParams.length > 0) {
+          dev().error(
+            TAG,
+            'Removed unknown query params from iframe:',
+            unknownParams
+          );
+        }
         const noSearch = `${location.origin}${location.pathname}${location.hash}`;
         this.ampdoc.win.history.replaceState({}, '', noSearch);
       }
