@@ -6384,10 +6384,10 @@ gulp-nop@0.0.3:
     gulp-util "~2.2.14"
     through "~2.3.4"
 
-gulp-prettier@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/gulp-prettier/-/gulp-prettier-2.1.0.tgz#6e7b2a12395315fb9e1ebd4ea9ed9514410aec15"
-  integrity sha512-6PvGPX+x0d1+PbP7tHF42o6zWzxCXqouTnpwZV1GjF47/wAgWBfPU1E6/6d4uAGM+NhmwWdKvIVumL3wMZZxDg==
+gulp-prettier@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/gulp-prettier/-/gulp-prettier-2.2.0.tgz#05bfa5659ad24007e645853a6887430a62f85db3"
+  integrity sha512-IYHqgF4bg7GNOQ1h3JiVlZyHGY0rTvd3QYM+nkEOXQJKCsF2jF6BUs8Jd52Hmz/tSJmYg3XRwAgezDn20Q3JbQ==
   dependencies:
     plugin-error "^1.0.1"
     prettier "^1.5.3"
