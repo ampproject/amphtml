@@ -99,15 +99,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
             });
           });
         }
-        // if (opt_options.withStoryVariableService) {
-        //   markElementScheduledForTesting(iframe.win, 'amp-story');
-        //   registerServiceBuilder(iframe.win, 'story-variable', function() {
-        //     return Promise.resolve({
-        //       pageIndex: 546,
-        //       pageId: 'id-123',
-        //     });
-        //   });
-        // }
         if (opt_options.withViewerIntegrationVariableService) {
           markElementScheduledForTesting(iframe.win, 'amp-viewer-integration');
           registerServiceBuilder(

@@ -457,7 +457,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID', () => {
-      // This was iframe.win before...
+      // This was registerServiceBuilder(iframe.win, ...) before
       registerServiceBuilder(win, 'story-variable', function() {
         return Promise.resolve({
           pageIndex: 546,
@@ -477,9 +477,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         ' with empty string if amp-story is not configured',
       () => {
         return check('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID', '?index=&id=');
-        // return expect(
-        //   expandUrlAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID')
-        // ).to.eventually.equal('?index=&id=');
       }
     );
   });

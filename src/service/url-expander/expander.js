@@ -79,7 +79,6 @@ export class Expander {
     if (!url.length) {
       return this.sync_ ? url : Promise.resolve(url);
     }
-
     const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
 
     const matches = this.findMatches_(url, expr);
@@ -298,7 +297,6 @@ export class Expander {
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;
     let binding;
-
     if (bindingInfo.prioritized != undefined) {
       // Has to explicity check for undefined because bindingInfo.priorityized
       // could not be a function but a false value. For example {FOO: 0}
@@ -316,6 +314,7 @@ export class Expander {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async || bindingInfo.sync;
     }
+
     // We should only ever encode the top level resolution, or not at all.
     const shouldEncode = encode && !NOENCODE_WHITELIST[name];
     if (this.sync_) {
