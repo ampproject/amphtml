@@ -128,8 +128,12 @@ class AmpSocialShare extends AMP.BaseElement {
       const isMailTo = protocol === 'mailto:';
       const isSms = protocol === 'sms:';
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
+      const isIos13Webkit =
+        this.platform_.isIos() &&
+        this.platform_.getIosMajorVersion() >= 13 &&
+        !this.platform_.isSafari();
       this.target_ =
-        isIosSafari && (isMailTo || isSms)
+        (isIosSafari || isIos13Webkit) && (isMailTo || isSms)
           ? '_top'
           : this.element.hasAttribute('data-target')
           ? this.element.getAttribute('data-target')
