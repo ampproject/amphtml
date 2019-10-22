@@ -8735,10 +8735,10 @@ log4js@^4.0.0:
     rfdc "^1.1.4"
     streamroller "^1.0.6"
 
-lolex@5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/lolex/-/lolex-5.0.1.tgz#6dcd8812cfa725b98db6521f7d89929fee4e677d"
-  integrity sha512-CDEwkXui3ZrulrA+f4ewVuEo5rOXLrVhfLLG7FS+gaP5qhdGMaKLWCtK0crVZRhHiNRQwPAdP7KtRyEQRFQa7g==
+lolex@5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/lolex/-/lolex-5.1.1.tgz#9587144854511d27940ee5e113dcb7de9b0fd666"
+  integrity sha512-dEwHz1CJ8DsdgfpiimgQQEhEJYOEiJ69a0s4aJDNHajaTqOJuF34vBAWVa/sS0V8aQvt72p+KgQ3pRmEVJM+iA==
 
 lolex@^4.0.1, lolex@^4.1.0:
   version "4.2.0"
