@@ -38,7 +38,8 @@ Add any other information that may help people understand your I2I.
 -->
 ## Launch tracker
 <!--
-Add a link to the launch tracker for this work here. Template and instructions can be found here: bit.ly/amp-launch-tracker
+The launch tracker is meant to be an easy way of sharing a project's status with others on the AMP Project. 
+You should add a link to the launch tracker for this work here if applicable. One ideal template and instructions can be found here: bit.ly/amp-launch-tracker
 -->
 
 <!--
