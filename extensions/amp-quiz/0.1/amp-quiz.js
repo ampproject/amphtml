@@ -19,8 +19,6 @@ import {createShadowRootWithStyle} from '../../amp-story/0.1/utils';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
-// TODO: FIGURE OUT HOW TO IMPORT POPPINS
-
 export class AmpQuiz extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
@@ -33,6 +31,9 @@ export class AmpQuiz extends AMP.BaseElement {
 
     /** @private {?ShadowRoot} */
     this.shadowRoot_ = null;
+
+    /** @private {boolean} */
+    this.hasReceivedResponse_ = false;
   }
 
   /** @override */
@@ -73,11 +74,12 @@ export class AmpQuiz extends AMP.BaseElement {
     // TODO: OPTIMIZE THIS ISH
     // AND TEST FOR THE EDGE CASES
     const prompt = this.element.children[0];
+    // TODO: BAN H4-H6
     if (!(prompt instanceof HTMLHeadingElement)) {
-      handleError('Heading missing');
+      handleError('The first child must be a heading element');
     }
 
-    const options = Array.from(this.element.querySelectorAll('span'));
+    const options = Array.from(this.element.querySelectorAll('option'));
     if (options.length < 2 || options.length > 4) {
       handleError('Improper number of options');
     }
@@ -88,17 +90,23 @@ export class AmpQuiz extends AMP.BaseElement {
 
     const answerChoiceOptions = ['A', 'B', 'C', 'D'];
     options.forEach(option => {
-      option.setAttribute('class', 'i-amp-quiz-option');
+      // TODO: THIS IS A MESS, DOCUMENT THIS
+      const convertedOption = document.createElement('span');
+      convertedOption.textContent = option.textContent;
+      if (option.hasAttribute('correct')) {
+        convertedOption.setAttribute('correct', 'correct');
+      }
+      option.remove();
+
+      convertedOption.setAttribute('class', 'i-amp-quiz-option');
       this.shadowRoot_
         .querySelector('.i-amp-quiz-option-container')
-        .appendChild(option);
+        .appendChild(convertedOption);
 
       const answerChoice = document.createElement('span');
       answerChoice.textContent = answerChoiceOptions.shift();
       answerChoice.setAttribute('class', 'i-amp-quiz-answer-choice');
-      option.prepend(answerChoice);
-      // add option number to each
-      // will this be an issue with the option tag?
+      convertedOption.prepend(answerChoice);
     });
 
     if (this.element.children.length !== 0) {
@@ -115,18 +123,29 @@ export class AmpQuiz extends AMP.BaseElement {
     // attach listeners
     options.forEach(option => {
       option.addEventListener('click', () => {
-        // CHANGE STYLES ON OTHER STORIES
-        // add an overall style then override it!
-        options.forEach(o => {
-          o.setAttribute(
+        if (!this.hasReceivedResponse_) {
+          options.forEach(o => {
+            o.setAttribute(
+              'class',
+              `i-amp-quiz-option i-amp-quiz-option-post-selection`
+            );
+
+            const symbolContainer = o.querySelector('.i-amp-quiz-answer-choice');
+            if (o.hasAttribute('correct')) {
+              symbolContainer.textContent =  '✓';
+            } else {
+              symbolContainer.textContent = '×';
+              // TODO: IS THIS ONE ARIA LABEL ACCEPTABLE?
+              symbolContainer.setAttribute('aria-label', 'X');
+            }
+          });
+          option.setAttribute(
             'class',
-            `i-amp-quiz-option i-amp-quiz-option-post-selection`
+            `i-amp-quiz-option i-amp-quiz-option-post-selection i-amp-quiz-option-selected`
           );
-        });
-        option.setAttribute(
-          'class',
-          `i-amp-quiz-option i-amp-quiz-option-post-selection i-amp-quiz-option-selected`
-        );
+
+          this.hasReceivedResponse_ = true;
+        }
       });
     });
   }
