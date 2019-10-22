@@ -38,6 +38,15 @@ import {
 import {toArray} from '../../../src/types';
 
 /**
+ * @enum {number}
+ */
+const Controls = {
+  ALWAYS: 0,
+  NEVER: 1,
+  AUTO: 2,
+};
+
+/**
  * @param {!Element} el The Element to check.
  * @return {boolean} Whether or not the Element is a sizer Element.
  */
@@ -83,6 +92,9 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
+
+    /** @private {!Controls} */
+    this.controls_ = Controls.AUTO;
   }
 
   /**
@@ -106,6 +118,9 @@ class AmpCarousel extends AMP.BaseElement {
       },
       'auto-advance-loops': newValue => {
         this.carousel_.updateAutoAdvanceLoops(Number(newValue) || 0);
+      },
+      'controls': newValue => {
+        this.updateControls_(newValue);
       },
       'dir': newValue => {
         this.carousel_.updateForwards(newValue != 'rtl');
@@ -457,6 +472,35 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} Whether or not controls should be hidden.
+   */
+  shouldHideControls_() {
+    if (this.controls_ == Controls.NEVER) {
+      return true;
+    }
+
+    if (this.controls_ == Controls.ALWAYS) {
+      return false;
+    }
+
+    return this.hadTouch_;
+  }
+
+  /**
+   * @param {string} controls
+   * @private
+   */
+  updateControls_(controls) {
+    this.controls_ =
+      controls === 'always'
+        ? Controls.ALWAYS
+        : controls === 'never'
+        ? Controls.NEVER
+        : Controls.AUTO;
+    this.updateUi_();
+  }
+
+  /**
    * Updates the UI of the <amp-base-carousel> itself, but not the internal
    * implementation.
    * @private
@@ -477,7 +521,7 @@ class AmpCarousel extends AMP.BaseElement {
     toggleAttribute(
       this.element,
       'i-amphtml-base-carousel-hide-buttons',
-      this.hadTouch_
+      this.shouldHideControls_()
     );
   }
 
