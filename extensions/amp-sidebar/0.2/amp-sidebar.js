@@ -34,6 +34,7 @@ import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
+import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -106,6 +107,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.isSafari_ = platform.isSafari();
 
+    /** @private {number} */
+    this.historyId_ = -1;
+
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
 
@@ -129,7 +133,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.win,
       cb => this.mutateElement(cb),
       // The sidebar is already animated by swipe to dismiss, so skip animation.
-      () => this.dismiss_(true)
+      () => this.dismiss_(true, ActionTrust.HIGH)
     );
   }
 
@@ -190,7 +194,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.key == Keys.ESCAPE) {
-        if (this.close_()) {
+        // Keypress is high trust.
+        if (this.close_(ActionTrust.HIGH)) {
           event.preventDefault();
         }
       }
@@ -207,9 +212,22 @@ export class AmpSidebar extends AMP.BaseElement {
     // always create a close button at the end of the sidebar for screen
     // readers.
     element.appendChild(this.createScreenReaderCloseButton());
-    this.registerDefaultAction(invocation => this.open_(invocation), 'open');
-    this.registerAction('toggle', this.toggle_.bind(this));
-    this.registerAction('close', this.close_.bind(this));
+
+    this.registerDefaultAction(invocation => {
+      const {trust, caller} = invocation;
+      this.open_(trust, caller);
+    }, 'open');
+    this.registerAction('close', invocation => {
+      this.close_(invocation.trust);
+    });
+    this.registerAction('toggle', invocation => {
+      const {trust, caller} = invocation;
+      if (this.opened_) {
+        this.close_(trust);
+      } else {
+        this.open_(trust, caller);
+      }
+    });
 
     element.addEventListener(
       'click',
@@ -219,7 +237,20 @@ export class AmpSidebar extends AMP.BaseElement {
           'A'
         );
         if (target && target.href) {
-          this.close_();
+          const tgtLoc = Services.urlForDoc(element).parse(target.href);
+          const currentHref = this.getAmpDoc().getUrl();
+          // Important: Only close sidebar (and hence pop sidebar history entry)
+          // when navigating locally, Chrome might cancel navigation request
+          // due to after-navigation history manipulation inside a timer callback.
+          // See this issue for more details:
+          // https://github.com/ampproject/amphtml/issues/6585
+          if (removeFragment(target.href) != removeFragment(currentHref)) {
+            return;
+          }
+          if (tgtLoc.hash) {
+            // Click gesture is high trust.
+            this.close_(ActionTrust.HIGH);
+          }
         }
       },
       true
@@ -298,7 +329,8 @@ export class AmpSidebar extends AMP.BaseElement {
     // and would be confusing to tab to if not using a screen reader.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
-      this.close_();
+      // Click gesture is high trust.
+      this.close_(ActionTrust.HIGH);
     });
 
     return screenReaderCloseButton;
@@ -314,19 +346,6 @@ export class AmpSidebar extends AMP.BaseElement {
           toolbar.onLayoutChange();
         });
       });
-  }
-
-  /**
-   * Toggles the open/close state of the sidebar.
-   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
-   * @private
-   */
-  toggle_(opt_invocation) {
-    if (this.opened_) {
-      this.close_();
-    } else {
-      this.open_(opt_invocation);
-    }
   }
 
   /**
@@ -355,8 +374,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Updates the sidebar while it is animating to the opened state.
+   * @param {!ActionTrust} trust
    */
-  updateForOpening_() {
+  updateForOpening_(trust) {
     toggle(this.element, /* display */ true);
     toggle(this.getMaskElement_(), /* display */ true);
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
@@ -374,14 +394,16 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element./*OK*/ scrollTop = 1;
     this.element.setAttribute('open', '');
     this.getMaskElement_().setAttribute('open', '');
-    this.setUpdateFn_(() => this.updateForOpened_(), ANIMATION_TIMEOUT);
+    this.setUpdateFn_(() => this.updateForOpened_(trust), ANIMATION_TIMEOUT);
     handleAutoscroll(this.getAmpDoc(), this.element);
   }
 
   /**
    * Updates the sidebar for when it has finished opening.
+   * @param {!ActionTrust} trust
+   * @private
    */
-  updateForOpened_() {
+  updateForOpened_(trust) {
     // On open sidebar
     const children = this.getRealChildren();
     const owners = Services.ownersForDoc(this.element);
@@ -395,7 +417,7 @@ export class AmpSidebar extends AMP.BaseElement {
       // experience, so we also just focus the first close button.
       tryFocus(devAssert(this.closeButton_));
     }
-    this.triggerEvent_(SidebarEvents.OPEN);
+    this.triggerEvent_(SidebarEvents.OPEN, trust);
     this.element.setAttribute('i-amphtml-sidebar-opened', '');
     this.getMaskElement_().setAttribute('i-amphtml-sidebar-opened', '');
   }
@@ -403,8 +425,10 @@ export class AmpSidebar extends AMP.BaseElement {
   /**
    * Updates the sidebar for when it is animating to the closed state.
    * @param {boolean} immediate
+   * @param {!ActionTrust} trust
+   * @private
    */
-  updateForClosing_(immediate) {
+  updateForClosing_(immediate, trust) {
     this.getMaskElement_().removeAttribute('open');
     this.getMaskElement_().removeAttribute('i-amphtml-sidebar-opened');
     this.mutateElement(() => {
@@ -414,61 +438,78 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element.removeAttribute('open');
     this.element.removeAttribute('i-amphtml-sidebar-opened');
     this.setUpdateFn_(
-      () => this.updateForClosed_(),
+      () => this.updateForClosed_(trust),
       immediate ? 0 : ANIMATION_TIMEOUT
     );
   }
 
   /**
    * Updates the sidebar for when it has finished closing.
+   * @param {!ActionTrust} trust
+   * @private
    */
-  updateForClosed_() {
+  updateForClosed_(trust) {
     toggle(this.element, /* display */ false);
     toggle(this.getMaskElement_(), /* display */ false);
     Services.ownersForDoc(this.element).schedulePause(
       this.element,
       this.getRealChildren()
     );
-    this.triggerEvent_(SidebarEvents.CLOSE);
+    // TODO(#25080): update history manipulation based on resolution of this issue.
+    if (this.historyId_ != -1) {
+      this.getHistory_().pop(this.historyId_);
+      this.historyId_ = -1;
+    }
+    this.triggerEvent_(SidebarEvents.CLOSE, trust);
   }
 
   /**
    * Reveals the sidebar.
-   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
+   * @param {!ActionTrust} trust
+   * @param {?Element} openerElement
    * @private
    */
-  open_(opt_invocation) {
+  open_(trust, openerElement) {
     if (this.opened_) {
       return;
     }
     this.opened_ = true;
     this.viewport_.enterOverlayMode();
-    this.setUpdateFn_(() => this.updateForOpening_());
-    if (opt_invocation) {
-      this.openerElement_ = opt_invocation.caller;
+    this.setUpdateFn_(() => this.updateForOpening_(trust));
+    // TODO(#25080): update history manipulation based on resolution of this issue.
+    this.getHistory_()
+      .push(() => this.close_(trust))
+      .then(historyId => {
+        this.historyId_ = historyId;
+      });
+
+    if (openerElement) {
+      this.openerElement_ = openerElement;
       this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
   }
 
   /**
    * Hides the sidebar.
+   * @param {!ActionTrust} trust
    * @return {boolean} Whether the sidebar actually transitioned from "visible"
    *     to "hidden".
    * @private
    */
-  close_() {
-    return this.dismiss_(false);
+  close_(trust) {
+    return this.dismiss_(false, trust);
   }
 
   /**
    * Dismisses the sidebar.
    * @param {boolean} immediate Whether sidebar should close immediately,
    *     without animation.
+   * @param {!ActionTrust} trust
    * @return {boolean} Whether the sidebar actually transitioned from "visible"
    *     to "hidden".
    * @private
    */
-  dismiss_(immediate) {
+  dismiss_(immediate, trust) {
     if (!this.opened_) {
       return false;
     }
@@ -477,7 +518,7 @@ export class AmpSidebar extends AMP.BaseElement {
     const scrollDidNotChange =
       this.initialScrollTop_ == this.viewport_.getScrollTop();
     const sidebarIsActive = this.element.contains(this.document_.activeElement);
-    this.setUpdateFn_(() => this.updateForClosing_(immediate));
+    this.setUpdateFn_(() => this.updateForClosing_(immediate, trust));
     // Immediately hide the sidebar so that animation does not play.
     if (immediate) {
       toggle(this.element, /* display */ false);
@@ -560,7 +601,8 @@ export class AmpSidebar extends AMP.BaseElement {
       const mask = this.document_.createElement('div');
       mask.classList.add('i-amphtml-sidebar-mask');
       mask.addEventListener('click', () => {
-        this.close_();
+        // Click gesture is high trust.
+        this.close_(ActionTrust.HIGH);
       });
       this.getAmpDoc()
         .getBody()
@@ -612,12 +654,21 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
+   * @private
+   * @return {!../../../src/service/history-impl.History}
+   */
+  getHistory_() {
+    return Services.historyForDoc(this.getAmpDoc());
+  }
+
+  /**
    * @param {string} name
+   * @param {!ActionTrust} trust
    * @private
    */
-  triggerEvent_(name) {
+  triggerEvent_(name, trust) {
     const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
-    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+    this.action_.trigger(this.element, name, event, trust);
   }
 
   /**
