@@ -727,6 +727,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
   },
 
+  'nativery': {
+    preconnect: 'https://cdn.nativery.com',
+  },
+
   'nativo': {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
