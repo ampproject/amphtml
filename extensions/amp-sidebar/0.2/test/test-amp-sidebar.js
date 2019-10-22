@@ -27,7 +27,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
 
 describes.realWin(
-  'amp-sidebar 1.0 version',
+  'amp-sidebar 0.2 version',
   {
     win: {
       /* window spec */
@@ -37,7 +37,7 @@ describes.realWin(
     amp: {
       /* amp spec */
       runtimeOn: false,
-      extensions: ['amp-sidebar:1.0'],
+      extensions: ['amp-sidebar:0.2'],
     },
   },
   env => {
