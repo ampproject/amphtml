@@ -5,11 +5,11 @@
   rules: [
     {
       owners: [
-        { name: 'taojing10' },
-        { name: 'dmvjs' },
-        { name: 'pjcunnin' },
-        { name: 'matthinegardner' }
-      ]
-    }
-  ]
+        {name: 'taojing10'},
+        {name: 'dmvjs'},
+        {name: 'pjcunnin'},
+        {name: 'matthinegardner'},
+      ],
+    },
+  ],
 }

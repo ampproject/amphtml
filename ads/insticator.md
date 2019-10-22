@@ -16,14 +16,18 @@ limitations under the License.
 
 # Insticator
 
+Our embed serves content and ads that align with your audience. It reflects your visitor's interests and increases engagement.
+
 ## Example of Insticator's Embed implementation
 
 
 ```html
-<amp-embed 
-    type="insticator"
-    data-site-id="SITE-ID"
-    data-embed-id="EMBED-ID">
+<amp-embed
+  width="auto"
+  height="850"
+  type="insticator"
+  data-site-id="SITE-ID"
+  data-embed-id="EMBED-ID">
 </amp-embed>
 ```
 
@@ -33,5 +37,5 @@ For details on the configuration semantics, please contact [Insticator](https://
 
 ### Required parameters
 
-- `data-site-id`: ID for the site where your Insticator Embed lives
-- `data-embed-id`: Uniquie ID of your Insticator Embed
+- `data-site-id`: ID of the site your Insticator Embed lives in
+- `data-embed-id`: ID of your Insticator Embed

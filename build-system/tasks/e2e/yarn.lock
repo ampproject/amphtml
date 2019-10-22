@@ -153,10 +153,10 @@ chownr@^1.0.1:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-1.1.1.tgz#54726b8b8fff4df053c42187e801fb4412df1494"
   integrity sha512-j38EvO5+LHX84jlo6h4UzmOwi0UgW61WRyPtJz4qaadK5eY3BTS5TY/S1Stc3Uk2lIM6TPevAlULiEJwie860g==
 
-chromedriver@76.0.1:
-  version "76.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-76.0.1.tgz#65283299c3b34b1212eef272c32bd826c6bdebd3"
-  integrity sha512-+8BCemJLKPF2w/UpzA1uNgLWQrg1IgIO4ZYcsAjYYgqD8zUcvQ+RfwA/0TR1Zwv9Mkd8fdzTe21eZ2FyZ83DAg==
+chromedriver@77.0.0:
+  version "77.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-77.0.0.tgz#bd916cc87a0ccb7a6e4fb4b43cb2368bc54db6a0"
+  integrity sha512-mZa1IVx4HD8rDaItWbnS470mmypgiWsDiu98r0NkiT4uLm3qrANl4vOU6no6vtWtLQiW5kt1POcIbjeNpsLbXA==
   dependencies:
     del "^4.1.1"
     extract-zip "^1.6.7"
@@ -379,10 +379,10 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
-geckodriver@1.18.0:
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.18.0.tgz#a4d9b0504be26ed933d7be208b06b15833e32415"
-  integrity sha512-PFBq5UsngfLrxmNqnynix4rQgOkOWCKl3I3PlXCROiTQKSE2znIK9MnEUNQznzxNOPMRt1RGGy2cinIARSRvKQ==
+geckodriver@1.19.0:
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.19.0.tgz#b2b07e343c2e409ce645e65fe88132bd34fa400a"
+  integrity sha512-Zq98rXKjvB+NCfzKlJGkQkFAO8zvmUSNqYEIxUwlF1qxmv4taRwwBbEfDa6Dj7Auf7C0p+ZZZmIA8KmlL1cfsw==
   dependencies:
     adm-zip "0.4.11"
     bluebird "3.4.6"
