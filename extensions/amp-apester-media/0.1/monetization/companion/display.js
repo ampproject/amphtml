@@ -22,7 +22,8 @@ export function handleCompanionDisplay(media, apesterElement) {
   const monetizationSettings = media['campaignData'] || {};
   const companionRawSettings = monetizationSettings['companionOptions'] || {};
   const {enabled, settings = {}} = companionRawSettings;
-  if (enabled && settings['bannerAdProvider'] === 'gdt') {
+  const allowedAdProvider = 'gdt';
+  if (enabled && settings['bannerAdProvider'] === allowedAdProvider) {
     const slot = settings['slot'];
     const defaultBannerSizes = [[300, 250]];
     const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
