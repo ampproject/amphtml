@@ -2057,6 +2057,12 @@ export class ResourcesImpl {
     if (target.nodeType !== Node.ELEMENT_NODE) {
       return;
     }
+    // In iOS <= 12, the scroll hacks cause the scrolling element to be
+    // reported as the target, instead of the document.
+    if (target === this.viewport_.getScrollingElement()) {
+      return;
+    }
+
     const scrolled = dev().assertElement(target);
     if (!this.elementsThatScrolled_.includes(scrolled)) {
       this.elementsThatScrolled_.push(scrolled);
