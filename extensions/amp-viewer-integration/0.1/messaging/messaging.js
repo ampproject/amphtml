@@ -133,14 +133,14 @@ export class Messaging {
           app: APP,
           name: HANDSHAKE_POLL_MSG,
         };
-        target.postMessage(message, '*', [channel.port2]);
+        target./*OK*/ postMessage(message, '*', [channel.port2]);
 
         const port = channel.port1;
         const listener = e => {
           if (e.data['app'] === APP && e.data['name'] === CHANNEL_OPEN_MSG) {
             clearInterval(interval);
             port.removeEventListener('message', listener);
-            port.postMessage({
+            port./*OK*/ postMessage({
               app: APP,
               requestid: e.data['requestid'],
               type: MessageType.RESPONSE,
@@ -173,7 +173,7 @@ export class Messaging {
         ) {
           source.removeEventListener('message', listener);
           const port = new WindowPortEmulator(source, origin, target);
-          port.postMessage({
+          port./*OK*/ postMessage({
             app: APP,
             requestid: e.data['requestid'],
             type: MessageType.RESPONSE,
