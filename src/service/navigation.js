@@ -571,7 +571,7 @@ export class Navigation {
         if (unknownParams.length > 0) {
           dev().error(
             TAG,
-            'Removed unknown query params from iframe:',
+            'Removed unknown iframe query params before navigation:',
             unknownParams
           );
         }
