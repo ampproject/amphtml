@@ -1,0 +1,98 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>A Basic inline gallery</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js"></script>
+  <script async custom-element="amp-inline-gallery" src="https://cdn.ampproject.org/v0/amp-inline-gallery-0.1.js"></script>
+  <script async custom-element="amp-truncate-text" src="https://cdn.ampproject.org/v0/amp-truncate-text-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+    .outset-pagination {
+      font-size: 1.1em;
+    }
+
+    .gallery .slide img {
+      object-fit: cover;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .white {
+      background-color: white;
+    }
+
+    .grey {
+      background-color: hsla(0, 0%, 33%);
+    }
+
+    .black {
+      background-color: black;
+    }
+
+    .checkered {
+      background-image:
+          linear-gradient(45deg, #666 25%, transparent 25%),
+          linear-gradient(-45deg, #666 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #666 75%),
+          linear-gradient(-45deg, transparent 75%, #666 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+  </style>
+</head>
+<body>
+  <h1>A pagination-only inline gallery</h1>
+  <amp-inline-gallery layout="container">
+    <amp-base-carousel class="gallery" layout="responsive" width="3" height="2" snap-align="center" loop="true">
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=0" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=1" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=2" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=3" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=4" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=5" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=6" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=7" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=8" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=9" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=10" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=11" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=12" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=13" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=14" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=15" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=16" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=17" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=18" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=19" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=20" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=21" layout="flex-item"></amp-img>
+    </amp-base-carousel>
+    <amp-inline-gallery-pagination media="(max-width: 600px)" layout="nodisplay" inset>
+    </amp-inline-gallery-pagination>
+    <amp-inline-gallery-pagination class="outset-pagination" media="(min-width: 601px)" layout="fixed-height" height="26px">
+    </amp-inline-gallery-pagination>
+  </amp-inline-gallery>
+  <h2>Config</h2>
+  <ul>
+    <li>
+      Looping
+    </li>
+    <li>
+      10% peek on each slide
+    </li>
+    <li>
+      Many slides (pagination shows count instead of dots).
+    </li>
+    <li>
+      Pagination dots inset when width <= 600px
+    </li>
+  </ul>
+</body>
+</html>

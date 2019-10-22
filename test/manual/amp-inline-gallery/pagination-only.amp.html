@@ -46,7 +46,13 @@
 <body>
   <h1>A pagination-only inline gallery</h1>
   <amp-inline-gallery layout="container">
-    <amp-base-carousel class="gallery" layout="responsive" width="3" height="2" snap-align="center" loop="false">
+    <amp-base-carousel
+        class="gallery"
+        layout="responsive"
+        width="3" height="2"
+        snap-align="center"
+        loop="false"
+        controls="always">
       <amp-img class="slide" src="./img/sander-dewerte--jcP3xbN88w-unsplash-small.jpg" layout="flex-item"></amp-img>
       <amp-img class="slide" src="./img/ivars-krutainis-jTJ9-4ESzU4-unsplash-small.jpg" layout="flex-item"></amp-img>
       <amp-img class="slide" src="./img/ola-gronlund--MuvLw5G6x8-unsplash-small.jpg" layout="flex-item"></amp-img>
@@ -68,6 +74,9 @@
     </li>
     <li>
       Inset pagination dots
+    </li>
+    <li>
+      Always show arrows (even after touch)
     </li>
   </ul>
 </body>
