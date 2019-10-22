@@ -79,14 +79,21 @@ export class Expander {
     if (!url.length) {
       return this.sync_ ? url : Promise.resolve(url);
     }
+    console.log('bindings: ');
+    console.log(this.bindings_);
     const expr = this.variableSource_.getExpr(this.bindings_, this.whiteList_);
 
     const matches = this.findMatches_(url, expr);
+    console.log(matches);
     // if no keywords move on
     if (!matches.length) {
       return this.sync_ ? url : Promise.resolve(url);
     }
-    return this.parseUrlRecursively_(url, matches);
+    return this.parseUrlRecursively_(url, matches).then(resp => {
+      console.log('parsed:');
+      console.log(resp);
+      return resp;
+    });
   }
 
   /**
@@ -190,6 +197,7 @@ export class Expander {
           } else {
             // Many macros do not take arguments, in this case we do not need to
             // recurse, we just start resolution in it's position.
+            console.log('evaluating');
             results.push(this.evaluateBinding_(binding));
           }
 
@@ -296,33 +304,46 @@ export class Expander {
    */
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;
+    console.log(
+      'Encode: ' + encode + ' name: ' + name + ' sync: ' + this.sync_
+    );
     let binding;
     if (bindingInfo.prioritized != undefined) {
       // Has to explicity check for undefined because bindingInfo.priorityized
       // could not be a function but a false value. For example {FOO: 0}
       // If a binding is passed in through the bindings argument it always takes
       // precedence.
+      console.log('a');
       binding = bindingInfo.prioritized;
     } else if (this.sync_ && bindingInfo.sync != undefined) {
       // Use the sync resolution if avaliable when called synchronously.
       binding = bindingInfo.sync;
+      console.log('ab');
     } else if (this.sync_) {
       // If there is no sync resolution we can not wait.
       user().error(TAG, 'ignoring async replacement key: ', bindingInfo.name);
       binding = '';
+      console.log('ac');
     } else {
       // Prefer the async over the sync but it may not exist.
       binding = bindingInfo.async || bindingInfo.sync;
+      console.log('ad');
     }
-
+    console.log('binding: ' + binding);
     // We should only ever encode the top level resolution, or not at all.
     const shouldEncode = encode && !NOENCODE_WHITELIST[name];
     if (this.sync_) {
       const result = this.evaluateBindingSync_(binding, name, opt_args);
       return shouldEncode ? encodeURIComponent(result) : result;
     } else {
-      return this.evaluateBindingAsync_(binding, name, opt_args).then(result =>
-        shouldEncode ? encodeURIComponent(result) : result
+      console.log('async');
+      return this.evaluateBindingAsync_(binding, name, opt_args).then(
+        result => {
+          console.log('result: ');
+          console.log(result);
+          console.log(shouldEncode);
+          return shouldEncode ? encodeURIComponent(result) : result;
+        }
       );
     }
   }
@@ -363,12 +384,16 @@ export class Expander {
         })
         .catch(e => {
           rethrowAsync(e);
+          console.log(e.message);
+          console.log('*************************');
           this.maybeCollectVars_(name, '', opt_args);
           return Promise.resolve('');
         });
     } catch (e) {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
+      console.log(e.message);
+      console.log('----------------');
       rethrowAsync(e);
       this.maybeCollectVars_(name, '', opt_args);
       return Promise.resolve('');

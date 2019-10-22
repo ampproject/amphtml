@@ -27,6 +27,7 @@ import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
+import {registerServiceBuilder} from '../../../../src/service';
 
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
   let variables;
@@ -205,6 +206,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       urlReplacementService = Services.urlReplacementsForDoc(documentElement);
       analyticsElement = doc.createElement('amp-analytics');
       doc.body.appendChild(analyticsElement);
+      console.log('done the before each');
     });
 
     function check(input, output, opt_bindings) {
@@ -212,6 +214,8 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         variables.getMacros(analyticsElement),
         opt_bindings
       );
+      console.log('macros:');
+      console.log(macros);
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
       return expect(expanded).to.eventually.equal(output);
     }
@@ -454,6 +458,33 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
       });
     });
+
+    it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID', () => {
+      // This was iframe.win before...
+      registerServiceBuilder(win, 'story-variable', function() {
+        return Promise.resolve({
+          pageIndex: 546,
+          pageId: 'id-123',
+        });
+      });
+
+      return check(
+        '?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID',
+        '?index=546&id=id-123'
+      );
+    });
+
+    // TODO(#16916): Make this test work with synchronous throws.
+    it(
+      'should replace STORY_PAGE_INDEX and STORY_PAGE_ID' +
+        ' with empty string if amp-story is not configured',
+      () => {
+        return check('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID', '?index=&id=');
+        // return expect(
+        //   expandUrlAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID')
+        // ).to.eventually.equal('?index=&id=');
+      }
+    );
   });
 
   describe('getNameArgs:', () => {

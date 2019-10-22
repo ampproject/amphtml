@@ -213,13 +213,13 @@ export class VariableService {
       this.linkerReader_.get(name, id)
     );
 
-    this.register_('STORY_PAGE_INDEX', () => {
-      this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX');
-    });
+    this.register_('STORY_PAGE_INDEX', () =>
+      this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX')
+    );
 
-    this.register_('STORY_PAGE_ID', () => {
-      this.getStoryValue_('pageId', 'STORY_PAGE_ID');
-    });
+    this.register_('STORY_PAGE_ID', () =>
+      this.getStoryValue_('pageId', 'STORY_PAGE_ID')
+    );
   }
 
   /**
@@ -233,6 +233,8 @@ export class VariableService {
       'CONSENT_STATE': getConsentStateStr(element),
     };
     const merged = Object.assign({}, this.macros_, elementMacros);
+    console.log('merged:');
+    console.log(merged);
     return /** @type {!JsonObject} */ (merged);
   }
 
@@ -244,17 +246,39 @@ export class VariableService {
    * @private
    */
   getStoryValue_(property, name) {
-    return () => {
-      const service = Services.storyVariableServiceForOrNull(this.ampdoc_.win);
-      return service.then(storyVariables => {
-        userAssert(
-          storyVariables,
-          'To use variable %s amp-story should be configured',
-          name
-        );
-        return storyVariables[property];
-      });
-    };
+    console.log('Property: ' + property);
+    console.log('Name: ' + name);
+    console.log('in the story value function ');
+    const service = Services.storyVariableServiceForOrNull(this.ampdoc_.win);
+    console.log('service:');
+    console.log(service);
+    return service.then(storyVariables => {
+      console.log('storyVariable[property]: ');
+      console.log(storyVariables[property]);
+      userAssert(
+        storyVariables,
+        'To use variable %s amp-story should be configured',
+        name
+      );
+      // return 'hello';
+      return storyVariables[property];
+    });
+    // return () => {
+    //   console.log('in the story value function ');
+    //   const service = Services.storyVariableServiceForOrNull(this.ampdoc_.win);
+    //   console.log('service:');
+    //   console.log(service);
+    //   return service.then(storyVariables => {
+    //     console.log('storyVariables: ');
+    //     console.log(storyVariables);
+    //     userAssert(
+    //       storyVariables,
+    //       'To use variable %s amp-story should be configured',
+    //       name
+    //     );
+    //     return storyVariables[property];
+    //   });
+    // };
   }
 
   /**

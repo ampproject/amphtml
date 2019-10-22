@@ -1017,7 +1017,11 @@ export class UrlReplacements {
       opt_noEncode
     )
       ./*OK*/ expand(url)
-      .then(replacement => this.ensureProtocolMatches_(url, replacement)));
+      .then(replacement => {
+        console.log('replacement:');
+        console.log(replacement);
+        return this.ensureProtocolMatches_(url, replacement);
+      }));
   }
 
   /**
