@@ -258,13 +258,15 @@ export class ResourcesImpl {
 
     this.rebuildDomWhenReady_();
 
-    /** @private @const */
-    this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 10);
+    if (isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')) {
+      /** @private @const */
+      this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 10);
 
-    listen(this.win.document, 'scroll', this.throttledScroll_, {
-      capture: true,
-      passive: true,
-    });
+      listen(this.win.document, 'scroll', this.throttledScroll_, {
+        capture: true,
+        passive: true,
+      });
+    }
   }
 
   /** @private */
