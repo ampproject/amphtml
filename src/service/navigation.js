@@ -369,68 +369,59 @@ export class Navigation {
   }
 
   /**
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {!Event} e
    * @private
    */
-  handleClick_(target, e) {
-    this.expandVarsForAnchor_(target);
+  handleClick_(element, e) {
+    this.expandVarsForAnchor_(element);
 
-    let tgtLoc = this.parseUrl_(target.href);
+    let targetLocation = this.parseUrl_(element.href);
 
-    // Handle AMP-to-AMP navigation if rel=amphtml.
-    if (this.handleA2AClick_(e, target, tgtLoc)) {
+    // Handle AMP-to-AMP navigation and early-outs, if rel=amphtml.
+    if (this.handleA2AClick_(e, element, targetLocation)) {
       return;
     }
 
-    // Handle navigating to custom protocol if applicable.
-    if (this.handleCustomProtocolClick_(e, target, tgtLoc)) {
+    // Handle navigating to custom protocol and early-outs, if applicable.
+    if (this.handleCustomProtocolClick_(e, element, targetLocation)) {
       return;
     }
 
-    // In test mode, we're not able to properly fix the anchor tag's base URL.
-    // So, we have to use the (mocked) window's location instead.
-    const baseHref =
-      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
-    const curLoc = this.parseUrl_(baseHref);
-    const tgtHref = getHref(tgtLoc);
-    const curHref = getHref(curLoc);
-
-    if (tgtHref != curHref) {
-      // Only apply anchor mutator if this is an external navigation
-      this.applyAnchorMutators_(target, e);
-      tgtLoc = this.parseUrl_(target.href);
+    const currentLocation = this.getLocation_();
+    // Only apply anchor mutator if this is an external navigation.
+    // Note that anchor mutators may theoretically change the navigation
+    // from external to internal, so we re-parse the new targetLocation
+    // in handleNavigation_().
+    if (getHrefMinusHash(targetLocation) != getHrefMinusHash(currentLocation)) {
+      this.applyAnchorMutators_(element, e);
+      targetLocation = this.parseUrl_(element.href);
     }
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavClick_(e, target, tgtLoc, curLoc);
+    this.handleNavigation_(e, element, targetLocation, currentLocation);
   }
 
   /**
-   * @param {!Element} target
+   * Handles "contextmenu" event e.g. right mouse button click.
+   * @param {!Element} element
    * @param {!Event} e
    * @private
    */
-  handleContextMenuClick_(target, e) {
-    // Handles contextmenu click. Note that currently this only deals
-    // with url variable substitution and expansion, as there is
-    // straightforward way of determining what the user clicked in the
-    // context menu, required for A2A navigation and custom link protocol
-    // handling.
-    // TODO(alabiaga): investigate fix for handling A2A and custom link
-    // protocols.
-    this.expandVarsForAnchor_(target);
-    this.applyAnchorMutators_(target, e);
+  handleContextMenuClick_(element, e) {
+    // TODO(wg-runtime): Handle A2A and custom link protocols.
+    this.expandVarsForAnchor_(element);
+    this.applyAnchorMutators_(element, e);
   }
 
   /**
    * Apply anchor transformations.
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {!Event} e
    */
-  applyAnchorMutators_(target, e) {
+  applyAnchorMutators_(element, e) {
     this.anchorMutators_.forEach(anchorMutator => {
-      anchorMutator(target, e);
+      anchorMutator(element, e);
     });
   }
 
@@ -466,20 +457,20 @@ export class Navigation {
    * Handles clicking on a custom protocol link.
    * Returns true if the navigation was handled. Otherwise, returns false.
    * @param {!Event} e
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {!Location} location
    * @return {boolean}
    * @private
    */
-  handleCustomProtocolClick_(e, target, location) {
+  handleCustomProtocolClick_(e, element, location) {
     // Handle custom protocols only if the document is iframed.
     if (!this.isIframed_) {
       return false;
     }
 
     /** @const {!Window} */
-    const win = toWin(target.ownerDocument.defaultView);
-    const url = target.href;
+    const win = toWin(element.ownerDocument.defaultView);
+    const url = element.href;
     const {protocol} = location;
 
     // On Safari iOS, custom protocol links will fail to open apps when the
@@ -510,16 +501,16 @@ export class Navigation {
    * Handles clicking on an AMP link.
    * Returns true if the navigation was handled. Otherwise, returns false.
    * @param {!Event} e
-   * @param {!Element} target
+   * @param {!Element} element
    * @param {!Location} location
    * @return {boolean}
    * @private
    */
-  handleA2AClick_(e, target, location) {
-    if (!target.hasAttribute('rel')) {
+  handleA2AClick_(e, element, location) {
+    if (!element.hasAttribute('rel')) {
       return false;
     }
-    const relations = target
+    const relations = element
       .getAttribute('rel')
       .split(' ')
       .map(s => s.trim());
@@ -535,63 +526,57 @@ export class Navigation {
   }
 
   /**
-   * Handles clicking on a link with hash navigation.
+   * Handles click-navigation on a non-A2A, standard-protocol link.
    * @param {!Event} e
-   * @param {!Element} target
-   * @param {!Location} tgtLoc
-   * @param {!Location} curLoc
+   * @param {!Element} element
+   * @param {!Location} targetLocation
+   * @param {!Location} currentLocation
    * @private
    */
-  handleNavClick_(e, target, tgtLoc, curLoc) {
-    const tgtHref = getHref(tgtLoc);
-    const curHref = getHref(curLoc);
+  handleNavigation_(e, element, targetLocation, currentLocation) {
+    const target = getHrefMinusHash(targetLocation);
+    const current = getHrefMinusHash(currentLocation);
 
-    // If the current target anchor link is the same origin + path
-    // as the current document then we know we are just linking to an
-    // identifier in the document. Otherwise, it's an external navigation.
-    if (!tgtLoc.hash || tgtHref != curHref) {
+    // Handle same-page (hash) navigation separately.
+    if (targetLocation.hash && target == current) {
+      this.handleHashNavigation_(e, targetLocation, currentLocation);
+    } else {
+      // Otherwise, this is an other-page (external) navigation.
       if (this.isEmbed_ || this.isInABox_) {
-        // Target in the embed must be either _top or _blank. If none specified,
-        // force to _blank.
-        const targetAttr = (target.getAttribute('target') || '').toLowerCase();
+        // Target in the embed must be either _top or _blank (default).
+        const targetAttr = (element.getAttribute('target') || '').toLowerCase();
         if (targetAttr != '_top' && targetAttr != '_blank') {
-          target.setAttribute('target', '_blank');
-        }
-        return; // bail early.
-      }
-
-      // Accessibility fix for IE browser.
-      // Issue: anchor navigation in IE changes visual focus of the browser
-      // and shifts to the element being linked to,
-      // where the input focus stays where it was.
-      // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
-      // @see https://github.com/ampproject/amphtml/issues/18671
-      if (Services.platformFor(this.ampdoc.win).isIe()) {
-        const internalTargetElmId = tgtLoc.hash.substring(1);
-        const internalElm = this.ampdoc.getElementById(internalTargetElmId);
-        if (internalElm) {
-          if (
-            !/^(?:a|select|input|button|textarea)$/i.test(internalElm.tagName)
-          ) {
-            internalElm.tabIndex = -1;
-          }
-          tryFocus(internalElm);
+          element.setAttribute('target', '_blank');
         }
       }
-      return;
     }
-
-    this.handleInternalNavigation_(e, tgtLoc, curLoc);
   }
 
   /**
    * Handles clicking on an internal link
    * @param {!Event} e
-   * @param {!Location} tgtLoc
-   * @param {!Location} curLoc
+   * @param {!Location} targetLocation
+   * @param {!Location} currentLocation
    * @private
    */
-  handleInternalNavigation_(e, tgtLoc, curLoc) {
+  handleHashNavigation_(e, targetLocation, currentLocation) {
+    // Anchor navigation in IE doesn't change input focus, which can result in
+    // confusing behavior e.g. when pressing "tab" button.
+    // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
+    // @see https://github.com/ampproject/amphtml/issues/18671
+    if (Services.platformFor(this.ampdoc.win).isIe()) {
+      const id = targetLocation.hash.substring(1);
+      const elementWithId = this.ampdoc.getElementById(id);
+      if (elementWithId) {
+        if (
+          !/^(?:a|select|input|button|textarea)$/i.test(elementWithId.tagName)
+        ) {
+          elementWithId.tabIndex = -1;
+        }
+        tryFocus(elementWithId);
+      }
+    }
+
     // We prevent default so that the current click does not push
     // into the history stack as this messes up the external documents
     // history which contains the amp document.
@@ -604,11 +589,11 @@ export class Navigation {
     }
 
     // Look for the referenced element.
-    const hash = tgtLoc.hash.slice(1);
-    let elem = null;
+    const hash = targetLocation.hash.slice(1);
+    let el = null;
     if (hash) {
       const escapedHash = escapeCssSelectorIdent(hash);
-      elem =
+      el =
         this.rootNode_.getElementById(hash) ||
         // Fallback to anchor[name] if element with id is not found.
         // Linking to an anchor element with name is obsolete in html5.
@@ -617,13 +602,13 @@ export class Navigation {
 
     // If possible do update the URL with the hash. As explained above
     // we do `replace` to avoid messing with the container's history.
-    if (tgtLoc.hash != curLoc.hash) {
-      this.history_.replaceStateForTarget(tgtLoc.hash).then(() => {
-        this.scrollToElement_(elem, hash);
+    if (targetLocation.hash != currentLocation.hash) {
+      this.history_.replaceStateForTarget(targetLocation.hash).then(() => {
+        this.scrollToElement_(el, hash);
       });
     } else {
       // If the hash did not update just scroll to the element.
-      this.scrollToElement_(elem, hash);
+      this.scrollToElement_(el, hash);
     }
   }
 
@@ -681,6 +666,18 @@ export class Navigation {
   parseUrl_(url) {
     return Services.urlForDoc(this.serviceContext_).parse(url);
   }
+
+  /**
+   * @return {!Location}
+   * @private
+   */
+  getLocation_() {
+    // In test mode, we're not able to properly fix the anchor tag's base URL.
+    // So, we have to use the (mocked) window's location instead.
+    const baseHref =
+      getMode().test && !this.isEmbed_ ? this.ampdoc.win.location.href : '';
+    return this.parseUrl_(baseHref);
+  }
 }
 
 /**
@@ -735,10 +732,10 @@ function maybeExpandUrlParams(ampdoc, e) {
 }
 
 /**
- * Calculate and return the href from the Location
+ * Returns href without hash.
  * @param {!Location} location
  * @return {string}
  */
-function getHref(location) {
+function getHrefMinusHash(location) {
   return `${location.origin}${location.pathname}${location.search}`;
 }
