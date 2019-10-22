@@ -21,8 +21,8 @@
   },
   "content_scripts": [
     {
-      "js": [ "content_script.js" ],
-      "matches": [ "<all_urls>" ],
+      "js": ["content_script.js"],
+      "matches": ["<all_urls>"],
       "run_at": "document_start"
     }
   ],
