@@ -40,15 +40,8 @@ export class AmpQuiz extends AMP.BaseElement {
     const html = htmlFor(this.element);
     this.shadowElement_ = html`
       <div class="i-amp-quiz-container">
-        <div class="i-amp-quiz-head-container">
-          <div><slot name="prompt">prompt</slot></div>
-        </div>
-        <div class="i-amp-quiz-option-container">
-          <slot class="i-amp-quiz-option" name="option1"></slot>
-          <slot class="i-amp-quiz-option" name="option2"></slot>
-          <slot class="i-amp-quiz-option" name="option3"></slot>
-          <slot class="i-amp-quiz-option" name="option4"></slot>
-        </div>
+        <div class="i-amp-quiz-prompt-container"></div>
+        <div class="i-amp-quiz-option-container"></div>
       </div>
     `;
 
@@ -65,8 +58,7 @@ export class AmpQuiz extends AMP.BaseElement {
     });
     this.attachOptionHandlers_();
 
-    // // TODO: ATTACH A SURFACE LEVEL CLASS
-    // // TODO: ATTACH A STYLESHEET NORMALLY
+    // TODO: ATTACH SURFACE OPTIONS USING CSS CUSTOM PROPERTIES
   }
 
   /** @override */
@@ -80,34 +72,38 @@ export class AmpQuiz extends AMP.BaseElement {
   attachContent_(handleError) {
     // TODO: OPTIMIZE THIS ISH
     // AND TEST FOR THE EDGE CASES
-    // grab content
     const prompt = this.element.children[0];
     if (!(prompt instanceof HTMLHeadingElement)) {
       handleError('Heading missing');
     }
 
-    const options = Array.from(this.element.querySelectorAll('option'));
+    const options = Array.from(this.element.querySelectorAll('span'));
     if (options.length < 2 || options.length > 4) {
       handleError('Improper number of options');
     }
 
-    // TODO: FIX CSS SETUP!
+    this.shadowRoot_
+      .querySelector('.i-amp-quiz-prompt-container')
+      .appendChild(prompt);
 
-    prompt.setAttribute('slot', 'prompt');
-
-    let i = 0;
+    const answerChoiceOptions = ['A', 'B', 'C', 'D'];
     options.forEach(option => {
-      option.setAttribute('slot', `option${++i}`);
-      // TODO: MANUALLY PASS THROUGH CORRECT
-      // TODO: FIX THIS SO IT WORKS WITH THE CSS
-      if (option.hasAttribute('correct')) {
-        this.shadowRoot_
-          // eslint-disable-next-line local/query-selector
-          .querySelector(`[name=${option.slot}]`)
-          .setAttribute('correct', 'correct');
-      }
+      option.setAttribute('class', 'i-amp-quiz-option');
+      this.shadowRoot_
+        .querySelector('.i-amp-quiz-option-container')
+        .appendChild(option);
+
+      const answerChoice = document.createElement('span');
+      answerChoice.textContent = answerChoiceOptions.shift();
+      answerChoice.setAttribute('class', 'i-amp-quiz-answer-choice');
+      option.prepend(answerChoice);
+      // add option number to each
+      // will this be an issue with the option tag?
     });
-    // check constraints
+
+    if (this.element.children.length !== 0) {
+      handleError('Too many children');
+    }
   }
 
   /** @private */
