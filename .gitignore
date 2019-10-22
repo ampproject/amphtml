@@ -21,8 +21,6 @@ test/coverage
 *.swp
 *.swo
 yarn-error.log
-PERCY_BUILD_ID
-chromedriver.log
 sc-*-linux*
 sc-*-osx*
 sauce_connect_*
