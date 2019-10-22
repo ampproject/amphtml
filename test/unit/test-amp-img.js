@@ -731,5 +731,45 @@ describe('amp-img', () => {
           expect(imgDimensions.width).to.equal(800);
         });
     });
+
+    it('expands a parent div with no explicit dimensions', () => {
+      const parentDiv = fixture.doc.getElementById('parent');
+      // inline-block to force width and height to size of children
+      // font-size 0 to get rid of the 4px added by inline-block for whitespace
+      parentDiv.setAttribute('style', 'display: inline-block; font-size: 0;');
+      return getImg({
+        src: '/examples/img/sample.jpg', // 641 x 481
+        width: 600,
+        height: 400,
+        layout: 'intrinsic',
+      }).then(ampImg => {
+        const dimensions = ampImg.getBoundingClientRect();
+        expect(dimensions.width).to.equal(600);
+        expect(dimensions.height).to.equal(400);
+        const parentDiv = fixture.doc.getElementById('parent');
+        const parentDimensions = parentDiv.getBoundingClientRect();
+        expect(parentDimensions.width).to.equal(600);
+        expect(parentDimensions.height).to.equal(400);
+      });
+    });
+
+    it('is bounded by explicit dimensions of a parent container', () => {
+      const parentDiv = fixture.doc.getElementById('parent');
+      parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+      return getImg({
+        src: '/examples/img/sample.jpg', // 641 x 481
+        width: 800,
+        height: 600,
+        layout: 'intrinsic',
+      }).then(ampImg => {
+        const dimensions = ampImg.getBoundingClientRect();
+        expect(dimensions.width).to.equal(80);
+        expect(dimensions.height).to.equal(60);
+        const parentDiv = fixture.doc.getElementById('parent');
+        const parentDimensions = parentDiv.getBoundingClientRect();
+        expect(parentDimensions.height).to.equal(80);
+        expect(parentDimensions.width).to.equal(80);
+      });
+    });
   });
 });
