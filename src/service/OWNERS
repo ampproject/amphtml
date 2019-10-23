@@ -4,12 +4,8 @@
 {
   rules: [
     {
-      owners: [
-        { name: 'aghassemi' },
-        { name: 'choumx' },
-        { name: 'erwinmombay' },
-        { name: 'rsimha' }
-      ]
-    }
-  ]
+      pattern: 'video-*.js',
+      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+    },
+  ],
 }

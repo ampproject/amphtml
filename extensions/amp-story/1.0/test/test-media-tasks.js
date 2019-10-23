@@ -27,12 +27,14 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, () => {
+describes.realWin('media-tasks', {}, env => {
+  let win;
   let sandbox;
   let el;
   let vsyncApi;
 
   beforeEach(() => {
+    win = env.win;
     sandbox = sinon.sandbox;
     el = document.createElement('video');
 
@@ -159,7 +161,7 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(null, []);
-      const task = new UpdateSourcesTask(newSources);
+      const task = new UpdateSourcesTask(win, newSources);
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
@@ -173,7 +175,7 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, []);
-      const task = new UpdateSourcesTask(newSources);
+      const task = new UpdateSourcesTask(win, newSources);
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
@@ -186,7 +188,7 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(NEW_SRC_URL, []);
-      const task = new UpdateSourcesTask(newSources);
+      const task = new UpdateSourcesTask(win, newSources);
       task.execute(el);
       expect(el.src).to.equal(NEW_SRC_URL);
       expect(toArray(el.children)).to.be.empty;
@@ -202,10 +204,47 @@ describes.realWin('media-tasks', {}, () => {
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, NEW_SRC_ELS);
-      const task = new UpdateSourcesTask(newSources);
+      const task = new UpdateSourcesTask(win, newSources);
       task.execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.deep.equal(NEW_SRC_ELS);
+    });
+
+    it('should propagate the src attribute as a source', () => {
+      el.setAttribute('src', './foo.mp4');
+      const newSources = Sources.removeFrom(win, el);
+      const task = new UpdateSourcesTask(win, newSources);
+      task.execute(el);
+      expect(el).to.not.have.attribute('src');
+      expect(toArray(el.children)).to.have.length(1);
+      expect(el.firstElementChild).to.have.attribute('src');
+      expect(el.firstElementChild.getAttribute('src')).to.equal('./foo.mp4');
+    });
+
+    it('should propagate the amp-orig-src attribute as a source', () => {
+      el.setAttribute('src', './foo.mp4');
+      el.setAttribute('amp-orig-src', './bar.mp4');
+      const newSources = Sources.removeFrom(win, el);
+      const task = new UpdateSourcesTask(win, newSources);
+      task.execute(el);
+      expect(el.firstElementChild).to.have.attribute('amp-orig-src');
+      expect(el.firstElementChild.getAttribute('amp-orig-src')).to.equal(
+        './bar.mp4'
+      );
+    });
+
+    it('should drop sources if a src attribute is specified', () => {
+      el.setAttribute('src', './foo.mp4');
+      getFakeSources([1, 2, 3]).forEach(source => {
+        el.appendChild(source);
+      });
+      const newSources = Sources.removeFrom(win, el);
+      const task = new UpdateSourcesTask(win, newSources);
+      task.execute(el);
+      expect(el).to.not.have.attribute('src');
+      expect(toArray(el.children)).to.have.length(1);
+      expect(el.firstElementChild).to.have.attribute('src');
+      expect(el.firstElementChild.getAttribute('src')).to.equal('./foo.mp4');
     });
   });
 

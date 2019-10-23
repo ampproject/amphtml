@@ -44,7 +44,7 @@ export function maybeValidate(win) {
   if (validator) {
     loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
       /* global amp: false */
-      amp.validator.validateUrlAndLog(filename, win.document, getMode().filter);
+      amp.validator.validateUrlAndLog(filename, win.document);
     });
   } else if (getMode().examiner) {
     loadScript(win.document, `${urls.cdn}/examiner.js`);

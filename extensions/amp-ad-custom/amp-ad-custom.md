@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# AMP Template Ad Integration Guidelines 
+# AMP Template Ad Integration Guidelines
 
 ## Overview
 AMP template ads are an alternative way to serve valid AMPHTML ads without the complexity of serving time validation and signing. The high level idea is to load an ad template that is written in AMP and served from an authorized AMP proxy server, and render the ad client-side with fetched ad data in JSON format from an ad server.
@@ -24,13 +24,13 @@ For any ad network to serve AMPHTML template ads, the integration consists of 3 
 - Ad server change: ad serving endpoint
 - Ads tag in AMP
 
-## AMPHTML Ad Template Creation 
-Ad network creates ad templates in AMP format and hosts them on their own domain similar to canonical AMP pages. 
+## AMPHTML Ad Template Creation
+Ad network creates ad templates in AMP format and hosts them on their own domain similar to canonical AMP pages.
 
 For example, adnetwork.com could host a template at the following URL:
-`https://adexample.com/amp_template_1.html`
+`https://adnetwork.com/amp_template_1.html`
 The corresponding AMP proxy URL is:
-`https://adexample-com.cdn.ampproject.org/ad/s/adnetwork.com/amp_template_1.html.`
+`https://adnetwork-com.cdn.ampproject.org/ad/s/adnetwork.com/amp_template_1.html.`
 
 The ad network's domain name (origin) serves as a namespace, and the URL path serves as its ID.
 
@@ -71,6 +71,7 @@ The response requires a couple of custom headers:
 
 The `amp-ad-custom` extension can be used to quickly declare ad slots, using key-value pairs set on data attributes to form the ad request. An example slot might look like:
 
+```html
 <amp-ad-custom width=320 height=50
   src="http://www.my-ad-network.com"
   data-request-param-{param_1}="{val_1}"
@@ -78,6 +79,7 @@ The `amp-ad-custom` extension can be used to quickly declare ad slots, using key
   . . .
   data-request-param-{param_N}="{val_N}">
 </amp-ad-custom>
+```
 
 And the resultant ad request URL would be: `http://www.my-ad-network.com?{param_1}={val_1}&{param_2}={val_2}&...&{param_N}={val_N}`.
 
