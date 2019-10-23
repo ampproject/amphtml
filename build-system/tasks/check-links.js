@@ -63,9 +63,9 @@ async function checkLinks() {
         }
         if (status === 'dead') {
           deadLinksFoundInFile = true;
-          log(`[${red('✖')}]`, link, `(${red(statusCode)})`);
+          log(`[${red('✖')}] ${link} (${red(statusCode)})`);
         } else if (!isTravisBuild()) {
-          log(`[${green('✔')}]`, link);
+          log(`[${green('✔')}] ${link}`);
         }
       }
       const filename = markdownFiles[index];
@@ -75,7 +75,7 @@ async function checkLinks() {
       }
       log(green('SUCCESS'), 'All links in', magenta(filename), 'are alive.');
     })
-    .filter(filenameOrUndef => !!filenameOrUndef);
+    .filter(filenameOrUndef => filenameOrUndef);
 
   if (filesWithDeadLinks.length > 0) {
     log(
@@ -150,9 +150,9 @@ function filterAllowedLinks(markdown) {
  * @return {Promise} Used to wait until the async link checker is done.
  */
 function runLinkChecker(markdownFile) {
-  // `-TEMPLATE` is a common suffix for files that may have interpolation
+  // `.template.md` is a common suffix for files that may have interpolation
   // tokens, possibly as part of their links. So we skip them.
-  if (path.basename(markdownFile).endsWith('-TEMPLATE.md')) {
+  if (path.basename(markdownFile).endsWith('.template.md')) {
     return Promise.resolve();
   }
   // Skip files that were deleted by the PR.

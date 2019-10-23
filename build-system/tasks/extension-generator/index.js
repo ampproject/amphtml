@@ -74,7 +74,7 @@ tags: {  # <${name}>
 }
 
 const getMarkdownDocFile = async name =>
-  (await fs.readFile(`${__dirname}/extension-doc-TEMPLATE.md`))
+  (await fs.readFile(`${__dirname}/extension-doc.template.md`))
     .toString('utf-8')
     .replace(/\${name}/g, name)
     .replace(/\${year}/g, year);
