@@ -244,7 +244,9 @@ describes.realWin(
 
     it('renderResults_() should update the container_ with rich text', () => {
       const sourceData = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
-      impl.templateElement_ = doc.createElement('template');
+      const template = doc.createElement('template');
+      sandbox.stub(impl.templates_, 'hasTemplate').returns(true);
+      sandbox.stub(impl.templates_, 'findTemplate').returns(template);
       const renderedChildren = [];
       sourceData.forEach(item => {
         const renderedChild = doc.createElement('div');
@@ -874,7 +876,9 @@ describes.realWin(
     });
 
     it('should not return disabled items from getEnabledItems_()', () => {
-      impl.templateElement_ = doc.createElement('template');
+      const template = doc.createElement('template');
+      sandbox.stub(impl.templates_, 'hasTemplate').returns(true);
+      sandbox.stub(impl.templates_, 'findTemplate').returns(template);
       const sourceData = ['apple', 'mango', 'pear'];
       const renderedChildren = sourceData.map(item => {
         const renderedChild = doc.createElement('div');

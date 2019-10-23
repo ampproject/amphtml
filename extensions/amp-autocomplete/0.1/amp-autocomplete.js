@@ -19,18 +19,25 @@ import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
+  requestForBatchFetch,
 } from '../../../src/batched-json';
 import {childElementsByTag, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
+import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
+import {
+  setupAMPCors,
+  setupInput,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
 import {toggle} from '../../../src/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
@@ -158,10 +165,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.templates_ = Services.templatesFor(this.win);
 
     /**
-     * The reference to the <template> tag provided as a child.
-     * @private {?Element}
+     * @private {?../../../src/ssr-template-helper.SsrTemplateHelper}
      */
-    this.templateElement_ = null;
+    this.ssrTemplateHelper_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -177,6 +183,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    this.ssrTemplateHelper_ = new SsrTemplateHelper(
+      TAG,
+      viewer,
+      this.templates_
+    );
 
     const jsonScript = this.element.querySelector(
       'script[type="application/json"]'
@@ -215,17 +227,38 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
 
-    if (
-      this.templates_.hasTemplate(this.element, 'template, script[template]')
-    ) {
-      this.templateElement_ = this.templates_.findTemplate(
-        this.element,
-        'template, script[template]'
+    const isSsr = this.ssrTemplateHelper_.isSupported();
+    const hasTemplate = this.templates_.hasTemplate(
+      this.element,
+      'template, script[template]'
+    );
+    if (isSsr) {
+      userAssert(
+        hasTemplate,
+        `${TAG} should provide a <template> or <script type="plain/text"> element.`
       );
-      // Dummy render to verify existence of "data-value" attribute.
-      this.templates_
-        .renderTemplate(this.templateElement_, /** @type {!JsonObject} */ ({}))
+      userAssert(
+        !this.element.hasAttribute('filter'),
+        `${TAG} does not support client-side filter when server-side render is possible`
+      );
+      this.filter_ = FilterType.NONE;
+    } else {
+      this.filter_ = userAssert(
+        this.element.getAttribute('filter'),
+        `${TAG} requires "filter" attribute.`
+      );
+      userAssert(
+        isEnumValue(FilterType, this.filter_),
+        `Unexpected filter: ${this.filter_}`
+      );
+    }
+    if (hasTemplate) {
+      // Dummy render to verify existence of "data-value" or "data-disabled" attribute.
+      const empty = /** @type {!JsonObject} */ ({});
+      this.ssrTemplateHelper_
+        .applySsrOrCsrTemplate(this.element, empty)
         .then(renderedEl => {
+          dev().assertElement(renderedEl);
           userAssert(
             renderedEl.hasAttribute('data-value') ||
               renderedEl.hasAttribute('data-disabled'),
@@ -233,15 +266,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
           );
         });
     }
-
-    this.filter_ = userAssert(
-      this.element.getAttribute('filter'),
-      `${TAG} requires "filter" attribute.`
-    );
-    userAssert(
-      isEnumValue(FilterType, this.filter_),
-      `Unexpected filter: ${this.filter_}`
-    );
 
     // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
@@ -310,6 +334,31 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
+    if (this.ssrTemplateHelper_.isSupported()) {
+      return requestForBatchFetch(this.element, policy).then(r => {
+        const request = r;
+
+        request.xhrUrl = setupInput(this.win, request.xhrUrl, request.fetchOpt);
+        request.fetchOpt = setupAMPCors(
+          this.win,
+          request.xhrUrl,
+          request.fetchOpt
+        );
+        setupJsonFetchInit(r.fetchOpt);
+
+        const attributes = dict({
+          'ampAutocompleteAttributes': {
+            'items': itemsExpr,
+          },
+        });
+        return this.ssrTemplateHelper_.ssr(
+          this.element,
+          request,
+          /* opt_templates */ null,
+          attributes
+        );
+      });
+    }
     return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy).catch(
       e => {
         if (e.message === 'Response is undefined.') {
@@ -513,9 +562,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
   renderResults_(filteredData, container, input) {
     let renderPromise = Promise.resolve();
     this.resetActiveElement_();
-    if (this.templateElement_) {
-      renderPromise = this.templates_
-        .renderTemplateArray(this.templateElement_, filteredData)
+    if (
+      this.templates_.hasTemplate(this.element, 'template, script[template]')
+    ) {
+      renderPromise = this.ssrTemplateHelper_
+        .applySsrOrCsrTemplate(this.element, filteredData)
         .then(renderedChildren => {
           renderedChildren.map(child => {
             if (child.hasAttribute('data-disabled')) {
