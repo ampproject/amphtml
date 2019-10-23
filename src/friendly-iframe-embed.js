@@ -857,7 +857,10 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   installDOMTokenList(childWin);
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  installCustomElements(childWin, class {});
+  installCustomElements(
+    childWin,
+    NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
+  );
 }
 
 /**
