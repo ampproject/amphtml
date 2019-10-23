@@ -20,7 +20,9 @@
  */
 
 import {childElementsByTag, isJsonScriptTag} from './dom';
-import {isObject} from './types';
+import {isObject, parseJson} from './types';
+
+export {parseJson};
 
 // NOTE Type are changed to {*} because of
 // https://github.com/google/closure-compiler/issues/1999
@@ -99,17 +101,6 @@ export function getValueForExpr(obj, expr) {
     break;
   }
   return value;
-}
-
-/**
- * Simple wrapper around JSON.parse that casts the return value
- * to JsonObject.
- * Create a new wrapper if an array return value is desired.
- * @param {*} json JSON string to parse
- * @return {?JsonObject} May be extend to parse arrays.
- */
-export function parseJson(json) {
-  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**

@@ -95,3 +95,32 @@ export function isEnumValue(enumObj, s) {
 export function toWin(winOrNull) {
   return /** @type {!Window} */ (winOrNull);
 }
+
+/**
+ * Returns the data property of an event with the correct type.
+ * @param {!Event|{data: !JsonObject}} event
+ * @return {?JsonObject|string|undefined}
+ */
+export function getData(event) {
+  return /** @type {?JsonObject|string|undefined} */ (event.data);
+}
+
+/**
+ * Returns the detail property of an event with the correct type.
+ * @param {!Event|{detail: !JsonObject}} event
+ * @return {?JsonObject|string|undefined}
+ */
+export function getDetail(event) {
+  return /** @type {?JsonObject|string|undefined} */ (event.detail);
+}
+
+/**
+ * Simple wrapper around JSON.parse that casts the return value
+ * to JsonObject.
+ * Create a new wrapper if an array return value is desired.
+ * @param {*} json JSON string to parse
+ * @return {?JsonObject} May be extend to parse arrays.
+ */
+export function parseJson(json) {
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+}

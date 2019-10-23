@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {getData, getDetail} from './types';
 import {internalListenImplementation} from './event-helper-listen';
 import {lastChildElement} from './dom';
 import {user} from './log';
+
+export {getData, getDetail};
 
 /** @const {string}  */
 const LOAD_FAILURE_PREFIX = 'Failed to load:';
@@ -67,24 +70,6 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
     listener,
     opt_evtListenerOpts
   );
-}
-
-/**
- * Returns the data property of an event with the correct type.
- * @param {!Event|{data: !JsonObject}} event
- * @return {?JsonObject|string|undefined}
- */
-export function getData(event) {
-  return /** @type {?JsonObject|string|undefined} */ (event.data);
-}
-
-/**
- * Returns the detail property of an event with the correct type.
- * @param {!Event|{detail: !JsonObject}} event
- * @return {?JsonObject|string|undefined}
- */
-export function getDetail(event) {
-  return /** @type {?JsonObject|string|undefined} */ (event.detail);
 }
 
 /**

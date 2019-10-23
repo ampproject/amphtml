@@ -257,15 +257,15 @@ requirement: {
   whitelist: 'ads/mads.js'
   whitelist: 'ads/google/imaVideo.js'
   whitelist: 'ads/zen.js'
-  whitelist: 'src/json.js' # Where parseJson itself is implemented.
+  whitelist: 'src/types.js' # Where parseJson itself is implemented.
 }
 
 requirement: {
   type: BANNED_PROPERTY_READ
-  error_message: 'Use eventHelper#getData to read the data property. OK to whitelist 3p ads for now.'
+  error_message: 'Use types#getData to read the data property. OK to whitelist 3p ads for now.'
   value: 'Event.prototype.data'
   value: 'MessageEvent.prototype.data'
-  whitelist: 'src/event-helper.js' # getData is implemented here
+  whitelist: 'src/types.js' # getData is implemented here
   whitelist: 'src/web-worker/amp-worker.js' # OK to use in version bound worker
   whitelist: 'src/web-worker/web-worker.js' # OK to use in version bound worker
 
@@ -281,10 +281,10 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_READ
-  error_message: 'Use eventHelper#getDetail to read the detail property. OK to whitelist 3p ads for now.'
+  error_message: 'Use types#getDetail to read the detail property. OK to whitelist 3p ads for now.'
   value: 'Event.prototype.detail'
   value: 'MessageEvent.prototype.detail'
-  whitelist: 'src/event-helper.js' # getDetail is implemented here
+  whitelist: 'src/types.js' # getDetail is implemented here
 
   # 3p ads are OK
   whitelist: 'ads/adhese.js'
