@@ -171,11 +171,18 @@ export class AutoAdvance {
    * @private
    */
   createDebouncedAdvance_(interval) {
-    this.debouncedAdvance_ = debounce(
+    const debouncedAdvance = debounce(
       this.win_,
-      () => this.advance_(),
+      () => {
+        if (debouncedAdvance != this.debouncedAdvance_) {
+          return;
+        }
+
+        this.advance_();
+      },
       interval
     );
+    this.debouncedAdvance_ = debouncedAdvance;
   }
 
   /**
