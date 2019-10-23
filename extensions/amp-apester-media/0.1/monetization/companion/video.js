@@ -15,6 +15,8 @@
  */
 
 import {Services} from '../../../../../src/services';
+const ALLOWED_AD_PROVIDER = 'sr';
+const get = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o);
 
 /**
  * @param {!JsonObject} media
@@ -23,53 +25,57 @@ import {Services} from '../../../../../src/services';
  * @return {Promise}
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
-  const monetizationSettings = media['campaignData'] || {};
-  const companionCampaignOptions =
-    monetizationSettings['companionCampaignOptions'] || {};
-  const companionRawSettings = monetizationSettings['companionOptions'] || {};
-  if (!companionRawSettings.video) {
+  const companionCampaignOptions = get(
+    ['campaignData', 'companionCampaignOptions'],
+    media
+  );
+  const videoSettings = get(
+    ['campaignData', 'companionOptions', 'video'],
+    media
+  );
+  const position = getCompanionPosition(videoSettings);
+  if (
+    !companionCampaignOptions ||
+    !videoSettings ||
+    !videoSettings['enabled'] ||
+    videoSettings['provider'] !== ALLOWED_AD_PROVIDER ||
+    !position ||
+    position === 'floating'
+  ) {
     return Promise.resolve();
   }
-  if (!companionRawSettings.video.enabled) {
-    return Promise.resolve();
-  }
-  if (!companionRawSettings.video.provider === 'sr') {
-    return Promise.resolve();
-  }
+  const macros = getSrMacros(
+    media,
+    companionCampaignOptions['companionCampaignId'],
+    apesterElement,
+    consentObj
+  );
 
-  const position = getCompanionPosition(companionRawSettings.video);
-  if (position && position !== 'floating') {
-    const macros = getSrMacros(
-      media,
-      companionCampaignOptions['companionCampaignId'],
-      apesterElement,
-      consentObj
-    );
+  constructCompanionSrElement(
+    videoSettings['videoTag'],
+    position,
+    /** @type {!JsonObject} */ (macros),
+    apesterElement
+  );
 
-    constructCompanionSrElement(
-      companionRawSettings['video']['videoTag'],
-      position,
-      /** @type {!JsonObject} */ (macros),
-      apesterElement
-    );
-  }
   return Promise.resolve();
 }
 /**
  * @param {!JsonObject} video
- * @return {string}
+ * @return {?string}
  */
 function getCompanionPosition(video) {
-  if (video['companion']['enabled']) {
-    return 'above';
+  if (video) {
+    if (video['companion']['enabled']) {
+      return 'above';
+    }
+    if (video['companion_below']['enabled']) {
+      return 'below';
+    }
+    if (video['floating']['enabled']) {
+      return 'floating';
+    }
   }
-  if (video['companion_below']['enabled']) {
-    return 'below';
-  }
-  if (video['floating']['enabled']) {
-    return 'floating';
-  }
-  return '';
 }
 
 /**
