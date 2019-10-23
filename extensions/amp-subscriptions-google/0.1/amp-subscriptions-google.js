@@ -39,7 +39,6 @@ import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factor
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseUrlDeprecated} from '../../../src/url';
-import {setExperiment} from '../../../third_party/subscriptions-project/swg';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
@@ -124,7 +123,7 @@ export class GoogleSubscriptionsPlatform {
     );
     // Map AMP experiment to SwG experiment.
     if (isExperimentOn(this.runtime_.win(), 'gpay-api')) {
-      setExperiment(this.runtime_.win(), 'gpay-api', true);
+      this.runtime_.configure({experiments: ['gpay-api']});
     }
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */
