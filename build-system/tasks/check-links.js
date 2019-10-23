@@ -51,51 +51,68 @@ function getMarkdownFiles() {
 async function checkLinks() {
   maybeUpdatePackages();
   const markdownFiles = getMarkdownFiles();
-  const allResults = await Promise.all(markdownFiles.map(runLinkChecker));
-
-  const filesWithDeadLinks = allResults
-    .map((results, index) => {
+  const linkCheckers = markdownFiles.map(function(markdownFile) {
+    return runLinkChecker(markdownFile);
+  });
+  return BBPromise.all(linkCheckers).then(function(allResults) {
+    let deadLinksFound = false;
+    const filesWithDeadLinks = [];
+    allResults.map(function(results, index) {
+      // Skip files that were deleted by the PR.
+      if (!fs.existsSync(markdownFiles[index])) {
+        return;
+      }
       let deadLinksFoundInFile = false;
-      for (const {link, status, statusCode} of results || []) {
+      results.forEach(function(result) {
         // Skip links to files that were introduced by the PR.
-        if (isLinkToFileIntroducedByPR(link)) {
-          continue;
+        if (isLinkToFileIntroducedByPR(result.link)) {
+          return;
         }
-        if (status === 'dead') {
+        if (result.status === 'dead') {
+          deadLinksFound = true;
           deadLinksFoundInFile = true;
-          log(`[${red('✖')}] ${link} (${red(statusCode)})`);
+          log(`[${red('✖')}] ${result.link} (${red(result.statusCode)})`);
         } else if (!isTravisBuild()) {
-          log(`[${green('✔')}] ${link}`);
+          log(`[${green('✔')}] ${result.link}`);
         }
-      }
-      const filename = markdownFiles[index];
+      });
       if (deadLinksFoundInFile) {
-        log(red('ERROR'), 'Possible dead link(s) found in', magenta(filename));
-        return filename;
+        filesWithDeadLinks.push(markdownFiles[index]);
+        log(
+          red('ERROR'),
+          'Possible dead link(s) found in',
+          magenta(markdownFiles[index])
+        );
+      } else {
+        log(
+          green('SUCCESS'),
+          'All links in',
+          magenta(markdownFiles[index]),
+          'are alive.'
+        );
       }
-      log(green('SUCCESS'), 'All links in', magenta(filename), 'are alive.');
-    })
-    .filter(filenameOrUndef => filenameOrUndef);
-
-  if (filesWithDeadLinks.length > 0) {
-    log(
-      red('ERROR'),
-      'Please update dead link(s) in',
-      magenta(filesWithDeadLinks.join(',')),
-      'or whitelist them in build-system/tasks/check-links.js'
-    );
-    log(
-      yellow('NOTE'),
-      'If the link(s) above are not meant to resolve to a real webpage,',
-      'surrounding them with backticks will exempt them from the link checker.'
-    );
-    process.exitCode = 1;
-    return;
-  }
-  log(
-    green('SUCCESS'),
-    'All links in all markdown files in this branch are alive.'
-  );
+    });
+    if (deadLinksFound) {
+      log(
+        red('ERROR'),
+        'Please update dead link(s) in',
+        magenta(filesWithDeadLinks.join(',')),
+        'or whitelist them in build-system/tasks/check-links.js'
+      );
+      log(
+        yellow('NOTE'),
+        'If the link(s) above are not meant to resolve to a real webpage',
+        'surrounding them with backticks will exempt them from the link',
+        'checker.'
+      );
+      process.exitCode = 1;
+    } else {
+      log(
+        green('SUCCESS'),
+        'All links in all markdown files in this branch are alive.'
+      );
+    }
+  });
 }
 
 /**
@@ -111,12 +128,12 @@ function isLinkToFileIntroducedByPR(link) {
 }
 
 /**
- * Filters out links in allow-list before running the link checker.
+ * Filters out whitelisted links before running the link checker.
  *
  * @param {string} markdown Original markdown.
- * @return {string} Markdown after filtering out allowed links.
+ * @return {string} Markdown after filtering out whitelisted links.
  */
-function filterAllowedLinks(markdown) {
+function filterWhitelistedLinks(markdown) {
   let filteredMarkdown = markdown;
 
   // localhost links optionally preceded by ( or [ (not served on Travis)
@@ -134,7 +151,7 @@ function filterAllowedLinks(markdown) {
   // Links inside a <pre> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<pre>([^]*?)<\/pre>/g, '');
 
-  // After allow-listing is done, clean up any remaining empty blocks bounded
+  // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block
   // and confuse the link extractor.
   filteredMarkdown = filteredMarkdown.replace(/\ \`\`\ /g, '');
@@ -150,17 +167,12 @@ function filterAllowedLinks(markdown) {
  * @return {Promise} Used to wait until the async link checker is done.
  */
 function runLinkChecker(markdownFile) {
-  // `.template.md` is a common suffix for files that may have interpolation
-  // tokens, possibly as part of their links. So we skip them.
-  if (path.basename(markdownFile).endsWith('.template.md')) {
-    return Promise.resolve();
-  }
   // Skip files that were deleted by the PR.
   if (!fs.existsSync(markdownFile)) {
     return Promise.resolve();
   }
   const markdown = fs.readFileSync(markdownFile).toString();
-  const filteredMarkdown = filterAllowedLinks(markdown);
+  const filteredMarkdown = filterWhitelistedLinks(markdown);
   const opts = {
     baseUrl: 'file://' + path.dirname(path.resolve(markdownFile)),
   };
