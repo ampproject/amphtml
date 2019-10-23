@@ -21,28 +21,29 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function nativery(global, data) {
-    validateData(data, ['wid']);
-    var params = Object.assign({}, data);
+  validateData(data, ['wid']);
+  const params = Object.assign({}, data);
 
-    // push the two object into the '_nativery' global
-    window._nativery = window._nativery || Object.assign( {}, {
-        wid: data.wid,
-        referrer: data.referrer || window.context.referrer,
-        url: data.url || window.context.canonicalUrl,
-        viewId: window.context.pageViewId,
-        params: params,
-    });
+  // push the two object into the '_nativery' global
+  window._nativery = window._nativery || Object.assign( {}, {
+    wid: data.wid,
+    referrer: data.referrer || window.context.referrer,
+    url: data.url || window.context.canonicalUrl,
+    viewId: window.context.pageViewId,
+    params: params,
+  });
     
-    // must add listener for the creation of window.context
-    window.addEventListener('amp-widgetCreated', function(e){
-        console.log("Nativery - AMP - Widget ready!");
-        if(e && e.detail)
-          global.context.requestResize(undefined, e.detail.height);
-    });
+  // must add listener for the creation of window.context
+  window.addEventListener('amp-widgetCreated', function(e){
+    console.log("Nativery - AMP - Widget ready!");
+    if(e && e.detail) {
+      global.context.requestResize(undefined, e.detail.height);
+    }
+  });
 
-    // load the nativery loader asynchronously
-    writeScript(
-      global,
-      `https://cdn.nativery.com/widget/js/natamp.js`
-    );
+  // load the nativery loader asynchronously
+  writeScript(
+    global,
+    `https://cdn.nativery.com/widget/js/natamp.js`
+  );
 }
