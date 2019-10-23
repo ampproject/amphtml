@@ -396,10 +396,6 @@ function compile(
             checkForUnknownDeps()
           )
         )
-        .on('error', err => {
-          handleCompilerError(outputFilename);
-          reject(err);
-        })
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);
