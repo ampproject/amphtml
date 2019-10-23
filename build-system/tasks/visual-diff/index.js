@@ -767,6 +767,10 @@ async function performVisualTests() {
 }
 
 async function ensureOrBuildAmpRuntimeInTestMode_() {
+  if (argv.empty) {
+    return;
+  }
+
   if (argv.nobuild) {
     const isInTestMode = /AMP_CONFIG=\{(?:.+,)?"test":true\b/.test(
       fs.readFileSync('dist/v0.js', 'utf8')
