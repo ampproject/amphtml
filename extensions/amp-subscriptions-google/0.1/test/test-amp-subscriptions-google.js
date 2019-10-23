@@ -33,6 +33,9 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {isExperimentOn} from '../../../../third_party/subscriptions-project/swg';
+import {toggleExperiment} from '../../../../src/experiments';
+
 
 const PLATFORM_ID = 'subscribe.google.com';
 
@@ -51,8 +54,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ackStub;
   let element;
   let entitlementResponse;
+  let win;
 
   beforeEach(() => {
+    win = env.win;
     ampdoc = env.ampdoc;
     element = env.win.document.createElement('script');
     element.id = 'amp-subscriptions';
@@ -123,6 +128,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   afterEach(() => {
     serviceAdapterMock.verify();
     analyticsMock.verify();
+    toggleExperiment(win, 'gpay-api', false);
   });
 
   function callback(stub) {
@@ -141,6 +147,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should scope the runtime to one ampdoc', () => {
     expect(platform.runtime_.doc_.ampdoc_).to.equal(ampdoc);
+  });
+
+  it('should propagate experiment', () => {
+    expect(isExperimentOn(win, 'gpay-api')).to.be.false;
+    toggleExperiment(win, 'gpay-api', true);
+    expect(isExperimentOn(win, 'gpay-api')).to.be.true;
   });
 
   it('should proxy fetch via AMP fetcher', () => {
