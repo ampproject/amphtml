@@ -12,45 +12,21 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <style amp-custom>
-    .outset-pagination {
-      font-size: 1.1em;
-    }
-
     .gallery .slide img {
       object-fit: cover;
-    }
-
-    .flex {
-      display: flex;
-    }
-
-    .white {
-      background-color: white;
-    }
-
-    .grey {
-      background-color: hsla(0, 0%, 33%);
-    }
-
-    .black {
-      background-color: black;
-    }
-
-    .checkered {
-      background-image:
-          linear-gradient(45deg, #666 25%, transparent 25%),
-          linear-gradient(-45deg, #666 25%, transparent 25%),
-          linear-gradient(45deg, transparent 75%, #666 75%),
-          linear-gradient(-45deg, transparent 75%, #666 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
   </style>
 </head>
 <body>
   <h1>A pagination-only inline gallery</h1>
   <amp-inline-gallery layout="container">
-    <amp-base-carousel class="gallery" layout="responsive" width="3" height="2" snap-align="center" loop="true">
+    <amp-base-carousel
+        class="gallery"
+        layout="responsive"
+        width="3" height="2"
+        snap-align="center"
+        loop="true"
+        controls="always">
       <amp-img class="slide" src="https://picsum.photos/400/600?foo=0" layout="flex-item"></amp-img>
       <amp-img class="slide" src="https://picsum.photos/400/600?foo=1" layout="flex-item"></amp-img>
       <amp-img class="slide" src="https://picsum.photos/400/600?foo=2" layout="flex-item"></amp-img>
@@ -73,25 +49,38 @@
       <amp-img class="slide" src="https://picsum.photos/400/600?foo=19" layout="flex-item"></amp-img>
       <amp-img class="slide" src="https://picsum.photos/400/600?foo=20" layout="flex-item"></amp-img>
       <amp-img class="slide" src="https://picsum.photos/400/600?foo=21" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=22" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=23" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=24" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=25" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=26" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=27" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=28" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=29" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=30" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=31" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=32" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=33" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=34" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=35" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=36" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=37" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=38" layout="flex-item"></amp-img>
+      <amp-img class="slide" src="https://picsum.photos/400/600?foo=39" layout="flex-item"></amp-img>
     </amp-base-carousel>
-    <amp-inline-gallery-pagination media="(max-width: 600px)" layout="nodisplay" inset>
-    </amp-inline-gallery-pagination>
-    <amp-inline-gallery-pagination class="outset-pagination" media="(min-width: 601px)" layout="fixed-height" height="26px">
+    <amp-inline-gallery-pagination layout="nodisplay" inset>
     </amp-inline-gallery-pagination>
   </amp-inline-gallery>
   <h2>Config</h2>
   <ul>
     <li>
-      Looping
+      Non-looping
     </li>
     <li>
-      10% peek on each slide
+      Inset pagination dots
     </li>
     <li>
-      Many slides (pagination shows count instead of dots).
-    </li>
-    <li>
-      Pagination dots inset when width <= 600px
+      Always show arrows (even after touch)
     </li>
   </ul>
 </body>
