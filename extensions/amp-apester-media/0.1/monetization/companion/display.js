@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-const get = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o);
+import {getValueForExpr} from '../../../../../src/json';
 
 /**
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
  */
 export function handleCompanionDisplay(media, apesterElement) {
-  const enabled = get(['campaignData', 'companionOptions', 'enabled'], media);
-  const settings = get(['campaignData', 'companionOptions', 'settings'], media);
+  const companionOptions = getValueForExpr(
+    media,
+    'campaignData.companionOptions'
+  );
+  const enabledDisplayAd = getValueForExpr(companionOptions, 'enabled');
+  const settings = getValueForExpr(companionOptions, 'settings');
   const allowedAdProvider = 'gdt';
   if (
-    enabled &&
+    enabledDisplayAd &&
     settings &&
     settings['bannerAdProvider'] === allowedAdProvider
   ) {
