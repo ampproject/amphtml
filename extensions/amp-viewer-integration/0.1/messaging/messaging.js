@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import {getData} from '../../../../src/event-helper';
-import {parseJson} from '../../../../src/json';
-
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 const HANDSHAKE_POLL_MSG = 'handshake-poll';
@@ -53,7 +50,7 @@ export function parseMessage(message) {
   }
 
   try {
-    return /** @type {?Message} */ /** @type {?} */ (parseJson(
+    return /** @type {?Message} */ /** @type {?} */ (JSON.parse(
       /** @type {string} */ (message)
     ));
   } catch (e) {
@@ -87,11 +84,10 @@ export class WindowPortEmulator {
    */
   addEventListener(eventType, handler) {
     this.win.addEventListener('message', e => {
-      const data = getData(e);
       if (
         e.origin == this.origin_ &&
         e.source == this.target_ &&
-        data['app'] === APP
+        e.data['app'] === APP
       ) {
         handler(e);
       }
@@ -123,13 +119,18 @@ export class Messaging {
   /**
    * Performs a handshake and initializes messaging.
    * @param {!Window} source
-   * @param {!HTMLIFrameElement} iframe
-   * @param {number} opt_interval
+   * @param {!Window} target
+   * @param {?string=} opt_token
+   * @param {?number=} opt_interval
    * @return {!Promise<!Messaging>}
    */
-  static initiateHandshake(source, iframe, opt_interval) {
+  static initiateHandshakeWithDocument(
+    source,
+    target,
+    opt_token,
+    opt_interval
+  ) {
     opt_interval = opt_interval || 1000;
-    const target = iframe.contentWindow;
     return new Promise(resolve => {
       const interval = setInterval(() => {
         const channel = new MessageChannel();
@@ -141,11 +142,11 @@ export class Messaging {
 
         const port = channel.port1;
         const listener = e => {
-          const data = getData(e);
+          const data = e.data;
           if (data['app'] === APP && data['name'] === CHANNEL_OPEN_MSG) {
             clearInterval(interval);
             port.removeEventListener('message', listener);
-            const messaging = new Messaging(source, port);
+            const messaging = new Messaging(null, port, false, opt_token, true);
             messaging.sendResponse_(data['requestid'], CHANNEL_OPEN_MSG, null);
             resolve(messaging);
           }
@@ -159,25 +160,24 @@ export class Messaging {
   /**
    * Waits for handshake from iframe and initializes messaging.
    * @param {!Window} source
-   * @param {!HTMLIFrameElement} iframe
-   * @param {string} origin
+   * @param {!Window} target
+   * @param {!string} origin
+   * @param {?string=} opt_token
    * @return {!Promise<!Messaging>}
    */
-  static waitForHandshake(source, iframe, origin) {
-    const target = /** @type {!Window} */ (iframe.contentWindow);
+  static waitForHandshakeFromDocument(source, target, origin, opt_token) {
     return new Promise(resolve => {
       const listener = e => {
-        const data = getData(e);
         if (
           e.origin == origin &&
           (!e.source || e.source == target) &&
-          data['app'] === APP &&
-          data['name'] === CHANNEL_OPEN_MSG
+          e.data['app'] === APP &&
+          e.data['name'] === CHANNEL_OPEN_MSG
         ) {
           source.removeEventListener('message', listener);
           const port = new WindowPortEmulator(source, origin, target);
-          const messaging = new Messaging(source, port);
-          messaging.sendResponse_(data['requestid'], CHANNEL_OPEN_MSG, null);
+          const messaging = new Messaging(null, port, false, opt_token, true);
+          messaging.sendResponse_(e.data['requestid'], CHANNEL_OPEN_MSG, null);
           resolve(messaging);
         }
       };
@@ -187,13 +187,14 @@ export class Messaging {
 
   /**
    * Conversation (messaging protocol) between me and Bob.
-   * @param {!Window} win
+   * @param {?Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
    * @param {boolean=} opt_isWebview
    * @param {?string=} opt_token
+   * @param {boolean=} opt_verifyToken
    */
-  constructor(win, port, opt_isWebview, opt_token) {
-    /** @const {!Window} */
+  constructor(win, port, opt_isWebview, opt_token, opt_verifyToken) {
+    /** @const {?Window} */
     this.win = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
@@ -228,6 +229,13 @@ export class Messaging {
      * @const @private {?string}
      */
     this.token_ = opt_token || null;
+
+    /**
+     * If true, the token above is verified on incoming messages instead of
+     * being attached to outgoing messages.
+     * @const @private {boolean}
+     */
+    this.verifyToken_ = !!opt_verifyToken;
 
     /** @private {number} */
     this.requestIdCounter_ = 0;
@@ -278,8 +286,17 @@ export class Messaging {
    * @private
    */
   handleMessage_(event) {
-    const message = parseMessage(getData(event));
+    const message = parseMessage(event.data);
     if (!message) {
+      return;
+    }
+    if (
+      this.token_ &&
+      this.verifyToken_ &&
+      message.messagingToken !== this.token_
+    ) {
+      // We received a message with an invalid token - dismiss it.
+      this.logError_(TAG + ': handleMessage_ error: ', 'invalid token');
       return;
     }
     if (message.type === MessageType.REQUEST) {
@@ -366,7 +383,7 @@ export class Messaging {
    */
   sendMessage_(message) {
     const /** Object<string, *> */ finalMessage = Object.assign(message, {});
-    if (this.token_) {
+    if (this.token_ && !this.verifyToken_) {
       finalMessage['messagingToken'] = this.token_;
     }
     this.port_./*OK*/ postMessage(
@@ -390,7 +407,7 @@ export class Messaging {
     }
     if (!handler) {
       const error = new Error(
-        'Cannot handle request because handshake is not yet confirmed!'
+        'Cannot handle request because no default handler is set!'
       );
       error.args = message.name;
       throw error;
@@ -446,6 +463,9 @@ export class Messaging {
    * @private
    */
   logError_(state, opt_data) {
+    if (!this.win) {
+      return;
+    }
     let stateStr = 'amp-messaging-error-logger: ' + state;
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
