@@ -343,9 +343,12 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
-            handleCompanionAds(media, this.element);
           })
           .then(() => {
+            return handleCompanionAds(media, this.element);
+          })
+          .then(ampAd => {
+            // this.element.appendChild(ampAd);
             return this.loadPromise(iframe).then(() => {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {

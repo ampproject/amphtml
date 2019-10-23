@@ -50,15 +50,14 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
     apesterElement,
     consentObj
   );
-
-  constructCompanionSrElement(
+  const ampAd = constructCompanionSrElement(
     videoSettings['videoTag'],
     position,
     /** @type {!JsonObject} */ (macros),
     apesterElement
   );
 
-  return Promise.resolve();
+  return Promise.resolve(ampAd);
 }
 /**
  * @param {!JsonObject} video
@@ -83,6 +82,7 @@ function getCompanionPosition(video) {
  * @param {string} position
  * @param {!JsonObject} macros
  * @param {AmpElement} apesterElement
+ * @return {ampAd}
  */
 function constructCompanionSrElement(
   videoTag,
@@ -102,10 +102,11 @@ function constructCompanionSrElement(
   ampAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
   ampAd.classList.add('amp-apester-companion');
 
-  const relativeElement =
-    position === 'below' ? apesterElement.nextSibling : apesterElement;
+  // const relativeElement =
+  // position === 'below' ? apesterElement.nextSibling : apesterElement;
 
-  apesterElement.parentNode.insertBefore(ampAd, relativeElement);
+  return ampAd;
+  // apesterElement.parentNode.insertBefore(ampAd, relativeElement);
 }
 
 /**
