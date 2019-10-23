@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+const get = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o);
+
 /**
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
  */
 export function handleCompanionDisplay(media, apesterElement) {
-  const monetizationSettings = media['campaignData'] || {};
-  const companionRawSettings = monetizationSettings['companionOptions'] || {};
-  const {enabled, settings} = companionRawSettings;
+  const enabled = get(['campaignData', 'companionOptions', 'enabled'], media);
+  const settings = get(['campaignData', 'companionOptions', 'settings'], media);
   const allowedAdProvider = 'gdt';
   if (
     enabled &&
