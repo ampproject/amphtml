@@ -28,11 +28,12 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc, element;
+    let win, doc, element, sandbox;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      sandbox = env.sandbox;
 
       element = getAmpMegaMenu();
       doc.body.appendChild(element);
@@ -53,12 +54,11 @@ describes.realWin(
               <div id="content1" role="dialog">Loreum ipsum</div>
             </li>
             <li>
-              <button id="heading2">Menu Item 2</button>
+              <div id="heading2" role="button">Menu Item 2</div>
               <div id="content2" role="dialog">Loreum ipsum</div>
             </li>
             <li>
-              <button id="heading3">Menu Item 3</button>
-              <div id="content3" role="dialog">Loreum ipsum</div>
+              <a id="heading3">Menu Item 3</a>
             </li>
           </ul>
         </nav>
@@ -82,7 +82,7 @@ describes.realWin(
       const headingClass = '.i-amphtml-mega-menu-heading';
       expect(element.querySelectorAll(headingClass).length).to.equal(3);
       const contentClass = '.i-amphtml-mega-menu-content';
-      expect(element.querySelectorAll(contentClass).length).to.equal(3);
+      expect(element.querySelectorAll(contentClass).length).to.equal(2);
     });
 
     it('should expand when heading of a collapsed menu item is clicked', async () => {
@@ -196,6 +196,21 @@ describes.realWin(
       expect(doc.activeElement).to.equal(heading3);
       heading3.dispatchEvent(rightKey);
       expect(doc.activeElement).to.equal(heading1);
+    });
+
+    it('should remove event listeners on root element when menu is closed', async () => {
+      await element.build();
+      await element.layoutCallback();
+      await element.unlayoutCallback();
+      const impl = element.implementation_;
+      const clickEvent = new Event('click');
+      const rootClickSpy = sandbox.spy(impl, 'handleRootClick_');
+      doc.documentElement.dispatchEvent(clickEvent);
+      expect(rootClickSpy).to.not.be.called;
+      const keydownEvent = new KeyboardEvent('keydown');
+      const rootKeyDownSpy = sandbox.spy(impl, 'handleRootKeyDown_');
+      doc.documentElement.dispatchEvent(keydownEvent);
+      expect(rootKeyDownSpy).to.not.be.called;
     });
   }
 );
