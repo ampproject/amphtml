@@ -42,18 +42,10 @@ export const AdvancementMode = {
   ADVANCE_TO_ADS: 'manualAdvanceFromAd',
 };
 
-/**
- * @typedef {{
- *  pageId: PageEventCountDef,
- * }}
- */
+/** @typedef {!Object<string, !PageEventCountDef>} */
 let EventsPerPageDef;
 
-/**
- * @typedef {{
- *  eventType: number,
- * }}
- */
+/** @typedef {!Object<string, number>} */
 let PageEventCountDef;
 
 /**
@@ -94,7 +86,7 @@ export class StoryAnalyticsService {
     this.variableService_ = getVariableService(win);
 
     /** @private {EventsPerPageDef} */
-    this.pageEventCount_ = map();
+    this.pageEventsMap_ = map();
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
@@ -156,13 +148,14 @@ export class StoryAnalyticsService {
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
 
-    if (this.pageEventCount_[pageId][eventType] > 1) {
+    if (this.pageEventsMap_[pageId][eventType] > 1) {
       details.repeated = true;
     }
 
-    let pageEventDetails = {};
-    pageEventDetails = {pageDetails: details};
-    return /** @type {!JsonObject} */ (Object.assign(pageEventDetails, vars));
+    return /** @type {!JsonObject} */ (Object.assign(
+      {pageDetails: details},
+      vars
+    ));
   }
 
   /**
@@ -174,9 +167,9 @@ export class StoryAnalyticsService {
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
 
-    this.pageEventCount_[pageId] = this.pageEventCount_[pageId] || {};
-    this.pageEventCount_[pageId][eventType] =
-      this.pageEventCount_[pageId][eventType] || 0;
-    this.pageEventCount_[pageId][eventType]++;
+    this.pageEventsMap_[pageId] = this.pageEventsMap_[pageId] || {};
+    this.pageEventsMap_[pageId][eventType] =
+      this.pageEventsMap_[pageId][eventType] || 0;
+    this.pageEventsMap_[pageId][eventType]++;
   }
 }
