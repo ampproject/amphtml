@@ -82,7 +82,7 @@ async function checkLinks() {
       red('ERROR'),
       'Please update dead link(s) in',
       magenta(filesWithDeadLinks.join(',')),
-      'or whitelist them in build-system/tasks/check-links.js'
+      'or add them to allow-list in build-system/tasks/check-links.js'
     );
     log(
       yellow('NOTE'),
