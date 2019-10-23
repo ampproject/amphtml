@@ -111,10 +111,10 @@ function isLinkToFileIntroducedByPR(link) {
 }
 
 /**
- * Filters out whitelisted links before running the link checker.
+ * Filters out links in allow-list before running the link checker.
  *
  * @param {string} markdown Original markdown.
- * @return {string} Markdown after filtering out whitelisted links.
+ * @return {string} Markdown after filtering out allowed links.
  */
 function filterAllowedLinks(markdown) {
   let filteredMarkdown = markdown;
