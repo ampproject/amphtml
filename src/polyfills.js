@@ -39,7 +39,9 @@ if (self.document) {
   installDOMTokenList(self);
   installDocContains(self);
   installGetBoundingClientRect(self);
-  installCustomElements(self);
+  // The anonymous class parameter allows us to detect native classes vs
+  // transpiled classes.
+  installCustomElements(self, NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined);
 }
 
 // TODO(#18268, erwinm): For whatever reason imports to modules that have no

@@ -377,6 +377,8 @@ describe('amp-img', () => {
   it('should propagate the object-fit attribute', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-fit': 'cover',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -387,6 +389,8 @@ describe('amp-img', () => {
   it('should not propagate the object-fit attribute if invalid', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-fit': 'foo 80%',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -397,6 +401,8 @@ describe('amp-img', () => {
   it('should propagate the object-position attribute', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-position': '20% 80%',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -407,6 +413,8 @@ describe('amp-img', () => {
   it('should not propagate the object-position attribute if invalid', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-position': 'url("example.com")',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');

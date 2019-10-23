@@ -20,9 +20,13 @@
     "sourceType": "module"
   },
   "globals": {
-    "AMP": false,
-    "context": false,
-    "global": false
+    "ANALYTICS_VENDOR_SPLIT": "readonly",
+    "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
+    "_RTVEXP_INABOX_LITE": "readonly",
+
+    "AMP": "readonly",
+    "context": "readonly",
+    "global": "readonly"
   },
   "settings": {
     "jsdoc": {

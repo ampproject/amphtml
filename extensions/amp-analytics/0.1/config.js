@@ -98,7 +98,6 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   fetchVendorConfig_() {
-    // eslint-disable-next-line no-undef
     if (!ANALYTICS_VENDOR_SPLIT) {
       return Promise.resolve();
     }
@@ -137,21 +136,21 @@ export class AnalyticsConfig {
     const type = this.element_.getAttribute('type');
     const rtv = getMode().rtvVersion;
     const isRc = rtv ? rtv.substring(0, 2) === '03' : false;
-    // eslint-disable-next-line no-undef
-    const isExperiment = ANALYTICS_VENDOR_SPLIT;
 
     if (
       type === 'googleanalytics' &&
-      (isRc || isExperiment) &&
+      (isRc || ANALYTICS_VENDOR_SPLIT) &&
       this.config_['requests']
     ) {
       if (this.config_['requests']['pageview']) {
         this.config_['requests']['pageview'][
           'baseUrl'
-        ] += `&aae=${isExperiment}`;
+        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
       }
       if (this.config_['requests']['timing']) {
-        this.config_['requests']['timing']['baseUrl'] += `&aae=${isExperiment}`;
+        this.config_['requests']['timing'][
+          'baseUrl'
+        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
       }
     }
   }
