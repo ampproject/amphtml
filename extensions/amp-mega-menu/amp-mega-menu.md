@@ -172,7 +172,7 @@ The following sample demonstrates how to hide the mega menu when viewport width 
   ...
   <style amp-custom>
     @media (max-width: 959px) {
-      amp-mega-menu {
+      #mega-menu {
         display: none;
       }
     }
@@ -188,7 +188,7 @@ The following sample demonstrates how to hide the mega menu when viewport width 
 ```html
 <body>
   <header>
-    <amp-mega-menu height="50" layout="fixed-height">
+    <amp-mega-menu id="mega-menu" height="50" layout="fixed-height">
       <nav>
       ... <!-- list of menu items here -->
       </nav>
