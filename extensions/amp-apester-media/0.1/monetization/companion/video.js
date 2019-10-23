@@ -16,7 +16,7 @@
 
 import {Services} from '../../../../../src/services';
 const ALLOWED_AD_PROVIDER = 'sr';
-const get = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o);
+import {getValueForExpr} from '../../../../../src/json';
 
 /**
  * @param {!JsonObject} media
@@ -25,13 +25,13 @@ const get = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o);
  * @return {Promise}
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
-  const companionCampaignOptions = get(
-    ['campaignData', 'companionCampaignOptions'],
-    media
+  const companionCampaignOptions = getValueForExpr(
+    media,
+    'campaignData.companionCampaignOptions'
   );
-  const videoSettings = get(
-    ['campaignData', 'companionOptions', 'video'],
-    media
+  const videoSettings = getValueForExpr(
+    media,
+    'campaignData.companionOptions.video'
   );
   const position = getCompanionPosition(videoSettings);
   if (
