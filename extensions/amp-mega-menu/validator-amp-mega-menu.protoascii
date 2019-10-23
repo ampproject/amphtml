@@ -104,6 +104,7 @@ tags: {
     child_tag_name_oneof: "H4"
     child_tag_name_oneof: "H5"
     child_tag_name_oneof: "H6"
+    child_tag_name_oneof: "SPAN"
   }
   reference_points: {
     tag_spec_name: "AMP-MEGA-MENU item-content"
