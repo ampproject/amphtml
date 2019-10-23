@@ -50,16 +50,14 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
   });
 
   it('Should show a companion display ad', async () => {
-    const media = {};
-    media.campaignData = createCampaignData({display: true});
+    const media = createCampaignData({display: true});
     await handleCompanionAds(media, baseElement);
     const displayAd = queryAmpAdDisplaySelector(doc);
     expect(displayAd).to.exist;
     expect(baseElement.nextSibling).to.be.equal(displayAd);
   });
   it('Should show an SR companion ad below', async () => {
-    const media = {};
-    media.campaignData = createCampaignData({
+    const media = createCampaignData({
       display: false,
       srAbove: false,
       srBelow: true,
@@ -70,8 +68,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     expect(baseElement.nextSibling).to.be.equal(srAdBelow);
   });
   it('Should show an SR companion ad above', async () => {
-    const media = {};
-    media.campaignData = createCampaignData({
+    const media = createCampaignData({
       display: false,
       srAbove: true,
       srBelow: false,
@@ -82,8 +79,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     expect(baseElement.previousSibling).to.be.equal(srAboveAd);
   });
   it('Should show an SR companion above with display companion', async () => {
-    const media = {};
-    media.campaignData = createCampaignData({
+    const media = createCampaignData({
       display: true,
       srAbove: true,
       srBelow: false,
@@ -97,8 +93,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     expect(baseElement.previousSibling).to.be.equal(srAboveAd);
   });
   it('Should not show ads if disabled amp companion ads', async () => {
-    const media = {};
-    media.campaignData = createCampaignData({
+    const media = createCampaignData({
       display: true,
       srAbove: true,
       srBelow: false,
@@ -118,6 +113,7 @@ function createCampaignData({
   srBelow,
   disabledAmpCompanionAds,
 }) {
+  const media = {};
   const campaignData = {
     'companionOptions': {
       'settings': {
@@ -163,5 +159,6 @@ function createCampaignData({
   if (disabledAmpCompanionAds) {
     campaignData.disabledAmpCompanionAds = true;
   }
-  return campaignData;
+  media.campaignData = campaignData;
+  return media;
 }
