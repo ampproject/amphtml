@@ -51,68 +51,51 @@ function getMarkdownFiles() {
 async function checkLinks() {
   maybeUpdatePackages();
   const markdownFiles = getMarkdownFiles();
-  const linkCheckers = markdownFiles.map(function(markdownFile) {
-    return runLinkChecker(markdownFile);
-  });
-  return BBPromise.all(linkCheckers).then(function(allResults) {
-    let deadLinksFound = false;
-    const filesWithDeadLinks = [];
-    allResults.map(function(results, index) {
-      // Skip files that were deleted by the PR.
-      if (!fs.existsSync(markdownFiles[index])) {
-        return;
-      }
+  const allResults = await Promise.all(markdownFiles.map(runLinkChecker));
+
+  const filesWithDeadLinks = allResults
+    .map((results, index) => {
       let deadLinksFoundInFile = false;
-      results.forEach(function(result) {
+      for (const {link, status, statusCode} of results || []) {
         // Skip links to files that were introduced by the PR.
-        if (isLinkToFileIntroducedByPR(result.link)) {
-          return;
+        if (isLinkToFileIntroducedByPR(link)) {
+          continue;
         }
-        if (result.status === 'dead') {
-          deadLinksFound = true;
+        if (status === 'dead') {
           deadLinksFoundInFile = true;
-          log(`[${red('✖')}] ${result.link} (${red(result.statusCode)})`);
+          log(`[${red('✖')}]`, link, `(${red(statusCode)})`);
         } else if (!isTravisBuild()) {
-          log(`[${green('✔')}] ${result.link}`);
+          log(`[${green('✔')}]`, link);
         }
-      });
-      if (deadLinksFoundInFile) {
-        filesWithDeadLinks.push(markdownFiles[index]);
-        log(
-          red('ERROR'),
-          'Possible dead link(s) found in',
-          magenta(markdownFiles[index])
-        );
-      } else {
-        log(
-          green('SUCCESS'),
-          'All links in',
-          magenta(markdownFiles[index]),
-          'are alive.'
-        );
       }
-    });
-    if (deadLinksFound) {
-      log(
-        red('ERROR'),
-        'Please update dead link(s) in',
-        magenta(filesWithDeadLinks.join(',')),
-        'or whitelist them in build-system/tasks/check-links.js'
-      );
-      log(
-        yellow('NOTE'),
-        'If the link(s) above are not meant to resolve to a real webpage',
-        'surrounding them with backticks will exempt them from the link',
-        'checker.'
-      );
-      process.exitCode = 1;
-    } else {
-      log(
-        green('SUCCESS'),
-        'All links in all markdown files in this branch are alive.'
-      );
-    }
-  });
+      const filename = markdownFiles[index];
+      if (deadLinksFoundInFile) {
+        log(red('ERROR'), 'Possible dead link(s) found in', magenta(filename));
+        return filename;
+      }
+      log(green('SUCCESS'), 'All links in', magenta(filename), 'are alive.');
+    })
+    .filter(filenameOrUndef => !!filenameOrUndef);
+
+  if (filesWithDeadLinks.length > 0) {
+    log(
+      red('ERROR'),
+      'Please update dead link(s) in',
+      magenta(filesWithDeadLinks.join(',')),
+      'or whitelist them in build-system/tasks/check-links.js'
+    );
+    log(
+      yellow('NOTE'),
+      'If the link(s) above are not meant to resolve to a real webpage,',
+      'surrounding them with backticks will exempt them from the link checker.'
+    );
+    process.exitCode = 1;
+    return;
+  }
+  log(
+    green('SUCCESS'),
+    'All links in all markdown files in this branch are alive.'
+  );
 }
 
 /**
@@ -166,17 +149,17 @@ function filterAllowedLinks(markdown) {
  * @param {string} markdownFile Path of markdown file, relative to src root.
  * @return {Promise} Used to wait until the async link checker is done.
  */
-async function runLinkChecker(markdownFile) {
-  // The extension generator markdown template has placeholder links that can't
-  // be checked.
-  if (/doc-template\.md$/.test(markdownFile)) {
-    return;
+function runLinkChecker(markdownFile) {
+  // `-TEMPLATE` is a common suffix for files that may have interpolation
+  // tokens, possibly as part of their links. So we skip them.
+  if (path.basename(markdownFile).endsWith('-TEMPLATE.md')) {
+    return Promise.resolve();
   }
   // Skip files that were deleted by the PR.
   if (!fs.existsSync(markdownFile)) {
-    return;
+    return Promise.resolve();
   }
-  const markdown = (await fs.readFile(markdownFile)).toString();
+  const markdown = fs.readFileSync(markdownFile).toString();
   const filteredMarkdown = filterAllowedLinks(markdown);
   const opts = {
     baseUrl: 'file://' + path.dirname(path.resolve(markdownFile)),
