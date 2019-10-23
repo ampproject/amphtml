@@ -72,12 +72,18 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
 }
 
 /**
- * The `.i-amphtml-base-carousel-arrow-overlay` element is needed to work
- * around a stacking issue with `backdrop-filter` on iOS. The backdrop,
- * background, frosting and the svg icon will not stack in the correct order
- * otherwise.
+ * This element is needed to work around a stacking issue with
+ * `backdrop-filter` on iOS. The backdrop, background, frosting and the svg
+ * icon will not stack in the correct order otherwise.
  */
-.i-amphtml-base-carousel-arrow-overlay,
+.i-amphtml-base-carousel-arrow-overlay {
+  /**
+   * Note: This should not do anything, since this element has static
+   * positioning. It is unclear why this works, it should not.
+   */
+  z-index: 0;
+}
+
 .i-amphtml-base-carousel-arrow-backdrop,
 .i-amphtml-base-carousel-arrow-background,
 .i-amphtml-base-carousel-arrow-frosting {
@@ -87,7 +93,6 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  z-index: 0;
 }
 
 
