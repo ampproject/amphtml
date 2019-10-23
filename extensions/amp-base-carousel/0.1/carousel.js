@@ -167,6 +167,7 @@ export class Carousel {
     /** @private @const */
     this.autoAdvance_ = new AutoAdvance({
       win,
+      element,
       scrollContainer,
       advanceable: this,
     });
