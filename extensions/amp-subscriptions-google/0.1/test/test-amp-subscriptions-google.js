@@ -122,6 +122,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       linkAccount: sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
     };
     ackStub = sandbox.stub(Entitlements.prototype, 'ack');
+    toggleExperiment(win, 'gpay-api', true);
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
   });
 
@@ -150,8 +151,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should propagate experiment', () => {
-    expect(isExperimentOn(win, 'gpay-api')).to.be.false;
-    toggleExperiment(win, 'gpay-api', true);
     expect(isExperimentOn(win, 'gpay-api')).to.be.true;
   });
 
