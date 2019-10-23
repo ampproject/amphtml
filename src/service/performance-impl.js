@@ -682,8 +682,10 @@ export class Performance {
     const storedVal = Math.round(
       opt_delta != null ? Math.max(opt_delta, 0) : value - this.initTime_
     );
+    console.log('label: ' + label);
     switch (label) {
       case 'fcp':
+        console.log('storing fcp');
         this.firstContentfulPaint_ = storedVal;
         break;
       case 'pc':
@@ -831,6 +833,7 @@ export class Performance {
    * @return {number|null}
    */
   getFirstContentfulPaint() {
+    console.log('fcp in performance impl is: ' + this.firstContentfulPaint_);
     return this.firstContentfulPaint_;
   }
 

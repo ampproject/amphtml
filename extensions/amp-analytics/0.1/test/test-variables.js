@@ -399,6 +399,33 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
+    it('should replace FIRST_CONTENTFUL_PAINT', () => {
+      sandbox.stub(Services, 'performanceFor').returns({
+        getFirstContentfulPaint() {
+          return 1;
+        },
+      });
+      return check('FIRST_CONTENTFUL_PAINT', '1');
+    });
+
+    it('should replace FIRST_VIEWPORT_READY', () => {
+      sandbox.stub(Services, 'performanceFor').returns({
+        getFirstViewportReady() {
+          return 1;
+        },
+      });
+      return check('FIRST_VIEWPORT_READY', '1');
+    });
+
+    it('should replace MAKE_BODY_VISIBLE', () => {
+      sandbox.stub(Services, 'performanceFor').returns({
+        getMakeBodyVisible() {
+          return 1;
+        },
+      });
+      return check('MAKE_BODY_VISIBLE', '1');
+    });
+
     describe('$MATCH', () => {
       it('handles default index', () => {
         return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
@@ -452,33 +479,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
           /Third argument in MATCH macro must be a number >= 0/
         );
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
-      });
-
-      it('should replace FIRST_CONTENTFUL_PAINT', () => {
-        sandbox.stub(Services, 'performanceFor').returns({
-          getFirstContentfulPaint() {
-            return 1;
-          },
-        });
-        return check('FIRST_CONTENTFUL_PAINT', '1');
-      });
-
-      it('should replace FIRST_VIEWPORT_READY', () => {
-        sandbox.stub(Services, 'performanceFor').returns({
-          getFirstViewportReady() {
-            return 1;
-          },
-        });
-        return check('FIRST_VIEWPORT_READY', '1');
-      });
-
-      it('should replace MAKE_BODY_VISIBLE', () => {
-        sandbox.stub(Services, 'performanceFor').returns({
-          getMakeBodyVisible() {
-            return 1;
-          },
-        });
-        return check('MAKE_BODY_VISIBLE', '1');
       });
     });
   });

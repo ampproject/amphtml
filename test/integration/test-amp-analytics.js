@@ -50,7 +50,10 @@ describe('amp-analytics', function() {
             "cid": "\${clientId(_cid)}",
             "loadend": "\${navTiming(loadEventEnd)}",
             "default": "\$DEFAULT( , test)",
-            "cookie": "\${cookie(test-cookie)}"
+            "cookie": "\${cookie(test-cookie)}",
+            "firstContentfulPaint": "FIRST_CONTENTFUL_PAINT",
+            "firstViewportReady": "FIRST_VIEWPORT_READY",
+            "makeBodyVisible": "MAKE_BODY_VISIBLE"
           }
         }
         </script>
@@ -63,7 +66,7 @@ describe('amp-analytics', function() {
         document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
       });
 
-      it('should send request', () => {
+      it.only('should send request', () => {
         return RequestBank.withdraw().then(req => {
           const q = parseQueryString(req.url.substr(1));
           expect(q['a']).to.equal('2');
@@ -71,6 +74,11 @@ describe('amp-analytics', function() {
           expect(q['cid']).to.equal('amp-12345');
           expect(q['loadend']).to.not.equal('0');
           expect(q['default']).to.equal('test');
+          console.log(q['firstViewportReady']);
+          console.log(q['makeBodyVisible']);
+          console.log(q['firstContentfulPaint']);
+          console.log(JSON.stringify(q));
+          console.log(req.url);
           // cookie set via http response header when requesting
           // localhost:9876/amp4test/compose-doc
           expect(q['cookie']).to.equal('test');
