@@ -837,7 +837,6 @@ export function installInaboxViewportService(ampdoc) {
     ampdoc,
     'viewport',
     function() {
-      // eslint-disable-next-line no-undef
       return _RTVEXP_INABOX_LITE ||
         isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
         ? new InaboxViewportImpl(ampdoc, binding)
