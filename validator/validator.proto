@@ -685,6 +685,16 @@ message ValidatorRules {
   // reserved 2, 5, 11, 12, 14;
 }
 
+// This feature was removed in October 2019, however there are still
+// some callers that expect an ErrorCategory to be set. Do not rely
+// on this in new code.
+// TODO(#25188): Remove ErrorCategory completely.
+message ErrorCategory {
+  enum Code {
+    UNKNOWN = 0;
+  }
+}
+
 // We record validation errors in a structured form, so that they can be
 // worked with in code - e.g., to provide translated messages.
 // In the Javascript implementation (validator.js), you may find
@@ -822,6 +832,8 @@ message ValidationError {
   optional int32 col = 3;
   optional string spec_url = 5;
   repeated string params = 7;
+  // This field is deprecated. Do not use.
+  optional ErrorCategory.Code category = 8;
 
   // Used only in JavaScript, if an error is emitted for a specific HTML tag and
   // if that HTML tag has an attribute named data-amp-report-test, this string
@@ -831,7 +843,7 @@ message ValidationError {
   optional string data_amp_report_test_value = 9;
 
   // Deprecated fields, do not reuse.
-  // reserved 4, 8;
+  // reserved 4;
 }
 
 // Used in the verbose validator to select between multiple generated error

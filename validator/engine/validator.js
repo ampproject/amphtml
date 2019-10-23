@@ -35,6 +35,7 @@ goog.require('amp.validator.AttrSpec');
 goog.require('amp.validator.CdataSpec');
 goog.require('amp.validator.CssDeclaration');
 goog.require('amp.validator.CssSpec');
+goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.ExtensionSpec');
 goog.require('amp.validator.PropertySpecList');
 goog.require('amp.validator.ReferencePoint');
@@ -6266,3 +6267,28 @@ amp.validator.renderValidationResult = function(validationResult, filename) {
 function isAuthorStylesheet(param) {
   return goog.string./*OK*/ startsWith(param, 'style amp-custom');
 }
+
+/**
+ * This function was removed in October 2019. Older versions of the nodejs
+ * amphtml-validator library still call this function, so this stub is left
+ * in place for now so as not to break them. TODO(#25188): Delete this function
+ * after most usage had moved to a newer version of the amphtml-validator lib.
+ * @param {!amp.validator.ValidationError} error
+ * @return {!amp.validator.ErrorCategory.Code}
+ * @export
+ */
+amp.validator.categorizeError = function(error) {
+  return amp.validator.ErrorCategory.Code.UNKNOWN;
+};
+
+/**
+ * Convenience function which calls |CategorizeError| for each error
+ * in |result| and sets its category field accordingly.
+ * @param {!amp.validator.ValidationResult} result
+ * @export
+ */
+amp.validator.annotateWithErrorCategories = function(result) {
+  for (const error of result.errors) {
+    error.category = amp.validator.categorizeError(error);
+  }
+};
