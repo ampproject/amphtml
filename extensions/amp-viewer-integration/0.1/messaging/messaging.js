@@ -130,9 +130,9 @@ export class Messaging {
     opt_token,
     opt_interval
   ) {
-    opt_interval = opt_interval || 1000;
+    const interval = opt_interval || 1000;
     return new Promise(resolve => {
-      const interval = setInterval(() => {
+      const intervalRef = setInterval(() => {
         const channel = new MessageChannel();
         const pollMessage = /** @type {JsonObject} */ ({
           app: APP,
@@ -142,9 +142,9 @@ export class Messaging {
 
         const port = channel.port1;
         const listener = e => {
-          const data = e.data;
+          const data = {e};
           if (data['app'] === APP && data['name'] === CHANNEL_OPEN_MSG) {
-            clearInterval(interval);
+            clearInterval(intervalRef);
             port.removeEventListener('message', listener);
             const messaging = new Messaging(null, port, false, opt_token, true);
             messaging.sendResponse_(data['requestid'], CHANNEL_OPEN_MSG, null);
@@ -153,7 +153,7 @@ export class Messaging {
         };
         port.addEventListener('message', listener);
         port.start();
-      }, opt_interval);
+      }, interval);
     });
   }
 
@@ -161,7 +161,7 @@ export class Messaging {
    * Waits for handshake from iframe and initializes messaging.
    * @param {!Window} source
    * @param {!Window} target
-   * @param {!string} origin
+   * @param {string} origin
    * @param {?string=} opt_token
    * @return {!Promise<!Messaging>}
    */
@@ -384,7 +384,7 @@ export class Messaging {
   sendMessage_(message) {
     const /** Object<string, *> */ finalMessage = Object.assign(message, {});
     if (this.token_ && !this.verifyToken_) {
-      finalMessage['messagingToken'] = this.token_;
+      finalMessage.messagingToken = this.token_;
     }
     this.port_./*OK*/ postMessage(
       this.isWebview_
