@@ -144,33 +144,37 @@ export class AmpMegaMenu extends AMP.BaseElement {
   }
 
   /**
-   * Find all menu items under this mega menu and add appropriate classes,
-   * attributes and event listeners to its children.
+   * Find all menu items under this mega menu and register them if they are not
+   * already registered.
    * @private
    */
   registerMenuItems_() {
-    this.items_ = [];
-    const items = toArray(scopedQuerySelectorAll(this.element, 'nav > * > li'));
-    items.forEach(item => {
-      // check if the item has already been registered.
-      if (item.classList.contains('i-amphtml-mega-menu-item')) {
-        this.items_.push(item);
-        return;
-      }
-      const heading =
-        scopedQuerySelector(item, '> button') ||
-        scopedQuerySelector(item, '> [role=button]');
-      const content = scopedQuerySelector(item, '> [role=dialog]');
-      // register item only if heading element is present.
-      if (heading) {
+    this.items_ = toArray(scopedQuerySelectorAll(this.element, 'nav > * > li'));
+    // first filter out items that have already been registered.
+    this.items_
+      .filter(item => !item.classList.contains('i-amphtml-mega-menu-item'))
+      .forEach(item => {
+        // if item has only one child, then use that as the heading element.
+        if (item.childElementCount == 1) {
+          const heading = dev().assertElement(item.firstElementChild);
+          this.registerMenuItem_(item, heading, null);
+          return;
+        }
+        const heading =
+          scopedQuerySelector(item, '> button') ||
+          scopedQuerySelector(item, '> [role=button]');
+        const content = scopedQuerySelector(item, '> [role=dialog]');
+        userAssert(
+          heading,
+          `${TAG} requires each expandable item to include a button that toggles it.`
+        );
         this.registerMenuItem_(item, heading, content);
-        this.items_.push(item);
-      }
-    });
+      });
   }
 
   /**
-   * Register the given menu item, along with its heading and content elements.
+   * Register the given menu item by adding appropriate classes, accessibility
+   * attributes and event listeners to its children.
    * @param {!Element} item
    * @param {!Element} heading
    * @param {?Element} content

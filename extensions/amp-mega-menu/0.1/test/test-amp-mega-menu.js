@@ -58,7 +58,7 @@ describes.realWin(
               <div id="content2" role="dialog">Loreum ipsum</div>
             </li>
             <li>
-              <button id="heading3">Menu Item 3</button>
+              <a id="heading3">Menu Item 3</a>
             </li>
           </ul>
         </nav>
