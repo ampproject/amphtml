@@ -674,111 +674,121 @@ describe('amp-img', () => {
       );
     });
   });
-  describe('layout intrinsic', () => {
-    let browser;
-    beforeEach(() => {
-      fixture.iframe.height = 800;
-      fixture.iframe.width = 800;
-      browser = new BrowserController(fixture.win);
-    });
-    it('should not exceed given width and height even if image\
+
+  // Firefox misbehaves on Windows for this test because getBoundingClientRect
+  // returns 0x0 for width and height. Strangely Firefox on MacOS will return
+  // reasonable values for getBoundingClientRect if we add an explicit wait
+  // for laid out attributes via waitForElementLayout. If we change the test to
+  // test for client or offset values, Safari yields 0px measurements.
+  // For details, see: https://github.com/ampproject/amphtml/pull/24574
+  describe
+    .configure()
+    .skipFirefox()
+    .run('layout intrinsic', () => {
+      let browser;
+      beforeEach(() => {
+        fixture.iframe.height = 800;
+        fixture.iframe.width = 800;
+        browser = new BrowserController(fixture.win);
+      });
+      it('should not exceed given width and height even if image\
       natural size is larger', () => {
-      let ampImg;
-      return getImg({
-        src: '/examples/img/sample.jpg', // 641 x 481
-        width: 100,
-        height: 100,
-        layout: 'intrinsic',
-      })
-        .then(image => {
-          ampImg = image;
-          return browser.waitForElementLayout('amp-img');
+        let ampImg;
+        return getImg({
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 100,
+          height: 100,
+          layout: 'intrinsic',
         })
-        .then(() => {
-          const dimensions = ampImg.getBoundingClientRect();
-          expect(dimensions.height).to.equal(100);
-          expect(dimensions.width).to.equal(100);
-          const img = ampImg.querySelector('img');
-          const imgDimensions = img.getBoundingClientRect();
-          expect(imgDimensions.height).to.equal(100);
-          expect(imgDimensions.width).to.equal(100);
-        });
-    });
+          .then(image => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            const dimensions = ampImg.getBoundingClientRect();
+            expect(dimensions.height).to.equal(100);
+            expect(dimensions.width).to.equal(100);
+            const img = ampImg.querySelector('img');
+            const imgDimensions = img.getBoundingClientRect();
+            expect(imgDimensions.height).to.equal(100);
+            expect(imgDimensions.width).to.equal(100);
+          });
+      });
 
-    it('should reach given width and height even if image\
+      it('should reach given width and height even if image\
       natural size is smaller', () => {
-      let ampImg;
-      return getImg({
-        src: '/examples/img/sample.jpg', // 641 x 481
-        width: 800,
-        height: 600,
-        layout: 'intrinsic',
-      })
-        .then(image => {
-          ampImg = image;
-          return browser.waitForElementLayout('amp-img');
+        let ampImg;
+        return getImg({
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
         })
-        .then(() => {
-          const dimensions = ampImg.getBoundingClientRect();
-          expect(dimensions.height).to.equal(600);
-          expect(dimensions.width).to.equal(800);
-          const img = ampImg.querySelector('img');
-          const imgDimensions = img.getBoundingClientRect();
-          expect(imgDimensions.height).to.equal(600);
-          expect(imgDimensions.width).to.equal(800);
-        });
-    });
+          .then(image => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            const dimensions = ampImg.getBoundingClientRect();
+            expect(dimensions.height).to.equal(600);
+            expect(dimensions.width).to.equal(800);
+            const img = ampImg.querySelector('img');
+            const imgDimensions = img.getBoundingClientRect();
+            expect(imgDimensions.height).to.equal(600);
+            expect(imgDimensions.width).to.equal(800);
+          });
+      });
 
-    it('expands a parent div with no explicit dimensions', () => {
-      let ampImg;
-      const parentDiv = fixture.doc.getElementById('parent');
-      // inline-block to force width and height to size of children
-      // font-size 0 to get rid of the 4px added by inline-block for whitespace
-      parentDiv.setAttribute('style', 'display: inline-block; font-size: 0;');
-      return getImg({
-        src: '/examples/img/sample.jpg', // 641 x 481
-        width: 600,
-        height: 400,
-        layout: 'intrinsic',
-      })
-        .then(image => {
-          ampImg = image;
-          return browser.waitForElementLayout('amp-img');
+      it('expands a parent div with no explicit dimensions', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        // inline-block to force width and height to size of children
+        // font-size 0 to get rid of the 4px added by inline-block for whitespace
+        parentDiv.setAttribute('style', 'display: inline-block; font-size: 0;');
+        return getImg({
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 600,
+          height: 400,
+          layout: 'intrinsic',
         })
-        .then(() => {
-          const dimensions = ampImg.getBoundingClientRect();
-          expect(dimensions.width).to.equal(600);
-          expect(dimensions.height).to.equal(400);
-          const parentDiv = fixture.doc.getElementById('parent');
-          const parentDimensions = parentDiv.getBoundingClientRect();
-          expect(parentDimensions.width).to.equal(600);
-          expect(parentDimensions.height).to.equal(400);
-        });
-    });
+          .then(image => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            const dimensions = ampImg.getBoundingClientRect();
+            expect(dimensions.width).to.equal(600);
+            expect(dimensions.height).to.equal(400);
+            const parentDiv = fixture.doc.getElementById('parent');
+            const parentDimensions = parentDiv.getBoundingClientRect();
+            expect(parentDimensions.width).to.equal(600);
+            expect(parentDimensions.height).to.equal(400);
+          });
+      });
 
-    it('is bounded by explicit dimensions of a parent container', () => {
-      let ampImg;
-      const parentDiv = fixture.doc.getElementById('parent');
-      parentDiv.setAttribute('style', 'width: 80px; height: 80px');
-      return getImg({
-        src: '/examples/img/sample.jpg', // 641 x 481
-        width: 800,
-        height: 600,
-        layout: 'intrinsic',
-      })
-        .then(image => {
-          ampImg = image;
-          return browser.waitForElementLayout('amp-img');
+      it('is bounded by explicit dimensions of a parent container', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+        return getImg({
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
         })
-        .then(() => {
-          const dimensions = ampImg.getBoundingClientRect();
-          expect(dimensions.width).to.equal(80);
-          expect(dimensions.height).to.equal(60);
-          const parentDiv = fixture.doc.getElementById('parent');
-          const parentDimensions = parentDiv.getBoundingClientRect();
-          expect(parentDimensions.height).to.equal(80);
-          expect(parentDimensions.width).to.equal(80);
-        });
+          .then(image => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            const dimensions = ampImg.getBoundingClientRect();
+            expect(dimensions.width).to.equal(80);
+            expect(dimensions.height).to.equal(60);
+            const parentDiv = fixture.doc.getElementById('parent');
+            const parentDimensions = parentDiv.getBoundingClientRect();
+            expect(parentDimensions.height).to.equal(80);
+            expect(parentDimensions.width).to.equal(80);
+          });
+      });
     });
-  });
 });
