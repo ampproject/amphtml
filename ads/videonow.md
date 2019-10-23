@@ -21,7 +21,7 @@ limitations under the License.
 ```html
 <amp-ad width="300" height="200"
       type="videonow"
-      data-pid="1"
+      data-pid="55555"
       layout="responsive">
 </amp-ad>
 ```
