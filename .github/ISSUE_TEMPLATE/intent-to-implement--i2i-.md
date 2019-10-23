@@ -36,7 +36,11 @@ A clear and concise description of any alternative solutions or features you've 
 <!--
 Add any other information that may help people understand your I2I.
 -->
-
+## Launch tracker
+<!--
+The launch tracker is meant to be an easy way of sharing a project's status with others on the AMP Project. 
+You should add a link to the launch tracker for this work here if applicable. One ideal template and instructions can be found here: bit.ly/amp-launch-tracker
+-->
 
 <!--
 Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md for help in finding a reviewer.
