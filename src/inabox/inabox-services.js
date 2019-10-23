@@ -44,11 +44,7 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installUrlForDoc(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installInaboxCidService(ampdoc);
-  if (
-    // eslint-disable-next-line no-undef
-    _RTVEXP_INABOX_LITE ||
-    isExperimentOn(ampdoc.win, 'inabox-viewer-lite')
-  ) {
+  if (_RTVEXP_INABOX_LITE || isExperimentOn(ampdoc.win, 'inabox-viewer-lite')) {
     installInaboxViewerServiceForDoc(ampdoc);
   } else {
     installViewerServiceForDoc(ampdoc);
@@ -57,7 +53,6 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   if (
-    // eslint-disable-next-line no-undef
     _RTVEXP_INABOX_LITE ||
     isExperimentOn(ampdoc.win, 'inabox-resources-lite')
   ) {
