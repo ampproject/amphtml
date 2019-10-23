@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 
 /**
  * myTarget base URL
@@ -23,14 +23,6 @@ import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
  * @private
  */
 const MYTARGET_BASE_URL_ = 'https://ad.mail.ru/adp/';
-
-/**
- * myTarget crossorigin render method
- *
- * @type {string}
- * @private
- */
-const MYTARGET_XORIGIN_MODE = 'nameframe';
 
 /**
  * This is a minimalistic AmpA4A implementation that primarily gets an Ad
@@ -53,7 +45,7 @@ export class AmpAdNetworkMyTargetImpl extends AmpA4A {
 
   /** @override */
   getNonAmpCreativeRenderingMethod() {
-    return MYTARGET_XORIGIN_MODE;
+    return XORIGIN_MODE.NAMEFRAME;
   }
 
   /** @override */
