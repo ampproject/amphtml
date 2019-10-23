@@ -71,19 +71,6 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
   pointer-events: none;
 }
 
-/**
- * This element is needed to work around a stacking issue with
- * `backdrop-filter` on iOS. The backdrop, background, frosting and the svg
- * icon will not stack in the correct order otherwise.
- */
-.i-amphtml-base-carousel-arrow-overlay {
-  /**
-   * Note: This should not do anything, since this element has static
-   * positioning. It is unclear why this works, it should not.
-   */
-  z-index: 0;
-}
-
 .i-amphtml-base-carousel-arrow-backdrop,
 .i-amphtml-base-carousel-arrow-background,
 .i-amphtml-base-carousel-arrow-frosting {
@@ -199,6 +186,18 @@ amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel
   width: 24px;
   height: 24px;
 }
+
+.i-amphtml-base-carousel-arrow-background,
+.i-amphtml-base-carousel-arrow-icon {
+  /**
+   * Workaround for iOS not stacking things correctly, causing the arrow
+   * components to mix incorrectly. This may work by forcing a separate layer
+   * where z-index may not do so correctly. Note this issue does not occur on
+   * all pages.
+   */
+  transform: translateZ(1px);
+}
+
 
 amp-base-carousel .i-amphtml-carousel-slotted > .i-amphtml-replaced-content {
   /*
