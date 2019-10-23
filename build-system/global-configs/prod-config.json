@@ -14,7 +14,9 @@
     "twitter-default-placeholder-fade",
     "twitter-default-placeholder-pulse"
   ],
+
   "canary": 0,
+
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 0.01,
   "amp-access-iframe": 1,
