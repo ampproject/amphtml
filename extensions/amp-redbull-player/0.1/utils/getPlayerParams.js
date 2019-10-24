@@ -15,9 +15,9 @@ limitations under the License.
 */
 
 /**
- * Read elements attributes and convert into a combined string.
+ * Read elements attributes and convet into a combined string.
  * @param {!Element} el
- * @return {!string} str
+ * @return {string} str
  */
 const getPlayerParams = el => {
   const arr = el.attributes;

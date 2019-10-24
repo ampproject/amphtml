@@ -22,7 +22,6 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
@@ -30,6 +29,7 @@ import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 import {removeElement} from '../../../src/dom';
+import {userAssert} from '../../../src/log';
 import addAttributesToElement from './utils/addAttributesToElement';
 import getPlayerParams from './utils/getPlayerParams';
 
