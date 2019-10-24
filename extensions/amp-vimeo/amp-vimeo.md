@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Vimeo video.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -48,9 +49,11 @@ With responsive layout, the width and height from the example should yield corre
 
 ```html
 <amp-vimeo
-    data-videoid="27246366"
-    layout="responsive"
-    width="500" height="281"></amp-vimeo>
+  data-videoid="27246366"
+  layout="responsive"
+  width="500"
+  height="281"
+></amp-vimeo>
 ```
 
 ## Attributes

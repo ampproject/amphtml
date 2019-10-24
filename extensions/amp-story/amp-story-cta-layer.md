@@ -5,6 +5,7 @@ formats:
 teaser:
   text: A single layer of a single page of an AMP story, which allows linking to other content.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -44,8 +45,8 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
 
 ## Constraints
 
-* If specified, the `<amp-story-cta-layer>` element must be the last layer within an `<amp-story-page>`. As a result, effectively every `<amp-story-page>` can have exactly one or exactly zero of the `<amp-story-cta-layer>` element.
-* Positioning and sizing of this layer cannot be controlled. It is always 100% width of the page, 20% height of the page, and aligned to the bottom of the page.
+- If specified, the `<amp-story-cta-layer>` element must be the last layer within an `<amp-story-page>`. As a result, effectively every `<amp-story-page>` can have exactly one or exactly zero of the `<amp-story-cta-layer>` element.
+- Positioning and sizing of this layer cannot be controlled. It is always 100% width of the page, 20% height of the page, and aligned to the bottom of the page.
 
 ## Example
 
@@ -65,10 +66,10 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
 <amp-img alt="CTA Layer" layout="fixed"
     src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png"
     width="404" height="678">
-  <noscript>
-    <img width="404" height="678"
+<noscript>
+<img width="404" height="678"
          src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-cta-layer.png" />
-  </noscript>
+</noscript>
 </amp-img>
 
 [Complete example found in the examples directory](https://github.com/ampproject/amphtml/blob/master/examples/amp-story/cta-layer-outlink.html)

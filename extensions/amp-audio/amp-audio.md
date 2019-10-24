@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Replaces the HTML5 audio tag.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -52,21 +53,27 @@ Like all embedded external resources in an AMP file, the audio is "lazily" loade
 The `amp-audio` component accepts up to three unique types of HTML nodes as children:
 
 - `source` tags: Just like in the HTML `<audio>` tag, you can add `<source>` tag children to specify different source media files to play.
--  a placeholder for before the audio starts: One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
--  a fallback if the browser doesn’t support HTML5 audio: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 audio is not supported on the user’s browser.
+- a placeholder for before the audio starts: One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
+- a fallback if the browser doesn’t support HTML5 audio: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 audio is not supported on the user’s browser.
 
 For example:
+
 ```html
-<amp-audio width="400" height="300" src="https://yourhost.com/audios/myaudio.mp3">
+<amp-audio
+  width="400"
+  height="300"
+  src="https://yourhost.com/audios/myaudio.mp3"
+>
   <div fallback>
     <p>Your browser doesn’t support HTML5 audio</p>
   </div>
-  <source type="audio/mpeg" src="foo.mp3">
-  <source type="audio/ogg" src="foo.ogg">
+  <source type="audio/mpeg" src="foo.mp3" />
+  <source type="audio/ogg" src="foo.ogg" />
 </amp-audio>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>src</strong></td>
@@ -95,7 +102,6 @@ it is ready.</td>
   </tr>
 </table>
 
-
 ## Media Session Attributes
 
 `amp-audio` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the audio file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
@@ -122,20 +128,24 @@ it is ready.</td>
 Example:
 
 ```html
-<amp-audio width="400" height="300"
+<amp-audio
+  width="400"
+  height="300"
   src="https://yourhost.com/audios/myaudio.mp3"
   artwork="https://yourhost.com/artworks/artwork.png"
-  title="Awesome music" artist="Awesome singer"
-  album="Amazing album">
-  <source type="audio/mpeg" src="foo.mp3">
+  title="Awesome music"
+  artist="Awesome singer"
+  album="Amazing album"
+>
+  <source type="audio/mpeg" src="foo.mp3" />
 </amp-audio>
 ```
 
 ## Analytics
+
 AMP audio analytics gathers data about how users interact with audios in AMP documents. AMP audio extension issues analytics events during their lifecycle. These events can be reported through the analytics configuration using `audio-*` triggers. `audio-play` and `audio-pause` are the two analytics events supported now.
 
-See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
-
+See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
 
 ### Audio play trigger (`"on": "audio-play"`)
 

@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Apester smart unit.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -43,22 +44,20 @@ Displays a <a href="https://apester.com/">Apester</a> smart unit.
 ## Examples
 
 Single Mode:
+
 ```html
-<amp-apester-media
-        height="390"
-        data-apester-media-id="#">
-</amp-apester-media>
+<amp-apester-media height="390" data-apester-media-id="#"> </amp-apester-media>
 ```
 
 Playlist Mode:
+
 ```html
-<amp-apester-media
-        height="390"
-        data-apester-channel-token="#">
+<amp-apester-media height="390" data-apester-channel-token="#">
 </amp-apester-media>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-apester-media-id</strong></td>
@@ -69,7 +68,6 @@ Playlist Mode:
     <td>This attribute is required for playlist mode, and it represents the token of the channel (string value).</td>
   </tr>
 </table>
-
 
 ## Validation
 
