@@ -564,7 +564,7 @@ export class Navigation {
           this.ampdoc.win,
           'remove-viewer-query-params-on-navigate'
         ) &&
-        location.search &&
+        fromLocation.search &&
         platform.isSafari() &&
         platform.getMajorVersion() >= 13 &&
         viewer.isProxyOrigin() &&
@@ -573,21 +573,22 @@ export class Navigation {
         dev().info(
           TAG,
           'Removing iframe query string before navigation:',
-          location.search
+          fromLocation.search
         );
-        const original = location.href;
-        const noQuery = `${location.origin}${location.pathname}${location.hash}`;
+        const original = fromLocation.href;
+        const noQuery = `${fromLocation.origin}${fromLocation.pathname}${fromLocation.hash}`;
         win.history.replaceState(null, '', noQuery);
 
         const restoreQuery = () => {
-          if (location.href == noQuery) {
+          const currentHref = win.location.href;
+          if (currentHref == noQuery) {
             dev().info(TAG, 'Restored iframe URL with query string:', original);
             win.history.replaceState(null, '', original);
           } else {
             dev().error(
               TAG,
               'Unexpected iframe URL change:',
-              location.href,
+              currentHref,
               noQuery
             );
           }
