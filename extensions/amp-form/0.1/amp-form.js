@@ -739,8 +739,7 @@ export class AmpForm {
         );
       })
       .then(
-        response =>
-          this.handleSubmitSuccess_(tryResolve(() => response), trust),
+        response => this.handleSsrTemplateResponse_(response, trust),
         error => {
           const detail = dict();
           if (error && error.message) {
@@ -771,6 +770,25 @@ export class AmpForm {
       errorTemplate = this.templates_.maybeFindTemplate(errorContainer);
     }
     return {successTemplate, errorTemplate};
+  }
+
+  /**
+   * Transition the form to the submit-success or submit-error state depending on the response status.
+   * @param {!JsonObject} response
+   * @param {!ActionTrust} trust
+   * @return {!Promise}
+   * @private
+   */
+  handleSsrTemplateResponse_(response, trust) {
+    const init = response['init'];
+    if (init) {
+      const status = init['status'];
+      if (status >= 300) {
+        /** HTTP status codes of 300+ mean redirects and errors. */
+        return this.handleSubmitFailure_(status, response, trust);
+      }
+    }
+    return this.handleSubmitSuccess_(tryResolve(() => response), trust);
   }
 
   /**

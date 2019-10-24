@@ -56,18 +56,23 @@ Command                                                                 | Descri
 `gulp dist --noextensions`                                              | Builds production binaries without building any extensions.
 `gulp dist --fortesting`                                                | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.)
 `gulp dist --fortesting --config=<config>`                              | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.)
-`gulp lint`                                                             | Validates against the ESLint linter.
+`gulp lint`                                                             | Validates JS files against the ESLint linter.
 `gulp lint --watch`                                                     | Watches for changes in files, and validates against the ESLint linter.
 `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.
 `gulp lint --files=<files-path-glob>`                                   | Lints just the files provided. Can be used with `--fix`.
 `gulp lint --local_changes`                                             | Lints just the files changed in the local branch. Can be used with `--fix`.
+`gulp prettify`                                                         | Validates non-JS files using Prettier.
+`gulp prettify --fix`                                                   | Fixes simple formatting errors automatically.
+`gulp prettify --files=<files-path-glob>`                               | Checks just the files provided. Can be used with `--fix`.
+`gulp prettify --local_changes`                                         | Checks just the files changed in the local branch. Can be used with `--fix`.
 `gulp build`                                                            | Builds the AMP library.
 `gulp build --extensions=amp-foo,amp-bar`                               | Builds the AMP library, with only the listed extensions.
 `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
 `gulp build --extensions_from=examples/foo.amp.html`                    | Builds the AMP library, with only the extensions needed to load the listed examples.
 `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
 `gulp build --fortesting`                                               | Builds the AMP library and sets the `test` field in `AMP_CONFIG` to `true`.
-`gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.
+`gulp check-links --files=<files-path-glob>`                            | Reports dead links in `.md` files.
+`gulp check-links --local_changes`                                      | Reports dead links in `.md` files changed in the local branch.
 `gulp clean`                                                            | Removes build output.
 `gulp css`                                                              | Recompiles css to the build directory and builds the embedded css into js files for the AMP library.
 `gulp compile-jison`                                                    | Compiles jison parsers for extensions to build directory.
@@ -332,6 +337,16 @@ If you are only testing a single file, you can use `gulp firebase --file=path/to
 After deploying, you can access your project publically at its hosting URL `https://your-project-name.firebaseapp.com`.
 
 Additionally, you can create multiple projects and switch between them in the CLI using `firebase use your-project-name`.
+
+#### Testing Ads
+Testing ads in deployed demos requires whitelisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
+
+```
+export AMP_TESTING_HOST="my-project.firebaseapp.com"
+gulp firebase --fortesting
+firebase deploy
+```
+This will write "my-project.firebaseapp.com" as a third party url to relevant attributes in `AMP_CONFIG`, which is prepended to `amp.js` and `integration.js` files in the firebase folder. If you're curious about how this is done, feel free to inspect `build-system/tasks/firebase.js`.
 
 ## End-to-End Tests
 

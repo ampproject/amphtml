@@ -49,12 +49,13 @@ async function main() {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp prettify');
     timedExecOrDie('gulp presubmit');
     timedExecOrDie('gulp ava');
     timedExecOrDie('gulp babel-plugin-tests');
     timedExecOrDie('gulp caches-json');
-    timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dev-dashboard-tests');
+    timedExecOrDie('gulp check-owners');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   } else {
@@ -65,6 +66,7 @@ async function main() {
 
     timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp prettify');
     timedExecOrDie('gulp presubmit');
 
     if (buildTargets.has('AVA')) {
@@ -77,16 +79,19 @@ async function main() {
 
     if (buildTargets.has('CACHES_JSON')) {
       timedExecOrDie('gulp caches-json');
-      timedExecOrDie('gulp json-syntax');
     }
 
     // Check document links only for PR builds.
     if (buildTargets.has('DOCS')) {
-      timedExecOrDie('gulp check-links');
+      timedExecOrDie('gulp check-links --local_changes');
     }
 
     if (buildTargets.has('DEV_DASHBOARD')) {
       timedExecOrDie('gulp dev-dashboard-tests');
+    }
+
+    if (buildTargets.has('OWNERS')) {
+      timedExecOrDie('gulp check-owners');
     }
 
     if (buildTargets.has('RUNTIME')) {

@@ -360,6 +360,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  'conative': {
+    renderStartImplemented: true,
+  },
+
   'connatix': {
     renderStartImplemented: true,
   },
@@ -415,6 +419,11 @@ const adConfig = jsonConfiguration({
 
   'eas': {
     prefetch: 'https://amp.emediate.eu/amp.v0.js',
+    renderStartImplemented: true,
+  },
+
+  'empower': {
+    prefetch: 'https://cdn.empower.net/sdk/amp-ad.min.js',
     renderStartImplemented: true,
   },
 
