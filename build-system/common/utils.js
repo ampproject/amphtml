@@ -51,17 +51,19 @@ function getFilesChanged(globs) {
 }
 
 /**
- * Logs the list of files that will be checked.
+ * Logs the list of files that will be checked and returns the list.
  *
  * @param {!Array<string>} files
+ * @return {!Array<string>}
  */
 function logFiles(files) {
   if (!isTravisBuild()) {
     log(green('INFO: ') + 'Checking the following files:');
-    files.forEach(file => {
+    for (const file of files) {
       log(cyan(file));
-    });
+    }
   }
+  return files;
 }
 
 /**
@@ -73,21 +75,18 @@ function logFiles(files) {
  * @return {!Array<string>}
  */
 function getFilesToCheck(globs, options = {}) {
-  let filesToCheck = [];
   if (argv.files) {
-    filesToCheck = globby.sync(argv.files.split(','));
-    logFiles(filesToCheck);
-  } else if (argv.local_changes) {
-    filesToCheck = getFilesChanged(globs);
-    if (filesToCheck.length == 0) {
-      log(green('INFO: ') + 'No files to check in this PR');
-    } else {
-      logFiles(filesToCheck);
-    }
-  } else {
-    filesToCheck = globby.sync(globs, options);
+    return logFiles(globby.sync(argv.files.split(',')));
   }
-  return filesToCheck;
+  if (argv.local_changes) {
+    const filesChanged = getFilesChanged(globs);
+    if (filesChanged.length == 0) {
+      log(green('INFO: ') + 'No files to check in this PR');
+      return [];
+    }
+    return logFiles(filesChanged);
+  }
+  return globby.sync(globs, options);
 }
 
 module.exports = {

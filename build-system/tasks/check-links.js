@@ -45,11 +45,8 @@ async function checkLinks() {
     log(green('Starting checks...'));
   }
   filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
-  const filesWithDeadLinks = [];
-  await Promise.all(
-    filesToCheck.map(file => checkLinksInFile(file, filesWithDeadLinks))
-  );
-  reportFinalResults(filesWithDeadLinks);
+  const allResults = await Promise.all(filesToCheck.map(checkLinksInFile));
+  reportFinalResults(allResults);
 }
 
 /**
@@ -82,9 +79,12 @@ function isValidUsage() {
 /**
  * Reports final results after having checked all markdown files.
  *
- * @param {!Array<string>} filesWithDeadLinks
+ * @param {!Array<string>} allResults
  */
-function reportFinalResults(filesWithDeadLinks) {
+function reportFinalResults(allResults) {
+  const filesWithDeadLinks = allResults
+    .filter(result => result.containsDeadLinks)
+    .map(result => result.file);
   if (filesWithDeadLinks.length > 0) {
     log(
       red('ERROR:'),
@@ -116,7 +116,7 @@ function reportFinalResults(filesWithDeadLinks) {
  * @return {boolean} True if the link points to a file introduced by the PR.
  */
 function isLinkToFileIntroducedByPR(link) {
-  return filesIntroducedByPr.some(function(file) {
+  return filesIntroducedByPr.some(file => {
     return file.length > 0 && link.includes(path.parse(file).base);
   });
 }
@@ -125,10 +125,9 @@ function isLinkToFileIntroducedByPR(link) {
  * Checks a given markdown file for dead links.
  *
  * @param {string} file
- * @param {!Array<string>} filesWithDeadLinks
  * @return {!Promise}
  */
-function checkLinksInFile(file, filesWithDeadLinks) {
+function checkLinksInFile(file) {
   let markdown = fs.readFileSync(file).toString();
 
   // Links inside <code> blocks are illustrative and not always valid. Must be
@@ -147,12 +146,12 @@ function checkLinksInFile(file, filesWithDeadLinks) {
   };
 
   return new Promise((resolve, reject) => {
-    const callback = (err, results) => {
+    markdownLinkCheck(markdown, opts, (err, results) => {
       if (err) {
         reject(err);
         return;
       }
-      let deadLinksFoundInFile = false;
+      let containsDeadLinks = false;
       for (const {link, status, statusCode} of results) {
         // Skip links to files that were introduced by the PR.
         if (isLinkToFileIntroducedByPR(link)) {
@@ -170,20 +169,18 @@ function checkLinksInFile(file, filesWithDeadLinks) {
             }
             break;
           case 'dead':
-            deadLinksFoundInFile = true;
+            containsDeadLinks = true;
             log(`[${red('✖')}] ${link} (${red(statusCode)})`);
             break;
         }
       }
-      if (deadLinksFoundInFile) {
+      if (containsDeadLinks) {
         log(red('ERROR:'), 'Possible dead link(s) found in', cyan(file));
-        filesWithDeadLinks.push(file);
       } else {
         log(green('SUCCESS:'), 'All links in', cyan(file), 'are alive.');
       }
-      resolve(file);
-    };
-    markdownLinkCheck(markdown, opts, callback);
+      resolve({file, containsDeadLinks});
+    });
   });
 }
 
