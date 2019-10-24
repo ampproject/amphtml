@@ -48,6 +48,8 @@ describes.realWin(
     const encryptedKey =
       "ENCRYPT({'accessRequirements': ['googleAccessRequirements:123'], 'key':'0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ='})";
     const decryptedDocKey = '0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ=';
+    const decryptedDocKeyHash =
+      '5903f44139fd3d88414b0d29c986fd0ca1572eb214e3a0d56201d06ed753c39e';
     const encryptedKeys = {
       'local': encryptedKey,
       'google.com': encryptedKey,
@@ -92,21 +94,22 @@ describes.realWin(
       cryptoSection2.setAttribute('encrypted', '');
       cryptoSection2.appendChild(crypt2);
       win.document.body.appendChild(cryptoSection2);
-
-      cryptoHandler = new CryptoHandler(ampdoc);
     });
 
     describe('getEncryptedDocumentKey', () => {
       it('should return null when there are no keys', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return expect(cryptoHandler.getEncryptedDocumentKey()).to.be.null;
       });
 
       it('should return null when call doesnt match keys', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return expect(cryptoHandler.getEncryptedDocumentKey('doesntExist')).to
           .be.null;
       });
 
       it('should return expected value to a matching key', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return expect(cryptoHandler.getEncryptedDocumentKey('local')).to.equal(
           encryptedKey
         );
@@ -115,10 +118,11 @@ describes.realWin(
 
     describe('decryptDocumentContent_', () => {
       it('should decrypt the content correctly', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return cryptoHandler
           .decryptDocumentContent_(encryptedContent, decryptedDocKey)
-          .then(decryptedContent => {
-            expect(decryptedContent).to.equal(decryptedContent);
+          .then(actualContent => {
+            expect(actualContent).to.equal(decryptedContent);
           });
       });
     });
@@ -126,10 +130,40 @@ describes.realWin(
     describe('tryToDecryptDocument', () => {
       // eslint-disable-next-line max-len
       it('should replace the encrypted content with decrypted content in multiple sections', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
         return cryptoHandler.tryToDecryptDocument(decryptedDocKey).then(() => {
           expect(cryptoSection1.textContent).to.equal(decryptedContent);
           expect(cryptoSection2.textContent).to.equal(decryptedContent);
         });
+      });
+
+      it('should replace the encrypted content with decrypted content in multiple sections with SHA256 hash', () => {
+        win.document
+          .querySelector('script[cryptokeys]')
+          .setAttribute('sha-256-hash', decryptedDocKeyHash);
+        cryptoHandler = new CryptoHandler(ampdoc);
+        return cryptoHandler.tryToDecryptDocument(decryptedDocKey).then(() => {
+          expect(cryptoSection1.textContent).to.equal(decryptedContent);
+          expect(cryptoSection2.textContent).to.equal(decryptedContent);
+        });
+      });
+
+      it('should fail due to key hashes being unequal', () => {
+        win.document
+          .querySelector('script[cryptokeys]')
+          .setAttribute('sha-256-hash', decryptedDocKeyHash);
+        cryptoHandler = new CryptoHandler(ampdoc);
+        const fakeDocKey = '0nasdf234ikn23r09jijfakefake923r42aQ=';
+        return cryptoHandler.tryToDecryptDocument(fakeDocKey).then(
+          () => {
+            throw new Error('Promise should have rejected.');
+          },
+          reason => {
+            expect(() => {
+              throw reason;
+            }).to.throw('Invalid Document Key');
+          }
+        );
       });
     });
   }
