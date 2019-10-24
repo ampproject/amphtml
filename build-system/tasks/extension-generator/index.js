@@ -76,8 +76,9 @@ tags: {  # <${name}>
 const getMarkdownDocFile = async name =>
   (await fs.readFile(`${__dirname}/extension-doc.template.md`))
     .toString('utf-8')
-    .replace(/\${name}/g, name)
-    .replace(/\${year}/g, year);
+    .replace(/\\\$category/g, '$category')
+    .replace(/\\?\${name}/g, name)
+    .replace(/\\?\${year}/g, year);
 
 function getJsTestExtensionFile(name) {
   return `/**

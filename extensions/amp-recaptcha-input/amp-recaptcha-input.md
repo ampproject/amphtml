@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Appends a reCAPTCHA v3 token to AMP form submissions.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 

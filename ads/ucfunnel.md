@@ -19,12 +19,15 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="ucfunnel"
-    data-site-id="test-ad-83444226E44368D1E32E49EEBE6D29">
+<amp-ad
+  width="300"
+  height="250"
+  type="ucfunnel"
+  data-site-id="test-ad-83444226E44368D1E32E49EEBE6D29"
+>
 </amp-ad>
 ```
 
 ### Required Ad Parameters
 
-- `data-site-id` -  unique publisher identifier, supplied by ucfunnel.
+- `data-site-id` - unique publisher identifier, supplied by ucfunnel.

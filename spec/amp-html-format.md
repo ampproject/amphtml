@@ -52,43 +52,114 @@ In concrete terms this means that:
 ### Sample document
 
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡>
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Sample document</title>
-    <link rel="canonical" href="./regular-html-version.html">
-    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="./regular-html-version.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
     <style amp-custom>
-      h1 {color: red}
+      h1 {
+        color: red;
+      }
     </style>
     <script type="application/ld+json">
-    {
-      "@context": "http://schema.org",
-      "@type": "NewsArticle",
-      "headline": "Article headline",
-      "image": [
-        "thumbnail1.jpg"
-      ],
-      "datePublished": "2015-02-05T08:00:00+08:00"
-    }
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "headline": "Article headline",
+        "image": ["thumbnail1.jpg"],
+        "datePublished": "2015-02-05T08:00:00+08:00"
+      }
     </script>
-    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
-    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
-    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script
+      async
+      custom-element="amp-carousel"
+      src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-ad"
+      src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"
+    ></script>
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
     <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
     <h1>Sample document</h1>
     <p>
       Some text
-      <amp-img src=sample.jpg width=300 height=300></amp-img>
+      <amp-img src="sample.jpg" width="300" height="300"></amp-img>
     </p>
-    <amp-ad width=300 height=250
-        type="a9"
-        data-aax_size="300x250"
-        data-aax_pubname="test123"
-        data-aax_src="302">
+    <amp-ad
+      width="300"
+      height="250"
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="test123"
+      data-aax_src="302"
+    >
     </amp-ad>
   </body>
 </html>
@@ -270,14 +341,17 @@ Authors may add custom styles to a document using a single `<style amp-custom>` 
 The following restrictions apply to selectors in author style sheets:
 
 ##### Class and tag names
+
 Class names, IDs, tag names and attributes, in author stylesheets, may not start with the string `-amp-` and `i-amp-`. These are reserved for internal use by the AMP runtime. It follows, that the user's stylesheet may not reference CSS selectors for `-amp-` classes, `i-amp-` IDs and `i-amp-` tags and attributes. These classes, IDs and tag/attribute names are not meant to be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly forbidden by these components' spec.
 
 To prevent usage of attribute selectors to circumvent class name limitations it is generally not allowed for CSS selectors to contain tokens and strings starting with `-amp-` and `i-amp-`.
 
 #### Important
+
 Usage of the `!important` qualifier is not allowed. This is a necessary requirement to enable AMP to enforce its element sizing invariants.
 
 #### Properties
+
 AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently white list: `opacity`, `transform` (also `-vendorPrefix-transform`).
 
 In the following examples `<property>` needs to be in the white list above.
@@ -288,6 +362,7 @@ In the following examples `<property>` needs to be in the white list above.
 `overflow` (and `overflow-y`, `overflow-x`) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
 
 #### Maximum size
+
 It is a validation error if the author stylesheet or inline styles together are larger than 50,000 bytes.
 
 ### Keyframes stylesheet
@@ -295,9 +370,10 @@ It is a validation error if the author stylesheet or inline styles together are 
 In addition to the `<style amp-custom>`, authors may also add the `<style amp-keyframes>` tag, which is allowed specifically for keyframes animations.
 
 The following restrictions apply to the `<style amp-keyframes>` tag:
- 1. May only be placed as the last child of the document's `<body>` element.
- 2. May only contain `@keyframes`, `@media`, `@supports` rules and their combination.
- 3. May not be larger than 500,000 bytes.
+
+1.  May only be placed as the last child of the document's `<body>` element.
+2.  May only contain `@keyframes`, `@media`, `@supports` rules and their combination.
+3.  May not be larger than 500,000 bytes.
 
 The reason the `<style amp-keyframes>` tag exists is because keyframes rules are often bulky even for moderately complicated animations, which leads to slow CSS parsing and first contentful paint. But such rules often exceed the size limit imposed on `<style amp-custom>`. Putting such keyframes declarations at the bottom of the document in the `<style amp-keyframes>` allows them to exceed size limitations. And since keyframes are not render-blocking, it also avoids blocking first contentful paint to parse them.
 
@@ -321,7 +397,10 @@ Authors may include stylesheets for custom fonts. The 2 supported methods are li
 Example:
 
 ```html
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css?family=Tangerine"
+/>
 ```
 
 Font providers can be white listed if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
@@ -335,7 +414,6 @@ IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP Cache CSP ru
 
 Authors are free to include all custom fonts via an `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via the HTTP or HTTPS scheme.
 
-
 ## AMP runtime
 
 The AMP runtime is a piece of JavaScript that runs inside every AMP document. It provides implementations for AMP custom elements, manages resource loading and prioritization and optionally includes a runtime validator for AMP HTML for use during development.
@@ -344,7 +422,6 @@ The AMP runtime is loaded via the mandatory `<script src="https://cdn.ampproject
 
 The AMP runtime can be placed into a development mode for any page. Development mode will trigger AMP validation on the embedded page, which will emit the validation status and any errors to the JavaScript developer console. Development mode may be triggered by appending `#development=1` to the URL of the page.
 
-
 ## Resources
 
 Resources such as images, videos, audio files or ads must be included into an AMP HTML file through custom elements such as `<amp-img>`. We call them “managed resources” because whether and when they will be loaded and displayed to the user is decided by the AMP runtime.
@@ -352,7 +429,6 @@ Resources such as images, videos, audio files or ads must be included into an AM
 There are no particular guarantees as to the loading behavior of the AMP runtime, but it should generally strive to load resources quickly enough, so that they are loaded by the time the user would like to see them if possible. The runtime should prioritize resources currently in the viewport and attempt to predict changes to the viewport and preload resources accordingly.
 
 The AMP runtime may at any time decide to unload resources that are not currently in viewport or reuse the resource containers such as iframes to reduce overall RAM consumption.
-
 
 ## AMP Components
 
@@ -393,10 +469,11 @@ If `methodName` is omitted the default method is executed if defined for the ele
 Example: `on="tap:fooId"`
 
 Some actions, if documented, may accept arguments. The arguments are defined between parentheses in `key=value` notation. The accepted values are:
- - simple unquoted strings: `simple-value`;
- - quoted strings: `"string value"` or `'string value'`;
- - boolean values: `true` or `false`;
- - numbers: `11` or `1.1`.
+
+- simple unquoted strings: `simple-value`;
+- quoted strings: `"string value"` or `'string value'`;
+- boolean values: `true` or `false`;
+- numbers: `11` or `1.1`.
 
 You can listen to multiple events on an element by separating the two events with a semicolon `;`.
 
@@ -411,7 +488,11 @@ Extended components are components that do not necessarily ship with the AMP run
 Extended components are loaded by including a `<script>` tag in the head of the document like this:
 
 ```html
-<script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+<script
+  async
+  custom-element="amp-carousel"
+  src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"
+></script>
 ```
 
 The `<script>` tag must have an `async` attribute and must have a `custom-element` attribute referencing the name of the element.
@@ -432,7 +513,6 @@ https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
 
 See the [AMP versioning policy](amp-versioning-policy.md).
 
-
 ### Templates
 
 Templates render HTML content based on the language-specific template and provided JSON data.
@@ -443,7 +523,11 @@ Templates are not shipped with the AMP runtime and have to be downloaded just as
 Extended components are loaded by including a `<script>` tag in the head of the document like this:
 
 ```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+<script
+  async
+  custom-template="amp-mustache"
+  src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+></script>
 ```
 
 The `<script>` tag must have an `async` attribute and must have a `custom-template` attribute referencing the type of the
@@ -478,7 +562,6 @@ https://cdn.ampproject.org/$RUNTIME_VERSION/$TEMPLATE_TYPE-$TEMPLATE_VERSION.js
 
 See versioning of custom elements for more details.
 
-
 ## Security
 
 AMP HTML documents must not trigger errors when served with a Content Security Policy that does not include the keywords `unsafe-inline` and `unsafe-eval`.
@@ -491,18 +574,18 @@ All AMP template elements must go through AMP security review before they can be
 
 Currently, the following SVG elements are allowed:
 
-* basics: "g", "glyph", "glyphRef", "image", "marker", "metadata", "path", "solidcolor", "svg", "switch", "view"
-* shapes: "circle", "ellipse", "line", "polygon", "polyline", "rect"
-* text: "text", "textPath", "tref", "tspan"
-* rendering: "clipPath", "filter", "hkern", "linearGradient", "mask", "pattern", "radialGradient", "vkern"
-* special: "defs" (all children above are allowed here), "symbol", "use"
-* filter: "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", "feOffset", "foreignObject"
-* ARIA: "desc", "title"
+- basics: "g", "glyph", "glyphRef", "image", "marker", "metadata", "path", "solidcolor", "svg", "switch", "view"
+- shapes: "circle", "ellipse", "line", "polygon", "polyline", "rect"
+- text: "text", "textPath", "tref", "tspan"
+- rendering: "clipPath", "filter", "hkern", "linearGradient", "mask", "pattern", "radialGradient", "vkern"
+- special: "defs" (all children above are allowed here), "symbol", "use"
+- filter: "feColorMatrix", "feComposite", "feGaussianBlur", "feMerge", "feMergeNode", "feOffset", "foreignObject"
+- ARIA: "desc", "title"
 
 As well as these attributes:
 
-* "xlink:href": only URIs starting with "#" are allowed
-* "style"
+- "xlink:href": only URIs starting with "#" are allowed
+- "style"
 
 ## AMP document discovery
 
@@ -513,7 +596,7 @@ If an AMP document exists that is an alternative representation of a canonical d
 Example:
 
 ```html
-<link rel="amphtml" href="https://www.example.com/url/to/amp/document.html">
+<link rel="amphtml" href="https://www.example.com/url/to/amp/document.html" />
 ```
 
 The AMP document itself is expected to point back to its canonical document via a `link` tag with the relation "canonical".
@@ -521,9 +604,12 @@ The AMP document itself is expected to point back to its canonical document via 
 Example:
 
 ```html
-<link rel="canonical" href="https://www.example.com/url/to/canonical/document.html">
+<link
+  rel="canonical"
+  href="https://www.example.com/url/to/canonical/document.html"
+/>
 ```
 
-(If a single resource is simultaneously the AMP *and* the canonical document, the canonical relation should point to itself--no "amphtml" relation is required.)
+(If a single resource is simultaneously the AMP _and_ the canonical document, the canonical relation should point to itself--no "amphtml" relation is required.)
 
 Note that for widest compatibility with AMP-consuming systems, it should be possible to read the "amphtml" relation without executing JavaScript. (That is, the tag should be present in the raw HTML, and not injected via JavaScript.)

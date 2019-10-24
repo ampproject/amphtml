@@ -22,9 +22,9 @@ displays an image of a cat inside an AMP document. This extended component
 loads one of a set of 3 different pre-built cat images, so that the user
 doesn't need to host the images on their server. Each image has a cat name:
 
- - Oscar
- - Chloe
- - Bella
+- Oscar
+- Chloe
+- Bella
 
 Common usage of this extended component might look like:
 
@@ -54,11 +54,13 @@ You will be creating a rules file as well as two test files. The paths for
 these files, using the `<amp-cat>` example above, would be:
 
 **Rules File**
+
 <pre>
 amphtml/extensions/<b>amp-cat</b>/validator-<b>amp-cat</b>.protoascii
 </pre>
 
 **Test Files**
+
 <pre>
 amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat</b>.html
 amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat</b>.out
@@ -119,8 +121,8 @@ tags: {  # <amp-cat>
 
 This rules file specifies the rules for two tags:
 
- 1. A script tag for including the `amp-cat` extended component code.
- 2. The `<amp-cat>` tag itself.
+1.  A script tag for including the `amp-cat` extended component code.
+2.  The `<amp-cat>` tag itself.
 
 Let's see it broken down:
 
@@ -150,11 +152,11 @@ file.
 ```
 tags: {  # amp-cat extended component
 ```
+
 This tells the validator that we want to define a new tag. In this case, we want
 to validate a tag that looks something like the following:
 
-> `<script async custom-element='amp-cat'`
-> `        src='https://cdn.ampproject.org/v0/amp-cat-0.1.js'></script>`
+> `<script async custom-element='amp-cat' src='https://cdn.ampproject.org/v0/amp-cat-0.1.js'></script>`
 
 ```
   html_format: AMP
@@ -275,7 +277,6 @@ amp tags. See
 [AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md)
 to determine which options make sense for your tag.
 
-
 ### Attribute Validation Options
 
 We saw a very simple example of an attribute validation rule above:
@@ -297,30 +298,33 @@ attrs: {
   name: "data-selected-cat"
 }
 ```
+
 By specifying no value rules, any value is allowed for this attribute.
 
 If your code expects certain values, it is best to specify them here it will
 produce helpful error messages for developers trying to debug their tag.
 
-
 ```
 value: "oscar"
 ```
+
 ```
 value_casei: "oscar"
 ```
+
 Specifies that only "oscar" is an allowed value, as case-sensitive and
 case-insensitive variants.
 
 ```
   value_regex: "\\d+"
 ```
+
 ```
   value_regex_casei: "[a-z0-9]+"
 ```
+
 Specifies that only values matching these RegEx patterns is an allowed value,
 as case-sensitive and case-instensitive variants.
-
 
 ```
 value_url: {
@@ -330,6 +334,7 @@ value_url: {
   allow_empty: true
 }
 ```
+
 This specifies that the attribute value must be a valid URL or an empty string.
 If an URL, it may be either "http" or "https" and may be relative. Note that in
 many cases, you may want to allow only "https" as non-secure resources will
@@ -337,11 +342,11 @@ generate mixed-mode warnings when displayed from the AMP Cache.
 
 Only one of:
 
- - `value`
- - `value_casei`
- - `value_regex`
- - `value_regex_casei`
- - `value_url`
+- `value`
+- `value_casei`
+- `value_regex`
+- `value_regex_casei`
+- `value_url`
 
 may be specified for a single attribute. However, multiple values may be specified
 for `value` and `value_casei` as seen in the example above.
@@ -487,7 +492,6 @@ If your test case `.html` files produce the validator output in the test case
 
 Alternatively, if the tests don't match, this script will print the validator
 output to stdout, which can be used for updating the test file.
-
 
 ## Final Note on Rules
 

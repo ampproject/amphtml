@@ -84,4 +84,4 @@ fullscreen. These heuristics are applied as follows, in descending priority:
 2. If the visible percentage of the video is higher.
 3. If a video is closer to the center of the viewport.
 4. Everything else failing, select the video that is closest to the top of the
-viewport.
+   viewport.

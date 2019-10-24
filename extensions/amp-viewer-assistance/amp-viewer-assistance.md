@@ -73,7 +73,9 @@ The `amp-viewer-assistance` extension currently has two functions that can be in
 </table>
 
 ### UpdateActionState Payloads
+
 A valid `amp-viewer-assistance.updateActionState` payload can either be an `update` object of the format:
+
 ```
 {
   "actionStatus": "COMPLETED_ACTION_STATUS" | "ACTIVE_ACTION_STATUS" |
@@ -89,9 +91,11 @@ or an `error` standard [Response](https://developer.mozilla.org/en-US/docs/Web/A
 In the event of an error with the `amp-list` extension, we can listen to the `fetch-error` event and call `amp-viewer-assistance.updateActionState` to pass the error to the viewer. With an `error` parameter, `amp-viewer-assistance` will transform the parameter into a `FAILED_ACTION_STATUS` payload before sending it to the viewer.
 
 ```html
-<amp-list id="my-failing-list"
-    src="failing.xhr.address.com"
-    on="fetch-error:amp-viewer-assistance.updateActionState(error=event.response)">
+<amp-list
+  id="my-failing-list"
+  src="failing.xhr.address.com"
+  on="fetch-error:amp-viewer-assistance.updateActionState(error=event.response)"
+>
 </amp-list>
 ```
 
@@ -127,13 +131,17 @@ There are several messages that can be sent from the amp-viewer-assistance exten
 In order to act upon a successful sign in from the viewer assistance, a `signedIn` event is emitted from the `amp-viewer-assistance` script element. On the element, an expression can be attached via the `on` attribute. In this example, we are showing a success message after a user has signed in:
 
 ```html
-<script id="amp-viewer-assistance" type="application/json" on="signedIn:success-message.show">
-{
-  "myConfigItem1": {
-    "foo": 123,
-    "bar": 456
+<script
+  id="amp-viewer-assistance"
+  type="application/json"
+  on="signedIn:success-message.show"
+>
+  {
+    "myConfigItem1": {
+      "foo": 123,
+      "bar": 456
+    }
   }
-}
 </script>
 <div id="success-message" hidden>
   Successfully Signed In!
@@ -160,33 +168,42 @@ Given a viewer with identity capabilities, the `amp-viewer-assistance` extension
 Here are some examples:
 
 `amp-state:`
+
 ```html
-<amp-state id="myRemoteState" src="https://data.com/articles.json"
-     crossorigin=”amp-viewer-auth-token-via-post”>
+<amp-state
+  id="myRemoteState"
+  src="https://data.com/articles.json"
+  crossorigin="”amp-viewer-auth-token-via-post”"
+>
 </amp-state>
 ```
+
 yields a POST request body:
+
 ```
 ampViewerAuthToken=AUTH_TOKEN_FROM_VIEWER_ASSISTANCE
 ```
 
 `amp-form:`
+
 ```html
-<form id="name-form"
-    method="post"
-    target="_top"
-    action-xhr="https://data.com/formsubmit"
-    crossorigin="amp-viewer-auth-token-via-post">
+<form
+  id="name-form"
+  method="post"
+  target="_top"
+  action-xhr="https://data.com/formsubmit"
+  crossorigin="amp-viewer-auth-token-via-post"
+>
   <div class="form-header">Full Name</div>
-  <input type="text"
-      name="name"
-      value="Default name value"/>
+  <input type="text" name="name" value="Default name value" />
   <button type="submit">
     <span class="order-button-text">Submit Name</span>
   </button>
 </form>
 ```
+
 yields a POST request form-data payload of:
+
 ```
 --------formDataBoundary--------
 Content Disposition: form-data; name="name"
@@ -217,13 +234,17 @@ In this example, we have a message telling the user they are signed out. If the 
 Wrapping up the above, here is an example implementation of a page utilizing sign in, as well as an `updateActionState` after a form submission.
 
 ```html
-<script id="amp-viewer-assistance" type="application/json" on="signedIn:success-message.show">
-{
-  "myConfigItem1": {
-    "foo": 123,
-    "bar": 456,
-  },
-}
+<script
+  id="amp-viewer-assistance"
+  type="application/json"
+  on="signedIn:success-message.show"
+>
+  {
+    "myConfigItem1": {
+      "foo": 123,
+      "bar": 456,
+    },
+  }
 </script>
 <button on="tap:amp-viewer-assistance.signIn">
   Sign In
@@ -235,12 +256,13 @@ Wrapping up the above, here is an example implementation of a page utilizing sig
   Signed Out!
 </div>
 
-<form id="state-change-form"
-    method="POST"
-    action-xhr="myAuthorizedRemoteXHR/endpoint"
-    crossorigin="amp-viewer-auth-token-via-post"
-    on="submit-success:amp-viewer-assistance.updateActionState(update=event.response)">
-</form>
+<form
+  id="state-change-form"
+  method="POST"
+  action-xhr="myAuthorizedRemoteXHR/endpoint"
+  crossorigin="amp-viewer-auth-token-via-post"
+  on="submit-success:amp-viewer-assistance.updateActionState(update=event.response)"
+></form>
 <button on="tap:state-change-form.submit">
   Change State
 </button>
