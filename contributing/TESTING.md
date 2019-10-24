@@ -71,7 +71,8 @@ Command                                                                 | Descri
 `gulp build --extensions_from=examples/foo.amp.html`                    | Builds the AMP library, with only the extensions needed to load the listed examples.
 `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
 `gulp build --fortesting`                                               | Builds the AMP library and sets the `test` field in `AMP_CONFIG` to `true`.
-`gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.
+`gulp check-links --files=<files-path-glob>`                            | Reports dead links in `.md` files.
+`gulp check-links --local_changes`                                      | Reports dead links in `.md` files changed in the local branch.
 `gulp clean`                                                            | Removes build output.
 `gulp css`                                                              | Recompiles css to the build directory and builds the embedded css into js files for the AMP library.
 `gulp compile-jison`                                                    | Compiles jison parsers for extensions to build directory.
