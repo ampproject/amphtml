@@ -83,7 +83,7 @@ async function main() {
 
     // Check document links only for PR builds.
     if (buildTargets.has('DOCS')) {
-      timedExecOrDie('gulp check-links');
+      timedExecOrDie('gulp check-links --local_changes');
     }
 
     if (buildTargets.has('DEV_DASHBOARD')) {
