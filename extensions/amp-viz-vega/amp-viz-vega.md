@@ -6,6 +6,7 @@ teaser:
   text: Displays visualizations created by using Vega visualization grammar.
 experimental: true
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -48,6 +49,7 @@ Displays visualizations created using <a href="https://vega.github.io/vega/">Veg
 [TOC]
 
 ## What is Vega?
+
 Vega is a visualization grammar, a declarative format for creating and saving
 interactive visualization designs. Vega's runtime uses [D3](https://github.com/d3/d3)
 behind the scene to draw.
@@ -59,75 +61,77 @@ to learn more and play with samples.
 
 ```html
 <amp-viz-vega
-    src="https://raw.githubusercontent.com/vega/vega/master/examples/bar.json"
-    layout="responsive"
-    width="400" height="200"></amp-viz-vega>
+  src="https://raw.githubusercontent.com/vega/vega/master/examples/bar.json"
+  layout="responsive"
+  width="400"
+  height="200"
+></amp-viz-vega>
 ```
 
 ```html
- <amp-viz-vega width="400" height="400" layout="responsive">
-    <!-- https://github.com/vega/vega/blob/master/examples/arc.json -->
-    <script type="application/json">
-      {
-        "width": 400,
-        "height": 400,
-        "data": [
-          {
-            "name": "table",
-            "values": [12, 23, 47, 6, 52, 19],
-            "transform": [{"type": "pie", "field": "data"}]
-          }
-        ],
-        "scales": [
-          {
-            "name": "r",
-            "type": "sqrt",
-            "domain": {"data": "table", "field": "data"},
-            "range": [20, 100]
-          }
-        ],
-        "marks": [
-          {
-            "type": "arc",
-            "from": {"data": "table"},
-            "properties": {
-              "enter": {
-                "x": {"field": {"group": "width"}, "mult": 0.5},
-                "y": {"field": {"group": "height"}, "mult": 0.5},
-                "startAngle": {"field": "layout_start"},
-                "endAngle": {"field": "layout_end"},
-                "innerRadius": {"value": 20},
-                "outerRadius": {"scale": "r", "field": "data"},
-                "stroke": {"value": "#fff"}
-              },
-              "update": {
-                "fill": {"value": "#ccc"}
-              },
-              "hover": {
-                "fill": {"value": "pink"}
-              }
-            }
-          },
-          {
-            "type": "text",
-            "from": {"data": "table"},
-            "properties": {
-              "enter": {
-                "x": {"field": {"group": "width"}, "mult": 0.5},
-                "y": {"field": {"group": "height"}, "mult": 0.5},
-                "radius": {"scale": "r", "field": "data", "offset": 8},
-                "theta": {"field": "layout_mid"},
-                "fill": {"value": "#000"},
-                "align": {"value": "center"},
-                "baseline": {"value": "middle"},
-                "text": {"field": "data"}
-              }
+<amp-viz-vega width="400" height="400" layout="responsive">
+  <!-- https://github.com/vega/vega/blob/master/examples/arc.json -->
+  <script type="application/json">
+    {
+      "width": 400,
+      "height": 400,
+      "data": [
+        {
+          "name": "table",
+          "values": [12, 23, 47, 6, 52, 19],
+          "transform": [{"type": "pie", "field": "data"}]
+        }
+      ],
+      "scales": [
+        {
+          "name": "r",
+          "type": "sqrt",
+          "domain": {"data": "table", "field": "data"},
+          "range": [20, 100]
+        }
+      ],
+      "marks": [
+        {
+          "type": "arc",
+          "from": {"data": "table"},
+          "properties": {
+            "enter": {
+              "x": {"field": {"group": "width"}, "mult": 0.5},
+              "y": {"field": {"group": "height"}, "mult": 0.5},
+              "startAngle": {"field": "layout_start"},
+              "endAngle": {"field": "layout_end"},
+              "innerRadius": {"value": 20},
+              "outerRadius": {"scale": "r", "field": "data"},
+              "stroke": {"value": "#fff"}
+            },
+            "update": {
+              "fill": {"value": "#ccc"}
+            },
+            "hover": {
+              "fill": {"value": "pink"}
             }
           }
-        ]
-      }
-      </script>
-  </amp-viz-vega>
+        },
+        {
+          "type": "text",
+          "from": {"data": "table"},
+          "properties": {
+            "enter": {
+              "x": {"field": {"group": "width"}, "mult": 0.5},
+              "y": {"field": {"group": "height"}, "mult": 0.5},
+              "radius": {"scale": "r", "field": "data", "offset": 8},
+              "theta": {"field": "layout_mid"},
+              "fill": {"value": "#000"},
+              "align": {"value": "center"},
+              "baseline": {"value": "middle"},
+              "text": {"field": "data"}
+            }
+          }
+        }
+      ]
+    }
+  </script>
+</amp-viz-vega>
 ```
 
 ## Attributes
