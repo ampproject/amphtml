@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds the Facebook page plugin.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -51,13 +52,18 @@ You can use the `amp-facebook-page` component to embed the [Facebook page plugin
 **Example**
 
 ```html
-<amp-facebook-page width="340" height="130"
-    layout="fixed"
-    data-hide-cover="true"
-    data-href="https://www.facebook.com/imdb/">
+<amp-facebook-page
+  width="340"
+  height="130"
+  layout="fixed"
+  data-hide-cover="true"
+  data-href="https://www.facebook.com/imdb/"
+>
 </amp-facebook-page>
 ```
+
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-href (required)</strong></td>
@@ -92,7 +98,6 @@ You can use the `amp-facebook-page` component to embed the [Facebook page plugin
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

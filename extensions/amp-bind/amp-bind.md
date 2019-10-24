@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
 ---
+
 # amp-bind
 
 Adds custom interactivity with data binding and expressions.
@@ -83,9 +84,9 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 
 `amp-bind` has three main components:
 
-1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button.  After tapping the button, the state is `{foo: 'amp-bind'}`.
+1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button. After tapping the button, the state is `{foo: 'amp-bind'}`.
 2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the state variable `foo`.
-There is a limit of 100 operands what can be used in an expression.
+   There is a limit of 100 operands what can be used in an expression.
 3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
 
 `amp-bind` takes special care to ensure speed, security and performance on AMP pages.
@@ -117,8 +118,12 @@ There is a limit of 100 operands what can be used in an expression.
 </p>
 
 <!-- Or change an image's src with the [src] binding. -->
-<amp-img width="300" height="200" src="/img/dog.jpg"
-    [src]="myAnimals[currentAnimal].imageUrl">
+<amp-img
+  width="300"
+  height="200"
+  src="/img/dog.jpg"
+  [src]="myAnimals[currentAnimal].imageUrl"
+>
 </amp-img>
 
 <button on="tap:AMP.setState({currentAnimal: 'cat'})">Set to Cat</button>
@@ -129,9 +134,10 @@ When the button is pressed:
 1.  **State** is updated with `currentAnimal` defined as `'cat'`.
 
 2.  **Expressions** that depend on `currentAnimal` are evaluated:
+
     - `'This is a ' + currentAnimal + '.'` => `'This is a cat.'`
     - `myAnimals[currentAnimal].style` => `'redBackground'`
-    - `myAnimals[currentAnimal].imageUrl` =>  `/img/cat.jpg`
+    - `myAnimals[currentAnimal].imageUrl` => `/img/cat.jpg`
 
 3.  **Bindings** that depend on the changed expressions are updated:
     - The first `<p>` element's text will read "This is a cat."
@@ -141,7 +147,6 @@ When the button is pressed:
 {% call callout('Tip', type='success') %}
 [Try out the **live demo**](https://amp.dev/documentation/examples/components/amp-bind/) for this example with code annotations!
 {% endcall %}
-
 
 ## Details
 
@@ -186,7 +191,9 @@ The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges a
 ```html
 <!-- Like JavaScript, you can reference existing
      variables in the values of the  object literal. -->
-<button on="tap:AMP.setState({foo: 'bar', baz: myAmpState.someVariable})"></button>
+<button
+  on="tap:AMP.setState({foo: 'bar', baz: myAmpState.someVariable})"
+></button>
 ```
 
 In general, nested objects will be merged up to a maximum depth of 10. All variables, including those introduced by `amp-state`, can be overidden.
@@ -196,7 +203,7 @@ When triggered by certain events, `AMP.setState()` also can access event-related
 ```html
 <!-- The "change" event of this <input> element contains
      a "value" variable that can be referenced via "event.value". -->
-<input type="range" on="change:AMP.setState({myRangeValue: event.value})">
+<input type="range" on="change:AMP.setState({myRangeValue: event.value})" />
 ```
 
 #### Modifying history with `AMP.pushState()`
@@ -206,6 +213,7 @@ onto the browser history stack. Popping this history entry (e.g. by navigating b
 the previous value of variables set by `AMP.pushState()`.
 
 For example:
+
 ```html
 <button on="tap:AMP.pushState({foo: '123'})">Set 'foo' to 123</button>
 ```
@@ -232,10 +240,10 @@ The full expression grammar and implementation can be found in [bind-expr-impl.j
 The following are all valid expressions:
 
 ```javascript
-1 + '1'           // 11
-1 + (+'1')        // 2
-!0                // true
-null || 'default' // 'default'
+1 + '1'; // 11
+1 + +'1'; // 2
+!0; // true
+null || 'default'; // 'default'
 ```
 
 #### White-listed functions
@@ -357,7 +365,11 @@ encodeURIComponent('Hello world')</pre>
 `amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
 
 ```html
-<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius"></amp-bind-macro>
+<amp-bind-macro
+  id="circleArea"
+  arguments="radius"
+  expression="3.14 * radius * radius"
+></amp-bind-macro>
 
 <div>
   The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
@@ -657,8 +669,7 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
   </script>
 </amp-state>
 
-<amp-state id="myRemoteState" src="https://data.com/articles.json">
-</amp-state>
+<amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
 ```
 
 #### XHR batching
@@ -697,24 +708,29 @@ Consider the following example:
 
 ```javascript
 // State is empty.
-{}
+{
+}
 ```
 
 ```html
-<button on="tap:AMP.setState({
+<button
+  on="tap:AMP.setState({
   employee: {
     name: 'John Smith',
     age: 47,
     vehicle: 'Car'
   }
-})">
+})"
+>
   Set employee to John Smith
 </button>
-<button on="tap:AMP.setState({
+<button
+  on="tap:AMP.setState({
   employee: {
     age: 64
   }
-})">
+})"
+>
   Set employee age to 64
 </button>
 ```
