@@ -1,11 +1,4 @@
-export const TAG = 'amp-viewer-messaging';
-
-export const enum MessageType {
-  REQUEST = 'q',
-  RESPONSE = 's',
-}
-
-export interface Message {
+export interface AmpViewerMessage {
   app: string;
   type: string;
   requestid: number;
@@ -16,14 +9,13 @@ export interface Message {
   messagingToken?: string;
 }
 
-export type RequestHandler = () => void;
+export function parseMessage(message: any): AmpViewerMessage | null;
 
-export function parseMessage(message: any): Message;
+export type RequestHandler = () => void;
 
 export class WindowPortEmulator {
   constructor(win: Window, origin: string, target: Window);
-  readonly win: Window;
-  addEventListener(eventType: string, handler: (...params: any[]) => any): void;
+  addEventListener(eventType: string, handler: EventListener): void;
   postMessage(data: any): void;
   start(): void;
 }
@@ -46,7 +38,6 @@ export class Messaging {
     opt_isWebview?: boolean,
     opt_token?: string
   );
-  readonly win: Window;
   registerHandler(messageName: string, requestHandler: RequestHandler): void;
   unregisterHandler(messageName: string): void;
   setDefaultHandler(requestHandler: RequestHandler): void;

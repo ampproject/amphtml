@@ -17,40 +17,35 @@
 const TAG = 'amp-viewer-messaging';
 const CHANNEL_OPEN_MSG = 'channelOpen';
 const HANDSHAKE_POLL_MSG = 'handshake-poll';
-export const APP = '__AMPHTML__';
+const APP = '__AMPHTML__';
 
 /**
  * @enum {string}
  */
-export const MessageType = {
+const MessageType = {
   REQUEST: 'q',
   RESPONSE: 's',
 };
 
 /**
- * @typedef {!AmpViewerMessage}
- */
-export let Message;
-
-/**
  * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
  */
-export let RequestHandler;
+let RequestHandler; // eslint-disable-line no-unused-vars
 
 /**
  * @param {*} message
- * @return {?Message}
+ * @return {?AmpViewerMessage}
  */
 export function parseMessage(message) {
   if (typeof message != 'string') {
-    return /** @type {Message} */ (message);
+    return /** @type {AmpViewerMessage} */ (message);
   }
   if (message.charAt(0) != '{') {
     return null;
   }
 
   try {
-    return /** @type {?Message} */ /** @type {?} */ (JSON.parse(
+    return /** @type {?AmpViewerMessage} */ /** @type {?} */ (JSON.parse(
       /** @type {string} */ (message)
     ));
   } catch (e) {
@@ -70,20 +65,20 @@ export class WindowPortEmulator {
    * @param {!Window} target
    */
   constructor(win, origin, target) {
-    /** @const {!Window} */
-    this.win = win;
-    /** @private {string} */
+    /** @const @private {!Window} */
+    this.win_ = win;
+    /** @const @private {string} */
     this.origin_ = origin;
-    /** @private @const {!Window} */
+    /** @const @private {!Window} */
     this.target_ = target;
   }
 
   /**
    * @param {string} eventType
-   * @param {function(!Event):undefined} handler
+   * @param {function(!Event):*} handler
    */
   addEventListener(eventType, handler) {
-    this.win.addEventListener('message', event => {
+    this.win_.addEventListener('message', event => {
       if (event.origin == this.origin_ && event.source == this.target_) {
         handler(event);
       }
@@ -205,8 +200,8 @@ export class Messaging {
    * @param {boolean=} opt_verifyToken
    */
   constructor(win, port, opt_isWebview, opt_token, opt_verifyToken) {
-    /** @const {?Window} */
-    this.win = win;
+    /** @const @private {?Window} */
+    this.win_ = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
     /** @const @private */
@@ -373,7 +368,7 @@ export class Messaging {
   sendResponseError_(requestId, messageName, reason) {
     const errString = this.errorToString_(reason);
     this.logError_(
-      TAG + ': sendResponseError_, Message name: ' + messageName,
+      TAG + ': sendResponseError_, message name: ' + messageName,
       errString
     );
     this.sendMessage_(
@@ -389,7 +384,7 @@ export class Messaging {
   }
 
   /**
-   * @param {Message} message
+   * @param {!AmpViewerMessage} message
    * @private
    */
   sendMessage_(message) {
@@ -408,7 +403,7 @@ export class Messaging {
    * I'm handling an incoming request from Bob. I'll either respond normally
    * (ex: "got it Bob!") or with an error (ex: "I didn't get a word of what
    * you said!").
-   * @param {Message} message
+   * @param {!AmpViewerMessage} message
    * @private
    */
   handleRequest_(message) {
@@ -449,7 +444,7 @@ export class Messaging {
   /**
    * I sent out a request to Bob. He responded. And now I'm handling that
    * response.
-   * @param {Message} message
+   * @param {!AmpViewerMessage} message
    * @private
    */
   handleResponse_(message) {
@@ -474,13 +469,13 @@ export class Messaging {
    * @private
    */
   logError_(state, opt_data) {
-    if (!this.win) {
+    if (!this.win_) {
       return;
     }
     let stateStr = 'amp-messaging-error-logger: ' + state;
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
-    this.win['viewerState'] = stateStr;
+    this.win_['viewerState'] = stateStr;
   }
 
   /**
