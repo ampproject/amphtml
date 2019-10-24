@@ -2,7 +2,9 @@
 
 - [Detailed schedule](#detailed-schedule)
 - [Determining if your change is in production](#determining-if-your-change-is-in-production)
-- [Cherry picks](#cherry-picks) - [Cherry pick criteria](#cherry-pick-criteria) - [Process for requesting a cherry pick](#process-for-requesting-a-cherry-pick)
+- [Cherry picks](#cherry-picks)
+  - [Cherry pick criteria](#cherry-pick-criteria)
+  - [Process for requesting a cherry pick](#process-for-requesting-a-cherry-pick)
 - [AMP Dev Channel](#amp-dev-channel)
 - [AMP Release Candidate (RC) Channel](#amp-release-candidate-rc-channel)
 - [Release cadence](#release-cadence)

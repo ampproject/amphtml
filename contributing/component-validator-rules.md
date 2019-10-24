@@ -156,7 +156,7 @@ tags: {  # amp-cat extended component
 This tells the validator that we want to define a new tag. In this case, we want
 to validate a tag that looks something like the following:
 
-> `<script async custom-element='amp-cat'` > `src='https://cdn.ampproject.org/v0/amp-cat-0.1.js'></script>`
+> `<script async custom-element='amp-cat' src='https://cdn.ampproject.org/v0/amp-cat-0.1.js'></script>`
 
 ```
   html_format: AMP

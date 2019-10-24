@@ -400,17 +400,17 @@ the element will never be preloaded or laid out. This is true to all
 nested amp-elements that are not placeholders. AMP runtime will schedule
 nested amp-elements that are placeholders.
 
+<!-- prettier-ignore-start -->
 ```html
-<amp-carousel>
-  ← Parent element
-  <amp-figure>
-    ← Parent needs to schedule this element <amp-img placeholder></amp-img> ←
-    AMP will schedule this when amp-figure is scheduled <amp-img></amp-img> ←
-    Parent needs to schedule this element <amp-fit-text></amp-fit-text> ← Parent
-    needs to schedule this element
+<amp-carousel> ← Parent element
+  <amp-figure> ← Parent needs to schedule this element
+    <amp-img placeholder></amp-img> ← AMP will schedule this when amp-figure is scheduled
+    <amp-img></amp-img> ← Parent needs to schedule this element
+    <amp-fit-text></amp-fit-text> ← Parent needs to schedule this element
   </amp-figure>
 </amp-carousel>
 ```
+<!-- prettier-ignore-end -->
 
 ## Allowing proper validations
 
