@@ -12,8 +12,12 @@ distributed under the License is distributed on an "AS-IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
- *
- * @param el
+*/
+
+/**
+ * Read elements attributes and convert into a combined string.
+ * @param {!Element} el
+ * @return {!string} str
  */
 const getPlayerParams = el => {
   const arr = el.attributes;

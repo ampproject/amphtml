@@ -22,7 +22,7 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {dev, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
@@ -31,7 +31,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 import {removeElement} from '../../../src/dom';
 import addAttributesToElement from './utils/addAttributesToElement';
-import getPlayerParams from './utils/getPlayerParams'
+import getPlayerParams from './utils/getPlayerParams';
 
 /** @private @const */
 const TAG = 'amp-redbull-player';
@@ -76,9 +76,9 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     this.locale_ = null;
 
     /**
-      * @param {!Event} e
-      * @return {*} TODO(#23582): Specify return type
-      * @private
+     * @param {!Event} e
+     * @return {*} TODO(#23582): Specify return type
+     * @private
      */
     this.boundOnMessage_ = e => this.onMessage_(e);
   }
