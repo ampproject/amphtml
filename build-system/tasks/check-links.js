@@ -55,8 +55,12 @@ async function checkLinks() {
 
   const filesWithDeadLinks = allResults
     .map((results, index) => {
+      // Some files were ignored and have no results.
+      if (!results) {
+        return;
+      }
       let deadLinksFoundInFile = false;
-      for (const {link, status, statusCode} of results || []) {
+      for (const {link, status, statusCode} of results) {
         // Skip links to files that were introduced by the PR.
         if (isLinkToFileIntroducedByPR(link)) {
           continue;
