@@ -23,12 +23,11 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const globby = require('globby');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const path = require('path');
 const prettier = require('gulp-prettier');
-const {getFilesChanged, logOnSameLine} = require('../common/utils');
+const {getFilesToCheck, logOnSameLine} = require('../common/utils');
 const {green, cyan, red, yellow} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -42,40 +41,15 @@ const header =
   'Code style issues found in the following file(s). Forgot to run Prettier?';
 
 /**
- * Logs the list of files that will be checked.
- *
- * @param {!Array<string>} files
- */
-function logFiles(files) {
-  if (!isTravisBuild()) {
-    log(green('INFO: ') + 'Prettifying the following files:');
-    files.forEach(file => {
-      log(cyan(file));
-    });
-  }
-}
-
-/**
  * Checks files for formatting (and optionally fixes them) with Prettier.
  *
  * @return {!Promise}
  */
 function prettify() {
   maybeUpdatePackages();
-  let filesToCheck;
-  if (argv.files) {
-    filesToCheck = globby.sync(argv.files.split(','));
-    logFiles(filesToCheck);
-  } else if (argv.local_changes) {
-    filesToCheck = getFilesChanged(prettifyGlobs);
-    if (filesToCheck.length == 0) {
-      log(green('INFO: ') + 'No prettifiable files in this PR');
-      return Promise.resolve();
-    } else {
-      logFiles(filesToCheck);
-    }
-  } else {
-    filesToCheck = globby.sync(prettifyGlobs, {dot: true});
+  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
+  if (filesToCheck.length == 0) {
+    return Promise.resolve();
   }
   return runPrettify(filesToCheck);
 }

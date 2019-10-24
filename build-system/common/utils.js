@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
 const {gitDiffNameOnlyMaster} = require('../common/git');
+const {green, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 
 /**
@@ -48,7 +50,47 @@ function getFilesChanged(globs) {
   });
 }
 
+/**
+ * Logs the list of files that will be checked and returns the list.
+ *
+ * @param {!Array<string>} files
+ * @return {!Array<string>}
+ */
+function logFiles(files) {
+  if (!isTravisBuild()) {
+    log(green('INFO: ') + 'Checking the following files:');
+    for (const file of files) {
+      log(cyan(file));
+    }
+  }
+  return files;
+}
+
+/**
+ * Gets a list of files to be checked based on command line args and the given
+ * file matching globs. Used by tasks like prettify, check-links, etc.
+ *
+ * @param {!Array<string>} globs
+ * @param {Object=} options
+ * @return {!Array<string>}
+ */
+function getFilesToCheck(globs, options = {}) {
+  if (argv.files) {
+    return logFiles(globby.sync(argv.files.split(',')));
+  }
+  if (argv.local_changes) {
+    const filesChanged = getFilesChanged(globs);
+    if (filesChanged.length == 0) {
+      log(green('INFO: ') + 'No files to check in this PR');
+      return [];
+    }
+    return logFiles(filesChanged);
+  }
+  return globby.sync(globs, options);
+}
+
 module.exports = {
   getFilesChanged,
+  getFilesToCheck,
   logOnSameLine,
 };

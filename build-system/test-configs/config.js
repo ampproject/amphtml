@@ -160,6 +160,15 @@ const prettifyGlobs = [
 ];
 
 /**
+ * List of markdown files that may be checked by `gulp check-links` (using
+ * markdown-link-check).
+ */
+const linkCheckGlobs = [
+  '**/*.md',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
+];
+
+/**
  * Array of 3p bootstrap urls
  * Defined by the following object schema:
  * basename: the name of the 3p frame without extension
@@ -200,6 +209,7 @@ module.exports = {
   e2eTestPaths,
   integrationTestPaths,
   jisonPaths,
+  linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,
   prettifyGlobs,
