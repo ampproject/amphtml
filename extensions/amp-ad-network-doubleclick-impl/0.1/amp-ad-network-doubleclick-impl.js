@@ -1252,9 +1252,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.attemptChangeSize(newHeight, newWidth).catch(() => {});
       if (
         newWidth > width &&
-        // If 'fluid' was the primary requested size, ensure we do not trigger
-        // slot adjustment if the returned size is one of the requested multi
-        // -sizes. Slot adjustment should only be triggered when the creative 
+        // If 'fluid' were the primary requested size, ensure we do not trigger
+        // slot adjustment if the returned size is one of the requested multi-
+        // sizes. Slot adjustment should only be triggered when the creative 
         // size is not one of the requested sizes.
         (!this.isFluidPrimaryRequest_ ||
           (this.parameterSize &&
