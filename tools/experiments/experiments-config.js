@@ -317,6 +317,7 @@ export const EXPERIMENTS = [
   },
   {
     id: 'amp-sidebar-disable-history-ios',
-
+    name: 'Disable history manipulation in sidebar on iOS',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25243',
   },
 ];
