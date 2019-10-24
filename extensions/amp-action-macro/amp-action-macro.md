@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Creates reusable actions.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,8 +18,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
- # amp-action-macro
- Creates reusable actions.
+
+# amp-action-macro
+
+Creates reusable actions.
+
  <table>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -40,13 +44,14 @@ The `amp-action-macro` component allows for the creation of reusable actions.
 
 ```html
 <amp-action-macro
-    id="closeNavigations"
-    execute="AMP.setState({nav1: 'close', nav2: 'close})"></amp-action-macro>
+  id="closeNavigations"
+  execute="AMP.setState({nav1: 'close', nav2: 'close})"
+></amp-action-macro>
 ```
 
 ```html
- <button on="tap:closeNavigations.execute()">Close all</button>
- <div on="tap:closeNavigations.execute()">Close all</div>
+<button on="tap:closeNavigations.execute()">Close all</button>
+<div on="tap:closeNavigations.execute()">Close all</div>
 ```
 
 ```html
@@ -56,16 +61,16 @@ The `amp-action-macro` component allows for the creation of reusable actions.
 <amp-carousel id="carousel" ...>...</amp-carousel>
 
 <amp-action-macro
-    id="carousel-macro"
-    execute="carousel.goToSlide(index=foo), carousel.goToSlide(index=bar)"
-    arguments="foo, bar"></amp-action-macro>
-
+  id="carousel-macro"
+  execute="carousel.goToSlide(index=foo), carousel.goToSlide(index=bar)"
+  arguments="foo, bar"
+></amp-action-macro>
 ```
 
 ```html
- <button on="tap:carousel-macro.execute(foo=1, bar=2)">
-   Go to slide 1 then 2
- </button>
+<button on="tap:carousel-macro.execute(foo=1, bar=2)">
+  Go to slide 1 then 2
+</button>
 ```
 
 ## Attributes
@@ -81,19 +86,21 @@ The action to invoke. Any valid amp action is allowed here. See [actions and eve
 e.g.
 
 ```html
- <amp-action-macro
-    id="navigate-action"
-    action="AMP.navigateTo('http://www.ampproject.org')"></amp-action-macro>
+<amp-action-macro
+  id="navigate-action"
+  action="AMP.navigateTo('http://www.ampproject.org')"
+></amp-action-macro>
 
- <amp-action-macro
-    id="refresh-amp-list"
-    execute="ampList.refresh()"></amp-action-macro>
- <amp-list id="ampList" src="...">...</amp-list>
+<amp-action-macro
+  id="refresh-amp-list"
+  execute="ampList.refresh()"
+></amp-action-macro>
+<amp-list id="ampList" src="...">...</amp-list>
 
- <button on="tap:navigate-action"></button>
+<button on="tap:navigate-action"></button>
 
- <button on="tap:refresh-amp-list"></button>
- ```
+<button on="tap:refresh-amp-list"></button>
+```
 
 ##### arguments
 

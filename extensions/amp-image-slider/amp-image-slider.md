@@ -5,6 +5,7 @@ formats:
 teaser:
   text: A slider to compare two images.
 ---
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -44,7 +45,7 @@ The `amp-image-slider` component requires exactly two `amp-img` elements as its 
 
 The `amp-image-slider` component can also contain two `<div>` elements to use as labels for the images. The labels are overlaid on top of the images. The label on the left image requires the `first` attribute, while the right labels requires the `second` attribute. By default, the labels display at the top left corner of the image.
 
-*Example: Displays an image slider with labeled images*
+_Example: Displays an image slider with labeled images_
 
 ```html
 <amp-image-slider layout="responsive" width="100" height="200">
@@ -59,7 +60,7 @@ Once the slider is loaded, the compared images are separated by a vertical bar, 
 
 Users can mouse down or touch to move the slider to the position of the pointer, and can then move the pointer to drag the slider bar left or right. For the left image, only the part that is left to the bar is displayed; similarly for the right image, to only display the right portion.
 
-If you specify `tabindex` on the `amp-image-slider` element, users can navigate the slider with their keyboards. Pressing the  down, left, or right arrow moves the slider bar one step towards the corresponding direction. Pressing the Home key brings the slider to the center. Pressing the PageUp or PageDown keys moves to the left or right end of the slider body.
+If you specify `tabindex` on the `amp-image-slider` element, users can navigate the slider with their keyboards. Pressing the down, left, or right arrow moves the slider bar one step towards the corresponding direction. Pressing the Home key brings the slider to the center. Pressing the PageUp or PageDown keys moves to the left or right end of the slider body.
 
 ## Attributes
 
@@ -67,10 +68,15 @@ If you specify `tabindex` on the `amp-image-slider` element, users can navigate 
 
 The hints that shows at the center of the vertical bar will disappear once user starts interacting with the slider (such as clicking the mouse button, touch the slider, and pressing keys to move the slider). The hints would reappear if it then leaves the viewport and goes back in again. To stop such reappearing behavior, add the `disable-hint-reappear` attribute to the image slider.
 
-*Example: Displays an image slider without reappearing hints*
+_Example: Displays an image slider without reappearing hints_
 
 ```html
-<amp-image-slider layout="responsive" width="100" height="200" disable-hint-reappear>
+<amp-image-slider
+  layout="responsive"
+  width="100"
+  height="200"
+  disable-hint-reappear
+>
   <amp-img src="/green-apple.jpg" alt="A green apple"></amp-img>
   <amp-img src="/red-apple.jpg" alt="A red apple"></amp-img>
   <div first>This apple is green</div>
@@ -82,10 +88,15 @@ The hints that shows at the center of the vertical bar will disappear once user 
 
 The vertical slider bar sits at the center of the slider body by default. To move the initial slider position to a different place, set `initial-slider-position` to a value between 0 and 1, corresponding to 0% to 100% from the left slider edge.
 
-*Example: Displays an image slider with initial slider position on the left*
+_Example: Displays an image slider with initial slider position on the left_
 
 ```html
-<amp-image-slider layout="responsive" width="100" height="200" initial-slider-position="0">
+<amp-image-slider
+  layout="responsive"
+  width="100"
+  height="200"
+  initial-slider-position="0"
+>
   <amp-img src="/green-apple.jpg" alt="A green apple"></amp-img>
   <amp-img src="/red-apple.jpg" alt="A red apple"></amp-img>
   <div first>This apple is green</div>
@@ -97,7 +108,7 @@ The vertical slider bar sits at the center of the slider body by default. To mov
 
 When focusing on the slider, left and right keyboard buttons move the slider bar by 10% each press. To use a different step size, set `step-size` to a value between 0 and 1, corresponding to moving 0% to moving 100% each key press.
 
-*Example: Displays an image slider with step size of 25%*
+_Example: Displays an image slider with step size of 25%_
 
 ```html
 <amp-image-slider layout="responsive" width="100" height="200" step-size="0.25">
@@ -120,7 +131,8 @@ When focusing on the slider, left and right keyboard buttons move the slider bar
 
 You can customize your labels by providing customized CSS classes. You can use `top/right/bottom/left` and `transform: translate(...)` rules to control their positioning. Other rules, such as `border`, `background-color`, etc., could be used for customizing the style of your labels.
 
-*Example: Displays an image slider with left label on top left, right label on top right*
+_Example: Displays an image slider with left label on top left, right label on top right_
+
 ```html
 <!-- head -->
 <style amp-custom>
@@ -143,7 +155,7 @@ You can customize your labels by providing customized CSS classes. You can use `
 
 By default, the hints are a pair of white arrows with drop shadow. To customize the left and right hints, you can override `.amp-image-slider-hint-left` and `.amp-image-slider-hint-right` classes. To replace the arrows with customized images, overwrite `background-image`. To remove drop shadow, set `filter: none;`.
 
-*Example: Replace arrows with triangles*
+_Example: Replace arrows with triangles_
 
 ```css
 .amp-image-slider-hint-left {

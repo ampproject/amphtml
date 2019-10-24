@@ -1,10 +1,11 @@
 ---
 $category: dynamic-content
 formats:
- - websites
+  - websites
 teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -53,13 +54,14 @@ The `amp-autocomplete` extension should be used for suggesting completed items b
 This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
 
 Example:
+
 ```html
-  <amp-autocomplete filter="substring" id="myAutocomplete">
-    <input>
-    <script type="application/json">
-      { "items": ["a", "b", "c"] }
-    </script>
-  </amp-autocomplete>
+<amp-autocomplete filter="substring" id="myAutocomplete">
+  <input />
+  <script type="application/json">
+    { "items": ["a", "b", "c"] }
+  </script>
+</amp-autocomplete>
 ```
 
 ## Attributes
@@ -131,6 +133,7 @@ Example:
             { "items" : ["apples", "bananas", "pears"] }
            </script>
       </amp-autocomplete>
+
   </pre>
   <pre lang="html">
 
@@ -140,6 +143,7 @@ Example:
           { "fruit" : ["apples", "bananas", "pears"] }
           </script>
       </amp-autocomplete>
+
   </pre>
       In the first example, the JSON payload is queued by the "items" key, and thus no component attribute is needed because the default value corresponds. In the second example, the JSON payload is queued by the "fruit" key, so the <code>items</code> attribute is given the value <code>"fruit"</code> so as to accurately etrieve the intended datasource. In both examples, the end user interaction is the same.
     </td>

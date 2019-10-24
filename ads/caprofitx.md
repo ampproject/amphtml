@@ -24,7 +24,8 @@ limitations under the License.
   heigth="100"
   type="caprofitx"
   data-mediaid="3752"
-  data-tag-places="10001">
+  data-tag-places="10001"
+>
 </amp-ad>
 ```
 
@@ -36,7 +37,7 @@ please email ca_profitx_support@cyberagent.co.jp.
 Supported parameters:
 
 | Parameter                | Required |
-|--------------------------|----------|
+| ------------------------ | -------- |
 | data-mediaid             | Yes      |
 | data-tag-places          | Yes      |
 | data-pageid              | No       |

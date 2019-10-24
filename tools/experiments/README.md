@@ -20,11 +20,13 @@ Experiment opt-ins are saved to `localStorage` and only enables the experiment o
 For content served from non-CDN domains, experiments can be toggled in the devtools console using:
 
 ```javascript
-AMP.toggleExperiment('experiment')
+AMP.toggleExperiment('experiment');
 ```
 
 ## Enable an experiment for a particular document
+
 Document can choose to opt in a certain experiments. To do that, simply put a meta tag of name `amp-experiments-opt-in` in the head of the HTML document before your AMP script (`https://cdn.ampproject.org/v0.js`). Its `content` value is a comma separated string of experiment IDs to opt in.
+
 ```HTML
 <head>
   ...
@@ -34,9 +36,11 @@ Document can choose to opt in a certain experiments. To do that, simply put a me
   ...
 </head>
 ```
+
 By doing so, the specified experiments will be enabled for all visitors of the document.
 Note not all experiments allow document level opt-in. For a full list of white listed experiments, please see `allow-doc-opt-in` attribute in the project's `prod-config.json` file.
 Note that document opt-in can be overridden by user opt-out.
+
 ```javascript
 AMP.toggleExperiment('experiment', false);
 ```

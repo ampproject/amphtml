@@ -19,10 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="150"
-  type="rfp"
-  data-adspot-id="XXXXXXXX">
-</amp-ad>
+<amp-ad width="320" height="150" type="rfp" data-adspot-id="XXXXXXXX"> </amp-ad>
 ```
 
 ## Configuration

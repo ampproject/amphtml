@@ -21,9 +21,12 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-ad width="320" height="50"
-    type="mads"
-    data-adrequest='{"pid":"6252122059"}'>
+<amp-ad
+  width="320"
+  height="50"
+  type="mads"
+  data-adrequest='{"pid":"6252122059"}'
+>
 </amp-ad>
 ```
 

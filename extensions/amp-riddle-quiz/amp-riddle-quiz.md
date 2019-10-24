@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays Riddle content (e.g., quiz, list, poll, etc.).
 ---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -42,10 +43,11 @@ This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g.
 
 ```html
 <amp-riddle-quiz
-    layout="responsive"
-    width="600"
-    height="400"
-    data-riddle-id="25799">
+  layout="responsive"
+  width="600"
+  height="400"
+  data-riddle-id="25799"
+>
 </amp-riddle-quiz>
 ```
 
@@ -63,4 +65,5 @@ This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g.
 </table>
 
 ## Validation
+
 See [amp-riddle-quiz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-riddle-quiz/validator-amp-riddle-quiz.protoascii) in the AMP validator specification.

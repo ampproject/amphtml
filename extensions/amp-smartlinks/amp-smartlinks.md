@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Run Narrativ's Linkmate process inside your AMP page
 ---
+
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -54,24 +55,32 @@ NOTE: If you plan to use `amp-smartlinks` alongside other affiliate partners you
 In your AMP page you will have to add the following snippets:
 
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡>
-<head>
-  ...
-  <meta name="amp-link-rewriter-priorities" content="amp-smartlinks amp-other-affiliate">
-  <script async custom-element="amp-smartlinks" src="https://cdn.ampproject.org/v0/amp-smartlinks-0.1.js"></script>
-  ...
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-</head>
-<body>
+  <head>
+    ...
+    <meta
+      name="amp-link-rewriter-priorities"
+      content="amp-smartlinks amp-other-affiliate"
+    />
+    <script
+      async
+      custom-element="amp-smartlinks"
+      src="https://cdn.ampproject.org/v0/amp-smartlinks-0.1.js"
+    ></script>
+    ...
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
     ...
     <amp-smartlinks
-        layout="nodisplay"
-        nrtv-account-name="supercoolpublisher"
-        linkmate>
+      layout="nodisplay"
+      nrtv-account-name="supercoolpublisher"
+      linkmate
+    >
     </amp-smartlinks>
     ...
-</body>
+  </body>
 </html>
 ```
 

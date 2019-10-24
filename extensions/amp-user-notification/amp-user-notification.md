@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a dismissable notification to the user.
 ---
+
 <!--
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -69,7 +70,7 @@ the user.
 To close `amp-user-notification`, add an `on` attribute to a button with the
 following value scheme `on="event:idOfUserNotificationElement.dismiss"`
 (see example below). This user action also triggers the `GET` to the
-`data-dismiss-href` URL. Be very mindful of the browser caching the `GET` response; see details below in the [`data-show-if-href`](#data-show-if-href-(optional)) section. (We recommend
+`data-dismiss-href` URL. Be very mindful of the browser caching the `GET` response; see details below in the [`data-show-if-href`](<#data-show-if-href-(optional)>) section. (We recommend
 adding a unique value to the `GET` url like a timestamp as a query string field).
 
 When multiple `amp-user-notification` elements are on a page, only one is shown
@@ -80,13 +81,14 @@ Example:
 
 ```html
 <amp-user-notification
-    layout="nodisplay"
-    id="amp-user-notification1"
-    data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"
-    data-dismiss-href="https://foo.com/api/dismissed">
-    This site uses cookies to personalize content.
-    <a href="">Learn more.</a>
-   <button on="tap:amp-user-notification1.dismiss">I accept</button>
+  layout="nodisplay"
+  id="amp-user-notification1"
+  data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"
+  data-dismiss-href="https://foo.com/api/dismissed"
+>
+  This site uses cookies to personalize content.
+  <a href="">Learn more.</a>
+  <button on="tap:amp-user-notification1.dismiss">I accept</button>
 </amp-user-notification>
 ```
 
@@ -121,7 +123,7 @@ https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUse
 Example:
 
 ```json
-{ "showNotification": true }
+{"showNotification": true}
 ```
 
 ##### data-show-if-geo
@@ -130,10 +132,10 @@ When specified `amp-user-notification` will only trigger if an `amp-geo` country
 
 Example:
 
-In this example if the user is located in Mexico (`mx`) the `amp-geo` will return the `nafta` country group.  `nafta` is in the `data-show-if-geo` attribute so the notification will display.
+In this example if the user is located in Mexico (`mx`) the `amp-geo` will return the `nafta` country group. `nafta` is in the `data-show-if-geo` attribute so the notification will display.
 
 ```html
-<amp-geo layout=nodisplay>
+<amp-geo layout="nodisplay">
   <script type="application/json">
     {
       "ISOCountryGroups": {
@@ -146,25 +148,26 @@ In this example if the user is located in Mexico (`mx`) the `amp-geo` will retur
 </amp-geo>
 
 <amp-user-notification
-    layout=nodisplay
-    id="amp-user-notification1"
-    data-show-if-geo="nafta, anz"
-    data-dismiss-href="https://example.com/api/echo/post">
-    This notice is only shown in Canada, Mexico and USA.
-    <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
+  layout="nodisplay"
+  id="amp-user-notification1"
+  data-show-if-geo="nafta, anz"
+  data-dismiss-href="https://example.com/api/echo/post"
+>
+  This notice is only shown in Canada, Mexico and USA.
+  <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
 </amp-user-notification>
 ```
 
 ##### data-show-if-not-geo
 
-This is the opposite of `data-show-if-geo`.  When specified `amp-user-notification` will only trigger if the `amp-geo` country group does not match the supplied list.
+This is the opposite of `data-show-if-geo`. When specified `amp-user-notification` will only trigger if the `amp-geo` country group does not match the supplied list.
 
 Example:
 
-In this example user in Mexico would not trigger the notification, but a user in an unknon country (assigned to the  `whereIsWaldo` group) would trigger the notifcation.
+In this example user in Mexico would not trigger the notification, but a user in an unknon country (assigned to the `whereIsWaldo` group) would trigger the notifcation.
 
 ```html
-<amp-geo layout=nodisplay>
+<amp-geo layout="nodisplay">
   <script type="application/json">
     {
       "ISOCountryGroups": {
@@ -177,12 +180,13 @@ In this example user in Mexico would not trigger the notification, but a user in
 </amp-geo>
 
 <amp-user-notification
-    layout=nodisplay
-    id="amp-user-notification1"
-    data-show-if-not-geo="anz, nafta"
-    data-dismiss-href="https://example.com/api/echo/post">
-    This notice is only shown in Canada, Mexico and USA.
-    <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
+  layout="nodisplay"
+  id="amp-user-notification1"
+  data-show-if-not-geo="anz, nafta"
+  data-dismiss-href="https://example.com/api/echo/post"
+>
+  This notice is only shown in Canada, Mexico and USA.
+  <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
 </amp-user-notification>
 ```
 
@@ -206,10 +210,10 @@ will be passed in future requests to `data-show-if-href`.
 Example:
 
 ```json
-{ "elementId": "id-of-amp-user-notification", "ampUserId": "ampUserIdString" }
+{"elementId": "id-of-amp-user-notification", "ampUserId": "ampUserIdString"}
 ```
-**POST response** should be a 200 HTTP code and no data is expected back.
 
+**POST response** should be a 200 HTTP code and no data is expected back.
 
 ##### data-persist-dismissal (optional)
 
@@ -218,28 +222,33 @@ will always show if the `data-show-if-href` result is show notification. If no `
 the notification will always show.
 
 Example 1:
+
 ```html
 <amp-user-notification
-      layout=nodisplay
-      id="amp-user-notification5"
-      data-persist-dismissal="false"
-      data-show-if-href="https://example.com/api/shouldShow?timestamp=TIMESTAMP"
-      data-dismiss-href="https://example.com/api/echo/post">
-This notification should ALWAYS show - if shouldShow endpoint response was true.
-<a href="#learn-more">Learn more.</a>
-<button on="tap:amp-user-notification5.dismiss">Dismiss</button>
+  layout="nodisplay"
+  id="amp-user-notification5"
+  data-persist-dismissal="false"
+  data-show-if-href="https://example.com/api/shouldShow?timestamp=TIMESTAMP"
+  data-dismiss-href="https://example.com/api/echo/post"
+>
+  This notification should ALWAYS show - if shouldShow endpoint response was
+  true.
+  <a href="#learn-more">Learn more.</a>
+  <button on="tap:amp-user-notification5.dismiss">Dismiss</button>
 </amp-user-notification>
 ```
 
 Example 2:
+
 ```html
 <amp-user-notification
-      layout=nodisplay
-      id="amp-user-notification6"
-      data-persist-dismissal="false">
-This notification should ALWAYS show on every page visit.
-<a href="#learn-more">Learn more.</a>
-<button on="tap:amp-user-notification6.dismiss">Dismiss</button>
+  layout="nodisplay"
+  id="amp-user-notification6"
+  data-persist-dismissal="false"
+>
+  This notification should ALWAYS show on every page visit.
+  <a href="#learn-more">Learn more.</a>
+  <button on="tap:amp-user-notification6.dismiss">Dismiss</button>
 </amp-user-notification>
 ```
 
@@ -248,17 +257,20 @@ This notification should ALWAYS show on every page visit.
 By default, this is set to `application/json;charset=utf-8`. But you can set it to `application/x-www-form-urlencoded`, AMP will send the post dismiss request using this content type instead.
 
 Example:
+
 ```html
 <amp-user-notification
-      layout=nodisplay
-      id="amp-user-notification7"
-      enctype="application/x-www-form-urlencoded"
-      data-persist-dismissal="false"
-      data-show-if-href="https://example.com/api/shouldShow?timestamp=TIMESTAMP"
-      data-dismiss-href="https://example.com/api/echo/post">
-This notification should ALWAYS show - if shouldShow endpoint response was true.
-<a href="#learn-more">Learn more.</a>
-<button on="tap:amp-user-notification7.dismiss">Dismiss</button>
+  layout="nodisplay"
+  id="amp-user-notification7"
+  enctype="application/x-www-form-urlencoded"
+  data-persist-dismissal="false"
+  data-show-if-href="https://example.com/api/shouldShow?timestamp=TIMESTAMP"
+  data-dismiss-href="https://example.com/api/echo/post"
+>
+  This notification should ALWAYS show - if shouldShow endpoint response was
+  true.
+  <a href="#learn-more">Learn more.</a>
+  <button on="tap:amp-user-notification7.dismiss">Dismiss</button>
 </amp-user-notification>
 ```
 
@@ -266,29 +278,27 @@ This notification should ALWAYS show - if shouldShow endpoint response was true.
 
 - `elementId` (string): The HTML ID used on the `amp-user-notification` element.
 - `ampUserId` (string): This ID is passed to both the `data-show-if-href` GET request
-    (as a query string field) and the `data-dismiss-href` POST request (as a json field).
-    The ID will be the same for this user going forward, but no other requests
-    in AMP send the same ID.
-    You can use the ID on your side to lookup/store whether the user has
-    dismissed the notification before.
+  (as a query string field) and the `data-dismiss-href` POST request (as a json field).
+  The ID will be the same for this user going forward, but no other requests
+  in AMP send the same ID.
+  You can use the ID on your side to lookup/store whether the user has
+  dismissed the notification before.
 - `showNotification` (boolean): Indicates whether the notification should be shown. If `false`, the promise associated to the element is resolved right away.
-
 
 ## Behavior
 
 A notification is shown when:
 
 1. There's no record locally that the user has dismissed the notification with the
-specified ID.
+   specified ID.
 2. When specified, `data-show-if-href` endpoint returns `{ "showNotification": true }`.
 
 When notification is dismissed:
 
 1. AMP stores the "dismiss" record locally for the specified ID. This will prevent the
-notification from being shown again.
+   notification from being shown again.
 2. When specified, `data-dismiss-href` is invoked and can be used to make the "dismiss"
-record remotely.
-
+   record remotely.
 
 ## Styling
 
@@ -306,8 +316,12 @@ Example: w/o vendor prefixes
 
 ```css
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 amp-user-notification.amp-active {
@@ -317,6 +331,7 @@ amp-user-notification.amp-active {
 ```
 
 ## Actions
+
 The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 <table>

@@ -21,10 +21,13 @@ limitations under the License.
 ### Slot Ad
 
 ```html
-<amp-ad width="300" height="100"
+<amp-ad
+  width="300"
+  height="100"
   type="gumgum"
   data-zone="ggumtest"
-  data-slot="3883">
+  data-slot="3883"
+>
 </amp-ad>
 ```
 

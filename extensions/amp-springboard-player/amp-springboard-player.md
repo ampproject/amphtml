@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Springboard Platform video player.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -49,17 +50,21 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 
 ```html
 <amp-springboard-player
-	data-site-id="261"
-	data-mode="video"
-	data-content-id="1578473"
-	data-player-id="test401"
-	data-domain="test.com"
-	data-items="10"
-	layout="responsive" width="480" height="270">
+  data-site-id="261"
+  data-mode="video"
+  data-content-id="1578473"
+  data-player-id="test401"
+  data-domain="test.com"
+  data-items="10"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-springboard-player>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-site-id (required)</strong></td>

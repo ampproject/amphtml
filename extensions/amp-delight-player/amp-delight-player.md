@@ -5,6 +5,7 @@ formats:
 teaser:
   text: The amp-delight-player element displays a cloud-hosted Delight Player.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -47,10 +48,11 @@ Example:
 
 ```html
 <amp-delight-player
-    data-content-id="-123456789AbCdEfGhIj"
-    layout="responsive"
-    width="16"
-    height="9">
+  data-content-id="-123456789AbCdEfGhIj"
+  layout="responsive"
+  width="16"
+  height="9"
+>
 </amp-delight-player>
 ```
 
@@ -60,13 +62,15 @@ Example:
 
 ```html
 <amp-delight-player
-    data-content-id="-123456789AbCdEfGhIj"
-    width="460"
-    height="200">
+  data-content-id="-123456789AbCdEfGhIj"
+  width="460"
+  height="200"
+>
 </amp-delight-player>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-content-id (Required)</strong></td>
@@ -90,7 +94,9 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
 </table>
 
 ## Actions
+
 `amp-delight-player` exposes four self-explanatory actions: `play`, `pause`, `mute` and `unmute`.
 
 ## Validation
+
 See [amp-delight-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/validator-amp-delight-player.protoascii) in the AMP validator specification.

@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds videos from 3Q SDN.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,7 +23,9 @@ limitations under the License.
 -->
 
 # amp-3q-player
+
 Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.
+
 <table>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -42,9 +45,11 @@ With the `responsive` layout, the width and height in this should yield correct 
 
 ```html
 <amp-3q-player
-    data-id="c8dbe7f4-7f7f-11e6-a407-0cc47a188158"
-    layout="responsive"
-    width="480" height="270"></amp-3q-player>
+  data-id="c8dbe7f4-7f7f-11e6-a407-0cc47a188158"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-3q-player>
 ```
 
 ## Attributes

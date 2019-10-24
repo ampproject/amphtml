@@ -6,6 +6,7 @@ teaser:
   text: Request the user's precise location.
 experimental: true
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -75,17 +76,14 @@ The `src` attribute specifies a remote configuration for the `amp-user-location`
 Alternatively, a local configuration can be specified in a `script` tag.
 
 ```html
-<amp-user-location
-  id="location"
-  layout="nodisplay"
->
-<script type="application/json">
-{
-  "fallback": {"lat": 40, "lon": -40},
-  "maximumAge": 60000,
-  "timeout": 5000
-}
-</script>
+<amp-user-location id="location" layout="nodisplay">
+  <script type="application/json">
+    {
+      "fallback": {"lat": 40, "lon": -40},
+      "maximumAge": 60000,
+      "timeout": 5000
+    }
+  </script>
 </amp-user-location>
 ```
 
@@ -137,4 +135,5 @@ syntax as above. It will wait for the location to be requested before resolving,
 request from occurring until that time. Polling is useful when the location is required for the request.
 
 ## Validation
+
 See [amp-user-location rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-location/validator-amp-user-location.protoascii) in the AMP validator specification.

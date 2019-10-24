@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds an iframe containing a video player.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -49,7 +50,7 @@ supported by the AMP component library.
 2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)).
 
 3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, **you should use `amp-video-iframe`**. This is different from using [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe) in that it enables
-[Video Features on AMP](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
+   [Video Features on AMP](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
 
 ## Behavior
 
@@ -125,11 +126,13 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
 Include an `amp-video-iframe` on your AMP document:
 
 ```html
-<amp-video-iframe layout="responsive"
-    width="16"
-    height="16"
-    src="/my-video-player.html"
-    poster="/my-video-poster.jpg">
+<amp-video-iframe
+  layout="responsive"
+  width="16"
+  height="16"
+  src="/my-video-player.html"
+  poster="/my-video-poster.jpg"
+>
 </amp-video-iframe>
 ```
 
@@ -138,18 +141,22 @@ Include an `amp-video-iframe` on your AMP document:
 In order for the video integration to work, the embedded document (e.g. `my-video-player.html`) must include a small library:
 
 ```html
-<script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
+<script
+  async
+  src="https://cdn.ampproject.org/video-iframe-integration-v0.js"
+></script>
 
 <!-- Wait for API to initialize -->
 <script>
-(window.AmpVideoIframe = window.AmpVideoIframe || [])
-    .push(onAmpIntegrationReady);
+  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(
+    onAmpIntegrationReady
+  );
 
-function onAmpIntegrationReady(ampIntegration) {
-  // `ampIntegration` is an object containing the tools required to integrate.
-  // This callback specifies how the AMP document and the iframed video document
-  // talk to each other.
-}
+  function onAmpIntegrationReady(ampIntegration) {
+    // `ampIntegration` is an object containing the tools required to integrate.
+    // This callback specifies how the AMP document and the iframed video document
+    // talk to each other.
+  }
 </script>
 ```
 
@@ -344,6 +351,6 @@ Returns an object containing metadata about the host document:
 ```json
 {
   "canonicalUrl": "foo.html",
-  "sourceUrl": "bar.html",
+  "sourceUrl": "bar.html"
 }
 ```

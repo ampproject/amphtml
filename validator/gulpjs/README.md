@@ -16,15 +16,18 @@ npm install --save-dev gulp-amphtml-validator
 const gulpAmpValidator = require('gulp-amphtml-validator');
 
 gulp.task('amphtml:validate', () => {
-  return gulp.src('*.html')
-    // Validate the input and attach the validation result to the "amp" property
-    // of the file object. 
-    .pipe(gulpAmpValidator.validate())
-    // Print the validation results to the console.
-    .pipe(gulpAmpValidator.format())
-    // Exit the process with error code (1) if an AMP validation error
-    // occurred.
-    .pipe(gulpAmpValidator.failAfterError());
+  return (
+    gulp
+      .src('*.html')
+      // Validate the input and attach the validation result to the "amp" property
+      // of the file object.
+      .pipe(gulpAmpValidator.validate())
+      // Print the validation results to the console.
+      .pipe(gulpAmpValidator.format())
+      // Exit the process with error code (1) if an AMP validation error
+      // occurred.
+      .pipe(gulpAmpValidator.failAfterError())
+  );
 });
 ```
 
@@ -41,13 +44,13 @@ To treat warnings as errors, replace the last line of the validation closure wit
 
 ### 1.0.2
 
-* Add failAfterWarningOrError option
-* Upgrade amphtml-validator version to 1.0.21
+- Add failAfterWarningOrError option
+- Upgrade amphtml-validator version to 1.0.21
 
 ### 1.0.1
 
-* Upgrade amphtml-validator version to 1.0.18
+- Upgrade amphtml-validator version to 1.0.18
 
 ### 1.0.0
 
-* initial release
+- initial release

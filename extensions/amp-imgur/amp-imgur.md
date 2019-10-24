@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Imgur post.
 ---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -47,13 +48,16 @@ This extension creates an iframe and displays an [imgur](http://imgur.com) post.
 Example:
 
 ```html
-<amp-imgur data-imgur-id="f462IUj"
-    layout="responsive"
-    width="540"
-    height="663"></amp-imgur>
+<amp-imgur
+  data-imgur-id="f462IUj"
+  layout="responsive"
+  width="540"
+  height="663"
+></amp-imgur>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-imgur-id (required)</strong></td>
@@ -73,7 +77,6 @@ Example:
   </tr>
 </table>
 
-
-
 ## Validation
+
 See [amp-imgur rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-imgur/validator-amp-imgur.protoascii) in the AMP validator specification.

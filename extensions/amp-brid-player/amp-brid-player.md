@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Brid.tv player.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,6 +23,7 @@ limitations under the License.
 -->
 
 # amp-brid-player
+
 An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
 
 <table>
@@ -49,15 +51,18 @@ Example:
 
 ```html
 <amp-brid-player
-    data-partner="264"
-    data-player="4144"
-    data-video="13663"
-    layout="responsive"
-    width="480" height="270">
+  data-partner="264"
+  data-player="4144"
+  data-video="13663"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-brid-player>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>

@@ -1,5 +1,5 @@
-Optimized Inline SVG Icons
---------------------------
+## Optimized Inline SVG Icons
+
 SVG-powered social media icon set, yo :P
 Thanks for all the comments and suggestions!
 

@@ -19,9 +19,12 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="300"
-    type="noddus"
-    data-token='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwbGFjZW1lbnRfaWQiOjY2MX0.OdD2QrgxMoI7MM09QBFCtbjMnUGuumiqBHb-FJF4UBs'>
+<amp-ad
+  width="300"
+  height="300"
+  type="noddus"
+  data-token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwbGFjZW1lbnRfaWQiOjY2MX0.OdD2QrgxMoI7MM09QBFCtbjMnUGuumiqBHb-FJF4UBs"
+>
 </amp-ad>
 ```
 

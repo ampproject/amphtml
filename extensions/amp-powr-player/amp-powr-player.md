@@ -5,6 +5,7 @@ formats:
 teaser:
   text: An amp-powr-player component displays the Powr Player as configured in the Powr platform.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -46,11 +47,13 @@ Example:
 
 ```html
 <amp-powr-player
-    data-account="12345"
-    data-player="12345"
-    data-video="12345"
-    layout="responsive"
-    width="480" height="270">
+  data-account="12345"
+  data-player="12345"
+  data-video="12345"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-powr-player>
 ```
 

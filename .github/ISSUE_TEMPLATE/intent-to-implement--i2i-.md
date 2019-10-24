@@ -16,16 +16,19 @@ If you haven't already done so, sign the Contributor License Agreement (CLA) as 
 -->
 
 ## Summary
+
 <!--
 Provide a brief description of the feature/change you are planning on implementing.
 -->
 
 ## Design document
+
 <!--
 Provide a link to your design document once you have one. You do not need a design document to file this I2I.
 -->
 
 ## Motivation
+
 <!--
 Explain why AMP needs this change. It may be useful to describe what AMP developers/users are forced to do without it. When possible, include links to back up your claims.
 -->
@@ -33,16 +36,20 @@ Explain why AMP needs this change. It may be useful to describe what AMP develop
 A clear and concise description of any alternative solutions or features you've considered.
 
 ## Additional context
+
 <!--
 Add any other information that may help people understand your I2I.
 -->
+
 ## Launch tracker
+
 <!--
-The launch tracker is meant to be an easy way of sharing a project's status with others on the AMP Project. 
+The launch tracker is meant to be an easy way of sharing a project's status with others on the AMP Project.
 You should add a link to the launch tracker for this work here if applicable. One ideal template and instructions can be found here: bit.ly/amp-launch-tracker
 -->
 
 <!--
 Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
 -->
+
 /cc @ampproject/wg-approvers

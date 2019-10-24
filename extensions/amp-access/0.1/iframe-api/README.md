@@ -135,8 +135,7 @@ Example:
 ```
 
 The `publicationId` and `productId` are extracted from the
-parent document [structured data](../../../amp-subscriptions/amp-subscriptions.md#json-ld-markup).  
-
+parent document [structured data](../../../amp-subscriptions/amp-subscriptions.md#json-ld-markup).
 
 ## Authorize method
 
@@ -146,7 +145,6 @@ Strong timeout and one-behind semantics are observed for authorization call. If 
 
 In the case of `amp-subscriptions` the authorization response must
 conform to the `local` service [authorization response struture](../../../amp-subscriptions/amp-subscriptions.md#authorization-endpoint-and-entitlements).
-
 
 ## Pingback method
 

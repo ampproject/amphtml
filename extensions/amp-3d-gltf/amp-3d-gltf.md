@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays GL Transmission Format (gITF) 3D models.
 ---
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,6 +23,7 @@ limitations under the License.
 -->
 
 # amp-3d-gltf
+
 Displays GL Transmission Format (gITF) 3D models.
 
 <table>
@@ -45,16 +47,17 @@ The `amp-3d-gltf` component displays 3D models that are in gITF format.
 
 **Note**: A WebGL capable browser is required to display these models.
 
-###  Example
+### Example
 
 ```html
 <amp-3d-gltf
-    layout="responsive"
-    width="320"
-    height="240"
-    alpha="true"
-    antialiasing="true"
-    src="path/to/model.glb"></amp-3d-gltf>
+  layout="responsive"
+  width="320"
+  height="240"
+  alpha="true"
+  antialiasing="true"
+  src="path/to/model.glb"
+></amp-3d-gltf>
 ```
 
 ### Limitations
@@ -62,6 +65,7 @@ The `amp-3d-gltf` component displays 3D models that are in gITF format.
 Currently, only works with glTF 2.0.
 
 Unsupported features:
+
 - embeded cameras
 - animation
 
@@ -69,8 +73,8 @@ Unsupported features:
 
 `amp-3d-gltf` makes a `fetch` request from the origin `https://<random>.ampproject.net` so `access-control-allow-origin: *.ampproject.net` must be set on the response header of the endpoint specified as `src`. Wildcard is needed since the origin has a random sub-domain component to it.
 
-
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>src [required]</strong></td>
@@ -104,6 +108,7 @@ Default value is <code>false</code>.</td>
 </table>
 
 ## Actions
+
 <table>
   <tr>
     <td width="40%"><strong>setModelRotation(x, y, z, xMin, xMax, yMin, yMax, zMin, zMax)</strong></td>
@@ -117,4 +122,5 @@ Default value is <code>false</code>.</td>
 </table>
 
 ## Validation
+
 See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii) in the AMP validator specification.

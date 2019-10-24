@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Allows rendering of Mustache.js templates.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -46,10 +47,10 @@ Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</
 
 ## Version notes
 
-| Version | Description |
-| ------- | ----- |
-| 0.2 | Support for SVG elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
-| 0.1 | Initial implementation. |
+| Version | Description                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.2     | Support for SVG elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
+| 0.1     | Initial implementation.                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Syntax
 
@@ -68,11 +69,14 @@ The `amp-mustache` template has to be defined and used according to the
 First, the `amp-mustache` has to be declared/loaded like this:
 
 ```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+<script
+  async
+  custom-template="amp-mustache"
+  src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+></script>
 ```
 
 Then, the Mustache templates can be defined either in a `script` or `template` tag like this:
-
 
 ```html
 <!-- Using template tag. -->
@@ -80,9 +84,11 @@ Then, the Mustache templates can be defined either in a `script` or `template` t
   Hello {{world}}!
 </template>
 ```
+
 or
 
 <!-- Using script tag. -->
+
 ```html
 <script type="text/plain" template="amp-mustache">
   Hello {{world}}!
@@ -145,7 +151,9 @@ Since AMP template strings must be specified in `<template>` elements, this can 
 <template type="amp-mustache">
   <table>
     <tr>
-      {{#foo}}<td></td>{{/foo}}
+      {{#foo}}
+      <td></td>
+      {{/foo}}
     </tr>
   </table>
 </template>
@@ -154,8 +162,7 @@ Since AMP template strings must be specified in `<template>` elements, this can 
 The browser will foster parent the text nodes `{{#foo}}` and `{{/foo}}`:
 
 ```html
-{{#foo}}
-{{/foo}}
+{{#foo}} {{/foo}}
 <table>
   <tr>
     <td></td>
@@ -182,7 +189,7 @@ When using `amp-mustache` to calculate attribute values, quote escaping can be a
 ```html
 <template type="amp-mustache">
   <!-- A double-quote (") in foo will cause malformed HTML. -->
-  <amp-img alt="{{foo}}" src="example.jpg" width=100 height=100></amp-img>
+  <amp-img alt="{{foo}}" src="example.jpg" width="100" height="100"></amp-img>
 
   <!-- A single-quote (') or double-quote (") in bar will cause an AMP runtime parse error. -->
   <button on="tap:AMP.setState({foo: '{{bar}}'})">Click me</button>

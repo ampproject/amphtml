@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Functionality for videos that minimize ("dock") to a corner or a custom position on scroll.
 ---
+
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -73,7 +74,7 @@ Currently, the supported players are:
 
 ### Triggering conditions
 
-Note that the video won't be docked unless it's playing *manually*. This means:
+Note that the video won't be docked unless it's playing _manually_. This means:
 
 - If the video has `autoplay`, the feature will not be triggered unless the user clicks on the video first.
 - If the video does not have `autoplay`, the feature will not be triggered unless the user plays the video.
@@ -93,7 +94,7 @@ On scroll, the video will minimize to an automatically calculated corner or to a
 When setting the `dock` attribute with an empty value, the video will dock to a corner defined by the extension:
 
 ```html
-<amp-video src="my-video.mp4" ... dock>
+<amp-video src="my-video.mp4" ... dock></amp-video>
 ```
 
 By default, the video will be minimized to the top-right corner. It will be sized at 30% of the viewport's width, no less than 180 pixels wide. If the document is [RTL](https://www.w3.org/International/questions/qa-html-dir), the video will dock to the top-left corner. When in this mode, users can drag the docked video to snap to either corner.
@@ -104,8 +105,10 @@ When setting the `dock` attribute to a non-empty value, the video will dock to t
 
 ```html
 <amp-layout id="my-dock-slot" ...>
-<amp-video src="my-video.mp4" ... dock="#my-dock-slot">
+  <amp-video src="my-video.mp4" ... dock="#my-dock-slot"></amp-video
+></amp-layout>
 ```
+
 The slot element must always be an [`amp-layout`](https://amp.dev/documentation/components/amp-layout), which allows us to leverage the [AMP layout system](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/) in order to keep the same sizing properties between the slot and the video.
 
 In order for custom positioning to work properly, the slot element must be [`position: fixed`.](https://developer.mozilla.org/en-US/docs/Web/CSS/position)

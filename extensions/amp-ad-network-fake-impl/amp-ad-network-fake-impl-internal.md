@@ -35,13 +35,13 @@ limitations under the License.
 ## Behavior
 
 The 'fake' ad network produces only a single ad request and
-attempts to render it via the A4A fast rendering path.  It is intended only
+attempts to render it via the A4A fast rendering path. It is intended only
 for testing and demos. To send an ad request with 'fake' ad network, it is
 required that the ad element to have an id value starts with `i-amphtml-demo-`
 which makes the AMP page invalid.
 
 Like all A4A ad networks, you do not place an `<amp-ad-network-fake-impl>`
-tag directly on the page.  Instead, you place an `<amp-ad type="fake">` tag.
+tag directly on the page. Instead, you place an `<amp-ad type="fake">` tag.
 
 The fake impl loads an A4A creative or an AMP creative and convert it to an A4A
 creative. Use `a4a-conversion` attribute to instruct the fake impl to perform creative
@@ -53,7 +53,7 @@ verification fails.
 
 ## Attributes
 
-Fake impl largely uses the same tags as `<amp-ad>`.  The following are
+Fake impl largely uses the same tags as `<amp-ad>`. The following are
 special tags for fake or special behaviors of existing tags:
 
 **id** Must starts with `i-amphtml-demo-` to enable sending ad request.

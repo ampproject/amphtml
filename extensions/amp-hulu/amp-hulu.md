@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a simple embedded Hulu video.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -45,8 +46,12 @@ Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
 ## Example
 
 ```html
-<amp-hulu width="412" height="213" layout="responsive"
-  data-eid="4Dk5F2PYTtrgciuvloH3UA">
+<amp-hulu
+  width="412"
+  height="213"
+  layout="responsive"
+  data-eid="4Dk5F2PYTtrgciuvloH3UA"
+>
 </amp-hulu>
 ```
 
@@ -62,7 +67,6 @@ Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

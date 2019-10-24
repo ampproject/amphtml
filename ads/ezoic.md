@@ -19,17 +19,19 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="ezoic"
-    data-slot="slot-name" 
-    data-json='{"targeting":{"compid":0}, "extras":{"adsense_text_color":"000000"}'>
+<amp-ad
+  width="300"
+  height="250"
+  type="ezoic"
+  data-slot="slot-name"
+  data-json='{"targeting":{"compid":0}, "extras":{"adsense_text_color":"000000"}'
+>
 </amp-ad>
 ```
 
 ## Ad size
 
 The ad size is the size of the ad that should be displayed. Make sure the `width` and `height` attributes of the `amp-ad` tag match the available ad size.
-
 
 ## Configuration
 

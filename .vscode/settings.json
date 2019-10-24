@@ -24,5 +24,6 @@
   // https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
   "[yaml]": {"editor.formatOnSave": true},
   "[json]": {"editor.formatOnSave": true},
-  "[json5]": {"editor.formatOnSave": true}
+  "[json5]": {"editor.formatOnSave": true},
+  "[markdown]": {"editor.formatOnSave": true}
 }

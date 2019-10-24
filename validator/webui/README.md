@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 # Validator Web UI
 
 If you'd like to use the web UI, simply visit [validator.amp.dev](https://validator.amp.dev/).
@@ -38,14 +39,16 @@ Appengine app - please refer to the instructions in serve.go.
 This tool will also accept a document passed in via the URL as part of the URL hash. It expects the format `#doc=<ENCODED_DOCUMENT>`. This allows users to construct an link that will auto-populate the tool with the incoming document.
 
 To use this feature you must first base64 encode the HTML string. Due to unicode problems with the native `btoa()` function, this tool expects the string to be encoded using the following [solution from mdn](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/btoa#Unicode_strings):
+
 ```js
 // ucs-2 string to base64 encoded ascii
 function utoa(str) {
-    return window.btoa(unescape(encodeURIComponent(str)));
+  return window.btoa(unescape(encodeURIComponent(str)));
 }
 ```
 
 By default this tool will assume you want to validate an `AMPHTML` document. If you would like to validate another format you can chose one of the following:
+
 ```
 #htmlFormat=AMP4ADS
 #htmlFormat=AMP4EMAIL

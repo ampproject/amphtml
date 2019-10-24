@@ -21,10 +21,13 @@ Please visit [Geniee SSP website](https://www.geniee.co.jp/) for more informatio
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="genieessp"
-    data-vid="3"
-    data-zid="1077330">
+<amp-ad
+  width="300"
+  height="250"
+  type="genieessp"
+  data-vid="3"
+  data-zid="1077330"
+>
 </amp-ad>
 ```
 

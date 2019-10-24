@@ -5,6 +5,7 @@ formats:
 teaser:
   text: The share tracking feature is under development.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -20,6 +21,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 # amp-share-tracking
 
 The [share tracking feature](https://github.com/ampproject/amphtml/issues/3135) is under development.

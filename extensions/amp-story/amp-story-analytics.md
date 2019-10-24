@@ -22,7 +22,7 @@ This document details triggers associated with AMP Stories. If you're looking fo
 
 `amp-story` issues events for changes of state. These events can be reported through the analytics configuration by using triggers.
 
-See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
+See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
 
 ### Visible trigger (`"on": "story-page-visible"`)
 
@@ -98,7 +98,7 @@ The total number of pages available to the user in the story.
 
 ### `storyProgress`
 
-The user's progress through the story, as a decimal in the range [0...1].  This represents how many pages the user has passed; for example, if the user is currently looking at the second page of ten, the progress will be reported as 0.1 (as the user has not yet finished the second page).
+The user's progress through the story, as a decimal in the range [0...1]. This represents how many pages the user has passed; for example, if the user is currently looking at the second page of ten, the progress will be reported as 0.1 (as the user has not yet finished the second page).
 
 ### `storyIsMuted`
 

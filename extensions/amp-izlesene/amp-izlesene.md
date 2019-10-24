@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Izlesene video.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -44,12 +45,15 @@ With responsive layout the width and height from the example should yield correc
 
 ```html
 <amp-izlesene
-    data-videoid="7221390"
-    layout="responsive"
-    width="480" height="270"></amp-izlesene>
+  data-videoid="7221390"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-izlesene>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-videoid (required)</strong></td>
@@ -76,7 +80,6 @@ With responsive layout the width and height from the example should yield correc
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

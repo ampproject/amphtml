@@ -5,7 +5,9 @@ formats:
 teaser:
   text: A container to display an ad.
 ---
+
 # amp-ad / amp-embed
+
 A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.
 
 # <a name="amp-ad"></a> `amp-ad` / `amp-embed`
@@ -58,43 +60,52 @@ custom element called `<amp-ad>`. No ad network-provided JavaScript is allowed t
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
-The `<amp-ad>` requires width and height values to be specified according to the [rule](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#(tl;dr)-summary-of-layout-requirements-&-behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+The `<amp-ad>` requires width and height values to be specified according to the [rule](<https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#(tl;dr)-summary-of-layout-requirements-&-behaviors>) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 #### Example: Displaying a few ads
 
 [example preview="inline" playground="true" imports="amp-ad"]
+
 ```html
-<amp-ad type="a9"
+<amp-ad
+  type="a9"
   data-amzn_assoc_ad_mode="auto"
   data-divid="amzn-assoc-ad-fe746097-f142-4f8d-8dfb-45ec747632e5"
   data-recomtype="async"
   data-adinstanceid="fe746097-f142-4f8d-8dfb-45ec747632e5"
-    width="300"
-    height="250"
-    data-aax_size="300x250"
-    data-aax_pubname="test123"
-    data-aax_src="302">
-  </amp-ad>
-  <amp-ad width="300"
-    height="250"
-    type="industrybrains"
-    data-width="300"
-    data-height="250"
-    data-cid="19626-3798936394">
-  </amp-ad>
-  <amp-embed type="taboola"
-    width="400"
-    height="300"
-    layout="responsive"
-    data-publisher="amp-demo"
-    data-mode="thumbnails-a"
-    data-placement="Ads Example"
-    data-article="auto">
-  </amp-embed>
+  width="300"
+  height="250"
+  data-aax_size="300x250"
+  data-aax_pubname="test123"
+  data-aax_src="302"
+>
+</amp-ad>
+<amp-ad
+  width="300"
+  height="250"
+  type="industrybrains"
+  data-width="300"
+  data-height="250"
+  data-cid="19626-3798936394"
+>
+</amp-ad>
+<amp-embed
+  type="taboola"
+  width="400"
+  height="300"
+  layout="responsive"
+  data-publisher="amp-demo"
+  data-mode="thumbnails-a"
+  data-placement="Ads Example"
+  data-article="auto"
+>
+</amp-embed>
 ```
+
 [/example]
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>type (required)</strong></td>
@@ -140,8 +151,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
 Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing. Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders).
 
 ```html
-<amp-ad width=300 height=250
-    type="foo">
+<amp-ad width="300" height="250" type="foo">
   <div placeholder>Loading ...</div>
 </amp-ad>
 ```
@@ -155,22 +165,23 @@ In the case that the attempt to collapse fails. The `amp-ad` component supports 
 Example with fallback:
 
 ```html
-<amp-ad width=300 height=250 type="foo">
+<amp-ad width="300" height="250" type="foo">
   <div fallback>No ad for you</div>
 </amp-ad>
 ```
 
 ## Serving video ads
+
 There are 3 ways to monetize videos in AMP with video ads:
+
 1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
 2. Use the [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
 
 3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://amp.dev/documentation/examples/components/amp-iframe/).
-When using `amp-iframe` approach:
-    * Make sure there is a poster if loading the player in the first viewport. [Details](https://amp.dev/documentation/components/amp-iframe#iframe-with-placeholder).
-    * Video and poster must be served over HTTPS.
-
+   When using `amp-iframe` approach:
+   _ Make sure there is a poster if loading the player in the first viewport. [Details](https://amp.dev/documentation/components/amp-iframe#iframe-with-placeholder).
+   _ Video and poster must be served over HTTPS.
 
 ## Running ads from a custom domain
 
@@ -179,7 +190,10 @@ AMP supports loading the bootstrap iframe that is used to load ads from a custom
 To enable this, copy the file [remote.html](../../3p/remote.html) to your web server. Next up add the following meta tag to your AMP file(s):
 
 ```html
-<meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
+<meta
+  name="amp-3p-iframe-src"
+  content="https://assets.your-domain.com/path/to/remote.html"
+/>
 ```
 
 The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.

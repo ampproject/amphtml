@@ -10,14 +10,19 @@
      You can also add the "ads" and "stories" formats if they apply.
   3. And remove this comment! (no empty lines before "---")
 -->
+
 ---
-$category: presentation
+
+\$category: presentation
 formats:
-  - websites
-  - email
-teaser:
+
+- websites
+- email
+  teaser:
   text: FILL THIS IN.
+
 ---
+
 <!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
 
@@ -34,7 +39,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# \`${name}\`
+# `${name}`
 
 <table>
   <tr>
@@ -76,4 +81,4 @@ FILL THIS IN. Does this extension allow for properties to configure?
 
 ## Validation
 
-See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
+See [\${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.

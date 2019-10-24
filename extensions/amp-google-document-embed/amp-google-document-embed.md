@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a document file supported by Google Drive.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -50,12 +51,14 @@ The `amp-google-document-embed` component displays document files like Word docu
 Excel spreadsheets, and PDFs.
 
 Example:
+
 ```html
 <amp-google-document-embed
-    src="https://www.example.com/document.pdf"
-    width="800"
-    height="600"
-    layout="responsive">
+  src="https://www.example.com/document.pdf"
+  width="800"
+  height="600"
+  layout="responsive"
+>
 </amp-google-document-embed>
 ```
 

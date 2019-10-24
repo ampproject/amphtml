@@ -19,16 +19,19 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="300"
-    type="invibes"
-    data-pid="placement1"
-    data-ad-categ="infeed">
+<amp-ad
+  width="300"
+  height="300"
+  type="invibes"
+  data-pid="placement1"
+  data-ad-categ="infeed"
+>
 </amp-ad>
 ```
 
 ## Configuration
 
-For configuration semantics, please contact [Invibes] (https://www.invibes.com/#section-contact-email)
+For configuration semantics, please contact [Invibes](https://www.invibes.com/#section-contact-email)
 
 Supported parameters:
 

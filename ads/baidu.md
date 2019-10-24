@@ -19,10 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="baidu"
-    data-cproid="{cproid}">
-</amp-ad>
+<amp-ad width="300" height="250" type="baidu" data-cproid="{cproid}"> </amp-ad>
 ```
 
 ## Configuration
@@ -31,4 +28,4 @@ For additional detials and support, see [baidu ad union website](http://union.ba
 
 ### Required Parameters
 
-* `data-cproid` - baidu union ad id
+- `data-cproid` - baidu union ad id

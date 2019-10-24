@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Facebook post or video.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -46,40 +47,35 @@ You can use the `amp-facebook` component to embed a Facebook post, a Facebook vi
 
 #### Example: Embedding a post
 
-[example preview="inline" playground="true" imports="amp-facebook"]
-[sourcecode:html]
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="552" height="310"
     layout="responsive"
     data-href="https://www.facebook.com/ParksCanada/posts/1712989015384373">
 </amp-facebook>
-[/sourcecode]
-[/example]
+[/sourcecode][/example]
 
 #### Example: Embedding a video
 
-[example preview="inline" playground="true" imports="amp-facebook"]
-[sourcecode:html]
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="476" height="316"
     layout="responsive"
     data-embed-as="video"
     data-href="https://www.facebook.com/nasaearth/videos/10155187938052139">
 </amp-facebook>
-[/sourcecode]
-[/example]
+[/sourcecode][/example]
 
 #### Example: Embedding a comment on a post
 
-[example preview="inline" playground="true" imports="amp-facebook"]
-[sourcecode:html]
+[example preview="inline" playground="true" imports="amp-facebook"][sourcecode:html]
 <amp-facebook width="552" height="500"
     layout="responsive"
     data-embed-type="comment"
     data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185">
 </amp-facebook>
-[/sourcecode]
-[/example]
+[/sourcecode][/example]
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-href (required)</strong></td>

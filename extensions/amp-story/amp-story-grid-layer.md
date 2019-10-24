@@ -5,6 +5,7 @@ formats:
 teaser:
   text: A single layer of a single page of an AMP story that positions its content in a grid-based layout.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -21,10 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-
 # `amp-story-grid-layer`
 
-The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
+The `<amp-story-grid-layer>` component lays its children out into a grid. Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
 <table>
   <tr>
@@ -59,15 +59,13 @@ The `<amp-story-grid-layer>` component lays its children out into a grid.  Its i
 
 ## Attributes
 
-
 ### template [required]
 
 The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
 
-
 ### grid-area [optional]
 
-This attribute is specified on children of `<amp-story-grid-layer>`.  `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
+This attribute is specified on children of `<amp-story-grid-layer>`. `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
 
 Example:
 
@@ -109,7 +107,7 @@ Example:
 
 ### vertical
 
-The `vertical` template lays its elements out along the y-axis.  By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
+The `vertical` template lays its elements out along the y-axis. By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
 
 Names Areas: (none)
 
@@ -129,7 +127,7 @@ Names Areas: (none)
 
 ### horizontal
 
-The `horizontal` template lays its elements out along the x-axis.  By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
+The `horizontal` template lays its elements out along the x-axis. By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
 
 Names Areas: (none)
 
@@ -153,9 +151,9 @@ The `thirds` template divides the screen into three equally-sized rows, and allo
 
 Named Areas:
 
-  * `upper-third`
-  * `middle-third`
-  * `lower-third`
+- `upper-third`
+- `middle-third`
+- `lower-third`
 
 <amp-img alt="Horizontal template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" width="145" height="255">
   <noscript>

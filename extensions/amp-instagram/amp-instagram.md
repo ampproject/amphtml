@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Instagram embed.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -51,13 +52,15 @@ The system automatically adds space for the "chrome" that Instagram adds around 
 Many Instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work.
 
 Example:
+
 ```html
 <amp-instagram
-    data-shortcode="fBwFP"
-    data-captioned
-    width="400"
-    height="400"
-    layout="responsive">
+  data-shortcode="fBwFP"
+  data-captioned
+  width="400"
+  height="400"
+  layout="responsive"
+>
 </amp-instagram>
 ```
 
@@ -83,7 +86,6 @@ For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-sh
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

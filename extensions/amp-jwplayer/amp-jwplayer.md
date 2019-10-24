@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a cloud-hosted JW Player.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -50,10 +51,12 @@ Example:
 
 ```html
 <amp-jwplayer
-    data-player-id="aBcD1234"
-    data-media-id="5678WxYz"
-    layout="responsive"
-    width="16" height="9">
+  data-player-id="aBcD1234"
+  data-media-id="5678WxYz"
+  layout="responsive"
+  width="16"
+  height="9"
+>
 </amp-jwplayer>
 ```
 
@@ -63,9 +66,11 @@ Example:
 
 ```html
 <amp-jwplayer
-    data-player-id="aBcD1234"
-    data-playlist-id="5678WxYz"
-    width="160" height="90">
+  data-player-id="aBcD1234"
+  data-playlist-id="5678WxYz"
+  width="160"
+  height="90"
+>
 </amp-jwplayer>
 ```
 
@@ -106,6 +111,6 @@ Example:
   </tr>
 </table>
 
-
 ## Validation
+
 See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/validator-amp-jwplayer.protoascii) in the AMP validator specification.

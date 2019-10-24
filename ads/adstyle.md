@@ -21,9 +21,11 @@ limitations under the License.
 ### Basic
 
 ```html
-  <amp-embed width="400" height="260"
-    type="adstyle"
-    heights="(max-width: 320px) 933px,
+<amp-embed
+  width="400"
+  height="260"
+  type="adstyle"
+  heights="(max-width: 320px) 933px,
   (max-width: 360px) 1087px,
   (max-width: 375px) 1138px,
   (max-width: 412px) 1189px,
@@ -36,9 +38,10 @@ limitations under the License.
   (max-width: 768px) 633px,
   (max-width: 1024px) 711px,
   86vw"
-  data-widget="12345">
-    <div placeholder="">Loading ...</div>
-  </amp-embed>
+  data-widget="12345"
+>
+  <div placeholder="">Loading ...</div>
+</amp-embed>
 ```
 
 ## Configuration

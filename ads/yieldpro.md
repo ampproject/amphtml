@@ -21,50 +21,61 @@ limitations under the License.
 ### Single ad
 
 ```html
-<amp-ad width="728" height="90"
-  type="yieldpro" 
+<amp-ad
+  width="728"
+  height="90"
+  type="yieldpro"
   data-pubnetwork="12c6fc06"
   data-section-id="100"
-  data-slot="107" >
+  data-slot="107"
+>
 </amp-ad>
 ```
 
 ### Multi instance ads
 
 ```html
-<amp-ad width="250" height="250"
+<amp-ad
+  width="250"
+  height="250"
   type="yieldpro"
   data-pubnetwork="12c6fc06"
   data-section-id="475"
   data-slot="650"
-  data-instance="1" >
+  data-instance="1"
+>
 </amp-ad>
-<amp-ad width="250" height="250"
+<amp-ad
+  width="250"
+  height="250"
   type="yieldpro"
   data-pubnetwork="12c6fc06"
   data-section-id="475"
   data-slot="650"
-  data-instance="2" >
+  data-instance="2"
+>
 </amp-ad>
 ```
 
 ### Using custom params and custom ad server url
 
 ```html
-<amp-ad width="728" height="90"
-  type="yieldpro" 
+<amp-ad
+  width="728"
+  height="90"
+  type="yieldpro"
   data-pubnetwork="12c6fc06"
   data-section-id="100"
   data-slot="107"
   data-custom='{"my_custom_param":"my_custom_value"}'
-  data-ad-server-url="//creative.yieldpro.eu/ad" >
+  data-ad-server-url="//creative.yieldpro.eu/ad"
+>
 </amp-ad>
 ```
 
 ## Configuration
 
-
-For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
 
 ### Required parameters
 
@@ -75,8 +86,8 @@ For details on the configuration semantics, please contact the ad network or ref
 ### Optional parameters
 
 - `instance`: ID of section instance in case we multiple times used the same section on the same page. Can contain only letters and numbers.Strictly required to use the same section multiple times per page.
-- `click3rd`: 3rd party click watcher. 
-- `adServerUrl` 
+- `click3rd`: 3rd party click watcher.
+- `adServerUrl`
 - `cacheSafe`
 - `pageIdModifier`
 - `custom`: Custom targeting properties. You may use 3 types for its properties: `{String}`, `{Number}` and `{Array}`. The following array usage example translates into: `arrayKey=value1&arrayKey=1&stringKey=stringValue...`
@@ -87,5 +98,3 @@ For details on the configuration semantics, please contact the ad network or ref
       stringKey: 'stringValue'
   }
   ```
-                    
-
