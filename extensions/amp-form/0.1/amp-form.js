@@ -622,11 +622,7 @@ export class AmpForm {
     if (error && error.message) {
       detail['error'] = error.message;
     }
-    return this.handleSubmitFailure_(
-      error,
-      detail,
-      /** getSsrEventResponse */ false
-    );
+    return this.handleSubmitFailure_(error, detail, detail);
   }
 
   /**
@@ -745,11 +741,7 @@ export class AmpForm {
           if (error && error.message) {
             detail['error'] = error.message;
           }
-          return this.handleSubmitFailure_(
-            error,
-            detail,
-            /** getSsrEventResponse */ false
-          );
+          return this.handleSubmitFailure_(error, detail, detail);
         }
       );
   }
@@ -788,17 +780,10 @@ export class AmpForm {
       const status = init['status'];
       if (status >= 300) {
         /** HTTP status codes of 300+ mean redirects and errors. */
-        return this.handleSubmitFailure_(
-          status,
-          response,
-          /** getSsrEventResponse */ true
-        );
+        return this.handleSubmitFailure_(status, response, response['body']);
       }
     }
-    return this.handleSubmitSuccess_(
-      tryResolve(() => response),
-      /** getSsrEventResponse */ true
-    );
+    return this.handleSubmitSuccess_(response, response['body']);
   }
 
   /**
@@ -923,40 +908,34 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response) {
-    const json = /** @type {!Promise<!JsonObject>} */ (response.json());
-    return this.handleSubmitSuccess_(
-      json,
-      /** getSsrEventResponse */ false
-    ).then(() => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
-      this.maybeHandleRedirect_(response);
-    });
-  }
-
-  /**
-   * Transition the form to the submit success state.
-   * If getSsrEventResponse is true, exposes the response.body in
-   * the SUBMIT_SUCCESS event; otherwise exposes the resolved jsonPromise.
-   * @param {!Promise<!JsonObject>} jsonPromise
-   * @param {boolean} getSsrEventResponse
-   * @return {!Promise}
-   * @private visible for testing
-   */
-  handleSubmitSuccess_(jsonPromise, getSsrEventResponse) {
-    return jsonPromise.then(
-      json => {
-        // HTTP response payload returned by the amp-form endpoint from SSR
-        const eventResponse = getSsrEventResponse ? json['body'] : json;
-        this.setState_(FormState.SUBMIT_SUCCESS);
-        this.renderTemplate_(json || {}).then(() => {
-          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, eventResponse);
-          this.dirtinessHandler_.onSubmitSuccess();
+    return response.json().then(
+      /** @type {!JsonObject} */ json => {
+        return this.handleSubmitSuccess_(json, json).then(() => {
+          this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
+          this.maybeHandleRedirect_(response);
         });
       },
       error => {
         user().error(TAG, 'Failed to parse response JSON: %s', error);
       }
     );
+  }
+
+  /**
+   * Transition the form to the submit success state.
+   * @param {!JsonObject} result
+   * @param {!JsonObject} eventData
+   * @return {!Promise}
+   * @private visible for testing
+   */
+  handleSubmitSuccess_(result, eventData) {
+    this.setState_(FormState.SUBMIT_SUCCESS);
+    return tryResolve(() => {
+      this.renderTemplate_(result || {}).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_SUCCESS, eventData);
+        this.dirtinessHandler_.onSubmitSuccess();
+      });
+    });
   }
 
   /**
@@ -974,33 +953,25 @@ export class AmpForm {
     }
     return promise.then(responseJson => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
-      this.handleSubmitFailure_(
-        e,
-        responseJson,
-        /** getSsrEventResponse */ false
-      );
+      this.handleSubmitFailure_(e, responseJson, responseJson);
       this.maybeHandleRedirect_(e.response);
     });
   }
 
   /**
    * Transition the form the the submit error state.
-   * If getSsrEventResponse is true, exposes the response.body in
-   * the SUBMIT_ERROR event; otherwise exposes the provided json.
    * @param {*} error
    * @param {!JsonObject} json
-   * @param {boolean} getSsrEventResponse
+   * @param {!JsonObject} eventData
    * @return {!Promise}
    * @private
    */
-  handleSubmitFailure_(error, json, getSsrEventResponse) {
+  handleSubmitFailure_(error, json, eventData) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
-        // HTTP response payload returned by the amp-form endpoint from SSR
-        const eventResponse = getSsrEventResponse ? json['body'] : json;
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, eventResponse);
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, eventData);
         this.dirtinessHandler_.onSubmitError();
       });
     });
