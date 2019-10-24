@@ -15,6 +15,7 @@
  */
 
 import '../amp-selector';
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Keys} from '../../../../src/utils/key-codes';
 
@@ -845,6 +846,9 @@ describes.realWin(
         expect(event).to.have.property('detail');
         expect(event.detail).to.have.property('targetOption', '3');
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
+
+        const trust = triggerSpy.firstCall.args[3];
+        expect(trust).to.equal(ActionTrust.HIGH);
       });
 
       it('should trigger "select" event when an item is toggled', async () => {
@@ -864,6 +868,7 @@ describes.realWin(
           method: 'toggle',
           args,
           satisfiesTrust: () => true,
+          trust: 789,
         });
 
         expect(triggerSpy).to.be.calledOnce;
@@ -873,6 +878,9 @@ describes.realWin(
         expect(event).to.have.property('detail');
         expect(event.detail).to.have.property('targetOption', '3');
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
+
+        const trust = triggerSpy.firstCall.args[3];
+        expect(trust).to.equal(789);
       });
 
       it('should trigger "select" event for multiple selections', function*() {
@@ -906,6 +914,9 @@ describes.realWin(
           '1',
           '2',
         ]);
+
+        const trust = triggerSpy.firstCall.args[3];
+        expect(trust).to.equal(ActionTrust.HIGH);
       });
 
       it(
@@ -931,6 +942,7 @@ describes.realWin(
           impl.executeAction({
             method: 'selectDown',
             satisfiesTrust: () => true,
+            trust: 789,
           });
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
@@ -942,6 +954,9 @@ describes.realWin(
           expect(event).to.have.property('detail');
           expect(event.detail).to.have.property('targetOption', '1');
           expect(event.detail).to.have.deep.property('selectedOptions', ['1']);
+
+          const trust = triggerSpy.firstCall.args[3];
+          expect(trust).to.equal(789);
         }
       );
 
@@ -965,7 +980,11 @@ describes.realWin(
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
-          impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
+          impl.executeAction({
+            method: 'selectUp',
+            satisfiesTrust: () => true,
+            trust: 789,
+          });
 
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[5].hasAttribute('selected')).to.be.true;
@@ -977,6 +996,9 @@ describes.realWin(
           expect(event).to.have.property('detail');
           expect(event.detail).to.have.property('targetOption', '5');
           expect(event.detail).to.have.deep.property('selectedOptions', ['5']);
+
+          const trust = triggerSpy.firstCall.args[3];
+          expect(trust).to.equal(789);
         }
       );
 
