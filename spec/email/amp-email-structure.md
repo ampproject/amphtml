@@ -24,9 +24,9 @@ To embed AMP within an email, add a new MIME part with a content type of `text/x
     layout="responsive"
     width="752" height="246"
     src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-email-mime-parts.png">
-  <noscript>
-    <img alt="AMP for Email MIME Parts Diagram" src="../img/amp-email-mime-parts.png" />
-  </noscript>
+<noscript>
+<img alt="AMP for Email MIME Parts Diagram" src="../img/amp-email-mime-parts.png" />
+</noscript>
 </amp-img>
 
 For more information about the `multipart/alternative` subtype, refer to [RFC 1521, section 7.2.3](https://tools.ietf.org/html/rfc1521#section-7.2.3).
@@ -41,7 +41,7 @@ The `multipart/alternative` must contain at least one non-AMP (`text/plain` or `
 their email provider's settings.
 
 Note: Some email clients[[1]](https://openradar.appspot.com/radar?id=6054696888303616) will only render the last MIME part,
-so we recommend placing the `text/x-amp-html` MIME part *before* the `text/html` MIME part.
+so we recommend placing the `text/x-amp-html` MIME part _before_ the `text/html` MIME part.
 
 ### Replying/forwarding semantics
 

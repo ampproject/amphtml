@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Dailymotion video.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -48,9 +49,11 @@ With responsive layout, the width and height from the example should yield corre
 
 ```html
 <amp-dailymotion
-    data-videoid="x2m8jpp"
-    layout="responsive"
-    width="480" height="270"></amp-dailymotion>
+  data-videoid="x2m8jpp"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-dailymotion>
 ```
 
 ## Attributes
