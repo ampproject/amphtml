@@ -305,11 +305,8 @@ describes.repeated(
                 .stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
                 .returns(template);
 
-              const fetchAndRenderTemplate = sandbox.stub(
-                ampForm.ssrTemplateHelper_,
-                'fetchAndRenderTemplate'
-              );
-              fetchAndRenderTemplate
+              const ssr = sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              ssr
                 .onFirstCall()
                 .returns(
                   Promise.resolve({
@@ -328,12 +325,11 @@ describes.repeated(
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
               );
-              return whenCalled(fetchAndRenderTemplate)
+              return whenCalled(ssr)
                 .then(() => {
-                  expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate).to
-                    .have.been.called;
+                  expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
                   expect(
-                    ampForm.ssrTemplateHelper_.fetchAndRenderTemplate
+                    ampForm.ssrTemplateHelper_.ssr
                   ).to.have.been.calledWith(
                     form,
                     sinon.match.object,
@@ -389,11 +385,8 @@ describes.repeated(
                 .stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
                 .returns(template);
 
-              const fetchAndRenderTemplate = sandbox.stub(
-                ampForm.ssrTemplateHelper_,
-                'fetchAndRenderTemplate'
-              );
-              fetchAndRenderTemplate
+              const ssr = sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              ssr
                 .onFirstCall()
                 .returns(
                   Promise.resolve({
@@ -412,12 +405,11 @@ describes.repeated(
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
               );
-              return whenCalled(fetchAndRenderTemplate)
+              return whenCalled(ssr)
                 .then(() => {
-                  expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate).to
-                    .have.been.called;
+                  expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
                   expect(
-                    ampForm.ssrTemplateHelper_.fetchAndRenderTemplate
+                    ampForm.ssrTemplateHelper_.ssr
                   ).to.have.been.calledWith(
                     form,
                     sinon.match.object,
@@ -471,11 +463,11 @@ describes.repeated(
                 .stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
                 .returns(template);
 
-              const fetchAndRenderTemplate = sandbox.stub(
+              const ssr = sandbox.stub(
                 ampForm.ssrTemplateHelper_,
-                'renderTemplate'
+                'applySsrOrCsrTemplate'
               );
-              fetchAndRenderTemplate
+              ssr
                 .onFirstCall()
                 .returns(
                   Promise.resolve({
@@ -495,8 +487,8 @@ describes.repeated(
                 event
               );
               return whenCalled(renderTemplate, 2).then(() => {
-                expect(ampForm.ssrTemplateHelper_.renderTemplate).to.have.been
-                  .called;
+                expect(ampForm.ssrTemplateHelper_.applySsrOrCsrTemplate).to.have
+                  .been.called;
                 return handleSubmitEventPromise;
               });
             });
