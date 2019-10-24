@@ -27,7 +27,7 @@ import {toggleExperiment} from '../../../../src/experiments';
 const KEYBOARD_EVENT_WHICH_ESCAPE = 27;
 
 describes.realWin(
-  'amp-sidebar 1.0 version',
+  'amp-sidebar 0.2 version',
   {
     win: {
       /* window spec */
@@ -37,7 +37,7 @@ describes.realWin(
     amp: {
       /* amp spec */
       runtimeOn: false,
-      extensions: ['amp-sidebar:1.0'],
+      extensions: ['amp-sidebar:0.2'],
     },
   },
   env => {
@@ -245,7 +245,7 @@ describes.realWin(
         await impl.mutateElement(() => {});
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
-        expect(sidebarElement.getAttribute('role')).to.equal('menu');
+        expect(sidebarElement.getAttribute('role')).to.equal('dialog');
 
         expect(historyPushSpy).to.be.calledOnce;
         expect(historyPopSpy).to.have.not.been.called;
@@ -346,7 +346,7 @@ describes.realWin(
 
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
-        expect(sidebarElement.getAttribute('role')).to.equal('menu');
+        expect(sidebarElement.getAttribute('role')).to.equal('dialog');
         expect(doc.activeElement).to.not.equal(screenReaderCloseButton);
 
         execute(impl, 'toggle');
@@ -644,7 +644,7 @@ describes.realWin(
     });
 
     describe('amp-sidebar - toolbars in amp-sidebar', () => {
-      // Tests for amp-sidebar 1.0
+      // Tests for amp-sidebar 0.2
       it('should not create toolbars without <nav toolbar />', () => {
         return getAmpSidebar().then(sidebarElement => {
           const headerElements = doc.getElementsByTagName('header');
