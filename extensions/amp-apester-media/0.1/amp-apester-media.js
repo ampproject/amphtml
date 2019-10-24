@@ -32,7 +32,7 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {handleCompanionAds} from './monetization';
 
 import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
+import {setStyle, setStyles} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-apester-media';
@@ -98,6 +98,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.unlisteners_ = [];
     /** @private {?IntersectionObserverApi} */
     this.intersectionObserverApi_ = null;
+    /** @private {number} */
+    this.marginHeightAd_ = 10;
   }
 
   /**
@@ -293,6 +295,56 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Element}
+   */
+  constructUnitContainer_() {
+    const container = this.element.ownerDocument.createElement('div');
+    setStyles(container, {
+      position: 'relative',
+      height: `${this.height_}px`,
+    });
+    return container;
+  }
+
+  /**
+   * @param {?Element} displayAd
+   * @param {?JsonObject} videoAdObj
+   */
+  addStyleToAds_(displayAd, videoAdObj = {}) {
+    const {videoAd} = videoAdObj;
+    const mySetStyle = elm => {
+      if (elm) {
+        setStyle(elm, 'margin', `${this.marginHeightAd_}px auto`);
+      }
+    };
+    mySetStyle(displayAd);
+    mySetStyle(videoAd);
+  }
+
+  /**
+   * @param {?Element} ad
+   * @return {number}
+   */
+  getAdHeight_(ad) {
+    if (ad) {
+      const adHeight = getLengthNumeral(ad.getAttribute('height'));
+      const adHeightWithMargin = adHeight + this.marginHeightAd_ * 2;
+      return adHeightWithMargin;
+    }
+    return 0;
+  }
+
+  /**
+   * @param {?Element} displayAd
+   * @param {?JsonObject} videoAdObj
+   * @return {number}
+   */
+  calculateAdsHeight_(displayAd, videoAdObj = {}) {
+    const {videoAd} = videoAdObj;
+    return this.getAdHeight_(displayAd) + this.getAdHeight_(videoAd);
+  }
+
+  /**
    * @param {JsonObject} publisher
    */
   report3rdPartyPixel_(publisher) {
@@ -328,6 +380,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         const interactionId = media['interactionId'];
         const usePlayer = media['usePlayer'];
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
+        const unitContainer = this.constructUnitContainer_();
         const iframe = this.constructIframe_(src);
         this.intersectionObserverApi_ = new IntersectionObserverApi(
           this,
@@ -341,14 +394,17 @@ class AmpApesterMedia extends AMP.BaseElement {
         return vsync
           .mutatePromise(() => {
             const overflow = this.constructOverflow_();
-            this.element.appendChild(overflow);
-            this.element.appendChild(iframe);
+            unitContainer.appendChild(iframe);
+            iframe.appendChild(overflow);
+            this.element.appendChild(unitContainer);
           })
           .then(() => {
             return handleCompanionAds(media, this.element);
           })
-          .then(ampAd => {
-            // this.element.appendChild(ampAd);
+          .then(ads => {
+            const displayAd = ads[0];
+            const videoAdObj = ads[1];
+            this.addStyleToAds_(displayAd, videoAdObj);
             return this.loadPromise(iframe).then(() => {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {
@@ -370,7 +426,10 @@ class AmpApesterMedia extends AMP.BaseElement {
                 if (media && media['data'] && media['data']['size']) {
                   height = media['data']['size']['height'];
                 }
-                if (height != this.height_) {
+                if (displayAd || videoAdObj) {
+                  height += this.calculateAdsHeight_(displayAd, videoAdObj);
+                }
+                if (height !== this.height_) {
                   this.height_ = height;
                   if (this.random_) {
                     this./*OK*/ attemptChangeHeight(height);

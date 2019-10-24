@@ -22,7 +22,7 @@ import {getValueForExpr} from '../../../../../src/json';
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
  * @param {!JsonObject} consentObj
- * @return {Promise}
+ * @return {?JsonObject}
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
   const companionCampaignOptions = getValueForExpr(
@@ -42,7 +42,7 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
     !position ||
     position === 'floating'
   ) {
-    return Promise.resolve();
+    return;
   }
   const macros = getSrMacros(
     media,
@@ -50,14 +50,14 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
     apesterElement,
     consentObj
   );
-  const ampAd = constructCompanionSrElement(
+  const videoAd = constructCompanionSrElement(
     videoSettings['videoTag'],
     position,
     /** @type {!JsonObject} */ (macros),
     apesterElement
   );
 
-  return Promise.resolve(ampAd);
+  return {videoAd, position};
 }
 /**
  * @param {!JsonObject} video
@@ -95,18 +95,18 @@ function constructCompanionSrElement(
   ampAd.setAttribute('type', 'blade');
   ampAd.setAttribute('data-blade_player_type', 'bladex');
   ampAd.setAttribute('servingDomain', 'ssr.streamrail.net');
-  ampAd.setAttribute('width', size.width);
   ampAd.setAttribute('height', size.height);
+  ampAd.setAttribute('width', size.width);
+  ampAd.setAttribute('layout', 'responsive');
   ampAd.setAttribute('data-blade_macros', JSON.stringify(macros));
   ampAd.setAttribute('data-blade_player_id', videoTag);
   ampAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
   ampAd.classList.add('amp-apester-companion');
 
-  // const relativeElement =
-  // position === 'below' ? apesterElement.nextSibling : apesterElement;
-
+  position === 'below'
+    ? apesterElement.appendChild(ampAd)
+    : apesterElement.insertBefore(ampAd, apesterElement.firstChild);
   return ampAd;
-  // apesterElement.parentNode.insertBefore(ampAd, relativeElement);
 }
 
 /**

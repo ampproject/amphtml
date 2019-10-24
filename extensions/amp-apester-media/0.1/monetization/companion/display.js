@@ -19,6 +19,7 @@ import {getValueForExpr} from '../../../../../src/json';
 /**
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
+ * @return {?Element}
  */
 export function handleCompanionDisplay(media, apesterElement) {
   const companionOptions = getValueForExpr(
@@ -37,7 +38,7 @@ export function handleCompanionDisplay(media, apesterElement) {
     const defaultBannerSizes = [[300, 250]];
     const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
     const size = {width: bannerSizes[0][0], height: bannerSizes[0][1]};
-    constructCompanionDisplayAd(slot, size, apesterElement);
+    return constructCompanionDisplayAd(slot, size, apesterElement);
   }
 }
 
@@ -45,6 +46,7 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @param {string} slot
  * @param {{width: number, height:number}} size
  * @param {AmpElement} apesterElement
+ * @return {?ampAd}
  */
 function constructCompanionDisplayAd(slot, size, apesterElement) {
   const {width, height} = size;
@@ -54,6 +56,6 @@ function constructCompanionDisplayAd(slot, size, apesterElement) {
   ampAd.setAttribute('width', width);
   ampAd.setAttribute('height', height);
   ampAd.classList.add('amp-apester-companion');
-
-  apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
+  apesterElement.appendChild(ampAd);
+  return ampAd;
 }
