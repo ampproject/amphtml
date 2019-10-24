@@ -171,7 +171,7 @@ AMP.getState(expr) {}
 -->
 <script type="text/plain" target="amp-script" id="webSocketDemo">
   const socket = new WebSocket('wss://websocket.example');
-  socket.onmessage = e => {
+  socket.onmessage = event => {
     AMP.setState({socketData: event.data});
   };
 </script>
