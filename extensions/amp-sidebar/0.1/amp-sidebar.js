@@ -106,6 +106,11 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.isSafari_ = platform.isSafari();
 
+    /** @private @const {boolean} */
+    this.disableHistory_ =
+      isExperimentOn(this.win, 'amp-sidebar-disable-history-ios') &&
+      this.isIos_;
+
     /** @private {number} */
     this.historyId_ = -1;
 
@@ -434,11 +439,14 @@ export class AmpSidebar extends AMP.BaseElement {
     this.opened_ = true;
     this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForOpening_(trust));
-    this.getHistory_()
-      .push(() => this.close_(trust))
-      .then(historyId => {
-        this.historyId_ = historyId;
-      });
+
+    if (!this.disableHistory_) {
+      this.getHistory_()
+        .push(() => this.close_(trust))
+        .then(historyId => {
+          this.historyId_ = historyId;
+        });
+    }
 
     if (openerElement) {
       this.openerElement_ = openerElement;
@@ -481,10 +489,14 @@ export class AmpSidebar extends AMP.BaseElement {
       toggle(this.element, /* display */ false);
       toggle(this.getMaskElement_(), /* display */ false);
     }
-    if (this.historyId_ != -1) {
-      this.getHistory_().pop(this.historyId_);
-      this.historyId_ = -1;
+
+    if (!this.disableHistory_) {
+      if (this.historyId_ != -1) {
+        this.getHistory_().pop(this.historyId_);
+        this.historyId_ = -1;
+      }
     }
+
     if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
       // As of iOS 12.2, focus() causes undesired scrolling in UIWebViews.
       if (!this.isIosWebView_()) {
