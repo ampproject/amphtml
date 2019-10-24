@@ -315,4 +315,8 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/24168',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
+  {
+    id: 'amp-sidebar-disable-history-ios',
+
+  },
 ];
