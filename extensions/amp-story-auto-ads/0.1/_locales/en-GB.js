@@ -66,7 +66,7 @@ const strings = {
     string: 'Read',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Shop',
+    string: 'Shop Now',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
     string: 'Show',
