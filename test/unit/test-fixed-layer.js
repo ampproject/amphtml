@@ -123,7 +123,7 @@ describes.sandboxed('FixedLayer', {}, () => {
                 ]),
               ],
             },
-            // Uknown rule.
+            // Unknown rule.
             {
               type: 3,
             },
