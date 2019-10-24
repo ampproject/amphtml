@@ -622,7 +622,11 @@ export class AmpForm {
     if (error && error.message) {
       detail['error'] = error.message;
     }
-    return this.handleSubmitFailure_(error, detail);
+    return this.handleSubmitFailure_(
+      error,
+      detail,
+      /** opt_getSsrEventResponse */ false
+    );
   }
 
   /**
@@ -741,7 +745,11 @@ export class AmpForm {
           if (error && error.message) {
             detail['error'] = error.message;
           }
-          return this.handleSubmitFailure_(error, detail);
+          return this.handleSubmitFailure_(
+            error,
+            detail,
+            /** opt_getSsrEventResponse */ false
+          );
         }
       );
   }
@@ -780,10 +788,17 @@ export class AmpForm {
       const status = init['status'];
       if (status >= 300) {
         /** HTTP status codes of 300+ mean redirects and errors. */
-        return this.handleSubmitFailure_(status, response);
+        return this.handleSubmitFailure_(
+          status,
+          response,
+          /** opt_getSsrEventResponse */ true
+        );
       }
     }
-    return this.handleSubmitSuccess_(tryResolve(() => response));
+    return this.handleSubmitSuccess_(
+      tryResolve(() => response),
+      /** opt_getSsrEventResponse */ true
+    );
   }
 
   /**
@@ -909,7 +924,10 @@ export class AmpForm {
    */
   handleXhrSubmitSuccess_(response) {
     const json = /** @type {!Promise<!JsonObject>} */ (response.json());
-    return this.handleSubmitSuccess_(json).then(() => {
+    return this.handleSubmitSuccess_(
+      json,
+      /** opt_getSsrEventResponse */ false
+    ).then(() => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
       this.maybeHandleRedirect_(response);
     });
@@ -917,16 +935,21 @@ export class AmpForm {
 
   /**
    * Transition the form to the submit success state.
+   * If opt_getSsrEventResponse is true, exposes the response.body in
+   * the SUBMIT_SUCCESS event; otherwise exposes the resolved jsonPromise.
    * @param {!Promise<!JsonObject>} jsonPromise
+   * @param {?boolean} opt_getSsrEventResponse
    * @return {!Promise}
    * @private visible for testing
    */
-  handleSubmitSuccess_(jsonPromise) {
+  handleSubmitSuccess_(jsonPromise, opt_getSsrEventResponse) {
     return jsonPromise.then(
       json => {
+        // HTTP response payload returned by the amp-form endpoint from SSR
+        const eventResponse = opt_getSsrEventResponse ? json['body'] : json;
         this.setState_(FormState.SUBMIT_SUCCESS);
         this.renderTemplate_(json || {}).then(() => {
-          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
+          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, eventResponse);
           this.dirtinessHandler_.onSubmitSuccess();
         });
       },
@@ -951,24 +974,33 @@ export class AmpForm {
     }
     return promise.then(responseJson => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
-      this.handleSubmitFailure_(e, responseJson);
+      this.handleSubmitFailure_(
+        e,
+        responseJson,
+        /** opt_getSsrEventResponse */ false
+      );
       this.maybeHandleRedirect_(e.response);
     });
   }
 
   /**
    * Transition the form the the submit error state.
+   * If opt_getSsrEventResponse is true, exposes the response.body in
+   * the SUBMIT_ERROR event; otherwise exposes the provided json.
    * @param {*} error
    * @param {!JsonObject} json
+   * @param {?boolean} opt_getSsrEventResponse
    * @return {!Promise}
    * @private
    */
-  handleSubmitFailure_(error, json) {
+  handleSubmitFailure_(error, json, opt_getSsrEventResponse) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
+        // HTTP response payload returned by the amp-form endpoint from SSR
+        const eventResponse = opt_getSsrEventResponse ? json['body'] : json;
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, eventResponse);
         this.dirtinessHandler_.onSubmitError();
       });
     });
