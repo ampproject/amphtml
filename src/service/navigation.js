@@ -572,7 +572,7 @@ export class Navigation {
       ) {
         dev().info(
           TAG,
-          'Removing query string before navigation:',
+          'Removing iframe query string before navigation:',
           location.search
         );
         const original = location.href;
@@ -580,8 +580,17 @@ export class Navigation {
         win.history.replaceState(null, '', noQuery);
 
         const restoreQuery = () => {
-          dev().info(TAG, 'Restored URL with query string:', original);
-          win.history.replaceState(null, '', original);
+          if (location.href == noQuery) {
+            dev().info(TAG, 'Restored iframe URL with query string:', original);
+            win.history.replaceState(null, '', original);
+          } else {
+            dev().error(
+              TAG,
+              'Unexpected iframe URL change:',
+              location.href,
+              noQuery
+            );
+          }
         };
 
         // For blank_, restore query params after the new page opens.
