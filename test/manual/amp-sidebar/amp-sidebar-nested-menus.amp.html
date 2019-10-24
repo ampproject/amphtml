@@ -6,7 +6,7 @@
   <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-selector/index.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-1.0.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.2.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
   <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
@@ -48,25 +48,25 @@
   <amp-sidebar id="sidebar1" layout="nodisplay" side="left">
     <amp-list layout="fill" src="/list/ecommerce-nested-menu" items="." single-item>
       <template type="amp-mustache">
-        <amp-drilldown layout="fill">
+        <amp-nested-menu layout="fill">
           <p>nested menu options:</p>
 
           <div>
-            <button amp-drilldown-submenu-open>drilldowns</button>
-            <div amp-drilldown-submenu>
+            <button amp-nested-submenu-open>drilldowns</button>
+            <div amp-nested-submenu>
               <div class="container">
-              <button amp-drilldown-submenu-close>back to main</button>
+              <button amp-nested-submenu-close>back to main</button>
               {{#menu}}
               <section>
-                <button amp-drilldown-submenu-open>{{title}}</button>
-                <div amp-drilldown-submenu>
-                  <button amp-drilldown-submenu-close>back to categories</button>
+                <button amp-nested-submenu-open>{{title}}</button>
+                <div amp-nested-submenu>
+                  <button amp-nested-submenu-close>back to categories</button>
                   <amp-img src="{{image}}" layout="responsive" width="10" height="3"></amp-img>
                   {{#content}}
                   <section>
-                    <button amp-drilldown-submenu-open>{{title}}</button>
-                    <div amp-drilldown-submenu>
-                      <button amp-drilldown-submenu-close>back to sub-categories</button>
+                    <button amp-nested-submenu-open>{{title}}</button>
+                    <div amp-nested-submenu>
+                      <button amp-nested-submenu-close>back to sub-categories</button>
                       <ul>
                         {{#content}}
                         <li><button>{{.}}</button></li>
@@ -78,16 +78,16 @@
                 </div>
               </section>
               {{/menu}}
-              <amp-img src="https://www.colburnschool.edu/wp-content/uploads/2018/02/pix-vertical-placeholder.jpg" layout="responsive" width="5" height="10"></amp-img>
+              <amp-img src="http://placeimg.com/300/600/tech" layout="responsive" width="1" height="2"></amp-img>
             </div>
             </div>
           </div>
 
           <div>
-            <button amp-drilldown-submenu-open>accordions</button>
-            <div amp-drilldown-submenu>
+            <button amp-nested-submenu-open>accordions</button>
+            <div amp-nested-submenu>
               <div class="container">
-              <button amp-drilldown-submenu-close>back to main</button>
+              <button amp-nested-submenu-close>back to main</button>
               <amp-accordion expand-single-section>
                 {{#menu}}
                 <section>
@@ -115,7 +115,7 @@
             </div>
           </div>
 
-        </amp-drilldown>
+        </amp-nested-menu>
       </template>
     </amp-list>
   </amp-sidebar>
