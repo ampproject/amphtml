@@ -45,8 +45,8 @@ async function checkLinks() {
     log(green('Starting checks...'));
   }
   filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
-  const allResults = await Promise.all(filesToCheck.map(checkLinksInFile));
-  reportFinalResults(allResults);
+  const results = await Promise.all(filesToCheck.map(checkLinksInFile));
+  reportResults(results);
 }
 
 /**
@@ -77,28 +77,31 @@ function isValidUsage() {
 }
 
 /**
- * Reports final results after having checked all markdown files.
+ * Reports results after all markdown files have been checked.
  *
- * @param {!Array<string>} allResults
+ * @param {!Array<string>} results
  */
-function reportFinalResults(allResults) {
-  const filesWithDeadLinks = allResults
+function reportResults(results) {
+  const filesWithDeadLinks = results
     .filter(result => result.containsDeadLinks)
     .map(result => result.file);
   if (filesWithDeadLinks.length > 0) {
     log(
       red('ERROR:'),
-      'Please update dead link(s) in',
-      cyan(filesWithDeadLinks.join(',')),
-      'or add them to',
-      cyan('ignorePatterns'),
-      'in',
-      cyan('build-system/tasks/check-links.js')
+      'Please update the dead link(s) in these files:',
+      cyan(filesWithDeadLinks.join(', '))
     );
     log(
-      yellow('NOTE:'),
-      'If any of the link(s) above are not meant to resolve to a real webpage,',
-      'surrounding them with backticks will exempt them from the link checker.'
+      yellow('NOTE 1:'),
+      "Valid links that don't resolve on Travis can be ignored via",
+      cyan('ignorePatterns'),
+      'in',
+      cyan('build-system/tasks/check-links.js') + '.'
+    );
+    log(
+      yellow('NOTE 2:'),
+      "Links that aren't meant to resolve to a real webpage can be exempted",
+      'from this check by surrounding them with backticks (`).'
     );
     process.exitCode = 1;
     return;
