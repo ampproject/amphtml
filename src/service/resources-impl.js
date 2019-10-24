@@ -1275,7 +1275,10 @@ export class ResourcesImpl {
 
         if (!needsMeasure) {
           for (let i = 0; i < elementsThatScrolled.length; i++) {
-            // TODO: Shadow trees? FIEs?
+            // TODO(jridgewell): Need to figure out how ShadowRoots and FIEs
+            // should behave in this model. If the ShadowRoot's host scrolls,
+            // do we need to invalidate inside the shadow or light tree? Or if
+            // the FIE's iframe parent scrolls, do we?
             if (elementsThatScrolled[i].contains(r.element)) {
               needsMeasure = true;
               break;
