@@ -6,9 +6,7 @@
   "license": "Apache-2.0",
   "main": "messaging.js",
   "types": "messaging.d.ts",
-  "keywords": [
-    "amp"
-  ],
+  "keywords": ["amp"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ampproject/amp-toolbox.git"
