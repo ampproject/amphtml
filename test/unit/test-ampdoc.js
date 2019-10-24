@@ -31,7 +31,7 @@ import {
 import {Signals} from '../../src/utils/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {setParentWindow} from '../../src/service';
-import {toggleExperiment} from '../../src/experiments';
+import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 
 describes.sandboxed('AmpDocService', {}, () => {
   afterEach(() => {
@@ -320,7 +320,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     let host, shadowRoot, content;
 
     beforeEach(() => {
-      toggleExperiment(window, 'ampdoc-fie', true);
+      toggleAmpdocFieForTesting(window, true);
       service = new AmpDocService(window, /* isSingleDoc */ true);
       content = document.createElement('amp-img');
       host = document.createElement('div');
@@ -337,7 +337,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     });
 
     afterEach(() => {
-      toggleExperiment(window, 'ampdoc-fie', false);
+      toggleAmpdocFieForTesting(window, false);
       if (host.parentNode) {
         host.parentNode.removeChild(host);
       }

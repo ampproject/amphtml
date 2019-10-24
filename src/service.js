@@ -22,7 +22,7 @@
 
 import {Deferred} from './utils/promise';
 import {dev, devAssert} from './log';
-import {isExperimentOn} from './experiments';
+import {isInAmpdocFieExperiment} from './ampdoc-fie';
 import {toWin} from './types';
 
 /**
@@ -85,7 +85,7 @@ export function getExistingServiceForDocInEmbedScope(element, id) {
   const topWin = getTopWindow(win);
   // First, try to resolve via local embed window (if applicable).
   const isEmbed = win != topWin;
-  const ampdocFieExperimentOn = isExperimentOn(topWin, 'ampdoc-fie');
+  const ampdocFieExperimentOn = isInAmpdocFieExperiment(topWin);
   if (isEmbed && !ampdocFieExperimentOn) {
     if (isServiceRegistered(win, id)) {
       return getServiceInternal(win, id);
@@ -116,7 +116,7 @@ export function installServiceInEmbedScope(embedWin, id, service) {
     'Service override has already been installed: %s',
     id
   );
-  const ampdocFieExperimentOn = isExperimentOn(topWin, 'ampdoc-fie');
+  const ampdocFieExperimentOn = isInAmpdocFieExperiment(topWin);
   if (ampdocFieExperimentOn) {
     const ampdoc = getAmpdoc(embedWin.document);
     registerServiceInternal(

@@ -27,7 +27,7 @@ import {dev, devAssert} from '../log';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {isExperimentOn} from '../experiments';
+import {isInAmpdocFieExperiment} from '../ampdoc-fie';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
 import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
@@ -88,7 +88,7 @@ export class AmpDocService {
     }
 
     /** @private {boolean} */
-    this.ampdocFieExperimentOn_ = isExperimentOn(win, 'ampdoc-fie');
+    this.ampdocFieExperimentOn_ = isInAmpdocFieExperiment(win);
 
     /** @private {boolean} */
     this.mightHaveShadowRoots_ = !isSingleDoc;
