@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Viqeo video player.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -54,11 +55,12 @@ The `width` and `height` attributes determine the aspect ratio of the Viqeo embe
 
 ```html
 <amp-viqeo-player
-    data-profileid="184"
-    data-videoid="b51b70cdbb06248f4438"
-    width="640"
-    height="360"
-    layout="responsive">
+  data-profileid="184"
+  data-videoid="b51b70cdbb06248f4438"
+  width="640"
+  height="360"
+  layout="responsive"
+>
 </amp-viqeo-player>
 ```
 

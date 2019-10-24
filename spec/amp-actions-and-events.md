@@ -73,13 +73,11 @@ You can listen to multiple events on an element by separating the events with a 
 
 Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
 
-
 ## Multiple actions for one event
 
 You can execute multiple actions in sequence for the same event by separating the actions with a comma ','.
 
 Example: `on="tap:target1.actionA,target2.actionB"`
-
 
 ## Globally-defined events and actions
 
@@ -97,11 +95,13 @@ For example, the following is possible in AMP:
 
 <button on="tap:warning-message.hide">Cool, thanks!</button>
 ```
+
 {% endcall %}
 
 ## Element-specific events
 
-### * - all elements
+### \* - all elements
+
 <table>
   <tr>
     <th>Event</th>
@@ -114,6 +114,7 @@ For example, the following is possible in AMP:
 </table>
 
 ### Input elements
+
 <table>
   <tr>
     <th width="20%">Event</th>
@@ -167,6 +168,7 @@ event.value</pre>
 </table>
 
 ### amp-carousel[type="slides"]
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -182,6 +184,7 @@ event.index</pre></td>
 </table>
 
 ### amp-lightbox
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -201,6 +204,7 @@ event.index</pre></td>
 </table>
 
 ### amp-list
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -215,6 +219,7 @@ event.index</pre></td>
 </table>
 
 ### amp-selector
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -229,10 +234,12 @@ event.targetOption
 
 // Array of "option" attribute values of all selected elements.
 event.selectedOptions</pre></td>
+
   </tr>
 </table>
 
 ### amp-sidebar
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -252,6 +259,7 @@ event.selectedOptions</pre></td>
 </table>
 
 ### amp-state
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -266,6 +274,7 @@ event.selectedOptions</pre></td>
 </table>
 
 ### amp-video, amp-youtube
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -285,6 +294,7 @@ event.selectedOptions</pre></td>
 </table>
 
 ### form
+
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -320,10 +330,10 @@ event.response</pre></td>
   </tr>
 </table>
 
-
 ## Element-specific actions
 
-### * (all elements)
+### \* (all elements)
+
 <table>
   <tr>
     <th width="40%">Action</th>
@@ -369,6 +379,7 @@ event.response</pre></td>
 </table>
 
 ### amp-audio
+
 <table>
   <tr>
     <th width="20%">Action</th>
@@ -385,6 +396,7 @@ event.response</pre></td>
 </table>
 
 ### amp-bodymovin-animation
+
 <table>
   <tr>
     <th>Action</th>
@@ -413,6 +425,7 @@ event.response</pre></td>
 </table>
 
 ### amp-carousel[type="slides"]
+
 <table>
   <tr>
     <th>Action</th>
@@ -429,6 +442,7 @@ event.response</pre></td>
 </table>
 
 ### amp-image-lightbox
+
 <table>
   <tr>
     <th width="40%">Action</th>
@@ -441,6 +455,7 @@ event.response</pre></td>
 </table>
 
 ### amp-lightbox
+
 <table>
   <tr>
     <th>Action</th>
@@ -457,6 +472,7 @@ event.response</pre></td>
 </table>
 
 ### amp-list
+
 <table>
   <tr>
     <th>Action</th>
@@ -469,6 +485,7 @@ event.response</pre></td>
 </table>
 
 ### amp-live-list
+
 <table>
   <tr>
     <th>Action</th>
@@ -481,6 +498,7 @@ event.response</pre></td>
 </table>
 
 ### amp-selector
+
 <table>
   <tr>
     <th>Action</th>
@@ -501,6 +519,7 @@ event.response</pre></td>
 </table>
 
 ### amp-sidebar
+
 <table>
   <tr>
     <th>Action</th>
@@ -521,6 +540,7 @@ event.response</pre></td>
 </table>
 
 ### amp-state
+
 <table>
   <tr>
     <th>Action</th>
@@ -533,6 +553,7 @@ event.response</pre></td>
 </table>
 
 ### amp-user-notification
+
 <table>
   <tr>
     <th>Action</th>
@@ -576,6 +597,7 @@ The actions below are supported in the following AMP video elements: `amp-video`
 </table>
 
 ### form
+
 <table>
   <tr>
     <th>Action</th>
@@ -654,6 +676,6 @@ The `amp-access` target is provided by the [amp-access](https://amp.dev/document
 The `amp-access` target is special for these reasons:
 
 1.  You can't give an arbitrary ID to this target. The target is always `amp-access`.
-2. The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configuration](https://amp.dev/documentation/components/amp-access#configuration).
+2.  The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configuration](https://amp.dev/documentation/components/amp-access#configuration).
 
 See [details](https://amp.dev/documentation/components/amp-access#login-link) about using the `amp-access` target.

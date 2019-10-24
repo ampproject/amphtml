@@ -34,7 +34,11 @@ document.
 Before AMP templates can be used, the templating system has to be declared in the document's `head`:
 
 ```html
-<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+<script
+  async
+  custom-template="amp-mustache"
+  src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+></script>
 ```
 
 The `script` tag must be declared as `async` and with the `custom-template` attribute.
@@ -59,6 +63,7 @@ The `type` attribute must reference the template's type as defined in the `custo
   Hello {{world}}!
 </template>
 ```
+
 or like this:
 
 ```html
@@ -74,8 +79,6 @@ tables or server-side rendering.
 </script>
 ```
 
-
-
 The use of the template is up to a specific AMP element that wants to use it. An AMP element would typically
 look for a template within its children or using a template's ID. For instance, an `amp-carousel` element
 may (in the future) use a CORS endpoint and an AMP template to load and render a dynamic set of slides.
@@ -89,6 +92,6 @@ a specific AMP element how `templateElement` and `data` are provided.
 
 Here's a list of available templates:
 
-| Template  | Description |
-| --------- | ----------- |
+| Template                                                     | Description                                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | [`amp-mustache`](../extensions/amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |

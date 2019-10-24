@@ -36,31 +36,40 @@ limitations under the License.
 </table>
 
 #### Examples
+
 Example - Simple Ad
+
 ```html
-<amp-ad width=300 height=200
-    type="cloudflare"
-    data-cf-network="my-ad-network"
-    src="/ad.html?v=6">
+<amp-ad
+  width="300"
+  height="200"
+  type="cloudflare"
+  data-cf-network="my-ad-network"
+  src="/ad.html?v=6"
+>
 </amp-ad>
 ```
 
 Example - Ad with additional parameters and replacements
+
 ```html
-<amp-ad width=300 height=200
-    type="cloudflare"
-    data-cf-network="my-ad-network"
-    data-slot="slot_1"
-    data-format="panoramic"
-    src="/ad.html?v=6&w=SLOT_WIDTH">
+<amp-ad
+  width="300"
+  height="200"
+  type="cloudflare"
+  data-cf-network="my-ad-network"
+  data-slot="slot_1"
+  data-format="panoramic"
+  src="/ad.html?v=6&w=SLOT_WIDTH"
+>
 </amp-ad>
 ```
 
 #### Attributes
 
-* data-cf-network - ad network to use (contact Cloudflare to integrate new ones)
-* data-cf-a4a - disables Fast-Fetch Amp4Ads when false (still displays ad)
-* src - Path to the ad creative on a Ad network (can use the following replacement tokens)
-  * SLOT_WIDTH - width of the target slot
-  * SLOT_HEIGHT - height of the target slot
-* data-<param> - additional query parameters to the URL
+- data-cf-network - ad network to use (contact Cloudflare to integrate new ones)
+- data-cf-a4a - disables Fast-Fetch Amp4Ads when false (still displays ad)
+- src - Path to the ad creative on a Ad network (can use the following replacement tokens)
+  - SLOT_WIDTH - width of the target slot
+  - SLOT_HEIGHT - height of the target slot
+- data-<param> - additional query parameters to the URL

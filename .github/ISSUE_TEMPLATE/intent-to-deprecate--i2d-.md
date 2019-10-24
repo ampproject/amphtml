@@ -16,26 +16,31 @@ If your feature can be removed immediately after deprecation, you can use this i
 -->
 
 ## Summary
+
 <!--
 Provide a brief description of the feature you are planning on deprecating and a concrete plan for deprecating the feature.  Provide the detailed removal plan if the feature is ready for immediate removal after deprecation, otherwise provide an initial plan for removing the deprecated feature and file a separate Intent-to-Remove issue after this issue is approved.
 -->
 
 ## Motivation
+
 <!--
 Explain why this feature needs to be deprecated and eventually removed.
 -->
 
 ## Impact on existing users
+
 <!--
 How seriously would the removal of this feature break sites that currently use AMP?  If available what is the estimated usage of this feature?
 -->
 
 ## Alternative implementation suggestion for developers using AMP
+
 <!--
 When the feature you are deprecating is removed, how would developers using AMP achieve similar functionality?
 -->
 
 ## Additional context
+
 <!--
 Add any other information that may help people understand your I2D.
 -->
@@ -43,4 +48,5 @@ Add any other information that may help people understand your I2D.
 <!--
 Add anyone to this cc line that you want to notify about this I2D.
 -->
+
 /cc @ampproject/wg-approvers

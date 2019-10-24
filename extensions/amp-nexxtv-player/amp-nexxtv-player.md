@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a media stream from the nexxOMNIA platform.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -44,16 +45,18 @@ With the responsive layout, the width and height from the example should yield c
 
 ```html
 <amp-nexxtv-player
-    data-mediaid="71QQG852413DU7J"
-    data-client="761"
-    data-streamtype="video"
-    data-seek-to="2"
-    data-mode="static"
-    data-origin="https://embed.nexx.cloud/"
-    data-disable-ads="1"
-    data-streaming-filter="nxp-bitrate-2500"
-    layout="responsive"
-    width="480" height="270"></amp-nexxtv-player>
+  data-mediaid="71QQG852413DU7J"
+  data-client="761"
+  data-streamtype="video"
+  data-seek-to="2"
+  data-mode="static"
+  data-origin="https://embed.nexx.cloud/"
+  data-disable-ads="1"
+  data-streaming-filter="nxp-bitrate-2500"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-nexxtv-player>
 ```
 
 ## Attributes

@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Displays elements in a full-viewport “lightbox” modal.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -55,15 +56,16 @@ Pressing the escape key on the keyboard closes the lightbox. Alternatively, sett
 ```html
 <button on="tap:quote-lb">See Quote</button>
 <amp-lightbox id="quote-lb" layout="nodisplay">
-    <blockquote>"Don't talk to me about JavaScript fatigue" - Horse JS</blockquote>
-    <button on="tap:quote-lb.close">Nice!</button>
+  <blockquote>
+    "Don't talk to me about JavaScript fatigue" - Horse JS
+  </blockquote>
+  <button on="tap:quote-lb.close">Nice!</button>
 </amp-lightbox>
 ```
 
 {% call callout('Read on', type='read') %}
 For showing images in a lightbox, there's also the [`<amp-image-lightbox>`](https://amp.dev/documentation/components/amp-image-lightbox) component.
 {% endcall %}
-
 
 ## Attributes
 
@@ -108,6 +110,7 @@ required and valid for use with <a href="#a4a">AMPHTML Ads</a>.</td>
 You can style the `amp-lightbox` with standard CSS.
 
 ## Actions
+
 The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 <table>
@@ -162,9 +165,9 @@ In the examples below, we demonstrate how the transition looks for an AMPHTML ad
     layout="fixed"
     width="360" height="480"
     src="https://github.com/ampproject/amphtml/raw/master/spec/img/lightbox-ad-fie.gif" >
-  <noscript>
-    <img alt="lightbox ad in friendly iframe" src="../../spec/img/lightbox-ad-fie.gif" />
-  </noscript>
+<noscript>
+<img alt="lightbox ad in friendly iframe" src="../../spec/img/lightbox-ad-fie.gif" />
+</noscript>
 </amp-img>
 
 ##### On third-party iframes (e.g., outside the AMP cache)
@@ -173,9 +176,9 @@ In the examples below, we demonstrate how the transition looks for an AMPHTML ad
     layout="fixed"
     width="360" height="480"
     src="https://github.com/ampproject/amphtml/raw/master/spec/img/lightbox-ad-3p.gif" >
-  <noscript>
-    <img alt="lightbox ad in 3p iframe" src="../../spec/img/lightbox-ad-3p.gif" />
-  </noscript>
+<noscript>
+<img alt="lightbox ad in 3p iframe" src="../../spec/img/lightbox-ad-3p.gif" />
+</noscript>
 </amp-img>
 
 ## Validation

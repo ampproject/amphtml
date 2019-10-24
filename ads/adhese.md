@@ -23,30 +23,35 @@ Serves ads from [Adhese](https://www.adhese.com).
 ### Basic setup
 
 ```html
-<amp-ad width="300" height="250"
-    type="adhese"
-    data-location="_sdk_amp_"
-    data-position=""
-    data-format="amprectangle"
-    data-account="demo"
-    data-request-type="ad">
+<amp-ad
+  width="300"
+  height="250"
+  type="adhese"
+  data-location="_sdk_amp_"
+  data-position=""
+  data-format="amprectangle"
+  data-account="demo"
+  data-request-type="ad"
+>
 </amp-ad>
 ```
 
 ### With additional parameters
 
 ```html
-<amp-ad width="300" height="250"
-    type="adhese"
-    data-location="_sdk_amp_"
-    data-position=""
-    data-format="amprectangle"
-    data-account="demo"
-    data-request-type="ad"
-    json='{"targeting":{"br": ["sport", "info"],"dt": ["desktop"]}}'>
+<amp-ad
+  width="300"
+  height="250"
+  type="adhese"
+  data-location="_sdk_amp_"
+  data-position=""
+  data-format="amprectangle"
+  data-account="demo"
+  data-request-type="ad"
+  json='{"targeting":{"br": ["sport", "info"],"dt": ["desktop"]}}'
+>
 </amp-ad>
 ```
-
 
 ## Configuration
 
@@ -60,7 +65,7 @@ For details on the configuration semantics, see the [Adhese website](https://www
 - `data-position`
 - `data-format`
 
-### Optional parameter 
+### Optional parameter
 
 The following optional parameter is supported via the 'json' attribute:
 

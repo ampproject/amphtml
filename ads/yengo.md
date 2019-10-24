@@ -19,10 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="yengo"
-    data-block-id="152431">
-</amp-ad>
+<amp-ad width="300" height="250" type="yengo" data-block-id="152431"> </amp-ad>
 ```
 
 ## Configuration

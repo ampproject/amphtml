@@ -29,11 +29,12 @@ limitations under the License.
   data-area="areaname"
   data-site="sitename"
   data-tags='{"CAT":"SYLVESTER","POSITION":"TOP"}'
-  >
+>
 </amp-ad>
 ```
 
 ## Configuration
+
 For configuration details, please email support@sas.com.
 
 ### Required parameters

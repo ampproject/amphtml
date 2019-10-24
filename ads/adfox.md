@@ -19,10 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="360" height="400"
-    type="adfox"
-    data-owner-id="208087"
-    data-adfox-params='{"pt": "b","p1": "bsoji","p2": "feil","pct": "a","pfc": "bbhfo","pfb": "cwrtv"}'>
+<amp-ad
+  width="360"
+  height="400"
+  type="adfox"
+  data-owner-id="208087"
+  data-adfox-params='{"pt": "b","p1": "bsoji","p2": "feil","pct": "a","pfc": "bbhfo","pfb": "cwrtv"}'
+>
 </amp-ad>
 ```
 

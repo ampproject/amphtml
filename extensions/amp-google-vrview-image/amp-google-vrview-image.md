@@ -7,6 +7,7 @@ teaser:
   text: Displays a VR image.
 experimental: true
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -63,9 +64,12 @@ VR view supports mono and stereo 360 images. Note:
 
 ```html
 <amp-google-vrview-image
-    src="https://storage.googleapis.com/vrview/examples/coral.jpg"
-    stereo
-    width="400" height="300" layout=responsive>
+  src="https://storage.googleapis.com/vrview/examples/coral.jpg"
+  stereo
+  width="400"
+  height="300"
+  layout="responsive"
+>
 </amp-google-vrview-image>
 ```
 

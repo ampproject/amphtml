@@ -18,13 +18,15 @@ limitations under the License.
 
 ## Example
 
-
 ```html
-  <amp-ad width="50" height="66"
-      type="forkmedia"
-      data-product="inread"
-      data-html-access-allowed>
-  </amp-ad>
+<amp-ad
+  width="50"
+  height="66"
+  type="forkmedia"
+  data-product="inread"
+  data-html-access-allowed
+>
+</amp-ad>
 ```
 
 ## Configuration
@@ -35,4 +37,3 @@ For details on the configuration semantics, please contact Fork Media.
 
 - `data-product`
 - `data-html-access-allowed`
-

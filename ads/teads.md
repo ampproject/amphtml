@@ -19,10 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="1"
-    type="teads"
-    data-pid="42266"
-    layout="responsive">
+<amp-ad
+  width="300"
+  height="1"
+  type="teads"
+  data-pid="42266"
+  layout="responsive"
+>
 </amp-ad>
 ```
 

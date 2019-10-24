@@ -20,8 +20,8 @@ The AMP JS library is distributed via its major version only. The major version 
 
 Each AMP extension is versioned independently. Publishers of AMP documents can choose the major and minor version of an extension; they cannot choose the patch version.
 
-- Extension minor versions may be changed for breaking behavior changes *without* breaking API changes.
-- Extension major versions *must* be changed for any breaking API changes.
+- Extension minor versions may be changed for breaking behavior changes _without_ breaking API changes.
+- Extension major versions _must_ be changed for any breaking API changes.
 
 ## Breaking changes
 
@@ -52,6 +52,7 @@ In rare cases, it may be necessary to remove an existing feature or API. Such br
 Deprecations must be publicly discussed and provide significant user benefit that justifies additional work for page developers.
 
 The process for deprecations is similar to the [process for significant changes](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), but has some unique requirements:
+
 - [File](https://github.com/ampproject/amphtml/issues/new/choose) an [Intent-to-Deprecate (I2D) issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20DEPRECATE) describing the feature that is being deprecated, the motivation for deprecating it, and the plan for deprecating/removing the feature.
   - If you intend to remove the feature immediately after the warning period described below you may make your Intent-to-Deprecate issue an Intent-to-Deprecate-and-Remove issue (by modifying the title and adding the [INTENT TO REMOVE label](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20REMOVE) to it).
   - Otherwise if you do not have a concrete timeline for removal you may file a separate [Intent-to-Remove (I2R) issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20REMOVE) to track removal of the feature.
@@ -62,8 +63,6 @@ The process for deprecations is similar to the [process for significant changes]
 - Start warning for pages that might break via the developer console.
 - Give developers at least 6 weeks after your deprecation warning is in production to apply changes before removing the feature.
 - If you did not include removal in your I2D, file a separate Intent-to-Remove (I2R) when you are ready to remove the deprecated feature.
-
-
 
 ### Version deprecations
 

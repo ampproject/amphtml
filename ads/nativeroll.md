@@ -2,10 +2,7 @@
 
 **Example**
 
-`<amp-ad width="640" height="480"
-      type="nativeroll"
-      data-gid= "5d10df709762b6b31b8b461e">
-</amp-ad>`
+`<amp-ad width="640" height="480" type="nativeroll" data-gid= "5d10df709762b6b31b8b461e"> </amp-ad>`
 
 **Configuration**
 

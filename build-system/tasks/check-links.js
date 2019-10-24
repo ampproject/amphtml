@@ -27,6 +27,8 @@ const {isTravisBuild} = require('../common/travis');
 const {linkCheckGlobs} = require('../test-configs/config');
 const {maybeUpdatePackages} = require('./update-packages');
 
+const LARGE_REFACTOR_THRESHOLD = 20;
+
 let filesIntroducedByPr;
 
 /**
@@ -39,6 +41,10 @@ async function checkLinks() {
   }
   const filesToCheck = getFilesToCheck(linkCheckGlobs);
   if (filesToCheck.length == 0) {
+    return;
+  }
+  if (filesToCheck.length >= LARGE_REFACTOR_THRESHOLD) {
+    log(green('INFO:'), 'Skipping check because this is a large refactor.');
     return;
   }
   if (!isTravisBuild()) {

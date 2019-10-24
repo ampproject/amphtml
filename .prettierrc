@@ -9,6 +9,10 @@
       "options": {"parser": "json5"}
     },
     {
+      "files": "*.md",
+      "options": {"parser": "markdown"}
+    },
+    {
       "files": [".eslintrc", ".prettierrc", ".renovaterc.json", "*.json"],
       "options": {"parser": "json"}
     },

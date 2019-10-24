@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Installs a ServiceWorker.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -59,7 +60,8 @@ Example:
 <amp-install-serviceworker
   src="https://www.your-domain.com/serviceworker.js"
   data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
-  layout="nodisplay">
+  layout="nodisplay"
+>
 </amp-install-serviceworker>
 ```
 
@@ -99,7 +101,6 @@ Example:
    </tr>
 </table>
 
-
 ## Shell URL rewrite
 
 When service workers are not available or not yet active, it's possible to configure URL rewrite to direct navigations to the shell. This way, for example, AMP Runtime can redirect navigation to the "shell" instead of
@@ -111,26 +112,31 @@ The URL rewrite is configured using `data-no-service-worker-fallback-url-match` 
 attributes as following:
 
 ```html
-<amp-install-serviceworker layout="nodisplay"
-    src="https://www.your-domain.com/serviceworker.js"
-    data-no-service-worker-fallback-url-match=".*\.amp\.html"
-    data-no-service-worker-fallback-shell-url="https://pub.com/shell">
+<amp-install-serviceworker
+  layout="nodisplay"
+  src="https://www.your-domain.com/serviceworker.js"
+  data-no-service-worker-fallback-url-match=".*\.amp\.html"
+  data-no-service-worker-fallback-shell-url="https://pub.com/shell"
+>
 </amp-install-serviceworker>
 ```
 
 Where:
- - `data-no-service-worker-fallback-shell-url` specifies the link for AMP+PWA shell. It's required to be on the source origin as the AMP document.
- - `data-no-service-worker-fallback-url-match` is a JavaScript regular expression that describes how to match “in-shell” links vs non-in-shell links.
- - Both of these attributes must be present to trigger URL rewrite.
+
+- `data-no-service-worker-fallback-shell-url` specifies the link for AMP+PWA shell. It's required to be on the source origin as the AMP document.
+- `data-no-service-worker-fallback-url-match` is a JavaScript regular expression that describes how to match “in-shell” links vs non-in-shell links.
+- Both of these attributes must be present to trigger URL rewrite.
 
 URL rewrite works as following:
- 1. The document provides a configuration that explains how to navigate within the shell.
- 2. AMP Runtime tries to install the service worker.
- 3. If service worker is not installed (not installable), as a fallback AMP Runtime will preload the shell page via a hidden iframe.
- 4. AMP Runtime will intercept the “in-shell” navigations (which will often be AMP-to-AMP navigations) and if the service worker is not running, rewrite the navigation URL to proceed to the “shell”-based URL.
- 5. The shell will startup and run the requested navigation via its router. Typically the shell will immediately execute history.replaceState(href).
+
+1.  The document provides a configuration that explains how to navigate within the shell.
+2.  AMP Runtime tries to install the service worker.
+3.  If service worker is not installed (not installable), as a fallback AMP Runtime will preload the shell page via a hidden iframe.
+4.  AMP Runtime will intercept the “in-shell” navigations (which will often be AMP-to-AMP navigations) and if the service worker is not running, rewrite the navigation URL to proceed to the “shell”-based URL.
+5.  The shell will startup and run the requested navigation via its router. Typically the shell will immediately execute history.replaceState(href).
 
 A URL is rewritten in the form `shell-url#href={encodeURIComponent(href)}`. For example:
+
 ```text
 https://pub.com/doc.amp.html
 -->
@@ -140,7 +146,11 @@ https://pub.com/shell#href=%2Fdoc.amp.html
 Besides rewriting URLs, `amp-install-serviceworker` also will try to preload the shell. This is done by creating an iframe with `#preload` fragment:
 
 ```html
-<iframe src="https://pub.com/shell#preload" hidden sandbox="allow-scripts allow-same-origin"></iframe>
+<iframe
+  src="https://pub.com/shell#preload"
+  hidden
+  sandbox="allow-scripts allow-same-origin"
+></iframe>
 ```
 
 For the preload to be effective, of course, the shell response must have appropriate HTTP cache headers.

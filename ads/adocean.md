@@ -19,36 +19,44 @@ limitations under the License.
 ## Example
 
 ##### Single placement:
+
 ```html
-<amp-ad width="300" height="250"
-      type="adocean"
-      data-ao-id="ado-bIVMPpCJPX0.5tjQbNyrWpnws_dbbTJ1fUnGjLeSqJ3.K7"
-      data-ao-emitter="myao.adocean.pl"
-      data-block-on-consent
-      >
+<amp-ad
+  width="300"
+  height="250"
+  type="adocean"
+  data-ao-id="ado-bIVMPpCJPX0.5tjQbNyrWpnws_dbbTJ1fUnGjLeSqJ3.K7"
+  data-ao-emitter="myao.adocean.pl"
+  data-block-on-consent
+>
 </amp-ad>
 ```
 
 ##### Master-Slave:
+
 ```html
-<amp-ad width="300" height="250"
-      type="adocean"
-      data-ao-emitter="myao.adocean.pl"
-      data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
-      data-ao-id="adoceanmyaonhqnqukjtt"
-      data-ao-keys="key1,key2,key3"
-      data-block-on-consent
-      >
+<amp-ad
+  width="300"
+  height="250"
+  type="adocean"
+  data-ao-emitter="myao.adocean.pl"
+  data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
+  data-ao-id="adoceanmyaonhqnqukjtt"
+  data-ao-keys="key1,key2,key3"
+  data-block-on-consent
+>
 </amp-ad>
 
-<amp-ad width="300" height="250"
-      type="adocean"
-      data-ao-emitter="myao.adocean.pl"
-      data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
-      data-ao-id="adoceanmyaokiheeseoko"
-      data-ao-keys="key1,key2,key3"
-      data-block-on-consent
-      >
+<amp-ad
+  width="300"
+  height="250"
+  type="adocean"
+  data-ao-emitter="myao.adocean.pl"
+  data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
+  data-ao-id="adoceanmyaokiheeseoko"
+  data-ao-keys="key1,key2,key3"
+  data-block-on-consent
+>
 </amp-ad>
 ```
 
@@ -80,4 +88,3 @@ When [user consent](https://github.com/ampproject/amphtml/blob/master/extensions
 - `CONSENT_POLICY_STATE.INSUFFICIENT`: Serve a non-personalized ad to the user.
 - `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Serve a personalized ad to the user.
 - `CONSENT_POLICY_STATE.UNKNOWN`: Serve a non-personalized ad to the user.
-

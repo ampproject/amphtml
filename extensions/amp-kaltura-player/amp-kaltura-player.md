@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays the Kaltura Player as used in Kaltura's Video Platform.
 ---
+
 <!---
 Copyright 2016 Kaltura. All Rights Reserved.
 
@@ -49,13 +50,16 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 Example:
 
 ```html
- <amp-kaltura-player
-      data-uiconf="33502051"
-      data-partner="1281471"
-      data-entryid="1_3ts1ms9c"
-      data-param-streamerType = "auto"
-      layout="responsive" width="480" height="270">
-  </amp-kaltura-player>
+<amp-kaltura-player
+  data-uiconf="33502051"
+  data-partner="1281471"
+  data-entryid="1_3ts1ms9c"
+  data-param-streamerType="auto"
+  layout="responsive"
+  width="480"
+  height="270"
+>
+</amp-kaltura-player>
 ```
 
 ## Attributes
@@ -86,7 +90,6 @@ Example:
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

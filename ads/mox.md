@@ -21,12 +21,7 @@ Please visit our [website](https://mox.tv) for more information about us.
 ## Example
 
 ```html
-<amp-ad height="1"
-    type="mox"
-    data-z="1183"
-    data-w="720"
-    data-h="405">
-</amp-ad>
+<amp-ad height="1" type="mox" data-z="1183" data-w="720" data-h="405"> </amp-ad>
 ```
 
 ## Configuration

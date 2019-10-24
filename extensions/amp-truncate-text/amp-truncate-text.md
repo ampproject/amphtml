@@ -6,6 +6,7 @@ teaser:
   text: Truncates text with an ellipsis, optionally showing an overflow element.
 experimental: true
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -107,4 +108,5 @@ By default, clicking within an element that has `slot="expanded"` will collapse 
 ```
 
 ## Validation
+
 See [amp-truncate-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-truncate-text/validator-amp-truncate-text.protoascii) in the AMP validator specification.

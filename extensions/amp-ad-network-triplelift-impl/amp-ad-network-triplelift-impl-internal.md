@@ -35,16 +35,15 @@ The TripleLift ad network produces only a single ad request to `amp.3lift.com` a
 attempts to render it via the A4A fast rendering path.
 
 Like all A4A ad networks, you do not place an `<amp-ad-network-triplelift-impl>`
-tag directly on the page.  Instead, you place an `<amp-ad type="triplelift">` tag.
+tag directly on the page. Instead, you place an `<amp-ad type="triplelift">` tag.
 
 The TripleLift impl loads a creative from a JSON-formatted file containing two
-fields: `"creative"` and `"signature"`.  The `signature` field **must** be a
+fields: `"creative"` and `"signature"`. The `signature` field **must** be a
 valid signature for the text of the `creative` field.
 
 ## Attributes
 
-
-TripleLift impl  uses the same tags as `<amp-ad>`.
+TripleLift impl uses the same tags as `<amp-ad>`.
 
 <table>
   <tr>

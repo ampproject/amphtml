@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds the Facebook like button plugin.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -51,13 +52,18 @@ You can use the `amp-facebook-like` component to embed the [Facebook like button
 **Example**
 
 ```html
-<amp-facebook-like width=90 height=20
-    layout="fixed"
-    data-layout="button_count"
-    data-href="https://www.facebook.com/testesmegadivertidos/">
+<amp-facebook-like
+  width="90"
+  height="20"
+  layout="fixed"
+  data-layout="button_count"
+  data-href="https://www.facebook.com/testesmegadivertidos/"
+>
 </amp-facebook-like>
 ```
+
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-href (required)</strong></td>
@@ -105,7 +111,6 @@ If your web site or online service, or a portion of your service, is directed to
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

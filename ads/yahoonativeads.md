@@ -23,12 +23,15 @@ Yahoo Native Ads only requires a configured section code to run. Please work wit
 ### Basic
 
 ```html
-  <amp-embed width="320" height="320"
-             type="yahoonativeads"
-             data-code="192b5193-edb2-31c0-88be-4022dhca1090"
-             data-key="P55VS9SY2WQXH7TTN8ZA"
-             data-url="https://techcrunch.com">
-  </amp-embed>
+<amp-embed
+  width="320"
+  height="320"
+  type="yahoonativeads"
+  data-code="192b5193-edb2-31c0-88be-4022dhca1090"
+  data-key="P55VS9SY2WQXH7TTN8ZA"
+  data-url="https://techcrunch.com"
+>
+</amp-embed>
 ```
 
 ### Required parameters
