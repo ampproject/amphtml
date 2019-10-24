@@ -23,8 +23,7 @@ export class WindowPortEmulator {
 export class Messaging {
   static initiateHandshakeWithDocument(
     target: Window,
-    opt_token?: string,
-    opt_interval?: number
+    opt_token?: string
   ): Promise<Messaging>;
   static waitForHandshakeFromDocument(
     source: Window,

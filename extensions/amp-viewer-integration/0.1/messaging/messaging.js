@@ -89,7 +89,9 @@ export class WindowPortEmulator {
    * @param {JsonObject} data
    */
   postMessage(data) {
+    // Opaque (null) origin can only receive messages sent to "*"
     const targetOrigin = this.origin_ === 'null' ? '*' : this.origin_;
+
     this.target_./*OK*/ postMessage(data, targetOrigin);
   }
 
@@ -109,13 +111,13 @@ export class WindowPortEmulator {
 export class Messaging {
   /**
    * Performs a handshake and initializes messaging.
+   *
+   * Requires the `handshakepoll` viewer capability.
    * @param {!Window} target - window containing AMP document to perform handshake with
    * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
-   * @param {?number=} opt_interval - how often to attempt handshake (in ms)
    * @return {!Promise<!Messaging>}
    */
-  static initiateHandshakeWithDocument(target, opt_token, opt_interval) {
-    const interval = opt_interval || 1000;
+  static initiateHandshakeWithDocument(target, opt_token) {
     return new Promise(resolve => {
       const intervalRef = setInterval(() => {
         const channel = new MessageChannel();
@@ -147,14 +149,14 @@ export class Messaging {
         };
         port.addEventListener('message', listener);
         port.start();
-      }, interval);
+      }, 1000);
     });
   }
 
   /**
    * Waits for handshake from iframe and initializes messaging.
    *
-   * Requires the `handshakepoll` viewer capability.
+   * Requires the `origin` viewer parameter to be specified.
    * @param {!Window} source - the source window containing the viewer
    * @param {!Window} target - window containing AMP document to perform handshake with (usually contentWindow of iframe)
    * @param {string} origin - origin of target window (use "null" if opaque)
