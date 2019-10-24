@@ -308,19 +308,6 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
-let RRule;
-/**
- * @param {Date} unusedDt
- * @param {boolean} unusedInc
- * @return {?Date}
- */
-RRule.prototype.before = function(unusedDt, unusedInc) {};
-/**
- * @param {Date} unusedDt
- * @param {boolean} unusedInc
- * @return {?Date}
- */
-RRule.prototype.after = function(unusedDt, unusedInc) {};
 
 /**
  * @dict
