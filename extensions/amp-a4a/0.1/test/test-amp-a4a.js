@@ -67,7 +67,7 @@ import {
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {resetScheduledElementForTesting} from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
-import {toggleExperiment} from '../../../../src/experiments';
+import {toggleAmpdocFieForTesting} from '../../../../src/ampdoc-fie';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describe('amp-a4a', () => {
@@ -2081,7 +2081,7 @@ describe('amp-a4a', () => {
     it('should render correctly in ampdoc-fie mode', async () => {
       const parentWin = a4aElement.ownerDocument.defaultView;
       const ampdocService = Services.ampdocServiceFor(parentWin);
-      toggleExperiment(parentWin, 'ampdoc-fie', true);
+      toggleAmpdocFieForTesting(parentWin, true);
       updateFieModeForTesting(ampdocService, true);
       await a4a.renderAmpCreative_(metaData);
       // Verify iframe presence.
