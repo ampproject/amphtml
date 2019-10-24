@@ -1563,10 +1563,10 @@ amdefine@>=0.0.4:
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
   integrity sha1-SlKCrBZHKek2Gbz9OtFR+BfOkfU=
 
-amphtml-validator@1.0.27:
-  version "1.0.27"
-  resolved "https://registry.yarnpkg.com/amphtml-validator/-/amphtml-validator-1.0.27.tgz#51690a28d7c36aad992f318b7ee0c40993bd6213"
-  integrity sha512-BSodh6ygZlyDWy8CjTtNya/KeW5J8dcIo3RXW28rr9I5w6oo/10T70bnUplICKl7nWGss/awc7ssMVg0Ps9JNw==
+amphtml-validator@1.0.28:
+  version "1.0.28"
+  resolved "https://registry.yarnpkg.com/amphtml-validator/-/amphtml-validator-1.0.28.tgz#ae32bb0e9f75a26921b98ad8922d1b449fd2e33b"
+  integrity sha512-tnRKsOZ3St8SuaJ+pKkHmbOMkD4YMj4pKzjL0NayhcqzNsB4IwMSEhrpD6OQ+fNg+lDoo8vcdpaWSv9oOp1+Vg==
   dependencies:
     colors "1.2.5"
     commander "2.15.1"
