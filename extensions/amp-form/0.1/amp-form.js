@@ -336,6 +336,7 @@ export class AmpForm {
     } else if (invocation.method === 'clear') {
       this.handleClearAction_();
     }
+    return null;
   }
 
   /**
@@ -608,25 +609,26 @@ export class AmpForm {
           SUBMIT_TIMEOUT
         ).then(
           () => this.handlePresubmitSuccess_(trust),
-          error => this.handlePresubmitError_(error)
+          error => this.handlePresubmitError_(error, trust)
         );
       },
-      error => this.handlePresubmitError_(error)
+      error => this.handlePresubmitError_(error, trust)
     );
   }
 
   /**
-   * @private
-   * Handle form error for presubmit async calls
+   * Handle form error for presubmit async calls.
    * @param {*} error
+   * @param {!ActionTrust} trust
    * @return {Promise}
+   * @private
    */
-  handlePresubmitError_(error) {
+  handlePresubmitError_(error, trust) {
     const detail = dict();
     if (error && error.message) {
       detail['error'] = error.message;
     }
-    return this.handleSubmitFailure_(error, detail);
+    return this.handleSubmitFailure_(error, detail, trust);
   }
 
   /**
@@ -924,7 +926,9 @@ export class AmpForm {
     }
     const doc = this.form_.ownerDocument;
     // Only degrade trust across form submission in AMP4EMAIL for now.
-    return doc && isAmp4Email(doc) ? incomingTrust - 1 : incomingTrust;
+    return doc && isAmp4Email(doc)
+      ? /** @type {!ActionTrust} */ (incomingTrust - 1)
+      : incomingTrust;
   }
 
   /**

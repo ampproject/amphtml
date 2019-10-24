@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {devAssert} from './log';
+
 /**
  * Key string in an action arguments map for an unparsed object literal string.
  *
@@ -76,9 +78,10 @@ export function actionTrustToString(actionTrust) {
   switch (actionTrust) {
     case ActionTrust.LOW:
       return 'low';
-    case ActionTrust.DEFAULT:
-      return 'default';
     case ActionTrust.HIGH:
       return 'high';
+    default:
+      devAssert(actionTrust === ActionTrust.DEFAULT);
+      return 'default';
   }
 }
