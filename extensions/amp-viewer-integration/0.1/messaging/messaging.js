@@ -83,13 +83,9 @@ export class WindowPortEmulator {
    * @param {function(!Event):undefined} handler
    */
   addEventListener(eventType, handler) {
-    this.win.addEventListener('message', e => {
-      if (
-        e.origin == this.origin_ &&
-        e.source == this.target_ &&
-        e.data['app'] === APP
-      ) {
-        handler(e);
+    this.win.addEventListener('message', event => {
+      if (event.origin == this.origin_ && event.source == this.target_) {
+        handler(event);
       }
     });
   }
@@ -118,18 +114,12 @@ export class WindowPortEmulator {
 export class Messaging {
   /**
    * Performs a handshake and initializes messaging.
-   * @param {!Window} source
-   * @param {!Window} target
-   * @param {?string=} opt_token
-   * @param {?number=} opt_interval
+   * @param {!Window} target - window containing AMP document to perform handshake with
+   * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
+   * @param {?number=} opt_interval - how often to attempt handshake (in ms)
    * @return {!Promise<!Messaging>}
    */
-  static initiateHandshakeWithDocument(
-    source,
-    target,
-    opt_token,
-    opt_interval
-  ) {
+  static initiateHandshakeWithDocument(target, opt_token, opt_interval) {
     const interval = opt_interval || 1000;
     return new Promise(resolve => {
       const intervalRef = setInterval(() => {
@@ -141,13 +131,22 @@ export class Messaging {
         target./*OK*/ postMessage(pollMessage, '*', [channel.port2]);
 
         const port = channel.port1;
-        const listener = e => {
-          const data = {e};
-          if (data['app'] === APP && data['name'] === CHANNEL_OPEN_MSG) {
+        const listener = event => {
+          const message = parseMessage(event.data);
+          if (!message) {
+            return;
+          }
+          if (message.app === APP && message.name === CHANNEL_OPEN_MSG) {
             clearInterval(intervalRef);
             port.removeEventListener('message', listener);
-            const messaging = new Messaging(null, port, false, opt_token, true);
-            messaging.sendResponse_(data['requestid'], CHANNEL_OPEN_MSG, null);
+            const messaging = new Messaging(
+              null,
+              port,
+              /* opt_isWebview */ false,
+              opt_token,
+              /* opt_verifyToken */ true
+            );
+            messaging.sendResponse_(message.requestid, CHANNEL_OPEN_MSG, null);
             resolve(messaging);
           }
         };
@@ -159,25 +158,37 @@ export class Messaging {
 
   /**
    * Waits for handshake from iframe and initializes messaging.
-   * @param {!Window} source
-   * @param {!Window} target
-   * @param {string} origin
-   * @param {?string=} opt_token
+   *
+   * Requires the `handshakepoll` viewer capability.
+   * @param {!Window} source - the source window containing the viewer
+   * @param {!Window} target - window containing AMP document to perform handshake with (usually contentWindow of iframe)
+   * @param {string} origin - origin of target window (use "null" if opaque)
+   * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
    * @return {!Promise<!Messaging>}
    */
   static waitForHandshakeFromDocument(source, target, origin, opt_token) {
     return new Promise(resolve => {
-      const listener = e => {
+      const listener = event => {
+        const message = parseMessage(event.data);
+        if (!message) {
+          return;
+        }
         if (
-          e.origin == origin &&
-          (!e.source || e.source == target) &&
-          e.data['app'] === APP &&
-          e.data['name'] === CHANNEL_OPEN_MSG
+          event.origin == origin &&
+          (!event.source || event.source == target) &&
+          message.app === APP &&
+          message.name === CHANNEL_OPEN_MSG
         ) {
           source.removeEventListener('message', listener);
           const port = new WindowPortEmulator(source, origin, target);
-          const messaging = new Messaging(null, port, false, opt_token, true);
-          messaging.sendResponse_(e.data['requestid'], CHANNEL_OPEN_MSG, null);
+          const messaging = new Messaging(
+            null,
+            port,
+            /* opt_isWebview */ false,
+            opt_token,
+            /* opt_verifyToken */ true
+          );
+          messaging.sendResponse_(message.requestid, CHANNEL_OPEN_MSG, null);
           resolve(messaging);
         }
       };
@@ -287,7 +298,7 @@ export class Messaging {
    */
   handleMessage_(event) {
     const message = parseMessage(event.data);
-    if (!message) {
+    if (!message || message.app !== APP) {
       return;
     }
     if (
