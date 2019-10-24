@@ -19,19 +19,25 @@
       list-style-type: none;
       padding: 0;
     }
+    #header {
+      position: sticky;
+      z-index: 1000;
+      top: 0;
+    }
     #banner {
       background: #666;
       display: flex;
       flex-direction: row;
     }
-    #banner h2 {
+    #banner h1 {
       flex-grow: 1;
+      font-size: 1.5em;
       text-align: center;
       color: white;
     }
     .hamburger {
       padding: 10px 30px;
-      font-size: 3em;
+      font-size: 2em;
       background: none;
       border: 0;
       display: none;
@@ -44,7 +50,6 @@
       margin-bottom: 10px;
     }
     #megamenu nav > * {
-      margin: 0;
       background: #ccc;
       padding-left: 20px;
     }
@@ -94,9 +99,9 @@
   </style>
 </head>
 <body>
-  <header>
+  <header id="header">
     <div id="banner">
-      <h2>AMP Responsive Menu Example</h2>
+      <h1>AMP Responsive Menu</h1>
       <button
           class="hamburger"
           tabindex="0"

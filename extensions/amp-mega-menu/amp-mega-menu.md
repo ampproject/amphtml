@@ -48,7 +48,7 @@ limitations under the License.
 </table>
 
 ## Overview
-`<amp-mega-menu>` provides a way to organize and display large collections of navigational content at the top of an AMP page. The component is intended primarily for desktop and tablet use cases.
+`<amp-mega-menu>` provides a way to organize and display large collections of navigational content at the top of an AMP page. The component is intended primarily for desktop and tablet use cases, and it can be used jointly with `<amp-sidebar>` to create a responsive menu.
 
 ## Behavior
 
@@ -163,7 +163,7 @@ Note that the `<nav>` element must be parented by either the `<amp-mega-menu>` c
 
 ### Responsive design with `<amp-sidebar>`
 
-For viewports that may be too narrow to display the menu items in one row, we recommend placing the menu inside an [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar/) instead and responsively switch between the two components via media query.
+For viewports that may be too narrow to display the menu items in one row, we recommend using an [amp-sidebar](https://amp.dev/documentation/components/amp-sidebar/) instead and responsively switch between the two components via media query.
 
 The following sample demonstrates how to hide the mega menu when viewport width is less than `960px` and instead show a button to open the sidebar.
 
@@ -201,6 +201,34 @@ The following sample demonstrates how to hide the mega menu when viewport width 
   ...
 </body>
 ```
+
+## Accessibility
+
+`<amp-mega-menu>` assigns the following ARIA attributes on the children of each expandable menu item; these attributes are used by screen reader technology to associate a button with its togglable container as well as to trap focus inside the container once opened.
+
+```html
+<li>
+  <button aria-expanded aria-controls="unique_id" aria-haspopup="dialog">
+    ...
+  </button>
+  <div role="dialog" aria-modal id="unique_id">
+    ...
+  </div>
+</li>
+```
+
+In addition, to assist screen reader users, an invisible but tabbable close button is added to the start and end of each `role=dialog` element.
+
+Keyboard support for the component includes:
+- Left/right arrow keys to navigate between menu items when focused;
+- Enter/Space keys to trigger an active menu item button;
+- Esc key to collapse the mega menu;
+
+Open on hover is not currently supported by `<amp-mega-menu>` due to UX and accessibility concerns. In particular, we want to avoid scenarios where:
+- A user moves cursor over a button that toggles the dropdown menu and clicks, which immediately closes the dropdown after opening it on hover.
+- A user wants to click on an element below a closed dropdown but accidentally opens it on hover and clicks inside the dropdown instead.
+
+More information on this topic can be found in the [Accessibility Developer Guide](https://www.accessibility-developer-guide.com/examples/widgets/dropdown/).
 
 ## Attributes
 
