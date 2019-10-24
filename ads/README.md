@@ -7,23 +7,24 @@ This guide provides details for ad networks to create an `amp-ad` integration fo
 - [Overview](#overview)
 - [Constraints](#constraints)
 - [The iframe sandbox](#the-iframe-sandbox)
-    - [Available information](#available-information)
-    - [Available APIs](#available-apis)
-    - [Exceptions to available APIs and information](#exceptions-to-available-apis-and-information)
-    - [Ad viewability](#ad-viewability)
-    - [Ad resizing](#ad-resizing)
-    - [Support for multi-size ad requests](#support-for-multi-size-ad-requests)
-    - [Optimizing ad performance](#optimizing-ad-performance)
-    - [Ad markup](#ad-markup)
-    - [1st party cookies](#1st-party-cookies)
+  - [Available information](#available-information)
+  - [Available APIs](#available-apis)
+  - [Exceptions to available APIs and information](#exceptions-to-available-apis-and-information)
+  - [Ad viewability](#ad-viewability)
+  - [Ad resizing](#ad-resizing)
+  - [Support for multi-size ad requests](#support-for-multi-size-ad-requests)
+  - [Optimizing ad performance](#optimizing-ad-performance)
+  - [Ad markup](#ad-markup)
+  - [1st party cookies](#1st-party-cookies)
 - [Developer guidelines for a pull request](#developer-guidelines-for-a-pull-request)
-    - [Files to change](#files-to-change)
-    - [Verify your examples](#verify-your-examples)
-    - [Tests](#tests)
-    - [Other tips](#other-tips)
+  - [Files to change](#files-to-change)
+  - [Verify your examples](#verify-your-examples)
+  - [Tests](#tests)
+  - [Other tips](#other-tips)
 - [Developer announcements for ads related API changes ](#developer-announcements-for-ads-related-API-changes)
 
 ## Overview
+
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. AMP aims to support a large subset of existing ads with little or no changes to how the integrations work. AMP's long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information.
 
 If you are an ad technology provider looking to integrate with AMP HTML, please also check the [general 3P inclusion guidelines](../3p/README.md#ads) and [ad service integration guidelines](./_integration-guide.md).
@@ -97,7 +98,6 @@ More information can be provided in a similar fashion if needed (Please file an 
   <dd>MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.</dd>
 </dl>
 
-
 ### Exceptions to available APIs and information
 
 Depending on the ad server / provider, some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. AMP is working on a creative-level API that will enable this information to be accessible in such iframed cases, and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
@@ -110,7 +110,7 @@ Ads can call the special `window.context.observeIntersection(changesCallback)`AP
 
 The API allows you to specify a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
 
-*Example usage*:
+_Example usage_:
 
 ```javascript
 window.context.observeIntersection(function(changes) {
@@ -122,7 +122,7 @@ window.context.observeIntersection(function(changes) {
 
 `window.context.observeIntersection` returns a function which when called will stop listening for intersection messages.
 
-*Example usage*
+_Example usage_
 
 ```javascript
 var unlisten = window.context.observeIntersection(function(changes) {
@@ -166,16 +166,22 @@ Ads can observe whether resize request were successful using the `window.context
 
 The `opt_hasOverflow` is an optional boolean value, ads can specify `opt_hasOverflow` to `true` to let AMP runtime know that the ad context can handle overflow when attempt to resize is denied, and not to throw warning in such cases.
 
-*Example:*
+_Example:_
 
 ```javascript
-var unlisten = window.context.onResizeSuccess(function(requestedHeight, requestedWidth) {
+var unlisten = window.context.onResizeSuccess(function(
+  requestedHeight,
+  requestedWidth
+) {
   // Hide any overflow elements that were shown.
   // The requestedHeight and requestedWidth arguments may be used to
   // check which size change the request corresponds to.
 });
 
-var unlisten = window.context.onResizeDenied(function(requestedHeight, requestedWidth) {
+var unlisten = window.context.onResizeDenied(function(
+  requestedHeight,
+  requestedWidth
+) {
   // Show the overflow element and send a window.context.requestResize(width, height)
   // when the overflow element is clicked.
   // You may use the requestedHeight and requestedWidth to check which
@@ -193,7 +199,7 @@ Here are some factors that affect whether the resize will be executed:
 
 You can specify an `overflow` element that is only shown when a resize request is declined. When the user clicks the overflow element, the resize passes the "interaction" rule and will resize.
 
-*Example: Using an `overflow` element*
+_Example: Using an `overflow` element_
 
 ```html
 <amp-ad type="...">
@@ -210,7 +216,7 @@ To support multi-size ad requests, AMP accepts an optional `data` param to `wind
 
 In case the resize is not successful, AMP will horizontally and vertically center align the creative within the space initially reserved for the creative.
 
-*Example:*
+_Example:_
 
 ```javascript
 // Use the optional param to specify the width and height to request resize.
@@ -220,6 +226,7 @@ window.context.renderStart({width: 200, height: 100});
 Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height, opt_hasOverflow)` API. Details in [Ad Resizing](#ad-resizing).
 
 ### amp-consent integration
+
 If [amp-consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md) extension is used on the page, `data-block-on-consent` attribute
 can be added to `amp-ad` element to respect the corresponding `amp-consent` policy.
 In that case, the `amp-ad` element will be blocked from loading until the consent accepted.
@@ -248,7 +255,7 @@ AMP runtime provides the following `window.context` APIs for ad network to acces
 </dl>
 
 After overriding the default consent handling behavior, don't forget to update your publisher facing
- documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/master/ads/_ping_.md#user-consent-integration).
+documentation with the new behaviors on user's consent choices. You can refer to our documentation example [here](https://github.com/ampproject/amphtml/blob/master/ads/_ping_.md#user-consent-integration).
 
 ### Optimizing ad performance
 
@@ -260,39 +267,43 @@ The `computeInMasterFrame` function is designed to make it easy to perform a tas
 
 #### Preconnect and prefetch
 
-Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
+Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [\_config.js](_config.js).
 
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
 
 ### Ad markup
-Ads are loaded using the `<amp-ad>` tag containing the specified `type`  for the ad netowkr, and name value pairs of configuration.
+
+Ads are loaded using the `<amp-ad>` tag containing the specified `type` for the ad netowkr, and name value pairs of configuration.
 
 This is an example for the A9 network:
 
 ```html
-<amp-ad width="300" height="250"
-    type="a9"
-    data-aax_size="300x250"
-    data-aax_pubname="test123"
-    data-aax_src="302">
+<amp-ad
+  width="300"
+  height="250"
+  type="a9"
+  data-aax_size="300x250"
+  data-aax_pubname="test123"
+  data-aax_src="302"
+>
 </amp-ad>
 ```
 
 and another for DoubleClick:
 
 ```html
-<amp-ad width="320" height="50"
-    type="doubleclick"
-    json="{…}">
-</amp-ad>
+<amp-ad width="320" height="50" type="doubleclick" json="{…}"> </amp-ad>
 ```
 
 For ad networks that support loading via a single script tag, this form is supported:
 
 ```html
-<amp-ad width=300 height=250
-    type="adtech"
-    src="https://adserver.adtechus.com/addyn/3.0/5280.1/2274008/0/-1/ADTECH;size=300x250;key=plumber;alias=careerbear-ros-middle1;loc=300;;target=_blank;grp=27980912;misc=3767074">
+<amp-ad
+  width="300"
+  height="250"
+  type="adtech"
+  src="https://adserver.adtechus.com/addyn/3.0/5280.1/2274008/0/-1/ADTECH;size=300x250;key=plumber;alias=careerbear-ros-middle1;loc=300;;target=_blank;grp=27980912;misc=3767074"
+>
 </amp-ad>
 ```
 
