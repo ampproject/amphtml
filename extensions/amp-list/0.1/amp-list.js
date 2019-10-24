@@ -608,7 +608,7 @@ export class AmpList extends AMP.BaseElement {
             'maxItems': this.element.getAttribute('max-items'),
           },
         });
-        return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+        return this.ssrTemplateHelper_.ssr(
           this.element,
           request,
           /* opt_templates */ null,
@@ -693,7 +693,7 @@ export class AmpList extends AMP.BaseElement {
     };
     const isSSR = this.ssrTemplateHelper_.isSupported();
     let renderPromise = this.ssrTemplateHelper_
-      .renderTemplate(this.element, current.data)
+      .applySsrOrCsrTemplate(this.element, current.data)
       .then(result => this.updateBindings_(result, current.append))
       .then(elements => this.render_(elements, current.append));
     if (!isSSR) {
