@@ -15,6 +15,7 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
+import {tryDecodeUriComponent} from '../src/url';
 
 /**
  * @param {!Window} global
@@ -24,26 +25,25 @@ export function videonow(global, data) {
   const mandatoryAttributes = ['pid', 'width', 'height'];
   const optionalAttributes = ['kind', 'src'];
 
-  let customTag = null;
-  const gn = global && global.name;
-  if (gn) {
-    const p = JSON.parse(gn);
-    const href =
+  let customTag = '';
+  if (global && global.name) {
+    const p = JSON.parse(global.name);
+    if (
       p &&
       p.attributes &&
       p.attributes._context &&
       p.attributes._context.location &&
-      p.attributes._context.location.href;
-
-    if (href) {
+      p.attributes._context.location.href
+    ) {
+      const {href} = p.attributes._context.location;
       const vnDataStorageKey = 'videonow-config';
       const logLevelParsed = /[?&]vn_debug\b(?:=(\d+))?/.exec(href);
-      const vnModuleParsed = /[?&]vn_module=(.*?)($|&)/.exec(href);
-      const customTagParsed = /[?&]vn_init_module=(.*?)($|&)/.exec(href);
+      const vnModuleParsed = /vn_module=([^&]*)/.exec(href);
+      const customTagParsed = /vn_init_module=([^&]*)/.exec(href);
 
       const logLevel = (logLevelParsed && logLevelParsed[1]) || null;
       const vnModule = (vnModuleParsed && vnModuleParsed[1]) || null;
-      customTag = (customTagParsed && customTagParsed[1]) || null;
+      customTag = (customTagParsed && customTagParsed[1]) || '';
 
       if (logLevel !== null && global.localStorage) {
         const data = JSON.parse(
@@ -67,8 +67,8 @@ export function videonow(global, data) {
 
   // production version by default
   let script =
-    (customTag && decodeURIComponent(customTag)) ||
-    (data.src && decodeURIComponent(data.src)) ||
+    (customTag && tryDecodeUriComponent(customTag)) ||
+    (data.src && tryDecodeUriComponent(data.src)) ||
     'https://cdn.videonow.ru/vn_init_module.js';
 
   script = addParam(script, 'amp', 1);
