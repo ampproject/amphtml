@@ -143,8 +143,6 @@ export class ResourcesImpl {
     this.relayoutAll_ = true;
 
     /**
-     * TODO(jridgewell): relayoutTop should be replaced with parent layer
-     * dirtying.
      * @private {number}
      */
     this.relayoutTop_ = -1;
@@ -260,7 +258,7 @@ export class ResourcesImpl {
 
     if (isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')) {
       /** @private @const */
-      this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 10);
+      this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 250);
 
       listen(this.win.document, 'scroll', this.throttledScroll_, {
         capture: true,
@@ -846,9 +844,7 @@ export class ResourcesImpl {
     ) {
       // This signal mainly signifies that most of elements have been measured
       // by now. This is mostly used to avoid measuring too many elements
-      // individually. This will be superceeded by layers API, e.g.
-      // "layer measured".
-      // May not be called in shadow mode.
+      // individually. May not be called in shadow mode.
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
     }
 
@@ -911,7 +907,6 @@ export class ResourcesImpl {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_) ||
       now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2;
 
-    // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
       dev().fine(
         TAG_,
