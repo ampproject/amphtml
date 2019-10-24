@@ -92,6 +92,8 @@ export class SsrTemplateHelper {
   }
 
   /**
+   * Render provided data for the template in the given element.
+   * If SSR is supported, data is assumed to be from ssr() above.
    * @param {!Element} element
    * @param {(?JsonObject|string|undefined|!Array)} data
    * @return {!Promise}
