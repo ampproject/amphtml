@@ -364,9 +364,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       },
     ].forEach((testCase, testNum) => {
       it(`should adjust slot CSS after expanding width #${testNum}`, () => {
-        impl.parameterSize = testCase.isMultiSizeResponse
-          ? '320x50,200x50'
-          : '200x50';
+        if (testCase.isMultiSizeResponse) {
+          impl.parameterSize = '320x50,200x50';
+          impl.isFluidPrimaryRequest_ = true;
+        } else {
+          impl.paramterSize = '200x50';
+        }
         sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
           impl.element.style.width = `${width}px`;
           return {
