@@ -36,7 +36,7 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getExperimentBranch, isExperimentOn} from './experiments';
+import {getExperimentBranch} from './experiments';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -44,6 +44,7 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
+import {isInAmpdocFieExperiment} from './ampdoc-fie';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -142,7 +143,7 @@ export function installFriendlyIframeEmbed(
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
-  const ampdocFieExperimentOn = isExperimentOn(win, 'ampdoc-fie');
+  const ampdocFieExperimentOn = isInAmpdocFieExperiment(win);
   /** @const {?./service/ampdoc-impl.AmpDocService} */
   const ampdocService = ampdocFieExperimentOn
     ? Services.ampdocServiceFor(win)
