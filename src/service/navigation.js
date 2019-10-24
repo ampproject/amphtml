@@ -31,7 +31,6 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isExperimentOn} from '../experiments';
-import {removeAmpJsParamsFromUrl} from '../url';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
