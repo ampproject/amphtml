@@ -72,6 +72,11 @@ import {
 } from './sra-utils';
 import {WindowInterface} from '../../../src/window-interface';
 import {
+  assertDoesNotContainDisplay,
+  setImportantStyles,
+  setStyles,
+} from '../../../src/style';
+import {
   createElementWithAttributes,
   isRTL,
   removeElement,
@@ -102,7 +107,6 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {setImportantStyles, setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -1278,41 +1282,41 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     ) {
       return;
     }
+    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
     const isRtl = isRTL(this.win.document);
     const dirStr = isRtl ? 'Right' : 'Left';
-    // Guaranteed to be set after exiting if/else.
-    let /** ?number */ newMargin = null;
-    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
-    if (newWidth <= parentWidth) {
-      // Must center creative within its parent container
-      const parentPadding = parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
-      const parentBorder =
-        parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
-      const whitespace = (this.flexibleAdSlotData_.parentWidth - newWidth) / 2;
-      newMargin = whitespace - parentPadding - parentBorder;
-    } else {
-      // Must center creative within the viewport
-      const viewportWidth = this.getViewport().getRect().width;
-      const pageLayoutBox = this.element.getPageLayoutBox();
-      const whitespace = (viewportWidth - newWidth) / 2;
-      if (isRtl) {
-        newMargin = pageLayoutBox.right + whitespace - viewportWidth;
+    const /** !Object<string, string> */ style = {'z-index': '11'};
+    // Compute offset margins if the slot is not centered by default.
+    if (parentStyle.textAlign != 'center') {
+      const getMarginStr = marginNum => `${Math.round(marginNum)}px`;
+      if (newWidth <= parentWidth) {
+        // Must center creative within its parent container
+        const parentPadding =
+          parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
+        const parentBorder =
+          parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
+        const whitespace =
+          (this.flexibleAdSlotData_.parentWidth - newWidth) / 2;
+        style[isRtl ? 'margin-right' : 'margin-left'] = getMarginStr(
+          whitespace - parentPadding - parentBorder
+        );
       } else {
-        newMargin = -(pageLayoutBox.left - whitespace);
+        // Must center creative within the viewport
+        const viewportWidth = this.getViewport().getRect().width;
+        const pageLayoutBox = this.element.getPageLayoutBox();
+        const whitespace = (viewportWidth - newWidth) / 2;
+        if (isRtl) {
+          style['margin-right'] = getMarginStr(
+            pageLayoutBox.right + whitespace - viewportWidth
+          );
+        } else {
+          style['margin-left'] = getMarginStr(
+            -(pageLayoutBox.left - whitespace)
+          );
+        }
       }
     }
-    // setStyles cannot have computed style names, so we must do this by cases.
-    if (isRtl) {
-      setStyles(this.element, {
-        'z-index': '11',
-        'margin-right': `${Math.round(newMargin)}px`,
-      });
-    } else {
-      setStyles(this.element, {
-        'z-index': '11',
-        'margin-left': `${Math.round(newMargin)}px`,
-      });
-    }
+    setStyles(this.element, assertDoesNotContainDisplay(style));
   }
 
   /** @override */
