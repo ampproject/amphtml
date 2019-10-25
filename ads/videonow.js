@@ -34,12 +34,12 @@ export function videonow(global, data) {
     const p = parseJson(global.name);
     if (
       p &&
-      p.attributes &&
-      p.attributes._context &&
-      p.attributes._context.location &&
-      p.attributes._context.location.href
+      p['attributes'] &&
+      p['attributes']['_context'] &&
+      p['attributes']['_context']['location'] &&
+      p['attributes']['_context']['location']['href']
     ) {
-      const {href} = p.attributes._context.location;
+      const {href} = p['attributes']['_context']['location'];
       const logLevelParsed = /[?&]vn_debug\b(?:=(\d+))?/.exec(href);
       const vnModuleParsed = /vn_module=([^&]*)/.exec(href);
       const customTagParsed = /vn_init_module=([^&]*)/.exec(href);
