@@ -26,6 +26,9 @@ export function videonow(global, data) {
   const optionalAttributes = ['kind', 'src'];
 
   let customTag = '';
+  let logLevel = null;
+  let vnModule = '';
+
   if (global && global.name) {
     const p = JSON.parse(global.name);
     if (
@@ -36,29 +39,13 @@ export function videonow(global, data) {
       p.attributes._context.location.href
     ) {
       const {href} = p.attributes._context.location;
-      const vnDataStorageKey = 'videonow-config';
       const logLevelParsed = /[?&]vn_debug\b(?:=(\d+))?/.exec(href);
       const vnModuleParsed = /vn_module=([^&]*)/.exec(href);
       const customTagParsed = /vn_init_module=([^&]*)/.exec(href);
 
-      const logLevel = (logLevelParsed && logLevelParsed[1]) || null;
-      const vnModule = (vnModuleParsed && vnModuleParsed[1]) || null;
+      logLevel = (logLevelParsed && logLevelParsed[1]) || null;
+      vnModule = (vnModuleParsed && vnModuleParsed[1]) || '';
       customTag = (customTagParsed && customTagParsed[1]) || '';
-
-      if (logLevel !== null && global.localStorage) {
-        const data = JSON.parse(
-          global.localStorage.getItem(vnDataStorageKey) || '{}'
-        );
-        data['logLevel'] = logLevel;
-        global.localStorage.setItem(vnDataStorageKey, JSON.stringify(data));
-      }
-      if (vnModule && global.sessionStorage) {
-        const data = JSON.parse(
-          global.sessionStorage.getItem(vnDataStorageKey) || '{}'
-        );
-        data['vnModule'] = vnModule;
-        global.sessionStorage.setItem(vnDataStorageKey, JSON.stringify(data));
-      }
     }
   }
   validateData(data, mandatoryAttributes, optionalAttributes);
@@ -73,6 +60,12 @@ export function videonow(global, data) {
 
   script = addParam(script, 'amp', 1);
   script = addParam(script, 'profileId', profileId);
+  if (logLevel !== null) {
+    script = addParam(script, 'vn_debug', String(logLevel));
+  }
+  if (vnModule) {
+    script = addParam(script, 'vn_module', vnModule);
+  }
 
   loadScript(global, script);
 }
