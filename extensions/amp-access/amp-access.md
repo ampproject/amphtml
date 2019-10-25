@@ -278,7 +278,7 @@ When configuring the URLs for various endpoints, the Publisher can use substitut
 
 Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
 
-```text
+```http
 https://pub.com/access?
    rid=READER_ID
   &url=CANONICAL_URL
@@ -369,7 +369,7 @@ This endpoint produces the authorization response that can be used in the conten
 
 The request format is:
 
-```text
+```http
 https://publisher.com/amp-access.json?
    rid=READER_ID
   &url=SOURCE_URL
@@ -453,7 +453,7 @@ The publisher may choose to use the pingback:
 
 The request format is:
 
-```text
+```http
 https://publisher.com/amp-pingback?
    rid=READER_ID
   &url=SOURCE_URL
@@ -488,7 +488,7 @@ Login Page is simply a normal web page with no special constraints, other than i
 
 The request format is:
 
-```text
+```http
 https://publisher.com/amp-login.html?
    rid=READER_ID
   &url=SOURCE_URL

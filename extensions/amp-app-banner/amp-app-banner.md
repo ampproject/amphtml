@@ -65,7 +65,7 @@ android-app://${appId}/${protocol}/${host}${pathname}
 
 ### App manifest example
 
-```java
+```xml
 <activity
     android:name="com.example.android.GizmosActivity"
     android:label="@string/title_gizmos" >

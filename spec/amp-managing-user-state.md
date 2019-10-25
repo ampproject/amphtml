@@ -196,7 +196,7 @@ Once you’ve set up an identifier, you can now incorporate it in analytics ping
 
 The specific implementation will depend on your desired configuration, but generally you’ll be looking to send pings (requests) to your analytics server, which include useful data within the URL of the request itself. Here’s an example, which also indicates how you’d include your cookie value inside of the request:
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&user_id=$publisher_origin_identifier
 ```
 
@@ -308,7 +308,7 @@ Our mapping table will associate AMP Client ID values that are seen in the analy
 
 Immediately after determining that you were unsuccessful in reading the publisher origin identifier, check if the AMP Client ID contained within the analytics ping is already used in a mapping. To do this, first consult the incoming amp-analytics request to get the Client ID value. For example, from this request:
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&user_id=$amp_client_id
 ```
 
@@ -418,7 +418,7 @@ For passing multiple query parameters through `data-amp-addparams` have those `&
 
 By taking these steps, the Client ID is available to the target server and/or as a URL parameter on the page the user lands on after the link click or form submission (the **destination context**). The name (or “key”) will be `ref_id` because that’s how we’ve defined it in the above implementations and will have an associated value equal to the Client ID. For instance, by following the link (`<a>` tag) defined above, the user will navigate to this URL:
 
-```text
+```http
 https://example.com/step2.html?ref_id=$amp_client_id
 ```
 
@@ -457,13 +457,13 @@ To process on the landing page, the approach will vary depending on whether that
 
 _Updates to AMP page:_ Use the Query Parameter substitution feature in your amp-analytics configuration to obtain the `ref_id` identifier value within the URL. The Query Parameter feature takes a parameter that indicates the “key” of the desired key-value pair in the URL and returns the corresponding value. Use the Client ID feature as we have been doing to get the identifier for the AMP page context.
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&orig_user_id=${queryParam(ref_id)}&user_id=${clientId(uid)}
 ```
 
 When this gets transmitted across the network, actual values will be replaced:
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&orig_user_id=$referrer_page_identifier&user_id=$current_page_identifier
 ```
 
@@ -476,7 +476,7 @@ $current_page_identifier is $publisher_origin_id
 
 so the ping is actually:
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&orig_user_id=$amp_client_id&user_id=$publisher_origin_id
 ```
 
@@ -575,13 +575,13 @@ Values contained in a URL can be maliciously changed, malformed, or somehow othe
 
 For instance, in the steps above, we constructed the following URL, intended for the user to click on and navigate to the corresponding page:
 
-```text
+```http
 https://example.com/step2.html?orig_user_id=$amp_client_id
 ```
 
 However, it’s just as possible that the user or some attacker change this URL to be:
 
-```text
+```http
 https://example.com/step2.html?orig_user_id=$malicious_value
 ```
 

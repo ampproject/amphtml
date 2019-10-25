@@ -104,7 +104,7 @@ to run all of the validator tests in the amphtml repo.
 To create/update `validator-*.out` files that are used in the test,
 run `python build.py --update_tests`.
 
-```
+```sh
 $ amphtml-validator --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
 testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
 testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
@@ -123,14 +123,14 @@ _Note: This is for building the validator from source. If you are simply running
 
 To verify that you have the necessary prerequisites, run and verify:
 
-```
+```sh
 $ protoc --version
 libprotoc 3.5.1
 ```
 
 and
 
-```
+```sh
 $ python
 >>> import google.protobuf
 >>>

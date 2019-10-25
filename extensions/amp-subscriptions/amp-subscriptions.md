@@ -94,23 +94,23 @@ The JSON-LD and Microdata formats are supported.
 
 Using JSON-LD, the markup would look like:
 
-```
+```html
 <script type="application/ld+json">
-{
-  "@context": "http://schema.org",
-  "@type": "NewsArticle",
-  "isAccessibleForFree": false,
-  "publisher": {
-    "@type": "Organization",
-    "name": "The Norcal Tribune"
-  },
-  "hasPart": {...},
-  "isPartOf": {
-    "@type": ["CreativeWork", "Product"],
-    "name" : "The Norcal Tribune",
-    "productID": "norcal_tribune.com:basic"
+  {
+    "@context": "http://schema.org",
+    "@type": "NewsArticle",
+    "isAccessibleForFree": false,
+    "publisher": {
+      "@type": "Organization",
+      "name": "The Norcal Tribune"
+    },
+    "hasPart": {...},
+    "isPartOf": {
+      "@type": ["CreativeWork", "Product"],
+      "name" : "The Norcal Tribune",
+      "productID": "norcal_tribune.com:basic"
+    }
   }
-}
 </script>
 ```
 
@@ -123,12 +123,16 @@ Thus, notice that:
 
 Using Microdata, the markup could look like this:
 
-```
+```html
 <div itemscope itemtype="http://schema.org/NewsArticle">
-  <meta itemprop="isAccessibleForFree" content="false"/>
-  <div itemprop="isPartOf" itemscope itemtype="http://schema.org/CreativeWork http://schema.org/Product">
-    <meta itemprop="name" content="The Norcal Tribune"/>
-    <meta itemprop="productID" content="norcal_tribute.com:basic"/>
+  <meta itemprop="isAccessibleForFree" content="false" />
+  <div
+    itemprop="isPartOf"
+    itemscope
+    itemtype="http://schema.org/CreativeWork http://schema.org/Product"
+  >
+    <meta itemprop="name" content="The Norcal Tribune" />
+    <meta itemprop="productID" content="norcal_tribute.com:basic" />
   </div>
 </div>
 ```
@@ -146,28 +150,28 @@ The configuration is resolved as soon as `productID` and `isAccessibleForFree` a
 
 The `amp-subscriptions` extension must be configured using JSON configuration:
 
-```
+```html
 <script type="application/json" id="amp-subscriptions">
-{
-  "services": [
-    {
-      // Service 1 (local service)
+  {
+    "services": [
+      {
+        // Service 1 (local service)
+      },
+      {
+        // Service 2 (a vendor service)
+      }
+    ],
+    "score": {
+      "supportsViewer": 10,
+      "isReadyToPay": 9
     },
-    {
-      // Service 2 (a vendor service)
+    "fallbackEntitlement": {
+      "source": "fallback",
+      "granted": true,
+      "grantReason": "SUBSCRIBER/METERING",
+      "data": {...}
     }
-  ],
-  "score": {
-    "supportsViewer": 10,
-    "isReadyToPay": 9
-  },
-  "fallbackEntitlement": {
-    "source": "fallback",
-    "granted": true,
-    "grantReason": "SUBSCRIBER/METERING",
-    "data": {...}
   }
-}
 </script>
 ```
 
@@ -208,48 +212,48 @@ The "local" service is configured as following
 
 remote mode:
 
-```
+```html
 <script type="application/json" id="amp-subscriptions">
-{
-  "services": [
-    {
-      "authorizationUrl": "https://...",
-      "pingbackUrl": "https://...",
-      "actions":{
-        "login": "https://...",
-        "subscribe": "https://..."
-      }
-    },
-    ...
-  ]
-}
+  {
+    "services": [
+      {
+        "authorizationUrl": "https://...",
+        "pingbackUrl": "https://...",
+        "actions":{
+          "login": "https://...",
+          "subscribe": "https://..."
+        }
+      },
+      ...
+    ]
+  }
 </script>
 ```
 
 iframe mode:
 
-```
+```html
 <script type="application/json" id="amp-subscriptions">
-{
-  "services": [
-    {
-      "type": "iframe",
-      "iframeSrc": "https://...",
-      "iframeVars": [
-        "READER_ID",
-        "CANONICAL_URL",
-        "AMPDOC_URL",
-        "SOURCE_URL",
-        "DOCUMENT_REFERRER"
-      ],
-      "actions":{
-        "login": "https://...",
-        "subscribe": "https://..."
-      }
-    },
-    ...
-  ]
-}
+  {
+    "services": [
+      {
+        "type": "iframe",
+        "iframeSrc": "https://...",
+        "iframeVars": [
+          "READER_ID",
+          "CANONICAL_URL",
+          "AMPDOC_URL",
+          "SOURCE_URL",
+          "DOCUMENT_REFERRER"
+        ],
+        "actions":{
+          "login": "https://...",
+          "subscribe": "https://..."
+        }
+      },
+      ...
+    ]
+  }
 </script>
 ```
 
@@ -273,16 +277,16 @@ See [amp-access-iframe](../amp-access/0.1/iframe-api/README.md) for details of t
 
 The vendor service configuration must reference the service ID and can contain any additional properties allowed by the vendor service.
 
-```
+```html
 <script type="application/json" id="amp-subscriptions">
-{
-  "services": [
-    ...,
-    {
-      "serviceId": "subscribe.google.com"
-    }
-  ]
-}
+  {
+    "services": [
+      ...,
+      {
+        "serviceId": "subscribe.google.com"
+      }
+    ]
+  }
 </script>
 ```
 
@@ -294,7 +298,7 @@ Authorization is an endpoint provided by the local service and called by the AMP
 
 The Entitlement response returned by the authorization endpoint must conform to the predefined format:
 
-```
+```js
 {
   "granted": true/false,
   "grantReason": "SUBSCRIBER/METERING",
@@ -338,7 +342,7 @@ In the markup the actions can be delegated to other services for them to execute
 
 e.g. In order to ask google subscriptions to perform subscribe even when `local` service is selected:
 
-```
+```html
   <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
 ```
 
@@ -346,14 +350,14 @@ e.g. In order to ask google subscriptions to perform subscribe even when `local`
 
 In addition to delegation of the action to another service, you can also ask another service to decorate the element. Just add the attribute `subsciptions-decorate` to get the element decorated.
 
-```
-  <button
-    subscriptions-action='subscribe'
-    subscriptions-service='subscribe.google.com
-    subscriptions-decorate
-  >
-    Subscribe
-  </button>
+```html
+<button
+  subscriptions-action="subscribe"
+  subscriptions-service="subscribe.google.com"
+  subscriptions-decorate
+>
+  Subscribe
+</button>
 ```
 
 ## Showing/hiding premium and fallback content
@@ -362,7 +366,7 @@ The premium sections are shown/hidden automatically based on the authorization/e
 
 The premium content is marked up using `subscriptions-section="content"` attribute. For instance:
 
-```
+```html
 <section subscriptions-section="content">
   This content will be hidden unless the reader is authorized.
 </section>
@@ -372,7 +376,7 @@ _Important_: Do not apply `subscriptions-section="content"` to the whole page. D
 
 The fallback content is marked up using `subscriptions-section="content-not-granted"` attribute. For instance:
 
-```
+```html
 <section subscriptions-section="content-not-granted">
   You are not allowed to currently view this content.
 </section>
@@ -403,8 +407,10 @@ An action declared in the "actions" configuration can be marked up using `subscr
 
 For instance, this button will execute the "subscribe" action:
 
-```
-<button subscriptions-action="subscribe" subscriptions-display="EXPR">Subscribe now</button>
+```html
+<button subscriptions-action="subscribe" subscriptions-display="EXPR">
+  Subscribe now
+</button>
 ```
 
 By default, the actions are hidden and must be explicitly shown using the `subscriptions-display` expression.
@@ -415,16 +421,16 @@ The paywall dialogs are shown automatically based on the authorization/entitleme
 
 A dialog is marked up using the `subscriptions-dialog` and `subscriptions-display` attributes:
 
-```
+```html
 <div subscriptions-dialog subscriptions-display="EXPR">
-  This content will be shown as a dialog when "subscription-display"
-  expression matches.
+  This content will be shown as a dialog when "subscription-display" expression
+  matches.
 </div>
 ```
 
 The element on which `subscriptions-dialog` dialog is specified can also be a `<template>` element in which case it will be initially rendered before being displayed as a dialog. For instance:
 
-```
+```html
 <template type="amp-mustache" subscriptions-dialog subscriptions-display="EXPR">
   <div>
     You have {{metering.left}} articles left this month.
@@ -440,15 +446,23 @@ The `subscriptions-display` attribute uses expressions for actions and dialogs. 
 
 Values in the `data` object of an Entitlements response can be used to build expressions. In this example the values of `isLoggedIn` and `isSubscriber` are in the `data` object and are used to conditionally show UI for login and upgrading your account:
 
-```
+```html
 <section>
-  <button subscriptions-action="login" subscriptions-display="NOT data.isLoggedIn">Login</button>
+  <button
+    subscriptions-action="login"
+    subscriptions-display="NOT data.isLoggedIn"
+  >
+    Login
+  </button>
   <div subscriptions-actions subscriptions-display="data.isLoggedIn">
     <div>My Account</div>
     <div>Sign out</div>
   </div>
-  <div subscriptions-actions subscriptions-display="data.isLoggedIn AND NOT data.isSubscriber">
-    <a href='...'>Upgrade your account</a>
+  <div
+    subscriptions-actions
+    subscriptions-display="data.isLoggedIn AND NOT data.isSubscriber"
+  >
+    <a href="...">Upgrade your account</a>
   </div>
 </section>
 ```

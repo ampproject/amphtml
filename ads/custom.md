@@ -225,7 +225,7 @@ If no slot was specified, the server returns a single template rather than an ar
 The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
 Here is an example set of the relevant response headers:
 
-```
+```html
 Access-Control-Allow-Origin:https://my--ad--server-com.cdn.ampproject.org
 ```
 
