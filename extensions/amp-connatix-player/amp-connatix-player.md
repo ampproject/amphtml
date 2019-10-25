@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a cloud-hosted Connatix Player.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -45,11 +46,12 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 Example:
 
 ```html
-<amp-connatix-player 
+<amp-connatix-player
   data-player-id="03ef71d8-0941-4bff-94f2-74ca3580b497"
   layout="responsive"
   width="16"
-  height="9">
+  height="9"
+>
 </amp-connatix-player>
 ```
 
@@ -71,4 +73,5 @@ Example:
 </table>
 
 ## Validation
+
 See [amp-connatix-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-connatix-player/validator-amp-connatix-player.protoascii) in the AMP validator specification.
