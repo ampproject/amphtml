@@ -89,8 +89,8 @@ describes.repeated(
 
           ssrTemplateHelper = {
             isSupported: () => false,
-            fetchAndRenderTemplate: () => Promise.resolve(),
-            renderTemplate: sandbox.stub(),
+            ssr: () => Promise.resolve(),
+            applySsrOrCsrTemplate: sandbox.stub(),
           };
 
           list = createAmpList(element);
@@ -172,7 +172,7 @@ describes.repeated(
           } else if (opts.maxItems > 0) {
             itemsToRender = fetched[opts.expr].slice(0, opts.maxItems);
           }
-          ssrTemplateHelper.renderTemplate
+          ssrTemplateHelper.applySsrOrCsrTemplate
             .withArgs(element, itemsToRender)
             .returns(Promise.resolve(rendered));
 
@@ -559,7 +559,7 @@ describes.repeated(
               ]);
               await list.layoutCallback().then(() => rendered);
 
-              ssrTemplateHelper.renderTemplate
+              ssrTemplateHelper.applySsrOrCsrTemplate
                 .withArgs(element, newData)
                 .returns(Promise.resolve([second]));
               await list.mutatedAttributesCallback({src: newData});
@@ -692,9 +692,7 @@ describes.repeated(
             });
 
             it('should error if proxied fetch fails', () => {
-              sandbox
-                .stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
-                .returns(Promise.reject());
+              sandbox.stub(ssrTemplateHelper, 'ssr').returns(Promise.reject());
 
               listMock
                 .expects('toggleLoading')
@@ -711,7 +709,7 @@ describes.repeated(
             it('should error if proxied fetch returns invalid data', () => {
               expectAsyncConsoleError(/Expected response with format/, 1);
               sandbox
-                .stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
+                .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve(undefined));
               listMock
                 .expects('toggleLoading')
@@ -739,9 +737,9 @@ describes.repeated(
               listItem.setAttribute('role', 'item');
               listContainer.appendChild(listItem);
               sandbox
-                .stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
+                .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve({html}));
-              ssrTemplateHelper.renderTemplate.returns(
+              ssrTemplateHelper.applySsrOrCsrTemplate.returns(
                 Promise.resolve(listContainer)
               );
               listMock
@@ -753,7 +751,7 @@ describes.repeated(
                 .withExactArgs(listContainer, false)
                 .returns(Promise.resolve());
 
-              ssrTemplateHelper.renderTemplate
+              ssrTemplateHelper.applySsrOrCsrTemplate
                 .withArgs(element, html)
                 .returns(Promise.resolve(rendered));
 
@@ -775,10 +773,13 @@ describes.repeated(
                   singleItem: false,
                 }),
               });
-              expect(ssrTemplateHelper.fetchAndRenderTemplate).to.be.calledOnce;
-              expect(
-                ssrTemplateHelper.fetchAndRenderTemplate
-              ).to.be.calledWithExactly(element, request, null, attrs);
+              expect(ssrTemplateHelper.ssr).to.be.calledOnce;
+              expect(ssrTemplateHelper.ssr).to.be.calledWithExactly(
+                element,
+                request,
+                null,
+                attrs
+              );
             });
           });
 
@@ -922,7 +923,7 @@ describes.repeated(
 
               // Stub the rendering of the template.
               const itemsToRender = fetched[opts.expr];
-              ssrTemplateHelper.renderTemplate
+              ssrTemplateHelper.applySsrOrCsrTemplate
                 .withArgs(element, itemsToRender)
                 .returns(Promise.resolve(rendered));
 

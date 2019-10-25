@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.75 */
+/** Version: 0.1.22.78 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -43,6 +43,7 @@ const AnalyticsEvent = {
   IMPRESSION_CLICK_TO_SHOW_OFFERS_OR_ALREADY_SUBSCRIBED: 8,
   IMPRESSION_SUBSCRIPTION_COMPLETE: 9,
   IMPRESSION_ACCOUNT_CHANGED: 10,
+  IMPRESSION_PAGE_LOAD: 11,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -2861,118 +2862,6 @@ var activityPorts_11 = activityPorts.createAbortError;
 var activityPorts_12 = activityPorts.isAbortError;
 
 /**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Debug logger, only log message if #swg.log=1
- * @param {...*} var_args [decription]
- */
-
-/* eslint-disable */
-
-function debugLog(var_args) {
-  if (/swg.debug=1/.test(self.location.hash)) {
-    const logArgs = Array.prototype.slice.call(arguments, 0);
-    logArgs.unshift('[Subscriptions]');
-    log.apply(log, logArgs);
-  }
-}
-
-/**
- * @param  {...*} var_args [description]
- */
-function log(var_args) {
-  console.log.apply(console, arguments);
-}
-
-/**
- * Throws an error if the first argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- *
- * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
- *     not evaluate to true.
- * @param {string=} opt_message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTrueish.
- * @template T
- */
-function assert(shouldBeTrueish, opt_message, var_args) {
-  let firstElement;
-  if (!shouldBeTrueish) {
-    const message = opt_message || 'Assertion failed';
-    const splitMessage = message.split('%s');
-    const first = splitMessage.shift();
-    let formatted = first;
-    const messageArray = [];
-    pushIfNonEmpty(messageArray, first);
-    for (let i = 2; i < arguments.length; i++) {
-      const val = arguments[i];
-      if (val && val.tagName) {
-        firstElement = val;
-      }
-      const nextConstant = splitMessage.shift();
-      messageArray.push(val);
-      pushIfNonEmpty(messageArray, nextConstant.trim());
-      formatted += toString(val) + nextConstant;
-    }
-    const e = new Error(formatted);
-    e.fromAssert = true;
-    e.associatedElement = firstElement;
-    e.messageArray = messageArray;
-    throw e;
-  }
-  return shouldBeTrueish;
-}
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
-  }
-}
-
-function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return /** @type {string} */ (val);
-}
-
-var log_1 = {
-  assert,
-  debugLog,
-  log
-};
-var log_2 = log_1.assert;
-var log_3 = log_1.debugLog;
-var log_4 = log_1.log;
-
-/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3094,24 +2983,6 @@ class ActivityIframePort$1 {
    */
   onResizeRequest(callback) {
     return this.iframePort_.onResizeRequest(callback);
-  }
-
-  /**
-   * Sends a message to the host.
-   * @param {!Object} payload
-   */
-  messageDeprecated(payload) {
-    this.iframePort_.message(payload);
-    log_3('WARNING: messageDeprecated() is deprecated');
-  }
-
-  /**
-   * Registers a callback to receive messages from the host.
-   * @param {function(!Object)} callback
-   */
-  onMessageDeprecated(callback) {
-    this.callbackOriginal_ = callback;
-    log_3('WARNING: use of deprecated API onMessageDeprecated()');
   }
 
   /**
@@ -3252,6 +3123,117 @@ class ActivityPorts$1 {
     return this.activityPorts_;
   }
 }
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} opt_message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, opt_message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    const message = opt_message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
+var log_1 = {
+  assert,
+  debugLog,
+  log
+};
+var log_2 = log_1.assert;
+var log_4 = log_1.log;
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4183,7 +4165,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.75',
+    '_client': 'SwG 0.1.22.78',
   });
 }
 
@@ -5140,24 +5122,6 @@ class ActivityIframeView extends View {
     return this.portPromise_;
   }
 
-  /**
-   * @param {!Object} data
-   */
-  messageDeprecated(data) {
-    this.getPortPromise_().then(port => {
-      port.messageDeprecated(data);
-    });
-  }
-
-  /**
-   * Handles the message received by the port.
-   * @param {function(!Object<string, string|boolean>)} callback
-   */
-  onMessageDeprecated(callback) {
-    this.getPortPromise_().then(port => {
-      port.onMessageDeprecated(callback);
-    });
-  }
   /**
    * @param {!function(new: T)}  message
    * @param {function(../proto/api_messages.Message)} callback
@@ -12757,6 +12721,7 @@ class PaymentsAsyncClient {
           PayFrameHelper.postMessage({
             'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
             'clientLatencyStartMs': this.loadPaymentDataApiStartTimeMs_,
+            'buyFlowMode': this.buyFlowMode_,
           });
         })
         .catch(result => {
@@ -14689,16 +14654,6 @@ class AnalyticsService {
       request.setParams(event.additionalParameters);
     } // Ignore event.additionalParameters.  It may have data we shouldn't log.
     return request;
-  }
-
-  /**
-   * Handles the message received by the port.
-   * @param {function(!Object<string, string|boolean>)} callback
-   */
-  onMessage(callback) {
-    this.lastAction_ = this.start_().then(port => {
-      port.onMessageDeprecated(callback);
-    });
   }
 
   /**
