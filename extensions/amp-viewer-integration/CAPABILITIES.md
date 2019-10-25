@@ -26,6 +26,7 @@ Viewers can communicate their supported "capabilities" to documents through the
 | `errorReporter`        | `error`                               | Error reporter.                                                         |
 | `fragment`             | `fragment`                            | URL fragment support for the history API.                               |
 | `handshakepoll`        | `handshake-poll`                      | Mobile web handshake.                                                   |
+| `iframeScroll`         |                                       | Viewer platform supports and configures scrolling on the AMP document's iframe. |
 | `navigateTo`           | `navigateTo`                          | Support for navigating to external URLs.                                |
 | `replaceUrl`           | `getReplaceUrl`                       | Support for replacing the document URL with one provided by the viewer. |
 | `swipe`                | `touchstart`, `touchmove`, `touchend` | Forwards touch events from the document to the viewer.                  |
