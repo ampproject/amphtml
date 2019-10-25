@@ -118,6 +118,9 @@ export class ViewportImpl {
     /** @private {boolean} */
     this.scrollTracking_ = false;
 
+    /** @private {Element} */
+    this.scrollingElement_ = null;
+
     /** @private {number} */
     this.scrollCount_ = 0;
 
@@ -554,7 +557,10 @@ export class ViewportImpl {
 
   /** @override */
   getScrollingElement() {
-    return this.binding_.getScrollingElement();
+    if (this.scrollingElement_) {
+      return this.scrollingElement_;
+    }
+    return (this.scrollingElement_ = this.binding_.getScrollingElement());
   }
 
   /** @override */
