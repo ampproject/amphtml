@@ -106,21 +106,21 @@ export class Performance {
     this.ampexp_ = '';
 
     const fcpDeferred_ = new Deferred();
-    /** @private {Promise} */
+    /** @private {!Promise} */
     this.fcpPromise_ = fcpDeferred_.promise;
-    /** @private {Promise} */
+    /** @private {Function} */
     this.fcpResolve_ = fcpDeferred_.resolve;
 
     const fvrDeferred_ = new Deferred();
-    /** @private {Promise} */
+    /** @private {!Promise} */
     this.fvrPromise_ = fvrDeferred_.promise;
-    /** @private {Promise} */
+    /** @private {Function} */
     this.fvrResolve_ = fvrDeferred_.resolve;
 
     const mbvDeferred_ = new Deferred();
-    /** @private {Promise} */
+    /** @private {!Promise} */
     this.mbvPromise_ = mbvDeferred_.promise;
-    /** @private {Promise} */
+    /** @private {Function} */
     this.mbvResolve_ = mbvDeferred_.resolve;
 
     /**
@@ -845,21 +845,21 @@ export class Performance {
   }
 
   /**
-   * @return {Promise<number>}
+   * @return {!Promise<number>}
    */
   getFirstContentfulPaint() {
     return this.fcpPromise_;
   }
 
   /**
-   * @return {Promise<number>}
+   * @return {!Promise<number>}
    */
   getMakeBodyVisible() {
     return this.mbvPromise_;
   }
 
   /**
-   * @return {Promise<number>}
+   * @return {!Promise<number>}
    */
   getFirstViewportReady() {
     return this.fvrPromise_;
