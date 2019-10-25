@@ -114,7 +114,7 @@ To create your fork on GitHub and your local copy of that fork:
 
   - run the `git clone` command using the address for your remote repository (your GitHub fork):
 
-    ```
+    ```sh
     git clone git@github.com:<your username>/amphtml.git
     ```
 
@@ -130,13 +130,13 @@ As described in the previous section you have three repositories you are working
 
 The `git clone` command you ran above automatically set up one alias for you. From the local amphtml directory the git clone command created, run
 
-```
+```sh
 git remote -v
 ```
 
 and you will see
 
-```
+```sh
 origin git@github.com:<your username>/amphtml.git
 ```
 
@@ -144,7 +144,7 @@ This indicates that the alias _origin_ can be used to refer to your GitHub fork 
 
 You should also set an alias for the remote amphtml repository since you'll be referring to that in some Git commands. The convention is to use the alias _upstream_ for this repository. The address for the amphtml repository looks a lot like the address for your GitHub fork except your username is replaced by `ampproject`.
 
-```
+```sh
 git remote add upstream git@github.com:ampproject/amphtml.git
 ```
 
@@ -152,7 +152,7 @@ Now run `git remote -v` again and notice that you have set up your upstream alia
 
 Each branch of your local Git repository can track a branch of a remote repository. Right now, your local `master` branch is tracking `origin/master`, which corresponds to the `master` branch of your GitHub fork. You don't actually want this, though; the upstream `master` branch is constantly being updated, and your fork's `master` branch will rapidly become outdated. Instead, it's best to make your local `master` branch track the upstream `master` branch. You can do this like so:
 
-```
+```sh
 git fetch upstream master
 git branch -u upstream/master master
 ```
@@ -163,13 +163,13 @@ Now that you have all of the files copied locally you can actually build the cod
 
 - Install the latest LTS version of [Node.js](https://nodejs.org/) (which includes npm). If you're on Mac or Linux, an easy way to install Node.js is with `nvm`: [here](https://github.com/creationix/nvm).
 
-  ```
+  ```sh
   nvm install --lts
   ```
 
 - Install the stable version of [Yarn](https://yarnpkg.com/) (Mac and Linux: [here](https://yarnpkg.com/en/docs/install#alternatives-stable), Windows: [here](https://yarnpkg.com/lang/en/docs/install/#windows-stable))
 
-  ```
+  ```sh
   curl -o- -L https://yarnpkg.com/install.sh | bash
   ```
 
@@ -179,19 +179,19 @@ Now that you have all of the files copied locally you can actually build the cod
 
   - Note: If you are using Mac OS and have multiple versions of Java installed, make sure you are using Java 8 by adding this to `~/.bashrc`:
 
-  ```
+  ```sh
   export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
   ```
 
 - If you have a global install of [Gulp](https://gulpjs.com/), uninstall it. (Instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md). See [this article](https://medium.com/gulpjs/gulp-sips-command-line-interface-e53411d4467) for why.)
 
-  ```
+  ```sh
   yarn global remove gulp
   ```
 
 - Install the [Gulp](https://gulpjs.com/) command line tool, which will automatically use the version of `gulp` packaged with the the amphtml repository. (instructions [here](https://github.com/gulpjs/gulp/blob/v3.9.1/docs/getting-started.md))
 
-  ```
+  ```sh
   yarn global add gulp-cli
   ```
 
@@ -205,7 +205,7 @@ Now that you have all of the files copied locally you can actually build the cod
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
-```
+```sh
 gulp
 ```
 
@@ -247,7 +247,7 @@ By default you'll have a branch named _master_. You can see this if you run the 
 
 Although you could do work on the master branch, most people choose to leave the master branch unchanged and create other branches to actually do work in. Creating a branch is easy; simply run:
 
-```
+```sh
 git checkout -b <branch_name> master
 ```
 
@@ -257,13 +257,13 @@ This will move you to the new branch, which uses `master` as its start point, me
 
 Whenever you want to move to a different branch, run the checkout command:
 
-```
+```sh
 git checkout <branch_name>
 ```
 
 You can see a list of your branches and which one you're currently in by running:
 
-```
+```sh
 git branch
 ```
 
@@ -275,7 +275,7 @@ Since your local repository is just a copy of the amphtml repository it can quic
 
 In the workflow we will be using you'll go to the master branch on your local repository and pull the latest changes in from the remote amphtml repository's master branch. (Remember that you set up the alias _upstream_ to refer to the remote amphtml repository, and you set your local `master` branch to track `upstream/master`.)
 
-```
+```sh
 # make sure you are in your local repo's master branch
 git checkout master
 
@@ -287,7 +287,7 @@ If there have been any changes you'll see the details of what changed, otherwise
 
 After running that `git pull` command your local master branch has the latest files, but your other local branches won't get automatically updated. To get a local branch in sync:
 
-```
+```sh
 # go to the branch you want to sync
 git checkout <branch name>
 
@@ -319,13 +319,13 @@ You can think of a commit as a checkpoint in your branch. It's a good idea to cr
 
 Let's walk through creating a commit after editing a file. First, go to the branch you created earlier:
 
-```
+```sh
 git checkout <branch name>
 ```
 
 Edit a file in this branch using your favorite editor. After editing the file, run
 
-```
+```sh
 git status
 ```
 
@@ -333,7 +333,7 @@ and you should see the file you modified in a section that says `Changes not sta
 
 Git knows that there's a modified file, but isn't sure what you want to do with it. (In Git terms, this file is _unstaged_.) You have to tell Git that this is a change you care about by using the `git add` command.
 
-```
+```sh
 git add <filename>
 ```
 
@@ -341,7 +341,7 @@ Now run `git status` again and you'll see the file listed under a `Changes to be
 
 Since you're done with changes to that file, go ahead and create a commit:
 
-```
+```sh
 git commit -m "<a brief description of your commit>"
 ```
 
@@ -349,7 +349,7 @@ Now run `git status` again, and you'll see the message `nothing to commit` and `
 
 Note that you can optionally skip using `git add` commands and just use the `git commit -a` flag to say "add all of the modified/deleted files to this commit," e.g.
 
-```
+```sh
 git commit -a -m "<a brief description of your commit>"
 ```
 
@@ -393,13 +393,13 @@ Alternatively, you can manually fix most quality and style errors in your code b
 
 For JS files:
 
-```
+```sh
 gulp lint --local_changes --fix
 ```
 
 For non-JS files:
 
-```
+```sh
 gulp prettify --local_changes --fix
 ```
 
@@ -413,7 +413,7 @@ Note: You can automatically run critical checks before `git push` by enabling ou
 
 To run the tests that are affected by the changes on your feature branch:
 
-```
+```sh
 gulp unit --local_changes
 ```
 
@@ -425,7 +425,7 @@ If you need help with fixing failing tests, please ask on the GitHub issue you'r
 
 To avoid repeatedly waiting for Travis to run all pull-request checks, you can run them locally:
 
-```
+```sh
 gulp pr-check
 ```
 
@@ -444,13 +444,13 @@ Existing components will usually have existing tests that you can follow as an e
 
 To run tests in a single file, use `gulp unit --files=<path>`:
 
-```
+```sh
 gulp unit --files=extensions/amp-youtube/0.1/test/test-amp-youtube.js
 ```
 
 To run tests in multiple files, use `gulp unit --files=<path-1> --files=<path-2>`:
 
-```
+```sh
 gulp unit --files=extensions/amp-story/1.0/test/test-amp-story-embedded-component.js --files=extensions/amp-story/1.0/test/test-amp-story-hint.js
 ```
 
@@ -467,7 +467,7 @@ Up to this point you've been making changes in a branch on your local repository
 
 Before pushing your changes, make sure you have the latest changes in the amphtml repository on your branch by running the commands we described above:
 
-```
+```sh
 git checkout master
 git pull
 git checkout <branch name>
@@ -476,19 +476,19 @@ git merge master
 
 Now push your changes to `origin` (the alias for your GitHub fork):
 
-```
+```sh
 git push -u origin <branch name>
 ```
 
 `-u origin <branch name>` tells Git to create a remote branch with the specified name in `origin` and to make your local branch track that remote branch from now on. You only have to do this the first time you push each branch. For subsequent pushes on the same branch, you can use a shorter command:
 
-```
+```sh
 git push
 ```
 
 The changes you've made are now visible on GitHub! Go to your fork on GitHub:
 
-```
+```http
 https://github.com/<your username>/amphtml
 ```
 
@@ -496,7 +496,7 @@ If you recently pushed the branch you will see a message bar at the top that lis
 
 Instead of using that button take a look at the "Branch" dropdown on the top left. Click it and then select the branch you just pushed. This will take you to your branch on GitHub:
 
-```
+```http
 https://github.com/<your username>/amphtml/tree/<branch name>
 ```
 
@@ -515,7 +515,7 @@ Once your code is ready for a review, go to [https://github.com/ampproject/ampht
 
 On the "Open a pull request" page, you will see dropdowns at the top indicating the proposed merge. It will look something like:
 
-```
+```sh
 amproject/amphtml / master … <username>/amphtml / <branch name>
 ```
 
@@ -561,7 +561,7 @@ Creating, deleting and moving between branches in Git is cheap. Reusing branches
 
 GitHub offers a convenient "Delete branch" button on the PR page after the changes in your branch have been merged into the amphtml repository. You can click this button to delete your branch in the GitHub fork if you prefer, but you will also want to delete the branch in your local repository:
 
-```
+```sh
 # go back to the master branch
 git checkout master
 

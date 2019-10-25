@@ -169,7 +169,7 @@ AmpPublisher.biz uses FadNetwork's Fast Fetch implementation for all of their AM
 
 First, AmpPublisher's developer opens up callout-vendors.js to make sure that all of their desired vendors actually support RTC, and find:
 
-```
+```js
 /** amp-a4a/0.1/callout-vendors.js */
 vendors: {
    "vendor-a": {
@@ -190,7 +190,7 @@ All of the desired vendors are supported, thus they can use all of them.
 
 AmpPublisher now wants to check what macros they have available to use from FadNetwork's Fast Implementation, so they open up amp-ad-network-fadnetwork-impl.js and check the implementation of getCustomRealTimeConfigMacros:
 
-```
+```js
 /** amp-ad-network-fadnetwork-impl.js */
 
 export class AmpAdNetworkFadNetworkImpl extends AmpA4A {
@@ -236,7 +236,7 @@ The setup of the HTML page is now done. At runtime, the next steps happen:
 
 Real-time-config-manager parses the rtc-config from the ad slot, and uses macro substitution to construct the following 5 URLs:
 
-```text
+```http
 https://vendora.com?slot_id=1&start_time=1508779857330
 https://vendor-b.net/rtc?p_id=61393&adw=320
 https://www.vendorC.co.uk/ept
@@ -250,7 +250,7 @@ These 5 URLs are then called out to as quickly as possible in parallel. A publis
 
 The results of the 5 callouts are:
 
-```
+```js
 /** Callout 1 response https://www.AmpPublisher.biz/A */
 {"targeting": {"ages": "18-24", "g":["m", "f", "o"]}}
 

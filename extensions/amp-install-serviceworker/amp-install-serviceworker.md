@@ -137,7 +137,7 @@ URL rewrite works as following:
 
 A URL is rewritten in the form `shell-url#href={encodeURIComponent(href)}`. For example:
 
-```text
+```http
 https://pub.com/doc.amp.html
 -->
 https://pub.com/shell#href=%2Fdoc.amp.html

@@ -20,13 +20,13 @@ limitations under the License.
 
 Various AMP features allow variables to be used inside of strings and substituted with the corresponding actual values. For example, `amp-pixel` allows expressions like this:
 
-```text
+```html
 <amp-pixel src="https://foo.com/pixel?RANDOM"></amp-pixel>
 ```
 
 `RANDOM` gets resolved to a randomly generated value and AMP replaces it in the request string:
 
-```text
+```http
 https://foo.com/pixel?0.8390278471201
 ```
 
@@ -110,16 +110,25 @@ Only these variables are supported:
 
 Link substitution requires per-use opt-in as an added security measure and to affirm the intention to use variable substitution. This is done by specifying an additional attribute called `data-amp-replace` with a string value containing a space-delimited listing of the desired variables to substitute. An example is below.
 
-```text
-<a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM">Go to my site</a>
+```html
+<a
+  href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)"
+  data-amp-replace="CLIENT_ID QUERY_PARAM"
+  >Go to my site</a
+>
 ```
 
 #### Appending parameters to the href
 
 If you need to append dynamic parameters to the href, specify the parameters by using the `data-amp-addparams` attribute. Any substitution parameters that you specify in `data-amp-addparams` must also be specified in `data-amp-replace`, as in the following example
 
-```text
-<a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
+```html
+<a
+  href="https://example.com?abc=QUERY_PARAM(abc)"
+  data-amp-replace="CLIENT_ID QUERY_PARAM"
+  data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123"
+  >Go to my site</a
+>
 ```
 
 ### White listed domains for link substitution
@@ -132,8 +141,11 @@ Link substitutions are restricted and will only be fulfilled for URLs matching:
 
 To whitelist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
 
-```text
-<meta name="amp-link-variable-allowed-origin" content="https://example.com https://example.org">
+```html
+<meta
+  name="amp-link-variable-allowed-origin"
+  content="https://example.com https://example.org"
+/>
 ```
 
 ## Variables
@@ -751,7 +763,7 @@ of one ad to be seen by the provider of another ad on the page.
 
 Example:
 
-```
+```json
 "requests": {
     "sample_visibility_request": "//somewhere/imgData=${htmlAttr(img,src,decoding)}"
 },

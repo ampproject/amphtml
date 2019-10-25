@@ -349,9 +349,8 @@ Please verify your ad is fully functioning, for example, by clicking on an ad. W
 
 Please make sure your changes pass the tests:
 
-```
+```sh
 gulp unit --watch --nobuild --files=test/unit/{test-ads-config.js,test-integration.js}
-
 ```
 
 If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/test/unit/ads/test-yournetwork.js` is highly recommended.

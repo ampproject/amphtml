@@ -389,7 +389,7 @@ curl 'https://amp.dev/static/samples/json/examples.json' -H 'AMP-Same-Origin: tr
 
 The results from the command show the correct response headers (note: extra information was trimmed):
 
-```text
+```http
 HTTP/2 200
 access-control-allow-headers: Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token
 access-control-allow-credentials: true
@@ -409,7 +409,7 @@ curl 'https://amp.dev/static/samples/json/examples.json' -H 'origin: https://amp
 
 The results from the command show the correct response headers:
 
-```text
+```http
 HTTP/2 200
 access-control-allow-headers: Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token
 access-control-allow-credentials: true

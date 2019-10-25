@@ -37,14 +37,14 @@ Information entry can be passed between the AMP page and the supported AMP Viewe
 
 localStorage entry will be formatted as following
 
-```
+```js
 const entry = {
   'key': {
     'v': 'value',
     't': timestamp,
-  }
-}
-blob = btoa(JSON.stringify(entry))
+  },
+};
+blob = btoa(JSON.stringify(entry));
 ```
 
 ## Current Usage

@@ -136,7 +136,7 @@ Assuming that there is an `<amp-pan-zoom>` component with the id `pan-zoom` on t
 
 The following public CSS classes are exposed to allow customization for the zoom buttons:
 
-```
+```css
 .amp-pan-zoom-button
 .amp-pan-zoom-in-icon
 .amp-pan-zoom-out-icon
@@ -147,7 +147,7 @@ Use `.amp-pan-zoom-in-icon` to customize the icon for the zoom in button.
 Use `.amp-pan-zoom-out-icon` to customize the icon for the zoom out button.
 You can also hide these buttons entirely and create your own using the `transform` action. To hide them, just apply
 
-```
+```css
 .amp-pan-zoom-button {
   display: none;
 }
