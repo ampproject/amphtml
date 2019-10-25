@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
@@ -104,12 +105,23 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
-    /** @private {number|null} */
-    this.makeBodyVisible_ = null;
-    /** @private {number|null} */
-    this.firstContentfulPaint_ = null;
-    /** @private {number|null} */
-    this.firstViewportReady_ = null;
+    const fcpDeferred_ = new Deferred();
+    /** @private {Promise} */
+    this.fcpPromise_ = fcpDeferred_.promise;
+    /** @private {Promise} */
+    this.fcpResolve_ = fcpDeferred_.resolve;
+
+    const fvrDeferred_ = new Deferred();
+    /** @private {Promise} */
+    this.fvrPromise_ = fvrDeferred_.promise;
+    /** @private {Promise} */
+    this.fvrResolve_ = fvrDeferred_.resolve;
+
+    const mbvDeferred_ = new Deferred();
+    /** @private {Promise} */
+    this.mbvPromise_ = mbvDeferred_.promise;
+    /** @private {Promise} */
+    this.mbvResolve_ = mbvDeferred_.resolve;
 
     /**
      * How many times a layout jank metric has been ticked.
@@ -189,6 +201,9 @@ export class Performance {
           'first-input'
         );
       }
+    } else {
+      // If no Performance Observer, resolve fcp promise
+      this.fcpResolve_();
     }
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
@@ -421,6 +436,8 @@ export class Performance {
     }
 
     if (entryTypesToObserve.length === 0) {
+      // No entries to observe, so resolve promise
+      this.fcpResolve_();
       return;
     }
 
@@ -684,13 +701,13 @@ export class Performance {
     );
     switch (label) {
       case 'fcp':
-        this.firstContentfulPaint_ = storedVal;
+        this.fcpResolve_(storedVal);
         break;
       case 'pc':
-        this.firstViewportReady_ = storedVal;
+        this.fvrResolve_(storedVal);
         break;
       case 'mbv':
-        this.makeBodyVisible_ = storedVal;
+        this.mbvResolve_(storedVal);
         break;
     }
   }
@@ -828,24 +845,24 @@ export class Performance {
   }
 
   /**
-   * @return {number|null}
+   * @return {Promise<number>}
    */
   getFirstContentfulPaint() {
-    return this.firstContentfulPaint_;
+    return this.fcpPromise_;
   }
 
   /**
-   * @return {number|null}
+   * @return {Promise<number>}
    */
   getMakeBodyVisible() {
-    return this.makeBodyVisible_;
+    return this.mbvPromise_;
   }
 
   /**
-   * @return {number|null}
+   * @return {Promise<number>}
    */
   getFirstViewportReady() {
-    return this.firstViewportReady_;
+    return this.fvrPromise_;
   }
 }
 

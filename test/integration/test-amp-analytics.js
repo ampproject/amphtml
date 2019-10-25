@@ -28,7 +28,9 @@ describe('amp-analytics', function() {
         document.cookie='_cid=amp-12345';
       </script>
       <!-- put amp-analytics > 3 viewports away from viewport -->
-      <div style="height: 400vh"></div>
+      <div style="height: 400vh">
+        <p>hello</p>
+      </div>
       <amp-analytics>
         <script type="application/json">
         {
@@ -50,6 +52,9 @@ describe('amp-analytics', function() {
             "cid": "\${clientId(_cid)}",
             "loadend": "\${navTiming(loadEventEnd)}",
             "default": "\$DEFAULT( , test)",
+            "fcp": "FIRST_CONTENTFUL_PAINT",
+            "fvr": "FIRST_VIEWPORT_READY",
+            "mbv": "MAKE_BODY_VISIBLE",
             "cookie": "\${cookie(test-cookie)}"
           }
         }
@@ -74,6 +79,9 @@ describe('amp-analytics', function() {
           // cookie set via http response header when requesting
           // localhost:9876/amp4test/compose-doc
           expect(q['cookie']).to.equal('test');
+          expect(q['fcp']).to.not.be.null;
+          expect(q['fvr']).to.not.be.null;
+          expect(q['mbv']).to.not.be.null;
           expect(
             req.headers.referer,
             'should keep referrer if no referrerpolicy specified'
