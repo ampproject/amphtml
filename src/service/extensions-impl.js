@@ -560,6 +560,10 @@ export class Extensions {
     }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
+
+    // Allow error information to be collected
+    // https://github.com/ampproject/amphtml/issues/7353
+    scriptElement.setAttribute('crossorigin', 'anonymous');
     let loc = this.win.location;
     if (getMode().test && this.win.testLocation) {
       loc = this.win.testLocation;
