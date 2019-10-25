@@ -54,7 +54,8 @@ case, emails will display the `text/html` or `text/plain` part.
 
 ## Example
 
-```
+<!-- prettier-ignore-start -->
+```html
 From:  Person A <persona@gmail.com>
 To: Person B <personb@gmail.com>
 Subject: An AMP email!
@@ -85,3 +86,4 @@ Content-Type: text/html; charset="UTF-8"
 <span>Hello World in HTML!</span>
 --001a114634ac3555ae05525685ae
 ```
+<!-- prettier-ignore-end -->

@@ -272,7 +272,7 @@ You can also run the visual tests locally during development. You must first cre
 
 First, build the AMP runtime and run the gulp task that invokes the visual diff script:
 
-```
+```sh
 gulp build
 gulp visual-diff --nobuild
 ```
@@ -283,13 +283,13 @@ The build will use the Percy credentials set via environment variables in the pr
 
 To see debugging info during Percy runs, you can run:
 
-```
+```sh
  gulp visual-diff --chrome_debug --webserver_debug
 ```
 
 The debug flags `--chrome_debug` and `--webserver_debug` can be used independently. To enable both debug flags, you can also run:
 
-```
+```sh
  gulp visual-diff --debug
 ```
 
@@ -303,7 +303,7 @@ After each run, a new set of results will be available at `https://percy.io/<org
 
 It's much faster to debug with local build (`gulp` + `http://localhost:8000/`). In Chrome you can use [DevTools port forwarding](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/local-server). However, iOS Safari does not give a similar option. Instead, you can use [ngrok](https://ngrok.com/). Just [download](https://ngrok.com/download) the ngrok binary for your platform and run it like this:
 
-```
+```sh
 ngrok http 8000
 ```
 
@@ -313,7 +313,7 @@ Once started, the ngrok will print URLs for both `http` and `https`. E.g. `http:
 
 For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory\* (a `firebase` folder can be generated with the command, `gulp firebase`).
 
-```
+```sh
 npm install -g firebase-tools
 firebase login
 firebase init
@@ -331,15 +331,11 @@ firebase deploy
 
 `gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`). When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
 
-```
+```json
 {
   "hosting": {
     "public": "firebase",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ]
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
   }
 }
 ```
@@ -354,7 +350,7 @@ Additionally, you can create multiple projects and switch between them in the CL
 
 Testing ads in deployed demos requires whitelisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
 
-```
+```sh
 export AMP_TESTING_HOST="my-project.firebaseapp.com"
 gulp firebase --fortesting
 firebase deploy
@@ -368,7 +364,7 @@ You can run and create E2E tests locally during development. Currently tests onl
 
 Run all tests with:
 
-```
+```sh
 gulp e2e
 ```
 

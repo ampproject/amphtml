@@ -41,7 +41,7 @@ amphtmlValidator.getInstance().then(function(validator) {
 
 Now try running it:
 
-```
+```sh
 $ node demo.js
 FAIL
 line 1, col 0: The mandatory attribute '⚡' is missing in tag 'html ⚡ for top-level html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)

@@ -73,7 +73,7 @@ The RTC responses will be merged with whatever JSON targeting is specified on th
 
 ## Merging RTC targeting data and categoryExclusions into Ad Requests
 
-The results of the RTC callouts will be merged with any existing, static JSON targeting on the amp-ad element, and then sent on the **scp **parameter of the DFP ad request.
+The results of the RTC callouts will be merged with any existing, static JSON targeting on the amp-ad element, and then sent on the **scp** parameter of the DFP ad request.
 
 ### Merging targeting data for custom URLs
 
@@ -83,33 +83,38 @@ Keys for targeting data should be named differently to avoid collision. In case 
 
 For example, take the following amp-ad:
 
-```
-<amp-ad width="320" height="50"
-            type="doubleclick"
-            data-slot="/4119129/mobile_ad_banner"
-            rtc-config='{"urls": ["https://rtcEndpoint.biz/"}'
-            json='{"targeting":{"loc": "usa", "animal": "cat"},
-                   "categoryExclusions":["sports", "food", "fun"]}'>
+```html
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/4119129/mobile_ad_banner"
+  rtc-config='{"urls": ["https://rtcEndpoint.biz/"}'
+  json='{
+          "targeting":{"loc": "usa", "animal": "cat"},
+          "categoryExclusions":["sports", "food", "fun"]
+        }'
+>
 </amp-ad>
 ```
 
 And let the response from the callout to `https://rtcEndpoint.biz/` be:
 
-```
-{"targeting":{"animal": "dog"}}
+```json
+{"targeting": {"animal": "dog"}}
 ```
 
 The results will be merged with the value set on the amp-ad element, and the result will be:
 
-```
-{"targeting":{"loc": "usa", "animal": "dog"}}
+```json
+{"targeting": {"loc": "usa", "animal": "dog"}}
 ```
 
 _Note: the ordering of items is not guaranteed._
 
-This resulting object will then be sent on the **scp **parameter of the ad request, as
+This resulting object will then be sent on the **scp** parameter of the ad request, as
 
-```
+```http
 https://securepubads.g.doubleclick.net/gampad/ads?.....&scp=loc%3Dusa%26animal%3Ddog%26excl_cat%3Dsports,food,fun…...
 ```
 
@@ -119,50 +124,53 @@ To prevent malicious vendors from naming the keys in their RTC response to match
 
 For instance, take this example where we call out to vendors, VendorA and VendorB:
 
-```
-<amp-ad width="320" height="50"
-            type="doubleclick"
-            data-slot="/4119129/mobile_ad_banner"
-            rtc-config='{"vendors": {"vendorA": {}, "vendorB": {}}'
-            json='{"targeting":{"abc":"123"}'>
+```html
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/4119129/mobile_ad_banner"
+  rtc-config='{"vendors": {"vendorA": {}, "vendorB": {}}'
+  json='{"targeting":{"abc":"123"}'
+>
 </amp-ad>
 ```
 
 Let the response from VendorA be:
 
-```
-{"targeting":{"abc": "456"}}
+```json
+{"targeting": {"abc": "456"}}
 ```
 
 And let the response from VendorB be:
 
-```
-{"targeting":{"abc": "FOO"}}
+```json
+{"targeting": {"abc": "FOO"}}
 ```
 
 The Google Ad Manager Fast Fetch implementation automatically converts both of these responses to:
 
 Rewritten VendorA Response
 
-```
-{"targeting":{"abc_vendorA": "456"}}
+```json
+{"targeting": {"abc_vendorA": "456"}}
 ```
 
 Rewritten VendorB Response
 
-```
-{"targeting":{"abc_vendorB": "FOO"}}
+```json
+{"targeting": {"abc_vendorB": "FOO"}}
 ```
 
 Thus, when the merging happens, the final object is:
 
-```
-{"targeting":{"abc":"123", "abc_vendorA": "456", "abc_vendorB": "FOO"}}
+```json
+{"targeting": {"abc": "123", "abc_vendorA": "456", "abc_vendorB": "FOO"}}
 ```
 
 To disable key appending, within callout-vendors.js set the option `disableKeyAppend: true` as seen in the following example:
 
-```
+```js
 export const RTC_VENDORS = {
  ...
  ...
@@ -182,40 +190,44 @@ Any values for categoryExclusions returned by the RTC callouts (either from cust
 
 For example, take the following amp-ad:
 
-```
-<amp-ad width="320" height="50"
-            type="doubleclick"
-            data-slot="/4119129/mobile_ad_banner"
-             rtc-config='{"vendors": {"vendorA": {}},
-                         "urls": ["https://rtcEndpoint.biz/"]}'
-            json='{"categoryExclusions":["sports", "food", "fun"]}'>
+```html
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/4119129/mobile_ad_banner"
+  rtc-config='{
+                "vendors": {"vendorA": {}},
+                "urls": ["https://rtcEndpoint.biz/"]
+              }'
+  json='{"categoryExclusions":["sports", "food", "fun"]}'
+>
 </amp-ad>
-
 ```
 
 Let the response from the callout to `https://rtcEndpoint.biz/` be:
 
-```
-{"categoryExclusions":["health", "sports"]}
+```json
+{"categoryExclusions": ["health", "sports"]}
 ```
 
 Let the response from VendorA be:
 
-```
-{"categoryExclusions":["abc","fun"]}
+```json
+{"categoryExclusions": ["abc", "fun"]}
 ```
 
 The results will be merged with the value set on the amp-ad element, and the result will be:
 
-```
-{"categoryExclusions":["abc", "health", "sports", "food", "fun"]}
+```json
+{"categoryExclusions": ["abc", "health", "sports", "food", "fun"]}
 ```
 
 _Note: the ordering of items is not guaranteed._
 
-This resulting object will then be sent on the **scp **parameter of the ad request, as
+This resulting object will then be sent on the **scp** parameter of the ad request, as
 
-```
+```http
 https://securepubads.g.doubleclick.net/gampad/ads?.....&scp=excl_cat%3Dabc,health,sports,food,fun…...
 ```
 
@@ -225,41 +237,47 @@ The RTC responses from vendors and custom URLs are ultimately all merged togethe
 
 For example, take the following amp-ad:
 
-```
-<amp-ad width="320" height="50"
-            type="doubleclick"
-            data-slot="/4119129/mobile_ad_banner"
-            rtc-config='{"vendors": {"vendorA": {}},
-                         "urls": ["https://rtcEndpoint.biz/"]}'
-            json='{"targeting":{"loc": "usa"},
-                   "categoryExclusions":["sports"]}'>
+```html
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/4119129/mobile_ad_banner"
+  rtc-config='{
+                "vendors": {"vendorA": {}},
+                "urls": ["https://rtcEndpoint.biz/"]
+              }'
+  json='{"targeting":{"loc": "usa"}, "categoryExclusions":["sports"]}'
+>
 </amp-ad>
 ```
 
 Let the response from the callout to `https://rtcEndpoint.biz/` be:
 
-```
-{"targeting":{"gender": "f"}, "categoryExclusions":["dating"]}
+```json
+{"targeting": {"gender": "f"}, "categoryExclusions": ["dating"]}
 ```
 
 Let the response from VendorA be:
 
-```
-{"targeting":{"r": "h"}, "categoryExclusions":["autos"]}
+```json
+{"targeting": {"r": "h"}, "categoryExclusions": ["autos"]}
 ```
 
 The results will be merged with the value set on the amp-ad element, and the result will be:
 
-```
-{"targeting":{"loc": "usa", "gender":"f", "r":"h"},
- "categoryExclusions":["sports", "dating", "autos"]}
+```json
+{
+  "targeting": {"loc": "usa", "gender": "f", "r": "h"},
+  "categoryExclusions": ["sports", "dating", "autos"]
+}
 ```
 
 _Note: the ordering of items is not guaranteed._
 
 This resulting object will then be sent on the **scp** parameter of the ad request, as
 
-```
+```http
 https://securepubads.g.doubleclick.net/...scp=loc%3Dusa%26gender%3Df%26r%3Dh%26excl_cat%3Dsports%2Cdating%2Cautos&...
 ```
 

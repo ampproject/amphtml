@@ -117,7 +117,7 @@ and the "sh-" rules in [header-structure-07](https://tools.ietf.org/html/draft-i
 The `v` parameter value must be a string. Its value (after parsing as a string)
 must conform to the following ABNF:
 
-```
+```text
 v_spec = #v_range
 v_range = sh-integer / sh-integer OWS ".." OWS sh-integer
 ```
@@ -205,7 +205,7 @@ selected a resource of content type `application/signed-exchange`. In theory,
 there may be an interaction with content negotation. For instance, assume the
 request is:
 
-```
+```http
 Accept-Language: en, de
 AMP-Cache-Transform: google
 ```
@@ -275,7 +275,7 @@ feel free to get involved.
 A requestor wishing to receive an SXG, without any constraints on its
 subresource URLs, would send:
 
-```
+```http
 AMP-Cache-Transform: any
 ```
 
@@ -286,7 +286,7 @@ A requestor wishing to receive an SXG to be served from and prefetched from the
 Google AMP Cache (e.g. [Googlebot](https://support.google.com/webmasters/answer/182072))
 would send:
 
-```
+```http
 AMP-Cache-Transform: google
 ```
 
@@ -296,7 +296,7 @@ Google AMP Cache, or a non-SXG response.
 A requestor wishing to receive transformed AMP of a specific version may send a
 request like:
 
-```
+```http
 AMP-Cache-Transform: google;v="1..3,5"
 ```
 

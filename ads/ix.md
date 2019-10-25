@@ -24,26 +24,31 @@ Each [amp-ad](https://amp.dev/documentation/components/amp-ad/) element that us
 
 ### Example: RTC Specification on an amp-ad
 
-```
+```html
 <!-- Note: Default timeout is 1000ms -->
-<amp-ad width="320" height="50" type="doubleclick"
-        data-slot="/1234/pos"
-        rtc-config='{
-            "vendors": {
-                "IndexExchange": {"SITE_ID": "123456"},
-            },
-            "timeoutMillis": 1000}'>
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/1234/pos"
+  rtc-config='{
+                "vendors": {
+                  "IndexExchange": {"SITE_ID": "123456"}
+                },
+                "timeoutMillis": 1000
+              }'
+>
 </amp-ad>
 ```
 
 The value of `rtc-config` must conform to the following specification:
 
-```
+```json
 {
-            "vendors": {
-                "IndexExchange": {"SITE_ID": "123456"},
-            },
-            "timeoutMillis": 1000
+  "vendors": {
+    "IndexExchange": {"SITE_ID": "123456"}
+  },
+  "timeoutMillis": 1000
 }
 ```
 

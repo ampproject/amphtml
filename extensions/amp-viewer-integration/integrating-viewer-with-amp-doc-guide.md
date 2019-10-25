@@ -174,7 +174,7 @@ The AMP Viewer integration API must be enabled in the Viewer and in the AMP cach
 
 If the Viewer uses the Google AMP Cache, the AMP Cache URL in the Viewer must be as follows:
 
-```html
+```http
 https://...cdn.ampproject.org/v/s/origin?amp_js_v=0.1
 ```
 
@@ -284,7 +284,7 @@ To establish a handshake initiated by the AMP Document:
 
 To enable the Webview messaging protocol with port exchange, the Viewer Init Params should include `webview=1` and the AMP Cache URLs should be in the following format:
 
-```html
+```http
 https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#webview=1
 ```
 
@@ -355,7 +355,7 @@ var initParams = {
 
 _Example: Parameters in a query string in the fragment part of the URL_
 
-```html
+```http
 https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&cap=handshakepoll
 ```
 
@@ -436,7 +436,7 @@ var initParams = {
 
 By specifying `cap=swipe` as an init parameter (fyi, `"cap"` stands for capabilities) , `#cap=swipe` will be added to the AMP Cache URL:
 
-```html
+```http
 https://cdn.ampproject.org/v/s/origin?amp_js_v=0.1#origin=http%3A%2F%2FyourAmpDocsOrigin.com&cap=foo%2Cswipe
 ```
 

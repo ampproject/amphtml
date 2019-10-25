@@ -36,7 +36,7 @@ Example
 
 In the following example, the component creates a **`customEventReporter`** object that sends pings to example.com on **`layout`** and **`id`** events.
 
-```
+```js
   buildCallback() {
     const builder = new customEventReporterBuilder(this.element);
     builder.track('layout', 'example.come/layout');
@@ -51,7 +51,7 @@ Example
 
 In the following example, the component triggers two custom events: **`layout`** and **`id`**. The **`id`** event is triggered with the value of the id, after the id is ready.
 
-```
+```js
   layoutCallback() {
     this.reporter_.trigger('layout');
     getIdPromise.then(id => {
@@ -70,7 +70,7 @@ To send analytics pings, third-party AMP components must call the `useAnalyticsI
 
 Example
 
-```
+```js
 useAnalyticsInSandbox(this.element, configPromise);
 ```
 

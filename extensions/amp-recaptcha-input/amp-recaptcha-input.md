@@ -53,7 +53,7 @@ This example demonstrates how `<amp-recaptcha-input>` usage on an AMP page corre
 
 **`<amp-recaptcha-input>` usage**
 
-```
+```html
 <form amp-form-attributes-go-here>
   ...
   <amp-recaptcha-input layout="nodisplay" name="reCAPTCHA_body_key" data-sitekey=”reCAPTCHA_site_key" data-action="reCAPTCHA_example_action">
@@ -64,13 +64,13 @@ This example demonstrates how `<amp-recaptcha-input>` usage on an AMP page corre
 
 **Corresponding `grecaptcha` call**
 
-```
+```js
 grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
 ```
 
 **Corresponding AMP form submit body**
 
-```
+```js
 {
   ...other form params
   “reCAPTCHA_body_key”: “returned_reCAPTCHA_response_token”

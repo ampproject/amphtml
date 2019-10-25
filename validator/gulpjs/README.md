@@ -6,7 +6,7 @@ A Gulp plugin for validating [AMPHTML files](https://ampproject.org) using the o
 
 Install package with NPM and add it to your development dependencies:
 
-```
+```sh
 npm install --save-dev gulp-amphtml-validator
 ```
 
@@ -37,7 +37,6 @@ To treat warnings as errors, replace the last line of the validation closure wit
 // Exit the process with error code (1) if an AMP validation warning or
 // error occurred.
 .pipe(gulpAmpValidator.failAfterWarningOrError());
-
 ```
 
 ## Release Notes

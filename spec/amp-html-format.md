@@ -505,7 +505,7 @@ The script URL must start with `https://cdn.ampproject.org` and must follow a ve
 
 The URL for extended components is of the form:
 
-```html
+```http
 https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
 ```
 
@@ -554,7 +554,7 @@ To learn about the syntax and restrictions for an template, visit the [template'
 
 The URL for extended components is of the form:
 
-```html
+```http
 https://cdn.ampproject.org/$RUNTIME_VERSION/$TEMPLATE_TYPE-$TEMPLATE_VERSION.js
 ```
 

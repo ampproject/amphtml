@@ -60,8 +60,12 @@ component's visual area.
 In order to use this attribute, the [`amp-video-docking`](https://amp.dev/documentation/components/amp-video-docking)
 extension script must be present:
 
-```
-<script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
+```html
+<script
+  async
+  custom-element="amp-video-docking"
+  src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"
+></script>
 ```
 
 For more details, see [documentation on the docking extension itself.](https://amp.dev/documentation/components/amp-video-docking)

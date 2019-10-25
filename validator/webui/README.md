@@ -22,7 +22,7 @@ If you'd like to use the web UI, simply visit [validator.amp.dev](https://valida
 
 In this directory, run
 
-```
+```sh
 $ npm install
 $ go build serve-standalone.go
 $ ./serve-standalone
@@ -49,7 +49,7 @@ function utoa(str) {
 
 By default this tool will assume you want to validate an `AMPHTML` document. If you would like to validate another format you can chose one of the following:
 
-```
+```http
 #htmlFormat=AMP4ADS
 #htmlFormat=AMP4EMAIL
 #htmlFormat=ACTIONS
