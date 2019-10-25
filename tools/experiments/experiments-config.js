@@ -323,4 +323,12 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/25179',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
+  {
+    id: 'layoutbox-invalidate-on-scroll',
+    name:
+      'Invalidate the cached layoutboxes of elements nested in a scroller ' +
+      'after that scroller scrolls.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24929',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
+  },
 ];

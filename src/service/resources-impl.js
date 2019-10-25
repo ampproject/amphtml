@@ -32,10 +32,11 @@ import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
-import {loadPromise} from '../event-helper';
+import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
 import {startupChunk} from '../chunk';
+import {throttle} from '../utils/rate-limit';
 
 const TAG_ = 'Resources';
 const LAYOUT_TASK_ID_ = 'L';
@@ -142,8 +143,6 @@ export class ResourcesImpl {
     this.relayoutAll_ = true;
 
     /**
-     * TODO(jridgewell): relayoutTop should be replaced with parent layer
-     * dirtying.
      * @private {number}
      */
     this.relayoutTop_ = -1;
@@ -204,6 +203,9 @@ export class ResourcesImpl {
     /** @const @private {!Array<function()>} */
     this.passCallbacks_ = [];
 
+    /** @const @private {!Array<!Element>} */
+    this.elementsThatScrolled_ = [];
+
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
@@ -253,6 +255,16 @@ export class ResourcesImpl {
     });
 
     this.rebuildDomWhenReady_();
+
+    if (isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')) {
+      /** @private @const */
+      this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 250);
+
+      listen(this.win.document, 'scroll', this.throttledScroll_, {
+        capture: true,
+        passive: true,
+      });
+    }
   }
 
   /** @private */
@@ -832,9 +844,7 @@ export class ResourcesImpl {
     ) {
       // This signal mainly signifies that most of elements have been measured
       // by now. This is mostly used to avoid measuring too many elements
-      // individually. This will be superceeded by layers API, e.g.
-      // "layer measured".
-      // May not be called in shadow mode.
+      // individually. May not be called in shadow mode.
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
     }
 
@@ -897,7 +907,6 @@ export class ResourcesImpl {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_) ||
       now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2;
 
-    // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
       dev().fine(
         TAG_,
@@ -1219,6 +1228,7 @@ export class ResourcesImpl {
     this.relayoutAll_ = false;
     const relayoutTop = this.relayoutTop_;
     this.relayoutTop_ = -1;
+    const elementsThatScrolled = this.elementsThatScrolled_.splice(0, Infinity);
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
@@ -1256,13 +1266,27 @@ export class ResourcesImpl {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
-        if (
+        let needsMeasure =
           relayoutAll ||
           r.getState() == ResourceState.NOT_LAID_OUT ||
           !r.hasBeenMeasured() ||
           r.isMeasureRequested() ||
-          (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop)
-        ) {
+          (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop);
+
+        if (!needsMeasure) {
+          for (let i = 0; i < elementsThatScrolled.length; i++) {
+            // TODO(jridgewell): Need to figure out how ShadowRoots and FIEs
+            // should behave in this model. If the ShadowRoot's host scrolls,
+            // do we need to invalidate inside the shadow or light tree? Or if
+            // the FIE's iframe parent scrolls, do we?
+            if (elementsThatScrolled[i].contains(r.element)) {
+              needsMeasure = true;
+              break;
+            }
+          }
+        }
+
+        if (needsMeasure) {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
@@ -2014,6 +2038,35 @@ export class ResourcesImpl {
       if (pendingIndex != -1) {
         this.pendingBuildResources_.splice(pendingIndex, 1);
       }
+    }
+  }
+
+  /**
+   * Listens for scroll events on elements (not the root scroller), and marks
+   * them for invalidating all child layout boxes. This is to support native
+   * scrolling elements outside amp-components.
+   *
+   * @param {!Event} event
+   */
+  scrolled_(event) {
+    const {target} = event;
+    // If the target of the scroll event is an element, that means that element
+    // is an overflow scroller.
+    // If the target is the document itself, that means the native root
+    // scroller (`document.scrollingElement`) did the scrolling.
+    if (target.nodeType !== Node.ELEMENT_NODE) {
+      return;
+    }
+    // In iOS <= 12, the scroll hacks cause the scrolling element to be
+    // reported as the target, instead of the document.
+    if (target === this.viewport_.getScrollingElement()) {
+      return;
+    }
+
+    const scrolled = dev().assertElement(target);
+    if (!this.elementsThatScrolled_.includes(scrolled)) {
+      this.elementsThatScrolled_.push(scrolled);
+      this.schedulePass(FOUR_FRAME_DELAY_);
     }
   }
 }
