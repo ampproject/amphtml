@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import {
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
+import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
@@ -30,8 +31,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
-import addAttributesToElement from './utils/addAttributesToElement';
-import getPlayerParams from './utils/getPlayerParams';
 
 /** @private @const */
 const TAG = 'amp-redbull-player';
@@ -60,8 +59,7 @@ const getAnalyticsEventTypePrefixRegex = once(
 class AmpRedBullPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
-    const el = addAttributesToElement(element);
-    super(el);
+    super(element);
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -77,7 +75,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
 
     /**
      * @param {!Event} e
-     * @return {*} TODO(#23582): Specify return type
+     * @return {undefined}
      * @private
      */
     this.boundOnMessage_ = e => this.onMessage_(e);
@@ -101,11 +99,6 @@ class AmpRedBullPlayer extends AMP.BaseElement {
       element
     );
 
-    userAssert(
-      element.getAttribute('data-skin'),
-      'The data-skin attribute is required for %s',
-      element
-    );
     this.tagId_ = element.getAttribute('id') || '';
     this.locale_ = element.getAttribute('data-locale') || 'global';
 
@@ -115,50 +108,33 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const {element} = this;
-    const origin = 'https://player.redbull.com/amp/amp-iframe.html?';
-    // const origin = 'http://localhost:9000/amp-iframe.html?';
-    const params = `${getPlayerParams(element)}&ampTagId=${
-      this.tagId_
-    }&locale=${this.locale_}`;
-    const src = `${origin}${params}`;
 
-    const name = JSON.stringify(this.getMetadata_());
+    const origin = 'https://player.redbull.com/amp/amp-iframe.html';
+    const params = Object.assign(dict({}), element.dataset);
+    params['ampTagId'] = this.tagId_;
+    params['locale'] = this.locale_;
+    const src = addParamsToUrl(origin, params);
+
     this.iframe_ = disableScrollingOnIframe(
-      createFrameFor(this, src, name, SANDBOX)
+      createFrameFor(this, src, '', SANDBOX)
     );
 
     this.unlistenFrame_ = listen(this.win, 'message', this.boundOnMessage_);
-    const loaded = this.loadPromise(this.iframe_).then(() => {
+    return this.loadPromise(this.iframe_).then(() => {
       this.onReady_();
     });
-    return loaded;
   }
 
   /** @private */
   onReady_() {
-    const {element} = this;
-    Services.videoManagerForDoc(element).register(this);
-
+    Services.videoManagerForDoc(this.element).register(this);
     this.sendCommand_({msg: 'amp-loaded'});
-    element.dispatchCustomEvent(VideoEvents.LOAD);
-  }
-
-  /**
-   * @return {!JsonObject}
-   * @private
-   */
-  getMetadata_() {
-    const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.element);
-
-    return dict({
-      'sourceUrl': sourceUrl,
-      'canonicalUrl': canonicalUrl,
-    });
+    this.element.dispatchCustomEvent(VideoEvents.LOAD);
   }
 
   /**
    * Sends a command to the player through postMessage.
-   * @param {string} command
+   * @param {Object} command
    * @private
    */
   sendCommand_(command) {
@@ -217,21 +193,16 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     const data = objOrParseJson(eventData);
 
     if (data.id === `redbull-amp-video-tracking-${this.tagId_}`) {
-      const type = ANALYTICS_EVENT_TYPE_PREFIX + data.type;
+      const type = ANALYTICS_EVENT_TYPE_PREFIX + data[type];
       this.dispatchCustomAnalyticsEvent_(type, data);
     }
   }
 
   /**
-   * @param {string} eventType
+   * @param {string} eventType The eventType must be prefixed with video-custom- to prevent naming collisions with other analytics event types.
    * @param {!Object<string, string>=} vars
    */
-  dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
-    userAssert(
-      getAnalyticsEventTypePrefixRegex().test(eventType),
-      'Invalid analytics `eventType`. Value must start with `%s`.',
-      ANALYTICS_EVENT_TYPE_PREFIX
-    );
+  dispatchCustomAnalyticsEvent_(eventType, vars) {
     this.element.dispatchCustomEvent(
       VideoEvents.CUSTOM_TICK,
       dict({
@@ -246,12 +217,9 @@ class AmpRedBullPlayer extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    if (!message.msg) {
-      message = JSON.stringify(message);
-    }
-
-    this.iframe_.contentWindow.postMessage(message, '*');
+    this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
+
   /** @override */
   isInteractive() {
     return true;
@@ -264,31 +232,35 @@ class AmpRedBullPlayer extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
-    return this.element.hasAttribute('implements-media-session');
+    return false;
   }
 
   /** @override */
   preimplementsAutoFullscreen() {
-    return this.element.hasAttribute('implements-rotate-to-fullscreen');
+    return false;
   }
 
   /** @override */
   getCurrentTime() {
-    return 0;
+    // Not supported.
+    return NaN;
   }
 
   /** @override */
   getDuration() {
-    return 0;
+    // Not supported.
+    return NaN;
   }
 
   /** @override */
   getMetadata() {
+    // Not supported.
     return null;
   }
 
   /** @override */
   getPlayedRanges() {
+    // Not supported.
     return [];
   }
 }

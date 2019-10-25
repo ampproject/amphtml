@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,11 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getRedBullElement(videoId, skin) {
+    function getRedBullElement(videoId) {
       const player = doc.createElement('amp-redbull-player');
 
       if (videoId) {
         player.setAttribute('data-videoid', videoId);
-      }
-
-      if (skin) {
-        player.setAttribute('data-skin', skin);
       }
 
       player.setAttribute('width', '222');
@@ -52,32 +48,21 @@ describes.realWin(
       });
     }
 
-    it('renders the Red Bull player', () => {
-      return getRedBullElement(
-        'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT',
-        'com'
-      ).then(player => {
-        const playerIframe = player.querySelector('iframe');
-        expect(playerIframe).to.not.be.null;
-        expect(playerIframe.src).to.equal(
+    it('renders the Red Bull player', async () => {
+      const player = await getRedBullElement(
+        'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT'
+      );
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.src).to.equal(
           'https://redbull.com/embed/' +
-            'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT&skin=com'
+            'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT'
         );
-      });
     });
 
     it('fails without videoId', () => {
       return getRedBullElement(null, 'com').should.eventually.be.rejectedWith(
         /The data-videoid attribute is required/
-      );
-    });
-
-    it('fails without skinId', () => {
-      return getRedBullElement(
-        'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT',
-        null
-      ).should.eventually.be.rejectedWith(
-        /The data-skin attribute is required/
       );
     });
   }

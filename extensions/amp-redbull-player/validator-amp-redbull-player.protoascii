@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,14 +32,14 @@ tags: {  # <amp-redbull-player>
     name: "data-videoid"
     mandatory: true
   }
-  attrs: {
-    name: "data-skin"
-    mandatory: true
-  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FIXED
-    supported_layouts: FLEX_ITEM
+    supported_layouts: FIXED_HEIGHT
     supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: FLEX_ITEM
+    supported_layouts: FLUID
+    supported_layouts: INTRINSIC
   }
 }
