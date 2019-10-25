@@ -46,6 +46,7 @@ const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 const SWG_EVENTS_TO_SUPPRESS = {
   [AnalyticsEvent.IMPRESSION_PAYWALL]: true,
+  [AnalyticsEvent.IMPRESSION_PAGE_LOAD]: true,
 };
 
 const AMP_EVENT_TO_SWG_EVENT = {
@@ -125,6 +126,12 @@ export class GoogleSubscriptionsPlatform {
     this.eventManager_.registerEventFilterer(
       GoogleSubscriptionsPlatform.filterSwgEvent_
     );
+    this.eventManager_.logEvent({
+      eventType: AnalyticsEvent.IMPRESSION_PAGE_LOAD,
+      eventOriginator: EventOriginator.AMP_CLIENT,
+      isFromUserAction: false,
+      additionalParameters: null,
+    });
     resolver();
 
     this.runtime_.setOnLoginRequest(request => {
