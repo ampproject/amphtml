@@ -34,10 +34,8 @@ Where `refresh_interval` is the time, in seconds, in between refresh cycles. Thi
 
 An individual slot is eligible to be refreshed if it is configured as:
 
-```
-<amp-ad
- ...
- data-enable-refresh=refresh_interval>
+```html
+<amp-ad ... data-enable-refresh="refresh_interval"></amp-ad>
 ```
 
 `refresh_interval` must be a number greater than or equal to 30, or `false`. If `refresh_interval` is set to `false`, then this slot will not be refresh-enabled, even if page-level configurations are set. Otherwise, if `refresh_interval` is a numeric value, then it will represent the time, in seconds, between refresh events on this particular slot.

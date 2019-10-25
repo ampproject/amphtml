@@ -87,7 +87,7 @@ If you don't want to fetch the bookend configuration from a server, you can also
 
 Next, you must fill in the JSON configuration. This is where you customize the bookend. The overall structure of the config looks like so:
 
-```text
+```json
 {
   "bookendVersion": "v1.0",
   "shareProviders": [
@@ -97,7 +97,6 @@ Next, you must fill in the JSON configuration. This is where you customize the b
     ...
   ]
 }
-
 ```
 
 It is required to specify you are using the v1.0 version by including the first line.

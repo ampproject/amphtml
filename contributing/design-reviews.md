@@ -34,7 +34,7 @@ The process for bringing a design to the design review is:
   - Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc. [Phone call tracking in AMP](https://docs.google.com/document/d/1UDMYv0f2R9CvMUSBQhxjtkSnC4984t9dJeqwm_8WiAM/edit) and [New AMP Boilerplate](https://docs.google.com/document/d/1gZFaKvcDffceJNaI3bYfuYPtYU5u2y6UhE5wBPTsJ9w/edit) are examples of past AMP design docs.
   - Add this license text to the top of your design doc before sharing it with anyone else in the community (updating the year if necessary):
 
-    ```
+    ```js
     Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
