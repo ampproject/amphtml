@@ -19,7 +19,9 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="200"
+<amp-ad
+      width="300"
+      height="200"
       type="videonow"
       data-pid="55555"
       layout="responsive">

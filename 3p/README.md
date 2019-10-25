@@ -1,8 +1,8 @@
 # Inclusion of third party software, embeds, and services into AMP
 
-In general all inclusions are subject to [CONTRIBUTING.md](../CONTRIBUTING.md).  This files outlines specific rules for certain types of external embed and other software inclusions.
+In general all inclusions are subject to [CONTRIBUTING.md](../CONTRIBUTING.md). This files outlines specific rules for certain types of external embed and other software inclusions.
 
-In order to qualify for inclusion, an extended component that integrates a third-party service must generally meet the notability requirements of the English Wikipedia, and is in common use in Internet publishing.  As a rough rule of thumb, it should be used or requested by 5% of the top 10,000 websites as noted on builtwith.com, or already integrated into [oEmbed](http://oembed.com/).
+In order to qualify for inclusion, an extended component that integrates a third-party service must generally meet the notability requirements of the English Wikipedia, and is in common use in Internet publishing. As a rough rule of thumb, it should be used or requested by 5% of the top 10,000 websites as noted on builtwith.com, or already integrated into [oEmbed](http://oembed.com/).
 
 We highly prefer integrations that do not use iframes. JSONP cannot be used for security reasons, but CORS requests are perfectly fine.
 
@@ -47,7 +47,7 @@ The following aren't hard requirements, but are performance optimizations we sho
 - Creatives should only animate using CSS transforms and opacity.
 - When creatives animate they should not use more than 2ms time per frame to allow for other animations to have sufficient time for concurrent animations.
 
-The better an ad network does on the above requirements, the earlier ads from it will be loaded into AMP. In other words: *The slower the ad loads and the more it interferes with the page, the later AMP will load it.*
+The better an ad network does on the above requirements, the earlier ads from it will be loaded into AMP. In other words: _The slower the ad loads and the more it interferes with the page, the later AMP will load it._
 
 We are also excited to start conversations how modern web tech could improve overall ads latency, memory usage and framerate impact and how AMP's open source model could be used to inject trust through an auditable common code base into the ads ecosystem which would reduce the necessity of redundant metrics collection.
 
@@ -62,6 +62,7 @@ Review the [ads/README](../ads/README.md) for further details on ad integration.
 - If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist. AMP proxy sends the appropriate referrer header such as `https://cdn.ampproject.org` and `https://amp.cloudflare.com`.
 
 # Adding proper integration tests
+
 You should ensure there are integration tests for your extension. These should be added to the AMP
 repo where it makes sense. In some cases this won't be possible because it relies on bringing up
 third-party infrastructure. In these cases you should maintain testing for the extension on your

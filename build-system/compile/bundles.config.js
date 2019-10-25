@@ -131,6 +131,7 @@ exports.jsBundles = {
       incudePolyfills: true,
       extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
       compilationLevel: 'WHITESPACE_ONLY',
+      skipUnknownDepsCheck: true,
     },
   },
   'video-iframe-integration.js': {
@@ -730,7 +731,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-drilldown',
+    name: 'amp-nested-menu',
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
@@ -808,7 +809,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-sidebar',
-    version: ['0.1', '1.0'],
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,

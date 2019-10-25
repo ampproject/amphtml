@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Dynamically injects ads into an AMP page by using a remotely-served configuration file.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -54,9 +55,11 @@ Dynamically injects ads into an AMP page by using a remotely-served configuratio
 [TOC]
 
 ## Behavior
+
 Given a sufficient number of valid placements (supplied in the configuration),
 `amp-auto-ads` tries to insert additional ads while adhering to a set of
 constraints specified by the ad network. These constraints will limit:
+
 <ul>
   <li>The total number of ads that can be inserted</li>
   <li>The minimum distance that there should be between any adjacent ads</li>
@@ -68,19 +71,20 @@ The `<amp-auto-ads>` tag should be placed as the first child of the `<body>`.
 
 The ad network type and any additional information (required by the ad network)
 should be specified on the tag.
+
 ```html
-<amp-auto-ads
-    type="adsense"
-    data-ad-client="ca-pub-5439573510495356">
+<amp-auto-ads type="adsense" data-ad-client="ca-pub-5439573510495356">
 </amp-auto-ads>
 ```
 
 ## Supported ad networks
+
 - [AdSense](../../ads/google/adsense.md)
 - [Denakop](https://denakop.com)
 - [DoubleClick (experimental)](../../ads/google/doubleclick.md)
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>type (required)</strong></td>
@@ -114,19 +118,20 @@ positions immediately after all `<P class='paragraph'>` elements that are within
         "index": 2,
         "sub": {
           "selector": "P.paragraph",
-          "all": true,
-        },
+          "all": true
+        }
       },
       "pos": 4,
       "type": 1,
       "style": {
         "top_m": 5,
-        "bot_m": 10,
-      },
-    },
+        "bot_m": 10
+      }
+    }
   ]
 }
 ```
+
 ### Object Definitions
 
 #### ConfigObj
@@ -399,6 +404,7 @@ The fields to specify in the `adConstraints` configuration object:
 The fields to specify in the `subsequentMinSpacing` configuration object. `subsequentMinSpacing` entries
 can be used to change the spacing required between any additional ads based on the number of ads already on
 the page. As an example, consider the following scenario:
+
 <ul>
   <li>2 existing ads on the page</li>
   <li>subsequentMinSpacing field is:
