@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Brightcove Video Cloud or Perform player.
 ---
+
 <!---
 Copyright 2015 Brightcove. All Rights Reserved.
 
@@ -52,16 +53,19 @@ Example:
 
 ```html
 <amp-brightcove
-    data-account="12345"
-    data-player="default"
-    data-embed="default"
-    data-video-id="1234"
-    layout="responsive"
-    width="480" height="270">
+  data-account="12345"
+  data-player="default"
+  data-embed="default"
+  data-video-id="1234"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-brightcove>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-account</strong></td>
@@ -114,7 +118,6 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
     For more details, see <a href="https://amp.dev/documentation/components/amp-video-docking">documentation on the docking extension itself.</a></td>
   </tr>
 </table>
-
 
 ## Player configuration
 

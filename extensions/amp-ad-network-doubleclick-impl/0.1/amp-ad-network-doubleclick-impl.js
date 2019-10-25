@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
+import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
@@ -379,33 +380,36 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
     const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      // Only select into SRA experiments if SRA not already explicitly
-      // enabled and refresh is not being used by any slot.
-      [DOUBLECLICK_SRA_EXP]: {
-        isTrafficEligible: () =>
-          !forcedExperimentId &&
-          !this.win.document./*OK*/ querySelector(
-            'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'
+        !../../../src/experiments.ExperimentInfo>} */ (Object.assign(
+      {
+        // Only select into SRA experiments if SRA not already explicitly
+        // enabled and refresh is not being used by any slot.
+        [DOUBLECLICK_SRA_EXP]: {
+          isTrafficEligible: () =>
+            !forcedExperimentId &&
+            !this.win.document./*OK*/ querySelector(
+              'meta[name=amp-ad-enable-refresh], ' +
+                'amp-ad[type=doubleclick][data-enable-refresh], ' +
+                'meta[name=amp-ad-doubleclick-sra]'
+            ),
+          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+            key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
           ),
-        branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-          key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
-        ),
+        },
+        [FLEXIBLE_AD_SLOTS_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
+        },
+        [[FIE_CSS_CLEANUP_EXP.branch]]: {
+          isTrafficEligible: () => true,
+          branches: [
+            [FIE_CSS_CLEANUP_EXP.control],
+            [FIE_CSS_CLEANUP_EXP.experiment],
+          ],
+        },
       },
-      [FLEXIBLE_AD_SLOTS_EXP]: {
-        isTrafficEligible: () => true,
-        branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
-      },
-      [[FIE_CSS_CLEANUP_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_CSS_CLEANUP_EXP.control],
-          [FIE_CSS_CLEANUP_EXP.experiment],
-        ],
-      },
-    });
+      AMPDOC_FIE_EXPERIMENT_INFO_MAP
+    ));
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(
       expName => setExps[expName] && this.experimentIds.push(setExps[expName])
@@ -1245,7 +1249,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       (returnedSizeDifferent && heightNotIncreased)
     ) {
       this.attemptChangeSize(newHeight, newWidth).catch(() => {});
-      if (newWidth > width) {
+      if (
+        newWidth > width &&
+        // If 'fluid' were the primary requested size, ensure we do not trigger
+        // slot adjustment if the returned size is one of the requested multi-
+        // sizes. Slot adjustment should only be triggered when the creative
+        // size is not one of the requested sizes.
+        (!this.isFluidPrimaryRequest_ ||
+          (this.parameterSize &&
+            this.parameterSize.indexOf(`${newWidth}x${newHeight}`) == -1))
+      ) {
         this.adjustSlotPostExpansion_(newWidth);
       }
     }

@@ -18,8 +18,8 @@ limitations under the License.
 
 Serves ads to AMP pages using Navegg data.
 
-
 ## Example
+
 To get Navegg integration working you only need to specify the `rtc-config` parameter with your Navegg Account ID:
 
 ```html
