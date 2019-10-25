@@ -114,7 +114,7 @@ For handling CORS requests and responses, see the [AMP CORS spec](https://amp.de
 
 Example:
 
-```text
+```http
 https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
 ```
 

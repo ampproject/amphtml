@@ -30,7 +30,7 @@ For best results, only modify sizes for the b and r parameters, i.e. instead of 
 
 This is a synchronous call for the ad slot's geometry. Geometry is continuously updated in the background to keep the data fresh, with updates being sent from AMP at a maximum of once per second. Returns an object formatted as follows:
 
-```
+```js
 {
   win: { // The measurement of the application window.
     t: 0,

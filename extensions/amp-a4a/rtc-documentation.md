@@ -434,7 +434,7 @@ In addition to vendor-defined macros, with publishers specifying the values for 
 
 For example, Ad Network AmpAdCom overrides the property in their Fast Fetch Implementation:
 
-```
+```js
 /** amp-ad-network-ampadcom-impl.js */
 
 export class AmpAdNetworkAmpAdComImpl extends AmpA4A {
@@ -458,7 +458,7 @@ It is possible for a vendor to specify macros in their URL into which the Fast F
 
 Vendor1 wants to allow publishers to substitute in the value of the slot_id, and allow the Fast Fetch network implementation to substitute in the start time. Thus, they define their URL in [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js) as follows. Note, the vendor only lists SLOT_ID in the macros array, even though SLOT_ID and START are both macros in their URL. The macros array is a list of macros that can be utilized by the publisher. Fast Fetch will always attempt to substitute in network-defined macros, regardless of whether they are defined in the macros array.
 
-```text
+```js
 /** amp-a4a/0.1/callout-vendors.js */
 vendors: {
    "vendor1": {
@@ -470,7 +470,7 @@ vendors: {
 
 The Fast Fetch implementation has overridden **getCustomRealTimeConfigMacros**, and supports the macro 'START', as seen here:
 
-```text
+```js
 /** amp-ad-network-ampadcom-impl.js */
 
 export class AmpAdNetworkAmpAdComImpl extends AmpA4A {
@@ -485,23 +485,25 @@ getCustomRealTimeConfigMacros() {
 
 Finally, a publisher who wishes to use Vendor1 with AmpAdCom's Fast Fetch implementation defines their rtc-config as:
 
-```
+```html
 <!-- ampPublisher.biz/some/example/page.html -->
-<amp-ad width="320" height="50"
-            type="network-foo"
-            data-slot="/1234/5678"
-            rtc-config='{
-            "vendors": {
-              "vendor1": {"SLOT_ID": "1234"}
-              }
-             }'>
+<amp-ad
+  width="320"
+  height="50"
+  type="network-foo"
+  data-slot="/1234/5678"
+  rtc-config='{
+                "vendors": {
+                  "vendor1": {"SLOT_ID": "1234"}
+                }
+              }'
+>
 </amp-ad>
-
 ```
 
 After URL macro expansion, the resulting URL is then
 
-```
+```http
 https://vendor1.com/slot_id=1234&start_time=1508508227577
 ```
 
@@ -509,7 +511,7 @@ https://vendor1.com/slot_id=1234&start_time=1508508227577
 
 It is possible, but inadvisable, to have a situation where a vendor specifies the same macro as the Fast Fetch network, i.e. in the above example if **getCustomRealTimeConfigMacros** was defined as
 
-```
+```js
 /** amp-ad-network-ampadcom-impl.js */
 
 export class AmpAdNetworkAmpAdComImpl extends AmpA4A {
@@ -525,7 +527,7 @@ getCustomRealTimeConfigMacros() {
 
 There is a collision in this case, because the Fast Fetch network is specifying a value to substitute for SLOT_ID, but the vendor has declared SLOT_ID as their custom macro, and the publisher is then trying to substitute in '1234' as the value. In a case like this, the Fast Fetch implementation always wins, i.e. the final URL would be:
 
-```
+```http
 https://vendor1.com/slot_id=5678&start_time=1508508227577
 ```
 
@@ -613,7 +615,7 @@ AmpPublisher.biz uses FadNetwork's Fast Fetch implementation for all of their AM
 
 First, AmpPublisher's developer opens up callout-vendors.js to make sure that all of their desired vendors actually support RTC, and find:
 
-```
+```js
 /** amp-a4a/0.1/callout-vendors.js */
 vendors: {
    "vendor-a": {
@@ -634,7 +636,7 @@ All of the desired vendors are supported, thus they can use all of them.
 
 AmpPublisher now wants to check what macros they have available to use from FadNetwork's Fast Implementation, so they open up **amp-ad-network-fadnetwork-impl.js** and check the implementation of **getCustomRealTimeConfigMacros**:
 
-```
+```js
 /** amp-ad-network-fadnetwork-impl.js */
 
 export class AmpAdNetworkFadNetworkImpl extends AmpA4A {
@@ -655,30 +657,33 @@ AmpPublisher has also decided that the default timeout of 1000ms per callout is 
 
 Thus, they define their rtc-config:
 
-```
-<amp-ad width="320" height="50"
-            type="fadnetwork"
-            data-slot="/1234/5678"
-            rtc-config='{
-            "vendors": {
-              "vendor-a": {"SLOT_ID": "1"},
-              "vendor-b": {"PAGE_ID": "61393", "AD_W": "320"},
-              "vendorc": {}
-              },
-            "urls": [
-              "https://www.AmpPublisher.biz/A",
-              "https://www.amptgt.biz/B?d=START&vht=V_HT&vwt=V_WT"
-            ],
-            "timeoutMillis": 750}'>
+```html
+<amp-ad
+  width="320"
+  height="50"
+  type="fadnetwork"
+  data-slot="/1234/5678"
+  rtc-config='{
+                "vendors": {
+                  "vendor-a": {"SLOT_ID": "1"},
+                  "vendor-b": {"PAGE_ID": "61393", "AD_W": "320"},
+                  "vendorc": {}
+                },
+                "urls": [
+                  "https://www.AmpPublisher.biz/A",
+                  "https://www.amptgt.biz/B?d=START&vht=V_HT&vwt=V_WT"
+                ],
+                "timeoutMillis": 750
+              }'
+>
 </amp-ad>
-
 ```
 
 The setup of the HTML page is now done. At runtime, the next steps happen:
 
 Real-time-config-manager parses the rtc-config from the ad slot, and uses macro substitution to construct the following 5 URLs:
 
-```
+```http
 https://vendora.com?slot_id=1&start_time=1508779857330
 https://vendor-b.net/rtc?p_id=61393&adw=320
 https://www.vendorC.co.uk/ept
@@ -692,7 +697,7 @@ These 5 URLs are then called out to as quickly as possible in parallel. A publis
 
 The results of the 5 callouts are:
 
-```
+```js
 /** Callout 1 response https://www.AmpPublisher.biz/A */
 {"targeting": {"ages": "18-24", "g":["m", "f", "o"]}}
 
@@ -711,7 +716,7 @@ No Response, request was timed out due to surpassing 750ms.
 
 AmpA4a builds a promise to an array of RTC Response Objects, and passes that Promise to **getAdUrl** in FadNetwork's Fast Fetch Implementation, which then resolves this promise.
 
-```
+```js
 /** amp-ad-network-fadnetwork-impl.js */
 
 export class AmpAdNetworkFadNetworkImpl extends AmpA4A {
@@ -724,7 +729,6 @@ export class AmpAdNetworkFadNetworkImpl extends AmpA4A {
     });
   }
 }
-
 ```
 
 In this specific case, the Promise resolves to the following array:
@@ -772,17 +776,21 @@ _Callout 1, 4, and 5 all return valid JSON and cause no errors_
 
 The Fast Fetch Implementation for FadNetwork then uses this array of RTC response objects to build and send the ad request URL. It is at the discretion of FadNetwork to merge these parameters however they see fit. In this example, FadNetwork simply does a deep merge of all the successful RTC callout responses, with the last response given precedence in case of collision, and gets the resulting JSON:
 
-```js
-{"targeting": {"ages": "35-45",
-               "g":["m", "f", "o"],
-               "i": {"sport": "baseball", "city": "NYC"}}}
+```json
+{
+  "targeting": {
+    "ages": "35-45",
+    "g": ["m", "f", "o"],
+    "i": {"sport": "baseball", "city": "NYC"}
+  }
+}
 ```
 
 **Result of merging successful RTC Callouts 1, 4, and 5**
 
 FadNetwork then constructs and encodes their Ad URL as:
 
-```js
+```http
 https://www.fadnetwork.biz/adServer?%7B%E2%80%9Ctargeting%E2%80%9D:%20%7B%E2%80%9Cages%E2%80%9D:%20%E2%80%9C35-45%E2%80%9D,%20%E2%80%9Cg%E2%80%9D:%5B%E2%80%9Cm%E2%80%9D,%20%E2%80%9Cf%E2%80%9D,%20%E2%80%9Co%E2%80%9D%5D,%20%E2%80%9Ci%E2%80%9D:%20%7B%E2%80%9Csport%E2%80%9D:%20%E2%80%9Cbaseball%E2%80%9D,%20%E2%80%9Ccity%E2%80%9D:%20%E2%80%9CNYC%E2%80%9D%7D%7D
 ```
 
