@@ -47,14 +47,6 @@ const SANDBOX = [
   SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
-/**
- * @return {!RegExp}
- * @private
- */
-const getAnalyticsEventTypePrefixRegex = once(
-  () => new RegExp(`^${ANALYTICS_EVENT_TYPE_PREFIX}`)
-);
-
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpRedBullPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
