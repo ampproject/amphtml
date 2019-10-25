@@ -362,6 +362,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         margin: '',
         isMultiSizeResponse: true,
       },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '',
+        isAlreadyCentered: true,
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '',
+        isAlreadyCentered: true,
+      },
     ].forEach((testCase, testNum) => {
       it(`should adjust slot CSS after expanding width #${testNum}`, () => {
         if (testCase.isMultiSizeResponse) {
@@ -388,6 +402,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           parentWidth: testCase.parentWidth,
           parentStyle: {
             [`padding${dirStr}`]: '50px',
+            ['textAlign']: testCase.isAlreadyCentered ? 'center' : 'start',
           },
         };
         impl.win.document.body.dir = testCase.direction;
