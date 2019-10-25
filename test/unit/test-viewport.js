@@ -1651,7 +1651,8 @@ describe('createViewport', () => {
       it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
         win.parent = {};
         sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
-        sandbox.stub(viewer, 'hasCapability')
+        sandbox
+          .stub(viewer, 'hasCapability')
           .withArgs('iframeScroll')
           .returns(true);
         installViewportServiceForDoc(ampDoc);
