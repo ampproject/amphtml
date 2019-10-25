@@ -42,11 +42,13 @@ Displays an <a href="https://www.redbull.com/">Red Bull</a> video.
 
 ```html
 <amp-redbull-player
-      id="rbvideo"
-      data-videoid="rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT"
-      data-skin="com"
-      height="360"
-      width="640"></amp-redbull-player>
+  id="rbvideo"
+  data-videoid="rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT"
+  data-skin="com"
+  data-locale="en"
+  height="360"
+  width="640"
+></amp-redbull-player>
 ```
 
 ## Attributes
@@ -57,8 +59,12 @@ Displays an <a href="https://www.redbull.com/">Red Bull</a> video.
     <td>The video ID</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>data-skin (required)</strong></td>
-    <td>The ID of the skin to display.</td>
+    <td width="40%"><strong>data-skin (optional)</strong></td>
+    <td>The ID of the skin to display. Defaults to com</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-locale (optional)</strong></td>
+    <td>String value for the tracking configuration.</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>id (optional)</strong></td>
