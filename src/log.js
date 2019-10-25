@@ -121,11 +121,11 @@ function externalMessageUrlParts(id, interpolatedParts) {
 
   const externalUrlMessage = `More info at ${externalUrl}`;
 
-  if (!optAssociatedElement) {
-    return [externalUrlMessage];
+  if (optAssociatedElement) {
+    return [`${externalUrlMessage} %s`, optAssociatedElement];
   }
 
-  return [`${externalUrlMessage} %s`, optAssociatedElement];
+  return [externalUrlMessage];
 }
 
 /**
