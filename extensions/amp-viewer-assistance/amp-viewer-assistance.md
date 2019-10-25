@@ -76,10 +76,9 @@ The `amp-viewer-assistance` extension currently has two functions that can be in
 
 A valid `amp-viewer-assistance.updateActionState` payload can either be an `update` object of the format:
 
-```
+```js
 {
-  "actionStatus": "COMPLETED_ACTION_STATUS" | "ACTIVE_ACTION_STATUS" |
-      "FAILED_ACTION_STATUS",
+  "actionStatus": "COMPLETED_ACTION_STATUS" | "ACTIVE_ACTION_STATUS" | "FAILED_ACTION_STATUS",
   "result": { ... }, // optional field used with COMPLETED_ACTION_STATUS
 }
 ```
@@ -180,7 +179,7 @@ Here are some examples:
 
 yields a POST request body:
 
-```
+```http
 ampViewerAuthToken=AUTH_TOKEN_FROM_VIEWER_ASSISTANCE
 ```
 
@@ -204,7 +203,7 @@ ampViewerAuthToken=AUTH_TOKEN_FROM_VIEWER_ASSISTANCE
 
 yields a POST request form-data payload of:
 
-```
+```http
 --------formDataBoundary--------
 Content Disposition: form-data; name="name"
 Default name value

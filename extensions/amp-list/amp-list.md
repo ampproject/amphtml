@@ -355,7 +355,7 @@ This attribute accepts two values: "auto" or "manual". Setting the value of this
 
 This attribute specifies a field name in the returned data that will give the url of the next items to load. If this attribute is not specified, `<amp-list>` expects the json payload to have the `load-more-src` field, which corresponds to the next url to load. In the case where this field is called something else, you can specify the name of that field via the `load-more-bookmark` field.E.g. In the following sample payload, we would specify `load-more-bookmark="next"`.
 
-```
+```js
 { "items": [...], "next": "https://url.to.load" }
 ```
 
