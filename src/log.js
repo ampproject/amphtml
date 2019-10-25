@@ -100,10 +100,11 @@ export function overrideLogLevel(level) {
 const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
 
 /**
- * Gets an argument set to print a URL containing a message on amp.dev.
- * The first interpolated element part will be appended to the message to
- * associate an error to an element in order to display the message on the page
- * on #development mode.
+ * Returns an argument set to print a URL containing a message on amp.dev
+ *
+ * If existent, the first element part will be appended at the end of the
+ * message. This associates them so that the message is rendered inside the
+ * element in #development mode.
  * @param {string} id
  * @param {!Array} interpolatedParts
  * @return {!Array}
@@ -111,20 +112,20 @@ const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
 function externalMessageUrlParts(id, interpolatedParts) {
   let optAssociatedElement;
 
-  const externalMessageUrl = interpolatedParts.reduce((prefix, part) => {
-    if (part && part.tagName) {
+  const externalUrl = interpolatedParts.reduce((prefix, part) => {
+    if (!optAssociatedElement && part && part.tagName) {
       optAssociatedElement = part;
     }
     return `${prefix}&s[]=${encodeURIComponent(messagePartToString(part))}`;
   }, `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`);
 
-  const externalMessageUrlMessage = `More info at ${externalMessageUrl}`;
+  const externalUrlMessage = `More info at ${externalUrl}`;
 
   if (!optAssociatedElement) {
-    return [externalMessageUrlMessage];
+    return [externalUrlMessage];
   }
 
-  return [`${externalMessageUrlMessage} %s`, optAssociatedElement];
+  return [`${externalUrlMessage} %s`, optAssociatedElement];
 }
 
 /**
