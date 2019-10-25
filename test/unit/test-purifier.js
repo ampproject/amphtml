@@ -224,7 +224,7 @@ describe
               '<a target="other">other</a>'
           )
         ).to.equal(
-          '<a target="_top">_self</a>' +
+          '<a target="_self">_self</a>' +
             '<a target="_top">_parent</a>' +
             '<a target="_top">_other</a>' +
             '<a target="_top">_OTHER</a>' +
@@ -803,9 +803,9 @@ describe('validateAttributeChange', () => {
   it('should validate a[target]', () => {
     expect(vac('a', 'target', '_top')).to.be.true;
     expect(vac('a', 'target', '_blank')).to.be.true;
+    expect(vac('a', 'target', '_self')).to.be.true;
     expect(vac('a', 'target', '')).to.be.false;
     expect(vac('a', 'target', null)).to.be.false;
-    expect(vac('a', 'target', '_self')).to.be.false;
     expect(vac('a', 'target', '_parent')).to.be.false;
   });
 

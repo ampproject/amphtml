@@ -30,6 +30,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {isAmphtml} from '../format';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -38,7 +39,7 @@ const TAG = 'navigation';
 const EVENT_TYPE_CLICK = 'click';
 /** @private @const {string} */
 const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
-const VALID_TARGETS = ['_top', '_blank'];
+const VALID_TARGETS = ['_top', '_blank', '_self'];
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';
@@ -270,6 +271,13 @@ export class Navigation {
       `Target '${target}' not supported.`
     );
 
+    if (target === '_self') {
+      userAssert(
+        !isAmphtml(win.document),
+        'Target _self is not supported on valid AMP documents.'
+      );
+    }
+
     // Resolve navigateTos relative to the source URL, not the proxy URL.
     url = urlService.getSourceUrl(url);
 
@@ -294,8 +302,11 @@ export class Navigation {
       }
     }
 
-    // Otherwise, perform normal behavior of navigating the top frame.
-    win.top.location.href = url;
+    if (target === '_self') {
+      win.location.href = url;
+    } else {
+      win.top.location.href = url;
+    }
   }
 
   /**
