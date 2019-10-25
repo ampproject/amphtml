@@ -30,6 +30,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {isExperimentOn} from '../experiments';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
@@ -376,30 +377,30 @@ export class Navigation {
   handleClick_(element, e) {
     this.expandVarsForAnchor_(element);
 
-    let targetLocation = this.parseUrl_(element.href);
+    let toLocation = this.parseUrl_(element.href);
 
     // Handle AMP-to-AMP navigation and early-outs, if rel=amphtml.
-    if (this.handleA2AClick_(e, element, targetLocation)) {
+    if (this.handleA2AClick_(e, element, toLocation)) {
       return;
     }
 
     // Handle navigating to custom protocol and early-outs, if applicable.
-    if (this.handleCustomProtocolClick_(e, element, targetLocation)) {
+    if (this.handleCustomProtocolClick_(e, element, toLocation)) {
       return;
     }
 
-    const currentLocation = this.getLocation_();
+    const fromLocation = this.getLocation_();
     // Only apply anchor mutator if this is an external navigation.
     // Note that anchor mutators may theoretically change the navigation
     // from external to internal, so we re-parse the new targetLocation
     // in handleNavigation_().
-    if (getHrefMinusHash(targetLocation) != getHrefMinusHash(currentLocation)) {
+    if (getHrefMinusHash(toLocation) != getHrefMinusHash(fromLocation)) {
       this.applyAnchorMutators_(element, e);
-      targetLocation = this.parseUrl_(element.href);
+      toLocation = this.parseUrl_(element.href);
     }
 
     // Finally, handle normal click-navigation behavior.
-    this.handleNavigation_(e, element, targetLocation, currentLocation);
+    this.handleNavigation_(e, element, toLocation, fromLocation);
   }
 
   /**
@@ -529,24 +530,82 @@ export class Navigation {
    * Handles click-navigation on a non-A2A, standard-protocol link.
    * @param {!Event} e
    * @param {!Element} element
-   * @param {!Location} targetLocation
-   * @param {!Location} currentLocation
+   * @param {!Location} toLocation
+   * @param {!Location} fromLocation
    * @private
    */
-  handleNavigation_(e, element, targetLocation, currentLocation) {
-    const target = getHrefMinusHash(targetLocation);
-    const current = getHrefMinusHash(currentLocation);
+  handleNavigation_(e, element, toLocation, fromLocation) {
+    const to = getHrefMinusHash(toLocation);
+    const from = getHrefMinusHash(fromLocation);
 
     // Handle same-page (hash) navigation separately.
-    if (targetLocation.hash && target == current) {
-      this.handleHashNavigation_(e, targetLocation, currentLocation);
+    if (toLocation.hash && to == from) {
+      this.handleHashNavigation_(e, toLocation, fromLocation);
     } else {
       // Otherwise, this is an other-page (external) navigation.
+      let target = (element.getAttribute('target') || '').toLowerCase();
+
       if (this.isEmbed_ || this.isInABox_) {
         // Target in the embed must be either _top or _blank (default).
-        const targetAttr = (element.getAttribute('target') || '').toLowerCase();
-        if (targetAttr != '_top' && targetAttr != '_blank') {
-          element.setAttribute('target', '_blank');
+        if (target != '_top' && target != '_blank') {
+          target = '_blank';
+          element.setAttribute('target', target);
+        }
+      }
+
+      // Safari 13: Temporarily remove viewer query params from iframe
+      // (e.g. amp_js_v, usqp) to prevent document.referrer from being reduced
+      // to eTLD+1 (e.g. ampproject.org).
+      const {win} = this.ampdoc;
+      const platform = Services.platformFor(win);
+      const viewer = Services.viewerForDoc(element);
+      if (
+        isExperimentOn(
+          this.ampdoc.win,
+          'remove-viewer-query-params-on-navigate'
+        ) &&
+        fromLocation.search &&
+        platform.isSafari() &&
+        platform.getMajorVersion() >= 13 &&
+        viewer.isProxyOrigin() &&
+        viewer.isEmbedded()
+      ) {
+        dev().info(
+          TAG,
+          'Removing iframe query string before navigation:',
+          fromLocation.search
+        );
+        const original = fromLocation.href;
+        const noQuery = `${fromLocation.origin}${fromLocation.pathname}${fromLocation.hash}`;
+        win.history.replaceState(null, '', noQuery);
+
+        const restoreQuery = () => {
+          const currentHref = win.location.href;
+          if (currentHref == noQuery) {
+            dev().info(TAG, 'Restored iframe URL with query string:', original);
+            win.history.replaceState(null, '', original);
+          } else {
+            dev().error(
+              TAG,
+              'Unexpected iframe URL change:',
+              currentHref,
+              noQuery
+            );
+          }
+        };
+
+        // For blank_, restore query params after the new page opens.
+        if (target === '_blank') {
+          win.setTimeout(restoreQuery, 0);
+        } else {
+          // For _top etc., wait until page is restored from page cache (bfcache).
+          // https://webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
+          win.addEventListener('pageshow', function onPageShow(e) {
+            if (e.persisted) {
+              restoreQuery();
+              win.removeEventListener('pageshow', onPageShow);
+            }
+          });
         }
       }
     }
@@ -555,17 +614,17 @@ export class Navigation {
   /**
    * Handles clicking on an internal link
    * @param {!Event} e
-   * @param {!Location} targetLocation
-   * @param {!Location} currentLocation
+   * @param {!Location} toLocation
+   * @param {!Location} fromLocation
    * @private
    */
-  handleHashNavigation_(e, targetLocation, currentLocation) {
+  handleHashNavigation_(e, toLocation, fromLocation) {
     // Anchor navigation in IE doesn't change input focus, which can result in
     // confusing behavior e.g. when pressing "tab" button.
     // @see https://humanwhocodes.com/blog/2013/01/15/fixing-skip-to-content-links/
     // @see https://github.com/ampproject/amphtml/issues/18671
     if (Services.platformFor(this.ampdoc.win).isIe()) {
-      const id = targetLocation.hash.substring(1);
+      const id = toLocation.hash.substring(1);
       const elementWithId = this.ampdoc.getElementById(id);
       if (elementWithId) {
         if (
@@ -589,7 +648,7 @@ export class Navigation {
     }
 
     // Look for the referenced element.
-    const hash = targetLocation.hash.slice(1);
+    const hash = toLocation.hash.slice(1);
     let el = null;
     if (hash) {
       const escapedHash = escapeCssSelectorIdent(hash);
@@ -602,8 +661,8 @@ export class Navigation {
 
     // If possible do update the URL with the hash. As explained above
     // we do `replace` to avoid messing with the container's history.
-    if (targetLocation.hash != currentLocation.hash) {
-      this.history_.replaceStateForTarget(targetLocation.hash).then(() => {
+    if (toLocation.hash != fromLocation.hash) {
+      this.history_.replaceStateForTarget(toLocation.hash).then(() => {
         this.scrollToElement_(el, hash);
       });
     } else {
