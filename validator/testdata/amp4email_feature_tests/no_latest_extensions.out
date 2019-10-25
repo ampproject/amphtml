@@ -37,6 +37,8 @@ amp4email_feature_tests/no_latest_extensions.html:28:2 The attribute 'src' in ta
 >>   ^~~~~~~~~
 amp4email_feature_tests/no_latest_extensions.html:29:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-carousel] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-carousel-latest.js'. (see https://amp.dev/documentation/components/amp-carousel)
 |    <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-latest.js"></script>
+>>   ^~~~~~~~~
+amp4email_feature_tests/no_latest_extensions.html:30:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-fit-text] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-fit-text-latest.js'. (see https://amp.dev/documentation/components/amp-fit-text)
 |    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-latest.js"></script>
 >>   ^~~~~~~~~
 amp4email_feature_tests/no_latest_extensions.html:31:2 The attribute 'src' in tag 'SCRIPT[custom-element=amp-form] (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-form-latest.js'. (see https://amp.dev/documentation/components/amp-form)
