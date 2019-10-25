@@ -825,6 +825,7 @@ describes.sandboxed('Extensions', {}, () => {
         const script = doc.head.querySelector('[custom-element="amp-test"]');
         expect(script.getAttribute('data-script')).to.equal('amp-test');
         expect(script.getAttribute('async')).to.equal('');
+        expect(script.getAttribute('crossorigin')).to.equal('anonymous');
       });
 
       it('should insert special-case for amp-embed script', () => {
