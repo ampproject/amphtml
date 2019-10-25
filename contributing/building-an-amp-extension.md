@@ -45,7 +45,7 @@ extension. For example, video players are also suffixed with `-player`
 You create your extension's files inside the `extensions/` directory.
 The directory structure is below:
 
-```text
+```sh
 /extensions/amp-my-element/
 ├── 0.1/
 |   ├── test/
@@ -57,8 +57,7 @@ The directory structure is below:
 ├── validator-amp-my-element.protoascii  # Validator rules (req'd)
 ├── amp-my-element.md                    # Element's main documentation (req'd)
 └── More documentation in .md files (optional)
-└── OWNERS # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/CODE_OWNERSHIP.md) (req'd)
-
+└── OWNERS                               # Owners file. Primary contact(s) for the extension. (req'd)
 ```
 
 In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.

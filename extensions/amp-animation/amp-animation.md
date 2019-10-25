@@ -127,7 +127,7 @@ supports condition will match the current environment.
 
 In some cases it's convenient to combine multiple [conditional animations](#conditions) with an optional default into a single animation. This can be done using `switch` animation statement in this format:
 
-```
+```js
 {
   // Optional selector, vars, timing
   ...
@@ -151,7 +151,7 @@ In `switch` animation, the candidates are evaluated in the defined order and the
 
 For instance, this animation runs motion-path animation if supported and falls back to transform:
 
-```
+```json
 {
   "selector": "#target1",
   "duration": "1s",
@@ -159,12 +159,12 @@ For instance, this animation runs motion-path animation if supported and falls b
     {
       "supports": "offset-distance: 0",
       "keyframes": {
-        "offsetDistance": [0, '300px']
+        "offsetDistance": [0, "300px"]
       }
     },
     {
       "keyframes": {
-        "transform": [0, '300px']
+        "transform": [0, "300px"]
       }
     }
   ]
@@ -580,7 +580,7 @@ The `index()` function returns an index of the current target element in the ani
 
 Among other things, this property can be combined with `calc()` expressions and be used to create staggered effect. For instance:
 
-```
+```json
 {
   "selector": ".class-x",
   "delay": "calc(200ms * index())"
@@ -591,7 +591,7 @@ Among other things, this property can be combined with `calc()` expressions and 
 
 The `length()` function returns the number of target elements in the animation effect. This is most relevant when combined with `index()`:
 
-```
+```json
 {
   "selector": ".class-x",
   "delay": "calc(200ms * (length() - index()))"
@@ -604,7 +604,7 @@ The `rand()` function returns a random CSS value. There are two forms.
 
 The form without arguments simply returns the random number between 0 and 1.
 
-```
+```json
 {
   "delay": "calc(10s * rand())"
 }
@@ -612,7 +612,7 @@ The form without arguments simply returns the random number between 0 and 1.
 
 The second form has two arguments and returns the random value between these two arguments.
 
-```
+```json
 {
   "delay": "rand(5s, 10s)"
 }
@@ -632,7 +632,7 @@ The `width()` and `height()` are epsecially useful for transforms. The `left`, `
 
 These functions can be combined with `calc()`, `var()` and other CSS expressions. For instance:
 
-```
+```json
 {
   "transform": "translateX(calc(width('#container') + 10px))"
 }
@@ -648,7 +648,7 @@ The `num()` function returns a number representation of a CSS value. For instanc
 
 For instance, the following expression calculates the delay in seconds proportional to the element's width:
 
-```
+```json
 {
   "delay": "calc(1s * num(width()) / 100)"
 }

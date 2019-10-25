@@ -70,7 +70,7 @@ The `<amp-analytics>`'s `cookies` feature can be used to extract information fro
 
 A `cookies` example configuration looks like
 
-```
+```js
 'cookies': {
   'enabled': true,
   'cookieName1': {
