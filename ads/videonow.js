@@ -15,6 +15,7 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
+import {parseJson} from '../src/json';
 import {tryDecodeUriComponent} from '../src/url';
 
 /**
@@ -30,7 +31,7 @@ export function videonow(global, data) {
   let vnModule = '';
 
   if (global && global.name) {
-    const p = JSON.parse(global.name);
+    const p = parseJson(global.name);
     if (
       p &&
       p.attributes &&
