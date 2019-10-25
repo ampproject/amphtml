@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const colors = require('ansi-colors');
 const log = require('fancy-log');
 const through = require('through2');
+const {red, cyan} = require('ansi-colors');
 
 /**
  * Searches for the identifier "$$module$", which Closure uses to uniquely
@@ -41,15 +41,11 @@ exports.checkForUnknownDeps = function() {
     ];
 
     log(
-      colors.red(
-        'Unknown dependency found in ' + file.relative + ': ' + match[0]
-      )
+      red('Error:'),
+      `Unknown dependency ${cyan(match[0])} found in ${cyan(file.relative)}`
     );
-    cb(
-      new Error(
-        'Unknown dependency found in ' + file.relative + ': ' + match[0]
-      ),
-      file
-    );
+    const err = new Error('Compilation failed due to unknown dependency');
+    err.showStack = false;
+    cb(err, file);
   });
 };
