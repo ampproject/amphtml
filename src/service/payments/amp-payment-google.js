@@ -18,9 +18,8 @@ import {
   AsyncInputAttributes,
   AsyncInputClasses,
 } from '../../../src/async-input';
-import {PaymentsClient} from '../../../third_party/payjs/src/payjs';
+import {createButtonHelper,PaymentsClient} from '../../../third_party/aog-payjs/payjs';
 import {Services} from '../../services';
-import {createButtonHelper} from '../../../third_party/payjs/src/button';
 import {createCustomEvent} from '../../event-helper';
 import {getServiceForDoc} from '../../service';
 import {isJsonScriptTag} from '../../dom';
