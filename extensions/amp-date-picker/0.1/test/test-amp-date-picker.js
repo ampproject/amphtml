@@ -37,8 +37,7 @@ describes.realWin(
     "templates": [{
       "id": "srcTemplate",
       "dates": [
-        "2018-01-01",
-        "FREQ=WEEKLY;DTSTART=20180101T080000Z;WKST=SU;BYDAY=WE"
+        "2018-01-01"
       ]
     }, {
       "id": "defaultTemplate"
@@ -233,7 +232,7 @@ describes.realWin(
 
     describe('templates', () => {
       describe('element templates', () => {
-        it('should parse RRULE and date templates', () => {
+        it('should parse date templates', () => {
           const template = createDateTemplate('{{template}}', {
             dates: '2018-01-01',
           });
@@ -246,7 +245,7 @@ describes.realWin(
       });
 
       describe('src templates', () => {
-        it('should parse RRULE and date templates', function() {
+        it('should parse date templates', function() {
           this.timeout(4000);
           const template = createDateTemplate('{{val}}', {
             dates: '2018-01-01',
@@ -264,7 +263,6 @@ describes.realWin(
           );
           expect(srcTemplates[0].dates.contains('2018-01-01')).to.be.true;
           expect(srcTemplates[0].dates.contains('2018-01-02')).to.be.false;
-          expect(srcTemplates[0].dates.contains('2018-01-03')).to.be.true;
           expect(srcTemplates[0].template).to.equal(template);
           expect(srcDefaultTemplate).to.equal(defaultTemplate);
         });

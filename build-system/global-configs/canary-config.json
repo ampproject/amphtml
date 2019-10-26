@@ -27,7 +27,7 @@
   "amp-list-load-more": 1,
   "amp-list-viewport-resize": 1,
   "amp-playbuzz": 1,
-  "amp-sidebar-swipe-to-dismiss": 0.1,
+  "amp-sidebar-swipe-to-dismiss": 1,
   "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
   "ampdoc-closest": 1,
@@ -46,5 +46,6 @@
   "macro-after-long-task": 1,
   "pump-early-frame": 1,
   "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
+  "remove-viewer-query-params-on-navigate": 1,
   "version-locking": 1
 }
