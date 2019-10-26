@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Provides input masking capabilities to inputs in AMP forms
 ---
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -118,20 +119,23 @@ and may be listed separated by spaces:
 
 As an example, this masked input will allow the user to enter a
 Canadian postal code. The space will be automatically added for the user.
+
 ```html
-<input mask="L0L_0L0" placeholder="A1A 1A1" type="text">
+<input mask="L0L_0L0" placeholder="A1A 1A1" type="text" />
 ```
 
 This mask allows a user to enter either a 5-digit or a 9-digit US ZIP code.
 The hyphen will be automatically added as the user types the sixth digit.
+
 ```html
-<input mask="00000 00000-0000" placeholder="10001" type="tel">
+<input mask="00000 00000-0000" placeholder="10001" type="tel" />
 ```
 
 This mask accepts a North American phone number.
 The characters "+", "1", " ", "(", ")" and "-" will be automatically added as the user types.
+
 ```html
-<input type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555">
+<input type="tel" mask="+1_(000)_000-0000" placeholder="+1 (555) 555-5555" />
 ```
 
 The following named masks are supported:
@@ -154,7 +158,7 @@ As an example, this masked input will allow the user to enter a payment card num
 Space characters " " will be automatically added as the user types.
 
 ```html
-<input type="tel" mask="payment-card" placeholder="0000 0000 0000 0000">
+<input type="tel" mask="payment-card" placeholder="0000 0000 0000 0000" />
 ```
 
 #### mask-trim-zeros
@@ -174,20 +178,32 @@ The `mask-trim-zeros` attribute does not affect named masks.
 Specifies how the form will submit the input value.
 
 - **raw** (default): Outputs the value as-is with all special characters.
-- **alphanumeric**: Only outputs alphanumeric characters in the mask. The form will add a `type="hidden"` input with the masked input's `name` or `id` attribute with  `-unmasked` appended.
+- **alphanumeric**: Only outputs alphanumeric characters in the mask. The form will add a `type="hidden"` input with the masked input's `name` or `id` attribute with `-unmasked` appended.
 
 Example:
 
 Here, the `mask-output` output attribute is set to `raw`.
 
 ```html
-<input mask="+\1_(000)_000-0000" mask-output="raw" name="phone" type="tel" placeholder="+1 (555) 555-5555">
+<input
+  mask="+\1_(000)_000-0000"
+  mask-output="raw"
+  name="phone"
+  type="tel"
+  placeholder="+1 (555) 555-5555"
+/>
 ```
 
 If the `mask-output` attribute is missing, the default is `raw`
+
 ```html
 <!-- missing `mask-output`, which is equivalent to `mask-output="raw"` -->
-<input mask="+\1_(000)_000-0000" name="phone" type="tel" placeholder="+1 (555) 555-5555">
+<input
+  mask="+\1_(000)_000-0000"
+  name="phone"
+  type="tel"
+  placeholder="+1 (555) 555-5555"
+/>
 ```
 
 When `mask-output` is set to `raw`, the form will submit the `input` value as-is. For example, if the input contains `+1 (800) 123-4567`, the form will submit the following value:
@@ -199,10 +215,17 @@ When `mask-output` is set to `raw`, the form will submit the `input` value as-is
 Here, the `mask-output` output attribute is set to `alphanumeric`.
 
 ```html
-<input mask="+\1_(000)_000-0000" mask-output="alphanumeric" name="phone" type="tel" placeholder="+1 (555) 555-5555">
+<input
+  mask="+\1_(000)_000-0000"
+  mask-output="alphanumeric"
+  name="phone"
+  type="tel"
+  placeholder="+1 (555) 555-5555"
+/>
 ```
 
 When `mask-output` is set to `raw`, the form will submit the `input` value as-is, and the form will add a hidden input. The hidden input will have the alphanumeric characters from the original input. Its `name` will be the original input's name with `-unmasked` appended. For example, if the input contains `+1 (800) 123-4567`, the form will submit the following values:
+
 ```json
 {
   "phone": "+1 (800) 123-4567",
@@ -211,4 +234,5 @@ When `mask-output` is set to `raw`, the form will submit the `input` value as-is
 ```
 
 ## Validation
+
 See [amp-inputmask rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-inputmask/validator-amp-inputmask.protoascii) in the AMP validator specification.
