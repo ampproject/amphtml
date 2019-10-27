@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {calculateAdsHeight} from './monetization-utils';
 import {getConsentData} from './consent-util';
 import {handleCompanionDisplay} from './companion/display';
 import {handleCompanionVideo} from './companion/video';
@@ -27,13 +26,13 @@ export function handleCompanionAds(media, apesterElement) {
   const monetizationSettings = media['campaignData'];
   if (monetizationSettings && !monetizationSettings.disabledAmpCompanionAds) {
     return getConsentData(apesterElement).then(consentData => {
-      const displayAdDimension = handleCompanionDisplay(media, apesterElement);
-      const videoAdDimension = handleCompanionVideo(
+      const displayAdHeight = handleCompanionDisplay(media, apesterElement);
+      const videoAdHeight = handleCompanionVideo(
         media,
         apesterElement,
         consentData
       );
-      return calculateAdsHeight([displayAdDimension, videoAdDimension]);
+      return displayAdHeight + videoAdHeight;
     });
   }
   return Promise.resolve();

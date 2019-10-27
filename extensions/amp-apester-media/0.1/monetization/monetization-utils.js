@@ -13,17 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 export const MARGIN_AD_HEIGHT = 10;
-
-/**
- * @param {Array} ads
- * @return {number}
- */
-export function calculateAdsHeight(ads) {
-  return ads
-    .filter(ad => ad)
-    .reduce((accumulator, ad) => {
-      return MARGIN_AD_HEIGHT * 2 + accumulator + ad.height;
-    }, 0);
-}

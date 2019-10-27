@@ -18,7 +18,6 @@ import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {calculateAdsHeight} from './monetization/monetization-utils';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -29,9 +28,8 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
-import {getAdsDimension, handleCompanionAds} from './monetization';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {getValueForExpr} from '../../../src/json';
+import {handleCompanionAds} from './monetization';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 /** @const */

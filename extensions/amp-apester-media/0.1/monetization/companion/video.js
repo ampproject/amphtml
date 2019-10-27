@@ -24,12 +24,12 @@ import {setStyle} from '../../../../../src/style';
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
  * @param {!JsonObject} consentObj
- * @return {?JsonObject}
+ * @return {number}
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
   const adInfo = getVideoAdInfo(media);
   if (!isVideoAdShouldShow(adInfo)) {
-    return;
+    return 0;
   }
   const {companionCampaignOptions, videoSettings, position} = adInfo;
   const macros = getSrMacros(
@@ -45,7 +45,8 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
     apesterElement
   );
 
-  return videoAdSize;
+  const heightAdWithMargin = MARGIN_AD_HEIGHT * 2 + videoAdSize.height;
+  return heightAdWithMargin;
 }
 
 /**
@@ -135,17 +136,6 @@ function constructCompanionSrElement(
     : apesterElement.insertBefore(ampAd, apesterElement.firstChild);
 
   return size;
-}
-
-/**
- * @param {AmpElement} apesterElement
- * @param {JsonObject} adInfo
- * @return {{height: number, width: number}}
- */
-export function getCompanionVideoAdSizeIfVideoAllowed(apesterElement, adInfo) {
-  if (isVideoAdShouldShow(adInfo)) {
-    return getCompanionVideoAdSize(apesterElement);
-  }
 }
 
 /**
