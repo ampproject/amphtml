@@ -22,13 +22,14 @@ const allowedAdProvider = 'gdt';
 /**
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
- * @return {?Element}
+ * @return {?JsonObject}
  */
 export function handleCompanionDisplay(media, apesterElement) {
   const adInfo = getDisplayAdInfo(media);
   if (adInfo) {
     const {size, slot} = adInfo;
     constructCompanionDisplayAd(slot, size, apesterElement);
+    return size;
   }
 }
 

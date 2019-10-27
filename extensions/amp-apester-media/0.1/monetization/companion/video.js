@@ -38,14 +38,14 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
     apesterElement,
     consentObj
   );
-  const videoAd = constructCompanionSrElement(
+  const videoAdSize = constructCompanionSrElement(
     videoSettings['videoTag'],
     position,
     /** @type {!JsonObject} */ (macros),
     apesterElement
   );
 
-  return {videoAd, position};
+  return videoAdSize;
 }
 
 /**
@@ -108,7 +108,7 @@ function getCompanionPosition(video) {
  * @param {string} position
  * @param {!JsonObject} macros
  * @param {AmpElement} apesterElement
- * @return {ampAd}
+ * @return {JsonObject}
  */
 function constructCompanionSrElement(
   videoTag,
@@ -134,7 +134,7 @@ function constructCompanionSrElement(
     ? apesterElement.appendChild(ampAd)
     : apesterElement.insertBefore(ampAd, apesterElement.firstChild);
 
-  return ampAd;
+  return size;
 }
 
 /**

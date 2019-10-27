@@ -27,26 +27,34 @@ import {dev} from '../../../../src/log';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 
 const TAG = 'amp-apester-media';
+
+const awaitPromiseTimeout = response => {
+  return new Promise(resolve => {
+    const wait = setTimeout(() => {
+      clearTimeout(wait);
+      resolve(response);
+    }, 3000);
+  });
+};
 /**
  * @param {AmpElement} apesterElement
  * @return {Promise<!JsonObject>}
  * */
 export function getConsentData(apesterElement) {
-  const consentStatePromise = getConsentPolicyState(
-    apesterElement,
-    'default'
-  ).catch(err => {
+  const consentStatePromise = Promise.race([
+    getConsentPolicyState(apesterElement, 'default'),
+    awaitPromiseTimeout(CONSENT_POLICY_STATE.UNKNOWN),
+  ]).catch(err => {
     dev().error(TAG, 'Error determining consent state', err);
     return CONSENT_POLICY_STATE.UNKNOWN;
   });
-
-  const consentStringPromise = getConsentPolicyInfo(
-    apesterElement,
-    'default'
-  ).catch(err => {
-    dev().error(TAG, 'Error determining consent string', err);
-    return null;
-  });
+  const consentStringPromise = Promise.race([
+    getConsentPolicyInfo(apesterElement, 'default').catch(err => {
+      dev().error(TAG, 'Error determining consent string', err);
+      return null;
+    }),
+    awaitPromiseTimeout(),
+  ]);
 
   return Promise.all([consentStatePromise, consentStringPromise]).then(
     consentDataResponse => {

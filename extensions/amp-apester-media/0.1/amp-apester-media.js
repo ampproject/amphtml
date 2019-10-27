@@ -18,11 +18,6 @@ import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
-import {
-  addPlaceHolderAds,
-  getAdsDimension,
-  handleCompanionAds,
-} from './monetization';
 import {calculateAdsHeight} from './monetization/monetization-utils';
 import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -34,6 +29,7 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
+import {getAdsDimension, handleCompanionAds} from './monetization';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {getValueForExpr} from '../../../src/json';
 import {removeElement} from '../../../src/dom';
@@ -355,17 +351,17 @@ class AmpApesterMedia extends AMP.BaseElement {
         this.iframe_ = iframe;
         this.registerToApesterEvents_();
 
-        const adsDimension = getAdsDimension(media, this.element);
         return vsync
           .mutatePromise(() => {
             const overflow = this.constructOverflow_();
             unitContainer.appendChild(iframe);
             iframe.appendChild(overflow);
             this.element.appendChild(unitContainer);
-            addPlaceHolderAds(this.element, adsDimension, unitContainer);
-            return handleCompanionAds(media, this.element);
           })
           .then(() => {
+            return handleCompanionAds(media, this.element);
+          })
+          .then(adsDimension => {
             return this.loadPromise(iframe).then(() => {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {
@@ -387,16 +383,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                 if (media && media['data'] && media['data']['size']) {
                   height = media['data']['size']['height'];
                 }
-                const videoSize = getValueForExpr(adsDimension, 'video.size');
-                const displayAdSize = getValueForExpr(
-                  adsDimension,
-                  'displayAdSize'
-                );
-                const adsHeight = calculateAdsHeight([
-                  displayAdSize,
-                  videoSize,
-                ]);
-                height += adsHeight;
+                height += adsDimension;
                 if (height !== this.height_) {
                   this.height_ = height;
                   if (this.random_) {

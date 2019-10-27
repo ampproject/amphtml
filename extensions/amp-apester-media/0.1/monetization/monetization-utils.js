@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-const DISPLAY_AD_ELEMENT_ID = 'apester-companion-ad-display';
-const MARGIN_AD_HEIGHT = 10;
+export const MARGIN_AD_HEIGHT = 10;
 
 /**
  * @param {Array} ads
@@ -27,19 +26,4 @@ export function calculateAdsHeight(ads) {
     .reduce((accumulator, ad) => {
       return MARGIN_AD_HEIGHT * 2 + accumulator + ad.height;
     }, 0);
-}
-
-/**
- * @param {AmpElement} apesterElement
- * @param {Element} ampAd
- */
-export function addDisplayElement(apesterElement, ampAd) {
-  const placeholder = apesterElement
-    .getAmpDoc()
-    .getElementById(DISPLAY_AD_ELEMENT_ID);
-  if (placeholder) {
-    apesterElement.replaceChild(ampAd, placeholder);
-  } else {
-    apesterElement.appendChild(ampAd);
-  }
 }
