@@ -16,7 +16,9 @@
 
 import {Services} from '../../../../../src/services';
 const ALLOWED_AD_PROVIDER = 'sr';
+import {MARGIN_AD_HEIGHT} from '../monetization-utils';
 import {getValueForExpr} from '../../../../../src/json';
+import {setStyle} from '../../../../../src/style';
 
 /**
  * @param {!JsonObject} media
@@ -25,25 +27,11 @@ import {getValueForExpr} from '../../../../../src/json';
  * @return {?JsonObject}
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
-  const companionCampaignOptions = getValueForExpr(
-    media,
-    'campaignData.companionCampaignOptions'
-  );
-  const videoSettings = getValueForExpr(
-    media,
-    'campaignData.companionOptions.video'
-  );
-  const position = getCompanionPosition(videoSettings);
-  if (
-    !companionCampaignOptions ||
-    !videoSettings ||
-    !videoSettings['enabled'] ||
-    videoSettings['provider'] !== ALLOWED_AD_PROVIDER ||
-    !position ||
-    position === 'floating'
-  ) {
+  const adInfo = getVideoAdInfo(media);
+  if (!isVideoAdShouldShow(adInfo)) {
     return;
   }
+  const {companionCampaignOptions, videoSettings, position} = adInfo;
   const macros = getSrMacros(
     media,
     companionCampaignOptions['companionCampaignId'],
@@ -59,6 +47,44 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
 
   return {videoAd, position};
 }
+
+/**
+ * @param {!JsonObject} media
+ * @return {?JsonObject}
+ */
+export function getVideoAdInfo(media) {
+  const companionCampaignOptions = getValueForExpr(
+    media,
+    'campaignData.companionCampaignOptions'
+  );
+  const videoSettings = getValueForExpr(
+    media,
+    'campaignData.companionOptions.video'
+  );
+  const position = getCompanionPosition(videoSettings);
+
+  return {companionCampaignOptions, videoSettings, position};
+}
+
+/**
+ * @param {!JsonObject} adInfo
+ * @return {boolean}
+ */
+function isVideoAdShouldShow(adInfo) {
+  const {companionCampaignOptions, videoSettings, position} = adInfo;
+  if (
+    !companionCampaignOptions ||
+    !videoSettings ||
+    !videoSettings['enabled'] ||
+    videoSettings['provider'] !== ALLOWED_AD_PROVIDER ||
+    !position ||
+    position === 'floating'
+  ) {
+    return false;
+  }
+  return true;
+}
+
 /**
  * @param {!JsonObject} video
  * @return {?string}
@@ -102,18 +128,31 @@ function constructCompanionSrElement(
   ampAd.setAttribute('data-blade_player_id', videoTag);
   ampAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
   ampAd.classList.add('amp-apester-companion');
+  setStyle(ampAd, 'margin', `${MARGIN_AD_HEIGHT}px auto`);
 
   position === 'below'
     ? apesterElement.appendChild(ampAd)
     : apesterElement.insertBefore(ampAd, apesterElement.firstChild);
+
   return ampAd;
+}
+
+/**
+ * @param {AmpElement} apesterElement
+ * @param {JsonObject} adInfo
+ * @return {{height: number, width: number}}
+ */
+export function getCompanionVideoAdSizeIfVideoAllowed(apesterElement, adInfo) {
+  if (isVideoAdShouldShow(adInfo)) {
+    return getCompanionVideoAdSize(apesterElement);
+  }
 }
 
 /**
  * @param {AmpElement} apesterElement
  * @return {{height: number, width: number}}
  */
-function getCompanionVideoAdSize(apesterElement) {
+export function getCompanionVideoAdSize(apesterElement) {
   const adWidth = apesterElement./*REVIEW*/ clientWidth;
   const adRatio = 0.6;
   const adHeight = Math.ceil(adWidth * adRatio);

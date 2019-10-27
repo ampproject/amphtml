@@ -13,9 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  DISPLAY_AD_ELEMENT_ID,
+  MARGIN_AD_HEIGHT,
+  VIDEO_AD_ELEMENT_ID,
+  addDisplayElement,
+  addVideoElement,
+  createPlaceHolderElement,
+} from '../monetization/monetization-utils';
+import {
+  getCompanionVideoAdSizeIfVideoAllowed,
+  getVideoAdInfo,
+  handleCompanionVideo,
+} from './companion/video';
 import {getConsentData} from './consent-util';
-import {handleCompanionDisplay} from './companion/display';
-import {handleCompanionVideo} from './companion/video';
+import {getDisplayAdInfo, handleCompanionDisplay} from './companion/display';
+
 /**
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
@@ -25,11 +38,55 @@ export function handleCompanionAds(media, apesterElement) {
   const monetizationSettings = media['campaignData'];
   if (monetizationSettings && !monetizationSettings.disabledAmpCompanionAds) {
     return getConsentData(apesterElement).then(consentData => {
-      return [
-        handleCompanionDisplay(media, apesterElement),
-        handleCompanionVideo(media, apesterElement, consentData),
-      ];
+      handleCompanionDisplay(media, apesterElement);
+      handleCompanionVideo(media, apesterElement, consentData);
     });
   }
   return Promise.resolve();
+}
+
+/**
+ * @param {!JsonObject} media
+ * @param {AmpElement} apesterElement
+ * @return {JsonObject}
+ */
+export function getAdsDimension(media, apesterElement) {
+  const videoAdInfo = getVideoAdInfo(media);
+  const displayAdInfo = getDisplayAdInfo(media);
+
+  const videoAdSize = getCompanionVideoAdSizeIfVideoAllowed(
+    apesterElement,
+    videoAdInfo
+  );
+  const displayAdSize =
+    displayAdInfo && displayAdInfo.size ? displayAdInfo.size : undefined;
+
+  const {position} = videoAdInfo;
+  const adsSize = {displayAdSize, video: {size: videoAdSize, position}};
+  return adsSize;
+}
+
+/**
+ * @param {JsonObject} adsDimension
+ * @return {JsonObject}
+ */
+export function addPlaceHolderAds(adsDimension = {}) {
+  const {displayAdSize, video} = adsDimension;
+
+  if (adsDimension && adsDimension.displayAdSize) {
+    const displayAdPlaceholder = this.createPlaceHolderElement(
+      displayAdSize,
+      DISPLAY_AD_ELEMENT_ID
+    );
+    addDisplayElement(this.element, displayAdPlaceholder);
+  }
+
+  if (video) {
+    const {size, position} = video;
+    const videoAdPlaceholder = this.createPlaceHolderElement(
+      size,
+      VIDEO_AD_ELEMENT_ID
+    );
+    addVideoElement(this.element, videoAdPlaceholder, position);
+  }
 }
