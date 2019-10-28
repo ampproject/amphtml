@@ -27,8 +27,8 @@ import {setStyle} from '../../../../../src/style';
  * @return {number}
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
-  const adInfo = getVideoAdInfo(media);
-  if (!isVideoAdShouldShow(adInfo)) {
+  const adInfo = getVideoAdData(media);
+  if (!isVideoAdShouldPlay(adInfo)) {
     return 0;
   }
   const {companionCampaignOptions, videoSettings, position} = adInfo;
@@ -53,7 +53,7 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
  * @param {!JsonObject} media
  * @return {?JsonObject}
  */
-export function getVideoAdInfo(media) {
+export function getVideoAdData(media) {
   const companionCampaignOptions = getValueForExpr(
     media,
     'campaignData.companionCampaignOptions'
@@ -71,7 +71,7 @@ export function getVideoAdInfo(media) {
  * @param {!JsonObject} adInfo
  * @return {boolean}
  */
-function isVideoAdShouldShow(adInfo) {
+function isVideoAdShouldPlay(adInfo) {
   const {companionCampaignOptions, videoSettings, position} = adInfo;
   if (
     !companionCampaignOptions ||

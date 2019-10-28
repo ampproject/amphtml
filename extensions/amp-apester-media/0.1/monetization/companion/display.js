@@ -41,7 +41,7 @@ export function handleCompanionDisplay(media, apesterElement) {
  */
 export function getDisplayAdInfo(media) {
   const adInfo = getAdParameters_(media);
-  const isAdEnabled = isAdShouldShow(adInfo);
+  const isAdEnabled = isAdShouldPlay(adInfo);
   const {settings} = adInfo;
 
   if (isAdEnabled && settings) {
@@ -70,15 +70,15 @@ function getAdParameters_(media) {
  * @param {JsonObject} adInfo
  * @return {boolean}
  */
-function isAdShouldShow(adInfo) {
+function isAdShouldPlay(adInfo) {
   const {companionOptions, settings} = adInfo;
 
   const enabledDisplayAd = getValueForExpr(companionOptions, 'enabled');
-  return enabledDisplayAd &&
+  return (
+    enabledDisplayAd &&
     settings &&
     settings['bannerAdProvider'] === allowedAdProvider
-    ? true
-    : false;
+  );
 }
 
 /**

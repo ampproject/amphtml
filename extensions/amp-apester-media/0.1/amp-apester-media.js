@@ -359,7 +359,7 @@ class AmpApesterMedia extends AMP.BaseElement {
           .then(() => {
             return handleCompanionAds(media, this.element);
           })
-          .then(adsDimension => {
+          .then(adsHeight => {
             return this.loadPromise(iframe).then(() => {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {
@@ -381,7 +381,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                 if (media && media['data'] && media['data']['size']) {
                   height = media['data']['size']['height'];
                 }
-                height += adsDimension;
+                height += adsHeight;
                 if (height !== this.height_) {
                   this.height_ = height;
                   if (this.random_) {
