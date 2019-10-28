@@ -27,6 +27,7 @@ import {
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {toArray} from '../../../src/types';
 
 const TAG = 'amp-nested-menu';
 
@@ -81,13 +82,22 @@ export class AmpNestedMenu extends AMP.BaseElement {
       element.setAttribute('side', this.side_);
     }
 
-    this.registerAction('reset', this.reset_.bind(this));
+    this.registerAction('reset', this.reset.bind(this));
     element.addEventListener('click', this.clickHandler_);
     element.addEventListener('keydown', this.keydownHandler_);
   }
 
   /** @override */
   layoutCallback() {
+    this.registerSubmenuElements_();
+    return Promise.resolve();
+  }
+
+  /** Give submenu open/close buttons appropriate roles and
+   * add them to tab order for accessibility.
+   * @private
+   */
+  registerSubmenuElements_() {
     const submenuBtns = this.element.querySelectorAll(
       '[amp-nested-submenu-open],[amp-nested-submenu-close]'
     );
@@ -101,7 +111,6 @@ export class AmpNestedMenu extends AMP.BaseElement {
         'submenu open/close buttons should not have tap actions registered.'
       );
     });
-    return Promise.resolve();
   }
 
   /** @override */
@@ -127,7 +136,6 @@ export class AmpNestedMenu extends AMP.BaseElement {
       } else {
         this.handleSubmenuCloseClick_(submenuBtn);
       }
-      return;
     }
   }
 
@@ -177,11 +185,13 @@ export class AmpNestedMenu extends AMP.BaseElement {
       this.currentSubmenu_ = submenu;
       // move focus to close element after submenu fully opens.
       Services.timerFor(this.win).delay(() => {
-        // check that the close button is present and not in one of the child menus.
-        const submenuClose = scopedQuerySelector(
-          submenu,
-          '>[amp-nested-submenu-close], :not([amp-nested-submenu]) [amp-nested-submenu-close]'
+        // Find the first close button that is not in one of the child menus.
+        const submenuCloseCandidates = toArray(
+          submenu.querySelectorAll('[amp-nested-submenu-close]')
         );
+        const submenuClose = submenuCloseCandidates.filter(
+          candidate => this.getParentMenu_(candidate) == submenu
+        )[0];
         userAssert(
           submenuClose,
           `${TAG} requires each submenu to contain at least one submenu close button`
@@ -236,7 +246,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
   /**
    * Close all submenus and return to the root menu.
    */
-  reset_() {
+  reset() {
     while (this.element.hasAttribute('child-open')) {
       this.close_(this.currentSubmenu_);
     }

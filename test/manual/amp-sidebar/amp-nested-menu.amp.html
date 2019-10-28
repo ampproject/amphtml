@@ -23,9 +23,10 @@
     amp-sidebar {
       width: 300px;
     }
-    h4 {
+    h4, li > a {
       margin: 0;
       padding: 10px;
+      display: block;
     }
     h4 > b {
       float: right;
@@ -101,9 +102,7 @@
                 </div>
               </li>
               <li>
-                <h4>
-                  <a href="https://amp.dev/">just another link</a>
-                </h4>
+                <a href="https://amp.dev/">just another link</a>
               </li>
             </ul>
           </div>
@@ -150,19 +149,25 @@
               <li>
                 <h4 amp-nested-submenu-open>amp-list<b>></b></h4>
                 <div amp-nested-submenu>
-                  <amp-list src="https://api.myjson.com/bins/v2t98"
-                    layout="fixed-height" height="100" items="." single-item>
-                    <template type="amp-mustache">
-                      <ul>
-                        {{#items}}
-                        <li>
-                          <span tabindex="0">{{title}}</span>
-                        </li>
-                        {{/items}}
-                      </ul>
-                    </template>
-                  </amp-list>
-                  <h4 amp-nested-submenu-close>back</h4>
+                  <ul>
+                    <li>
+                      <h4 amp-nested-submenu-close>return to previous</h4>
+                    </li>
+                    <li>
+                      <amp-list src="https://api.myjson.com/bins/v2t98"
+                        layout="fixed-height" height="100" items="." single-item>
+                        <template type="amp-mustache">
+                          <ul>
+                            {{#items}}
+                            <li>
+                              <h4 tabindex="0">{{title}}</h4>
+                            </li>
+                            {{/items}}
+                          </ul>
+                        </template>
+                      </amp-list>
+                    </li>
+                  </ul>
                 </div>
               </li>
             </ul>

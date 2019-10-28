@@ -142,7 +142,7 @@ describes.realWin(
       expect(submenuEl1.hasAttribute('child-open')).to.be.true;
       expect(submenuEl1.hasAttribute('open')).to.be.true;
       expect(submenuEl3.hasAttribute('open')).to.be.true;
-      menuEl.implementation_.reset_();
+      menuEl.implementation_.reset();
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl1.hasAttribute('child-open')).to.be.false;
       expect(submenuEl1.hasAttribute('open')).to.be.false;
