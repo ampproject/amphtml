@@ -35,7 +35,6 @@ import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
 import {toggleExperiment} from '../../../../src/experiments';
 
-
 const PLATFORM_ID = 'subscribe.google.com';
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {

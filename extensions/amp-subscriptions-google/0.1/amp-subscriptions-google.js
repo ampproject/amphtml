@@ -112,7 +112,7 @@ export class GoogleSubscriptionsPlatform {
     );
 
     // Map AMP experiment to SwG experiment.
-    const swgExperiments = {}
+    const swgExperiments = {};
     if (isExperimentOn(ampdoc.win, 'gpay-api')) {
       swgExperiments.experiments = ['gpay-api'];
     }
@@ -125,7 +125,7 @@ export class GoogleSubscriptionsPlatform {
         fetcher: new AmpFetcher(ampdoc.win),
         configPromise: new Promise(resolve => (resolver = resolve)),
       },
-      swgExperiments,
+      swgExperiments
     );
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */
