@@ -728,7 +728,7 @@ export class AmpForm {
           request.xhrUrl,
           request.fetchOpt
         );
-        return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+        return this.ssrTemplateHelper_.ssr(
           this.form_,
           request,
           this.templatesForSsr_()
@@ -1164,7 +1164,7 @@ export class AmpForm {
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
         p = this.ssrTemplateHelper_
-          .renderTemplate(devAssert(container), data)
+          .applySsrOrCsrTemplate(devAssert(container), data)
           .then(rendered => {
             rendered.id = messageId;
             rendered.setAttribute('i-amphtml-rendered', '');

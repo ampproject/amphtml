@@ -46,5 +46,6 @@
   "macro-after-long-task": 1,
   "pump-early-frame": 1,
   "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
+  "remove-viewer-query-params-on-navigate": 1,
   "version-locking": 1
 }
