@@ -90,7 +90,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
       element
     );
 
-    this.tagId_ = element.getAttribute('id') || '';
+    this.tagId_ = element.getAttribute('id') || 'rbvideo';
     this.locale_ = element.getAttribute('data-locale') || 'global';
 
     installVideoManagerForDoc(element);

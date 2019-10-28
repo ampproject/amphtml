@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Red Bull video.
 ---
+
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -71,7 +72,6 @@ Displays an <a href="https://www.redbull.com/">Red Bull</a> video.
     <td>Selector for an amp-analytics triggers configuration.</td>
   </tr>
 </table>
-
 
 ## Validation
 
