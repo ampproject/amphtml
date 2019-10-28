@@ -50,8 +50,9 @@ export const AMP_LIVE_LIST_CUSTOM_SLOT_ID = 'AMP_LIVE_LIST_CUSTOM_SLOT_ID';
 export class LiveListManager {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {boolean} enrolledInAppendRandomExperiment
    */
-  constructor(ampdoc) {
+  constructor(ampdoc, enrolledInAppendRandomExperiment) {
     /** @const */
     this.ampdoc = ampdoc;
 
@@ -81,6 +82,9 @@ export class LiveListManager {
 
     /** @private @const {boolean} */
     this.isTransformed_ = isDocTransformed(ampdoc.getRootNode());
+
+    /** @private {boolean} */
+    this.enrolledInAppendRandomExperiment_ = enrolledInAppendRandomExperiment;
 
     // Only start polling when doc is ready and when the doc is visible.
     this.whenDocReady_().then(() => {
@@ -152,17 +156,19 @@ export class LiveListManager {
   fetchDocument_() {
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
-      url = addParamsToUrl(
-        url,
-        dict({
-          'amp_latest_update_time': String(this.latestUpdateTime_),
-          // AMP Caches do not always evict entries from their caches.
-          // A random number from the max safe range without BigInts helps add confidence the document is fresh.
-          'amp_random': String(
-            Math.floor(Math.random() * AMP_LIVE_LIST_MAX_RANDOM_NUMBER)
-          ),
-        })
-      );
+      const parameters = this.enrolledInAppendRandomExperiment_
+        ? dict({
+            'amp_latest_update_time': String(this.latestUpdateTime_),
+            // AMP Caches do not always evict entries from their caches.
+            // This experiment adds a random identifier to reduce cache hits for enrolled documents.
+            'amp_random': String(
+              Math.floor(Math.random() * AMP_LIVE_LIST_MAX_RANDOM_NUMBER)
+            ),
+          })
+        : dict({
+            'amp_latest_update_time': String(this.latestUpdateTime_),
+          });
+      url = addParamsToUrl(url, parameters);
     }
 
     if (this.isTransformed_) {

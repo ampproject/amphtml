@@ -23,6 +23,10 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
 import {childElementByAttr} from '../../../src/dom';
+import {
+  installOriginExperimentsForDoc,
+  originExperimentsForDoc,
+} from '../../../src/service/origin-experiments-impl';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -192,70 +196,72 @@ export class AmpLiveList extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
 
-    LiveListManager.forDoc(this.element).then(manager => {
-      this.manager_ = manager;
-      this.manager_.register(this.liveListId_, this);
+    return this.isExperimentEnabled_().then(enrolled => {
+      LiveListManager.forDoc(this.element, enrolled).then(manager => {
+        this.manager_ = manager;
+        this.manager_.register(this.liveListId_, this);
+      });
+
+      this.customSlotId_ = this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
+
+      this.updateSlot_ = userAssert(
+        this.getUpdateSlot_(this.element),
+        'amp-live-list must have an "update" slot.'
+      );
+
+      this.itemsSlot_ = userAssert(
+        this.getItemsSlot_(this.element),
+        'amp-live-list must have an "items" slot.'
+      );
+
+      this.paginationSlot_ = this.getPaginationSlot_(this.element);
+
+      this.liveListId_ = userAssert(
+        this.element.getAttribute('id'),
+        'amp-live-list must have an id.'
+      );
+
+      this.pollInterval_ = getNumberMaxOrDefault(
+        this.element.getAttribute('data-poll-interval'),
+        LiveListManager.getMinDataPollInterval()
+      );
+
+      const maxItems = this.element.getAttribute('data-max-items-per-page');
+      userAssert(
+        Number(maxItems) > 0 || this.element.hasAttribute('disable-pagination'),
+        'amp-live-list # %s must have data-max-items-per-page attribute with' +
+          ' numeric value. Found %s.',
+        this.liveListId_,
+        maxItems
+      );
+
+      const actualCount = [].slice
+        .call(this.itemsSlot_.children)
+        .filter(child => !child.hasAttribute('data-tombstone')).length;
+
+      this.maxItemsPerPage_ = Math.max(
+        getNumberMaxOrDefault(maxItems, 1),
+        actualCount
+      );
+
+      this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
+
+      // Make sure we hide the button
+      this.toggleUpdateButton_(false);
+      this.eachChildElement_(this.itemsSlot_, item => {
+        item.classList.add(classes.ITEM);
+      });
+
+      this.curNumOfLiveItems_ = this.countAndCacheValidItems_(
+        this.itemsSlot_,
+        true /** opt_cacheIds */
+      );
+
+      this.registerDefaultAction(this.updateAction_.bind(this), 'update');
+      if (!this.element.hasAttribute('aria-live')) {
+        this.element.setAttribute('aria-live', 'polite');
+      }
     });
-
-    this.customSlotId_ = this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
-
-    this.updateSlot_ = userAssert(
-      this.getUpdateSlot_(this.element),
-      'amp-live-list must have an "update" slot.'
-    );
-
-    this.itemsSlot_ = userAssert(
-      this.getItemsSlot_(this.element),
-      'amp-live-list must have an "items" slot.'
-    );
-
-    this.paginationSlot_ = this.getPaginationSlot_(this.element);
-
-    this.liveListId_ = userAssert(
-      this.element.getAttribute('id'),
-      'amp-live-list must have an id.'
-    );
-
-    this.pollInterval_ = getNumberMaxOrDefault(
-      this.element.getAttribute('data-poll-interval'),
-      LiveListManager.getMinDataPollInterval()
-    );
-
-    const maxItems = this.element.getAttribute('data-max-items-per-page');
-    userAssert(
-      Number(maxItems) > 0 || this.element.hasAttribute('disable-pagination'),
-      'amp-live-list # %s must have data-max-items-per-page attribute with' +
-        ' numeric value. Found %s.',
-      this.liveListId_,
-      maxItems
-    );
-
-    const actualCount = [].slice
-      .call(this.itemsSlot_.children)
-      .filter(child => !child.hasAttribute('data-tombstone')).length;
-
-    this.maxItemsPerPage_ = Math.max(
-      getNumberMaxOrDefault(maxItems, 1),
-      actualCount
-    );
-
-    this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
-
-    // Make sure we hide the button
-    this.toggleUpdateButton_(false);
-    this.eachChildElement_(this.itemsSlot_, item => {
-      item.classList.add(classes.ITEM);
-    });
-
-    this.curNumOfLiveItems_ = this.countAndCacheValidItems_(
-      this.itemsSlot_,
-      true /** opt_cacheIds */
-    );
-
-    this.registerDefaultAction(this.updateAction_.bind(this), 'update');
-    if (!this.element.hasAttribute('aria-live')) {
-      this.element.setAttribute('aria-live', 'polite');
-    }
   }
 
   /** @override */
@@ -492,6 +498,19 @@ export class AmpLiveList extends AMP.BaseElement {
       }
     });
     return count;
+  }
+
+  /**
+   * Check if amp-live-list-random identifier experiment is enabled
+   * through origin trial.
+   * @return {!Promise<boolean>}
+   */
+  isExperimentEnabled_() {
+    // Check if we are enabled by an origin trial
+    installOriginExperimentsForDoc(this.getAmpDoc());
+    return originExperimentsForDoc(this.element)
+      .getExperiments()
+      .then(trials => trials && trials.includes('amp-live-list-random'));
   }
 
   /**
