@@ -41,7 +41,6 @@ describes.realWin(
     let platform;
     let isIos = false;
     let isSafari = false;
-    let iOSVersion = 12;
 
     beforeEach(() => {
       win = env.win;
@@ -49,11 +48,9 @@ describes.realWin(
       doc.title = 'doc title';
       isIos = false;
       isSafari = false;
-      iOSVersion = 12;
       platform = Services.platformFor(win);
       sandbox.stub(platform, 'isIos').callsFake(() => isIos);
       sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
-      sandbox.stub(platform, 'getIosMajorVersion').callsFake(() => iOSVersion);
       sandbox./*OK*/ stub(win, 'open').returns(true);
     });
 
@@ -281,13 +278,12 @@ describes.realWin(
       });
     });
 
-    it('opens mailto: window in _top on iOS>=13 Webkit with recipient', () => {
+    it('opens mailto: window in _top on iOS Webview with recipient', () => {
       const params = {
         'recipient': 'sample@xyz.com',
       };
       isIos = true;
       isSafari = false;
-      iOSVersion = 13;
       return getShare('email', undefined, params, '_top').then(el => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
@@ -315,10 +311,9 @@ describes.realWin(
       });
     });
 
-    it('opens sms: window in _top on iOS>=13 Webkit', () => {
+    it('opens sms: window in _top on iOS Webview', () => {
       isIos = true;
       isSafari = false;
-      iOSVersion = 13;
       return getShare('sms').then(el => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
