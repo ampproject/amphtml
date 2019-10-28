@@ -61,7 +61,7 @@ Your player component is also shipped as an extension, so you should [become fam
 
 #### The `VideoManager`
 
-Every player component talks to a single [`VideoManager`] via standard methods (`VideoInterface`) and events (`VideoEvents`) defined in the [AMP video interface](../video-interface.js).
+Every player component talks to a single [`VideoManager`](../src/service/video-manager-impl.js) via standard methods (`VideoInterface`) and events (`VideoEvents`) defined in the [AMP video interface](../video-interface.js).
 
 This manager performs standard responsibilities for all videos, regardless of type:
 
