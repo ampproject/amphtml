@@ -33,7 +33,6 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
-import {isExperimentOn} from '../../../../third_party/subscriptions-project/swg';
 import {toggleExperiment} from '../../../../src/experiments';
 
 
@@ -151,7 +150,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should propagate experiment', () => {
-    expect(isExperimentOn(win, 'gpay-api')).to.be.true;
+    expect(platform.runtime_.payClient_.getType()).to.equal('PAYJS');
   });
 
   it('should proxy fetch via AMP fetcher', () => {
