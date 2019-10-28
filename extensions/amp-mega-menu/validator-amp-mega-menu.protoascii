@@ -30,7 +30,6 @@ tags: {  # <amp-mega-menu>
   # Mandate that component contains a nav element as descendant. This approach
   # only works because there is at most one <amp-mega-menu> in a document.
   requires: "amp-mega-menu nav"
-  unique: true
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-mega-menu"
   descendant_tag_list: "amp-mega-menu-allowed-descendants"
