@@ -35,5 +35,9 @@ export function install(win) {
     win.Promise.reject = Promise.reject;
     win.Promise.all = Promise.all;
     win.Promise.race = Promise.race;
+
+    win.Promise._overrideUnhandledExceptionHandler(error => {
+      win.__AMP_REPORT_ERROR(error);
+    });
   }
 }
