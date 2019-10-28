@@ -111,6 +111,11 @@ export class GoogleSubscriptionsPlatform {
       this.handleAnalyticsEvent_.bind(this)
     );
 
+    // Map AMP experiment to SwG experiment.
+    const swgExperiments = {}
+    if (isExperimentOn(ampdoc.win, 'gpay-api')) {
+      swgExperiments.experiments = ['gpay-api'];
+    }
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
@@ -119,12 +124,9 @@ export class GoogleSubscriptionsPlatform {
       {
         fetcher: new AmpFetcher(ampdoc.win),
         configPromise: new Promise(resolve => (resolver = resolve)),
-      }
+      },
+      swgExperiments,
     );
-    // Map AMP experiment to SwG experiment.
-    if (isExperimentOn(this.runtime_.win(), 'gpay-api')) {
-      this.runtime_.configure({experiments: ['gpay-api']});
-    }
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */
     this.eventManager_ = this.runtime_.eventManager();
