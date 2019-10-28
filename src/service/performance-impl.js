@@ -105,23 +105,9 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
-    const fcpDeferred_ = new Deferred();
-    /** @private {!Promise} */
-    this.fcpPromise_ = fcpDeferred_.promise;
-    /** @private {Function} */
-    this.fcpResolve_ = fcpDeferred_.resolve;
-
-    const fvrDeferred_ = new Deferred();
-    /** @private {!Promise} */
-    this.fvrPromise_ = fvrDeferred_.promise;
-    /** @private {Function} */
-    this.fvrResolve_ = fvrDeferred_.resolve;
-
-    const mbvDeferred_ = new Deferred();
-    /** @private {!Promise} */
-    this.mbvPromise_ = mbvDeferred_.promise;
-    /** @private {Function} */
-    this.mbvResolve_ = mbvDeferred_.resolve;
+    this.fcpDeferred_ = new Deferred();
+    this.fvrDeferred_ = new Deferred();
+    this.mbvDeferred_ = new Deferred();
 
     /**
      * How many times a layout jank metric has been ticked.
@@ -203,7 +189,7 @@ export class Performance {
       }
     } else {
       // If no Performance Observer, resolve fcp promise
-      this.fcpResolve_();
+      this.fcpDeferred_.resolve(null);
     }
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
@@ -437,7 +423,7 @@ export class Performance {
 
     if (entryTypesToObserve.length === 0) {
       // No entries to observe, so resolve promise
-      this.fcpResolve_();
+      this.fcpDeferred_.resolve(null);
       return;
     }
 
@@ -701,13 +687,13 @@ export class Performance {
     );
     switch (label) {
       case 'fcp':
-        this.fcpResolve_(storedVal);
+        this.fcpDeferred_.resolve(storedVal);
         break;
       case 'pc':
-        this.fvrResolve_(storedVal);
+        this.fvrDeferred_.resolve(storedVal);
         break;
       case 'mbv':
-        this.mbvResolve_(storedVal);
+        this.mbvDeferred_.resolve(storedVal);
         break;
     }
   }
@@ -848,21 +834,21 @@ export class Performance {
    * @return {!Promise<number>}
    */
   getFirstContentfulPaint() {
-    return this.fcpPromise_;
+    return this.fcpDeferred_.promise;
   }
 
   /**
    * @return {!Promise<number>}
    */
   getMakeBodyVisible() {
-    return this.mbvPromise_;
+    return this.mbvDeferred_.promise;
   }
 
   /**
    * @return {!Promise<number>}
    */
   getFirstViewportReady() {
-    return this.fvrPromise_;
+    return this.fvrDeferred_.promise;
   }
 }
 
