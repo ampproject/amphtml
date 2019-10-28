@@ -278,9 +278,42 @@ describes.realWin(
       });
     });
 
+    it('opens mailto: window in _top on iOS Webview with recipient', () => {
+      const params = {
+        'recipient': 'sample@xyz.com',
+      };
+      isIos = true;
+      isSafari = false;
+      return getShare('email', undefined, params, '_top').then(el => {
+        el.implementation_.handleClick_();
+        expect(el.implementation_.win.open).to.be.calledOnce;
+        expect(el.implementation_.win.open).to.be.calledWith(
+          'mailto:sample%40xyz.com?subject=doc%20title&' +
+            'body=https%3A%2F%2Fcanonicalexample.com%2F' +
+            '&recipient=sample%40xyz.com',
+          '_top',
+          'resizable,scrollbars,width=640,height=480'
+        );
+      });
+    });
+
     it('opens sms: window in _top on iOS Safari', () => {
       isIos = true;
       isSafari = true;
+      return getShare('sms').then(el => {
+        el.implementation_.handleClick_();
+        expect(el.implementation_.win.open).to.be.calledOnce;
+        expect(el.implementation_.win.open).to.be.calledWith(
+          'sms:?&body=doc%20title%20-%20https%3A%2F%2Fcanonicalexample.com%2F',
+          '_top',
+          'resizable,scrollbars,width=640,height=480'
+        );
+      });
+    });
+
+    it('opens sms: window in _top on iOS Webview', () => {
+      isIos = true;
+      isSafari = false;
       return getShare('sms').then(el => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
