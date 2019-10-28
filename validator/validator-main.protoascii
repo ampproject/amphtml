@@ -4877,6 +4877,10 @@ tags: {
     name: "type"
     value_casei: "text/javascript"
   }
+  attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -4913,6 +4917,10 @@ tags: {
       regex: "."
       error_message: "contents"
     }
+  }
+  attrs: {
+    name: "crossorigin"
+    value: "anonymous"
   }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
 }
@@ -5369,6 +5377,10 @@ attr_lists: {
   attrs: {
     name: "type"
     value_casei: "text/javascript"
+  }
+  attrs: {
+    name: "crossorigin"
+    value: "anonymous"
   }
 }
 
