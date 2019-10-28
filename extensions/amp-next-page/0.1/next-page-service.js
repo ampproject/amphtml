@@ -75,8 +75,8 @@ export class NextPageService {
     /** @private {?Element} */
     this.separator_ = null;
 
-    /** @private {?../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = null;
+    /** @private {?../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = null;
 
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
@@ -153,7 +153,7 @@ export class NextPageService {
 
     this.navigation_ = Services.navigationForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
-    this.resources_ = Services.resourcesForDoc(ampDoc);
+    this.mutator_ = Services.mutatorForDoc(ampDoc);
     this.multidocManager_ = new MultidocManager(
       win,
       Services.ampdocServiceFor(win),
@@ -311,7 +311,7 @@ export class NextPageService {
                 this.positionObserver_.unobserve(articleLinks);
                 documentRef.recUnit.isObserving = true;
               }
-              this.resources_.mutateElement(container, () => {
+              this.mutator_.mutateElement(container, () => {
                 try {
                   const amp = this.attachShadowDoc_(shadowRoot, doc);
                   documentRef.amp = amp;

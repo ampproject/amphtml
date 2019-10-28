@@ -89,13 +89,13 @@ describes.realWin(
         textarea.innerHTML = 'small text';
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         return maybeResizeTextarea(textarea).then(() => {
@@ -111,13 +111,13 @@ describes.realWin(
         textarea.innerHTML = 'big text'.repeat(100);
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         return maybeResizeTextarea(textarea).then(() => {
@@ -133,13 +133,13 @@ describes.realWin(
         textarea.innerHTML = 'big text'.repeat(100);
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         let increasedHeight;
@@ -168,7 +168,7 @@ describes.realWin(
         doc.body.appendChild(textarea);
         new AmpFormTextarea(doc);
         let callCount = 0;
-        const fakeResources = {
+        const fakeMutator = {
           measureElement(unused) {
             return Promise.resolve();
           },
@@ -178,7 +178,7 @@ describes.realWin(
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
         sandbox
           .stub(eventHelper, 'listenOncePromise')
           .returns(Promise.resolve());

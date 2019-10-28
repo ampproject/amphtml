@@ -49,7 +49,7 @@ describes.sandboxed('StandardActions', {}, () => {
 
   function stubMutate(methodName) {
     return sandbox
-      .stub(standardActions.resources_, methodName)
+      .stub(standardActions.mutator_, methodName)
       .callsFake((unusedElement, mutator) => mutator());
   }
 

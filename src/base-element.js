@@ -822,7 +822,7 @@ export class BaseElement {
    */
   changeHeight(newHeight) {
     this.element
-      .getResources()
+      .getMutator()
       ./*OK*/ changeSize(this.element, newHeight, /* newWidth */ undefined);
   }
 
@@ -832,7 +832,7 @@ export class BaseElement {
    * is no longer visible.
    */
   collapse() {
-    this.element.getResources().collapseElement(this.element);
+    this.element.getMutator().collapseElement(this.element);
   }
 
   /**
@@ -840,7 +840,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   attemptCollapse() {
-    return this.element.getResources().attemptCollapse(this.element);
+    return this.element.getMutator().attemptCollapse(this.element);
   }
 
   /**
@@ -859,7 +859,7 @@ export class BaseElement {
    */
   attemptChangeHeight(newHeight) {
     return this.element
-      .getResources()
+      .getMutator()
       .attemptChangeSize(this.element, newHeight, /* newWidth */ undefined);
   }
 
@@ -881,7 +881,7 @@ export class BaseElement {
    */
   attemptChangeSize(newHeight, newWidth, opt_event) {
     return this.element
-      .getResources()
+      .getMutator()
       .attemptChangeSize(
         this.element,
         newHeight,
@@ -899,7 +899,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureElement(measurer) {
-    return this.element.getResources().measureElement(measurer);
+    return this.element.getMutator().measureElement(measurer);
   }
 
   /**
@@ -938,7 +938,7 @@ export class BaseElement {
    */
   measureMutateElement(measurer, mutator, opt_element) {
     return this.element
-      .getResources()
+      .getMutator()
       .measureMutateElement(opt_element || this.element, measurer, mutator);
   }
 
@@ -957,7 +957,7 @@ export class BaseElement {
    * is no longer visible.
    */
   expand() {
-    this.element.getResources().expandElement(this.element);
+    this.element.getMutator().expandElement(this.element);
   }
 
   /**

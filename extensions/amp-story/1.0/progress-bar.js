@@ -97,8 +97,8 @@ export class ProgressBar {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = Services.ampdocServiceFor(this.win_).getSingleDoc();
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(this.ampdoc_);
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
 
     /** @private {!Object<string, number>} */
     this.segmentIdMap_ = map();
@@ -158,7 +158,7 @@ export class ProgressBar {
           this.clear_();
         }
 
-        this.segmentsAddedPromise_ = this.resources_.mutateElement(
+        this.segmentsAddedPromise_ = this.mutator_.mutateElement(
           this.getRoot(),
           () => {
             pageIds.forEach(id => {
@@ -240,7 +240,7 @@ export class ProgressBar {
         -(this.firstExpandedSegmentIndex_ - this.getPrevEllipsisCount_()) *
         (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
 
-      this.resources_.mutateElement(this.getRoot(), () => {
+      this.mutator_.mutateElement(this.getRoot(), () => {
         this.getRoot().classList.toggle(
           'i-amphtml-animate-progress',
           shouldAnimate
@@ -307,7 +307,7 @@ export class ProgressBar {
    * @private
    */
   getBarWidth_() {
-    return this.resources_.measureElement(() => {
+    return this.mutator_.measureElement(() => {
       return this.getRoot()./*OK*/ getBoundingClientRect().width;
     });
   }
@@ -373,7 +373,7 @@ export class ProgressBar {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
-    this.resources_.mutateElement(this.getRoot(), () => {
+    this.mutator_.mutateElement(this.getRoot(), () => {
       rtlState
         ? this.getRoot().setAttribute('dir', 'rtl')
         : this.getRoot().removeAttribute('dir');
@@ -607,7 +607,7 @@ export class ProgressBar {
         nthChildIndex
       )}) .i-amphtml-story-page-progress-value`
     );
-    this.resources_.mutateElement(devAssert(progressEl), () => {
+    this.mutator_.mutateElement(devAssert(progressEl), () => {
       let transition = 'none';
       if (withTransition) {
         // Using an eased transition only if filling the bar to 0 or 1.

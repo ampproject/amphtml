@@ -92,10 +92,12 @@ describes.realWin(
 
       installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
 
-      const resources = Services.resourcesForDoc(ampdoc);
-      sandbox.stub(resources, 'mutateElement').callsFake((element, mutator) => {
-        mutator();
-      });
+      const mutator = Services.mutatorForDoc(ampdoc);
+      sandbox
+        .stub(mutator, 'mutateElement')
+        .callsFake((element, mutatorFunc) => {
+          mutatorFunc();
+        });
 
       unrelated = createElementWithAttributes(doc, 'div', {});
 

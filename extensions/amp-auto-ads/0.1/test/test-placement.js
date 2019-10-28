@@ -413,8 +413,8 @@ describes.realWin(
           maxAdCount: 10,
         });
 
-        const resources = Services.resourcesForDoc(anchor);
-        sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
+        const mutator = Services.mutatorForDoc(anchor);
+        sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
           return Promise.reject();
         });
 
@@ -616,11 +616,11 @@ describes.realWin(
         anchor.id = 'anId';
         container.appendChild(anchor);
 
-        const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        const mutator = Services.mutatorForDoc(anchor);
+        sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
-        sandbox.stub(resource.viewport_, 'getWidth').callsFake(() => 2000);
+        sandbox.stub(mutator.viewport_, 'getWidth').callsFake(() => 2000);
 
         const placements = getPlacementsFromConfigObj(
           ampdoc,
@@ -675,8 +675,8 @@ describes.realWin(
         anchor.id = 'anId';
         container.appendChild(anchor);
 
-        const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        const mutator = Services.mutatorForDoc(anchor);
+        sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
         sandbox.stub(win, 'getComputedStyle').callsFake(() => {
@@ -713,7 +713,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
+            expect(mutator.attemptChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               150,
               300,
@@ -728,8 +728,8 @@ describes.realWin(
         anchor.id = 'anId';
         container.appendChild(anchor);
 
-        const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        const mutator = Services.mutatorForDoc(anchor);
+        sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
         sandbox.stub(win, 'getComputedStyle').callsFake(() => {
@@ -766,7 +766,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
+            expect(mutator.attemptChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               150,
               300,
@@ -781,8 +781,8 @@ describes.realWin(
         anchor.id = 'anId';
         container.appendChild(anchor);
 
-        const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        const mutator = Services.mutatorForDoc(anchor);
+        sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
 
@@ -813,7 +813,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
+            expect(mutator.attemptChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               250,
               undefined
@@ -827,8 +827,8 @@ describes.realWin(
         anchor.id = 'anId';
         container.appendChild(anchor);
 
-        const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        const mutator = Services.mutatorForDoc(anchor);
+        sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
           return Promise.reject(new Error('Resize failed'));
         });
 
@@ -859,7 +859,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
+            expect(mutator.attemptChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               150,
               300,
@@ -874,8 +874,8 @@ describes.realWin(
         anchor.id = 'anId';
         container.appendChild(anchor);
 
-        const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        const mutator = Services.mutatorForDoc(anchor);
+        sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
           return Promise.reject(new Error('Resize failed'));
         });
 
@@ -906,7 +906,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
+            expect(mutator.attemptChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               250,
               undefined

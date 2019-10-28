@@ -321,7 +321,7 @@ describes.fakeWin(
       adapterMock = sandbox.mock(adapter);
 
       sandbox
-        .stub(service.resources_, 'mutateElement')
+        .stub(service.mutator_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
@@ -588,7 +588,7 @@ describes.fakeWin(
       service = new AccessService(ampdoc);
 
       mutateElementStub = sandbox
-        .stub(service.resources_, 'mutateElement')
+        .stub(service.mutator_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
@@ -1785,7 +1785,7 @@ describes.fakeWin(
       adapterDonutsMock = sandbox.mock(adapterDonuts);
 
       sandbox
-        .stub(service.resources_, 'mutateElement')
+        .stub(service.mutator_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
           return Promise.resolve();

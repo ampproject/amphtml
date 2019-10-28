@@ -126,8 +126,8 @@ export class Placement {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(anchorElement);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(anchorElement);
 
     /** @const @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(anchorElement);
@@ -253,7 +253,7 @@ export class Placement {
             return whenUpgradedToCustomElement(this.getAdElement())
               .then(() => this.getAdElement().whenBuilt())
               .then(() => {
-                return this.resources_.attemptChangeSize(
+                return this.mutator_.attemptChangeSize(
                   this.getAdElement(),
                   placement.height,
                   placement.width,

@@ -44,7 +44,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     registerServiceBuilder(win, 'story-store', () => storeService);
 
     // Making sure resource tasks run synchronously.
-    sandbox.stub(Services, 'resourcesForDoc').returns({
+    sandbox.stub(Services, 'mutatorForDoc').returns({
       mutateElement: (element, callback) => {
         callback();
         return Promise.resolve();

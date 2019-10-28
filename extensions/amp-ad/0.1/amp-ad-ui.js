@@ -96,7 +96,7 @@ export class AmpAdUIHandler {
     if (this.containerElement_) {
       // Collapse the container element if there's one
       attemptCollapsePromise = this.element_
-        .getResources()
+        .getMutator()
         .attemptCollapse(this.containerElement_);
       attemptCollapsePromise.then(() => {});
     } else {
