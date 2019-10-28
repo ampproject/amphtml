@@ -27,7 +27,7 @@ describe('CircularBuffer', () => {
   it('add and get', () => {
     const buf = new CircularBuffer(5);
     for (let i = 0; i < 7; i++) {
-      buf.add(i);
+      buf.push(i);
     }
     const elems = [];
     for (let i = 0; i < 10; i++) {
@@ -126,6 +126,117 @@ describes.realWin('findSentences', {}, env => {
       texts.push(range.toString());
     }
     expect(texts).to.deep.equal(['“double ‘single quoted’ quoted']);
+  });
+
+  it('dupFirstSentenceBeforeSecond', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc abc def hij<p>';
+    const ranges = findSentences(win, root, ['abc', 'def', 'hij']);
+    expect(ranges).to.not.be.null;
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
+      range.setStart(r.start.node, r.start.offset);
+      range.setEnd(r.end.node, r.end.offset);
+      texts.push({
+        start: r.start.offset,
+        end: r.end.offset,
+        text: range.toString(),
+      });
+    }
+    expect(texts).to.deep.equal([
+      {start: 4, end: 7, text: 'abc'},
+      {start: 8, end: 11, text: 'def'},
+      {start: 12, end: 15, text: 'hij'},
+    ]);
+  });
+
+  it('testFindSentences_dupFirstSentenceAfterSecond', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc def abc hij<p>';
+    const ranges = findSentences(win, root, ['abc', 'def', 'hij']);
+    expect(ranges).to.not.be.null;
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
+      range.setStart(r.start.node, r.start.offset);
+      range.setEnd(r.end.node, r.end.offset);
+      texts.push({
+        start: r.start.offset,
+        end: r.end.offset,
+        text: range.toString(),
+      });
+    }
+    expect(texts).to.deep.equal([
+      {start: 0, end: 3, text: 'abc'},
+      {start: 4, end: 7, text: 'def'},
+      {start: 12, end: 15, text: 'hij'},
+    ]);
+  });
+
+  it('testFindSentences_dupSecondSentence', () => {
+    const root = document.createElement('div');
+    // With the current algorithm, the second sentence matches to the latter
+    // occurrence.
+    root.innerHTML = '<p>abc def def hij<p>';
+    const ranges = findSentences(win, root, ['abc', 'def', 'hij']);
+    expect(ranges).to.not.be.null;
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
+      range.setStart(r.start.node, r.start.offset);
+      range.setEnd(r.end.node, r.end.offset);
+      texts.push({
+        start: r.start.offset,
+        end: r.end.offset,
+        text: range.toString(),
+      });
+    }
+    expect(texts).to.deep.equal([
+      {start: 0, end: 3, text: 'abc'},
+      {start: 8, end: 11, text: 'def'},
+      {start: 12, end: 15, text: 'hij'},
+    ]);
+  });
+
+  it('testFindSentences_emptyStringAfterCanonicalization', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc def hij<p>';
+    const ranges = findSentences(win, root, ['abc', '...', 'hij']);
+    expect(ranges).to.not.be.null;
+    const texts = [];
+    for (let i = 0; i < ranges.length; i++) {
+      const r = ranges[i];
+      const range = document.createRange();
+      range.setStart(r.start.node, r.start.offset);
+      range.setEnd(r.end.node, r.end.offset);
+      texts.push({
+        start: r.start.offset,
+        end: r.end.offset,
+        text: range.toString(),
+      });
+    }
+    expect(texts).to.deep.equal([
+      {start: 0, end: 3, text: 'abc'},
+      {start: 8, end: 11, text: 'hij'},
+    ]);
+  });
+
+  it('testFindSentences_emptySentences', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc def hij<p>';
+    const ranges = findSentences(win, root, []);
+    expect(ranges).to.be.null;
+  });
+
+  it('testFindSentences_emptySentencesAfterCanonicalization', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>abc def hij<p>';
+    const ranges = findSentences(win, root, ['...']);
+    expect(ranges).to.be.null;
   });
 });
 

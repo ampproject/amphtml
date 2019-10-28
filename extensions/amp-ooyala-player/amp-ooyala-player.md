@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Ooyala video.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -42,10 +43,12 @@ Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.
 
 ```html
 <amp-ooyala-player
-    data-embedcode="Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ"
-    data-pcode="5zb2wxOlZcNCe_HVT3a6cawW298X"
-    data-playerid="6440813504804d76ba35c8c787a4b33c"
-    width="640" height="360"></amp-ooyala-player>
+  data-embedcode="Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ"
+  data-pcode="5zb2wxOlZcNCe_HVT3a6cawW298X"
+  data-playerid="6440813504804d76ba35c8c787a4b33c"
+  width="640"
+  height="360"
+></amp-ooyala-player>
 ```
 
 ## Attributes
@@ -76,7 +79,6 @@ Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

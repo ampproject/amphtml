@@ -36,7 +36,7 @@ import {
   setParentWindow,
 } from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
+import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 
 describe('service', () => {
   let sandbox;
@@ -529,7 +529,7 @@ describe('service', () => {
       });
 
       afterEach(() => {
-        toggleExperiment(windowApi, 'ampdoc-fie', false);
+        toggleAmpdocFieForTesting(windowApi, false);
       });
 
       it('should return the service via node', () => {
@@ -553,7 +553,7 @@ describe('service', () => {
       });
 
       it('should find ampdoc and return its service', () => {
-        toggleExperiment(windowApi, 'ampdoc-fie', true);
+        toggleAmpdocFieForTesting(windowApi, true);
         const fromChildNode = getExistingServiceForDocInEmbedScope(
           childWinNode,
           'c'
@@ -568,7 +568,7 @@ describe('service', () => {
       });
 
       it('should not fallback embedded ampdoc to parent', () => {
-        toggleExperiment(windowApi, 'ampdoc-fie', true);
+        toggleAmpdocFieForTesting(windowApi, true);
         const childAmpdoc = {
           isSingleDoc: () => false,
           win: windowApi,
@@ -593,7 +593,7 @@ describe('service', () => {
       });
 
       it('should override services on embedded ampdoc', () => {
-        toggleExperiment(windowApi, 'ampdoc-fie', true);
+        toggleAmpdocFieForTesting(windowApi, true);
         const childAmpdoc = {
           isSingleDoc: () => false,
           win: windowApi,

@@ -4,7 +4,8 @@
 {
   rules: [
     {
-      owners: [{ name: 'ampproject/wg-ui-and-a11y' }]
-    }
-  ]
+      pattern: 'video-*.js',
+      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+    },
+  ],
 }

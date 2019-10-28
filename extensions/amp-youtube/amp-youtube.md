@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Displays a YouTube video.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -49,25 +50,29 @@ With the responsive layout, the width and height from the example should yield c
 
 ```html
 <amp-youtube
-    data-videoid="mGENRKrdoGY"
-    layout="responsive"
-    width="480" height="270"></amp-youtube>
+  data-videoid="mGENRKrdoGY"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-youtube>
 ```
 
 ```html
-  <amp-youtube
-      id="myLiveChannel"
-      data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
-      width="358"
-      height="204"
-      layout="responsive">
-    <amp-img
-      src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
-      placeholder
-      layout="fill"
-      />
-  </amp-youtube>
+<amp-youtube
+  id="myLiveChannel"
+  data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
+  width="358"
+  height="204"
+  layout="responsive"
+>
+  <amp-img
+    src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+    placeholder
+    layout="fill"
+  />
+</amp-youtube>
 ```
+
 ## Attributes
 
 <table>
