@@ -213,13 +213,16 @@ export class VariableService {
       this.linkerReader_.get(name, id)
     );
 
-    this.register_('STORY_PAGE_INDEX', () =>
-      this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX')
-    );
+    this.register_('STORY_PAGE_INDEX', () => {
+      console.log('now theres so many thoughts going thorugh my brain');
+      return this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX');
+    });
 
-    this.register_('STORY_PAGE_ID', () =>
-      this.getStoryValue_('pageId', 'STORY_PAGE_ID')
-    );
+    this.register_('STORY_PAGE_ID', () => {
+      console.log('Page id in amp-analytics');
+      return this.getStoryValue_('pageId', 'STORY_PAGE_ID');
+    });
+    console.log('registered all variables!!!!!!!!!!!!!');
   }
 
   /**
@@ -253,6 +256,7 @@ export class VariableService {
         'To use variable %s amp-story should be configured',
         name
       );
+      console.log(storyVariables);
       return storyVariables[property];
     });
   }
