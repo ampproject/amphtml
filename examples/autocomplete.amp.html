@@ -54,10 +54,9 @@
   <h1>Autocomplete</h1>
   <h2>Inline</h2>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
-      <amp-autocomplete inline="@" filter="none" data-name="inlineInput" class="wide" min-characters="0" suggest-first
+      <amp-autocomplete inline="@" min-characters="0" suggest-first filter="none" 
           src="/form/mention/query" query="q" on="select:AMP.setState({inlineInputSelect: event.value})">
-          <noscript><input required></noscript>
-          <section contenteditable></section>
+        <textarea autoexpand class="wide" name="inlineInput" placeholder="Reply"></textarea>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
       <div submit-success>
