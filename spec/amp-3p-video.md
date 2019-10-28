@@ -46,7 +46,7 @@ For example, these are some of the features that justify specific players:
 - **`amp-ima-video`** renders a generic host-less page that ships with the IMA SDK in order to transparently include
   standard IMA interface videos.
 
-(Please note that most other 3p players exist for historical reasons before `amp-video-iframe` could fulfill their use case.)
+(Please note that most other 3p players historically exist before `amp-video-iframe` could fulfill their use case.)
 
 ## How can I build a player component?
 
