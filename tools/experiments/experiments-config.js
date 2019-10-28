@@ -242,11 +242,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'amp-list-load-more',
-    name: 'Enables load-more related functionality in amp-list',
-    spec: 'https://github.com/ampproject/amphtml/issues/13575',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
