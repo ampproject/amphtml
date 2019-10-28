@@ -77,7 +77,7 @@ Component implementation classes should implement the [`VideoInterface`](../src/
 You can implement this interface completely or partially, depending on [the video integration features you'd like to support](./amp-video-interface.js).
 
 At the very least, you should implement `play()` and `pause()`. Likewise, playback
-[actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/)
+[actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/) (like `my-element.play`) will not work when unimplemented.
 
 Read through [the `VideoInterface` code to understand the individual effects of leaving each method unimplemented.](../src/video-interface.js).
 
