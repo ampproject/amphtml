@@ -170,7 +170,7 @@ async function reportBundleSize() {
       const response = await requestPost({
         uri: url.resolve(
           bundleSizeAppBaseUrl,
-          path.join('commit', commitHash, 'report.json')
+          path.join('commit', commitHash, 'report')
         ),
         json: true,
         body: {
