@@ -36,6 +36,7 @@ export function install(win) {
     win.Promise.all = Promise.all;
     win.Promise.race = Promise.race;
 
+    // https://github.com/jridgewell/PJs/blob/v1.1.5/promise.js#L177-L182
     win.Promise._overrideUnhandledExceptionHandler(error => {
       win.__AMP_REPORT_ERROR(error);
     });
