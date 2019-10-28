@@ -1174,7 +1174,11 @@ function getViewportType(win, viewer) {
   ) {
     return viewportType;
   }
-  const isIosIframeScrollableOn = isExperimentOn(win, 'ios-scrollable-iframe');
+  const isIosIframeScrollableOn =
+    isExperimentOn(win, 'ios-scrollable-iframe') ||
+    viewer.hasCapability('iframeScroll');
+  // TODO(#23379): remove "development -> embed" override once iOS13 is fully
+  // launched.
   // Enable iOS Embedded mode so that it's easy to test against a more
   // realistic iOS environment w/o an iframe.
   if (
