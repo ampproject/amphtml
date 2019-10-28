@@ -458,6 +458,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
 - [Epeex](../../ads/epeex.md)
+- [Insticator](../../ads/insticator.md)
 - [Jubna](../../ads/jubna.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Postquare](../../ads/postquare.md)
