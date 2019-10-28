@@ -165,9 +165,21 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.templates_ = Services.templatesFor(this.win);
 
     /**
+     * Whether a <template> or <script type="text/plain"> tag is present.
+     * @private {boolean}
+     */
+    this.hasTemplate_ = false;
+
+    /**
      * @private {?../../../src/ssr-template-helper.SsrTemplateHelper}
      */
     this.ssrTemplateHelper_ = null;
+
+    /**
+     * Whether server-side rendering is supported.
+     * @private {boolean}
+     */
+    this.isSsr_ = false;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -227,14 +239,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
 
-    const isSsr = this.ssrTemplateHelper_.isSupported();
-    const hasTemplate = this.templates_.hasTemplate(
+    this.isSsr_ = this.ssrTemplateHelper_.isSupported();
+    this.hasTemplate_ = this.templates_.hasTemplate(
       this.element,
       'template, script[template]'
     );
-    if (isSsr) {
+    if (this.isSsr_) {
       userAssert(
-        hasTemplate,
+        this.hasTemplate_,
         `${TAG} should provide a <template> or <script type="plain/text"> element.`
       );
       userAssert(
@@ -252,7 +264,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `Unexpected filter: ${this.filter_}`
       );
     }
-    if (hasTemplate) {
+    if (this.hasTemplate_) {
       // Dummy render to verify existence of "data-value" or "data-disabled" attribute.
       const empty = /** @type {!JsonObject} */ ({});
       this.ssrTemplateHelper_
@@ -334,8 +346,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
-    if (this.ssrTemplateHelper_.isSupported()) {
-      return requestForBatchFetch(this.element, policy).then(r => {
+    if (this.isSsr_) {
+      return requestForBatchFetch(
+        this.element,
+        policy,
+        /* refresh */ false
+      ).then(r => {
         const request = r;
 
         request.xhrUrl = setupInput(this.win, request.xhrUrl, request.fetchOpt);
@@ -358,19 +374,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
           attributes
         );
       });
-    }
-    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy).catch(
-      e => {
-        if (e.message === 'Response is undefined.') {
-          user().warn(
-            TAG,
-            'Expected key "%s" in data but found nothing. Rendering empty results.',
-            itemsExpr
-          );
-          return [];
+    } else {
+      return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy).catch(
+        e => {
+          if (e.message === 'Response is undefined.') {
+            user().warn(
+              TAG,
+              'Expected key "%s" in data but found nothing. Rendering empty results.',
+              itemsExpr
+            );
+            return [];
+          }
         }
-      }
-    );
+      );
+    }
   }
 
   /**
@@ -562,15 +579,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
   renderResults_(filteredData, container, input) {
     let renderPromise = Promise.resolve();
     this.resetActiveElement_();
-    if (
-      this.templates_.hasTemplate(this.element, 'template, script[template]')
-    ) {
+    if (this.hasTemplate_) {
       renderPromise = this.ssrTemplateHelper_
         .applySsrOrCsrTemplate(this.element, filteredData)
         .then(renderedChildren => {
           renderedChildren.map(child => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
+            } else {
+              userAssert(
+                child.hasAttribute('data-value'),
+                `${TAG} requires a "data-value" or "data-disabled" attribute in the template.`
+              );
             }
             child.classList.add('i-amphtml-autocomplete-item');
             child.setAttribute('role', 'option');

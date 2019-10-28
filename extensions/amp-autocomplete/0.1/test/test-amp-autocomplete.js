@@ -244,9 +244,7 @@ describes.realWin(
 
     it('renderResults_() should update the container_ with rich text', () => {
       const sourceData = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
-      const template = doc.createElement('template');
-      sandbox.stub(impl.templates_, 'hasTemplate').returns(true);
-      sandbox.stub(impl.templates_, 'findTemplate').returns(template);
+      impl.hasTemplate_ = true;
       const renderedChildren = [];
       sourceData.forEach(item => {
         const renderedChild = doc.createElement('div');
@@ -254,7 +252,7 @@ describes.realWin(
         renderedChildren.push(renderedChild);
       });
       const renderTemplateSpy = sandbox
-        .stub(impl.templates_, 'renderTemplateArray')
+        .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(renderedChildren));
 
       return impl.renderResults_(sourceData, impl.container_).then(() => {
@@ -876,9 +874,7 @@ describes.realWin(
     });
 
     it('should not return disabled items from getEnabledItems_()', () => {
-      const template = doc.createElement('template');
-      sandbox.stub(impl.templates_, 'hasTemplate').returns(true);
-      sandbox.stub(impl.templates_, 'findTemplate').returns(template);
+      impl.hasTemplate_ = true;
       const sourceData = ['apple', 'mango', 'pear'];
       const renderedChildren = sourceData.map(item => {
         const renderedChild = doc.createElement('div');
@@ -887,7 +883,7 @@ describes.realWin(
       });
       renderedChildren[2].setAttribute('data-disabled', '');
       sandbox
-        .stub(impl.templates_, 'renderTemplateArray')
+        .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(renderedChildren));
 
       return impl.renderResults_(sourceData, impl.container_).then(() => {
