@@ -35,18 +35,19 @@ Documents served via a cache URL, e.g. cdn.ampproject.org/v/, will include the V
 `cap`<br/>
 A comma delimited list of capabilities supported by the Viewer. Other boolean parameters should be deprecated and replaced with an entry in cap.
 
-| Parameter              | Supported messages                    | Description                                                             |
-| ---------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
-| `a2a`                  | `a2aNavigate`                         | AMP-to-AMP (A2A) document linking support.                              |
-| `cid`                  | `cid`                                 | Client ID service.                                                      |
-| `errorReporter`        | `error`                               | Error reporter.                                                         |
-| `fragment`             | `fragment`                            | URL fragment support for the history API.                               |
-| `handshakepoll`        | `handshake-poll`                      | Mobile web handshake.                                                   |
-| `navigateTo`           | `navigateTo`                          | Support for navigating to external URLs.                                |
-| `replaceUrl`           | `getReplaceUrl`                       | Support for replacing the document URL with one provided by the Viewer. |
-| `swipe`                | `touchstart`, `touchmove`, `touchend` | Forwards touch events from the document to the Viewer.                  |
-| `viewerRenderTemplate` | `viewerRenderTemplate`                | Proxies all mustache template rendering to the Viewer.                  |
-| `xhrInterceptor`       | `xhr`                                 | Proxies all XHRs through the Viewer.                                    |
+| Parameter              | Supported messages                    | Description                                                                     |
+| ---------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
+| `a2a`                  | `a2aNavigate`                         | AMP-to-AMP (A2A) document linking support.                                      |
+| `cid`                  | `cid`                                 | Client ID service.                                                              |
+| `errorReporter`        | `error`                               | Error reporter.                                                                 |
+| `fragment`             | `fragment`                            | URL fragment support for the history API.                                       |
+| `handshakepoll`        | `handshake-poll`                      | Mobile web handshake.                                                           |
+| `iframeScroll`         |                                       | Viewer platform supports and configures scrolling on the AMP document's iframe. |
+| `navigateTo`           | `navigateTo`                          | Support for navigating to external URLs.                                        |
+| `replaceUrl`           | `getReplaceUrl`                       | Support for replacing the document URL with one provided by the Viewer.         |
+| `swipe`                | `touchstart`, `touchmove`, `touchend` | Forwards touch events from the document to the Viewer.                          |
+| `viewerRenderTemplate` | `viewerRenderTemplate`                | Proxies all mustache template rendering to the Viewer.                          |
+| `xhrInterceptor`       | `xhr`                                 | Proxies all XHRs through the Viewer.                                            |
 
 `origin`<br/>
 The origin of the Viewer. The Viewer Integration will verify this is an allowed domain and this will be the target of all messages sent from the AMP document to the Viewer.
