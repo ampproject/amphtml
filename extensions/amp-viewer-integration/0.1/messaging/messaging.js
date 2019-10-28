@@ -45,7 +45,7 @@ export function parseMessage(message) {
   }
 
   try {
-    return /** @type {?AmpViewerMessage} */ /** @type {?} */ (JSON.parse(
+    return /** @type {?AmpViewerMessage} */ (JSON.parse(
       /** @type {string} */ (message)
     ));
   } catch (e) {

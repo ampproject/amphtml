@@ -1,17 +1,8 @@
-export interface AmpViewerMessage {
-  app: string;
-  type: string;
-  requestid: number;
-  name: string;
-  data: any;
-  rsvp?: boolean;
-  error?: string;
-  messagingToken?: string;
-}
-
-export function parseMessage(message: any): AmpViewerMessage | null;
-
-export type RequestHandler = () => void;
+export type RequestHandler = (
+  name: string,
+  data: any,
+  rsvp: boolean
+) => Promise<any> | undefined;
 
 export class WindowPortEmulator {
   constructor(win: Window, origin: string, target: Window);
