@@ -137,12 +137,13 @@ config.run('amp-story analytics', () => {
       return browser.waitForElementLayout('amp-story');
     });
 
-    it('should send analytics event when landing on a page', async () => {
+    it.only('should send analytics event when landing on a page', async () => {
       await browser.waitForElementLayout('#page-1[active]');
 
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
       expect(q['pageVisible']).to.equal('page-1');
+      console.log(req.url);
     });
 
     it('should send analytics event when navigating', async () => {

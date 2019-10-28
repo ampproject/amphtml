@@ -244,7 +244,9 @@ export class VariableService {
    * @private
    */
   getStoryValue_(property, name) {
+    console.log(' STORY VALUE !!!!!!!!!!!!!!!');
     const service = Services.storyVariableServiceForOrNull(this.ampdoc_.win);
+    console.log('requesting story value for: ' + property);
     return service.then(storyVariables => {
       userAssert(
         storyVariables,
