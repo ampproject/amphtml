@@ -23,7 +23,6 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/manual/amp-list/' +
       'load-more-manual.amp.html',
-    experiments: ['amp-list-load-more'],
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(cathyxz, cvializ): figure out why 'viewer-demo' only shows 'FALLBACK'
     environments: ['single'],
