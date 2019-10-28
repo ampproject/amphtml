@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.78 */
+/** Version: 0.1.22.79 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4165,7 +4165,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.78',
+    '_client': 'SwG 0.1.22.79',
   });
 }
 
@@ -6346,7 +6346,6 @@ class PayStartFlow {
         'swg': swgPaymentRequest,
         'i': {
           'startTimeMs': Date.now(),
-          'googleTransactionId': this.analyticsService_.getTransactionId(),
           'productType': this.productType_,
         },
       },
@@ -11606,16 +11605,6 @@ class PaymentsWebActivityDelegate {
     {
       return;
     }
-    const containerAndFrame = this.injectIframe_(paymentDataRequest);
-    const paymentDataPromise = this.openIframe_(
-        containerAndFrame['container'], containerAndFrame['iframe'],
-        paymentDataRequest);
-    this.prefetchedObjects_ = {
-      'container': containerAndFrame['container'],
-      'iframe': containerAndFrame['iframe'],
-      'request': paymentDataRequest,
-      'dataPromise': paymentDataPromise,
-    };
   }
 
   /** @override */
@@ -13044,15 +13033,31 @@ function payDecryptUrl() {
  */
 class PayClient {
   /**
-   * @param {!Window} win
-   * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!../components/dialog-manager.DialogManager} dialogManager
+   * @param {!./deps.DepsDef} deps
    */
-  constructor(win, activityPorts, dialogManager) {
+  constructor(deps) {
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
     /** @const @private {!PayClientBindingDef} */
-    this.binding_ = isExperimentOn(win, ExperimentFlags.GPAY_API)
-      ? new PayClientBindingPayjs(win, activityPorts)
-      : new PayClientBindingSwg(win, activityPorts, dialogManager);
+    this.binding_ = isExperimentOn(this.win_, ExperimentFlags.GPAY_API)
+      ? new PayClientBindingPayjs(
+          this.win_,
+          this.activityPorts_,
+          // Generates a new Google Transaction ID.
+          deps.analytics().getTransactionId()
+        )
+      : new PayClientBindingSwg(
+          this.win_,
+          this.activityPorts_,
+          this.dialogManager_
+        );
   }
 
   /**
@@ -13188,8 +13193,9 @@ class PayClientBindingPayjs {
   /**
    * @param {!Window} win
    * @param {!../components/activities.ActivityPorts} activityPorts
+   * @param {!string} googleTransactionId
    */
-  constructor(win, activityPorts) {
+  constructor(win, activityPorts, googleTransactionId) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private @const {!../components/activities.ActivityPorts} */
@@ -13212,6 +13218,7 @@ class PayClientBindingPayjs {
           'redirectKey': this.redirectVerifierHelper_.restoreKey(),
         },
       },
+      googleTransactionId,
       this.handleResponse_.bind(this)
     );
 
@@ -13221,11 +13228,15 @@ class PayClientBindingPayjs {
 
   /**
    * @param {!Object} options
+   * @param {string} googleTransactionId
    * @param {function(!Promise<!Object>)} handler
    * @return {!PaymentsAsyncClient}
    * @private
    */
-  createClient_(options, handler) {
+  createClient_(options, googleTransactionId, handler) {
+    // Assign Google Transaction ID to PaymentsAsyncClient.googleTransactionId_
+    // so it can be passed to gpay_async.js and stored in payment clearcut log.
+    PaymentsAsyncClient.googleTransactionId_ = googleTransactionId;
     return new PaymentsAsyncClient(
       options,
       handler,
@@ -15289,13 +15300,6 @@ class ConfiguredRuntime {
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = new ActivityPorts$1(this.win_);
 
-    /** @private @const {!PayClient} */
-    this.payClient_ = new PayClient(
-      this.win_,
-      this.activityPorts_,
-      this.dialogManager_
-    );
-
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
@@ -15303,11 +15307,15 @@ class ConfiguredRuntime {
     //analytics service and entitlements manager are constructed unless
     //you are certain they do not rely on them because they are part of that
     //definition.
-    /** @private @const {!Logger} */
-    this.logger_ = new Logger(this);
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
+
+    /** @private @const {!PayClient} */
+    this.payClient_ = new PayClient(this);
+
+    /** @private @const {!Logger} */
+    this.logger_ = new Logger(this);
 
     /** @private @const {!EntitlementsManager} */
     this.entitlementsManager_ = new EntitlementsManager(
