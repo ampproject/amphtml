@@ -780,10 +780,10 @@ export class AmpForm {
       const status = init['status'];
       if (status >= 300) {
         /** HTTP status codes of 300+ mean redirects and errors. */
-        return this.handleSubmitFailure_(status, response);
+        return this.handleSubmitFailure_(status, response, response['body']);
       }
     }
-    return this.handleSubmitSuccess_(tryResolve(() => response));
+    return this.handleSubmitSuccess_(response, response['body']);
   }
 
   /**
@@ -908,32 +908,37 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response) {
-    const json = /** @type {!Promise<!JsonObject>} */ (response.json());
-    return this.handleSubmitSuccess_(json).then(() => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
-      this.maybeHandleRedirect_(response);
-    });
-  }
-
-  /**
-   * Transition the form to the submit success state.
-   * @param {!Promise<!JsonObject>} jsonPromise
-   * @return {!Promise}
-   * @private visible for testing
-   */
-  handleSubmitSuccess_(jsonPromise) {
-    return jsonPromise.then(
-      json => {
-        this.setState_(FormState.SUBMIT_SUCCESS);
-        this.renderTemplate_(json || {}).then(() => {
-          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
-          this.dirtinessHandler_.onSubmitSuccess();
+    return response.json().then(
+      /** @type {!JsonObject} */ json => {
+        return this.handleSubmitSuccess_(json).then(() => {
+          this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
+          this.maybeHandleRedirect_(response);
         });
       },
       error => {
         user().error(TAG, 'Failed to parse response JSON: %s', error);
       }
     );
+  }
+
+  /**
+   * Transition the form to the submit success state.
+   * @param {!JsonObject} result
+   * @param {?JsonObject=} opt_eventData
+   * @return {!Promise}
+   * @private visible for testing
+   */
+  handleSubmitSuccess_(result, opt_eventData) {
+    this.setState_(FormState.SUBMIT_SUCCESS);
+    return tryResolve(() => {
+      this.renderTemplate_(result || {}).then(() => {
+        this.triggerAction_(
+          FormEvents.SUBMIT_SUCCESS,
+          opt_eventData === undefined ? result : opt_eventData
+        );
+        this.dirtinessHandler_.onSubmitSuccess();
+      });
+    });
   }
 
   /**
@@ -960,15 +965,19 @@ export class AmpForm {
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
+   * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
    */
-  handleSubmitFailure_(error, json) {
+  handleSubmitFailure_(error, json, opt_eventData) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
+        this.triggerAction_(
+          FormEvents.SUBMIT_ERROR,
+          opt_eventData === undefined ? json : opt_eventData
+        );
         this.dirtinessHandler_.onSubmitError();
       });
     });
