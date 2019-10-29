@@ -27,8 +27,6 @@ tags: {  # <amp-mega-menu>
   html_format: AMP
   tag_name: "AMP-MEGA-MENU"
   requires_extension: "amp-mega-menu"
-  # Mandate that component contains a nav element as descendant. This approach
-  # only works because there is at most one <amp-mega-menu> in a document.
   requires: "amp-mega-menu nav"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-mega-menu"

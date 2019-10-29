@@ -6,6 +6,7 @@ teaser:
   text: Displays top-level navigational content inside expandable containers.
 experimental: true
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -42,6 +43,7 @@ A horizontal navigation bar containing a set of menu items that, when activated 
 </table>
 
 ## Overview
+
 `<amp-mega-menu>` provides a way to organize and display large collections of navigational content at the top of an AMP page. The component is intended primarily for desktop and tablet use cases, and it can be used jointly with [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md) to create a responsive menu.
 
 ## Usage
@@ -53,6 +55,7 @@ The `<nav>` element must be parented by either the `<amp-mega-menu>` component o
 [/tip]
 
 Each menu item can contain any of the following tags as direct children:
+
 - `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`
 - `<a>`
 - `<button>`
@@ -69,6 +72,7 @@ A menu item should have either one child (e.g. an anchor link or element with ta
 A mask will cover the rest of the page when a dropdown is open. Content, such as a title banner, can appear above the mask. Apply a background color on the content and place it, alongside the `<amp-mega-menu>`, inside a `<header>` element.
 
 Each dropdown may contain any of the following AMP elements:
+
 - `<amp-ad>`
 - `<amp-carousel>`
 - `<amp-form>`
@@ -80,6 +84,7 @@ Each dropdown may contain any of the following AMP elements:
 The example below demonstrates an `<amp-mega-menu>` with three menu items. The first two are toggleable and the third is an external link.
 
 [example playground="true" preview="top-frame" orientation="landscape" imports="amp-mega-menu"]
+
 ```html
 <amp-mega-menu height="30" layout="fixed-height">
   <nav>
@@ -87,9 +92,11 @@ The example below demonstrates an `<amp-mega-menu>` with three menu items. The f
       <li>
         <span role="button">Image</span>
         <div role="dialog">
-          <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+          <amp-img
+            src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
             width="300"
-            height="200"></amp-img>
+            height="200"
+          ></amp-img>
         </div>
       </li>
       <li>
@@ -109,6 +116,7 @@ The example below demonstrates an `<amp-mega-menu>` with three menu items. The f
   </nav>
 </amp-mega-menu>
 ```
+
 [/example]
 
 ### Dynamic content rendering
@@ -118,9 +126,15 @@ Fetch content of `<amp-mega-menu>` dynamically from a JSON endpoint using [`<amp
 The example below demonstrates this ability by nesting `<amp-list>` inside `<amp-mega-menu>`.
 
 [example playground="true" preview="top-frame" orientation="landscape" imports="amp-mega-menu,amp-list" template="amp-mustache"]
+
 ```html
 <amp-mega-menu height="60" layout="fixed-height">
-  <amp-list height="350" layout="fixed-height" src="{{server_for_email}}/static/samples/json/product-single-item.json" single-item>
+  <amp-list
+    height="350"
+    layout="fixed-height"
+    src="{{server_for_email}}/static/samples/json/product-single-item.json"
+    single-item
+  >
     <template type="amp-mustache">
       <nav>
         <ul>
@@ -128,7 +142,11 @@ The example below demonstrates this ability by nesting `<amp-list>` inside `<amp
           <li>
             <h4 role="button">{{name}}</h4>
             <div role="dialog">
-              <amp-img src="{{server_for_email}}{{img}}" width="320" height="213"></amp-img>
+              <amp-img
+                src="{{server_for_email}}{{img}}"
+                width="320"
+                height="213"
+              ></amp-img>
               <p>Price: $<b>{{price}}</b></p>
             </div>
           </li>
@@ -139,30 +157,37 @@ The example below demonstrates this ability by nesting `<amp-list>` inside `<amp
   </amp-list>
 </amp-mega-menu>
 ```
+
 [/example]
 
 Here is the JSON file used:
 
 ```json
 {
-  "items": [{
-    "values": [{
-      "id": 1,
-      "img": "/static/samples/img/product1_640x426.jpg",
-      "name": "Apple",
-      "price": "1.99"
-    }, {
-      "id": 2,
-      "img": "/static/samples/img/product2_640x426.jpg",
-      "name": "Orange",
-      "price": "0.99"
-    }, {
-      "id": 3,
-      "img": "/static/samples/img/product3_640x426.jpg",
-      "name": "Pear",
-      "price": "1.50"
-    }]
-  }]
+  "items": [
+    {
+      "values": [
+        {
+          "id": 1,
+          "img": "/static/samples/img/product1_640x426.jpg",
+          "name": "Apple",
+          "price": "1.99"
+        },
+        {
+          "id": 2,
+          "img": "/static/samples/img/product2_640x426.jpg",
+          "name": "Orange",
+          "price": "0.99"
+        },
+        {
+          "id": 3,
+          "img": "/static/samples/img/product3_640x426.jpg",
+          "name": "Pear",
+          "price": "1.50"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -173,11 +198,24 @@ Some viewports may be too narrow to display the content of `<amp-mega-menu>` in 
 The example below hides `<amp-mega-menu>` when the viewport width is less than 500px. It replaces `<amp-mega-menu>` with a button that opens `<amp-sidebar>`.
 
 [example playground="true" preview="top-frame"]
+
 ```html
 <head>
-  <script async custom-element="amp-mega-menu" src="https://cdn.ampproject.org/v0/amp-mega-menu-0.1.js"></script>
-  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
-  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script
+    async
+    custom-element="amp-mega-menu"
+    src="https://cdn.ampproject.org/v0/amp-mega-menu-0.1.js"
+  ></script>
+  <script
+    async
+    custom-element="amp-sidebar"
+    src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"
+  ></script>
+  <script
+    async
+    custom-element="amp-accordion"
+    src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"
+  ></script>
   <style amp-custom>
     .sidebar-open-btn {
       font-size: 2em;
@@ -219,6 +257,7 @@ The example below hides `<amp-mega-menu>` when the viewport width is less than 5
   </amp-sidebar>
 </body>
 ```
+
 [/example]
 
 ## Attributes
@@ -243,14 +282,20 @@ The `<amp-mega-menu>` component can be styled with standard CSS.
 - Expanding a menu item applies the `open` attribute to the `<amp-mega-menu>` component as well as the expanded `<li>` element.
 
 The example below customizes:
+
 - The background color of the navigation bar
 - The appearance of opened menu buttons
 - The position of the dropdown containers
 
 [example playground="true" preview="top-frame" orientation="landscape"]
+
 ```html
 <head>
-  <script async custom-element="amp-mega-menu" src="https://cdn.ampproject.org/v0/amp-mega-menu-0.1.js"></script>
+  <script
+    async
+    custom-element="amp-mega-menu"
+    src="https://cdn.ampproject.org/v0/amp-mega-menu-0.1.js"
+  ></script>
   <style amp-custom>
     .title {
       background-color: lightblue;
@@ -302,6 +347,7 @@ The example below customizes:
   </header>
 </body>
 ```
+
 [/example]
 
 ## Accessibility
@@ -322,15 +368,18 @@ The example below customizes:
 In addition, to assist screen reader users, an invisible but tabbable close button is added to the start and end of each `role=dialog` element.
 
 Keyboard support for the component includes:
+
 - Left/right arrow keys to navigate between menu items when focused;
 - Enter/Space keys to trigger an active menu item button;
 - Esc key to collapse the mega menu;
 
 Open on hover is not currently supported by `<amp-mega-menu>` due to UX and accessibility concerns. In particular, we want to avoid scenarios where:
+
 - A user moves cursor over a button that toggles the dropdown menu and clicks, which immediately closes the dropdown after opening it on hover.
 - A user wants to click on an element below a closed dropdown but accidentally opens it on hover and clicks inside the dropdown instead.
 
 More information on this topic can be found in the [Accessibility Developer Guide](https://www.accessibility-developer-guide.com/examples/widgets/dropdown/).
 
 ## Validation
+
 See [amp-mega-menu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mega-menu/validator-amp-mega-menu.protoascii) in the AMP validator specification.
