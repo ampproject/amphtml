@@ -583,6 +583,7 @@ describes.realWin(
           .then(() => {
             impl.submitOnEnter_ = true;
             impl.activeElement_ = impl.createElementFromItem_('abc');
+            sandbox.stub(impl, 'resultsShowing_').returns(true);
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -674,6 +675,7 @@ describes.realWin(
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
+      sandbox.stub(impl, 'resultsShowing_').returns(true);
       const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
       return element
         .layoutCallback()

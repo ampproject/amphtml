@@ -424,7 +424,7 @@ const mentionNames = [
   'rubeushagrid@hogwarts.edu',
   'dobby@hogwarts.edu',
   'bellatrixlestrange@deatheater.org',
-  'minervamcGonagall@hogwarts.edu',
+  'minervamcgonagall@hogwarts.edu',
 ];
 
 app.use('/form/mention/query', (req, res) => {

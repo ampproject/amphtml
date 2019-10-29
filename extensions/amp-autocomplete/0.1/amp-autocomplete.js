@@ -24,11 +24,12 @@ import {
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {childElementsByTag, removeChildren, tryFocus} from '../../../src/dom';
-import {createCustomEvent, getData} from '../../../src/event-helper';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
+import {isAmp4Email} from '../../../src/format';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
@@ -141,6 +142,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * For use when "inline_" is true.
      */
     this.menuTriggered_ = false;
+
+    /**
+     * The regex match value associated with the portion of the user input to suggest against.
+     * For use when "inline_" is true.
+     * @private {?RegExpResult}
+     */
+    this.match_ = null;
 
     /**
      * The base value obtained from the "src" attribute on amp-autocomplete.
@@ -298,14 +306,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
         });
     }
 
-    this.filter_ = userAssert(
-      this.element.getAttribute('filter'),
-      `${TAG} requires "filter" attribute.`
-    );
-    userAssert(
-      isEnumValue(FilterType, this.filter_),
-      `Unexpected filter: ${this.filter_}`
-    );
+    const doc = this.element.ownerDocument;
+    if (doc && isAmp4Email(doc)) {
+      this.filter_ = FilterType.NONE;
+    } else {
+      this.filter_ = userAssert(
+        this.element.getAttribute('filter'),
+        `${TAG} requires "filter" attribute.`
+      );
+      userAssert(
+        isEnumValue(FilterType, this.filter_),
+        `Unexpected filter: ${this.filter_}`
+      );
+    }
 
     // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
@@ -430,8 +443,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       },
       {passive: true}
     );
-    this.inputElement_.addEventListener('input', e => {
-      this.inputHandler_(e);
+    this.inputElement_.addEventListener('input', () => {
+      this.inputHandler_();
     });
     this.inputElement_.addEventListener('keydown', e => {
       this.keyDownHandler_(e);
@@ -519,11 +532,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Handle rendering results on user input.
-   * @param {!Event} event
    * @return {!Promise}
    * @private
    */
-  inputHandler_(event) {
+  inputHandler_() {
     let inlinePromise = Promise.resolve();
 
     // If the input is the first entry in the field.
@@ -532,7 +544,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.userInput_ = this.inputElement_.value;
 
     if (this.inline_) {
-      this.triggered_ = getData(event) === this.trigger_;
+      const match = this.getClosestPriorMatch_(this.trigger_);
+
+      if (!match) {
+        return this.mutateElement(() => {
+          this.clearAllItems_();
+        });
+      }
+
+      this.triggered_ = true;
+      this.match_ = match;
+      this.userInput_ = this.match_[0].slice(this.trigger_.length);
+
       if (!this.triggered_ && !this.menuTriggered_) {
         return Promise.resolve();
       }
@@ -541,14 +564,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
         hadResultsBeforeThisInput = true;
       }
 
-      const {value} = this.inputElement_;
-      const triggerLoc = value.lastIndexOf(this.trigger_);
-      if (triggerLoc == -1) {
-        return this.mutateElement(() => {
-          this.clearAllItems_();
-        });
-      }
-      this.userInput_ = value.slice(triggerLoc + 1);
       inlinePromise = this.getRemoteData_().then(sourceData => {
         this.sourceData_ = sourceData || [];
         this.menuTriggered_ = this.sourceData_.length;
@@ -571,6 +586,36 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
       });
     });
+  }
+
+  /**
+   * Finds the closest string in the user input prior to the cursor
+   * to display suggestions.
+   * @param {string} trigger
+   * @return {?RegExpResult}
+   * @private
+   */
+  getClosestPriorMatch_(trigger) {
+    const delimiter = `\\${trigger}`;
+    const pattern = `(((?<= )${delimiter}|^${delimiter})(\\w+)?)`;
+    const regex = new RegExp(pattern, 'gm');
+    const {value, selectionStart: cursor} = this.inputElement_;
+    let match, lastMatch;
+
+    while ((match = regex.exec(value)) !== null) {
+      if (match[0].length + ownProperty(match, 'index') > cursor) {
+        break;
+      }
+      lastMatch = match;
+    }
+
+    if (
+      !lastMatch ||
+      lastMatch[0].length + ownProperty(lastMatch, 'index') < cursor
+    ) {
+      return null;
+    }
+    return lastMatch;
   }
 
   /**
@@ -933,23 +978,32 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (element === null || element.hasAttribute('data-disabled')) {
       return;
     }
-
-    const selectedValue = (this.userInput_ =
-      element.getAttribute('data-value') || element.textContent);
-
-    this.inputElement_.value = this.inline_
-      ? this.replaceInlineValue_(selectedValue)
-      : selectedValue;
+    const selectedValue =
+      element.getAttribute('data-value') || element.textContent;
 
     this.fireSelectEvent_(selectedValue);
     this.clearAllItems_();
     this.toggleResults_(false);
 
     if (!this.inline_) {
+      this.inputElement_.value = this.userInput_ = selectedValue;
       return;
     }
 
+    let cursor = this.inputElement_.selectionStart;
+    const startIndex = ownProperty(this.match_, 'index');
+    const {length} = this.userInput_;
+    if (cursor >= startIndex + length) {
+      cursor = cursor - length;
+    }
+
+    this.inputElement_.value = this.replaceInlineValue_(selectedValue);
+    this.userInput_ = '';
+
     tryFocus(this.inputElement_);
+    cursor = cursor + selectedValue.length + 1;
+    this.inputElement_.setSelectionRange(cursor, cursor);
+    this.match_ = null;
   }
 
   /**
@@ -976,8 +1030,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
   replaceInlineValue_(selectedValue) {
     this.menuTriggered_ = false;
     const {value} = this.inputElement_;
-    const triggerLoc = value.lastIndexOf(this.trigger_);
-    return value.slice(0, triggerLoc + 1) + selectedValue + ' ';
+    const index = Number(ownProperty(this.match_, 'index'));
+
+    const pre = value.slice(0, index + this.trigger_.length);
+    const post = value.slice(
+      index + this.trigger_.length + this.userInput_.length
+    );
+    return pre + selectedValue + ' ' + post;
   }
 
   /**
@@ -1122,6 +1181,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
           }
           return this.updateActiveItem_(1);
         }
+        if (this.inline_ && !this.triggered_) {
+          return Promise.resolve();
+        }
         return this.mutateElement(() => {
           this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
           this.toggleResults_(true);
@@ -1147,7 +1209,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.inputElement_.setSelectionRange(inputLength, inputLength);
         }
         return this.mutateElement(() => {
-          if (this.activeElement_) {
+          if (this.resultsShowing_() && this.activeElement_) {
             this.selectItem_(this.activeElement_);
             if (this.inline_) {
               this.triggered_ = false;
@@ -1166,9 +1228,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
           }
         });
       case Keys.TAB:
-        if (this.activeElement_) {
-          this.userInput_ = this.inputElement_.value;
-          this.fireSelectEvent_(this.userInput_);
+        event.preventDefault;
+        if (this.resultsShowing_() && this.activeElement_) {
+          this.selectItem_(this.activeElement_);
         }
         return Promise.resolve();
       case Keys.BACKSPACE:

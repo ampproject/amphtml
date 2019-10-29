@@ -57,6 +57,11 @@
       <amp-autocomplete inline="@" min-characters="0" suggest-first filter="none" 
           src="/form/mention/query" query="q" on="select:AMP.setState({inlineInputSelect: event.value})">
         <textarea autoexpand class="wide" name="inlineInput" placeholder="Reply"></textarea>
+        <template type="amp-mustache" id="amp-template-plain">
+          <div data-value="{{ . }}">
+            {{ . }}
+          </div>
+        </template>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
       <div submit-success>
