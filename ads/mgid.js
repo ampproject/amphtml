@@ -28,9 +28,18 @@ export function mgid(global, data) {
 
   document.body.appendChild(scriptRoot);
 
+  /**
+   * Returns path for provided js filename
+   * @param {string} publisher js filename
+   * @return {string} Path to provided filename.
+   */
+  function getResourceFilePath(publisher) {
+    const publisherStr = publisher.replace(/[^A-z0-9]/g, '');
+    return `${publisherStr[0]}/${publisherStr[1]}`;
+  }
+
   const url =
-    `https://jsc.mgid.com/${encodeURIComponent(data.publisher[0])}/` +
-    `${encodeURIComponent(data.publisher[1])}/` +
+    `https://jsc.mgid.com/${getResourceFilePath(data.publisher)}/` +
     `${encodeURIComponent(data.publisher)}.` +
     `${encodeURIComponent(data.widget)}.js?t=` +
     Math.floor(Date.now() / 36e5);
