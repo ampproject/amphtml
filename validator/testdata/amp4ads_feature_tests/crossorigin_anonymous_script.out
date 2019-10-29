@@ -17,7 +17,7 @@ PASS
 |  <!--
 |    Test Description:
 |    This tests that the crossorigin=anonymous attribute is valid on the engine
-|    script and extension.
+|    script and extension scripts.
 |  -->
 |  <!doctype html>
 |  <html ⚡4ads>
