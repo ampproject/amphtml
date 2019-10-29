@@ -33,7 +33,7 @@ const {getFilesToCheck} = require('../common/utils');
 const {cyan, red, yellow, green} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 
-const OWNERS_SYNTAX_CHECK_URI = 'http://localhost:8080/v0/syntax';
+const OWNERS_SYNTAX_CHECK_URI = 'http://ampproject-owners-bot.appspot.com/v0/syntax';
 
 /**
  * Checks OWNERS files for correctness using the owners bot API.
