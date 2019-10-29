@@ -187,9 +187,6 @@ export class Performance {
           'first-input'
         );
       }
-    } else {
-      // If no Performance Observer, resolve fcp promise
-      this.fcpDeferred_.resolve(null);
     }
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
@@ -367,6 +364,10 @@ export class Performance {
       // Programmatically read once as currently PerformanceObserver does not
       // report past entries as of Chrome 61.
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      console.log('PPT');
+      this.win.performance.getEntriesByType('paint').forEach(val => {
+        console.log(val.name);
+      });
       this.win.performance.getEntriesByType('paint').forEach(processEntry);
       entryTypesToObserve.push('paint');
     }
