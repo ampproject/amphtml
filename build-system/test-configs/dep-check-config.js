@@ -683,6 +683,8 @@ exports.rules = [
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
         'src/service/extension-location.js',
+      'extensions/amp-live-list/0.1/live-list-manager.js->' +
+        'src/service/origin-experiments-impl.js',
     ],
   },
   {
