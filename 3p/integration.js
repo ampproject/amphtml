@@ -114,6 +114,7 @@ import {blade} from '../ads/blade';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
 import {broadstreetads} from '../ads/broadstreetads';
+import {byplay} from '../ads/byplay';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -293,6 +294,7 @@ const AMP_EMBED_ALLOWED = {
   adsloom: true,
   adstyle: true,
   bringhub: true,
+  byplay: true,
   dable: true,
   engageya: true,
   epeex: true,
@@ -389,6 +391,7 @@ register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
 register('broadstreetads', broadstreetads);
+register('byplay', byplay);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);

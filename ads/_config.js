@@ -333,6 +333,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
   },
 
+  'byplay': {},
+
   'caajainfeed': {
     prefetch: ['https://cdn.amanad.adtdp.com/sdk/ajaamp.js'],
     preconnect: ['https://ad.amanad.adtdp.com'],
