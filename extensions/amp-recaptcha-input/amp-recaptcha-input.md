@@ -1,5 +1,5 @@
 ---
-$category@: media
+$category@: dynamic-content
 formats:
   - websites
 teaser:
