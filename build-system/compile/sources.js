@@ -41,13 +41,10 @@ const COMMON_GLOBS = [
   'third_party/webcomponentsjs/ShadowCSS.js',
   'node_modules/dompurify/dist/purify.es.js',
   'node_modules/promise-pjs/promise.mjs',
-  'node_modules/rrule/dist/esm/src/index.js',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/dist/animations.mjs',
   'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
-  'node_modules/document-register-element/build/' +
-    'document-register-element.patched.js',
 ];
 
 /**

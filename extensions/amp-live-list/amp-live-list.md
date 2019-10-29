@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Provides a way to display and update content live.
 ---
+
 <!--
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -69,16 +70,20 @@ In the background, while an AMP page using `<amp-live-list>` is displayed on the
 The `amp-live-list` component has 3 sections. We'll refer to these sections as
 "reference points" and they are denoted by an attribute. These reference points must be a direct child of the `amp-live-list` component. The 3 reference points are:
 
-* `update`  (mandatory)
-* `items`  (mandatory)
-* `pagination` (optional)
+- `update` (mandatory)
+- `items` (mandatory)
+- `pagination` (optional)
 
 For more details, see the ["Reference Points"](#reference-points) section below.
 
 Example:
 
 ```html
-<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20">
+<amp-live-list
+  id="my-live-list"
+  data-poll-interval="15000"
+  data-max-items-per-page="20"
+>
   <button update on="tap:my-live-list.update">You have updates!</button>
   <div items></div>
   <!-- pagination is optional -->
@@ -131,7 +136,11 @@ The actual action handler may be at a descendant and does not have to be at the
 Example:
 
 ```html
-<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20">
+<amp-live-list
+  id="my-live-list"
+  data-poll-interval="15000"
+  data-max-items-per-page="20"
+>
   <div update class="outer-container">
     <div class="inner-container">
       <button class="btn" on="tap:my-live-list.update">Click me!</button>
@@ -207,7 +216,7 @@ See the documentation for [Server side filtering](../amp-live-list/amp-live-list
 Usually attribute requirements are only enforced on the actual component but
 because we need to anchor and make decisions on the client, we will also need
 to require an `items` and `update` attribute on a direct child of
-`amp-live-list`.  Children of the `items` reference point will also have
+`amp-live-list`. Children of the `items` reference point will also have
 attribute requirements.
 
 ### Attributes on `amp-live-list`
@@ -241,7 +250,6 @@ attribute requirements.
   </tr>
 </table>
 
-
 ### Attributes on `items` reference point children
 
 <table>
@@ -274,7 +282,6 @@ attribute requirements.
     of the top.</td>
   </tr>
 </table>
-
 
 ## Styling
 
@@ -328,6 +335,7 @@ reference point, and you can hook into this class to add transitions.
 (see Examples below)
 
 ## Actions
+
 The `amp-live-list` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
@@ -351,7 +359,6 @@ The polling interval will also be 16000 and not 20000 milliseconds, as we choose
 the lowest one.
 
 ```html
-
 <style amp-custom>
   amp-live-list > [update] {
     display: none;
@@ -361,7 +368,7 @@ the lowest one.
     position: fixed;
     top: 10px;
     left: 50%;
-    transform: translateX(-50%)
+    transform: translateX(-50%);
   }
 
   .slide.amp-active {
@@ -369,7 +376,7 @@ the lowest one.
     height: 100px;
     max-height: 150px;
     transition-property: height;
-    transition-duration: .2s;
+    transition-duration: 0.2s;
     transition-timing-function: ease-in;
     background: #3f51b5;
   }
@@ -385,7 +392,11 @@ the lowest one.
   }
 </style>
 
-<amp-live-list id="live-list-1" data-poll-interval="16000" data-max-items-per-page="5">
+<amp-live-list
+  id="live-list-1"
+  data-poll-interval="16000"
+  data-max-items-per-page="5"
+>
   <button update id="fixed-button" class="button" on="tap:live-list-1.update">
     new updates on live list 1
   </button>
@@ -393,8 +404,12 @@ the lowest one.
     <div id="live-list-1-item-2" data-sort-time="1462814963592">
       <div class="card">
         <div class="logo">
-          <amp-img src="/examples/img/ampicon.png"
-              layout="fixed" height="50" width="50">
+          <amp-img
+            src="/examples/img/ampicon.png"
+            layout="fixed"
+            height="50"
+            width="50"
+          >
           </amp-img>
         </div>
       </div>
@@ -402,8 +417,12 @@ the lowest one.
     <div id="live-list-1-item-1" data-sort-time="1462814955597">
       <div class="card">
         <div class="logo">
-          <amp-img src="/examples/img/ampicon.png"
-              layout="fixed" height="50" width="50">
+          <amp-img
+            src="/examples/img/ampicon.png"
+            layout="fixed"
+            height="50"
+            width="50"
+          >
           </amp-img>
         </div>
       </div>
@@ -411,7 +430,11 @@ the lowest one.
   </div>
 </amp-live-list>
 
-<amp-live-list id="live-list-2" data-poll-interval="20000" data-max-items-per-page="10">
+<amp-live-list
+  id="live-list-2"
+  data-poll-interval="20000"
+  data-max-items-per-page="10"
+>
   <div update class="slide" on="tap:live-list-2.update">
     new updates on live list 2
   </div>
@@ -423,4 +446,5 @@ the lowest one.
 ```
 
 ## Validation
+
 See [amp-live-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/validator-amp-live-list.protoascii) in the AMP validator specification.
