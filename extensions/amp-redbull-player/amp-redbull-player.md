@@ -29,7 +29,7 @@ Displays an <a href="https://www.redbull.com/">Red Bull</a> video.
 <table>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-redbull-player" src="https://cdn.ampproject.org/v0/amp-redbull-player-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-redbull-player" src=`https://cdn.ampproject.org/v0/amp-redbull-player-0.1.js`>&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
@@ -75,4 +75,4 @@ Displays an <a href="https://www.redbull.com/">Red Bull</a> video.
 
 ## Validation
 
-See [amp-redbull-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-redbull-player/validator-amp-player-player.protoascii) in the AMP validator specification.
+See [amp-redbull-player rules](`https://github.com/ampproject/amphtml/blob/master/extensions/amp-redbull-player/validator-amp-player-player.protoascii`) in the AMP validator specification.
