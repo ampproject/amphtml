@@ -4,13 +4,6 @@ export type RequestHandler = (
   rsvp: boolean
 ) => Promise<any> | undefined;
 
-export class WindowPortEmulator {
-  constructor(win: Window, origin: string, target: Window);
-  addEventListener(eventType: string, handler: EventListener): void;
-  postMessage(data: any): void;
-  start(): void;
-}
-
 export class Messaging {
   static initiateHandshakeWithDocument(
     target: Window,
@@ -24,7 +17,7 @@ export class Messaging {
   ): Promise<Messaging>;
   constructor(
     win: Window,
-    port: MessagePort | WindowPortEmulator,
+    port: MessagePort,
     opt_isWebview?: boolean,
     opt_token?: string
   );
