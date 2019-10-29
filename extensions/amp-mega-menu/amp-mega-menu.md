@@ -42,24 +42,33 @@ A horizontal navigation bar containing a set of menu items that, when activated 
 </table>
 
 ## Overview
-`<amp-mega-menu>` provides a way to organize and display large collections of navigational content at the top of an AMP page. The component is intended primarily for desktop and tablet use cases, and it can be used jointly with `<amp-sidebar>` to create a responsive menu.
+`<amp-mega-menu>` provides a way to organize and display large collections of navigational content at the top of an AMP page. The component is intended primarily for desktop and tablet use cases, and it can be used jointly with [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md) to create a responsive menu.
 
 ## Usage
 
 The `<amp-mega-menu>` component should include a single `<nav>` element containing either `<ul>` or `<ol>`, under which each `<li>` element will be regarded as a menu item.
 
 [tip type="note"]
-For the component to validate, the `<nav>` element must be parented by either the `<amp-mega-menu>` component itself or a `<template>`, and it must have a `<ul>` or `<ol>` as its only child.
+The `<nav>` element must be parented by either the `<amp-mega-menu>` component or a `<template>`, and it must have `<ul>` or `<ol>` as its only child.
 [/tip]
 
-Each menu item can contain only `<a>`, `<button>`, `<div>`, `<span>`, or any heading tag as direct children. It should have either one child (e.g. an anchor link or element with tap action), or two if the menu item expands into a dropdown container. In the latter case, the two children must conform to the following specs:
+Each menu item can contain any of the following tags as direct children:
+- `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`
+- `<a>`
+- `<button>`
+- `<span>`
+- `<div>`
+
+### Toggleable dropdowns
+
+A menu item should have either one child (e.g. an anchor link or element with tap action), or two if the item expands into a dropdown container. In the latter case, the two children must conform to the following specs:
 
 1. A `<button>` or element with `role=button`: this element is used to toggle the dropdown container (but only if the former has no registered tap action) and receives focus when navigating between items.
-2. A `<div>` with `role=dialog`: this element will be rendered as a container that holds additional content under an item, and its visibility is initially set to hidden.
+2. A `<div>` with `role=dialog`: this element will be rendered as a container that holds additional content under an item, and it is initially hidden.
 
-Additionally, when an item is expanded, a mask will be applied on the rest of the body. For any contents that should appear above the mask (e.g. a title banner), place them along with `<amp-mega-menu>` inside a `<header>` element and add background color to all children of `<header>`.
+A mask will cover the rest of the page when a dropdown is open. Content, such as a title banner, can appear above the mask. Apply a background color on the content and place it, alongside the `<amp-mega-menu>`, inside a `<header>` element.
 
-`<amp-mega-menu>` may contain any of the following AMP elements:
+Each dropdown may contain any of the following AMP elements:
 - `<amp-ad>`
 - `<amp-carousel>`
 - `<amp-form>`
@@ -68,7 +77,7 @@ Additionally, when an item is expanded, a mask will be applied on the rest of th
 - `<amp-list>`
 - `<amp-video>`
 
-In the example below, the `<amp-mega-menu>` contains two menu items with toggleable content, as well as a third item that is an external link.
+The example below demonstrates an `<amp-mega-menu>` with three menu items. The first two are toggleable and the third is an external link.
 
 [example playground="true" preview="top-frame" orientation="landscape" imports="amp-mega-menu"]
 ```html
@@ -104,9 +113,9 @@ In the example below, the `<amp-mega-menu>` contains two menu items with togglea
 
 ### Dynamic content rendering
 
-The content of a mega menu can be fetched dynamically from a CORS JSON endpoint using [amp-list](../amp-list/amp-list.md) and rendered via [amp-mustache template](../amp-mustache/amp-mustache.md).
+Fetch content of `<amp-mega-menu>` dynamically from a JSON endpoint using [`<amp-list>`](../amp-list/amp-list.md) and [`amp-mustache`](../amp-mustache/amp-mustache.md) template.
 
-In the following example, content of `<amp-mega-menu>` is rendered dynamically by nesting an `<amp-list>` directly inside the component.
+The example below demonstrates this ability by nesting `<amp-list>` inside `<amp-mega-menu>`.
 
 [example playground="true" preview="top-frame" orientation="landscape" imports="amp-mega-menu,amp-list" template="amp-mustache"]
 ```html
@@ -132,7 +141,7 @@ In the following example, content of `<amp-mega-menu>` is rendered dynamically b
 ```
 [/example]
 
-Here is the JSON file that we used:
+Here is the JSON file used:
 
 ```json
 {
@@ -159,9 +168,9 @@ Here is the JSON file that we used:
 
 ### Responsive design with `<amp-sidebar>`
 
-For viewports that may be too narrow to display the menu items in one row, we recommend using an `<amp-sidebar>` instead and responsively switch between the two components via media query.
+Some viewports may be too narrow to display the content of `<amp-mega-menu>` in a single row. For these use cases, use media queries to switch between `<amp-mega-menu>` and `<amp-sidebar>`.
 
-The following example demonstrates how to hide the mega menu when viewport width is no more than `500px` and instead show a button to open the sidebar containing an accordion menu.
+The example below hides `<amp-mega-menu>` when the viewport width is less than 500px. It replaces `<amp-mega-menu>` with a button that opens `<amp-sidebar>`.
 
 [example playground="true" preview="top-frame"]
 ```html
@@ -229,12 +238,14 @@ The following example demonstrates how to hide the mega menu when viewport width
 
 The `<amp-mega-menu>` component can be styled with standard CSS.
 
-- By default, a white background is applied to the `<nav>` element and the expandable content elements.
-- When open, the content containers will fill the entire viewport width but can be overridden with the `left` and `width` properties.
-- The current state of the mega menu is exposed via the `open` attribute that is set on the `amp-mega-menu` tag when one of the menu items is expanded.
-- The `<li>` element with expanded content will also receive the `open` attribute, which developers can use to style its children.
+- The `<nav>` element and dropdown elements have a default white background.
+- When open, the dropdown containers will fill the entire viewport width. This can be overridden with the left and width properties.
+- Expanding a menu item applies the `open` attribute to the `<amp-mega-menu>` component as well as the expanded `<li>` element.
 
-In the example below, we will customize the background color of the navigation bar, the appearance of menu buttons when opened, as well as the positioning of dropdown containers.
+The example below customizes:
+- The background color of the navigation bar
+- The appearance of opened menu buttons
+- The position of the dropdown containers
 
 [example playground="true" preview="top-frame" orientation="landscape"]
 ```html
@@ -295,7 +306,7 @@ In the example below, we will customize the background color of the navigation b
 
 ## Accessibility
 
-`<amp-mega-menu>` assigns the following ARIA attributes on the children of each expandable menu item. These attributes are used by screen reader technology to associate a button with its togglable container as well as to trap focus inside the container once opened.
+`<amp-mega-menu>` assigns the following ARIA attributes on the children of each expandable menu item. Screen readers use these attributes to associate buttons with toggleable containers and trap focus inside opened containers.
 
 ```html
 <li>
