@@ -8,13 +8,13 @@ This document outlines the configuration options that will determine in which co
 
 #### Format
 
-```javascript
+```json
 "linkers": {
-  <paramName>: {
-    ids: <Object>,
-    proxyOnly: <boolean>,
-    destinationDomains: <Array<string>>,
-    enabled: <boolean>
+  "<paramName>": {
+    "ids": <Object>,
+    "proxyOnly": <boolean>,
+    "destinationDomains": <Array<string>>,
+    "enabled": <boolean>
   }
 }
 ```
@@ -37,7 +37,7 @@ The most common use case is simply enabling this feature for an analytics provid
     {
       ... // Optional preexisting configuration.
       "linkers" : {
-        enabled: true
+        "enabled": true
       }
     }
   </script>
@@ -48,15 +48,15 @@ The most common use case is simply enabling this feature for an analytics provid
 
 An example of a config that grants more granular control may look like the example below:
 
-```javascript
+```json
 "linkers": {
   "linker1" : {
     "ids" : {
       "cid": "CLIENT_ID(_ga)",
-      "uid" "QUERY_PARAM(uid)",
+      "uid" "QUERY_PARAM(uid)"
     },
     "proxyOnly" : false,
-    "enabled": true,
+    "enabled": true
   }
 }
 ```
@@ -102,7 +102,7 @@ Some items in the configuration objects have default values. However, you may ov
 
 Example:
 
-```javascript
+```json
 "linkers": {
   "enabled": true, // This enables all child linkers contained in this object.
   "proxyOnly" : false,
@@ -112,7 +112,7 @@ Example:
     }
   },
   "linker2" : {
-    "proxyOnly": true
+    "proxyOnly": true,
     "ids" : {
       "gid": "CLIENT_ID(foo)"
     }
