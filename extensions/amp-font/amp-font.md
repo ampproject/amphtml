@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Triggers and monitors the loading of custom fonts.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,6 +25,7 @@ limitations under the License.
 -->
 
 # amp-font
+
 Trigger and monitor the loading of custom fonts on AMP pages.
 
 <table>
@@ -51,19 +53,22 @@ The `amp-font` extension allows adding and removing CSS classes from `document.d
 or `document.body` based on whether a font was loaded or is in error-state.
 
 Example:
+
 ```html
-  <amp-font
-      layout="nodisplay"
-      font-family="My Font"
-      timeout="3000"
-      on-error-remove-class="my-font-loading"
-      on-error-add-class="my-font-missing"></amp-font>
-  <amp-font
-      layout="nodisplay"
-      font-family="My Other Font"
-      timeout="1000"
-      on-load-add-class="my-other-font-loaded"
-      on-load-remove-class="my-other-font-loading"></amp-font>
+<amp-font
+  layout="nodisplay"
+  font-family="My Font"
+  timeout="3000"
+  on-error-remove-class="my-font-loading"
+  on-error-add-class="my-font-missing"
+></amp-font>
+<amp-font
+  layout="nodisplay"
+  font-family="My Other Font"
+  timeout="1000"
+  on-load-add-class="my-other-font-loaded"
+  on-load-remove-class="my-other-font-loading"
+></amp-font>
 ```
 
 The extension observes loading of a font and when it loads executes the optional attributes `on-load-add-class` and `on-load-remove-class` and when there is any error or timeout runs `on-error-remove-class` and `on-error-add-class`.
@@ -76,10 +81,10 @@ Using these classes authors can guard whether a font is displayed and get the fo
 - implement FOIT where the page renders with no text before the font comes in
 - make the timeout very short and only use a font if it was already cached.
 
-
-The `amp-font` extension accepts the `layout` value:  `nodisplay`
+The `amp-font` extension accepts the `layout` value: `nodisplay`
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>font-family</strong></td>
@@ -114,7 +119,6 @@ The `amp-font` extension accepts the `layout` value:  `nodisplay`
     <td>Must be <code>nodisplay</code>.</td>
   </tr>
 </table>
-
 
 ## Validation
 

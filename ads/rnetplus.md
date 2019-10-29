@@ -21,9 +21,12 @@ Provides support for [rnetplus](https://admin.rnet.plus/help/) Rambler&Co RNetPl
 ## Example
 
 ```html
-<amp-ad width="250" height="250"
-    type="rnetplus"
-    src="https://api.rnet.plus/Scripts/rnet_amp_embed.js?blockId=660">
+<amp-ad
+  width="250"
+  height="250"
+  type="rnetplus"
+  src="https://api.rnet.plus/Scripts/rnet_amp_embed.js?blockId=660"
+>
 </amp-ad>
 ```
 

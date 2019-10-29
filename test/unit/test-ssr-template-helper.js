@@ -84,7 +84,7 @@ describes.fakeWin(
       );
     });
 
-    describe('fetchAndRenderTemplate', () => {
+    describe('ssr', () => {
       it('should build payload', () => {
         const request = {
           'xhrUrl': 'https://www.abracadabra.org/some-json',
@@ -102,7 +102,7 @@ describes.fakeWin(
           successTemplate: {'innerHTML': '<div>much success</div>'},
           errorTemplate: {'innerHTML': '<div>try again</div>'},
         };
-        ssrTemplateHelper.fetchAndRenderTemplate({}, request, templates, {
+        ssrTemplateHelper.ssr({}, request, templates, {
           attr: 'test',
         });
         expect(sendMessage).calledWith('viewerRenderTemplate', {
@@ -156,9 +156,9 @@ describes.fakeWin(
         );
       });
 
-      describe('renderTemplate', () => {
+      describe('applySsrOrCsrTemplate', () => {
         it('should set html template', () => {
-          ssrTemplateHelper.renderTemplate(
+          ssrTemplateHelper.applySsrOrCsrTemplate(
             {},
             {html: '<div>some template</div>'}
           );
@@ -171,14 +171,14 @@ describes.fakeWin(
         it('should throw error if html template is not defined', () => {
           allowConsoleError(() => {
             expect(() => {
-              ssrTemplateHelper.renderTemplate({}, {html: null});
+              ssrTemplateHelper.applySsrOrCsrTemplate({}, {html: null});
             }).to.throw(/Server side html response must be defined/);
           });
         });
 
         it('should render template ', () => {
           hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-          ssrTemplateHelper.renderTemplate(
+          ssrTemplateHelper.applySsrOrCsrTemplate(
             {},
             {data: '<div>some template</div>'}
           );
@@ -190,7 +190,7 @@ describes.fakeWin(
 
         it('should set template array ', () => {
           hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-          ssrTemplateHelper.renderTemplate({}, [
+          ssrTemplateHelper.applySsrOrCsrTemplate({}, [
             {data: '<div>some template</div>'},
           ]);
           expect(findAndRenderTemplateArray).to.have.been.calledWith({}, [
