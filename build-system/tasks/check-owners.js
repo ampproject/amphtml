@@ -22,13 +22,15 @@
 
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const requestPost = BBPromise.promisify(require('request').post);
 const fs = require('fs-extra');
 const globby = require('globby');
 const JSON5 = require('json5');
 const log = require('fancy-log');
-const {cyan, red, green} = require('ansi-colors');
+const {getFilesToCheck} = require('../common/utils');
+const {cyan, red, yellow, green} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 
 const OWNERS_SYNTAX_CHECK_URI = 'http://localhost:8080/v0/syntax';
@@ -39,10 +41,40 @@ const OWNERS_SYNTAX_CHECK_URI = 'http://localhost:8080/v0/syntax';
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
-  const filesToCheck = globby.sync(['**/OWNERS']);
+  if (!isValidUsage()) {
+    return;
+  }
+  const filesToCheck = getFilesToCheck('**/OWNERS');
   for (const file of filesToCheck) {
     await checkFile(file);
   }
+}
+
+/**
+ * Checks if the correct arguments were passed in
+ *
+ * @return {boolean}
+ */
+function isValidUsage() {
+  const validUsage = argv.files || argv.local_changes;
+  if (!validUsage) {
+    log(
+      yellow('NOTE 1:'),
+      'It is infeasible for',
+      cyan('gulp check-owners'),
+      'to check all owners files in the repo at once.'
+    );
+    log(
+      yellow('NOTE 2:'),
+      'Please run',
+      cyan('gulp check-links'),
+      'with',
+      cyan('--files'),
+      'or',
+      cyan('--local_changes') + '.'
+    );
+  }
+  return validUsage;
 }
 
 /**
