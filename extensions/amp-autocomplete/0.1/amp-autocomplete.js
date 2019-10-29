@@ -575,15 +575,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     return inlinePromise.then(() => {
       return this.mutateElement(() => {
-        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
-        this.toggleResults_(true);
-        if (this.suggestFirst_) {
-          if (!this.detectBackspace_ || firstEntry) {
-            this.updateActiveItem_(1);
+        this.filterDataAndRenderResults_(
+          this.sourceData_,
+          this.userInput_
+        ).then(() => {
+          this.toggleResults_(true);
+          if (this.suggestFirst_) {
+            if (!this.detectBackspace_ || firstEntry) {
+              this.updateActiveItem_(1);
+            }
+            // Reset flag.
+            this.detectBackspace_ = false;
           }
-          // Reset flag.
-          this.detectBackspace_ = false;
-        }
+        });
       });
     });
   }
