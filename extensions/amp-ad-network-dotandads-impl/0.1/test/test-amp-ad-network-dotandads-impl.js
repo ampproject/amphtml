@@ -15,7 +15,7 @@
  */
 
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
-import {AmpAdNetworkFakeImpl} from '../amp-ad-network-dotandads-impl';
+import {AmpAdNetworkDotandadsImpl} from '../amp-ad-network-dotandads-impl';
 
 describes.realWin(
   'amp-ad-network-dotandads-impl',
@@ -50,18 +50,18 @@ describes.realWin(
     });
 
     it('should not send ad request with valid id', () => {
-      const fakeImpl = new AmpAdNetworkFakeImpl(fakeImplElem);
+      const fakeImpl = new AmpAdNetworkDotandadsImpl(fakeImplElem);
       // no id
       expect(fakeImpl.isValidElement()).to.be.false;
       // valid id
       fakeImplElem.setAttribute('id', 'valid');
-      const fakeImpl2 = new AmpAdNetworkFakeImpl(fakeImplElem);
+      const fakeImpl2 = new AmpAdNetworkDotandadsImpl(fakeImplElem);
       expect(fakeImpl2.isValidElement()).to.be.false;
     });
 
     it('send ad request with invalid id', () => {
       fakeImplElem.setAttribute('id', 'i-amphtml-demo-test');
-      const fakeImpl = new AmpAdNetworkFakeImpl(fakeImplElem);
+      const fakeImpl = new AmpAdNetworkDotandadsImpl(fakeImplElem);
       expect(fakeImpl.isValidElement()).to.be.true;
     });
 
@@ -83,7 +83,7 @@ describes.realWin(
         linkIcon +
         `</head><body><amp-analytics><script type=application/json>Iñtërnâtiônàlizætiøn☃💩</script></amp-analytics></body></html>`;
       fakeImplElem.setAttribute('id', 'i-amphtml-demo-test');
-      const transformed = new AmpAdNetworkFakeImpl(
+      const transformed = new AmpAdNetworkDotandadsImpl(
         fakeImplElem
       ).transformCreative_(input);
       expect(transformed).to.include(
@@ -179,7 +179,7 @@ describes.realWin(
       </body>
       </html>`;
       fakeImplElem.setAttribute('id', 'i-amphtml-demo-test');
-      const transformed = new AmpAdNetworkFakeImpl(
+      const transformed = new AmpAdNetworkDotandadsImpl(
         fakeImplElem
       ).transformCreative_(input);
       expect(transformed).to.include(
