@@ -82,8 +82,8 @@ export class LiveListManager {
     /** @private @const {boolean} */
     this.isTransformed_ = isDocTransformed(ampdoc.getRootNode());
 
-    /** @private {boolean} */
-    this.enrolledInAppendRandomExperiment_ = false;
+    /** @private {?boolean} */
+    this.enrolledInAppendRandomExperiment_ = null;
 
     // Only start polling when doc is ready and when the doc is visible.
     this.whenDocReady_().then(() => {
@@ -290,15 +290,17 @@ export class LiveListManager {
     this.liveLists_[id] = liveList;
     this.intervals_.push(liveList.getInterval());
 
-    // Origin Trial for cache busting requests for `amp-live-list`.
-    installOriginExperimentsForDoc(this.ampdoc);
-    originExperimentsForDoc(liveList.element)
-      .getExperiments()
-      .then(
-        trials =>
-          (this.enrolledInAppendRandomExperiment_ =
-            trials && trials.includes('amp-live-list-random'))
-      );
+    if (this.enrolledInAppendRandomExperiment_ === null) {
+      // Origin Trial for cache busting requests for `amp-live-list`.
+      installOriginExperimentsForDoc(this.ampdoc);
+      originExperimentsForDoc(liveList.element)
+        .getExperiments()
+        .then(
+          trials =>
+            (this.enrolledInAppendRandomExperiment_ =
+              trials && trials.includes('amp-live-list-random'))
+        );
+    }
 
     // Polling may not be started yet if no live lists were registered by
     // doc ready in LiveListManager's constructor.
