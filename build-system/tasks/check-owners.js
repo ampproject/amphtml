@@ -22,12 +22,16 @@
 
 'use strict';
 
+const BBPromise = require('bluebird');
+const requestPost = BBPromise.promisify(require('request').post);
 const fs = require('fs-extra');
 const globby = require('globby');
 const JSON5 = require('json5');
 const log = require('fancy-log');
 const {cyan, red, green} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
+
+const OWNERS_SYNTAX_CHECK_URI = 'http://localhost:8080/v0/syntax';
 
 /**
  * Checks OWNERS files for correctness using the owners bot API.
@@ -36,14 +40,16 @@ const {isTravisBuild} = require('../common/travis');
  */
 async function checkOwners() {
   const filesToCheck = globby.sync(['**/OWNERS']);
-  filesToCheck.forEach(checkFile);
+  for (const file of filesToCheck) {
+    await checkFile(file);
+  }
 }
 
 /**
  * Checks a single OWNERS file using the owners bot API.
  * @param {string} file
  */
-function checkFile(file) {
+async function checkFile(file) {
   if (!file.endsWith('OWNERS')) {
     log(red('ERROR:'), cyan(file), 'is not an', cyan('OWNERS'), 'file.');
     process.exitCode = 1;
@@ -62,6 +68,38 @@ function checkFile(file) {
   } catch {
     log(red('FAILURE:'), 'Found errors in', cyan(file));
     process.exitCode = 1;
+  }
+
+  try {
+    const response = await requestPost({
+      uri: OWNERS_SYNTAX_CHECK_URI,
+      json: true,
+      body: {path: file, contents},
+    });
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      log(red('Could not reach the owners syntax check API'));
+      throw new Error(
+        `${response.statusCode} ${response.statusMessage}: ` + response.body
+      );
+    }
+
+    const {requestErrors, fileErrors, rules} = response.body;
+
+    if (requestErrors) {
+      requestErrors.forEach(err => log(red(err)));
+      throw new Error('Could not reach the owners syntax check API')
+    } else if (fileErrors && fileErrors.length) {
+      fileErrors.forEach(err => log(red(err)));
+      throw new Error(`Errors encountered parsing "${file}"`);
+    }
+
+    log(green(`File "${file}" parsed successfully! Produced rules:`));
+    rules.forEach(rule => log(cyan(rule)));
+  } catch (error) {
+    log(red(error));
+    process.exitCode = 1;
+    return;
   }
 }
 
