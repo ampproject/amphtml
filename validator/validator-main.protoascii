@@ -4868,6 +4868,10 @@ tags: {
     value: ""
   }
   attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
+  attrs: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
@@ -4876,10 +4880,6 @@ tags: {
   attrs: {
     name: "type"
     value_casei: "text/javascript"
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "anonymous"
   }
   cdata: {
     blacklisted_cdata_regex: {
