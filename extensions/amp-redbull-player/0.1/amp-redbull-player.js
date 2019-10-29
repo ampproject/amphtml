@@ -26,9 +26,9 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @private @const */
@@ -59,10 +59,10 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     this.unlistenFrame_ = null;
 
     /** @private {string} */
-    this.tagId_ = null;
+    this.tagId_ = '';
 
     /** @private {string} */
-    this.locale_ = null;
+    this.locale_ = '';
 
     /**
      * @param {!Event} e
@@ -101,10 +101,15 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     const {element} = this;
 
     const origin = 'https://player.redbull.com/amp/amp-iframe.html';
-    const params = Object.assign(dict({}), element.dataset);
-    params['ampTagId'] = this.tagId_;
-    params['locale'] = this.locale_;
-    const src = addParamsToUrl(origin, params);
+    // const src = addParamsToUrl(origin, params);
+    const src = addParamsToUrl(
+      origin,
+      dict({
+        'videoid': element.dataset.videoid,
+        'ampTagId': this.tagId_,
+        'locale': this.locale_,
+      })
+    );
 
     this.iframe_ = disableScrollingOnIframe(
       createFrameFor(this, src, '', SANDBOX)
@@ -183,7 +188,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
-    if (data.id === `redbull-amp-video-tracking-${this.tagId_}`) {
+    if (data['id'] === `redbull-amp-video-tracking-${this.tagId_}`) {
       const type = ANALYTICS_EVENT_TYPE_PREFIX + data['type'];
       this.dispatchCustomAnalyticsEvent_(type, data);
     }
@@ -204,7 +209,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JsonObject} message
+   * @param {Object} message
    * @private
    */
   postMessage_(message) {
@@ -246,13 +251,62 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   /** @override */
   getMetadata() {
     // Not supported.
-    return null;
   }
 
   /** @override */
   getPlayedRanges() {
     // Not supported.
     return [];
+  }
+
+  /** @override */
+  play(unusedIsAutoplay) {
+    // Not supported
+  }
+
+  /** @override */
+  pause() {
+    // Not supported
+  }
+
+  /** @override */
+  mute() {
+    // Not supported
+  }
+
+  /** @override */
+  unmute() {
+    // Not supported
+  }
+
+  /** @override */
+  showControls() {
+    // Not supported
+  }
+
+  /** @override */
+  hideControls() {
+    // Not supported
+  }
+
+  /** @override */
+  fullscreenEnter() {
+    // Not supported
+  }
+
+  /** @override */
+  fullscreenExit() {
+    // Not supported
+  }
+
+  /** @override */
+  isFullscreen() {
+    return false;
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    // Not supported
   }
 }
 
