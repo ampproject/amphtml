@@ -21,6 +21,10 @@ import {dict} from '../../../src/utils/object';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  installOriginExperimentsForDoc,
+  originExperimentsForDoc,
+} from '../../../src/service/origin-experiments-impl';
 import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
@@ -29,10 +33,6 @@ import {userAssert} from '../../../src/log';
 export const SERVICE_ID = 'liveListManager';
 
 const TRANSFORMED_PREFIX = 'google;v=';
-
-// Maxiumum random number used as a query parameter.
-// Cannot use Number.MAX_SAFE_INTEGER due to IE Compatibility.
-const AMP_LIVE_LIST_MAX_RANDOM_NUMBER = 9007199254740991;
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to
@@ -50,9 +50,8 @@ export const AMP_LIVE_LIST_CUSTOM_SLOT_ID = 'AMP_LIVE_LIST_CUSTOM_SLOT_ID';
 export class LiveListManager {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {boolean} enrolledInAppendRandomExperiment
    */
-  constructor(ampdoc, enrolledInAppendRandomExperiment) {
+  constructor(ampdoc) {
     /** @const */
     this.ampdoc = ampdoc;
 
@@ -84,7 +83,7 @@ export class LiveListManager {
     this.isTransformed_ = isDocTransformed(ampdoc.getRootNode());
 
     /** @private {boolean} */
-    this.enrolledInAppendRandomExperiment_ = enrolledInAppendRandomExperiment;
+    this.enrolledInAppendRandomExperiment_ = false;
 
     // Only start polling when doc is ready and when the doc is visible.
     this.whenDocReady_().then(() => {
@@ -161,9 +160,7 @@ export class LiveListManager {
             'amp_latest_update_time': String(this.latestUpdateTime_),
             // AMP Caches do not always evict entries from their caches.
             // This experiment adds a random identifier to reduce cache hits for enrolled documents.
-            'amp_random': String(
-              Math.floor(Math.random() * AMP_LIVE_LIST_MAX_RANDOM_NUMBER)
-            ),
+            'amp_random': String(Math.random()),
           })
         : dict({
             'amp_latest_update_time': String(this.latestUpdateTime_),
@@ -292,6 +289,16 @@ export class LiveListManager {
     }
     this.liveLists_[id] = liveList;
     this.intervals_.push(liveList.getInterval());
+
+    // Origin Trial for cache busting requests for `amp-live-list`.
+    installOriginExperimentsForDoc(this.ampdoc);
+    originExperimentsForDoc(liveList.element)
+      .getExperiments()
+      .then(
+        trials =>
+          (this.enrolledInAppendRandomExperiment_ =
+            trials && trials.includes('amp-live-list-random'))
+      );
 
     // Polling may not be started yet if no live lists were registered by
     // doc ready in LiveListManager's constructor.
