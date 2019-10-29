@@ -19,7 +19,9 @@ import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
+  closest,
   closestAncestorElementBySelector,
+  isRTL,
   scopedQuerySelector,
   tryFocus,
 } from '../../../src/dom';
@@ -28,6 +30,12 @@ import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-nested-menu';
+
+/** @private @enum {string} */
+const Side = {
+  LEFT: 'left',
+  RIGHT: 'right',
+};
 
 /** @private @const {number} */
 const ANIMATION_TIMEOUT = 350;
@@ -40,29 +48,17 @@ export class AmpNestedMenu extends AMP.BaseElement {
     /** @private @const {!Document} */
     this.document_ = this.win.document;
 
-    /** @private @const {!Element} */
-    this.documentElement_ = this.document_.documentElement;
-
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {?Element} */
-    this.currentSubmenu_ = null;
+    /** @private {?string} */
+    this.side_ = null;
 
-    /** @private {?Array<!Element>} */
-    this.submenuElements_ = null;
-
-    /** @private {?Array<!Element>} */
-    this.submenuOpenElements_ = null;
-
-    /** @private {?Array<!Element>} */
-    this.submenuCloseElements_ = null;
+    /** @private {!Element} */
+    this.currentSubmenu_ = element;
 
     /** @private {function(!Event)} */
-    this.submenuOpenHandler_ = this.handleSubmenuOpenClick_.bind(this);
-
-    /** @private {function(!Event)} */
-    this.submenuCloseHandler_ = this.handleSubmenuCloseClick_.bind(this);
+    this.clickHandler_ = this.handleClick_.bind(this);
 
     /** @private {function(!Event)} */
     this.keydownHandler_ = this.handleKeyDown_.bind(this);
@@ -75,46 +71,46 @@ export class AmpNestedMenu extends AMP.BaseElement {
       isExperimentOn(this.win, 'amp-sidebar-v2'),
       `Turning on the amp-sidebar-v2 experiment is necessary to use the ${TAG} component.`
     );
+    const {element} = this;
 
     this.action_ = Services.actionServiceForDoc(this.element);
 
-    this.submenuElements_ = toArray(
-      this.element.querySelectorAll('[amp-nested-submenu]')
-    );
-    this.submenuElements_.forEach(submenu => {
-      // Make submenus programmatically focusable for a11y.
-      submenu.tabIndex = -1;
-    });
-    this.submenuOpenElements_ = toArray(
-      this.element.querySelectorAll('[amp-nested-submenu-open]')
-    );
-    this.submenuCloseElements_ = toArray(
-      this.element.querySelectorAll('[amp-nested-submenu-close]')
-    );
-    this.submenuOpenElements_
-      .concat(this.submenuCloseElements_)
-      .forEach(element => {
-        if (!element.hasAttribute('tabindex')) {
-          element.setAttribute('tabindex', 0);
-        }
-        element.setAttribute('role', 'button');
-        userAssert(
-          this.action_.hasAction(element, 'tap') == false,
-          'submenu open/close buttons should not have tap actions registered.'
-        );
-      });
+    this.side_ = element.getAttribute('side');
+    if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
+      // Submenus in RTL documents should open from the left by default.
+      this.side_ = isRTL(this.document_) ? Side.LEFT : Side.RIGHT;
+      element.setAttribute('side', this.side_);
+    }
+
+    this.registerAction('reset', this.reset.bind(this));
+    element.addEventListener('click', this.clickHandler_);
+    element.addEventListener('keydown', this.keydownHandler_);
   }
 
   /** @override */
   layoutCallback() {
-    this.registerEventListeners_();
+    this.registerSubmenuElements_();
     return Promise.resolve();
   }
 
-  /** @override */
-  unlayoutCallback() {
-    this.unregisterEventListeners_();
-    return true;
+  /** Give submenu open/close buttons appropriate roles and
+   * add them to tab order for accessibility.
+   * @private
+   */
+  registerSubmenuElements_() {
+    const submenuBtns = this.element.querySelectorAll(
+      '[amp-nested-submenu-open],[amp-nested-submenu-close]'
+    );
+    submenuBtns.forEach(submenuBtn => {
+      if (!submenuBtn.hasAttribute('tabindex')) {
+        submenuBtn.setAttribute('tabindex', 0);
+      }
+      submenuBtn.setAttribute('role', 'button');
+      userAssert(
+        this.action_.hasAction(submenuBtn, 'tap') == false,
+        'submenu open/close buttons should not have tap actions registered.'
+      );
+    });
   }
 
   /** @override */
@@ -123,48 +119,60 @@ export class AmpNestedMenu extends AMP.BaseElement {
   }
 
   /**
-   * Add event listeners on submenu open/close elements.
+   * Handler for click event on any element inside the component.
+   * @param {!Event} e
+   * @private
    */
-  registerEventListeners_() {
-    this.submenuOpenElements_.forEach(element => {
-      element.addEventListener('click', this.submenuOpenHandler_);
-    });
-    this.submenuCloseElements_.forEach(element => {
-      element.addEventListener('click', this.submenuCloseHandler_);
-    });
-
-    this.documentElement_.addEventListener('keydown', this.keydownHandler_);
-  }
-
-  /**
-   * Remove listeners on all submenu open/close elements.
-   */
-  unregisterEventListeners_() {
-    this.submenuOpenElements_.forEach(element => {
-      element.removeEventListener('click', this.submenuOpenHandler_);
-    });
-    this.submenuCloseElements_.forEach(element => {
-      element.removeEventListener('click', this.submenuCloseHandler_);
-    });
-
-    this.documentElement_.removeEventListener('keydown', this.keydownHandler_);
-  }
-
-  /**
-   * Handler for submenu open element click.
-   * @param {Event} e
-   */
-  handleSubmenuOpenClick_(e) {
-    const submenuParent = dev().assertElement(e.currentTarget.parentElement);
-    const submenu = scopedQuerySelector(submenuParent, '>[amp-nested-submenu]');
-    if (submenu) {
-      this.open_(submenu);
+  handleClick_(e) {
+    const target = dev().assertElement(e.target);
+    const submenuBtn = closestAncestorElementBySelector(
+      dev().assertElement(e.target),
+      '[amp-nested-submenu-open],[amp-nested-submenu-close]'
+    );
+    if (submenuBtn && this.shouldHandleClick_(target, submenuBtn)) {
+      const isOpenBtn = submenuBtn.hasAttribute('amp-nested-submenu-open');
+      if (isOpenBtn) {
+        this.handleSubmenuOpenClick_(submenuBtn);
+      } else {
+        this.handleSubmenuCloseClick_(submenuBtn);
+      }
     }
+  }
+
+  /**
+   * We should support clicks on any children of submenu open/close except for
+   * links or elements with tap targets, which should not have their default
+   * behavior overidden.
+   * @param {!Element} target
+   * @param {!Element} submenuBtn
+   * @return {boolean}
+   * @private
+   */
+  shouldHandleClick_(target, submenuBtn) {
+    const hasAnchor = !!closest(target, e => e.tagName == 'A', submenuBtn);
+    const hasTapAction = this.action_.hasAction(target, 'tap', submenuBtn);
+    return !hasAnchor && !hasTapAction;
+  }
+
+  /**
+   * Handles click on the given element to open a submenu.
+   * @param {!Element} openElement
+   * @private
+   */
+  handleSubmenuOpenClick_(openElement) {
+    const submenuParent = dev().assertElement(openElement.parentElement);
+    const submenu = scopedQuerySelector(submenuParent, '>[amp-nested-submenu]');
+    userAssert(
+      submenu,
+      `${TAG} requires each submenu open button to have a submenu as its sibling`
+    );
+    this.open_(submenu);
   }
 
   /**
    * Open the specified submenu.
    * @param {!Element} submenu
+   * @private
    */
   open_(submenu) {
     if (submenu.hasAttribute('open')) {
@@ -177,8 +185,16 @@ export class AmpNestedMenu extends AMP.BaseElement {
       this.currentSubmenu_ = submenu;
       // move focus to close element after submenu fully opens.
       Services.timerFor(this.win).delay(() => {
-        const submenuClose = dev().assertElement(
-          submenu.querySelector('[amp-nested-submenu-close]')
+        // Find the first close button that is not in one of the child menus.
+        const submenuCloseCandidates = toArray(
+          submenu.querySelectorAll('[amp-nested-submenu-close]')
+        );
+        const submenuClose = submenuCloseCandidates.filter(
+          candidate => this.getParentMenu_(candidate) == submenu
+        )[0];
+        userAssert(
+          submenuClose,
+          `${TAG} requires each submenu to contain at least one submenu close button`
         );
         tryFocus(submenuClose);
       }, ANIMATION_TIMEOUT);
@@ -186,23 +202,26 @@ export class AmpNestedMenu extends AMP.BaseElement {
   }
 
   /**
-   * Handler for submenu close element click.
-   * @param {Event} e
+   * Handles click on the given element to close the submenu.
+   * @param {!Element} closeElement
+   * @private
    */
-  handleSubmenuCloseClick_(e) {
-    const submenuClose = dev().assertElement(e.currentTarget);
+  handleSubmenuCloseClick_(closeElement) {
     const submenu = closestAncestorElementBySelector(
-      submenuClose,
+      closeElement,
       '[amp-nested-submenu]'
     );
-    if (submenu) {
-      this.close_(submenu);
-    }
+    userAssert(
+      submenu,
+      `${TAG}: submenu close buttons are only allowed inside submenus`
+    );
+    this.close_(submenu);
   }
 
   /**
    * Close the specified submenu.
    * @param {!Element} submenu
+   * @private
    */
   close_(submenu) {
     if (!submenu.hasAttribute('open')) {
@@ -225,35 +244,98 @@ export class AmpNestedMenu extends AMP.BaseElement {
   }
 
   /**
-   * Handles arrow key navigation.
-   * @param {Event} e
+   * Close all submenus and return to the root menu.
+   */
+  reset() {
+    while (this.element.hasAttribute('child-open')) {
+      this.close_(this.currentSubmenu_);
+    }
+  }
+
+  /**
+   * Handler for keydown event when the component or its children has focus.
+   * @param {!Event} e
+   * @private
    */
   handleKeyDown_(e) {
+    if (e.defaultPrevented) {
+      return;
+    }
     switch (e.key) {
-      // TODO(#24665): Add support for all arrow keys and for RTL.
-      case Keys.LEFT_ARROW:
-        const submenu = this.currentSubmenu_;
-        if (submenu) {
-          this.close_(submenu);
-        }
-        break;
+      case Keys.ENTER: /* fallthrough */
+      case Keys.SPACE:
+        this.handleClick_(e);
+        return;
+      case Keys.LEFT_ARROW: /* fallthrough */
       case Keys.RIGHT_ARROW:
+        this.handleHorizontalArrowKeyDown_(e);
         break;
-      case Keys.UP_ARROW:
-        break;
+      case Keys.UP_ARROW: /* fallthrough */
       case Keys.DOWN_ARROW:
+        this.handleVerticalArrowKeyDown_(e);
         break;
     }
   }
 
   /**
-   * Get the parent menu of specified submenu, if one exists.
-   * @param {!Element} submenu
-   * @return {?Element}
+   * Handle left/right arrow key down event to navigate between menus.
+   * @param {!Event} e
+   * @private
    */
-  getParentMenu_(submenu) {
+  handleHorizontalArrowKeyDown_(e) {
+    let back = e.key == Keys.LEFT_ARROW;
+    // Press right arrow key to go back if submenu opened from left.
+    if (this.side_ == Side.LEFT) {
+      back = !back;
+    }
+    if (back) {
+      this.close_(this.currentSubmenu_);
+    } else {
+      const target = dev().assertElement(e.target);
+      if (target.hasAttribute('amp-nested-submenu-open')) {
+        this.handleSubmenuOpenClick_(target);
+      }
+    }
+  }
+
+  /**
+   * Handle up/down arrow key down event to navigate between items;
+   * this requires each menu item to be under a li element and focusable.
+   * @param {!Event} e
+   * @private
+   */
+  handleVerticalArrowKeyDown_(e) {
+    const target = dev().assertElement(e.target);
+    const parentMenu = this.getParentMenu_(target);
+    const item = closest(target, e => e.tagName == 'LI', parentMenu);
+    // active element is not in a li that is inside the current submenu.
+    if (!item) {
+      return;
+    }
+    const nextItem =
+      e.key == Keys.UP_ARROW
+        ? item.previousElementSibling
+        : item.nextElementSibling;
+    // have reached the beginning or end of the list.
+    if (!nextItem) {
+      return;
+    }
+    const focusElement = nextItem.querySelector('button,a[href],[tabindex]');
+    if (focusElement) {
+      e.preventDefault();
+      tryFocus(focusElement);
+    }
+  }
+
+  /**
+   * Get the menu containing the given element, if one exists.
+   * @param {!Element} element
+   * @return {?Element}
+   * @private
+   */
+  getParentMenu_(element) {
     return closestAncestorElementBySelector(
-      dev().assertElement(submenu.parentElement),
+      dev().assertElement(element.parentElement),
       'amp-nested-menu,[amp-nested-submenu]'
     );
   }
