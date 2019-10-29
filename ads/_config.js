@@ -995,6 +995,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'springAds': {
+    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
+    preconnect: ['https://ib.adnxs.com'],
+    renderStartImplemented: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
