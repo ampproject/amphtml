@@ -112,7 +112,7 @@ export class Messaging {
   /**
    * Performs a handshake and initializes messaging.
    *
-   * Requires the `handshakepoll` viewer capability.
+   * Requires the `handshakepoll` viewer capability and the `origin` viewer parameter to be specified.
    * @param {!Window} target - window containing AMP document to perform handshake with
    * @param {?string=} opt_token - message token to verify on incoming messages (must be provided as viewer parameter)
    * @return {!Promise<!Messaging>}
