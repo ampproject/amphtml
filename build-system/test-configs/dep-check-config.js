@@ -186,6 +186,8 @@ exports.rules = [
         'extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config.js',
       'ads/_a4a-config.js->' +
         'extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config.js',
+		'ads/_a4a-config.js->' +
+        'extensions/amp-ad-network-dotandads-impl/0.1/dotandads-a4a-config.js',
     ],
   },
   // Rules for extensions and main src.
@@ -212,6 +214,7 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+	  'extensions/amp-ad-network-dotandads-impl/0.1/amp-ad-network-dotandads-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // And a few mrore things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
