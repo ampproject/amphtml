@@ -32,24 +32,8 @@
       ],
     },
     {
-      // The below rule will be here only temporarily during the transition
-      // period while many owners files are being updated as contributors and
-      // teams notice which files are out of date. The "notify" option means the
-      // owners bot will tag `rcebulko` on any PR that touches an owners file.
-      // This will allow verification of syntax and semantics for all updates
-      // until the syntax check API for Travis to use is complete.
-
-      // Though this gives `rcebulko` the ability to approve changes to owners
-      // files, he does not currently have merge access and he runs and
-      // maintains the owners bot application.
-
-      // TODO(#24685): Remove this once most owners files have been updated
-      // and/or the Travis check is implemented.
-      pattern: '**/{OWNERS.yaml,OWNERS}',
-      owners: [
-        {name: 'rcebulko', notify: true},
-        {name: 'mrjoro', requestReviews: false},
-      ],
+      pattern: '**/OWNERS',
+      owners: [{name: 'mrjoro', requestReviews: false}],
     },
   ],
 }
