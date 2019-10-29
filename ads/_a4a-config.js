@@ -15,6 +15,7 @@
  */
 
 import {cloudflareIsA4AEnabled} from '../extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config';
+import {dotandadsIsA4AEnabled} from '../extensions/amp-ad-network-dotandads-impl/0.1/dotandads-a4a-config';
 import {gmosspIsA4AEnabled} from '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
 import {map} from '../src/utils/object';
 import {myTargetIsA4AEnabled} from '../extensions/amp-ad-network-mytarget-impl/0.1/mytarget-a4a-config';
@@ -50,6 +51,7 @@ export function getA4ARegistry() {
       'cloudflare': cloudflareIsA4AEnabled,
       'gmossp': gmosspIsA4AEnabled,
       'fake': () => true,
+      'dotandads': dotandadsIsA4AEnabled,
       // TODO: Add new ad network implementation "is enabled" functions here.
       // Note: if you add a function here that requires a new "import", above,
       // you'll probably also need to add a whitelist exception to

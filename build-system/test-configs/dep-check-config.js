@@ -187,7 +187,9 @@ exports.rules = [
       'ads/_a4a-config.js->' +
         'extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config.js',
       'ads/_a4a-config.js->' +
-        'extensions/amp-ad-network-mytarget-impl/0.1/mytarget-a4a-config.js',
+            'extensions/amp-ad-network-mytarget-impl/0.1/mytarget-a4a-config.js',
+      'ads/_a4a-config.js->' +
+        'extensions/amp-ad-network-dotandads-impl/0.1/dotandads-a4a-config.js',
     ],
   },
   // Rules for extensions and main src.
@@ -215,6 +217,7 @@ exports.rules = [
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-mytarget-impl/0.1/amp-ad-network-mytarget-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-dotandads-impl/0.1/amp-ad-network-dotandads-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // And a few mrore things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
@@ -227,6 +230,8 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/callout-vendors.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/real-time-config-manager.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
+      'extensions/amp-ad-network-dotandads-impl/0.1/amp-ad-network-dotandads-impl.js->extensions/amp-a4a/0.1/callout-vendors.js',
+      'extensions/amp-ad-network-dotandads-impl/0.1/amp-ad-network-dotandads-impl.js->extensions/amp-a4a/0.1/real-time-config-manager.js',
 
       // AMP access depends on AMP access
       'extensions/amp-access-scroll/0.1/scroll-impl.js->extensions/amp-access/0.1/amp-access-client.js',
