@@ -184,7 +184,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     const data = objOrParseJson(eventData);
 
     if (data.id === `redbull-amp-video-tracking-${this.tagId_}`) {
-      const type = ANALYTICS_EVENT_TYPE_PREFIX + data[type];
+      const type = ANALYTICS_EVENT_TYPE_PREFIX + data['type'];
       this.dispatchCustomAnalyticsEvent_(type, data);
     }
   }
