@@ -131,29 +131,29 @@ In the `<amp-analytics>` element, you specify a JSON configuration object that c
 
 The configuration object for `<amp-analytics>` uses the following format:
 
-```javascript
+```json
 {
   "requests": {
-    request-name: request-value,
+    "request-name": request-value,
     ...
   },
   "vars": {
-    var-name: var-value,
+    "var-name": var-value,
     ...
   },
   "extraUrlParams": {
-    extraurlparam-name: extraurlparam-value,
+    "extraurlparam-name": extraurlparam-value,
     ...
   },
   "triggers": {
-    trigger-name: trigger-object,
+    "trigger-name": trigger-object,
     ...
   },
   "transport": {
     "beacon": *boolean*,
     "xhrpost": *boolean*,
     "image": *boolean*,
-  },
+  }
 }
 ```
 
@@ -283,7 +283,7 @@ The properties for defining a request with an object are:
 
 In this example, all requests are valid.
 
-```javascript
+```json
 "requests": {
   "base": "https://example.com/analytics?a=${account}&u=${canonicalUrl}&t=${title}",
   "pageview": {
@@ -303,7 +303,7 @@ Some analytics providers have an already-provided configuration, which you use v
 
 The top-level `requestOrigin` property accepts an absolute URL and defines the origin for requests. If `requestOrigin` is declared, the origin will be extracted from the value and it will be prepended to `baseUrl`. `requestOrigin` accepts and supports variables substitution. Variables will **not** be encoded in `requestOrigin`.
 
-```javascript
+```json
 "requestOrigin": "${example}/ignore_query",
 "requests": {
   "base": "/analytics?a=${account}",
@@ -323,13 +323,13 @@ In this example, outgoing requests will be `https://example.com/analytics?a=${ac
 
 Request objects can also have an `origin` property that will override this top-level `requestOrigin` property.
 
-```javascript
+```json
 "requestOrigin": "https://example.com",
 "requests": {
   "pageview": {
-    "origin": 'https://newexample.com',
+    "origin": "https://newexample.com",
     "baseUrl": "/analytics?type=pageview"
-  },
+  }
 }
 ```
 
@@ -345,11 +345,11 @@ The batching properties are:
 
 For example, the following config sends out a single request ping every 2 seconds, with one sample request ping looking like `https://example.com/analytics?rc=1&rc=2`.
 
-```javascript
+```json
 "requests": {
   "timer": {
     "baseUrl": "https://example.com/analytics?",
-    "batchInterval": 2,
+    "batchInterval": 2
   }
 }
 "triggers": {
@@ -368,11 +368,11 @@ For example, the following config sends out a single request ping every 2 second
 
 The following config sends out the first request ping after 1 second and then sends out a request every 3 seconds. The first request ping looks like `https://example.com/analytics?rc=1`, the second request ping looks like `https://example.com/analytics?rc=2&rc=3&rc=4`.
 
-```javascript
+```json
 "requests": {
   "timer": {
     "baseUrl": "https://example.com/analytics?",
-    "batchInterval": [1, 3],
+    "batchInterval": [1, 3]
   }
 }
 "triggers": {
@@ -395,7 +395,7 @@ The `amp-analytics` component defines many basic variables that can be used in r
 
 The `vars` configuration object can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information. Arrays can be used to specify a list of values that should be URL encoded separately while preserving the comma delimiter.
 
-```javascript
+```json
 "vars": {
   "account": "ABC123",
   "countryCode": "tr",
@@ -409,7 +409,7 @@ The `extraUrlParams` configuration object specifies additional parameters to be 
 
 Here's an example that would append `&a=1&b=2&c=3` to a request:
 
-```javascript
+```json
 "extraUrlParams": {
   "a": "1",
   "b": "2",
@@ -443,25 +443,25 @@ The `triggers` configuration object describes when an analytics request should b
 
 As an example, the following configuration can be used to sample 50% of the requests based on random input or at 1% based on client id.
 
-```javascript
-'triggers': {
-  'sampledOnRandom': {
-    'on': 'visible',
-    'request': 'request',
-    'sampleSpec': {
-      'sampleOn': '${random}',
-      'threshold': 50,
-    },
+```json
+"triggers": {
+  "sampledOnRandom": {
+    "on": "visible",
+    "request": "request",
+    "sampleSpec": {
+      "sampleOn": "${random}",
+      "threshold": 50
+    }
   },
-  'sampledOnClientId': {
-    'on': 'visible',
-    'request': 'request',
-    'sampleSpec': {
-      'sampleOn': '${clientId(cookieName)}',
-      'threshold': 1,
-    },
-  },
-},
+  "sampledOnClientId": {
+    "on": "visible",
+    "request": "request",
+    "sampleSpec": {
+      "sampleOn": "${clientId(cookieName)}",
+      "threshold": 1
+    }
+  }
+}
 ```
 
 ##### Element selector
@@ -482,7 +482,7 @@ is typically emitted as soon as it's possible to confirm that rendering of the e
 
 The trigger for the embed element must include a [`selector`](#element-selector) that points to the embedding element:
 
-```javascript
+```json
 "triggers": {
   "renderStart": {
     "on": "render-start",
@@ -494,7 +494,7 @@ The trigger for the embed element must include a [`selector`](#element-selector)
 
 The render start event is also emitted by the document itself and can be configured as:
 
-```javascript
+```json
 "triggers": {
   "renderStart": {
     "on": "render-start",
@@ -516,7 +516,7 @@ More specifically:
 
 The trigger for an embed or an AMP element must include a [`selector`](#element-selector) that points to the element:
 
-```javascript
+```json
 "triggers": {
   "iniLoad": {
     "on": "ini-load",
@@ -528,7 +528,7 @@ The trigger for an embed or an AMP element must include a [`selector`](#element-
 
 The initial load event is also emitted by the document itself and can be configured as:
 
-```javascript
+```json
 "triggers": {
   "iniLoad": {
     "on": "ini-load",
@@ -541,18 +541,18 @@ The initial load event is also emitted by the document itself and can be configu
 
 Use the page visibility trigger (`"on": "visible"`) to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`.
 
-```javascript
+```json
 "triggers": {
   "defaultPageview": {
     "on": "visible",
-    "request": "pageview",
+    "request": "pageview"
   }
 }
 ```
 
 The element visibility trigger can be configured for any AMP element or a document root using [`selector`](#element-selector). The trigger will fire when the specified element matches the visibility parameters that can be customized using the `visibilitySpec`.
 
-```javascript
+```json
 "triggers": {
   "defaultPageview": {
     "on": "visible",
@@ -572,11 +572,11 @@ If `reportWhen` is specified, the trigger waits for that signal before sending t
 
 The user error event (`"on": "user-error"`) is triggered when an error occurs that is attributable to the author of the page or to software that is used in publishing the page. This includes, but not limited to, misconfiguration of an AMP component, misconfigured ads, or failed assertions. User errors are also reported in the developer console.
 
-```javascript
+```json
 "triggers": {
   "userError": {
     "on": "user-error",
-     "request": "error"
+    "request": "error"
   }
 }
 ```
@@ -594,16 +594,16 @@ The `visibilitySpec` is a set of conditions and properties that can be applied t
 - `visiblePercentageMin` and `visiblePercentageMax`: These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive. The lower bound (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or both are set to 100. If both bounds are set to 0, then the trigger fires when the element is not visible. If both bounds are set to 100, the trigger fires when the element is fully visible. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. The default values for `visiblePercentageMin` and `visiblePercentageMax` are 0 and 100, respectively.
 - `repeat`: If this property is set to `true`, the trigger fires each time that the `visibilitySpec` conditions are met. In the following example, if the element is scrolled to 51% in view, then 49%, then 51% again, the trigger fires twice. However, if `repeat` was `false`, the trigger fires once. The default value of `repeat` is `false`. `reportWhen` and `repeat` may not both be used in the same visibilitySpec.
 
-```javascript
-visibilitySpec: {
-  visiblePercentageMin: 50,
-  repeat: true,
+```json
+"visibilitySpec": {
+  "visiblePercentageMin": 50,
+  "repeat": true
 }
 ```
 
 `visiblePercentageThresholds` may be used as a shorthand for creating multiple `visibilitySpec` instances that differ only in `visiblePercentageMin` and `visiblePercentageMax`. For example the following are equivalent:
 
-```javascript
+```json
 // Two triggers with visibilitySpecs that only differ in visiblePercentageMin and visiblePercentageMax:
 "triggers": {
   "pageView_30_to_40": {
@@ -613,10 +613,9 @@ visibilitySpec: {
     "visibilitySpec": {
       "visiblePercentageMin": 30,
       "visiblePercentageMax": 40,
-      "continuousTimeMin": 1000,
+      "continuousTimeMin": 1000
     }
-  }
-
+  },
   "pageView_40_to_50": {
     "on": "visible",
     "request": "pageview",
@@ -624,7 +623,7 @@ visibilitySpec: {
     "visibilitySpec": {
       "visiblePercentageMin": 40,
       "visiblePercentageMax": 50,
-      "continuousTimeMin": 1000,
+      "continuousTimeMin": 1000
     }
   }
 }
@@ -637,7 +636,7 @@ visibilitySpec: {
     "selector": "#ad1",
     "visibilitySpec": {
       "visiblePercentageThresholds": [[30, 40], [40, 50]],
-      "continuousTimeMin": 1000,
+      "continuousTimeMin": 1000
     }
   }
 }
@@ -645,7 +644,7 @@ visibilitySpec: {
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
 
-```javascript
+```json
 "triggers": {
   "defaultPageview": {
     "on": "visible",
@@ -668,7 +667,7 @@ In addition to the variables provided as part of triggers you can also specify a
 
 Use the click trigger (`"on": "click"`) to fire a request when a specified element is clicked. Use [`selector`](#element-selector) to control which elements will cause this request to fire. The trigger will fire for all elements matched by the specified selector.
 
-```javascript
+```json
 "vars": {
   "id1": "#socialButtonId",
   "id2": ".shareButtonClass"
@@ -693,7 +692,7 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 
 - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`.
 
-```javascript
+```json
 "triggers": {
   "scrollPings": {
     "on": "scroll",
@@ -715,7 +714,7 @@ Use the timer trigger (`"on": "timer"`) to fire a request on a regular time inte
   - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. An addtional request will be triggered when the `maxTimerLength` has been reached. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
   - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
-```javascript
+```json
 "triggers": {
   "pageTimer": {
     "on": "timer",
@@ -733,7 +732,7 @@ To configure a timer which times user events use:
 - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events. A config with a `startSpec` but no `stopSpec` will only stop after `maxTimerLength` has been reached.
 - `stopSpec` Specification for triggering when a timer stops. A config with a `stopSpec` but no `startSpec` will start immediately but only stop on the specified event.
 
-```javascript
+```json
 "triggers": {
   "videoPlayTimer": {
     "on": "timer",
@@ -759,11 +758,11 @@ See the spec on [triggers](#triggers) for details on creating nested timer trigg
 
 Use the hidden trigger (`"on": "hidden"`) to fire a request when the page becomes hidden.
 
-```javascript
+```json
 "triggers": {
   "defaultPageview": {
     "on": "hidden",
-    "request": "pagehide",
+    "request": "pagehide"
   }
 }
 ```
@@ -778,7 +777,7 @@ A [`visibilitySpec`](#visibility-spec) can be included so that a request is only
     "visibilitySpec": {
       "selector": "#anim-id",
       "visiblePercentageMin": 20,
-      "totalTimeMin": 3000,
+      "totalTimeMin": 3000
     }
   }
 }
@@ -811,7 +810,7 @@ If more than one of the above transport methods are enabled, the precedence is `
 
 In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
 
-```javascript
+```json
 "transport": {
   "beacon": false,
   "xhrpost": false,
@@ -829,7 +828,7 @@ The `useBody` configuration option indicates whether or not to include `extraUrl
 
 With `useBody`, you can include nested objects in `extraUrlParams`. However, if the request falls back to other transport options that don't support `useBody` (e.g. `image`), then those nested objects will be stringified into the URL as `[object Object]`.
 
-```javascript
+```json
 "transport": {
   "beacon": true,
   "xhrpost": true,
@@ -843,7 +842,7 @@ With `useBody`, you can include nested objects in `extraUrlParams`. However, if 
 Referrer policy can be specified as `referrerPolicy` field in the `transport` config. Currently only `no-referrer` is supported.
 Referrer policy is only available for `image` transport. If `referrerPolicy: no-referrer` is specified, the `beacon` & `xhrpost` transports are overridden to `false`.
 
-```javascript
+```json
 "transport": {
   "beacon": false,
   "xhrpost": false,
