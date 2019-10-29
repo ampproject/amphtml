@@ -4903,6 +4903,10 @@ tags: {
     value: ""
   }
   attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
+  attrs: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/amp4ads-v0.js"
@@ -4917,10 +4921,6 @@ tags: {
       regex: "."
       error_message: "contents"
     }
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "anonymous"
   }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
 }
@@ -5370,6 +5370,10 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
+  attrs: {
     disabled_by: "transformed"
     disabled_by: "amp4email"
     name: "nonce"
@@ -5377,10 +5381,6 @@ attr_lists: {
   attrs: {
     name: "type"
     value_casei: "text/javascript"
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "anonymous"
   }
 }
 
