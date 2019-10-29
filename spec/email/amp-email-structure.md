@@ -56,8 +56,8 @@ case, emails will display the `text/html` or `text/plain` part.
 
 <!-- prettier-ignore-start -->
 ```html
-From:  Person A <persona@gmail.com>
-To: Person B <personb@gmail.com>
+From:  Person A <persona@example.com>
+To: Person B <personb@example.com>
 Subject: An AMP email!
 Content-Type: multipart/alternative; boundary="001a114634ac3555ae05525685ae"
 
