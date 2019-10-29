@@ -26,9 +26,9 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @private @const */
