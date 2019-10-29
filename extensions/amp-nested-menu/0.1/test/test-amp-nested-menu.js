@@ -19,6 +19,7 @@ import * as lolex from 'lolex';
 import {Keys} from '../../../../src/utils/key-codes';
 import {htmlFor} from '../../../../src/static-template';
 import {toggleExperiment} from '../../../../src/experiments';
+import {tryFocus} from '../../../../src/dom';
 
 describes.realWin(
   'amp-nested-menu component',
@@ -40,10 +41,16 @@ describes.realWin(
       toggleExperiment(win, 'amp-sidebar-v2', true);
     });
 
-    async function getNestedMenu() {
+    async function getNestedMenu(options) {
+      options = options || {};
       const element = doc.createElement('amp-nested-menu');
       element.setAttribute('layout', 'fill');
+      if (options.side) {
+        element.setAttribute('side', options.side);
+      }
       const ul = doc.createElement('ul');
+      element.appendChild(ul);
+      doc.body.appendChild(element);
 
       [1, 2, 3].forEach(i => {
         const item = htmlFor(doc)`
@@ -63,54 +70,164 @@ describes.realWin(
         item
           .querySelector('[amp-nested-submenu-close]')
           .setAttribute('id', `close-${i}`);
-        ul.appendChild(item);
+
+        if (i == 3) {
+          // nest submenu 3 inside submenu 1
+          const subUl = doc.createElement('ul');
+          doc.getElementById('submenu-1').appendChild(subUl);
+          subUl.appendChild(item);
+        } else {
+          ul.appendChild(item);
+        }
       });
 
-      element.appendChild(ul);
-      doc.body.appendChild(element);
       await element.build();
       await element.layoutCallback();
       return element;
     }
 
+    it('should set side attribute to right by default, but left for RTL', async () => {
+      const menuEl1 = await getNestedMenu();
+      expect(menuEl1.getAttribute('side')).to.equal('right');
+      doc.documentElement.setAttribute('dir', 'rtl');
+      const menuEl2 = await getNestedMenu();
+      expect(menuEl2.getAttribute('side')).to.equal('left');
+    });
+
     it('should open corresponding submenu when open element is clicked', async () => {
       const menuEl = await getNestedMenu();
-      const openEl = doc.getElementById('open-1');
-      const submenuEl = doc.getElementById('submenu-1');
+      const openEl1 = doc.getElementById('open-1');
+      const submenuEl1 = doc.getElementById('submenu-1');
+      const openEl3 = doc.getElementById('open-3');
+      const submenuEl3 = doc.getElementById('submenu-3');
       expect(menuEl.hasAttribute('child-open')).to.be.false;
-      expect(submenuEl.hasAttribute('open')).to.be.false;
-      const clickEvent = new Event('click');
-      openEl.dispatchEvent(clickEvent);
+      expect(submenuEl1.hasAttribute('open')).to.be.false;
+      const clickEvent = new Event('click', {bubbles: true});
+      openEl1.dispatchEvent(clickEvent);
       expect(menuEl.hasAttribute('child-open')).to.be.true;
-      expect(submenuEl.hasAttribute('open')).to.be.true;
+      expect(submenuEl1.hasAttribute('open')).to.be.true;
+      expect(submenuEl1.hasAttribute('child-open')).to.be.false;
+      expect(submenuEl3.hasAttribute('open')).to.be.false;
+      openEl3.dispatchEvent(clickEvent);
+      expect(submenuEl1.hasAttribute('child-open')).to.be.true;
+      expect(submenuEl3.hasAttribute('open')).to.be.true;
     });
 
     it('should close corresponding submenu when close element is clicked', async () => {
       const menuEl = await getNestedMenu();
-      const closeEl = doc.getElementById('close-1');
-      const submenuEl = doc.getElementById('submenu-1');
-      menuEl.implementation_.open_(submenuEl);
+      const closeEl1 = doc.getElementById('close-1');
+      const submenuEl1 = doc.getElementById('submenu-1');
+      const closeEl3 = doc.getElementById('close-3');
+      const submenuEl3 = doc.getElementById('submenu-3');
+      menuEl.implementation_.open_(submenuEl1);
+      menuEl.implementation_.open_(submenuEl3);
       expect(menuEl.hasAttribute('child-open')).to.be.true;
-      expect(submenuEl.hasAttribute('open')).to.be.true;
-      const clickEvent = new Event('click');
-      closeEl.dispatchEvent(clickEvent);
+      expect(submenuEl1.hasAttribute('open')).to.be.true;
+      const clickEvent = new Event('click', {bubbles: true});
+      closeEl3.dispatchEvent(clickEvent);
+      expect(submenuEl1.hasAttribute('child-open')).to.be.false;
+      expect(submenuEl3.hasAttribute('open')).to.be.false;
+      closeEl1.dispatchEvent(clickEvent);
       expect(menuEl.hasAttribute('child-open')).to.be.false;
-      expect(submenuEl.hasAttribute('open')).to.be.false;
+      expect(submenuEl1.hasAttribute('open')).to.be.false;
     });
 
-    it('should return to parent menu when left arrow key is pressed', async () => {
+    it('should return to root menu on reset', async () => {
       const menuEl = await getNestedMenu();
+      const submenuEl1 = doc.getElementById('submenu-1');
+      const submenuEl3 = doc.getElementById('submenu-3');
+      menuEl.implementation_.open_(submenuEl1);
+      menuEl.implementation_.open_(submenuEl3);
+      expect(menuEl.hasAttribute('child-open')).to.be.true;
+      expect(submenuEl1.hasAttribute('child-open')).to.be.true;
+      expect(submenuEl1.hasAttribute('open')).to.be.true;
+      expect(submenuEl3.hasAttribute('open')).to.be.true;
+      menuEl.implementation_.reset();
+      expect(menuEl.hasAttribute('child-open')).to.be.false;
+      expect(submenuEl1.hasAttribute('child-open')).to.be.false;
+      expect(submenuEl1.hasAttribute('open')).to.be.false;
+      expect(submenuEl3.hasAttribute('open')).to.be.false;
+    });
+
+    it('should return to parent menu when left arrow key is pressed and side=right', async () => {
+      const menuEl = await getNestedMenu({'side': 'right'});
       const submenuEl = doc.getElementById('submenu-1');
       menuEl.implementation_.open_(submenuEl);
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl.hasAttribute('open')).to.be.true;
       const keyEvent = new KeyboardEvent('keydown', {key: Keys.LEFT_ARROW});
-      doc.documentElement.dispatchEvent(keyEvent);
+      menuEl.dispatchEvent(keyEvent);
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl.hasAttribute('open')).to.be.false;
     });
 
-    it('should shift focus when submenu is opened and closed', async () => {
+    it('should return to parent menu when right arrow key is pressed and side=left', async () => {
+      const menuEl = await getNestedMenu({'side': 'left'});
+      const submenuEl = doc.getElementById('submenu-1');
+      menuEl.implementation_.open_(submenuEl);
+      expect(menuEl.hasAttribute('child-open')).to.be.true;
+      expect(submenuEl.hasAttribute('open')).to.be.true;
+      const keyEvent = new KeyboardEvent('keydown', {key: Keys.RIGHT_ARROW});
+      menuEl.dispatchEvent(keyEvent);
+      expect(menuEl.hasAttribute('child-open')).to.be.false;
+      expect(submenuEl.hasAttribute('open')).to.be.false;
+    });
+
+    it('should open submenu when right arrow key is pressed, side=right and open button has focus', async () => {
+      const menuEl = await getNestedMenu({'side': 'right'});
+      const openEl = doc.getElementById('open-1');
+      const submenuEl = doc.getElementById('submenu-1');
+      expect(menuEl.hasAttribute('child-open')).to.be.false;
+      expect(submenuEl.hasAttribute('open')).to.be.false;
+      tryFocus(openEl);
+      expect(doc.activeElement).to.equal(openEl);
+      const keyEvent = new KeyboardEvent('keydown', {
+        key: Keys.RIGHT_ARROW,
+        bubbles: true,
+      });
+      openEl.dispatchEvent(keyEvent);
+      expect(menuEl.hasAttribute('child-open')).to.be.true;
+      expect(submenuEl.hasAttribute('open')).to.be.true;
+    });
+
+    it('should open submenu when left arrow key is pressed, side=left and open button has focus', async () => {
+      const menuEl = await getNestedMenu({'side': 'left'});
+      const openEl = doc.getElementById('open-1');
+      const submenuEl = doc.getElementById('submenu-1');
+      expect(menuEl.hasAttribute('child-open')).to.be.false;
+      expect(submenuEl.hasAttribute('open')).to.be.false;
+      tryFocus(openEl);
+      expect(doc.activeElement).to.equal(openEl);
+      const keyEvent = new KeyboardEvent('keydown', {
+        key: Keys.LEFT_ARROW,
+        bubbles: true,
+      });
+      openEl.dispatchEvent(keyEvent);
+      expect(menuEl.hasAttribute('child-open')).to.be.true;
+      expect(submenuEl.hasAttribute('open')).to.be.true;
+    });
+
+    it('should shift focus between list items when up/down arrow key is pressed', async () => {
+      await getNestedMenu();
+      const openEl1 = doc.getElementById('open-1');
+      const openEl2 = doc.getElementById('open-2');
+      tryFocus(openEl1);
+      expect(doc.activeElement).to.equal(openEl1);
+      const downKeyEvent = new KeyboardEvent('keydown', {
+        key: Keys.DOWN_ARROW,
+        bubbles: true,
+      });
+      openEl1.dispatchEvent(downKeyEvent);
+      expect(doc.activeElement).to.equal(openEl2);
+      const upKeyEvent = new KeyboardEvent('keydown', {
+        key: Keys.UP_ARROW,
+        bubbles: true,
+      });
+      openEl2.dispatchEvent(upKeyEvent);
+      expect(doc.activeElement).to.equal(openEl1);
+    });
+
+    it('should shift focus to close/open button when submenu is opened/closed, respectively', async () => {
       const menuEl = await getNestedMenu();
       const openEl = doc.getElementById('open-1');
       const closeEl = doc.getElementById('close-1');
