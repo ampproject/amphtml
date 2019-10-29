@@ -16,7 +16,6 @@
 
 import {AmpPixel} from '../../builtins/amp-pixel';
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
 
 describe.configure().run('amp-pixel', function() {
@@ -38,6 +37,29 @@ describe.configure().run('amp-pixel', function() {
       it('should expand the TITLE macro', () => {
         return RequestBank.withdraw().then(req => {
           expect(req.url).to.equal('/hello-world?title=AMP%20TEST&qp=123');
+          expect(req.headers.host).to.be.ok;
+        });
+      });
+    }
+  );
+
+  describes.integration(
+    'amp-pixel nested macro with leading spaces',
+    {
+      body: `<amp-pixel src="${RequestBank.getUrl()}?nested=QUERY_PARAM(doesNotExist,  1.QUERY_PARAM(a))">`,
+      params: {
+        a: '1234',
+      },
+    },
+    env => {
+      beforeEach(() => {
+        const browser = new BrowserController(env.win);
+        return browser.waitForElementBuild('amp-pixel');
+      });
+
+      it('should ignore leading spaces and resolve correctly', () => {
+        return RequestBank.withdraw().then(req => {
+          expect(req.url).to.equal('/?nested=1.1234');
           expect(req.headers.host).to.be.ok;
         });
       });
@@ -98,10 +120,7 @@ describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
       createElementWithAttributes(env.win.document, 'img', {src})
     );
     env.win.document.body.appendChild(pixelElem);
-    const viewer = Services.viewerForDoc(env.win.document);
-    env.sandbox.stub(viewer, 'whenFirstVisible').callsFake(() => {
-      return Promise.resolve();
-    });
+    env.sandbox.stub(env.ampdoc, 'whenFirstVisible').returns(Promise.resolve());
     const pixel = new AmpPixel(pixelElem);
     pixel.buildCallback();
     expect(pixelElem.querySelectorAll('img').length).to.equal(1);

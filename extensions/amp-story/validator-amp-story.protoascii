@@ -146,6 +146,11 @@ tags: {  # <amp-story-grid-layer>
     value: "thirds"
     value: "vertical"
   }
+  attrs: {
+    name: "position"
+    value: "landscape-half-left"
+    value: "landscape-half-right"
+  }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER default"
@@ -437,6 +442,29 @@ tags: {  # <amp-story-cta-layer>
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
 }
+tags: {  # amp-experiment (json)
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "SCRIPT"
+  spec_name: "amp-experiment story extension .json script"
+  mandatory_parent: "AMP-EXPERIMENT"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    max_bytes: 15000
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-experiment"
+}
 tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
@@ -699,6 +727,7 @@ descendant_tag_list: {
   tag: "RUBY"
   tag: "S"
   tag: "SAMP"
+  tag: "SCRIPT"
   tag: "SECTION"
   tag: "SMALL"
   tag: "SOLIDCOLOR"
@@ -799,6 +828,7 @@ descendant_tag_list {
   tag: "AMP-LIVE-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-MATHML"
+  tag: "AMP-MEGAPHONE"
   tag: "AMP-MOWPLAYER"
   tag: "AMP-NEXXTV-PLAYER"
   tag: "AMP-O2-PLAYER"

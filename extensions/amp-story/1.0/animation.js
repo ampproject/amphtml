@@ -79,22 +79,11 @@ class AnimationRunner {
    *    !../../amp-animation/0.1/web-animations.Builder
    * >} webAnimationBuilderPromise
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {!../../../src/service/timer-impl.Timer} timer
    * @param {!AnimationSequence} sequence
    */
-  constructor(
-    page,
-    animationDef,
-    webAnimationBuilderPromise,
-    vsync,
-    timer,
-    sequence
-  ) {
+  constructor(page, animationDef, webAnimationBuilderPromise, vsync, sequence) {
     /** @private @const */
     this.page_ = page;
-
-    /** @private @const */
-    this.timer_ = timer;
 
     /** @private @const */
     this.vsync_ = vsync;
@@ -204,6 +193,7 @@ class AnimationRunner {
     return this.keyframes_.then(keyframes => ({
       keyframes,
       target: this.target_,
+      delay: `${this.delay_}ms`,
       duration: `${this.duration_}ms`,
       easing: this.easing_,
       fill: 'forwards',
@@ -249,10 +239,6 @@ class AnimationRunner {
       promise = promise.then(() => this.sequence_.waitFor(startAfterId));
     }
 
-    if (this.delay_) {
-      promise = promise.then(() => this.timer_.promise(this.delay_));
-    }
-
     return promise;
   }
 
@@ -283,6 +269,12 @@ class AnimationRunner {
 
   /** Pauses the animation. */
   pause() {
+    // Animation hasn't started yet since it's waiting for a sequenced
+    // animation.
+    if (this.scheduledWait_ !== null) {
+      return;
+    }
+
     if (this.runner_) {
       devAssert(this.runner_).pause();
     }
@@ -290,6 +282,12 @@ class AnimationRunner {
 
   /** Resumes the animation. */
   resume() {
+    // Animation hasn't started yet since it's waiting for a sequenced
+    // animation.
+    if (this.scheduledWait_ !== null) {
+      return;
+    }
+
     if (this.runner_) {
       devAssert(this.runner_).resume();
     }
@@ -430,9 +428,6 @@ export class AnimationManager {
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
 
     /** @private @const */
-    this.timer_ = Services.timerFor(this.ampdoc_.win);
-
-    /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
     /** @private {?Array<!Promise<!AnimationRunner>>} */
@@ -498,12 +493,19 @@ export class AnimationManager {
     this.getRunners_().forEach(runner => runner.resume());
   }
 
-  /** Determines if there is an entrance animation running. */
+  /**
+   * Determines if there is an entrance animation running.
+   *
+   * @return {*} TODO(#23582): Specify return type
+   */
   hasAnimationStarted() {
     return this.getRunners_().some(runner => runner.hasStarted());
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   getRunners_() {
     return devAssert(this.runners_, 'Executed before applyFirstFrame');
   }
@@ -535,7 +537,6 @@ export class AnimationManager {
       animationDef,
       devAssert(this.builderPromise_),
       this.vsync_,
-      this.timer_,
       this.sequence_
     );
   }
@@ -682,7 +683,11 @@ class AnimationSequence {
     this.subscriptionResolvers_ = map();
   }
 
-  /** Decouples constructor for testing. */
+  /**
+   * Decouples constructor for testing.
+   *
+   * @return {!AnimationSequence}
+   */
   static create() {
     return new AnimationSequence();
   }

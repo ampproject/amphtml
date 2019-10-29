@@ -63,12 +63,21 @@ export class Gestures {
    * the specified element.
    * @param {!Element} element
    * @param {boolean=} opt_shouldNotPreventDefault
+   * @param {boolean=} opt_shouldStopPropagation
    * @return {!Gestures}
    */
-  static get(element, opt_shouldNotPreventDefault = false) {
+  static get(
+    element,
+    opt_shouldNotPreventDefault = false,
+    opt_shouldStopPropagation = false
+  ) {
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(element, opt_shouldNotPreventDefault);
+      res = new Gestures(
+        element,
+        opt_shouldNotPreventDefault,
+        opt_shouldStopPropagation
+      );
       element[PROP_] = res;
     }
     return res;
@@ -77,8 +86,9 @@ export class Gestures {
   /**
    * @param {!Element} element
    * @param {boolean} shouldNotPreventDefault
+   * @param {boolean} shouldStopPropagation
    */
-  constructor(element, shouldNotPreventDefault) {
+  constructor(element, shouldNotPreventDefault, shouldStopPropagation) {
     /** @private {!Element} */
     this.element_ = element;
 
@@ -99,6 +109,9 @@ export class Gestures {
 
     /** @private {boolean} */
     this.shouldNotPreventDefault_ = shouldNotPreventDefault;
+
+    /** @private {boolean} */
+    this.shouldStopPropagation_ = shouldStopPropagation;
 
     /**
      * This variable indicates that the eventing has stopped on this
@@ -437,6 +450,8 @@ export class Gestures {
       if (!this.shouldNotPreventDefault_) {
         event.preventDefault();
       }
+    } else if (this.shouldStopPropagation_) {
+      event.stopPropagation();
     }
     if (this.passAfterEvent_) {
       this.passAfterEvent_ = false;

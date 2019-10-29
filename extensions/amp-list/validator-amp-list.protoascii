@@ -31,8 +31,8 @@ tags: {  # amp-list
   spec_name: "SCRIPT[custom-element=amp-list] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-list"
+    # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -64,6 +64,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "refresh"
   }
   attrs: { name: "credentials" }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: {
     name: "load-more"
@@ -93,9 +97,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
   # <amp-bind>
   attrs: {
     name: "[is-layout-container]"
@@ -118,10 +123,24 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     supported_layouts: RESPONSIVE
   }
 }
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  tag_name: "DIV"
+  spec_name: "AMP-LIST DIV [fetch-error]"
+  mandatory_ancestor: "AMP-LIST"
+  attrs: { name: "align" }
+  attrs: {
+    name: "fetch-error"
+    mandatory: true
+  }
+}
 
 tags: { # amp-list-load-more
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   tag_name: "AMP-LIST-LOAD-MORE"
   requires_extension: "amp-list"
   mandatory_parent: "AMP-LIST"
@@ -150,7 +169,7 @@ tags: { # amp-list-load-more
 # The button element variant allowed in amp-list-load-more.
 tags: {
   html_format: AMP
-  html_format: EXPERIMENTAL
+  html_format: ACTIONS
   requires_extension: "amp-list"
   tag_name: "BUTTON"
   spec_name: "amp-list-load-more button[load-more-clickable]"
@@ -187,6 +206,16 @@ tags: {  # <amp-list>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
+  attrs: {
+    name: "binding"
+    value: "always"
+    value: "no"
+    value: "refresh"
+  }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
@@ -200,9 +229,10 @@ tags: {  # <amp-list>
     blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in src.
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
@@ -235,6 +265,10 @@ tags: {  # <amp-list>
   attrs: {
     name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"
+  }
+  attrs: {
+    name: "diffable"
+    value: ""
   }
   attrs: { name: "items" }
   attrs: { name: "max-items" }

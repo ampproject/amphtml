@@ -519,6 +519,30 @@ export class ActionService {
   }
 
   /**
+   * Checks if the given element's registered action resolves to at least one
+   * existing element by id or a global target (e.g. "AMP").
+   * @param {!Element} element
+   * @param {string} actionEventType
+   * @param {!Element} targetElement
+   * @param {!Element=} opt_stopAt
+   * @return {boolean}
+   */
+  hasResolvableActionForTarget(
+    element,
+    actionEventType,
+    targetElement,
+    opt_stopAt
+  ) {
+    const action = this.findAction_(element, actionEventType, opt_stopAt);
+    if (!action) {
+      return false;
+    }
+    return action.actionInfos.some(({target}) => {
+      return this.getActionNode_(target) == targetElement;
+    });
+  }
+
+  /**
    * For global targets e.g. "AMP", returns the document root. Otherwise,
    * `target` is an element id and the corresponding element is returned.
    * @param {string} target

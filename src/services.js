@@ -141,11 +141,11 @@ export class Services {
 
   /**
    * Returns the AmpDoc for the specified context node.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrAmpDoc
    * @return {!./service/ampdoc-impl.AmpDoc}
    */
-  static ampdoc(elementOrAmpDoc) {
-    return getAmpdoc(elementOrAmpDoc);
+  static ampdoc(nodeOrAmpDoc) {
+    return getAmpdoc(nodeOrAmpDoc);
   }
 
   /**
@@ -227,6 +227,30 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
+   */
+  static loaderServiceForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>} */ (getElementServiceForDoc(
+      element,
+      'loader',
+      'amp-loader'
+    ));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>}
+   */
+  static standaloneServiceForDoc(element) {
+    return /** @type {!Promise<!../extensions/amp-standalone/0.1/amp-standalone.StandaloneService>} */ (getElementServiceForDoc(
+      element,
+      'standalone',
+      'amp-standalone'
+    ));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/crypto-impl.Crypto}
    */
@@ -270,15 +294,6 @@ export class Services {
       elementOrAmpDoc,
       'form-submit-service'
     ));
-  }
-
-  /**
-   * @param {!Window} window
-   * @return {!./service/document-state.DocumentState}
-   * @restricted  Only to be used for global document services, such as vsync.
-   */
-  static globalDocumentStateFor(window) {
-    return getService(window, 'documentState');
   }
 
   /**
@@ -328,12 +343,12 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/layers-impl.LayoutLayers}
+   * @return {!./service/owners-interface.OwnersInterface}
    */
-  static layersForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/layers-impl.LayoutLayers} */ (getServiceForDoc(
+  static ownersForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/owners-interface.OwnersInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
-      'layers'
+      'owners'
     ));
   }
 
@@ -385,10 +400,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/resources-impl.Resources}
+   * @return {!./service/resources-interface.ResourcesInterface}
    */
   static resourcesForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/resources-impl.Resources} */ (getServiceForDoc(
+    return /** @type {!./service/resources-interface.ResourcesInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -396,10 +411,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/resources-impl.Resources>}
+   * @return {!Promise<!./service/resources-interface.ResourcesInterface>}
    */
   static resourcesPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/resources-interface.ResourcesInterface>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'resources'
     ));
@@ -484,6 +499,17 @@ export class Services {
     return (
       /** @type {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
       (getExistingServiceOrNull(win, 'story-request'))
+    );
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService}
+   */
+  static mediaPerformanceMetricsService(win) {
+    return (
+      /** @type {?../extensions/amp-story/1.0/media-performance-metrics-service.MediaPerformanceMetricsService} */
+      (getExistingServiceOrNull(win, 'media-performance-metrics'))
     );
   }
 
@@ -758,10 +784,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/viewer-impl.Viewer}
+   * @return {!./service/viewer-interface.ViewerInterface}
    */
   static viewerForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/viewer-impl.Viewer} */ (getServiceForDoc(
+    return /** @type {!./service/viewer-interface.ViewerInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'viewer'
     ));
@@ -772,10 +798,10 @@ export class Services {
    * for services that need reference to the viewer before it has been
    * initialized. Most of the code, however, just should use `viewerForDoc`.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!Promise<!./service/viewer-impl.Viewer>}
+   * @return {!Promise<!./service/viewer-interface.ViewerInterface>}
    */
   static viewerPromiseForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!./service/viewer-impl.Viewer>} */ (getServicePromiseForDoc(
+    return /** @type {!Promise<!./service/viewer-interface.ViewerInterface>} */ (getServicePromiseForDoc(
       elementOrAmpDoc,
       'viewer'
     ));
@@ -794,10 +820,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   static viewportForDoc(elementOrAmpDoc) {
-    return /** @type {!./service/viewport/viewport-impl.Viewport} */ (getServiceForDoc(
+    return /** @type {!./service/viewport/viewport-interface.ViewportInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
       'viewport'
     ));

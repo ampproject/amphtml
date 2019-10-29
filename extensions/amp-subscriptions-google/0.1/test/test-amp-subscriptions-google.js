@@ -60,7 +60,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     serviceAdapter = new ServiceAdapter(null);
     serviceAdapterMock = sandbox.mock(serviceAdapter);
     sandbox.stub(serviceAdapter, 'getPageConfig').callsFake(() => pageConfig);
@@ -146,7 +146,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should proxy fetch via AMP fetcher', () => {
     const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
       expect(url).to.match(/publication\/example.org/);
-      expect(init).to.deep.equal({credentials: 'include'});
+      expect(init).to.deep.equal({
+        credentials: 'include',
+        prerenderSafe: true,
+      });
       return Promise.resolve({
         json: () => {
           return Promise.resolve({entitlements: entitlementResponse});
@@ -159,16 +162,38 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
   });
 
+  it('should proxy fetch non-granting response', () => {
+    const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
+      expect(url).to.match(/publication\/example.org/);
+      expect(init).to.deep.equal({
+        credentials: 'include',
+        prerenderSafe: true,
+      });
+      return Promise.resolve({
+        json: () => {
+          return Promise.resolve({
+            entitlements: {
+              source: 'subscribe.google.com',
+              products: ['example.org:registered_user'],
+              subscriptionToken: 'tok1',
+            },
+          });
+        },
+      });
+    });
+    return platform.getEntitlements().then(ents => {
+      expect(ents.source).to.equal(PLATFORM_ID);
+      expect(ents.granted).to.be.false;
+      expect(fetchStub).to.be.calledOnce;
+    });
+  });
+
   it('should proxy fetch empty response', () => {
     sandbox.stub(xhr, 'fetchJson').callsFake(() => {
       return Promise.resolve({
         json: () => {
           return Promise.resolve({
-            entitlements: {
-              source: 'google',
-              products: ['example.org:other'],
-              subscriptionToken: 'tok1',
-            },
+            entitlements: {},
           });
         },
       });
@@ -403,17 +428,17 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should infer the viewer from viewerUrl', () => {
-    delete viewer.params_['viewerUrl'];
+    delete ampdoc.params_['viewerUrl'];
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
     expect(platform.isGoogleViewer_).to.be.false;
 
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
     expect(platform.isGoogleViewer_).to.be.true;
   });
 
   it('should infer the viewer from origin', () => {
-    delete viewer.params_['viewerUrl'];
+    delete ampdoc.params_['viewerUrl'];
     let viewerOrigin = null;
     sandbox.stub(viewer, 'getViewerOrigin').callsFake(() => viewerOrigin);
 
@@ -445,11 +470,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should allow prerender if in a google viewer', () => {
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
-    // TODO(#23102): restore safe prerendering mode. This will be `true` once
-    // it's restored.
-    expect(platform.isPrerenderSafe()).to.be.false;
+    expect(platform.isPrerenderSafe()).to.be.true;
   });
 
   it('should attach button given to decorateUI', () => {
@@ -489,6 +512,21 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     platform.decorateUI(elem, 'subscribe-smartbutton-dark');
     expect(elem.textContent).to.be.equal('');
     expect(attachStub).to.be.calledWith(elem, {theme: 'dark', lang: 'en'});
+  });
+
+  it('should use message text color', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    elem.setAttribute('subscriptions-message-text-color', '#09f');
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {
+      lang: 'en',
+      messageTextColor: '#09f',
+      theme: 'light',
+    });
   });
 
   it('should throw if smartButton language is missing', () => {
@@ -537,7 +575,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       });
     });
 
-    it('should convert non granted entitlements to null', () => {
+    it('should convert non granted internal shape with granted == false', () => {
       sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
@@ -552,7 +590,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         });
       });
       return platform.getEntitlements().then(entitlement => {
-        expect(entitlement).to.be.equal(null);
+        expect(entitlement.source).to.be.equal('google');
+        expect(entitlement.granted).to.be.equal(false);
+        expect(entitlement.grantReason).to.be.null;
       });
     });
   });

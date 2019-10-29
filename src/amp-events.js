@@ -19,8 +19,8 @@
  * @enum {string}
  */
 export const AmpEvents = {
-  BUILT: 'amp:built',
   DOM_UPDATE: 'amp:dom-update',
+  FORM_DIRTINESS_CHANGE: 'amp:form-dirtiness-change',
   FORM_VALUE_CHANGE: 'amp:form-value-change',
   VISIBILITY_CHANGE: 'amp:visibilitychange', // https://github.com/ampproject/amphtml/blob/master/ads/README.md#page-visibility
   // The following codes are only used for testing.

@@ -80,6 +80,7 @@ export class IframeMessagingClient {
    * @param {string} responseType The type of the response message.
    * @param {function(JsonObject)} callback The callback function to call
    *   when a message with type responseType is received.
+   * @return {function()}
    */
   makeRequest(requestType, responseType, callback) {
     const unlisten = this.registerCallback(responseType, callback);
@@ -95,6 +96,7 @@ export class IframeMessagingClient {
    * @param {string} responseType The type of the response message.
    * @param {function(Object)} callback The callback function to call
    *   when a message with type responseType is received.
+   * @return {*} TODO(#23582): Specify return type
    */
   requestOnce(requestType, responseType, callback) {
     const unlisten = this.registerCallback(responseType, event => {
@@ -113,6 +115,7 @@ export class IframeMessagingClient {
    * @param {string} messageType The type of the message.
    * @param {function(?JsonObject)} callback The callback function to call
    *   when a message with type messageType is received.
+   * @return {function()}
    */
   registerCallback(messageType, callback) {
     // NOTE : no validation done here. any callback can be register

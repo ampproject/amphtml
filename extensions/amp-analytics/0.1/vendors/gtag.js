@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const GTAG_CONFIG = jsonLiteral({
   'configRewriter': {
     'url': 'https://www.googletagmanager.com/gtag/amp',
     'varGroups': {
@@ -122,3 +124,5 @@ export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {GTAG_CONFIG};

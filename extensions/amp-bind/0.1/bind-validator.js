@@ -221,6 +221,19 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-AUDIO': {
+      'album': null,
+      'artist': null,
+      'artwork': null,
+      'controlsList': null,
+      'loop': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'title': null,
+    },
     'AMP-AUTOCOMPLETE': {
       'src': {
         'allowedProtocols': {
@@ -313,10 +326,17 @@ function createElementRules_() {
       'datetime': null,
       'title': null,
     },
+    'AMP-TWITTER': {
+      'data-tweetid': null,
+    },
     'AMP-VIDEO': {
+      'album': null,
       'alt': null,
+      'artist': null,
+      'artwork': null,
       'attribution': null,
       'controls': null,
+      'controlslist': null,
       'loop': null,
       'poster': null,
       'preload': null,
@@ -325,6 +345,7 @@ function createElementRules_() {
           'https': true,
         },
       },
+      'title': null,
     },
     'AMP-YOUTUBE': {
       'data-videoid': null,

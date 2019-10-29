@@ -25,10 +25,10 @@ import {userAssert} from '../log';
  * @return {!Object<string, function(new:../base-element.BaseElement, !Element)>}
  */
 function getExtendedElements(win) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
+  if (!win.__AMP_EXTENDED_ELEMENTS) {
+    win.__AMP_EXTENDED_ELEMENTS = {};
   }
-  return win.ampExtendedElements;
+  return win.__AMP_EXTENDED_ELEMENTS;
 }
 
 /**
@@ -70,7 +70,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
       element.tagName.toLowerCase() == name &&
       element.ownerDocument.defaultView == win
     ) {
-      tryUpgradeElementNoInline(element, toClass);
+      tryUpgradeElement_(element, toClass);
       // Remove element from array.
       stubbedElements.splice(i--, 1);
     }
@@ -79,13 +79,12 @@ export function upgradeOrRegisterElement(win, name, toClass) {
 
 /**
  * This method should not be inlined to prevent TryCatch deoptimization.
- * NoInline keyword at the end of function name also prevents Closure compiler
- * from inlining the function.
  * @param {Element} element
  * @param {function(new:../base-element.BaseElement, !Element)} toClass
  * @private
+ * @noinline
  */
-function tryUpgradeElementNoInline(element, toClass) {
+function tryUpgradeElement_(element, toClass) {
   try {
     element.upgrade(toClass);
   } catch (e) {
@@ -142,15 +141,7 @@ export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
   const klass = createCustomElementClass(win, name);
-
-  const supportsCustomElementsV1 = 'customElements' in win;
-  if (supportsCustomElementsV1) {
-    win['customElements'].define(name, klass);
-  } else {
-    win.document.registerElement(name, {
-      prototype: klass.prototype,
-    });
-  }
+  win['customElements'].define(name, klass);
 }
 
 /**
@@ -175,8 +166,8 @@ export function markElementScheduledForTesting(win, elementName) {
  * @visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
-  if (win.ampExtendedElements) {
-    delete win.ampExtendedElements[elementName];
+  if (win.__AMP_EXTENDED_ELEMENTS) {
+    delete win.__AMP_EXTENDED_ELEMENTS[elementName];
   }
 }
 
@@ -188,6 +179,6 @@ export function resetScheduledElementForTesting(win, elementName) {
  * @visibleForTesting
  */
 export function getElementClassForTesting(win, elementName) {
-  const knownElements = win.ampExtendedElements;
+  const knownElements = win.__AMP_EXTENDED_ELEMENTS;
   return (knownElements && knownElements[elementName]) || null;
 }

@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Displays a YouTube video.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -32,12 +33,12 @@ Displays a <a href="https://www.youtube.com/">YouTube</a> video.
     <td><code>&lt;script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-youtube/">Annotated code example for amp-youtube</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-youtube/">Annotated code example for amp-youtube</a></td>
   </tr>
 </table>
 
@@ -49,25 +50,29 @@ With the responsive layout, the width and height from the example should yield c
 
 ```html
 <amp-youtube
-    data-videoid="mGENRKrdoGY"
-    layout="responsive"
-    width="480" height="270"></amp-youtube>
+  data-videoid="mGENRKrdoGY"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-youtube>
 ```
 
 ```html
-  <amp-youtube
-      id="myLiveChannel"
-      data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
-      width="358"
-      height="204"
-      layout="responsive">
-    <amp-img
-      src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
-      placeholder
-      layout="fill"
-      />
-  </amp-youtube>
+<amp-youtube
+  id="myLiveChannel"
+  data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
+  width="358"
+  height="204"
+  layout="responsive"
+>
+  <amp-img
+    src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+    placeholder
+    layout="fill"
+  />
+</amp-youtube>
 ```
+
 ## Attributes
 
 <table>
@@ -132,7 +137,7 @@ With the responsive layout, the width and height from the example should yield c
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

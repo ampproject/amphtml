@@ -147,6 +147,12 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    if (this.element.isInA4A()) {
+      this.user().error(
+        TAG,
+        'amp-youtube is deprecated in AMPHTML ads. See https://github.com/ampproject/amphtml/issues/21340'
+      );
+    }
     this.videoid_ = this.getVideoId_();
     this.liveChannelid_ = this.getLiveChannelId_();
     this.assertDatasourceExists_();

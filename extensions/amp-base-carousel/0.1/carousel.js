@@ -28,6 +28,7 @@ import {
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
+import {CarouselEvents} from './carousel-events';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {clamp, mod} from '../../../src/utils/math';
 import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
@@ -292,6 +293,9 @@ export class Carousel {
      */
     this.forwards_ = true;
 
+    /** @private {boolean} */
+    this.hideScrollbar_ = true;
+
     /**
      * TODO(sparhami) Rename this to `activeIndex`. We do not want to expose
      * this as it changes, only when the user stops scrolling. Also change
@@ -397,7 +401,7 @@ export class Carousel {
     if (this.isLooping()) {
       slideIndex = mod(newIndex, endIndex + 1);
     } else if (!allowWrap) {
-      slideIndex = clamp(0, newIndex, endIndex);
+      slideIndex = clamp(newIndex, 0, endIndex);
     } else if (
       delta > 0 &&
       this.inLastWindow_(index) &&
@@ -481,6 +485,7 @@ export class Carousel {
       return;
     }
 
+    this.ignoreNextScroll_ = false;
     this.requestedIndex_ = index;
     this.actionSource_ = actionSource;
     this.scrollSlideIntoView_(this.slides_[index], {smoothScroll});
@@ -544,6 +549,15 @@ export class Carousel {
    */
   updateForwards(forwards) {
     this.forwards_ = forwards;
+    this.updateUi();
+  }
+
+  /**
+   * @param {boolean} hideScrollbar Whether or not the scrollbar should be
+   *    hidden.
+   */
+  updateHideScrollbar(hideScrollbar) {
+    this.hideScrollbar_ = hideScrollbar;
     this.updateUi();
   }
 
@@ -632,6 +646,7 @@ export class Carousel {
         'user-scrollable',
         this.userScrollable_
       );
+      this.scrollContainer_.setAttribute('hide-scrollbar', this.hideScrollbar_);
       this.scrollContainer_.setAttribute('horizontal', this.axis_ == Axis.X);
       this.scrollContainer_.setAttribute('loop', this.isLooping());
       this.scrollContainer_.setAttribute('snap', this.snap_);
@@ -665,19 +680,26 @@ export class Carousel {
   }
 
   /**
-   * Updates the resting index as well as firing an event.
+   * Updates the resting index as well as firing an event, if it actually
+   * changed.
    * @param {number} restingIndex The new resting index.
+   * @param {ActionSource=} actionSource The actionSource associated with this
+   *    change.
    * @private
    */
-  updateRestingIndex_(restingIndex) {
+  updateRestingIndex_(restingIndex, actionSource) {
+    if (this.restingIndex_ == restingIndex) {
+      return;
+    }
+
     this.restingIndex_ = restingIndex;
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        'indexchange',
+        CarouselEvents.INDEX_CHANGE,
         dict({
           'index': restingIndex,
-          'actionSource': this.actionSource_,
+          'actionSource': actionSource,
         })
       )
     );
@@ -688,9 +710,20 @@ export class Carousel {
    * settled. In some situations, the index may not change, but you still want
    * to react to the scroll position changing.
    */
+  notifyScrollStart() {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, CarouselEvents.SCROLL_START, null)
+    );
+  }
+
+  /**
+   * Fires an event when the scroll position has changed, once scrolling has
+   * settled. In some situations, the index may not change, but you still want
+   * to react to the scroll position changing.
+   */
   notifyScrollPositionChanged_() {
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'scrollpositionchange', null)
+      createCustomEvent(this.win_, CarouselEvents.SCROLL_POSITION_CHANGED, null)
     );
   }
 
@@ -703,6 +736,7 @@ export class Carousel {
     this.touching_ = true;
     this.actionSource_ = ActionSource.TOUCH;
     this.requestedIndex_ = null;
+    this.ignoreNextScroll_ = false;
 
     listenOnce(
       window,
@@ -725,6 +759,7 @@ export class Carousel {
   handleWheel_() {
     this.actionSource_ = ActionSource.WHEEL;
     this.requestedIndex_ = null;
+    this.ignoreNextScroll_ = false;
   }
 
   /**
@@ -740,6 +775,7 @@ export class Carousel {
 
     this.scrolling_ = true;
     this.updateCurrent_();
+    this.notifyScrollStart();
     this.debouncedResetScrollReferencePoint_();
   }
 
@@ -809,9 +845,9 @@ export class Carousel {
       return false;
     }
 
-    const el = this.scrollContainer_;
-    const {width} = el./*OK*/ getBoundingClientRect();
-    return el./*OK*/ scrollLeft + width >= el./*OK*/ scrollWidth;
+    return this.forwards_
+      ? this.isScrollAtRightEdge()
+      : this.isScrollAtLeftEdge();
   }
 
   /**
@@ -823,6 +859,28 @@ export class Carousel {
       return false;
     }
 
+    return this.forwards_
+      ? this.isScrollAtLeftEdge()
+      : this.isScrollAtRightEdge();
+  }
+
+  /**
+   * @return {boolean} True if the scrolling is at the right edge of the
+   *    carousel. Note that this ignores RTL, and only checks for the right
+   *    edge.
+   */
+  isScrollAtRightEdge() {
+    const el = this.scrollContainer_;
+    const {width} = el./*OK*/ getBoundingClientRect();
+    return el./*OK*/ scrollLeft + width >= el./*OK*/ scrollWidth;
+  }
+
+  /**
+   * @return {boolean} True if the scrolling is at the left edge of the
+   *    carousel. Note that this ignores RTL, and only checks for the left
+   *    edge.
+   */
+  isScrollAtLeftEdge() {
     return this.scrollContainer_./*OK*/ scrollLeft <= 0;
   }
 
@@ -1028,16 +1086,22 @@ export class Carousel {
    * @private
    */
   resetScrollReferencePoint_(force = false) {
-    this.scrolling_ = false;
-    this.runMutate_(() => {
-      this.notifyScrollPositionChanged_();
-    });
+    const {actionSource_} = this;
 
     // Make sure if the user is in the middle of a drag, we do not move
-    // anything.
+    // anything. The touch end will cause us to get called again.
     if (this.touching_) {
       return;
     }
+
+    // Scrolling has stopped, so clear the action source from whatever caused
+    // the scrolling in the first place.
+    this.actionSource_ = undefined;
+    this.scrolling_ = false;
+
+    this.runMutate_(() => {
+      this.notifyScrollPositionChanged_();
+    });
 
     // Check if the resting index we are centered around is the same as where
     // we stopped scrolling. If so, we do not want move anything or fire an
@@ -1061,7 +1125,7 @@ export class Carousel {
     const totalLength = sum(this.getSlideLengths_());
 
     this.runMutate_(() => {
-      this.updateRestingIndex_(this.currentIndex_);
+      this.updateRestingIndex_(this.currentIndex_, actionSource_);
 
       this.resetSlideTransforms_(totalLength);
       this.hideSpacersAndSlides_();

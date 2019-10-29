@@ -114,15 +114,19 @@ describes.fakeWin(
         env.sandbox.spy(ampSmartlinks, 'getLinkmateOptions_');
         env.sandbox.stub(xhr, 'fetchJson');
 
-        return ampSmartlinks.buildCallback().then(() => {
-          expect(ampSmartlinks.getLinkmateOptions_.calledOnce).to.be.true;
-        });
+        return (
+          ampSmartlinks
+            .buildCallback()
+            // Skip microtask.
+            .then(() => Promise.resolve())
+            .then(() => {
+              expect(ampSmartlinks.getLinkmateOptions_.calledOnce).to.be.true;
+            })
+        );
       });
     });
 
     describe('runSmartlinks_', () => {
-      let fakeViewer;
-
       beforeEach(() => {
         const options = {
           'nrtv-account-name': 'thisisnotapublisher',
@@ -131,7 +135,6 @@ describes.fakeWin(
         };
 
         ampSmartlinks = helpers.createAmpSmartlinks(options);
-        fakeViewer = Services.viewerForDoc(env.ampdoc);
 
         env.sandbox
           .stub(ampSmartlinks, 'getLinkmateOptions_')
@@ -143,7 +146,7 @@ describes.fakeWin(
         env.sandbox.spy(ampSmartlinks, 'postPageImpression_');
 
         return ampSmartlinks.buildCallback().then(() => {
-          fakeViewer.whenFirstVisible().then(() => {
+          env.ampdoc.whenFirstVisible().then(() => {
             expect(ampSmartlinks.postPageImpression_.calledOnce).to.be.true;
           });
         });
@@ -153,7 +156,7 @@ describes.fakeWin(
         env.sandbox.spy(ampSmartlinks, 'initLinkRewriter_');
 
         return ampSmartlinks.buildCallback().then(() => {
-          fakeViewer.whenFirstVisible().then(() => {
+          env.ampdoc.whenFirstVisible().then(() => {
             expect(ampSmartlinks.initLinkRewriter_.calledOnce).to.be.true;
           });
         });

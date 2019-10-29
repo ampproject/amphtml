@@ -56,12 +56,25 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   };
   const authUrl = configAuthUrl.replace('READER_ID', readerId);
   const pingbackUrl = configPingbackUrl.replace('READER_ID', readerId);
+  const fakeScoreStates = {
+    'subscribe.google.com': {
+      'isReadyToPay': 1,
+      'supportsViewer': 1,
+    },
+    'local': {
+      'isReadyToPay': 0,
+      'supportsViewer': 0,
+    },
+  };
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
+    sandbox
+      .stub(serviceAdapter, 'getScoreFactorStates')
+      .callsFake(() => Promise.resolve(fakeScoreStates));
     sandbox
       .stub(serviceAdapter, 'getPageConfig')
       .callsFake(() => new PageConfig('example.org:basic', true));
@@ -360,9 +373,35 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         localSubscriptionPlatform.renderer_,
         'render'
       );
+      const stateSub = sandbox
+        .stub(localSubscriptionPlatform, 'createRenderState_')
+        .callsFake(() => Promise.resolve({foo: 'bar'}));
       localSubscriptionPlatform.activate(entitlement);
-      return localSubscriptionPlatform.actions_.build().then(() => {
+      expect(stateSub).to.be.calledOnce;
+      return Promise.resolve().then(() => {
         expect(renderStub).to.be.calledOnce;
+      });
+    });
+
+    it('should build renderState', () => {
+      return expect(
+        localSubscriptionPlatform.createRenderState_(entitlement)
+      ).to.eventually.deep.equal({
+        'source': 'sample-source',
+        'service': '',
+        'granted': true,
+        'grantReason': 'SUBSCRIBER',
+        'data': null,
+        'factors': {
+          'subscribe.google.com': {
+            'isReadyToPay': 1,
+            'supportsViewer': 1,
+          },
+          'local': {
+            'isReadyToPay': 0,
+            'supportsViewer': 0,
+          },
+        },
       });
     });
 
@@ -387,6 +426,20 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
         expect(sendSignalStub.getCall(0).args[1].body).to.equal(
           JSON.stringify(entitlement.jsonForPingback())
+        );
+      });
+    });
+    it('pingback should handle multiple entitlements ', () => {
+      const sendSignalStub = sandbox.stub(
+        localSubscriptionPlatform.xhr_,
+        'sendSignal'
+      );
+
+      return localSubscriptionPlatform.pingback([entitlement]).then(() => {
+        expect(sendSignalStub).to.be.calledOnce;
+        expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
+        expect(sendSignalStub.getCall(0).args[1].body).to.equal(
+          JSON.stringify([entitlement.jsonForPingback()])
         );
       });
     });

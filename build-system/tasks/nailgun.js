@@ -15,12 +15,13 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 const sleep = require('sleep-promise');
-const {exec, execScriptAsync, getStdout} = require('../exec');
+const {exec, execScriptAsync, getStdout} = require('../common/exec');
 const {green, red, cyan, yellow} = colors;
-const {isTravisBuild} = require('../travis');
+const {maybeGenerateRunner} = require('./generate-runner');
 
 // Used to start and stop the Closure nailgun server
 let nailgunRunnerReplacer;
@@ -30,20 +31,21 @@ const nailgunRunner = require.resolve(
 const nailgunServer = require.resolve(
   '../../third_party/nailgun/nailgun-server.jar'
 );
-const customRunner = require.resolve('../runner/dist/runner.jar');
 const DEFAULT_NAILGUN_PORT = '2113';
-const CLOSURE_NAILGUN_PORT = '2114';
+const CHECK_TYPES_NAILGUN_PORT = '2114';
+const DIST_NAILGUN_PORT = '2115';
 const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
+const NAILGUN_STOP_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
+ * @return {?NodeRequire}
  */
 function maybeReplaceDefaultCompiler() {
   if (process.platform == 'darwin') {
     return require('require-hijack')
       .replace('google-closure-compiler-osx')
       .with(nailgunRunner);
-    return true;
   } else if (process.platform == 'linux') {
     return require('require-hijack')
       .replace('google-closure-compiler-linux')
@@ -73,12 +75,19 @@ function maybeReplaceDefaultCompiler() {
  * @param {boolean} detached
  */
 async function startNailgunServer(port, detached) {
+  await maybeGenerateRunner(port);
+
+  if (argv.disable_nailgun) {
+    return;
+  }
+
   nailgunRunnerReplacer = maybeReplaceDefaultCompiler();
   if (!nailgunRunnerReplacer) {
     return;
   }
 
   // Start up the nailgun server after cleaning up old instances (if any)
+  const customRunner = require.resolve(`../runner/dist/${port}/runner.jar`);
   const startNailgunServerCmd =
     'java -XX:+TieredCompilation -server -cp ' +
     `${nailgunServer}:${customRunner} ` +
@@ -102,9 +111,7 @@ async function startNailgunServer(port, detached) {
     try {
       const version = getStdout(getVersionCmd).trim();
       if (/Version/.test(version)) {
-        if (!isTravisBuild()) {
-          log('Started', cyan('nailgun-server.jar'), 'on port', cyan(port));
-        }
+        log('Started', cyan('nailgun-server.jar'), 'on port', cyan(port));
         return;
       }
     } catch (e) {
@@ -127,23 +134,30 @@ async function startNailgunServer(port, detached) {
  * @param {string} port
  */
 async function stopNailgunServer(port) {
+  if (argv.disable_nailgun) {
+    return;
+  }
+
   if (nailgunRunnerReplacer) {
     nailgunRunnerReplacer.restore();
   }
   if (process.platform == 'darwin' || process.platform == 'linux') {
     const stopNailgunServerCmd = `${nailgunRunner} --nailgun-port ${port} ng-stop`;
-    if (exec(stopNailgunServerCmd, {stdio: 'pipe'}).status == 0) {
-      if (!isTravisBuild()) {
-        log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
-      }
+    const stopped = exec(stopNailgunServerCmd, {
+      stdio: 'pipe',
+      timeout: NAILGUN_STOP_TIMEOUT_MS,
+    });
+    if (stopped.status == 0) {
+      log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
     } else {
       log(
         yellow('WARNING:'),
-        'Could not find a running instance of',
+        'Could not stop',
         cyan('nailgun-server.jar'),
         'on port',
         cyan(port)
       );
+      log(red(stopped.stderr));
     }
   }
 }
@@ -161,7 +175,8 @@ async function nailgunStop() {
 }
 
 module.exports = {
-  closureNailgunPort: CLOSURE_NAILGUN_PORT,
+  checkTypesNailgunPort: CHECK_TYPES_NAILGUN_PORT,
+  distNailgunPort: DIST_NAILGUN_PORT,
   nailgunStart,
   nailgunStop,
   startNailgunServer,

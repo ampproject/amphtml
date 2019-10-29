@@ -1,6 +1,6 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.23",
+  "version": "1.0.29",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
   "keywords": [
     "AMP",
@@ -10,7 +10,7 @@
     "Accelerated Mobile Pages"
   ],
   "engines": {
-    "node": "^10.0.0"
+    "node": "^8 || ^10 || ^12 || ^14"
   },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
@@ -20,9 +20,6 @@
   },
   "bin": {
     "amphtml-validator": "index.js"
-  },
-  "scripts": {
-    "preinstall": "node ../../build-system/check-package-manager.js"
   },
   "dependencies": {
     "colors": "1.2.5",

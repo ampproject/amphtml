@@ -17,11 +17,8 @@
 import {masterSelection} from '../../../3p/ampcontext-integration';
 
 describes.fakeWin('#masterSelect', {}, env => {
-  it('should allow sharing between configured networks', () => {
-    const win1 = masterSelection(env.win, 'adsense');
-    expect(win1.name).to.equal('frame_google_network_master');
-
-    const win2 = masterSelection(env.win, 'fake_network');
-    expect(win2.name).to.equal('frame_fake_network_master');
-  });
+  it('should allow sharing between configured networks', () =>
+    expect(masterSelection(env.win, 'fake_network').name).to.equal(
+      'frame_fake_network_master'
+    ));
 });

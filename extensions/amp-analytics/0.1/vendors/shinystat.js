@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const SHINYSTAT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const SHINYSTAT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -48,3 +50,5 @@ export const SHINYSTAT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {SHINYSTAT_CONFIG};

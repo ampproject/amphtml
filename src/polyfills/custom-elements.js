@@ -585,7 +585,7 @@ class Registry {
  * @param {!Registry} registry
  */
 function installPatches(win, registry) {
-  const {Document, Element, Node, Object} = win;
+  const {Document, Element, Node, Object, document} = win;
   const docProto = Document.prototype;
   const elProto = Element.prototype;
   const nodeProto = Node.prototype;
@@ -613,7 +613,14 @@ function installPatches(win, registry) {
   // TODO(jridgewell): Can fire adoptedCallback for cross doc imports.
   docProto.importNode = function() {
     const imported = importNode.apply(this, arguments);
-    if (imported) {
+
+    // Only upgrade elements if the document that the nodes were imported into
+    // is _this_ document. If it's another document, then that document's
+    // element registry must do the upgrade.
+    // Eg, when importing from a <template>, the cloned document fragment
+    // should be upgraded. But importing from document into the <template>
+    // should not.
+    if (imported && this === document) {
       registry.upgradeSelf(imported);
       registry.upgrade(imported);
     }
@@ -651,21 +658,41 @@ function installPatches(win, registry) {
   // Patch cloneNode to immediately upgrade custom elements.
   nodeProto.cloneNode = function() {
     const cloned = cloneNode.apply(this, arguments);
-    registry.upgradeSelf(cloned);
-    registry.upgrade(cloned);
+
+    // Only upgrade elements if the cloned node belonged to _this_ document.
+    // Eg, when cloning a <template>'s content, the cloned document fragment
+    // does not belong to this document.
+    if (cloned.ownerDocument === document) {
+      registry.upgradeSelf(cloned);
+      registry.upgrade(cloned);
+    }
     return cloned;
   };
 
   // Patch the innerHTML setter to immediately upgrade custom elements.
   // Note, this could technically fire connectedCallbacks if this node was
   // connected, but we leave that to the Mutation Observer.
-  const innerHTMLDesc = Object.getOwnPropertyDescriptor(elProto, 'innerHTML');
+  let innerHTMLProto = elProto;
+  let innerHTMLDesc = Object.getOwnPropertyDescriptor(
+    innerHTMLProto,
+    'innerHTML'
+  );
+  if (!innerHTMLDesc) {
+    // Sigh... IE11 puts innerHTML desciptor on HTMLElement. But, we've
+    // replaced HTMLElement with a polyfill wrapper, so have to get its proto.
+    innerHTMLProto =
+      /** @type {!Object} */ (win.HTMLElement.prototype.__proto__);
+    innerHTMLDesc = Object.getOwnPropertyDescriptor(
+      innerHTMLProto,
+      'innerHTML'
+    );
+  }
   const innerHTMLSetter = innerHTMLDesc.set;
   innerHTMLDesc.set = function(html) {
     innerHTMLSetter.call(this, html);
     registry.upgrade(this);
   };
-  Object.defineProperty(elProto, 'innerHTML', innerHTMLDesc);
+  Object.defineProperty(innerHTMLProto, 'innerHTML', innerHTMLDesc);
 }
 
 /**
@@ -727,6 +754,7 @@ function polyfill(win) {
    * You can't use the real HTMLElement constructor, because you can't subclass
    * it without using native classes. So, mock its approximation using
    * createElement.
+   * @return {*} TODO(#23582): Specify return type
    */
   function HTMLElementPolyfill() {
     const {constructor} = this;
@@ -756,17 +784,27 @@ function polyfill(win) {
       el = createElement.call(document, def.name);
     }
 
-    // Finally, if the node was already constructed, we need to reset it's
+    // Finally, if the node was already constructed, we need to reset its
     // prototype to the custom element prototype. And if it wasn't already
     // constructed, we created a new node via native createElement, and we need
-    // to reset it's prototype. Basically always reset the prototype.
-    Object.setPrototypeOf(el, constructor.prototype);
+    // to reset its prototype. Basically always reset the prototype.
+    el.__proto__ = constructor.prototype;
     return el;
   }
   subClass(Object, HTMLElement, HTMLElementPolyfill);
 
   // Expose the polyfilled HTMLElement constructor for everyone to extend from.
   win.HTMLElement = HTMLElementPolyfill;
+
+  // When we transpile `super` in Custom Element subclasses, we change it to
+  // `superClass.call(this)` (where `superClass` is `HTMLElementPolyfill`).
+  // That `.call` value is inherited from `Function.prototype`.
+  // But, IE11's native HTMLElement hierarchy doesn't extend from Function!
+  // And because `HTMLElementPolyfill` extends from `HTMLElement`, it doesn't
+  // have a `.call`! So we need to manually install it.
+  if (!HTMLElementPolyfill.call) {
+    HTMLElementPolyfill.call = win.Function.call;
+  }
 }
 
 /**
@@ -782,6 +820,7 @@ function polyfill(win) {
 function wrapHTMLElement(win) {
   const {HTMLElement, Reflect, Object} = win;
   /**
+   * @return {!Element}
    */
   function HTMLElementWrapper() {
     const ctor = /** @type {function(...?):?|undefined} */ (this.constructor);
@@ -815,6 +854,7 @@ function subClass(Object, superClass, subClass) {
       value: subClass,
     },
   });
+  subClass.__proto__ = superClass;
 }
 
 /**
@@ -836,14 +876,15 @@ function subClass(Object, superClass, subClass) {
 export function install(win, opt_ctor) {
   // Don't install in no-DOM environments e.g. worker.
   const shouldInstall = win.document;
-  if (!shouldInstall || isPatched(win)) {
+  const hasCE = hasCustomElements(win);
+  if (!shouldInstall || (hasCE && isPatched(win))) {
     return;
   }
 
   let install = true;
   let installWrapper = false;
 
-  if (opt_ctor && hasCustomElements(win)) {
+  if (opt_ctor && hasCE) {
     // If ctor is constructable without new, it's a function. That means it was
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.

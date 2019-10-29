@@ -149,7 +149,7 @@ describes.repeated(
           return form;
         }
 
-        function getAmpFormWithAsyncInput() {
+        function getAmpFormWithAsyncInput(includeRequiredAction) {
           return getAmpForm(getForm()).then(ampForm => {
             const form = ampForm.form_;
 
@@ -173,6 +173,42 @@ describes.repeated(
               });
 
             form.appendChild(asyncInput);
+
+            if (includeRequiredAction) {
+              // Create our async input element
+              // With the required fields
+              const asyncInputRequiredAction = createElement(
+                'amp-mock-async-input-required-action'
+              );
+              asyncInputRequiredAction.classList.add(
+                AsyncInputClasses.ASYNC_INPUT
+              );
+              asyncInputRequiredAction.classList.add(
+                AsyncInputClasses.ASYNC_REQUIRED_ACTION
+              );
+              asyncInput.setAttribute(
+                AsyncInputAttributes.NAME,
+                'mock-async-input-required-action'
+              );
+
+              // Create stubs that can be used for observing the async input
+              const asyncInputValueRequiredAction =
+                'async-input-value-required-action';
+              const getValueStubRequiredAction = sandbox
+                .stub()
+                .returns(Promise.resolve(asyncInputValueRequiredAction));
+              asyncInputRequiredAction.getImpl = () =>
+                Promise.resolve({
+                  getValue: getValueStubRequiredAction,
+                });
+
+              form.appendChild(asyncInputRequiredAction);
+
+              return Promise.resolve({
+                ampForm,
+                getValueStubRequiredAction,
+              });
+            }
             return Promise.resolve({
               ampForm,
               asyncInput,
@@ -234,7 +270,7 @@ describes.repeated(
             });
           });
 
-          it('should server side render templates if enabled', () => {
+          it('should server side render submit-success template if enabled', () => {
             sandbox.spy(xhrUtils, 'setupInput');
             sandbox.spy(xhrUtils, 'setupAMPCors');
             sandbox.stub(xhrUtils, 'fromStructuredCloneable');
@@ -269,31 +305,126 @@ describes.repeated(
                 .stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
                 .returns(template);
 
-              const fetchAndRenderTemplate = sandbox.stub(
-                ampForm.ssrTemplateHelper_,
-                'fetchAndRenderTemplate'
-              );
-              fetchAndRenderTemplate
+              const ssr = sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              ssr
                 .onFirstCall()
-                .returns(Promise.resolve({html: '<div>much success</div>'}))
+                .returns(
+                  Promise.resolve({
+                    init: {status: 200},
+                    html: '<div>much success</div>',
+                  })
+                )
                 .onSecondCall()
-                .returns(Promise.resolve({html: '<div>much success</div>'}));
+                .returns(
+                  Promise.resolve({
+                    init: {status: 200},
+                    html: '<div>much success</div>',
+                  })
+                );
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
               );
-              return whenCalled(fetchAndRenderTemplate).then(() => {
-                expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate).to
-                  .have.been.called;
-                expect(
-                  ampForm.ssrTemplateHelper_.fetchAndRenderTemplate
-                ).to.have.been.calledWith(
-                  form,
-                  sinon.match.object,
-                  sinon.match.object
+              return whenCalled(ssr)
+                .then(() => {
+                  expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
+                  expect(
+                    ampForm.ssrTemplateHelper_.ssr
+                  ).to.have.been.calledWith(
+                    form,
+                    sinon.match.object,
+                    sinon.match.object
+                  );
+                  return handleSubmitEventPromise;
+                })
+                .then(() => {
+                  expect(ampForm.state_).to.equal('submit-success');
+                  expect(form.className).to.not.contain('amp-form-submitting');
+                  expect(form.className).to.contain('amp-form-submit-success');
+                  expect(form.className).not.to.contain(
+                    'amp-form-submit-error'
+                  );
+                });
+            });
+          });
+
+          it('should server side render submit-error template if enabled', () => {
+            sandbox.spy(xhrUtils, 'setupInput');
+            sandbox.spy(xhrUtils, 'setupAMPCors');
+            sandbox.stub(xhrUtils, 'fromStructuredCloneable');
+
+            return getSsrAmpFormPromise.then(ampForm => {
+              const form = ampForm.form_;
+              const template = createElement('template');
+              template.setAttribute('type', 'amp-mustache');
+              template.content.appendChild(createTextNode('Some {{template}}'));
+              form.id = 'registration';
+              const event = {
+                stopImmediatePropagation: sandbox.spy(),
+                target: form,
+                preventDefault: sandbox.spy(),
+              };
+              const errorTemplateContainer = createElement('div');
+              errorTemplateContainer.setAttribute('submit-error', '');
+              errorTemplateContainer.appendChild(template);
+
+              form.appendChild(errorTemplateContainer);
+
+              form.xhrAction_ = 'https://www.xhr-action.org';
+
+              sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse').returns(
+                Promise.resolve({
+                  data: {
+                    html: '<div>much error</div>',
+                  },
+                })
+              );
+              const renderedTemplate = createElement('div');
+              renderedTemplate.innerText = 'much error';
+              sandbox
+                .stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
+                .returns(template);
+
+              const ssr = sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              ssr
+                .onFirstCall()
+                .returns(
+                  Promise.resolve({
+                    init: {status: 404},
+                    html: '<div>much error</div>',
+                  })
+                )
+                .onSecondCall()
+                .returns(
+                  Promise.resolve({
+                    init: {status: 404},
+                    html: '<div>much error</div>',
+                  })
                 );
-                return handleSubmitEventPromise;
-              });
+
+              const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
+                event
+              );
+              return whenCalled(ssr)
+                .then(() => {
+                  expect(ampForm.ssrTemplateHelper_.ssr).to.have.been.called;
+                  expect(
+                    ampForm.ssrTemplateHelper_.ssr
+                  ).to.have.been.calledWith(
+                    form,
+                    sinon.match.object,
+                    sinon.match.object
+                  );
+                  return handleSubmitEventPromise;
+                })
+                .then(() => {
+                  expect(ampForm.state_).to.equal('submit-error');
+                  expect(form.className).to.not.contain('amp-form-submitting');
+                  expect(form.className).to.not.contain(
+                    'amp-form-submit-success'
+                  );
+                  expect(form.className).to.contain('amp-form-submit-error');
+                });
             });
           });
 
@@ -332,15 +463,23 @@ describes.repeated(
                 .stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
                 .returns(template);
 
-              const fetchAndRenderTemplate = sandbox.stub(
+              const ssr = sandbox.stub(
                 ampForm.ssrTemplateHelper_,
-                'renderTemplate'
+                'applySsrOrCsrTemplate'
               );
-              fetchAndRenderTemplate
+              ssr
                 .onFirstCall()
-                .returns(Promise.resolve({html: renderedTemplate}))
+                .returns(
+                  Promise.resolve({
+                    html: renderedTemplate,
+                  })
+                )
                 .onSecondCall()
-                .returns(Promise.resolve({html: template}));
+                .returns(
+                  Promise.resolve({
+                    html: template,
+                  })
+                );
 
               const renderTemplate = sandbox.spy(ampForm, 'renderTemplate_');
 
@@ -348,8 +487,8 @@ describes.repeated(
                 event
               );
               return whenCalled(renderTemplate, 2).then(() => {
-                expect(ampForm.ssrTemplateHelper_.renderTemplate).to.have.been
-                  .called;
+                expect(ampForm.ssrTemplateHelper_.applySsrOrCsrTemplate).to.have
+                  .been.called;
                 return handleSubmitEventPromise;
               });
             });
@@ -507,16 +646,15 @@ describes.repeated(
           button1.setAttribute('autofocus', '');
           new AmpForm(form);
 
-          const viewer = Services.viewerForDoc(env.ampdoc);
           let resolve_ = null;
-          sandbox.stub(viewer, 'whenNextVisible').returns(
+          sandbox.stub(env.ampdoc, 'whenNextVisible').returns(
             new Promise(resolve => {
               resolve_ = resolve;
             })
           );
 
           expect(document.activeElement).to.not.equal(button1);
-          viewer.whenNextVisible().then(() => {
+          env.ampdoc.whenNextVisible().then(() => {
             expect(document.activeElement).to.equal(button1);
           });
           return timer.promise(1).then(() => resolve_());
@@ -2883,6 +3021,23 @@ describes.repeated(
               });
             }
           );
+
+          it('should submit with async input required action ', () => {
+            return getAmpFormWithAsyncInput(
+              true /*includeRequiredAction*/
+            ).then(response => {
+              const {ampForm, getValueStubRequiredAction} = response;
+
+              const handlePresubmitSuccessStub = sandbox.stub(
+                ampForm,
+                'handlePresubmitSuccess_'
+              );
+              return ampForm.submit_(ActionTrust.HIGH).then(() => {
+                expect(getValueStubRequiredAction).to.be.called;
+                expect(handlePresubmitSuccessStub).to.be.called;
+              });
+            });
+          });
 
           it(
             'should handle errors when, ' +

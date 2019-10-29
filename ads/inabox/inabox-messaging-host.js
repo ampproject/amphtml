@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {FrameOverlayManager} from './frame-overlay-manager';
 import {
   MessageType,
   deserializeMessage,
   serializeMessage,
 } from '../../src/3p-frame-messaging';
-import {PositionObserver} from './position-observer';
 import {canInspectWindow} from '../../src/iframe-helper';
 import {dev, devAssert} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {getData} from '../../src/event-helper';
+import {getFrameOverlayManager} from './frame-overlay-manager';
+import {getPositionObserver} from './position-observer';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -91,14 +91,14 @@ export class InaboxMessagingHost {
     /** @private {!Object<string,!AdFrameDef>} */
     this.iframeMap_ = Object.create(null);
 
-    /** @private {!PositionObserver} */
-    this.positionObserver_ = new PositionObserver(hostWin);
+    /** @private {!./position-observer.PositionObserver} */
+    this.positionObserver_ = getPositionObserver(hostWin);
 
     /** @private {!NamedObservable} */
     this.msgObservable_ = new NamedObservable();
 
-    /** @private {!FrameOverlayManager} */
-    this.frameOverlayManager_ = new FrameOverlayManager(hostWin);
+    /** @private {!./frame-overlay-manager.FrameOverlayManager} */
+    this.frameOverlayManager_ = getFrameOverlayManager(hostWin);
 
     this.msgObservable_.listen(
       MessageType.HOST_BROADCAST,

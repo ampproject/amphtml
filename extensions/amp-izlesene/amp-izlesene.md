@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Izlesene video.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -31,7 +32,7 @@ Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.
     <td><code>&lt;script async custom-element="amp-izlesene" src="https://cdn.ampproject.org/v0/amp-izlesene-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
 </table>
@@ -44,12 +45,15 @@ With responsive layout the width and height from the example should yield correc
 
 ```html
 <amp-izlesene
-    data-videoid="7221390"
-    layout="responsive"
-    width="480" height="270"></amp-izlesene>
+  data-videoid="7221390"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-izlesene>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-videoid (required)</strong></td>
@@ -73,10 +77,9 @@ With responsive layout the width and height from the example should yield correc
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

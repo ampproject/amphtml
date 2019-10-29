@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  ActionStatus,
+  SubscriptionAnalytics,
+  SubscriptionAnalyticsEvents,
+} from './analytics';
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
@@ -27,7 +32,6 @@ import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
-import {SubscriptionAnalytics, SubscriptionAnalyticsEvents} from './analytics';
 import {SubscriptionPlatform} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
@@ -94,7 +98,7 @@ export class SubscriptionService {
     /** @private {!ViewerTracker} */
     this.viewerTracker_ = new ViewerTracker(ampdoc);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {?Promise} */
@@ -281,7 +285,7 @@ export class SubscriptionService {
     // page to become visible, all others wait for whenFirstVisible()
     const visiblePromise = subscriptionPlatform.isPrerenderSafe()
       ? Promise.resolve()
-      : this.viewer_.whenFirstVisible();
+      : this.ampdoc_.whenFirstVisible();
     return visiblePromise.then(() => {
       return this.timer_
         .timeoutPromise(timeout, subscriptionPlatform.getEntitlements())
@@ -610,6 +614,10 @@ export class SubscriptionService {
           dict({
             'action': action,
             'serviceId': serviceId,
+          }),
+          dict({
+            'action': action,
+            'status': ActionStatus.STARTED,
           })
         );
         resolve(platform.executeAction(action));
@@ -654,16 +662,30 @@ export class SubscriptionService {
         return getValueForExpr(entitlement.json(), field);
       });
   }
+
+  /**
+   * Gets Score Factors for all platforms
+   * @return {!Promise<!JsonObject>}
+   */
+  getScoreFactorStates() {
+    return this.platformStore_.getScoreFactorStates();
+  }
 }
 
-/** @package @VisibleForTesting */
+/**
+ * @package
+ * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
+ */
 export function getPlatformClassForTesting() {
   return SubscriptionPlatform;
 }
 
 /**
  * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @VisibleForTesting
+ * @package
+ * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;

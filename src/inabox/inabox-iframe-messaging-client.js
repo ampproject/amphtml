@@ -16,8 +16,10 @@
 
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
 import {MessageType} from '../../src/3p-frame-messaging';
+import {canInspectWindow} from '../iframe-helper';
 import {dict} from '../../src/utils/object';
 import {getServicePromise, registerServiceBuilder} from '../service';
+import {isExperimentOn} from '../experiments';
 import {tryParseJson} from '../json';
 
 /**
@@ -35,12 +37,17 @@ export function iframeMessagingClientFor(win) {
  * @param {!Window} win
  */
 export function installIframeMessagingClient(win) {
-  registerServiceBuilder(
-    win,
-    'iframeMessagingClient',
-    createIframeMessagingClient.bind(null, win),
-    /* opt_instantiate */ true
-  );
+  if (
+    !isExperimentOn(win, 'inabox-viewport-friendly') ||
+    !canInspectWindow(win.top)
+  ) {
+    registerServiceBuilder(
+      win,
+      'iframeMessagingClient',
+      createIframeMessagingClient.bind(null, win),
+      /* opt_instantiate */ true
+    );
+  }
 }
 
 /**

@@ -73,14 +73,14 @@ const WHITELISTED_VARIABLES = [
 /** Provides A4A specific variable substitution. */
 export class A4AVariableSource extends VariableSource {
   /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} parentAmpdoc
    * @param  {!Window} embedWin
    */
-  constructor(ampdoc, embedWin) {
-    super(ampdoc);
+  constructor(parentAmpdoc, embedWin) {
+    super(parentAmpdoc);
 
     // Use parent URL replacements service for fallback.
-    const headNode = ampdoc.getHeadNode();
+    const headNode = parentAmpdoc.getHeadNode();
     const urlReplacements = Services.urlReplacementsForDoc(headNode);
 
     /** @private {VariableSource} global variable source for fallback. */

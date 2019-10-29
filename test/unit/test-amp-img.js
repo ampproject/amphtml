@@ -20,7 +20,7 @@ import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
@@ -153,30 +153,23 @@ describe('amp-img', () => {
     });
   });
 
-  // TODO(cvializ, #12336): unskip
-  it.skip('should handle attribute mutations', () => {
-    return getImg({
-      src: 'test.jpg',
-      srcset: 'large.jpg 2000w, small.jpg 1000w',
+  it('should handle attribute mutations', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      srcset: SRCSET_STRING,
       width: 300,
       height: 200,
-    }).then(ampImg => {
-      const impl = ampImg.implementation_;
-
-      ampImg.setAttribute('srcset', 'mutated-srcset.jpg 500w');
-      ampImg.setAttribute('src', 'mutated-src.jpg');
-
-      // `srcset` mutation should take precedence over `src` mutation.
-      impl.mutatedAttributesCallback({
-        srcset: 'mutated-srcset.jpg 1000w',
-        src: 'mutated-src.jpg',
-      });
-      expect(impl.img_.getAttribute('src')).to.equal('mutated-srcset.jpg');
-
-      // `src` mutation should override existing `srcset` attribute.
-      impl.mutatedAttributesCallback({src: 'mutated-src.jpg'});
-      expect(impl.img_.getAttribute('src')).to.equal('mutated-src.jpg');
     });
+    const impl = ampImg.implementation_;
+
+    expect(impl.img_.hasAttribute('srcset')).to.be.true;
+
+    ampImg.setAttribute('src', 'foo.jpg');
+    impl.mutatedAttributesCallback({src: 'foo.jpg'});
+
+    expect(impl.img_.getAttribute('src')).to.equal('foo.jpg');
+    // src mutation should override existing srcset attribute.
+    expect(impl.img_.hasAttribute('srcset')).to.be.false;
   });
 
   it('should propagate srcset and sizes', () => {
@@ -384,6 +377,8 @@ describe('amp-img', () => {
   it('should propagate the object-fit attribute', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-fit': 'cover',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -394,6 +389,8 @@ describe('amp-img', () => {
   it('should not propagate the object-fit attribute if invalid', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-fit': 'foo 80%',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -404,6 +401,8 @@ describe('amp-img', () => {
   it('should propagate the object-position attribute', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-position': '20% 80%',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -414,6 +413,8 @@ describe('amp-img', () => {
   it('should not propagate the object-position attribute if invalid', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-position': 'url("example.com")',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -508,7 +509,6 @@ describe('amp-img', () => {
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
 
-      impl.mutateElement = fn => fn();
       impl.getViewport = function() {
         return {
           getWidth: () => windowWidth,
@@ -517,13 +517,8 @@ describe('amp-img', () => {
       return impl;
     }
 
-    beforeEach(() => {
-      toggleExperiment(window, 'amp-img-auto-sizes', true, true);
-    });
-
     it('should not generate sizes for amp-imgs that already have sizes', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         src: '/examples/img/sample.jpg',
         srcset: SRCSET_STRING,
@@ -544,7 +539,6 @@ describe('amp-img', () => {
 
     it('should not generate sizes for amp-imgs without srcset', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         src: '/examples/img/sample.jpg',
         width: 300,
@@ -563,7 +557,6 @@ describe('amp-img', () => {
 
     it('should not generate sizes for amp-imgs with x descriptors', () => {
       let impl;
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       return getImg({
         srcset: '/examples/img/hero@1x.jpg, /examples/img/hero@2x.jpg 2x',
         width: 300,
@@ -581,7 +574,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fixed', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.FIXED,
@@ -602,7 +594,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout responsive', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.RESPONSIVE,
@@ -623,7 +614,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fixed-height', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.FIXED_HEIGHT,
@@ -644,7 +634,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout fill', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.FILL,
@@ -665,7 +654,6 @@ describe('amp-img', () => {
     });
 
     it('should generate correct sizes for layout flex-item', () => {
-      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
       const impl = getStubbedImg(
         {
           layout: Layout.FLEX_ITEM,

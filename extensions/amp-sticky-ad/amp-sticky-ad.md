@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Provides a way to display and stick ad content at the bottom of the page.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -33,12 +34,12 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-sticky-ad/">Annotated code example for amp-sticky-ad</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-sticky-ad/">Annotated code example for amp-sticky-ad</a></td>
   </tr>
 </table>
 
@@ -60,12 +61,15 @@ limitations under the License.
 - If no ad is filled, the sticky ad container will collapse and will no longer be visible.
 
 Example:
+
 ```html
 <amp-sticky-ad layout="nodisplay">
-  <amp-ad width="320"
-      height="50"
-      type="doubleclick"
-      data-slot="/35096353/amptesting/formats/sticky">
+  <amp-ad
+    width="320"
+    height="50"
+    type="doubleclick"
+    data-slot="/35096353/amptesting/formats/sticky"
+  >
   </amp-ad>
 </amp-sticky-ad>
 ```

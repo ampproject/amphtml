@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a media stream from the nexxOMNIA platform.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -31,7 +32,7 @@ Displays a media stream from the nexxOMNIA platform.
     <td><code>&lt;script async custom-element="amp-nexxtv-player" src="https://cdn.ampproject.org/v0/amp-nexxtv-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
@@ -44,16 +45,18 @@ With the responsive layout, the width and height from the example should yield c
 
 ```html
 <amp-nexxtv-player
-    data-mediaid="71QQG852413DU7J"
-    data-client="761"
-    data-streamtype="video"
-    data-seek-to="2"
-    data-mode="static"
-    data-origin="https://embed.nexx.cloud/"
-    data-disable-ads="1"
-    data-streaming-filter="nxp-bitrate-2500"
-    layout="responsive"
-    width="480" height="270"></amp-nexxtv-player>
+  data-mediaid="71QQG852413DU7J"
+  data-client="761"
+  data-streamtype="video"
+  data-seek-to="2"
+  data-mode="static"
+  data-origin="https://embed.nexx.cloud/"
+  data-disable-ads="1"
+  data-streaming-filter="nxp-bitrate-2500"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-nexxtv-player>
 ```
 
 ## Attributes
@@ -101,7 +104,7 @@ With the responsive layout, the width and height from the example should yield c
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

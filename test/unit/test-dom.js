@@ -89,35 +89,25 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   it('isConnectedNode (no Node.p.isConnected)', () => {
-    if (!Object.hasOwnProperty.call(Node.prototype, 'isConnected')) {
-      return;
-    }
+    sandbox.deleteProperty(Node.prototype, 'isConnected');
+    expect(dom.isConnectedNode(document)).to.be.true;
 
-    const desc = Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected');
-    try {
-      delete Node.prototype.isConnected;
+    const a = document.createElement('div');
+    expect(dom.isConnectedNode(a)).to.be.false;
 
-      expect(dom.isConnectedNode(document)).to.be.true;
+    const b = document.createElement('div');
+    b.appendChild(a);
 
-      const a = document.createElement('div');
-      expect(dom.isConnectedNode(a)).to.be.false;
+    document.body.appendChild(b);
+    expect(dom.isConnectedNode(a)).to.be.true;
 
-      const b = document.createElement('div');
-      b.appendChild(a);
+    const shadow = a.attachShadow({mode: 'open'});
+    const c = document.createElement('div');
+    shadow.appendChild(c);
+    expect(dom.isConnectedNode(c)).to.be.true;
 
-      document.body.appendChild(b);
-      expect(dom.isConnectedNode(a)).to.be.true;
-
-      const shadow = a.attachShadow({mode: 'open'});
-      const c = document.createElement('div');
-      shadow.appendChild(c);
-      expect(dom.isConnectedNode(c)).to.be.true;
-
-      document.body.removeChild(b);
-      expect(dom.isConnectedNode(c)).to.be.false;
-    } finally {
-      Object.defineProperty(Node.prototype, 'isConnected', desc);
-    }
+    document.body.removeChild(b);
+    expect(dom.isConnectedNode(c)).to.be.false;
   });
 
   it('rootNodeFor', () => {
@@ -134,33 +124,24 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   it('rootNodeFor (no Node.p.getRootNode)', () => {
-    if (!Object.hasOwnProperty.call(Node.prototype, 'getRootNode')) {
-      return;
-    }
+    sandbox.deleteProperty(Node.prototype, 'getRootNode');
 
-    const desc = Object.getOwnPropertyDescriptor(Node.prototype, 'getRootNode');
-    try {
-      delete Node.prototype.getRootNode;
+    const a = document.createElement('div');
+    expect(dom.rootNodeFor(a)).to.equal(a);
 
-      const a = document.createElement('div');
-      expect(dom.rootNodeFor(a)).to.equal(a);
+    const b = document.createElement('div');
+    a.appendChild(b);
+    expect(dom.rootNodeFor(b)).to.equal(a);
 
-      const b = document.createElement('div');
-      a.appendChild(b);
-      expect(dom.rootNodeFor(b)).to.equal(a);
+    const c = document.createElement('div');
+    b.appendChild(c);
+    expect(dom.rootNodeFor(c)).to.equal(a);
 
-      const c = document.createElement('div');
-      b.appendChild(c);
-      expect(dom.rootNodeFor(c)).to.equal(a);
-
-      const polyfill = document.createElement('i-amphtml-shadow-root');
-      const e = document.createElement('div');
-      polyfill.appendChild(e);
-      a.appendChild(polyfill);
-      expect(dom.rootNodeFor(e)).to.equal(polyfill);
-    } finally {
-      Object.defineProperty(Node.prototype, 'getRootNode', desc);
-    }
+    const polyfill = document.createElement('i-amphtml-shadow-root');
+    const e = document.createElement('div');
+    polyfill.appendChild(e);
+    a.appendChild(polyfill);
+    expect(dom.rootNodeFor(e)).to.equal(polyfill);
   });
 
   describe('isShadowRoot', () => {
@@ -1027,6 +1008,21 @@ describes.sandboxed('DOM', {}, env => {
           );
         }).to.throw(/intentional2/);
       });
+    });
+
+    it('should not retry with noopener set', () => {
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'noopener,width=1')
+        .returns(null)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_blank',
+        'noopener,width=1'
+      );
+      expect(res).to.be.null;
     });
 
     it('should retry only non-top target', () => {

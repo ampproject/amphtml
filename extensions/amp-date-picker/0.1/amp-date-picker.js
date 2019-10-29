@@ -553,7 +553,9 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.setupListeners_();
 
     if (this.element.contains(this.document_.activeElement)) {
-      this.maybeTransitionWithFocusChange_(this.document_.activeElement);
+      this.maybeTransitionWithFocusChange_(
+        dev().assertElement(this.document_.activeElement)
+      );
     }
 
     // Make sure it's rendered and measured properly. Then if possible, attempt
@@ -698,6 +700,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   /**
    * Set the date via a string.
    * @param {string} date
+   * @return {*} TODO(#23582): Specify return type
    */
   handleSetDateFromString_(date) {
     const momentDate = this.createOffsetMoment_(date);
@@ -869,6 +872,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Merge the supplied state object with the existing state and re-render the
    * React tree.
    * @param {!JsonObject} newState
+   * @return {*} TODO(#23582): Specify return type
    */
   setState_(newState) {
     return this.render(
@@ -1129,6 +1133,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * closing the date picker.
    * @param {!Event} e
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   handleKeydown_(e) {
     const target = dev().assertElement(e.target);
@@ -1143,6 +1148,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * Close the date picker overlay when the escape key is pressed.
    * @param {!Event} e
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   handleDocumentKeydown_(e) {
     if (
@@ -1638,6 +1644,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {?moment} endDate
    * @param {function(!moment)} cb
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   iterateDateRange_(startDate, endDate, cb) {
     const normalizedEndDate = endDate || startDate;
@@ -1683,6 +1690,7 @@ export class AmpDatePicker extends AMP.BaseElement {
   /**
    * Render a day in the calendar view.
    * @param {!moment} date
+   * @return {*} TODO(#23582): Specify return type
    */
   renderDay_(date) {
     const key = date.format(DEFAULT_FORMAT);
@@ -1747,6 +1755,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
   /**
    * Render the info section of the calendar view.
+   * @return {*} TODO(#23582): Specify return type
    */
   renderInfo() {
     if (!this.infoTemplatePromise_) {
