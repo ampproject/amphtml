@@ -105,7 +105,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     const src = addParamsToUrl(
       origin,
       dict({
-        'videoid': element.dataset.videoid,
+        'videoid': element['dataset']['videoid'],
         'ampTagId': this.tagId_,
         'locale': this.locale_,
       })
@@ -124,22 +124,8 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   /** @private */
   onReady_() {
     Services.videoManagerForDoc(this.element).register(this);
-    this.sendCommand_({msg: 'amp-loaded'});
-    this.element.dispatchCustomEvent(VideoEvents.LOAD);
-  }
-
-  /**
-   * Sends a command to the player through postMessage.
-   * @param {Object} command
-   * @private
-   */
-  sendCommand_(command) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      if (!command.id) {
-        command.id = `${TAG}-${this.tagId_}`;
-      }
-      this.postMessage_(command);
-    }
+    const message = `{"msg":"amp-loaded","id":"${TAG}-${this.tagId_}"}`;
+    this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
   }
 
   /** @override */
@@ -206,14 +192,6 @@ class AmpRedBullPlayer extends AMP.BaseElement {
         'vars': vars,
       })
     );
-  }
-
-  /**
-   * @param {Object} message
-   * @private
-   */
-  postMessage_(message) {
-    this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
 
   /** @override */
