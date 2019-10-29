@@ -116,7 +116,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
           scrolling="no" id="inabox"
           width="300" height="250">
       </iframe>
-      <script src="/examples/inabox-tag-integration.js"></script>
+      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
     },
     env => {
