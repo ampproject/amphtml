@@ -158,7 +158,7 @@ describe('Transition', () => {
     expect(func(1)).to.equal(-10);
   });
 
-  it('spring', () => {
+  it('springAds.js', () => {
     let func = tr.spring(2, 10, 12, 0.8);
     expect(func(0)).to.equal(2);
     expect(func(0.3)).to.be.closeTo(5.75, 1e-3);
