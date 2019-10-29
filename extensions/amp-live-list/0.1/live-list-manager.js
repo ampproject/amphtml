@@ -290,21 +290,20 @@ export class LiveListManager {
     this.liveLists_[id] = liveList;
     this.intervals_.push(liveList.getInterval());
 
-    if (this.enrolledInAppendRandomExperiment_ === null) {
-      // Origin Trial for cache busting requests for `amp-live-list`.
-      installOriginExperimentsForDoc(this.ampdoc);
-      originExperimentsForDoc(liveList.element)
-        .getExperiments()
-        .then(
-          trials =>
-            (this.enrolledInAppendRandomExperiment_ =
-              trials && trials.includes('amp-live-list-random'))
-        );
-    }
-
     // Polling may not be started yet if no live lists were registered by
     // doc ready in LiveListManager's constructor.
     if (liveList.isEnabled() && this.poller_ && this.ampdoc.isVisible()) {
+      if (this.enrolledInAppendRandomExperiment_ === null) {
+        // Origin Trial for cache busting requests for `amp-live-list`.
+        installOriginExperimentsForDoc(this.ampdoc);
+        originExperimentsForDoc(liveList.element)
+          .getExperiments()
+          .then(
+            trials =>
+              (this.enrolledInAppendRandomExperiment_ =
+                trials && trials.includes('amp-live-list-random'))
+          );
+      }
       this.poller_.start();
     }
   }
