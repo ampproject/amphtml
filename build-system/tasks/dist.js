@@ -15,7 +15,7 @@
  */
 
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
+const conf = require('../compile/build.conf');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -32,6 +32,10 @@ const {
   toPromise,
 } = require('./helpers');
 const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
+const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
 const {
@@ -39,21 +43,20 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {maybeUpdatePackages} = require('./update-packages');
-const {VERSION} = require('../internal-version');
+const {VERSION} = require('../compile/internal-version');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
 const babel = require('@babel/core');
-const deglob = require('globs-to-files');
+const globby = require('globby');
 
 const WEB_PUSH_PUBLISHER_FILES = [
   'amp-web-push-helper-frame',
@@ -69,7 +72,7 @@ function transferSrcsToTempDir() {
     'transforms in',
     colors.cyan(SRC_TEMP_DIR)
   );
-  const files = deglob.sync(BABEL_SRC_GLOBS);
+  const files = globby.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
     if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
       fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
@@ -84,7 +87,7 @@ function transferSrcsToTempDir() {
       retainLines: true,
       compact: false,
     });
-    const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
+    const name = `${SRC_TEMP_DIR}/${file}`;
     fs.outputFileSync(name, code);
     process.stdout.write('.');
   });

@@ -20,13 +20,13 @@ goog.require('amp.validator.CssLength');
 goog.require('amp.validator.HtmlFormat');
 goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
-goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
 goog.require('amp.validator.renderErrorMessage');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.sortAndUniquify');
 goog.require('amp.validator.subtractDiff');
 goog.require('amp.validator.validateString');
+goog.require('goog.asserts');
 goog.require('goog.uri.utils');
 
 /**
@@ -226,9 +226,6 @@ function renderErrorWithPosition(filenameOrUrl, error) {
   if (error.specUrl) {
     errorLine += ' (see ' + error.specUrl + ')';
   }
-  if (error.category !== null) {
-    errorLine += ' [' + error.category + ']';
-  }
   return errorLine;
 }
 
@@ -280,7 +277,6 @@ function renderInlineResult(validationResult, filename, filecontents) {
 ValidatorTestCase.prototype.run = function() {
   const results =
       amp.validator.validateString(this.ampHtmlFileContents, this.htmlFormat);
-  amp.validator.annotateWithErrorCategories(results);
   const observed = this.inlineOutput ?
     renderInlineResult(results, this.ampUrl, this.ampHtmlFileContents) :
     amp.validator.renderValidationResult(results, this.ampUrl).join('\n');
@@ -305,7 +301,7 @@ ValidatorTestCase.prototype.run = function() {
                ' is incorrect, please run `gulp validator --update_tests` to ' +
                'regenerate it based on its corresponding .html file.';
   }
-  assert.fail('', '', message, '');
+  goog.asserts.fail(message);
 };
 
 /**
@@ -338,14 +334,12 @@ describe('ValidatorOutput', () => {
         'http://google.com/foo.html#development=1');
     const results =
         amp.validator.validateString(test.ampHtmlFileContents);
-    amp.validator.annotateWithErrorCategories(results);
     const observed =
         amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
     const expectedSubstr = 'http://google.com/foo.html:28:3';
     if (observed.indexOf(expectedSubstr) === -1)
-    {assert.fail(
-        '', '', 'expectedSubstr:\n' + expectedSubstr +
-          '\nsaw:\n' + observed, '');}
+    {goog.asserts.fail('expectedSubstr:\n' + expectedSubstr +
+          '\nsaw:\n' + observed);}
   });
 
   it('validate amp format', () => {
@@ -505,11 +499,11 @@ describe('ValidatorCssLength', () => {
            .replace('replace_inline_style', '');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-       'feature_tests/css_length.html:28:2 The author stylesheet ' +
-       'specified in tag \'style amp-custom\' is too long - document ' +
-       'contains 50001 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -526,11 +520,11 @@ describe('ValidatorCssLength', () => {
            .replace('replace_inline_style', '');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-       'feature_tests/css_length.html:28:2 The author stylesheet ' +
-       'specified in tag \'style amp-custom\' is too long - document ' +
-       'contains 50002 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50002 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -547,8 +541,7 @@ describe('ValidatorCssLength', () => {
            'feature_tests/css_length.html:34:2 The inline style specified in ' +
            'tag \'div\' is too long - it contains 50000 bytes whereas the ' +
            'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
-           '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+           '-and-tutorials/learn/spec/amphtml#maximum-size)';
        test.run();
      });
 
@@ -567,14 +560,13 @@ describe('ValidatorCssLength', () => {
         'feature_tests/css_length.html:34:2 The inline style specified in ' +
         'tag \'div\' is too long - it contains 50001 bytes whereas the ' +
         'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
-        '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]\n' +
+        '-and-tutorials/learn/spec/amphtml#maximum-size)\n' +
         'feature_tests/css_length.html:36:6 The author stylesheet ' +
         'specified in tag \'style amp-custom\' and the combined inline ' +
         'styles is too large - document contains 50001 bytes whereas the ' +
         'limit is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -590,12 +582,12 @@ describe('ValidatorCssLength', () => {
            .replace('.replace_amp_custom {}', stylesheet)
            .replace('replace_inline_style', 'display:block;');
     test.expectedOutput = 'FAIL\n' +
-       'feature_tests/css_length.html:5036:6 The author stylesheet ' +
-       'specified in tag \'style amp-custom\' and the combined inline ' +
-       'styles is too large - document contains 50014 bytes whereas the ' +
-       'limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:5036:6 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' and the combined inline ' +
+        'styles is too large - document contains 50014 bytes whereas the ' +
+        'limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 });
@@ -636,7 +628,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -662,7 +654,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -688,7 +680,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 });
@@ -776,7 +768,7 @@ describe('ValidatorTransformedAmpCssLengthWithUrls', () => {
         'is too long - document contains 50010 bytes whereas the limit ' +
         'is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 });
@@ -1300,7 +1292,6 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-position-observer': ['0.1', 'latest'],
         'amp-social-share': ['0.1', 'latest'],
         'amp-video': ['0.1', 'latest'],
-        'amp-youtube': ['0.1', 'latest'],
       };
       // Verify extension is approved.
       const extension = tagSpec.extensionSpec.name;
@@ -1333,20 +1324,20 @@ describe('ValidatorRulesMakeSense', () => {
       // Changes to the following map must be approved by the AMP4Email
       // Working Group, @wg-amp4email.
       const approvedAmp4EmailExtensions = {
-        'AMP-ACCORDION': ['0.1', 'latest'],
-        'AMP-ANIM': ['0.1', 'latest'],
-        'AMP-BIND-MACRO': ['0.1', 'latest'],
+        'AMP-ACCORDION': ['0.1'],
+        'AMP-ANIM': ['0.1'],
+        'AMP-BIND-MACRO': ['0.1'],
         'AMP-CAROUSEL': ['0.1'],
-        'AMP-FIT-TEXT': ['0.1', 'latest'],
-        'AMP-IMG': ['0.1', 'latest'],
-        'AMP-IMAGE-LIGHTBOX': ['0.1', 'latest'],
-        'AMP-LAYOUT': ['0.1', 'latest'],
-        'AMP-LIGHTBOX': ['0.1', 'latest'],
-        'AMP-LIST': ['0.1', 'latest'],
-        'AMP-SELECTOR': ['0.1', 'latest'],
-        'AMP-SIDEBAR': ['0.1', 'latest'],
-        'AMP-STATE': ['0.1', 'latest'],
-        'AMP-TIMEAGO': ['0.1', 'latest'],
+        'AMP-FIT-TEXT': ['0.1'],
+        'AMP-IMG': ['0.1'],
+        'AMP-IMAGE-LIGHTBOX': ['0.1'],
+        'AMP-LAYOUT': ['0.1'],
+        'AMP-LIGHTBOX': ['0.1'],
+        'AMP-LIST': ['0.1'],
+        'AMP-SELECTOR': ['0.1'],
+        'AMP-SIDEBAR': ['0.1'],
+        'AMP-STATE': ['0.1'],
+        'AMP-TIMEAGO': ['0.1'],
       };
       // Verify extension and it's usage is approved.
       it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
@@ -1464,15 +1455,13 @@ describe('ValidatorRulesMakeSense', () => {
       it('extension must have a name field value', () => {
         expect(extensionSpec.name).toBeDefined();
       });
-      // TODO(b/139732703): remove the guard when AMP4EMAIL supports
-      // amp-carousel 0.2.
-      if (extensionSpec.name !== 'amp-carousel' ||
-          !tagSpec.htmlFormat.includes(
+      // AMP4EMAIL extensions must support at least one version.
+      if (tagSpec.htmlFormat.includes(
               amp.validator.HtmlFormat.Code.AMP4EMAIL)) {
-        it('extension ' + extensionSpec.name + ' must have at least two ' +
-               'versions, latest and a numeric version, e.g `1.0`',
+        it('extension ' + extensionSpec.name + ' must have at least one ' +
+               'version',
            () => {
-             expect(extensionSpec.version.length).toBeGreaterThan(1);
+             expect(extensionSpec.version.length).toBeGreaterThan(0);
            });
       }
       it('extension ' + extensionSpec.name + ' versions must be `latest` ' +

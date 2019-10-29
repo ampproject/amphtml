@@ -545,6 +545,7 @@ describes.realWin(
 
         const consentEl = win.document.createElement('amp-consent');
         const storyConsentEl = win.document.createElement('amp-story-consent');
+        storyConsentEl.setAttribute('layout', 'nodisplay');
         consentEl.appendChild(storyConsentEl);
         element.appendChild(consentEl);
 
@@ -1580,6 +1581,8 @@ describes.realWin(
           element.querySelector('#cover').appendChild(actionButton);
           // Click on the actionButton to trigger the goToPage action.
           actionButton.click();
+          // Next tick.
+          await Promise.resolve();
           expect(story.activePage_.element.id).to.equal('page-2');
         });
 
@@ -1611,7 +1614,7 @@ describes.realWin(
           expect(story.activePage_.element.id).to.equal('cover');
         });
 
-        it.skip('should navigate back to the correct previous page after advance-to', async () => {
+        it('should navigate back to the correct previous page after advance-to', async () => {
           await createStoryWithPages(4, [
             'cover',
             'page-1',

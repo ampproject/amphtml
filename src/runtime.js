@@ -53,6 +53,7 @@ import {
 } from './service/extensions-impl';
 import {installStylesForDoc} from './style-installer';
 import {internalRuntimeVersion} from './internal-version';
+import {isArray, isObject} from './types';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
@@ -513,6 +514,42 @@ export class MultidocManager {
       amp.resources = Services.resourcesForDoc(ampdoc);
     }
 
+    /**
+     * Expose amp-bind getState
+     * @param {string} name - Name of state or deep state
+     * @return {Promise<*>} - Resolves to a copy of the value of a state
+     */
+    amp['getState'] = name => {
+      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+        if (!bind) {
+          return Promise.reject('amp-bind is not available in this document');
+        }
+        return bind.getState(name);
+      });
+    };
+
+    /**
+     * Expose amp-bind setState
+     * @param {(!JsonObject|string)} state - State to be set
+     * @return {Promise} - Resolves after state and history have been updated
+     */
+    amp['setState'] = state => {
+      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+        if (!bind) {
+          return Promise.reject('amp-bind is not available in this document');
+        }
+        if (typeof state === 'string') {
+          return bind.setStateWithExpression(
+            /** @type {string} */ (state),
+            /** @type {!JsonObject} */ ({})
+          );
+        } else if (isObject(state) || isArray(state)) {
+          return bind.setStateWithObject(/** @type {!JsonObject} */ (state));
+        }
+        return Promise.reject('Invalid state');
+      });
+    };
+
     // Start building the shadow doc DOM.
     builder(amp, shadowRoot, ampdoc).then(() => {
       // Document is ready.
@@ -727,6 +764,8 @@ export class MultidocManager {
               const src = n.getAttribute('src');
               const isRuntime =
                 src.indexOf('/amp.js') != -1 || src.indexOf('/v0.js') != -1;
+              // Note: Some extensions don't have [custom-element] or
+              // [custom-template] e.g. amp-viewer-integration.
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
               const versionRe = /-(\d+.\d+)(.max)?\.js$/;

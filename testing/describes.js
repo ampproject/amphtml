@@ -506,6 +506,7 @@ class IntegrationFixture {
         ? undefined
         : this.spec.extensions.join(',');
     const ampDocType = this.spec.ampdoc || 'single';
+    const style = this.spec.frameStyle;
 
     let url =
       this.spec.amp === false
@@ -527,7 +528,10 @@ class IntegrationFixture {
         src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
       }
 
-      env.iframe = createElementWithAttributes(document, 'iframe', {src});
+      env.iframe = createElementWithAttributes(document, 'iframe', {
+        src,
+        style,
+      });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
         resolve();
@@ -641,7 +645,12 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win);
+          // The anonymous class parameter allows us to detect native classes
+          // vs transpiled classes.
+          installCustomElements(
+            win,
+            NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
+          );
         }
 
         // Intercept event listeners

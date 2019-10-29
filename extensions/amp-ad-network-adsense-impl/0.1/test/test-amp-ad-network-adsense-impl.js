@@ -19,6 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
@@ -88,6 +89,14 @@ describes.realWin(
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.win['goog_identity_prom'] = Promise.resolve({});
+      sandbox.stub(Services, 'timerFor').returns({
+        timeoutPromise: (unused, promise) => {
+          if (promise) {
+            return promise;
+          }
+          return Promise.reject(new Error('No token'));
+        },
+      });
     });
 
     /**
@@ -429,6 +438,48 @@ describes.realWin(
           'abc'
         );
         expect(impl.iframe.id).to.equal('google_ads_iframe_3');
+      });
+
+      it('should write auto ad size data to localstorage', async () => {
+        const storage = await Services.storageForDoc(doc);
+        let promiseResolver;
+        const savePromise = new Promise(resolve => {
+          promiseResolver = resolve;
+        });
+        const storageContent = {};
+        sandbox.stub(storage, 'set').callsFake((key, value) => {
+          storageContent[key] = value;
+          promiseResolver();
+          return Promise.resolve();
+        });
+
+        forceExperimentBranch(
+          impl.win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        impl.iframe = {
+          contentWindow: window,
+          nodeType: 1,
+          style: {},
+        };
+        impl.element.setAttribute('data-ad-client', 'ca-adsense');
+
+        impl.size_ = {width: 123, height: 456};
+
+        impl.onCreativeRender();
+
+        const data = {
+          'googMsgType': 'adsense-settings',
+          'adClient': 'ca-adsense',
+          'enableAutoAdSize': '1',
+        };
+
+        win.postMessage(data, '*');
+
+        await savePromise;
+
+        expect(storageContent).to.deep.equal({'aas-ca-adsense': true});
       });
     });
 
@@ -883,10 +934,11 @@ describes.realWin(
       const VIEWPORT_HEIGHT = 667;
 
       let iframe;
-      let didAttemptSizeChange = false;
+      let didAttemptSizeChange;
 
       function constructImpl(config) {
         config.type = 'adsense';
+        config['data-ad-client'] = 'ca-adsense';
         element = createElementWithAttributes(doc, 'amp-ad', config);
         iframe = env.win.document.createElement('iframe');
         element.appendChild(iframe);
@@ -901,6 +953,7 @@ describes.realWin(
           width: VIEWPORT_WIDTH,
           height: VIEWPORT_HEIGHT,
         });
+        didAttemptSizeChange = false;
         env.sandbox.stub(element, 'getImpl').returns(
           Promise.resolve({
             attemptChangeSize: () => {
@@ -912,16 +965,19 @@ describes.realWin(
         return impl;
       }
 
-      it('should do nothing for non-responsive', () => {
+      it('should do nothing for non-responsive', async () => {
         const adsense = constructImpl({
           width: '320',
           height: '150',
         });
-        expect(adsense.buildCallback()).to.be.undefined;
+        const promise = adsense.buildCallback();
+        expect(promise).to.exist;
+        await promise;
+
         expect(didAttemptSizeChange).to.be.false;
       });
 
-      it('should schedule a resize for responsive', function*() {
+      it('should schedule a resize for responsive', async () => {
         const adsense = constructImpl({
           width: '100vw',
           height: '100',
@@ -930,12 +986,12 @@ describes.realWin(
 
         const promise = adsense.buildCallback();
         expect(promise).to.exist;
-        yield promise;
+        await promise;
 
         expect(didAttemptSizeChange).to.be.true;
       });
 
-      it('should schedule a resize for matched content responsive', function*() {
+      it('should schedule a resize for matched content responsive', async () => {
         const adsense = constructImpl({
           width: '100vw',
           height: '100',
@@ -944,8 +1000,115 @@ describes.realWin(
 
         const promise = adsense.buildCallback();
         expect(promise).to.exist;
-        yield promise;
+        await promise;
         expect(didAttemptSizeChange).to.be.true;
+      });
+
+      describe('for publisher opted in to auto ad size optimization', () => {
+        beforeEach(async () => {
+          const storage = await Services.storageForDoc(doc);
+          const storageContent = {'aas-ca-adsense': true};
+
+          sandbox.stub(storage, 'get').callsFake(key => {
+            return Promise.resolve(storageContent[key]);
+          });
+        });
+
+        it('does nothing if experiment is disabled', async () => {
+          forceExperimentBranch(
+            impl.win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.control
+          );
+          const adsense = constructImpl({
+            width: '320',
+            height: '150',
+          });
+
+          const promise = adsense.buildCallback();
+          expect(promise).to.exist;
+          await promise;
+
+          expect(didAttemptSizeChange).to.be.false;
+          expect(adsense.element.hasAttribute('data-auto-format')).to.be.false;
+        });
+
+        it('does nothing if ad unit is responsive already', async () => {
+          forceExperimentBranch(
+            impl.win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.experiment
+          );
+          const adsense = constructImpl({
+            width: '100vw',
+            height: '100',
+            'data-auto-format': 'mcrspv',
+          });
+          const promise = adsense.buildCallback();
+          expect(promise).to.exist;
+          await promise;
+
+          expect(adsense.element.getAttribute('data-auto-format')).to.be.equal(
+            'mcrspv'
+          );
+          expect(didAttemptSizeChange).to.be.true;
+        });
+
+        it('upgrades manual ad units to responsive if experiment is enabled', async () => {
+          forceExperimentBranch(
+            impl.win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.experiment
+          );
+          const adsense = constructImpl({
+            width: '320',
+            height: '150',
+          });
+          env.sandbox
+            .stub(adsense, 'attemptChangeSize')
+            .returns(Promise.resolve());
+
+          const promise = adsense.buildCallback();
+          expect(promise).to.exist;
+          await promise;
+
+          expect(adsense.element.getAttribute('data-auto-format')).to.be.equal(
+            'rspv'
+          );
+          expect(didAttemptSizeChange).to.be.true;
+        });
+      });
+      describe('for publisher not opted in to auto ad size optimization', () => {
+        beforeEach(async () => {
+          const storage = await Services.storageForDoc(doc);
+          const storageContent = {'aas-ca-adsense': false};
+
+          sandbox.stub(storage, 'get').callsFake(key => {
+            return Promise.resolve(storageContent[key]);
+          });
+        });
+
+        it('does not upgrade manual ad units to responsive if experiment is enabled', async () => {
+          forceExperimentBranch(
+            impl.win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.experiment
+          );
+          const adsense = constructImpl({
+            width: '320',
+            height: '150',
+          });
+          env.sandbox
+            .stub(adsense, 'attemptChangeSize')
+            .returns(Promise.resolve());
+
+          const promise = adsense.buildCallback();
+          expect(promise).to.exist;
+          await promise;
+
+          expect(adsense.attemptChangeSize).to.not.be.called;
+          expect(adsense.element.hasAttribute('data-auto-format')).to.be.false;
+        });
       });
     });
 
@@ -1004,6 +1167,7 @@ describes.realWin(
       }
 
       beforeEach(() => {
+        Services.timerFor.restore();
         viewer.toggleRuntime(); // Turn runtime on for these tests.
       });
 

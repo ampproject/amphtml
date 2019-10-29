@@ -51,7 +51,7 @@ const {
   assertAliases,
   singletonFunctions,
   transformableMethods,
-} = require('../../log-module-metadata.js');
+} = require('../log-module-metadata.js');
 
 // Considered default for this transform, configurable only for tests.
 // For other files output from this transform see linked module.
@@ -124,7 +124,7 @@ module.exports = function({types: t}) {
 
   /**
    * @param {!Node} node
-   * @return {../../log-module-metadata.LogMethodMetadataDef}
+   * @return {../log-module-metadata.LogMethodMetadataDef}
    */
   function getTransformableCalleeMeta({callee}) {
     if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
