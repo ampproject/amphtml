@@ -61,20 +61,20 @@ Your player component is also shipped as an extension, so you should [become fam
 
 #### The `VideoManager`
 
-Every player component talks to a single [`VideoManager`](../src/service/video-manager-impl.js) via standard methods (`VideoInterface`) and events (`VideoEvents`) defined in the [AMP video interface](../video-interface.js).
+Every player component talks to a single [`VideoManager`](../src/service/video-manager-impl.js) via standard methods (`VideoInterface`) and events (`VideoEvents`) defined in the [AMP video interface](../src/video-interface.js).
 
 This manager performs standard responsibilities for all videos, regardless of type:
 
 - accessible, managed autoplay
 - analytics tracking for playback
 - coordination with [`amp-story`](https://go.amp.dev/c/amp-youtube)
-- [docked video](https://go.amp.dev/c/amp-video-docking/)
+- [docked video](https://amp.dev/documentation/components/amp-video-docking/)
 - rotate-to-fullscreen
 
 #### Interface support
 
 Component implementation classes should implement the [`VideoInterface`](../src/video-interface.js).
-You can implement this interface completely or partially, depending on [the video integration features you'd like to support](./amp-video-interface.js).
+You can implement this interface completely or partially, depending on [the video integration features you'd like to support](./amp-video-interface.md).
 
 At the very least, you should implement `play()` and `pause()`. Likewise, playback
 [actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/) (like `my-element.play`) will not work when unimplemented.
@@ -83,4 +83,4 @@ Read through [the `VideoInterface` code to understand the individual effects of 
 
 #### Reference
 
-Existing implementations for [`amp-youtube.js`](../extensions/amp-youtube/0.1/amp-youtube.js) and [`amp-video-iframe.js`](../extensions/amp-youtube/0.1/amp-video-iframe.js) are good starter examples for implementation details. They use several standard utilities for creating the video frame and communicating with the `VideoManager`.
+Existing implementations for [`amp-youtube.js`](../extensions/amp-youtube/0.1/amp-youtube.js) and [`amp-video-iframe.js`](../extensions/amp-video-iframe/0.1/amp-video-iframe.js) are good starter examples for implementation details. They use several standard utilities for creating the video frame and communicating with the `VideoManager`.
