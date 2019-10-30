@@ -228,11 +228,6 @@ class Registry {
     this.win_ = win;
 
     /**
-     * @private @const
-     */
-    this.doc_ = win.document;
-
-    /**
      * @type {!Object<string, !CustomElementDef>}
      * @private
      * @const
