@@ -1227,13 +1227,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
           if (!this.fallbackDisplayed_) {
+            event.preventDefault();
             this.displayUserInput_();
             this.toggleResults_(false);
           }
         });
       case Keys.TAB:
-        event.preventDefault;
         if (this.resultsShowing_() && this.activeElement_) {
+          event.preventDefault();
           this.selectItem_(this.activeElement_);
         }
         return Promise.resolve();

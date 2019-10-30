@@ -645,7 +645,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() on Esc', () => {
-      const event = {key: Keys.ESCAPE};
+      const event = {key: Keys.ESCAPE, preventDefault: () => {}};
       const displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
       const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
       const toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
@@ -671,7 +671,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() on Tab', () => {
-      const event = {key: Keys.TAB};
+      const event = {key: Keys.TAB, preventDefault: () => {}};
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
