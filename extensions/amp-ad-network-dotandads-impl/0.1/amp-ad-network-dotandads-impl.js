@@ -1,46 +1,40 @@
 /**
-* Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS-IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {startsWith} from '../../../src/string';
-import {user, userAssert} from '../../../src/log';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {Deferred} from '../../../src/utils/promise';
+import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {Services} from '../../../src/services';
-import {
-  getIdentityToken,
-  googleAdUrl,
-  googleBlockParameters,
-  googlePageParameters,
-} from '../../../ads/google/a4a/utils';
+import {deepMerge} from '../../../src/utils/object';
+import {googleAdUrl} from '../../../ads/google/a4a/utils';
+import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-DOTANDADS-IMPL';
 const RTC_SUCCESS = '2';
 const DOT_BASE_URL = 'https://et.ad.dotandad.com/iframeCall?';
-//const DOT_BASE_URL = 'https://staging.ad.dotandad.com/iframeCall?';
 
 export class AmpAdNetworkDotandadsImpl extends AmpA4A {
   /**
-  * @param {!Element} element
-  */
+   * @param {!Element} element
+   */
   constructor(element) {
     super(element);
 
     this.getAdUrlDeferred = new Deferred();
-    this.troubleshootData_ = ({});
+    this.troubleshootData_ = {};
     this.identityToken = null;
     this.jsonTargeting = {};
   }
@@ -76,6 +70,14 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
     return [];
   }
 
+  /**
+   * Appends the callout value to the keys of response to prevent a collision
+   * case caused by multiple vendors returning the same keys.
+   * @param {!Object<string, string>} response
+   * @param {string} callout
+   * @return {!Object<string, string>}
+   * @private
+   */
   rewriteRtcKeys_(response, callout) {
     // Only perform this substitution for vendor-defined URLs.
     if (!RTC_VENDORS[callout] || RTC_VENDORS[callout].disableKeyAppend) {
@@ -88,6 +90,13 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
     return newResponse;
   }
 
+  /**
+   * Merges all of the rtcResponses into the JSON targeting and
+   * category exclusions.
+   * @param {?Array<!rtcResponseDef>} rtcResponseArray
+   * @return {?Object|undefined}
+   * @private
+   */
   mergeRtcResponses_(rtcResponseArray) {
     if (!rtcResponseArray) {
       return null;
@@ -95,7 +104,6 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
     const artc = [];
     const ati = [];
     const ard = [];
-    let exclusions;
     rtcResponseArray.forEach(rtcResponse => {
       if (!rtcResponse) {
         return;
@@ -110,44 +118,44 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
             rtcResponse.callout
           );
           this.jsonTargeting['targeting'] = !!this.jsonTargeting['targeting']
-          ? deepMerge(this.jsonTargeting['targeting'], rewrittenResponse)
-          : rewrittenResponse;
+            ? deepMerge(this.jsonTargeting['targeting'], rewrittenResponse)
+            : rewrittenResponse;
         }
       }
     });
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
+  /**
+   * Constructs block-level url parameters with side effect of setting
+   * size_, jsonTargeting, and adKey_ fields.
+   * @return {!Object<string,string|boolean|number>}
+   */
   getBlockParameters_() {
-    var retVal = "";
-    retVal += 'mpt=' + this.element.getAttribute('data-mpt') +
-    '&mpo='  + this.element.getAttribute('data-mpo') +
-    '&cid='  + this.element.getAttribute('data-cid') +
-    '&sp='   + this.element.getAttribute('data-sp') +
-    '&ssl=1' +
-    '&isAmp=1' +
-    '&kw='   + 'ampAds' + ( this.element.getAttribute('data-kw') ? this.element.getAttribute('data-kw') : "")
+    let retVal = '';
+    retVal +=
+      'mpt=' +
+      this.element.getAttribute('data-mpt') +
+      '&mpo=' +
+      this.element.getAttribute('data-mpo') +
+      '&cid=' +
+      this.element.getAttribute('data-cid') +
+      '&sp=' +
+      this.element.getAttribute('data-sp') +
+      '&ssl=1' +
+      '&isAmp=1' +
+      '&kw=' +
+      'ampAds' +
+      (this.element.getAttribute('data-kw')
+        ? this.element.getAttribute('data-kw')
+        : '');
     if (this.jsonTargeting['targeting']) {
-      for (var key in this.jsonTargeting['targeting']) {
-        retVal += "&" + key + "=" + this.jsonTargeting['targeting'][key];
+      for (const key in this.jsonTargeting['targeting']) {
+        retVal += '&' + key + '=' + this.jsonTargeting['targeting'][key];
       }
     }
-    retVal += "&rnd=" + (new Date()).getTime();
+    retVal += '&rnd=' + new Date().getTime();
     return retVal;
-  }
-
-  getPageParameters(consentState, instances) {
-    return {};
-  }
-
-  buildIdentityParams() {
-    return this.identityToken
-    ? {
-      adsid: this.identityToken.token || null,
-      jar: this.identityToken.jar || null,
-      pucrd: this.identityToken.pucrd || null,
-    }
-    : {};
   }
 
   /** @override */
@@ -155,17 +163,17 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
     opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
     const startTime = Date.now();
     const identityPromise = Services.timerFor(this.win)
-    .timeoutPromise(1000, this.identityTokenPromise_)
-    .catch(() => {
-      // On error/timeout, proceed.
-      //window.console.log("AB: ERR");
-      return ({});
-    });
+      .timeoutPromise(1000, this.identityTokenPromise_)
+      .catch(() => {
+        // On error/timeout, proceed.
+        //window.console.log("AB: ERR");
+        return {};
+      });
     const experimentIds = [];
     const checkStillCurrent = this.verifyStillCurrent();
     Promise.all([opt_rtcResponsesPromise, identityPromise]).then(results => {
       checkStillCurrent();
-      const rtcParams = this.mergeRtcResponses_(results[0]);
+      this.mergeRtcResponses_(results[0]);
       /*window.console.log("jsonTargeting: ");
       window.console.log(this.jsonTargeting);*/
       this.identityToken = results[1];
@@ -173,12 +181,7 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
         this,
         DOT_BASE_URL + this.getBlockParameters_(),
         startTime,
-        {} /* Object.assign(
-          this.getBlockParameters_(),
-          this.buildIdentityParams(),
-          this.getPageParameters(),
-          rtcParams
-        )*/,
+        {},
         experimentIds
       ).then(adUrl => this.getAdUrlDeferred.resolve(adUrl));
     });
@@ -211,10 +214,10 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
       if (this.element.getAttribute('a4a-conversion') == 'true') {
         return response.text().then(
           responseText =>
-          new Response(this.transformCreative_(responseText), {
-            status,
-            headers,
-          })
+            new Response(this.transformCreative_(responseText), {
+              status,
+              headers,
+            })
         );
       }
 
@@ -224,10 +227,10 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
   }
 
   /**
-  * Converts a general AMP doc to a AMP4ADS doc.
-  * @param {string} source
-  * @return {string}
-  */
+   * Converts a general AMP doc to a AMP4ADS doc.
+   * @param {string} source
+   * @return {string}
+   */
   transformCreative_(source) {
     const doc = new DOMParser().parseFromString(source, 'text/html');
     const root = doc.documentElement;
@@ -256,15 +259,18 @@ export class AmpAdNetworkDotandadsImpl extends AmpA4A {
     const creative = root./*OK*/ outerHTML;
     const creativeSplit = creative.split('</body>');
     const docWithMetadata =
-    creativeSplit[0] +
-    `<script type="application/json" amp-ad-metadata>` +
-    metadata +
-    '</script></body>' +
-    creativeSplit[1];
+      creativeSplit[0] +
+      `<script type="application/json" amp-ad-metadata>` +
+      metadata +
+      '</script></body>' +
+      creativeSplit[1];
     return docWithMetadata;
   }
 }
 
 AMP.extension('amp-ad-network-dotandads-impl', '0.1', AMP => {
-  AMP.registerElement('amp-ad-network-dotandads-impl', AmpAdNetworkDotandadsImpl);
+  AMP.registerElement(
+    'amp-ad-network-dotandads-impl',
+    AmpAdNetworkDotandadsImpl
+  );
 });

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-
- 
 /**
  * @param {!Window} win
  * @param {!Element} element
@@ -23,9 +21,5 @@
  * @return {boolean}
  */
 export function dotandadsIsA4AEnabled(win, element, useRemoteHtml) {
-  let src;
-  return (
-    !useRemoteHtml &&
-    !!element.getAttribute('data-use-a4a')
-  );
+  return !useRemoteHtml && !!element.getAttribute('data-use-a4a');
 }
