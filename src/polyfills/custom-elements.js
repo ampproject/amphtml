@@ -260,8 +260,7 @@ class Registry {
     this.mutationObserver_ = null;
 
     /**
-     * All the observed DOM trees, including shadow trees. This is cleared out
-     * when the mutation observer is created.
+     * All the observed DOM trees, including shadow trees.
      *
      * @private @const {!Array<!Node>}
      */
