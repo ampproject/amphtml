@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-redbull-player
 
-Displays a <a href="https://www.redbull.com/">Red Bull</a> video.
+Displays a <a href="https://player.redbull.com/demo/index.html">Red Bull Video Player</a>.
 
 <table>
   <tr>
@@ -33,7 +33,7 @@ Displays a <a href="https://www.redbull.com/">Red Bull</a> video.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, flex-item, responsive</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
 
