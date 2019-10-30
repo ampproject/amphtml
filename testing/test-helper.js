@@ -277,12 +277,6 @@ export class BrowserController {
     }
   }
 
-  clickAtPosition(selector, clientX = 0, clientY = 0) {
-    const element = this.doc_.querySelector(selector);
-    const clickEvent = new MouseEvent('click', {clientX, clientY});
-    element.dispatchEvent(clickEvent);
-  }
-
   scrollTo(px) {
     this.win_.scrollTo(0, px);
   }

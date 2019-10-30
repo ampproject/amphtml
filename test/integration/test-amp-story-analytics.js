@@ -129,12 +129,20 @@ config.run('amp-story analytics', () => {
     env => {
       let browser;
       let clickAndWait;
+      let clickAtPosition;
+      let doc;
 
       beforeEach(async () => {
         browser = new BrowserController(env.win);
         clickAndWait = async selector => {
           browser.click(selector);
           await browser.wait(1000);
+        };
+        clickAtPosition = async (selector, clientX = 0, clientY = 0) => {
+          doc = env.win.document;
+          const element = doc.querySelector(selector);
+          const clickEvent = new MouseEvent('click', {clientX, clientY});
+          element.dispatchEvent(clickEvent);
         };
         env.iframe.style.height = '732px';
         env.iframe.style.width = '412px';
@@ -196,7 +204,7 @@ config.run('amp-story analytics', () => {
 
         await browser.waitForElementLayout('#page-2[active]');
         // Go back to page 1.
-        browser.clickAtPosition('#left-2', 10);
+        clickAtPosition('#left-2', 10);
         await browser.wait(1000);
 
         await browser.waitForElementLayout('#page-1[active]');
@@ -256,9 +264,17 @@ config.run('amp-story analytics', () => {
     },
     env => {
       let browser;
+      let clickAtPosition;
+      let doc;
 
       beforeEach(async () => {
         browser = new BrowserController(env.win);
+        clickAtPosition = async (selector, clientX = 0, clientY = 0) => {
+          doc = env.win.document;
+          const element = doc.querySelector(selector);
+          const clickEvent = new MouseEvent('click', {clientX, clientY});
+          element.dispatchEvent(clickEvent);
+        };
         env.iframe.style.height = '732px';
         env.iframe.style.width = '412px';
         await browser.waitForElementLayout('amp-analytics');
@@ -272,7 +288,7 @@ config.run('amp-story analytics', () => {
 
         await browser.waitForElementLayout('#page-2[active]');
         // Go back to page 1.
-        browser.clickAtPosition('#left-2', 10);
+        clickAtPosition('#left-2', 10);
         await browser.wait(1000);
 
         const req = await RequestBank.withdraw();
