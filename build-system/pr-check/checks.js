@@ -55,7 +55,6 @@ async function main() {
     timedExecOrDie('gulp babel-plugin-tests');
     timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp dev-dashboard-tests');
-    timedExecOrDie('gulp check-owners');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   } else {
@@ -91,7 +90,7 @@ async function main() {
     }
 
     if (buildTargets.has('OWNERS')) {
-      timedExecOrDie('gulp check-owners');
+      timedExecOrDie('gulp check-owners --local_changes');
     }
 
     if (buildTargets.has('RUNTIME')) {
