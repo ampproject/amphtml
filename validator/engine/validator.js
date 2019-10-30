@@ -73,6 +73,11 @@ goog.require('parse_url.URL');
 
 /**
  * Sorts and eliminates duplicates in |arrayValue|. Modifies the input in place.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!Array<T>} arrayValue
  * @template T
  * @export
@@ -93,6 +98,11 @@ function sortAndUniquify(arrayValue) {
 /**
  * Computes the difference set |left| - |right|, assuming |left| and
  * |right| are sorted and uniquified.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!Array<T>} left
  * @param {!Array<T>} right
  * @return {!Array<T>} Computed difference of left - right.
@@ -6057,6 +6067,11 @@ amp.validator.ValidationHandler =
 /**
  * Convenience function which informs caller if given ValidationError is
  * severity warning.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!amp.validator.ValidationError} error
  * @return {boolean}
  * @export
@@ -6067,6 +6082,11 @@ amp.validator.isSeverityWarning = function(error) {
 
 /**
  * Validates a document input as a string.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {string} inputDocContents
  * @param {string=} opt_htmlFormat the allowed format. Defaults to 'AMP'.
  * @return {!amp.validator.ValidationResult} Validation Result (status and
@@ -6205,6 +6225,11 @@ function applyFormat(format, error) {
 
 /**
  * Renders the error message for a single error.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!amp.validator.ValidationError} error
  * @return {string}
  * @export
@@ -6244,6 +6269,11 @@ function errorLine(filenameOrUrl, error) {
  * Renders the validation results into an array of human readable strings.
  * Careful when modifying this - it's called from
  * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!Object} validationResult
  * @param {string} filename to use in rendering error messages.
  * @return {!Array<string>}
@@ -6273,6 +6303,11 @@ function isAuthorStylesheet(param) {
  * amphtml-validator library still call this function, so this stub is left
  * in place for now so as not to break them. TODO(#25188): Delete this function
  * after most usage had moved to a newer version of the amphtml-validator lib.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!amp.validator.ValidationError} error
  * @return {!amp.validator.ErrorCategory.Code}
  * @export
@@ -6284,6 +6319,11 @@ amp.validator.categorizeError = function(error) {
 /**
  * Convenience function which calls |CategorizeError| for each error
  * in |result| and sets its category field accordingly.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!amp.validator.ValidationResult} result
  * @export
  */
