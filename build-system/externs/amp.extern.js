@@ -279,6 +279,8 @@ AmpViewerMessage.prototype.data;
 AmpViewerMessage.prototype.rsvp;
 /** @public {string|undefined}  */
 AmpViewerMessage.prototype.error;
+/** @public {string|undefined}  */
+AmpViewerMessage.prototype.messagingToken;
 
 // AMP-Analytics Cross-domain iframes
 let IframeTransportEvent;
