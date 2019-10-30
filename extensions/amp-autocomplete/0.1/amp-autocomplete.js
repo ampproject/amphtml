@@ -329,13 +329,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
     if (this.element.hasAttribute('suggest-first')) {
-      this.suggestFirst_ =
-        this.filter_ === FilterType.PREFIX ||
-        (this.inline_ && this.filter_ === FilterType.NONE);
+      this.suggestFirst_ = this.filter_ === FilterType.PREFIX || this.inline_;
       userAssert(
         this.suggestFirst_,
         '"suggest-first" requires "filter" to equal "prefix". ' +
-          'If "inline" is present, "filter" can also equal "none".' +
+          'If "inline" is present, "filter" can be any value.' +
           ' Unexpected "filter" type: ' +
           this.filter_
       );
@@ -545,14 +543,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     if (this.inline_) {
       const match = this.getClosestPriorMatch_(this.trigger_);
+      this.triggered_ = !!match;
 
-      if (!match) {
+      if (!this.triggered_) {
         return this.mutateElement(() => {
           this.clearAllItems_();
         });
       }
 
-      this.triggered_ = true;
       this.match_ = match;
       this.userInput_ = this.match_[0].slice(this.trigger_.length);
 
@@ -607,7 +605,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let match, lastMatch;
 
     while ((match = regex.exec(value)) !== null) {
-      if (match[0].trim().length + ownProperty(match, 'index') > cursor) {
+      if (match[0].length + ownProperty(match, 'index') > cursor) {
         break;
       }
       lastMatch = match;
@@ -632,9 +630,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.mutateElement(() => {
       const element = dev().assertElement(event.target);
       this.selectItem_(this.getItemElement_(element));
-      if (this.inline_) {
-        this.triggered_ = false;
-      }
+      this.triggered_ = false;
     });
   }
 
@@ -1209,15 +1205,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
           event.preventDefault();
         }
         if (this.suggestFirst_ && !this.inline_) {
+          // Remove any highlighting by moving cursor to end of word.
           const inputLength = this.inputElement_.value.length;
           this.inputElement_.setSelectionRange(inputLength, inputLength);
         }
         return this.mutateElement(() => {
           if (this.resultsShowing_() && this.activeElement_) {
             this.selectItem_(this.activeElement_);
-            if (this.inline_) {
-              this.triggered_ = false;
-            }
+            this.triggered_ = false;
             this.resetActiveElement_();
           } else {
             this.toggleResults_(false);
@@ -1239,7 +1234,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return Promise.resolve();
       case Keys.BACKSPACE:
-        this.detectBackspace_ = this.suggestFirst_ || this.inline_;
+        this.detectBackspace_ = this.suggestFirst_;
         this.menuTriggered_ = this.inline_;
         return Promise.resolve();
       default:
