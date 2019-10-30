@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.79 */
+/** Version: 0.1.22.80 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -44,6 +44,8 @@ const AnalyticsEvent = {
   IMPRESSION_SUBSCRIPTION_COMPLETE: 9,
   IMPRESSION_ACCOUNT_CHANGED: 10,
   IMPRESSION_PAGE_LOAD: 11,
+  IMPRESSION_SAVE_SUBSCRIPTION: 12,
+  IMPRESSION_SAVED_SUBSCRIPTION: 13,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -55,6 +57,9 @@ const AnalyticsEvent = {
   ACTION_VIEW_OFFERS: 1008,
   ACTION_ALREADY_SUBSCRIBED: 1009,
   ACTION_NEW_DEFERRED_ACCOUNT: 1010,
+  ACTION_SAVE_SUBSCRIPTION: 1011,
+  ACTION_DONT_SAVE_SUBSCRIPTION: 1012,
+  ACTION_SAVED_SUBSCRIPTION: 1013,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -3163,6 +3168,13 @@ function log(var_args) {
 }
 
 /**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
+
+/**
  * Throws an error if the first argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
@@ -3230,10 +3242,12 @@ function toString(val) {
 var log_1 = {
   assert,
   debugLog,
+  warn,
   log
 };
 var log_2 = log_1.assert;
-var log_4 = log_1.log;
+var log_4 = log_1.warn;
+var log_5 = log_1.log;
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4165,7 +4179,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.79',
+    '_client': 'SwG 0.1.22.80',
   });
 }
 
@@ -4557,13 +4571,12 @@ const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!
 const CallbackId = {
   ENTITLEMENTS: 1,
   SUBSCRIBE_REQUEST: 2,
-  SUBSCRIBE_RESPONSE: 3,
+  PAYMENT_RESPONSE: 3,
   LOGIN_REQUEST: 4,
   LINK_PROGRESS: 5,
   LINK_COMPLETE: 6,
   FLOW_STARTED: 7,
   FLOW_CANCELED: 8,
-  CONTRIBUTION_RESPONSE: 9,
 };
 
 /**
@@ -4683,34 +4696,36 @@ class Callbacks {
    * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnSubscribeResponse(callback) {
-    this.setCallback_(CallbackId.SUBSCRIBE_RESPONSE, callback);
+    log_4(
+      `[swg.js:setOnSubscribeResponse]: This method has been deprecated, please switch usages to 'setOnPaymentResponse'`
+    );
+    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
   }
 
   /**
    * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
    */
   setOnContributionResponse(callback) {
-    this.setCallback_(CallbackId.CONTRIBUTION_RESPONSE, callback);
-  }
-
-  /**
-   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
-   * @return {boolean} Whether the callback has been found.
-   */
-  triggerSubscribeResponse(responsePromise) {
-    return this.trigger_(
-      CallbackId.SUBSCRIBE_RESPONSE,
-      responsePromise.then(res => res.clone())
+    log_4(
+      `[swg.js:setOnContributionResponse]: This method has been deprecated, please switch usages to 'setOnPaymentResponse'`
     );
+    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
+  }
+
+  /**
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
+   */
+  setOnPaymentResponse(callback) {
+    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
   }
 
   /**
    * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
-  triggerContributionResponse(responsePromise) {
+  triggerPaymentResponse(responsePromise) {
     return this.trigger_(
-      CallbackId.CONTRIBUTION_RESPONSE,
+      CallbackId.PAYMENT_RESPONSE,
       responsePromise.then(res => res.clone())
     );
   }
@@ -4718,15 +4733,8 @@ class Callbacks {
   /**
    * @return {boolean}
    */
-  hasSubscribeResponsePending() {
-    return !!this.resultBuffer_[CallbackId.SUBSCRIBE_RESPONSE];
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasContributionResponsePending() {
-    return !!this.resultBuffer_[CallbackId.CONTRIBUTION_RESPONSE];
+  hasPaymentResponsePending() {
+    return !!this.resultBuffer_[CallbackId.PAYMENT_RESPONSE];
   }
 
   /**
@@ -4773,6 +4781,11 @@ class Callbacks {
    * @private
    */
   setCallback_(id, callback) {
+    if (this.callbacks_[id]) {
+      log_4(
+        `[swg.js]: You have registered multiple callbacks for the same response.`
+      );
+    }
     this.callbacks_[id] = callback;
     // If result already exist, execute the callback right away.
     if (id in this.resultBuffer_) {
@@ -6377,7 +6390,7 @@ class PayCompleteFlow {
         payPromise,
         flow.complete.bind(flow)
       );
-      deps.callbacks().triggerSubscribeResponse(promise);
+      deps.callbacks().triggerPaymentResponse(promise);
       return promise.then(
         response => {
           eventManager.logSwgEvent(
@@ -14408,14 +14421,14 @@ class ClientEventManager {
             return Promise.resolve();
           }
         } catch (e) {
-          log_4(e);
+          log_5(e);
         }
       }
       for (let listener = 0; listener < this.listeners_.length; listener++) {
         try {
           this.listeners_[listener](event);
         } catch (e) {
-          log_4(e);
+          log_5(e);
         }
       }
       return Promise.resolve();
