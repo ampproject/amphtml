@@ -23,14 +23,14 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const BBPromise = require('bluebird');
-const requestPost = BBPromise.promisify(require('request').post);
+const utils = require('bluebird');
+const requestPost = utils.promisify(require('request').post);
 const fs = require('fs-extra');
 const globby = require('globby');
 const JSON5 = require('json5');
 const log = require('fancy-log');
-const {getFilesToCheck} = require('../common/utils');
-const {cyan, red, yellow, green} = require('ansi-colors');
+const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
+const {cyan, red, green} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 
 const OWNERS_SYNTAX_CHECK_URI = 'http://ampproject-owners-bot.appspot.com/v0/syntax';
@@ -41,40 +41,13 @@ const OWNERS_SYNTAX_CHECK_URI = 'http://ampproject-owners-bot.appspot.com/v0/syn
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
-  if (!isValidUsage()) {
+  if (!usesFilesOrLocalChanges()) {
     return;
   }
   const filesToCheck = getFilesToCheck('**/OWNERS');
   for (const file of filesToCheck) {
     await checkFile(file);
   }
-}
-
-/**
- * Checks if the correct arguments were passed in
- *
- * @return {boolean}
- */
-function isValidUsage() {
-  const validUsage = argv.files || argv.local_changes;
-  if (!validUsage) {
-    log(
-      yellow('NOTE 1:'),
-      'It is infeasible for',
-      cyan('gulp check-owners'),
-      'to check all owners files in the repo at once.'
-    );
-    log(
-      yellow('NOTE 2:'),
-      'Please run',
-      cyan('gulp check-links'),
-      'with',
-      cyan('--files'),
-      'or',
-      cyan('--local_changes') + '.'
-    );
-  }
-  return validUsage;
 }
 
 /**
@@ -110,7 +83,7 @@ async function checkFile(file) {
     });
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      log(red('Could not reach the owners syntax check API'));
+      log(red('ERROR:'), 'Could not reach the owners syntax check API');
       throw new Error(
         `${response.statusCode} ${response.statusMessage}: ` + response.body
       );
@@ -126,10 +99,15 @@ async function checkFile(file) {
       throw new Error(`Errors encountered parsing "${file}"`);
     }
 
-    log(green(`File "${file}" parsed successfully! Produced rules:`));
-    rules.forEach(rule => log(cyan(rule)));
+    log(
+      green('SUCCESS:'),
+      'Parsed',
+      cyan(file),
+      'successfully! Produced rules:',
+    );
+    rules.forEach(rule => log(rule));
   } catch (error) {
-    log(red(error));
+    log(red('FAILURE:'), error);
     process.exitCode = 1;
     return;
   }
