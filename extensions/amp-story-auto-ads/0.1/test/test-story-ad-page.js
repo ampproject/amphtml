@@ -257,7 +257,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       expect(created).to.be.true;
       const anchor = doc.querySelector('a');
       expect(anchor.href).to.equal('https://www.example.com/');
-      expect(anchor.textContent).to.equal('Shop');
+      expect(anchor.textContent).to.equal('Shop Now');
     });
 
     it('prefers CTA url from amp-ad-exit if it exists', async () => {
@@ -289,23 +289,19 @@ describes.realWin('story-ad-page', {amp: true}, env => {
     });
 
     it('throws on missing cta url', () => {
-      expectAsyncConsoleError(
-        '[amp-story-auto-ads:page] Both CTA Type & CTA Url are required in ad-server response.'
-      );
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
-
-      const created = storyAdPage.maybeCreateCta();
-      expect(created).to.be.false;
+      allowConsoleError(() => {
+        const created = storyAdPage.maybeCreateCta();
+        expect(created).to.be.false;
+      });
     });
 
     it('throws on missing cta type', () => {
-      expectAsyncConsoleError(
-        '[amp-story-auto-ads:page] Both CTA Type & CTA Url are required in ad-server response.'
-      );
       ampAdElement.setAttribute('data-vars-ctaurl', 'INSTALL');
-
-      const created = storyAdPage.maybeCreateCta();
-      expect(created).to.be.false;
+      allowConsoleError(() => {
+        const created = storyAdPage.maybeCreateCta();
+        expect(created).to.be.false;
+      });
     });
 
     it('creates attribution badge with outlink', async () => {
@@ -353,10 +349,14 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         <body></body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-      const created = storyAdPage.maybeCreateCta();
-      expect(created).to.be.true;
-      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
-      expect(attribution).not.to.exist;
+      allowConsoleError(() => {
+        const created = storyAdPage.maybeCreateCta();
+        expect(created).to.be.false;
+        const attribution = doc.querySelector(
+          '.i-amphtml-story-ad-attribution'
+        );
+        expect(attribution).not.to.exist;
+      });
     });
 
     it('does not create attribution when missing url', async () => {
@@ -371,10 +371,14 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         <body></body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-      const created = storyAdPage.maybeCreateCta();
-      expect(created).to.be.true;
-      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
-      expect(attribution).not.to.exist;
+      allowConsoleError(() => {
+        const created = storyAdPage.maybeCreateCta();
+        expect(created).to.be.false;
+        const attribution = doc.querySelector(
+          '.i-amphtml-story-ad-attribution'
+        );
+        expect(attribution).not.to.exist;
+      });
     });
   });
 

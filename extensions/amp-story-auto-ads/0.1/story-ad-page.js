@@ -257,7 +257,12 @@ export class StoryAdPage {
       )
     );
 
-    this.maybeCreateAttribution_();
+    try {
+      this.maybeCreateAttribution_();
+    } catch (e) {
+      // Failure due to missing adchoices icon or url.
+      return false;
+    }
 
     return this.createCtaLayer_(ctaUrl, ctaText);
   }
@@ -418,13 +423,17 @@ export class StoryAdPage {
       return;
     }
 
-    if (!href || !src) {
-      user().warn(TAG, 'Both icon and URL must be supplied for Ad Choices.');
-      return;
-    }
+    assertHttpsUrl(
+      href,
+      dev().assertElement(this.pageElement_),
+      'amp-story-auto-ads attribution url'
+    );
 
-    assertHttpsUrl(href, dev().assertElement(this.pageElement_));
-    assertHttpsUrl(src, dev().assertElement(this.pageElement_));
+    assertHttpsUrl(
+      src,
+      dev().assertElement(this.pageElement_),
+      'amp-story-auto-ads attribution icon'
+    );
 
     const root = createElementWithAttributes(
       this.doc_,
