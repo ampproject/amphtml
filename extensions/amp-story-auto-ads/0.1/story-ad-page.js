@@ -203,7 +203,7 @@ export class StoryAdPage {
       .signals()
       // TODO(ccordry): Investigate using a better signal waiting for video loads.
       .whenSignal(CommonSignals.INI_LOAD)
-      .then(() => this.whenAdLoaded_());
+      .then(() => this.onAdLoaded_());
 
     this.analyticsEvent_(AnalyticsEvents.AD_REQUESTED, {
       [AnalyticsVars.AD_REQUESTED]: Date.now(),
@@ -292,7 +292,7 @@ export class StoryAdPage {
    * Things that need to happen after the created ad is "loaded".
    * @private
    */
-  whenAdLoaded_() {
+  onAdLoaded_() {
     // Ensures the video-manager does not follow the autoplay attribute on
     // amp-video tags, which would play the ad in the background before it is
     // displayed.
