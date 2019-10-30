@@ -107,6 +107,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
 ￼        </iframe>
 ￼        `;
 
+  // Test that the host script can observe a nested iframe properly.
   describes.integration(
     'ATF nested',
     {
