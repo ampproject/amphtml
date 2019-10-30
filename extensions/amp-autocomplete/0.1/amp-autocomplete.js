@@ -601,13 +601,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   getClosestPriorMatch_(trigger) {
     const delimiter = `\\${trigger}`;
-    const pattern = `(((?<= )${delimiter}|^${delimiter})(\\w+)?)`;
+    const pattern = `((${delimiter}|^${delimiter})(\\w+)?)`;
     const regex = new RegExp(pattern, 'gm');
     const {value, selectionStart: cursor} = this.inputElement_;
     let match, lastMatch;
 
     while ((match = regex.exec(value)) !== null) {
-      if (match[0].length + ownProperty(match, 'index') > cursor) {
+      if (match[0].trim().length + ownProperty(match, 'index') > cursor) {
         break;
       }
       lastMatch = match;
