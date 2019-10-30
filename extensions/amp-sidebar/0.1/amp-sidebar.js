@@ -153,6 +153,8 @@ export class AmpSidebar extends AMP.BaseElement {
       element.setAttribute('side', this.side_);
     }
 
+    this.maybeBuildNestedMenu_();
+
     // Get the toolbar attribute from the child navs.
     const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
 
@@ -240,6 +242,32 @@ export class AmpSidebar extends AMP.BaseElement {
     );
 
     this.setupGestures_(this.element);
+  }
+
+  /**
+   * Loads the extension for amp-nested-menu if sidebar contains one.
+   */
+  maybeBuildNestedMenu_() {
+    // TODO(#25343): remove this check when cleaning up experiment post launch.
+    if (!isExperimentOn(this.win, 'amp-nested-menu')) {
+      return;
+    }
+    let nestedMenu = this.element.querySelector('amp-nested-menu');
+    // check if nested menu is inside a template.
+    if (!nestedMenu) {
+      const templates = this.element.querySelectorAll('template');
+      templates.forEach(template => {
+        const fragment = template.content;
+        nestedMenu =
+          nestedMenu || (fragment && fragment.querySelector('amp-nested-menu'));
+      });
+    }
+    if (nestedMenu) {
+      Services.extensionsFor(this.win).installExtensionForDoc(
+        this.getAmpDoc(),
+        'amp-nested-menu'
+      );
+    }
   }
 
   /**
