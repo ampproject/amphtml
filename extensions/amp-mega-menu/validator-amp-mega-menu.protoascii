@@ -141,7 +141,6 @@ descendant_tag_list {
   tag: "AMP-AD"
   tag: "AMP-CAROUSEL"
   tag: "AMP-EMBED"
-  tag: "AMP-FORM"
   tag: "AMP-IMG"
   tag: "AMP-LIGHTBOX"
   tag: "AMP-LIST"

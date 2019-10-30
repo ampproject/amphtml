@@ -25,7 +25,7 @@ limitations under the License.
 
 # `amp-mega-menu`
 
-A horizontal navigation bar containing a set of menu items that, when activated via click, open/close corresponding containers underneath with additional content.
+Horizontal navigation bar with menu items that open/close content containers on click.
 
 <table>
   <tr>
@@ -48,7 +48,7 @@ A horizontal navigation bar containing a set of menu items that, when activated 
 
 ## Usage
 
-The `<amp-mega-menu>` component should include a single `<nav>` element containing either `<ul>` or `<ol>`, under which each `<li>` element will be regarded as a menu item.
+The `<amp-mega-menu>` component includes a single `<nav>` element containing either a `<ul>` or `<ol>`, where each `<li>` element is a menu item.
 
 [tip type="note"]
 The `<nav>` element must be parented by either the `<amp-mega-menu>` component or a `<template>`, and it must have `<ul>` or `<ol>` as its only child.
@@ -121,7 +121,7 @@ The example below demonstrates an `<amp-mega-menu>` with three menu items. The f
 
 ### Dynamic content rendering
 
-Fetch content of `<amp-mega-menu>` dynamically from a JSON endpoint using [`<amp-list>`](../amp-list/amp-list.md) and [`amp-mustache`](../amp-mustache/amp-mustache.md) template.
+Fetch content of `<amp-mega-menu>` dynamically from a JSON endpoint using [`<amp-list>`](../amp-list/amp-list.md) and [`<amp-mustache>`](../amp-mustache/amp-mustache.md) template.
 
 The example below demonstrates this ability by nesting `<amp-list>` inside `<amp-mega-menu>`.
 
@@ -283,9 +283,9 @@ The `<amp-mega-menu>` component can be styled with standard CSS.
 
 The example below customizes:
 
-- The background color of the navigation bar
-- The appearance of opened menu buttons
-- The position of the dropdown containers
+- The background color of the navigation bar.
+- The appearance of opened menu buttons.
+- The position of the dropdown containers.
 
 [example playground="true" preview="top-frame" orientation="landscape"]
 
@@ -369,9 +369,9 @@ In addition, to assist screen reader users, an invisible but tabbable close butt
 
 Keyboard support for the component includes:
 
-- Left/right arrow keys to navigate between menu items when focused;
-- Enter/Space keys to trigger an active menu item button;
-- Esc key to collapse the mega menu;
+- Left/right arrow keys to navigate between menu items when focused.
+- Enter/Space keys to trigger an active menu item button.
+- Esc key to collapse the mega menu.
 
 Open on hover is not currently supported by `<amp-mega-menu>` due to UX and accessibility concerns. In particular, we want to avoid scenarios where:
 
