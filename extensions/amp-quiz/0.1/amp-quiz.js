@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-quiz-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/0.1/utils';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setStyle} from '../../../src/style';
 
 export class AmpQuiz extends AMP.BaseElement {
   /**
@@ -34,6 +35,9 @@ export class AmpQuiz extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
+
+    /** @private {Array<number>} */
+    this.percentages_ = this.generatePercentages_();
   }
 
   /** @override */
@@ -107,11 +111,58 @@ export class AmpQuiz extends AMP.BaseElement {
       answerChoice.textContent = answerChoiceOptions.shift();
       answerChoice.setAttribute('class', 'i-amp-quiz-answer-choice');
       convertedOption.prepend(answerChoice);
+
+      const percentageBox = document.createElement('span');
+      // TODO: FILL THIS IN WITH ACTUAL CONTENT
+      percentageBox.textContent = '25%';
+      percentageBox.setAttribute('class', 'i-amp-quiz-percentage');
+      convertedOption.append(percentageBox);
     });
 
     if (this.element.children.length !== 0) {
       handleError('Too many children');
     }
+  }
+
+  /** @private
+   * @return {Array<number>}
+   */
+  generatePercentages_() {
+    const percentages = [];
+    let pool = 100;
+    let random;
+    for (let i = 0; i < 3; i++) {
+      random = Math.floor(Math.random() * pool);
+      percentages.push(random);
+      pool -= random;
+    }
+    percentages.push(pool);
+    return percentages;
+  }
+
+  /** @private
+   * @param {Node} option
+   */
+  setOptionPercentage_(option) {
+    // TODO: ASSIGN THE PERCENTAGES BETTER
+    const percentage = this.percentages_.shift();
+    let backgroundString;
+    if (option.getAttribute('class').includes('i-amp-quiz-option-selected')) {
+      if (option.hasAttribute('correct')) {
+        backgroundString = `linear-gradient(90deg, var(--correct-color-shaded) ${50 +
+          percentage / 2}%, var(--correct-color) ${percentage / 2}%)`;
+      } else {
+        backgroundString = `linear-gradient(90deg, var(--incorrect-color-shaded) ${50 +
+          percentage / 2}%, var(--incorrect-color) ${percentage / 2}%)`;
+      }
+    } else {
+      backgroundString = `linear-gradient(90deg, #d9d9d9 ${50 +
+        percentage / 2}%, #ffffff ${percentage / 2}%)`;
+    }
+    setStyle(option, 'background', backgroundString);
+    option.querySelector(
+      '.i-amp-quiz-percentage'
+    ).textContent = `${percentage}%`;
   }
 
   /** @private */
@@ -130,19 +181,26 @@ export class AmpQuiz extends AMP.BaseElement {
               `i-amp-quiz-option i-amp-quiz-option-post-selection`
             );
 
-            const symbolContainer = o.querySelector('.i-amp-quiz-answer-choice');
+            if (o === option) {
+              o.setAttribute(
+                'class',
+                `i-amp-quiz-option i-amp-quiz-option-post-selection i-amp-quiz-option-selected`
+              );
+            }
+
+            const symbolContainer = o.querySelector(
+              '.i-amp-quiz-answer-choice'
+            );
             if (o.hasAttribute('correct')) {
-              symbolContainer.textContent =  '✓';
+              symbolContainer.textContent = '✓';
             } else {
               symbolContainer.textContent = '×';
               // TODO: IS THIS ONE ARIA LABEL ACCEPTABLE?
               symbolContainer.setAttribute('aria-label', 'X');
             }
+
+            this.setOptionPercentage_(o);
           });
-          option.setAttribute(
-            'class',
-            `i-amp-quiz-option i-amp-quiz-option-post-selection i-amp-quiz-option-selected`
-          );
 
           this.hasReceivedResponse_ = true;
         }

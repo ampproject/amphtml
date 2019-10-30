@@ -2,7 +2,9 @@
 
 :host {
     --correct-color: #5BB974;
+    --correct-color-shaded: #4b9960;
     --incorrect-color: #F34E4E;
+    --incorrect-color-shaded: #cc4141;
   }
 
 .i-amp-quiz-container {
@@ -31,11 +33,12 @@
 
 .i-amp-quiz-option {
     display: inline-grid;
-    grid-template-columns: 50px auto;
+    grid-template-columns: 50px auto 50px;
     justify-items: start;
     align-items: center;
     border-radius: 32px;
-    padding-left: 10px;;
+    padding-left: 10px;
+    padding-right: 10px;
     background-color: inherit;
     margin-bottom: 10px;
     min-height: 60px;
@@ -51,11 +54,18 @@
 
 .i-amp-quiz-option-post-selection.i-amp-quiz-option-selected[correct] {
     background: var(--correct-color);
+    /* background: linear-gradient(90deg, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0) 50%) */
 }
 
 .i-amp-quiz-option-post-selection.i-amp-quiz-option-selected:not([correct]) {
     background: var(--incorrect-color);
 }
+
+/*
+    background: linear-gradient(90deg, var(--correct-color) 50%, #00FFFF 50%);
+
+    TODO: USE THIS FOR BACKGROUND PERCENTAGE DISPLAY
+*/
 
 .i-amp-quiz-answer-choice {
     display: grid;
@@ -82,6 +92,16 @@
     color: var(--correct-color);
 }
 
-.i-amp-quiz-option-post-selection.i-amp-quiz-option-selected > .i-amp-quiz-answer-choice {
+.i-amp-quiz-option-post-selection > .i-amp-quiz-answer-choice {
     background: white;
+}
+
+.i-amp-quiz-percentage {
+    display: none;
+}
+
+/* TODO: ANIMATE THE PERCENTAGES IN */
+
+.i-amp-quiz-option-post-selection > .i-amp-quiz-percentage {
+    display: inherit;
 }
