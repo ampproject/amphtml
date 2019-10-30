@@ -100,6 +100,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
     }
   );
 
+  /*
   const srcdoc = `
 ￼        <iframe
 ￼        src='//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}'
@@ -130,6 +131,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       });
     }
   );
+  */
 
   describes.integration(
     'BTF',
