@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const markdownLinkCheck = require('markdown-link-check');

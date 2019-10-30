@@ -90,9 +90,10 @@ function getFilesToCheck(globs, options = {}) {
 }
 
 /**
- * Checks if the correct arguments were passed in
+ * Ensures that a target is only called with `--files` or `--local_changes`
  *
- * @return {boolean}
+ * @param {string} taskName name of the gulp task.
+ * @return {boolean} if the use is valid.
  */
 function usesFilesOrLocalChanges(taskName) {
   const validUsage = argv.files || argv.local_changes;

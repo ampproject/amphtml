@@ -22,18 +22,17 @@
 
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const utils = require('bluebird');
-const requestPost = utils.promisify(require('request').post);
 const fs = require('fs-extra');
-const globby = require('globby');
 const JSON5 = require('json5');
 const log = require('fancy-log');
-const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
+const utils = require('bluebird');
+const requestPost = utils.promisify(require('request').post);
 const {cyan, red, green} = require('ansi-colors');
+const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {isTravisBuild} = require('../common/travis');
 
-const OWNERS_SYNTAX_CHECK_URI = 'http://ampproject-owners-bot.appspot.com/v0/syntax';
+const OWNERS_SYNTAX_CHECK_URI =
+  'http://ampproject-owners-bot.appspot.com/v0/syntax';
 
 /**
  * Checks OWNERS files for correctness using the owners bot API.
@@ -41,7 +40,7 @@ const OWNERS_SYNTAX_CHECK_URI = 'http://ampproject-owners-bot.appspot.com/v0/syn
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
-  if (!usesFilesOrLocalChanges()) {
+  if (!usesFilesOrLocalChanges('check-owners')) {
     return;
   }
   const filesToCheck = getFilesToCheck('**/OWNERS');
@@ -93,7 +92,7 @@ async function checkFile(file) {
 
     if (requestErrors) {
       requestErrors.forEach(err => log(red(err)));
-      throw new Error('Could not reach the owners syntax check API')
+      throw new Error('Could not reach the owners syntax check API');
     } else if (fileErrors && fileErrors.length) {
       fileErrors.forEach(err => log(red(err)));
       throw new Error(`Errors encountered parsing "${file}"`);
@@ -103,7 +102,7 @@ async function checkFile(file) {
       green('SUCCESS:'),
       'Parsed',
       cyan(file),
-      'successfully! Produced rules:',
+      'successfully! Produced rules:'
     );
     rules.forEach(rule => log(rule));
   } catch (error) {
