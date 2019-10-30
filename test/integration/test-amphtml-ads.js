@@ -95,12 +95,11 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       });
 
       afterEach(() => {
-        unregisterIframe(env.win.document.getElementById('inabox'));
+        unregisterIframe(env.win, env.win.document.getElementById('inabox'));
       });
     }
   );
 
-  /*
   const srcdoc = `
 ￼        <iframe
 ￼        src='//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}'
@@ -127,11 +126,10 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       });
 
       afterEach(() => {
-        unregisterIframe(env.win.document.getElementById('inabox'));
+        unregisterIframe(env.win, env.win.document.getElementById('inabox'));
       });
     }
   );
-  */
 
   describes.integration(
     'BTF',
@@ -155,7 +153,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       });
 
       afterEach(() => {
-        unregisterIframe(env.win.document.getElementById('inabox'));
+        unregisterIframe(env.win, env.win.document.getElementById('inabox'));
       });
     }
   );
@@ -184,7 +182,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       });
 
       afterEach(() => {
-        unregisterIframe(iframe);
+        unregisterIframe(env.win, iframe);
         env.win.document.body.removeChild(iframe);
       });
 
@@ -235,7 +233,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       });
 
       afterEach(() => {
-        unregisterIframe(iframe);
+        unregisterIframe(env.win, iframe);
         env.win.document.body.removeChild(iframe);
       });
 
@@ -327,7 +325,7 @@ describe('A more real AMPHTML image ad', () => {
       });
 
       afterEach(() => {
-        unregisterIframe(iframe);
+        unregisterIframe(env.win, iframe);
         doc.body.removeChild(iframe);
       });
     }
@@ -390,7 +388,8 @@ describe('A more real AMPHTML image ad', () => {
         Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
         setTimeout(() => {
           env.win.scrollTo(0, 1000);
-          window.top.scrollTo(window.top.scrollX, window.top.scrollY - 1);
+          window.top.scrollBy(0, 1);
+          window.top.scrollBy(0, -1);
         }, 2000);
       });
 
@@ -405,7 +404,7 @@ describe('A more real AMPHTML image ad', () => {
       });
 
       afterEach(() => {
-        unregisterIframe(iframe);
+        unregisterIframe(env.win, iframe);
         doc.body.removeChild(iframe);
       });
     }
@@ -454,10 +453,10 @@ function testAmpComponentsBTF(win) {
   setTimeout(() => {
     scrollTime = Date.now();
     win.scrollTo(0, 1000);
-    // Scroll the top frame by 1 pixel manually because the host script lives
+    // Scroll the top frame by 1 pixel manually because the observer lives
     // there so it will only fire the position changed event if the top window
     // itself is scrolled.
-    window.top.scrollTo(window.top.scrollX, window.top.scrollY - 1);
+    window.top.scrollBy(0, 1);
   }, 2000);
   return Promise.all([imgPromise, pixelPromise, analyticsPromise]);
 }
@@ -499,13 +498,12 @@ function writeSafeFrame(doc, iframe, adContent) {
 }
 
 /**
- * Unregister the specified iframe from the host script at the top-level window.
+ * Unregister the specified iframe from the host script at the specified window.
  * Use this command to reset between tests so the host script stops observing
  * iframes that has been removed when their tests ended.
  */
-function unregisterIframe(frame) {
+function unregisterIframe(hostWin, frame) {
   try {
-    const hostWin = window;
     if (hostWin.AMP && hostWin.AMP.inaboxUnregisterIframe) {
       hostWin['AMP'].inaboxUnregisterIframe(frame);
     }
