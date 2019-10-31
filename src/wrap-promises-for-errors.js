@@ -54,7 +54,7 @@ export function wrapPromsies(win, reportError) {
   let allowNative = false;
 
   /**
-   * Wrapper wraps the native Promise class!
+   * Wraps the native Promise class!
    *
    * Why isn't this using class syntax? Because closure doesn't properly setup
    * the constructor's prototype chain (it only sets the
@@ -64,7 +64,7 @@ export function wrapPromsies(win, reportError) {
    * @return {!Promise<T>}
    * @template T
    */
-  function Wrapper(executer) {
+  function NuclearPromises(executer) {
     const p = new NativePromise((resolve, reject) => {
       // The promises spec says that the `resolve` and `reject` functions may
       // only be called once. After that, they do nothing.
@@ -113,18 +113,18 @@ export function wrapPromsies(win, reportError) {
     p._chainEnd = true;
     p._rejected = false;
 
-    Object.setPrototypeOf(p, Wrapper.prototype);
+    Object.setPrototypeOf(p, NuclearPromises.prototype);
     return p;
   }
 
   // Setup the wrapper's prototype chain. Both the constructor, and the
   // constructor.prototype must properly inherit.
-  Wrapper.__proto__ = NativePromise;
-  Wrapper.prototype.__proto__ = NativePromise.prototype;
+  NuclearPromises.__proto__ = NativePromise;
+  NuclearPromises.prototype.__proto__ = NativePromise.prototype;
 
   // Wrap the then method so that we can tell that this current promise is not
   // the end of a promise chain, it's the returned promise that's the end.
-  Wrapper.prototype.then = function(f, r) {
+  NuclearPromises.prototype.then = function(f, r) {
     this._chainEnd = false;
     const p = originalThen.call(this, f, r);
 
@@ -161,18 +161,18 @@ export function wrapPromsies(win, reportError) {
    * methods. Whatever constructor is return by the speciesWraper will be used
    * to construct a new instance.
    *
-   * Eg, having a `Wrapper` instance, then calling `w.then()` will return a new
-   * instance of Wrapper, instead of Promise.
+   * Eg, having a `NuclearPromises` instance, then calling `w.then()` will
+   * return a new instance of NuclearPromises, instead of Promise.
    *
    * @return {function()}
    */
   function speciesWraper() {
-    return allowNative ? NativePromise : Wrapper;
+    return allowNative ? NativePromise : NuclearPromises;
   }
   NativePromise[species] = speciesWraper;
 
   // Finally, we need to force promises to use the think they are not the
   // NativePromise. This will make them always call the species' constructor.
-  NativePromise.prototype.constructor = Wrapper;
-  win.Promise = Wrapper;
+  NativePromise.prototype.constructor = NuclearPromises;
+  win.Promise = NuclearPromises;
 }
