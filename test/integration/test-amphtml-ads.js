@@ -108,6 +108,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
 ￼        `;
 
   // Test that the host script can observe a nested iframe properly.
+  // TODO: Make this work on Edge (which doesn't support srcdoc).
   describes.integration(
     'ATF nested',
     {
@@ -121,9 +122,11 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       `,
     },
     env => {
-      it('should layout amp-img, amp-pixel, amp-analytics', () => {
-        return testAmpComponents();
-      });
+      it.configure()
+        .skipEdge()
+        .run('should layout amp-img, amp-pixel, amp-analytics', () => {
+          return testAmpComponents();
+        });
 
       afterEach(() => {
         unregisterIframe(env.win, env.win.document.getElementById('inabox'));
