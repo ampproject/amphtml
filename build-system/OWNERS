@@ -2,9 +2,10 @@
 // https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
 
 {
+  reviewerTeam: 'ampproject/reviewers-amphtml',
   rules: [
     {
-      owners: [{name: 'ampproject/wg-infra'}],
+      owners: [{name: 'ampproject/wg-infrastructure'}],
     },
   ],
 }

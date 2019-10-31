@@ -24,6 +24,10 @@
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
+      pattern: 'build-system/*',
+      owners: [{name: 'ampproject/wg-infra'}],
+    },
+    {
       pattern: '{package.json,yarn.lock}',
       owners: [
         {name: 'ampproject/wg-infra'},
