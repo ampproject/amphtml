@@ -121,4 +121,5 @@ module.exports = {
 checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
 checkOwners.flags = {
   'files': '  Checks only the specified OWNERS files',
+  'local_changes': '  Checks just the OWNERS files changed in the local branch',
 };
