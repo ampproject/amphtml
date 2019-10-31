@@ -21,15 +21,15 @@ The asterisk `*` is used to seperate each piece of data.
 
 Take this example [linker configuration](./linker-id-forwarding.md):
 
-```javascript
+```json
 "linkers": {
   "linker1" : {
     "ids" : {
       "cid": "CLIENT_ID(_ga)",
-      "uid" "QUERY_PARAM(uid)",
-    }
+      "uid" "QUERY_PARAM(uid)"
+    },
     "proxyOnly" : false,
-    "enabled": true,
+    "enabled": true
   }
 }
 ```
