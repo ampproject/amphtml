@@ -25,11 +25,13 @@
 const fs = require('fs-extra');
 const JSON5 = require('json5');
 const log = require('fancy-log');
+const request = require('request');
 const utils = require('bluebird');
-const requestPost = utils.promisify(require('request').post);
 const {cyan, red, green} = require('ansi-colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {isTravisBuild} = require('../common/travis');
+
+const requestPost = utils.promisify(request.post);
 
 const OWNERS_SYNTAX_CHECK_URI =
   'http://ampproject-owners-bot.appspot.com/v0/syntax';
@@ -102,7 +104,7 @@ async function checkFile(file) {
       green('SUCCESS:'),
       'Parsed',
       cyan(file),
-      'successfully; Produced',
+      'successfully; produced',
       cyan(rules.length),
       'rules.'
     );
@@ -119,5 +121,4 @@ module.exports = {
 checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
 checkOwners.flags = {
   'files': '  Checks only the specified OWNERS files',
-  'validate': '  Validates the OWNERS files with the owners bot API',
 };
