@@ -36,19 +36,25 @@ import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle, setImportantStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
 
 /** @private @const {number} */
-const ANIMATION_TIMEOUT = 350;
+const ANIMATION_TIMEOUT = 500;
 
 /** @private @enum {string} */
 const Side = {
   LEFT: 'left',
   RIGHT: 'right',
+};
+
+/** @private @enum {string} */
+const OpenStyle = {
+  OVERLAY: 'overlay',
+  PUSH: 'push',
 };
 
 /**
@@ -95,6 +101,12 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {?string} */
     this.side_ = null;
+
+    /** @private {?string} */
+    this.openStyle_ = null;
+
+    /** @private {?string} */
+    this.pushTarget_ = null;
 
     /** @private {Array} */
     this.toolbars_ = [];
@@ -160,6 +172,22 @@ export class AmpSidebar extends AMP.BaseElement {
         isRTL(this.document_) ? Side.RIGHT : Side.LEFT
       );
       element.setAttribute('side', this.side_);
+    }
+
+    const width = element.getAttribute('width');
+    if (width) {
+      setImportantStyles(this.documentElement_, {
+        '--sidebar-width': `${width}px`,
+      });
+    }
+
+    const pushTargetQuery = element.getAttribute('push-target');
+    this.pushTarget_ = this.documentElement_.querySelector(pushTargetQuery);
+    if (this.pushTarget_) {
+      this.openStyle_ = OpenStyle.PUSH;
+      this.pushTarget_.classList.add('i-amphtml-sidebar-push-target');
+    } else {
+      this.openStyle_ = OpenStyle.OVERLAY;
     }
 
     // Get the toolbar attribute from the child navs.
@@ -394,6 +422,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element./*OK*/ scrollTop = 1;
     this.element.setAttribute('open', '');
     this.getMaskElement_().setAttribute('open', '');
+    this.pushTarget_ && this.pushTarget_.setAttribute('side', this.side_);
+    this.pushTarget_ && this.pushTarget_.setAttribute('open', '');
+    this.pushTarget_ && this.pushTarget_.removeAttribute('i-amphtml-sidebar-closed');
     this.setUpdateFn_(() => this.updateForOpened_(trust), ANIMATION_TIMEOUT);
     handleAutoscroll(this.getAmpDoc(), this.element);
   }
@@ -420,6 +451,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.triggerEvent_(SidebarEvents.OPEN, trust);
     this.element.setAttribute('i-amphtml-sidebar-opened', '');
     this.getMaskElement_().setAttribute('i-amphtml-sidebar-opened', '');
+    this.pushTarget_ && this.pushTarget_.setAttribute('i-amphtml-sidebar-opened', '');
   }
 
   /**
@@ -437,6 +469,11 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     this.element.removeAttribute('open');
     this.element.removeAttribute('i-amphtml-sidebar-opened');
+    this.pushTarget_ && this.pushTarget_.removeAttribute('open');
+    this.pushTarget_ && this.pushTarget_.removeAttribute('i-amphtml-sidebar-opened');
+    if (immediate) {
+      this.pushTarget_ && this.pushTarget_.setAttribute('i-amphtml-sidebar-closed', '');
+    }
     this.setUpdateFn_(
       () => this.updateForClosed_(trust),
       immediate ? 0 : ANIMATION_TIMEOUT
@@ -561,6 +598,7 @@ export class AmpSidebar extends AMP.BaseElement {
     if (data.first) {
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.element),
+        coSwipeElement: dev().assertElement(this.pushTarget_ || document.createElement('div')),
         mask: dev().assertElement(this.maskElement_),
         direction:
           this.side_ == Side.LEFT ? Direction.BACKWARD : Direction.FORWARD,
@@ -599,7 +637,11 @@ export class AmpSidebar extends AMP.BaseElement {
   getMaskElement_() {
     if (!this.maskElement_) {
       const mask = this.document_.createElement('div');
-      mask.classList.add('i-amphtml-sidebar-mask');
+      if (this.openStyle_ == OpenStyle.PUSH) {
+        mask.classList.add('i-amphtml-sidebar-mask-nodisplay');
+      } else {
+        mask.classList.add('i-amphtml-sidebar-mask');
+      }
       mask.addEventListener('click', () => {
         // Click gesture is high trust.
         this.close_(ActionTrust.HIGH);

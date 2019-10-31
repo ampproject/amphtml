@@ -96,6 +96,7 @@ export class SwipeToDismiss {
      * @private {?Element}
      */
     this.swipeElement_ = null;
+    this.coSwipeElement_ = null;
 
     /**
      * A background mask element behind the swipe element.
@@ -123,8 +124,8 @@ export class SwipeToDismiss {
   capDistance_(deltaX, deltaY) {
     const delta = this.orientation_ == Orientation.HORIZONTAL ? deltaX : deltaY;
     return this.direction_ == Direction.BACKWARD
-      ? -Math.min(delta, 0)
-      : Math.max(delta, 0);
+      ? Math.min(-Math.min(delta, 0), this.getSwipeElementLength_())
+      : Math.min(Math.max(delta, 0), this.getSwipeElementLength_());
   }
 
   /**
@@ -149,8 +150,9 @@ export class SwipeToDismiss {
    *   mask: !Element,
    * }} config
    */
-  startSwipe({swipeElement, mask, direction, orientation}) {
+  startSwipe({swipeElement, coSwipeElement, mask, direction, orientation}) {
     this.swipeElement_ = swipeElement;
+    this.coSwipeElement_ = coSwipeElement;
     this.mask_ = mask;
     this.direction_ = direction;
     this.orientation_ = orientation;
@@ -231,6 +233,10 @@ export class SwipeToDismiss {
         transform: this.translateBy_(100, '%'),
         transition: `${duration}ms transform ease-out`,
       });
+      setStyles(dev().assertElement(this.coSwipeElement_), {
+        transform: this.translateBy_(0),
+        transition: `${duration}ms transform ease-out`,
+      });
       setStyles(dev().assertElement(this.mask_), {
         opacity: 0,
         transition: `${duration}ms opacity ease-out`,
@@ -243,15 +249,19 @@ export class SwipeToDismiss {
   /**
    * Adjusts the UI elements for the current swipe position in a swipe to
    * dismiss gesture. This should be called in a mutate context.
-   * @param {string} swipeElementTransform How to transform the swiping
+   * @param {string} swipeDistance How to transform the swiping
    *    element.
    * @param {number|string} maskOpacity The opacity for the mask element.
    *    container.
    * @private
    */
-  adjustForSwipePosition_(swipeElementTransform = '', maskOpacity = '') {
+  adjustForSwipePosition_(swipeDistance = '', maskOpacity = '') {
     setStyles(dev().assertElement(this.swipeElement_), {
-      transform: swipeElementTransform,
+      transform: swipeDistance && this.translateBy_(swipeDistance, 'px'),
+      transition: '',
+    });
+    setStyles(dev().assertElement(this.coSwipeElement_), {
+      transform: swipeDistance && this.translateBy_(swipeDistance-this.getSwipeElementLength_(), 'px'),
       transition: '',
     });
     setStyles(dev().assertElement(this.mask_), {
@@ -318,10 +328,7 @@ export class SwipeToDismiss {
       const swipeFraction = swipeDistance / this.getSwipeElementLength_();
       const maskOpacity = Math.max(0, 1 - swipeFraction);
 
-      this.adjustForSwipePosition_(
-        this.translateBy_(swipeDistance, 'px'),
-        maskOpacity
-      );
+      this.adjustForSwipePosition_(swipeDistance, maskOpacity);
     });
   }
 }
