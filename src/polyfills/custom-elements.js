@@ -106,7 +106,8 @@ function isPatched(win) {
  * @param {!Error} error
  */
 function rethrowAsync(error) {
-  new /*OK*/ Promise(() => {
+  setTimeout(() => {
+    self.__AMP_REPORT_ERROR(error);
     throw error;
   });
 }
