@@ -19,7 +19,7 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
 const {gitDiffNameOnlyMaster} = require('../common/git');
-const {green, cyan} = require('ansi-colors');
+const {green, cyan, yellow} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 
 /**
@@ -89,8 +89,37 @@ function getFilesToCheck(globs, options = {}) {
   return globby.sync(globs, options);
 }
 
+/**
+ * Ensures that a target is only called with `--files` or `--local_changes`
+ *
+ * @param {string} taskName name of the gulp task.
+ * @return {boolean} if the use is valid.
+ */
+function usesFilesOrLocalChanges(taskName) {
+  const validUsage = argv.files || argv.local_changes;
+  if (!validUsage) {
+    log(
+      yellow('NOTE 1:'),
+      'It is infeasible for',
+      cyan(`gulp ${taskName}`),
+      'to check all files in the repo at once.'
+    );
+    log(
+      yellow('NOTE 2:'),
+      'Please run',
+      cyan(`gulp ${taskName}`),
+      'with',
+      cyan('--files'),
+      'or',
+      cyan('--local_changes') + '.'
+    );
+  }
+  return validUsage;
+}
+
 module.exports = {
   getFilesChanged,
   getFilesToCheck,
   logOnSameLine,
+  usesFilesOrLocalChanges,
 };

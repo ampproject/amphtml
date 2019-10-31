@@ -15,12 +15,11 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
-const {getFilesToCheck} = require('../common/utils');
+const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {gitDiffAddedNameOnlyMaster} = require('../common/git');
 const {green, cyan, red, yellow} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
@@ -36,7 +35,7 @@ let filesIntroducedByPr;
  */
 async function checkLinks() {
   maybeUpdatePackages();
-  if (!isValidUsage()) {
+  if (!usesFilesOrLocalChanges('check-links')) {
     return;
   }
   const filesToCheck = getFilesToCheck(linkCheckGlobs);
@@ -53,33 +52,6 @@ async function checkLinks() {
   filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
   const results = await Promise.all(filesToCheck.map(checkLinksInFile));
   reportResults(results);
-}
-
-/**
- * Checks if the correct arguments were passed in
- *
- * @return {boolean}
- */
-function isValidUsage() {
-  const validUsage = argv.files || argv.local_changes;
-  if (!validUsage) {
-    log(
-      yellow('NOTE 1:'),
-      'It is infeasible for',
-      cyan('gulp check-links'),
-      'to check for dead links in all markdown files in the repo at once.'
-    );
-    log(
-      yellow('NOTE 2:'),
-      'Please run',
-      cyan('gulp check-links'),
-      'with',
-      cyan('--files'),
-      'or',
-      cyan('--local_changes') + '.'
-    );
-  }
-  return validUsage;
 }
 
 /**
