@@ -35,8 +35,7 @@ function isNative(fn) {
 export function wrapPromises(win, reportError) {
   const {Promise} = win;
   const originalThen = Promise.prototype.then;
-  const species =
-    typeof win['Species'] !== 'undefined' && win['Species'].species;
+  const species = typeof win['Symbol'] !== 'undefined' && win['Symbol'].species;
 
   // If there's no species symbol, there's nothing we can do.
   if (!species) {
