@@ -1106,6 +1106,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.inputElement_.setAttribute('aria-activedescendant', elementId);
         this.activeIndex_ = activeIndex;
         this.activeElement_ = newActiveElement;
+        tryFocus(this.activeElement);
       }
     );
   }
