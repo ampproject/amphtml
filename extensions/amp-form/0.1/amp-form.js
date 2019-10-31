@@ -971,10 +971,11 @@ export class AmpForm {
     this.setState_(FormState.SUBMIT_SUCCESS);
     return tryResolve(() => {
       this.renderTemplate_(result || {}).then(() => {
+        const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
         this.triggerAction_(
           FormEvents.SUBMIT_SUCCESS,
           opt_eventData === undefined ? result : opt_eventData,
-          incomingTrust
+          outgoingTrust
         );
         this.dirtinessHandler_.onSubmitSuccess();
       });
