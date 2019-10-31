@@ -421,6 +421,7 @@ We are planning to make this change around mid October 2019 and would expect eve
 - 2019-10-07: test domains will be enabled for manual testing.
 - 2019-10-14: (but depending on how testing goes): the feature will be rolled out generally.
 
+Follow the related [issue here.](https://github.com/ampproject/amphtml/issues/24834)
 
 ## Testing CORS in AMP
 
