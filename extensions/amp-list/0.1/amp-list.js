@@ -618,7 +618,22 @@ export class AmpList extends AMP.BaseElement {
       .then(
         response => {
           userAssert(
-            response && typeof response['html'] === 'string',
+            response,
+            'Error proxying amp-list templates, received no response.'
+          );
+          const init = response['init'];
+          if (init) {
+            const status = init['status'];
+            if (status >= 300) {
+              /** HTTP status codes of 300+ mean redirects and errors. */
+              throw user().createError(
+                'Error proxying amp-list templates with status: ',
+                status
+              );
+            }
+          }
+          userAssert(
+            typeof response['html'] === 'string',
             'Expected response with format {html: <string>}. Received: ',
             response
           );
