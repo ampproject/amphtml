@@ -27,14 +27,23 @@ tags: {  # <amp-mega-menu>
   html_format: AMP
   tag_name: "AMP-MEGA-MENU"
   requires_extension: "amp-mega-menu"
-  requires: "amp-mega-menu nav"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-mega-menu"
   descendant_tag_list: "amp-mega-menu-allowed-descendants"
+  # We want to support both of the cases below:
+  # <amp-mega-menu> > <nav> > ... and
+  # <amp-mega-menu> > <amp-list> > <template> > <nav> > ...
+  # The latter is needed for dynamic template rendering.
   child_tags: {
     mandatory_num_child_tags: 1
     child_tag_name_oneof: "NAV"
     child_tag_name_oneof: "AMP-LIST"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU > AMP-LIST"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU > NAV"
   }
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
@@ -42,28 +51,8 @@ tags: {  # <amp-mega-menu>
 }
 tags: {  # <amp-mega-menu> <nav>
   html_format: AMP
-  tag_name: "NAV"
+  tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU > NAV"
-  satisfies: "amp-mega-menu nav"
-  mandatory_parent: "AMP-MEGA-MENU"
-  siblings_disallowed: true
-  child_tags: {
-    mandatory_num_child_tags: 1
-    child_tag_name_oneof: "OL"
-    child_tag_name_oneof: "UL"
-  }
-  reference_points: {
-    tag_spec_name: "AMP-MEGA-MENU NAV > UL/OL"
-  }
-}
-tags: {  # <amp-mega-menu> <template> <nav>
-  html_format: AMP
-  tag_name: "NAV"
-  spec_name: "AMP-MEGA-MENU TEMPLATE > NAV"
-  satisfies: "amp-mega-menu nav"
-  mandatory_parent: "TEMPLATE"
-  mandatory_ancestor: "AMP-MEGA-MENU"
-  disallowed_ancestor: "NAV"
   siblings_disallowed: true
   child_tags: {
     mandatory_num_child_tags: 1
@@ -77,7 +66,43 @@ tags: {  # <amp-mega-menu> <template> <nav>
 tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU > AMP-LIST"
+  # Include mandatory amp-list attrs so that <amp-mega-menu> > <nav>
+  # does not match to this tag.
+  attrs: {
+    name: "src"
+    mandatory_anyof: "['src','[src]']"
+  }
+  attrs: {
+    name: "[src]"
+    mandatory_anyof: "['src','[src]']"
+  }
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "TEMPLATE"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU > AMP-LIST > TEMPLATE"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-MEGA-MENU > AMP-LIST > TEMPLATE"
+  mandatory_parent: "AMP-LIST"
+  child_tags: {
+    mandatory_num_child_tags: 1
+    child_tag_name_oneof: "NAV"
+  }
+  reference_points: {
+    tag_spec_name: "AMP-MEGA-MENU > NAV"
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-MEGA-MENU NAV > UL/OL"
+  mandatory_parent: "NAV"
   child_tags: {
     mandatory_min_num_child_tags: 1
     child_tag_name_oneof: "LI"

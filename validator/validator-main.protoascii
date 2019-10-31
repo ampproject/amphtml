@@ -1636,7 +1636,6 @@ tags: {
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "NAV"
-  disallowed_ancestor: "AMP-MEGA-MENU"
 }
 # 4.3.5 The aside element
 tags: {
