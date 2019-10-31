@@ -1645,7 +1645,7 @@ describes.fakeWin('scroll depth', {amp: true}, env => {
   });
 });
 
-describes.realWin.only(
+describes.realWin(
   'VisibilityManager in shadow runtime',
   {amp: 'multi'},
   env => {
