@@ -862,9 +862,10 @@ export class MultidocManager {
     // resources.onNextPass firing, but this is intentional. closeShadowRoot_
     // was traditionally introduced as a synchronous method, so PWAs in the wild
     // do not expect to have to wait for a promise to resolve before the shadow
-    // is deemed 'cleaned up'. The promise race is designed to be very quick so
-    // even if resources.onNextPass already manages to fire before the entire
-    // visibility state change completes, we're only delayed by a few ms.
+    // is deemed 'closed'. The promise race is designed to be very quick so that
+    // even if the resources the pass callback completes before
+    // resources.onNextPass is reached below, we only delay promise resolution
+    // by a few ms.
     return this.timer_
       .timeoutPromise(
         15, // Delay for queued pass after visibility change is 10ms
