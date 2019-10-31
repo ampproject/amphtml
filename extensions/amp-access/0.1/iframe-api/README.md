@@ -25,7 +25,7 @@ The `AmpAccessIframeApi` is the entry point for access iframe implementation. As
 
 The document's access configuration would use the "iframe" type. For example when used with `amp-access`:
 
-```
+```html
 <script id="amp-access" type="application/json">
   {
     "type": "iframe",
@@ -44,34 +44,34 @@ The document's access configuration would use the "iframe" type. For example whe
 
 and with `amp-subscriptions`:
 
-```
+```html
 <script type="application/json" id="amp-subscriptions">
-{
-  "services": [
-    {
-      "type": "iframe",
-      "iframeSrc": "https://example.org/access-controller-iframe",
-      "iframeVars": [
-        "READER_ID",
-        "CANONICAL_URL",
-        "AMPDOC_URL",
-        "SOURCE_URL",
-        "DOCUMENT_REFERRER"
-      ],
-      "actions":{
-        "login": "https://...",
-        "subscribe": "https://..."
-      }
-    },
-    ...
-  ]
-}
+  {
+    "services": [
+      {
+        "type": "iframe",
+        "iframeSrc": "https://example.org/access-controller-iframe",
+        "iframeVars": [
+          "READER_ID",
+          "CANONICAL_URL",
+          "AMPDOC_URL",
+          "SOURCE_URL",
+          "DOCUMENT_REFERRER"
+        ],
+        "actions":{
+          "login": "https://...",
+          "subscribe": "https://..."
+        }
+      },
+      ...
+    ]
+  }
 </script>
 ```
 
 The instrumentation would normally look like this:
 
-```
+```js
 /** Implements AccessController interface */
 class Controller {
   connect(origin, protocol, config) {
@@ -104,7 +104,7 @@ The `protocol` argument in the connect method will be one of
 
 The `config` argument in the `connect` method will contain the original document config with `iframeVars` replace with the map of resolved AMP variables. See [Access URL Variables](../../amp-access.md#access-url-variables) for more details. For instance, for the example, using `amp-access`, above the `config` value could look like this:
 
-```
+```js
 {
   "type": "iframe",
   "iframeSrc": "https://example.org/access-controller-iframe",
@@ -123,7 +123,7 @@ to `amp-subscriptions` and a `pageConfig` object is included.
 
 Example:
 
-```
+```js
 {
   "type": "iframe",
   "pageConfig": {
@@ -135,8 +135,7 @@ Example:
 ```
 
 The `publicationId` and `productId` are extracted from the
-parent document [structured data](../../../amp-subscriptions/amp-subscriptions.md#json-ld-markup).  
-
+parent document [structured data](../../../amp-subscriptions/amp-subscriptions.md#json-ld-markup).
 
 ## Authorize method
 
@@ -146,7 +145,6 @@ Strong timeout and one-behind semantics are observed for authorization call. If 
 
 In the case of `amp-subscriptions` the authorization response must
 conform to the `local` service [authorization response struture](../../../amp-subscriptions/amp-subscriptions.md#authorization-endpoint-and-entitlements).
-
 
 ## Pingback method
 

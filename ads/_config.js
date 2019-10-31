@@ -360,6 +360,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  'conative': {
+    renderStartImplemented: true,
+  },
+
   'connatix': {
     renderStartImplemented: true,
   },
@@ -415,6 +419,11 @@ const adConfig = jsonConfiguration({
 
   'eas': {
     prefetch: 'https://amp.emediate.eu/amp.v0.js',
+    renderStartImplemented: true,
+  },
+
+  'empower': {
+    prefetch: 'https://cdn.empower.net/sdk/amp-ad.min.js',
     renderStartImplemented: true,
   },
 
@@ -540,6 +549,11 @@ const adConfig = jsonConfiguration({
   'innity': {
     prefetch: 'https://cdn.innity.net/admanager.js',
     preconnect: 'https://as.innity.com',
+    renderStartImplemented: true,
+  },
+
+  'insticator': {
+    preconnect: 'https://d3lcz8vpax4lo2.cloudfront.net', // can also be array if more than one URL needed
     renderStartImplemented: true,
   },
 
@@ -978,6 +992,12 @@ const adConfig = jsonConfiguration({
 
   'spotx': {
     preconnect: 'https://js.spotx.tv',
+    renderStartImplemented: true,
+  },
+
+  'springAds': {
+    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
+    preconnect: ['https://ib.adnxs.com'],
     renderStartImplemented: true,
   },
 

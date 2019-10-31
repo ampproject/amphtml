@@ -120,6 +120,7 @@ import {caprofitx} from '../ads/caprofitx';
 import {cedato} from '../ads/cedato';
 import {chargeads, nws} from '../ads/nws';
 import {colombia} from '../ads/colombia';
+import {conative} from '../ads/conative';
 import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
@@ -131,6 +132,7 @@ import {dotandads} from '../ads/dotandads';
 import {dynad} from '../ads/dynad';
 import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
+import {empower} from '../ads/empower';
 import {engageya} from '../ads/engageya';
 import {epeex} from '../ads/epeex';
 import {eplanning} from '../ads/eplanning';
@@ -157,6 +159,7 @@ import {imonomy} from '../ads/imonomy';
 import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
+import {insticator} from '../ads/insticator';
 import {invibes} from '../ads/invibes';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
@@ -239,6 +242,7 @@ import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
+import {springAds} from '../ads/springAds';
 import {strossle} from '../ads/strossle';
 import {sunmedia} from '../ads/sunmedia';
 import {svknative} from '../ads/svknative';
@@ -295,6 +299,7 @@ const AMP_EMBED_ALLOWED = {
   epeex: true,
   forkmedia: true,
   idealmedia: true,
+  insticator: true,
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
@@ -391,6 +396,7 @@ register('caprofitx', caprofitx);
 register('cedato', cedato);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('conative', conative);
 register('connatix', connatix);
 register('contentad', contentad);
 register('criteo', criteo);
@@ -403,6 +409,7 @@ register('dynad', dynad);
 register('eadv', eadv);
 register('eas', eas);
 register('embedly', embedly);
+register('empower', empower);
 register('engageya', engageya);
 register('epeex', epeex);
 register('eplanning', eplanning);
@@ -432,6 +439,7 @@ register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
+register('insticator', insticator);
 register('invibes', invibes);
 register('ix', ix);
 register('jubna', jubna);
@@ -517,6 +525,7 @@ register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
+register('springAds', springAds);
 register('strossle', strossle);
 register('sunmedia', sunmedia);
 register('svknative', svknative);

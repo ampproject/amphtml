@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an Embedly card.
 ---
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -45,15 +46,13 @@ blog posts, and articles from any URL using <a href="http://docs.embed.ly/docs/c
 
 Cards are the easiest way to leverage Embedly. For any media, cards provide a responsive embed with built-in embed analytics.
 
-*Example: Embedding multiple resources*
+_Example: Embedding multiple resources_
 
 If you have a paid plan, use the `amp-embedly-key` component to set your api key.
 You just need one `amp-embedly-key` per AMP page.
 
 ```html
-<amp-embedly-key
-    value="12af2e3543ee432ca35ac30a4b4f656a"
-    layout="nodisplay">
+<amp-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a" layout="nodisplay">
 </amp-embedly-key>
 ```
 
@@ -63,23 +62,26 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
 
 ```html
 <amp-embedly-card
-    data-url="https://twitter.com/AMPhtml/status/986750295077040128"
-    layout="responsive"
-    width="150"
-    height="80"
-    data-card-theme="dark"
-    data-card-controls="0">
+  data-url="https://twitter.com/AMPhtml/status/986750295077040128"
+  layout="responsive"
+  width="150"
+  height="80"
+  data-card-theme="dark"
+  data-card-controls="0"
+>
 </amp-embedly-card>
 
 <amp-embedly-card
-    data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
-    layout="responsive"
-    width="100"
-    height="50">
+  data-url="https://www.youtube.com/watch?v=lBTCB7yLs8Y"
+  layout="responsive"
+  width="100"
+  height="50"
+>
 </amp-embedly-card>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-url (required)</strong></td>
@@ -132,4 +134,5 @@ Not all image URLs are supported, if the image is not loaded, try a different im
 </table>
 
 ## Validation
+
 See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.
