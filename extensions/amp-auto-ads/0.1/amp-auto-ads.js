@@ -23,6 +23,7 @@ import {
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {getAdNetworkConfig} from './ad-network-config';
 import {getPlacementsFromConfigObj} from './placement';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
@@ -86,6 +87,7 @@ export class AmpAutoAds extends AMP.BaseElement {
           responsiveSizingBranch
         );
         const attributes = /** @type {!JsonObject} */ (Object.assign(
+          dict({}),
           adNetwork.getAttributes(),
           getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
         ));
@@ -102,6 +104,7 @@ export class AmpAutoAds extends AMP.BaseElement {
           adNetwork.isResponsiveEnabled()
         ).run();
         const stickyAdAttributes = /** @type {!JsonObject} */ (Object.assign(
+          dict({}),
           attributes,
           getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
         ));

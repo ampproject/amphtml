@@ -444,16 +444,35 @@ describes.repeated(
             });
           });
 
-          it('should insert anchor anchor ad with provided anchor ad attributes.', () => {
-            configObj = {
-              optInStatus: [2],
-            };
+          it('should insert three ads with base attribute and anchor anchor ad with provided anchor ad attributes.', () => {
+            configObj['optInStatus'].push(OPT_IN_STATUS_ANCHOR_ADS);
             configObj.stickyAdAttributes = {
               'data-no-fill': 'true',
             };
 
             return getAmpAutoAds().then(() => {
-              return new Promise(resolve => {
+              const bannerAdsPromise = new Promise(resolve => {
+                waitForChild(
+                  anchor4,
+                  parent => {
+                    return parent.childNodes.length > 0;
+                  },
+                  () => {
+                    expect(anchor1.childNodes).to.have.lengthOf(1);
+                    expect(anchor2.childNodes).to.have.lengthOf(1);
+                    expect(anchor3.childNodes).to.have.lengthOf(0);
+                    expect(anchor4.childNodes).to.have.lengthOf(1);
+                    verifyAdElement(anchor1.childNodes[0]);
+                    verifyAdElement(anchor2.childNodes[0]);
+                    verifyAdElement(anchor4.childNodes[0]);
+                    expect(anchor4.childNodes[0].hasAttribute('data-no-fill'))
+                      .to.be.false;
+                    resolve();
+                  }
+                );
+              });
+
+              const anchorAdPromise = new Promise(resolve => {
                 waitForChild(
                   env.win.document.body,
                   parent => {
@@ -467,6 +486,7 @@ describes.repeated(
                   }
                 );
               });
+              return Promise.all([bannerAdsPromise, anchorAdPromise]);
             });
           });
         });
