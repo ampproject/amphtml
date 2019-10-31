@@ -925,7 +925,7 @@ export class AmpForm {
     if (incomingTrust <= ActionTrust.DEFAULT) {
       dev().expectedError(
         TAG,
-        'Recursive form submissions are intended to be deprecated. ' +
+        'Recursive form submissions are intended to be deprecated by 1/1/2020. ' +
           'See https://github.com/ampproject/amphtml/issues/24894.'
       );
     }
@@ -1413,7 +1413,7 @@ function checkUserValidity(element, propagate = false) {
  * Responds to user interaction with an input by checking user validity of the
  * input and possibly its input-related ancestors (e.g. feildset, form).
  * @param {!Element} input
- * @private visible for testing.
+ * @private
  */
 export function checkUserValidityAfterInteraction_(input) {
   checkUserValidity(input, /* propagate */ true);
