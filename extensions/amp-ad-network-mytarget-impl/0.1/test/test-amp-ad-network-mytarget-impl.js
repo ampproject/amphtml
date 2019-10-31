@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,17 @@ describes.realWin(
         mytargetImpl = new AmpAdNetworkMyTargetImpl(mytargetImplElem);
         expect(mytargetImpl.getAdUrl()).to.equal(
           'https://ad.mail.ru/adp/?q=197378&preview=1'
+        );
+      });
+
+      it('should encode query parameters', () => {
+        mytargetImplElem.setAttribute(
+          'data-ad-query',
+          'preview=1&test=foo|bar'
+        );
+        mytargetImpl = new AmpAdNetworkMyTargetImpl(mytargetImplElem);
+        expect(mytargetImpl.getAdUrl()).to.equal(
+          'https://ad.mail.ru/adp/?q=197378&preview=1&test=foo%7Cbar'
         );
       });
     });

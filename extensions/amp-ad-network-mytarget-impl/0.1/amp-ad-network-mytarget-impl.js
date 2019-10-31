@@ -15,6 +15,11 @@
  */
 
 import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
+import {
+  addParamToUrl,
+  addParamsToUrl,
+  parseQueryString,
+} from '../../../src/url';
 
 /**
  * myTarget base URL
@@ -40,7 +45,15 @@ export class AmpAdNetworkMyTargetImpl extends AmpA4A {
     const slot = this.element.getAttribute('data-ad-slot');
     const query = this.element.getAttribute('data-ad-query');
 
-    return MYTARGET_BASE_URL_ + '?q=' + slot + (query ? '&' + query : '');
+    let url = addParamToUrl(MYTARGET_BASE_URL_, 'q', slot);
+
+    // Additionally encode optional parameters
+    if (query) {
+      const queryMap = parseQueryString(query);
+      url = addParamsToUrl(url, queryMap);
+    }
+
+    return url;
   }
 
   /** @override */

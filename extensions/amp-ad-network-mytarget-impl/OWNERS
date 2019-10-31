@@ -4,7 +4,11 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/a4a'}, {name: 'vfedoseev'}],
+      owners: [
+        {name: 'ampproject/a4a'},
+        {name: 'ampproject/wg-ads'},
+        {name: 'vfedoseev'},
+      ],
     },
   ],
 }
