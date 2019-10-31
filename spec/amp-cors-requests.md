@@ -395,7 +395,7 @@ function assertFontCors(req, res, opt_validMethods, opt_exposeHeaders) {
   if (allowedOrigins.indexOf(req.headers.origin) != -1) {
       res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   } else {
-      res.statusCode = 401;
+      res.statusCode = 403;
       res.end(JSON.stringify({message: unauthorized}));
       throw unauthorized;
   }
