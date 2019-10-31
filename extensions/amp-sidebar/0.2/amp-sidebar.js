@@ -35,8 +35,8 @@ import {dict} from '../../../src/utils/object';
 import {handleAutoscroll} from './autoscroll';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeFragment} from '../../../src/url';
+import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
-import {setStyles, toggle, setImportantStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
@@ -105,7 +105,7 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?string} */
     this.openStyle_ = null;
 
-    /** @private {?string} */
+    /** @private {?Element} */
     this.pushTarget_ = null;
 
     /** @private {Array} */
@@ -422,9 +422,11 @@ export class AmpSidebar extends AMP.BaseElement {
     this.element./*OK*/ scrollTop = 1;
     this.element.setAttribute('open', '');
     this.getMaskElement_().setAttribute('open', '');
-    this.pushTarget_ && this.pushTarget_.setAttribute('side', this.side_);
-    this.pushTarget_ && this.pushTarget_.setAttribute('open', '');
-    this.pushTarget_ && this.pushTarget_.removeAttribute('i-amphtml-sidebar-closed');
+    if (this.pushTarget_) {
+      this.pushTarget_.setAttribute('side', dev().assertString(this.side_));
+      this.pushTarget_.setAttribute('open', '');
+      this.pushTarget_.removeAttribute('i-amphtml-sidebar-closed');
+    }
     this.setUpdateFn_(() => this.updateForOpened_(trust), ANIMATION_TIMEOUT);
     handleAutoscroll(this.getAmpDoc(), this.element);
   }
@@ -451,7 +453,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.triggerEvent_(SidebarEvents.OPEN, trust);
     this.element.setAttribute('i-amphtml-sidebar-opened', '');
     this.getMaskElement_().setAttribute('i-amphtml-sidebar-opened', '');
-    this.pushTarget_ && this.pushTarget_.setAttribute('i-amphtml-sidebar-opened', '');
+    if (this.pushTarget_) {
+      this.pushTarget_.setAttribute('i-amphtml-sidebar-opened', '');
+    }
   }
 
   /**
@@ -469,10 +473,12 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     this.element.removeAttribute('open');
     this.element.removeAttribute('i-amphtml-sidebar-opened');
-    this.pushTarget_ && this.pushTarget_.removeAttribute('open');
-    this.pushTarget_ && this.pushTarget_.removeAttribute('i-amphtml-sidebar-opened');
-    if (immediate) {
-      this.pushTarget_ && this.pushTarget_.setAttribute('i-amphtml-sidebar-closed', '');
+    if (this.pushTarget_) {
+      this.pushTarget_.removeAttribute('open');
+      this.pushTarget_.removeAttribute('i-amphtml-sidebar-opened');
+      if (immediate) {
+        this.pushTarget_.setAttribute('i-amphtml-sidebar-closed', '');
+      }
     }
     this.setUpdateFn_(
       () => this.updateForClosed_(trust),
@@ -598,7 +604,9 @@ export class AmpSidebar extends AMP.BaseElement {
     if (data.first) {
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.element),
-        coSwipeElement: dev().assertElement(this.pushTarget_ || document.createElement('div')),
+        coSwipeElement: dev().assertElement(
+          this.pushTarget_ || document.createElement('div')
+        ),
         mask: dev().assertElement(this.maskElement_),
         direction:
           this.side_ == Side.LEFT ? Direction.BACKWARD : Direction.FORWARD,

@@ -59,14 +59,8 @@ amp-sidebar[side][i-amphtml-sidebar-opened] {
   animation: none;
 }
 
-.i-amphtml-sidebar-push-target[side="left"] {
-}
-
 .i-amphtml-sidebar-push-target[side="left"][open] {
   transform: translateX(var(--sidebar-width));
-}
-
-.i-amphtml-sidebar-push-target[side="right"] {
 }
 
 .i-amphtml-sidebar-push-target[side="right"][open] {
@@ -81,7 +75,7 @@ amp-sidebar[side][i-amphtml-sidebar-opened] {
   transition: none;
 }
 
-amp-sidebar[side], .i-amphtml-sidebar-push-target, .i-amphtml-sidebar-mask {
+amp-sidebar[side] {
   /*
    * Note: This uses animations (instead of transitions) to make sure the
    * animation always plays correctly. Previously, the display was toggled in a
@@ -90,10 +84,13 @@ amp-sidebar[side], .i-amphtml-sidebar-push-target, .i-amphtml-sidebar-mask {
    * from working correctly.
    */
   /* Use same transition as PWA App-Shell https://goo.gl/AGFioO */
-  transition: transform 233ms ease, opacity 233ms;
   animation-duration: 233ms;
   animation-timing-function: cubic-bezier(0,0,.21,1);
   animation-fill-mode: forwards;
+}
+
+.i-amphtml-sidebar-push-target, .i-amphtml-sidebar-mask {
+  transition: transform 233ms cubic-bezier(0,0,.21,1), opacity 233ms;
 }
 
 .i-amphtml-toolbar > ul, .i-amphtml-toolbar > ol {

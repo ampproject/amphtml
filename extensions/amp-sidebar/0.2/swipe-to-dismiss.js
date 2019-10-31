@@ -96,6 +96,11 @@ export class SwipeToDismiss {
      * @private {?Element}
      */
     this.swipeElement_ = null;
+
+    /**
+     * The element that is moved alongside the swipe element.
+     * @private {?Element}
+     */
     this.coSwipeElement_ = null;
 
     /**
@@ -147,6 +152,7 @@ export class SwipeToDismiss {
    * Handles the start of a swipe.
    * @param {{
    *   swipeElement: !Element,
+   *   coSwipeElement: !Element,
    *   mask: !Element,
    * }} config
    */
@@ -249,19 +255,21 @@ export class SwipeToDismiss {
   /**
    * Adjusts the UI elements for the current swipe position in a swipe to
    * dismiss gesture. This should be called in a mutate context.
-   * @param {string} swipeDistance How to transform the swiping
+   * @param {number} swipeDistance How to transform the swiping
    *    element.
    * @param {number|string} maskOpacity The opacity for the mask element.
    *    container.
    * @private
    */
-  adjustForSwipePosition_(swipeDistance = '', maskOpacity = '') {
+  adjustForSwipePosition_(swipeDistance = 0, maskOpacity = '') {
     setStyles(dev().assertElement(this.swipeElement_), {
       transform: swipeDistance && this.translateBy_(swipeDistance, 'px'),
       transition: '',
     });
     setStyles(dev().assertElement(this.coSwipeElement_), {
-      transform: swipeDistance && this.translateBy_(swipeDistance-this.getSwipeElementLength_(), 'px'),
+      transform:
+        swipeDistance &&
+        this.translateBy_(swipeDistance - this.getSwipeElementLength_(), 'px'),
       transition: '',
     });
     setStyles(dev().assertElement(this.mask_), {
