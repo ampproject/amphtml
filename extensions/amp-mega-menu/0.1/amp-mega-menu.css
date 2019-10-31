@@ -23,6 +23,14 @@ amp-mega-menu.i-amphtml-layout-size-defined[open] {
   overflow: visible !important;
 }
 
+amp-mega-menu nav {
+  background: white;
+}
+
+amp-mega-menu nav > * {
+  margin: 0;
+}
+
 amp-mega-menu .i-amphtml-mega-menu-item {
   display: inline-block !important;
 }
