@@ -37,6 +37,7 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {isExperimentOn} from '../../../src/experiments';
 import {parseUrlDeprecated} from '../../../src/url';
 import {userAssert} from '../../../src/log';
 
@@ -46,6 +47,7 @@ const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 
 const SWG_EVENTS_TO_SUPPRESS = {
   [AnalyticsEvent.IMPRESSION_PAYWALL]: true,
+  [AnalyticsEvent.IMPRESSION_PAGE_LOAD]: true,
 };
 
 const AMP_EVENT_TO_SWG_EVENT = {
@@ -109,6 +111,11 @@ export class GoogleSubscriptionsPlatform {
       this.handleAnalyticsEvent_.bind(this)
     );
 
+    // Map AMP experiment to SwG experiment.
+    const swgExperiments = {};
+    if (isExperimentOn(ampdoc.win, 'gpay-api')) {
+      swgExperiments.experiments = ['gpay-api'];
+    }
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
@@ -117,7 +124,8 @@ export class GoogleSubscriptionsPlatform {
       {
         fetcher: new AmpFetcher(ampdoc.win),
         configPromise: new Promise(resolve => (resolver = resolve)),
-      }
+      },
+      swgExperiments
     );
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */
@@ -125,6 +133,12 @@ export class GoogleSubscriptionsPlatform {
     this.eventManager_.registerEventFilterer(
       GoogleSubscriptionsPlatform.filterSwgEvent_
     );
+    this.eventManager_.logEvent({
+      eventType: AnalyticsEvent.IMPRESSION_PAGE_LOAD,
+      eventOriginator: EventOriginator.AMP_CLIENT,
+      isFromUserAction: false,
+      additionalParameters: null,
+    });
     resolver();
 
     this.runtime_.setOnLoginRequest(request => {

@@ -90,15 +90,15 @@ jobs:
       env:
         - CACHE_NAME=E2EJOB
     - stage: experiment
-      name: "Experiment A Tests"
+      name: 'Experiment A Tests'
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
     - stage: experiment
-      name: "Experiment B Tests"
+      name: 'Experiment B Tests'
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
     - stage: experiment
-      name: "Experiment C Tests"
+      name: 'Experiment C Tests'
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
 before_cache:
