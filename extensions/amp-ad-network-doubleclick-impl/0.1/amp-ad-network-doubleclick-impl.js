@@ -1407,7 +1407,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
-      this.win,
+      this.getAmpDoc(),
       this.element.getAttribute('type'),
       getNetworkId
     );
