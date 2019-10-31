@@ -787,7 +787,12 @@ export class AmpForm {
       const status = init['status'];
       if (status >= 300) {
         /** HTTP status codes of 300+ mean redirects and errors. */
-        return this.handleSubmitFailure_(status, response, trust, response['body']);
+        return this.handleSubmitFailure_(
+          status,
+          response,
+          trust,
+          response['body']
+        );
       }
     }
     return this.handleSubmitSuccess_(response, trust, response['body']);
@@ -933,14 +938,17 @@ export class AmpForm {
 
   /**
    * @param {!Response} response
-   * @param {!ActionTrust} incomingTrust
+   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
     return response.json().then(
-      /** @type {!JsonObject} */ json => {
-        return this.handleSubmitSuccess_(json, incomingTrust).then(() => {
+      json => {
+        return this.handleSubmitSuccess_(
+          /** @type {!JsonObject} */ (json),
+          incomingTrust
+        ).then(() => {
           this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
           this.maybeHandleRedirect_(response);
         });
@@ -954,17 +962,19 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject} result
+   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
-   * @private visible for testing
+   * @private
    */
-  handleSubmitSuccess_(result, opt_eventData) {
+  handleSubmitSuccess_(result, incomingTrust, opt_eventData) {
     this.setState_(FormState.SUBMIT_SUCCESS);
     return tryResolve(() => {
       this.renderTemplate_(result || {}).then(() => {
         this.triggerAction_(
           FormEvents.SUBMIT_SUCCESS,
-          opt_eventData === undefined ? result : opt_eventData
+          opt_eventData === undefined ? result : opt_eventData,
+          incomingTrust
         );
         this.dirtinessHandler_.onSubmitSuccess();
       });
@@ -1010,7 +1020,7 @@ export class AmpForm {
         this.triggerAction_(
           FormEvents.SUBMIT_ERROR,
           opt_eventData === undefined ? json : opt_eventData,
-          outgoingTrust,
+          outgoingTrust
         );
         this.dirtinessHandler_.onSubmitError();
       });
