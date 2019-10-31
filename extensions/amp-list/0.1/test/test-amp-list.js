@@ -707,7 +707,7 @@ describes.repeated(
             });
 
             it('should error if proxied fetch returns invalid data', () => {
-              expectAsyncConsoleError(/Expected response with format/, 1);
+              expectAsyncConsoleError(/received no response/, 1);
               sandbox
                 .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve(undefined));
@@ -717,7 +717,23 @@ describes.repeated(
                 .once();
               return expect(
                 list.layoutCallback()
-              ).to.eventually.be.rejectedWith(/Expected response with format/);
+              ).to.eventually.be.rejectedWith(/received no response/);
+            });
+
+            it('should error if proxied fetch returns non-2xx status (error) in the response', () => {
+              expectAsyncConsoleError(/received no response/, 1);
+              sandbox
+                .stub(ssrTemplateHelper, 'ssr')
+                .returns(Promise.resolve({init: {status: 400}}));
+              listMock
+                .expects('toggleLoading')
+                .withExactArgs(false)
+                .once();
+              return expect(
+                list.layoutCallback()
+              ).to.eventually.be.rejectedWith(
+                /Error proxying amp-list templates with status/
+              );
             });
 
             it('should delegate template rendering to viewer', function*() {
