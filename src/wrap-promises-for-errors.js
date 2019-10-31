@@ -33,16 +33,17 @@ function isNative(fn) {
  * @param {function(err)} reportError
  */
 export function wrapPromsies(win, reportError) {
-  const NativePromise = win.Promise;
-  const originalThen = originalThen.prototype.then;
-  const species = typeof win['Species'] !== undefined && win['Species'].species;
+  const {Promise} = win;
+  const originalThen = Promise.prototype.then;
+  const species =
+    typeof win['Species'] !== 'undefined' && win['Species'].species;
 
   // If there's no species symbol, there's nothing we can do.
   if (!species) {
     return;
   }
   // If we using the polyfilled promise, there's no need to wrap it.
-  if (!isNative(NativePromise)) {
+  if (!isNative(Promise)) {
     return;
   }
 
@@ -65,7 +66,7 @@ export function wrapPromsies(win, reportError) {
    * @template T
    */
   function NuclearPromises(executer) {
-    const p = new NativePromise((resolve, reject) => {
+    const p = new Promise((resolve, reject) => {
       // The promises spec says that the `resolve` and `reject` functions may
       // only be called once. After that, they do nothing.
       let called = false;
@@ -119,8 +120,8 @@ export function wrapPromsies(win, reportError) {
 
   // Setup the wrapper's prototype chain. Both the constructor, and the
   // constructor.prototype must properly inherit.
-  NuclearPromises.__proto__ = NativePromise;
-  NuclearPromises.prototype.__proto__ = NativePromise.prototype;
+  NuclearPromises.__proto__ = Promise;
+  NuclearPromises.prototype.__proto__ = Promise.prototype;
 
   // Wrap the then method so that we can tell that this current promise is not
   // the end of a promise chain, it's the returned promise that's the end.
@@ -167,12 +168,12 @@ export function wrapPromsies(win, reportError) {
    * @return {function()}
    */
   function speciesWraper() {
-    return allowNative ? NativePromise : NuclearPromises;
+    return allowNative ? Promise : NuclearPromises;
   }
-  NativePromise[species] = speciesWraper;
+  Promise[species] = speciesWraper;
 
   // Finally, we need to force promises to use the think they are not the
-  // NativePromise. This will make them always call the species' constructor.
-  NativePromise.prototype.constructor = NuclearPromises;
+  // Promise. This will make them always call the species' constructor.
+  Promise.prototype.constructor = NuclearPromises;
   win.Promise = NuclearPromises;
 }
