@@ -37,6 +37,7 @@ import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
+import { AmpEvents } from '../../../src/amp-events';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
@@ -124,6 +125,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.opened_ = false;
 
+    /** @private {?Element} */
+    this.nestedMenu_ = null;
+
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
@@ -153,7 +157,15 @@ export class AmpSidebar extends AMP.BaseElement {
       element.setAttribute('side', this.side_);
     }
 
-    this.maybeBuildNestedMenu_();
+    // TODO(#25343): remove this check when cleaning up experiment post launch.
+    if (isExperimentOn(this.win, 'amp-nested-menu')) {
+      this.maybeBuildNestedMenu_();
+      // Nested menu may not be present during buildCallback if it is rendered
+      // dynamically with amp-list, in which case listen for dom update.
+      element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+        this.maybeBuildNestedMenu_();
+      });
+    }
 
     // Get the toolbar attribute from the child navs.
     const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
@@ -245,28 +257,20 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Loads the extension for amp-nested-menu if sidebar contains one.
+   * Loads the extension for nested menu if sidebar contains one and it
+   * has not been installed already.
    */
   maybeBuildNestedMenu_() {
-    // TODO(#25343): remove this check when cleaning up experiment post launch.
-    if (!isExperimentOn(this.win, 'amp-nested-menu')) {
+    if (this.nestedMenu_) {
       return;
     }
-    let nestedMenu = this.element.querySelector('amp-nested-menu');
-    // check if nested menu is inside a template.
-    if (!nestedMenu) {
-      const templates = this.element.querySelectorAll('template');
-      templates.forEach(template => {
-        const fragment = template.content;
-        nestedMenu =
-          nestedMenu || (fragment && fragment.querySelector('amp-nested-menu'));
-      });
-    }
+    const nestedMenu = this.element.querySelector('amp-nested-menu');
     if (nestedMenu) {
       Services.extensionsFor(this.win).installExtensionForDoc(
         this.getAmpDoc(),
         'amp-nested-menu'
       );
+      this.nestedMenu_ = nestedMenu;
     }
   }
 
