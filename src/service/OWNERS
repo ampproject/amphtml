@@ -4,11 +4,8 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'ampproject/wg-infra'},
-        {name: 'ampproject/runtime'},
-        {name: 'ampproject/performance'},
-      ],
+      pattern: 'video-*.js',
+      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
     },
   ],
 }

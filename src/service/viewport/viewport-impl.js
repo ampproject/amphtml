@@ -118,6 +118,9 @@ export class ViewportImpl {
     /** @private {boolean} */
     this.scrollTracking_ = false;
 
+    /** @private {Element} */
+    this.scrollingElement_ = null;
+
     /** @private {number} */
     this.scrollCount_ = 0;
 
@@ -554,7 +557,10 @@ export class ViewportImpl {
 
   /** @override */
   getScrollingElement() {
-    return this.binding_.getScrollingElement();
+    if (this.scrollingElement_) {
+      return this.scrollingElement_;
+    }
+    return (this.scrollingElement_ = this.binding_.getScrollingElement());
   }
 
   /** @override */
@@ -1168,7 +1174,11 @@ function getViewportType(win, viewer) {
   ) {
     return viewportType;
   }
-  const isIosIframeScrollableOn = isExperimentOn(win, 'ios-scrollable-iframe');
+  const isIosIframeScrollableOn =
+    isExperimentOn(win, 'ios-scrollable-iframe') ||
+    viewer.hasCapability('iframeScroll');
+  // TODO(#23379): remove "development -> embed" override once iOS13 is fully
+  // launched.
   // Enable iOS Embedded mode so that it's easy to test against a more
   // realistic iOS environment w/o an iframe.
   if (

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.75 */
+/** Version: 0.1.22.79 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -43,6 +43,7 @@ const AnalyticsEvent = {
   IMPRESSION_CLICK_TO_SHOW_OFFERS_OR_ALREADY_SUBSCRIBED: 8,
   IMPRESSION_SUBSCRIPTION_COMPLETE: 9,
   IMPRESSION_ACCOUNT_CHANGED: 10,
+  IMPRESSION_PAGE_LOAD: 11,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -2861,118 +2862,6 @@ var activityPorts_11 = activityPorts.createAbortError;
 var activityPorts_12 = activityPorts.isAbortError;
 
 /**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Debug logger, only log message if #swg.log=1
- * @param {...*} var_args [decription]
- */
-
-/* eslint-disable */
-
-function debugLog(var_args) {
-  if (/swg.debug=1/.test(self.location.hash)) {
-    const logArgs = Array.prototype.slice.call(arguments, 0);
-    logArgs.unshift('[Subscriptions]');
-    log.apply(log, logArgs);
-  }
-}
-
-/**
- * @param  {...*} var_args [description]
- */
-function log(var_args) {
-  console.log.apply(console, arguments);
-}
-
-/**
- * Throws an error if the first argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- *
- * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
- *     not evaluate to true.
- * @param {string=} opt_message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTrueish.
- * @template T
- */
-function assert(shouldBeTrueish, opt_message, var_args) {
-  let firstElement;
-  if (!shouldBeTrueish) {
-    const message = opt_message || 'Assertion failed';
-    const splitMessage = message.split('%s');
-    const first = splitMessage.shift();
-    let formatted = first;
-    const messageArray = [];
-    pushIfNonEmpty(messageArray, first);
-    for (let i = 2; i < arguments.length; i++) {
-      const val = arguments[i];
-      if (val && val.tagName) {
-        firstElement = val;
-      }
-      const nextConstant = splitMessage.shift();
-      messageArray.push(val);
-      pushIfNonEmpty(messageArray, nextConstant.trim());
-      formatted += toString(val) + nextConstant;
-    }
-    const e = new Error(formatted);
-    e.fromAssert = true;
-    e.associatedElement = firstElement;
-    e.messageArray = messageArray;
-    throw e;
-  }
-  return shouldBeTrueish;
-}
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
-  }
-}
-
-function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return /** @type {string} */ (val);
-}
-
-var log_1 = {
-  assert,
-  debugLog,
-  log
-};
-var log_2 = log_1.assert;
-var log_3 = log_1.debugLog;
-var log_4 = log_1.log;
-
-/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3094,24 +2983,6 @@ class ActivityIframePort$1 {
    */
   onResizeRequest(callback) {
     return this.iframePort_.onResizeRequest(callback);
-  }
-
-  /**
-   * Sends a message to the host.
-   * @param {!Object} payload
-   */
-  messageDeprecated(payload) {
-    this.iframePort_.message(payload);
-    log_3('WARNING: messageDeprecated() is deprecated');
-  }
-
-  /**
-   * Registers a callback to receive messages from the host.
-   * @param {function(!Object)} callback
-   */
-  onMessageDeprecated(callback) {
-    this.callbackOriginal_ = callback;
-    log_3('WARNING: use of deprecated API onMessageDeprecated()');
   }
 
   /**
@@ -3252,6 +3123,117 @@ class ActivityPorts$1 {
     return this.activityPorts_;
   }
 }
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} opt_message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, opt_message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    const message = opt_message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
+var log_1 = {
+  assert,
+  debugLog,
+  log
+};
+var log_2 = log_1.assert;
+var log_4 = log_1.log;
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -4183,7 +4165,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.75',
+    '_client': 'SwG 0.1.22.79',
   });
 }
 
@@ -5140,24 +5122,6 @@ class ActivityIframeView extends View {
     return this.portPromise_;
   }
 
-  /**
-   * @param {!Object} data
-   */
-  messageDeprecated(data) {
-    this.getPortPromise_().then(port => {
-      port.messageDeprecated(data);
-    });
-  }
-
-  /**
-   * Handles the message received by the port.
-   * @param {function(!Object<string, string|boolean>)} callback
-   */
-  onMessageDeprecated(callback) {
-    this.getPortPromise_().then(port => {
-      port.onMessageDeprecated(callback);
-    });
-  }
   /**
    * @param {!function(new: T)}  message
    * @param {function(../proto/api_messages.Message)} callback
@@ -6382,7 +6346,6 @@ class PayStartFlow {
         'swg': swgPaymentRequest,
         'i': {
           'startTimeMs': Date.now(),
-          'googleTransactionId': this.analyticsService_.getTransactionId(),
           'productType': this.productType_,
         },
       },
@@ -11642,16 +11605,6 @@ class PaymentsWebActivityDelegate {
     {
       return;
     }
-    const containerAndFrame = this.injectIframe_(paymentDataRequest);
-    const paymentDataPromise = this.openIframe_(
-        containerAndFrame['container'], containerAndFrame['iframe'],
-        paymentDataRequest);
-    this.prefetchedObjects_ = {
-      'container': containerAndFrame['container'],
-      'iframe': containerAndFrame['iframe'],
-      'request': paymentDataRequest,
-      'dataPromise': paymentDataPromise,
-    };
   }
 
   /** @override */
@@ -12757,6 +12710,7 @@ class PaymentsAsyncClient {
           PayFrameHelper.postMessage({
             'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
             'clientLatencyStartMs': this.loadPaymentDataApiStartTimeMs_,
+            'buyFlowMode': this.buyFlowMode_,
           });
         })
         .catch(result => {
@@ -13079,15 +13033,31 @@ function payDecryptUrl() {
  */
 class PayClient {
   /**
-   * @param {!Window} win
-   * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!../components/dialog-manager.DialogManager} dialogManager
+   * @param {!./deps.DepsDef} deps
    */
-  constructor(win, activityPorts, dialogManager) {
+  constructor(deps) {
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
     /** @const @private {!PayClientBindingDef} */
-    this.binding_ = isExperimentOn(win, ExperimentFlags.GPAY_API)
-      ? new PayClientBindingPayjs(win, activityPorts)
-      : new PayClientBindingSwg(win, activityPorts, dialogManager);
+    this.binding_ = isExperimentOn(this.win_, ExperimentFlags.GPAY_API)
+      ? new PayClientBindingPayjs(
+          this.win_,
+          this.activityPorts_,
+          // Generates a new Google Transaction ID.
+          deps.analytics().getTransactionId()
+        )
+      : new PayClientBindingSwg(
+          this.win_,
+          this.activityPorts_,
+          this.dialogManager_
+        );
   }
 
   /**
@@ -13223,8 +13193,9 @@ class PayClientBindingPayjs {
   /**
    * @param {!Window} win
    * @param {!../components/activities.ActivityPorts} activityPorts
+   * @param {!string} googleTransactionId
    */
-  constructor(win, activityPorts) {
+  constructor(win, activityPorts, googleTransactionId) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private @const {!../components/activities.ActivityPorts} */
@@ -13247,6 +13218,7 @@ class PayClientBindingPayjs {
           'redirectKey': this.redirectVerifierHelper_.restoreKey(),
         },
       },
+      googleTransactionId,
       this.handleResponse_.bind(this)
     );
 
@@ -13256,11 +13228,15 @@ class PayClientBindingPayjs {
 
   /**
    * @param {!Object} options
+   * @param {string} googleTransactionId
    * @param {function(!Promise<!Object>)} handler
    * @return {!PaymentsAsyncClient}
    * @private
    */
-  createClient_(options, handler) {
+  createClient_(options, googleTransactionId, handler) {
+    // Assign Google Transaction ID to PaymentsAsyncClient.googleTransactionId_
+    // so it can be passed to gpay_async.js and stored in payment clearcut log.
+    PaymentsAsyncClient.googleTransactionId_ = googleTransactionId;
     return new PaymentsAsyncClient(
       options,
       handler,
@@ -14692,16 +14668,6 @@ class AnalyticsService {
   }
 
   /**
-   * Handles the message received by the port.
-   * @param {function(!Object<string, string|boolean>)} callback
-   */
-  onMessage(callback) {
-    this.lastAction_ = this.start_().then(port => {
-      port.onMessageDeprecated(callback);
-    });
-  }
-
-  /**
    * @return {boolean}
    */
   shouldLogPublisherEvents_() {
@@ -15334,13 +15300,6 @@ class ConfiguredRuntime {
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = new ActivityPorts$1(this.win_);
 
-    /** @private @const {!PayClient} */
-    this.payClient_ = new PayClient(
-      this.win_,
-      this.activityPorts_,
-      this.dialogManager_
-    );
-
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
@@ -15348,11 +15307,15 @@ class ConfiguredRuntime {
     //analytics service and entitlements manager are constructed unless
     //you are certain they do not rely on them because they are part of that
     //definition.
-    /** @private @const {!Logger} */
-    this.logger_ = new Logger(this);
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
+
+    /** @private @const {!PayClient} */
+    this.payClient_ = new PayClient(this);
+
+    /** @private @const {!Logger} */
+    this.logger_ = new Logger(this);
 
     /** @private @const {!EntitlementsManager} */
     this.entitlementsManager_ = new EntitlementsManager(
