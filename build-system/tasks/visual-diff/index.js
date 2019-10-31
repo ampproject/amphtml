@@ -84,7 +84,7 @@ let percyAgentProcess_;
  * Override PERCY_* environment variables if passed via gulp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
-  ['percy_project', 'percy_token', 'percy_branch'].forEach(variable => {
+  ['percy_token', 'percy_branch'].forEach(variable => {
     if (variable in argv) {
       process.env[variable.toUpperCase()] = argv[variable];
     }
@@ -722,17 +722,12 @@ async function visualDiff() {
  */
 async function performVisualTests() {
   setDebuggingLevel();
-  if (
-    !argv.percy_disabled &&
-    (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN)
-  ) {
+  if (!argv.percy_disabled && !process.env.PERCY_TOKEN) {
     log(
       'fatal',
       'Could not find',
-      colors.cyan('PERCY_PROJECT'),
-      'and',
       colors.cyan('PERCY_TOKEN'),
-      'environment variables'
+      'environment variable'
     );
   } else {
     try {
@@ -851,7 +846,6 @@ visualDiff.flags = {
   'debug': '  Sets all debugging flags',
   'verbose': '  Prints verbose log statements',
   'grep': '  Runs tests that match the pattern',
-  'percy_project': '  Override the PERCY_PROJECT environment variable',
   'percy_token': '  Override the PERCY_TOKEN environment variable',
   'percy_branch': '  Override the PERCY_BRANCH environment variable',
   'percy_disabled':
