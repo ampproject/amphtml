@@ -34,6 +34,7 @@ const PATHS_TO_INCLUDE = [
 
 const PATHS_TO_IGNORE = [
   path.resolve(ROOT_DIR, 'src/polyfills'),
+  path.resolve(ROOT_DIR, 'src/wrap-promises-for-errors.js'),
   path.resolve(ROOT_DIR, 'test/'),
 ];
 

@@ -33,6 +33,7 @@ import {makeBodyVisibleRecovery} from './style-installer';
 import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
+import {wrapPromsies} from './wrap-promises-for-errors';
 
 /**
  * @const {string}
@@ -281,7 +282,7 @@ export function isBlockedByConsent(errorOrMessage) {
  */
 export function installErrorReporting(win) {
   win.onerror = /** @type {!Function} */ (onError);
-  win.addEventListener('unhandledrejection', event => {
+  const unhandledrejection = event => {
     if (
       event.reason &&
       (event.reason.message === CANCELLED ||
@@ -292,6 +293,13 @@ export function installErrorReporting(win) {
       return;
     }
     reportError(event.reason || new Error('rejected promise ' + event));
+  };
+  win.addEventListener('unhandledrejection', unhandledrejection);
+  wrapPromsies(self, err => {
+    unhandledrejection({
+      reason: err,
+      preventDefault() {},
+    });
   });
 }
 
