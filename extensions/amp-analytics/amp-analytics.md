@@ -131,7 +131,7 @@ In the `<amp-analytics>` element, you specify a JSON configuration object that c
 
 The configuration object for `<amp-analytics>` uses the following format:
 
-```json
+```javascript
 {
   "requests": {
     "request-name": request-value,

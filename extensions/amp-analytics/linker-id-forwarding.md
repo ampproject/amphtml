@@ -8,7 +8,7 @@ This document outlines the configuration options that will determine in which co
 
 #### Format
 
-```json
+```javascript
 "linkers": {
   "<paramName>": {
     "ids": <Object>,
@@ -102,7 +102,7 @@ Some items in the configuration objects have default values. However, you may ov
 
 Example:
 
-```json
+```javascript
 "linkers": {
   "enabled": true, // This enables all child linkers contained in this object.
   "proxyOnly" : false,
