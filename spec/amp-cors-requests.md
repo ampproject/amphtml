@@ -403,7 +403,11 @@ function assertFontCors(req, res, opt_validMethods, opt_exposeHeaders) {
 ```
 As an example, if you wanted to load /some/font.ttf in https://example.com/amp.html, the origin server should respond with the Access-Control-Allow-Origin header as below.
 
-// TODO: Add photo
+<amp-img alt="CORS font example" layout="responsive" src="https://amp.dev/static/img/docs/cors-font.jpg" width="2268" height="1594">
+  <noscript>
+    <img alt="CORS font example" src="https://amp.dev/static/img/docs/cors-font.jpg" />
+  </noscript>
+</amp-img>
 
 [tip type="note]
 If your font file is okay to be accessible from any origin, you can respond with a wild card `Access-Control-Allow-Origin`, AMP cache will also echo that value meaning it will be responding with `Access-Control-Allow-Origin: *`. If you already have this setting, there is no need in changing anything.
