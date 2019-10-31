@@ -32,7 +32,7 @@ function isNative(fn) {
  * @param {!Window} win
  * @param {function(err)} reportError
  */
-export function wrapPromsies(win, reportError) {
+export function wrapPromises(win, reportError) {
   const {Promise} = win;
   const originalThen = Promise.prototype.then;
   const species =
