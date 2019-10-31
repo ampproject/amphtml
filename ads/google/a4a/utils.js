@@ -203,12 +203,12 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} type matching typing attribute.
  * @param {function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
-export function groupAmpAdsByType(win, type, groupFn) {
+export function groupAmpAdsByType(ampdoc, type, groupFn) {
   // Look for amp-ad elements of correct type or those contained within
   // standard container type.  Note that display none containers will not be
   // included as they will never be measured.
@@ -217,10 +217,8 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // visible).
   const ampAdSelector = r =>
     r.element./*OK*/ querySelector(`amp-ad[type=${type}]`);
-  const {documentElement} = win.document;
-  const ampdoc = Services.ampdoc(documentElement);
   return (
-    getMeasuredResources(ampdoc, win, r => {
+    getMeasuredResources(ampdoc, ampdoc.win, r => {
       const isAmpAdType =
         r.element.tagName == 'AMP-AD' && r.element.getAttribute('type') == type;
       if (isAmpAdType) {
