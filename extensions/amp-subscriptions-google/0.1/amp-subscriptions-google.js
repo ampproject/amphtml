@@ -195,9 +195,12 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnPaymentResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response,
-          response.productType === 'CONTRIBUTION' ?
-          Action.CONTRIBUTE : Action.SUBSCRIBE);
+        this.onSubscribeResponse_(
+          response,
+          response.productType === 'CONTRIBUTION'
+            ? Action.CONTRIBUTE
+            : Action.SUBSCRIBE
+        );
       });
     });
 
