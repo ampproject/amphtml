@@ -132,19 +132,14 @@ export class Timer {
    * @param {number} delay
    * @param {?Promise<RESULT>|undefined} opt_racePromise
    * @param {string=} opt_message
-   * @param {boolean=} opt_resolveOnTimeout
    * @return {!Promise<RESULT>}
    * @template RESULT
    */
-  timeoutPromise(delay, opt_racePromise, opt_message, opt_resolveOnTimeout) {
+  timeoutPromise(delay, opt_racePromise, opt_message) {
     let timerKey;
-    const delayPromise = new this.win.Promise((resolve, reject) => {
+    const delayPromise = new this.win.Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
-        if (opt_resolveOnTimeout) {
-          resolve();
-        } else {
-          reject(user().createError(opt_message || 'timeout'));
-        }
+        reject(user().createError(opt_message || 'timeout'));
       }, delay);
 
       if (timerKey == -1) {

@@ -430,6 +430,9 @@ export class MultidocManager {
     setStyle(hostElement, 'visibility', 'hidden');
     const shadowRoot = createShadowRoot(hostElement);
 
+    // TODO: closeShadowRoot_ is asynchronous. While this safety check is well
+    // intentioned, it leads to a race between unlayout and layout of custom
+    // elements.
     if (shadowRoot.AMP) {
       user().warn(TAG, "Shadow doc wasn't previously closed");
       this.closeShadowRoot_(shadowRoot);
@@ -503,19 +506,12 @@ export class MultidocManager {
     }, origin);
 
     /**
-     * Closes the document. The document can no longer be activated again.
-     */
-    amp['close'] = () => {
-      this.closeShadowRoot_(shadowRoot);
-    };
-
-    /**
      * Closes the document, resolving when visibility changes and services have
      * been cleand up. The document can no longer be activated again.
      * @return {Promise}
      */
-    amp['closeAsync'] = () => {
-      return this.closeShadowRootAsync_(shadowRoot);
+    amp['close'] = () => {
+      return this.closeShadowRoot_(shadowRoot);
     };
 
     if (getMode().development) {
@@ -851,15 +847,38 @@ export class MultidocManager {
 
   /**
    * @param {!ShadowRoot} shadowRoot
+   * @return {Promise}
    * @private
    */
   closeShadowRoot_(shadowRoot) {
+    const cleanup = () => {
+      ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
+      disposeServicesForDoc(ampdoc);
+    };
+
     this.removeShadowRoot_(shadowRoot);
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
-    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
-    disposeServicesForDoc(ampdoc);
+    return this.timer_
+      .timeoutPromise(
+        15, // Delay for queued pass after visibility change is 10ms
+        new this.win.Promise(resolve => {
+          getServicePromiseOrNullForDoc(ampdoc, 'resources').then(resources => {
+            if (resources) {
+              resources.onNextPass(resolve);
+              cleanup();
+            } else {
+              cleanup();
+              resolve();
+            }
+          });
+        }),
+        'Timeout reached before shadowRoot cleanup completed'
+      )
+      .catch(error => {
+        user().warn(TAG, error);
+      });
   }
 
   /**
@@ -875,27 +894,12 @@ export class MultidocManager {
 
   /**
    * @param {!ShadowRoot} shadowRoot
-   * @return {Promise}
    * @private
    */
   closeShadowRootAsync_(shadowRoot) {
-    return this.timer_.timeoutPromise(
-      15, // Delay for queued pass after visibility change is 10ms
-      new this.win.Promise(resolve => {
-        const {ampdoc} = shadowRoot.AMP;
-        getServicePromiseOrNullForDoc(ampdoc, 'resources').then(resources => {
-          if (resources) {
-            resources.onNextPass(resolve);
-            this.closeShadowRoot_(shadowRoot);
-          } else {
-            this.closeShadowRoot_(shadowRoot);
-            resolve();
-          }
-        });
-      }),
-      undefined,
-      true
-    );
+    this.timer_.delay(() => {
+      this.closeShadowRoot_(shadowRoot);
+    }, 0);
   }
 
   /** @private */
