@@ -34,10 +34,13 @@ myTarget implementation of AMP Ad tag which requests early by XHR and renders na
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="mytarget"
-    data-use-a4a="true"
-    data-ad-slot="197378">
+<amp-ad
+  width="300"
+  height="250"
+  type="mytarget"
+  data-use-a4a="true"
+  data-ad-slot="197378"
+>
 </amp-ad>
 ```
 
