@@ -372,13 +372,13 @@ Access-Control-Allow-Origin: https://example-com.cdn.ampproject.org
 Google AMP Cache caches AMP HTML documents, images and fonts to optimize the speed of the AMP page. While making the AMP page fast, we also want to be careful in securing the cached resources. We will be making a change in how AMP cache responds it’s cached resources, 
 typically for fonts, by respecting the origin’s `Access-Control-Allow-Origin` value.
 
-### How AMP Cache works as-is
+### Past behavior (before October 2019)
 When an AMP page was loading [https://example.com/some/font.ttf](https://example.com/some/font.ttf) from `@font-face src` attribute, AMP Cache will cache the font file and serve the resource as below with having the wild card `Access-Control-Allow-Origin`.
 
 - URL [https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff](https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff)
 - Access-Control-Allow-Origin: *
 
-### Font implementation 
+### New behavior (October 2019 and after)
 While the current implementation is permissive, this could lead to unexpected use of the fonts from cross-origin sites. In this change AMP Cache will start to respond with the exact same `Access-Control-Allow-Origin` value the origin server responds. 
 To properly load the fonts from the cached AMP document, you will need to accept the AMP Cache origin via the header.
 
@@ -415,7 +415,7 @@ If your font file is okay to be accessible from any origin, you can respond with
 
 We are planning to make this change around mid October 2019 and would expect every AMP publishers using self-hosted fonts to check if it’s affected.
 
-### Roll out plan
+#### Roll out plan
 
 - 2019-09-30: release contains more precise control over which domains this change applies to. This build should roll out over the course of this week.
 - 2019-10-07: test domains will be enabled for manual testing.
