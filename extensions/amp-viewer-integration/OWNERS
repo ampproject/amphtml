@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'chenshay'}],
+      owners: [{name: 'ampproject/wg-viewers'}, {name: 'chenshay'}],
     },
   ],
 }
