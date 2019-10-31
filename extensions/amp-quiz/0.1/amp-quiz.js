@@ -20,15 +20,14 @@ import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 
+const answerChoiceOptions = ['A', 'B', 'C', 'D'];
+
 export class AmpQuiz extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
    */
   constructor(element) {
     super(element);
-
-    /** @private {?HTMLElement} */
-    this.shadowElement_ = null;
 
     /** @private {?ShadowRoot} */
     this.shadowRoot_ = null;
@@ -37,13 +36,15 @@ export class AmpQuiz extends AMP.BaseElement {
     this.hasReceivedResponse_ = false;
 
     /** @private {Array<number>} */
-    this.percentages_ = this.generatePercentages_();
+    this.percentages_ = this.TEMPgeneratePercentages_();
+
+    this.configureOption_ = this.configureOption_.bind(this);
   }
 
   /** @override */
   buildCallback() {
     const html = htmlFor(this.element);
-    this.shadowElement_ = html`
+    const shadowElement = html`
       <div class="i-amp-quiz-container">
         <div class="i-amp-quiz-prompt-container"></div>
         <div class="i-amp-quiz-option-container"></div>
@@ -52,16 +53,17 @@ export class AmpQuiz extends AMP.BaseElement {
 
     this.shadowRoot_ = createShadowRootWithStyle(
       this.element,
-      this.shadowElement_,
+      shadowElement,
       CSS
     );
 
-    // TODO: FIND A MORE JS-Y WAY TO DO THIS LOL
+    // TODO: CONVERT THIS TO STANDARD AMP ERROR REPORTING
     this.attachContent_(e => {
       console.log('error!', e);
+      // TODO: SET ELEMENT TO DISPLAY NONE
       throw new Error(e);
     });
-    this.attachOptionHandlers_();
+    this.attachOptionActionHandlers_();
 
     // TODO: ATTACH SURFACE OPTIONS USING CSS CUSTOM PROPERTIES
   }
@@ -75,12 +77,15 @@ export class AmpQuiz extends AMP.BaseElement {
    * @param {Function} handleError
    */
   attachContent_(handleError) {
-    // TODO: OPTIMIZE THIS ISH
-    // AND TEST FOR THE EDGE CASES
     const prompt = this.element.children[0];
-    // TODO: BAN H4-H6
-    if (!(prompt instanceof HTMLHeadingElement)) {
-      handleError('The first child must be a heading element');
+    // First child must be heading h1-h3
+    if (
+      !(prompt instanceof HTMLHeadingElement) ||
+      prompt.tagName[prompt.tagName.length - 1] > 3
+    ) {
+      handleError(
+        'The first child must be a heading element <h1>, <h2>, or <h3>'
+      );
     }
 
     const options = Array.from(this.element.querySelectorAll('option'));
@@ -92,42 +97,51 @@ export class AmpQuiz extends AMP.BaseElement {
       .querySelector('.i-amp-quiz-prompt-container')
       .appendChild(prompt);
 
-    const answerChoiceOptions = ['A', 'B', 'C', 'D'];
-    options.forEach(option => {
-      // TODO: THIS IS A MESS, DOCUMENT THIS
-      const convertedOption = document.createElement('span');
-      convertedOption.textContent = option.textContent;
-      if (option.hasAttribute('correct')) {
-        convertedOption.setAttribute('correct', 'correct');
-      }
-      option.remove();
-
-      convertedOption.setAttribute('class', 'i-amp-quiz-option');
-      this.shadowRoot_
-        .querySelector('.i-amp-quiz-option-container')
-        .appendChild(convertedOption);
-
-      const answerChoice = document.createElement('span');
-      answerChoice.textContent = answerChoiceOptions.shift();
-      answerChoice.setAttribute('class', 'i-amp-quiz-answer-choice');
-      convertedOption.prepend(answerChoice);
-
-      const percentageBox = document.createElement('span');
-      // TODO: FILL THIS IN WITH ACTUAL CONTENT
-      percentageBox.textContent = '25%';
-      percentageBox.setAttribute('class', 'i-amp-quiz-percentage');
-      convertedOption.append(percentageBox);
-    });
+    options.forEach(this.configureOption_);
 
     if (this.element.children.length !== 0) {
       handleError('Too many children');
     }
   }
 
+  /**
+   * @private
+   * @param {HTMLOptionElement} option
+   */
+  configureOption_(option) {
+    // Transfer the option information into a span
+    const convertedOption = document.createElement('span');
+    convertedOption.textContent = option.textContent;
+    if (option.hasAttribute('correct')) {
+      convertedOption.setAttribute('correct', 'correct');
+    }
+    option.remove();
+
+    // Set up the class and add it to the shadow root
+    convertedOption.setAttribute('class', 'i-amp-quiz-option');
+    this.shadowRoot_
+      .querySelector('.i-amp-quiz-option-container')
+      .appendChild(convertedOption);
+
+    // Create a container for the answer choice and add it to the shadow root
+    const answerChoice = document.createElement('span');
+    answerChoice.textContent = answerChoiceOptions.shift();
+    answerChoice.setAttribute('class', 'i-amp-quiz-answer-choice');
+    convertedOption.prepend(answerChoice);
+
+    // Create a container for the percentage and add it to the shadow root
+    const percentageBox = document.createElement('span');
+    // TODO: FILL THIS IN WITH GENERATED PERCENT CONTENT
+    percentageBox.textContent = '25%';
+    percentageBox.setAttribute('class', 'i-amp-quiz-percentage');
+    convertedOption.append(percentageBox);
+  }
+
   /** @private
+   * Temporary method to generate random percentages
    * @return {Array<number>}
    */
-  generatePercentages_() {
+  TEMPgeneratePercentages_() {
     const percentages = [];
     let pool = 100;
     let random;
@@ -146,27 +160,25 @@ export class AmpQuiz extends AMP.BaseElement {
   setOptionPercentage_(option) {
     // TODO: ASSIGN THE PERCENTAGES BETTER
     const percentage = this.percentages_.shift();
-    let backgroundString;
-    if (option.getAttribute('class').includes('i-amp-quiz-option-selected')) {
-      if (option.hasAttribute('correct')) {
-        backgroundString = `linear-gradient(90deg, var(--correct-color-shaded) ${50 +
-          percentage / 2}%, var(--correct-color) ${percentage / 2}%)`;
-      } else {
-        backgroundString = `linear-gradient(90deg, var(--incorrect-color-shaded) ${50 +
-          percentage / 2}%, var(--incorrect-color) ${percentage / 2}%)`;
-      }
-    } else {
-      backgroundString = `linear-gradient(90deg, #d9d9d9 ${50 +
-        percentage / 2}%, #ffffff ${percentage / 2}%)`;
-    }
-    setStyle(option, 'background', backgroundString);
+    // UNCOMMENT TO GET PERCENTAGE BARS
+    // let backgroundString;
+    // if (option.getAttribute('class').includes('i-amp-quiz-option-selected')) {
+    //   const colorPrefix = option.hasAttribute('correct') ? '' : 'in';
+    //   backgroundString = `linear-gradient(90deg, var(--${colorPrefix}correct-color-shaded) ${50 +
+    //     percentage / 2}%, var(--${colorPrefix}correct-color) ${percentage /
+    //     2}%)`;
+    // } else {
+    //   backgroundString = `linear-gradient(90deg, #d9d9d9 ${50 +
+    //     percentage / 2}%, #ffffff ${percentage / 2}%)`;
+    // }
+    // setStyle(option, 'background', backgroundString);
     option.querySelector(
       '.i-amp-quiz-percentage'
     ).textContent = `${percentage}%`;
   }
 
   /** @private */
-  attachOptionHandlers_() {
+  attachOptionActionHandlers_() {
     const options = Array.from(
       this.shadowRoot_.querySelectorAll('.i-amp-quiz-option')
     );
@@ -176,17 +188,15 @@ export class AmpQuiz extends AMP.BaseElement {
       option.addEventListener('click', () => {
         if (!this.hasReceivedResponse_) {
           options.forEach(o => {
-            o.setAttribute(
-              'class',
-              `i-amp-quiz-option i-amp-quiz-option-post-selection`
-            );
-
-            if (o === option) {
-              o.setAttribute(
-                'class',
-                `i-amp-quiz-option i-amp-quiz-option-post-selection i-amp-quiz-option-selected`
-              );
-            }
+            o === option
+              ? o.setAttribute(
+                  'class',
+                  `i-amp-quiz-option i-amp-quiz-option-post-selection i-amp-quiz-option-selected`
+                )
+              : o.setAttribute(
+                  'class',
+                  `i-amp-quiz-option i-amp-quiz-option-post-selection`
+                );
 
             const symbolContainer = o.querySelector(
               '.i-amp-quiz-answer-choice'
