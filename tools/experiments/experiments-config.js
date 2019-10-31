@@ -242,11 +242,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'amp-list-load-more',
-    name: 'Enables load-more related functionality in amp-list',
-    spec: 'https://github.com/ampproject/amphtml/issues/13575',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
@@ -316,5 +311,19 @@ export const EXPERIMENTS = [
     name: 'Use amp-ad responsive to make amp auto ads responsive.',
     spec: 'https://github.com/ampproject/amphtml/issues/24168',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
+  },
+  {
+    id: 'remove-viewer-query-params-on-navigate',
+    name: 'Removes query params from viewer iframe on navigation.',
+    spec: 'https://github.com/ampproject/amphtml/issues/25179',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
+  },
+  {
+    id: 'layoutbox-invalidate-on-scroll',
+    name:
+      'Invalidate the cached layoutboxes of elements nested in a scroller ' +
+      'after that scroller scrolls.',
+    spec: 'https://github.com/ampproject/amphtml/issues/24929',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
   },
 ];

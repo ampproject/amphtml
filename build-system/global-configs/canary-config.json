@@ -24,8 +24,6 @@
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-consent-v2": 1,
-  "amp-list-load-more": 1,
-  "amp-list-viewport-resize": 1,
   "amp-playbuzz": 1,
   "amp-sidebar-swipe-to-dismiss": 1,
   "amp-story-responsive-units": 1,
@@ -37,7 +35,7 @@
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
   "fie-css-cleanup": 1,
-  "fix-inconsistent-responsive-height-selection": 0.05,
+  "fix-inconsistent-responsive-height-selection": 0,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
@@ -46,5 +44,6 @@
   "macro-after-long-task": 1,
   "pump-early-frame": 1,
   "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
+  "remove-viewer-query-params-on-navigate": 1,
   "version-locking": 1
 }
