@@ -102,13 +102,13 @@ async function checkFile(file) {
       green('SUCCESS:'),
       'Parsed',
       cyan(file),
-      'successfully! Produced rules:'
+      'successfully; Produced',
+      cyan(rules.length),
+      'rules.'
     );
-    rules.forEach(rule => log(rule));
   } catch (error) {
     log(red('FAILURE:'), error);
     process.exitCode = 1;
-    return;
   }
 }
 
@@ -119,4 +119,5 @@ module.exports = {
 checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
 checkOwners.flags = {
   'files': '  Checks only the specified OWNERS files',
+  'validate': '  Validates the OWNERS files with the owners bot API',
 };

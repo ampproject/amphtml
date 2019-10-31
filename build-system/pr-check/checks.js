@@ -89,6 +89,7 @@ async function main() {
       timedExecOrDie('gulp dev-dashboard-tests');
     }
 
+    // Validate owners syntax only for PR builds.
     if (buildTargets.has('OWNERS')) {
       timedExecOrDie('gulp check-owners --local_changes');
     }
