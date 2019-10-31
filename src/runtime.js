@@ -851,15 +851,20 @@ export class MultidocManager {
    * @private
    */
   closeShadowRoot_(shadowRoot) {
-    const cleanup = () => {
-      ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
-      disposeServicesForDoc(ampdoc);
-    };
-
     this.removeShadowRoot_(shadowRoot);
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
+    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
+    disposeServicesForDoc(ampdoc);
+
+    // There is a race between the visibility state change finishing and
+    // resources.onNextPass firing, but this is intentional. closeShadowRoot_
+    // was traditionally introduced as a synchronous method, so PWAs in the wild
+    // do not expect to have to wait for a promise to resolve before the shadow
+    // is deemed 'cleaned up'. The promise race is designed to be very quick so
+    // even if resources.onNextPass already manages to fire before the entire
+    // visibility state change completes, we're only delayed by a few ms.
     return this.timer_
       .timeoutPromise(
         15, // Delay for queued pass after visibility change is 10ms
@@ -867,14 +872,12 @@ export class MultidocManager {
           getServicePromiseOrNullForDoc(ampdoc, 'resources').then(resources => {
             if (resources) {
               resources.onNextPass(resolve);
-              cleanup();
             } else {
-              cleanup();
               resolve();
             }
           });
         }),
-        'Timeout reached before shadowRoot cleanup completed'
+        'Timeout reached waiting for visibility state change callback'
       )
       .catch(error => {
         user().warn(TAG, error);
