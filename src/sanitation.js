@@ -88,7 +88,7 @@ export const BLACKLISTED_TAGS = {
 
 /**
  * AMP elements allowed in AMP4EMAIL, modulo:
- * - amp-list, which cannot be nested.
+ * - amp-list and amp-state, which cannot be nested.
  * - amp-lightbox and amp-image-lightbox, which are deprecated.
  * @const {!Object<string, boolean>}
  * @see https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-components.md
@@ -103,7 +103,6 @@ export const EMAIL_WHITELISTED_AMP_TAGS = {
   'amp-layout': true,
   'amp-selector': true,
   'amp-sidebar': true,
-  'amp-state': true,
   'amp-timeago': true,
 };
 
@@ -184,10 +183,10 @@ export const WHITELISTED_ATTRS = [
   'subscriptions-display',
   'subscriptions-section',
   'subscriptions-service',
-  // Attributes for amp-drilldown.
-  'amp-drilldown-submenu',
-  'amp-drilldown-submenu-open',
-  'amp-drilldown-submenu-close',
+  // Attributes for amp-nested-menu.
+  'amp-nested-submenu',
+  'amp-nested-submenu-open',
+  'amp-nested-submenu-close',
   // A global attribute used for structured data.
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/itemprop
   'itemprop',

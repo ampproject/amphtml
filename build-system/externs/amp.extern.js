@@ -279,6 +279,8 @@ AmpViewerMessage.prototype.data;
 AmpViewerMessage.prototype.rsvp;
 /** @public {string|undefined}  */
 AmpViewerMessage.prototype.error;
+/** @public {string|undefined}  */
+AmpViewerMessage.prototype.messagingToken;
 
 // AMP-Analytics Cross-domain iframes
 let IframeTransportEvent;
@@ -308,19 +310,6 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function() {};
-let RRule;
-/**
- * @param {Date} unusedDt
- * @param {boolean} unusedInc
- * @return {?Date}
- */
-RRule.prototype.before = function(unusedDt, unusedInc) {};
-/**
- * @param {Date} unusedDt
- * @param {boolean} unusedInc
- * @return {?Date}
- */
-RRule.prototype.after = function(unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -538,7 +527,7 @@ grecaptcha.execute;
 // Validator
 var amp;
 amp.validator;
-amp.validator.validateUrlAndLog = function(string, doc, filter) {}
+amp.validator.validateUrlAndLog = function(string, doc) {}
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).

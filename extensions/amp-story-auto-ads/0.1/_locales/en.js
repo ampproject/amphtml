@@ -108,7 +108,7 @@ const strings = {
       'users to read content.',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Shop',
+    string: 'Shop Now',
     description:
       'Button label for an ad call to action button that asks ' +
       'users to shop for something.',

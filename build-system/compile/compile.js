@@ -28,6 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
@@ -103,7 +104,6 @@ function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
   del.sync('build/parsers');
-  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
@@ -390,6 +390,13 @@ function compile(
           reject(err);
         })
         .pipe(rename(outputFilename))
+        .pipe(
+          gulpIf(
+            !argv.pseudo_names && !options.skipUnknownDepsCheck,
+            checkForUnknownDeps()
+          )
+        )
+        .on('error', reject)
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);

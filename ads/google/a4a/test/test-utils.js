@@ -1001,10 +1001,11 @@ describe('Google A4A utils', () => {
 });
 
 describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
-  let doc, win;
+  let doc, win, ampdoc;
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    ampdoc = env.ampdoc;
   });
 
   function createResource(config, tagName = 'amp-ad', parent = doc.body) {
@@ -1023,14 +1024,18 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     sandbox
       .stub(IniLoad, 'getMeasuredResources')
       .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
-    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
-      expect(Object.keys(result).length).to.equal(1);
-      expect(result['foo']).to.be.ok;
-      expect(result['foo'].length).to.equal(1);
-      return result['foo'][0].then(baseElement =>
-        expect(baseElement.element.getAttribute('type')).to.equal('doubleclick')
-      );
-    });
+    return groupAmpAdsByType(ampdoc, 'doubleclick', () => 'foo').then(
+      result => {
+        expect(Object.keys(result).length).to.equal(1);
+        expect(result['foo']).to.be.ok;
+        expect(result['foo'].length).to.equal(1);
+        return result['foo'][0].then(baseElement =>
+          expect(baseElement.element.getAttribute('type')).to.equal(
+            'doubleclick'
+          )
+        );
+      }
+    );
   });
 
   it('should find amp-ad within sticky container', () => {

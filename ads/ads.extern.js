@@ -377,6 +377,11 @@ data.zone;
 // distroscale.js
 data.tid;
 
+// empower.js
+data.category;
+data.site;
+data.zone;
+
 // eplanning.js
 data.epl_si;
 data.epl_isv;
@@ -458,16 +463,6 @@ window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
 data.adrequest;
 
-// mediaimpact.js
-var asmi;
-asmi.sas;
-asmi.sas.call;
-asmi.sas.setup;
-data.site;
-data.page;
-data.format;
-data.slot.replace;
-
 // medianet.js
 data.crid;
 data.hasOwnProperty;
@@ -505,6 +500,12 @@ data.delayByTime;
 
 // nokta.js
 data.category;
+
+// onead.js
+var Guoshi;
+Guoshi.queryAd;
+Guoshi.queryAd.amp;
+Guoshi.queryAd.amp.setup;
 
 // openadstream.js
 data.adhost

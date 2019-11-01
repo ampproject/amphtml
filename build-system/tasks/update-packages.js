@@ -38,24 +38,6 @@ function writeIfUpdated(patchedName, file) {
 }
 
 /**
- * @param {string} filePath
- * @param {string} newFilePath
- * @param  {...any} args Search and replace string pairs.
- */
-function replaceInFile(filePath, newFilePath, ...args) {
-  let file = fs.readFileSync(filePath, 'utf8');
-  for (let i = 0; i < args.length; i += 2) {
-    const searchValue = args[i];
-    const replaceValue = args[i + 1];
-    if (!file.includes(searchValue)) {
-      throw new Error(`Expected "${searchValue}" to appear in ${filePath}.`);
-    }
-    file = file.replace(searchValue, replaceValue);
-  }
-  writeIfUpdated(newFilePath, file);
-}
-
-/**
  * Patches Web Animations API by wrapping its body into `install` function.
  * This gives us an option to call polyfill directly on the main window
  * or a friendly iframe.
@@ -92,28 +74,6 @@ function patchWebAnimations() {
     '\n' +
     '}\n';
   writeIfUpdated(patchedName, file);
-}
-
-/**
- * Creates a version of document-register-element that can be installed
- * without side effects.
- */
-function patchRegisterElement() {
-  // Copies document-register-element into a new file that has an export.
-  // This works around a bug in closure compiler, where without the
-  // export this module does not generate a goog.provide which fails
-  // compilation: https://github.com/google/closure-compiler/issues/1831
-  const dir = 'node_modules/document-register-element/build/';
-  replaceInFile(
-    dir + 'document-register-element.node.js',
-    dir + 'document-register-element.patched.js',
-    // Elimate the immediate side effect.
-    'installCustomElements(global);',
-    '',
-    // Replace CJS export with ES6 export.
-    'module.exports = installCustomElements;',
-    'export {installCustomElements};'
-  );
 }
 
 /**
@@ -158,14 +118,13 @@ function maybeUpdatePackages() {
 
 /**
  * Installs custom lint rules, updates node_modules (for local dev), and patches
- * web-animations-js and document-register-element if necessary.
+ * web-animations-js if necessary.
  */
 async function updatePackages() {
   if (!isTravisBuild()) {
     runYarnCheck();
   }
   patchWebAnimations();
-  patchRegisterElement();
 }
 
 module.exports = {

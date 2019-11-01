@@ -4,11 +4,11 @@
 {
   rules: [
     {
-      owners: [{ name: 'ampproject/wg-infra' }]
+      owners: [{name: 'ampproject/wg-infra'}],
     },
     {
       pattern: 'lazy-build.js',
-      owners: [{ name: 'rsimha', notify: true }]
-    }
-  ]
+      owners: [{name: 'rsimha', notify: true}],
+    },
+  ],
 }
