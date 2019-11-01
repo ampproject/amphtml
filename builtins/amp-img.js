@@ -22,6 +22,7 @@ import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
+import {removeElement} from '../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -279,6 +280,18 @@ export class AmpImg extends BaseElement {
       this.unlistenLoad_();
       this.unlistenLoad_ = null;
     }
+
+    // Interrupt retrieval of incomplete images to free network resources when
+    // navigating pages in a PWA. Opt for tiny dataURI image instead of empty
+    // src to prevent the viewer from detecting a load error.
+    const img = dev().assertElement(this.img_);
+    if (!img.complete) {
+      img.src =
+        'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+      removeElement(img);
+      this.img_ = null;
+    }
+
     return true;
   }
 
