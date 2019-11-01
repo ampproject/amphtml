@@ -32,6 +32,7 @@ import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
 } from '../../../src/layout-rect';
+import {rootNodeFor} from '../../../src/dom';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -74,9 +75,10 @@ function createVisibilityManager(rootNode) {
   const ampdoc = Services.ampdoc(rootNode);
   const frame = getParentWindowFrameElement(rootNode);
   const embed = frame && getFriendlyIframeEmbedOptional(frame);
-  if (embed && frame && frame.ownerDocument) {
+  const frameRootNode = frame && rootNodeFor(frame);
+  if (embed && frameRootNode) {
     return new VisibilityManagerForEmbed(
-      provideVisibilityManager(frame.ownerDocument),
+      provideVisibilityManager(frameRootNode),
       embed
     );
   }
