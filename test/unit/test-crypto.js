@@ -123,7 +123,7 @@ describes.realWin('crypto-impl', {}, env => {
     installDocService(win, /* isSingleDoc */ true);
     installExtensionsService(win);
     const extensions = Services.extensionsFor(win);
-    sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
+    env.sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(win);
       return Promise.resolve();

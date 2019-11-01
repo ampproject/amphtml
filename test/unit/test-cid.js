@@ -38,7 +38,7 @@ import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
 
-describes.sandboxed('cid', {}, () => {
+describes.sandboxed('cid', {}, env => {
   let clock;
   let fakeWin;
   let ampdoc;
@@ -59,7 +59,7 @@ describes.sandboxed('cid', {}, () => {
 
   beforeEach(() => {
     seed = 1;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
     shouldSendMessageTimeout = false;
@@ -111,22 +111,22 @@ describes.sandboxed('cid', {}, () => {
     installExtensionsService(fakeWin);
     const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
-    sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
+    env.sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);
       return Promise.resolve();
     });
 
     installViewerServiceForDoc(ampdoc);
-    storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    storageGetStub = stubServiceForDoc(env.sandbox, ampdoc, 'storage', 'get');
     viewer = Services.viewerForDoc(ampdoc);
-    sandbox.stub(ampdoc, 'whenFirstVisible').callsFake(function() {
+    env.sandbox.stub(ampdoc, 'whenFirstVisible').callsFake(function() {
       return whenFirstVisible;
     });
-    sandbox
+    env.sandbox
       .stub(viewer, 'isTrustedViewer')
       .callsFake(() => Promise.resolve(trustedViewer));
-    viewerSendMessageStub = sandbox
+    viewerSendMessageStub = env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake((eventType, opt_data) => {
         if (eventType != 'cid') {
@@ -142,10 +142,10 @@ describes.sandboxed('cid', {}, () => {
       });
 
     cid = cidServiceForDocForTesting(ampdoc);
-    sandbox.stub(cid, 'isScopeOptedIn_').callsFake(() => null);
+    env.sandbox.stub(cid, 'isScopeOptedIn_').callsFake(() => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
-    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
+    env.sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -396,7 +396,9 @@ describes.sandboxed('cid', {}, () => {
           );
         })
         .then(() => {
-          expect(viewerSendMessageStub).to.be.calledWith(sinon.match.string);
+          expect(viewerSendMessageStub).to.be.calledWith(
+            env.sandbox.match.string
+          );
           return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
         });
     });
@@ -792,7 +794,7 @@ describes.realWin('cid', {amp: true}, env => {
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     cid = cidServiceForDocForTesting(ampdoc);
-    sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
+    env.sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
   });
 
   afterEach(() => {
@@ -800,7 +802,7 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('should store CID in cookie when not in Viewer', function*() {
-    sandbox
+    env.sandbox
       .stub(cid.viewerCidApi_, 'isSupported')
       .returns(Promise.resolve(false));
     setCookie(win, 'foo', '', 0);
@@ -823,45 +825,50 @@ describes.realWin('cid', {amp: true}, env => {
   });
 
   it('get method should return CID when in Viewer ', () => {
-    sandbox
+    env.sandbox
       .stub(cid.viewerCidApi_, 'isSupported')
       .returns(Promise.resolve(true));
     win.parent = {};
     stubServiceForDoc(
-      sandbox,
+      env.sandbox,
       ampdoc,
       'viewer',
       'sendMessageAwaitResponse'
     ).returns(Promise.resolve('cid-from-viewer'));
-    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
+    stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
       Promise.resolve(true)
     );
-    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'hasCapability')
+    stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'hasCapability')
       .withArgs('cid')
       .returns(true);
-    sandbox.stub(url, 'isProxyOrigin').returns(true);
+    env.sandbox.stub(url, 'isProxyOrigin').returns(true);
     return expect(cid.get({scope: 'foo'}, hasConsent)).to.eventually.equal(
       'cid-from-viewer'
     );
   });
 
   it('get method should time out when in Viewer', function*() {
-    sandbox
+    env.sandbox
       .stub(cid.viewerCidApi_, 'isSupported')
       .returns(Promise.resolve(true));
     win.parent = {};
     stubServiceForDoc(
-      sandbox,
+      env.sandbox,
       ampdoc,
       'viewer',
       'sendMessageAwaitResponse'
     ).returns(new Promise(() => {}));
-    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
+    stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
       Promise.resolve(true)
     );
-    const storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    const storageGetStub = stubServiceForDoc(
+      env.sandbox,
+      ampdoc,
+      'storage',
+      'get'
+    );
     storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(false));
-    sandbox.stub(url, 'isProxyOrigin').returns(true);
+    env.sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
     cid.get({scope: 'foo'}, hasConsent).then(result => {
@@ -878,7 +885,7 @@ describes.realWin('cid', {amp: true}, env => {
 
   describe('pub origin, CID API opt in', () => {
     beforeEach(() => {
-      sandbox.stub(url, 'isProxyOrigin').returns(false);
+      env.sandbox.stub(url, 'isProxyOrigin').returns(false);
       ampdoc.win.document.head.innerHTML +=
         '<meta name="amp-google-client-id-api" content="googleanalytics">';
       setCookie(win, '_ga', '', 0);
@@ -890,7 +897,7 @@ describes.realWin('cid', {amp: true}, env => {
 
     it('should use cid api on pub origin if opted in', () => {
       cid.apiKeyMap_ = {'AMP_ECID_GOOGLE': 'cid-api-key'};
-      const getScopedCidStub = sandbox.stub(cid.cidApi_, 'getScopedCid');
+      const getScopedCidStub = env.sandbox.stub(cid.cidApi_, 'getScopedCid');
       getScopedCidStub.returns(Promise.resolve('cid-from-api'));
       return cid
         .get(
@@ -912,7 +919,7 @@ describes.realWin('cid', {amp: true}, env => {
     });
 
     it('should fallback to cookie if cid api returns nothing', () => {
-      sandbox.stub(cid.cidApi_, 'getScopedCid').returns(Promise.resolve());
+      env.sandbox.stub(cid.cidApi_, 'getScopedCid').returns(Promise.resolve());
       return cid
         .get(
           {
@@ -929,7 +936,7 @@ describes.realWin('cid', {amp: true}, env => {
     });
 
     it('should respect CID API opt out', () => {
-      sandbox
+      env.sandbox
         .stub(cid.cidApi_, 'getScopedCid')
         .returns(Promise.resolve('$OPT_OUT'));
       return cid
@@ -1001,10 +1008,10 @@ describes.fakeWin('cid optout:', {amp: true}, env => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    storageSetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'set');
-    storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
+    storageSetStub = stubServiceForDoc(env.sandbox, ampdoc, 'storage', 'set');
+    storageGetStub = stubServiceForDoc(env.sandbox, ampdoc, 'storage', 'get');
     viewerSendMessageStub = stubServiceForDoc(
-      sandbox,
+      env.sandbox,
       ampdoc,
       'viewer',
       'sendMessage'

@@ -20,7 +20,7 @@ import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {user} from '../../../../src/log';
 
-describes.realWin('Platform store', {}, () => {
+describes.realWin('Platform store', {}, env => {
   let platformStore;
   const serviceIds = ['service1', 'service2'];
   const entitlementsForService1 = new Entitlement({
@@ -95,7 +95,7 @@ describes.realWin('Platform store', {}, () => {
   });
 
   it('should call onChange callbacks on every resolve', () => {
-    const cb = sandbox.stub(
+    const cb = env.sandbox.stub(
       platformStore.onEntitlementResolvedCallbacks_,
       'fire'
     );
@@ -200,23 +200,25 @@ describes.realWin('Platform store', {}, () => {
     const anotherPlatformBaseScore = 0;
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
-      sandbox
+      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
         .stub(localPlatform, 'getBaseScore')
         .callsFake(() => localPlatformBaseScore);
       anotherPlatform = new SubscriptionPlatform();
-      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
-      sandbox
+      env.sandbox
+        .stub(anotherPlatform, 'getServiceId')
+        .callsFake(() => 'another');
+      env.sandbox
         .stub(anotherPlatform, 'getBaseScore')
         .callsFake(() => anotherPlatformBaseScore);
       platformStore.resolvePlatform('another', localPlatform);
       platformStore.resolvePlatform('local', anotherPlatform);
     });
     it('should return sorted array of platforms and weights', () => {
-      sandbox
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
-      sandbox
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
 
@@ -249,10 +251,10 @@ describes.realWin('Platform store', {}, () => {
         'is true',
       () => {
         const fakeResult = [entitlementsForService1, entitlementsForService2];
-        const getAllPlatformsStub = sandbox
+        const getAllPlatformsStub = env.sandbox
           .stub(platformStore, 'getAllPlatformsEntitlements')
           .callsFake(() => Promise.resolve(fakeResult));
-        const selectApplicablePlatformStub = sandbox
+        const selectApplicablePlatformStub = env.sandbox
           .stub(platformStore, 'selectApplicablePlatform_')
           .callsFake(() => Promise.resolve());
         return platformStore.selectPlatform(true).then(() => {
@@ -270,13 +272,15 @@ describes.realWin('Platform store', {}, () => {
     let anotherPlatformBaseScore = 0;
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
-      sandbox
+      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox
         .stub(localPlatform, 'getBaseScore')
         .callsFake(() => localPlatformBaseScore);
       anotherPlatform = new SubscriptionPlatform();
-      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
-      sandbox
+      env.sandbox
+        .stub(anotherPlatform, 'getServiceId')
+        .callsFake(() => 'another');
+      env.sandbox
         .stub(anotherPlatform, 'getBaseScore')
         .callsFake(() => anotherPlatformBaseScore);
       platformStore = new PlatformStore(
@@ -336,10 +340,10 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should choose local platform if all other conditions are same', () => {
-      sandbox
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
-      sandbox
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
 
@@ -365,11 +369,11 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should chose platform based on score weight', () => {
-      sandbox
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
       // +9
-      sandbox
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor =>
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
@@ -398,13 +402,13 @@ describes.realWin('Platform store', {}, () => {
 
     it('should chose platform based on multiple factors', () => {
       // +10
-      sandbox
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor =>
           fakeGetSupportedScoreFactor(factor, {'testFactor1': 1})
         );
       // +9
-      sandbox
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor =>
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
@@ -433,13 +437,13 @@ describes.realWin('Platform store', {}, () => {
 
     it('should chose platform specified factors', () => {
       // +10
-      sandbox
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor =>
           fakeGetSupportedScoreFactor(factor, {'testFactor1': 1})
         );
       // +9
-      sandbox
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor =>
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
@@ -468,13 +472,13 @@ describes.realWin('Platform store', {}, () => {
 
     it('should chose platform handle negative factor values', () => {
       // +10, -10
-      sandbox
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor =>
           fakeGetSupportedScoreFactor(factor, {testFactor1: 1, testFactor2: -1})
         );
       // +9
-      sandbox
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor =>
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
@@ -502,10 +506,10 @@ describes.realWin('Platform store', {}, () => {
     });
 
     it('should use baseScore', () => {
-      sandbox
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
-      sandbox
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
       localPlatformBaseScore = 1;
@@ -531,16 +535,16 @@ describes.realWin('Platform store', {}, () => {
       );
     });
     it('getScoreFactorStates should return promised score', () => {
-      sandbox
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
       // +9
-      sandbox
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor =>
           fakeGetSupportedScoreFactor(factor, {'supportsViewer': 1})
         );
-      sandbox
+      env.sandbox
         .stub(platformStore, 'getEntitlementPromiseFor')
         .callsFake(() => Promise.resolve());
 
@@ -582,17 +586,19 @@ describes.realWin('Platform store', {}, () => {
     beforeEach(() => {
       localFactors = {};
       localPlatform = new SubscriptionPlatform();
-      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
       // Base score does not matter.
-      sandbox.stub(localPlatform, 'getBaseScore').callsFake(() => 10000);
-      sandbox
+      env.sandbox.stub(localPlatform, 'getBaseScore').callsFake(() => 10000);
+      env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => localFactors[factor]);
       anotherFactors = {};
       anotherPlatform = new SubscriptionPlatform();
-      sandbox.stub(anotherPlatform, 'getServiceId').callsFake(() => 'another');
-      sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 0);
-      sandbox
+      env.sandbox
+        .stub(anotherPlatform, 'getServiceId')
+        .callsFake(() => 'another');
+      env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 0);
+      env.sandbox
         .stub(anotherPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => anotherFactors[factor]);
       // Local is ordered last in this case intentionally.
@@ -625,15 +631,15 @@ describes.realWin('Platform store', {}, () => {
   describe('reportPlatformFailureAndFallback', () => {
     let errorSpy;
     beforeEach(() => {
-      errorSpy = sandbox.spy(user(), 'warn');
+      errorSpy = env.sandbox.spy(user(), 'warn');
     });
     it(
       'should report warning if all platforms fail and resolve ' +
         'local with fallbackEntitlement',
       () => {
         const platform = new SubscriptionPlatform();
-        sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
-        sandbox
+        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+        env.sandbox
           .stub(platformStore, 'getLocalPlatform')
           .callsFake(() => platform);
         platformStore.reportPlatformFailureAndFallback('service1');
@@ -652,14 +658,14 @@ describes.realWin('Platform store', {}, () => {
       () => {
         const platform = new SubscriptionPlatform();
         const anotherPlatform = new SubscriptionPlatform();
-        sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
-        sandbox
+        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+        env.sandbox
           .stub(platformStore, 'getLocalPlatform')
           .callsFake(() => platform);
-        sandbox
+        env.sandbox
           .stub(anotherPlatform, 'getServiceId')
           .callsFake(() => serviceIds[0]);
-        sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
+        env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
         platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
         platformStore.resolvePlatform('local', platform);
         platformStore.reportPlatformFailureAndFallback('local');
@@ -683,14 +689,14 @@ describes.realWin('Platform store', {}, () => {
       () => {
         const platform = new SubscriptionPlatform();
         const anotherPlatform = new SubscriptionPlatform();
-        sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
-        sandbox
+        env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
+        env.sandbox
           .stub(platformStore, 'getLocalPlatform')
           .callsFake(() => platform);
-        sandbox
+        env.sandbox
           .stub(anotherPlatform, 'getServiceId')
           .callsFake(() => serviceIds[0]);
-        sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
+        env.sandbox.stub(anotherPlatform, 'getBaseScore').callsFake(() => 10);
         platformStore.resolvePlatform(serviceIds[0], anotherPlatform);
         platformStore.resolvePlatform('local', platform);
         fallbackEntitlement.grantReason = GrantReason.METERING;
@@ -844,7 +850,7 @@ describes.realWin('Platform store', {}, () => {
 
     beforeEach(() => {
       localPlatform = new SubscriptionPlatform();
-      sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
+      env.sandbox.stub(localPlatform, 'getServiceId').callsFake(() => 'local');
     });
 
     it(

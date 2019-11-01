@@ -31,17 +31,16 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
   let ampdoc;
   let isPkcsAvailable;
   let originExperiments;
-  let sandbox;
   let win;
   let error;
 
   beforeEach(() => {
-    ({win, ampdoc, sandbox} = env);
+    ({win, ampdoc} = env);
 
     const crypto = Services.cryptoFor(win);
-    isPkcsAvailable = sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
+    isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
 
-    error = sandbox.stub(user(), 'error');
+    error = env.sandbox.stub(user(), 'error');
 
     originExperiments = new OriginExperiments(ampdoc);
   });

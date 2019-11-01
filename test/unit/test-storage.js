@@ -23,7 +23,7 @@ import {
 } from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
 
-describes.sandboxed('Storage', {}, () => {
+describes.sandboxed('Storage', {}, env => {
   let storage;
   let binding;
   let bindingMock;
@@ -41,7 +41,7 @@ describes.sandboxed('Storage', {}, () => {
       },
       broadcast: () => {},
     };
-    viewerMock = sandbox.mock(viewer);
+    viewerMock = env.sandbox.mock(viewer);
 
     windowApi = {
       document: {},
@@ -53,7 +53,7 @@ describes.sandboxed('Storage', {}, () => {
       loadBlob: () => {},
       saveBlob: () => {},
     };
-    bindingMock = sandbox.mock(binding);
+    bindingMock = env.sandbox.mock(binding);
 
     storage = new Storage(ampdoc, viewer, binding);
     storage.start_();
@@ -214,7 +214,7 @@ describes.sandboxed('Storage', {}, () => {
       .expects('saveBlob')
       .withExactArgs(
         'https://acme.com',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           const store2 = new Store(JSON.parse(atob(arg)));
           return (
             store2.get('key1') !== undefined && store2.get('key2') !== undefined
@@ -226,7 +226,7 @@ describes.sandboxed('Storage', {}, () => {
     viewerMock
       .expects('broadcast')
       .withExactArgs(
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           return (
             arg['type'] == 'amp-storage-reset' &&
             arg['origin'] == 'https://acme.com'
@@ -267,7 +267,7 @@ describes.sandboxed('Storage', {}, () => {
       .expects('saveBlob')
       .withExactArgs(
         'https://acme.com',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           const store2 = new Store(JSON.parse(atob(arg)));
           return store2.get('key1') === undefined;
         })
@@ -277,7 +277,7 @@ describes.sandboxed('Storage', {}, () => {
     viewerMock
       .expects('broadcast')
       .withExactArgs(
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           return (
             arg['type'] == 'amp-storage-reset' &&
             arg['origin'] == 'https://acme.com'
@@ -354,12 +354,12 @@ describes.sandboxed('Storage', {}, () => {
   });
 });
 
-describes.sandboxed('Store', {}, () => {
+describes.sandboxed('Store', {}, env => {
   let clock;
   let store;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     store = new Store({}, 2);
   });
 
@@ -468,7 +468,7 @@ describes.sandboxed('Store', {}, () => {
   });
 });
 
-describes.sandboxed('LocalStorageBinding', {}, () => {
+describes.sandboxed('LocalStorageBinding', {}, env => {
   let windowApi;
   let localStorageMock;
   let binding;
@@ -480,12 +480,12 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
         setItem: () => {},
       },
     };
-    localStorageMock = sandbox.mock(windowApi.localStorage);
+    localStorageMock = env.sandbox.mock(windowApi.localStorage);
     binding = new LocalStorageBinding(windowApi);
   });
 
   it('should throw if localStorage is not supported', () => {
-    const errorSpy = sandbox.spy(dev(), 'expectedError');
+    const errorSpy = env.sandbox.spy(dev(), 'expectedError');
 
     expect(errorSpy).to.have.not.been.called;
     new LocalStorageBinding(windowApi);
@@ -619,7 +619,7 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
   });
 
   it('should bypass saving to localStorage if getItem throws', () => {
-    const setItemSpy = sandbox.spy(windowApi.localStorage, 'setItem');
+    const setItemSpy = env.sandbox.spy(windowApi.localStorage, 'setItem');
 
     localStorageMock
       .expects('getItem')
@@ -640,7 +640,7 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
   });
 });
 
-describes.sandboxed('ViewerStorageBinding', {}, () => {
+describes.sandboxed('ViewerStorageBinding', {}, env => {
   let viewer;
   let viewerMock;
   let binding;
@@ -649,7 +649,7 @@ describes.sandboxed('ViewerStorageBinding', {}, () => {
     viewer = {
       sendMessageAwaitResponse: () => {},
     };
-    viewerMock = sandbox.mock(viewer);
+    viewerMock = env.sandbox.mock(viewer);
     binding = new ViewerStorageBinding(viewer);
   });
 
@@ -658,7 +658,7 @@ describes.sandboxed('ViewerStorageBinding', {}, () => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'loadStore',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           return arg['origin'] == 'https://acme.com';
         })
       )
@@ -674,7 +674,7 @@ describes.sandboxed('ViewerStorageBinding', {}, () => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'loadStore',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           return arg['origin'] == 'https://acme.com';
         })
       )
@@ -690,7 +690,7 @@ describes.sandboxed('ViewerStorageBinding', {}, () => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'loadStore',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           return arg['origin'] == 'https://acme.com';
         })
       )
@@ -712,7 +712,7 @@ describes.sandboxed('ViewerStorageBinding', {}, () => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'saveStore',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           return arg['origin'] == 'https://acme.com' && arg['blob'] == 'BLOB1';
         })
       )
@@ -726,7 +726,7 @@ describes.sandboxed('ViewerStorageBinding', {}, () => {
       .expects('sendMessageAwaitResponse')
       .withExactArgs(
         'saveStore',
-        sinon.match(() => true)
+        env.sandbox.match(() => true)
       )
       .returns(Promise.reject('unknown'))
       .once();

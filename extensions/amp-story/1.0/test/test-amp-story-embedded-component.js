@@ -44,7 +44,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     addAttributesToElement(clickableEl, {'href': 'https://google.com'});
 
     // Making sure resource tasks run synchronously.
-    sandbox.stub(Services, 'resourcesForDoc').returns({
+    env.sandbox.stub(Services, 'resourcesForDoc').returns({
       mutateElement: (element, callback) => {
         callback();
         return Promise.resolve();
@@ -130,7 +130,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const nextPageSpy = sandbox.spy();
+    const nextPageSpy = env.sandbox.spy();
     parentEl.addEventListener(EventType.NEXT_PAGE, nextPageSpy);
 
     const rightButton = component.focusedStateOverlay_.querySelector(
@@ -151,7 +151,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
       storeService.dispatch(Action.TOGGLE_RTL, true);
       storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-      const previousPageSpy = sandbox.spy();
+      const previousPageSpy = env.sandbox.spy();
       parentEl.addEventListener(EventType.PREVIOUS_PAGE, previousPageSpy);
 
       const rightButton = component.focusedStateOverlay_.querySelector(

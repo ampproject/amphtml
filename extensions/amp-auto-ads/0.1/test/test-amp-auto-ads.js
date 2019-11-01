@@ -66,7 +66,6 @@ describes.repeated(
 
         let win;
         let doc;
-        let sandbox;
         let container;
         let anchor1;
         let anchor2;
@@ -79,7 +78,6 @@ describes.repeated(
         beforeEach(() => {
           win = env.win;
           doc = win.document;
-          sandbox = env.sandbox;
           const a4aRegistry = getA4ARegistry();
           a4aRegistry['_ping_'] = () => true;
 
@@ -101,11 +99,11 @@ describes.repeated(
           }
 
           const extensions = Services.extensionsFor(win);
-          sandbox
+          env.sandbox
             .stub(extensions, 'loadElementClass')
             .returns(Promise.resolve(el => new FakeA4A(el)));
 
-          const viewportMock = sandbox.mock(Services.viewportForDoc(doc));
+          const viewportMock = env.sandbox.mock(Services.viewportForDoc(doc));
           viewportMock
             .expects('getSize')
             .returns({width: 320, height: 500})
@@ -184,9 +182,9 @@ describes.repeated(
               },
             });
           };
-          sandbox.spy(xhr, 'fetchJson');
+          env.sandbox.spy(xhr, 'fetchJson');
 
-          whenVisible = sandbox.stub(env.ampdoc, 'whenFirstVisible');
+          whenVisible = env.sandbox.stub(env.ampdoc, 'whenFirstVisible');
           whenVisible.returns(Promise.resolve());
         });
 

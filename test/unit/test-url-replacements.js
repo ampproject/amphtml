@@ -42,7 +42,7 @@ import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {user} from '../../src/log';
 
-describes.sandboxed('UrlReplacements', {}, () => {
+describes.sandboxed('UrlReplacements', {}, env => {
   let canonical;
   let loadObservable;
   let replacements;
@@ -52,7 +52,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   beforeEach(() => {
     canonical = 'https://canonical.com/doc1';
-    userErrorStub = sandbox.stub(user(), 'error');
+    userErrorStub = env.sandbox.stub(user(), 'error');
   });
 
   function getReplacements(opt_options) {
@@ -278,7 +278,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace DOCUMENT_REFERRER', async () => {
     const replacements = await getReplacements();
-    sandbox
+    env.sandbox
       .stub(viewerService, 'getReferrerUrl')
       .returns('http://fake.example/?foo=bar');
     const res = await replacements.expandUrlAsync('?ref=DOCUMENT_REFERRER');
@@ -286,13 +286,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace EXTERNAL_REFERRER', () => {
-    const windowInterface = mockWindowInterface(sandbox);
+    const windowInterface = mockWindowInterface(env.sandbox);
     windowInterface.getHostname.returns('different.org');
     return getReplacements()
       .then(replacements => {
-        stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl').returns(
-          Promise.resolve('http://example.org/page.html')
-        );
+        stubServiceForDoc(
+          env.sandbox,
+          ampdoc,
+          'viewer',
+          'getReferrerUrl'
+        ).returns(Promise.resolve('http://example.org/page.html'));
         return replacements.expandUrlAsync('?ref=EXTERNAL_REFERRER');
       })
       .then(res => {
@@ -304,12 +307,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     'should replace EXTERNAL_REFERRER to empty string ' +
       'if referrer is of same domain',
     () => {
-      const windowInterface = mockWindowInterface(sandbox);
+      const windowInterface = mockWindowInterface(env.sandbox);
       windowInterface.getHostname.returns('example.org');
       return getReplacements()
         .then(replacements => {
           stubServiceForDoc(
-            sandbox,
+            env.sandbox,
             ampdoc,
             'viewer',
             'getReferrerUrl'
@@ -326,12 +329,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     'should replace EXTERNAL_REFERRER to empty string ' +
       'if referrer is CDN proxy of same domain',
     () => {
-      const windowInterface = mockWindowInterface(sandbox);
+      const windowInterface = mockWindowInterface(env.sandbox);
       windowInterface.getHostname.returns('example.org');
       return getReplacements()
         .then(replacements => {
           stubServiceForDoc(
-            sandbox,
+            env.sandbox,
             ampdoc,
             'viewer',
             'getReferrerUrl'
@@ -352,12 +355,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
     'should replace EXTERNAL_REFERRER to empty string ' +
       'if referrer is CDN proxy of same domain (before CURLS)',
     () => {
-      const windowInterface = mockWindowInterface(sandbox);
+      const windowInterface = mockWindowInterface(env.sandbox);
       windowInterface.getHostname.returns('example.org');
       return getReplacements()
         .then(replacements => {
           stubServiceForDoc(
-            sandbox,
+            env.sandbox,
             ampdoc,
             'viewer',
             'getReferrerUrl'
@@ -492,12 +495,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should replace SOURCE_URL and SOURCE_HOST', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated('https://wrong.com');
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return new Promise(resolve => {
-          win.location = parseUrlDeprecated('https://example.com/test');
-          resolve();
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return new Promise(resolve => {
+            win.location = parseUrlDeprecated('https://example.com/test');
+            resolve();
+          });
         });
-      });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?url=SOURCE_URL&host=SOURCE_HOST')
         .then(res => {
@@ -510,12 +515,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should replace SOURCE_URL and SOURCE_HOSTNAME', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated('https://wrong.com');
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return new Promise(resolve => {
-          win.location = parseUrlDeprecated('https://example.com/test');
-          resolve();
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return new Promise(resolve => {
+            win.location = parseUrlDeprecated('https://example.com/test');
+            resolve();
+          });
         });
-      });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?url=SOURCE_URL&hostname=SOURCE_HOSTNAME')
         .then(res => {
@@ -528,12 +535,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should update SOURCE_URL after track impression', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated('https://wrong.com');
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return new Promise(resolve => {
-          win.location = parseUrlDeprecated('https://example.com?gclid=123456');
-          resolve();
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return new Promise(resolve => {
+            win.location = parseUrlDeprecated(
+              'https://example.com?gclid=123456'
+            );
+            resolve();
+          });
         });
-      });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?url=SOURCE_URL')
         .then(res => {
@@ -546,9 +557,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win.location = parseUrlDeprecated(
         'https://cdn.ampproject.org/a/o.com/foo/?a&amp_r=hello%3Dworld'
       );
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return Promise.resolve();
-      });
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?url=SOURCE_URL')
         .then(res => {
@@ -563,9 +576,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win.location = parseUrlDeprecated(
         'https://cdn.ampproject.org/a/o.com/foo/?a=1&safe=1&amp_r=hello%3Dworld%26safe=evil'
       );
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return Promise.resolve();
-      });
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?url=SOURCE_URL')
         .then(res => {
@@ -581,9 +596,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win.location = parseUrlDeprecated(
         'https://cdn.ampproject.org/v/o.com/foo/?a&amp_r=hello%3Dworld'
       );
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return Promise.resolve();
-      });
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?url=SOURCE_URL')
         .then(res => {
@@ -628,7 +645,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should allow empty CLIENT_ID', () => {
     return getReplacements()
       .then(replacements => {
-        stubServiceForDoc(sandbox, ampdoc, 'cid', 'get').returns(
+        stubServiceForDoc(env.sandbox, ampdoc, 'cid', 'get').returns(
           Promise.resolve()
         );
         return replacements.expandUrlAsync('?a=CLIENT_ID(_ga)');
@@ -687,7 +704,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace AMP_STATE(key)', () => {
     const win = getFakeWindow();
-    sandbox.stub(Services, 'bindForDocOrNull').returns(
+    env.sandbox.stub(Services, 'bindForDocOrNull').returns(
       Promise.resolve({
         getStateValue(key) {
           expect(key).to.equal('foo.bar');
@@ -799,7 +816,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should return correct ISO timestamp', () => {
     const fakeTime = 1499979336612;
-    sandbox.useFakeTimers(fakeTime);
+    env.sandbox.useFakeTimers(fakeTime);
     return expect(expandUrlAsync('?tsf=TIMESTAMP_ISO')).to.eventually.equal(
       '?tsf=2017-07-13T20%3A55%3A36.612Z'
     );
@@ -867,7 +884,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace FIRST_CONTENTFUL_PAINT', () => {
     const win = getFakeWindow();
-    sandbox.stub(Services, 'performanceFor').returns({
+    env.sandbox.stub(Services, 'performanceFor').returns({
       getFirstContentfulPaint() {
         return 1;
       },
@@ -881,7 +898,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace FIRST_VIEWPORT_READY', () => {
     const win = getFakeWindow();
-    sandbox.stub(Services, 'performanceFor').returns({
+    env.sandbox.stub(Services, 'performanceFor').returns({
       getFirstViewportReady() {
         return 1;
       },
@@ -895,7 +912,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace MAKE_BODY_VISIBLE', () => {
     const win = getFakeWindow();
-    sandbox.stub(Services, 'performanceFor').returns({
+    env.sandbox.stub(Services, 'performanceFor').returns({
       getMakeBodyVisible() {
         return 1;
       },
@@ -923,7 +940,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('Should replace BACKGROUND_STATE with 0', () => {
     const win = getFakeWindow();
     const {ampdoc} = win;
-    sandbox.stub(ampdoc, 'isVisible').returns(true);
+    env.sandbox.stub(ampdoc, 'isVisible').returns(true);
     return Services.urlReplacementsForDoc(win.document.documentElement)
       .expandUrlAsync('?sh=BACKGROUND_STATE')
       .then(res => {
@@ -934,7 +951,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('Should replace BACKGROUND_STATE with 1', () => {
     const win = getFakeWindow();
     const {ampdoc} = win;
-    sandbox.stub(ampdoc, 'isVisible').returns(false);
+    env.sandbox.stub(ampdoc, 'isVisible').returns(false);
     return Services.urlReplacementsForDoc(win.document.documentElement)
       .expandUrlAsync('?sh=BACKGROUND_STATE')
       .then(res => {
@@ -944,12 +961,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
     const win = getFakeWindow();
-    sandbox.stub(Services, 'videoManagerForDoc').returns({
+    env.sandbox.stub(Services, 'videoManagerForDoc').returns({
       getAnalyticsDetails() {
         return Promise.resolve({currentTime: 1.5});
       },
     });
-    sandbox
+    env.sandbox
       .stub(win.document, 'getElementById')
       .withArgs('video')
       .returns(document.createElement('video'));
@@ -1110,7 +1127,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace VIEWER with origin', () => {
     return getReplacements().then(replacements => {
-      sandbox
+      env.sandbox
         .stub(viewerService, 'getViewerOrigin')
         .returns(Promise.resolve('https://www.google.com'));
       return replacements.expandUrlAsync('?sh=VIEWER').then(res => {
@@ -1121,7 +1138,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace VIEWER with empty string', () => {
     return getReplacements().then(replacements => {
-      sandbox
+      env.sandbox
         .stub(viewerService, 'getViewerOrigin')
         .returns(Promise.resolve(''));
       return replacements.expandUrlAsync('?sh=VIEWER').then(res => {
@@ -1223,7 +1240,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   // TODO(#16916): Make this test work with synchronous throws.
   it.skip('should report errors & replace them with empty string (sync)', () => {
-    const clock = sandbox.useFakeTimers();
+    const clock = env.sandbox.useFakeTimers();
     const {documentElement} = window.document;
     const replacements = Services.urlReplacementsForDoc(documentElement);
     replacements.getVariableSource().set('ONE', () => {
@@ -1242,7 +1259,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   // TODO(#16916): Make this test work with synchronous throws.
   it.skip('should report errors & replace them with empty string (promise)', () => {
-    const clock = sandbox.useFakeTimers();
+    const clock = env.sandbox.useFakeTimers();
     const {documentElement} = window.document;
     const replacements = Services.urlReplacementsForDoc(documentElement);
     replacements.getVariableSource().set('ONE', () => {
@@ -1397,14 +1414,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win.location = parseUrlDeprecated(
         'https://example.com?query_string_param1=wrong'
       );
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return new Promise(resolve => {
-          win.location = parseUrlDeprecated(
-            'https://example.com?query_string_param1=foo'
-          );
-          resolve();
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return new Promise(resolve => {
+            win.location = parseUrlDeprecated(
+              'https://example.com?query_string_param1=foo'
+            );
+            resolve();
+          });
         });
-      });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
         .then(res => {
@@ -1415,9 +1434,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should replace QUERY_PARAM with ""', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated('https://example.com');
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return Promise.resolve();
-      });
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1)&s')
         .then(res => {
@@ -1428,9 +1449,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should replace QUERY_PARAM with default_value', () => {
       const win = getFakeWindow();
       win.location = parseUrlDeprecated('https://example.com');
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return Promise.resolve();
-      });
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
         .then(res => {
@@ -1443,14 +1466,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win.location = parseUrlDeprecated(
         'https://cdn.ampproject.org/a/o.com/foo/?x=wrong'
       );
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return new Promise(resolve => {
-          win.location = parseUrlDeprecated(
-            'https://cdn.ampproject.org/a/o.com/foo/?amp_r=x%3Dfoo'
-          );
-          resolve();
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return new Promise(resolve => {
+            win.location = parseUrlDeprecated(
+              'https://cdn.ampproject.org/a/o.com/foo/?amp_r=x%3Dfoo'
+            );
+            resolve();
+          });
         });
-      });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?sh=QUERY_PARAM(x)&s')
         .then(res => {
@@ -1463,14 +1488,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
       win.location = parseUrlDeprecated(
         'https://cdn.ampproject.org/a/o.com/foo/?x=wrong'
       );
-      sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-        return new Promise(resolve => {
-          win.location = parseUrlDeprecated(
-            'https://cdn.ampproject.org/a/o.com/foo/?x=foo&amp_r=x%3Devil'
-          );
-          resolve();
+      env.sandbox
+        .stub(trackPromise, 'getTrackImpressionPromise')
+        .callsFake(() => {
+          return new Promise(resolve => {
+            win.location = parseUrlDeprecated(
+              'https://cdn.ampproject.org/a/o.com/foo/?x=foo&amp_r=x%3Devil'
+            );
+            resolve();
+          });
         });
-      });
       return Services.urlReplacementsForDoc(win.document.documentElement)
         .expandUrlAsync('?sh=QUERY_PARAM(x)&s')
         .then(res => {
@@ -1482,9 +1509,11 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should collect vars', () => {
     const win = getFakeWindow();
     win.location = parseUrlDeprecated('https://example.com?p1=foo');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
-      return Promise.resolve();
-    });
+    env.sandbox
+      .stub(trackPromise, 'getTrackImpressionPromise')
+      .callsFake(() => {
+        return Promise.resolve();
+      });
     return Services.urlReplacementsForDoc(win.document.documentElement)
       .collectVars('?SOURCE_HOST&QUERY_PARAM(p1)&SIMPLE&FUNC&PROMISE', {
         'SIMPLE': 21,
@@ -1629,8 +1658,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
         getAccessReaderId: () => {},
         getAuthdataField: () => {},
       };
-      accessServiceMock = sandbox.mock(accessService);
-      sandbox.stub(Services, 'accessServiceForDocOrNull').callsFake(() => {
+      accessServiceMock = env.sandbox.mock(accessService);
+      env.sandbox.stub(Services, 'accessServiceForDocOrNull').callsFake(() => {
         return Promise.resolve(accessService);
       });
     });
@@ -1698,8 +1727,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
         getAccessReaderId: () => {},
         getAuthdataField: () => {},
       };
-      accessServiceMock = sandbox.mock(accessService);
-      sandbox
+      accessServiceMock = env.sandbox.mock(accessService);
+      env.sandbox
         .stub(Services, 'subscriptionsServiceForDocOrNull')
         .callsFake(() => {
           return Promise.resolve(accessService);

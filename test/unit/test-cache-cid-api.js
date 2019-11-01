@@ -22,17 +22,15 @@ import {mockServiceForDoc, stubService} from '../../testing/test-helper';
 describes.realWin('cacheCidApi', {amp: true}, env => {
   let ampdoc;
   let api;
-  let sandbox;
   let viewerMock;
   let fetchJsonStub;
   let clock;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    sandbox = env.sandbox;
     fetchJsonStub = stubService(env.sandbox, env.win, 'xhr', 'fetchJson');
 
-    viewerMock = mockServiceForDoc(sandbox, ampdoc, 'viewer', [
+    viewerMock = mockServiceForDoc(env.sandbox, ampdoc, 'viewer', [
       'isCctEmbedded',
       'isProxyOrigin',
     ]);
