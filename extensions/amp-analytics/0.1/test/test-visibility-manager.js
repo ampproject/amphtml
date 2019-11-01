@@ -15,16 +15,20 @@
  */
 
 import {AnalyticsEventType} from '../events';
+import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
 import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../../src/intersection-observer-polyfill';
+import {Services} from '../../../../src/services';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
+  provideVisibilityManager,
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {setParentWindow} from '../../../../src/service';
 
 class IntersectionObserverStub {
   constructor(callback, options) {
@@ -1640,3 +1644,49 @@ describes.fakeWin('scroll depth', {amp: true}, env => {
     expect(root.getMaxScrollDepth()).to.equal(400);
   });
 });
+
+describes.realWin(
+  'VisibilityManager in shadow runtime',
+  {amp: 'multi'},
+  env => {
+    let top;
+    let ampdocService;
+    let host, shadowRoot, shadowDoc;
+
+    beforeEach(() => {
+      top = env.win;
+      ampdocService = Services.ampdocServiceFor(top);
+      host = top.document.createElement('div');
+      top.document.body.appendChild(host);
+      shadowRoot = host.attachShadow({mode: 'open'});
+      shadowDoc = ampdocService.installShadowDoc(
+        'https://example.com',
+        shadowRoot
+      );
+      sandbox.stub(Services, 'resourcesForDoc').returns({});
+      sandbox.stub(Services, 'viewportForDoc').returns({
+        onChanged() {},
+      });
+    });
+
+    it('should create a visibility manager for a shadow doc', () => {
+      const vm = provideVisibilityManager(shadowRoot);
+      expect(vm).to.be.instanceOf(VisibilityManagerForDoc);
+      expect(vm.ampdoc).to.equal(shadowDoc);
+    });
+
+    it('should create a visibility manager for a FIE', async () => {
+      const iframe = top.document.createElement('iframe');
+      await new Promise(resolve => {
+        iframe.onload = resolve;
+        iframe.srcdoc = '<div id="div1"></div>';
+        iframe[FIE_EMBED_PROP] = {host: iframe};
+        shadowRoot.appendChild(iframe);
+      });
+      setParentWindow(iframe.contentWindow, top);
+      const vm = provideVisibilityManager(iframe.contentDocument);
+      expect(vm).to.be.instanceOf(VisibilityManagerForEmbed);
+      expect(vm.ampdoc).to.equal(shadowDoc);
+    });
+  }
+);
