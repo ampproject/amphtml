@@ -7,8 +7,7 @@
     "expirationDateUTC": "2019-11-08",
     "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
   },
-  "experimentB": {
-  },
+  "experimentB": {},
   "experimentC": {
     "name": "Native Custom Elements V1",
     "environment": "AMP",
