@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AsyncResolverDef} from '../../../src/service/variable-source';
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';

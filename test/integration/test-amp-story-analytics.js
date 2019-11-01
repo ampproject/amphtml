@@ -113,8 +113,6 @@ config.run('amp-story analytics', () => {
           },
           "extraUrlParams": {
             "pageVisible": "\${storyPageId}",
-            "storyPageId": "STORY_PAGE_ID",
-            "storyPageIndex": "STORY_PAGE_INDEX",
             "bookendEnter": false,
             "bookendExit": false,
             "muted": false,
@@ -139,15 +137,12 @@ config.run('amp-story analytics', () => {
       return browser.waitForElementLayout('amp-story');
     });
 
-    it.only('should send analytics event when landing on a page', async () => {
+    it('should send analytics event when landing on a page', async () => {
       await browser.waitForElementLayout('#page-1[active]');
-      console.log('Withdrawing from the bank $$$$$$$$$$$$$$$');
+
       const req = await RequestBank.withdraw();
       const q = parseQueryString(req.url.substr(1));
       expect(q['pageVisible']).to.equal('page-1');
-      console.log(req.url);
-      console.log(q['storyPageId']);
-      console.log(q['storyPageIndex']);
     });
 
     it('should send analytics event when navigating', async () => {

@@ -27,7 +27,6 @@ import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
-import {registerServiceBuilder} from '../../../../src/service';
 
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
   let variables;
@@ -455,6 +454,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
       });
     });
+  });
 
   describe('getNameArgs:', () => {
     function check(input, name, argList) {

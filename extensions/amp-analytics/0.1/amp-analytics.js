@@ -125,8 +125,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    dev().info(TAG, 'in the build callback');
-    console.log('In the build callback');
     this.isSandbox_ = this.element.hasAttribute('sandbox');
 
     this.element.setAttribute('aria-hidden', 'true');
