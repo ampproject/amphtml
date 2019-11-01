@@ -43,8 +43,7 @@ let inProgress = 0;
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  isTravisBuild() && argv.single_pass ? 4 : 1;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
