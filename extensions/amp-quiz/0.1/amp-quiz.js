@@ -77,6 +77,7 @@ export class AmpQuiz extends AMP.BaseElement {
    * @param {Function} handleError
    */
   attachContent_(handleError) {
+    // TODO: If prompt is optional I need to handle the case where it's not present
     const prompt = this.element.children[0];
     // First child must be heading h1-h3
     if (
