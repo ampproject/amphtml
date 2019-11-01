@@ -212,17 +212,6 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
-
-    this.register_('STORY_PAGE_INDEX', () => {
-      console.log('now theres so many thoughts going thorugh my brain');
-      return this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX');
-    });
-
-    this.register_('STORY_PAGE_ID', () => {
-      console.log('Page id in amp-analytics');
-      return this.getStoryValue_('pageId', 'STORY_PAGE_ID');
-    });
-    console.log('registered all variables!!!!!!!!!!!!!');
   }
 
   /**
@@ -237,28 +226,6 @@ export class VariableService {
     };
     const merged = Object.assign({}, this.macros_, elementMacros);
     return /** @type {!JsonObject} */ (merged);
-  }
-
-  /**
-   * Resolves the value via amp-story's service.
-   * @param {string} property
-   * @param {string} name
-   * @return {!AsyncResolverDef}
-   * @private
-   */
-  getStoryValue_(property, name) {
-    console.log(' STORY VALUE !!!!!!!!!!!!!!!');
-    const service = Services.storyVariableServiceForOrNull(this.ampdoc_.win);
-    console.log('requesting story value for: ' + property);
-    return service.then(storyVariables => {
-      userAssert(
-        storyVariables,
-        'To use variable %s amp-story should be configured',
-        name
-      );
-      console.log(storyVariables);
-      return storyVariables[property];
-    });
   }
 
   /**

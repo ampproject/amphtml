@@ -456,31 +456,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       });
     });
 
-    it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID', () => {
-      // This was registerServiceBuilder(iframe.win, ...) before
-      registerServiceBuilder(win, 'story-variable', function() {
-        return Promise.resolve({
-          pageIndex: 546,
-          pageId: 'id-123',
-        });
-      });
-
-      return check(
-        '?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID',
-        '?index=546&id=id-123'
-      );
-    });
-
-    // TODO(#16916): Make this test work with synchronous throws.
-    it.skip(
-      'should replace STORY_PAGE_INDEX and STORY_PAGE_ID' +
-        ' with empty string if amp-story is not configured',
-      () => {
-        return check('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID', '?index=&id=');
-      }
-    );
-  });
-
   describe('getNameArgs:', () => {
     function check(input, name, argList) {
       it('can parse ' + name, () => {
