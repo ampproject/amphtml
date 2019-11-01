@@ -183,6 +183,10 @@ export class VariableService {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
+    // why const and not this. ?
+    /** @const {!./viewport/viewport-interface.ViewportInterface} */
+    const viewport = Services.viewportForDoc(this.ampdoc);
+
     /** @private {!JsonObject} */
     this.macros_ = dict({});
 
@@ -211,6 +215,12 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.set('SCROLL_TOP', () => viewport.getScrollTop());
+
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
   }
 
   /**

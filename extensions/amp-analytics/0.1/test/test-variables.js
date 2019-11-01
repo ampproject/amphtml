@@ -207,13 +207,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, opt_bindings) {
+    function check(input, output, toMatch, opt_bindings) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
       );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
-      return expect(expanded).to.eventually.equal(output);
+      return toMatch
+        ? expect(expanded).to.eventually.match(output)
+        : expect(expanded).to.eventually.equal(output);
     }
 
     it('handles consecutive macros in inner arguments', () => {
@@ -397,6 +399,20 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = 'test=123';
       await check('COOKIE(test)', '');
       doc.cookie = '';
+    });
+
+    it('should replace SCROLL_TOP', () => {
+      // return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
+      //   expect(res).to.match();
+      // });
+      return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/);
+    });
+
+    it('should replace SCROLL_LEFT', () => {
+      // return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
+      //   expect(res).to.match(/scrollLeft=\d+/);
+      // });
+      return check('?scrollLeft=SCROLL_LEFT', /scrollLeft=\d+/);
     });
 
     describe('$MATCH', () => {
