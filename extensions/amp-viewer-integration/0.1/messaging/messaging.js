@@ -206,7 +206,7 @@ export class Messaging {
     this.win_ = win;
     /** @const @private {!MessagePort|!WindowPortEmulator} */
     this.port_ = port;
-    /** @const @private */
+    /** @const @private {boolean} */
     this.isWebview_ = !!opt_isWebview;
 
     /**
