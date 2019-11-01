@@ -117,7 +117,7 @@ export class InaboxResources {
 
   /** @override */
   scheduleLayoutOrPreload(unusedResource) {
-    this.schedulePass();
+    this.pass_.schedule();
   }
 
   /** @override */
