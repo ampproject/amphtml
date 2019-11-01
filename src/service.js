@@ -346,6 +346,7 @@ export function getParentWindowFrameElement(node, opt_topWin) {
  */
 export function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
+    // TODO: isConnected check on document?
     const win = toWin(
       /** @type {!Document} */ (nodeOrDoc.ownerDocument || nodeOrDoc)
         .defaultView
