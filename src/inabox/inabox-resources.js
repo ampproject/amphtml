@@ -117,7 +117,7 @@ export class InaboxResources {
 
   /** @override */
   scheduleLayoutOrPreload(unusedResource) {
-    // all elements are immediately scheduled for layout after being added
+    this.pass_.schedule();
   }
 
   /** @override */
