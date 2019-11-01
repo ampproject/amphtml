@@ -15,19 +15,27 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-
 // Global cache of typedefName: typedefLocation.
 const typedefs = new Map();
 
 module.exports = function(context) {
   return {
-    VariableDeclaration(node) {
-      // This rule does not work with per-file on-the-fly linting done by IDEs.
-      if (!argv._.includes('lint')) {
-        return;
+    Program() {
+      // When relinting a file, remove all typedefs that it declared.
+      const filename = context.getFilename();
+      const keys = [];
+      for (const [key, file] of typedefs) {
+        if (file === filename) {
+          keys.push(key);
+        }
       }
 
+      for (const key of keys) {
+        typedefs.delete(key);
+      }
+    },
+
+    VariableDeclaration(node) {
       if (!node.leadingComments) {
         return;
       }
