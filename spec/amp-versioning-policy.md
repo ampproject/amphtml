@@ -63,7 +63,7 @@ The process for deprecations is similar to the [process for significant changes]
 - Give developers at least 6 weeks after your deprecation warning is in production to apply changes before removing the feature.
 - If you did not include removal in your I2D, file a separate Intent-to-Remove (I2R) when you are ready to remove the deprecated feature.
 
-As breaking an `amp-ad` or `amp-analytics` integration is less user disruptive, an easier process can be applied. After verifying of no usages from the ads / analytics vendor side, the original contributor of the integration can send a PR to remove the integration directly.
+The given component or integration may be neutered immediately in such a way that usage in a document no longer has side effects, but validation does not break.
 
 ### Version deprecations
 
