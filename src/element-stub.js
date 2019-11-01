@@ -21,10 +21,15 @@ import {devAssert} from './log';
 export const stubbedElements = [];
 
 export class ElementStub extends BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
+  /**
+   * @param {!AmpElement} element
+   * @param {boolean=} exclude
+   */
+  constructor(element, exclude) {
     super(element);
-    stubbedElements.push(this);
+    if (!exclude) {
+      stubbedElements.push(this);
+    }
   }
 
   /** @override */

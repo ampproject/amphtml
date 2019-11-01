@@ -245,21 +245,6 @@ function createBaseCustomElementClass(win) {
        */
       this.layoutScheduleTime = undefined;
 
-      // Closure compiler appears to mark HTMLElement as @struct which
-      // disables bracket access. Force this with a type coercion.
-      const nonStructThis = /** @type {!Object} */ (this);
-
-      // `opt_implementationClass` is only used for tests.
-      let Ctor =
-        win.__AMP_EXTENDED_ELEMENTS &&
-        win.__AMP_EXTENDED_ELEMENTS[this.elementName()];
-      if (getMode().test && nonStructThis['implementationClassForTesting']) {
-        Ctor = nonStructThis['implementationClassForTesting'];
-      }
-      devAssert(Ctor);
-      /** @private {!./base-element.BaseElement} */
-      this.implementation_ = new Ctor(this);
-
       /**
        * An element always starts in a unupgraded state until it's added to DOM
        * for the first time in which case it can be upgraded immediately or wait
@@ -301,6 +286,26 @@ function createBaseCustomElementClass(win) {
       /** @private {?./layout-delay-meter.LayoutDelayMeter} */
       this.layoutDelayMeter_ = null;
 
+      // Closure compiler appears to mark HTMLElement as @struct which
+      // disables bracket access. Force this with a type coercion.
+      const nonStructThis = /** @type {!Object} */ (this);
+
+      // `opt_implementationClass` is only used for tests.
+      let Ctor =
+        win.__AMP_EXTENDED_ELEMENTS &&
+        win.__AMP_EXTENDED_ELEMENTS[this.elementName()];
+      if (getMode().test && nonStructThis['implementationClassForTesting']) {
+        Ctor = nonStructThis['implementationClassForTesting'];
+      }
+      devAssert(Ctor);
+      try {
+        /** @private {!./base-element.BaseElement} */
+        this.implementation_ = new Ctor(this);
+      } catch (e) {
+        this.implementation_ = new ElementStub(this, /* exclude */ true);
+        throw e;
+      }
+
       if (nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
         nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](nonStructThis);
         delete nonStructThis[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
@@ -328,8 +333,19 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getAmpDoc() {
-      devAssert(this.ampdoc_, 'no ampdoc yet, since element is not attached');
-      return /** @typedef {!./service/ampdoc-impl.AmpDoc} */ this.ampdoc_;
+      if (this.ampdoc_) {
+        return this.ampdoc_;
+      }
+      if (!this.isConnected_) {
+        throw dev().createError(
+          this.tagName.toLowerCase(),
+          'attempted to get ampdoc before being connected'
+        );
+      }
+      const win = toWin(this.ownerDocument.defaultView);
+      const ampdocService = Services.ampdocServiceFor(win);
+      this.ampdoc_ = ampdocService.getAmpDoc(this);
+      return devAssert(this.ampdoc_);
     }
 
     /**
@@ -812,10 +828,7 @@ function createBaseCustomElementClass(win) {
 
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
-        const win = toWin(this.ownerDocument.defaultView);
-        const ampdocService = Services.ampdocServiceFor(win);
-        const ampdoc = ampdocService.getAmpDoc(this);
-        this.ampdoc_ = ampdoc;
+        const ampdoc = this.getAmpDoc();
         // Load the pre-stubbed extension if needed.
         const extensionId = this.tagName.toLowerCase();
         if (
