@@ -37,6 +37,7 @@ import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen'
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
+import sinon from 'sinon'; // eslint-disable-line local/no-import
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
@@ -400,7 +401,8 @@ beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  window.sandbox = sinon.sandbox = sinon.createSandbox();
+  sinon.sandbox = sinon.createSandbox();
+  window.sandbox = sinon.sandbox;
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
