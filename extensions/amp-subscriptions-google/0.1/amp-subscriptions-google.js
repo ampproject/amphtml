@@ -590,7 +590,6 @@ AMP.extension(TAG, '0.1', function(AMP) {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
       const element = ampdoc.getHeadNode();
       Services.subscriptionsServiceForDoc(element).then(service => {
-        console.log('Yeet!');
         service.registerPlatform(
           PLATFORM_ID,
           (platformConfig, serviceAdapter) => {
