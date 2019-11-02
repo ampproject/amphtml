@@ -44,23 +44,23 @@ Drilldown menu component with items that open nested submenus on tap.
 
 ## Overview
 
-`<amp-nested-menu>` provides a way to organize and display multiple levels of menu content inside an [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md). The component can be used jointly with [`<amp-mega-menu>`](../amp-mega-menu/amp-mega-menu.md) to create a responsive menu.
+`<amp-nested-menu>` enables layered content organization within [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md). A sidebar with `<amp-nested-menu>` can be used jointly with [`<amp-mega-menu>`](../amp-mega-menu/amp-mega-menu.md) to create a responsive menu.
 
 ## Usage
 
 The `<amp-nested-menu>` component must be placed inside `<amp-sidebar>`. The component may contain the following AMP elements:
 
-- `<amp-img>`
-- `<amp-list>`
-- `<amp-accordion>`
+- [`<amp-img>`](../../builtins/amp-img.md)
+- [`<amp-list>`](../amp-list/amp-list.md)
+- [`<amp-accordion>`](../amp-accordion/amp-accordion.md)
 
 ### Nested submenus
 
 `<amp-nested-menu>` supports nesting one or more layers of submenus. It uses the following attributes on its descendants as identifiers for the submenu functionality:
 
-- `amp-nested-submenu`: this identifies a submenu container. The element is initially out of view but, when opened, slides in and takes the place of the parent menu (either `<amp-nested-menu>` or another submenu).
+- `amp-nested-submenu`: this identifies a hidden submenu container. When opened, the element slides in and takes the place of its parent menu (either `<amp-nested-menu>` or another submenu).
 - `amp-nested-submenu-open`: this identifies an element that opens a submenu on tap. It must be a sibling of the said submenu.
-- `amp-nested-submenu-close`: this identifies an element that finds the closest containing submenu and closes it on tap. The element must be the descendant of a submenu.
+- `amp-nested-submenu-close`: this identifies an element that closes the closest containing submenu. The element must be the descendant of a submenu.
 
 Only `<div>` tags may receive the `amp-nested-submenu` attribute. The submenu open/close attributes can be applied to any of the tags below:
 
