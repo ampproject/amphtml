@@ -274,7 +274,7 @@ export class GoogleSubscriptionsPlatform {
    */
   onLoginRequest_(linkRequested) {
     if (linkRequested && this.isGoogleViewer_) {
-      this.runtime_.linkAccount();
+      this.loginWithAmpReaderId_();
       this.subscriptionAnalytics_.actionEvent(
         this.getServiceId(),
         Action.LINK,
@@ -288,6 +288,17 @@ export class GoogleSubscriptionsPlatform {
     } else {
       this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal('login'));
     }
+  }
+
+  /**
+   * Kicks off login flow for account linking, and passes AMP Reader ID to authorization URL.
+   * @private
+   */
+  loginWithAmpReaderId_() {
+    // Get local AMP reader ID, to match the ID sent to local entitlement endpoints.
+    this.serviceAdapter_.getReaderId('local').then(ampReaderId => {
+      this.runtime_.linkAccount({ampReaderId});
+    });
   }
 
   /** @private */
@@ -500,7 +511,7 @@ export class GoogleSubscriptionsPlatform {
       return Promise.resolve(true);
     }
     if (action == Action.LOGIN) {
-      this.runtime_.linkAccount();
+      this.loginWithAmpReaderId_();
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
@@ -579,6 +590,7 @@ AMP.extension(TAG, '0.1', function(AMP) {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
       const element = ampdoc.getHeadNode();
       Services.subscriptionsServiceForDoc(element).then(service => {
+        console.log('Yeet!');
         service.registerPlatform(
           PLATFORM_ID,
           (platformConfig, serviceAdapter) => {
