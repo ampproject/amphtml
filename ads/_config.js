@@ -638,15 +638,6 @@ const adConfig = jsonConfiguration({
     ],
   },
 
-  'mediaimpact': {
-    prefetch: 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
-    preconnect: [
-      'https://ww251.smartadserver.com',
-      'https://static.sascdn.com/',
-    ],
-    renderStartImplemented: true,
-  },
-
   'medianet': {
     preconnect: 'https://contextual.media.net',
     renderStartImplemented: true,
@@ -992,6 +983,12 @@ const adConfig = jsonConfiguration({
 
   'spotx': {
     preconnect: 'https://js.spotx.tv',
+    renderStartImplemented: true,
+  },
+
+  'springAds': {
+    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
+    preconnect: ['https://ib.adnxs.com'],
     renderStartImplemented: true,
   },
 

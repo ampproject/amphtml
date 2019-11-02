@@ -25,6 +25,8 @@ limitations under the License.
 
 # amp-live-list
 
+Warning: Currently, content served via an AMP cache may be slow to receive live updates. Read more [here](https://github.com/ampproject/amphtml/issues/13659)
+
 A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document.
 
 <table>
