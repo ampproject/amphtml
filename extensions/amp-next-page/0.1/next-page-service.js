@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-next-page-0.1.css';
 import {MultidocManager} from '../../../src/runtime';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
+import {VisibilityState} from '../../../src/visibility-state';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
@@ -173,6 +174,16 @@ export class NextPageService {
       win.document.title,
       canonicalUrl
     );
+
+    // TODO(gharbiw) Establish parity with the shadow doc amp object
+    documentRef.amp = {
+      ampdoc: ampDoc,
+      url: win.document.location.href,
+      title: win.document.title,
+      canonicalUrl,
+      setVisibilityState: ampDoc.overrideVisibilityState.bind(ampDoc),
+    };
+
     this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
 
@@ -216,7 +227,9 @@ export class NextPageService {
       removeElement(item);
     }
 
-    const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+    const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {
+      visibilityState: VisibilityState.PRERENDER,
+    });
     installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
 
     const body = amp.ampdoc.getBody();
@@ -457,24 +470,32 @@ export class NextPageService {
       return;
     }
 
-    let documentRef;
+    let documentIndex;
     let analyticsEvent = '';
 
-    if (position.relativePos === 'top') {
-      documentRef = this.documentRefs_[i + 1];
-      analyticsEvent = 'amp-next-page-scroll';
-    } else if (position.relativePos === 'bottom') {
-      documentRef = this.documentRefs_[i];
-      analyticsEvent = 'amp-next-page-scroll-back';
+    switch (position.relativePos) {
+      case 'top':
+        documentIndex = i + 1;
+        analyticsEvent = 'amp-next-page-scroll';
+        break;
+      case 'bottom':
+        documentIndex = i;
+        analyticsEvent = 'amp-next-page-scroll-back';
+        break;
+      default:
+        break;
     }
 
-    if (documentRef && documentRef.amp) {
+    if (
+      this.documentRefs_[documentIndex] &&
+      this.documentRefs_[documentIndex].amp
+    ) {
       this.triggerAnalyticsEvent_(
         analyticsEvent,
-        documentRef.ampUrl,
+        this.documentRefs_[documentIndex].ampUrl,
         this.activeDocumentRef_.ampUrl
       );
-      this.setActiveDocument_(documentRef);
+      this.setActiveDocument_(documentIndex);
     }
   }
 
@@ -497,17 +518,45 @@ export class NextPageService {
 
   /**
    * Sets the specified document as active, updating the document title and URL.
-   * @param {!DocumentRef} documentRef Reference to the document to set as
-   *     active.
+   *
+   * @param {number} documentIndex Index of the document to be activated
    * @private
    */
-  setActiveDocument_(documentRef) {
-    const {amp} = documentRef;
-    this.win_.document.title = amp.title || '';
-    this.activeDocumentRef_ = documentRef;
-    this.setActiveDocumentInHistory_(documentRef);
+  setActiveDocument_(documentIndex) {
+    this.documentRefs_.forEach((docRef, index) => {
+      const {amp} = docRef;
+      let updatedVisibilityState;
+      // Update the title and history
+      if (index == documentIndex) {
+        this.win_.document.title = amp.title || '';
+        this.activeDocumentRef_ = docRef;
+        this.setActiveDocumentInHistory_(docRef);
+        updatedVisibilityState = VisibilityState.VISIBLE;
+      } else if (index !== 0) {
+        updatedVisibilityState = VisibilityState.HIDDEN;
+      }
+      // Show the active doc and hide other docs
+      if (updatedVisibilityState) {
+        this.setDocumentVisibility_(index, updatedVisibilityState);
+      }
+    });
 
     // TODO(emarchiori): Consider updating position fixed elements.
+  }
+
+  /**
+   * Manually overrides the document's visible state to the given state
+   *
+   * @param {number} documentIndex Index of the document to change
+   * @param {!../../../src/visibility-state.VisibilityState} visibilityState
+   * @private
+   */
+  setDocumentVisibility_(documentIndex, visibilityState) {
+    const doc = this.documentRefs_[documentIndex];
+
+    if (doc && doc.amp && doc.amp['ampdoc']) {
+      doc.amp.setVisibilityState(visibilityState);
+    }
   }
 
   /**
