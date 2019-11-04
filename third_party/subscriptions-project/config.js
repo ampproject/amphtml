@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.79 */
+/** Version: 0.1.22.81 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -359,6 +359,13 @@ function log(var_args) {
 }
 
 /**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
+
+/**
  * Throws an error if the first argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
@@ -426,6 +433,7 @@ function toString(val) {
 var log_1 = {
   assert,
   debugLog,
+  warn,
   log
 };
 var log_3 = log_1.debugLog;
