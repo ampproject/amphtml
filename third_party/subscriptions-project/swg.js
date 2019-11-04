@@ -14687,9 +14687,8 @@ class AnalyticsService {
 
   /**
    * @return {!Promise<!../components/activities.ActivityIframePort>}
-   * @private
    */
-  start_() {
+  start() {
     if (!this.serviceReady_) {
       // TODO(sohanirao): Potentially do this even earlier
       this.doc_.getBody().appendChild(this.getElement());
@@ -14774,7 +14773,7 @@ class AnalyticsService {
     ) {
       return;
     }
-    this.lastAction_ = this.start_().then(port => {
+    this.lastAction_ = this.start().then(port => {
       const request = this.createLogRequest_(event);
       this.everLogged_ = true;
       port.execute(request);
@@ -15393,6 +15392,7 @@ class ConfiguredRuntime {
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
+    this.analyticsService_.start();
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(this);
