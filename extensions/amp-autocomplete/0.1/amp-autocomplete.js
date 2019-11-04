@@ -31,7 +31,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
-import {isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
 import {
   setupAMPCors,
@@ -542,7 +542,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (
       opt_input.length < this.minChars_ ||
       !sourceData ||
-      !sourceData.length
+      !(sourceData.length || sourceData['html'])
     ) {
       return Promise.resolve();
     }
@@ -568,7 +568,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.hasTemplate_) {
       renderPromise = this.ssrTemplateHelper_
         .applySsrOrCsrTemplate(this.element, filteredData)
-        .then(renderedChildren => {
+        .then(rendered => {
+          const renderedChildren = isArray(rendered)
+            ? rendered
+            : Array.from(rendered.childNodes);
           renderedChildren.map(child => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');

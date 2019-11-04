@@ -178,6 +178,16 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="9"] #container9 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+    viewer[data-show-container="9"] #show-container9-anchor {
+      text-decoration: underline;
+    }
+
     viewer[data-show-container="dynamic"] #container-dynamic {
       visibility: visible;
       -webkit-transform: none;
@@ -475,6 +485,8 @@
           return this.ssrRenderAmpListTemplate_(data);
         } else if (ampComponentType == 'amp-form') {
           return this.ssrRenderAmpFormTemplate_(data);
+        } else if (ampComponentType == 'amp-autocomplete') {
+          return this.ssrRenderAmpAutocompleteTemplate_(data);
         } else {
           return Promise.reject({error: 'source amp component is not valid'})
         }
@@ -502,6 +514,27 @@
           },
           "type": 'application/json',
         },
+      });
+    };
+
+    // TODO: We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
+    Viewer.prototype.ssrRenderAmpAutocompleteTemplate_ = function(data) {
+      // Mocked response.
+      return Promise.resolve({
+        "html":
+          "<div class='product' role='option' data-value='Apple'>Apple</div>"
+            + "<div class='product' role='option' data-value='Orange'>Orange</div>"
+            + "<div class='product' role='option' data-value='Pear'>Pear</div>"
+            + "<div class='product' role='option' data-value='Banana'>Banana</div>"
+            + "<div class='product' role='option' data-value='Watermelon'>Watermelon</div>",
+        "body" : "",
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          }
+        }
       });
     };
 
@@ -710,6 +743,13 @@
           'xhrInterceptor').start();
       addShowContainer('8');
 
+      new Viewer(
+          'container9',
+          '9',
+          './amp-autocomplete.ssr.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('9');
+
       if (href) {
         new Viewer(
             'container-dynamic',
@@ -767,6 +807,7 @@
       <a class="show-container-anchor" id="show-container6-anchor">Six</a>
       <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
       <a class="show-container-anchor" id="show-container8-anchor">Eight</a>
+      <a class="show-container-anchor" id="show-container9-anchor">Nine</a>
       <a class="show-container-anchor" id="show-containerdynamic-anchor" hidden>Dynamic</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
@@ -816,6 +857,11 @@
         Please wait, the AMP doc will appear here...
       </div>
     </container>
+    <container id="container9">
+        <div class="wait">
+          Please wait, the AMP doc will appear here...
+        </div>
+      </container>
   </viewer>
 </body>
 </html>
