@@ -90,7 +90,7 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   attrs: { name: "single-item" }
   attrs: {
     name: "src"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
@@ -107,7 +107,7 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   }
   attrs: {
     name: "[src]"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
   attrs: {
     name: "[state]"
@@ -281,7 +281,7 @@ tags: {  # <amp-list>
   attrs: { name: "single-item" }
   attrs: {
     name: "src"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
       allow_relative: true
@@ -292,7 +292,7 @@ tags: {  # <amp-list>
   # <amp-bind>
   attrs: {
     name: "[src]"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
   attrs: {
     name: "[state]"
