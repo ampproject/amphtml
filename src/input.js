@@ -92,9 +92,10 @@ export class Input {
   }
 
   /**
+   * See https://github.com/ampproject/amphtml/blob/master/spec/amp-css-classes.md#input-mode-classes
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
-  toggleClassOnInputDetected(ampdoc) {
+  setupInputModeClasses(ampdoc) {
     this.onTouchDetected(detected => {
       this.toggleInputClass_(ampdoc, 'amp-mode-touch', detected);
     }, true);

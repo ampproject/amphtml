@@ -61,7 +61,7 @@ export class InaboxResources {
     this.mutator_ = new InaboxMutator(ampdoc, this);
 
     const input = Services.inputFor(this.win);
-    input.toggleClassOnInputDetected(ampdoc);
+    input.setupInputModeClasses(ampdoc);
   }
 
   /** @override */

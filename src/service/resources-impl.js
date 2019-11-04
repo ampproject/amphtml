@@ -283,7 +283,7 @@ export class ResourcesImpl {
         remeasure();
       }
       const input = Services.inputFor(this.win);
-      input.toggleClassOnInputDetected(this.ampdoc);
+      input.setupInputModeClasses(this.ampdoc);
 
       // Safari 10 and under incorrectly estimates font spacing for
       // `@font-face` fonts. This leads to wild measurement errors. The best
