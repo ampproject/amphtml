@@ -264,25 +264,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `Unexpected filter: ${this.filter_}`
       );
     }
-    if (this.hasTemplate_) {
-      // Dummy render to verify existence of "data-value" or "data-disabled" attribute.
-      const empty = /** @type {!JsonObject} */ ({});
-      this.ssrTemplateHelper_
-        .applySsrOrCsrTemplate(this.element, empty)
-        .then(renderedEl => {
-          dev().assertElement(renderedEl);
-          if (
-            !renderedEl.hasAttribute('data-value') &&
-            !renderedEl.hasAttribute('data-disabled')
-          ) {
-            user().warn(
-              TAG,
-              'Expected "data-value" or "data-disabled" attribute on template-rendered elements. Found: ',
-              renderedEl
-            );
-          }
-        });
-    }
 
     // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
