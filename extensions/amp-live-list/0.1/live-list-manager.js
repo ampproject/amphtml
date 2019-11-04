@@ -16,10 +16,15 @@
 
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
-import {addParamToUrl} from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  installOriginExperimentsForDoc,
+  originExperimentsForDoc,
+} from '../../../src/service/origin-experiments-impl';
 import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
@@ -76,6 +81,9 @@ export class LiveListManager {
 
     /** @private @const {boolean} */
     this.isTransformed_ = isDocTransformed(ampdoc.getRootNode());
+
+    /** @private {?boolean} */
+    this.enrolledInAppendRandomExperiment_ = null;
 
     // Only start polling when doc is ready and when the doc is visible.
     this.whenDocReady_().then(() => {
@@ -147,11 +155,17 @@ export class LiveListManager {
   fetchDocument_() {
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
-      url = addParamToUrl(
-        url,
-        'amp_latest_update_time',
-        String(this.latestUpdateTime_)
-      );
+      const parameters = this.enrolledInAppendRandomExperiment_
+        ? dict({
+            'amp_latest_update_time': String(this.latestUpdateTime_),
+            // AMP Caches do not always evict entries from their caches.
+            // This experiment adds a random identifier to reduce cache hits for enrolled documents.
+            'amp_random': String(Math.random()),
+          })
+        : dict({
+            'amp_latest_update_time': String(this.latestUpdateTime_),
+          });
+      url = addParamsToUrl(url, parameters);
     }
 
     if (this.isTransformed_) {
@@ -279,6 +293,17 @@ export class LiveListManager {
     // Polling may not be started yet if no live lists were registered by
     // doc ready in LiveListManager's constructor.
     if (liveList.isEnabled() && this.poller_ && this.ampdoc.isVisible()) {
+      if (this.enrolledInAppendRandomExperiment_ === null) {
+        // Origin Trial for cache busting requests for `amp-live-list`.
+        installOriginExperimentsForDoc(this.ampdoc);
+        originExperimentsForDoc(liveList.element)
+          .getExperiments()
+          .then(
+            trials =>
+              (this.enrolledInAppendRandomExperiment_ =
+                trials && trials.includes('amp-live-list-random'))
+          );
+      }
       this.poller_.start();
     }
   }
