@@ -181,7 +181,6 @@ export class NextPageService {
       url: win.document.location.href,
       title: win.document.title,
       canonicalUrl,
-      setVisibilityState: ampDoc.overrideVisibilityState.bind(ampDoc),
     };
 
     this.documentRefs_.push(documentRef);
@@ -552,9 +551,21 @@ export class NextPageService {
    * @private
    */
   setDocumentVisibility_(documentIndex, visibilityState) {
+    // Prevent updating visibility of the host document
+    if (documentIndex === 0) {
+      return;
+    }
+
     const doc = this.documentRefs_[documentIndex];
 
     if (doc && doc.amp && doc.amp['ampdoc']) {
+      // Prevent hiding of documents that are being pre-rendered
+      if (
+        !doc.amp.ampdoc.hasBeenVisible() &&
+        visibilityState == VisibilityState.HIDDEN
+      ) {
+        return;
+      }
       doc.amp.setVisibilityState(visibilityState);
     }
   }
