@@ -900,7 +900,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   getSlotSize() {
     const {width, height} = this.getDeclaredSlotSize_();
-    return width && height
+    return !isNaN(width) && !isNaN(height)
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
         this.getIntersectionElementLayoutBox();
@@ -1185,9 +1185,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return Promise.reject('Cannot access body of friendly frame');
       }
       return this.setCssPosition_('static').then(() => {
-        return this.attemptChangeHeight(
-          this.iframe.contentWindow.document.body./*OK*/ clientHeight
-        )
+        const creativeHeight = this.iframe.contentWindow.document.body
+          ./*OK*/ clientHeight;
+        return this.attemptChangeHeight(creativeHeight)
           .then(() => {
             this.fireFluidDelayedImpression();
             this.reattemptToExpandFluidCreative_ = false;
@@ -1198,6 +1198,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               'Attempt to change size failed on fluid ' +
                 'creative. Will re-attempt when slot is out of the viewport.'
             );
+            const slotHeight = this.getSlotSize().height;
+            if (slotHeight >= 0.5 * creativeHeight) {
+              // This call is idempotent, so it's okay to make it multiple
+              // times.
+              this.fireFluidDelayedImpression();
+            }
             this.reattemptToExpandFluidCreative_ = true;
             this.setCssPosition_('absolute');
           });
