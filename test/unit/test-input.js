@@ -16,6 +16,7 @@
 
 import {Input} from '../../src/input';
 import {installTimerService} from '../../src/service/timer-impl.js';
+import {stubService} from '../../testing/test-helper';
 
 describe('Input', () => {
   let sandbox;
@@ -215,4 +216,45 @@ describe('Input', () => {
     expect(input.isKeyboardActive()).to.equal(false);
     expect(kbActive).to.equal(undefined);
   });
+});
+
+describes.realWin('test-input.js setupInputModeClasses', {amp: false}, env => {
+  let ampdoc;
+  let input;
+  let body;
+
+  beforeEach(() => {
+    body = env.win.document.body;
+    ampdoc = {
+      waitForBodyOpen: () => Promise.resolve(body),
+    };
+    stubService(env.sandbox, env.win, 'vsync', 'mutate').callsFake(func => {
+      func();
+    });
+    input = new Input(env.win);
+    input.setupInputModeClasses(ampdoc);
+  });
+
+  it('should add amp-mode-mouse class to body when mouseConfirmed', async () => {
+    expect(body).to.not.have.class('amp-mode-mouse');
+    input.mouseConfirmed_();
+    await new Promise(setTimeout);
+    expect(body).to.have.class('amp-mode-mouse');
+  });
+
+  it('should add amp-mode-keyboard-active class to body when onKeyDown', async () => {
+    expect(body).to.not.have.class('amp-mode-keyboard-active');
+    simulateKeyDown();
+    await new Promise(setTimeout);
+    expect(body).to.have.class('amp-mode-keyboard-active');
+  });
+
+  function simulateKeyDown() {
+    const event = new /*OK*/ KeyboardEvent('keydown', {
+      'keyCode': 65,
+      'which': 65,
+      bubbles: true,
+    });
+    env.win.document.body.dispatchEvent(event);
+  }
 });

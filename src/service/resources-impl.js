@@ -282,7 +282,8 @@ export class ResourcesImpl {
         // No promise means that there's no problem.
         remeasure();
       }
-      this.monitorInput_();
+      const input = Services.inputFor(this.win);
+      input.setupInputModeClasses(this.ampdoc);
 
       // Safari 10 and under incorrectly estimates font spacing for
       // `@font-face` fonts. This leads to wild measurement errors. The best
@@ -315,33 +316,6 @@ export class ResourcesImpl {
   /** @override */
   getAmpdoc() {
     return this.ampdoc;
-  }
-
-  /** @private */
-  monitorInput_() {
-    const input = Services.inputFor(this.win);
-    input.onTouchDetected(detected => {
-      this.toggleInputClass_('amp-mode-touch', detected);
-    }, true);
-    input.onMouseDetected(detected => {
-      this.toggleInputClass_('amp-mode-mouse', detected);
-    }, true);
-    input.onKeyboardStateChanged(active => {
-      this.toggleInputClass_('amp-mode-keyboard-active', active);
-    }, true);
-  }
-
-  /**
-   * @param {string} clazz
-   * @param {boolean} on
-   * @private
-   */
-  toggleInputClass_(clazz, on) {
-    this.ampdoc.waitForBodyOpen().then(body => {
-      this.vsync_.mutate(() => {
-        body.classList.toggle(clazz, on);
-      });
-    });
   }
 
   /** @override */

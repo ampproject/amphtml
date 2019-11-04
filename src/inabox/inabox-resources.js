@@ -20,6 +20,7 @@ import {Observable} from '../observable';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';
+import {Services} from '../services';
 import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
 
@@ -58,6 +59,9 @@ export class InaboxResources {
 
     /** @const @private {!InaboxMutator} */
     this.mutator_ = new InaboxMutator(ampdoc, this);
+
+    const input = Services.inputFor(this.win);
+    input.setupInputModeClasses(ampdoc);
   }
 
   /** @override */
