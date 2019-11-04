@@ -168,16 +168,24 @@ it lives on the non-AMP document that is iframed.
 If you're using a common video framework like JwPlayer or Video.js, you can
 simply call `listenTo` for a basic integration:
 
-##### For JwPlayer:
+##### For JwPlayer
+
+Pass in your [`jwplayer` instance object](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/)
+through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `ampIntegration` object then knows how
+to setup the player through the instance API.
 
 ```js
 function onAmpIntegrationReady(ampIntegration) {
-  var myVideo = jwplayer('my-video');
-  ampIntegration.listenTo('jwplayer', myVideo);
+  var myJwplayer = jwplayer('my-video');
+  ampIntegration.listenTo('jwplayer', myJwplayer);
 }
 ```
 
-##### For Video.js:
+##### For Video.js
+
+Pass in your [`<video>` element](https://docs.videojs.com/docs/api/player.html)
+through the signature `ampIntegration.listenTo('videojs', myVideo)`. Video.js overloads this element to provide methods
+that the `ampIntegration` object uses to setup the player.
 
 ```js
 function onAmpIntegrationReady(ampIntegration) {
