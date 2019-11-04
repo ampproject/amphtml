@@ -156,7 +156,7 @@ In order for the video integration to work, the embedded document (e.g. `my-vide
     // `ampIntegration` is an object containing the tools required to integrate.
     // This callback specifies how the AMP document and the iframed video document
     // talk to each other.
-    // YOU MAY NEED TO IMPLEMENT THIS. See below.
+    // YOU NEED TO IMPLEMENT THIS. See below.
   }
 </script>
 ```
