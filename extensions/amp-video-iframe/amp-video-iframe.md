@@ -163,7 +163,11 @@ In order for the video integration to work, the embedded document (e.g. `my-vide
 Note that this library is separate from the extension code (`amp-video-iframe-0.1.js`), because
 it lives on the non-AMP document that is iframed.
 
-### Simple integrations
+{% call callout('Do not autoplay yourself', type='caution') %}
+**Never play the video inside the frame automatically.** Instead, you should support the integration script and use the `amp-video-iframe` tag with the `autoplay` attribute. The AMP component will automatically send the necessary signals to your iframe to autoplay for a better user experience.
+{% endcall %}
+
+### Readymade integrations
 
 If you're using a common video framework like [JwPlayer](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call `listenTo` for a basic, readymade integration.
 
@@ -197,7 +201,16 @@ function onAmpIntegrationReady(ampIntegration) {
 }
 ```
 
-**Never play the video inside the frame automatically.** Instead, you should support the integration script and use the `amp-video-iframe` tag with the `autoplay` attribute. The AMP component will autoamtically send the necessary signals to your iframe to autoplay for a better user experience.
+`listenTo` initializes the Video.js instance on the `<video>` element if required. This uses the global `videojs` function by default. If your page provides the initializer differently, you must pass it in as the third argument:
+
+```js
+function onAmpIntegrationReady(ampIntegration) {
+  var myVideo = document.querySelector('#my-video');
+  
+  // ampIntegration initializes player with `myVideojsInitializer(myVideo)`
+  ampIntegration.listenTo('videojs', myVideo, myVideojsInitializer);
+}
+```
 
 ### Custom integrations
 
