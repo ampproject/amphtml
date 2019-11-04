@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
 
 :host {
+    align-self: start;
     --correct-color: #5BB974;
     --correct-color-shaded: #4b9960;
     --incorrect-color: #F34E4E;

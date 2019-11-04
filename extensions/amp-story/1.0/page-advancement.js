@@ -430,7 +430,7 @@ class ManualAdvancement extends AdvancementConfig {
       dev().assertElement(event.target),
       el => {
         tagName = el.tagName.toLowerCase();
-        if (tagName === 'amp-story-page-attachment') {
+        if (tagName === 'amp-story-page-attachment' || tagName === 'amp-quiz') {
           shouldHandleEvent = false;
           return true;
         }

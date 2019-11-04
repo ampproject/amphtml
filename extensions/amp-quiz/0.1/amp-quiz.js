@@ -18,9 +18,7 @@ import {CSS} from '../../../build/amp-quiz-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/0.1/utils';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
-
-const answerChoiceOptions = ['A', 'B', 'C', 'D'];
+// import {setStyle} from '../../../src/style';
 
 export class AmpQuiz extends AMP.BaseElement {
   /**
@@ -37,6 +35,9 @@ export class AmpQuiz extends AMP.BaseElement {
 
     /** @private {Array<number>} */
     this.percentages_ = this.TEMPgeneratePercentages_();
+
+    /** @private {Array<string>} */
+    this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
 
     this.configureOption_ = this.configureOption_.bind(this);
   }
@@ -66,6 +67,11 @@ export class AmpQuiz extends AMP.BaseElement {
     this.attachOptionActionHandlers_();
 
     // TODO: ATTACH SURFACE OPTIONS USING CSS CUSTOM PROPERTIES
+    const bcr = this.element.getBoundingClientRect();
+    console.log(bcr);
+    console.log(this);
+    console.log(this.getLayoutBox());
+    // console.log(this.getPageLayoutBox());
   }
 
   /** @override */
@@ -126,7 +132,7 @@ export class AmpQuiz extends AMP.BaseElement {
 
     // Create a container for the answer choice and add it to the shadow root
     const answerChoice = document.createElement('span');
-    answerChoice.textContent = answerChoiceOptions.shift();
+    answerChoice.textContent = this.answerChoiceOptions_.shift();
     answerChoice.setAttribute('class', 'i-amp-quiz-answer-choice');
     convertedOption.prepend(answerChoice);
 
@@ -146,7 +152,11 @@ export class AmpQuiz extends AMP.BaseElement {
     const percentages = [];
     let pool = 100;
     let random;
-    for (let i = 0; i < 3; i++) {
+    // TODO: FIND A SMARTER WAY OF DOING THIS?
+    // OR NOT - THIS IS TEMP ANYWAY
+    const numOptions = Array.from(this.element.querySelectorAll('option'))
+      .length;
+    for (let i = 0; i < numOptions - 1; i++) {
       random = Math.floor(Math.random() * pool);
       percentages.push(random);
       pool -= random;
@@ -159,7 +169,7 @@ export class AmpQuiz extends AMP.BaseElement {
    * @param {Node} option
    */
   setOptionPercentage_(option) {
-    // TODO: ASSIGN THE PERCENTAGES BETTER
+    // TODO: ASSIGN THE PERCENTAGES BETTER DUMMY
     const percentage = this.percentages_.shift();
     // UNCOMMENT TO GET PERCENTAGE BARS
     // let backgroundString;
