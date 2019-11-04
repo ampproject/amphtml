@@ -64,7 +64,7 @@ The AMP runtime provides the following information to the ad:
   </ul>
   </dd>
   <dt><code>window.context.container</code></dt>
-  <dd>Contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: <code>amp-sticky-ad</code>, <code>amp-fx-flying-carpet</code>, <code>amp-lightbox`</code>. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.</dd>
+  <dd>Contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: <code>amp-sticky-ad</code>, <code>amp-fx-flying-carpet</code>, <code>amp-lightbox</code>. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.</dd>
   <dt><code>window.context.domFingerprint</code></dt>
   <dd>Contains a string key based on where in the page the ad slot appears. Its purpose is to identify the same ad slot across many page views. It is formed by listing the ancestor tags and their ordinal position, up to 25 levels. For example, if its value is <code>amp-ad.0,td.1,tr.0,table.0,div/id2.0,div/id1.0</code> this would mean the first amp-ad child of the second td child of the first tr child of... etc.</dd>
   <dt><code>window.context.location</code></dt>
