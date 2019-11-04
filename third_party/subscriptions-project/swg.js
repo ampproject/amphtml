@@ -15631,8 +15631,18 @@ class ConfiguredRuntime {
   }
 
   /** @override */
+  setOnPaymentResponse(callback) {
+    this.callbacks_.setOnPaymentResponse(callback);
+  }
+
+  /** @override */
   setOnSubscribeResponse(callback) {
     this.callbacks_.setOnSubscribeResponse(callback);
+  }
+
+  /** @override */
+  setOnContributionResponse(callback) {
+    this.callbacks_.setOnContributionResponse(callback);
   }
 
   /** @override */
