@@ -60,6 +60,8 @@ function build_(config) {
 }
 
 function test_() {
+  process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+  timedExecOrDie('gulp visual-diff --nobuild --master');
   timedExecOrDie('gulp integration --nobuild --compiled --headless');
   timedExecOrDie('gulp e2e --nobuild --headless');
 }

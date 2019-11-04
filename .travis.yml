@@ -43,7 +43,7 @@ stages:
   - name: build
   - name: test
   - name: experiment
-    if: type = push
+    # if: type = push
 jobs:
   include:
     - stage: build
