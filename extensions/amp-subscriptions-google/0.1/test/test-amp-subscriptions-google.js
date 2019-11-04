@@ -298,10 +298,18 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(methods.showAbbrvOffer).to.be.calledOnce;
   });
 
-  it('should start linking flow when requested', () => {
+  it('should start linking flow when requested', async () => {
+    serviceAdapterMock
+      .expects('getReaderId')
+      .withExactArgs('local')
+      .returns(Promise.resolve('ari1'))
+      .once();
     serviceAdapterMock.expects('delegateActionToLocal').never();
     callback(callbacks.loginRequest)({linkRequested: true});
-    expect(methods.linkAccount).to.be.calledOnce.calledWithExactly();
+    await 'Promises...';
+    expect(methods.linkAccount).to.be.calledOnce.calledWithExactly({
+      ampReaderId: 'ari1',
+    });
   });
 
   it('should delegate login when linking not requested', () => {
@@ -561,9 +569,15 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
-  it('should link accounts if login action is delegated', () => {
+  it('should link accounts if login action is delegated', async () => {
+    serviceAdapterMock
+      .expects('getReaderId')
+      .withExactArgs('local')
+      .returns(Promise.resolve('ari1'))
+      .once();
     const executeStub = platform.runtime_.linkAccount;
     platform.executeAction(Action.LOGIN);
+    await 'Promises...';
     expect(executeStub).to.be.calledWith();
   });
 
