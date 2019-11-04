@@ -24,13 +24,15 @@ import {validateData, writeScript} from '../3p/3p';
 export function sas(global, data) {
   let url, adHost;
   const fields = ['site', 'size', 'area'];
-  validateData(data, ['customerName'],
-      ['adHost', 'site', 'size', 'area', 'mid','tags']);
+  validateData(
+    data,
+    ['customerName'],
+    ['adHost', 'site', 'size', 'area', 'mid', 'tags']
+  );
 
   if (typeof data.adHost === 'undefined') {
     adHost = encodeURIComponent(data['customerName']) + '-ads.aimatch.com';
-  }
-  else {
+  } else {
     adHost = encodeURIComponent(data['adHost']);
   }
 

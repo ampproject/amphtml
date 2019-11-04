@@ -27,7 +27,6 @@ const TAG_ = 'iframe-transport-client';
  * creatives.
  */
 export class IframeTransportClient {
-
   /** @param {!Window} win */
   constructor(win) {
     /** @private {!Window} */
@@ -39,47 +38,63 @@ export class IframeTransportClient {
     const parsedFrameName = tryParseJson(this.win_.name);
 
     /** @private {string} */
-    this.vendor_ = dev().assertString(parsedFrameName['type'],
-        'Parent frame must supply vendor name as type in ' +
-        this.win_.location.href);
+    this.vendor_ = dev().assertString(
+      parsedFrameName['type'],
+      'Parent frame must supply vendor name as type in ' +
+        this.win_.location.href
+    );
     // Note: amp-ad-exit will validate the vendor name before performing
     // variable substitution, so if the vendor name is not a valid one from
     // vendors.js, then its response messages will have no effect.
-    devAssert(this.vendor_.length, 'Vendor name cannot be empty in ' +
-        this.win_.location.href);
+    devAssert(
+      this.vendor_.length,
+      'Vendor name cannot be empty in ' + this.win_.location.href
+    );
 
     /** @protected {!IframeMessagingClient} */
     this.iframeMessagingClient_ = new IframeMessagingClient(win);
     this.iframeMessagingClient_.setHostWindow(this.win_.parent);
-    this.iframeMessagingClient_.setSentinel(dev().assertString(
+    this.iframeMessagingClient_.setSentinel(
+      dev().assertString(
         parsedFrameName['sentinel'],
-        'Invalid/missing sentinel on iframe name attribute' + this.win_.name));
+        'Invalid/missing sentinel on iframe name attribute' + this.win_.name
+      )
+    );
     this.iframeMessagingClient_.makeRequest(
-        MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
-        MessageType.IFRAME_TRANSPORT_EVENTS,
-        eventData => {
-          const events =
+      MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
+      MessageType.IFRAME_TRANSPORT_EVENTS,
+      eventData => {
+        const events =
           /**
            * @type
            *   {!Array<../src/3p-frame-messaging.IframeTransportEvent>}
            */
           (eventData['events']);
-          devAssert(events,
-              'Received malformed events list in ' + this.win_.location.href);
-          devAssert(events.length,
-              'Received empty events list in ' + this.win_.location.href);
-          events.forEach(event => {
-            try {
-              devAssert(event.creativeId,
-                  'Received malformed event in ' + this.win_.location.href);
-              this.contextFor_(event.creativeId).dispatch(event.message);
-            } catch (e) {
-              user().error(TAG_,
-                  'Exception in callback passed to onAnalyticsEvent',
-                  e);
-            }
-          });
+        devAssert(
+          events,
+          'Received malformed events list in ' + this.win_.location.href
+        );
+        devAssert(
+          events.length,
+          'Received empty events list in ' + this.win_.location.href
+        );
+        events.forEach(event => {
+          try {
+            devAssert(
+              event.creativeId,
+              'Received malformed event in ' + this.win_.location.href
+            );
+            this.contextFor_(event.creativeId).dispatch(event.message);
+          } catch (e) {
+            user().error(
+              TAG_,
+              'Exception in callback passed to onAnalyticsEvent',
+              e
+            );
+          }
         });
+      }
+    );
   }
 
   /**
@@ -90,10 +105,15 @@ export class IframeTransportClient {
    * @private
    */
   contextFor_(creativeId) {
-    return this.creativeIdToContext_[creativeId] ||
-        (this.creativeIdToContext_[creativeId] =
-            new IframeTransportContext(this.win_, this.iframeMessagingClient_,
-                creativeId, this.vendor_));
+    return (
+      this.creativeIdToContext_[creativeId] ||
+      (this.creativeIdToContext_[creativeId] = new IframeTransportContext(
+        this.win_,
+        this.iframeMessagingClient_,
+        creativeId,
+        this.vendor_
+      ))
+    );
   }
 
   /**
@@ -127,9 +147,11 @@ export class IframeTransportContext {
     /** @private {?function(string)} */
     this.listener_ = null;
 
-    userAssert(win['onNewContextInstance'] &&
+    userAssert(
+      win['onNewContextInstance'] &&
         typeof win['onNewContextInstance'] == 'function',
-    'Must implement onNewContextInstance in ' + win.location.href);
+      'Must implement onNewContextInstance in ' + win.location.href
+    );
     win['onNewContextInstance'](this);
   }
 
@@ -158,9 +180,10 @@ export class IframeTransportContext {
    * @param {!Object<string, string>} data
    */
   sendResponseToCreative(data) {
-    this.iframeMessagingClient_./*OK*/sendMessage(
-        MessageType.IFRAME_TRANSPORT_RESPONSE,
-        /** @type {!JsonObject} */
-        (Object.assign({message: data}, this.baseMessage_)));
+    this.iframeMessagingClient_./*OK*/ sendMessage(
+      MessageType.IFRAME_TRANSPORT_RESPONSE,
+      /** @type {!JsonObject} */
+      (Object.assign({message: data}, this.baseMessage_))
+    );
   }
 }

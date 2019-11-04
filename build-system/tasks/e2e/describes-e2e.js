@@ -14,114 +14,440 @@
  * limitations under the License.
  */
 
-// import to install chromedriver
+// import to install chromedriver and geckodriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
-const {AmpDriver} = require('./amp-driver');
+require('geckodriver'); // eslint-disable-line no-unused-vars
+
+const chrome = require('selenium-webdriver/chrome');
+const firefox = require('selenium-webdriver/firefox');
+const puppeteer = require('puppeteer');
+const {
+  SeleniumWebDriverController,
+} = require('./selenium-webdriver-controller');
+const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
-const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
+const {installRepl, uninstallRepl} = require('./repl');
+const {isTravisBuild} = require('../../common/travis');
+const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TIMEOUT = 20000;
+const TEST_TIMEOUT = 40000;
+const SETUP_TIMEOUT = 30000;
+const SETUP_RETRIES = 1;
+const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
+/**
+ * TODO(cvializ): Firefox now experimentally supports puppeteer.
+ * When it's more mature we might want to support it.
+ * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
+ */
+const PUPPETEER_BROWSERS = new Set(['chrome']);
 
 /**
- * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
+ * @typedef {{
+ *  browsers: string,
+ *  headless: boolean,
+ *  engine: string,
+ * }}
+ */
+let DescribesConfigDef;
+
+/**
+ * @typedef {{
+ *  headless: boolean,
+ * }}
+ */
+let PuppeteerConfigDef;
+
+/**
+ * @typedef {{
+ *  headless: boolean,
+ * }}
+ */
+let SeleniumConfigDef;
+
+/** @const {?DescribesConfigDef} */
+let describesConfig = null;
+
+/**
+ * Map the browserName to the capabilities name. (firefox for example has a
+ * prefix.
+ *
+ * @enum {string}
+ */
+const capabilitiesKeys = {
+  'chrome': 'chromeOptions',
+  'firefox': 'moz:firefoxOptions',
+  'safari': 'safariOptions',
+};
+
+/**
+ * Configure all tests. This may only be called once, since it is only read once
+ * and writes after reading will not have any effect.
+ * @param {!DescribesConfigDef} config
+ */
+function configure(config) {
+  if (describesConfig) {
+    throw new Error('describes.configure should only be called once');
+  }
+
+  describesConfig = Object.assign({}, config);
+}
+
+/**
+ * Retrieve the describes config if set.
+ * If not set, it sets the config to an empty object and returns it.
+ * After getting the config the first time, the config may not be changed.
+ * @return {!DescribesConfigDef}
+ */
+function getConfig() {
+  if (!describesConfig) {
+    describesConfig = {};
+  }
+
+  return describesConfig;
+}
+
+/**
+ * Configure and launch a Puppeteer instance
+ * @param {!PuppeteerConfigDef=} opt_config
+ * @return {!Promise}
+ */
+async function createPuppeteer(opt_config = {}) {
+  const browser = await puppeteer.launch({
+    headless: opt_config.headless || false,
+    devtools: false,
+    defaultViewport: null,
+    timeout: 0,
+  });
+  return browser;
+}
+
+/**
+ * Configure and launch a Selenium instance
+ * @param {string} browserName
+ * @param {!SeleniumConfigDef=} args
+ * @param {?string} deviceName
+ * @return {!SeleniumDriver}
+ */
+async function createSelenium(browserName, args = {}, deviceName) {
+  switch (browserName) {
+    case 'safari':
+      // Safari's only option is setTechnologyPreview
+      return createDriver(browserName, []);
+    case 'firefox':
+      return createDriver(browserName, getFirefoxArgs(args));
+    case 'chrome':
+    default:
+      return createDriver(browserName, getChromeArgs(args), deviceName);
+  }
+}
+
+async function createDriver(browserName, args, deviceName) {
+  const capabilities = Capabilities[browserName]();
+  capabilities.set(capabilitiesKeys[browserName], {'args': args});
+  const builder = new Builder().withCapabilities(capabilities);
+
+  switch (browserName) {
+    case 'firefox':
+      const firefoxOptions = new firefox.Options();
+      firefoxOptions.addArguments(...args);
+      firefoxOptions.windowSize({
+        width: DEFAULT_E2E_INITIAL_RECT.width,
+        height: DEFAULT_E2E_INITIAL_RECT.height,
+      });
+      builder.setFirefoxOptions(firefoxOptions);
+    case 'chrome':
+      const chromeOptions = new chrome.Options();
+      chromeOptions.addArguments(args);
+      if (deviceName) {
+        chromeOptions.setMobileEmulation({deviceName});
+      }
+      builder.setChromeOptions(chromeOptions);
+  }
+
+  return await builder.build();
+}
+
+/**
+ * Configure chrome args.
+ *
+ * @param {!SeleniumConfigDef} config
+ * @return {!Array<string>}
+ */
+function getChromeArgs(config) {
+  const args = [
+    '--no-sandbox',
+    '--disable-gpu',
+    `--window-size=${DEFAULT_E2E_INITIAL_RECT.width},${DEFAULT_E2E_INITIAL_RECT.height}`,
+  ];
+
+  if (config.headless) {
+    args.push('--headless');
+  }
+  return args;
+}
+
+/**
+ * Configure firefox args.
+ *
+ * @param {!SeleniumConfigDef} config
+ * @return {!Array<string>}
+ */
+function getFirefoxArgs(config) {
+  const args = [];
+
+  if (config.headless) {
+    args.push('--headless');
+  }
+  return args;
+}
+
+/**
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
- *  fixtures: (!Array<string>|undefined),
+ *  environments: (!Array<!AmpdocEnvironment>|undefined),
+ *  testUrl: string,
+ *  initialRect: ({{width: number, height:number}}|undefined),
+ *  deviceName: string|undefined,
  * }}
  */
 let TestSpec;
 
 /**
- * An end2end test using selenium web driver on a regular amp page
+ * An end2end test using Selenium Web Driver or Puppeteer
  */
-const endtoend = describeEnv(spec => [
-  new AmpPageFixture(spec),
-  // TODO(estherkim): add fixtures for viewer, shadow, cache, etc
-]);
+const endtoend = describeEnv(spec => new EndToEndFixture(spec));
+
+/**
+ * Maps an environment enum value to a `describes.repeated` variant object.
+ */
+const EnvironmentVariantMap = {
+  [AmpdocEnvironment.SINGLE]: {
+    name: 'Standalone environment',
+    value: {environment: 'single'},
+  },
+  [AmpdocEnvironment.VIEWER_DEMO]: {
+    name: 'Viewer environment',
+    value: {environment: 'viewer-demo'},
+  },
+  [AmpdocEnvironment.SHADOW_DEMO]: {
+    name: 'Shadow environment',
+    value: {environment: 'shadow-demo'},
+  },
+  [AmpdocEnvironment.A4A_FIE]: {
+    name: 'AMPHTML ads FIE environment',
+    value: {environment: 'a4a-fie'},
+  },
+  [AmpdocEnvironment.A4A_INABOX]: {
+    name: 'AMPHTML ads inabox environment',
+    value: {environment: 'a4a-inabox'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
+    name: 'AMPHTML ads inabox friendly frame environment',
+    value: {environment: 'a4a-inabox-friendly'},
+  },
+  [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
+    name: 'AMPHTML ads inabox safeframe environment',
+    value: {environment: 'a4a-inabox-safeframe'},
+  },
+};
+
+const envPresets = {
+  'ampdoc-preset': [
+    AmpdocEnvironment.SINGLE,
+    AmpdocEnvironment.VIEWER_DEMO,
+    AmpdocEnvironment.SHADOW_DEMO,
+  ],
+  'amp4ads-preset': [
+    AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_INABOX,
+    AmpdocEnvironment.A4A_INABOX_FRIENDLY,
+    AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
+  ],
+};
+envPresets['ampdoc-amp4ads-preset'] = envPresets['ampdoc-preset'].concat(
+  envPresets['amp4ads-preset']
+);
+
+/**
+ * Helper class to skip E2E tests in a specific AMP environment.
+ * Must be instantiated using it.configure().
+ *
+ * Example usage:
+ * it.configure().skipViewerDemo().skipShadowDemo().run('Should ...', ...);
+ */
+class ItConfig {
+  constructor(it, env) {
+    this.it = it;
+    this.env = env;
+    this.skip = false;
+  }
+
+  skipShadowDemo() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'shadow-demo';
+    return this;
+  }
+
+  skipSingle() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'single';
+    return this;
+  }
+
+  skipViewerDemo() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'viewer-demo';
+    return this;
+  }
+
+  skipA4aFie() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'a4a-fie';
+    return this;
+  }
+
+  run(name, fn) {
+    if (this.skip) {
+      return this.it.skip(name, fn);
+    }
+
+    this.it(name, function() {
+      return fn.apply(this, arguments);
+    });
+  }
+}
 
 /**
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
  * @param {function(!Object):!Array<?Fixture>} factory
+ * @return {function()}
  */
 function describeEnv(factory) {
   /**
-   * @param {string} name
+   * @param {string} suiteName
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
+   * @return {function()}
    */
-  const templateFunc = function(name, spec, fn, describeFunc) {
-    const fixtures = [];
-    factory(spec).forEach(fixture => {
-      if (fixture && fixture.isOn()) {
-        fixtures.push(fixture);
-      }
+  const templateFunc = function(suiteName, spec, fn, describeFunc) {
+    const fixture = factory(spec);
+    let environments = spec.environments || 'ampdoc-preset';
+    if (typeof environments === 'string') {
+      environments = envPresets[environments];
+    }
+    if (!environments) {
+      throw new Error('Invalid environment preset: ' + spec.environments);
+    }
+    const variants = Object.create(null);
+    environments.forEach(environment => {
+      const o = EnvironmentVariantMap[environment];
+      variants[o.name] = o.value;
     });
-    return describeFunc(name, function() {
-      const env = Object.create(null);
-      let asyncErrorTimerId;
-      this.timeout(TIMEOUT);
-      beforeEach(() => {
-        let totalPromise = undefined;
-        // Set up all fixtures.
-        fixtures.forEach((fixture, unusedIndex) => {
-          if (totalPromise) {
-            totalPromise = totalPromise.then(() => fixture.setup(env));
-          } else {
-            const res = fixture.setup(env);
-            if (res && typeof res.then == 'function') {
-              totalPromise = res;
-            }
-          }
-        });
-        return totalPromise;
-      });
 
-      afterEach(function() {
-        clearLastExpectError();
-        clearTimeout(asyncErrorTimerId);
-        // Tear down all fixtures.
-        fixtures.slice(0).reverse().forEach(fixture => {
-          // TODO(cvializ): handle errors better
-          // if (this.currentTest.state == 'failed') {
-          //   fixture.handleError();
-          // }
-          fixture.teardown(env);
-        });
+    // Use chrome as default if no browser is specified
+    if (!Array.isArray(spec.browsers)) {
+      spec.browsers = ['chrome'];
+    }
 
-        // Delete all other keys.
-        for (const key in env) {
-          delete env[key];
+    function createBrowserDescribe() {
+      const allowedBrowsers = getAllowedBrowsers();
+
+      spec.browsers
+        .filter(x => allowedBrowsers.has(x))
+        .forEach(browserName => {
+          describe(browserName, function() {
+            createVariantDescribe(browserName);
+          });
+        });
+    }
+
+    function getAllowedBrowsers() {
+      const {engine, browsers} = getConfig();
+
+      const allowedBrowsers = browsers
+        ? new Set(browsers.split(',').map(x => x.trim()))
+        : supportedBrowsers;
+
+      if (engine === 'puppeteer') {
+        const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
+        if (result.size === 0) {
+          const browsersList = Array.from(allowedBrowsers).join(',');
+          throw new Error(
+            `browsers ${browsersList} not supported by Puppeteer`
+          );
+        }
+        return result;
+      }
+
+      if (process.platform !== 'darwin' && allowedBrowsers.has('safari')) {
+        // silently skip safari tests
+        allowedBrowsers.delete('safari');
+      }
+
+      return allowedBrowsers;
+    }
+
+    function createVariantDescribe(browserName) {
+      for (const name in variants) {
+        it.configure = function() {
+          return new ItConfig(it, variants[name]);
+        };
+
+        describe(name ? ` ${name} ` : SUB, function() {
+          doTemplate.call(this, name, variants[name], browserName);
+        });
+      }
+    }
+
+    return describeFunc(suiteName, function() {
+      createBrowserDescribe();
+    });
+
+    function doTemplate(name, variant, browserName) {
+      const env = Object.create(variant);
+      this.timeout(TEST_TIMEOUT);
+      beforeEach(async function() {
+        this.timeout(SETUP_TIMEOUT);
+        await fixture.setup(env, browserName, SETUP_RETRIES);
+
+        // don't install for CI
+        if (!isTravisBuild()) {
+          installRepl(global, env);
         }
       });
 
-      after(function() {
-        clearTimeout(asyncErrorTimerId);
-      });
+      afterEach(async function() {
+        // If there is an async expect error, throw it in the final state.
+        const lastExpectError = getLastExpectError();
+        if (lastExpectError) {
+          this.test.error(lastExpectError);
+          clearLastExpectError();
+        }
 
+        await fixture.teardown(env);
+        for (const key in env) {
+          delete env[key];
+        }
+
+        if (!isTravisBuild()) {
+          uninstallRepl();
+        }
+      });
 
       describe(SUB, function() {
-        // If there is an async expect error, throw it in the final state.
-        asyncErrorTimerId = setTimeout(() => {
-          const lastExpectError = getLastExpectError();
-          if (lastExpectError) {
-            throw lastExpectError;
-          }
-        }, this.timeout() - 1);
         fn.call(this, env);
       });
-    });
+    }
   };
 
   /**
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
+   * @return {function()}
    */
   const mainFunc = function(name, spec, fn) {
     return templateFunc(name, spec, fn, describe);
@@ -131,9 +457,10 @@ function describeEnv(factory) {
    * @param {string} name
    * @param {!Object} spec
    * @param {function(!Object)} fn
+   * @return {function()}
    */
   mainFunc.only = function(name, spec, fn) {
-    return templateFunc(name, spec, fn, describe./*OK*/only);
+    return templateFunc(name, spec, fn, describe./*OK*/ only);
   };
 
   mainFunc.skip = function(name, variants, fn) {
@@ -143,85 +470,115 @@ function describeEnv(factory) {
   return mainFunc;
 }
 
-
-/** @interface */
-class FixtureInterface {
-
-  /** @return {boolean} */
-  isOn() {}
-
-  /**
-   * @param {!Object} unusedEnv
-   * @return {!Promise|undefined}
-   */
-  setup(unusedEnv) {}
-
-  /**
-   * @param {!Object} unusedEnv
-   */
-  teardown(unusedEnv) {}
-}
-
-/** @implements {FixtureInterface} */
-class AmpPageFixture {
-
+class EndToEndFixture {
   /** @param {!TestSpec} spec */
   constructor(spec) {
     /** @const */
     this.spec = spec;
-
-    // /** @private @const {!Array<string>} */
-    // this.browsers_ = this.spec.browsers || ['chrome'];
-
-    /** @private @const */
-    this.driver_ = null;
   }
 
-  /** @override */
-  isOn() {
-    return true;
-  }
-
-  /** @override */
-  setup(env) {
-    // TODO(estherkim): implement sessions
-    // TODO(estherkim): ensure tests are in a sandbox
-    // See https://w3c.github.io/webdriver/#sessions
-
-    // TODO(estherkim): create multiple drivers per 'config.browsers'
-    // const config = {
-    //   browsers: this.browsers_,
-    //   session: undefined,
-    // };
-
-    // TODO(estherkim): remove hardcoded chrome driver
-    const capabilities = Capabilities.chrome();
-    const chromeOptions = {
-      // TODO(cvializ,estherkim,sparhami):
-      //   figure out why headless causes more flakes
-      // 'args': ['--headless']
-    };
-    capabilities.set('chromeOptions', chromeOptions);
-
-    const builder = new Builder().withCapabilities(capabilities);
-    return builder.build().then(driver => {
-      const controller = new SeleniumWebDriverController(driver);
+  /**
+   * @param {!Object} env
+   * @param {string} browserName
+   * @param {number} retries
+   */
+  async setup(env, browserName, retries = 0) {
+    try {
+      const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
+      const config = getConfig();
+      const controller = await getController(config, browserName, deviceName);
+      const ampDriver = new AmpDriver(controller);
       env.controller = controller;
-      env.ampDriver = new AmpDriver(controller);
-      this.driver_ = driver;
-    });
+      env.ampDriver = ampDriver;
+
+      const {environment} = env;
+
+      const url = new URL(testUrl);
+      if (experiments.length > 0) {
+        if (environment.includes('inabox')) {
+          // inabox experiments are toggled at server side using <meta> tag
+          url.searchParams.set('exp', experiments.join(','));
+        } else {
+          // AMP doc experiments are toggled via cookies
+          await toggleExperiments(ampDriver, url.href, experiments);
+        }
+      }
+
+      if (initialRect) {
+        const {width, height} = initialRect;
+        await controller.setWindowRect({width, height});
+      }
+
+      await ampDriver.navigateToEnvironment(environment, url.href);
+    } catch (ex) {
+      if (retries > 0) {
+        await this.setup(env, browserName, --retries);
+      } else {
+        throw ex;
+      }
+    }
   }
 
-  /** @override */
-  async teardown(unusedEnv) {
-    if (this.driver_) {
-      await this.driver_.quit();
+  async teardown(env) {
+    const {controller} = env;
+    if (controller) {
+      await controller.switchToParent();
+      await controller.dispose();
     }
-    this.driver_ = null;
   }
+}
+
+/**
+ * Get the controller object for the configured engine.
+ * @param {!DescribesConfigDef} describesConfig
+ * @param {string} browserName
+ * @param {?string} deviceName
+ * @return {!SeleniumWebDriverController}
+ */
+async function getController(
+  {engine = 'selenium', headless = false},
+  browserName,
+  deviceName
+) {
+  if (engine == 'puppeteer') {
+    const browser = await createPuppeteer({headless});
+    return new PuppeteerController(browser);
+  }
+
+  if (engine == 'selenium') {
+    const driver = await createSelenium(browserName, {headless}, deviceName);
+    return new SeleniumWebDriverController(driver);
+  }
+}
+
+/**
+ * Toggle the given experiments for the given test URL domain.
+ * @param {!AmpDriver} ampDriver
+ * @param {string} testUrl
+ * @param {!Array<string>} experiments
+ * @return {!Promise}
+ */
+async function toggleExperiments(ampDriver, testUrl, experiments) {
+  await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
+
+  for (const experiment of experiments) {
+    await ampDriver.toggleExperiment(experiment, true);
+  }
+}
+
+/**
+ * Intersection of two sets
+ * @param {Set<T>} a
+ * @param {Set<T>} b
+ * @return {Set<T>}
+ * @template T
+ */
+function intersect(a, b) {
+  return new Set(Array.from(a).filter(aItem => b.has(aItem)));
 }
 
 module.exports = {
   TestSpec,
   endtoend,
+  configure,
 };

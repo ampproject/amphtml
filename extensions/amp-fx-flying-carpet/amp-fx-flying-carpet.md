@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Wraps its children in a unique full-screen scrolling container allowing you to display a full-screen ad without taking up the entire viewport.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -32,11 +33,13 @@ A flying carpet wraps its children in a unique full-screen scrolling container. 
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-fx-flying-carpet/">Annotated code example for amp-fx-flying-carpet</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-fx-flying-carpet/">Annotated code example for amp-fx-flying-carpet</a></td>
   </tr>
 </table>
 
-[TOC]
+[tip type="note"]
+Check if your ad network permits use of flying carpets when implementing the `amp-fx-flying-carpet` to display adds.
+[/tip][toc]
 
 ## Behavior
 
@@ -46,15 +49,22 @@ Example:
 
 ```html
 <amp-fx-flying-carpet height="300px">
-  <amp-img src="fullscreen.png" width="300" height="500" layout="responsive"></amp-img>
+  <amp-img
+    src="fullscreen.png"
+    width="300"
+    height="500"
+    layout="responsive"
+  ></amp-img>
 </amp-fx-flying-carpet>
 ```
 
 The following requirements are imposed on `amp-fx-flying-carpet` positioning:
- - It should be positioned so that it doesn't obscure the first viewport (outside of top 75%).
- - It should be positioned so that its top can reach or be above the top of the last viewport when scrolled.
+
+- It should be positioned so that it doesn't obscure the first viewport (outside of top 75%).
+- It should be positioned so that its top can reach or be above the top of the last viewport when scrolled.
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>height</strong></td>
@@ -62,10 +72,9 @@ The following requirements are imposed on `amp-fx-flying-carpet` positioning:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Styling
 

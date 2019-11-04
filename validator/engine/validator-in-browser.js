@@ -17,6 +17,7 @@
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.validateString');
 goog.require('goog.Promise');
+goog.require('goog.uri.utils');
 
 goog.provide('amp.validator.validateInBrowser');
 goog.provide('amp.validator.validateUrlAndLog');
@@ -51,13 +52,13 @@ function getUrl(url) {
  */
 amp.validator.isAmpCacheUrl = function(url) {
   return (
-    url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 ||
-    url.toLowerCase().indexOf('amp.cloudflare.com') !== -1);
+    url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 || // lgtm [js/incomplete-url-substring-sanitization]
+    url.toLowerCase().indexOf('amp.cloudflare.com') !== -1); // lgtm [js/incomplete-url-substring-sanitization]
 };
 
 /**
  * Validates doc in the browser by inspecting elements, attributes, etc. in
- * the DOM. This method is exported so it can be unittested.
+ * the DOM. This method is exported so it can be unit tested.
  * @param {!Document=} opt_doc
  * @return {!amp.validator.ValidationResult}
  */
@@ -78,13 +79,16 @@ amp.validator.validateInBrowser = function(opt_doc) {
  * Validates a URL input, logging to the console the result.
  * Careful when modifying this; it's called from
  * https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {string} url
  * @param {!Document=} opt_doc
- * @param {string=} opt_errorCategoryFilter
  * @export
  */
-amp.validator.validateUrlAndLog = function(
-  url, opt_doc, opt_errorCategoryFilter) {
+amp.validator.validateUrlAndLog = function(url, opt_doc) {
   if (amp.validator.isAmpCacheUrl(url)) {
     console.error(
         'Attempting to validate an AMP cache URL. Please use ' +
@@ -93,13 +97,22 @@ amp.validator.validateUrlAndLog = function(
   }
   getUrl(url).then(
       function(html) { // Success
-        const validationResult = amp.validator.validateString(html);
+        const fragment  = goog.uri.utils.getFragment(url);
+        let format = 'AMP';
+        if (fragment.indexOf('development') != -1) {
+          fragment.split('&').forEach(hashValue => {
+            const keyValue = hashValue.split('=');
+            if (keyValue[0] === 'development') {
+              format = keyValue[1] === '1' ? 'AMP' : format = keyValue[1];
+            }
+          });
+        }
+        const validationResult = amp.validator.validateString(html, format);
         if (opt_doc) {
           const browserResult = amp.validator.validateInBrowser(opt_doc);
           validationResult.mergeFrom(browserResult);
         }
-        validationResult.outputToTerminal(
-            url, undefined, opt_errorCategoryFilter);
+        validationResult.outputToTerminal(url, undefined);
       },
       function(reason) { // Failure
         console.error(reason);

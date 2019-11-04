@@ -105,8 +105,7 @@ export class AffiliateLinkResolver {
       credentials: 'include',
     };
 
-    return this.xhr_.fetchJson(beaconUrl, fetchOptions)
-        .then(res => res.json());
+    return this.xhr_.fetchJson(beaconUrl, fetchOptions).then(res => res.json());
   }
 
   /**
@@ -128,7 +127,8 @@ export class AffiliateLinkResolver {
    */
   resolveUnknownAnchors(anchorList) {
     const alreadyResolvedResponse = this.associateWithReplacementUrl_(
-        anchorList);
+      anchorList
+    );
     let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);
@@ -138,13 +138,14 @@ export class AffiliateLinkResolver {
       this.markDomainsAsUnknown_(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
       const unknownAnchors = this.getUnknownAnchors_(anchorList, domainsToAsk);
-      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(unknownAnchors,
-          domainsToAsk);
+      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(
+        unknownAnchors,
+        domainsToAsk
+      );
     }
 
     // Returns an object containing a sync reponse and an async response.
-    return new TwoStepsResponse(alreadyResolvedResponse,
-        willBeResolvedPromise);
+    return new TwoStepsResponse(alreadyResolvedResponse, willBeResolvedPromise);
   }
 
   /**
@@ -170,11 +171,13 @@ export class AffiliateLinkResolver {
     return anchorList.map(anchor => {
       let replacementUrl = null;
       const status = this.getDomainAffiliateStatus_(
-          this.getAnchorDomain_(anchor));
+        this.getAnchorDomain_(anchor)
+      );
       // Always replace unknown, we will overwrite them after asking
       // the api if needed
-      const shouldReplace = status === AFFILIATE_STATUS.AFFILIATE ||
-                            status === AFFILIATE_STATUS.UNKNOWN;
+      const shouldReplace =
+        status === AFFILIATE_STATUS.AFFILIATE ||
+        status === AFFILIATE_STATUS.UNKNOWN;
       if (shouldReplace) {
         replacementUrl = this.waypoint_.getAffiliateUrl(anchor);
       }
@@ -209,7 +212,7 @@ export class AffiliateLinkResolver {
    * @private
    */
   getNewDomains_(anchorList) {
-    return anchorList.reduce(((acc, anchor) => {
+    return anchorList.reduce((acc, anchor) => {
       const domain = this.getAnchorDomain_(anchor);
       const isResolved = this.domains_[domain];
       const isExcluded = isExcludedDomain(domain, this.skimOptions_);
@@ -220,7 +223,7 @@ export class AffiliateLinkResolver {
       }
 
       return acc;
-    }), []);
+    }, []);
   }
 
   /**
@@ -293,9 +296,9 @@ export class AffiliateLinkResolver {
   updateDomainsStatusMap_(allDomains, affiliateDomains) {
     allDomains.forEach(domain => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
-      this.domains_[domain] = isAffiliateDomain ?
-        AFFILIATE_STATUS.AFFILIATE :
-        AFFILIATE_STATUS.NON_AFFILIATE;
+      this.domains_[domain] = isAffiliateDomain
+        ? AFFILIATE_STATUS.AFFILIATE
+        : AFFILIATE_STATUS.NON_AFFILIATE;
     });
   }
 

@@ -16,8 +16,8 @@
 
 import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
-import {isExperimentOn} from './experiments';
-
+import {dev} from './log';
+import {isAmphtml} from './format';
 
 /** @const @enum {string} */
 export const AutoLightboxEvents = {
@@ -26,17 +26,65 @@ export const AutoLightboxEvents = {
   NEWLY_SET: 'amp-auto-lightbox:newly-set',
 };
 
-
 /**
+ * Installs the amp-auto-lightbox extension.
+ *
+ * This extension conditionally loads amp-lightbox-gallery for images and videos
+ * that fulfill a set criteria on certain documents.
+ *
+ * Further information on spec/auto-lightbox.md and the amp-auto-lightbox extension
+ * code.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
-  if (!isExperimentOn(win, 'amp-auto-lightbox')) {
+  // Only enabled on single documents tagged as <html amp> or <html ⚡>.
+  if (!isAmphtml(win.document) || !ampdoc.isSingleDoc()) {
     return;
   }
-  chunk(ampdoc, () => {
-    Services.extensionsFor(win)
-        .installExtensionForDoc(ampdoc, 'amp-auto-lightbox');
-  }, ChunkPriority.LOW);
+  chunk(
+    ampdoc,
+    () => {
+      Services.extensionsFor(win).installExtensionForDoc(
+        ampdoc,
+        'amp-auto-lightbox'
+      );
+    },
+    ChunkPriority.LOW
+  );
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isActionableByTap(element) {
+  if (element.tagName.toLowerCase() == 'a' && element.hasAttribute('href')) {
+    return true;
+  }
+  if (element.querySelector('a[href]')) {
+    return true;
+  }
+  const action = Services.actionServiceForDoc(element);
+  const hasTapAction = action.hasResolvableAction(
+    element,
+    'tap',
+    dev().assertElement(element.parentElement)
+  );
+  if (hasTapAction) {
+    return true;
+  }
+  const actionables = element.querySelectorAll('[on]');
+  for (let i = 0; i < actionables.length; i++) {
+    const actionable = actionables[i];
+    const hasTapAction = action.hasResolvableAction(
+      actionable,
+      'tap',
+      dev().assertElement(actionable.parentElement)
+    );
+    if (hasTapAction) {
+      return true;
+    }
+  }
+  return false;
 }

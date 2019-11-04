@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-
 # Wisteria
 
 ## Example
 
 ```html
 <amp-ad
-    type="wisteria"
-    width="300"
-    height="480"
-    layout=responsive
-    data-site-id="8"
-    data-template-number="0">
+  type="wisteria"
+  width="300"
+  height="480"
+  layout="responsive"
+  data-site-id="8"
+  data-template-number="0"
+>
 </amp-ad>
 ```
 

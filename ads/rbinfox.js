@@ -59,9 +59,9 @@ function addToQueue(global, src) {
   const ctx = n + blockId;
   global[ctx] = global[ctx] || [];
   global[ctx].push(() => {
-	  const renderTo = 'infox_' + blockId;
-	  // Create container
-	  createContainer(global, renderTo);
-	  global['INFOX' + blockId].renderTo(renderTo);
+    const renderTo = 'infox_' + blockId;
+    // Create container
+    createContainer(global, renderTo);
+    global['INFOX' + blockId].renderTo(renderTo);
   });
 }

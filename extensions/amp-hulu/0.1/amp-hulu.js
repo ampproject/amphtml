@@ -71,18 +71,20 @@ class AmpHulu extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.eid_ = userAssert(
-        this.element.getAttribute('data-eid'),
-        'The data-eid attribute is required for <amp-hulu> %s',
-        this.element);
+      this.element.getAttribute('data-eid'),
+      'The data-eid attribute is required for <amp-hulu> %s',
+      this.element
+    );
   }
 
   /** @return {string} */
   getVideoIframeSrc_() {
     devAssert(this.eid_);
-    return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(this.eid_ || '')}`;
+    return `https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=${encodeURIComponent(
+      this.eid_ || ''
+    )}`;
   }
 }
-
 
 AMP.extension('amp-hulu', '0.1', AMP => {
   AMP.registerElement('amp-hulu', AmpHulu);

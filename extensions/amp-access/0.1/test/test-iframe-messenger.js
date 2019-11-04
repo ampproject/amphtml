@@ -16,7 +16,6 @@
 
 import {Messenger} from '../iframe-api/messenger';
 
-
 describes.fakeWin('Messenger', {}, env => {
   let win;
 
@@ -33,9 +32,7 @@ describes.fakeWin('Messenger', {}, env => {
     beforeEach(() => {
       // A port knows the origin, but doesn't always know the source window.
       source = null;
-      messenger = new Messenger(win,
-          () => source,
-          'https://example-sp.com');
+      messenger = new Messenger(win, () => source, 'https://example-sp.com');
       onCommand = sandbox.spy();
       addEventListenerSpy = sandbox.spy(win, 'addEventListener');
       removeEventListenerSpy = sandbox.spy(win, 'removeEventListener');
@@ -211,11 +208,16 @@ describes.fakeWin('Messenger', {}, env => {
           payload: {error: 'intentional'},
         },
       });
-      return promise.then(() => {
-        throw new Error('must have failed');
-      }, reason => {
-        expect(() => {throw reason;}).to.throw(/intentional/);
-      });
+      return promise.then(
+        () => {
+          throw new Error('must have failed');
+        },
+        reason => {
+          expect(() => {
+            throw reason;
+          }).to.throw(/intentional/);
+        }
+      );
     });
 
     describe('execute rsvp', () => {
@@ -225,16 +227,16 @@ describes.fakeWin('Messenger', {}, env => {
       let handlerResponse;
 
       beforeEach(() => {
-        sandbox.stub(messenger, 'handleCommand_')
-            .callsFake(() => handlerResponse);
+        sandbox
+          .stub(messenger, 'handleCommand_')
+          .callsFake(() => handlerResponse);
         let sendResolver;
         sendPromise = new Promise(resolve => {
           sendResolver = resolve;
         });
-        sendStub = sandbox.stub(messenger, 'sendCommand_')
-            .callsFake(() => {
-              sendResolver();
-            });
+        sendStub = sandbox.stub(messenger, 'sendCommand_').callsFake(() => {
+          sendResolver();
+        });
         handler = addEventListenerSpy.args[0][1];
       });
 
@@ -293,7 +295,6 @@ describes.fakeWin('Messenger', {}, env => {
     });
   });
 
-
   describe('iframe side', () => {
     let messenger;
     let target;
@@ -305,9 +306,7 @@ describes.fakeWin('Messenger', {}, env => {
       target = {
         postMessage: sandbox.spy(),
       };
-      messenger = new Messenger(win,
-          target,
-          /* targetOrigin */ null);
+      messenger = new Messenger(win, target, /* targetOrigin */ null);
       onCommand = sandbox.spy();
       addEventListenerSpy = sandbox.spy(win, 'addEventListener');
       messenger.connect(onCommand);

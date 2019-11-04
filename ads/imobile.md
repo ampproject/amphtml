@@ -19,11 +19,14 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="50"
+<amp-ad
+  width="320"
+  height="50"
   type="imobile"
   data-pid="1847"
   data-asid="813689"
-  data-adtype="banner">
+  data-adtype="banner"
+>
 </amp-ad>
 ```
 

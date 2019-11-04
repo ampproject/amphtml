@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-export const RAKAM_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const RAKAM_CONFIG = jsonLiteral({
   'vars': {
     'deviceId': 'CLIENT_ID(rakam_device_id)',
   },
   'requests': {
-    'base': '?api.api_key=${writeKey}' +
+    'base':
+      '?api.api_key=${writeKey}' +
       '&prop._platform=amp' +
       '&prop._device_id=${deviceId}' +
       '&prop.locale=${browserLanguage}' +
@@ -31,7 +34,11 @@ export const RAKAM_CONFIG = /** @type {!JsonObject} */ ({
       '&prop.timezone=${timezone}' +
       '&prop._time=${timestamp}' +
       '&prop.resolution=${screenWidth} × ${screenHeight}',
-    'pageview': 'https://${apiEndpoint}/event/pixel${base}&collection=${pageViewName}',
-    'custom': 'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
+    'pageview':
+      'https://${apiEndpoint}/event/pixel${base}&collection=${pageViewName}',
+    'custom':
+      'https://${apiEndpoint}/event/pixel${base}&collection=${collection}',
   },
 });
+
+export {RAKAM_CONFIG};

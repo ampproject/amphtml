@@ -16,7 +16,6 @@
 
 const config = describe.configure().ifChrome();
 config.run('amp-fx-collection', function() {
-
   const css = `
     .spacer {
       height: 100vh;
@@ -42,27 +41,31 @@ config.run('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration("amp-fx='fade-in'", {
-    body: defaultBody,
-    css,
-    extensions,
-  }, env => {
+  describes.integration(
+    "amp-fx='fade-in'",
+    {
+      body: defaultBody,
+      css,
+      extensions,
+    },
+    env => {
+      let win;
+      beforeEach(() => {
+        win = env.win;
+      });
 
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    it('runs fade-in animation with default parameters', () => {
-      // Not visible yet, opacity = 0;
-      expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, 0.2 * getViewportHeight(win));
-      return Promise.resolve().then(timeout(2000))
+      it('runs fade-in animation with default parameters', () => {
+        // Not visible yet, opacity = 0;
+        expect(getOpacity(win)).to.equal(0);
+        win.scrollTo(0, 0.2 * getViewportHeight(win));
+        return Promise.resolve()
+          .then(timeout(2000))
           .then(() => {
             expect(getOpacity(win)).to.equal(1);
           });
-    });
-  });
+      });
+    }
+  );
 
   const marginSpecific = `
     <div class="spacer"></div>
@@ -73,27 +76,31 @@ config.run('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration("amp-fx='fade-in'", {
-    body: marginSpecific,
-    css,
-    extensions,
-  }, env => {
+  describes.integration(
+    "amp-fx='fade-in'",
+    {
+      body: marginSpecific,
+      css,
+      extensions,
+    },
+    env => {
+      let win;
+      beforeEach(() => {
+        win = env.win;
+      });
 
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    it('margin-start specified', () => {
-      // Not visible yet, opacity = 0;
-      expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, 0.5 * getViewportHeight(win));
-      return Promise.resolve().then(timeout(2000))
+      it('margin-start specified', () => {
+        // Not visible yet, opacity = 0;
+        expect(getOpacity(win)).to.equal(0);
+        win.scrollTo(0, 0.5 * getViewportHeight(win));
+        return Promise.resolve()
+          .then(timeout(2000))
           .then(() => {
             expect(getOpacity(win)).to.equal(1);
           });
-    });
-  });
+      });
+    }
+  );
 
   const durationSpecific = `
     <div class="spacer"></div>
@@ -104,31 +111,36 @@ config.run('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration("amp-fx='fade-in'", {
-    body: durationSpecific,
-    css,
-    extensions,
-  }, env => {
+  describes.integration(
+    "amp-fx='fade-in'",
+    {
+      body: durationSpecific,
+      css,
+      extensions,
+    },
+    env => {
+      let win;
+      beforeEach(() => {
+        win = env.win;
+      });
 
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    it('duration specified', () => {
-      // Not visible yet, opacity = 0;
-      expect(getOpacity(win)).to.equal(0);
-      win.scrollTo(0, getViewportHeight(win));
-      Promise.resolve().then(timeout(2000))
+      it('duration specified', () => {
+        // Not visible yet, opacity = 0;
+        expect(getOpacity(win)).to.equal(0);
+        win.scrollTo(0, getViewportHeight(win));
+        Promise.resolve()
+          .then(timeout(2000))
           .then(() => {
             expect(getOpacity(win)).to.be.above(0);
             expect(getOpacity(win)).to.be.below(1);
-          }).then(timeout(2000))
+          })
+          .then(timeout(2000))
           .then(() => {
             expect(getOpacity(win)).to.equal(1);
           });
-    });
-  });
+      });
+    }
+  );
 });
 
 function getOpacity(win) {
@@ -143,4 +155,3 @@ function getViewportHeight(win) {
 function timeout(ms) {
   return () => new Promise(resolve => setTimeout(resolve, ms));
 }
-

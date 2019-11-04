@@ -93,7 +93,7 @@ export class BindValidator {
    * @return {boolean}
    */
   canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+    return this.rulesForTagAndProperty_(tag, property) !== undefined;
   }
 
   /**
@@ -221,17 +221,27 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
-    'AMP-BRIGHTCOVE': {
-      'data-account': null,
-      'data-embed': null,
-      'data-player': null,
-      'data-player-id': null,
-      'data-playlist-id': null,
-      'data-video-id': null,
+    'AMP-AUDIO': {
+      'album': null,
+      'artist': null,
+      'artwork': null,
+      'controlsList': null,
+      'loop': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'title': null,
     },
-    'AMP-CAROUSEL': {
-      'slide': null,
-      // For carousel v2
+    'AMP-AUTOCOMPLETE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-BASE-CAROUSEL': {
       'advance-count': null,
       'auto-advance-count': null,
       'auto-advance-interval': null,
@@ -242,10 +252,22 @@ function createElementRules_() {
       'loop': null,
       'mixed-length': null,
       'side-slide-count': null,
+      'slide': null,
       'snap-align': null,
       'snap-by': null,
       'snap': null,
       'visible-count': null,
+    },
+    'AMP-BRIGHTCOVE': {
+      'data-account': null,
+      'data-embed': null,
+      'data-player': null,
+      'data-player-id': null,
+      'data-playlist-id': null,
+      'data-video-id': null,
+    },
+    'AMP-CAROUSEL': {
+      'slide': null,
     },
     'AMP-DATE-PICKER': {
       'max': null,
@@ -304,10 +326,17 @@ function createElementRules_() {
       'datetime': null,
       'title': null,
     },
+    'AMP-TWITTER': {
+      'data-tweetid': null,
+    },
     'AMP-VIDEO': {
+      'album': null,
       'alt': null,
+      'artist': null,
+      'artwork': null,
       'attribution': null,
       'controls': null,
+      'controlslist': null,
       'loop': null,
       'poster': null,
       'preload': null,
@@ -316,6 +345,7 @@ function createElementRules_() {
           'https': true,
         },
       },
+      'title': null,
     },
     'AMP-YOUTUBE': {
       'data-videoid': null,
@@ -397,6 +427,9 @@ function createElementRules_() {
       'disabled': null,
       'label': null,
     },
+    'SECTION': {
+      'data-expand': null,
+    },
     'SELECT': {
       'autofocus': null,
       'disabled': null,
@@ -438,6 +471,8 @@ function createElementRules_() {
       'selectionstart': null,
       'spellcheck': null,
       'wrap': null,
+      // Non-standard property.
+      'defaulttext': null,
     },
   };
   return rules;

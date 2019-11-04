@@ -15,32 +15,39 @@
  */
 'use strict';
 
-const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible, verifySelectorsInvisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'tapping on a clickable anchor should show the tooltip': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
     await page.tap('a.title-small.center');
+    await page.waitFor(300); // For animations to finish.
     await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
   'tapping outside tooltip should hide it': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
     await page.tap('.i-amphtml-story-focused-state-layer');
+    await page.waitFor(150); // For animations to finish.
     await verifySelectorsVisible(
       page, name, ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
   },
-  'tapping on tooltip should keep it open': async (page, name) => {
+  'tapping on anchor tooltip should keep it open': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
     await page.tap('a.i-amphtml-story-tooltip');
     await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
@@ -48,10 +55,51 @@ module.exports = {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
     await page.tap('button.i-amphtml-story-tooltip-nav-button-left');
-    await page.waitFor(150);
+    await page.waitFor(150); // For animations to finish.
     await verifySelectorsVisible(page, name, ['amp-story-page#cover[active]']);
+  },
+  'tapping on embed tooltip should expand the component': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
+    await page.tap('amp-twitter.interactive-embed');
+    await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
+    await page.tap('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
+    await verifySelectorsVisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
+  },
+  'tapping on non-interactive embed should not show tooltip or block navigation': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
+    await screen.tap(200, 240);
+    await page.waitFor('amp-story-page#page-3[active]');
+    await page.waitFor(150); // For animations to finish.
+    await page.tap('amp-twitter.non-interactive-embed');
+    await page.waitFor(150); // For animations to finish.
+    await verifySelectorsInvisible(page, name, ['a.i-amphtml-story-tooltip']);
+    await verifySelectorsVisible(page, name, ['amp-story-page#page-2[active]']);
+  },
+  'tapping on closing button should exit expanded view': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
+    await page.tap('amp-twitter.interactive-embed');
+    await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
+    await page.tap('a.i-amphtml-story-tooltip');
+    await page.waitFor('amp-story-page.i-amphtml-expanded-mode');
+    await page.waitFor(300); // For animations to finish.
+    await page.tap('span.i-amphtml-expanded-view-close-button');
+    await verifySelectorsInvisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
   },
  };

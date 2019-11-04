@@ -21,22 +21,33 @@ import {
   hasRenderDelayingServices,
   waitForServices,
 } from '../../src/render-delaying-services';
+import {macroTask} from '../../testing/yield';
 
 describe('waitForServices', () => {
-
   let win;
   let sandbox;
   let clock;
   let dynamicCssResolve;
   let experimentResolve;
   let variantResolve;
+  let variantService;
+  let variantStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
     const getService = sandbox.stub(service, 'getServicePromise');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
     experimentResolve = waitForService(getService, 'amp-experiment');
-    variantResolve = waitForService(getService, 'variant');
+
+    variantService = {
+      whenReady: () => {
+        throw new Error('whenReady should be stubbed');
+      },
+    };
+    variantResolve = waitForService(getService, 'variant', variantService);
+    variantStub = sandbox
+      .stub(variantService, 'whenReady')
+      .returns(Promise.resolve());
 
     return createIframePromise().then(iframe => {
       win = iframe.win;
@@ -56,7 +67,7 @@ describe('waitForServices', () => {
     return expect(waitForServices(win)).to.eventually.have.lengthOf(0);
   });
 
-  it('should timeout if some blocking services are missing', () => {
+  it('should timeout if some blocking services are missing', function*() {
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
     expect(hasRenderDelayingServices(win)).to.be.true;
@@ -65,6 +76,11 @@ describe('waitForServices', () => {
     const promise = waitForServices(win);
     dynamicCssResolve();
     experimentResolve(); // 'amp-experiment' is actually blocked by 'variant'
+
+    // Push ourselves back on the event queue,
+    // to allow the dynamic-css service.whenReady
+    // to resolve
+    yield macroTask();
     clock.tick(3000);
     return expect(promise).to.eventually.be.rejectedWith('variant');
   });
@@ -81,13 +97,42 @@ describe('waitForServices', () => {
 
     return expect(promise).to.eventually.have.lengthOf(2);
   });
+
+  it('should resolve if no service.whenReady', () => {
+    addExtensionScript(win, 'amp-dynamic-css-classes');
+    expect(hasRenderDelayingServices(win)).to.be.true;
+    addExtensionScript(win, 'non-blocking-extension');
+
+    const promise = waitForServices(win);
+    dynamicCssResolve();
+
+    return expect(promise).to.eventually.have.lengthOf(1);
+  });
+
+  it('should wait to resolve for service.whenReady', () => {
+    addExtensionScript(win, 'amp-dynamic-css-classes');
+    win.document.body.appendChild(win.document.createElement('amp-experiment'));
+    expect(hasRenderDelayingServices(win)).to.be.true;
+    addExtensionScript(win, 'non-blocking-extension');
+
+    const promise = waitForServices(win);
+    dynamicCssResolve();
+    variantResolve(); // this unblocks 'amp-experiment'
+
+    return promise.then(services => {
+      expect(services.length).to.be.equal(2);
+      expect(variantStub).to.be.calledOnce;
+    });
+  });
 });
 
-function waitForService(getService, serviceId) {
+function waitForService(getService, serviceId, service) {
   let resolve = null;
-  getService.withArgs(sinon.match.any, serviceId).returns(new Promise(r => {
-    resolve = r;
-  }));
+  getService.withArgs(sinon.match.any, serviceId).returns(
+    new Promise(r => {
+      resolve = r.bind(this, service);
+    })
+  );
   return resolve;
 }
 

@@ -27,21 +27,34 @@ const TAG = 'amp-auto-ads';
  */
 const NON_DATA_ATTRIBUTE_WHITELIST = {
   'type': true,
+  'rtc-config': true,
+};
+
+/**
+ * Indicates attributes from config object for different ad formats.
+ * @enum {string}
+ */
+export const Attributes = {
+  // Attributes from config object which should be added on any ads.
+  BASE_ATTRIBUTES: 'attributes',
+  // Attributes from config object which should be added on anchor ads.
+  STICKY_AD_ATTRIBUTES: 'stickyAdAttributes',
 };
 
 /**
  * @param {!JsonObject} configObj
+ * @param {!Attributes} attributes
  * @return {!JsonObject<string, string>}
  */
-export function getAttributesFromConfigObj(configObj) {
-  if (!configObj['attributes']) {
+export function getAttributesFromConfigObj(configObj, attributes) {
+  if (!configObj[attributes]) {
     return dict();
   }
-  if (!isObject(configObj['attributes']) || isArray(configObj['attributes'])) {
-    user().warn(TAG, 'attributes property not an object');
+  if (!isObject(configObj[attributes]) || isArray(configObj[attributes])) {
+    user().warn(TAG, attributes + ' property not an object');
     return dict();
   }
-  return parseAttributes(configObj['attributes']);
+  return parseAttributes(configObj[attributes]);
 }
 
 /**
@@ -55,9 +68,12 @@ function parseAttributes(attributeObject) {
       user().warn(TAG, 'Attribute not whitlisted: ' + key);
       continue;
     }
-    const valueType = (typeof attributeObject[key]);
-    if (valueType != 'number' && valueType != 'string' &&
-        valueType != 'boolean') {
+    const valueType = typeof attributeObject[key];
+    if (
+      valueType != 'number' &&
+      valueType != 'string' &&
+      valueType != 'boolean'
+    ) {
       user().warn(TAG, 'Attribute type not supported: ' + valueType);
       continue;
     }

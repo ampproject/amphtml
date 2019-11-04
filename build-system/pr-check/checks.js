@@ -26,56 +26,81 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
+  stopTimedJob,
+  timedExecOrDie: timedExecOrDieBase,
+} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
+const {reportAllExpectedTests} = require('../tasks/report-test-status');
+const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'checks.js';
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
-
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp presubmit');
-  timedExecOrDie('gulp lint');
+  if (!runYarnChecks(FILENAME)) {
+    stopTimedJob(FILENAME, startTime);
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp check-exact-versions');
+    timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp prettify');
+    timedExecOrDie('gulp presubmit');
     timedExecOrDie('gulp ava');
-    timedExecOrDie('node node_modules/jest/bin/jest.js');
+    timedExecOrDie('gulp babel-plugin-tests');
     timedExecOrDie('gulp caches-json');
-    timedExecOrDie('gulp json-syntax');
+    timedExecOrDie('gulp dev-dashboard-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   } else {
     printChangeSummary(FILENAME);
-    if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM')) {
+    const buildTargets = determineBuildTargets(FILENAME);
+    await reportAllExpectedTests(buildTargets);
+    timedExecOrDie('gulp update-packages');
 
+    timedExecOrDie('gulp check-exact-versions');
+    timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp prettify');
+    timedExecOrDie('gulp presubmit');
+
+    if (buildTargets.has('AVA')) {
       timedExecOrDie('gulp ava');
-      timedExecOrDie('node node_modules/jest/bin/jest.js');
     }
 
-    if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('UNIT_TEST') ||
-        buildTargets.has('INTEGRATION_TEST')) {
+    if (buildTargets.has('BABEL_PLUGIN')) {
+      timedExecOrDie('gulp babel-plugin-tests');
+    }
 
+    if (buildTargets.has('CACHES_JSON')) {
       timedExecOrDie('gulp caches-json');
-      timedExecOrDie('gulp json-syntax');
+    }
+
+    // Check document links only for PR builds.
+    if (buildTargets.has('DOCS')) {
+      timedExecOrDie('gulp check-links --local_changes');
+    }
+
+    if (buildTargets.has('DEV_DASHBOARD')) {
+      timedExecOrDie('gulp dev-dashboard-tests');
+    }
+
+    // Validate owners syntax only for PR builds.
+    if (buildTargets.has('OWNERS')) {
+      timedExecOrDie('gulp check-owners --local_changes');
+    }
+
+    if (buildTargets.has('RUNTIME')) {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
-    }
-
-    if (buildTargets.has('DOCS')) {
-      timedExecOrDie('gulp check-links');
     }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

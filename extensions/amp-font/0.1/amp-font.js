@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @fileoverview Triggers and monitors loading of custom fonts on AMP pages.
  * Example:
@@ -69,9 +68,7 @@ const DEFAULT_SIZE_ = 'medium';
  */
 const CACHED_FONT_LOAD_TIME_ = 100;
 
-
 export class AmpFont extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -97,22 +94,21 @@ export class AmpFont extends AMP.BaseElement {
     return true;
   }
 
-
   /** @override */
   buildCallback() {
-    this.fontFamily_ = userAssert(this.element.getAttribute('font-family'),
-        'The font-family attribute is required for <amp-font> %s',
-        this.element);
+    this.fontFamily_ = userAssert(
+      this.element.getAttribute('font-family'),
+      'The font-family attribute is required for <amp-font> %s',
+      this.element
+    );
     this.fontWeight_ =
-        this.element.getAttribute('font-weight') || DEFAULT_WEIGHT_;
-    this.fontStyle_ =
-        this.element.getAttribute('font-style') || DEFAULT_STYLE_;
+      this.element.getAttribute('font-weight') || DEFAULT_WEIGHT_;
+    this.fontStyle_ = this.element.getAttribute('font-style') || DEFAULT_STYLE_;
     this.fontVariant_ =
-        this.element.getAttribute('font-variant') || DEFAULT_VARIANT_;
+      this.element.getAttribute('font-variant') || DEFAULT_VARIANT_;
     this.fontLoader_ = new FontLoader(this.getAmpDoc());
     this.startLoad_();
   }
-
 
   /**
    * Starts to download the font.
@@ -126,36 +122,34 @@ export class AmpFont extends AMP.BaseElement {
       size: DEFAULT_SIZE_,
       family: this.fontFamily_,
     };
-    this.fontLoader_.load(fontConfig, this.getTimeout_()).then(() => {
-      this.onFontLoadSuccess_();
-    }).catch(unusedError => {
-      this.onFontLoadError_();
-      user().warn(TAG, 'Font download timed out for ' + this.fontFamily_);
-    });
+    this.fontLoader_
+      .load(fontConfig, this.getTimeout_())
+      .then(() => {
+        this.onFontLoadSuccess_();
+      })
+      .catch(unusedError => {
+        this.onFontLoadError_();
+        user().warn(TAG, 'Font download timed out for ' + this.fontFamily_);
+      });
   }
-
 
   /**
    * @private
    */
   onFontLoadSuccess_() {
     const addClassName = this.element.getAttribute('on-load-add-class');
-    const removeClassName =
-        this.element.getAttribute('on-load-remove-class');
+    const removeClassName = this.element.getAttribute('on-load-remove-class');
     this.onFontLoadFinish_(addClassName, removeClassName);
   }
-
 
   /**
    * @private
    */
   onFontLoadError_() {
     const addClassName = this.element.getAttribute('on-error-add-class');
-    const removeClassName =
-        this.element.getAttribute('on-error-remove-class');
+    const removeClassName = this.element.getAttribute('on-error-remove-class');
     this.onFontLoadFinish_(addClassName, removeClassName);
   }
-
 
   /**
    * @param {?string} addClassName css class to be added to the
@@ -177,14 +171,12 @@ export class AmpFont extends AMP.BaseElement {
     this.dispose_();
   }
 
-
   /**
    * @private
    */
   dispose_() {
     this.fontLoader_ = null;
   }
-
 
   /**
    * Computes and returns the time (in ms) to wait for font download.
@@ -193,16 +185,17 @@ export class AmpFont extends AMP.BaseElement {
    */
   getTimeout_() {
     let timeoutInMs = parseInt(this.element.getAttribute('timeout'), 10);
-    timeoutInMs = !isFiniteNumber(timeoutInMs) ||
-        timeoutInMs < 0 ? DEFAULT_TIMEOUT_ : timeoutInMs;
+    timeoutInMs =
+      !isFiniteNumber(timeoutInMs) || timeoutInMs < 0
+        ? DEFAULT_TIMEOUT_
+        : timeoutInMs;
     timeoutInMs = Math.max(
-        (timeoutInMs - Services.timerFor(this.win).timeSinceStart()),
-        CACHED_FONT_LOAD_TIME_
+      timeoutInMs - Services.timerFor(this.win).timeSinceStart(),
+      CACHED_FONT_LOAD_TIME_
     );
     return timeoutInMs;
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpFont);

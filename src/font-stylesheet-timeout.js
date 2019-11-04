@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from './dom';
-import {isExperimentOn} from './experiments';
+import {escapeCssSelectorIdent} from './css';
 import {onDocumentReady} from './document-ready';
 import {urls} from './config';
 
@@ -63,9 +62,10 @@ function maybeTimeoutFonts(win) {
     // Find all stylesheets that aren't loaded from the AMP CDN (those are
     // critical if they are present).
     const styleLinkElements = win.document.querySelectorAll(
-        `link[rel~="stylesheet"]:not([href^="${
-          escapeCssSelectorIdent(urls.cdn)
-        }"])`);
+      `link[rel~="stylesheet"]:not([href^="${escapeCssSelectorIdent(
+        urls.cdn
+      )}"])`
+    );
     // Compare external sheets against elements of document.styleSheets.
     // They do not appear in this list until they have been loaded.
     const timedoutStyleSheets = [];
@@ -88,7 +88,7 @@ function maybeTimeoutFonts(win) {
       // To avoid blocking the render, we assign a non-matching media
       // attribute first…
       const media = link.media || 'all';
-      link.media = 'not-matching';
+      link.media = 'print';
       // And then switch it back to the original after the stylesheet
       // loaded.
       link.onload = () => {
@@ -118,9 +118,6 @@ function maybeTimeoutFonts(win) {
  * @param {!Window} win
  */
 function timeoutFontFaces(win) {
-  if (!isExperimentOn(win, 'font-display-swap')) {
-    return;
-  }
   const doc = win.document;
   // TODO(@cramforce) Switch to .values when FontFaceSet extern supports it.
   if (!doc.fonts || !doc.fonts['values']) {

@@ -19,11 +19,9 @@ import {
   AmpStoryStoreService,
   EmbeddedComponentState,
 } from '../amp-story-store-service';
-import {
-  AmpStoryEmbeddedComponent,
-} from '../amp-story-embedded-component';
+import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
-import {LocalizationService} from '../localization';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {addAttributesToElement} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -52,7 +50,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
         return Promise.resolve();
       },
       measureMutateElement: (measure, mutate) => {
-        return Promise.resolve().then(measure).then(mutate);
+        return Promise.resolve()
+          .then(measure)
+          .then(mutate);
       },
     });
 
@@ -83,24 +83,29 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     expect(component.focusedStateOverlay_).to.exist;
   });
 
-  it('should append the tooltip to the parentEl when clicking a clickable ' +
-    'element', () => {
-    fakePage.appendChild(clickableEl);
+  it(
+    'should append the tooltip to the parentEl when clicking a clickable ' +
+      'element',
+    () => {
+      fakePage.appendChild(clickableEl);
 
-    storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
-        fakeComponent);
+      storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    // Children in parentEl: fakeCover, fakePage, and tooltip overlay.
-    expect(parentEl.childElementCount).to.equal(3);
-  });
+      // Children in parentEl: fakeCover, fakePage, and tooltip overlay.
+      expect(parentEl.childElementCount).to.equal(3);
+    }
+  );
 
-  it('should show the tooltip on store property update', () => {
+  it('should show the tooltip on store property update', async () => {
     fakePage.appendChild(clickableEl);
 
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    expect(component.focusedStateOverlay_).to.not.have
-        .class('i-amphtml-hidden');
+    // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before showing tooltip.
+    await timeout(150);
+    expect(component.focusedStateOverlay_).to.not.have.class(
+      'i-amphtml-hidden'
+    );
   });
 
   it('should hide the tooltip when switching page', () => {
@@ -128,78 +133,104 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     const nextPageSpy = sandbox.spy();
     parentEl.addEventListener(EventType.NEXT_PAGE, nextPageSpy);
 
-    const rightButton = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-focused-state-layer-nav-button' +
-          '.i-amphtml-story-tooltip-nav-button-right');
+    const rightButton = component.focusedStateOverlay_.querySelector(
+      '.i-amphtml-story-focused-state-layer-nav-button' +
+        '.i-amphtml-story-tooltip-nav-button-right'
+    );
 
     rightButton.dispatchEvent(new Event('click'));
 
     expect(nextPageSpy).to.have.been.calledOnce;
   });
 
-  it('should navigate to previous page when clicked on right arrow and ' +
-    'story is RTL', () => {
-    fakePage.appendChild(clickableEl);
-    storeService.dispatch(Action.TOGGLE_RTL, true);
-    storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
+  it(
+    'should navigate to previous page when clicked on right arrow and ' +
+      'story is RTL',
+    () => {
+      fakePage.appendChild(clickableEl);
+      storeService.dispatch(Action.TOGGLE_RTL, true);
+      storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const previousPageSpy = sandbox.spy();
-    parentEl.addEventListener(EventType.PREVIOUS_PAGE, previousPageSpy);
+      const previousPageSpy = sandbox.spy();
+      parentEl.addEventListener(EventType.PREVIOUS_PAGE, previousPageSpy);
 
-    const rightButton = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-focused-state-layer-nav-button' +
-          '.i-amphtml-story-tooltip-nav-button-right');
+      const rightButton = component.focusedStateOverlay_.querySelector(
+        '.i-amphtml-story-focused-state-layer-nav-button' +
+          '.i-amphtml-story-tooltip-nav-button-right'
+      );
 
-    rightButton.dispatchEvent(new Event('click'));
+      rightButton.dispatchEvent(new Event('click'));
 
-    expect(previousPageSpy).to.have.been.calledOnce;
-  });
+      expect(previousPageSpy).to.have.been.calledOnce;
+    }
+  );
 
-  it('should append icon when icon attribute is present', () => {
+  it('should append icon when icon attribute is present', async () => {
     addAttributesToElement(clickableEl, {'data-tooltip-icon': '/my-icon'});
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const tooltipIconEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
+    const tooltipIconEl = component.focusedStateOverlay_.querySelector(
+      '.i-amphtml-story-tooltip-custom-icon'
+    );
 
-    expect(tooltipIconEl).to.have.attribute('src');
-    expect(tooltipIconEl.getAttribute('src'))
-        .to.equal('http://localhost:9876/my-icon');
+    // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
+    await timeout(150);
+    expect(tooltipIconEl.style['background-image']).to.equal(
+      'url("http://localhost:9876/my-icon")'
+    );
   });
 
   it('should find invalid urls', () => {
-    addAttributesToElement(clickableEl,
-        {'data-tooltip-icon':
-        /*eslint no-script-url: 0*/ 'javascript:alert("evil!")'});
+    addAttributesToElement(clickableEl, {
+      'data-tooltip-icon':
+        /*eslint no-script-url: 0*/ 'javascript:alert("evil!")',
+    });
     fakePage.appendChild(clickableEl);
     expectAsyncConsoleError(
-        '[amp-story-embedded-component] The tooltip icon url is invalid');
+      '[amp-story-embedded-component] The tooltip icon url is invalid'
+    );
 
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
-    const tooltipIconEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
-    expect(tooltipIconEl).to.not.have.attribute('src');
+    const tooltipIconEl = component.focusedStateOverlay_.querySelector(
+      '.i-amphtml-story-tooltip-custom-icon'
+    );
+
+    expect(tooltipIconEl.style['background-image']).to.equal('');
   });
 
-  it('should append text when text attribute is present', () => {
+  it('should append text when text attribute is present', async () => {
     addAttributesToElement(clickableEl, {'data-tooltip-text': 'my cool text'});
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const tooltipTextEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-tooltip-text');
+    const tooltipTextEl = component.focusedStateOverlay_.querySelector(
+      '.i-amphtml-tooltip-text'
+    );
 
+    // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
+    await timeout(150);
     expect(tooltipTextEl.textContent).to.equal('my cool text');
   });
 
-  it('should append href url when text attribute is not present', () => {
+  it('should append href url when text attribute is not present', async () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const tooltipTextEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-tooltip-text');
+    const tooltipTextEl = component.focusedStateOverlay_.querySelector(
+      '.i-amphtml-tooltip-text'
+    );
 
+    // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
+    await timeout(150);
     expect(tooltipTextEl.textContent).to.equal('google.com');
   });
 });
+
+/**
+ * @param {number} ms
+ * @return {!Promise}
+ */
+function timeout(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Whether the document is ready.
  * @param {!Document} doc

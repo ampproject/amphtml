@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const TEALIUMCOLLECT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -28,30 +30,33 @@ export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'host': 'https://collect.tealiumiq.com',
-    'base': '${host}/event?${tealium}&' +
-        '${dom1}&${dom2}&${datetime}&' +
-        'tealium_event=${tealium_event}&' +
-        'amp_version=${ampVersion}&' +
-        'amp_request_count=${requestCount}',
-    'tealium': 'tealium_account=${account}&' +
-        'tealium_profile=${profile}&' +
-        'tealium_datasource=${datasource}&' +
-        'tealium_visitor_id=${visitor_id}',
-    'dom1': 'url=${sourceUrl}&ampdoc_url=${ampdocUrl}&' +
-        'domain=${sourceHost}&pathname=${sourcePath}&' +
-        'amp_hostname=${ampdocHostname}&' +
-        'canonical_hostname=${canonicalHostname}',
-    'dom2': 'title=${title}&' +
-        'viewport_width=${availableScreenWidth}&' +
-        'viewport_height=${availableScreenHeight}',
-    'datetime': 'timestamp=${timestamp}&' +
-        'tz=${timezone}&lang=${browserLanguage}',
-    'pageview': '${base}&referrer=${documentReferrer}&' +
-        'screen_size=${screenWidth}x${screenHeight}&' +
-        'content_load_ms=${contentLoadTime}&' +
-        'page_view_id=${pageViewId}',
-    'event': '${base}&' +
-        'scroll_y=${scrollTop}&scroll_x=${scrollLeft}',
+    'base':
+      '${host}/event/?${tealium}&' +
+      '${dom1}&${dom2}&${datetime}&' +
+      'tealium_event=${tealium_event}&' +
+      'amp_version=${ampVersion}&' +
+      'amp_request_count=${requestCount}',
+    'tealium':
+      'tealium_account=${account}&' +
+      'tealium_profile=${profile}&' +
+      'tealium_datasource=${datasource}&' +
+      'tealium_visitor_id=${visitor_id}',
+    'dom1':
+      'url=${sourceUrl}&ampdoc_url=${ampdocUrl}&' +
+      'domain=${sourceHost}&pathname=${sourcePath}&' +
+      'amp_hostname=${ampdocHostname}&' +
+      'canonical_hostname=${canonicalHostname}',
+    'dom2':
+      'title=${title}&' +
+      'viewport_width=${availableScreenWidth}&' +
+      'viewport_height=${availableScreenHeight}',
+    'datetime': 'timestamp=${timestamp}&tz=${timezone}&lang=${browserLanguage}',
+    'pageview':
+      '${base}&referrer=${documentReferrer}&' +
+      'screen_size=${screenWidth}x${screenHeight}&' +
+      'content_load_ms=${contentLoadTime}&' +
+      'page_view_id=${pageViewId}',
+    'event': '${base}&scroll_y=${scrollTop}&scroll_x=${scrollLeft}',
   },
   'triggers': {
     'defaultPageview': {
@@ -64,3 +69,4 @@ export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
   },
 });
 
+export {TEALIUMCOLLECT_CONFIG};

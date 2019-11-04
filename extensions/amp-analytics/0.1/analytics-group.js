@@ -15,10 +15,7 @@
  */
 
 import {dev, userAssert} from '../../../src/log';
-import {
-  getTrackerKeyName,
-  getTrackerTypesForParentType,
-} from './events';
+import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
 
 /**
  * Represents the group of analytics triggers for a single config. All triggers
@@ -32,7 +29,6 @@ export class AnalyticsGroup {
    * @param {!Element} analyticsElement
    */
   constructor(root, analyticsElement) {
-
     /** @const */
     this.root_ = root;
     /** @const */
@@ -65,13 +61,21 @@ export class AnalyticsGroup {
     const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
 
     const tracker = this.root_.getTrackerForWhitelist(
-        trackerKey, trackerWhitelist);
-    userAssert(!!tracker,
-        'Trigger type "%s" is not allowed in the %s', eventType,
-        this.root_.getType());
-    const unlisten = tracker.add(this.analyticsElement_, eventType, config,
-        handler);
+      trackerKey,
+      trackerWhitelist
+    );
+    userAssert(
+      !!tracker,
+      'Trigger type "%s" is not allowed in the %s',
+      eventType,
+      this.root_.getType()
+    );
+    const unlisten = tracker.add(
+      this.analyticsElement_,
+      eventType,
+      config,
+      handler
+    );
     this.listeners_.push(unlisten);
   }
 }
-

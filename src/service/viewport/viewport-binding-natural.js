@@ -16,12 +16,13 @@
 
 import {Observable} from '../../observable';
 import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
-import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-
 
 const TAG_ = 'Viewport';
 
@@ -36,7 +37,6 @@ const TAG_ = 'Viewport';
  * @implements {ViewportBindingDef}
  */
 export class ViewportBindingNatural_ {
-
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
    */
@@ -56,21 +56,35 @@ export class ViewportBindingNatural_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    /** @const {function()} */
-    this.boundScrollEventListener_ = () => {
-      this.scrollObservable_.fire();
-    };
+    /**
+     * See `handleScrollEvent_` for details.
+     * @private @const {boolean}
+     */
+    this.resetScrollX_ = this.platform_.isIos() && this.win.parent !== this.win;
 
+    /** @const {function()} */
+    this.boundScrollEventListener_ = this.handleScrollEvent_.bind(this);
+
+    // eslint-disable-next-line jsdoc/require-returns
     /** @const {function()} */
     this.boundResizeEventListener_ = () => this.resizeObservable_.fire();
 
-    /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
-
-    /** @private {number} */
-    this.paddingTop_ = 0;
-
     dev().fine(TAG_, 'initialized natural viewport');
+  }
+
+  /** @private */
+  handleScrollEvent_() {
+    if (
+      this.resetScrollX_ &&
+      this.getScrollingElement()./*OK*/ scrollLeft > 0
+    ) {
+      // In the iframed iOS Safari case the `touch-action` and
+      // `overscroll-behavior` are not observed which leads to the overscroll
+      // bugs on the horizontal axis. The solution is to reset the horizontal
+      // scrolling in this case. See b/140131460 for more details.
+      this.getScrollingElement()./*OK*/ scrollLeft = 0;
+    }
+    this.scrollObservable_.fire();
   }
 
   /** @override */
@@ -101,6 +115,11 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
+  overrideGlobalScrollTo() {
+    return false;
+  }
+
+  /** @override */
   supportsPositionFixed() {
     return true;
   }
@@ -117,7 +136,6 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    this.paddingTop_ = paddingTop;
     setImportantStyles(this.win.document.documentElement, {
       'padding-top': px(paddingTop),
     });
@@ -141,14 +159,16 @@ export class ViewportBindingNatural_ {
   disableScroll() {
     // TODO(jridgewell): Recursively disable scroll
     this.win.document.documentElement.classList.add(
-        'i-amphtml-scroll-disabled');
+      'i-amphtml-scroll-disabled'
+    );
   }
 
   /** @override */
   resetScroll() {
     // TODO(jridgewell): Recursively disable scroll
     this.win.document.documentElement.classList.remove(
-        'i-amphtml-scroll-disabled');
+      'i-amphtml-scroll-disabled'
+    );
   }
 
   /** @override */
@@ -163,21 +183,22 @@ export class ViewportBindingNatural_ {
     // documentElement clientWidth/clientHeight.
     // documentElement./*OK*/clientHeight is buggy on iOS Safari
     // and thus cannot be used.
-    const winWidth = this.win./*OK*/innerWidth;
-    const winHeight = this.win./*OK*/innerHeight;
+    const winWidth = this.win./*OK*/ innerWidth;
+    const winHeight = this.win./*OK*/ innerHeight;
     if (winWidth && winHeight) {
       return {width: winWidth, height: winHeight};
     }
     const el = this.win.document.documentElement;
-    return {width: el./*OK*/clientWidth, height: el./*OK*/clientHeight};
+    return {width: el./*OK*/ clientWidth, height: el./*OK*/ clientHeight};
   }
 
   /** @override */
   getScrollTop() {
-    const pageScrollTop = this.getScrollingElement()./*OK*/scrollTop ||
-        this.win./*OK*/pageYOffset;
+    const pageScrollTop =
+      this.getScrollingElement()./*OK*/ scrollTop ||
+      this.win./*OK*/ pageYOffset;
     const {host} = this.ampdoc.getRootNode();
-    return (host ? pageScrollTop - host./*OK*/offsetTop : pageScrollTop);
+    return host ? pageScrollTop - host./*OK*/ offsetTop : pageScrollTop;
   }
 
   /** @override */
@@ -189,30 +210,44 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollWidth() {
-    return this.getScrollingElement()./*OK*/scrollWidth;
+    return this.getScrollingElement()./*OK*/ scrollWidth;
   }
 
   /** @override */
   getScrollHeight() {
-    return this.getScrollingElement()./*OK*/scrollHeight;
+    return this.getScrollingElement()./*OK*/ scrollHeight;
   }
 
   /** @override */
   getContentHeight() {
     // Don't use scrollHeight, since it returns `MAX(viewport_height,
-    // document_height)`, even though we only want the latter. Also, it doesn't
-    // account for margins
-    const scrollingElement = this.getScrollingElement();
-    const rect = scrollingElement./*OK*/getBoundingClientRect();
-    const style = computedStyle(this.win, scrollingElement);
-    let paddingTop = 0;
-    if (scrollingElement !== this.win.document.documentElement) {
-      paddingTop = this.paddingTop_;
-    }
-    return rect.height
-        + paddingTop
-        + parseInt(style.marginTop, 10)
-        + parseInt(style.marginBottom, 10);
+    // document_height)` (we only want the latter), and it doesn't account
+    // for margins. Also, don't use documentElement's rect height because
+    // there's no workable analog for either ios-embed-* modes.
+    const content = this.getScrollingElement();
+    const rect = content./*OK*/ getBoundingClientRect();
+
+    // The Y-position of `content` can be offset by the vertical margin
+    // of its first child, and this is _not_ accounted for in `rect.height`.
+    // This causes smaller than expected content height, so add it manually.
+    // Note this "top" value already includes padding-top of ancestor elements
+    // and getBorderTop().
+    const top = rect.top + this.getScrollTop();
+
+    // As of Safari 12.1.1, the getBoundingClientRect().height does not include
+    // the bottom margin of children and there's no other API that does.
+    const childMarginBottom = Services.platformFor(this.win).isSafari()
+      ? marginBottomOfLastChild(this.win, content)
+      : 0;
+
+    const style = computedStyle(this.win, content);
+    return (
+      top +
+      parseInt(style.marginTop, 10) +
+      rect.height +
+      childMarginBottom +
+      parseInt(style.marginBottom, 10)
+    );
   }
 
   /** @override */
@@ -222,21 +257,17 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const b = el./*OK*/getBoundingClientRect();
-    if (this.useLayers_) {
-      return layoutRectLtwh(b.left, b.top, b.width, b.height);
-    }
-
-    const scrollTop = opt_scrollTop != undefined
-      ? opt_scrollTop
-      : this.getScrollTop();
-    const scrollLeft = opt_scrollLeft != undefined
-      ? opt_scrollLeft
-      : this.getScrollLeft();
-    return layoutRectLtwh(Math.round(b.left + scrollLeft),
-        Math.round(b.top + scrollTop),
-        Math.round(b.width),
-        Math.round(b.height));
+    const b = el./*OK*/ getBoundingClientRect();
+    const scrollTop =
+      opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
+    const scrollLeft =
+      opt_scrollLeft != undefined ? opt_scrollLeft : this.getScrollLeft();
+    return layoutRectLtwh(
+      Math.round(b.left + scrollLeft),
+      Math.round(b.top + scrollTop),
+      Math.round(b.width),
+      Math.round(b.height)
+    );
   }
 
   /** @override */
@@ -246,22 +277,24 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   setScrollTop(scrollTop) {
-    this.getScrollingElement()./*OK*/scrollTop = scrollTop;
+    this.getScrollingElement()./*OK*/ scrollTop = scrollTop;
   }
 
   /** @override */
   getScrollingElement() {
     const doc = this.win.document;
-    if (doc./*OK*/scrollingElement) {
-      return doc./*OK*/scrollingElement;
+    if (doc./*OK*/ scrollingElement) {
+      return doc./*OK*/ scrollingElement;
     }
-    if (doc.body
-        // Due to https://bugs.webkit.org/show_bug.cgi?id=106133, WebKit
-        // browsers have to use `body` and NOT `documentElement` for
-        // scrolling purposes. This has mostly being resolved via
-        // `scrollingElement` property, but this branch is still necessary
-        // for backward compatibility purposes.
-        && this.platform_.isWebKit()) {
+    if (
+      doc.body &&
+      // Due to https://bugs.webkit.org/show_bug.cgi?id=106133, WebKit
+      // browsers have to use `body` and NOT `documentElement` for
+      // scrolling purposes. This has mostly being resolved via
+      // `scrollingElement` property, but this branch is still necessary
+      // for backward compatibility purposes.
+      this.platform_.isWebKit()
+    ) {
       return doc.body;
     }
     return doc.documentElement;

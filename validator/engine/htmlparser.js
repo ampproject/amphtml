@@ -391,7 +391,28 @@ class TagNameStack {
    * @param {string} text
    */
   pcdata(text) {
-    if (!amp.htmlparser.HtmlParser.SPACE_RE_.test(text)) {
+    if (amp.htmlparser.HtmlParser.SPACE_RE_.test(text)) {
+      // Only ASCII whitespace; this can be ignored for validator's purposes.
+    } else if (amp.htmlparser.HtmlParser.CPP_SPACE_RE_.test(text)) {
+      // Non-ASCII whitespace; if this occurs outside <body>, output a
+      // manufactured-body error. Do not create implicit tags, in order to match
+      // the behavior of the buggy C++ parser. (It just so happens this is also
+      // good UX, since the subsequent validation errors caused by the implicit
+      // tags are unhelpful.)
+      switch (this.region_) {
+        // Fallthroughs intentional.
+        case TagRegion.PRE_DOCTYPE:
+        case TagRegion.PRE_HTML:
+        case TagRegion.PRE_HEAD:
+        case TagRegion.IN_HEAD:
+        case TagRegion.PRE_BODY:
+          if (this.handler_.markManufacturedBody) {
+            this.handler_.markManufacturedBody();
+          }
+      }
+    } else {
+      // Non-whitespace text; if this occurs outside <body>, output a
+      // manufactured-body error and create the necessary implicit tags.
       switch (this.region_) {
         // Fallthroughs intentional.
         case TagRegion.PRE_DOCTYPE:  // doctype is not manufactured
@@ -402,11 +423,10 @@ class TagNameStack {
         case TagRegion.IN_HEAD:
           this.endTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
         case TagRegion.PRE_BODY:
-          if (this.handler_.markManufacturedBody)
-          {this.handler_.markManufacturedBody();}
+          if (this.handler_.markManufacturedBody) {
+            this.handler_.markManufacturedBody();
+          }
           this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
-        default:
-          break;
       }
     }
     this.handler_.pcdata(text);
@@ -917,17 +937,27 @@ amp.htmlparser.HtmlParser.NULL_RE_ = /\0/g;
 amp.htmlparser.HtmlParser.ENTITY_RE_ = /&(#\d+|#x[0-9A-Fa-f]+|\w+);/g;
 
 /**
- * Regular expression that matches strings composed of all space characters:
- * https://dev.w3.org/html5/spec-LC/common-microsyntaxes.html#space-character
+ * Regular expression that matches strings composed of all space characters, as
+ * defined in https://infra.spec.whatwg.org/#ascii-whitespace,
+// and in the various HTML parsing rules at
+// https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml.
  *
- * Note: Do not USE \s to match whitespace as this includes byte order mark
- * characters, which html parsing does not consider whitespace.
- * @type {RegExp}
+ * Note: Do not USE \s to match whitespace as this includes many other
+ * characters that HTML parsing does not consider whitespace.
+ * @type {!RegExp}
  * @private
  */
-amp.htmlparser.HtmlParser.SPACE_RE_ =
-    /^[ \f\n\r\t\v\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]*$/;
+amp.htmlparser.HtmlParser.SPACE_RE_ = /^[ \f\n\r\t]*$/;
 
+/**
+ * Regular expression that matches the characters considered whitespace by the
+ * C++ HTML parser.
+ *
+ * @type {!RegExp}
+ * @private
+ */
+amp.htmlparser.HtmlParser.CPP_SPACE_RE_ =
+    /^[ \f\n\r\t\v\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]*$/;
 
 /**
  * Regular expression that matches decimal numbers.
@@ -1003,7 +1033,7 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
         // Entity captured in group 1.
         '&(\\#[0-9]+|\\#[x][0-9a-f]+|\\w+);' +
         // Comments not captured.
-        '|<[!]--[\\s\\S]*?(?:-->|$)' +
+        '|<[!]--[\\s\\S]*?(?:--[!]?>|$)' +
         // '/' captured in group 2 for close tags, and name captured in group 3.
         // The first character of a tag (after possibly '/') can be A-Z, a-z,
         // '!' or '?'. The remaining characters are more easily expressed as a

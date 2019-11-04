@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-export const SNOWPLOW_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const SNOWPLOW_CONFIG = jsonLiteral({
   'vars': {
     'duid': 'CLIENT_ID(_sp_id)',
   },
   'requests': {
-    'aaVersion': 'amp-0.2',
-    'basePrefix': 'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
-        'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
-        'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}&' +
-        'cd=${screenColorDepth}&cs=${documentCharset}&' +
-        'duid=${duid}&' +
-        'lang=${browserLanguage}&refr=${documentReferrer}&stm=${timezone}&' +
-        'vp=${viewportWidth}x${viewportHeight}',
+    'aaVersion': 'amp-0.3',
+    'basePrefix':
+      'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
+      'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
+      'tz=${timezoneCode}&aid=${appId}&p=web&tv=${aaVersion}&' +
+      'cd=${screenColorDepth}&cs=${documentCharset}&' +
+      'duid=${duid}&' +
+      'lang=${browserLanguage}&refr=${documentReferrer}&' +
+      'vp=${viewportWidth}x${viewportHeight}&' +
+      'ds=${scrollWidth}x${scrollHeight}',
     'pageView': '${basePrefix}&e=pv',
-    'structEvent': '${basePrefix}&e=se&' +
-        'se_ca=${structEventCategory}&se_ac=${structEventAction}&' +
-        'se_la=${structEventLabel}&se_pr=${structEventProperty}&' +
-        'se_va=${structEventValue}',
+    'structEvent':
+      '${basePrefix}&e=se&' +
+      'se_ca=${structEventCategory}&se_ac=${structEventAction}&' +
+      'se_la=${structEventLabel}&se_pr=${structEventProperty}&' +
+      'se_va=${structEventValue}',
   },
   'transport': {
     'beacon': false,
@@ -39,3 +44,5 @@ export const SNOWPLOW_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {SNOWPLOW_CONFIG};

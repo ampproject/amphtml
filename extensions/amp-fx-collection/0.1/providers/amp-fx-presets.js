@@ -14,25 +14,144 @@
  * limitations under the License.
  */
 
-import {computedStyle, setStyles} from '../../../../src/style';
-import {devAssert, userAssert} from '../../../../src/log';
+import {FxType} from '../fx-type';
+import {Services} from '../../../../src/services';
+import {
+  assertDoesNotContainDisplay,
+  computedStyle,
+  setStyles,
+} from '../../../../src/style';
+import {dev, devAssert, userAssert} from '../../../../src/log';
 
+/**
+ * These fully qualified names, my goodness.
+ * @typedef {!../../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
+ */
+let PositionObserverEntryDef;
+
+/** @typedef {function(this:./fx-provider.FxElement, ?PositionObserverEntryDef)} */
+let FxUpdateDef;
+
+/** @typedef {{userAsserts: function(!Element):*, update: !FxUpdateDef}} */
+let FxPresetDef;
+
+/**
+ * @param {!./fx-provider.FxElement} fxElement
+ * @param {string} axis 'X' or 'Y' (uppercase)
+ * @param {number} coeff 1 or -1
+ */
+function flyIn(fxElement, axis, coeff) {
+  devAssert(axis == 'X' || axis == 'Y');
+  devAssert(Math.abs(coeff) == 1);
+
+  const element = dev().assertElement(fxElement.element);
+
+  const axisIsX = axis == 'X';
+
+  // Not using interpolation in the following assignment since closure compiles
+  // to a leading, useless empty string.
+  const flyInDistanceAsLength =
+    coeff * fxElement.flyInDistance + (axisIsX ? 'vw' : 'vh');
+
+  // only do this on the first element
+  if (!fxElement.initialTrigger) {
+    Services.resourcesForDoc(element).mutateElement(element, () => {
+      const style = computedStyle(fxElement.win, element);
+      const prop = axisIsX ? 'left' : 'top';
+      const propAsLength = style[prop] === 'auto' ? '0px' : style[prop];
+      const position =
+        style.position === 'static' ? 'relative' : style.position;
+      const styles = {
+        position,
+        visibility: 'visible',
+      };
+      styles[prop] = `calc(${propAsLength} - ${flyInDistanceAsLength})`;
+      setStyles(element, assertDoesNotContainDisplay(styles));
+    });
+    fxElement.initialTrigger = true;
+  }
+
+  // If above the threshold of trigger-position, translate the element by
+  // distance as [vw|vh].
+  setStyles(element, {
+    'transition-duration': fxElement.duration,
+    'transition-timing-function': fxElement.easing,
+    'transform': `translate${axis}(${flyInDistanceAsLength})`,
+  });
+}
+
+/**
+ * @param {!Element} element
+ * @return {number} [data-margin-start] value
+ */
+function marginStartAsserts(element) {
+  const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+  if (marginStart) {
+    userAssert(
+      marginStart >= 0 && marginStart <= 100,
+      'data-margin-start must be a percentage value ' +
+        'and be between 0% and 100% for: %s',
+      element
+    );
+  }
+  return marginStart;
+}
+
+/**
+ * @param {?PositionObserverEntryDef} entry
+ * @return {?number}
+ */
+function topFromPosObsEntryOrNull(entry) {
+  return entry && entry.positionRect ? entry.positionRect.top : null;
+}
+
+/**
+ * @param {?PositionObserverEntryDef} entry
+ * @param {!./fx-provider.FxElement} fxElement
+ * @param {number} coeff
+ * @return {boolean}
+ */
+function isInViewportForTopAxis(entry, fxElement, coeff) {
+  const top = topFromPosObsEntryOrNull(entry);
+  devAssert(Math.abs(coeff) == 1);
+  return (
+    !!top &&
+    top + (coeff * fxElement.viewportHeight * fxElement.flyInDistance) / 100 <=
+      (1 - fxElement.marginStart) * fxElement.viewportHeight
+  );
+}
+
+/**
+ * @param {?PositionObserverEntryDef} entry
+ * @param {!./fx-provider.FxElement} fxElement
+ * @param {number=} opt_vh optional adjusted viewport height
+ * @return {boolean}
+ */
+function isInViewportConsideringMargins(entry, fxElement, opt_vh) {
+  const top = topFromPosObsEntryOrNull(entry);
+  const vh = opt_vh !== undefined ? opt_vh : fxElement.viewportHeight;
+  return !!top && top <= (1 - fxElement.marginStart) * vh;
+}
+
+/** @const {!Object<!FxType, !FxPresetDef>} */
 export const Presets = {
-  'parallax': {
+  [FxType.PARALLAX]: {
     userAsserts(element) {
       const factorValue = userAssert(
-          element.getAttribute('data-parallax-factor'),
-          'data-parallax-factor=<number> attribute must be provided for: %s',
-          element);
-      userAssert(parseFloat(factorValue) > 0,
-          'data-parallax-factor must be a number and greater than 0 for: %s',
-          element);
+        element.getAttribute('data-parallax-factor'),
+        'data-parallax-factor=<number> attribute must be provided for: %s',
+        element
+      );
+      userAssert(
+        parseFloat(factorValue) > 0,
+        'data-parallax-factor must be a number and greater than 0 for: %s',
+        element
+      );
     },
     update(entry) {
       const fxElement = this;
+      const top = topFromPosObsEntryOrNull(entry);
       devAssert(fxElement.adjustedViewportHeight);
-      const top = entry.positionRect ? entry.positionRect.top : null;
-      // outside viewport
       if (!top || top > fxElement.adjustedViewportHeight) {
         return;
       }
@@ -40,290 +159,136 @@ export const Presets = {
       // User provided factor is 1-based for easier understanding.
       // Also negating number since we are using tranformY so negative = upward,
       // positive = downward.
-      const adjustedFactor = -(parseFloat(fxElement.getFactor()) - 1);
+      const adjustedFactor = -(parseFloat(fxElement.factor) - 1);
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
       const offset = (fxElement.adjustedViewportHeight - top) * adjustedFactor;
-      fxElement.setOffset(offset);
+      fxElement.offset = offset;
 
       // If above the threshold of trigger-position
       // Translate the element offset pixels.
-      setStyles(fxElement.getElement(),
-          {transform:
-            `translateY(${fxElement.getOffset().toFixed(0)}px)`});
-    },
-  },
-  'fly-in-bottom': {
-    userAsserts(element) {
-      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
-      if (!marginStart) {
-        return;
-      }
-      userAssert(marginStart >= 0 && marginStart <= 100,
-          'data-margin-start must be a percentage value ' +
-          'and be between 0% and 100% for: %s', element);
-    },
-    update(entry) {
-      const fxElement = this;
-      devAssert(fxElement.viewportHeight);
-      const top = entry.positionRect ? entry.positionRect.top : null;
-      // Outside viewport
-      if (!top || top - (fxElement.viewportHeight *
-        fxElement.getFlyInDistance() / 100) >
-          (1 - fxElement.getMarginStart()) *
-            fxElement.viewportHeight) {
-        return;
-      }
-
-      // only do this on the first element
-      if (!fxElement.initialTrigger) {
-        fxElement.getResources().mutateElement(
-            fxElement.getElement(), function() {
-              const style = computedStyle(fxElement.getAmpDoc().win,
-                  fxElement.getElement());
-              const topAsLength = style.top === 'auto' ? '0px' : style.top;
-              const positionKeyword =
-                style.position === 'static' ? 'relative' : style.position;
-              setStyles(fxElement.getElement(), {
-                'top': `calc(${topAsLength} +
-                  ${fxElement.getFlyInDistance()}vh)`,
-                'visibility': 'visible',
-                'position': positionKeyword,
-              });
-              fxElement.initialTrigger = true;
-            });
-      }
-
-      // If above the threshold of trigger-position
-      // Translate the element offset pixels.
-      setStyles(fxElement.getElement(), {
-        'transition-duration': fxElement.getDuration(),
-        'transition-timing-function': fxElement.getEasing(),
-        'transform': `translateY(-${fxElement.getFlyInDistance()}vh)`,
+      setStyles(fxElement.element, {
+        transform: `translateY(${fxElement.offset.toFixed(0)}px)`,
       });
     },
   },
-  'fly-in-left': {
-    userAsserts(element) {
-      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
-      if (!marginStart) {
-        return;
-      }
-      userAssert(marginStart >= 0 && marginStart <= 100,
-          'data-margin-start must be a percentage value ' +
-          'and be between 0% and 100% for: %s', element);
-    },
+  [FxType.FLY_IN_BOTTOM]: {
+    userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
       devAssert(fxElement.viewportHeight);
-      const top = entry.positionRect ? entry.positionRect.top : null;
-      // Outside viewport
-      if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.viewportHeight) {
+      if (!isInViewportForTopAxis(entry, fxElement, /* coeff */ -1)) {
         return;
       }
-
-      // only do this on the first element
-      if (!fxElement.initialTrigger) {
-        fxElement.getResources().mutateElement(
-            fxElement.getElement(), function() {
-              const style = computedStyle(fxElement.getAmpDoc().win,
-                  fxElement.getElement());
-              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
-              const positionKeyword =
-                style.position === 'static' ? 'relative' : style.position;
-              setStyles(fxElement.getElement(), {
-                'left':
-                  `calc(${leftAsLength} - ${fxElement.getFlyInDistance()}vw)`,
-                'visibility': 'visible',
-                'position': positionKeyword,
-              });
-              fxElement.initialTrigger = true;
-            });
-      }
-
-      // If above the threshold of trigger-position
-      // Translate the element offset pixels.
-      setStyles(fxElement.getElement(), {
-        'transition-duration': fxElement.getDuration(),
-        'transition-timing-function': fxElement.getEasing(),
-        'transform': `translateX(${fxElement.getFlyInDistance()}vw)`,
-      });
+      flyIn(fxElement, 'Y', /* coeff */ -1);
     },
   },
-  'fly-in-right': {
-    userAsserts(element) {
-      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
-      if (!marginStart) {
-        return;
-      }
-      userAssert(marginStart >= 0 && marginStart <= 100,
-          'data-margin-start must be a percentage value ' +
-          'and be between 0% and 100% for: %s', element);
-    },
+  [FxType.FLY_IN_LEFT]: {
+    userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
       devAssert(fxElement.viewportHeight);
-      const top = entry.positionRect ? entry.positionRect.top : null;
-      // Outside viewport
-      if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.viewportHeight) {
+      if (!isInViewportConsideringMargins(entry, fxElement)) {
         return;
       }
-
-      // only do this on the first element
-      if (!fxElement.initialTrigger) {
-        fxElement.getResources().mutateElement(
-            fxElement.getElement(), function() {
-              const style = computedStyle(fxElement.getAmpDoc().win,
-                  fxElement.getElement());
-              const leftAsLength = style.left === 'auto' ? '0px' : style.left;
-              const positionKeyword =
-                style.position === 'static' ? 'relative' : style.position;
-              setStyles(fxElement.getElement(), {
-                'left':
-                  `calc(${leftAsLength} + ${fxElement.getFlyInDistance()}vw)`,
-                'visibility': 'visible',
-                'position': positionKeyword,
-              });
-              fxElement.initialTrigger = true;
-            });
-      }
-
-      // If above the threshold of trigger-position
-      // Translate the element offset pixels.
-      setStyles(fxElement.getElement(), {
-        'transition-duration': fxElement.getDuration(),
-        'transition-timing-function': fxElement.getEasing(),
-        'transform': `translateX(-${fxElement.getFlyInDistance()}vw)`,
-      });
+      flyIn(fxElement, 'X', /* coeff */ 1);
     },
   },
-  'fly-in-top': {
-    userAsserts(element) {
-      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
-      if (!marginStart) {
-        return;
-      }
-      userAssert(marginStart >= 0 && marginStart <= 100,
-          'data-margin-start must be a percentage value ' +
-          'and be between 0% and 100% for: %s', element);
-    },
+  [FxType.FLY_IN_RIGHT]: {
+    userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
       devAssert(fxElement.viewportHeight);
-      const top = entry.positionRect ? entry.positionRect.top : null;
-      // Outside viewport
-      if (!top || top + (fxElement.viewportHeight *
-        fxElement.getFlyInDistance() / 100) >
-          (1 - fxElement.getMarginStart()) *
-            fxElement.viewportHeight) {
+      if (!isInViewportConsideringMargins(entry, fxElement)) {
         return;
       }
-
-      // only do this on the first element
-      if (!fxElement.initialTrigger) {
-        fxElement.getResources().mutateElement(
-            fxElement.getElement(), function() {
-              const style = computedStyle(fxElement.getAmpDoc().win,
-                  fxElement.getElement());
-              const topAsLength = style.top === 'auto' ? '0px' : style.top;
-              const positionKeyword =
-                style.position === 'static' ? 'relative' : style.position;
-              setStyles(fxElement.getElement(), {
-                'top': `calc(${topAsLength} -
-                  ${fxElement.getFlyInDistance()}vh)`,
-                'visibility': 'visible',
-                'position': positionKeyword,
-              });
-              fxElement.initialTrigger = true;
-            });
-      }
-
-      // If above the threshold of trigger-position
-      // Translate the element offset pixels.
-      setStyles(fxElement.getElement(), {
-        'transition-duration': fxElement.getDuration(),
-        'transition-timing-function': fxElement.getEasing(),
-        'transform': `translateY(${fxElement.getFlyInDistance()}vh)`,
-      });
+      flyIn(fxElement, 'X', /* coeff */ -1);
     },
   },
-  'fade-in': {
-    userAsserts(element) {
-      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
-      if (!marginStart) {
-        return;
-      }
-      userAssert(marginStart >= 0 && marginStart <= 100,
-          'data-margin-start must be a percentage value ' +
-          'and be between 0% and 100% for: %s', element);
-    },
+  [FxType.FLY_IN_TOP]: {
+    userAsserts: marginStartAsserts,
     update(entry) {
       const fxElement = this;
       devAssert(fxElement.viewportHeight);
-      const top = entry.positionRect ? entry.positionRect.top : null;
-      // Outside viewport
-      if (!top || top > (1 - fxElement.getMarginStart()) *
-        fxElement.viewportHeight) {
+      if (!isInViewportForTopAxis(entry, fxElement, /* coeff */ 1)) {
+        return;
+      }
+      flyIn(fxElement, 'Y', /* coeff */ 1);
+    },
+  },
+  [FxType.FADE_IN]: {
+    userAsserts: marginStartAsserts,
+    update(entry) {
+      const fxElement = this;
+      devAssert(fxElement.viewportHeight);
+      if (!isInViewportConsideringMargins(entry, fxElement)) {
         return;
       }
 
       // If above the threshold of trigger-position
       // Translate the element offset pixels.
-      setStyles(fxElement.getElement(), {
-        'transition-duration': fxElement.getDuration(),
-        'transition-timing-function': fxElement.getEasing(),
+      setStyles(fxElement.element, {
+        'transition-duration': fxElement.duration,
+        'transition-timing-function': fxElement.easing,
         'opacity': 1,
       });
     },
   },
-  'fade-in-scroll': {
+  [FxType.FADE_IN_SCROLL]: {
     userAsserts(element) {
-      const marginStart = parseFloat(element.getAttribute('data-margin-start'));
+      const marginStart = marginStartAsserts(element);
       const marginEnd = parseFloat(element.getAttribute('data-margin-end'));
 
-      if (!marginStart && !marginEnd) {
+      if (!marginEnd) {
         return;
       }
-      userAssert(marginStart >= 0 && marginStart <= 100,
-          'data-margin-start must be a percentage value ' +
-          'and be between 0% and 100% for: %s', element);
-      userAssert(marginEnd >= 0 && marginEnd <= 100,
-          'data-margin-end must be a percentage value ' +
-          'and be between 0% and 100% for: %s', element);
 
-      userAssert(marginEnd > marginStart,
-          'data-margin-end must be greater than data-margin-start for: %s',
-          element);
+      userAssert(
+        marginEnd >= 0 && marginEnd <= 100,
+        'data-margin-end must be a percentage value ' +
+          'and be between 0% and 100% for: %s',
+        element
+      );
+
+      userAssert(
+        marginEnd > marginStart,
+        'data-margin-end must be greater than data-margin-start for: %s',
+        element
+      );
     },
     update(entry) {
       const fxElement = this;
+      const {viewportHeight, marginStart} = fxElement;
       devAssert(fxElement.adjustedViewportHeight);
-      const top = entry.positionRect ? entry.positionRect.top : null;
-      // Outside viewport or margins
-      if (!top || (top > (1 - fxElement.getMarginStart()) *
-        fxElement.adjustedViewportHeight)) {
+
+      if (
+        !isInViewportConsideringMargins(
+          entry,
+          fxElement,
+          fxElement.adjustedViewportHeight
+        )
+      ) {
         return;
       }
 
       // Early exit if the animation doesn't need to repeat and it is fully
       // opaque.
-      if (!fxElement.hasRepeat() && fxElement.getOffset() >= 1) {
+      if (!fxElement.hasRepeat && fxElement.offset >= 1) {
         return;
       }
+      const top = topFromPosObsEntryOrNull(entry);
       // Translate the element offset pixels.
-      const marginDelta = fxElement.getMarginEnd() - fxElement.getMarginStart();
+      const marginDelta = fxElement.marginEnd - marginStart;
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
-      const offset = 1 * (fxElement.viewportHeight - top -
-        (fxElement.getMarginStart() * fxElement.viewportHeight)) /
-        (marginDelta * fxElement.viewportHeight);
-      fxElement.setOffset(offset);
+      const offset =
+        (1 * (viewportHeight - top - marginStart * viewportHeight)) /
+        (marginDelta * viewportHeight);
+      fxElement.offset = offset;
 
       // If above the threshold of trigger-position
       // Translate the element offset pixels.
-      setStyles(fxElement.getElement(), {opacity: fxElement.getOffset()});
+      setStyles(fxElement.element, {opacity: fxElement.offset});
     },
   },
 };

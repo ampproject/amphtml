@@ -32,9 +32,13 @@ import {userAssert} from '../src/log';
  * @param {string} locale
  */
 function getFacebookSdk(global, cb, locale) {
-  loadScript(global, 'https://connect.facebook.net/' + locale + '/sdk.js', () => {
-    cb(global.FB);
-  });
+  loadScript(
+    global,
+    'https://connect.facebook.net/' + locale + '/sdk.js',
+    () => {
+      cb(global.FB);
+    }
+  );
 }
 
 /**
@@ -100,8 +104,10 @@ function getCommentContainer(global, data) {
   const c = global.document.getElementById('c');
   const container = createContainer(global, 'comment-embed', data.href);
   container.setAttribute(
-      'data-include-parent', data.includeCommentParent || 'false');
-  container.setAttribute('data-width', c./*OK*/offsetWidth);
+    'data-include-parent',
+    data.includeCommentParent || 'false'
+  );
+  container.setAttribute('data-width', c./*OK*/ offsetWidth);
   return container;
 }
 
@@ -123,9 +129,12 @@ function getDefaultEmbedAs(href) {
 function getEmbedContainer(global, data) {
   const embedAs = data.embedAs || getDefaultEmbedAs(data.href);
 
-  userAssert(['post', 'video', 'comment'].indexOf(embedAs) !== -1,
-      'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
-  ' "post", "video" or "comment" but was: %s', embedAs);
+  userAssert(
+    ['post', 'video', 'comment'].indexOf(embedAs) !== -1,
+    'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
+      ' "post", "video" or "comment" but was: %s',
+    embedAs
+  );
 
   switch (embedAs) {
     case 'comment':
@@ -157,7 +166,7 @@ function getPageContainer(global, data) {
   // Note: The facebook embed  allows a maximum width of 500px.
   // If the container's width exceeds that, the embed's width will
   // be clipped to 500px.
-  container.setAttribute('data-width', c./*OK*/offsetWidth);
+  container.setAttribute('data-width', c./*OK*/ offsetWidth);
   return container;
 }
 
@@ -211,30 +220,36 @@ export function facebook(global, data) {
     container = getLikeContainer(global, data);
   } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
     container = getCommentsContainer(global, data);
-  } else /*AMP-FACEBOOK */ {
+  } /*AMP-FACEBOOK */ else {
     container = getEmbedContainer(global, data);
   }
 
   global.document.getElementById('c').appendChild(container);
 
-  getFacebookSdk(global, FB => {
-    // Dimensions are given by the parent frame.
-    delete data.width;
-    delete data.height;
+  getFacebookSdk(
+    global,
+    FB => {
+      // Dimensions are given by the parent frame.
+      delete data.width;
+      delete data.height;
 
-    FB.Event.subscribe('xfbml.resize', event => {
-      context.updateDimensions(
+      FB.Event.subscribe('xfbml.resize', event => {
+        context.updateDimensions(
           parseInt(event.width, 10),
-          parseInt(event.height, 10) + /* margins */ 20);
-    });
+          parseInt(event.height, 10) + /* margins */ 20
+        );
+      });
 
-    FB.init({xfbml: true, version: 'v2.5'});
+      FB.init({xfbml: true, version: 'v2.5'});
 
-    // Report to parent that the SDK has loaded and is ready to paint
-    const message = JSON.stringify(dict({
-      'action': 'ready',
-    }));
-    global.parent. /*OK*/postMessage(message, '*');
-
-  }, data.locale ? data.locale : dashToUnderline(window.navigator.language));
+      // Report to parent that the SDK has loaded and is ready to paint
+      const message = JSON.stringify(
+        dict({
+          'action': 'ready',
+        })
+      );
+      global.parent./*OK*/ postMessage(message, '*');
+    },
+    data.locale ? data.locale : dashToUnderline(window.navigator.language)
+  );
 }

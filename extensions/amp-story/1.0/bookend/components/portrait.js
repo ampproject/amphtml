@@ -15,6 +15,8 @@
  */
 
 import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
   BookendComponentInterface,
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
@@ -51,18 +53,18 @@ let portraitElementsDef;
  * @implements {BookendComponentInterface}
  */
 export class PortraitComponent {
-
   /** @override */
   assertValidity(portraitJson, element) {
-
     const requiredFields = ['title', 'image', 'url'];
-    const hasAllRequiredFields =
-        !requiredFields.some(field => !(field in portraitJson));
+    const hasAllRequiredFields = !requiredFields.some(
+      field => !(field in portraitJson)
+    );
     userAssert(
-        hasAllRequiredFields,
-        'Portrait component must contain ' +
+      hasAllRequiredFields,
+      'Portrait component must contain ' +
         requiredFields.map(field => '`' + field + '`').join(', ') +
-        ' fields, skipping invalid.');
+        ' fields, skipping invalid.'
+    );
 
     userAssertValidProtocol(element, portraitJson['url']);
     userAssertValidProtocol(element, portraitJson['image']);
@@ -90,13 +92,11 @@ export class PortraitComponent {
   }
 
   /** @override */
-  buildElement(portraitData, doc) {
+  buildElement(portraitData, doc, data) {
+    portraitData = /** @type {PortraitComponentDef} */ (portraitData);
     const html = htmlFor(doc);
-    const el =
-        html`
-        <a class="i-amphtml-story-bookend-portrait
-          i-amphtml-story-bookend-component"
-          target="_top">
+    const el = html`
+        <a class="i-amphtml-story-bookend-portrait i-amphtml-story-bookend-component" target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
             ref="category"></h2>
           <h2 class="i-amphtml-story-bookend-article-heading"
@@ -108,13 +108,21 @@ export class PortraitComponent {
             ref="meta"></div>
         </a>`;
     addAttributesToElement(el, dict({'href': portraitData.url}));
+    el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.PORTRAIT,
+    };
 
     if (portraitData['amphtml'] === true) {
       addAttributesToElement(el, dict({'rel': 'amphtml'}));
     }
 
-    const {category, title, image, meta} =
-      /** @type {!portraitElementsDef} */ (htmlRefs(el));
+    const {
+      category,
+      title,
+      image,
+      meta,
+    } = /** @type {!portraitElementsDef} */ (htmlRefs(el));
 
     category.textContent = portraitData.category;
     title.textContent = portraitData.title;

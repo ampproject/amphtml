@@ -33,7 +33,6 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-bodymovin-animation';
 
 export class AmpBodymovinAnimation extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -73,9 +72,10 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const scriptToLoad = this.renderer_ === 'svg' ?
-      'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js' :
-      'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
+    const scriptToLoad =
+      this.renderer_ === 'svg'
+        ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
+        : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
     preloadBootstrap(this.win, this.preconnect);
     this.preconnect.url(scriptToLoad, opt_onLayout);
   }
@@ -85,23 +85,47 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     this.loop_ = this.element.getAttribute('loop') || 'true';
     this.autoplay_ = !this.element.hasAttribute('noautoplay');
     this.renderer_ = this.element.getAttribute('renderer') || 'svg';
-    userAssert(this.element.hasAttribute('src'),
-        'The src attribute must be specified for <amp-bodymovin-animation>');
+    userAssert(
+      this.element.hasAttribute('src'),
+      'The src attribute must be specified for <amp-bodymovin-animation>'
+    );
     assertHttpsUrl(this.element.getAttribute('src'), this.element);
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
 
     // Register relevant actions
-    this.registerAction('play', () => { this.play_(); }, ActionTrust.LOW);
-    this.registerAction('pause', () => { this.pause_(); }, ActionTrust.LOW);
-    this.registerAction('stop', () => { this.stop_(); }, ActionTrust.LOW);
-    this.registerAction('seekTo', invocation => {
-      const {args} = invocation;
-      if (args) {
-        this.seekTo_(args);
-      }
-    }, ActionTrust.LOW);
+    this.registerAction(
+      'play',
+      () => {
+        this.play_();
+      },
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'pause',
+      () => {
+        this.pause_();
+      },
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'stop',
+      () => {
+        this.stop_();
+      },
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'seekTo',
+      invocation => {
+        const {args} = invocation;
+        if (args) {
+          this.seekTo_(args);
+        }
+      },
+      ActionTrust.LOW
+    );
   }
 
   /** @override */
@@ -115,19 +139,25 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
         animationData: data,
       };
       const iframe = getIframe(
-          this.win, this.element, 'bodymovinanimation', opt_context);
-      return Services.vsyncFor(this.win).mutatePromise(() => {
-        this.applyFillContent(iframe);
-        this.unlistenMessage_ = listen(
+        this.win,
+        this.element,
+        'bodymovinanimation',
+        opt_context
+      );
+      return Services.vsyncFor(this.win)
+        .mutatePromise(() => {
+          this.applyFillContent(iframe);
+          this.unlistenMessage_ = listen(
             this.win,
             'message',
             this.handleBodymovinMessages_.bind(this)
-        );
-        this.element.appendChild(iframe);
-        this.iframe_ = iframe;
-      }).then(() => {
-        return this.playerReadyPromise_;
-      });
+          );
+          this.element.appendChild(iframe);
+          this.iframe_ = iframe;
+        })
+        .then(() => {
+          return this.playerReadyPromise_;
+        });
     });
   }
 
@@ -154,8 +184,13 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     if (this.iframe_ && event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!getData(event) || !(isObject(getData(event))
-        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
+    if (
+      !getData(event) ||
+      !(
+        isObject(getData(event)) ||
+        startsWith(/** @type {string} */ (getData(event)), '{')
+      )
+    ) {
       return; // Doesn't look like JSON.
     }
 
@@ -181,12 +216,14 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   sendCommand_(action, opt_valueType, opt_value) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(dict({
-          'action': action,
-          'valueType': opt_valueType || '',
-          'value': opt_value || '',
-        }));
-        this.iframe_.contentWindow. /*OK*/postMessage(message, '*');
+        const message = JSON.stringify(
+          dict({
+            'action': action,
+            'valueType': opt_valueType || '',
+            'value': opt_value || '',
+          })
+        );
+        this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });
   }
