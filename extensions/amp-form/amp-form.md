@@ -131,14 +131,15 @@ To learn about redirecting the user after successfully submitting the form, see 
 
 ##### data-initialize-from-url
 
-Initializes supported form fields from the URL. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields under the form can optionally be initialized from URL query parameter values. Individual fields are opted-in if they contain attribute `data-allow-initialization`.
+Initializes supported form fields from the URL. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields under the form can optionally be initialized from URL query parameter values.
 
-Example: an AMP page can be used to display search results, where the search input echoes the search term.
+Individual fields are opted-in if they contain attribute `data-allow-initialization`. On page load, if the URL contains a query parameter with name matching an opted-in field's `name` attribute, the value or checked-state of that field will be updated based on the value of that query parameter. For example, `<input type="search" name="q" data-allow-initialization>` would display "my search" if the AMP page is visited with URL `https://example.com/search?q=my+search`.
+
+Sample:
 
 ```html
-<form id="myform"
+<form data-initialize-from-url
     method="get"
-    data-initialize-from-url
     action="https://example.com/search"{% if not format=='email'%}
     target="_top"{% endif %}>
   <label>Search: <input type="search" name="q" data-allow-initialization></label>
@@ -150,7 +151,7 @@ Limitations:
 
 - Supported `<input>` types include `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
 - Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
-- AMP pages delivered from an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/) ignore this attribute. Forms with this attribute are valid, but fields will not initialize from URL query parameter values.
+- This feature is not supported on AMP pages delivered by an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/). The `data-initialize-from-url` and `data-allow-initialization` attributes will not cause AMP validation failures, but the form fields will not be initialized from the URL.
 
 ##### Other form attributes
 
