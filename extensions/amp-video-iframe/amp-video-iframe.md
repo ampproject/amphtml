@@ -169,13 +169,17 @@ it lives on the non-AMP document that is iframed.
 
 ### Readymade integrations
 
-If you're using a common video framework like [JwPlayer](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call `listenTo` for a basic, readymade integration.
+If you're using a common video framework like [JwPlayer](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo`** for a basic, readymade integration. This integrations support all playback and UI controls when the framework provides them, see each for supported methods.
 
 {% call callout('Framework APIs', type='note') %}
 Depending on which video framework you use, you'll call the `listenTo` method differently. Read on the specific APIs below.
 {% endcall %}
 
 ##### For JwPlayer
+
+**Default supported events:** `ad_end`/`ad_start`, `canplay`, `error`, `muted`/`unmuted`, `pause`/`playing`
+
+**Default supported methods:** `pause`/`play`, `mute`/`unmute`, `hidecontrols`/`showcontrols`, `fullscreenenter`/`fullscreenexit`
 
 Pass in your [`jwplayer` instance object](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/)
 through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `ampIntegration` object then knows how
@@ -189,6 +193,10 @@ function onAmpIntegrationReady(ampIntegration) {
 ```
 
 ##### For Video.js
+
+**Default supported events:** `canplay`, `ended`, `muted`/`unmuted`, `pause`/`playing`
+
+**Default supported methods:** `pause`/`play`, `mute`/`unmute`, `hidecontrols`/`showcontrols`, `fullscreenenter`/`fullscreenexit`
 
 Pass in your [`<video>` element](https://docs.videojs.com/docs/api/player.html)
 through the signature `ampIntegration.listenTo('videojs', myVideo)`. Video.js overloads this element to provide methods
