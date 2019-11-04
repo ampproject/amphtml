@@ -1288,11 +1288,7 @@ export class AmpForm {
         valueTags.includes(tag)
       ) {
         if (field.value !== value) {
-          try {
-            field.value = value;
-          } catch (e) {
-            dev().error(TAG, 'unable to initialize form element', e);
-          }
+          field.value = value;
         }
       } else if (tag === 'INPUT' && checkedInputTypes.includes(type)) {
         const inputs = this.form_./*OK*/ querySelectorAll(
@@ -1300,11 +1296,7 @@ export class AmpForm {
         );
         iterateCursor(inputs, input => {
           if (input.checked !== (input.value === value)) {
-            try {
-              input.checked = input.value === value;
-            } catch (e) {
-              dev().error(TAG, 'unable to initialize form element', e);
-            }
+            input.checked = input.value === value;
           }
         });
       }

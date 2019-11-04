@@ -149,7 +149,7 @@ Sample:
 
 Limitations:
 
-- Supported `<input>` types include `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
+- Supported `<input>` types include `checkbox`, `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `radio`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
 - Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
 - This feature is not supported on AMP pages delivered by an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/). The `data-initialize-from-url` and `data-allow-initialization` attributes will not cause AMP validation failures, but the form fields will not be initialized from the URL.
 

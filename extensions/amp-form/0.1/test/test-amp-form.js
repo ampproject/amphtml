@@ -3170,9 +3170,8 @@ describes.repeated(
       'Initialize from URL',
       {
         amp: {
-          runtimeOn: true,
           ampdoc: variant.ampdoc,
-          extensions: ['amp-form', 'amp-selector'], // amp-form is installed as service.
+          extensions: ['amp-form'],
         },
         win: {
           location:
@@ -3190,15 +3189,7 @@ describes.repeated(
           doc = env.ampdoc.getRootNode();
           const ownerDoc = doc.ownerDocument || doc;
           createElement = ownerDoc.createElement.bind(ownerDoc);
-          Services.resourcesForDoc(env.ampdoc);
         });
-
-        function getAmpForm(form, canonical = 'https://example.com/amps.html') {
-          new AmpFormService(env.ampdoc);
-          Services.documentInfoForDoc(env.ampdoc).canonicalUrl = canonical;
-          env.ampdoc.getBody().appendChild(form);
-          return Promise.resolve(new AmpForm(form, 'amp-form-test-id'));
-        }
 
         function getAmpFormWithInitialization(initFromUrl) {
           const form = createElement('form');
@@ -3269,20 +3260,20 @@ describes.repeated(
           textarea.innerHTML = '0';
           form.appendChild(textarea);
 
-          return getAmpForm(form).then(ampForm => {
-            return {
-              ampForm,
-              fields: {
-                textNoInit,
-                hiddenAmpReplace,
-                text,
-                radio0,
-                radio1,
-                checkbox,
-                select,
-                textarea,
-              },
-            };
+          env.ampdoc.getBody().appendChild(form);
+          const ampForm = new AmpForm(form, 'amp-form-test-id');
+          return Promise.resolve({
+            ampForm,
+            fields: {
+              textNoInit,
+              hiddenAmpReplace,
+              text,
+              radio0,
+              radio1,
+              checkbox,
+              select,
+              textarea,
+            },
           });
         }
 
