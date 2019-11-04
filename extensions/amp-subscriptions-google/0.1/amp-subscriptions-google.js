@@ -37,6 +37,7 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {isExperimentOn} from '../../../src/experiments';
 import {parseUrlDeprecated} from '../../../src/url';
 import {userAssert} from '../../../src/log';
 
@@ -110,6 +111,11 @@ export class GoogleSubscriptionsPlatform {
       this.handleAnalyticsEvent_.bind(this)
     );
 
+    // Map AMP experiment to SwG experiment.
+    const swgExperiments = {};
+    if (isExperimentOn(ampdoc.win, 'gpay-api')) {
+      swgExperiments.experiments = ['gpay-api'];
+    }
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
@@ -118,7 +124,8 @@ export class GoogleSubscriptionsPlatform {
       {
         fetcher: new AmpFetcher(ampdoc.win),
         configPromise: new Promise(resolve => (resolver = resolve)),
-      }
+      },
+      swgExperiments
     );
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */
@@ -267,7 +274,7 @@ export class GoogleSubscriptionsPlatform {
    */
   onLoginRequest_(linkRequested) {
     if (linkRequested && this.isGoogleViewer_) {
-      this.runtime_.linkAccount();
+      this.loginWithAmpReaderId_();
       this.subscriptionAnalytics_.actionEvent(
         this.getServiceId(),
         Action.LINK,
@@ -281,6 +288,17 @@ export class GoogleSubscriptionsPlatform {
     } else {
       this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal('login'));
     }
+  }
+
+  /**
+   * Kicks off login flow for account linking, and passes AMP Reader ID to authorization URL.
+   * @private
+   */
+  loginWithAmpReaderId_() {
+    // Get local AMP reader ID, to match the ID sent to local entitlement endpoints.
+    this.serviceAdapter_.getReaderId('local').then(ampReaderId => {
+      this.runtime_.linkAccount({ampReaderId});
+    });
   }
 
   /** @private */
@@ -493,7 +511,7 @@ export class GoogleSubscriptionsPlatform {
       return Promise.resolve(true);
     }
     if (action == Action.LOGIN) {
-      this.runtime_.linkAccount();
+      this.loginWithAmpReaderId_();
       return Promise.resolve(true);
     }
     return Promise.resolve(false);
