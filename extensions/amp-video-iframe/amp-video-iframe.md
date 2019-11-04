@@ -223,7 +223,7 @@ function onAmpIntegrationReady(ampIntegration) {
 ```js
 function onAmpIntegrationReady(ampIntegration) {
   var myVideo = document.querySelector('#my-video');
-  
+
   // ampIntegration initializes player with `myVideojsInitializer(myVideo)`
   ampIntegration.listenTo('videojs', myVideo, myVideojsInitializer);
 }
