@@ -164,9 +164,9 @@ In order for the video integration to work, the embedded document (e.g. `my-vide
 Note that this library is separate from the extension code (`amp-video-iframe-0.1.js`), because
 it lives on the non-AMP document that is iframed.
 
-The provided callback specifies how the AMP document and the iframed video document. You need to implement a set of
-playback methods and event dispatchers to plug these together. For common video frameworks, the integration script already
-provides [readymade playback support](#readymade-integrations), but you can also [write a custom integration yourself](#custom-integrations) if you don't use any of the tools for which readymade support is available.
+The provided callback specifies how the AMP document and the iframed video document talk to each other. You need to implement a set of
+playback methods and event dispatchers to plug these together. For common video frameworks, the integration script
+[provides readymade playback support](#readymade-integrations), but you can also [write a custom integration yourself](#custom-integrations) if you don't use any of the tools for which support is available.
 
 {% call callout('Do not autoplay yourself', type='caution') %}
 **Never play the video inside the frame automatically.** Instead, you should support the integration script and use the `amp-video-iframe` tag with the `autoplay` attribute. The AMP component will automatically send the necessary signals to your iframe to autoplay for a better user experience.
