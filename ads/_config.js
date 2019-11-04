@@ -638,15 +638,6 @@ const adConfig = jsonConfiguration({
     ],
   },
 
-  'mediaimpact': {
-    prefetch: 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
-    preconnect: [
-      'https://ww251.smartadserver.com',
-      'https://static.sascdn.com/',
-    ],
-    renderStartImplemented: true,
-  },
-
   'medianet': {
     preconnect: 'https://contextual.media.net',
     renderStartImplemented: true,

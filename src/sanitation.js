@@ -88,7 +88,7 @@ export const BLACKLISTED_TAGS = {
 
 /**
  * AMP elements allowed in AMP4EMAIL, modulo:
- * - amp-list, which cannot be nested.
+ * - amp-list and amp-state, which cannot be nested.
  * - amp-lightbox and amp-image-lightbox, which are deprecated.
  * @const {!Object<string, boolean>}
  * @see https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-components.md
@@ -103,7 +103,6 @@ export const EMAIL_WHITELISTED_AMP_TAGS = {
   'amp-layout': true,
   'amp-selector': true,
   'amp-sidebar': true,
-  'amp-state': true,
   'amp-timeago': true,
 };
 
