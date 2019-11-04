@@ -21,6 +21,7 @@
  * This is run during the CI stage = test; job = experiments tests.
  */
 
+const atob = require('atob');
 const colors = require('ansi-colors');
 const experimentsConfig = require('../global-configs/experiments-config.json');
 const {
