@@ -169,7 +169,7 @@ it lives on the non-AMP document that is iframed.
 
 ### Readymade integrations
 
-If you're using a common video framework like [JwPlayer](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo`** for a basic, readymade integration. This integrations support all playback and UI controls when the framework provides them, see each for supported methods.
+If you're using a common video framework like [JwPlayer](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo`** for a basic, readymade integration. These integrations support all playback and UI controls when the framework provides them, see each for supported methods.
 
 {% call callout('Framework APIs', type='note') %}
 Depending on which video framework you use, you'll call the `listenTo` method differently. Read on the specific APIs below.
