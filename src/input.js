@@ -92,6 +92,21 @@ export class Input {
   }
 
   /**
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  toggleClassOnInputDetected(ampdoc) {
+    this.onTouchDetected(detected => {
+      this.toggleInputClass_(ampdoc, 'amp-mode-touch', detected);
+    }, true);
+    this.onMouseDetected(detected => {
+      this.toggleInputClass_(ampdoc, 'amp-mode-mouse', detected);
+    }, true);
+    this.onKeyboardStateChanged(active => {
+      this.toggleInputClass_(ampdoc, 'amp-mode-keyboard-active', active);
+    }, true);
+  }
+
+  /**
    * Whether the touch input has been detected.
    * @return {boolean}
    */
@@ -152,6 +167,21 @@ export class Input {
       handler(this.isKeyboardActive());
     }
     return this.keyboardStateObservable_.add(handler);
+  }
+
+  /**
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} clazz
+   * @param {boolean} on
+   * @private
+   */
+  toggleInputClass_(ampdoc, clazz, on) {
+    ampdoc.waitForBodyOpen().then(body => {
+      const vsync = Services./*OK*/ vsyncFor(this.win);
+      vsync.mutate(() => {
+        body.classList.toggle(clazz, on);
+      });
+    });
   }
 
   /**
