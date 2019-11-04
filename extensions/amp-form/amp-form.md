@@ -129,6 +129,29 @@ The value for `action-xhr` can be the same or a different endpoint than `action`
 
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
+##### data-initialize-from-url
+
+Initializes supported form fields from the URL. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields under the form can optionally be initialized from URL query parameter values. Individual fields are opted-in if they contain attribute `data-allow-initialization`.
+
+Example: an AMP page can be used to display search results, where the search input echoes the search term.
+
+```html
+<form id="myform"
+    method="get"
+    data-initialize-from-url
+    action="https://example.com/search"{% if not format=='email'%}
+    target="_top"{% endif %}>
+  <label>Search: <input type="search" name="q" data-allow-initialization></label>
+</form>
+<!-- display search results using amp-list -->
+```
+
+Limitations:
+
+- Supported `<input>` types include `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
+- Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
+- AMP pages delivered from an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/) ignore this attribute. Forms with this attribute are valid, but fields will not initialize from URL query parameter values.
+
 ##### Other form attributes
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.

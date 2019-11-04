@@ -31,7 +31,12 @@ import {
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
-import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
+import {
+  SOURCE_ORIGIN_PARAM,
+  addParamsToUrl,
+  isProxyOrigin,
+  parseQueryString,
+} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -214,6 +219,7 @@ export class AmpForm {
     );
     this.installEventHandlers_();
     this.installInputMasking_();
+    this.maybeInitializeFromUrl_();
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
@@ -1221,6 +1227,88 @@ export class AmpForm {
     if (previousRender) {
       removeElement(previousRender);
     }
+  }
+
+  /**
+   * Initialize form fields from query parameter values if attribute
+   * 'data-initialize-from-url' is present on the form and attribute
+   * 'data-allow-initialization' is present on the field.
+   * @private
+   */
+  maybeInitializeFromUrl_() {
+    if (
+      isProxyOrigin(this.win_.location) ||
+      !this.form_.hasAttribute('data-initialize-from-url')
+    ) {
+      return;
+    }
+
+    const valueTags = ['SELECT', 'TEXTAREA'];
+    const valueInputTypes = [
+      'color',
+      'date',
+      'datetime-local',
+      'email',
+      'hidden',
+      'month',
+      'number',
+      'range',
+      'search',
+      'tel',
+      'text',
+      'time',
+      'url',
+      'week',
+    ];
+    const checkedInputTypes = ['checkbox', 'radio'];
+
+    const queryParams = parseQueryString(this.win_.location.search);
+    Object.keys(queryParams).forEach(key => {
+      const field = this.form_./*OK*/ querySelector(`[name="${key}"]`);
+      if (!field) {
+        return;
+      }
+      // Do not interfere with form fields that utilize variable substitutions.
+      // These fields are populated at time of form submission.
+      if (field.hasAttribute('data-amp-replace')) {
+        return;
+      }
+      // Form fields must be whitelisted
+      if (!field.hasAttribute('data-allow-initialization')) {
+        return;
+      }
+
+      const value = queryParams[key] || '';
+      const type = field.getAttribute('type') || 'text';
+      const tag = field.tagName;
+
+      if (
+        (tag === 'INPUT' &&
+          valueInputTypes.includes(type.toLocaleLowerCase())) ||
+        valueTags.includes(tag)
+      ) {
+        if (field.value !== value) {
+          try {
+            field.value = value;
+          } catch (e) {
+            dev().error(TAG, 'unable to initialize form element', e);
+          }
+        }
+      } else if (tag === 'INPUT' && checkedInputTypes.includes(type)) {
+        const inputs = this.form_./*OK*/ querySelectorAll(
+          `[name="${key}"][type="${type}"]`
+        );
+        iterateCursor(inputs, input => {
+          if (input.checked !== (input.value === value)) {
+            try {
+              input.checked = input.value === value;
+            } catch (e) {
+              dev().error(TAG, 'unable to initialize form element', e);
+            }
+          }
+        });
+      }
+    });
   }
 
   /**
