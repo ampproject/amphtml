@@ -271,11 +271,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
         .applySsrOrCsrTemplate(this.element, empty)
         .then(renderedEl => {
           dev().assertElement(renderedEl);
-          userAssert(
-            renderedEl.hasAttribute('data-value') ||
-              renderedEl.hasAttribute('data-disabled'),
-            `${TAG} requires a "data-value" or "data-disabled" attribute.`
-          );
+          if (
+            !renderedEl.hasAttribute('data-value') &&
+            !renderedEl.hasAttribute('data-disabled')
+          ) {
+            user().warn(
+              TAG,
+              'Expected "data-value" or "data-disabled" attribute on template-rendered elements. Found: ',
+              renderedEl
+            );
+          }
         });
     }
 
