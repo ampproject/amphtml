@@ -342,9 +342,7 @@ function createBaseCustomElementClass(win) {
           'attempted to get ampdoc before being connected'
         );
       }
-      const win = toWin(this.ownerDocument.defaultView);
-      const ampdocService = Services.ampdocServiceFor(win);
-      this.ampdoc_ = ampdocService.getAmpDoc(this);
+      this.ampdoc_ = Services.ampdoc(this);
       return devAssert(this.ampdoc_);
     }
 
