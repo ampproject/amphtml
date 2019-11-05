@@ -62,10 +62,9 @@ const mockPromise = {
   },
 };
 
-
 /**
  * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
- * tests.
+ * tests. Ipsum lorem....
  * @param {!AmpAdNetworkDoubleclickImpl} impl
  * @param {!Object} sandbox Sinon sandbox to mock out properties.
  */
