@@ -12,6 +12,7 @@ requirement: {
   type: BANNED_PROPERTY
   error_message: 'Use ampdoc instead'
   value: 'Document.prototype.head'
+  whitelist: '3p/'
   whitelist: 'ads/'
   whitelist: 'src/service/ampdoc-impl.js'
   whitelist: 'src/validator-integration.js'
