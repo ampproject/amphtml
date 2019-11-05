@@ -352,7 +352,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
 - [Media.net](../../ads/medianet.md)
-- [MediaImpact](../../ads/mediaimpact.md)
 - [Mediavine](../../ads/mediavine.md)
 - [Medyanet](../../ads/medyanet.md)
 - [Meg](../../ads/meg.md)
