@@ -83,9 +83,12 @@
 
   <!-- Invalid: Non-https 'src' attribute. -->
   <amp-script layout=container src="http://not.https.url"></amp-script>
-
+  
   <!-- Invalid: 'development' attribute. -->
   <amp-script layout=container src="https://example.com/foo.js" development></amp-script>
+
+  <!-- Invalid: 'data-ampdevmode' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode></amp-script>
 
   <!-- Invalid: Local script without 'target' or 'id' attributes. -->
   <script type=text/plain>
