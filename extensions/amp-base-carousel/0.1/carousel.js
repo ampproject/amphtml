@@ -734,7 +734,7 @@ export class Carousel {
         dict({
           'index': index,
           'total': this.slides_.length,
-          'offset': offset,
+          'offset': this.forwards_ ? -offset : offset,
           'slides': this.slides_,
         }),
         {

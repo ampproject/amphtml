@@ -213,7 +213,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
    */
   updateDots_(index, offset) {
     this.getDots_().forEach((dot, i) => {
-      const distance = i + offset - index;
+      const distance = i - (index + offset);
       const percentage = Math.max(1 - Math.abs(distance), 0);
       const percentageFalloff = exponentialFalloff(percentage, -0.5);
 
