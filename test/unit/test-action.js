@@ -1658,19 +1658,17 @@ describes.fakeWin('Core events', {amp: true}, env => {
   });
 });
 
-describes.realWin(
+describes.ampdocs(
   'Action whitelisting',
-  {
-    amp: {
-      ampdoc: 'single',
-    },
-  },
+  {},
   env => {
+    let ampdoc;
     let action;
     let target;
     let spy;
     let getDefaultActionAlias;
     beforeEach(() => {
+      ampdoc = env.ampdoc;
       spy = env.sandbox.spy();
       getDefaultActionAlias = env.sandbox.stub();
       target = createExecElement('foo', spy, getDefaultActionAlias);
@@ -1683,8 +1681,8 @@ describes.realWin(
             'AMP.pushState, AMP.setState, *.show, ' +
             'amp-element.defaultAction',
         });
-        env.win.document.head.appendChild(meta);
-        action = new ActionService(env.ampdoc, env.win.document);
+        ampdoc.getHeadNode().appendChild(meta);
+        action = new ActionService(ampdoc);
       });
 
       it('should allow whitelisted actions', () => {
@@ -1800,8 +1798,8 @@ describes.realWin(
         name: 'amp-action-whitelist',
         content: '',
       });
-      env.win.document.head.appendChild(meta);
-      action = new ActionService(env.ampdoc, env.win.document);
+      ampdoc.getHeadNode().appendChild(meta);
+      action = new ActionService(ampdoc);
       const i = new ActionInvocation(
         target,
         'print',
@@ -1825,9 +1823,9 @@ describes.realWin(
         name: 'amp-action-whitelist',
         content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',
       });
-      env.win.document.head.appendChild(meta);
+      ampdoc.getHeadNode().appendChild(meta);
       allowConsoleError(() => {
-        action = new ActionService(env.ampdoc, env.win.document);
+        action = new ActionService(ampdoc);
       });
       const i = new ActionInvocation(
         target,

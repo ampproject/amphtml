@@ -209,6 +209,59 @@ export const realWin = describeEnv(spec => [
 ]);
 
 /**
+ * A test with a real (iframed) window and multiple ampdoc scenarios:
+ * - single ampdoc
+ * - shadoc ampdoc
+ * TODO(#25419): "fie ampdoc" and "fie in shadow" ampdoc.
+ */
+export const ampdocs = (function() {
+  /**
+   * @param {string} name
+   * @param {{
+   *   fakeRegisterElement: (boolean|undefined),
+   *   amp: (boolean|!AmpTestSpec|undefined),
+   * }} spec
+   * @param {function({
+   *   win: !Window,
+   *   iframe: !HTMLIFrameElement,
+   *   amp: (!AmpTestEnv|undefined),
+   * })} fn
+   * @param {function(string, function())} describeFunc
+   */
+  const templateFunc = function(name, spec, fn, describeFunc) {
+    function run(ampdocType) {
+      const clonedSpec = JSON.parse(JSON.stringify(spec));
+      clonedSpec.amp = Object.assign(clonedSpec.amp || {}, {ampdoc: ampdocType});
+      realWin(`ampdoc:${ampdocType}`, clonedSpec, fn);
+    }
+    return describeFunc(name, function() {
+      run('single');
+      run('shadow');
+    });
+  };
+
+  /**
+   * @param {string} name
+   * @param {!Object<string, *>} variants
+   * @param {function(string, *)} fn
+   */
+  const mainFunc = function(name, variants, fn) {
+    return templateFunc(name, variants, fn, describe);
+  };
+
+  /**
+   * @param {string} name
+   * @param {!Object<string, *>} variants
+   * @param {function(string, *)} fn
+   */
+  mainFunc.only = function(name, variants, fn) {
+    return templateFunc(name, variants, fn, describe./*OK*/ only);
+  };
+
+  return mainFunc;
+})();
+
+/**
  * A test that loads HTML markup in `spec.body` into an embedded iframe.
  * @param {string} name
  * @param {{

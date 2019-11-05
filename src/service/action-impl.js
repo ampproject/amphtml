@@ -800,7 +800,7 @@ export class ActionService {
    * @private
    */
   queryWhitelist_() {
-    const {head} = this.ampdoc.getRootNode();
+    const head = this.ampdoc.getHeadNode();
     if (!head) {
       return null;
     }
