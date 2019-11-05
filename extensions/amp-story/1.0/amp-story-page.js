@@ -834,9 +834,14 @@ export class AmpStoryPage extends AMP.BaseElement {
                 // If autoplay got rejected, display a "play" button. If
                 // autoplay was supported, dispay an error message.
                 this.isAutoplaySupported_().then(isAutoplaySupported => {
-                  isAutoplaySupported
-                    ? this.toggleErrorMessage_(true)
-                    : this.togglePlayMessage_(true);
+                  if (isAutoplaySupported) {
+                    this.toggleErrorMessage_(true);
+                    return;
+                  }
+
+                  // Error was expected, don't send the performance metrics.
+                  this.stopMeasuringVideoPerformance_(false /** sendMetrics */);
+                  this.togglePlayMessage_(true);
                 });
               }
 
@@ -1324,16 +1329,18 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Stops measuring video performance metrics, if performance tracking is on.
    * Computes and sends the metrics.
+   * @param {boolean=} sendMetrics
    * @private
    */
-  stopMeasuringVideoPerformance_() {
+  stopMeasuringVideoPerformance_(sendMetrics = true) {
     if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
       return;
     }
 
     for (let i = 0; i < this.performanceTrackedVideos_.length; i++) {
       this.mediaPerformanceMetricsService_.stopMeasuring(
-        this.performanceTrackedVideos_[i]
+        this.performanceTrackedVideos_[i],
+        sendMetrics
       );
     }
   }
@@ -1460,6 +1467,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.playMessageEl_.addEventListener('click', () => {
       this.togglePlayMessage_(false);
+      this.startMeasuringVideoPerformance_();
       this.mediaPoolPromise_
         .then(mediaPool => mediaPool.blessAll())
         .then(() => this.playAllMedia_());
