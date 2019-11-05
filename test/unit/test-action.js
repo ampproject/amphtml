@@ -1661,175 +1661,30 @@ describes.fakeWin('Core events', {amp: true}, env => {
   });
 });
 
-describes.ampdocs(
-  'Action whitelisting',
-  {},
-  env => {
-    let ampdoc;
-    let action;
-    let target;
-    let spy;
-    let getDefaultActionAlias;
+describes.ampdocs('Action whitelisting', {}, env => {
+  let ampdoc;
+  let action;
+  let target;
+  let spy;
+  let getDefaultActionAlias;
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    spy = env.sandbox.spy();
+    getDefaultActionAlias = env.sandbox.stub();
+    target = createExecElement('foo', spy, getDefaultActionAlias);
+  });
+  describe('with non-empty whitelist', () => {
     beforeEach(() => {
-      ampdoc = env.ampdoc;
-      spy = env.sandbox.spy();
-      getDefaultActionAlias = env.sandbox.stub();
-      target = createExecElement('foo', spy, getDefaultActionAlias);
-    });
-    describe('with non-empty whitelist', () => {
-      beforeEach(() => {
-        const meta = createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-action-whitelist',
-          content:
-            'AMP.pushState, AMP.setState, *.show, ' +
-            'amp-element.defaultAction',
-        });
-        ampdoc.getHeadNode().appendChild(meta);
-        action = new ActionService(ampdoc);
-      });
-
-      it('should allow whitelisted actions', () => {
-        const i = new ActionInvocation(
-          target,
-          'setState',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
-        action.invoke_(i);
-        expect(spy).to.be.calledWithExactly(i);
-      });
-
-      it('should allow whitelisted actions case insensitive', () => {
-        const i = new ActionInvocation(
-          target,
-          'setState',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'TAP',
-          'amp'
-        );
-        action.invoke_(i);
-        expect(spy).to.be.calledWithExactly(i);
-      });
-
-      it('should whitelist default actions if alias is registered default', () => {
-        // Given that 'defaultAction' is a registered default action.
-        getDefaultActionAlias.returns('defaultAction');
-        // Expect the 'activate' call to invoke it.
-        const i = new ActionInvocation(
-          target,
-          'activate',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          null
-        );
-        action.invoke_(i);
-        expect(spy).to.be.calledWithExactly(i);
-      });
-
-      it('should allow whitelisted actions with wildcard target', () => {
-        const i = new ActionInvocation(
-          target,
-          'show',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'DIV'
-        );
-        action.invoke_(i);
-        expect(spy).to.be.calledWithExactly(i);
-      });
-
-      it('should not allow non-whitelisted actions', () => {
-        const i = new ActionInvocation(
-          target,
-          'print',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
-        sandbox.stub(action, 'error_');
-        expect(action.invoke_(i)).to.be.null;
-        expect(action.error_).to.be.calledWith(
-          '"AMP.print" is not whitelisted ' +
-            '[{"tagOrTarget":"AMP","method":"pushState"},' +
-            '{"tagOrTarget":"AMP","method":"setState"},' +
-            '{"tagOrTarget":"*","method":"show"},' +
-            '{"tagOrTarget":"amp-element","method":"defaultAction"}].'
-        );
-      });
-
-      it('should allow adding actions to the whitelist', () => {
-        const i = new ActionInvocation(
-          target,
-          'print',
-          /* args */ null,
-          'source',
-          'caller',
-          'event',
-          ActionTrust.HIGH,
-          'tap',
-          'AMP'
-        );
-        action.addToWhitelist('AMP', 'print');
-        action.invoke_(i);
-        expect(spy).to.be.calledWithExactly(i);
-      });
-    });
-
-    it('should not allow any action with empty string whitelist', () => {
       const meta = createElementWithAttributes(env.win.document, 'meta', {
         name: 'amp-action-whitelist',
-        content: '',
+        content:
+          'AMP.pushState, AMP.setState, *.show, amp-element.defaultAction',
       });
       ampdoc.getHeadNode().appendChild(meta);
       action = new ActionService(ampdoc);
-      const i = new ActionInvocation(
-        target,
-        'print',
-        /* args */ null,
-        'source',
-        'caller',
-        'event',
-        ActionTrust.HIGH,
-        'tap',
-        'AMP'
-      );
-      sandbox.stub(action, 'error_');
-      expect(action.invoke_(i)).to.be.null;
-      expect(action.error_).to.be.calledWith(
-        '"AMP.print" is not whitelisted [].'
-      );
     });
 
-    it('should ignore unparseable whitelist entries', () => {
-      const meta = createElementWithAttributes(env.win.document, 'meta', {
-        name: 'amp-action-whitelist',
-        content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',
-      });
-      ampdoc.getHeadNode().appendChild(meta);
-      allowConsoleError(() => {
-        action = new ActionService(ampdoc);
-      });
+    it('should allow whitelisted actions', () => {
       const i = new ActionInvocation(
         target,
         'setState',
@@ -1844,5 +1699,145 @@ describes.ampdocs(
       action.invoke_(i);
       expect(spy).to.be.calledWithExactly(i);
     });
-  }
-);
+
+    it('should allow whitelisted actions case insensitive', () => {
+      const i = new ActionInvocation(
+        target,
+        'setState',
+        /* args */ null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH,
+        'TAP',
+        'amp'
+      );
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should whitelist default actions if alias is registered default', () => {
+      // Given that 'defaultAction' is a registered default action.
+      getDefaultActionAlias.returns('defaultAction');
+      // Expect the 'activate' call to invoke it.
+      const i = new ActionInvocation(
+        target,
+        'activate',
+        /* args */ null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH,
+        'tap',
+        null
+      );
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should allow whitelisted actions with wildcard target', () => {
+      const i = new ActionInvocation(
+        target,
+        'show',
+        /* args */ null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH,
+        'tap',
+        'DIV'
+      );
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+
+    it('should not allow non-whitelisted actions', () => {
+      const i = new ActionInvocation(
+        target,
+        'print',
+        /* args */ null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH,
+        'tap',
+        'AMP'
+      );
+      sandbox.stub(action, 'error_');
+      expect(action.invoke_(i)).to.be.null;
+      expect(action.error_).to.be.calledWith(
+        '"AMP.print" is not whitelisted ' +
+          '[{"tagOrTarget":"AMP","method":"pushState"},' +
+          '{"tagOrTarget":"AMP","method":"setState"},' +
+          '{"tagOrTarget":"*","method":"show"},' +
+          '{"tagOrTarget":"amp-element","method":"defaultAction"}].'
+      );
+    });
+
+    it('should allow adding actions to the whitelist', () => {
+      const i = new ActionInvocation(
+        target,
+        'print',
+        /* args */ null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH,
+        'tap',
+        'AMP'
+      );
+      action.addToWhitelist('AMP', 'print');
+      action.invoke_(i);
+      expect(spy).to.be.calledWithExactly(i);
+    });
+  });
+
+  it('should not allow any action with empty string whitelist', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: '',
+    });
+    ampdoc.getHeadNode().appendChild(meta);
+    action = new ActionService(ampdoc);
+    const i = new ActionInvocation(
+      target,
+      'print',
+      /* args */ null,
+      'source',
+      'caller',
+      'event',
+      ActionTrust.HIGH,
+      'tap',
+      'AMP'
+    );
+    sandbox.stub(action, 'error_');
+    expect(action.invoke_(i)).to.be.null;
+    expect(action.error_).to.be.calledWith(
+      '"AMP.print" is not whitelisted [].'
+    );
+  });
+
+  it('should ignore unparseable whitelist entries', () => {
+    const meta = createElementWithAttributes(env.win.document, 'meta', {
+      name: 'amp-action-whitelist',
+      content: 'AMP.pushState, invalidEntry, AMP.setState, *.show',
+    });
+    ampdoc.getHeadNode().appendChild(meta);
+    allowConsoleError(() => {
+      action = new ActionService(ampdoc);
+    });
+    const i = new ActionInvocation(
+      target,
+      'setState',
+      /* args */ null,
+      'source',
+      'caller',
+      'event',
+      ActionTrust.HIGH,
+      'tap',
+      'AMP'
+    );
+    action.invoke_(i);
+    expect(spy).to.be.calledWithExactly(i);
+  });
+});

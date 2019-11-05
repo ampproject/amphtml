@@ -232,7 +232,9 @@ export const ampdocs = (function() {
   const templateFunc = function(name, spec, fn, describeFunc) {
     function run(ampdocType) {
       const clonedSpec = JSON.parse(JSON.stringify(spec));
-      clonedSpec.amp = Object.assign(clonedSpec.amp || {}, {ampdoc: ampdocType});
+      clonedSpec.amp = Object.assign(clonedSpec.amp || {}, {
+        ampdoc: ampdocType,
+      });
       realWin(`ampdoc:${ampdocType}`, clonedSpec, fn);
     }
     return describeFunc(name, function() {
