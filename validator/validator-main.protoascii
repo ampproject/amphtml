@@ -4872,14 +4872,6 @@ tags: {
     value: "anonymous"
   }
   attrs: {
-    name: "crossorigin"
-    value: "anonymous"
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "anonymous"
-  }
-  attrs: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
@@ -4909,14 +4901,6 @@ tags: {
     name: "async"
     mandatory: true
     value: ""
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "anonymous"
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "anonymous"
   }
   attrs: {
     name: "crossorigin"
@@ -5384,14 +5368,6 @@ attr_lists: {
     name: "async"
     mandatory: true
     value: ""
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "anonymous"
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "anonymous"
   }
   attrs: {
     name: "crossorigin"
