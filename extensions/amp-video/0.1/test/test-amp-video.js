@@ -482,6 +482,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'cover',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectFit).to.equal('cover');
@@ -491,6 +492,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'foo 80%',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectFit).to.be.empty;
@@ -500,6 +502,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-position': '20% 80%',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectPosition).to.equal('20% 80%');
@@ -509,6 +512,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-position': 'url("example.com")',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectPosition).to.be.empty;
@@ -785,6 +789,26 @@ describes.realWin(
                 height: 90,
               },
               [source, cachedSource],
+              element => {
+                expect(element.implementation_.prerenderAllowed()).to.be.true;
+                resolve();
+              }
+            );
+          });
+        });
+      });
+
+      describe('should prerender poster image', () => {
+        it('with just cached src', () => {
+          return new Promise(resolve => {
+            getVideo(
+              {
+                src: 'https://example.com/video.mp4',
+                poster: 'https://example.com/poster.jpg',
+                width: 160,
+                height: 90,
+              },
+              null,
               element => {
                 expect(element.implementation_.prerenderAllowed()).to.be.true;
                 resolve();

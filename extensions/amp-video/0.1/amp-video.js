@@ -115,10 +115,12 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   firstAttachedCallback() {
-    // Only allow prerender if video sources are cached on CDN. Set this value
-    // in `firstAttachedCallback` since `buildCallback` is too late and the
-    // element children may not be available in the constructor.
-    this.prerenderAllowed_ = this.hasAnyCachedSources_();
+    // Only allow prerender if video sources are cached on CDN, or if video has
+    // a poster image. Set this value in `firstAttachedCallback` since
+    // `buildCallback` is too late and the element children may not be available
+    // in the constructor.
+    const posterAttr = this.element.getAttribute('poster');
+    this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
   }
 
   /**
