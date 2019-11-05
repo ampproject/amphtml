@@ -401,14 +401,14 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
-    it('should replace SCROLL_TOP', () => {
+    it.only('should replace SCROLL_TOP', () => {
       // return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
       //   expect(res).to.match();
       // });
       return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/);
     });
 
-    it('should replace SCROLL_LEFT', () => {
+    it.only('should replace SCROLL_LEFT', () => {
       // return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
       //   expect(res).to.match(/scrollLeft=\d+/);
       // });
