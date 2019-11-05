@@ -200,14 +200,14 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnNativeSubscribeRequest(() => {
       this.onNativeSubscribeRequest_();
     });
-    this.runtime_.setOnSubscribeResponse(promise => {
+    this.runtime_.setOnPaymentResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response, Action.SUBSCRIBE);
-      });
-    });
-    this.runtime_.setOnContributionResponse(promise => {
-      promise.then(response => {
-        this.onSubscribeResponse_(response, Action.CONTRIBUTE);
+        this.onSubscribeResponse_(
+          response,
+          response.productType === 'CONTRIBUTION'
+            ? Action.CONTRIBUTE
+            : Action.SUBSCRIBE
+        );
       });
     });
 
