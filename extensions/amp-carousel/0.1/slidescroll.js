@@ -417,6 +417,8 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * Escapes Left and Right arrow key events on the carousel container.
+   * This is to prevent them from doubly interacting with surrounding viewer
+   * contexts such as email clients when interacting with the amp-carousel.
    * @param {!Event} event
    * @private
    */
