@@ -159,8 +159,9 @@ export class MediaPerformanceMetricsService {
    * Stops recording, computes, and sends performance metrics collected for the
    * given media element.
    * @param {!HTMLMediaElement} media
+   * @param {boolean=} sendMetrics
    */
-  stopMeasuring(media) {
+  stopMeasuring(media, sendMetrics = true) {
     const mediaEntry = this.getMediaEntry_(media);
 
     if (!mediaEntry) {
@@ -179,7 +180,9 @@ export class MediaPerformanceMetricsService {
         break;
     }
 
-    this.sendMetrics_(mediaEntry);
+    if (sendMetrics) {
+      this.sendMetrics_(mediaEntry);
+    }
   }
 
   /**
