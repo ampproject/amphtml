@@ -212,7 +212,8 @@ export const realWin = describeEnv(spec => [
  * A test with a real (iframed) window and multiple ampdoc scenarios:
  * - single ampdoc
  * - shadoc ampdoc
- * TODO(#25419): "fie ampdoc" and "fie in shadow" ampdoc.
+ * TODO(#25419): "fie ampdoc" and "fie in shadow" ampdoc. Can only be added
+ * once ampdoc-fie launches.
  */
 export const ampdocs = (function() {
   /**
@@ -237,6 +238,7 @@ export const ampdocs = (function() {
     return describeFunc(name, function() {
       run('single');
       run('shadow');
+      run('fie');
     });
   };
 

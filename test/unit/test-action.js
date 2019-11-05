@@ -39,7 +39,10 @@ import {whenCalled} from '../../testing/test-helper.js';
  */
 function actionService() {
   const win = {
-    document: {body: {}},
+    document: {
+      body: document.createElement('body'),
+      head: document.createElement('head'),
+    },
     __AMP_SERVICES: {
       vsync: {obj: {}},
     },
