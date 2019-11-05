@@ -248,11 +248,12 @@ export class Extensions {
       /* includeInserted */ false
     );
     devAssert(el, 'Cannot find script for extension: %s', extensionId);
-    // "Disconnect" the old script element and extension record.
+    // The previously awaited extension loader must not have finished or
+    // failed.
     const holder = this.extensions_[extensionId];
     if (holder) {
       devAssert(!holder.loaded && !holder.error);
-      delete this.extensions_[extensionId];
+      holder.scriptPresent = false;
     }
     el.setAttribute('i-amphtml-loaded-new-version', extensionId);
     const urlParts = parseExtensionUrl(el.src);
@@ -270,12 +271,22 @@ export class Extensions {
    */
   getExtensionScript_(extensionId, includeInserted = true) {
     // Always ignore <script> elements that have a mismatched RTV.
+    // We have to match against "src" because a few extensions, such as
+    // "amp-viewer-integration", do not have "custom-element" attribute.
     const modifier =
       ':not([i-amphtml-loaded-new-version])' +
       (includeInserted ? '' : ':not([i-amphtml-inserted])');
-    return this.win.document.head./*OK*/ querySelector(
+    const matches = this.win.document.head./*OK*/ querySelectorAll(
       `script[src*="/${extensionId}-"]` + modifier
     );
+    const matcher = new RegExp(`${extensionId}-\\d`);
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      if (matcher.test(match.src)) {
+        return match;
+      }
+    }
+    return null;
   }
 
   /**
