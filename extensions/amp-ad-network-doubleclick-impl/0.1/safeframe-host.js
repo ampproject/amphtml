@@ -746,13 +746,7 @@ export class SafeframeHostApi {
         this.checkStillCurrent_();
         this.onFluidResize_(newHeight);
       })
-      .catch(err => {
-        user().warn(TAG, err);
-        const {width, height} = this.baseInstance_.getSlotSize();
-        if (width > 0 && height > 0) {
-          this.onFluidResize_(height);
-        }
-      });
+      .catch(err => user().warn(TAG, err));
   }
 
   /**
