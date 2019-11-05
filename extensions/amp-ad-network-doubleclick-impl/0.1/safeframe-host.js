@@ -748,9 +748,9 @@ export class SafeframeHostApi {
       })
       .catch(err => {
         user().warn(TAG, err);
-        const slotHeight = this.baseInstance_.getSlotSize().height;
-        if (slotHeight >= 0.5 * newHeight) {
-          this.onFluidResize_(slotHeight);
+        const {width, height} = this.baseInstance_.getSlotSize();
+        if (width > 0 && height > 0) {
+          this.onFluidResize_(height);
         }
       });
   }

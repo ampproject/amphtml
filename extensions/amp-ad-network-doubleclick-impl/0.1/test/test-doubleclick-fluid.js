@@ -261,8 +261,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
       impl.safeframeApi_,
       'onFluidResize_'
     );
-    // Height needs to be >= half of the creative height to fire impression.
-    impl.element.setAttribute('height', 125);
+    // Size must be non-zero to fire impression.
+    impl.element.setAttribute('height', 1);
+    impl.element.setAttribute('width', 1);
     return impl.adPromise_.then(() => {
       return impl.layoutCallback().then(() => {
         expect(connectMessagingChannelSpy).to.be.calledOnce;
@@ -309,8 +310,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
     impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
-    // Height needs to be >= half of the creative height to fire impression.
-    impl.element.setAttribute('height', creativeHeight / 2 + 1);
+    // Size must be non-zero to fire impression.
+    impl.element.setAttribute('height', 1);
+    impl.element.setAttribute('width', 1);
     return impl.expandFluidCreative_().then(() => {
       expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk')).to.be
         .calledOnce;
@@ -330,9 +332,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.buildCallback();
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
-    impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
-    // Height needs to be >= half of the creative height to fire impression.
-    impl.element.setAttribute('height', creativeHeight / 2 - 1);
     return impl.expandFluidCreative_().then(() => {
       expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk')).to.not.be
         .calledOnce;
