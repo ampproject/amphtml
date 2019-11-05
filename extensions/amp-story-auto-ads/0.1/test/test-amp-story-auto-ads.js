@@ -26,14 +26,12 @@ import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   MockStoryImpl,
-  addCtaValues,
   addStoryAutoAdsConfig,
   addStoryPages,
-  fireBuildSignals,
-  insertAdContent,
 } from './story-mock';
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {Services} from '../../../../src/services';
+import {StoryAdPage} from '../story-ad-page';
 import {macroTask} from '../../../../testing/yield';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -210,92 +208,6 @@ describes.realWin(
       });
     });
 
-    describe('CTA button', () => {
-      beforeEach(async () => {
-        addStoryAutoAdsConfig(adElement);
-        const storyImpl = new MockStoryImpl(storyElement);
-        storyElement.getImpl = () => Promise.resolve(storyImpl);
-        await addStoryPages(doc, storyImpl);
-        await autoAds.buildCallback();
-        await autoAds.layoutCallback();
-        fireBuildSignals(doc);
-        return Promise.resolve();
-      });
-
-      it('reads value from amp-ad-exit over meta tags', async () => {
-        const iframeContent = `
-          <amp-ad-exit id="exit-api">
-            <script type="application/json">
-            {
-              "targets": {
-                "url_0": {
-                  "finalUrl": "https://amp.dev/"
-                }
-              }
-            }
-            </script>
-          </amp-ad-exit>
-        `;
-        addCtaValues(autoAds, 'SHOP', 'https://example.com'); // This url should be ignored.
-        await insertAdContent(autoAds, iframeContent);
-        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
-        const cta = doc.querySelector('.i-amphtml-story-ad-link');
-        expect(cta.href).to.equal('https://amp.dev/');
-      });
-    });
-
-    describe('ad choices', () => {
-      beforeEach(async () => {
-        addStoryAutoAdsConfig(adElement);
-        const storyImpl = new MockStoryImpl(storyElement);
-        storyElement.getImpl = () => Promise.resolve(storyImpl);
-        await addStoryPages(doc, storyImpl);
-        await autoAds.buildCallback();
-        await autoAds.layoutCallback();
-        fireBuildSignals(doc);
-        return Promise.resolve();
-      });
-
-      it('does not render the ad choices icon if no meta tags present', async () => {
-        addCtaValues(autoAds, 'SHOP', 'https://example.com');
-        await insertAdContent(autoAds, ''); // No ad content.
-        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
-        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
-        expect(adChoices).not.to.exist;
-      });
-
-      it('does not render if only one tag present', async () => {
-        const url = 'https://amp.dev';
-        const iframeContent = `
-          <meta name="amp4ads-vars-attribution-url" content="${url}">
-        `;
-        addCtaValues(autoAds, 'SHOP', 'https://example.com');
-        await insertAdContent(autoAds, iframeContent);
-        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
-        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
-        expect(adChoices).not.to.exist;
-      });
-
-      it('renders the ad choices icon if meta tags present', async () => {
-        const windowOpenStub = sandbox.stub(win, 'open');
-        const icon =
-          'https://tpc.googlesyndication.com/pagead/images/adchoices/icon.png';
-        const url = 'https://amp.dev';
-        const iframeContent = `
-          <meta name="amp4ads-vars-attribution-icon" content="${icon}">
-          <meta name="amp4ads-vars-attribution-url" content="${url}">
-        `;
-        addCtaValues(autoAds, 'SHOP', 'https://example.com');
-        await insertAdContent(autoAds, iframeContent);
-        autoAds.forcePlaceAdAfterPage('story-page-0' /* pageBeforeAdId */);
-        const adChoices = doc.querySelector('.i-amphtml-story-ad-attribution');
-        expect(adChoices).to.exist;
-        expect(adChoices.getAttribute('src')).to.equal(icon);
-        adChoices.click();
-        expect(windowOpenStub).to.be.calledWith(url);
-      });
-    });
-
     describe('analytics triggers', () => {
       it('should fire "story-ad-insert" upon insertion', () => {
         autoAds.uniquePagesCount_ = 10;
@@ -325,39 +237,6 @@ describes.realWin(
         });
       });
 
-      it('should fire "story-ad-load" upon ad load', async () => {
-        const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
-        new MockStoryImpl(storyElement);
-        addStoryAutoAdsConfig(adElement);
-        await autoAds.buildCallback();
-        await autoAds.layoutCallback();
-        const ampAd = doc.querySelector('amp-ad');
-        ampAd.signals().signal(CommonSignals.INI_LOAD);
-        await macroTask();
-        expect(analyticsStub).to.be.called;
-        expect(analyticsStub).to.have.been.calledWithMatch('story-ad-load', {
-          'loadTime': sinon.match.number,
-        });
-      });
-
-      it('should fire "story-ad-request" upon ad request', () => {
-        autoAds.ampStory_ = {
-          element: storyElement,
-          addPage: NOOP,
-        };
-        const page = win.document.createElement('amp-story-page');
-        sandbox.stub(autoAds, 'createAdPage_').returns(page);
-        page.getImpl = () => Promise.resolve();
-
-        const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
-        autoAds.schedulePage_();
-
-        expect(analyticsStub).to.be.called;
-        expect(analyticsStub).to.have.been.calledWithMatch('story-ad-request', {
-          'requestTime': sinon.match.number,
-        });
-      });
-
       it('should fire "story-ad-view" upon ad visible', () => {
         autoAds.ampStory_ = {
           element: storyElement,
@@ -365,14 +244,9 @@ describes.realWin(
         };
         autoAds.setVisibleAttribute_ = NOOP;
         autoAds.adPagesCreated_ = 1;
-        const page = win.document.createElement('amp-story-page');
-        sandbox.stub(autoAds, 'createAdPage_').returns(page);
-        page.getImpl = () => Promise.resolve();
-
         const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
         autoAds.adPageIds_ = {'ad-page-1': 1};
         autoAds.handleActivePageChange_(1, 'ad-page-1');
-
         expect(analyticsStub).to.be.called;
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-view', {
           'viewTime': sinon.match.number,
@@ -386,7 +260,6 @@ describes.realWin(
         };
         autoAds.adPagesCreated_ = 1;
         const page = win.document.createElement('amp-story-page');
-        sandbox.stub(autoAds, 'createAdPage_').returns(page);
         page.getImpl = () => Promise.resolve();
 
         const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
@@ -421,9 +294,13 @@ describes.realWin(
           type: 'fake',
         };
         addStoryAutoAdsConfig(adElement, config);
+
+        sandbox
+          .stub(StoryAdPage.prototype, 'maybeCreateCta')
+          .returns(/* success */ true);
+
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
-        addCtaValues(autoAds, 'SHOP', 'https://example.com');
 
         const adPageElement = doc.querySelector('#i-amphtml-ad-page-1');
         const insertSpy = sandbox.spy(storyImpl, 'insertPage');
