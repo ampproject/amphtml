@@ -251,27 +251,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
-  it('should fire delayed impression ping, if creative partly visible', () => {
-    createScaffoldingForFluidRendering(impl, sandbox, false);
-    const connectMessagingChannelSpy = sandbox./*OK*/ spy(
-      impl.safeframeApi_,
-      'connectMessagingChannel'
-    );
-    const onFluidResizeSpy = sandbox./*OK*/ spy(
-      impl.safeframeApi_,
-      'onFluidResize_'
-    );
-    // Size must be non-zero to fire impression.
-    impl.element.setAttribute('height', 1);
-    impl.element.setAttribute('width', 1);
-    return impl.adPromise_.then(() => {
-      return impl.layoutCallback().then(() => {
-        expect(connectMessagingChannelSpy).to.be.calledOnce;
-        expect(onFluidResizeSpy).to.be.calledOnce;
-      });
-    });
-  });
-
   it('should set height on iframe', () => {
     createScaffoldingForFluidRendering(impl, sandbox);
     return impl.adPromise_.then(() => {
@@ -294,40 +273,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.onCreativeRender(null, mockPromise);
     expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk')).to.be
       .calledOnce;
-  });
-
-  it('should fire impression for AMP fluid creative, if partly visible', () => {
-    impl.iframe = impl.win.document.createElement('iframe');
-    impl.win.document.body.appendChild(impl.iframe);
-    sandbox.stub(impl, 'setCssPosition_').returns(Promise.resolve());
-    sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.reject());
-    const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
-    impl.buildCallback();
-    impl.isFluidRequest_ = true;
-    impl.isVerifiedAmpCreative_ = true;
-    impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
-    // Size must be non-zero to fire impression.
-    impl.element.setAttribute('height', 1);
-    impl.element.setAttribute('width', 1);
-    return impl.expandFluidCreative_().then(() => {
-      expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk')).to.be
-        .calledOnce;
-    });
-  });
-
-  it('should not fire impression for AMP fluid creative', () => {
-    impl.iframe = impl.win.document.createElement('iframe');
-    impl.win.document.body.appendChild(impl.iframe);
-    sandbox.stub(impl, 'setCssPosition_').returns(Promise.resolve());
-    sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.reject());
-    const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
-    impl.buildCallback();
-    impl.isFluidRequest_ = true;
-    impl.isVerifiedAmpCreative_ = true;
-    return impl.expandFluidCreative_().then(() => {
-      expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk')).to.not.be
-        .calledOnce;
-    });
   });
 
   it('should set expansion re-attempt flag after initial failure', () => {
