@@ -20,8 +20,8 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
 
-const EXAMPLE_VIDEOID = 'myfwarfx4tb';
-const EXAMPLE_VIDEOID_URL = 'https://cdn.mowplayer.com/player.html?code=myfwarfx4tb';
+const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';
+const EXAMPLE_VIDEOID_URL = 'https://mowplayer.com/watch/v-myfwarfx4tb';
 
 describes.realWin('amp-mowplayer', {
   amp: {
@@ -57,7 +57,7 @@ describes.realWin('amp-mowplayer', {
     }).then(() => {
       const mpIframe = mp.querySelector('iframe');
       mp.implementation_.handleMowMessage_({
-        origin: 'https://cdn.mowplayer.com',
+        origin: 'https://mowplayer.com',
         source: mpIframe.contentWindow,
         data: JSON.stringify({event: 'onReady'}),
       });
@@ -132,7 +132,7 @@ describes.realWin('amp-mowplayer', {
 
   function sendFakeInfoDeliveryMessage(mp, iframe, info) {
     mp.implementation_.handleMowMessage_({
-      origin: 'https://cdn.mowplayer.com',
+      origin: 'https://mowplayer.com',
       source: iframe.contentWindow,
       data: JSON.stringify({
         event: 'infoDelivery',
