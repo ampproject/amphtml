@@ -232,6 +232,52 @@ describes.realWin(
       });
     });
 
+    it('getRemoteData_() should proxy XHR to viewer', () => {
+      impl.isSsr_ = true;
+      impl.element.setAttribute('src', '');
+      const html =
+        '<div> <div>apple</div> <div>mango</div> <div>pear</div> </div>';
+      sandbox
+        .stub(impl.ssrTemplateHelper_, 'ssr')
+        .returns(Promise.resolve({html}));
+      return impl.getRemoteData_().then(() => {
+        expect(impl.ssrTemplateHelper_.ssr).to.be.calledOnce;
+      });
+    });
+
+    it('renderResults() should delegate template rendering to viewer', () => {
+      impl.hasTemplate_ = true;
+      const items = ['apple', 'mango', 'pear'];
+      const html =
+        '<div> <div>apple</div> <div>mango</div> <div>pear</div> </div>';
+      const sourceData = {html};
+      const rendered = doc.createElement('div');
+      items.forEach(item => {
+        const child = doc.createElement('div');
+        child.setAttribute('data-value', item);
+        rendered.appendChild(child);
+      });
+      sandbox
+        .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
+        .returns(Promise.resolve(rendered));
+      return impl.renderResults_(sourceData, impl.container_).then(() => {
+        expect(impl.ssrTemplateHelper_.applySsrOrCsrTemplate).to.be.calledOnce;
+        expect(
+          impl.ssrTemplateHelper_.applySsrOrCsrTemplate
+        ).to.have.been.calledWith(impl.element, sourceData);
+        expect(impl.container_.children[0].getAttribute('data-value')).to.equal(
+          'apple'
+        );
+        expect(impl.container_.children[1].getAttribute('data-value')).to.equal(
+          'mango'
+        );
+        expect(impl.container_.children[2].getAttribute('data-value')).to.equal(
+          'pear'
+        );
+        expect(impl.container_.children.length).to.equal(3);
+      });
+    });
+
     it('renderResults_() should update the container_ with plain text', () => {
       const createSpy = sandbox.spy(impl, 'createElementFromItem_');
       return impl.renderResults_(['apple'], impl.container_).then(() => {
