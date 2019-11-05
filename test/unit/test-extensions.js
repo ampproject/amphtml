@@ -736,6 +736,20 @@ describes.sandboxed('Extensions', {}, () => {
         expect(win.customElements.elements['amp-mustache']).to.be.undefined;
       });
 
+      it('should insert extension script and not colide with prefixes', () => {
+        // First add an extension with the same suffix.
+        extensions.preloadExtension('amp-test-suffix');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test-suffix"]')
+        ).to.have.length(1);
+
+        // Then try to add the prefix-based extension.
+        extensions.preloadExtension('amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
+      });
+
       it('should insert extension version correctly', () => {
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')

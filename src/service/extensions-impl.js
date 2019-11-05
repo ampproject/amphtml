@@ -270,12 +270,22 @@ export class Extensions {
    */
   getExtensionScript_(extensionId, includeInserted = true) {
     // Always ignore <script> elements that have a mismatched RTV.
+    // We have to match against "src" because a few extensions, such as
+    // "amp-viewer-integration", do not have "custom-element" attribute.
     const modifier =
       ':not([i-amphtml-loaded-new-version])' +
       (includeInserted ? '' : ':not([i-amphtml-inserted])');
-    return this.win.document.head./*OK*/ querySelector(
+    const matches = this.win.document.head./*OK*/ querySelectorAll(
       `script[src*="/${extensionId}-"]` + modifier
     );
+    const matcher = new RegExp(`${extensionId}-[0-9]`);
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      if (matcher.test(match.src)) {
+        return match;
+      }
+    }
+    return null;
   }
 
   /**
