@@ -100,6 +100,21 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
     expect(flushStub).to.have.been.calledTwice;
   });
 
+  it('should not flush metrics if sendMetrics is false', () => {
+    const flushStub = sandbox.stub(service.performanceService_, 'flush');
+
+    const video = win.document.createElement('video');
+    service.startMeasuring(video);
+    clock.tick(20);
+    video.dispatchEvent(new Event('playing'));
+    clock.tick(100);
+    video.dispatchEvent(new Event('waiting'));
+    clock.tick(300);
+    service.stopMeasuring(video, false /** sendMetrics */);
+
+    expect(flushStub).to.not.have.been.called;
+  });
+
   describe('Joint latency', () => {
     it('should record joint latency if playback starts with no wait', () => {
       const video = win.document.createElement('video');

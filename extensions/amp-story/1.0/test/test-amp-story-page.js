@@ -478,7 +478,10 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     page.setState(PageState.PLAYING);
     page.setState(PageState.NOT_ACTIVE);
 
-    expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(videoEl);
+    expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(
+      videoEl,
+      true /* sendMetrics */
+    );
   });
 
   it('should not start tracking media performance if tracking is off', async () => {
