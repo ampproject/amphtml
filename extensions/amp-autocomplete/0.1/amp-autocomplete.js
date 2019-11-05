@@ -542,7 +542,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (
       opt_input.length < this.minChars_ ||
       !sourceData ||
-      !(sourceData.length || sourceData['html'])
+      !(sourceData.length || hasOwn(sourceData, 'html'))
     ) {
       return Promise.resolve();
     }
@@ -569,10 +569,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       renderPromise = this.ssrTemplateHelper_
         .applySsrOrCsrTemplate(this.element, filteredData)
         .then(rendered => {
-          const renderedChildren = isArray(rendered)
+          const elements = isArray(rendered)
             ? rendered
-            : Array.from(rendered.childNodes);
-          renderedChildren.map(child => {
+            : this.getChildNodesAsArray_(dev().assertElement(rendered));
+          elements.map(child => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
             } else {
@@ -598,6 +598,21 @@ export class AmpAutocomplete extends AMP.BaseElement {
       });
     }
     return renderPromise;
+  }
+
+  /**
+   * Detaches the children nodes of the given element and returns them as an array.
+   * @param {!Element} element
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getChildNodesAsArray_(element) {
+    const children = [];
+    let child;
+    while ((child = element.firstChild)) {
+      children.push(element.removeChild(child));
+    }
+    return children;
   }
 
   /**
