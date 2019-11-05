@@ -278,7 +278,7 @@ export class Extensions {
     const matches = this.win.document.head./*OK*/ querySelectorAll(
       `script[src*="/${extensionId}-"]` + modifier
     );
-    const matcher = new RegExp(`${extensionId}-[0-9]`);
+    const matcher = new RegExp(`${extensionId}-\\d`);
     for (let i = 0; i < matches.length; i++) {
       const match = matches[i];
       if (matcher.test(match.src)) {
