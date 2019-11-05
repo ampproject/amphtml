@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isLayoutSizeFixed} from '../../../src/layout';
@@ -70,6 +71,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.cancelTouchEvents_();
 
     this.container_.addEventListener('scroll', this.scrollHandler_.bind(this));
+    this.container_.addEventListener(
+      'keydown',
+      this.keydownHandler_.bind(this)
+    );
 
     this.registerAction(
       'goToSlide',
@@ -205,6 +210,20 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     if (this.scrollTimerId_ === null) {
       this.waitForScroll_(currentScrollLeft);
+    }
+  }
+
+  /**
+   * Escapes Left and Right arrow key events on the carousel container.
+   * This is to prevent them from doubly interacting with surrounding viewer
+   * contexts such as email clients when interacting with the amp-carousel.
+   * @param {!Event} event
+   * @private
+   */
+  keydownHandler_(event) {
+    const {key} = event;
+    if (key == Keys.LEFT_ARROW || key == Keys.RIGHT_ARROW) {
+      event.stopPropagation();
     }
   }
 
