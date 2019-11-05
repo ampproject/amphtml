@@ -244,6 +244,10 @@ export class ViewportImpl {
     if (this./*OK*/ scrollTop_ == null) {
       this./*OK*/ scrollTop_ = this.binding_.getScrollTop();
     }
+    console.log('Scroll top in viewport impl: ' + this.scrollTop_);
+    console.log(
+      'binding version of scroll top: ' + this.binding_.getScrollTop()
+    );
     return this./*OK*/ scrollTop_;
   }
 

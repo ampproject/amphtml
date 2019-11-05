@@ -33,6 +33,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
   beforeEach(() => {
     installLinkerReaderService(env.win);
+    console.log('before each');
     variables = new VariableService(env.ampdoc);
   });
 
@@ -207,7 +208,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, toMatch, opt_bindings) {
+    function check(input, output, toMatch = false, opt_bindings) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
@@ -405,14 +406,14 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       // return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
       //   expect(res).to.match();
       // });
-      return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/);
+      return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/, true);
     });
 
     it.only('should replace SCROLL_LEFT', () => {
       // return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
       //   expect(res).to.match(/scrollLeft=\d+/);
       // });
-      return check('?scrollLeft=SCROLL_LEFT', /scrollLeft=\d+/);
+      return check('?scrollLeft=SCROLL_LEFT', /scrollLeft=\d+/, true);
     });
 
     describe('$MATCH', () => {

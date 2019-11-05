@@ -185,7 +185,7 @@ export class VariableService {
 
     // why const and not this. ?
     /** @const {!./viewport/viewport-interface.ViewportInterface} */
-    const viewport = Services.viewportForDoc(this.ampdoc);
+    const viewport = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {!JsonObject} */
     this.macros_ = dict({});
@@ -217,10 +217,15 @@ export class VariableService {
     );
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', () => viewport.getScrollTop());
+    this.register_('SCROLL_TOP', () => {
+      const x = viewport.getScrollTop();
+      console.log('top value: ' + x);
+      return x;
+      return viewport.getScrollTop();
+    });
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
+    this.register_('SCROLL_LEFT', () => viewport.getScrollLeft());
   }
 
   /**
