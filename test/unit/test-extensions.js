@@ -603,6 +603,32 @@ describes.sandboxed('Extensions', {}, () => {
         expect(elementClass).to.equal(ctor);
       });
     });
+
+    it('should keep awaiting promise through reload', () => {
+      const script = document.createElement('script');
+      script.setAttribute('custom-element', 'amp-ext');
+      script.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-ext-0.1.js'
+      );
+      win.document.head.appendChild(script);
+
+      // Start waiting immediately.
+      const initialPromise = extensions.waitForExtension(win, 'amp-ext');
+
+      // Reload the extension. E.g. due to the version mismatch.
+      const reloadPromise = extensions.reloadExtension('amp-ext');
+
+      // Register extension.
+      extensions.registerExtension('amp-ext', () => {}, {});
+
+      return reloadPromise.then(reloadedExtension => {
+        expect(reloadedExtension).to.exist;
+        return initialPromise.then(initialExtension => {
+          expect(initialExtension).to.equal(reloadedExtension);
+        });
+      });
+    });
   });
 
   describes.fakeWin('reloadExtension', {}, env => {

@@ -248,12 +248,10 @@ export class Extensions {
       /* includeInserted */ false
     );
     devAssert(el, 'Cannot find script for extension: %s', extensionId);
-    // "Disconnect" the old script element and extension record.
+    // The previously awaited extension loader must not have finished or
+    // failed.
     const holder = this.extensions_[extensionId];
-    if (holder) {
-      devAssert(!holder.loaded && !holder.error);
-      delete this.extensions_[extensionId];
-    }
+    devAssert(!holder || (!holder.loaded && !holder.error));
     el.setAttribute('i-amphtml-loaded-new-version', extensionId);
     const urlParts = parseExtensionUrl(el.src);
     return this.preloadExtension(extensionId, urlParts.extensionVersion);
