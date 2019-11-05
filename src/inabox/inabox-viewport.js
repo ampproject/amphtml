@@ -18,7 +18,6 @@ import {MessageType} from '../../src/3p-frame-messaging';
 import {Observable} from '../observable';
 import {Services} from '../services';
 import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {ViewportImpl} from '../service/viewport/viewport-impl';
 import {ViewportInterface} from '../service/viewport/viewport-interface';
 import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
@@ -837,10 +836,7 @@ export function installInaboxViewportService(ampdoc) {
     ampdoc,
     'viewport',
     function() {
-      return _RTVEXP_INABOX_LITE ||
-        isExperimentOn(ampdoc.win, 'inabox-viewport-lite')
-        ? new InaboxViewportImpl(ampdoc, binding)
-        : new ViewportImpl(ampdoc, binding, Services.viewerForDoc(ampdoc));
+      return new InaboxViewportImpl(ampdoc, binding);
     },
     /* opt_instantiate */ true
   );

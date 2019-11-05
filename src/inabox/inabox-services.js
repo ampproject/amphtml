@@ -26,12 +26,9 @@ import {installInaboxResourcesServiceForDoc} from './inabox-resources';
 import {installInaboxViewerServiceForDoc} from './inabox-viewer';
 import {installInaboxViewportService} from './inabox-viewport';
 import {installOwnersServiceForDoc} from '../service/owners-impl';
-import {installResourcesServiceForDoc} from '../service/resources-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installUrlForDoc} from '../service/url-impl';
 import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
-import {isExperimentOn} from '../experiments';
 import {rejectServicePromiseForDoc} from '../service';
 
 /**
@@ -44,22 +41,11 @@ export function installAmpdocServicesForInabox(ampdoc) {
   installUrlForDoc(ampdoc);
   installDocumentInfoServiceForDoc(ampdoc);
   installInaboxCidService(ampdoc);
-  if (_RTVEXP_INABOX_LITE || isExperimentOn(ampdoc.win, 'inabox-viewer-lite')) {
-    installInaboxViewerServiceForDoc(ampdoc);
-  } else {
-    installViewerServiceForDoc(ampdoc);
-  }
+  installInaboxViewerServiceForDoc(ampdoc);
   installInaboxViewportService(ampdoc);
   installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
-  if (
-    _RTVEXP_INABOX_LITE ||
-    isExperimentOn(ampdoc.win, 'inabox-resources-lite')
-  ) {
-    installInaboxResourcesServiceForDoc(ampdoc);
-  } else {
-    installResourcesServiceForDoc(ampdoc);
-  }
+  installInaboxResourcesServiceForDoc(ampdoc);
   installOwnersServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
