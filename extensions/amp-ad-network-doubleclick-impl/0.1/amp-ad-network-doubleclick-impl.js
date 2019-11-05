@@ -900,7 +900,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   getSlotSize() {
     const {width, height} = this.getDeclaredSlotSize_();
-    return !isNaN(width) && !isNaN(height)
+    return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
         this.getIntersectionElementLayoutBox();
