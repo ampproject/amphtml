@@ -1,11 +1,5 @@
 {
-  "allow-doc-opt-in": [
-    "amp-next-page",
-    "inabox-viewport-friendly",
-    "inabox-resources-lite",
-    "inabox-viewer-lite",
-    "inabox-viewport-lite"
-  ],
+  "allow-doc-opt-in": ["amp-next-page", "inabox-viewport-friendly"],
   "allow-url-opt-in": [
     "ios-scrollable-iframe",
     "pump-early-frame",
