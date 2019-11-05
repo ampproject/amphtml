@@ -171,6 +171,12 @@ export class ViewerImpl {
     /** @private {?Promise<boolean>} */
     this.isTrustedViewer_ = null;
 
+    /** @private {boolean} */
+    this.showStoryUrlInfo_ = !!(
+      parseInt(ampdoc.getParam('showStoryUrlInfo'), 10) || this.isEmbedded()
+    );
+    dev().fine(TAG_, '- showStoryUrlInfo:', this.showStoryUrlInfo_);
+
     /** @private {?Promise<string>} */
     this.viewerOrigin_ = null;
 
@@ -419,6 +425,14 @@ export class ViewerImpl {
   /** @override */
   isOvertakeHistory() {
     return this.overtakeHistory_;
+  }
+
+  /**
+   * Should a story show the URL info dialog.
+   * @return {boolean}
+   */
+  showStoryUrlInfo() {
+    return this.showStoryUrlInfo_;
   }
 
   /**

@@ -315,7 +315,9 @@ export class SystemLayer {
     }
 
     if (
-      Services.viewerForDoc(this.win_.document.documentElement).isEmbedded()
+      Services.viewerForDoc(
+        this.win_.document.documentElement
+      ).showStoryUrlInfo()
     ) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');

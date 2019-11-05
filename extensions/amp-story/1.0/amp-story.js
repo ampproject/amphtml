@@ -1019,7 +1019,7 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = this.viewer_.isEmbedded()
+        const infoDialog = this.viewer_.showStoryUrlInfo()
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
