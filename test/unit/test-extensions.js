@@ -603,6 +603,36 @@ describes.sandboxed('Extensions', {}, () => {
         expect(elementClass).to.equal(ctor);
       });
     });
+
+    it('should keep awaiting promise through reload', () => {
+      const script = document.createElement('script');
+      script.setAttribute('custom-element', 'amp-ext');
+      script.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-ext-0.1.js'
+      );
+      win.document.head.appendChild(script);
+
+      // Start waiting immediately.
+      const initialPromise = extensions.preloadExtension('amp-ext');
+
+      // Reload the extension. E.g. due to the version mismatch.
+      const reloadPromise = extensions.reloadExtension('amp-ext');
+
+      // Register extension.
+      extensions.registerExtension('amp-ext', () => {}, {});
+
+      return reloadPromise.then(reloadedExtension => {
+        expect(reloadedExtension).to.exist;
+        return initialPromise.then(initialExtension => {
+          expect(initialExtension).to.equal(reloadedExtension);
+          const newScript = win.document.head.querySelector(
+            'script[custom-element="amp-ext"]:not([i-amphtml-loaded-new-version])'
+          );
+          expect(newScript).to.exist;
+        });
+      });
+    });
   });
 
   describes.fakeWin('reloadExtension', {}, env => {
@@ -734,6 +764,20 @@ describes.sandboxed('Extensions', {}, () => {
         ).to.have.length(1);
         expect(extensions.extensions_['amp-mustache'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-mustache']).to.be.undefined;
+      });
+
+      it('should insert extension script and not colide with prefixes', () => {
+        // First add an extension with the same suffix.
+        extensions.preloadExtension('amp-test-suffix');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test-suffix"]')
+        ).to.have.length(1);
+
+        // Then try to add the prefix-based extension.
+        extensions.preloadExtension('amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
       });
 
       it('should insert extension version correctly', () => {
