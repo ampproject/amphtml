@@ -20,6 +20,7 @@ import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel.js';
 import {CarouselEvents} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';
+import {Keys} from '../../../src/utils/key-codes';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
@@ -31,6 +32,7 @@ import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {
+  isRTL,
   iterateCursor,
   scopedQuerySelectorAll,
   toggleAttribute,
@@ -293,7 +295,7 @@ class AmpCarousel extends AMP.BaseElement {
     const html = htmlFor(this.element);
     return html`
       <div class="i-amphtml-carousel-content">
-        <div class="i-amphtml-carousel-scroll"></div>
+        <div class="i-amphtml-carousel-scroll" tabindex="-1"></div>
         <div class="i-amphtml-base-carousel-arrows">
           <div class="i-amphtml-base-carousel-arrow-prev-slot"></div>
           <div class="i-amphtml-base-carousel-arrow-next-slot"></div>
@@ -455,6 +457,9 @@ class AmpCarousel extends AMP.BaseElement {
       const detail = getDetail(event);
       this.carousel_.goToSlide(detail['index']);
     });
+    this.element.addEventListener('keydown', event => {
+      this.onKeydown_(event);
+    });
     this.prevArrowSlot_.addEventListener('click', event => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
@@ -544,6 +549,31 @@ class AmpCarousel extends AMP.BaseElement {
     this.childLayoutManager_.setQueueChanges(false);
 
     this.updateUi_();
+  }
+
+  /**
+   * Handle a keyup, potentially going to the next/previous set of slides,
+   * depending on the carousel configuration.
+   * @param {!KeyboardEvent} event
+   */
+  onKeydown_(event) {
+    const isRight = event.key === Keys.RIGHT_ARROW;
+    const isLeft = event.key === Keys.LEFT_ARROW;
+
+    if (!isRight && !isLeft) {
+      return;
+    }
+
+    const rtl = isRTL(this.element.ownerDocument);
+    const next = (isRight && !rtl) || (isLeft && rtl);
+
+    if (next) {
+      this.carousel_.next();
+    } else {
+      this.carousel_.prev();
+    }
+
+    event.preventDefault();
   }
 
   /**
