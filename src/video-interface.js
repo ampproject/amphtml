@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {whenUpgradedToCustomElement} from './dom';
+
 export const MIN_VISIBILITY_RATIO_FOR_AUTOPLAY = 0.5;
 
 /**
@@ -530,7 +532,9 @@ export const VideoServiceSignals = {
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
-  video.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
+  whenUpgradedToCustomElement(video).then(el => {
+    el.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
+  });
 }
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
