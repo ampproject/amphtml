@@ -33,7 +33,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
   beforeEach(() => {
     installLinkerReaderService(env.win);
-    console.log('before each');
     variables = new VariableService(env.ampdoc);
   });
 
@@ -409,7 +408,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/, true);
     });
 
-    it.only('should replace SCROLL_LEFT', () => {
+    it('should replace SCROLL_LEFT', () => {
       // return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
       //   expect(res).to.match(/scrollLeft=\d+/);
       // });
