@@ -7,6 +7,15 @@ requirement: {
   error_message: 'Should not throw a non-Error object.'
 }
 
+# Document: most of properties should be access via ampdoc for proper scoping.
+requirement: {
+  type: BANNED_PROPERTY
+  error_message: 'Use ampdoc instead'
+  value: 'Document.prototype.head'
+  whitelist: 'src/service/ampdoc-impl.js'
+}
+
+
 # Element
 
 requirement: {
