@@ -1185,9 +1185,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return Promise.reject('Cannot access body of friendly frame');
       }
       return this.setCssPosition_('static').then(() => {
-        const creativeHeight = this.iframe.contentWindow.document.body
-          ./*OK*/ clientHeight;
-        return this.attemptChangeHeight(creativeHeight)
+        return this.attemptChangeHeight(
+          this.iframe.contentWindow.document.body./*OK*/ clientHeight
+        )
           .then(() => {
             this.fireFluidDelayedImpression();
             this.reattemptToExpandFluidCreative_ = false;
