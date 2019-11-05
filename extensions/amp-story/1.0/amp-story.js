@@ -457,16 +457,24 @@ export class AmpStory extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  pauseCallback() {
+  /**
+   * Pauses the whole story on viewer visibilityState updates, or tab visibility
+   * updates.
+   * @private
+   */
+  pause_() {
     this.pausedStateToRestore_ = !!this.storeService_.get(
       StateProperty.PAUSED_STATE
     );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
   }
 
-  /** @override */
-  resumeCallback() {
+  /**
+   * Resumes the whole story on viewer visibilityState updates, or tab
+   * visibility updates.
+   * @private
+   */
+  resume_() {
     this.storeService_.dispatch(
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
@@ -1790,7 +1798,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.getAmpDoc().isVisible() ? this.resumeCallback() : this.pauseCallback();
+    this.getAmpDoc().isVisible() ? this.resume_() : this.pause_();
   }
 
   /**

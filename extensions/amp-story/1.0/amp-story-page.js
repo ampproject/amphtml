@@ -393,13 +393,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
-        this.pauseCallback();
+        this.pause_();
         this.state_ = state;
         break;
       case PageState.PLAYING:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
-          this.resumeCallback();
+          this.resume_();
         }
 
         if (this.state_ === PageState.PAUSED) {
@@ -430,8 +430,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  pauseCallback() {
+  /**
+   * @private
+   */
+  pause_() {
     this.advancement_.stop();
 
     this.stopMeasuringVideoPerformance_();
@@ -458,8 +460,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  resumeCallback() {
+  /**
+   * @private
+   */
+  resume_() {
     this.registerAllMedia_();
 
     if (this.isActive()) {

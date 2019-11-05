@@ -33,6 +33,7 @@ import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
+import {VisibilityState} from '../../../../src/visibility-state';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {poll} from '../../../../testing/iframe';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -224,11 +225,15 @@ describes.realWin(
       const oldPage = pages[0];
       const newPage = pages[1];
 
-      const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
-      const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+      const setStateOldPageStub = sandbox.stub(oldPage, 'setState');
+      const setStateNewPageStub = sandbox.stub(newPage, 'setState');
       await story.switchTo_('page-1');
-      expect(pauseOldPageStub).to.have.been.calledOnce;
-      expect(resumeNewPageStub).to.have.been.calledOnce;
+      expect(setStateOldPageStub).to.have.been.calledOnceWithExactly(
+        PageState.NOT_ACTIVE
+      );
+      expect(setStateNewPageStub).to.have.been.calledOnceWithExactly(
+        PageState.PLAYING
+      );
     });
 
     // TODO(#11639): Re-enable this test.
@@ -698,18 +703,56 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.pauseCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+      });
+
+      it('should pause the story when viewer becomes hidden', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+      });
+
+      it('should pause the story when viewer becomes paused', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+      });
+
+      it('should pause the story page when viewer becomes paused', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        const setStateStub = sandbox.stub(story.activePage_, 'setState');
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        expect(setStateStub).to.have.been.calledOnceWithExactly(
+          PageState.PAUSED
+        );
       });
 
       it('should play the story when viewer becomes active', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+        await story.layoutCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
+      });
+
+      it('should play the story page when viewer becomes active', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.resumeCallback();
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
+        const setStateStub = sandbox.stub(story.activePage_, 'setState');
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
+          PageState.PLAYING
+        );
       });
 
       it('should keep the story paused on resume when previously paused', async () => {
@@ -718,8 +761,8 @@ describes.realWin(
         story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
         await story.layoutCallback();
-        story.pauseCallback();
-        story.resumeCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
