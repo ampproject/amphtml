@@ -614,7 +614,7 @@ describes.sandboxed('Extensions', {}, () => {
       win.document.head.appendChild(script);
 
       // Start waiting immediately.
-      const initialPromise = extensions.waitForExtension(win, 'amp-ext');
+      const initialPromise = extensions.preloadExtension('amp-ext');
 
       // Reload the extension. E.g. due to the version mismatch.
       const reloadPromise = extensions.reloadExtension('amp-ext');
@@ -626,6 +626,10 @@ describes.sandboxed('Extensions', {}, () => {
         expect(reloadedExtension).to.exist;
         return initialPromise.then(initialExtension => {
           expect(initialExtension).to.equal(reloadedExtension);
+          const newScript = win.document.head.querySelector(
+            'script[custom-element="amp-ext"]:not([i-amphtml-loaded-new-version])'
+          );
+          expect(newScript).to.exist;
         });
       });
     });
