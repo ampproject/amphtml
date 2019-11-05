@@ -161,7 +161,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * The value of the "query" attribute on amp-autocomplete.
      * @private {string}
      */
-    this.query_ = '';
+    this.queryKey_ = '';
 
     /**
      * The index of the active suggested item.
@@ -241,27 +241,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     this.inline_ = this.element.hasAttribute('inline');
-    if (this.inline_) {
-      userAssert(
-        isExperimentOn(this.win, 'amp-autocomplete'),
-        `Experiment ${TAG} is not turned on for "inline" attr.`
-      );
-      this.trigger_ = this.element.getAttribute('inline');
-    }
+    this.trigger_ = this.element.getAttribute('inline');
+    userAssert(
+      !this.inline_ || isExperimentOn(this.win, 'amp-autocomplete'),
+      `Experiment ${TAG} is not turned on for "inline" attr. %s`,
+      this.element
+    );
 
-    if (this.element.hasAttribute('query')) {
-      userAssert(
-        isExperimentOn(this.win, 'amp-autocomplete'),
-        `Experiment ${TAG} is not turned on for "query" attr.`
-      );
-      userAssert(
-        this.element.hasAttribute('src'),
-        'Expected a value for attribute "src" when using attribute "query',
-        TAG
-      );
-      this.srcBase_ = this.element.getAttribute('src');
-      this.query_ = this.element.getAttribute('query');
-    }
+    this.queryKey_ = this.element.getAttribute('query');
+    this.srcBase_ = this.element.getAttribute('src');
+    userAssert(
+      !this.queryKey_ || isExperimentOn(this.win, 'amp-autocomplete'),
+      `Experiment ${TAG} is not turned on for "query" attr. %s`,
+      this.element
+    );
 
     const jsonScript = this.element.querySelector(
       'script[type="application/json"]'
@@ -332,10 +325,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.suggestFirst_ = this.filter_ === FilterType.PREFIX || this.inline_;
       userAssert(
         this.suggestFirst_,
-        '"suggest-first" requires "filter" to equal "prefix". ' +
-          'If "inline" is present, "filter" can be any value.' +
-          ' Unexpected "filter" type: ' +
-          this.filter_
+        '"suggest-first" requires "filter" type "prefix" unless "inline" is present. ' +
+          ' Unexpected "filter" type: %s, %s',
+        this.filter_,
+        this.element
       );
     }
     this.highlightUserEntry_ = this.element.hasAttribute(
@@ -401,14 +394,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Takes the given input and returns the constructed server endpoint for it.
-   * For use when publishers provide "src-base" and "src-query-param" attributes
+   * For use when publishers provide "src" and "query" attributes
    * in the AMP4Email context only.
-   * @param {string=} opt_input
+   * @param {string=} opt_query
    * @return {string}
    * @private
    */
-  generateSrc_(opt_input = '') {
-    return this.srcBase_ + '?' + this.query_ + '=' + opt_input;
+  generateSrc_(opt_query = '') {
+    const encodedQueryKey = encodeURIComponent(this.queryKey_);
+    const encodedQuery = encodeURIComponent(opt_query);
+    return `${this.srcBase_}?${encodedQueryKey}=${encodedQuery}`;
   }
 
   /**
@@ -554,9 +549,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.match_ = match;
       this.userInput_ = this.match_[0].slice(this.trigger_.length);
 
-      if (!this.triggered_ && !this.menuTriggered_) {
-        return Promise.resolve();
-      }
       let hadResultsBeforeThisInput = false;
       if (this.sourceData_ && this.userInput_ != '') {
         hadResultsBeforeThisInput = true;
@@ -598,7 +590,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   getClosestPriorMatch_(trigger) {
-    const delimiter = `\\${trigger}`;
+    const delimiter = trigger.replace(/([()[{*+.$^\\|?])/g, '\\$1');
     const pattern = `((${delimiter}|^${delimiter})(\\w+)?)`;
     const regex = new RegExp(pattern, 'gm');
     const {value, selectionStart: cursor} = this.inputElement_;
