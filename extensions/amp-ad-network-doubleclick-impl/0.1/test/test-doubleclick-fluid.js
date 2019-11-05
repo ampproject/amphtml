@@ -62,14 +62,14 @@ const mockPromise = {
   },
 };
 
+
 /**
  * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
  * tests.
  * @param {!AmpAdNetworkDoubleclickImpl} impl
  * @param {!Object} sandbox Sinon sandbox to mock out properties.
- * @param {boolean=} resize Whether resize is permitted.
  */
-function createScaffoldingForFluidRendering(impl, sandbox, resize = true) {
+function createScaffoldingForFluidRendering(impl, sandbox) {
   impl.getVsync = () => {
     return {
       run: runArgs => {
@@ -78,9 +78,7 @@ function createScaffoldingForFluidRendering(impl, sandbox, resize = true) {
     };
   };
   impl.buildCallback();
-  impl.attemptChangeHeight = resize
-    ? () => Promise.resolve()
-    : () => Promise.reject('Creative in viewport');
+  impl.attemptChangeHeight = () => Promise.resolve();
   sandbox.stub(impl, 'sendXhrRequest').returns(
     Promise.resolve({
       arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
