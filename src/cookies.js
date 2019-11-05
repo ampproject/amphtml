@@ -241,7 +241,7 @@ function checkOriginForSettingCookie(win, options, name) {
   if (options.allowOnProxyOrigin) {
     userAssert(
       !options.highestAvailableDomain,
-      'Could not support higestAvailable Domain on proxy origin, ' +
+      'Could not support highestAvailable Domain on proxy origin, ' +
         'specify domain explicitly'
     );
     return;
