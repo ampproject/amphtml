@@ -299,10 +299,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   it('should fire impression for AMP fluid creative, if partly visible', () => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
-    const creativeHeight = parseInt(
-      impl.iframe.contentWindow.document.body.clientHeight,
-      10
-    );
     sandbox.stub(impl, 'setCssPosition_').returns(Promise.resolve());
     sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.reject());
     const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
@@ -322,10 +318,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   it('should not fire impression for AMP fluid creative', () => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
-    const creativeHeight = parseInt(
-      impl.iframe.contentWindow.document.body.clientHeight,
-      10
-    );
     sandbox.stub(impl, 'setCssPosition_').returns(Promise.resolve());
     sandbox.stub(impl, 'attemptChangeHeight').returns(Promise.reject());
     const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
