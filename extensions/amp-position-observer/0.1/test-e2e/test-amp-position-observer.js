@@ -25,18 +25,6 @@ describes.endtoend(
   testScroll
 );
 
-describes.endtoend(
-  'amp-position-observer in AMPHTML ad with inabox-viewport-lite experiment on',
-  {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-position-observer/scrollbound-animation.html',
-    environments: 'amp4ads-preset',
-    experiments: ['inabox-viewport-lite'],
-    initialRect: {width: 800, height: 600},
-  },
-  testScroll
-);
-
 async function testScroll(env) {
   let controller;
 
