@@ -224,6 +224,8 @@ function trySetCookie(win, name, value, expirationTime, domain, sameSite) {
 function getSameSiteString(win, sameSite) {
   if (!sameSite) {
     return '';
+  } else if (sameSite == SameSite.NONE) {
+    return `; Secure; SameSite=${SameSite.NONE};`;
   }
 
   return `; SameSite=${sameSite}`;
