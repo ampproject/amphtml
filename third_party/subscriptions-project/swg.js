@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.81 */
+/** Version: 0.1.22.82 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -60,7 +60,7 @@ const AnalyticsEvent = {
   ACTION_NEW_DEFERRED_ACCOUNT: 1010,
   ACTION_LINK_CONTINUE: 1011,
   ACTION_LINK_CANCEL: 1012,
-  ACTION_GOOGLE_UPDATED_DISMISS: 1013,
+  ACTION_GOOGLE_UPDATED_CLOSE: 1013,
   ACTION_USER_CANCELED_PAYFLOW: 1014,
   ACTION_SAVE_SUBSCR_TO_GOOGLE_CONTINUE: 1015,
   ACTION_SAVE_SUBSCR_TO_GOOGLE_CANCEL: 1016,
@@ -4202,7 +4202,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.81',
+    '_client': 'SwG 0.1.22.82',
   });
 }
 
@@ -9390,7 +9390,7 @@ function duplicateErrorIfNecessary(error) {
 const LINK_REQUEST_ID = 'swg-link';
 
 /**
- * The flow to initiate linkback flow.
+ * The flow to link an existing publisher account to an existing google account.
  */
 class LinkbackFlow {
   /**
@@ -9434,6 +9434,7 @@ class LinkbackFlow {
       args,
       {}
     );
+    this.deps_.eventManager().logSwgEvent(AnalyticsEvent.IMPRESSION_LINK);
     this.dialogManager_.popupOpened(opener && opener.targetWin);
     return Promise.resolve();
   }
@@ -9469,6 +9470,9 @@ class LinkCompleteFlow {
         reason => {
           if (isCancelError(reason)) {
             deps
+              .eventManager()
+              .logSwgEvent(AnalyticsEvent.ACTION_LINK_CANCEL, true);
+            deps
               .callbacks()
               .triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
           }
@@ -9483,6 +9487,9 @@ class LinkCompleteFlow {
    * @param {?Object} response
    */
   constructor(deps, response) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
     /** @private @const {!Window} */
     this.win_ = deps.win();
 
@@ -9544,6 +9551,12 @@ class LinkCompleteFlow {
         // The flow is complete.
         this.dialogManager_.completeView(this.activityIframeView_);
       });
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.EVENT_GOOGLE_UPDATED, true);
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.IMPRESSION_GOOGLE_UPDATED, true);
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 
@@ -9552,6 +9565,9 @@ class LinkCompleteFlow {
    * @private
    */
   complete_(response) {
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.ACTION_GOOGLE_UPDATED_CLOSE, true);
     this.callbacks_.triggerLinkComplete();
     this.callbacks_.resetLinkProgress();
     this.entitlementsManager_.setToastShown(true);
@@ -9570,7 +9586,9 @@ class LinkCompleteFlow {
 }
 
 /**
- * The flow to save subscription information.
+ * The flow to save subscription information from an existing publisher account
+ * to an existing google account.  The accounts may or may not already be
+ * linked.
  */
 class LinkSaveFlow {
   /**
@@ -9709,6 +9727,9 @@ class LinkSaveFlow {
       this.activityIframeView_,
       /* hidden */ true
     );
+    this.deps_
+      .eventManager()
+      .logSwgEvent(AnalyticsEvent.IMPRESSION_SAVE_SUBSCR_TO_GOOGLE);
     /** {!Promise<boolean>} */
     return this.activityIframeView_
       .acceptResultAndVerify(
@@ -9724,6 +9745,12 @@ class LinkSaveFlow {
         this.complete_();
         // Handle cancellation from user, link confirm start or completion here
         if (isCancelError(reason)) {
+          this.deps_
+            .eventManager()
+            .logSwgEvent(
+              AnalyticsEvent.ACTION_SAVE_SUBSCR_TO_GOOGLE_CANCEL,
+              true
+            );
           this.deps_
             .callbacks()
             .triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
@@ -15703,6 +15730,11 @@ class ConfiguredRuntime {
   /** @override */
   setOnSubscribeResponse(callback) {
     this.callbacks_.setOnSubscribeResponse(callback);
+  }
+
+  /** @override */
+  setOnPaymentResponse(callback) {
+    this.callbacks_.setOnPaymentResponse(callback);
   }
 
   /** @override */
