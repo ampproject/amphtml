@@ -206,7 +206,7 @@ export class AmpSlideScroll extends BaseSlides {
       'scroll',
       this.scrollHandler_.bind(this)
     );
-    this.container_.addEventListener(
+    this.slidesContainer_.addEventListener(
       'keydown',
       this.keydownHandler_.bind(this)
     );
