@@ -175,7 +175,7 @@ export class NextPageService {
       canonicalUrl
     );
 
-    // TODO(gharbiw) Establish parity with the shadow doc amp object
+    // TODO(wassgha): Establish parity with the shadow doc amp object
     documentRef.amp = {
       ampdoc: ampDoc,
       url: win.document.location.href,
@@ -325,8 +325,7 @@ export class NextPageService {
               }
               this.resources_.mutateElement(container, () => {
                 try {
-                  const amp = this.attachShadowDoc_(shadowRoot, doc);
-                  documentRef.amp = amp;
+                  documentRef.amp = this.attachShadowDoc_(shadowRoot, doc);
 
                   toggle(dev().assertElement(documentRef.recUnit.el), false);
                   this.documentQueued_ = false;
@@ -469,7 +468,7 @@ export class NextPageService {
       return;
     }
 
-    let documentIndex;
+    let documentIndex = i;
     let analyticsEvent = '';
 
     switch (position.relativePos) {
@@ -478,7 +477,6 @@ export class NextPageService {
         analyticsEvent = 'amp-next-page-scroll';
         break;
       case 'bottom':
-        documentIndex = i;
         analyticsEvent = 'amp-next-page-scroll-back';
         break;
       default:

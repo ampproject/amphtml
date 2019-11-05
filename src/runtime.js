@@ -68,6 +68,22 @@ setReportError(reportErrorForWin.bind(null, self));
 const TAG = 'runtime';
 
 /**
+ * @typedef {{
+ *  url: string,
+ *  ampdoc: !./service/ampdoc-impl.AmpDocShadow,
+ *  setVisibilityState: (Function|undefined),
+ *  postMessage: (Function|undefined),
+ *  onMessage: (Function|undefined),
+ *  close: (Function|undefined),
+ *  getState: (Function|undefined),
+ *  setState: (Function|undefined),
+ *  toggleRuntime: (Function|undefined),
+ *  resources: !./service/resources-interface.ResourcesInterface
+ * }}
+ */
+export let ShadowDoc;
+
+/**
  * Applies the runtime to a given global scope for a single-doc mode. Multi
  * frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
@@ -420,7 +436,7 @@ export class MultidocManager {
    * @param {!Object<string, string>|undefined} params
    * @param {function(!Object, !ShadowRoot,
    * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
-   * @return {!Object}
+   * @return {!ShadowDoc}
    * @private
    */
   attachShadowDoc_(hostElement, url, params, builder) {
