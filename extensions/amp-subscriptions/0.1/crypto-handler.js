@@ -141,7 +141,7 @@ export class CryptoHandler {
     //    bytes.
     const encryptedBytes = base64DecodeToBytes(encryptedContent);
     const iv = encryptedBytes.slice(0, AES_GCM_IV_LENGTH);
-    const encryptedBytes = encryptedBytes.slice(AES_GCM_IV_LENGTH);
+    const content = encryptedBytes.slice(AES_GCM_IV_LENGTH);
 
     // 3. Get document Key in the correct format.
     return this.stringToCryptoKey_(decryptedDocumentKey).then(function(
@@ -155,7 +155,7 @@ export class CryptoHandler {
             iv: iv,
           },
           formattedDocKey,
-          encryptedBytes
+          content
         )
         .then(function(buffer) {
           // 5. Decryption gives us raw bytes and we need to turn them into text.

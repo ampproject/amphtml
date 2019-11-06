@@ -40,16 +40,16 @@ describes.realWin(
     };
     // eslint-disable-next-line max-len
     const encryptedContent =
-      'PTzfydqid9+FitGB3xeQEG98u+zj6/wpZ/KMeZewGldw/pp2MCvwstHGCtqjIN5ROi61OmZkQDW9c2ezuu1WTXDANoE5UY5ED51lftywdTYmLk+rvtRL/fUVaPIOaiP/wkm+I2Ssw99cOnv4hFphOuz9Db2/RisQXVT/7yiaiHDEE5aJlxuAYqyjMnDweGhKjuXpgAOpbOOEI78t91AKpTbsQg9bxXafruB46+3jI6COfzI3e7griJ5LoQSPG4JEn7bw8jnD67djb9J3c6hak++vbSvqBxewNpSV+v9HU+w=';
+      'W03SytAJzlAhsj/XVOBtKQdVhINRBWcMIEO3ttsJgYj8GjwDRS0x8SNGu8IO4OyFB/SSpWYKOJITu4Fo98OzCF4ue3RT94XqmZf2UCjLc5i/eIl0f+jYJRl5Qfo1tnAD6z4sgF1pEHJ8H5JbaqCQXSv7rmBiD7NkdLOgcJlwYwCPBpHWmJkFBeQfMohSpuk38xEtwIDqAqN0eKGBz8aTU0jHvpC5zWBFVhjxnoSgTfYJMrmIldFqSqaXra+KlOeaXvTaMT7vZCY5bAJcuHAlmxNghv7GptrLiR02ZMEt334AjY8dPYJQBW+giMqjeU3w5i0GJHmksrfFognnjlRtS5/hOc9JVwqq';
     // eslint-disable-next-line max-len
     const decryptedContent =
       "\n      This is section is top secret.\n      You should only be able to read this if you have the correct permissions.\n      If you don't have the correct permissions, you shouldn't be able to read this section at all.\n      ";
     // eslint-disable-next-line max-len
     const encryptedKey =
-      "ENCRYPT({'accessRequirements': ['googleAccessRequirements:123'], 'key':'0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ='})";
-    const decryptedDocKey = '0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ=';
+      "ENCRYPT({'AccessRequirements': ['googleAccessRequirements:123'], 'Key':'/L2HS2v6LrJIk8iq+7AhdA=='})";
+    const decryptedDocKey = '/L2HS2v6LrJIk8iq+7AhdA==';
     const decryptedDocKeyHash =
-      '5903f44139fd3d88414b0d29c986fd0ca1572eb214e3a0d56201d06ed753c39e';
+      '9dc1e142b11338d895438a3f8c0947b57a7c368e9d7913f7df80b5491f488490';
     const encryptedKeys = {
       'local': encryptedKey,
       'google.com': encryptedKey,
