@@ -172,7 +172,6 @@ export class InaboxMessagingHost {
     this.sendPosition_(
       request,
       source,
-      origin,
       dict({
         'viewportRect': viewportRect,
         'targetRect': targetRect,
@@ -186,7 +185,6 @@ export class InaboxMessagingHost {
         this.sendPosition_(
           request,
           source,
-          origin,
           /** @type {?JsonObject} */ (data)
         )
       );
@@ -200,11 +198,10 @@ export class InaboxMessagingHost {
    * @param {string} origin
    * @param {?JsonObject} data
    */
-  sendPosition_(request, source, origin, data) {
+  sendPosition_(request, source, data) {
     dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
     source./*OK*/ postMessage(
-      serializeMessage(MessageType.POSITION, request.sentinel, data),
-      origin
+      serializeMessage(MessageType.POSITION, request.sentinel, data), '*'
     );
   }
 
