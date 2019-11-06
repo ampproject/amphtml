@@ -42,7 +42,7 @@ const LOADER_PROP = '__AMP_EXT_LDR';
  * (8 seconds is the same as the CSS boilerplate timoeout)
  * @const
  */
-const LOAD_TIMEOUT = 8000;
+const LOAD_TIMEOUT = 16000;
 
 /**
  * Contains data for the declaration of a custom element.
