@@ -232,9 +232,7 @@ export class NextPageService {
     const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {
       visibilityState: VisibilityState.PRERENDER,
     });
-    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (dev().assert(
-      amp.ampdoc
-    ));
+    const ampdoc = dev().assert(amp.ampdoc);
     installStylesForDoc(ampdoc, CSS, null, false, TAG);
 
     const body = ampdoc.getBody();
