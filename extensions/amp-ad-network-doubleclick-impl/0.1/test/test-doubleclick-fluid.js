@@ -64,11 +64,11 @@ const mockPromise = {
 
 /**
  * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
- * tests. Ipsum lorem....
+ * tests.
  * @param {!AmpAdNetworkDoubleclickImpl} impl
  * @param {!Object} sandbox Sinon sandbox to mock out properties.
  */
-function createScaffoldingForFluidRendering(impl, sandbox) {
+function createScaffoldingForFluidRendering(impl, sandbox, resize = true) {
   impl.getVsync = () => {
     return {
       run: runArgs => {
@@ -77,7 +77,9 @@ function createScaffoldingForFluidRendering(impl, sandbox) {
     };
   };
   impl.buildCallback();
-  impl.attemptChangeHeight = () => Promise.resolve();
+  impl.attemptChangeHeight = resize ?
+    ? () => Promise.resolve()
+    : () => Promise.reject('foo');
   sandbox.stub(impl, 'sendXhrRequest').returns(
     Promise.resolve({
       arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
