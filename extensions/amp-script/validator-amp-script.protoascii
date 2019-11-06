@@ -206,7 +206,7 @@ tags: {  # <amp-script>
   }
   attrs: {
     name: "development"
-    deprecation: "the data-ampdevmode attribute on the root html element"
+    deprecation: "The 'data-ampdevmode' attribute on the root html element"
     deprecation_url: "https://github.com/ampproject/amphtml/issues/24987"
   }
   attr_lists: "extended-amp-global"
