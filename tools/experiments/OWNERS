@@ -11,7 +11,7 @@
       ],
     },
     {
-      pattern: 'experiment-config.js',
+      pattern: 'experiments-config.js',
       owners: [{name: 'ampproject/working-groups'}],
     },
   ],
