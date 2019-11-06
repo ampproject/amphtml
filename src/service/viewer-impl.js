@@ -427,10 +427,7 @@ export class ViewerImpl {
     return this.overtakeHistory_;
   }
 
-  /**
-   * Should a story show the URL info dialog.
-   * @return {boolean}
-   */
+  /** @override */
   showStoryUrlInfo() {
     return this.showStoryUrlInfo_;
   }
