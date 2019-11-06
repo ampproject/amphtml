@@ -164,11 +164,12 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {string}
+   * @return {?string}
    */
   getVideoSourceForPreconnect_() {
     if (this.getAmpDoc().getVisibilityState() === VisibilityState.PRERENDER) {
-      return this.getFirstCachedSource_();
+      const source = this.getFirstCachedSource_();
+      return (source && source.getAttribute('src')) || null;
     }
     let videoSrc = this.element.getAttribute('src');
     if (!videoSrc) {
@@ -458,7 +459,7 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {string=}
+   * @return {?Element}
    */
   getFirstCachedSource_() {
     const {element} = this;
