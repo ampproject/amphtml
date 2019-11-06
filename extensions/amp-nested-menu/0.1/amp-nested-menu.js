@@ -66,10 +66,10 @@ export class AmpNestedMenu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO(#25022): remove this assert when cleaning up experiment post launch.
+    // TODO(#25343): remove this assert when cleaning up experiment post launch.
     userAssert(
-      isExperimentOn(this.win, 'amp-sidebar-v2'),
-      `Turning on the amp-sidebar-v2 experiment is necessary to use the ${TAG} component.`
+      isExperimentOn(this.win, 'amp-nested-menu'),
+      `Turning on the amp-nested-menu experiment is necessary to use the ${TAG} component.`
     );
     const {element} = this;
 
@@ -115,6 +115,8 @@ export class AmpNestedMenu extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
+    // If support is added for other layouts, we should ensure that
+    // lazy loading by sidebar does not cause FOUC when sidebar first opens.
     return layout == Layout.FILL;
   }
 

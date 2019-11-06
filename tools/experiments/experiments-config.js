@@ -68,6 +68,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
   },
   {
+    id: 'amp-nested-menu',
+    name: 'AMP extension for a nested drilldown menu',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25343',
+  },
+  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
