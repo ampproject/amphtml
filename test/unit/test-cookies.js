@@ -84,7 +84,9 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     const utcDate = new Date(date).toUTCString();
 
     setCookie(win, 'name', 'val', date, {secure: 'true'});
-    expect(doc.lastSetCookieRaw).to.equal(`name=val; path=/; expires=${utcDate}; Secure`);
+    expect(doc.lastSetCookieRaw).to.equal(
+      `name=val; path=/; expires=${utcDate}; Secure`
+    );
     expect(doc.cookie).to.equal('name=val');
   });
 

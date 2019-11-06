@@ -113,7 +113,15 @@ export function setCookie(win, name, value, expirationTime, options = {}) {
   } else if (options.highestAvailableDomain) {
     domain = /** @type {string} */ (getHighestAvailableDomain(win));
   }
-  trySetCookie(win, name, value, expirationTime, domain, options.sameSite, options.secure);
+  trySetCookie(
+    win,
+    name,
+    value,
+    expirationTime,
+    domain,
+    options.sameSite,
+    options.secure
+  );
 }
 
 /**
@@ -185,7 +193,15 @@ export function getHighestAvailableDomain(win) {
  * @param {!SameSite=} sameSite
  * @param {boolean|undefined=} secure
  */
-function trySetCookie(win, name, value, expirationTime, domain, sameSite, secure) {
+function trySetCookie(
+  win,
+  name,
+  value,
+  expirationTime,
+  domain,
+  sameSite,
+  secure
+) {
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
   // Note: we need to allow cdn.ampproject.org in order to optin to experiments
