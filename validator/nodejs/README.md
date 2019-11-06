@@ -111,7 +111,7 @@ As expected, this emits errors because the provided string in the example, `<htm
 - The amphtml-validator binary now requires the Node.js binary to be called node.
   On systems where the Node.js binary is called nodejs, consider installing
   the nodejs-legacy Debian package or better yet, NVM.
-  
+
 ### 1.0.24
 
 - Introduce node v10 support and remove node 8 support.
