@@ -152,7 +152,7 @@ export class CryptoHandler {
         .decrypt(
           {
             name: 'AES-GCM',
-            iv: iv,
+            iv,
           },
           formattedDocKey,
           content

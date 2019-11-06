@@ -40,16 +40,16 @@ describes.realWin(
     };
     // eslint-disable-next-line max-len
     const encryptedContent =
-      'W03SytAJzlAhsj/XVOBtKQdVhINRBWcMIEO3ttsJgYj8GjwDRS0x8SNGu8IO4OyFB/SSpWYKOJITu4Fo98OzCF4ue3RT94XqmZf2UCjLc5i/eIl0f+jYJRl5Qfo1tnAD6z4sgF1pEHJ8H5JbaqCQXSv7rmBiD7NkdLOgcJlwYwCPBpHWmJkFBeQfMohSpuk38xEtwIDqAqN0eKGBz8aTU0jHvpC5zWBFVhjxnoSgTfYJMrmIldFqSqaXra+KlOeaXvTaMT7vZCY5bAJcuHAlmxNghv7GptrLiR02ZMEt334AjY8dPYJQBW+giMqjeU3w5i0GJHmksrfFognnjlRtS5/hOc9JVwqq';
+      '8bCQpCyIBxBHwTZVRaMuA+DGXSTzVHR/Eh/l6QqfvcXQbn5uF/HzL539jw6Ok8+oppqo2eP/H9oqaYCi4Ya50uVFzdTCBzOSTlJDmeXhqO1DIBYHIQTK3z+NweOAJci7aXwSOLtJZd1KrrCesoBjAlQ55GwyPe6xPVcUESjtT15Z7Ez1GSetSE99MIbn8fWjq5CjUZn4q3jDKdNGdM6NZ86lqL5ZsbbUQRQ2dIVExrwS9GuuFsuFi8Eahe3/eZaibZY4PzPuVR6jjCrDrgF5qw+N+uacDumoA5he/1WrHiYHzoV28Xo9yuBBm5JWEcMepoUkQgKVywOFZS4otSR81va9JNwk1F1AIQ4VOqezFE6ce92qbzo+aMVzceZJqPhVqsA=';
     // eslint-disable-next-line max-len
     const decryptedContent =
-      "\n      This is section is top secret.\n      You should only be able to read this if you have the correct permissions.\n      If you don't have the correct permissions, you shouldn't be able to read this section at all.\n      ";
+      "\n              This is section is top secret.\n              You should only be able to read this if you have the correct permissions.\n              If you don't have the correct permissions, you shouldn't be able to read this section at all.\n            ";
     // eslint-disable-next-line max-len
     const encryptedKey =
-      "ENCRYPT({'AccessRequirements': ['googleAccessRequirements:123'], 'Key':'/L2HS2v6LrJIk8iq+7AhdA=='})";
-    const decryptedDocKey = '/L2HS2v6LrJIk8iq+7AhdA==';
+      "ENCRYPT({'AccessRequirements': ['googleAccessRequirements:123'], 'Key':'mSfq5tRx5omXoOX20Oqq8g=='})";
+    const decryptedDocKey = 'mSfq5tRx5omXoOX20Oqq8g==';
     const decryptedDocKeyHash =
-      '9dc1e142b11338d895438a3f8c0947b57a7c368e9d7913f7df80b5491f488490';
+      'a2de5c3d4947d3af3e9357b224220855591fa5ebecfbfcaa8a5dd8361f1c08da';
     const encryptedKeys = {
       'local': encryptedKey,
       'google.com': encryptedKey,
@@ -122,7 +122,9 @@ describes.realWin(
         return cryptoHandler
           .decryptDocumentContent_(encryptedContent, decryptedDocKey)
           .then(actualContent => {
-            expect(actualContent).to.equal(decryptedContent);
+            expect(actualContent.replace(/&#39;/g, "'")).to.equal(
+              decryptedContent
+            );
           });
       });
     });
