@@ -28,8 +28,9 @@ import {getMode} from '../src/mode';
 export class IframeMessagingClient {
   /**
    *  @param {!Window} win A window object.
+   *  @param {boolean=} broadcast whether to enable broadcast mode.
    */
-  constructor(win) {
+  constructor(win, broadcast) {
     /** @private {!Window} */
     this.win_ = win;
     /** @private {?string} */
@@ -48,7 +49,7 @@ export class IframeMessagingClient {
     this.observableFor_ = map();
     this.setupEventListener_();
     /** @private {boolean} */
-    this.broadcastMode_ = false;
+    this.broadcastMode_ = broadcast || false;
   }
 
   /**
@@ -74,7 +75,10 @@ export class IframeMessagingClient {
   }
 
   /**
-   * Make an event listening request to the host window.
+   * Make an event listening request to the host window. If broadcast mode is
+   * on, then make a request to all windows and start listening to only the
+   * first window that replied with a proper message, turning off broadcast mode
+   * in the progress.
    *
    * @param {string} requestType The type of the request message.
    * @param {string} responseType The type of the response message.
@@ -83,14 +87,33 @@ export class IframeMessagingClient {
    * @return {function()}
    */
   makeRequest(requestType, responseType, callback) {
-    const unlisten = this.registerCallback(responseType, callback);
-    this.sendMessage(requestType);
+    const unlisten = this.registerCallback(responseType, event => {
+      if (this.broadcastMode_) {
+        this.setBroadcastMode(false);
+        this.setHostWindow(event['source']);
+      }
+      callback(event);
+    });
+
+    if (this.broadcastMode_) {
+      for (let j = 0, hostWin = this.win_;
+          j < 10 && hostWin != this.win_.top;
+          j++) {
+        hostWin = hostWin.parent;
+        this.setHostWindow(hostWin);
+        this.sendMessage(requestType);
+        j++;
+      }
+    } else {
+      this.sendMessage(requestType);
+    }
     return unlisten;
   }
 
   /**
    * Make a one time event listening request to the host window.
-   * Will unlisten after response is received
+   * Will unlisten after response is received. Same behavior as makeRequest
+   * concerning broadcast mode.
    *
    * @param {string} requestType The type of the request message.
    * @param {string} responseType The type of the response message.
@@ -100,18 +123,30 @@ export class IframeMessagingClient {
    */
   requestOnce(requestType, responseType, callback) {
     const unlisten = this.registerCallback(responseType, event => {
+      if (this.broadcastMode_) {
+        this.setBroadcastMode(false);
+        this.setHostWindow(event['source']);
+      }
       unlisten();
       callback(event);
     });
-    this.sendMessage(requestType);
+    if (this.broadcastMode_) {
+      for (let j = 0, hostWin = this.win_;
+          j < 10 && hostWin != this.win_.top;
+          j++) {
+        hostWin = hostWin.parent;
+        this.setHostWindow(hostWin);
+        this.sendMessage(requestType);
+        j++;
+      }
+    } else {
+      this.sendMessage(requestType);
+    }
     return unlisten;
   }
 
   /**
    * Register callback function for message with type messageType.
-   *   As it stands right now, only one callback can exist at a time.
-   *   All future calls will overwrite any previously registered
-   *   callbacks.
    * @param {string} messageType The type of the message.
    * @param {function(?JsonObject)} callback The callback function to call
    *   when a message with type messageType is received.

@@ -435,7 +435,7 @@ export class ViewportBindingInabox {
      */
     this.boxRect_ = layoutRectLtwh(0, boxHeight + 1, boxWidth, boxHeight);
 
-    /** @private @const {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>} */
+    /** @private @const {?../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
 
     /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
@@ -482,16 +482,15 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
-    return this.iframeClient_.then(client =>
-      client.makeRequest(
-        MessageType.SEND_POSITIONS,
-        MessageType.POSITION,
-        data => {
-          dev().fine(TAG, 'Position changed: ', data);
-          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
-        }
-      )
+    this.iframeClient_.makeRequest(
+      MessageType.SEND_POSITIONS,
+      MessageType.POSITION,
+      data => {
+        dev().fine(TAG, 'Position changed: ', data);
+        this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
+      }
     );
+    return Promise.resolve();
   }
 
   /** @private */
@@ -651,20 +650,17 @@ export class ViewportBindingInabox {
       );
     }
     if (!this.requestPositionPromise_) {
-      this.requestPositionPromise_ = this.iframeClient_.then(
-        client =>
-          new Promise(resolve =>
-            client.requestOnce(
-              MessageType.SEND_POSITIONS,
-              MessageType.POSITION,
-              data => {
-                this.requestPositionPromise_ = null;
-                devAssert(data['targetRect'], 'Host should send targetRect');
-                resolve(data['targetRect']);
-              }
-            )
-          )
-      );
+      this.requestPositionPromise_ = new Promise(resolve => {
+        this.iframeClient_.requestOnce(
+          MessageType.SEND_POSITIONS,
+          MessageType.POSITION,
+          data => {
+            this.requestPositionPromise_ = null;
+            devAssert(data['targetRect'], 'Host should send targetRect');
+            resolve(data['targetRect']);
+          }
+        );
+      });
     }
     return this.requestPositionPromise_;
   }
@@ -724,19 +720,17 @@ export class ViewportBindingInabox {
           reject('Request to open lightbox failed; frame does not exist.');
         }
       } else {
-        this.iframeClient_.then(client =>
-          client.requestOnce(
-            MessageType.FULL_OVERLAY_FRAME,
-            MessageType.FULL_OVERLAY_FRAME_RESPONSE,
-            response => {
-              if (response['success']) {
-                this.updateBoxRect_(response['boxRect']);
-                resolve();
-              } else {
-                reject('Request to open lightbox rejected by host document');
-              }
+        this.iframeClient_.requestOnce(
+          MessageType.FULL_OVERLAY_FRAME,
+          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            if (response['success']) {
+              this.updateBoxRect_(response['boxRect']);
+              resolve();
+            } else {
+              reject('Request to open lightbox rejected by host document');
             }
-          )
+          }
         );
       }
     });
@@ -759,15 +753,13 @@ export class ViewportBindingInabox {
           reject('Request to open lightbox failed; frame does not exist.');
         }
       } else {
-        this.iframeClient_.then(client =>
-          client.requestOnce(
-            MessageType.CANCEL_FULL_OVERLAY_FRAME,
-            MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-            response => {
-              this.updateBoxRect_(response['boxRect']);
-              resolve();
-            }
-          )
+        this.iframeClient_.requestOnce(
+          MessageType.CANCEL_FULL_OVERLAY_FRAME,
+          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+          response => {
+            this.updateBoxRect_(response['boxRect']);
+            resolve();
+          }
         );
       }
     });

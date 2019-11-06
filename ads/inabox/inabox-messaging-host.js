@@ -30,10 +30,7 @@ import {getPositionObserver} from './position-observer';
 const TAG = 'InaboxMessagingHost';
 
 /** @const */
-const READ_ONLY_MESSAGES = [
-  MessageType.SEND_POSITIONS,
-  MessageType.HOST_BROADCAST,
-];
+const READ_ONLY_MESSAGES = [MessageType.SEND_POSITIONS];
 
 /** Simple helper for named callbacks. */
 class NamedObservable {
@@ -99,11 +96,6 @@ export class InaboxMessagingHost {
 
     /** @private {!./frame-overlay-manager.FrameOverlayManager} */
     this.frameOverlayManager_ = getFrameOverlayManager(hostWin);
-
-    this.msgObservable_.listen(
-      MessageType.HOST_BROADCAST,
-      this.handleHostBroadcast_
-    );
 
     this.msgObservable_.listen(
       MessageType.SEND_POSITIONS,
@@ -267,22 +259,6 @@ export class InaboxMessagingHost {
         origin
       );
     });
-
-    return true;
-  }
-
-  /**
-   * @param {!HTMLIFrameElement} iframe
-   * @param {!Object} request
-   * @param {!Window} source
-   * @param {string} origin
-   * @return {boolean}
-   */
-  handleHostBroadcast_(iframe, request, source, origin) {
-    source./*OK*/ postMessage(
-      serializeMessage(MessageType.HOST_RESPONSE, request.sentinel, dict({})),
-      origin
-    );
 
     return true;
   }

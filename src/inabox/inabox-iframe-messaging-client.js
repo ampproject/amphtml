@@ -15,19 +15,17 @@
  */
 
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
-import {MessageType} from '../../src/3p-frame-messaging';
 import {canInspectWindow} from '../iframe-helper';
-import {dict} from '../../src/utils/object';
-import {getServicePromise, registerServiceBuilder} from '../service';
+import {getExistingServiceOrNull, registerServiceBuilder} from '../service';
 import {isExperimentOn} from '../experiments';
 import {tryParseJson} from '../json';
 
 /**
  * @param {!Window} win
- * @return {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>}
+ * @return {?../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>} */ (getServicePromise(
+  return /** @type {?../../3p/iframe-messaging-client.IframeMessagingClient} */ (getExistingServiceOrNull(
     win,
     'iframeMessagingClient'
   ));
@@ -52,10 +50,10 @@ export function installIframeMessagingClient(win) {
 
 /**
  * @param {!Window} win
- * @return {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>}
+ * @return {!../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 function createIframeMessagingClient(win) {
-  const iframeClient = new IframeMessagingClient(win);
+  const iframeClient = new IframeMessagingClient(win, true);
   //  Try read sentinel from window first.
   const dataObject = tryParseJson(win.name);
   let sentinel = null;
@@ -63,25 +61,8 @@ function createIframeMessagingClient(win) {
     sentinel = dataObject['_context']['sentinel'];
   }
   iframeClient.setSentinel(sentinel || getRandom(win));
-
-  iframeClient.setBroadcastMode(true);
-  return new Promise(resolve => {
-    const unlisten = iframeClient.registerCallback(
-      MessageType.HOST_RESPONSE,
-      message => {
-        iframeClient.setBroadcastMode(false);
-        iframeClient.setHostWindow(message['source']);
-        unlisten();
-        resolve(iframeClient);
-      }
-    );
-    for (let j = 0, hostWin = win; j < 10 && hostWin != win.top; j++) {
-      hostWin = hostWin.parent;
-      iframeClient.setHostWindow(hostWin);
-      iframeClient./*OK*/ sendMessage(MessageType.HOST_BROADCAST, dict({}));
-      j++;
-    }
-  });
+  iframeClient.setHostWindow(win.top);
+  return iframeClient;
 }
 
 /**
