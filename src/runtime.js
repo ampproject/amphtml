@@ -70,14 +70,17 @@ const TAG = 'runtime';
 /**
  * @typedef {{
  *  url: string,
+ *  title: string,
+ *  canonicalUrl: string,
+ *  head: (Element|undefined),
  *  ampdoc: !./service/ampdoc-impl.AmpDocShadow,
- *  setVisibilityState: (Function|undefined),
- *  postMessage: (Function|undefined),
- *  onMessage: (Function|undefined),
- *  close: (Function|undefined),
- *  getState: (Function|undefined),
- *  setState: (Function|undefined),
- *  toggleRuntime: (Function|undefined),
+ *  setVisibilityState: (function()|undefined),
+ *  postMessage: (function()|undefined),
+ *  onMessage: (function()|undefined),
+ *  close: (function()|undefined),
+ *  getState: (function()|undefined),
+ *  setState: (function()|undefined),
+ *  toggleRuntime: (function()|undefined),
  *  resources: !./service/resources-interface.ResourcesInterface
  * }}
  */

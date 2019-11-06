@@ -522,19 +522,16 @@ export class NextPageService {
   setActiveDocument_(documentIndex) {
     this.documentRefs_.forEach((docRef, index) => {
       const {amp} = docRef;
-      let updatedVisibilityState;
       // Update the title and history
-      if (index == documentIndex) {
+      if (index === documentIndex) {
         this.win_.document.title = amp.title || '';
         this.activeDocumentRef_ = docRef;
         this.setActiveDocumentInHistory_(docRef);
-        updatedVisibilityState = VisibilityState.VISIBLE;
-      } else if (index !== 0) {
-        updatedVisibilityState = VisibilityState.HIDDEN;
-      }
-      // Show the active doc and hide other docs
-      if (updatedVisibilityState) {
-        this.setDocumentVisibility_(index, updatedVisibilityState);
+        // Show the active document
+        this.setDocumentVisibility_(index, VisibilityState.VISIBLE);
+      } else {
+        // Hide other documents
+        this.setDocumentVisibility_(index, VisibilityState.HIDDEN);
       }
     });
 
@@ -555,17 +552,19 @@ export class NextPageService {
     }
 
     const doc = this.documentRefs_[documentIndex];
+    const ampDoc = doc && doc.amp && doc.amp.ampdoc;
 
-    if (doc && doc.amp && doc.amp['ampdoc']) {
-      // Prevent hiding of documents that are being pre-rendered
-      if (
-        !doc.amp.ampdoc.hasBeenVisible() &&
-        visibilityState == VisibilityState.HIDDEN
-      ) {
-        return;
-      }
-      doc.amp.setVisibilityState(visibilityState);
+    // Prevent hiding of documents that are not shadow docs
+    if (!ampDoc) {
+      return;
     }
+
+    // Prevent hiding of documents that are being pre-rendered
+    if (!ampDoc.hasBeenVisible() && visibilityState == VisibilityState.HIDDEN) {
+      return;
+    }
+
+    doc.amp.setVisibilityState(visibilityState);
   }
 
   /**
