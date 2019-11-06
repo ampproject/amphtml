@@ -62,11 +62,9 @@ tags: {  # <amp-nested-menu> <div amp-nested-submenu(-open/-close)>
     mandatory_oneof: "['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open']"
   }
 }
-tags: {  # <amp-nested-menu> <button amp-nested-submenu-open/close>
-  html_format: AMP
-  tag_name: "BUTTON"
-  spec_name: "AMP-NESTED-MENU BUTTON"
-  mandatory_ancestor: "AMP-NESTED-MENU"
+
+attr_lists {
+  name: "amp-nested-menu-actions"
   attrs: {
     name: "amp-nested-submenu-close"
     mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
@@ -75,90 +73,55 @@ tags: {  # <amp-nested-menu> <button amp-nested-submenu-open/close>
     name: "amp-nested-submenu-open"
     mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
   }
+}
+tags: {  # <amp-nested-menu> <button amp-nested-submenu-open/close>
+  html_format: AMP
+  tag_name: "BUTTON"
+  spec_name: "AMP-NESTED-MENU BUTTON"
+  mandatory_ancestor: "AMP-NESTED-MENU"
+  attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h2 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H2"
   spec_name: "AMP-NESTED-MENU H2"
   mandatory_ancestor: "AMP-NESTED-MENU"
-  attrs: {
-    name: "amp-nested-submenu-close"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
-  attrs: {
-    name: "amp-nested-submenu-open"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
+  attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h3 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H3"
   spec_name: "AMP-NESTED-MENU H3"
   mandatory_ancestor: "AMP-NESTED-MENU"
-  attrs: {
-    name: "amp-nested-submenu-close"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
-  attrs: {
-    name: "amp-nested-submenu-open"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
+  attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h4 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H4"
   spec_name: "AMP-NESTED-MENU H4"
   mandatory_ancestor: "AMP-NESTED-MENU"
-  attrs: {
-    name: "amp-nested-submenu-close"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
-  attrs: {
-    name: "amp-nested-submenu-open"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
+  attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h5 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H5"
   spec_name: "AMP-NESTED-MENU H5"
   mandatory_ancestor: "AMP-NESTED-MENU"
-  attrs: {
-    name: "amp-nested-submenu-close"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
-  attrs: {
-    name: "amp-nested-submenu-open"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
+  attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h6 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H6"
   spec_name: "AMP-NESTED-MENU H6"
   mandatory_ancestor: "AMP-NESTED-MENU"
-  attrs: {
-    name: "amp-nested-submenu-close"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
-  attrs: {
-    name: "amp-nested-submenu-open"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
+  attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <span amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "SPAN"
   spec_name: "AMP-NESTED-MENU SPAN"
   mandatory_ancestor: "AMP-NESTED-MENU"
-  attrs: {
-    name: "amp-nested-submenu-close"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
-  attrs: {
-    name: "amp-nested-submenu-open"
-    mandatory_oneof: "['amp-nested-submenu-close', 'amp-nested-submenu-open']"
-  }
+  attr_lists: "amp-nested-menu-actions"
 }
 descendant_tag_list {
   # Purposefully being restrictive when whitelisting child components;
