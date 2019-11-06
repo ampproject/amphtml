@@ -183,7 +183,6 @@ export class VariableService {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    // why const and not this. ?
     /** @const {!./viewport/viewport-interface.ViewportInterface} */
     const viewport = Services.viewportForDoc(this.ampdoc_);
 

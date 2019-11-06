@@ -402,16 +402,10 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it.only('should replace SCROLL_TOP', () => {
-      // return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
-      //   expect(res).to.match();
-      // });
       return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/, true);
     });
 
     it('should replace SCROLL_LEFT', () => {
-      // return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
-      //   expect(res).to.match(/scrollLeft=\d+/);
-      // });
       return check('?scrollLeft=SCROLL_LEFT', /scrollLeft=\d+/, true);
     });
 
