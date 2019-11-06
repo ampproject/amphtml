@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
@@ -124,6 +125,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.opened_ = false;
 
+    /** @private {?Element} */
+    this.nestedMenu_ = null;
+
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
@@ -151,6 +155,16 @@ export class AmpSidebar extends AMP.BaseElement {
         isRTL(this.document_) ? Side.RIGHT : Side.LEFT
       );
       element.setAttribute('side', this.side_);
+    }
+
+    // TODO(#25343): remove this check when cleaning up experiment post launch.
+    if (isExperimentOn(this.win, 'amp-nested-menu')) {
+      this.maybeBuildNestedMenu_();
+      // Nested menu may not be present during buildCallback if it is rendered
+      // dynamically with amp-list, in which case listen for dom update.
+      element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+        this.maybeBuildNestedMenu_();
+      });
     }
 
     // Get the toolbar attribute from the child navs.
@@ -240,6 +254,24 @@ export class AmpSidebar extends AMP.BaseElement {
     );
 
     this.setupGestures_(this.element);
+  }
+
+  /**
+   * Loads the extension for nested menu if sidebar contains one and it
+   * has not been installed already.
+   */
+  maybeBuildNestedMenu_() {
+    if (this.nestedMenu_) {
+      return;
+    }
+    const nestedMenu = this.element.querySelector('amp-nested-menu');
+    if (nestedMenu) {
+      Services.extensionsFor(this.win).installExtensionForDoc(
+        this.getAmpDoc(),
+        'amp-nested-menu'
+      );
+      this.nestedMenu_ = nestedMenu;
+    }
   }
 
   /**
