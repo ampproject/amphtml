@@ -401,7 +401,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
-    it.only('should replace SCROLL_TOP', () => {
+    it('should replace SCROLL_TOP', () => {
       return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/, true);
     });
 
