@@ -204,6 +204,7 @@ tags: {  # <amp-script>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "development", deprecation: "data-ampdevmode" }
   attr_lists: "extended-amp-global"
   amp_layout {
     supported_layouts: CONTAINER
