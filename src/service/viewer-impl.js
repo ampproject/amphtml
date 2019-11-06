@@ -172,9 +172,9 @@ export class ViewerImpl {
     this.isTrustedViewer_ = null;
 
     /** @private {boolean} */
-    this.showStoryUrlInfo_ = !!(
-      parseInt(ampdoc.getParam('showStoryUrlInfo'), 10) || this.isEmbedded()
-    );
+    this.showStoryUrlInfo_ = ampdoc.getParam('showStoryUrlInfo')
+      ? !!parseInt(ampdoc.getParam('showStoryUrlInfo'), 10)
+      : this.isEmbedded();
     dev().fine(TAG_, '- showStoryUrlInfo:', this.showStoryUrlInfo_);
 
     /** @private {?Promise<string>} */

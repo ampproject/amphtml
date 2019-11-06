@@ -1754,4 +1754,36 @@ describes.sandboxed('Viewer', {}, () => {
       return result;
     });
   });
+
+  describe('showStoryUrlInfo', () => {
+    it('should be true when isEmbedded', () => {
+      // Sets isEmbedded() to true.
+      windowApi.parent = {};
+      params = {'origin': 'g.com'};
+
+      const viewer = new ViewerImpl(ampdoc);
+      expect(viewer.showStoryUrlInfo()).to.be.true;
+    });
+
+    it('should be forced to false when isEmbedded', () => {
+      // Sets isEmbedded() to true.
+      windowApi.parent = {};
+      params = {'origin': 'g.com'};
+
+      setUrl('http://www.example.com#showStoryUrlInfo=0');
+      const viewer = new ViewerImpl(ampdoc);
+      expect(viewer.showStoryUrlInfo()).to.be.false;
+    });
+
+    it('should be false when !isEmbedded', () => {
+      const viewer = new ViewerImpl(ampdoc);
+      expect(viewer.showStoryUrlInfo()).to.be.false;
+    });
+
+    it('should be forced to true when !isEmbedded', () => {
+      setUrl('http://www.example.com#showStoryUrlInfo=1');
+      const viewer = new ViewerImpl(ampdoc);
+      expect(viewer.showStoryUrlInfo()).to.be.true;
+    });
+  });
 });
