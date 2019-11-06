@@ -77,7 +77,7 @@ function createScaffoldingForFluidRendering(impl, sandbox, resize = true) {
     };
   };
   impl.buildCallback();
-  impl.attemptChangeHeight = resize ?
+  impl.attemptChangeHeight = resize
     ? () => Promise.resolve()
     : () => Promise.reject('foo');
   sandbox.stub(impl, 'sendXhrRequest').returns(
