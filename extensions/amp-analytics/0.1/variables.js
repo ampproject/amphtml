@@ -217,12 +217,7 @@ export class VariableService {
     );
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.register_('SCROLL_TOP', () => {
-      const x = viewport.getScrollTop();
-      console.log('top value: ' + x);
-      return x;
-      return viewport.getScrollTop();
-    });
+    this.register_('SCROLL_TOP', () => viewport.getScrollTop());
 
     // Returns a promise resolving to viewport.getScrollLeft.
     this.register_('SCROLL_LEFT', () => viewport.getScrollLeft());
