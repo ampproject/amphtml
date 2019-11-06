@@ -207,13 +207,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, opt_bindings) {
+    function check(input, output, toMatch = false, opt_bindings) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
       );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
-      return expect(expanded).to.eventually.equal(output);
+      return toMatch
+        ? expect(expanded).to.eventually.match(output)
+        : expect(expanded).to.eventually.equal(output);
     }
 
     it('handles consecutive macros in inner arguments', () => {
@@ -397,6 +399,13 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = 'test=123';
       await check('COOKIE(test)', '');
       doc.cookie = '';
+    });
+
+    it('should replace TIMEZONE_CODE', () => {
+      // return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
+      //   expect(res).to.match(/tz_code=\w+|^$/);
+      // });
+      return check('?tz_code=TIMEZONE_CODE', /tz_code=\w+|^$/, true);
     });
 
     describe('$MATCH', () => {
