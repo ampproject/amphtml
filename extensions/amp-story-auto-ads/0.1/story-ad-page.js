@@ -19,6 +19,7 @@ import {
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
+import {ButtonTextFitter} from './story-ad-button-text-fitter';
 import {CommonSignals} from '../../../src/common-signals';
 import {CtaTypes} from './story-ad-localization';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
@@ -121,6 +122,9 @@ export class StoryAdPage {
 
     /** @private @const {!Array<Function>} */
     this.loadCallbacks_ = [];
+
+    /** @private @const {./story-ad-button-text-fitter.ButtonTextFitter} */
+    this.buttonFitter_ = new ButtonTextFitter(ampdoc);
   }
 
   /** @return {?Document} ad document within FIE */
@@ -239,13 +243,16 @@ export class StoryAdPage {
       return false;
     }
 
-    const ctaLocalizedStringId = CtaTypes[ctaType];
-    const ctaText = this.localizationService_.getLocalizedString(
-      ctaLocalizedStringId
-    );
-    if (!ctaText) {
-      user().error(TAG, 'invalid "CTA Type" in ad response');
-      return false;
+    let ctaText;
+    // CTA picked from predefined choices.
+    if (CtaTypes[ctaType]) {
+      const ctaLocalizedStringId = CtaTypes[ctaType];
+      ctaText = this.localizationService_.getLocalizedString(
+        ctaLocalizedStringId
+      );
+    } else {
+      // Custom CTA text - Should already be localized.
+      ctaText = ctaType;
     }
 
     // Store the cta-type as an accesible var for any further pings.
@@ -253,7 +260,7 @@ export class StoryAdPage {
       analytics.setVar(
         this.index_, // adIndex
         AnalyticsVars.CTA_TYPE,
-        ctaType
+        ctaText
       )
     );
 
@@ -329,14 +336,27 @@ export class StoryAdPage {
    */
   createCtaLayer_(ctaUrl, ctaText) {
     // TODO(ccordry): Move button to shadow root.
-    const a = this.doc_.createElement('a');
-    a.className = 'i-amphtml-story-ad-link';
-    a.setAttribute('target', '_blank');
-    setStyles(a, {
-      'font-size': '0',
-      opactiy: '0',
-      transform: 'scale(0)',
-    });
+    const a = createElementWithAttributes(
+      this.doc_,
+      'a',
+      dict({
+        'class': 'i-amphtml-story-ad-link',
+        'target': 'blank',
+        'href': ctaUrl,
+      })
+    );
+
+    const didFit = this.buttonFitter_.fit(
+      this.pageElement_,
+      a, // Container
+      ctaText // Content
+    );
+
+    if (!didFit) {
+      user().warn(TAG, 'CTA button text is too long. Ad was discarded');
+      return false;
+    }
+
     a.href = ctaUrl;
     a.textContent = ctaText;
 
@@ -355,6 +375,7 @@ export class StoryAdPage {
     });
 
     const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
+    ctaLayer.className = 'i-amphtml-cta-container';
     ctaLayer.appendChild(a);
     this.pageElement_.appendChild(ctaLayer);
     return true;
