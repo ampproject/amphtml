@@ -106,7 +106,7 @@ amp-script/0.1/test/validator-amp-script.html:85:2 Invalid URL protocol 'http:' 
 |    <!-- Invalid: 'development' attribute. -->
 |    <amp-script layout=container src="https://example.com/foo.js" development></amp-script>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:88:2 The attribute 'development' in tag 'amp-script' is deprecated - use 'data-ampdevmode' instead.
+amp-script/0.1/test/validator-amp-script.html:88:2 The attribute 'development' in tag 'amp-script' is deprecated - use 'the data-ampdevmode attribute on the root html element' instead. (see https://github.com/ampproject/amphtml/issues/24987)
 |
 |    <!-- Invalid: 'data-ampdevmode' attribute. -->
 |    <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode></amp-script>
