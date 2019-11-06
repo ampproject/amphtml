@@ -15,6 +15,9 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {AutocompleteBindingDef} from './autocomplete-binding-def';
+import {AutocompleteBindingInline} from './autocomplete-binding-inline';
+import {AutocompleteBindingSingle} from './autocomplete-binding-single';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -55,6 +58,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {AutocompleteBindingDef} */
+    this.binding_ = null;
 
     /**
      * The data extracted from the <script> tag optionally provided
@@ -130,25 +136,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {string}
      */
     this.trigger_ = '';
-
-    /**
-     * Whether the trigger_ value above has been detected via user input.
-     * For use when "inline_" is true.
-     */
-    this.triggered_ = false;
-
-    /**
-     * Whether autocomplete suggestions are displaying for the triggered user input.
-     * For use when "inline_" is true.
-     */
-    this.menuTriggered_ = false;
-
-    /**
-     * The regex match value associated with the portion of the user input to suggest against.
-     * For use when "inline_" is true.
-     * @private {?RegExpResult}
-     */
-    this.match_ = null;
 
     /**
      * The base value obtained from the "src" attribute on amp-autocomplete.
@@ -241,6 +228,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     this.inline_ = this.element.hasAttribute('inline');
+    this.binding_ = this.inline_
+      ? new AutocompleteBindingInline()
+      : new AutocompleteBindingSingle();
     this.trigger_ = this.element.getAttribute('inline');
     userAssert(
       !this.inline_ || isExperimentOn(this.win, 'amp-autocomplete'),
@@ -322,7 +312,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
     if (this.element.hasAttribute('suggest-first')) {
-      this.suggestFirst_ = this.filter_ === FilterType.PREFIX || this.inline_;
+      this.suggestFirst_ = this.binding_.shouldSuggestFirst(this.filter_);
       userAssert(
         this.suggestFirst_,
         '"suggest-first" requires "filter" type "prefix" unless "inline" is present. ' +
@@ -444,7 +434,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     });
     this.inputElement_.addEventListener('focus', () => {
       this.checkFirstInteractionAndMaybeFetchData_().then(() => {
-        this.toggleResultsHandler_(!this.inline_);
+        const display = this.binding_.shouldShowOnFocus();
+        this.toggleResultsHandler_(display);
       });
     });
     this.inputElement_.addEventListener('blur', () => {
@@ -529,87 +520,57 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   inputHandler_() {
-    let inlinePromise = Promise.resolve();
-
-    // If the input is the first entry in the field.
-    const firstEntry =
-      this.userInput_.length === 0 && this.inputElement_.value.length === 1;
-    this.userInput_ = this.inputElement_.value;
-
-    if (this.inline_) {
-      const match = this.getClosestPriorMatch_(this.trigger_);
-      this.triggered_ = !!match;
-
-      if (!this.triggered_) {
-        return this.mutateElement(() => {
-          this.clearAllItems_();
-        });
-      }
-
-      this.match_ = match;
-      this.userInput_ = this.match_[0].slice(this.trigger_.length);
-
-      let hadResultsBeforeThisInput = false;
-      if (this.sourceData_ && this.userInput_ != '') {
-        hadResultsBeforeThisInput = true;
-      }
-
-      inlinePromise = this.getRemoteData_().then(sourceData => {
-        this.sourceData_ = sourceData || [];
-        this.menuTriggered_ = this.sourceData_.length;
-        if (!this.menuTriggered_ && hadResultsBeforeThisInput) {
-          this.triggered_ = false;
-        }
+    if (!this.binding_.shouldAutocomplete(this.trigger_, this.inputElement_)) {
+      return this.mutateElement(() => {
+        this.clearAllItems_();
       });
     }
 
-    return inlinePromise.then(() => {
+    // If the input is the first entry in the field.
+    const firstInteraction =
+      this.userInput_.length === 0 && this.inputElement_.value.length === 1;
+    this.userInput_ = this.binding_.updateUserInput(
+      this.trigger_,
+      this.inputElement_
+    );
+
+    return this.maybeFetchAndAutocomplete_(firstInteraction);
+  }
+
+  /**
+   * @param {boolean} firstInteraction
+   * @return {!Promise}
+   */
+  maybeFetchAndAutocomplete_(firstInteraction) {
+    const maybeFetch = this.binding_.shouldFetch()
+      ? this.getRemoteData_()
+      : Promise.resolve(this.sourceData_);
+    return maybeFetch.then(data => {
+      this.sourceData_ = data;
       return this.mutateElement(() => {
         this.filterDataAndRenderResults_(
           this.sourceData_,
           this.userInput_
         ).then(() => {
-          this.toggleResults_(true);
-          if (this.suggestFirst_) {
-            if (!this.detectBackspace_ || firstEntry) {
-              this.updateActiveItem_(1);
-            }
-            // Reset flag.
-            this.detectBackspace_ = false;
-          }
+          this.displaySuggestions_(firstInteraction);
         });
       });
     });
   }
 
   /**
-   * Finds the closest string in the user input prior to the cursor
-   * to display suggestions.
-   * @param {string} trigger
-   * @return {?RegExpResult}
-   * @private
+   * Toggle the container of suggestions to show.
+   * If the publisher has opted to autosuggest the first option, do this as well.
+   * @param {boolean} firstInteraction
    */
-  getClosestPriorMatch_(trigger) {
-    const delimiter = trigger.replace(/([()[{*+.$^\\|?])/g, '\\$1');
-    const pattern = `((${delimiter}|^${delimiter})(\\w+)?)`;
-    const regex = new RegExp(pattern, 'gm');
-    const {value, selectionStart: cursor} = this.inputElement_;
-    let match, lastMatch;
-
-    while ((match = regex.exec(value)) !== null) {
-      if (match[0].length + ownProperty(match, 'index') > cursor) {
-        break;
+  displaySuggestions_(firstInteraction) {
+    this.toggleResults_(true);
+    if (this.suggestFirst_) {
+      if (!this.detectBackspace_ || firstInteraction) {
+        this.updateActiveItem_(1);
       }
-      lastMatch = match;
+      this.detectBackspace_ = false;
     }
-
-    if (
-      !lastMatch ||
-      lastMatch[0].length + ownProperty(lastMatch, 'index') < cursor
-    ) {
-      return null;
-    }
-    return lastMatch;
   }
 
   /**
@@ -622,7 +583,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.mutateElement(() => {
       const element = dev().assertElement(event.target);
       this.selectItem_(this.getItemElement_(element));
-      this.triggered_ = false;
     });
   }
 
@@ -630,24 +590,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Filter the source data according to the given opt_input and render it in
    * the results container_.
    * @param {?Array<!JsonObject|string>} sourceData
-   * @param {string=} opt_input
+   * @param {string} input
    * @return {!Promise}
    * @private
    */
-  filterDataAndRenderResults_(sourceData, opt_input = '') {
+  filterDataAndRenderResults_(sourceData, input = '') {
     this.clearAllItems_();
-    if (
-      opt_input.length < this.minChars_ ||
-      !sourceData ||
-      !sourceData.length
-    ) {
+    if (input.length < this.minChars_ || !sourceData || !sourceData.length) {
       return Promise.resolve();
     }
-    const filteredData = this.filterData_(sourceData, opt_input);
+    const filteredData = this.filterData_(sourceData, input);
     return this.renderResults_(
       filteredData,
       dev().assertElement(this.container_),
-      opt_input
+      input
     );
   }
 
@@ -977,25 +933,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.clearAllItems_();
     this.toggleResults_(false);
 
-    if (!this.inline_) {
-      this.inputElement_.value = this.userInput_ = selectedValue;
-      return;
-    }
-
-    let cursor = this.inputElement_.selectionStart;
-    const startIndex = ownProperty(this.match_, 'index');
-    const {length} = this.userInput_;
-    if (cursor >= startIndex + length) {
-      cursor = cursor - length;
-    }
-
-    this.inputElement_.value = this.replaceInlineValue_(selectedValue);
-    this.userInput_ = '';
-
-    tryFocus(this.inputElement_);
-    cursor = cursor + selectedValue.length + 1;
-    this.inputElement_.setSelectionRange(cursor, cursor);
-    this.match_ = null;
+    this.inputElement_.value = this.binding_.updateInputWithSelection(
+      selectedValue,
+      this.inputElement_,
+      this.userInput_.length,
+      this.trigger_
+    );
+    this.userInput_ = this.binding_.updateUserInput(
+      this.trigger_,
+      this.inputElement_
+    );
   }
 
   /**
@@ -1011,24 +958,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       /** @type {!JsonObject} */ ({value})
     );
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
-  }
-
-  /**
-   * Insert the selected value into the inline autocomplete input.
-   * @param {string} selectedValue
-   * @return {string}
-   * @private
-   */
-  replaceInlineValue_(selectedValue) {
-    this.menuTriggered_ = false;
-    const {value} = this.inputElement_;
-    const index = Number(ownProperty(this.match_, 'index'));
-
-    const pre = value.slice(0, index + this.trigger_.length);
-    const post = value.slice(
-      index + this.trigger_.length + this.userInput_.length
-    );
-    return pre + selectedValue + ' ' + post;
   }
 
   /**
@@ -1052,17 +981,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const activeIndex = mod(index, enabledElements.length);
     const newActiveElement = enabledElements[activeIndex];
 
-    if (!this.inline_) {
-      this.inputElement_.value = newActiveElement.getAttribute('data-value');
-
-      // Highlight if suggest-first is present.
-      if (this.suggestFirst_) {
-        this.inputElement_.setSelectionRange(
-          this.userInput_.length,
-          this.inputElement_.value.length
-        );
-      }
-    }
+    this.binding_.displayActiveItemInInput(
+      newActiveElement,
+      this.inputElement_,
+      this.userInput_.length,
+      this.suggestFirst_
+    );
 
     // Element visibility logic
     let shouldScroll, newTop;
@@ -1098,7 +1022,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.inputElement_.setAttribute('aria-activedescendant', elementId);
         this.activeIndex_ = activeIndex;
         this.activeElement_ = newActiveElement;
-        tryFocus(this.activeElement);
+        tryFocus(dev().assertElement(this.activeElement_));
       }
     );
   }
@@ -1119,9 +1043,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   displayUserInput_() {
-    if (!this.inline_) {
-      this.inputElement_.value = this.userInput_;
-    }
+    this.binding_.resetValue(this.userInput_, this.inputElement_);
     this.resetActiveElement_();
   }
 
@@ -1174,9 +1096,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
           }
           return this.updateActiveItem_(1);
         }
-        if (this.inline_ && !this.triggered_) {
-          return Promise.resolve();
-        }
         return this.mutateElement(() => {
           this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
           this.toggleResults_(true);
@@ -1190,26 +1109,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
-        if (
-          this.resultsShowing_() &&
-          ((!this.submitOnEnter_ && !this.inline_) ||
-            (this.inline_ && this.activeElement_))
-        ) {
-          event.preventDefault();
-        }
-        if (this.suggestFirst_ && !this.inline_) {
-          // Remove any highlighting by moving cursor to end of word.
-          const inputLength = this.inputElement_.value.length;
-          this.inputElement_.setSelectionRange(inputLength, inputLength);
-        }
+        this.binding_.maybePreventDefaultOnEnter(
+          event,
+          this.resultsShowing_(),
+          this.submitOnEnter_,
+          !!this.activeElement_
+        );
+        this.binding_.removeHighlighting(this.inputElement_);
         return this.mutateElement(() => {
           if (this.resultsShowing_() && this.activeElement_) {
             this.selectItem_(this.activeElement_);
-            this.triggered_ = false;
             this.resetActiveElement_();
-          } else {
-            this.toggleResults_(false);
+            return Promise.resolve();
           }
+          this.toggleResults_(false);
         });
       case Keys.ESCAPE:
         // Select user's partial input and hide results.
@@ -1228,7 +1141,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return Promise.resolve();
       case Keys.BACKSPACE:
         this.detectBackspace_ = this.suggestFirst_;
-        this.menuTriggered_ = this.inline_;
         return Promise.resolve();
       default:
         return Promise.resolve();
