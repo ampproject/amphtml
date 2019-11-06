@@ -103,7 +103,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       ),
       subscribeResponse: sandbox.stub(
         ConfiguredRuntime.prototype,
-        'setOnSubscribeResponse'
+        'setOnPaymentResponse'
       ),
     };
     methods = {
