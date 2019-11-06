@@ -41,7 +41,7 @@ const TAG = 'amp-next-page';
 /**
  * @typedef {{
  *   ampUrl: string,
- *   amp: ?Object,
+ *   amp: (?../../../src/runtime.ShadowDoc | undefined),
  *   recUnit: {el: ?Element, isObserving: boolean},
  *   cancelled: boolean
  * }}
@@ -175,13 +175,15 @@ export class NextPageService {
       canonicalUrl
     );
 
-    // TODO(wassgha): Establish parity with the shadow doc amp object
-    documentRef.amp = {
+    // TODO(wassgha): Untype as ShadowDoc and tighten the ShadowDoc type spec
+    /** @type {!../../../src/runtime.ShadowDoc} */
+    const amp = {
       ampdoc: ampDoc,
       url: win.document.location.href,
       title: win.document.title,
       canonicalUrl,
     };
+    documentRef.amp = amp;
 
     this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
@@ -208,7 +210,7 @@ export class NextPageService {
    * Attach a ShadowDoc using the given document.
    * @param {!Element} shadowRoot Root element to attach the shadow document to.
    * @param {!Document} doc Document to attach.
-   * @return {?Object} Return value of {@link MultidocManager#attachShadowDoc}
+   * @return {?../../../src/runtime.ShadowDoc} Return value of {@link MultidocManager#attachShadowDoc}
    */
   attachShadowDoc_(shadowRoot, doc) {
     if (this.hideSelector_) {
@@ -226,12 +228,16 @@ export class NextPageService {
       removeElement(item);
     }
 
+    /** @type {!../../../src/runtime.ShadowDoc} */
     const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {
       visibilityState: VisibilityState.PRERENDER,
     });
-    installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
+    const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (dev().assert(
+      amp.ampdoc
+    ));
+    installStylesForDoc(ampdoc, CSS, null, false, TAG);
 
-    const body = amp.ampdoc.getBody();
+    const body = ampdoc.getBody();
     body.classList.add('i-amphtml-next-page-document');
 
     return amp;

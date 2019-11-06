@@ -69,19 +69,19 @@ const TAG = 'runtime';
 
 /**
  * @typedef {{
- *  url: string,
- *  title: string,
- *  canonicalUrl: string,
+ *  url: (string|undefined),
+ *  title: (string|undefined),
+ *  canonicalUrl: (string|undefined),
  *  head: (Element|undefined),
- *  ampdoc: !./service/ampdoc-impl.AmpDocShadow,
- *  setVisibilityState: (function()|undefined),
+ *  ampdoc: (!./service/ampdoc-impl.AmpDoc | undefined),
+ *  setVisibilityState: (function(!VisibilityState)|undefined),
  *  postMessage: (function()|undefined),
  *  onMessage: (function()|undefined),
  *  close: (function()|undefined),
  *  getState: (function()|undefined),
  *  setState: (function()|undefined),
  *  toggleRuntime: (function()|undefined),
- *  resources: !./service/resources-interface.ResourcesInterface
+ *  resources: (!./service/resources-interface.ResourcesInterface | undefined)
  * }}
  */
 export let ShadowDoc;
@@ -598,7 +598,7 @@ export class MultidocManager {
    * @param {!Document} doc
    * @param {string} url
    * @param {!Object<string, string>=} opt_initParams
-   * @return {!Object}
+   * @return {!ShadowDoc}
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
     dev().fine(TAG, 'Attach shadow doc:', doc);
