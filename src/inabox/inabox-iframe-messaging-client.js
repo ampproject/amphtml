@@ -53,7 +53,7 @@ export function installIframeMessagingClient(win) {
  * @return {!../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 function createIframeMessagingClient(win) {
-  const iframeClient = new IframeMessagingClient(win, true);
+  const iframeClient = new IframeMessagingClient(win);
   //  Try read sentinel from window first.
   const dataObject = tryParseJson(win.name);
   let sentinel = null;
@@ -61,7 +61,6 @@ function createIframeMessagingClient(win) {
     sentinel = dataObject['_context']['sentinel'];
   }
   iframeClient.setSentinel(sentinel || getRandom(win));
-  iframeClient.setHostWindow(win.top);
   return iframeClient;
 }
 

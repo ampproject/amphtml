@@ -27,8 +27,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
     win = env.win;
     postMessageStub = sandbox.stub();
     hostWindow = {postMessage: postMessageStub};
-    client = new IframeMessagingClient(win);
-    client.setHostWindow(hostWindow);
+    client = new IframeMessagingClient(win, hostWindow);
     client.setSentinel('sentinel-123');
     client.nextMessageId_ = 1;
   });
