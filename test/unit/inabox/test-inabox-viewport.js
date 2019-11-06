@@ -15,7 +15,6 @@
  */
 
 import * as iframeHelper from '../../../src/iframe-helper';
-import * as service from '../../../src/service';
 import {FrameOverlayManager} from '../../../ads/inabox/frame-overlay-manager';
 import {Observable} from '../../../src/observable';
 import {PositionObserver} from '../../../ads/inabox/position-observer';
@@ -25,6 +24,8 @@ import {
   prepareBodyForOverlay,
   resetBodyForOverlay,
 } from '../../../src/inabox/inabox-viewport';
+import {installIframeMessagingClient} from '../../../src/inabox/inabox-iframe-messaging-client';
+import {installPlatformService} from '../../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {toggleExperiment} from '../../../src/experiments';
 
@@ -40,7 +41,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let onResizeCallback;
   let topWindowObservable;
   let measureSpy;
-  let iframeClient;
 
   function stubIframeClientMakeRequest(
     requestType,
@@ -52,7 +52,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     const methodName = opt_once ? 'requestOnce' : 'makeRequest';
 
     return sandbox
-      ./*OK*/ stub(iframeClient, methodName)
+      ./*OK*/ stub(binding.iframeClient_, methodName)
       .callsFake((req, res, cb) => {
         expect(req).to.equal(requestType);
         expect(res).to.equal(responseType);
@@ -92,14 +92,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     };
     win.frameElement = iframeElement;
 
-    iframeClient = {
-      requestOnce() {},
-      makeRequest() {},
-    };
-    sandbox
-      .stub(service, 'getServicePromise')
-      .returns(Promise.resolve(iframeClient));
     toggleExperiment(win, 'inabox-viewport-friendly', false);
+    installIframeMessagingClient(win);
+    installPlatformService(win);
     binding = new ViewportBindingInabox(win);
     sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
     toggleExperiment(win, 'inabox-viewport-friendly', true);
@@ -451,8 +446,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           targetRect: layoutRectLtwh(10, 20, 100, 100),
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
         }),
-      /* opt_sync */ false,
-      /* opt_once */ true
+      undefined,
+      true
     );
     return binding.getRootClientRectAsync().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
