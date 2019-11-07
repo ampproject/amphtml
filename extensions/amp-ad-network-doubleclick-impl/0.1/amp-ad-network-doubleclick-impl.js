@@ -1198,6 +1198,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               'Attempt to change size failed on fluid ' +
                 'creative. Will re-attempt when slot is out of the viewport.'
             );
+            const {width, height} = this.getSlotSize();
+            if (width && height) {
+              // This call is idempotent, so it's okay to make it multiple
+              // times.
+              this.fireFluidDelayedImpression();
+            }
             this.reattemptToExpandFluidCreative_ = true;
             this.setCssPosition_('absolute');
           });
