@@ -126,7 +126,7 @@ window.initRecaptcha = initRecaptcha;
  * @param {!JsonObject} dataObject
  */
 function initializeIframeMessagingClient(win, grecaptcha, dataObject) {
-  iframeMessagingClient = new IframeMessagingClient(win);
+  iframeMessagingClient = new IframeMessagingClient(win, win.parent);
   iframeMessagingClient.setSentinel(dataObject.sentinel);
   iframeMessagingClient.registerCallback(
     'amp-recaptcha-action',
