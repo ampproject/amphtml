@@ -39,7 +39,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
-  AnalyticsEvent,
+  StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
@@ -676,7 +676,9 @@ export class AmpStory extends AMP.BaseElement {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
         this.analyticsService_.triggerEvent(
-          isMuted ? AnalyticsEvent.STORY_MUTED : AnalyticsEvent.STORY_UNMUTED
+          isMuted
+            ? StoryAnalyticsEvent.STORY_MUTED
+            : StoryAnalyticsEvent.STORY_UNMUTED
         );
       },
       false /** callToInitialize */
