@@ -90,11 +90,6 @@ class InaboxViewer {
   }
 
   /** @override */
-  showStoryUrlInfo() {
-    return this.isEmbedded();
-  }
-
-  /** @override */
   getPrerenderSize() {
     return 0;
   }

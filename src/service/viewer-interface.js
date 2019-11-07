@@ -102,12 +102,6 @@ export class ViewerInterface {
   isOvertakeHistory() {}
 
   /**
-   * Whether a Story should show the URL info dialog.
-   * @return {boolean}
-   */
-  showStoryUrlInfo() {}
-
-  /**
    * How much the viewer has requested the runtime to prerender the document.
    * The values are in number of screens.
    * @return {number}
