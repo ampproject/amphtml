@@ -17,7 +17,6 @@
 import {AMP_STORY_BOOKEND_COMPONENT_DATA} from './components/bookend-component-interface';
 import {Action, StateProperty, UIType} from '../amp-story-store-service';
 import {ActionTrust} from '../../../../src/action-constants';
-import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {BookendComponent} from './bookend-component';
 import {CSS} from '../../../../build/amp-story-bookend-1.0.css';
@@ -37,6 +36,7 @@ import {
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../../src/localized-strings';
 import {Services} from '../../../../src/services';
+import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
@@ -575,7 +575,7 @@ export class AmpStoryBookend extends DraggableDrawer {
       componentData.position
     );
 
-    this.analyticsService_.triggerEvent(AnalyticsEvent.BOOKEND_CLICK);
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.BOOKEND_CLICK);
   }
 
   /**
