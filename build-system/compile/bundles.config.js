@@ -889,6 +889,7 @@ exports.extensionBundles = [
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',
+        'amp-story-quiz',
       ],
     },
     type: TYPES.MISC,
@@ -972,16 +973,6 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-quiz',
-    version: '0.1',
-    latestVersion: '0.1',
-    options: {
-      hasCss: true,
-      cssBinaries: ['amp-quiz'],
-    },
     type: TYPES.MISC,
   },
   {

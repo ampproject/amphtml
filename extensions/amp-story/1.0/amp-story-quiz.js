@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-quiz-0.1.css';
-import {createShadowRootWithStyle} from '../../amp-story/0.1/utils';
+import {CSS} from '../../../build/amp-story-quiz-1.0.css';
+import {createShadowRootWithStyle} from '../0.1/utils';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 
-export class AmpQuiz extends AMP.BaseElement {
+export class AmpStoryQuiz extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
    */
@@ -46,9 +46,9 @@ export class AmpQuiz extends AMP.BaseElement {
   buildCallback() {
     const html = htmlFor(this.element);
     const shadowElement = html`
-      <div class="i-amp-quiz-container">
-        <div class="i-amp-quiz-prompt-container"></div>
-        <div class="i-amp-quiz-option-container"></div>
+      <div class="i-amp-story-quiz-container">
+        <div class="i-amp-story-quiz-prompt-container"></div>
+        <div class="i-amp-story-quiz-option-container"></div>
       </div>
     `;
 
@@ -89,7 +89,7 @@ export class AmpQuiz extends AMP.BaseElement {
       );
     }
 
-    prompt.setAttribute('class', 'i-amp-quiz-prompt');
+    prompt.setAttribute('class', 'i-amp-story-quiz-prompt');
 
     const options = Array.from(this.element.querySelectorAll('option'));
     if (options.length < 2 || options.length > 4) {
@@ -97,7 +97,7 @@ export class AmpQuiz extends AMP.BaseElement {
     }
 
     this.shadowRoot_
-      .querySelector('.i-amp-quiz-prompt-container')
+      .querySelector('.i-amp-story-quiz-prompt-container')
       .appendChild(prompt);
 
     options.forEach(this.configureOption_);
@@ -121,20 +121,20 @@ export class AmpQuiz extends AMP.BaseElement {
     option.remove();
 
     // Set up the class and add it to the shadow root
-    convertedOption.setAttribute('class', 'i-amp-quiz-option');
+    convertedOption.setAttribute('class', 'i-amp-story-quiz-option');
     this.shadowRoot_
-      .querySelector('.i-amp-quiz-option-container')
+      .querySelector('.i-amp-story-quiz-option-container')
       .appendChild(convertedOption);
 
     // Create a container for the answer choice and add it to the shadow root
     const answerChoice = document.createElement('span');
     answerChoice.textContent = this.answerChoiceOptions_.shift();
-    answerChoice.setAttribute('class', 'i-amp-quiz-answer-choice');
+    answerChoice.setAttribute('class', 'i-amp-story-quiz-answer-choice');
     convertedOption.prepend(answerChoice);
 
     // Create a container for the percentage and add it to the shadow root
     const percentageBox = document.createElement('span');
-    percentageBox.setAttribute('class', 'i-amp-quiz-percentage');
+    percentageBox.setAttribute('class', 'i-amp-story-quiz-percentage');
     convertedOption.append(percentageBox);
   }
 
@@ -167,7 +167,9 @@ export class AmpQuiz extends AMP.BaseElement {
     // TODO: CHECK THAT EACH IS A NUMBER
 
     let backgroundString;
-    if (option.getAttribute('class').includes('i-amp-quiz-option-selected')) {
+    if (
+      option.getAttribute('class').includes('i-amp-story-quiz-option-selected')
+    ) {
       const colorPrefix = option.hasAttribute('correct') ? '' : 'in';
       backgroundString = `linear-gradient(90deg, var(--${colorPrefix}correct-color-shaded) ${10 +
         (9 * percentage) / 10}%, var(--${colorPrefix}correct-color) ${10 +
@@ -178,14 +180,14 @@ export class AmpQuiz extends AMP.BaseElement {
     }
     setStyle(option, 'background', backgroundString);
     option.querySelector(
-      '.i-amp-quiz-percentage'
+      '.i-amp-story-quiz-percentage'
     ).textContent = `${percentage}%`;
   }
 
   /** @private */
   attachOptionActionHandlers_() {
     const options = Array.from(
-      this.shadowRoot_.querySelectorAll('.i-amp-quiz-option')
+      this.shadowRoot_.querySelectorAll('.i-amp-story-quiz-option')
     );
 
     // attach listeners
@@ -196,15 +198,15 @@ export class AmpQuiz extends AMP.BaseElement {
             o === option
               ? o.setAttribute(
                   'class',
-                  `i-amp-quiz-option i-amp-quiz-option-post-selection i-amp-quiz-option-selected`
+                  `i-amp-story-quiz-option i-amp-story-quiz-option-post-selection i-amp-story-quiz-option-selected`
                 )
               : o.setAttribute(
                   'class',
-                  `i-amp-quiz-option i-amp-quiz-option-post-selection`
+                  `i-amp-story-quiz-option i-amp-story-quiz-option-post-selection`
                 );
 
             const symbolContainer = o.querySelector(
-              '.i-amp-quiz-answer-choice'
+              '.i-amp-story-quiz-answer-choice'
             );
             // TODO: REPLACE THESE WITH ICONS
             if (o.hasAttribute('correct')) {
@@ -223,7 +225,3 @@ export class AmpQuiz extends AMP.BaseElement {
     });
   }
 }
-
-AMP.extension('amp-quiz', '0.1', AMP => {
-  AMP.registerElement('amp-quiz', AmpQuiz);
-});
