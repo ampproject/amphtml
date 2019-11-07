@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Wistia video.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -42,8 +43,10 @@ Displays a <a href="https://wistia.com">Wistia</a> video.
 
 ```html
 <amp-wistia-player
-    data-media-hashed-id="u8p9wq6mq8"
-    width="512" height="360"></amp-wistia-player>
+  data-media-hashed-id="u8p9wq6mq8"
+  width="512"
+  height="360"
+></amp-wistia-player>
 ```
 
 ## Attributes

@@ -19,12 +19,15 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="felmat"
-    data-host="felmat.net"
-    data-fmt="banner"
-    data-fmk="U12473_n2cJD"
-    data-fmp="0">
+<amp-ad
+  width="300"
+  height="250"
+  type="felmat"
+  data-host="felmat.net"
+  data-fmt="banner"
+  data-fmk="U12473_n2cJD"
+  data-fmp="0"
+>
 </amp-ad>
 ```
 
@@ -38,4 +41,3 @@ Supported parameters:
 - `data-fmt`
 - `data-fmk`
 - `data-fmp`
-

@@ -7,6 +7,7 @@ formats:
 teaser:
   text: A tracking pixel to count page views.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -49,14 +50,12 @@ The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a
 In this basic example, the `amp-pixel` issues a simple GET request to the given URL and ignores the result.
 
 ```html
-<amp-pixel src="https://foo.com/tracker/foo"
-    layout="nodisplay"></amp-pixel>
+<amp-pixel src="https://foo.com/tracker/foo" layout="nodisplay"></amp-pixel>
 ```
 
 {% call callout('Note', type='note') %}
 When processing AMP URLs in the referrer header of analytics requests, strip out or ignore the `usqp` parameter. This parameter is used by Google to trigger experiments for the Google AMP Cache.
 {% endcall %}
-
 
 ## Attributes
 
@@ -69,9 +68,11 @@ A simple URL to a remote endpoint that must be `https` protocol.
 This attribute is similar to the `referrerpolicy` attribute on `<img>`, however `no-referrer` is the only accepted value. If `referrerpolicy=no-referrer` is specified, the `referrer` header is removed from the HTTP request.
 
 ```html
-<amp-pixel src="https://foo.com/tracker/foo"
-    layout="nodisplay"
-    referrerpolicy="no-referrer"></amp-pixel>
+<amp-pixel
+  src="https://foo.com/tracker/foo"
+  layout="nodisplay"
+  referrerpolicy="no-referrer"
+></amp-pixel>
 ```
 
 ##### allow-ssr-img (optional)
@@ -94,8 +95,7 @@ See the [Substitutions Guide](../spec/amp-var-substitutions.md) for more informa
 In the following example, a request might be made to something like `https://foo.com/pixel?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
 
 ```html
-<amp-pixel src="https://foo.com/pixel?RANDOM"
-    layout="nodisplay"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?RANDOM" layout="nodisplay"></amp-pixel>
 ```
 
 ## Styling

@@ -19,12 +19,15 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="1"
-	type="sunmedia"
-	layout="responsive"
-	data-cid="sunmedia_test"
-	data-cskp=1
-	data-crst=1>
+<amp-ad
+  width="300"
+  height="1"
+  type="sunmedia"
+  layout="responsive"
+  data-cid="sunmedia_test"
+  data-cskp="1"
+  data-crst="1"
+>
 </amp-ad>
 ```
 
@@ -38,5 +41,5 @@ For further information, please contact [SunMedia](http://sunmedia.tv/#contact).
 
 ### Optional parameters
 
--	`data-cskp`: Indicates skip button enabled
--	`data-crst`: Indicates restart option enabled
+- `data-cskp`: Indicates skip button enabled
+- `data-crst`: Indicates restart option enabled

@@ -146,7 +146,7 @@ class AmpCarousel extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
 
-    this.setupCarouselDom_();
+    this.buildCarouselDom_();
 
     this.carousel_ = new Carousel({
       win: this.win,
@@ -162,9 +162,9 @@ class AmpCarousel extends AMP.BaseElement {
     });
 
     this.carousel_.updateSlides(this.slides_);
-    this.setupChildVisibilityTracking_();
-    this.setupActions_();
-    this.setupListeners_();
+    this.initializeChildLayoutManagement_();
+    this.initializeActions_();
+    this.initializeListeners_();
     this.updateUi_();
   }
 
@@ -232,7 +232,7 @@ class AmpCarousel extends AMP.BaseElement {
    * Creates the DOM for the carousel, placing the children into their correct
    * spot.
    */
-  setupCarouselDom_() {
+  buildCarouselDom_() {
     const {element} = this;
     const children = toArray(element.children);
     let prevArrow;
@@ -330,7 +330,7 @@ class AmpCarousel extends AMP.BaseElement {
    * Setups up visibility tracking for the child elements, laying them out
    * when needed.
    */
-  setupChildVisibilityTracking_() {
+  initializeChildLayoutManagement_() {
     // Set up management of layout for the child slides.
     const owners = Services.ownersForDoc(this.element);
     this.childLayoutManager_ = new ChildLayoutManager({
@@ -368,7 +368,7 @@ class AmpCarousel extends AMP.BaseElement {
   /**
    * @private
    */
-  setupActions_() {
+  initializeActions_() {
     this.registerAction(
       'prev',
       ({trust}) => {
@@ -397,7 +397,7 @@ class AmpCarousel extends AMP.BaseElement {
   /**
    * @private
    */
-  setupListeners_() {
+  initializeListeners_() {
     this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
       this.onIndexChanged_(event);
     });
