@@ -21,27 +21,34 @@
  */
 export class AutocompleteBindingDef {
   /**
-   * @param {string} trigger
-   * @param {?HTMLInputElement} inputEl
+   * Whether the binding should attempt to display
+   * autocomplete suggestions on user input.
+   * @param {string} unusedTrigger
+   * @param {?HTMLInputElement} unusedInputEl
    * @return {boolean}
    */
-  shouldAutocomplete(trigger, inputEl) {}
+  shouldAutocomplete(unusedTrigger, unusedInputEl) {}
 
   /**
-   * @param {string} trigger
-   * @param {?HTMLInputElement} inputEl
-   * @return string
-   */
-  updateUserInput(trigger, inputEl) {}
-
-  /**
-   * @param {string} selection
-   * @param {!HTMLInputElement} inputEl
-   * @param {number} inputLength
-   * @param {string} trigger
+   * @param {string} unusedTrigger
+   * @param {?HTMLInputElement} unusedInputEl
    * @return {string}
    */
-  updateInputWithSelection(selection, inputEl, inputLength, trigger) {}
+  updateUserInput(unusedTrigger, unusedInputEl) {}
+
+  /**
+   * @param {string} unusedSelection
+   * @param {!HTMLInputElement} unusedInputEl
+   * @param {number} unusedInputLength
+   * @param {string} unusedTrigger
+   * @return {string}
+   */
+  updateInputWithSelection(
+    unusedSelection,
+    unusedInputEl,
+    unusedInputLength,
+    unusedTrigger
+  ) {}
 
   /**
    * @return {boolean}
@@ -49,16 +56,16 @@ export class AutocompleteBindingDef {
   shouldFetch() {}
 
   /**
-   * @param {string} userInput
-   * @param {?HTMLInputElement} inputEl
+   * @param {string} unusedUserInput
+   * @param {?HTMLInputElement} unusedInputEl
    */
-  resetValue(userInput, inputEl) {}
+  resetValue(unusedUserInput, unusedInputEl) {}
 
   /**
-   * @param {string} filter
+   * @param {string} unusedFilter
    * @return {boolean}
    */
-  shouldSuggestFirst(filter) {}
+  shouldSuggestFirst(unusedFilter) {}
 
   /**
    * @return {boolean}
@@ -66,28 +73,33 @@ export class AutocompleteBindingDef {
   shouldShowOnFocus() {}
 
   /**
-   * @param {*} element
-   * @param {*} inputEl
-   * @param {*} userInputLength
-   * @param {*} highlight
+   * @param {*} unusedElement
+   * @param {*} unusedInputEl
+   * @param {*} unusedUserInputLength
+   * @param {*} unusedHighlight
    */
-  displayActiveItemInInput(element, inputEl, userInputLength, highlight) {}
+  displayActiveItemInInput(
+    unusedElement,
+    unusedInputEl,
+    unusedUserInputLength,
+    unusedHighlight
+  ) {}
 
   /**
-   * @param {HTMLInputElement} inputEl
+   * @param {HTMLInputElement} unusedInputEl
    */
-  removeHighlighting(inputEl) {}
+  removeHighlighting(unusedInputEl) {}
 
   /**
-   * @param {Event} event
-   * @param {boolean} resultsShowing
-   * @param {boolean} submitOnEnter
-   * @param {boolean} activeElement
+   * @param {Event} unusedEvent
+   * @param {boolean} unusedResultsShowing
+   * @param {boolean} unusedSubmitOnEnter
+   * @param {boolean} unusedActiveElement
    */
   maybePreventDefaultOnEnter(
-    event,
-    resultsShowing,
-    submitOnEnter,
-    activeElement
+    unusedEvent,
+    unusedResultsShowing,
+    unusedSubmitOnEnter,
+    unusedActiveElement
   ) {}
 }

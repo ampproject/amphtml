@@ -24,31 +24,37 @@ import {FilterType} from './amp-autocomplete';
  */
 export class AutocompleteBindingSingle {
   /**
-   * @param {string} trigger
-   * @param {?HTMLInputElement} inputEl
+   * @override
+   * @param {string} unusedTrigger
+   * @param {?HTMLInputElement} unusedInputEl
    * @return {boolean}
    */
-  shouldAutocomplete(trigger, inputEl) {
+  shouldAutocomplete(unusedTrigger, unusedInputEl) {
     return true;
   }
 
   /**
-   * @param {string} trigger
+   * @param {string} unusedTrigger
    * @param {?HTMLInputElement} inputEl
    * @return {string}
    */
-  updateUserInput(trigger, inputEl) {
+  updateUserInput(unusedTrigger, inputEl) {
     return inputEl.value || '';
   }
 
   /**
    * @param {string} selection
-   * @param {!HTMLInputElement} inputEl
-   * @param {number} inputLength
-   * @param {string} trigger
+   * @param {!HTMLInputElement} unusedInputEl
+   * @param {number} unusedInputLength
+   * @param {string} unusedTrigger
    * @return {string}
    */
-  updateInputWithSelection(selection, inputEl, inputLength, trigger) {
+  updateInputWithSelection(
+    selection,
+    unusedInputEl,
+    unusedInputLength,
+    unusedTrigger
+  ) {
     return selection;
   }
 
@@ -110,13 +116,13 @@ export class AutocompleteBindingSingle {
    * @param {Event} event
    * @param {boolean} resultsShowing
    * @param {boolean} submitOnEnter
-   * @param {boolean} activeElement
+   * @param {boolean} unusedActiveElement
    */
   maybePreventDefaultOnEnter(
     event,
     resultsShowing,
     submitOnEnter,
-    activeElement
+    unusedActiveElement
   ) {
     if (!resultsShowing || submitOnEnter) {
       return;

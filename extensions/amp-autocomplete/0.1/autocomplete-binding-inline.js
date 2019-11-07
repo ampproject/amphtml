@@ -84,10 +84,10 @@ export class AutocompleteBindingInline {
 
   /**
    * @param {string} trigger
-   * @param {?HTMLInputElement} inputEl
+   * @param {?HTMLInputElement} unusedInputEl
    * @return {string}
    */
-  updateUserInput(trigger, inputEl) {
+  updateUserInput(trigger, unusedInputEl) {
     if (!this.match_) {
       return '';
     }
@@ -128,17 +128,17 @@ export class AutocompleteBindingInline {
   }
 
   /**
-   * @param {string} userInput
-   * @param {?HTMLInputElement} inputEl
+   * @param {string} unusedUserInput
+   * @param {?HTMLInputElement} unusedInputEl
    */
-  resetValue(userInput, inputEl) {}
+  resetValue(unusedUserInput, unusedInputEl) {}
 
   /**
    *
-   * @param {string} filter
+   * @param {string} unusedFilter
    * @return {boolean}
    */
-  shouldSuggestFirst(filter) {
+  shouldSuggestFirst(unusedFilter) {
     return true;
   }
 
@@ -157,21 +157,21 @@ export class AutocompleteBindingInline {
 
   /**
    *
-   * @param {HTMLInputElement} inputEl
+   * @param {HTMLInputElement} unusedInputEl
    */
-  removeHighlighting(inputEl) {}
+  removeHighlighting(unusedInputEl) {}
 
   /**
    *
    * @param {Event} event
    * @param {boolean} resultsShowing
-   * @param {boolean} submitOnEnter
+   * @param {boolean} unusedSubmitOnEnter
    * @param {boolean} activeElement
    */
   maybePreventDefaultOnEnter(
     event,
     resultsShowing,
-    submitOnEnter,
+    unusedSubmitOnEnter,
     activeElement
   ) {
     if (!resultsShowing || !activeElement) {
