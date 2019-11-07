@@ -18,7 +18,7 @@
  * @fileoverview This is a sample bootstrap script for AMP in-a-box host.
  */
 
-const win = window.top;
+const win = window;
 initInaboxHost(win);
 
 // Enable amp-inabox APIs for all iframes. Normally, the actualy bootstrap
