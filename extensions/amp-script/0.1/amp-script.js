@@ -112,8 +112,10 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.development_ =
-      this.element.ownerDocument.documentElement.hasAttribute('data-ampdevmode') ||
-      this.element.hasAttribute('development');
+      this.element.hasAttribute('development') ||
+      this.element.ownerDocument.documentElement.hasAttribute(
+        'data-ampdevmode'
+      );
 
     if (this.development_) {
       user().warn(
@@ -121,6 +123,13 @@ export class AmpScript extends AMP.BaseElement {
         'JavaScript size and script hash requirements are disabled in development mode.',
         this.element
       );
+      if (this.element.hasAttribute('development')) {
+        user().warn(
+          TAG,
+          "The 'development' flag is deprecated. Please use 'data-ampdevmode' on the root html element instead",
+          this.element
+        );
+      }
     }
 
     return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
