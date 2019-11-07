@@ -172,7 +172,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('Element - createdCallback', () => {
         const element = new ElementClass();
-        const build = sandbox.stub(element, 'build');
+        const build = sandbox.stub(element, 'build').returns(Promise.resolve());
 
         expect(element.isBuilt()).to.equal(false);
         expect(element.hasAttributes()).to.equal(false);
@@ -225,9 +225,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('Element - should only add classes on first attachedCallback', () => {
         const element = new ElementClass();
         const buildPromise = Promise.resolve();
-        const buildStub = sandbox
-          .stub(element, 'build')
-          .callsFake(() => buildPromise);
+        const buildStub = sandbox.stub(element, 'build').returns(buildPromise);
 
         expect(element).to.not.have.class('i-amphtml-element');
         expect(element).to.not.have.class('i-amphtml-notbuilt');
@@ -272,9 +270,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         clock.tick(1);
         const element = new ElementClass();
         const buildPromise = Promise.resolve();
-        const buildStub = sandbox
-          .stub(element, 'build')
-          .callsFake(() => buildPromise);
+        const buildStub = sandbox.stub(element, 'build').returns(buildPromise);
         container.appendChild(element);
         container.removeChild(element);
 
@@ -298,7 +294,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('Element - should NOT reset on 2nd attachedCallback w/o request', () => {
         clock.tick(1);
         const element = new ElementClass();
-        sandbox.stub(element, 'build');
+        sandbox.stub(element, 'build').returns(Promise.resolve());
         container.appendChild(element);
         container.removeChild(element);
 
@@ -524,10 +520,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
 
       it('Element - re-upgrade with a failed promised', () => {
+        expectAsyncConsoleError('upgrade failed', 1);
         const element = new ElementClass();
         expect(element.isUpgraded()).to.equal(false);
         const oldImpl = element.implementation_;
-        const promise = Promise.reject();
+        const promise = Promise.reject(new Error('upgrade failed'));
         oldImpl.upgradeCallback = () => promise;
 
         container.appendChild(element);

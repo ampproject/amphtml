@@ -615,7 +615,8 @@ function createBaseCustomElementClass(win) {
           this.toggleLoading(true);
         } else if (
           layoutBox.top < PREPARE_LOADING_THRESHOLD &&
-          layoutBox.top >= 0
+          layoutBox.top >= 0 &&
+          !this.loadingContainer_
         ) {
           // Few top elements will also be pre-initialized with a loading
           // element.
