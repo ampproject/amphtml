@@ -207,7 +207,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, toMatch = false, opt_bindings) {
+    function check(input, output, opt_bindings, toMatch = false) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
@@ -402,11 +402,11 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('should replace SCROLL_TOP', () => {
-      return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/, true);
+      return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/, {}, true);
     });
 
     it('should replace SCROLL_LEFT', () => {
-      return check('?scrollLeft=SCROLL_LEFT', /scrollLeft=\d+/, true);
+      return check('?scrollLeft=SCROLL_LEFT', /scrollLeft=\d+/, {}, true);
     });
 
     describe('$MATCH', () => {

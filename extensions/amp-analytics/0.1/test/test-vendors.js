@@ -30,6 +30,14 @@ import {macroTask} from '../../../../testing/yield';
 const VENDOR_REQUESTS = require('./vendor-requests.json');
 const AnalyticsConfig = Object.assign({}, ANALYTICS_CONFIG);
 
+/**
+ * Right now any vendor test that sends a request using scrollLeft
+ * or scrollTop dies. Because it was a url-replacement variable
+ * and so those variables got changed to `_variable_name_`
+ * but now they both get changed to `0` (because its resolved in
+ * amp-anlytics variables).
+ */
+
 describe('iframe transport', () => {
   it('Should not contain iframe transport if not whitelisted', () => {
     for (const vendor in AnalyticsConfig) {
@@ -145,6 +153,8 @@ describes.realWin(
                   .stub(urlReplacements.getVariableSource(), 'get')
                   .callsFake(function(name) {
                     expect(this.replacements_).to.have.property(name);
+                    console.log(JSON.stringify(this.replacements_));
+                    console.log(name);
                     const defaultValue = `_${name.toLowerCase()}_`;
                     return {
                       sync: () => defaultValue,
