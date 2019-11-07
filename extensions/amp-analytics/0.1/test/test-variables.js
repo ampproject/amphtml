@@ -207,7 +207,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, toMatch = false, opt_bindings) {
+    function check(input, output, opt_bindings, toMatch = false) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
@@ -405,7 +405,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       // return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
       //   expect(res).to.match(/tz_code=\w+|^$/);
       // });
-      return check('?tz_code=TIMEZONE_CODE', /tz_code=\w+|^$/, true);
+      return check('?tz_code=TIMEZONE_CODE', /tz_code=\w+|^$/, {}, true);
     });
 
     describe('$MATCH', () => {
