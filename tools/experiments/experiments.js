@@ -263,6 +263,7 @@ function setAmpCanaryCookie_(cookieState) {
     // other domains. Chrome's default of LAX would otherwise prevent it
     // from being sent.
     sameSite: SameSite.NONE,
+    secure: true,
   };
   setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.

@@ -79,6 +79,17 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     expect(doc.cookie).to.equal('c%261=v%261');
   });
 
+  it('should respect the secure option', () => {
+    const date = Date.now() + BASE_CID_MAX_AGE_MILLIS;
+    const utcDate = new Date(date).toUTCString();
+
+    setCookie(win, 'name', 'val', date, {secure: 'true'});
+    expect(doc.lastSetCookieRaw).to.equal(
+      `name=val; path=/; expires=${utcDate}; Secure`
+    );
+    expect(doc.cookie).to.equal('name=val');
+  });
+
   it('getHighestAvailableDomain without meta tag', () => {
     // Proxy Origin
     win.location = 'https://foo-bar.cdn.ampproject.org/c/foo.bar.com';
