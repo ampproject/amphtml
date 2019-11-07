@@ -30,7 +30,7 @@ export class IframeMessagingClient {
    * @param {!Window} win A window object.
    * @param {Window=} hostWindow The host window to send messages to. If not set
    * then we'll broadcast our messages to all parent windows and choose the
-   * first one that replies to be the host window.
+   * first one with a valid response to be the host window.
    */
   constructor(win, hostWindow) {
     /** @private {!Window} */

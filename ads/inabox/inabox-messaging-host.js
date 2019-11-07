@@ -80,6 +80,7 @@ export class InaboxMessagingHost {
    * @param {!Array<!HTMLIFrameElement>} iframes
    */
   constructor(win, iframes) {
+    // We want to measure elements relative to the top viewport if possible.
     const hostWin = canInspectWindow(win.top) ? win.top : win;
 
     /** @private {!Array<!HTMLIFrameElement>} */
