@@ -288,6 +288,7 @@ export function isMediaDisplayed(ampMediaEl, resource) {
 
 /**
  * Whether a Story should show the URL info dialog.
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
  * @return {boolean}
  */
 export function shouldShowStoryUrlInfo(viewer) {

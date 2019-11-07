@@ -17,8 +17,8 @@
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
-  timeStrToMillis,
   shouldShowStoryUrlInfo,
+  timeStrToMillis,
 } from '../utils';
 
 describes.fakeWin('amp-story utils', {}, () => {
