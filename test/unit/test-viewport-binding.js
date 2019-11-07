@@ -156,15 +156,6 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(win.document.scrollingElement./*OK*/ scrollTop).to.equal(21);
   });
 
-  it.only('should fallback scrollTop to pageYOffset', () => {
-    win.pageYOffset = 11;
-    delete win.document.scrollingElement.scrollTop;
-    // win.document.scrollingElement.scrollTop = undefined;
-    console.log(win.document.scrollingElement.scrollTop);
-    console.log(JSON.stringify(win.document.scrollingElement));
-    expect(binding.getScrollTop()).to.equal(11);
-  });
-
   it('should offset client rect for layout', () => {
     win.pageXOffset = 0;
     win.pageYOffset = 200;
