@@ -43,13 +43,13 @@ amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:36:4 The attribute
 |        <div>
 |          <h4 amp-nested-submenu-open amp-nested-submenu-close></h4>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:39:8 Mutually exclusive attributes encountered in tag 'AMP-NESTED-MENU H4' - pick one of ['amp-nested-submenu-close', 'amp-nested-submenu-open'].
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:39:8 Mutually exclusive attributes encountered in tag 'h4 amp-nested-menu' - pick one of ['amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |          <div amp-nested-submenu amp-nested-submenu-close></div>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:40:8 Mutually exclusive attributes encountered in tag 'AMP-NESTED-MENU DIV' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:40:8 Mutually exclusive attributes encountered in tag 'div amp-nested-menu' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |          <div amp-nested-submenu amp-nested-submenu-open></div>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:41:8 Mutually exclusive attributes encountered in tag 'AMP-NESTED-MENU DIV' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:41:8 Mutually exclusive attributes encountered in tag 'div amp-nested-menu' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |        </div>
 |        <!-- Invalid: only divs may include the amp-nested-submenu attribute -->
 |        <div>

@@ -45,7 +45,7 @@ tags: {  # amp-nested-menu
 tags: {  # <amp-nested-menu> <div amp-nested-submenu(-open/-close)>
   html_format: AMP
   tag_name: "DIV"
-  spec_name: "AMP-NESTED-MENU DIV"
+  spec_name: "div amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   # submenus inside accordion do not display correctly due to styling of <amp-accordion>.
   disallowed_ancestor: "AMP-ACCORDION"
@@ -77,49 +77,49 @@ attr_lists {
 tags: {  # <amp-nested-menu> <button amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "BUTTON"
-  spec_name: "AMP-NESTED-MENU BUTTON"
+  spec_name: "button amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h2 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H2"
-  spec_name: "AMP-NESTED-MENU H2"
+  spec_name: "h2 amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h3 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H3"
-  spec_name: "AMP-NESTED-MENU H3"
+  spec_name: "h3 amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h4 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H4"
-  spec_name: "AMP-NESTED-MENU H4"
+  spec_name: "h4 amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h5 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H5"
-  spec_name: "AMP-NESTED-MENU H5"
+  spec_name: "h5 amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <h6 amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "H6"
-  spec_name: "AMP-NESTED-MENU H6"
+  spec_name: "h6 amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   attr_lists: "amp-nested-menu-actions"
 }
 tags: {  # <amp-nested-menu> <span amp-nested-submenu-open/close>
   html_format: AMP
   tag_name: "SPAN"
-  spec_name: "AMP-NESTED-MENU SPAN"
+  spec_name: "span amp-nested-menu"
   mandatory_ancestor: "AMP-NESTED-MENU"
   attr_lists: "amp-nested-menu-actions"
 }
