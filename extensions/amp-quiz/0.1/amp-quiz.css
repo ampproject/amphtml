@@ -2,8 +2,8 @@
 
 :host {
     align-self: start;
-    --correct-color: #5BB974;
-    --correct-color-shaded: #4b9960;
+    --correct-color: #5BBA74;
+    --correct-color-shaded: #2D8E42;
     --incorrect-color: #F34E4E;
     --incorrect-color-shaded: #cc4141;
   }
@@ -19,9 +19,26 @@
     display: grid;
     justify-items: center;
     padding: 20px;
-    padding-top: 10px;
-    padding-bottom: 10px;
     color: white;
+}
+
+.i-amp-quiz-prompt {
+    margin: 0px;
+}
+
+h1.i-amp-quiz-prompt {
+    font-size: 28px;
+    line-height: 36px;
+}
+
+h2.i-amp-quiz-prompt {
+    font-size: 22px;
+    line-height: 28px;
+}
+
+h3.i-amp-quiz-prompt {
+    font-size: 18px;
+    line-height: 24px;
 }
 
 .i-amp-quiz-option-container {
@@ -38,14 +55,16 @@
     justify-items: start;
     align-items: center;
     border-radius: 32px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 8px;
     background-color: inherit;
-    margin-bottom: 10px;
-    min-height: 60px;
+    margin-bottom: 8px;
     color: #5F6368;
     border: solid 1px;
     border-color: #DADCE0;
+    /* TODO: Why won't this notation work? */
+    /* font: 16px/20px; */
+    font-size: 16px;
+    line-height: 20px;
 }
 
 .i-amp-quiz-option-post-selection.i-amp-quiz-option-selected {
@@ -53,26 +72,10 @@
     color: white;
 }
 
-.i-amp-quiz-option-post-selection.i-amp-quiz-option-selected[correct] {
-    background: var(--correct-color);
-    /* background: linear-gradient(90deg, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0) 50%) */
-}
-
-.i-amp-quiz-option-post-selection.i-amp-quiz-option-selected:not([correct]) {
-    background: var(--incorrect-color);
-}
-
-/*
-    background: linear-gradient(90deg, var(--correct-color) 50%, #00FFFF 50%);
-
-    TODO: USE THIS FOR BACKGROUND PERCENTAGE DISPLAY
-*/
-
 .i-amp-quiz-answer-choice {
     display: grid;
     justify-items: center;
     align-items: center;
-    margin-right: 25px;
     height: 24px;
     width: 24px;
     border-radius: 50%;
@@ -81,16 +84,21 @@
     padding: 5px;
     color: #005AF0;
     font-weight: 800;
+    font-size: 16px;
+    line-height: 16px;
 }
 
 .i-amp-quiz-option-post-selection:not([correct]) > .i-amp-quiz-answer-choice {
-    border-color: var(--incorrect-color);
     color: var(--incorrect-color);
 }
 
 .i-amp-quiz-option-post-selection[correct] > .i-amp-quiz-answer-choice {
-    border-color: var(--correct-color);
     color: var(--correct-color);
+}
+
+.i-amp-quiz-option-post-selection.i-amp-quiz-option-selected > .i-amp-quiz-answer-choice {
+    border: none;
+    margin: 2px;
 }
 
 .i-amp-quiz-option-post-selection > .i-amp-quiz-answer-choice {
@@ -98,11 +106,17 @@
 }
 
 .i-amp-quiz-percentage {
+    padding-left: 10px;
+    font-weight: 800;
     display: none;
 }
 
-/* TODO: ANIMATE THE PERCENTAGES IN */
+.i-amp-quiz-option-post-selection:not(.i-amp-quiz-option-selected) > .i-amp-quiz-percentage {
+    color: #AAAAAA;
+}
 
 .i-amp-quiz-option-post-selection > .i-amp-quiz-percentage {
     display: inherit;
 }
+
+/* TODO: ADD ANIMATIONS */

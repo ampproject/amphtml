@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-quiz-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/0.1/utils';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-// import {setStyle} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 
 export class AmpQuiz extends AMP.BaseElement {
   /**
@@ -34,7 +34,7 @@ export class AmpQuiz extends AMP.BaseElement {
     this.hasReceivedResponse_ = false;
 
     /** @private {Array<number>} */
-    this.percentages_ = this.TEMPgeneratePercentages_();
+    this.percentages_ = this.TEMPgenerateRandomPercentages_();
 
     /** @private {Array<string>} */
     this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
@@ -61,17 +61,11 @@ export class AmpQuiz extends AMP.BaseElement {
     // TODO: CONVERT THIS TO STANDARD AMP ERROR REPORTING
     this.attachContent_(e => {
       console.log('error!', e);
-      // TODO: SET ELEMENT TO DISPLAY NONE
       throw new Error(e);
     });
     this.attachOptionActionHandlers_();
 
     // TODO: ATTACH SURFACE OPTIONS USING CSS CUSTOM PROPERTIES
-    const bcr = this.element.getBoundingClientRect();
-    console.log(bcr);
-    console.log(this);
-    console.log(this.getLayoutBox());
-    // console.log(this.getPageLayoutBox());
   }
 
   /** @override */
@@ -94,6 +88,8 @@ export class AmpQuiz extends AMP.BaseElement {
         'The first child must be a heading element <h1>, <h2>, or <h3>'
       );
     }
+
+    prompt.setAttribute('class', 'i-amp-quiz-prompt');
 
     const options = Array.from(this.element.querySelectorAll('option'));
     if (options.length < 2 || options.length > 4) {
@@ -138,8 +134,6 @@ export class AmpQuiz extends AMP.BaseElement {
 
     // Create a container for the percentage and add it to the shadow root
     const percentageBox = document.createElement('span');
-    // TODO: FILL THIS IN WITH GENERATED PERCENT CONTENT
-    percentageBox.textContent = '25%';
     percentageBox.setAttribute('class', 'i-amp-quiz-percentage');
     convertedOption.append(percentageBox);
   }
@@ -148,12 +142,11 @@ export class AmpQuiz extends AMP.BaseElement {
    * Temporary method to generate random percentages
    * @return {Array<number>}
    */
-  TEMPgeneratePercentages_() {
+  TEMPgenerateRandomPercentages_() {
     const percentages = [];
     let pool = 100;
     let random;
-    // TODO: FIND A SMARTER WAY OF DOING THIS?
-    // OR NOT - THIS IS TEMP ANYWAY
+
     const numOptions = Array.from(this.element.querySelectorAll('option'))
       .length;
     for (let i = 0; i < numOptions - 1; i++) {
@@ -169,20 +162,21 @@ export class AmpQuiz extends AMP.BaseElement {
    * @param {Node} option
    */
   setOptionPercentage_(option) {
-    // TODO: ASSIGN THE PERCENTAGES BETTER DUMMY
+    // TODO: FIND AN ORDER-CONSCIOUS WAY OF ASSIGNING PERCENTAGES
     const percentage = this.percentages_.shift();
-    // UNCOMMENT TO GET PERCENTAGE BARS
-    // let backgroundString;
-    // if (option.getAttribute('class').includes('i-amp-quiz-option-selected')) {
-    //   const colorPrefix = option.hasAttribute('correct') ? '' : 'in';
-    //   backgroundString = `linear-gradient(90deg, var(--${colorPrefix}correct-color-shaded) ${50 +
-    //     percentage / 2}%, var(--${colorPrefix}correct-color) ${percentage /
-    //     2}%)`;
-    // } else {
-    //   backgroundString = `linear-gradient(90deg, #d9d9d9 ${50 +
-    //     percentage / 2}%, #ffffff ${percentage / 2}%)`;
-    // }
-    // setStyle(option, 'background', backgroundString);
+    // TODO: CHECK THAT EACH IS A NUMBER
+
+    let backgroundString;
+    if (option.getAttribute('class').includes('i-amp-quiz-option-selected')) {
+      const colorPrefix = option.hasAttribute('correct') ? '' : 'in';
+      backgroundString = `linear-gradient(90deg, var(--${colorPrefix}correct-color-shaded) ${10 +
+        (9 * percentage) / 10}%, var(--${colorPrefix}correct-color) ${10 +
+        (9 * percentage) / 10}%)`;
+    } else {
+      backgroundString = `linear-gradient(90deg, #ECEDEF ${10 +
+        (9 * percentage) / 10}%, #ffffff ${10 + (9 * percentage) / 10}%)`;
+    }
+    setStyle(option, 'background', backgroundString);
     option.querySelector(
       '.i-amp-quiz-percentage'
     ).textContent = `${percentage}%`;
@@ -212,12 +206,12 @@ export class AmpQuiz extends AMP.BaseElement {
             const symbolContainer = o.querySelector(
               '.i-amp-quiz-answer-choice'
             );
+            // TODO: REPLACE THESE WITH ICONS
             if (o.hasAttribute('correct')) {
               symbolContainer.textContent = '✓';
             } else {
               symbolContainer.textContent = '×';
-              // TODO: IS THIS ONE ARIA LABEL ACCEPTABLE?
-              symbolContainer.setAttribute('aria-label', 'X');
+              symbolContainer.setAttribute('aria-label', 'x');
             }
 
             this.setOptionPercentage_(o);
