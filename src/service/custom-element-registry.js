@@ -18,7 +18,7 @@ import {ElementStub} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
 import {devAssert, userAssert} from '../log';
 import {extensionScriptsInNode} from '../element-service';
-import {getMode} from './mode';
+import {getMode} from '../mode';
 import {reportError} from '../error';
 
 /** @type {!Array<!Element>} */
