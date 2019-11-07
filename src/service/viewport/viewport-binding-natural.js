@@ -196,7 +196,6 @@ export class ViewportBindingNatural_ {
   getScrollTop() {
     const scrollingElementScrollTop = this.getScrollingElement()
       ./*OK*/ scrollTop;
-    console.log('scrollingElem: ' + scrollingElementScrollTop);
     const pageScrollTop = isNaN(scrollingElementScrollTop)
       ? this.win./*OK*/ pageYOffset
       : scrollingElementScrollTop;

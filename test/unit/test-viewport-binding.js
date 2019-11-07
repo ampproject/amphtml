@@ -156,6 +156,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(win.document.scrollingElement./*OK*/ scrollTop).to.equal(21);
   });
 
+  // This test fails because getLayoutRect calls
+  // getScrollTop and since win.document.scrollElement
+  // is 0, it uses that value instead of 200.
+  // So rect.top == 13 not 213.
   it('should offset client rect for layout', () => {
     win.pageXOffset = 0;
     win.pageYOffset = 200;
