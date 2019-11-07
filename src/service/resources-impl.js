@@ -1232,7 +1232,8 @@ export class ResourcesImpl {
       relayoutCount > 0 ||
       remeasureCount > 0 ||
       relayoutAll ||
-      relayoutTop != -1
+      relayoutTop != -1 ||
+      elementsThatScrolled.length > 0
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
