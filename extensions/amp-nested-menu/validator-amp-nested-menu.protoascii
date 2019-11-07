@@ -20,7 +20,6 @@ tags: {  # amp-nested-menu
     name: "amp-nested-menu"
     version: "0.1"
     version: "latest"
-    requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
 }
