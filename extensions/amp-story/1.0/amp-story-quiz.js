@@ -73,7 +73,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @private
+  /**
+   * @private
+   * Finds the prompt and options content
+   * and adds it to the shadow DOM.
+   *
    * @param {Function} handleError
    */
   attachContent_(handleError) {
@@ -109,6 +113,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * @private
+   * Creates an option container with option content,
+   * adds styling, answer choices, and percentage containers,
+   * and adds it to the shadow DOM.
+   *
    * @param {HTMLOptionElement} option
    */
   configureOption_(option) {
@@ -138,8 +146,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     convertedOption.append(percentageBox);
   }
 
-  /** @private
+  /**
+   * @private
    * Temporary method to generate random percentages
+   *
    * @return {Array<number>}
    */
   TEMPgenerateRandomPercentages_() {
@@ -158,14 +168,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     return percentages;
   }
 
-  /** @private
+  /**
+   * @private
+   * Sets the percentage of an option and adjusts the background accordingly.
    * @param {Node} option
+   * @param {number} percentage
    */
-  setOptionPercentage_(option) {
-    // TODO: FIND AN ORDER-CONSCIOUS WAY OF ASSIGNING PERCENTAGES
-    const percentage = this.percentages_.shift();
-    // TODO: CHECK THAT EACH IS A NUMBER
-
+  setOptionPercentage_(option, percentage) {
     let backgroundString;
     if (
       option.getAttribute('class').includes('i-amp-story-quiz-option-selected')
@@ -184,7 +193,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     ).textContent = `${percentage}%`;
   }
 
-  /** @private */
+  /**
+   * @private
+   * Attaches functions to each option to handle state transition.
+   *
+   */
   attachOptionActionHandlers_() {
     const options = Array.from(
       this.shadowRoot_.querySelectorAll('.i-amp-story-quiz-option')
@@ -216,7 +229,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
               symbolContainer.setAttribute('aria-label', 'x');
             }
 
-            this.setOptionPercentage_(o);
+            // TODO: FIND AN ORDER-CONSCIOUS WAY OF ASSIGNING PERCENTAGES
+            const percentage = this.percentages_.shift();
+            this.setOptionPercentage_(o, percentage);
           });
 
           this.hasReceivedResponse_ = true;
