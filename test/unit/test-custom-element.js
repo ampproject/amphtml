@@ -270,9 +270,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         clock.tick(1);
         const element = new ElementClass();
         const buildPromise = Promise.resolve();
-        const buildStub = sandbox
-          .stub(element, 'build')
-          .returns(buildPromise);
+        const buildStub = sandbox.stub(element, 'build').returns(buildPromise);
         container.appendChild(element);
         container.removeChild(element);
 
