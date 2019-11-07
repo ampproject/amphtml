@@ -32,6 +32,10 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
+import {
+  getImplementation,
+  upgradeWhenRegistered,
+} from './custom-element-registry';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
@@ -40,7 +44,7 @@ import {setStyle} from './style';
 import {shouldBlockOnConsentByMeta} from '../src/consent';
 import {startupChunk} from './chunk';
 import {toWin} from './types';
-import {tryResolve} from '../src/utils/promise';
+import {tryResolve} from './utils/promise';
 
 const TAG = 'CustomElement';
 
@@ -249,16 +253,8 @@ function createBaseCustomElementClass(win) {
       // disables bracket access. Force this with a type coercion.
       const nonStructThis = /** @type {!Object} */ (this);
 
-      // `opt_implementationClass` is only used for tests.
-      let Ctor =
-        win.__AMP_EXTENDED_ELEMENTS &&
-        win.__AMP_EXTENDED_ELEMENTS[this.elementName()];
-      if (getMode().test && nonStructThis['implementationClassForTesting']) {
-        Ctor = nonStructThis['implementationClassForTesting'];
-      }
-      devAssert(Ctor);
       /** @private {!./base-element.BaseElement} */
-      this.implementation_ = new Ctor(this);
+      this.implementation_ = new ElementStub(this);
 
       /**
        * An element always starts in a unupgraded state until it's added to DOM
@@ -817,16 +813,34 @@ function createBaseCustomElementClass(win) {
         const ampdocService = Services.ampdocServiceFor(win);
         const ampdoc = ampdocService.getAmpDoc(this);
         this.ampdoc_ = ampdoc;
+
         // Load the pre-stubbed extension if needed.
-        const extensionId = this.tagName.toLowerCase();
-        if (
-          isStub(this.implementation_) &&
-          !ampdoc.declaresExtension(extensionId)
-        ) {
-          Services.extensionsFor(win).installExtensionForDoc(
-            ampdoc,
-            extensionId
-          );
+        if (isStub(this.implementation_)) {
+          const Ctor = getImplementation(win, this);
+
+          // If the registered BaseElement implementation is still the
+          // ElementStub, that means the extension script hasn't been
+          // downloaded yet to register the real BaseElement implementation.
+          // We'll need to wait until it is before it can be "upgraded".
+          if (Ctor === ElementStub) {
+            const extensionId = this.tagName.toLowerCase();
+            upgradeWhenRegistered(this);
+            if (!ampdoc.declaresExtension(extensionId)) {
+              Services.extensionsFor(win).installExtensionForDoc(
+                ampdoc,
+                extensionId
+              );
+            }
+          } else {
+            // If the implmementation fails to construct, we'll leave it as a
+            // ElementStub. The runtime will ignore the element from now on.
+            try {
+              this.implementation_ = new Ctor(this);
+            } catch (e) {
+              const TAG = this.tagName;
+              dev().error(TAG, 'Failed to constrcutor BaseElement', e);
+            }
+          }
         }
       }
       if (!this.resources_) {
