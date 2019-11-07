@@ -19,22 +19,22 @@ import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel.js';
 import {CarouselEvents} from './carousel-events';
+import {ChildLayoutManager} from './child-layout-manager';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from './responsive-attributes';
 import {Services} from '../../../src/services';
-import {
-  closestAncestorElementBySelector,
-  iterateCursor,
-  toggleAttribute,
-} from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  iterateCursor,
+  scopedQuerySelectorAll,
+  toggleAttribute,
+} from '../../../src/dom';
 import {toArray} from '../../../src/types';
 
 /**
@@ -50,8 +50,14 @@ class AmpCarousel extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @protected {number} */
-    this.advanceCount_ = 1;
+    /** @private @const */
+    this.responsiveAttributes_ = this.getAttributeConfig_();
+
+    /** @private @const {boolean} */
+    this.isIos_ = Services.platformFor(this.win).isIos();
+
+    /** @private {?Element} */
+    this.scrollContainer_ = null;
 
     /** @private {?Carousel} */
     this.carousel_ = null;
@@ -75,8 +81,17 @@ class AmpCarousel extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private @const */
-    this.responsiveAttributes_ = new ResponsiveAttributes({
+    /** @private {?ChildLayoutManager} */
+    this.childLayoutManager_ = null;
+  }
+
+  /**
+   * The configuration for handling attributes on this element.
+   * @return {!Object<string, function(string)>}
+   * @private
+   */
+  getAttributeConfig_() {
+    return new ResponsiveAttributes({
       'advance-count': newValue => {
         this.carousel_.updateAdvanceCount(Number(newValue) || 0);
       },
@@ -131,76 +146,26 @@ class AmpCarousel extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
 
-    const {element, win} = this;
-    const children = toArray(element.children);
-    let prevArrow;
-    let nextArrow;
-    // Figure out which slot the children go into.
-    children.forEach(c => {
-      const slot = c.getAttribute('slot');
-      if (slot == 'prev-arrow') {
-        prevArrow = c;
-      } else if (slot == 'next-arrow') {
-        nextArrow = c;
-      } else if (!isSizer(c)) {
-        this.slides_.push(c);
-      }
-    });
-    // Create the carousel's inner DOM.
-    element.appendChild(this.renderContainerDom_());
-
-    const scrollContainer = dev().assertElement(
-      this.element.querySelector('.i-amphtml-carousel-scroll')
-    );
+    this.buildCarouselDom_();
 
     this.carousel_ = new Carousel({
-      win,
-      element,
-      scrollContainer,
+      win: this.win,
+      element: this.element,
+      scrollContainer: dev().assertElement(this.scrollContainer_),
       initialIndex: this.getInitialIndex_(),
       runMutate: cb => this.mutateElement(cb),
     });
-
-    // Do some manual "slot" distribution
-    this.slides_.forEach(slide => {
-      slide.classList.add('i-amphtml-carousel-slotted');
-      scrollContainer.appendChild(slide);
-    });
-    this.prevArrowSlot_ = this.element.querySelector(
-      '.i-amphtml-base-carousel-arrow-prev-slot'
-    );
-    this.nextArrowSlot_ = this.element.querySelector(
-      '.i-amphtml-base-carousel-arrow-next-slot'
-    );
-    // Slot the arrows, with defaults
-    this.prevArrowSlot_.appendChild(prevArrow || this.createPrevArrow_());
-    this.nextArrowSlot_.appendChild(nextArrow || this.createNextArrow_());
 
     // Handle the initial set of attributes
     toArray(this.element.attributes).forEach(attr => {
       this.attributeMutated_(attr.name, attr.value);
     });
 
-    // Setup actions and listeners
-    this.setupActions_();
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
-      this.onIndexChanged_(event);
-    });
-    this.prevArrowSlot_.addEventListener('click', event => {
-      if (event.target != event.currentTarget) {
-        this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
-      }
-    });
-    this.nextArrowSlot_.addEventListener('click', event => {
-      if (event.target != event.currentTarget) {
-        this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
-      }
-    });
-
     this.carousel_.updateSlides(this.slides_);
+    this.initializeChildLayoutManagement_();
+    this.initializeActions_();
+    this.initializeListeners_();
     this.updateUi_();
-    // Signal for runtime to check children for layout.
-    return this.mutateElement(() => {});
   }
 
   /** @override */
@@ -209,29 +174,27 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
-    // we have something better.
-    const isScaled = closestAncestorElementBySelector(
-      this.element,
-      '[i-amphtml-scale-animation]'
-    );
-    if (isScaled) {
-      return Promise.resolve();
-    }
-
-    this.carousel_.updateUi();
-    return Promise.resolve();
-  }
-
-  /** @override */
   pauseCallback() {
-    this.carousel_.pauseAutoAdvance();
+    this.carousel_.pauseLayout();
   }
 
   /** @override */
   resumeCallback() {
-    this.carousel_.resumeAutoAdvance();
+    this.carousel_.resumeLayout();
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.carousel_.updateUi();
+    this.childLayoutManager_.wasLaidOut();
+
+    return Promise.resolve();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    this.childLayoutManager_.wasUnlaidOut();
+    return true;
   }
 
   /** @override */
@@ -263,6 +226,48 @@ class AmpCarousel extends AMP.BaseElement {
    */
   interactionPrev() {
     this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
+  }
+
+  /**
+   * Creates the DOM for the carousel, placing the children into their correct
+   * spot.
+   */
+  buildCarouselDom_() {
+    const {element} = this;
+    const children = toArray(element.children);
+    let prevArrow;
+    let nextArrow;
+
+    // Figure out which "slot" the children go into.
+    children.forEach(c => {
+      const slot = c.getAttribute('slot');
+      if (slot == 'prev-arrow') {
+        prevArrow = c;
+      } else if (slot == 'next-arrow') {
+        nextArrow = c;
+      } else if (!isSizer(c)) {
+        this.slides_.push(c);
+      }
+    });
+
+    // Create the DOM, get references to elements.
+    element.appendChild(this.renderContainerDom_());
+    this.scrollContainer_ = element.querySelector('.i-amphtml-carousel-scroll');
+    this.prevArrowSlot_ = this.element.querySelector(
+      '.i-amphtml-base-carousel-arrow-prev-slot'
+    );
+    this.nextArrowSlot_ = this.element.querySelector(
+      '.i-amphtml-base-carousel-arrow-next-slot'
+    );
+
+    // Do some manual "slot" distribution
+    this.slides_.forEach(slide => {
+      slide.classList.add('i-amphtml-carousel-slotted');
+      this.scrollContainer_.appendChild(slide);
+    });
+
+    this.prevArrowSlot_.appendChild(prevArrow || this.createPrevArrow_());
+    this.nextArrowSlot_.appendChild(nextArrow || this.createNextArrow_());
   }
 
   /**
@@ -322,9 +327,48 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * Setups up visibility tracking for the child elements, laying them out
+   * when needed.
+   */
+  initializeChildLayoutManagement_() {
+    // Set up management of layout for the child slides.
+    const owners = Services.ownersForDoc(this.element);
+    this.childLayoutManager_ = new ChildLayoutManager({
+      ampElement: this,
+      intersectionElement: dev().assertElement(this.scrollContainer_),
+      // For iOS, we queue changes until scrolling stops, which we detect
+      // ~200ms after it actually stops. Load items earlier so they have time
+      // to load.
+      nearbyMarginInPercent: this.isIos_ ? 200 : 100,
+      viewportIntersectionCallback: (child, isIntersecting) => {
+        if (isIntersecting) {
+          owners.scheduleResume(this.element, child);
+        } else {
+          owners.schedulePause(this.element, child);
+        }
+      },
+    });
+    // For iOS, we cannot trigger layout during scrolling or the UI will
+    // flicker, so tell the layout to simply queue the changes, which we
+    // flush after scrolling stops.
+    this.childLayoutManager_.setQueueChanges(this.isIos_);
+
+    // For amp-inline-gallery-slide, we need to actually monitor the content,
+    // which is transformed instead of the slide.
+    const monitoredDescendants = this.slides_
+      .map(slide => {
+        return slide.localName === 'amp-inline-gallery-slide'
+          ? toArray(scopedQuerySelectorAll(slide, '> :not([slot])'))
+          : slide;
+      })
+      .reduce((arr, children) => arr.concat(children), []);
+    this.childLayoutManager_.updateChildren(monitoredDescendants);
+  }
+
+  /**
    * @private
    */
-  setupActions_() {
+  initializeActions_() {
     this.registerAction(
       'prev',
       ({trust}) => {
@@ -351,6 +395,42 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * @private
+   */
+  initializeListeners_() {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+      this.onIndexChanged_(event);
+    });
+    this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
+      this.onScrollStarted_();
+    });
+    this.element.addEventListener(
+      CarouselEvents.SCROLL_POSITION_CHANGED,
+      () => {
+        this.onScrollPositionChanged_();
+      }
+    );
+    this.element.addEventListener('goToSlide', event => {
+      const detail = getDetail(event);
+      this.carousel_.goToSlide(detail['index']);
+    });
+    this.prevArrowSlot_.addEventListener('click', event => {
+      // Make sure the slot itself was not clicked, since that fills the
+      // entire height of the gallery.
+      if (event.target != event.currentTarget) {
+        this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
+      }
+    });
+    this.nextArrowSlot_.addEventListener('click', event => {
+      // Make sure the slot itself was not clicked, since that fills the
+      // entire height of the gallery.
+      if (event.target != event.currentTarget) {
+        this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
+      }
+    });
+  }
+
+  /**
    * Updates the UI of the <amp-base-carousel> itself, but not the internal
    * implementation.
    * @private
@@ -373,6 +453,27 @@ class AmpCarousel extends AMP.BaseElement {
       'i-amphtml-base-carousel-hide-buttons',
       this.hadTouch_
     );
+  }
+
+  /**
+   * Starts queuing all intersection based changes when scrolling starts, to
+   * prevent paint flickering on iOS.
+   */
+  onScrollStarted_() {
+    this.childLayoutManager_.setQueueChanges(this.isIos_);
+  }
+
+  /**
+   * Update the UI (buttons) for the new scroll position. This occurs when
+   * scrolling has settled.
+   */
+  onScrollPositionChanged_() {
+    // Now that scrolling has settled, flush any layout changes for iOS since
+    // it will not cause flickering.
+    this.childLayoutManager_.flushChanges();
+    this.childLayoutManager_.setQueueChanges(false);
+
+    this.updateUi_();
   }
 
   /**
@@ -428,12 +529,5 @@ class AmpCarousel extends AMP.BaseElement {
 }
 
 AMP.extension('amp-base-carousel', '0.1', AMP => {
-  if (
-    !isExperimentOn(AMP.win, 'amp-base-carousel') &&
-    !isExperimentOn(AMP.win, 'amp-lightbox-gallery-base-carousel')
-  ) {
-    return;
-  }
-
   AMP.registerElement('amp-base-carousel', AmpCarousel, CSS);
 });
