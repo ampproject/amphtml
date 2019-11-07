@@ -900,7 +900,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   getSlotSize() {
     const {width, height} = this.getDeclaredSlotSize_();
-    return !isNaN(width) && !isNaN(height)
+    return width && height
       ? {width, height}
       : // width/height could be 'auto' in which case we fallback to measured.
         this.getIntersectionElementLayoutBox();
@@ -1199,7 +1199,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 'creative. Will re-attempt when slot is out of the viewport.'
             );
             const {width, height} = this.getSlotSize();
-            if (width > 0 && height > 0) {
+            if (width && height) {
               // This call is idempotent, so it's okay to make it multiple
               // times.
               this.fireFluidDelayedImpression();
