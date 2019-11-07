@@ -196,9 +196,11 @@ export class ViewportBindingNatural_ {
   getScrollTop() {
     const scrollingElementScrollTop = this.getScrollingElement()
       ./*OK*/ scrollTop;
+    console.log('scrollingElem: ' + scrollingElementScrollTop);
     const pageScrollTop = isNaN(scrollingElementScrollTop)
       ? this.win./*OK*/ pageYOffset
       : scrollingElementScrollTop;
+
     const {host} = this.ampdoc.getRootNode();
     return host ? pageScrollTop - host./*OK*/ offsetTop : pageScrollTop;
   }
