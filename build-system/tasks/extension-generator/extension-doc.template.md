@@ -1,9 +1,9 @@
 <!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev 
-  and improves SEO. 
-  Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, 
+  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
+  and improves SEO.
+  Include the relevant category(ies): ads-analytics, dynamic-content, layout, media,
   presentation, social, personalization
-  List applicable format(s): websites, ads, stories, email 
+  List applicable format(s): websites, ads, stories, email
   And remove this comment! (no empty lines before "---")
 -->
 
@@ -11,10 +11,11 @@
 
 \$category: presentation
 formats:
-  - websites
-  - email
-teaser:
-text: FILL THIS IN.
+
+- websites
+- email
+  teaser:
+  text: FILL THIS IN.
 
 ---
 
@@ -59,70 +60,76 @@ limitations under the License.
   </tr>
 </table>
 
-<!-- 
+<!--
   If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple code samples. 
+  formats, include and filter multiple code samples.
 -->
 
 [filter formats=“websites”]
 
 [example preview=“inline” playground=“true” imports=“amp-component-name”]
-```html
-  <amp-component-name required-attribute>
-        I am a hello world inline executable code sample for websites! 
-  </amp-component-name>
-```
-[/example]
-[/filter]
 
-[filter formats=“ads”]
-[example preview=“inline” playground=“true” imports=“amp-component-name”]
 ```html
-     <amp-component-name required-attribute>
-          I am a hello world inline executable code sample for ads! 
-     </amp-component-name>
+<amp-component-name required-attribute>
+  I am a hello world inline executable code sample for websites!
+</amp-component-name>
 ```
-[/example]
-[/filter]
+
+[/example][/filter]
+
+[filter formats=“ads”][example preview=“inline” playground=“true” imports=“amp-component-name”]
+
+```html
+<amp-component-name required-attribute>
+  I am a hello world inline executable code sample for ads!
+</amp-component-name>
+```
+
+[/example][/filter]
 
 ## Usage
 
-One to three paragraph explaining the component usage. 
+One to three paragraph explaining the component usage.
 
 List important functionality.
 
-Explain why developers care about it. 
+Explain why developers care about it.
 
 ### Common thing users need to know to do for ads
 
-Explanation of how to do this thing 
+Explanation of how to do this thing
 
 [example preview=“inline” playground=“true” imports=“amp-component-name”]
-```html
-Code sample of this usage 
-```
-[/example] 
 
-### Behavior users should be aware of 
+```html
+Code sample of this usage
+```
+
+[/example]
+
+### Behavior users should be aware of
+
 What to do if they want behavior. How to work around it.
 
 ```html
-Code sample of behavior or behavior workaround.  
+Code sample of behavior or behavior workaround.
 ```
 
-###  Behavior restrictions 
+### Behavior restrictions
 
-What is allowed, what isn't. 
+What is allowed, what isn't.
 
 ## Attributes
 
 ### attribute-name
 
-Description of attribute. Use cases for this attribute. 
-*   attribute-value-option-one (default): attribute-option-one-value does this to amp-component-name. 
-*   attribute-value-option-two: attribute-option-two-value does this to amp-component-name. 
+Description of attribute. Use cases for this attribute.
+
+- attribute-value-option-one (default): attribute-option-one-value does this to amp-component-name.
+- attribute-value-option-two: attribute-option-two-value does this to amp-component-name.
 
 [example preview=”top-frame” playground=”true”]
+
 ```html
 <head>
      <amp-component-name script tag>
@@ -130,14 +137,15 @@ Description of attribute. Use cases for this attribute.
 <body>
      <amp-component-name attribute-name="attribute-value-option-one">
           I am an inline executable code sample of the amp-component that demonstrates how
-          `attribute-name` with the value of "attribute-option-one-value" behaves.  
+          `attribute-name` with the value of "attribute-option-one-value" behaves.
      </amp-component-name>
 </body>
 ```
+
 [/example]
 
-<!-- 
-  If the attribute list requires a table, use the template below. 
+<!--
+  If the attribute list requires a table, use the template below.
 -->
 
 <table>
@@ -149,9 +157,10 @@ Description of attribute. Use cases for this attribute.
 
 ### optional-attribute-name (optional)
 
-Here, I write what optional-attribute-name will do to amp-component-name. 
+Here, I write what optional-attribute-name will do to amp-component-name.
 
 [example preview=”top-frame” playground=”true”]
+
 ```html
 <head>
      <amp-component-name script tag>
@@ -159,19 +168,21 @@ Here, I write what optional-attribute-name will do to amp-component-name.
 <body>
      <amp-component-name optional-attribute-name>
           I am an inline executable code sample of the amp-component that demonstrates how
-          `optional-attribute-name` behaves.  
+          `optional-attribute-name` behaves.
      </amp-component-name>
 </body>
 ```
+
 [/example]
 
 Actions
 
 ### action-name
 
-Description of action. Use cases of action-name. Include all the nuances, such as: amp-component-name needs to be identified with an `id` to work. 
+Description of action. Use cases of action-name. Include all the nuances, such as: amp-component-name needs to be identified with an `id` to work.
 
 [example preview=”top-frame” playground=”true”]
+
 ```html
 <head>
      <amp-component-name script tag>
@@ -185,15 +196,17 @@ Description of action. Use cases of action-name. Include all the nuances, such a
     </button>
 </body>
 ```
+
 [/example]
 
 ## Events
 
 ### event-name
 
-Description of event. Use cases of event-name. Include all the nuances, such as: amp-component-name needs to be identified with an `id` to work. 
+Description of event. Use cases of event-name. Include all the nuances, such as: amp-component-name needs to be identified with an `id` to work.
 
 [example preview=”top-frame” playground=”true”]
+
 ```html
 <head>
      <amp-component-name script tag>
@@ -208,13 +221,15 @@ Description of event. Use cases of event-name. Include all the nuances, such as:
     </button>
 </body>
 ```
+
 [/example]
 
 ## Styling
 
-Explain how to style the element. 
+Explain how to style the element.
 
 [example preview=”top-frame” playground=”true”]
+
 ```html
 <head>
      <amp-component-name script tag>
@@ -233,19 +248,20 @@ Explain how to style the element.
     </button>
 </body>
 ```
+
 [/example]
 
-## Analytics (if applicable) 
+## Analytics (if applicable)
 
-Explain analytics. 
+Explain analytics.
 
 ```html
 "configuration": {}
 ```
 
-## Accessibility 
+## Accessibility
 
-Accessibility information related to `amp-component-name`. 
+Accessibility information related to `amp-component-name`.
 
 ## Validation
 
