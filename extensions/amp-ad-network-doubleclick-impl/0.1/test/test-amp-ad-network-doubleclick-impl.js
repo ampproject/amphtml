@@ -1450,7 +1450,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
 describes.realWin(
   'additional amp-ad-network-doubleclick-impl',
-  realWinConfigAmpAd,
+  realWinConfig,
   env => {
     let doc;
     let impl;
@@ -1485,7 +1485,7 @@ describes.realWin(
       });
     });
 
-    describe('centering', () => {
+    describes.realWin('centering', realWinConfigAmpAd, env => {
       const size = {width: '300px', height: '150px'};
 
       /**
@@ -1588,7 +1588,7 @@ describes.realWin(
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.getAmpDoc = () => {};
+        impl.getAmpDoc = () => env.ampdoc;
         isSecureStub = sandbox.stub();
         sandbox.stub(Services, 'urlForDoc').returns({isSecure: isSecureStub});
       });
