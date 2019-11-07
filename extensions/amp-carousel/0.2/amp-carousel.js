@@ -212,12 +212,12 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.carousel_.pauseAutoAdvance();
+    this.carousel_.pauseLayout();
   }
 
   /** @override */
   resumeCallback() {
-    this.carousel_.resumeAutoAdvance();
+    this.carousel_.resumeLayout();
   }
 
   /** @override */
