@@ -35,7 +35,7 @@ import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {
   getImplementation,
   upgradeWhenRegistered,
-} from './custom-element-registry';
+} from './service/custom-element-registry';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';

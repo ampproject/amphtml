@@ -39,7 +39,7 @@ function getExtendedElements(win) {
  * Returns the BaseElement implmementation that the element should upgrade to.
  * @param {!Window} win
  * @param {!Element} el
- * @return {?function(new:../base-element.BaseElement)}
+ * @return {?function(new:../base-element.BaseElement, !Element)}
  */
 export function getImplementation(win, el) {
   // Closure compiler appears to mark HTMLElement as @struct which
