@@ -749,7 +749,7 @@ export class SafeframeHostApi {
       .catch(err => {
         user().warn(TAG, err);
         const {width, height} = this.baseInstance_.getSlotSize();
-        if (width > 0 && height > 0) {
+        if (width && height) {
           this.onFluidResize_(height);
         }
       });
