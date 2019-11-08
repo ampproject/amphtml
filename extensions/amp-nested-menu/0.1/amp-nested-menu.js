@@ -26,7 +26,6 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-nested-menu';

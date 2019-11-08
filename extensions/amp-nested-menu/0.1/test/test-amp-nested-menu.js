@@ -18,7 +18,6 @@ import '../amp-nested-menu';
 import * as lolex from 'lolex';
 import {Keys} from '../../../../src/utils/key-codes';
 import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
 import {tryFocus} from '../../../../src/dom';
 
 describes.realWin(
