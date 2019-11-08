@@ -118,17 +118,11 @@ export class AmpScript extends AMP.BaseElement {
      *   2. The amp-script tag or any of its parents must also have 'data-ampdevmode'.
      */
     const htmlEl = this.element.ownerDocument.documentElement;
-    let devMode = false;
-    if (htmlEl.hasAttribute('data-ampdevmode')) {
-      const closestAncestorWithDevTag = closestAncestorElementBySelector(
-        this.element,
-        'data-ampdevmode'
-      );
-      devMode =
-        closestAncestorWithDevTag != null &&
-        closestAncestorWithDevTag != htmlEl;
-    }
-    this.development_ = this.element.hasAttribute('development') || devMode;
+    this.development_ =
+      this.element.hasAttribute('development') ||
+      (htmlEl.hasAttribute('data-ampdevmode') &&
+        closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
+          htmlEl);
 
     if (this.development_) {
       user().warn(
