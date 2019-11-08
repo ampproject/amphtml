@@ -1195,14 +1195,12 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(opt_refresh = false, token = undefined) {
-    return batchFetchJsonFor(
-      this.getAmpDoc(),
-      this.element,
-      '.',
-      this.getPolicy_(),
-      opt_refresh,
-      token
-    );
+    return batchFetchJsonFor(this.getAmpDoc(), this.element, {
+      expr: '.',
+      urlReplacement: this.getPolicy_(),
+      refresh: opt_refresh,
+      token: token,
+    });
   }
 
   /**
