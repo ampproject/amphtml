@@ -572,6 +572,7 @@ export class AmpList extends AMP.BaseElement {
     return fetch.catch(error => {
       this.triggerFetchErrorEvent_(error);
       this.showFallback_();
+      throw error;
     });
   }
 
