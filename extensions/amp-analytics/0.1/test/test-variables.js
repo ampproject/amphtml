@@ -399,7 +399,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
-    it.only('Should replace VIDEO_STATE(video,parameter) with video data', () => {
+    it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
       sandbox.stub(Services, 'videoManagerForDoc').returns({
         getAnalyticsDetails() {
           return Promise.resolve({currentTime: 1.5});
