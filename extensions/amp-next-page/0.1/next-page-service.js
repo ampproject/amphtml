@@ -19,7 +19,7 @@ import {MultidocManager} from '../../../src/runtime';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
@@ -232,7 +232,7 @@ export class NextPageService {
     const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {
       visibilityState: VisibilityState.PRERENDER,
     });
-    const ampdoc = dev().assert(amp.ampdoc);
+    const ampdoc = devAssert(amp.ampdoc);
     installStylesForDoc(ampdoc, CSS, null, false, TAG);
 
     const body = ampdoc.getBody();
@@ -472,12 +472,12 @@ export class NextPageService {
       return;
     }
 
-    let documentIndex = i;
+    let ref = this.documentRefs_[i];
     let analyticsEvent = '';
 
     switch (position.relativePos) {
       case 'top':
-        documentIndex = i + 1;
+        ref = this.documentRefs_[i + 1];
         analyticsEvent = 'amp-next-page-scroll';
         break;
       case 'bottom':
@@ -487,16 +487,13 @@ export class NextPageService {
         break;
     }
 
-    if (
-      this.documentRefs_[documentIndex] &&
-      this.documentRefs_[documentIndex].amp
-    ) {
+    if (ref && ref.amp) {
       this.triggerAnalyticsEvent_(
         analyticsEvent,
-        this.documentRefs_[documentIndex].ampUrl,
+        ref.ampUrl,
         this.activeDocumentRef_.ampUrl
       );
-      this.setActiveDocument_(documentIndex);
+      this.setActiveDocument_(ref);
     }
   }
 
@@ -520,22 +517,22 @@ export class NextPageService {
   /**
    * Sets the specified document as active, updating the document title and URL.
    *
-   * @param {number} documentIndex Index of the document to be activated
+   * @param {DocumentRef} ref Reference to the document to be activated
    * @private
    */
-  setActiveDocument_(documentIndex) {
-    this.documentRefs_.forEach((docRef, index) => {
+  setActiveDocument_(ref) {
+    this.documentRefs_.forEach(docRef => {
       const {amp} = docRef;
       // Update the title and history
-      if (index === documentIndex) {
+      if (docRef === ref) {
         this.win_.document.title = amp.title || '';
         this.activeDocumentRef_ = docRef;
         this.setActiveDocumentInHistory_(docRef);
         // Show the active document
-        this.setDocumentVisibility_(index, VisibilityState.VISIBLE);
+        this.setDocumentVisibility_(docRef, VisibilityState.VISIBLE);
       } else {
         // Hide other documents
-        this.setDocumentVisibility_(index, VisibilityState.HIDDEN);
+        this.setDocumentVisibility_(docRef, VisibilityState.HIDDEN);
       }
     });
 
@@ -545,18 +542,17 @@ export class NextPageService {
   /**
    * Manually overrides the document's visible state to the given state
    *
-   * @param {number} documentIndex Index of the document to change
+   * @param {DocumentRef} ref Reference to the document to change
    * @param {!../../../src/visibility-state.VisibilityState} visibilityState
    * @private
    */
-  setDocumentVisibility_(documentIndex, visibilityState) {
+  setDocumentVisibility_(ref, visibilityState) {
     // Prevent updating visibility of the host document
-    if (documentIndex === 0) {
+    if (ref === this.documentRefs_[0]) {
       return;
     }
 
-    const doc = this.documentRefs_[documentIndex];
-    const ampDoc = doc && doc.amp && doc.amp.ampdoc;
+    const ampDoc = ref && ref.amp && ref.amp.ampdoc;
 
     // Prevent hiding of documents that are not shadow docs
     if (!ampDoc) {
@@ -568,7 +564,7 @@ export class NextPageService {
       return;
     }
 
-    doc.amp.setVisibilityState(visibilityState);
+    ref.amp.setVisibilityState(visibilityState);
   }
 
   /**
