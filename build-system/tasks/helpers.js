@@ -41,6 +41,9 @@ const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
+const globby = require('globby');
+const babel = require('@babel/core');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -653,6 +656,40 @@ function toPromise(readable) {
   });
 }
 
+/**
+ * @param {{isEsmBuild: boolean|undefined, isCheckTypes: boolean|undefined, isFortesting: boolean|undefined, isSinglePass: boolean|undefined}=} options
+ */
+function transferSrcsToTempDir(options = {}) {
+  log(
+    'Performing pre-closure',
+    colors.cyan('babel'),
+    'transforms in',
+    colors.cyan(SRC_TEMP_DIR)
+  );
+  const files = globby.sync(BABEL_SRC_GLOBS);
+  files.forEach(file => {
+    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
+      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
+      return;
+    }
+
+    const {code} = babel.transformFileSync(file, {
+      plugins: conf.plugins({
+        isEsmBuild: options.isEsmBuild,
+        isSinglePass: options.isSinglePass,
+        isForTesting: options.isForTesting,
+        isChecktypes: options.isChecktypes,
+      }),
+      retainLines: true,
+      compact: false,
+    });
+    const name = `${SRC_TEMP_DIR}/${file}`;
+    fs.outputFileSync(name, code);
+    process.stdout.write('.');
+  });
+  console.log('\n');
+}
+
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
   BABELIFY_PLUGINS,
@@ -670,4 +707,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   toPromise,
+  transferSrcsToTempDir,
 };
