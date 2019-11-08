@@ -151,7 +151,7 @@ describe('batchFetchJsonFor', () => {
       const token = '';
       return batchFetchJsonFor(ampdoc, el, {
         replacementUrl: all,
-        token: token,
+        token,
       }).then(() => {
         const fetchOpt = fetchJson.firstCall.args[1];
         expect(fetchOpt.body.ampViewerAuthToken).to.equal('');

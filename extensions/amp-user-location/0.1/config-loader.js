@@ -204,7 +204,7 @@ export class ConfigLoader {
    */
   fetch_(ampdoc, element, token, policy) {
     return batchFetchJsonFor(ampdoc, element, {
-      token: token,
+      token,
       urlReplacement: policy,
     });
   }

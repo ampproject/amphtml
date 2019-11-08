@@ -35,7 +35,7 @@ export const UrlReplacementPolicy = {
  *
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
- * @param options options bag for modifying the request.
+ * @param {!Object} options options bag for modifying the request.
  * @param {string|undefined} options.expr Dot-syntax reference to subdata of JSON result.
  *     to return. If not specified, entire JSON result is returned.
  * @param {UrlReplacementPolicy|undefined} options.urlReplacement If ALL, replaces all URL
