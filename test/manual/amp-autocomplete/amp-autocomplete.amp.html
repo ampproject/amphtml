@@ -10,62 +10,19 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-latest.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
-  </head>
+</head>
 <body>
   <div height="1000">
-    <button id="focusButton" on="tap:input.focus">Focus single autocomplete</button>
-    <button id="focusButton2" on="tap:textarea.focus">Focus inline autocomplete</button>
-    <br><br>
-
-    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <button id="focusButton" on="tap:input.focus">Focus</button>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank"
+      on="submit-success:AMP.setState({result: event.response})">
       <amp-autocomplete id="autocomplete" filter="substring" min-characters="0">
-        <label>Single autocomplete></label><br>
         <input type="text" id="input">
         <script type="application/json" id="script">
           { "items" : ["apple", "banana", "orange"] }
         </script>
       </amp-autocomplete>
-      <br><br>
-      <amp-autocomplete
-        inline="+"
-        filter="none"
-        min-characters="0"
-        suggest-first
-        src="/form/mention/query"
-        query="q"
-      >
-        <label>Inline autocomplete></label><br>
-        <textarea
-          id="textarea"
-          autoexpand
-          cols="40"
-          rows="2"
-          placeholder="Reply"
-          name="inlineInput"
-        ></textarea>
-        <template type="amp-mustache" id="amp-template-rich">
-          <div class="close-friends" data-value="{{ . }}">
-            <div class="info">
-              <div>{{ . }}</div>
-            </div>
-          </div>
-        </template>
-      </amp-autocomplete><br>
-      <input
-        name="submit-button"
-        type="submit"
-        value="Send Message"
-      />
-      <div submit-success>
-        <template type="amp-mustache">
-          Message sent!
-        </template>
-      </div>
-      </form>
-    </div>
+    </form>
   </div>
-
-  
 </body>
 </html>
