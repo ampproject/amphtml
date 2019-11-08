@@ -37,7 +37,7 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isExperimentOn} from '../../../src/experiments';
+import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {parseUrlDeprecated} from '../../../src/url';
 import {userAssert} from '../../../src/log';
 
@@ -111,11 +111,11 @@ export class GoogleSubscriptionsPlatform {
       this.handleAnalyticsEvent_.bind(this)
     );
 
-    // Map AMP experiment to SwG experiment.
-    const swgExperiments = {};
-    if (isExperimentOn(ampdoc.win, 'gpay-api')) {
-      swgExperiments.experiments = ['gpay-api'];
-    }
+    // Map AMP experiments to SwG experiments.
+    const enabledAmpExperiments =
+          Object.keys(experimentToggles(ampdoc.win)).
+          filter(exp => isExperimentOn(ampdoc.win, exp));
+    const swgConfig = { 'experiments': enabledAmpExperiments};
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
@@ -125,7 +125,7 @@ export class GoogleSubscriptionsPlatform {
         fetcher: new AmpFetcher(ampdoc.win),
         configPromise: new Promise(resolve => (resolver = resolve)),
       },
-      swgExperiments
+      swgConfig
     );
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */
