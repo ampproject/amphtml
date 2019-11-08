@@ -705,13 +705,15 @@ describe('amp-img', () => {
             return browser.waitForElementLayout('amp-img');
           })
           .then(() => {
-            const dimensions = ampImg.getBoundingClientRect();
-            expect(dimensions.height).to.equal(100);
-            expect(dimensions.width).to.equal(100);
+            expect(ampImg.getBoundingClientRect()).to.include({
+              width: 100,
+              height: 100,
+            });
             const img = ampImg.querySelector('img');
-            const imgDimensions = img.getBoundingClientRect();
-            expect(imgDimensions.height).to.equal(100);
-            expect(imgDimensions.width).to.equal(100);
+            expect(img.getBoundingClientRect()).to.include({
+              width: 100,
+              height: 100,
+            });
           });
       });
 
@@ -729,13 +731,15 @@ describe('amp-img', () => {
             return browser.waitForElementLayout('amp-img');
           })
           .then(() => {
-            const dimensions = ampImg.getBoundingClientRect();
-            expect(dimensions.height).to.equal(600);
-            expect(dimensions.width).to.equal(800);
+            expect(ampImg.getBoundingClientRect()).to.include({
+              width: 800,
+              height: 600,
+            });
             const img = ampImg.querySelector('img');
-            const imgDimensions = img.getBoundingClientRect();
-            expect(imgDimensions.height).to.equal(600);
-            expect(imgDimensions.width).to.equal(800);
+            expect(img.getBoundingClientRect()).to.include({
+              width: 800,
+              height: 600,
+            });
           });
       });
 
@@ -756,13 +760,15 @@ describe('amp-img', () => {
             return browser.waitForElementLayout('amp-img');
           })
           .then(() => {
-            const dimensions = ampImg.getBoundingClientRect();
-            expect(dimensions.width).to.equal(600);
-            expect(dimensions.height).to.equal(400);
+            expect(ampImg.getBoundingClientRect()).to.include({
+              width: 600,
+              height: 400,
+            });
             const parentDiv = fixture.doc.getElementById('parent');
-            const parentDimensions = parentDiv.getBoundingClientRect();
-            expect(parentDimensions.width).to.equal(600);
-            expect(parentDimensions.height).to.equal(400);
+            expect(parentDiv.getBoundingClientRect()).to.include({
+              width: 600,
+              height: 400,
+            });
           });
       });
 
@@ -781,13 +787,15 @@ describe('amp-img', () => {
             return browser.waitForElementLayout('amp-img');
           })
           .then(() => {
-            const dimensions = ampImg.getBoundingClientRect();
-            expect(dimensions.width).to.equal(80);
-            expect(dimensions.height).to.equal(60);
+            expect(ampImg.getBoundingClientRect()).to.include({
+              width: 80,
+              height: 60,
+            });
             const parentDiv = fixture.doc.getElementById('parent');
-            const parentDimensions = parentDiv.getBoundingClientRect();
-            expect(parentDimensions.height).to.equal(80);
-            expect(parentDimensions.width).to.equal(80);
+            expect(parentDiv.getBoundingClientRect()).to.include({
+              width: 80,
+              height: 80,
+            });
           });
       });
     });
