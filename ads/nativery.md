@@ -24,9 +24,10 @@ limitations under the License.
 <amp-embed
   width="100"
   height="283"
-  type=nativery
-  layout=responsive
-  data-wid="[YOUR_WIDGET_ID]">
+  type="nativery"
+  layout="responsive"
+  data-wid="[YOUR_WIDGET_ID]"
+>
 </amp-embed>
 ```
 
