@@ -70,12 +70,22 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     expect(getElementClassForTesting(win, 'amp-element1')).to.equal(
       ConcreteElement
     );
-    expect(element1.implementation_).to.be.instanceOf(ConcreteElement);
 
-    // Elements created post-download and immediately upgraded.
-    const element2 = doc.createElement('amp-element1');
-    doc.body.appendChild(element1);
-    expect(element2.implementation_).to.be.instanceOf(ConcreteElement);
+    return element1
+      .whenUpgraded()
+      .then(() => {
+        expect(element1.implementation_).to.be.instanceOf(ConcreteElement);
+
+        // Elements created post-download and immediately upgraded.
+        const element2 = doc.createElement('amp-element1');
+        element2.setAttribute('layout', 'nodisplay');
+        doc.body.appendChild(element2);
+
+        return element2.whenUpgraded().then(() => element2);
+      })
+      .then(element2 => {
+        expect(element2.implementation_).to.be.instanceOf(ConcreteElement);
+      });
   });
 
   it('should mark stubbed element as declared', () => {
@@ -101,6 +111,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     expect(stub).to.not.be.called;
 
     const element = doc.createElement('amp-element2');
+    element.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(element);
     expect(stub).to.be.calledOnce;
     expect(stub).to.be.calledWithExactly(ampdoc, 'amp-element2');
@@ -116,6 +127,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     expect(stub).to.not.be.called;
 
     const element = doc.createElement('amp-element2');
+    element.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(element);
     expect(stub).to.not.be.called;
   });
@@ -131,6 +143,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     expect(stub).to.not.be.called;
 
     const element = doc.createElement('amp-element1');
+    element.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(element);
     expect(stub).to.not.be.called;
   });

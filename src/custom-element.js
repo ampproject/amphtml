@@ -376,7 +376,16 @@ function createBaseCustomElementClass(win) {
         // Already upgraded or in progress or failed.
         return;
       }
-      this.implementation_ = new newImplClass(this);
+
+      // If the implmementation fails to construct, we'll leave it as a
+      // ElementStub. The runtime will ignore the element from now on.
+      try {
+        this.implementation_ = new newImplClass(this);
+      } catch (e) {
+        const TAG = this.tagName;
+        dev().error(TAG, 'Failed to constrcutor BaseElement', e);
+        return;
+      }
       if (this.everAttached) {
         // Usually, we do an implementation upgrade when the element is
         // attached to the DOM. But, if it hadn't yet upgraded from
@@ -832,14 +841,7 @@ function createBaseCustomElementClass(win) {
               );
             }
           } else {
-            // If the implmementation fails to construct, we'll leave it as a
-            // ElementStub. The runtime will ignore the element from now on.
-            try {
-              this.implementation_ = new Ctor(this);
-            } catch (e) {
-              const TAG = this.tagName;
-              dev().error(TAG, 'Failed to constrcutor BaseElement', e);
-            }
+            this.upgrade(Ctor);
           }
         }
       }
