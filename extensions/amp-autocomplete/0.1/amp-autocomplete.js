@@ -290,6 +290,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     const doc = this.element.ownerDocument;
+    // Client side filtering is disabled for email
     if (doc && isAmp4Email(doc)) {
       this.filter_ = FilterType.NONE;
     } else {
