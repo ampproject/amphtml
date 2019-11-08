@@ -422,6 +422,17 @@ describe('amp-img', () => {
     });
   });
 
+  it('should not error on unlayoutCallback before layoutCallback', () => {
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+    el.setAttribute('noprerender', '');
+    const impl = new AmpImg(el);
+    impl.buildCallback();
+    impl.unlayoutCallback();
+  });
+
   describe('blurred image placeholder', () => {
     beforeEach(() => {
       toggleExperiment(window, 'blurry-placeholder', true, true);
