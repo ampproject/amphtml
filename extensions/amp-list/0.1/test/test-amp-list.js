@@ -414,7 +414,9 @@ describes.repeated(
               .expects('toggleLoading')
               .withExactArgs(false)
               .once();
-            return list.layoutCallback();
+            return expect(list.layoutCallback()).to.eventually.be.rejectedWith(
+              /Response must contain an array/
+            );
           });
 
           it('should fail to load b/c data single-item object is absent', () => {
@@ -431,7 +433,9 @@ describes.repeated(
               .expects('toggleLoading')
               .withExactArgs(false)
               .once();
-            return list.layoutCallback();
+            return expect(list.layoutCallback()).to.eventually.be.rejectedWith(
+              /Response must contain an array or object/
+            );
           });
 
           it('should load and render with a different root', () => {
