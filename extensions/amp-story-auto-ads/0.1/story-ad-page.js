@@ -345,7 +345,7 @@ export class StoryAdPage {
       'a',
       dict({
         'class': 'i-amphtml-story-ad-link',
-        'target': 'blank',
+        'target': '_blank',
         'href': ctaUrl,
       })
     );

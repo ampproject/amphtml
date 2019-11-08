@@ -16,6 +16,7 @@
 
 import * as dom from '../../../../src/dom';
 import * as service from '../../../../src/service';
+import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {CommonSignals} from '../../../../src/common-signals';
 import {StoryAdAnalytics} from '../story-ad-analytics';
 import {StoryAdLocalization} from '../story-ad-localization';
@@ -52,7 +53,8 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       storyAutoAdsEl.getAmpDoc(),
       baseConfig,
       1, // index
-      new StoryAdLocalization(win)
+      new StoryAdLocalization(win),
+      new ButtonTextFitter(env.ampdoc)
     );
   });
 
@@ -224,7 +226,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
 
-      const created = storyAdPage.maybeCreateCta();
+      const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
 
       const ctaLayer = doc.querySelector('amp-story-cta-layer');
@@ -253,7 +255,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
-      const created = storyAdPage.maybeCreateCta();
+      const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const anchor = doc.querySelector('a');
       expect(anchor.href).to.equal('https://www.example.com/');
@@ -281,27 +283,29 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
-      const created = storyAdPage.maybeCreateCta();
+      const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const anchor = doc.querySelector('a');
       expect(anchor.href).to.equal('https://amp.dev/');
       expect(anchor.textContent).to.equal('Learn More');
     });
 
-    it('throws on missing cta url', () => {
+    it('throws on missing cta url', async () => {
+      expectAsyncConsoleError(
+        '[amp-story-auto-ads:page] Both CTA Type & CTA Url are required in ad response.'
+      );
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
-      allowConsoleError(() => {
-        const created = storyAdPage.maybeCreateCta();
-        expect(created).to.be.false;
-      });
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
     });
 
-    it('throws on missing cta type', () => {
+    it('throws on missing cta type', async () => {
+      expectAsyncConsoleError(
+        '[amp-story-auto-ads:page] Both CTA Type & CTA Url are required in ad response.'
+      );
       ampAdElement.setAttribute('data-vars-ctaurl', 'INSTALL');
-      allowConsoleError(() => {
-        const created = storyAdPage.maybeCreateCta();
-        expect(created).to.be.false;
-      });
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
     });
 
     it('creates attribution badge with outlink', async () => {
@@ -317,7 +321,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         <body></body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-      const created = storyAdPage.maybeCreateCta();
+      const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
       expect(attribution).to.exist;
@@ -338,6 +342,9 @@ describes.realWin('story-ad-page', {amp: true}, env => {
     });
 
     it('does not create attribution when missing icon', async () => {
+      expectAsyncConsoleError(
+        /amp-story-auto-ads attribution icon must be available/
+      );
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
       iframe.contentDocument.write(`
@@ -349,17 +356,16 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         <body></body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-      allowConsoleError(() => {
-        const created = storyAdPage.maybeCreateCta();
-        expect(created).to.be.false;
-        const attribution = doc.querySelector(
-          '.i-amphtml-story-ad-attribution'
-        );
-        expect(attribution).not.to.exist;
-      });
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
+      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
+      expect(attribution).not.to.exist;
     });
 
     it('does not create attribution when missing url', async () => {
+      expectAsyncConsoleError(
+        /amp-story-auto-ads attribution url must be available/
+      );
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
       iframe.contentDocument.write(`
@@ -371,14 +377,10 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         <body></body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-      allowConsoleError(() => {
-        const created = storyAdPage.maybeCreateCta();
-        expect(created).to.be.false;
-        const attribution = doc.querySelector(
-          '.i-amphtml-story-ad-attribution'
-        );
-        expect(attribution).not.to.exist;
-      });
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
+      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
+      expect(attribution).not.to.exist;
     });
   });
 
@@ -393,7 +395,8 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         storyAutoAdsEl.getAmpDoc(),
         baseConfig,
         1, // index
-        new StoryAdLocalization(win)
+        new StoryAdLocalization(win),
+        new ButtonTextFitter(env.ampdoc)
       );
     });
 
@@ -436,7 +439,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
-      storyAdPage.maybeCreateCta();
+      await storyAdPage.maybeCreateCta();
       const cta = doc.querySelector('.i-amphtml-story-ad-link');
       // Don't open new tab for test.
       cta.target = '_self';
