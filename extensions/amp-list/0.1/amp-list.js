@@ -551,9 +551,10 @@ export class AmpList extends AMP.BaseElement {
       actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
 
       if (opt_append) {
-        throw error;
+        this.handleLoadMoreFailed_();
+      } else {
+        this.showFallback_();
       }
-      this.showFallbackOrThrow_(error);
     });
   }
 
@@ -1168,9 +1169,6 @@ export class AmpList extends AMP.BaseElement {
       .then(() => {
         // Necessary since load-more elements are toggled in the above block
         this.attemptToFitLoadMore_(dev().assertElement(this.container_));
-      })
-      .catch(() => {
-        this.handleLoadMoreFailed_();
       });
   }
 
@@ -1279,11 +1277,10 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {*=} error
    * @throws {!Error} If fallback element is not present.
    * @private
    */
-  showFallbackOrThrow_(error) {
+  showFallback_() {
     this.element.classList.add('i-amphtml-list-fetch-error');
     // Displaying [fetch-error] may offset initial content, so resize to fit.
     if (childElementByAttr(this.element, 'fetch-error')) {
@@ -1294,8 +1291,6 @@ export class AmpList extends AMP.BaseElement {
     if (this.getFallback()) {
       this.toggleFallback_(true);
       this.togglePlaceholder(false);
-    } else {
-      throw error;
     }
   }
 
