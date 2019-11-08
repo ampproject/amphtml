@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-story-quiz-1.0.css';
 import {createShadowRootWithStyle} from '../0.1/utils';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
 
 /** @private {Array<string>} */
 const answerChoiceOptions = ['A', 'B', 'C', 'D'];
@@ -35,9 +34,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
-
-    /** @private {Array<number>} */
-    this.percentages_ = this.TEMPgenerateRandomPercentages_();
   }
 
   /** @override */
@@ -110,17 +106,17 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
- * @private 
-Creates an option container with option content,
- * adds styling, answer choices, and percentage containers,
- * and adds it to the shadow DOM.
- * @param {HTMLOptionElement} option
- * @param {number} index
- */
+   * @private
+   * Creates an option container with option content,
+   * adds styling and answer choices,
+   * and adds it to the shadow DOM.
+   * @param {HTMLOptionElement} option
+   * @param {number} index
+   */
   configureOption_(option, index) {
     // Transfer the option information into a span -
     // this allows the option container to house other markup,
-    // such as the answer choices and the percentages
+    // such as the answer choices
     const convertedOption = document.createElement('span');
     convertedOption.textContent = option.textContent;
     if (option.hasAttribute('correct')) {
@@ -139,70 +135,6 @@ Creates an option container with option content,
     answerChoice.textContent = answerChoiceOptions[index];
     answerChoice.setAttribute('class', 'i-amp-story-quiz-answer-choice');
     convertedOption.prepend(answerChoice);
-
-    // Create a container for the percentage and add it to the shadow root
-    const percentageBox = document.createElement('span');
-    percentageBox.setAttribute('class', 'i-amp-story-quiz-percentage');
-    convertedOption.append(percentageBox);
-  }
-
-  /**
-   * @private
-   * Temporary method to generate random percentages
-   *
-   * @return {Array<number>}
-   */
-  TEMPgenerateRandomPercentages_() {
-    const percentages = [];
-    let pool = 100;
-    let random;
-
-    const numOptions = Array.from(this.element.querySelectorAll('option'))
-      .length;
-    for (let i = 0; i < numOptions - 1; i++) {
-      random = Math.floor(Math.random() * pool);
-      percentages.push(random);
-      pool -= random;
-    }
-    percentages.push(pool);
-    return percentages;
-  }
-
-  /**
-   * @private
-   * Sets the percentage of an option and adjusts the background accordingly.
-   * @param {Node} option
-   * @param {number} percentage
-   */
-  setOptionPercentage_(option, percentage) {
-    /**
-     * @param {number} percentage
-     * @return {number} the width of the percentage bar scaled up to start further from the front
-     */
-    const scalePercentageString = percentage => {
-      // Starts each percentage bar at 10% of the way to the end, and allocates the remaining 90% proportionally
-      return 10 + (9 * percentage) / 10;
-    };
-
-    let backgroundString;
-    if (
-      option.getAttribute('class').includes('i-amp-story-quiz-option-selected')
-    ) {
-      const colorPrefix = option.hasAttribute('correct') ? '' : 'in';
-      backgroundString = `linear-gradient(90deg, var(--${colorPrefix}correct-color-shaded) ${scalePercentageString(
-        percentage
-      )}%, var(--${colorPrefix}correct-color) ${scalePercentageString(
-        percentage
-      )}%)`;
-    } else {
-      backgroundString = `linear-gradient(90deg, #ECEDEF ${scalePercentageString(
-        percentage
-      )}%, #ffffff ${scalePercentageString(percentage)}%)`;
-    }
-    setStyle(option, 'background', backgroundString);
-    option.querySelector(
-      '.i-amp-story-quiz-percentage'
-    ).textContent = `${percentage}%`;
   }
 
   /**
@@ -240,10 +172,6 @@ Creates an option container with option content,
               symbolContainer.textContent = '×';
               symbolContainer.setAttribute('aria-label', 'x');
             }
-
-            // TODO: FIND AN ORDER-CONSCIOUS WAY OF ASSIGNING PERCENTAGES
-            const percentage = this.percentages_.shift();
-            this.setOptionPercentage_(o, percentage);
           });
 
           this.hasReceivedResponse_ = true;

@@ -51,11 +51,12 @@ h3.i-amp-story-quiz-prompt {
 
 .i-amp-story-quiz-option {
     display: inline-grid !important;
-    grid-template-columns: 50px auto 50px !important;
+    grid-template-columns: 50px auto !important;
     justify-items: start !important;
     align-items: center !important;
     border-radius: 32px !important;
     padding: 8px !important;
+    padding-right: 16px !important;
     background-color: inherit !important;
     margin-bottom: 8px !important;
     color: #5F6368 !important;
@@ -94,6 +95,14 @@ h3.i-amp-story-quiz-prompt {
 
 .i-amp-story-quiz-option-post-selection[correct] > .i-amp-story-quiz-answer-choice {
     color: var(--correct-color) !important;
+}
+
+.i-amp-story-quiz-option-post-selection.i-amp-story-quiz-option-selected:not([correct]) {
+    background-color: var(--incorrect-color) !important;
+}
+
+.i-amp-story-quiz-option-post-selection.i-amp-story-quiz-option-selected[correct] {
+    background-color: var(--correct-color) !important;
 }
 
 .i-amp-story-quiz-option-post-selection.i-amp-story-quiz-option-selected > .i-amp-story-quiz-answer-choice {
