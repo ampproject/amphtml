@@ -27,6 +27,7 @@ import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {cancellation} from '../../../src/error';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
@@ -117,19 +118,14 @@ export class AmpScript extends AMP.BaseElement {
      *   2. The amp-script tag or any of its parents must also have 'data-ampdevmode'.
      */
     const devTag = 'data-ampdevmode';
-    let parentHasDevTag = false;
-    if (this.element.ownerDocument.documentElement.hasAttribute(devTag)) {
-      let parentWalker = this.element;
-      while (parentWalker != null) {
-        if (parentWalker.hasAttribute('data-ampdevmode')) {
-          parentHasDevTag = true;
-          break;
-        }
-        parentWalker = parentWalker.parentNode;
-      }
-    }
+    const doc = this.element.ownerDocument.documentElement;
+    const closestAncestorWithDevTag = closestAncestorElementBySelector(
+      this.element,
+      `[${devTag}]:not(html)`
+    );
     this.development_ =
-      this.element.hasAttribute('development') || parentHasDevTag;
+      this.element.hasAttribute('development') ||
+      (closestAncestorWithDevTag != null && doc.hasAttribute(devTag));
 
     if (this.development_) {
       user().warn(
