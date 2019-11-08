@@ -527,7 +527,7 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Trigger a fetch-error event
-   * @param {!Error} error
+   * @param {*} error
    */
   triggerFetchErrorEvent_(error) {
     const event = error
