@@ -21,7 +21,9 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-embed width="100" height="283"
+<amp-embed
+  width="100"
+  height="283"
   type=nativery
   layout=responsive
   data-wid="[YOUR_WIDGET_ID]">
