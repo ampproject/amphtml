@@ -31,9 +31,7 @@ export class ButtonTextFitter {
     /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
-    this.win_ = ampdoc.win;
-
-    this.doc_ = this.win_.document;
+    this.doc_ = ampdoc.win.document;
 
     this.measurer_ = this.doc_.createElement('div');
 
@@ -58,22 +56,26 @@ export class ButtonTextFitter {
    * @return {boolean}
    */
   fit(pageElement, container, content) {
-    return this.resources_.mutateElement(container, () => {
-      this.measurer_.textContent = content;
-      const fontSize = calculateFontSize(
-        this.measurer_,
-        this.maxHeight_,
-        this.getMaxWidth_(pageElement),
-        // Less than real min so that we can find text that is too long.
-        FontSizes.MIN - 1,
-        FontSizes.MAX
-      );
-      if (fontSize >= FontSizes.MIN) {
-        this.updateFontSize_(container, fontSize);
-        return true;
-      }
-      return false;
-    });
+    let success = false;
+    return this.resources_
+      .mutateElement(container, () => {
+        this.measurer_.textContent = content;
+        const fontSize = calculateFontSize(
+          this.measurer_,
+          this.maxHeight_,
+          this.getMaxWidth_(pageElement),
+          // Less than real min so that we can find text that is too long.
+          FontSizes.MIN - 1,
+          FontSizes.MAX
+        );
+        if (fontSize >= FontSizes.MIN) {
+          this.updateFontSize_(container, fontSize);
+          success = true;
+        }
+      })
+      .then(() => {
+        return success;
+      });
   }
 
   /**

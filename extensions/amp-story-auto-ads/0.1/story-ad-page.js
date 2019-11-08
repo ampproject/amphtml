@@ -39,7 +39,6 @@ import {dict} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
-import {setStyles} from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -76,8 +75,9 @@ export class StoryAdPage {
    * @param {!JsonObject} config
    * @param {number} index
    * @param {!./story-ad-localization.StoryAdLocalization} localization
+   * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
    */
-  constructor(ampdoc, config, index, localization) {
+  constructor(ampdoc, config, index, localization, buttonFitter) {
     /** @private @const {!JsonObject} */
     this.config_ = config;
 
@@ -124,7 +124,7 @@ export class StoryAdPage {
     this.loadCallbacks_ = [];
 
     /** @private @const {./story-ad-button-text-fitter.ButtonTextFitter} */
-    this.buttonFitter_ = new ButtonTextFitter(ampdoc);
+    this.buttonFitter_ = buttonFitter;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -219,7 +219,7 @@ export class StoryAdPage {
   /**
    * Try to create CTA (Click-To-Action) before showing the ad. Will fail if
    * not enough metadata to create the outlink button.
-   * @return {boolean}
+   * @return {Promise<boolean>}
    */
   maybeCreateCta() {
     // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
@@ -332,7 +332,7 @@ export class StoryAdPage {
    * Create layer to contain outlink button.
    * @param {string} ctaUrl
    * @param {string} ctaText
-   * @return {boolean}
+   * @return {Promise<boolean>}
    */
   createCtaLayer_(ctaUrl, ctaText) {
     // TODO(ccordry): Move button to shadow root.
@@ -346,39 +346,41 @@ export class StoryAdPage {
       })
     );
 
-    const didFit = this.buttonFitter_.fit(
+    const fitPromise = this.buttonFitter_.fit(
       this.pageElement_,
       a, // Container
       ctaText // Content
     );
 
-    if (!didFit) {
-      user().warn(TAG, 'CTA button text is too long. Ad was discarded');
-      return false;
-    }
+    return fitPromise.then(success => {
+      if (!success) {
+        user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
+        return false;
+      }
 
-    a.href = ctaUrl;
-    a.textContent = ctaText;
+      a.href = ctaUrl;
+      a.textContent = ctaText;
 
-    if (a.protocol !== 'https:' && a.protocol !== 'http:') {
-      user().warn(TAG, 'CTA url is not valid. Ad was discarded');
-      return false;
-    }
+      if (a.protocol !== 'https:' && a.protocol !== 'http:') {
+        user().warn(TAG, 'CTA url is not valid. Ad was discarded');
+        return false;
+      }
 
-    // Click listener so that we can fire `story-ad-click` analytics trigger at
-    // the appropriate time.
-    a.addEventListener('click', () => {
-      const vars = {
-        [AnalyticsVars.AD_CLICKED]: Date.now(),
-      };
-      this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
+      // Click listener so that we can fire `story-ad-click` analytics trigger at
+      // the appropriate time.
+      a.addEventListener('click', () => {
+        const vars = {
+          [AnalyticsVars.AD_CLICKED]: Date.now(),
+        };
+        this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
+      });
+
+      const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
+      ctaLayer.className = 'i-amphtml-cta-container';
+      ctaLayer.appendChild(a);
+      this.pageElement_.appendChild(ctaLayer);
+      return true;
     });
-
-    const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
-    ctaLayer.className = 'i-amphtml-cta-container';
-    ctaLayer.appendChild(a);
-    this.pageElement_.appendChild(ctaLayer);
-    return true;
   }
 
   /**
