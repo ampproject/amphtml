@@ -809,11 +809,11 @@ export class AmpStory extends AMP.BaseElement {
 
     this.win.addEventListener('hashchange', event => {
       const target = closestAncestorElementBySelector(
-        devAssert(event.target),
+        event.target,
         'amp-sidebar'
       );
-      // Only allow branching links from the sidebar.
-      if (!target) {
+      // Only allow branching links from the sidebar and from address bar.
+      if (!target || typeof event.target === Window) {
         return;
       }
 
