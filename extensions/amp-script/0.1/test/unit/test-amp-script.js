@@ -153,6 +153,59 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     service.checkSha384.withArgs('alert(1)').rejects(/Invalid sha384/);
     return script.layoutCallback().should.be.rejected;
   });
+
+  describe('development mode', () => {
+    it('should not be in dev mode by default', () => {
+      script.buildCallback();
+      expect(script.development_).false;
+    });
+
+    it('development tag present should put it in dev mode', () => {
+      element.setAttribute('development', true);
+      script = new AmpScript(element);
+      script.buildCallback();
+      expect(script.development_).true;
+    });
+
+    it('data-ampdevmode on just the element should not enable dev mode', () => {
+      element.setAttribute('data-ampdevmode', true);
+      script = new AmpScript(element);
+      script.buildCallback();
+      expect(script.development_).false;
+    });
+
+    it('data-ampdevmode on just the root html element should not enable dev mode', () => {
+      element.ownerDocument.documentElement.setAttribute(
+        'data-ampdevmode',
+        true
+      );
+      script = new AmpScript(element);
+      script.buildCallback();
+      expect(script.development_).false;
+    });
+
+    it('data-ampdevmode on both the element and root html element should enable dev mode', () => {
+      element.setAttribute('data-ampdevmode', true);
+      element.ownerDocument.documentElement.setAttribute(
+        'data-ampdevmode',
+        true
+      );
+      script = new AmpScript(element);
+      script.buildCallback();
+      expect(script.development_).true;
+    });
+
+    it('data-ampdevmode on both the element and a parent element should enable dev mode', () => {
+      element.ownerDocument.documentElement.setAttribute(
+        'data-ampdevmode',
+        true
+      );
+      element.ownerDocument.body.setAttribute('data-ampdevmode', true);
+      script = new AmpScript(element);
+      script.buildCallback();
+      expect(script.development_).true;
+    });
+  });
 });
 
 describes.fakeWin('AmpScriptService', {amp: {runtimeOn: false}}, env => {
