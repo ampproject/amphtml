@@ -399,6 +399,19 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
+    it.only('Should replace VIDEO_STATE(video,parameter) with video data', () => {
+      sandbox.stub(Services, 'videoManagerForDoc').returns({
+        getAnalyticsDetails() {
+          return Promise.resolve({currentTime: 1.5});
+        },
+      });
+      sandbox
+        .stub(doc, 'getElementById')
+        .withArgs('video')
+        .returns(doc.createElement('video'));
+      return check('?sh=VIDEO_STATE(video,currentTime)', '?sh=1.5');
+    });
+
     describe('$MATCH', () => {
       it('handles default index', () => {
         return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');

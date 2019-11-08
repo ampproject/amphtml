@@ -183,6 +183,8 @@ export class VariableService {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
+    const root_ = this.ampdoc_.getRootNode();
+
     /** @private {!JsonObject} */
     this.macros_ = dict({});
 
@@ -211,6 +213,16 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+
+    this.register_('VIDEO_STATE', (id, property) => {
+      const video = user().assertElement(
+        root_.getElementById(/** @type {string} */ (id)),
+        `Could not find an element with id="${id}" for VIDEO_STATE`
+      );
+      return Services.videoManagerForDoc(this.ampdoc_)
+        .getAnalyticsDetails(video)
+        .then(details => (details ? details[property] : ''));
+    });
   }
 
   /**

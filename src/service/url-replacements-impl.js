@@ -662,17 +662,6 @@ export class GlobalVariableSource extends VariableSource {
       return this.ampdoc.isVisible() ? '0' : '1';
     });
 
-    this.setAsync('VIDEO_STATE', (id, property) => {
-      const root = this.ampdoc.getRootNode();
-      const video = user().assertElement(
-        root.getElementById(/** @type {string} */ (id)),
-        `Could not find an element with id="${id}" for VIDEO_STATE`
-      );
-      return Services.videoManagerForDoc(this.ampdoc)
-        .getAnalyticsDetails(video)
-        .then(details => (details ? details[property] : ''));
-    });
-
     this.setAsync(
       'STORY_PAGE_INDEX',
       this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX')
