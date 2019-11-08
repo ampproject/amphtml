@@ -76,6 +76,9 @@ export function batchFetchJsonFor(
         throw new Error('Response is undefined.');
       }
       return getValueForExpr(data, expr || '.');
+    })
+    .catch(err => {
+      throw user().createError('failed fetching JSON data', err);
     });
 }
 
