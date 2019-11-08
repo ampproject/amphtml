@@ -39,9 +39,9 @@ export function nativery(global, data) {
     );
 
   // must add listener for the creation of window.context
-  window.addEventListener('amp-widgetCreated', function(e) {
-    if (e && e.detail) {
-      global.context.requestResize(undefined, e.detail.height);
+  window.addEventListener('amp-widgetCreated', function(mye) {
+    if (mye && mye.detail) {
+      global.context.requestResize(undefined, mye.detail.height);
     }
   });
 
