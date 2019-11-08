@@ -31,14 +31,14 @@ FAIL
 |  <body>
 |  	<!-- Example of a valid amp-mowplayer. -->
 |  	<amp-mowplayer
-|  		data-mediaid="meeqmaqg5js"
+|  		data-mediaid="v-myfwarfx4tb"
 |  		layout="responsive"
 |  		width="16" 
 |  		height="9">
 |  	</amp-mowplayer>
 |  	<!-- Alternate valid example with playlist. -->
 |  	<amp-mowplayer
-|  		data-mediaid="mbmpou9hzag"
+|  		data-mediaid="p-mmzhwcu9mbu"
 |  		layout="responsive"
 |  		width="16" 
 |  		height="9">
@@ -47,7 +47,7 @@ FAIL
 |  	<amp-mowplayer
 >>  ^~~~~~~~~
 amp-mowplayer/0.1/test/validator-amp-mowplayer.html:46:1 The mandatory attribute 'data-mediaid' is missing in tag 'amp-mowplayer'. (see https://amp.dev/documentation/components/amp-mowplayer)
-|  		data-mediasid="mbmpou9hzag"
+|  		data-mediasid="v-myfwarfx4tb"
 |  		layout="responsive"
 |  		width="16" 
 |  		height="9">
