@@ -68,6 +68,25 @@ setReportError(reportErrorForWin.bind(null, self));
 const TAG = 'runtime';
 
 /**
+ * @typedef {{
+ *  url: (string|undefined),
+ *  title: (string|undefined),
+ *  canonicalUrl: (string|undefined),
+ *  head: (Element|undefined),
+ *  ampdoc: (!./service/ampdoc-impl.AmpDoc | undefined),
+ *  setVisibilityState: (function(!VisibilityState)|undefined),
+ *  postMessage: (function()|undefined),
+ *  onMessage: (function()|undefined),
+ *  close: (function()|undefined),
+ *  getState: (function()|undefined),
+ *  setState: (function()|undefined),
+ *  toggleRuntime: (function()|undefined),
+ *  resources: (!./service/resources-interface.ResourcesInterface | undefined)
+ * }}
+ */
+export let ShadowDoc;
+
+/**
  * Applies the runtime to a given global scope for a single-doc mode. Multi
  * frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
@@ -420,7 +439,7 @@ export class MultidocManager {
    * @param {!Object<string, string>|undefined} params
    * @param {function(!Object, !ShadowRoot,
    * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
-   * @return {!Object}
+   * @return {!ShadowDoc}
    * @private
    */
   attachShadowDoc_(hostElement, url, params, builder) {
@@ -579,7 +598,7 @@ export class MultidocManager {
    * @param {!Document} doc
    * @param {string} url
    * @param {!Object<string, string>=} opt_initParams
-   * @return {!Object}
+   * @return {!ShadowDoc}
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
     dev().fine(TAG, 'Attach shadow doc:', doc);
