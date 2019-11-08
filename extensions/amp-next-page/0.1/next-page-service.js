@@ -517,7 +517,7 @@ export class NextPageService {
   /**
    * Sets the specified document as active, updating the document title and URL.
    *
-   * @param {DocumentRef} ref Reference to the document to be activated
+   * @param {!DocumentRef} ref Reference to the document to be activated
    * @private
    */
   setActiveDocument_(ref) {
@@ -542,7 +542,7 @@ export class NextPageService {
   /**
    * Manually overrides the document's visible state to the given state
    *
-   * @param {DocumentRef} ref Reference to the document to change
+   * @param {!DocumentRef} ref Reference to the document to change
    * @param {!../../../src/visibility-state.VisibilityState} visibilityState
    * @private
    */
@@ -552,7 +552,7 @@ export class NextPageService {
       return;
     }
 
-    const ampDoc = ref && ref.amp && ref.amp.ampdoc;
+    const ampDoc = ref.amp && ref.amp.ampdoc;
 
     // Prevent hiding of documents that are not shadow docs
     if (!ampDoc) {
