@@ -540,6 +540,7 @@ export class AmpList extends AMP.BaseElement {
     const actions = Services.actionServiceForDoc(this.element);
     actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
   }
+
   /**
    * Request list data from `src` and return a promise that resolves when
    * the list has been populated with rendered list items. If the viewer is
