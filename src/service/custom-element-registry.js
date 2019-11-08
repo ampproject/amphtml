@@ -41,7 +41,7 @@ function getExtendedElements(win) {
  * @param {!Element} el
  * @return {function(new:../base-element.BaseElement, !Element)}
  */
-export function getImplementation(win, el) {
+export function getImplementationClass(win, el) {
   // Closure compiler appears to mark HTMLElement as @struct which
   // disables bracket access. Force this with a type coercion.
   const nonStructEl = /** @type {!Object} */ (el);

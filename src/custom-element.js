@@ -33,7 +33,7 @@ import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {
-  getImplementation,
+  getImplementationClass,
   upgradeWhenRegistered,
 } from './service/custom-element-registry';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
@@ -825,7 +825,7 @@ function createBaseCustomElementClass(win) {
 
         // Load the pre-stubbed extension if needed.
         if (isStub(this.implementation_)) {
-          const Ctor = getImplementation(win, this);
+          const Ctor = getImplementationClass(win, this);
 
           // If the registered BaseElement implementation is still the
           // ElementStub, that means the extension script hasn't been
