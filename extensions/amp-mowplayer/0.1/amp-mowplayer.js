@@ -17,7 +17,6 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {addParamsToUrl} from '../../../src/url';
 import {
   createFrameFor,
   isJsonOrObj,
