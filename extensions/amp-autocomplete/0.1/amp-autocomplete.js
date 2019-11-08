@@ -314,14 +314,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
       expr: itemsExpr,
       urlReplacement: policy,
     }).catch(e => {
-      if (e.message === 'Response is undefined.') {
-        user().warn(
-          TAG,
-          'Expected key "%s" in data but found nothing. Rendering empty results.',
-          itemsExpr
-        );
-        return [];
-      }
+      user().warn(
+        TAG,
+        'Expected key "%s" in data but found nothing. Rendering empty results.',
+        itemsExpr
+      );
+      return [];
     });
   }
 
