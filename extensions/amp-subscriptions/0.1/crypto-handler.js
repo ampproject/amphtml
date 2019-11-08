@@ -21,6 +21,9 @@ import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
+// Length of IV in AES-GCM encoded content.
+const AES_GCM_IV_LENGTH = 12;
+
 export class CryptoHandler {
   /**
    * Creates an instance of CryptoHandler.
@@ -137,6 +140,8 @@ export class CryptoHandler {
     // 2. Un-base64 the encrypted content. This way we get the actual encrypted
     //    bytes.
     const encryptedBytes = base64DecodeToBytes(encryptedContent);
+    const iv = encryptedBytes.slice(0, AES_GCM_IV_LENGTH);
+    const content = encryptedBytes.slice(AES_GCM_IV_LENGTH);
 
     // 3. Get document Key in the correct format.
     return this.stringToCryptoKey_(decryptedDocumentKey).then(function(
@@ -146,12 +151,11 @@ export class CryptoHandler {
       return crypto.subtle
         .decrypt(
           {
-            name: 'AES-CTR',
-            counter: new Uint8Array(16), // iv: all zeros.
-            length: 128, // block size (16): 1-128
+            name: 'AES-GCM',
+            iv,
           },
           formattedDocKey,
-          encryptedBytes
+          content
         )
         .then(function(buffer) {
           // 5. Decryption gives us raw bytes and we need to turn them into text.
@@ -170,7 +174,7 @@ export class CryptoHandler {
     const documentKeyBytes = base64DecodeToBytes(decryptedDocumentKey);
 
     // 2. Convert bytes to CryptoKey format.
-    return crypto.subtle.importKey('raw', documentKeyBytes, 'AES-CTR', true, [
+    return crypto.subtle.importKey('raw', documentKeyBytes, 'AES-GCM', true, [
       'decrypt',
     ]);
   }
