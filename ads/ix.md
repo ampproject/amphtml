@@ -13,8 +13,7 @@ limitations under the License.
 # Index Exchange AMP RTC
 Index Exchange (IX) supports [AMP Real Time Config (RTC)](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-publisher-implementation-guide.md) which allows Publishers to augment their ad requests with targeting information that is retrieved at runtime. This document provides instructions on adding IX as a vendor to AMP pages.
 ## Configuration
-Each [amp-ad](https://amp.dev/documentation/components/amp-ad/) element that uses RTC must have the `rtc-config` attribute set with valid JSON.</br>
-
+Each [amp-ad](https://amp.dev/documentation/components/amp-ad/) element that uses RTC must have the `rtc-config` attribute set with valid JSON.
 **Attributes**
 - `<amp-ad>`: Required. IX `<amp-ad>` tags require the `width`, `height`, and `type="doubleclick"` parameters.</br>
   **Note**: IX leverages AMP through Google Ad Manager (GAM, formerly DoubleClick for Publishers).
@@ -88,6 +87,5 @@ The value of `rtc-config` must conform to the following specification:
 >
 </amp-ad>
 ```
-Additional parameters including JSON are passed through in the resulting call to GAM. For details refer to the [Google Ad Manager documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md).</br>
-
+Additional parameters including JSON are passed through in the resulting call to GAM. For details refer to the [Google Ad Manager documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md).
 To learn about the required Google Ad Manager (GAM) configuration, refer to [Index Exchange Knowledge Base](https://kb.indexexchange.com/Mobile/About_AMP.htm).
