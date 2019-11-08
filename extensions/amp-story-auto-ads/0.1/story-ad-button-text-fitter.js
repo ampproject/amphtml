@@ -37,8 +37,8 @@ export class ButtonTextFitter {
     /** @private {!Element} */
     this.measurer_ = this.doc_.createElement('div');
 
-    /** @private {number} */
-    this.maxHeight_ = 32; // Fixed button height from design spec.
+    /** @private {number} Fixed button height from design spec. */
+    this.maxHeight_ = 32;
 
     this.resources_.mutateElement(this.measurer_, () => {
       this.doc_.body.appendChild(this.measurer_);
