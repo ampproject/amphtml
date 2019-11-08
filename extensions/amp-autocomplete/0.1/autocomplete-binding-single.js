@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {FilterType} from './amp-autocomplete';
-
 /**
  * Single implementation of autocomplete. This supports autocompleting
  * a single input value in its entirety.
@@ -82,7 +80,7 @@ export class AutocompleteBindingSingle {
    * @return {boolean}
    */
   shouldSuggestFirst(filter) {
-    return filter === FilterType.PREFIX;
+    return filter === 'prefix';
   }
 
   /**
