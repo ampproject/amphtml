@@ -20,6 +20,9 @@ import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
 
+/** @private {Array<string>} */
+const answerChoiceOptions = ['A', 'B', 'C', 'D'];
+
 export class AmpStoryQuiz extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
@@ -35,11 +38,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     /** @private {Array<number>} */
     this.percentages_ = this.TEMPgenerateRandomPercentages_();
-
-    /** @private {Array<string>} */
-    this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
-
-    this.configureOption_ = this.configureOption_.bind(this);
   }
 
   /** @override */
@@ -104,7 +102,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       .querySelector('.i-amp-story-quiz-prompt-container')
       .appendChild(prompt);
 
-    options.forEach(this.configureOption_);
+    options.forEach((option, index) => this.configureOption_(option, index));
 
     if (this.element.children.length !== 0) {
       handleError('Too many children');
@@ -112,15 +110,17 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * @private
-   * Creates an option container with option content,
-   * adds styling, answer choices, and percentage containers,
-   * and adds it to the shadow DOM.
-   *
-   * @param {HTMLOptionElement} option
-   */
-  configureOption_(option) {
-    // Transfer the option information into a span
+ * @private 
+Creates an option container with option content,
+ * adds styling, answer choices, and percentage containers,
+ * and adds it to the shadow DOM.
+ * @param {HTMLOptionElement} option
+ * @param {number} index
+ */
+  configureOption_(option, index) {
+    // Transfer the option information into a span -
+    // this allows the option container to house other markup,
+    // such as the answer choices and the percentages
     const convertedOption = document.createElement('span');
     convertedOption.textContent = option.textContent;
     if (option.hasAttribute('correct')) {
@@ -136,7 +136,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     // Create a container for the answer choice and add it to the shadow root
     const answerChoice = document.createElement('span');
-    answerChoice.textContent = this.answerChoiceOptions_.shift();
+    answerChoice.textContent = answerChoiceOptions[index];
     answerChoice.setAttribute('class', 'i-amp-story-quiz-answer-choice');
     convertedOption.prepend(answerChoice);
 
@@ -175,17 +175,29 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @param {number} percentage
    */
   setOptionPercentage_(option, percentage) {
+    /**
+     * @param {number} percentage
+     * @return {number} the width of the percentage bar scaled up to start further from the front
+     */
+    const scalePercentageString = percentage => {
+      // Starts each percentage bar at 10% of the way to the end, and allocates the remaining 90% proportionally
+      return 10 + (9 * percentage) / 10;
+    };
+
     let backgroundString;
     if (
       option.getAttribute('class').includes('i-amp-story-quiz-option-selected')
     ) {
       const colorPrefix = option.hasAttribute('correct') ? '' : 'in';
-      backgroundString = `linear-gradient(90deg, var(--${colorPrefix}correct-color-shaded) ${10 +
-        (9 * percentage) / 10}%, var(--${colorPrefix}correct-color) ${10 +
-        (9 * percentage) / 10}%)`;
+      backgroundString = `linear-gradient(90deg, var(--${colorPrefix}correct-color-shaded) ${scalePercentageString(
+        percentage
+      )}%, var(--${colorPrefix}correct-color) ${scalePercentageString(
+        percentage
+      )}%)`;
     } else {
-      backgroundString = `linear-gradient(90deg, #ECEDEF ${10 +
-        (9 * percentage) / 10}%, #ffffff ${10 + (9 * percentage) / 10}%)`;
+      backgroundString = `linear-gradient(90deg, #ECEDEF ${scalePercentageString(
+        percentage
+      )}%, #ffffff ${scalePercentageString(percentage)}%)`;
     }
     setStyle(option, 'background', backgroundString);
     option.querySelector(

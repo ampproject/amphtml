@@ -2,121 +2,121 @@
 
 :host {
     align-self: start;
-    --correct-color: #5BBA74;
-    --correct-color-shaded: #2D8E42;
-    --incorrect-color: #F34E4E;
-    --incorrect-color-shaded: #cc4141;
+    --correct-color: #5BBA74 !important;
+    --correct-color-shaded: #2D8E42 !important;
+    --incorrect-color: #F34E4E !important;
+    --incorrect-color-shaded: #cc4141 !important;
+    --accent-color: #005AF0;
   }
 
 .i-amp-story-quiz-container {
-    font-family: 'Poppins-bold', sans-serif;
-    font-weight: 400;
-    background: #005AF0;
-    border-radius: 32px;
+    font-family: 'Poppins-bold', sans-serif !important;
+    background: var(--accent-color) !important;
+    border-radius: 32px !important;
 }
 
 .i-amp-story-quiz-prompt-container {
-    display: grid;
-    justify-items: center;
-    padding: 20px;
-    color: white;
+    display: grid !important;
+    justify-items: center !important;
+    padding: 20px !important;
+    color: white !important;
 }
 
 .i-amp-story-quiz-prompt {
-    margin: 0px;
+    margin: 0px !important;
 }
 
 h1.i-amp-story-quiz-prompt {
-    font-size: 28px;
-    line-height: 36px;
+    font-size: 28px !important;
+    line-height: 36px !important;
 }
 
 h2.i-amp-story-quiz-prompt {
-    font-size: 22px;
-    line-height: 28px;
+    font-size: 22px !important;
+    line-height: 28px !important;
 }
 
 h3.i-amp-story-quiz-prompt {
-    font-size: 18px;
-    line-height: 24px;
+    font-size: 18px !important;
+    line-height: 24px !important;
 }
 
 .i-amp-story-quiz-option-container {
-    display: grid;
-    background-color: white;
-    border-radius: 32px;
-    padding: 8px;
-    padding-bottom: 0px;
+    display: grid !important;
+    background-color: white !important;
+    border-radius: 32px !important;
+    padding: 8px !important;
+    padding-bottom: 0px !important;
 }
 
 .i-amp-story-quiz-option {
-    display: inline-grid;
-    grid-template-columns: 50px auto 50px;
-    justify-items: start;
-    align-items: center;
-    border-radius: 32px;
-    padding: 8px;
-    background-color: inherit;
-    margin-bottom: 8px;
-    color: #5F6368;
-    border: solid 1px;
-    border-color: #DADCE0;
+    display: inline-grid !important;
+    grid-template-columns: 50px auto 50px !important;
+    justify-items: start !important;
+    align-items: center !important;
+    border-radius: 32px !important;
+    padding: 8px !important;
+    background-color: inherit !important;
+    margin-bottom: 8px !important;
+    color: #5F6368 !important;
+    border: solid 1px !important;
+    border-color: #DADCE0 !important;
     /* TODO: Why won't this notation work? */
-    /* font: 16px/20px; */
-    font-size: 16px;
-    line-height: 20px;
+    /* font: 16px/20px !important; */
+    font-size: 16px !important;
+    line-height: 20px !important;
 }
 
 .i-amp-story-quiz-option-post-selection.i-amp-story-quiz-option-selected {
-    border: none;
-    color: white;
+    border: none !important;
+    color: white !important;
 }
 
 .i-amp-story-quiz-answer-choice {
-    display: grid;
-    justify-items: center;
-    align-items: center;
-    height: 24px;
-    width: 24px;
-    border-radius: 50%;
-    border-style: solid;
-    border-width: 2px;
-    padding: 5px;
-    color: #005AF0;
-    font-weight: 800;
-    font-size: 16px;
-    line-height: 16px;
+    display: grid !important;
+    justify-items: center !important;
+    align-items: center !important;
+    height: 24px !important;
+    width: 24px !important;
+    border-radius: 50% !important;
+    border-style: solid !important;
+    border-width: 2px !important;
+    padding: 5px !important;
+    color: var(--accent-color) !important;
+    font-weight: 800 !important;
+    font-size: 16px !important;
+    line-height: 16px !important;
 }
 
 .i-amp-story-quiz-option-post-selection:not([correct]) > .i-amp-story-quiz-answer-choice {
-    color: var(--incorrect-color);
+    color: var(--incorrect-color) !important;
 }
 
 .i-amp-story-quiz-option-post-selection[correct] > .i-amp-story-quiz-answer-choice {
-    color: var(--correct-color);
+    color: var(--correct-color) !important;
 }
 
 .i-amp-story-quiz-option-post-selection.i-amp-story-quiz-option-selected > .i-amp-story-quiz-answer-choice {
-    border: none;
-    margin: 2px;
+    border: none !important;
+    margin: 2px !important;
 }
 
 .i-amp-story-quiz-option-post-selection > .i-amp-story-quiz-answer-choice {
-    background: white;
+    background: white !important;
 }
 
 .i-amp-story-quiz-percentage {
-    padding-left: 10px;
-    font-weight: 800;
-    display: none;
+    padding-left: 10px !important;
+    font-weight: 800 !important;
+    display: none !important;
 }
 
 .i-amp-story-quiz-option-post-selection:not(.i-amp-story-quiz-option-selected) > .i-amp-story-quiz-percentage {
-    color: #AAAAAA;
+    color: #AAAAAA !important;
 }
 
 .i-amp-story-quiz-option-post-selection > .i-amp-story-quiz-percentage {
-    display: inherit;
+    display: block !important;
 }
 
 /* TODO: ADD ANIMATIONS */
