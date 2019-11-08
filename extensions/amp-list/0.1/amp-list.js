@@ -561,7 +561,7 @@ export class AmpList extends AMP.BaseElement {
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
-        return this.scheduleRender_(items);
+        return this.scheduleRender_(items).then(() => this.maybeSetLoadMore_());
       });
     }
 
@@ -746,9 +746,9 @@ export class AmpList extends AMP.BaseElement {
       .then(elements => this.render_(elements, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
-      renderPromise = renderPromise
-        .then(() => this.maybeRenderLoadMoreTemplates_(payload))
-        .then(() => this.maybeSetLoadMore_());
+      renderPromise = renderPromise.then(() =>
+        this.maybeRenderLoadMoreTemplates_(payload)
+      );
     }
     renderPromise.then(onFulfilledCallback, onRejectedCallback);
   }
