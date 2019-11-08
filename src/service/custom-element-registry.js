@@ -54,9 +54,9 @@ export function getImplementation(win, el) {
 }
 
 /**
- * Returns the BaseElement implmementation that the element should upgrade to.
+ * Schedules the element to have its BaseElement implementation upgraded when
+ * it becomes registered.
  * @param {!Element} el
- * @return {?function(new:../base-element.BaseElement)}
  */
 export function upgradeWhenRegistered(el) {
   stubbedElements.push(el);
