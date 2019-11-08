@@ -27,19 +27,21 @@ export function nativery(global, data) {
   // push the two object into the '_nativery' global
   window._nativery = 
     window._nativery || 
-    Object.assign( {}, {
-      wid: data.wid,
-      referrer: data.referrer || window.context.referrer,
-      url: data.url || window.context.canonicalUrl,
-      viewId: window.context.pageViewId,
-      params: params,
-    }
-  );
-    
+    Object.assign(
+      {},
+      {
+        wid: data.wid,
+        referrer: data.referrer || window.context.referrer,
+        url: data.url || window.context.canonicalUrl,
+        viewId: window.context.pageViewId,
+        params: params
+      }
+    );
+
   // must add listener for the creation of window.context
-  window.addEventListener('amp-widgetCreated', function(e){
+  window.addEventListener('amp-widgetCreated', function(e) {
     console.log('Nativery - AMP - Widget ready!');
-    if(e && e.detail) {
+    if (e && e.detail) {
       global.context.requestResize(undefined, e.detail.height);
     }
   });
