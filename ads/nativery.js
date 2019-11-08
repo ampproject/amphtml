@@ -25,8 +25,8 @@ export function nativery(global, data) {
   const params = Object.assign({}, data);
 
   // push the two object into the '_nativery' global
-  window._nativery = 
-    window._nativery || 
+  window._nativery =
+    window._nativery ||
     Object.assign(
       {},
       {
@@ -34,7 +34,7 @@ export function nativery(global, data) {
         referrer: data.referrer || window.context.referrer,
         url: data.url || window.context.canonicalUrl,
         viewId: window.context.pageViewId,
-        params: params
+        params,
       }
     );
 
