@@ -22,6 +22,14 @@ requirement: {
   whitelist: 'src/preconnect.js'
   whitelist: 'src/experiments.js'
   whitelist: 'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js'
+
+  # DO NOT SUBMIT: remove; testing only.
+  whitelist: 'extensions/'
+  whitelist: 'src/cookies.js'
+  whitelist: 'src/element-service.js'
+  whitelist: 'src/inabox/utils.js'
+  whitelist: 'src/runtime.js'
+  whitelist: 'src/service/document-info-impl.js'
 }
 
 
