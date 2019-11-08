@@ -38,7 +38,7 @@ export function nativery(global, data) {
       }
     );
 
-  // must add listener for the creation of window.context
+  // must add listener for resize
   window.addEventListener('amp-widgetCreated', function(e) {
     if (e && e.getDetail) {
       global.context.requestResize(undefined, e.getDetail.height);
