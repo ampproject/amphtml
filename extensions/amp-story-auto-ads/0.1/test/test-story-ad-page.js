@@ -243,6 +243,38 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       expect(anchor.textContent).to.equal('Install Now');
     });
 
+    it('allows custom CTA text', async () => {
+      ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
+      ampAdElement.setAttribute('data-vars-ctatype', 'I am a custom button!');
+
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.true;
+
+      const ctaLayer = doc.querySelector('amp-story-cta-layer');
+      expect(ctaLayer).to.exist;
+      const anchor = ctaLayer.firstChild;
+      expect(anchor.tagName).to.equal('A');
+      expect(anchor.target).to.equal('_blank');
+      expect(anchor.href).to.equal('https://amp.dev/');
+      expect(anchor).to.have.attribute(
+        'style',
+        'font-size: 0px; transform: scale(0);'
+      );
+      expect(anchor).to.have.class('i-amphtml-story-ad-link');
+      expect(anchor.textContent).to.equal('I am a custom button!');
+    });
+
+    it('rejects custom CTA text if it is too long', async () => {
+      ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
+      ampAdElement.setAttribute(
+        'data-vars-ctatype',
+        'I am a very long CTA that will not fit within the button limit!'
+      );
+
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
+    });
+
     it('reads CTA values from amp4ads-vars meta tags', async () => {
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
