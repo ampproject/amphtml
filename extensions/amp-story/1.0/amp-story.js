@@ -87,6 +87,7 @@ import {
   childElements,
   childNodes,
   closest,
+  closestAncestorElementBySelector,
   createElementWithAttributes,
   isRTL,
   scopedQuerySelectorAll,
@@ -806,7 +807,16 @@ export class AmpStory extends AMP.BaseElement {
 
     this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
 
-    this.win.addEventListener('hashchange', () => {
+    this.win.addEventListener('hashchange', event => {
+      const target = closestAncestorElementBySelector(
+        devAssert(event.target),
+        'amp-sidebar'
+      );
+      // Only allow branching links from the sidebar.
+      if (!target) {
+        return;
+      }
+
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
       if (!maybePageId || !this.isActualPage_(maybePageId)) {
         return;
