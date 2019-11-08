@@ -36,9 +36,6 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       clock = lolex.install({target: win});
-
-      // TODO(#25343): remove this toggle when cleaning up experiment post launch.
-      toggleExperiment(win, 'amp-nested-menu', true);
     });
 
     async function getNestedMenu(options) {
