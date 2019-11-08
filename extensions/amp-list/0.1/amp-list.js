@@ -500,6 +500,7 @@ export class AmpList extends AMP.BaseElement {
    * attribute is set, and truncates the list-items to a length defined
    * by max-items.
    * @param {!JsonObject|!Array<JsonObject>} data
+   * @throws {!Error} If response is undefined
    * @return {!Array}
    */
   computeListItems_(data) {
@@ -1320,7 +1321,6 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @throws {!Error} If fallback element is not present.
    * @private
    */
   showFallback_() {
