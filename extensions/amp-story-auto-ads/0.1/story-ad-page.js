@@ -19,7 +19,6 @@ import {
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
-import {ButtonTextFitter} from './story-ad-button-text-fitter';
 import {CommonSignals} from '../../../src/common-signals';
 import {CtaTypes} from './story-ad-localization';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
@@ -222,56 +221,61 @@ export class StoryAdPage {
    * @return {Promise<boolean>}
    */
   maybeCreateCta() {
-    // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
-    if (this.adDoc_) {
-      this.extractA4AVars_();
-      this.readAmpAdExit_();
-    }
+    return Promise.resolve().then(() => {
+      // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
+      if (this.adDoc_) {
+        this.extractA4AVars_();
+        this.readAmpAdExit_();
+      }
 
-    // If making a CTA layer we need a button name & outlink url.
-    const ctaUrl =
-      this.ampAdExitOutlink_ ||
-      this.a4aVars_[A4AVarNames.CTA_URL] ||
-      this.adElement_.getAttribute(DataAttrs.CTA_URL);
+      // If making a CTA layer we need a button name & outlink url.
+      const ctaUrl =
+        this.ampAdExitOutlink_ ||
+        this.a4aVars_[A4AVarNames.CTA_URL] ||
+        this.adElement_.getAttribute(DataAttrs.CTA_URL);
 
-    const ctaType =
-      this.a4aVars_[A4AVarNames.CTA_TYPE] ||
-      this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
+      const ctaType =
+        this.a4aVars_[A4AVarNames.CTA_TYPE] ||
+        this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
 
-    if (!ctaUrl || !ctaType) {
-      user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
-      return false;
-    }
+      if (!ctaUrl || !ctaType) {
+        user().error(
+          TAG,
+          'Both CTA Type & CTA Url are required in ad response.'
+        );
+        return false;
+      }
 
-    let ctaText;
-    // CTA picked from predefined choices.
-    if (CtaTypes[ctaType]) {
-      const ctaLocalizedStringId = CtaTypes[ctaType];
-      ctaText = this.localizationService_.getLocalizedString(
-        ctaLocalizedStringId
+      let ctaText;
+      // CTA picked from predefined choices.
+      if (CtaTypes[ctaType]) {
+        const ctaLocalizedStringId = CtaTypes[ctaType];
+        ctaText = this.localizationService_.getLocalizedString(
+          ctaLocalizedStringId
+        );
+      } else {
+        // Custom CTA text - Should already be localized.
+        ctaText = ctaType;
+      }
+
+      // Store the cta-type as an accesible var for any further pings.
+      this.analytics_.then(analytics =>
+        analytics.setVar(
+          this.index_, // adIndex
+          AnalyticsVars.CTA_TYPE,
+          ctaText
+        )
       );
-    } else {
-      // Custom CTA text - Should already be localized.
-      ctaText = ctaType;
-    }
 
-    // Store the cta-type as an accesible var for any further pings.
-    this.analytics_.then(analytics =>
-      analytics.setVar(
-        this.index_, // adIndex
-        AnalyticsVars.CTA_TYPE,
-        ctaText
-      )
-    );
+      try {
+        this.maybeCreateAttribution_();
+      } catch (e) {
+        // Failure due to missing adchoices icon or url.
+        return false;
+      }
 
-    try {
-      this.maybeCreateAttribution_();
-    } catch (e) {
-      // Failure due to missing adchoices icon or url.
-      return false;
-    }
-
-    return this.createCtaLayer_(ctaUrl, ctaText);
+      return this.createCtaLayer_(ctaUrl, ctaText);
+    });
   }
 
   /**
@@ -347,7 +351,7 @@ export class StoryAdPage {
     );
 
     const fitPromise = this.buttonFitter_.fit(
-      this.pageElement_,
+      dev().assertElement(this.pageElement_),
       a, // Container
       ctaText // Content
     );

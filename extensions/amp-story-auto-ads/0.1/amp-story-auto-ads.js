@@ -132,6 +132,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {boolean} */
     this.hasForcedRender_ = false;
 
+    /** @private {boolean} */
+    this.tryingToPlace_ = false;
+
+    /** @private {?./story-ad-button-text-fitter.ButtonTextFitter} */
     this.buttonFitter_ = null;
   }
 
@@ -372,7 +376,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.config_,
       index,
       this.localizationService_,
-      this.buttonFitter_
+      devAssert(this.buttonFitter_)
     );
 
     this.maybeForceAdPlacement_(page);

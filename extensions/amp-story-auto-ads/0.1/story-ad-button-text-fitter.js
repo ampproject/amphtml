@@ -31,10 +31,13 @@ export class ButtonTextFitter {
     /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
 
+    /** @private {!Document} */
     this.doc_ = ampdoc.win.document;
 
+    /** @private {!Element} */
     this.measurer_ = this.doc_.createElement('div');
 
+    /** @private {number} */
     this.maxHeight_ = 32; // Fixed button height from design spec.
 
     this.resources_.mutateElement(this.measurer_, () => {
@@ -50,10 +53,10 @@ export class ButtonTextFitter {
   }
 
   /**
-   * @param {!HTMLElement} pageElement
-   * @param {!HTMLElement} container
+   * @param {!Element} pageElement
+   * @param {!Element} container
    * @param {string} content
-   * @return {boolean}
+   * @return {Promise<boolean>}
    */
   fit(pageElement, container, content) {
     let success = false;
@@ -81,7 +84,7 @@ export class ButtonTextFitter {
   /**
    * Called on each button creation, in case of window resize.
    * Page width - (2 x 32px of padding on each side) + (2 x 10px padding on button).
-   * @param {!HTMLElement} pageElement
+   * @param {!Element} pageElement
    * @return {number}
    * @private
    */
@@ -90,7 +93,7 @@ export class ButtonTextFitter {
   }
 
   /**
-   * @param {!HTMLElement} container
+   * @param {!Element} container
    * @param {number} fontSize
    */
   updateFontSize_(container, fontSize) {
