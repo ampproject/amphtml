@@ -1,7 +1,6 @@
 {
   "allow-doc-opt-in": ["amp-next-page", "inabox-viewport-friendly"],
   "allow-url-opt-in": [
-    "ios-scrollable-iframe",
     "pump-early-frame",
     "macro-after-long-task",
     "twitter-default-placeholder",
@@ -32,7 +31,6 @@
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
-  "ios-scrollable-iframe": 0,
   "macro-after-long-task": 0,
   "pump-early-frame": 1,
   "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
