@@ -211,6 +211,19 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+
+    this.register_('AMP_STATE', key => {
+      // This is safe since AMP_STATE is not an A4A whitelisted variable.
+      const root = this.ampdoc_.getRootNode();
+      const element =
+        /** @type {!Element|!ShadowRoot} */ (root.documentElement || root);
+      return Services.bindForDocOrNull(element).then(bind => {
+        if (!bind) {
+          return '';
+        }
+        return bind.getStateValue(/** @type {string} */ (key));
+      });
+    });
   }
 
   /**

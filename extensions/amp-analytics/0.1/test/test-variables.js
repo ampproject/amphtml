@@ -399,6 +399,18 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
+    it('should replace AMP_STATE(key)', () => {
+      sandbox.stub(Services, 'bindForDocOrNull').returns(
+        Promise.resolve({
+          getStateValue(key) {
+            expect(key).to.equal('foo.bar');
+            return Promise.resolve('baz');
+          },
+        })
+      );
+      return check('?state=AMP_STATE(foo.bar)', '?state=baz');
+    });
+
     describe('$MATCH', () => {
       it('handles default index', () => {
         return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');

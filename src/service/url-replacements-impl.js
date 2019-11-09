@@ -700,19 +700,6 @@ export class GlobalVariableSource extends VariableSource {
         Services.performanceFor(win).getMakeBodyVisible()
       );
     });
-
-    this.setAsync('AMP_STATE', key => {
-      // This is safe since AMP_STATE is not an A4A whitelisted variable.
-      const root = this.ampdoc.getRootNode();
-      const element =
-        /** @type {!Element|!ShadowRoot} */ (root.documentElement || root);
-      return Services.bindForDocOrNull(element).then(bind => {
-        if (!bind) {
-          return '';
-        }
-        return bind.getStateValue(/** @type {string} */ (key));
-      });
-    });
   }
 
   /**

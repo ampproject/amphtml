@@ -8,6 +8,7 @@
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-custom>
     amp-base-carousel img {
       object-fit: cover;
@@ -17,6 +18,40 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+    <amp-analytics id="nestedAnalytics">
+        <script type="application/json">
+        {
+          "transport": {"beacon": false, "xhrpost": false, "image":true},
+          "requests": {
+            "visibility": "/analytics/${type}?RANDOM"
+          },
+          "triggers": {
+            "visibilityScope": {
+              "on": "visible",
+              "request": "visibility",
+              "visibilitySpec": {
+                "selector": "amp-img",
+                "selectionMethod": "scope",
+                "visiblePercentageMin": 10
+              },
+              "vars": { "type": "visible-scope" }
+            },
+            "visibilityClosest": {
+              "on": "visible",
+              "request": "visibility",
+              "visibilitySpec": {
+                "selectionMethod": "closest",
+                "visiblePercentageMin": 20
+              },
+              "vars": { "type": "visible-closest" }
+            }
+          },
+          "extraUrlParams": {
+            "ampState": "AMP_STATE(carousel)"
+          }
+        }
+        </script>
+      </amp-analytics>
   <amp-state id="carousel">
     <script type="application/json">
       {

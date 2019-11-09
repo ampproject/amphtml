@@ -226,7 +226,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       // Restrict the number of replacement params to globalVaraibleSource
       // Please consider adding the logic to amp-analytics instead.
       // Please contact @lannka or @zhouyx if the test fail.
-      expect(variables.length).to.equal(72);
+      expect(variables.length).to.equal(71);
     });
   });
 
@@ -684,23 +684,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
           });
       });
     });
-
-  it('should replace AMP_STATE(key)', () => {
-    const win = getFakeWindow();
-    sandbox.stub(Services, 'bindForDocOrNull').returns(
-      Promise.resolve({
-        getStateValue(key) {
-          expect(key).to.equal('foo.bar');
-          return Promise.resolve('baz');
-        },
-      })
-    );
-    return Services.urlReplacementsForDoc(win.document.documentElement)
-      .expandUrlAsync('?state=AMP_STATE(foo.bar)')
-      .then(res => {
-        expect(res).to.equal('?state=baz');
-      });
-  });
 
   // TODO(#16916): Make this test work with synchronous throws.
   it.skip('should replace VARIANT', () => {
