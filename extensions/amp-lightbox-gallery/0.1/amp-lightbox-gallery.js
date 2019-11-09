@@ -188,6 +188,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private @const */
     this.boundMeasureMutate_ = this.measureMutateElement.bind(this);
 
+    /** @private {boolean} */
+    this.swipeStarted_ = false;
+
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
@@ -634,6 +637,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   swipeGesture_(data) {
     if (data.first) {
+      if (this.swipeStarted_) {
+        dev().error(
+          TAG,
+          'badly ordered swipe gestures: second first without last'
+        );
+      }
+      this.swipeStarted_ = true;
+
       const {sourceElement} = this.getCurrentElement_();
       const parentCarousel = this.getSourceElementParentCarousel_(
         sourceElement
@@ -648,8 +659,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       return;
     }
 
+    if (!this.swipeStarted_) {
+      dev().error(
+        TAG,
+        'badly ordered swipe gestures: subsequent without first'
+      );
+      return;
+    }
+
     if (data.last) {
       this.swipeToDismiss_.endSwipe(data);
+      this.swipeStarted_ = false;
       return;
     }
 

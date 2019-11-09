@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds a Yotpo on-site widget.
 ---
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -40,33 +41,35 @@ Embeds a <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo</a>
 
 You can use the `amp-yotpo` extension to display [Yotpo on-site widgets](https://support.yotpo.com/en/on-site/reviews-widget).
 
-*Example: Display the Yotpo bottom line widget*
+_Example: Display the Yotpo bottom line widget_
 
 ```html
 <amp-yotpo
-    width="550"
-    height="100"
-    data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-    data-widget-type="BottomLine"
-    data-product-id="9408616206">
+  width="550"
+  height="100"
+  data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
+  data-widget-type="BottomLine"
+  data-product-id="9408616206"
+>
 </amp-yotpo>
 ```
 
-*Example: Display the reviews widget*
+_Example: Display the reviews widget_
 
 ```html
 <amp-yotpo
-    width="550"
-    height="700"
-    layout="responsive"
-    data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
-    data-widget-type="MainWidget"
-    data-product-id="9408616206"
-    data-name="hockey skates"
-    data-url="https://ranabram.myshopify.com/products/hockey-skates"
-    data-image-url="https://ichef.bbci.co.uk/news/320/media/images/83351000/jpg/_83351965_explorer273lincolnshirewoldssouthpicturebynicholassilkstone.jpg"
-    data-descriptipn="skates"
-    data-yotpo-element-id="1">
+  width="550"
+  height="700"
+  layout="responsive"
+  data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
+  data-widget-type="MainWidget"
+  data-product-id="9408616206"
+  data-name="hockey skates"
+  data-url="https://ranabram.myshopify.com/products/hockey-skates"
+  data-image-url="https://ichef.bbci.co.uk/news/320/media/images/83351000/jpg/_83351965_explorer273lincolnshirewoldssouthpicturebynicholassilkstone.jpg"
+  data-descriptipn="skates"
+  data-yotpo-element-id="1"
+>
 </amp-yotpo>
 ```
 

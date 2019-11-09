@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Provides a collection of preset visual effects, such as parallax.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,6 +23,7 @@ limitations under the License.
 -->
 
 # amp-fx-collection
+
 Provides a collection of preset visual effects, such as parallax.
 
 [TOC]
@@ -47,7 +49,6 @@ The `amp-fx-collection` extension provides a collection of preset visual effects
 such as parallax that can be easily enabled on any element via attributes.
 
 To specify a visual effect for an element, add the `amp-fx` attribute with the value of the visual effect.
-
 
 ## Visual effects
 
@@ -91,26 +92,37 @@ This is the duration over which the animation takes places. The default value is
 In the below example, the animation lasts over `2000ms`.
 
 ```html
-  <div amp-fx="fade-in" data-duration="2000ms">
-    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
-  </div>
+<div amp-fx="fade-in" data-duration="2000ms">
+  <amp-img
+    width="1600"
+    height="900"
+    layout="responsive"
+    src="https://picsum.photos/1600/900?image=1069"
+  ></amp-img>
+</div>
 ```
 
 ##### data-easing (optional)
 
 This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-in` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
-* “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
-* “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
-* “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00) (default)
-* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
-or specify a `custom-bezier()` input
+
+- “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
+- “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
+- “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00) (default)
+- “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00)
+  or specify a `custom-bezier()` input
 
 In the below example, the animation acceleration curve is a custom specified `cubic-bezier(...)` curve.
 
 ```html
-  <div amp-fx="fade-in" data-easing="cubic-bezier(0.40, 0.00, 0.40, 1.00)">
-    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
-  </div>
+<div amp-fx="fade-in" data-easing="cubic-bezier(0.40, 0.00, 0.40, 1.00)">
+  <amp-img
+    width="1600"
+    height="900"
+    layout="responsive"
+    src="https://picsum.photos/1600/900?image=1069"
+  ></amp-img>
+</div>
 ```
 
 ##### data-margin-start (optional)
@@ -120,9 +132,14 @@ This parameter determines when to trigger the timed animation. The value specifi
 In the below example, the animation doesn't start until the element has crossed 20% of the viewport from the bottom.
 
 ```html
-  <div amp-fx="fade-in" data-margin-start="20%">
-    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
-  </div>
+<div amp-fx="fade-in" data-margin-start="20%">
+  <amp-img
+    width="1600"
+    height="900"
+    layout="responsive"
+    src="https://picsum.photos/1600/900?image=1069"
+  ></amp-img>
+</div>
 ```
 
 ### fade-in-scroll
@@ -140,9 +157,14 @@ This parameter determines when to stop the animation. The value specified in `<p
 In the below example, the `<div>` is fully visible by the time it has crossed 80% of the viewport from the bottom.
 
 ```html
-  <div amp-fx="fade-in-scroll" data-margin-end="80%">
-    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
-  </div>
+<div amp-fx="fade-in-scroll" data-margin-end="80%">
+  <amp-img
+    width="1600"
+    height="900"
+    layout="responsive"
+    src="https://picsum.photos/1600/900?image=1069"
+  ></amp-img>
+</div>
 ```
 
 ##### data-repeat (optional)
@@ -152,9 +174,14 @@ By default once the element is fully visible we don't animate the opacity anymor
 In the below example, the animation is fully dependent on scroll and the `<div>` fades in and out as the user scrolls.
 
 ```html
-  <div amp-fx="fade-in-scroll" data-repeat>
-    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
-  </div>
+<div amp-fx="fade-in-scroll" data-repeat>
+  <amp-img
+    width="1600"
+    height="900"
+    layout="responsive"
+    src="https://picsum.photos/1600/900?image=1069"
+  ></amp-img>
+</div>
 ```
 
 ### float-in-top, float-in-bottom
@@ -181,6 +208,7 @@ This is the duration over which the animation takes places. The default value di
 Between `480 px` (the minimum width of a mobile device) and `1000px` (the minimum width of a laptop screen width), we scale the default duration between `400ms` and `600ms`.
 
 Here are some examples to help you better understand this:
+
 1. screen width - `610px` the default duration for a `fly-in-bottom` would be `450ms`.
 2. screen width - `675px` the default duration for a `fly-in-bottom` would be `475ms`.
 3. screen width - `740px` the default duration for a `fly-in-bottom` would be `500ms`.
@@ -192,15 +220,17 @@ If the user overrides this default value of `data-duration` to `Xms`, the same d
 ##### data-easing (optional)
 
 This parameter lets you vary the animation's speed over the course of its duration. The default is `ease-out` which is `cubic-bezier(0.40, 0.00, 0.40, 1.00)`. You can choose from one of the presets available:
-* “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
-* “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
-* “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)
-* “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00) (default)
-or specify a `custom-bezier()` input.
+
+- “linear” - cubic-bezier(0.00, 0.00, 1.00, 1.00)
+- “ease-in-out” - cubic-bezier(0.80, 0.00, 0.20, 1.00)
+- “ease-in” - cubic-bezier(0.80, 0.00, 0.60, 1.00)
+- “ease-out” - cubic-bezier(0.40, 0.00, 0.40, 1.00) (default)
+  or specify a `custom-bezier()` input.
 
 ##### data-fly-in-distance (optional)
 
 This parameter determines the translation to take place. The value is specified in `<percent>` of viewport. The default value are as follows:
+
 <table>
   <tr>
     <th>amp-fx value</th>
@@ -237,9 +267,14 @@ This parameter determines the translation to take place. The value is specified 
 In the below example, the element is translated along the Y axis across `20%` of the viewport.
 
 ```html
-  <div amp-fx="fly-in-bottom" data-fly-in-distance="20%">
-    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
-  </div>
+<div amp-fx="fly-in-bottom" data-fly-in-distance="20%">
+  <amp-img
+    width="1600"
+    height="900"
+    layout="responsive"
+    src="https://picsum.photos/1600/900?image=1069"
+  ></amp-img>
+</div>
 ```
 
 ##### data-margin-start (optional)
@@ -250,13 +285,17 @@ This parameter determines when to trigger the timed animation. The value specifi
 
 Developers can also combine `amp-fx` presets together to create combined animations.
 
-
 In the below example, the element is both translated along the Y axis and has it's opacity changed from `0` to `1` over a duration of `1000ms`.
 
 ```html
-  <div amp-fx="fade-in fly-in-bottom" data-duration="1000ms">
-    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
-  </div>
+<div amp-fx="fade-in fly-in-bottom" data-duration="1000ms">
+  <amp-img
+    width="1600"
+    height="900"
+    layout="responsive"
+    src="https://picsum.photos/1600/900?image=1069"
+  ></amp-img>
+</div>
 ```
 
 However, there are some presets which don't combine together to create great results. In such cases, we accept the first preset listed and ignore the clashing preset and warn in the console.
@@ -264,12 +303,18 @@ However, there are some presets which don't combine together to create great res
 In the below example, the element is being translated along the Y axis by two clashing presets `parallax` and `fly-in-bottom`. In this case we only allow the `parallax` animation and ignore the `fly-in-bottom` preset.
 
 ```html
-  <div amp-fx="parallax fly-in-bottom" data-parallax-factor="1.5">
-    <amp-img width="1600" height="900" layout="responsive" src="https://picsum.photos/1600/900?image=1069"></amp-img>
-  </div>
+<div amp-fx="parallax fly-in-bottom" data-parallax-factor="1.5">
+  <amp-img
+    width="1600"
+    height="900"
+    layout="responsive"
+    src="https://picsum.photos/1600/900?image=1069"
+  ></amp-img>
+</div>
 ```
 
 Below is a list of group of presets, AMP advises you don't combine:
+
 1. `parallax`, `fly-in-top`, `fly-in-bottom`,
 2. `fly-in-left`, `fly-in-right`,
 3. `fade-in`, `fade-in-scroll`.

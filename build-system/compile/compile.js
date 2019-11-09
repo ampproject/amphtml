@@ -28,6 +28,7 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
@@ -42,8 +43,7 @@ let inProgress = 0;
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  isTravisBuild() && argv.single_pass ? 4 : 1;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
@@ -103,7 +103,6 @@ function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
   del.sync('build/parsers');
-  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
@@ -390,6 +389,13 @@ function compile(
           reject(err);
         })
         .pipe(rename(outputFilename))
+        .pipe(
+          gulpIf(
+            !argv.pseudo_names && !options.skipUnknownDepsCheck,
+            checkForUnknownDeps()
+          )
+        )
+        .on('error', reject)
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);

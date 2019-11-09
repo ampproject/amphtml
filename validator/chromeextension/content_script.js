@@ -15,7 +15,7 @@
  * limitations under the license.
  */
 const globals = {};
-globals.amphtmlRegex = new RegExp('(^\s*)amphtml(\s*$)');
+globals.amphtmlRegex = new RegExp('(^\\s*)amphtml(\\s*$)');
 globals.ampCaches = [
   {
     'getAmpHref': function() {
