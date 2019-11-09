@@ -313,7 +313,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return batchFetchJsonFor(ampdoc, this.element, {
       expr: itemsExpr,
       urlReplacement: policy,
-    }).catch(e => {
+    }).catch(() => {
       user().warn(
         TAG,
         'Expected key "%s" in data but found nothing. Rendering empty results.',
