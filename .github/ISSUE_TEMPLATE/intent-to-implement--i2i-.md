@@ -53,10 +53,6 @@ The launch tracker is meant to be an easy way of sharing a project's status with
 You should add a link to the launch tracker for this work here if applicable. One ideal template and instructions can be found here: bit.ly/amp-launch-tracker
 -->
 
-<!--
-Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
--->
-
 ## Consideration checklist
 ### Design
 - [ ] Design shows understanding of problem statement/priority
@@ -66,5 +62,8 @@ Add anyone to this cc line that you want to notify about this I2I, including a r
 Mark as done once this design has been presented at a [Design Review](https://github.com/ampproject/amphtml/blob/532dbbbc15c879a32e26e1e890b3a6b5b71cb123/contributing/design-reviews.md).
 -->
 
+<!--
+Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
+-->
 
 /cc @ampproject/wg-approvers
