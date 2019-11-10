@@ -15,6 +15,11 @@ See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-
 If you haven't already done so, sign the Contributor License Agreement (CLA) as soon as possible to avoid delays merging your code. A signed CLA is not necessary to submit this I2I or to send a pull request, but it will be needed before your code can be merged. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement for more information on CLAs.
 -->
 
+## Status
+<!--
+Draft, Ready for Review
+-->
+
 ## Summary
 
 <!--
@@ -51,5 +56,15 @@ You should add a link to the launch tracker for this work here if applicable. On
 <!--
 Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
 -->
+
+## Consideration checklist
+### Design
+- [ ] Design shows understanding of problem statement/priority
+- [ ] Acceptance/success criteria for problem being solved is clear
+- [ ] Design socialized
+<!--
+Mark as done once this design has been presented at a [Design Review](https://github.com/ampproject/amphtml/blob/532dbbbc15c879a32e26e1e890b3a6b5b71cb123/contributing/design-reviews.md).
+-->
+
 
 /cc @ampproject/wg-approvers
