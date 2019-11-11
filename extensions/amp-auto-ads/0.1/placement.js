@@ -36,6 +36,9 @@ import {getElementLayoutBox} from './utils';
 /** @const */
 const TAG = 'amp-auto-ads';
 
+/** @const */
+export const RESPONSIVE_SIZING_HOLDBACK_BRANCH = '368226533';
+
 /**
  * @typedef {{
  *   width: (number|undefined),
@@ -216,7 +219,8 @@ export class Placement {
           return this.state_;
         }
         const useResponsiveAdElement =
-          isResponsiveEnabled && this.responsiveSizingBranch_ == '368226531';
+          isResponsiveEnabled &&
+          this.responsiveSizingBranch_ != RESPONSIVE_SIZING_HOLDBACK_BRANCH;
         this.adElement_ = useResponsiveAdElement
           ? this.createResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
