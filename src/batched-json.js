@@ -35,34 +35,37 @@ export const UrlReplacementPolicy = {
  *
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!Element} element
- * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
+ * @param {!Object} options options bag for modifying the request.
+ * @param {string|undefined} options.expr Dot-syntax reference to subdata of JSON result.
  *     to return. If not specified, entire JSON result is returned.
- * @param {UrlReplacementPolicy=} opt_urlReplacement If ALL, replaces all URL
- *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand..
- * @param {boolean=} opt_refresh Forces refresh of browser cache.
- * @param {string=} opt_token Auth token that forces a POST request.
+ * @param {UrlReplacementPolicy|undefined} options.urlReplacement If ALL, replaces all URL
+ *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ * @param {boolean|undefined} options.refresh Forces refresh of browser cache.
+ * @param {string|undefined} options.token Auth token that forces a POST request.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
 export function batchFetchJsonFor(
   ampdoc,
   element,
-  opt_expr = '.',
-  opt_urlReplacement = UrlReplacementPolicy.NONE,
-  opt_refresh = false,
-  opt_token = undefined
+  {
+    expr = '.',
+    urlReplacement = UrlReplacementPolicy.NONE,
+    refresh = false,
+    token = undefined,
+  } = {}
 ) {
   assertHttpsUrl(element.getAttribute('src'), element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
-  return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
+  return requestForBatchFetch(element, urlReplacement, refresh)
     .then(data => {
-      if (opt_token !== undefined) {
+      if (token !== undefined) {
         data.fetchOpt['method'] = 'POST';
         data.fetchOpt['headers'] = {
           'Content-Type': 'application/x-www-form-urlencoded',
         };
         data.fetchOpt['body'] = {
-          'ampViewerAuthToken': opt_token,
+          'ampViewerAuthToken': token,
         };
       }
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
@@ -72,7 +75,7 @@ export function batchFetchJsonFor(
       if (data == null) {
         throw new Error('Response is undefined.');
       }
-      return getValueForExpr(data, opt_expr || '.');
+      return getValueForExpr(data, expr || '.');
     })
     .catch(err => {
       throw user().createError('failed fetching JSON data', err);

@@ -203,7 +203,10 @@ export class ConfigLoader {
    * @private visible for testing
    */
   fetch_(ampdoc, element, token, policy) {
-    return batchFetchJsonFor(ampdoc, element, token, policy);
+    return batchFetchJsonFor(ampdoc, element, {
+      token,
+      urlReplacement: policy,
+    });
   }
 
   /**
