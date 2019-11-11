@@ -26,7 +26,7 @@ import {
 } from '../../amp-base-carousel/0.1/responsive-attributes';
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -156,7 +156,7 @@ class AmpStreamGallery extends AMP.BaseElement {
         this.updateInsetArrowVisibility_(newValue);
       },
       'loop': newValue => {
-        this.carousel_.updateLoop(newValue == 'true');
+        this.updateLoop_(newValue == 'true');
       },
       'outset-arrows': newValue => {
         this.updateOutsetArrows_(newValue == 'true');
@@ -638,6 +638,22 @@ class AmpStreamGallery extends AMP.BaseElement {
       insetArrowVisibilityMapping[insetArrowVisibility] ||
       InsetArrowVisibility.AUTO;
     this.updateUi_();
+  }
+
+  /**
+   * @param {boolean} loop
+   */
+  updateLoop_(loop) {
+    // For iOS, do not allow looping as scrolling, then touching during the
+    // momentum scrolling can cause very broken behavior, since the carousel
+    // is not aware that the user is touching the carousel.
+    if (loop && Services.platformFor(this.win).isIos()) {
+      user().warn('amp-stream-gallery does not support looping on iOS due ' +
+          'to https://bugs.webkit.org/show_bug.cgi?id=191218.');
+      return;
+    }
+
+    this.carousel_.updateLoop(loop);
   }
 
   /**
