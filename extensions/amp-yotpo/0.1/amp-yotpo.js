@@ -52,24 +52,6 @@ export class AmpYotpo extends AMP.BaseElement {
       'The data-widget-type attribute is required for <amp-yotpo> %s',
       this.element
     );
-    const iframe = getIframe(this.win, this.element, 'yotpo');
-    this.applyFillContent(iframe);
-
-    const unlisten = listenFor(
-      iframe,
-      'embed-size',
-      data => {
-        this.attemptChangeHeight(data['height']).catch(() => {
-          /* do nothing */
-        });
-      },
-      /* opt_is3P */ true
-    );
-    this.unlisteners_.push(unlisten);
-
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -92,6 +74,28 @@ export class AmpYotpo extends AMP.BaseElement {
       this.iframe_ = null;
     }
     return true;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const iframe = getIframe(this.win, this.element, 'yotpo');
+    this.applyFillContent(iframe);
+
+    const unlisten = listenFor(
+      iframe,
+      'embed-size',
+      data => {
+        this.attemptChangeHeight(data['height']).catch(() => {
+          /* do nothing */
+        });
+      },
+      /* opt_is3P */ true
+    );
+    this.unlisteners_.push(unlisten);
+
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
 }
 
