@@ -138,7 +138,9 @@ function runPrettify(filesToCheck) {
         printFixMessages();
         rejectWithReason(reason);
       } else {
-        const reason = 'Found an unrecoverable error';
+        const reason =
+          'Found an unrecoverable error in ' +
+          cyan(path.relative(rootDir, error.fileName));
         logOnSameLine(red('ERROR: ') + reason + ':');
         log(error.message);
         rejectWithReason(reason);
