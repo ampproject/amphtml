@@ -385,32 +385,36 @@ export class AmpForm {
     );
 
     //  Form verification is not supported when SSRing templates is enabled.
-    if (!this.ssrTemplateHelper_.isSupported()) {
-      this.form_.addEventListener('change', e => {
-        this.verifier_.onCommit().then(({updatedElements, errors}) => {
-          updatedElements.forEach(checkUserValidityAfterInteraction_);
-          // Tell the validation to reveal any input.validationMessage added
-          // by the form verifier.
-          this.validator_.onBlur(e);
+    this.ssrTemplateHelper_.isSupported().then(isSSRSupported => {
+      if (!isSSRSupported) {
+        this.form_.addEventListener('change', e => {
+          this.verifier_.onCommit().then(({updatedElements, errors}) => {
+            updatedElements.forEach(checkUserValidityAfterInteraction_);
+            // Tell the validation to reveal any input.validationMessage added
+            // by the form verifier.
+            this.validator_.onBlur(e);
 
-          // Only make the verify XHR if the user hasn't pressed submit.
-          if (this.state_ === FormState.VERIFYING) {
-            if (errors.length) {
-              this.setState_(FormState.VERIFY_ERROR);
-              this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
-                this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
-              });
-            } else {
-              this.setState_(FormState.INITIAL);
+            // Only make the verify XHR if the user hasn't pressed submit.
+            if (this.state_ === FormState.VERIFYING) {
+              if (errors.length) {
+                this.setState_(FormState.VERIFY_ERROR);
+                this.renderTemplate_(dict({'verifyErrors': errors})).then(
+                  () => {
+                    this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
+                  }
+                );
+              } else {
+                this.setState_(FormState.INITIAL);
+              }
             }
-          }
+          });
         });
-      });
-    }
+      }
 
-    this.form_.addEventListener('input', e => {
-      checkUserValidityAfterInteraction_(dev().assertElement(e.target));
-      this.validator_.onInput(e);
+      this.form_.addEventListener('input', e => {
+        checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+        this.validator_.onInput(e);
+      });
     });
   }
 
@@ -674,20 +678,22 @@ export class AmpForm {
    * @return {!Promise}
    */
   handleXhrSubmit_(trust) {
-    let p;
-    if (this.ssrTemplateHelper_.isSupported()) {
-      p = this.handleSsrTemplate_(trust);
-    } else {
-      this.submittingWithTrust_(trust);
-      p = this.doActionXhr_().then(
-        response => this.handleXhrSubmitSuccess_(response),
-        error => this.handleXhrSubmitFailure_(error)
-      );
-    }
-    if (getMode().test) {
-      this.xhrSubmitPromise_ = p;
-    }
-    return p;
+    return this.ssrTemplateHelper_.isSupported().then(isSSRSupported => {
+      let p;
+      if (isSSRSupported) {
+        p = this.handleSsrTemplate_(trust);
+      } else {
+        this.submittingWithTrust_(trust);
+        p = this.doActionXhr_().then(
+          response => this.handleXhrSubmitSuccess_(response),
+          error => this.handleXhrSubmitFailure_(error)
+        );
+      }
+      if (getMode().test) {
+        this.xhrSubmitPromise_ = p;
+      }
+      return p;
+    });
   }
 
   /**
@@ -1007,12 +1013,13 @@ export class AmpForm {
    * @private
    */
   assertSsrTemplate_(value, msg) {
-    const supported = this.ssrTemplateHelper_.isSupported();
-    userAssert(
-      supported === value,
-      '[amp-form]: viewerRenderTemplate | %s',
-      msg
-    );
+    this.ssrTemplateHelper_.isSupported().then(supported => {
+      userAssert(
+        supported === value,
+        '[amp-form]: viewerRenderTemplate | %s',
+        msg
+      );
+    });
   }
 
   /**

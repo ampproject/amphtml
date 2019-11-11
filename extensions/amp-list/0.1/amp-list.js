@@ -555,26 +555,26 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve();
     }
     let fetch;
-    if (this.ssrTemplateHelper_.isSupported()) {
-      fetch = this.ssrTemplate_(opt_refresh);
-    } else {
-      fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
-        const items = this.computeListItems_(data);
-        if (this.loadMoreEnabled_) {
-          this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
-        }
-        return this.scheduleRender_(
-          items,
-          /*opt_append*/ false,
-          data
-        ).then(() => this.maybeSetLoadMore_());
-      });
-    }
+    return this.ssrTemplateHelper_.isSupported().then(isSSRSupported => {
+      if (isSSRSupported) {
+        fetch = this.ssrTemplate_(opt_refresh);
+      } else {
+        fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
+          const items = this.computeListItems_(data);
+          if (this.loadMoreEnabled_) {
+            this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
+          }
+          return this.scheduleRender_(items, /*opt_append*/ false, data).then(
+            () => this.maybeSetLoadMore_()
+          );
+        });
+      }
 
-    return fetch.catch(error => {
-      this.triggerFetchErrorEvent_(error);
-      this.showFallback_();
-      throw error;
+      return fetch.catch(error => {
+        this.triggerFetchErrorEvent_(error);
+        this.showFallback_();
+        throw error;
+      });
     });
   }
 
@@ -622,10 +622,10 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Proxies the template rendering to the viewer.
-   * @param {boolean} refresh
+   * @param {boolean=} refresh
    * @return {!Promise}
    */
-  ssrTemplate_(refresh) {
+  ssrTemplate_(refresh = false) {
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
@@ -746,18 +746,19 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
-    const isSSR = this.ssrTemplateHelper_.isSupported();
-    let renderPromise = this.ssrTemplateHelper_
-      .applySsrOrCsrTemplate(this.element, current.data)
-      .then(result => this.updateBindings_(result, current.append))
-      .then(elements => this.render_(elements, current.append));
-    if (!isSSR) {
-      const payload = /** @type {!JsonObject} */ (current.payload);
-      renderPromise = renderPromise.then(() =>
-        this.maybeRenderLoadMoreTemplates_(payload)
-      );
-    }
-    renderPromise.then(onFulfilledCallback, onRejectedCallback);
+    this.ssrTemplateHelper_.isSupported().then(isSSR => {
+      let renderPromise = this.ssrTemplateHelper_
+        .applySsrOrCsrTemplate(this.element, current.data)
+        .then(result => this.updateBindings_(result, current.append))
+        .then(elements => this.render_(elements, current.append));
+      if (!isSSR) {
+        const payload = /** @type {!JsonObject} */ (current.payload);
+        renderPromise = renderPromise.then(() =>
+          this.maybeRenderLoadMoreTemplates_(payload)
+        );
+      }
+      renderPromise.then(onFulfilledCallback, onRejectedCallback);
+    });
   }
 
   /**
@@ -845,10 +846,7 @@ export class AmpList extends AMP.BaseElement {
       // Forward elements to chained promise on success or failure.
       return bind
         .rescan(elements, removedElements, {'fast': true, 'update': true})
-        .then(
-          () => elements,
-          () => elements
-        );
+        .then(() => elements, () => elements);
     };
 
     // binding=refresh: Only do render-blocking update after initial render.

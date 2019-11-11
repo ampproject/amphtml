@@ -56,32 +56,45 @@ describes.fakeWin(
     });
 
     describe('isSupported', () => {
-      it('should return true if doc level opt-in', () => {
+      it('should return true if doc level opt-in, trusted viewer, and has capability', async () => {
         win.document.documentElement.setAttribute(
           'allow-viewer-render-template',
           true
         );
         hasCapabilityStub.withArgs('viewerRenderTemplate').returns(true);
-        expect(ssrTemplateHelper.isSupported()).to.be.true;
+        viewer.isTrustedViewer = () => Promise.resolve(true);
+
+        expect(await ssrTemplateHelper.isSupported()).to.be.true;
       });
 
-      it('should return false if not doc level opt-in', () => {
+      it('should return false if not a trusted viewer', async () => {
+        win.document.documentElement.setAttribute(
+          'allow-viewer-render-template',
+          true
+        );
         hasCapabilityStub.withArgs('viewerRenderTemplate').returns(true);
-        expect(ssrTemplateHelper.isSupported()).to.be.false;
+        viewer.isTrustedViewer = () => Promise.resolve(false);
+
+        expect(await ssrTemplateHelper.isSupported()).to.be.false;
       });
 
-      it(
-        'should return false if doc level opt-in but viewer does not have ' +
-          'capability',
-        () => {
-          win.document.documentElement.setAttribute(
-            'allow-viewer-render-template',
-            true
-          );
-          hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-          expect(ssrTemplateHelper.isSupported()).to.be.false;
-        }
-      );
+      it('should return false if not doc level opt-in', async () => {
+        hasCapabilityStub.withArgs('viewerRenderTemplate').returns(true);
+        viewer.isTrustedViewer = () => Promise.resolve(true);
+
+        expect(await ssrTemplateHelper.isSupported()).to.be.false;
+      });
+
+      it('should return false if viewer does not have capability', async () => {
+        win.document.documentElement.setAttribute(
+          'allow-viewer-render-template',
+          true
+        );
+        viewer.isTrustedViewer = () => Promise.resolve(true);
+        hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
+
+        expect(await ssrTemplateHelper.isSupported()).to.be.false;
+      });
     });
 
     describe('ssr', () => {
@@ -137,11 +150,6 @@ describes.fakeWin(
       let findAndRenderTemplate;
       let findAndRenderTemplateArray;
       beforeEach(() => {
-        win.document.documentElement.setAttribute(
-          'allow-viewer-render-template',
-          true
-        );
-        hasCapabilityStub.withArgs('viewerRenderTemplate').returns(true);
         findAndSetHtmlForTemplate = sandbox.stub(
           templates,
           'findAndSetHtmlForTemplate'
@@ -157,11 +165,13 @@ describes.fakeWin(
       });
 
       describe('applySsrOrCsrTemplate', () => {
-        it('should set html template', () => {
-          ssrTemplateHelper.applySsrOrCsrTemplate(
+        it('should set html template', async () => {
+          ssrTemplateHelper.isSupported = () => Promise.resolve(true);
+          await ssrTemplateHelper.applySsrOrCsrTemplate(
             {},
             {html: '<div>some template</div>'}
           );
+
           expect(findAndSetHtmlForTemplate).to.have.been.calledWith(
             {},
             '<div>some template</div>'
@@ -169,16 +179,21 @@ describes.fakeWin(
         });
 
         it('should throw error if html template is not defined', () => {
-          allowConsoleError(() => {
-            expect(() => {
-              ssrTemplateHelper.applySsrOrCsrTemplate({}, {html: null});
-            }).to.throw(/Server side html response must be defined/);
-          });
+          ssrTemplateHelper.isSupported = () => Promise.resolve(true);
+          const errorMsg = /Server side html response must be defined/;
+          expectAsyncConsoleError(errorMsg);
+
+          return ssrTemplateHelper.applySsrOrCsrTemplate({}, {html: null}).then(
+            () => {
+              throw new Error('must never happen');
+            },
+            error => expect(error).to.match(errorMsg)
+          );
         });
 
-        it('should render template ', () => {
-          hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-          ssrTemplateHelper.applySsrOrCsrTemplate(
+        it('should render template ', async () => {
+          ssrTemplateHelper.isSupported = () => Promise.resolve(false);
+          await ssrTemplateHelper.applySsrOrCsrTemplate(
             {},
             {data: '<div>some template</div>'}
           );
@@ -188,9 +203,9 @@ describes.fakeWin(
           );
         });
 
-        it('should set template array ', () => {
-          hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-          ssrTemplateHelper.applySsrOrCsrTemplate({}, [
+        it('should set template array ', async () => {
+          ssrTemplateHelper.isSupported = () => Promise.resolve(false);
+          await ssrTemplateHelper.applySsrOrCsrTemplate({}, [
             {data: '<div>some template</div>'},
           ]);
           expect(findAndRenderTemplateArray).to.have.been.calledWith({}, [

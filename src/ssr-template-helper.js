@@ -51,17 +51,23 @@ export class SsrTemplateHelper {
    * Whether the viewer can render templates. A doc-level opt in as
    * trusted viewers must set this capability explicitly, as a security
    * measure for potential abuse of feature.
-   * @return {boolean}
+   * @return {Promise<boolean>}
    */
   isSupported() {
     const ampdoc = this.viewer_.getAmpDoc();
-    if (ampdoc.isSingleDoc()) {
-      const htmlElement = ampdoc.getRootNode().documentElement;
-      if (htmlElement.hasAttribute('allow-viewer-render-template')) {
-        return this.viewer_.hasCapability('viewerRenderTemplate');
-      }
+    if (!ampdoc.isSingleDoc()) {
+      return Promise.resolve(false);
     }
-    return false;
+    return this.viewer_.isTrustedViewer().then(isTrusted => {
+      if (!isTrusted) {
+        return false;
+      }
+      const htmlElement = ampdoc.getRootNode().documentElement;
+      return (
+        htmlElement.hasAttribute('allow-viewer-render-template') &&
+        this.viewer_.hasCapability('viewerRenderTemplate')
+      );
+    });
   }
 
   /**
@@ -100,28 +106,30 @@ export class SsrTemplateHelper {
    */
   applySsrOrCsrTemplate(element, data) {
     let renderTemplatePromise;
-    if (this.isSupported()) {
-      userAssert(
-        typeof data['html'] === 'string',
-        'Server side html response must be defined'
-      );
-      renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
-        element,
-        /** @type {string} */ (data['html'])
-      );
-    } else if (isArray(data)) {
-      renderTemplatePromise = this.templates_.findAndRenderTemplateArray(
-        element,
-        /** @type {!Array} */ (data)
-      );
-    } else {
-      renderTemplatePromise = this.templates_.findAndRenderTemplate(
-        element,
-        /** @type {!JsonObject} */ (data)
-      );
-    }
+    return this.isSupported().then(isSupported => {
+      if (isSupported) {
+        userAssert(
+          typeof data['html'] === 'string',
+          'Server side html response must be defined'
+        );
+        renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
+          element,
+          /** @type {string} */ (data['html'])
+        );
+      } else if (isArray(data)) {
+        renderTemplatePromise = this.templates_.findAndRenderTemplateArray(
+          element,
+          /** @type {!Array} */ (data)
+        );
+      } else {
+        renderTemplatePromise = this.templates_.findAndRenderTemplate(
+          element,
+          /** @type {!JsonObject} */ (data)
+        );
+      }
 
-    return renderTemplatePromise;
+      return renderTemplatePromise;
+    });
   }
 
   /**
