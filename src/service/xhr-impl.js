@@ -23,12 +23,12 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../utils/xhr-utils';
+import {dev, user} from '../log';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
-import {parseJson} from '../json';
-import {startsWith} from '../string';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {user, dev} from '../log';
+import {parseJson} from '../json';
+import {startsWith} from '../string';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -154,6 +154,7 @@ export class Xhr {
    *
    * @param {!Response} res fetch response to convert to json.
    * @param {string|undefined} prefix to strip away.
+   * @return {JsonObject}
    */
   xssiJson(res, prefix) {
     if (!prefix) {
