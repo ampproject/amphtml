@@ -36,8 +36,8 @@ import {
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
-import {installStylesForDoc} from '../../../src/style-installer';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 import {userAssert} from '../../../src/log';
 
@@ -111,11 +111,15 @@ export class GoogleSubscriptionsPlatform {
       this.handleAnalyticsEvent_.bind(this)
     );
 
-    // Map AMP experiments to SwG experiments.
-    const enabledAmpExperiments =
-          Object.keys(experimentToggles(ampdoc.win)).
-          filter(exp => isExperimentOn(ampdoc.win, exp));
-    const swgConfig = { 'experiments': enabledAmpExperiments};
+    // Map AMP experiments prefixed with 'swg-' to SwG experiments.
+    const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
+      .filter(
+        exp =>
+          exp.startsWith('swg-') && isExperimentOn(ampdoc.win, exp.toString())
+      )
+      .map(exp => exp.substring(4));
+
+    const swgConfig = {'experiments': ampExperimentsForSwg};
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(

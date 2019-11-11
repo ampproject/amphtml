@@ -120,14 +120,15 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       linkAccount: sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
     };
     ackStub = sandbox.stub(Entitlements.prototype, 'ack');
-    toggleExperiment(win, 'gpay-api', true);
+    toggleExperiment(win, 'swg-gpay-api', true);
+    toggleExperiment(win, 'nonswgexp', true);
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
   });
 
   afterEach(() => {
     serviceAdapterMock.verify();
     analyticsMock.verify();
-    toggleExperiment(win, 'gpay-api', false);
+    toggleExperiment(win, 'swg-gpay-api', false);
   });
 
   function callback(stub) {
@@ -150,6 +151,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should propagate experiment', () => {
     expect(platform.runtime_.payClient_.getType()).to.equal('PAYJS');
+    expect(platform.runtime_.config()['experiments']).to.have.members([
+      'gpay-api',
+    ]);
   });
 
   it('should proxy fetch via AMP fetcher', () => {
