@@ -16,8 +16,11 @@ If you haven't already done so, sign the Contributor License Agreement (CLA) as 
 -->
 
 ## Status
+- [ ] Draft
+- [ ] Ready for review
+
 <!--
-Draft, Ready for Review
+Issues that aren't marked "Ready for review" are considered drafts. Draft I2Is are encouraged for complex or cross functional proposals in order to promote broader community awareness and get earlier feedback.
 -->
 
 ## Summary
