@@ -457,6 +457,15 @@ export class AmpStoryEventTracker extends CustomEventTracker {
     const repeat =
       storySpec['repeat'] === undefined ? true : storySpec['repeat'];
     const pageDetails = vars['pageDetails'];
+    const tagName = config['tagName'];
+
+    if (
+      tagName &&
+      pageDetails['tagName'] &&
+      tagName.toLowerCase() !== pageDetails['tagName']
+    ) {
+      return;
+    }
 
     if (repeat === false && pageDetails['repeated']) {
       return;
