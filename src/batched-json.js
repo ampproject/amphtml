@@ -42,6 +42,8 @@ export const UrlReplacementPolicy = {
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
  * @param {boolean|undefined} options.refresh Forces refresh of browser cache.
  * @param {string|undefined} options.token Auth token that forces a POST request.
+ * @param {string|undefined} options.stripPrefix Prefix to optionally
+ *     strip from the response before calling parseJson.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
