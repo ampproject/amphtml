@@ -129,25 +129,25 @@ export class StoryAnalyticsService {
 
   /**
    * @param {!StoryAnalyticsEvent} eventType
-   * @param {?Element} opt_element
+   * @param {Element=} element
    */
-  triggerEvent(eventType, opt_element = null) {
+  triggerEvent(eventType, element = null) {
     this.incrementPageEventCount_(eventType);
     triggerAnalyticsEvent(
       this.element_,
       eventType,
-      this.updateDetails(eventType, opt_element)
+      this.updateDetails(eventType, element)
     );
   }
 
   /**
    * Updates event details.
    * @param {!StoryAnalyticsEvent} eventType
-   * @param {?Element} opt_element
+   * @param {Element=} element
    * @visibleForTesting
    * @return {!JsonObject}}
    */
-  updateDetails(eventType, opt_element = null) {
+  updateDetails(eventType, element = null) {
     const details = {};
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
@@ -156,8 +156,8 @@ export class StoryAnalyticsService {
       details.repeated = true;
     }
 
-    if (opt_element) {
-      details.tagName = opt_element.tagName.toLowerCase();
+    if (element) {
+      details.tagName = element.tagName.toLowerCase();
     }
 
     return /** @type {!JsonObject} */ (Object.assign(
