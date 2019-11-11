@@ -114,8 +114,7 @@ export class GoogleSubscriptionsPlatform {
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
       .filter(
-        exp =>
-          exp.startsWith('swg-') && isExperimentOn(ampdoc.win, exp.toString())
+        exp => exp.startsWith('swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
       .map(exp => exp.substring(4));
 
