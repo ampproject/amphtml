@@ -601,14 +601,15 @@ export class Bind {
         return Promise.all(whenParsed);
       })
       .then(() => {
-        // In dev mode, check default values against initial expression results.
-        if (getMode().development) {
-          return this.evaluate_().then(results => this.verify_(results));
-        }
         // Bind is "ready" when its initialization completes _and_ all <amp-state>
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);
         this.dispatchEventForTesting_(BindEvents.INITIALIZE);
+
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then(results => this.verify_(results));
+        }
       });
   }
 
