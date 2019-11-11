@@ -28,7 +28,6 @@ describe('batchFetchJsonFor', () => {
   let fetchJson;
   // Mutable return variables.
   const data = {'foo': 'bar'};
-  const xssiPrefix = ")]}'\n";
 
   /**
    * @param {string} src
@@ -53,7 +52,6 @@ describe('batchFetchJsonFor', () => {
     fetchJson = window.sandbox.stub().returns(
       Promise.resolve({
         json: () => Promise.resolve(data),
-        text: () => Promise.resolve(xssiPrefix + JSON.stringify(data)),
       })
     );
     batchedXhr = {fetchJson};
@@ -174,41 +172,5 @@ describe('batchFetchJsonFor', () => {
       });
     });
   });
-
-  describe('Should respect strip-prefix', () => {
-    it('empty string has no effect', () => {
-      const el = element('https://data.com');
-      el.setAttribute('strip-prefix', '');
-      return batchFetchJsonFor(ampdoc, el, null, undefined, false).then(
-        json => {
-          expect(json).to.be.equal(data);
-        }
-      );
-    });
-
-    it('strip-prefix on an element where the response does not actually start with that prefix will have no effect', () => {
-      const el = element('https://data.com');
-      el.setAttribute('strip-prefix', 'cats');
-      return batchFetchJsonFor(ampdoc, el, null, undefined, false).then(
-        () => {
-          throw new Error(
-            'parseJson should have failed due to presence of the xssi prefix.'
-          );
-        },
-        () => 'success' // TODO(friedj): is there a better way of writing this?
-      );
-    });
-
-    it('strip-prefix on the element ensures text is stripped prior to JSON.parse', () => {
-      const el = element('https://data.com');
-      el.setAttribute('strip-prefix', xssiPrefix);
-      return batchFetchJsonFor(ampdoc, el, null, undefined, false).then(
-        json => {
-          expect(json).to.be.deep.equal(data);
-        }
-      );
-    });
-  });
-
   // TODO(choumx): Add tests for normal fetch functionality.
 });
