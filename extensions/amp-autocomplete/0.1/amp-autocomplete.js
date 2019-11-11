@@ -310,18 +310,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
-    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy).catch(
-      e => {
-        if (e.message === 'Response is undefined.') {
-          user().warn(
-            TAG,
-            'Expected key "%s" in data but found nothing. Rendering empty results.',
-            itemsExpr
-          );
-          return [];
-        }
-      }
-    );
+    return batchFetchJsonFor(ampdoc, this.element, {
+      expr: itemsExpr,
+      urlReplacement: policy,
+    }).catch(() => {
+      user().warn(
+        TAG,
+        'Expected key "%s" in data but found nothing. Rendering empty results.',
+        itemsExpr
+      );
+      return [];
+    });
   }
 
   /**

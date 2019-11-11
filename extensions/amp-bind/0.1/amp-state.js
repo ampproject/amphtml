@@ -165,14 +165,11 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   fetch_(ampdoc, policy, opt_refresh, token = undefined) {
-    return batchFetchJsonFor(
-      ampdoc,
-      this.element,
-      /* opt_expr */ undefined,
-      policy,
-      opt_refresh,
-      token
-    );
+    return batchFetchJsonFor(ampdoc, this.element, {
+      urlReplacement: policy,
+      refresh: opt_refresh,
+      token,
+    });
   }
 
   /**
