@@ -53,6 +53,7 @@ export function batchFetchJsonFor(
     urlReplacement = UrlReplacementPolicy.NONE,
     refresh = false,
     token = undefined,
+    stripPrefix = undefined,
   } = {}
 ) {
   assertHttpsUrl(element.getAttribute('src'), element);
@@ -70,7 +71,7 @@ export function batchFetchJsonFor(
       }
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
-    .then(res => res.json())
+    .then(res => Services.xhrFor(ampdoc.win).xssiJson(res, stripPrefix))
     .then(data => {
       if (data == null) {
         throw new Error('Response is undefined.');
