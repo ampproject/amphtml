@@ -184,6 +184,7 @@
           'allow-popups allow-scripts allow-forms allow-pointer-lock' +
           ' allow-popups-to-escape-sandbox allow-same-origin');
       this.iframe.setAttribute('scrolling', 'yes');
+      this.viewer.classList.add('natural');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
       this.visibilityToggle_.addEventListener('click', function() {
