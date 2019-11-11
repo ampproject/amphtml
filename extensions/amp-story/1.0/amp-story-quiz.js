@@ -15,12 +15,28 @@
  */
 
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
-import {createShadowRootWithStyle} from '../0.1/utils';
+import {createShadowRootWithStyle} from './utils';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {toArray} from '../../../src/types';
+import {user} from '../../../src/log';
 
-/** @private {Array<string>} */
+/** @const {Array<string>} */
 const answerChoiceOptions = ['A', 'B', 'C', 'D'];
+
+/** @const {string} */
+const TAG = 'amp-story-quiz';
+
+const buildQuizTemplate = element => {
+  const html = htmlFor(element);
+  const shadowElement = html`
+    <div class="i-amp-story-quiz-container">
+      <div class="i-amp-story-quiz-prompt-container"></div>
+      <div class="i-amp-story-quiz-option-container"></div>
+    </div>
+  `;
+  return shadowElement;
+};
 
 export class AmpStoryQuiz extends AMP.BaseElement {
   /**
@@ -29,37 +45,26 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?ShadowRoot} */
-    this.shadowRoot_ = null;
-
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
+
+    /** @private {?ShadowRoot} */
+    this.shadowRoot_ = null;
   }
 
   /** @override */
   buildCallback() {
-    const html = htmlFor(this.element);
-    const shadowElement = html`
-      <div class="i-amp-story-quiz-container">
-        <div class="i-amp-story-quiz-prompt-container"></div>
-        <div class="i-amp-story-quiz-option-container"></div>
-      </div>
-    `;
-
-    this.shadowRoot_ = createShadowRootWithStyle(
+    createShadowRootWithStyle(
       this.element,
-      shadowElement,
+      buildQuizTemplate(this.element),
       CSS
     );
 
-    // TODO: CONVERT THIS TO STANDARD AMP ERROR REPORTING
-    this.attachContent_(e => {
-      console.log('error!', e);
-      throw new Error(e);
-    });
+    this.shadowRoot_ = this.element.shadowRoot;
+    this.attachContent_();
     this.attachOptionActionHandlers_();
 
-    // TODO: ATTACH SURFACE OPTIONS USING CSS CUSTOM PROPERTIES
+    // TODO(jackbsteinberg): Add support for custom CSS to appropriate areas
   }
 
   /** @override */
@@ -68,30 +73,27 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * @private
    * Finds the prompt and options content
    * and adds it to the shadow DOM.
-   *
-   * @param {Function} handleError
+   * @private
    */
-  attachContent_(handleError) {
-    // TODO: If prompt is optional I need to handle the case where it's not present
+  attachContent_() {
+    // TODO(jackbsteinberg): Optional prompt behavior must be implemented
+    // alongside other validation efforts
     const prompt = this.element.children[0];
     // First child must be heading h1-h3
-    if (
-      !(prompt instanceof HTMLHeadingElement) ||
-      prompt.tagName[prompt.tagName.length - 1] > 3
-    ) {
-      handleError(
+    if (!['h1', 'h2', 'h3'].includes(prompt.tagName.toLowerCase())) {
+      user().error(
+        TAG,
         'The first child must be a heading element <h1>, <h2>, or <h3>'
       );
     }
 
-    prompt.setAttribute('class', 'i-amp-story-quiz-prompt');
+    prompt.classList.add('i-amp-story-quiz-prompt');
 
-    const options = Array.from(this.element.querySelectorAll('option'));
+    const options = toArray(this.element.querySelectorAll('option'));
     if (options.length < 2 || options.length > 4) {
-      handleError('Improper number of options');
+      user().error(TAG, 'Improper number of options');
     }
 
     this.shadowRoot_
@@ -101,71 +103,70 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     options.forEach((option, index) => this.configureOption_(option, index));
 
     if (this.element.children.length !== 0) {
-      handleError('Too many children');
+      user().error(TAG, 'Too many children');
     }
   }
 
   /**
-   * @private
    * Creates an option container with option content,
    * adds styling and answer choices,
    * and adds it to the shadow DOM.
    * @param {HTMLOptionElement} option
    * @param {number} index
+   * @private
    */
   configureOption_(option, index) {
-    // Transfer the option information into a span -
-    // this allows the option container to house other markup,
-    // such as the answer choices
-    const convertedOption = document.createElement('span');
-    convertedOption.textContent = option.textContent;
+    const html = htmlFor(option);
+    const convertedOption = html`
+      <span class="i-amp-story-quiz-option">
+        <span class="i-amp-story-quiz-answer-choice"></span>
+      </span>
+    `;
+
+    // Fill in the answer choice
+    convertedOption.querySelector(
+      '.i-amp-story-quiz-answer-choice'
+    ).textContent = answerChoiceOptions[index];
+
+    // Transfer the option information into a span then remove the option
+    const optionText = document.createTextNode(option.textContent);
+    convertedOption.append(optionText);
+
     if (option.hasAttribute('correct')) {
       convertedOption.setAttribute('correct', 'correct');
     }
     option.remove();
 
-    // Set up the class and add it to the shadow root
-    convertedOption.setAttribute('class', 'i-amp-story-quiz-option');
+    // Add the option to the shadow root
     this.shadowRoot_
       .querySelector('.i-amp-story-quiz-option-container')
       .appendChild(convertedOption);
-
-    // Create a container for the answer choice and add it to the shadow root
-    const answerChoice = document.createElement('span');
-    answerChoice.textContent = answerChoiceOptions[index];
-    answerChoice.setAttribute('class', 'i-amp-story-quiz-answer-choice');
-    convertedOption.prepend(answerChoice);
   }
 
   /**
-   * @private
    * Attaches functions to each option to handle state transition.
-   *
+   * @private
    */
   attachOptionActionHandlers_() {
-    const options = Array.from(
+    const options = toArray(
       this.shadowRoot_.querySelectorAll('.i-amp-story-quiz-option')
     );
 
-    // attach listeners
+    // Attach click listeners to each option to fire on selection
     options.forEach(option => {
       option.addEventListener('click', () => {
         if (!this.hasReceivedResponse_) {
           options.forEach(o => {
-            o === option
-              ? o.setAttribute(
-                  'class',
-                  `i-amp-story-quiz-option i-amp-story-quiz-option-post-selection i-amp-story-quiz-option-selected`
-                )
-              : o.setAttribute(
-                  'class',
-                  `i-amp-story-quiz-option i-amp-story-quiz-option-post-selection`
-                );
+            o.classList.add('i-amp-story-quiz-option-post-selection');
+            if (o === option) {
+              o.classList.add('i-amp-story-quiz-option-selected');
+            }
 
             const symbolContainer = o.querySelector(
               '.i-amp-story-quiz-answer-choice'
             );
-            // TODO: REPLACE THESE WITH ICONS
+
+            // TODO(jackbsteinberg): Replace text with icons when the assets are ready
             if (o.hasAttribute('correct')) {
               symbolContainer.textContent = '✓';
             } else {
