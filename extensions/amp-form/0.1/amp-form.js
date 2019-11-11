@@ -1262,12 +1262,7 @@ export class AmpForm {
     ];
     const checkedInputTypes = ['checkbox', 'radio'];
 
-    const queryParams = parseQueryString(this.win_.location.search);
-    Object.keys(queryParams).forEach(key => {
-      const field = this.form_./*OK*/ querySelector(`[name="${key}"]`);
-      if (!field) {
-        return;
-      }
+    const maybeFillField = (field, name) => {
       // Do not interfere with form fields that utilize variable substitutions.
       // These fields are populated at time of form submission.
       if (field.hasAttribute('data-amp-replace')) {
@@ -1278,27 +1273,43 @@ export class AmpForm {
         return;
       }
 
-      const value = queryParams[key] || '';
+      const value = queryParams[name] || '';
       const type = field.getAttribute('type') || 'text';
       const tag = field.tagName;
 
-      if (
-        (tag === 'INPUT' &&
-          valueInputTypes.includes(type.toLocaleLowerCase())) ||
-        valueTags.includes(tag)
-      ) {
+      if (tag === 'INPUT') {
+        if (valueInputTypes.includes(type.toLocaleLowerCase())) {
+          if (field.value !== value) {
+            field.value = value;
+          }
+        } else if (checkedInputTypes.includes(type)) {
+          const checked = field.value === value;
+          if (field.checked !== checked) {
+            field.checked = checked;
+          }
+        }
+      } else if (valueTags.includes(tag)) {
         if (field.value !== value) {
           field.value = value;
         }
-      } else if (tag === 'INPUT' && checkedInputTypes.includes(type)) {
-        const inputs = this.form_./*OK*/ querySelectorAll(
-          `[name="${key}"][type="${type}"]`
-        );
-        iterateCursor(inputs, input => {
-          if (input.checked !== (input.value === value)) {
-            input.checked = input.value === value;
-          }
-        });
+      }
+    };
+
+    const queryParams = parseQueryString(this.win_.location.search);
+    Object.keys(queryParams).forEach(key => {
+      // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
+      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
+        .elements[key]);
+      if (!formControls) {
+        return;
+      }
+
+      if (formControls.nodeType === Node.ELEMENT_NODE) {
+        const field = dev().assertElement(formControls);
+        maybeFillField(field, key);
+      } else if (formControls.length) {
+        const fields = /** @type {!NodeList} */ (formControls);
+        iterateCursor(fields, field => maybeFillField(field, key));
       }
     });
   }
