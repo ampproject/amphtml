@@ -2426,6 +2426,28 @@ describes.repeated(
                 });
               });
 
+              it('should redirect users if header is set but json rejects', () => {
+                sandbox.stub(ampForm.xhr_, 'fetch').returns(
+                  Promise.resolve({
+                    json: () => Promise.reject(),
+                    headers: headersMock,
+                  })
+                );
+                redirectToValue = 'https://google.com/';
+
+                const submitActionPromise = ampForm.handleSubmitAction_(
+                  /* invocation */ {}
+                );
+                expect(navigateTo).to.not.be.called;
+
+                return submitActionPromise.then(() => {
+                  expect(navigateTo).to.be.calledOnce;
+                  const {args} = navigateTo.firstCall;
+                  expect(args[1]).to.equal('https://google.com/');
+                  expect(args[2]).to.equal('AMP-Redirect-To');
+                });
+              });
+
               it('should fail to redirect to non-secure urls', () => {
                 sandbox
                   .stub(ampForm.xhr_, 'fetch')
