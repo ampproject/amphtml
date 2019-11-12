@@ -1167,38 +1167,22 @@ const ViewportType = {
  * @return {string}
  */
 function getViewportType(win, viewer) {
-  const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (
-    !Services.platformFor(win).isIos() ||
-    viewportType != ViewportType.NATURAL
-  ) {
-    return viewportType;
-  }
-  const isIosIframeScrollableOn =
-    isExperimentOn(win, 'ios-scrollable-iframe') ||
-    viewer.hasCapability('iframeScroll');
-  // TODO(#23379): remove "development -> embed" override once iOS13 is fully
-  // launched.
-  // Enable iOS Embedded mode so that it's easy to test against a more
-  // realistic iOS environment w/o an iframe.
-  if (
-    !isIframed(win) &&
-    (getMode(win).localDev || getMode(win).development) &&
-    !isIosIframeScrollableOn
-  ) {
-    return ViewportType.NATURAL_IOS_EMBED;
-  }
+  const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
 
   // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
-  if (isIframed(win) && getMode(win).test) {
+  if (getMode(win).test && isIframedIos) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  if (isIframed(win) && viewer.isEmbedded() && !isIosIframeScrollableOn) {
+  if (
+    isIframedIos &&
+    viewer.isEmbedded() &&
+    !viewer.hasCapability('iframeScroll')
+  ) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
-  return viewportType;
+  return ViewportType.NATURAL;
 }
 
 /**

@@ -43,9 +43,6 @@ export class WebviewViewerForTesting {
     this.alreadyLoaded_ = false;
 
     /** @private {string} */
-    this.viewportType_ = 'natural';
-
-    /** @private {string} */
     this.visibilityState_ = visible ? 'visible' : 'hidden';
 
     /** @type {Element} */
@@ -59,13 +56,7 @@ export class WebviewViewerForTesting {
     /** @type {Element} */
     this.iframe = document.createElement('iframe');
     this.iframe.setAttribute('id', 'AMP_DOC_' + id);
-
-    const isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
-    if (this.viewportType_ == 'natural' && !isIos_) {
-      this.iframe.setAttribute('scrolling', 'yes');
-    } else {
-      this.iframe.setAttribute('scrolling', 'no');
-    }
+    this.iframe.setAttribute('scrolling', 'yes');
 
     this.pollingIntervalIds_ = [];
     this.intervalCtr = 0;
@@ -90,14 +81,13 @@ export class WebviewViewerForTesting {
   waitForHandshakeResponse() {
     const params = {
       history: 1,
-      viewportType: this.viewportType_,
       width: this.containerEl./*OK*/ offsetWidth,
       height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
-      cap: 'foo,a2a',
+      cap: 'foo,a2a,iframeScroll',
       webview: 1,
     };
 

@@ -39,7 +39,6 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
-import {toggleExperiment} from '../../src/experiments';
 
 const NOOP = () => {};
 
@@ -1618,16 +1617,6 @@ describe('createViewport', () => {
         expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
       });
 
-      it('should bind to "iOS embed" when not iframed but in dev mode', () => {
-        getMode(win).development = true;
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(
-          ViewportBindingIosEmbedWrapper_
-        );
-      });
-
       it('should bind to "iOS embed" when iframed but in test mode', () => {
         win.parent = {};
         getMode(win).test = true;
@@ -1639,15 +1628,6 @@ describe('createViewport', () => {
         );
       });
 
-      it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {
-        win.parent = {};
-        getMode(win).development = true;
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
-      });
-
       it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
         win.parent = {};
         sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
@@ -1655,26 +1635,6 @@ describe('createViewport', () => {
           .stub(viewer, 'hasCapability')
           .withArgs('iframeScroll')
           .returns(true);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
-      });
-
-      it('should bind to "natural" when iframed, but iOS supports scrollable iframes w/exp', () => {
-        // TODO(#23379): remove this test. capability test already exists.
-        toggleExperiment(win, 'ios-scrollable-iframe', true);
-        win.parent = {};
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
-      });
-
-      it('should bind to "natural" when in dev mode, but iOS supports scrollable iframes w/exp', () => {
-        // TODO(#23379): remove "development -> embed" mode.
-        toggleExperiment(win, 'ios-scrollable-iframe', true);
-        getMode(win).development = true;
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
         expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);

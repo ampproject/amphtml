@@ -214,14 +214,12 @@
       this.url = url;
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
-      this.viewportType_ = 'natural';
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
       this.csi_ = 1;
       this.startResolve_ = null;
       this.startPromise_ = null;
-      this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate';
-      this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+      this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate,iframeScroll';
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
@@ -231,6 +229,8 @@
       this.iframe.setAttribute('sandbox',
           'allow-popups allow-scripts allow-forms allow-pointer-lock' +
           ' allow-popups-to-escape-sandbox allow-same-origin');
+      this.iframe.setAttribute('scrolling', 'yes');
+      this.viewer.classList.add('natural');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
       this.visibilityToggle_.addEventListener('click', function() {
@@ -239,13 +239,6 @@
           this.toggleVisibility(this.visibilityState_ != 'visible', true);
         }
       }.bind(this));
-      this.viewer.classList.add(this.viewportType_);
-
-      if (this.viewportType_ == 'natural' && !this.isIos_) {
-        this.iframe.setAttribute('scrolling', 'yes');
-      } else {
-        this.iframe.setAttribute('scrolling', 'no');
-      }
 
       window.addEventListener('resize', this.onResize_.bind(this));
       window.addEventListener('popstate', this.onPopState_.bind(this));
@@ -257,7 +250,6 @@
 
       var params = {
         history: 1,
-        viewportType: this.viewportType_,
         width: this.container./*OK*/offsetWidth,
         height: this.container./*OK*/offsetHeight,
         paddingTop: this.header./*OK*/offsetHeight,
