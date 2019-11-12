@@ -83,23 +83,6 @@ export function startsWith(string, prefix) {
 }
 
 /**
- * Polyfill for String.prototype.includes.
- * @param {string} string
- * @param {string} substring
- * @param {number=} start
- * @return {boolean}
- */
-export function includes(string, substring, start) {
-  if (typeof start !== 'number') {
-    start = 0;
-  }
-  if (start + substring.length > string.length) {
-    return false;
-  }
-  return string.indexOf(substring, start) !== -1;
-}
-
-/**
  * Expands placeholders in a given template string with values.
  *
  * Placeholders use ${key-name} syntax and are replaced with the value

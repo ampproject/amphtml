@@ -422,7 +422,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.highlightUserEntry_ &&
       substring &&
       substring.length <= item.length &&
-      includes(lowerCaseItem, lowerCaseSubstring)
+      lowerCaseItem.includes(lowerCaseSubstring)
     ) {
       const loc = lowerCaseItem.indexOf(lowerCaseSubstring);
       const span = this.element.ownerDocument.createElement('span');
@@ -566,7 +566,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       item = item.toLocaleLowerCase();
       switch (this.filter_) {
         case FilterType.SUBSTRING:
-          return includes(item, input);
+          return item.includes(input);
         case FilterType.PREFIX:
           return startsWith(item, input);
         case FilterType.TOKEN_PREFIX:
