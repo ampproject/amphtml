@@ -101,7 +101,6 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     const {element} = this;
 
     const origin = 'https://player.redbull.com/amp/amp-iframe.html';
-    // const src = addParamsToUrl(origin, params);
     const src = addParamsToUrl(
       origin,
       dict({
@@ -131,7 +130,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.removeIframe_();
-    return true; // layout again.
+    return true;
   }
 
   /** @private */
