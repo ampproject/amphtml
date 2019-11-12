@@ -21,6 +21,7 @@ To use RTC, you must meet the following requirements:
 
 - AppNexus
 - APS
+- Automatad
 - Criteo
 - IndexExchange
 - Lotame
