@@ -52,6 +52,12 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {boolean} */
     this.isMultiple_ = false;
 
+    /** @private {boolean} */
+    this.isRequired_ = false;
+
+    /** @private {?HTMLInputElement} */
+    this.hiddenRequiredInput_ = null;
+
     /** @private {!Array<!Element>} */
     this.selectedElements_ = [];
 
@@ -85,6 +91,7 @@ export class AmpSelector extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
+    this.isRequired_ = this.element.hasAttribute('required');
 
     if (!this.element.hasAttribute('role')) {
       this.element.setAttribute('role', 'listbox');
@@ -92,6 +99,22 @@ export class AmpSelector extends AMP.BaseElement {
 
     if (this.isMultiple_) {
       this.element.setAttribute('aria-multiselectable', 'true');
+    }
+
+    if (this.isRequired_) {
+      this.element.setAttribute('aria-required', 'true');
+      this.hiddenRequiredInput_ = document.createElement('input');
+      const name = this.element.getAttribute('name');
+      this.hiddenRequiredInput_.setAttribute('name', `${name}Required`);
+      this.hiddenRequiredInput_.setAttribute(
+        'id',
+        `amp-selector-required-${name}`
+      );
+      this.hiddenRequiredInput_.setAttribute('required', '');
+      this.hiddenRequiredInput_.setAttribute('tabIndex', '-1');
+      this.hiddenRequiredInput_.setAttribute('aria-hidden', 'true');
+      this.hiddenRequiredInput_.setAttribute('aria-required', 'true');
+      this.element.appendChild(this.hiddenRequiredInput_);
     }
 
     if (this.element.hasAttribute('disabled')) {
@@ -321,6 +344,7 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.removeChild(input);
     });
     this.inputs_ = [];
+    this.setValueIfRequired_('');
     const doc = this.win.document;
     const fragment = doc.createDocumentFragment();
     this.selectedElements_.forEach(option => {
@@ -339,7 +363,19 @@ export class AmpSelector extends AMP.BaseElement {
       }
     });
     this.element.appendChild(fragment);
+    this.setValueIfRequired_(selectedValues);
     return selectedValues;
+  }
+
+  /**
+   * Sets the value of the hidden input element if the "required" attribute is present.
+   * @param {string} value
+   */
+  setValueIfRequired_(value) {
+    if (!this.isRequired_) {
+      return;
+    }
+    this.hiddenRequiredInput_.value = value;
   }
 
   /**
