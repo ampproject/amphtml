@@ -110,8 +110,9 @@ export class AmpStoryAffiliateLink {
       }
     );
 
-    this.element_.addEventListener('click', () => {
+    this.element_.addEventListener('click', event => {
       if (this.element_.hasAttribute('expanded')) {
+        event.stopPropagation();
         this.analyticsService_.triggerEvent(
           StoryAnalyticsEvent.STORY_CLICK_THROUGH,
           this.element_
