@@ -20,7 +20,7 @@
   "dependencies": {
     "@ampproject/animations": "0.2.0",
     "@ampproject/worker-dom": "0.21.0",
-    "dompurify": "2.0.2",
+    "dompurify": "2.0.7",
     "moment": "2.24.0",
     "preact": "8.4.2",
     "preact-compat": "3.18.4",

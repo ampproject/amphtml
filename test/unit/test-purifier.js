@@ -237,19 +237,25 @@ describe
         expect(purify('a<a href="javascript:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(purify('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
+        expect(purify('a<a href=" JAVASCRIPT:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
         expect(purify('a<a href="vbscript:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(purify('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
+        expect(purify('a<a href=" VBSCRIPT:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
         expect(purify('a<a href="data:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(purify('a<a href="DATA:alert">b</a>')).to.be.equal(
+        expect(purify('a<a href=" DATA:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>'
+        );
+        expect(purify('a<a href="blob:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>'
+        );
+        expect(purify('a<a href=" BLOB:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
         expect(purify('a<a href="?__amp_source_origin=foo">b</a>')).to.be.equal(
