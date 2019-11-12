@@ -228,8 +228,8 @@ describes.realWin(
         yield ampSelector.build();
         expect(impl.isRequired_).to.be.true;
         expect(initSpy).to.have.been.calledOnce;
-        expect(impl.getSelectedElementsForTesting().length).to.equal(2);
-        expect(setInputsSpy).to.have.been.calledOnce;
+        expect(impl.getSelectedElementsForTesting().length).to.equal(1);
+        expect(setInputsSpy).to.have.been.calledThrice; // once to set, twice to clear
       });
 
       it('should init properly for selector with disabled options', function*() {
