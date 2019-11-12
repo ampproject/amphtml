@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator.css;
@@ -29,7 +29,7 @@ import javax.annotation.Nonnull;
  * Abstract class modeling a css rule.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public abstract class Rule extends Token {

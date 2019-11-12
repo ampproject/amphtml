@@ -10,7 +10,7 @@ import java.util.List;
  * This class contains the result of srcset parsing.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class SrcsetParsingResult {

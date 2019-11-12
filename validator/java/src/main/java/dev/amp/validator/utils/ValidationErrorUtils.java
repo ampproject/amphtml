@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator.utils;
@@ -31,7 +31,7 @@ import java.util.List;
  * Validation error utility methods.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public final class ValidationErrorUtils {

@@ -17,7 +17,7 @@
 
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator.css;
@@ -34,7 +34,7 @@ import static dev.amp.validator.css.TokenType.PARSED_CSS_URL;
  * the URLToken instance or the FunctionToken instance.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class ParsedCssUrl extends Token {

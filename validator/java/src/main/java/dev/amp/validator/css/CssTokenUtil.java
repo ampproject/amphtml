@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator.css;
@@ -32,7 +32,7 @@ import java.util.Map;
  * General utility methods to map token types to token kinds from cssparser library.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public final class CssTokenUtil {

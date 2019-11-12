@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator.visitor;
@@ -33,7 +33,7 @@ import javax.annotation.Nonnull;
  * A visitor model implementation for rules to implement.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public interface RuleVisitor {

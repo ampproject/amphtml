@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator;
@@ -42,7 +42,7 @@ import java.util.Map;
  * and eventually it will be invoked upon exiting the parent tag.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class ReferencePointMatcher {

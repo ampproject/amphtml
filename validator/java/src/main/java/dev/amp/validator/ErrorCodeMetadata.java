@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator;
@@ -25,7 +25,7 @@ package dev.amp.validator;
  * Error code meta data data holder.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class ErrorCodeMetadata {

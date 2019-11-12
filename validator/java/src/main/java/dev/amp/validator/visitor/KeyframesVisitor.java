@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator.visitor;
@@ -37,7 +37,7 @@ import java.util.List;
  * A visitor for keyframes at rule.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class KeyframesVisitor implements RuleVisitor {

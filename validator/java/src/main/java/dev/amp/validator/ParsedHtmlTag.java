@@ -9,7 +9,7 @@ import java.util.HashMap;
  * The AMP HTML ParsedHtmlTag class.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class ParsedHtmlTag {

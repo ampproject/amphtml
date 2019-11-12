@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator.css;
@@ -43,7 +43,7 @@ import static dev.amp.validator.css.CssTokenUtil.copyPosTo;
  * A utility to parse css text into a list of tokens.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public final class CssParser extends SACParserCSS3 {

@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator;
@@ -59,7 +59,7 @@ import static dev.amp.validator.visitor.MediaQueryVisitor.parseMediaQueries;
  * handle it while the opening tag is being processed.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class CdataMatcher {

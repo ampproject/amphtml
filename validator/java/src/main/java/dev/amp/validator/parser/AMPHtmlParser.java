@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator.parser;
@@ -39,7 +39,7 @@ import java.net.URISyntaxException;
  * The AMP HTML parser class.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  *
  */
 

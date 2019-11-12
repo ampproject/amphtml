@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 
@@ -34,7 +34,7 @@ import javax.annotation.Nonnull;
  * document and maintains a record of child-parent relationships.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class TagStackEntry {

@@ -16,7 +16,7 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 package dev.amp.validator;
@@ -29,7 +29,7 @@ import java.util.List;
  * are allowed as descendent tags of a particular tag (|tagName|).
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class DescendantConstraints {

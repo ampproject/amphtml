@@ -17,7 +17,7 @@ package dev.amp.validator.css;
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 import com.steadystate.css.parser.SACParserCSS3Constants;
@@ -30,7 +30,7 @@ import com.steadystate.css.parser.Token;
  * Class to manage a list of tokens as a stream with accessors to iterate through stream.
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class TokenStream {

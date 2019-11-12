@@ -18,7 +18,7 @@ package dev.amp.validator.css;
  */
 
 /*
- * Changes to the original project are Copyright 2019, Oath Inc..
+ * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
 
 import org.w3c.css.sac.CSSException;
@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
  * Error handler for css errors
  *
  * @author nhant01
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class CssErrorHandler implements ErrorHandler {
