@@ -20,7 +20,7 @@ amp-selector [option] {
 
 amp-selector [option][selected] {
   cursor: auto;
-  outline: solid 1px rgba(0,0,0,0.7);
+  outline: solid 1px rgba(0, 0, 0, 0.7);
 }
 
 amp-selector [disabled][option],
@@ -29,4 +29,10 @@ amp-selector [selected][disabled],
 amp-selector[disabled] [selected] {
   cursor: auto;
   outline: none;
+}
+
+amp-selector[required] > input[aria-hidden] {
+  width: 0px;
+  height: 0px;
+  opacity: 0;
 }
