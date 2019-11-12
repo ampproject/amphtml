@@ -21,7 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function ucfunnel(global, data) {
-  validateData(data, ['siteId']);
+  validateData(data, ['siteId', 'schain']);
   loadScript(window, 'https://ads.aralego.com/ampsdk');
   window.context.renderStart();
 }
