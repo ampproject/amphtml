@@ -150,6 +150,11 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['ADSLOT_ID'],
     disableKeyAppend: true,
   },
+  automatad: {
+    url: 'https://pbs01.automatad.com/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests
