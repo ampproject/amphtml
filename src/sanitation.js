@@ -208,14 +208,11 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
 /** @const {!Array<string>} */
 export const WHITELISTED_TARGETS = ['_top', '_blank'];
 
-/** @const {!Array<string>} */
-const BLACKLISTED_ATTR_VALUES = Object.freeze([
-  /*eslint no-script-url: 0*/ 'javascript:',
-  /*eslint no-script-url: 0*/ 'vbscript:',
-  /*eslint no-script-url: 0*/ 'data:',
-  /*eslint no-script-url: 0*/ '<script',
-  /*eslint no-script-url: 0*/ '</script',
-]);
+// Extended from IS_SCRIPT_OR_DATA in https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
+const BLACKLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
+
+// From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
+const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
@@ -286,7 +283,7 @@ const INVALID_INLINE_STYLE_REGEX = /!important|position\s*:\s*fixed|position\s*:
  * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue attribute value
  * @param {!Document} doc
- * @param {boolean} opt_purify Is true, skips some attribute sanitizations
+ * @param {boolean} opt_purify If true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
  * @return {boolean}
  */
@@ -297,21 +294,24 @@ export function isValidAttr(
   doc,
   opt_purify = false
 ) {
+  const attrValueWithoutWhitespace = attrValue.replace(ATTR_WHITESPACE, '');
   if (!opt_purify) {
     // "on*" attributes are not allowed.
     if (startsWith(attrName, 'on') && attrName != 'on') {
       return false;
     }
 
-    // No attributes with "javascript" or other blacklisted substrings in them.
-    if (attrValue) {
-      const normalized = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
-      for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
-        if (normalized.indexOf(BLACKLISTED_ATTR_VALUES[i]) >= 0) {
-          return false;
-        }
-      }
+    // No attributes with "<script" or "</script" in them.
+    const normalized = attrValueWithoutWhitespace.toLowerCase();
+    if (normalized === '<script' || normalized === '</script') {
+      return false;
     }
+  }
+
+  // Disallow protocols like "javascript:". Note that DOMPurify (opt_purify)
+  // already sanitizes "*script:"" and "data:"" protocols.
+  if (BLACKLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
+    return false;
   }
 
   // Don't allow certain inline style values.
