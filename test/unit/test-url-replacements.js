@@ -108,18 +108,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
             });
           });
         }
-        if (opt_options.withViewerIntegrationVariableService) {
-          markElementScheduledForTesting(iframe.win, 'amp-viewer-integration');
-          registerServiceBuilder(
-            iframe.win,
-            'viewer-integration-variable',
-            function() {
-              return Promise.resolve(
-                opt_options.withViewerIntegrationVariableService
-              );
-            }
-          );
-        }
         if (opt_options.withOriginalTitle) {
           iframe.doc.originalTitle = 'Original Pixel Test';
         }
@@ -1157,18 +1145,19 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace ANCESTOR_ORIGIN', () => {
-    return expect(
-      expandUrlAsync('ANCESTOR_ORIGIN/recipes', /*opt_bindings*/ undefined, {
-        withViewerIntegrationVariableService: {
-          ancestorOrigin: () => {
-            return 'http://margarine-paradise.com';
-          },
-          fragmentParam: (param, defaultValue) => {
-            return param == 'ice_cream' ? '2' : defaultValue;
-          },
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'viewerIntegrationVariableServiceForOrNull').returns(
+      Promise.resolve({
+        ancestorOrigin: () => {
+          return 'http://margarine-paradise.com';
         },
       })
-    ).to.eventually.equal('http://margarine-paradise.com/recipes');
+    );
+    return Services.urlReplacementsForDoc(win.document.documentElement)
+      .expandUrlAsync('ANCESTOR_ORIGIN/recipes')
+      .then(res => {
+        expect(res).to.equal('http://margarine-paradise.com/recipes');
+      });
   });
 
   it('should replace FRAGMENT_PARAM with 2', () => {
