@@ -55,7 +55,7 @@ describes.realWin(
       const playerIframe = player.querySelector('iframe');
       expect(playerIframe).to.not.be.null;
       expect(playerIframe.src).to.equal(
-        'https://player.redbull.com/amp/amp-iframe.html?videoid=' +
+        'https://player.redbull.com/amp/amp-iframe.html?videoId=' +
           encodeURIComponent(
             'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT'
           ) +
