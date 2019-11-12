@@ -131,12 +131,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
   },
   {
-    id: 'ios-scrollable-iframe',
-    name: 'iOS 13 enables iframe scrolling per spec',
-    spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23379',
-  },
-  {
     id: 'chunked-amp',
     name: "Split AMP's loading phase into chunks",
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
