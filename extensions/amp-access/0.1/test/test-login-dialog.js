@@ -258,7 +258,10 @@ describes.sandboxed('WebLoginDialog', {}, () => {
       .twice()
       .throws('OPEN ERROR');
     return openLoginDialog(ampdoc, 'http://acme.com/login')
-      .then(() => 'SUCCESS', error => 'ERROR ' + error)
+      .then(
+        () => 'SUCCESS',
+        error => 'ERROR ' + error
+      )
       .then(result => {
         expect(result).to.match(/OPEN ERROR/);
         expect(windowApi.messageListener).to.not.exist;
@@ -272,7 +275,10 @@ describes.sandboxed('WebLoginDialog', {}, () => {
       .twice()
       .returns(null);
     return openLoginDialog(ampdoc, 'http://acme.com/login')
-      .then(() => 'SUCCESS', error => 'ERROR ' + error)
+      .then(
+        () => 'SUCCESS',
+        error => 'ERROR ' + error
+      )
       .then(result => {
         expect(result).to.match(/failed to open dialog/);
         expect(windowApi.messageListener).to.not.exist;
@@ -286,7 +292,10 @@ describes.sandboxed('WebLoginDialog', {}, () => {
       .twice()
       .returns(null);
     return openLoginDialog(ampdoc, Promise.resolve('http://acme.com/login'))
-      .then(() => 'SUCCESS', error => 'ERROR ' + error)
+      .then(
+        () => 'SUCCESS',
+        error => 'ERROR ' + error
+      )
       .then(result => {
         expect(result).to.match(/failed to open dialog/);
         expect(windowApi.messageListener).to.not.exist;
@@ -429,7 +438,10 @@ describes.sandboxed('WebLoginDialog', {}, () => {
         clock.tick(10000);
         return promise;
       })
-      .then(res => res, error => 'ERROR ' + error)
+      .then(
+        res => res,
+        error => 'ERROR ' + error
+      )
       .then(result => {
         expect(result).to.equal('');
       });
@@ -477,7 +489,10 @@ describes.sandboxed('WebLoginDialog', {}, () => {
       .then(() => {
         return promise;
       })
-      .then(() => 'SUCCESS', error => 'ERROR ' + error)
+      .then(
+        () => 'SUCCESS',
+        error => 'ERROR ' + error
+      )
       .then(result => {
         expect(result).to.match(/failed to resolve url/);
         expect(windowApi.messageListener).to.not.exist;

@@ -397,38 +397,39 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       expect(internalElement).to.have.class(BASE_CLASS_NAME);
     });
 
-    [{step: 0, fn: 'ease-in'}, {step: 1, fn: 'ease-out'}].forEach(
-      ({step, fn}) => {
-        it(`sets transition timing on elements for step = ${step}`, function*() {
-          const {overlay} = stubControls();
+    [
+      {step: 0, fn: 'ease-in'},
+      {step: 1, fn: 'ease-out'},
+    ].forEach(({step, fn}) => {
+      it(`sets transition timing on elements for step = ${step}`, function*() {
+        const {overlay} = stubControls();
 
-          enableComputedStyle(video.element);
-          enableComputedStyle(overlay);
+        enableComputedStyle(video.element);
+        enableComputedStyle(overlay);
 
-          const x = 30;
-          const y = 60;
-          const scale = 0.5;
+        const x = 30;
+        const y = 60;
+        const scale = 0.5;
 
-          const durationMs = 260;
-          const durationSecondsStr = '0.26s';
+        const durationMs = 260;
+        const durationSecondsStr = '0.26s';
 
-          yield docking.placeAt_(video, x, y, scale, step, durationMs);
+        yield docking.placeAt_(video, x, y, scale, step, durationMs);
 
-          [
-            internalElement,
-            overlay,
-            videoLayerElement('.amp-video-docked-placeholder-background'),
-            videoLayerElement('.amp-video-docked-placeholder-icon'),
-            bodyLayerElement('.amp-video-docked-shadow'),
-          ].forEach(el => {
-            const style = getComputedStyle(el);
+        [
+          internalElement,
+          overlay,
+          videoLayerElement('.amp-video-docked-placeholder-background'),
+          videoLayerElement('.amp-video-docked-placeholder-icon'),
+          bodyLayerElement('.amp-video-docked-shadow'),
+        ].forEach(el => {
+          const style = getComputedStyle(el);
 
-            expect(style['transitionDuration']).to.equal(durationSecondsStr);
-            expect(style['transitionTimingFunction']).to.equal(fn);
-          });
+          expect(style['transitionDuration']).to.equal(durationSecondsStr);
+          expect(style['transitionTimingFunction']).to.equal(fn);
         });
-      }
-    );
+      });
+    });
 
     PLACEHOLDER_ICON_BREAKPOINTS.forEach(({minWidth, className}) => {
       const width = Math.max(200, minWidth);
