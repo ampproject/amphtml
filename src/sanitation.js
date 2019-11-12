@@ -281,7 +281,7 @@ const INVALID_INLINE_STYLE_REGEX = /!important|position\s*:\s*fixed|position\s*:
  * Whether the attribute/value is valid.
  * @param {string} tagName Lowercase tag name.
  * @param {string} attrName Lowercase attribute name.
- * @param {string} attrValue attribute value
+ * @param {?string} attrValue Sometimes null when called by Caja.
  * @param {!Document} doc
  * @param {boolean} opt_purify If true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
@@ -294,7 +294,10 @@ export function isValidAttr(
   doc,
   opt_purify = false
 ) {
-  const attrValueWithoutWhitespace = attrValue.replace(ATTR_WHITESPACE, '');
+  const attrValueWithoutWhitespace = attrValue
+    ? attrValue.replace(ATTR_WHITESPACE, '')
+    : '';
+
   if (!opt_purify) {
     // "on*" attributes are not allowed.
     if (startsWith(attrName, 'on') && attrName != 'on') {
