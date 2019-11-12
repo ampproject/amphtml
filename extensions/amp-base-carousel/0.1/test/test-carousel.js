@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 /**
- * @fileoverview Description of this file.
+ * @fileoverview Some unit tests of the internal carousel implementation.
  */
 
 import {Carousel} from '../carousel';
 import {setInitialDisplay, setStyle, setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('child layout manager', {}, env => {
+describes.realWin('carousel implementation', {}, env => {
   let win;
   let doc;
   let element;
@@ -44,7 +44,7 @@ describes.realWin('child layout manager', {}, env => {
       scrollContainer.removeChild(slide);
     });
 
-    const slides = new Array(count).fill('').map(() => {
+    const slides = new Array(count).fill(null).map(() => {
       const slide = document.createElement('div');
       slide.className = 'test-slide';
       setStyles(slide, {
@@ -63,7 +63,7 @@ describes.realWin('child layout manager', {}, env => {
   /**
    *
    * @param {{
-   *  slideCount,
+   *  slideCount: number,
    *  loop: boolean,
    *  forwards: boolean,
    * }} options
