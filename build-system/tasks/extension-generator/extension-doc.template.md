@@ -1,15 +1,14 @@
 <!--
   All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
   and improves SEO.
-  Include the relevant category(ies): ads-analytics, dynamic-content, layout, media,
-  presentation, social, personalization
-  List applicable format(s): websites, ads, stories, email
-  And remove this comment! (no empty lines before "---")
+  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
+  * List applicable format(s): websites, ads, stories, email
+  * Remove this comment! (no empty lines before "---")
 -->
 
 ---
 
-\$category: presentation
+category: presentation
 formats:
 
 - websites
