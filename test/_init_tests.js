@@ -314,10 +314,10 @@ function warnForConsoleError() {
       Array(repeat).fill(message)
     );
   };
-  self.allowConsoleError = function(func) {
+  self.allowConsoleError = async function(func) {
     consoleErrorStub.reset();
     consoleErrorStub.callsFake(() => {});
-    const result = func();
+    const result = await func();
     try {
       expect(consoleErrorStub).to.have.been.called;
     } catch (e) {
