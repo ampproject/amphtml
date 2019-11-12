@@ -57,7 +57,7 @@
     "browserify": "16.5.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "cli-highlight": "2.1.1",
+    "cli-highlight": "2.1.3",
     "codecov": "3.6.1",
     "commander": "4.0.1",
     "connect-header": "0.0.5",
