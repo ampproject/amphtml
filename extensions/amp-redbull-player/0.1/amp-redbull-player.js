@@ -26,9 +26,9 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @private @const */
@@ -61,9 +61,6 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.tagId_ = '';
 
-    /** @private {string} */
-    this.locale_ = '';
-
     /**
      * @param {!Event} e
      * @return {undefined}
@@ -80,18 +77,18 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
+
     /*
-     * Required Paramaters: data-video-id, data-skin
+     * Required Paramaters: data-params-videoid
      * Break creation if required parameters are missing!
      */
     userAssert(
-      element.getAttribute('data-videoid'),
-      'The data-videoid attribute is required for %s',
+      element.getAttribute('data-param-videoid'),
+      'The data-param-videoid attribute is required for %s',
       element
     );
 
     this.tagId_ = element.getAttribute('id') || 'rbvideo';
-    this.locale_ = element.getAttribute('data-locale') || 'global';
 
     installVideoManagerForDoc(element);
   }
@@ -100,13 +97,20 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   layoutCallback() {
     const {element} = this;
 
+    const params = getDataParamsFromAttributes(element);
+    const videoId = params['videoid'];
+    const skinId = params['skinid'] || 'com';
+    const locale = params['locale'] || 'global';
+
     const origin = 'https://player.redbull.com/amp/amp-iframe.html';
+
     const src = addParamsToUrl(
       origin,
       dict({
-        'videoid': element['dataset']['videoid'],
+        'videoId': videoId,
+        'skinId': skinId,
         'ampTagId': this.tagId_,
-        'locale': this.locale_,
+        'locale': locale,
       })
     );
 

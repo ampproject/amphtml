@@ -34,7 +34,7 @@ describes.realWin(
       const player = doc.createElement('amp-redbull-player');
 
       if (videoId) {
-        player.setAttribute('data-videoid', videoId);
+        player.setAttribute('data-param-videoid', videoId);
       }
 
       player.setAttribute('width', '222');
@@ -64,8 +64,8 @@ describes.realWin(
     });
 
     it('fails without videoId', () => {
-      return getRedBullElement(null, 'com').should.eventually.be.rejectedWith(
-        /The data-videoid attribute is required/
+      return getRedBullElement(null).should.eventually.be.rejectedWith(
+        /The data-param-videoid attribute is required/
       );
     });
   }
