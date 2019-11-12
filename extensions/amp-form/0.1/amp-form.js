@@ -22,7 +22,7 @@ import {
   AsyncInputClasses,
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
+import {Deferred} from '../../../src/utils/promise';
 import {
   FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,
@@ -911,12 +911,8 @@ export class AmpForm {
     return response
       .json()
       .then(
-        /** @type {!JsonObject} */ json => {
-          return this.handleSubmitSuccess_(json);
-        },
-        error => {
-          user().error(TAG, 'Failed to parse response JSON: %s', error);
-        }
+        json => this.handleSubmitSuccess_(/** @type {!JsonObject} */ (json)),
+        error => user().error(TAG, 'Failed to parse response JSON: %s', error)
       )
       .then(() => {
         this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
@@ -933,14 +929,12 @@ export class AmpForm {
    */
   handleSubmitSuccess_(result, opt_eventData) {
     this.setState_(FormState.SUBMIT_SUCCESS);
-    return tryResolve(() => {
-      this.renderTemplate_(result || {}).then(() => {
-        this.triggerAction_(
-          FormEvents.SUBMIT_SUCCESS,
-          opt_eventData === undefined ? result : opt_eventData
-        );
-        this.dirtinessHandler_.onSubmitSuccess();
-      });
+    return this.renderTemplate_(result || {}).then(() => {
+      this.triggerAction_(
+        FormEvents.SUBMIT_SUCCESS,
+        opt_eventData === undefined ? result : opt_eventData
+      );
+      this.dirtinessHandler_.onSubmitSuccess();
     });
   }
 
@@ -975,14 +969,12 @@ export class AmpForm {
   handleSubmitFailure_(error, json, opt_eventData) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
-    return tryResolve(() => {
-      this.renderTemplate_(json).then(() => {
-        this.triggerAction_(
-          FormEvents.SUBMIT_ERROR,
-          opt_eventData === undefined ? json : opt_eventData
-        );
-        this.dirtinessHandler_.onSubmitError();
-      });
+    return this.renderTemplate_(json).then(() => {
+      this.triggerAction_(
+        FormEvents.SUBMIT_ERROR,
+        opt_eventData === undefined ? json : opt_eventData
+      );
+      this.dirtinessHandler_.onSubmitError();
     });
   }
 
