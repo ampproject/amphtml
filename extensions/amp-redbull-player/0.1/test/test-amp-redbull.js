@@ -59,7 +59,7 @@ describes.realWin(
           encodeURIComponent(
             'rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT'
           ) +
-          '&ampTagId=rbvideo&locale=global'
+          '&skinId=com&ampTagId=rbvideo&locale=global'
       );
     });
 
