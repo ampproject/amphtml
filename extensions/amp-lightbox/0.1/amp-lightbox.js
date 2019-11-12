@@ -153,6 +153,9 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.isIos_ = platform.isIos();
 
+    /** @private @const {boolean} */
+    this.disableHistory_ = this.isIos_ && !platform.isSafari();
+
     /** @const {function()} */
     this.boundReschedule_ = debounce(
       this.win,
@@ -377,11 +380,13 @@ class AmpLightbox extends AMP.BaseElement {
     owners.scheduleResume(this.element, container);
     this.triggerEvent_(LightboxEvents.OPEN, trust);
 
-    this.getHistory_()
-      .push(this.close.bind(this))
-      .then(historyId => {
-        this.historyId_ = historyId;
-      });
+    if (!this.disableHistory_) {
+      this.getHistory_()
+        .push(this.close.bind(this))
+        .then(historyId => {
+          this.historyId_ = historyId;
+        });
+    }
 
     this.active_ = true;
   }
@@ -496,9 +501,10 @@ class AmpLightbox extends AMP.BaseElement {
       assertDoesNotContainDisplay(this.getAnimationPresetDef_().closedStyle)
     );
 
-    if (this.historyId_ != -1) {
+    if (!this.disableHistory_ && this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
+
     this.win.document.documentElement.removeEventListener(
       'keydown',
       this.boundCloseOnEscape_
