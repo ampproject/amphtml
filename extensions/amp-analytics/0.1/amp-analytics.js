@@ -497,7 +497,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   generateRequests_() {
     if (!this.config_['requests']) {
-      if (!this.isInabox_) {
+      if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
         this.user().error(
           TAG,
