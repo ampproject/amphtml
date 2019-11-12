@@ -132,6 +132,7 @@ const targetMatchers = [
   {
     targets: ['INTEGRATION_TEST'],
     func: file => {
+      return true;
       if (isOwnersFile(file)) {
         return false;
       }
