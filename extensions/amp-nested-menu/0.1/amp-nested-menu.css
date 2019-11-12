@@ -20,6 +20,8 @@ amp-nested-menu [amp-nested-submenu] {
   top: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
   transform: translateX(0) !important;
 }
 
@@ -30,6 +32,11 @@ amp-nested-menu.i-amphtml-layout-size-defined {
 amp-nested-menu ul, amp-nested-menu ol {
   list-style-type: none;
   padding: 0;
+}
+
+amp-nested-menu [amp-nested-submenu-open],
+amp-nested-menu [amp-nested-submenu-close] {
+  cursor: pointer;
 }
 
 amp-nested-menu [amp-nested-submenu] {
