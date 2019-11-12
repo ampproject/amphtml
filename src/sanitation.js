@@ -211,6 +211,9 @@ export const WHITELISTED_TARGETS = ['_top', '_blank'];
 // Extended from IS_SCRIPT_OR_DATA in https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
 const BLACKLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
 
+// Same as BLACKLISTED_PROTOCOLS modulo those handled by DOMPurify.
+const EXTENDED_BLACKLISTED_PROTOCOLS = /^(?:blob):/i;
+
 // From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
 const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
 
@@ -306,14 +309,22 @@ export function isValidAttr(
 
     // No attributes with "<script" or "</script" in them.
     const normalized = attrValueWithoutWhitespace.toLowerCase();
-    if (normalized === '<script' || normalized === '</script') {
+    if (normalized.includes('<script') || normalized.includes('</script')) {
+      return false;
+    }
+
+    // Don't allow protocols like "javascript:".
+    if (BLACKLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
       return false;
     }
   }
 
-  // Disallow protocols like "javascript:". Note that DOMPurify (opt_purify)
-  // already sanitizes "*script:"" and "data:"" protocols.
-  if (BLACKLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
+  // Don't allow certain protocols that are otherwise "safe".
+  // DOMPurify (opt_purify) already sanitizes javascript: etc., but
+  // allows them in special cases (data URIs in images, data-* attrs).
+  // So, just handle the other "extended" protocols here to avoid
+  // banning "javascript:" in known-safe ARIA attributes, for example.
+  if (EXTENDED_BLACKLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
     return false;
   }
 
