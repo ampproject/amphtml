@@ -39,6 +39,7 @@ import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factor
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
+import {startsWith} from '../../../src/string';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
@@ -114,7 +115,7 @@ export class GoogleSubscriptionsPlatform {
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
       .filter(
-        exp => exp.startsWith('swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
+        exp => startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
       .map(exp => exp.substring(4));
 
