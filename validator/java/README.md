@@ -50,7 +50,12 @@ bazel run //:amphtml_validator_test
 ```
 
 ## Usage
-
+Initialize the validator using
+```
+final AMPHtmlParser ampHtmlParser = new AMPHtmlParser();
+final ValidationResult validationResult = ampHtmlParser.parse(inputHtml, htmlFormat, condition, maxNodes);
+```
+The parser can be used beyond the first document, to truncate initialization time. The maxNode condition is the maximum number of tags reviewed by the validator before forcing exit on exception. The condition is an enumeration of type ExitCondition, either exit on first error or a full parsing attempt. The htmlFormat is an enumeration for the format of AMP to be validated against.
 ## Issues
 
 The are several known bugs in the validation output.
@@ -61,6 +66,7 @@ The are several known bugs in the validation output.
 - Validation of URLs found within the HTML document may not return the same errors as the Node.js implementation. This stems from the fact that the internal URL library is lenient in terms of validating hostnames and characters used within the URL.
 - The parser obfuscates Unicode values, this is grievous as the amp symbol is never discovered (⚡), this package only handles the literal "amp4email."
 Importantly, this validator prioritizes amp4email html content, enforcement of validator logic for other formats is not guaranteed.
+- CSS validation does not yet configure for a max nodes value
 
 ## Contribute
 Please refer to the [Contributing.md](Contributing.md) file for information about how to get involved. We welcome issues, questions, and pull requests. Pull Requests are welcome.
