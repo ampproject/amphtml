@@ -805,7 +805,10 @@ export class AmpList extends AMP.BaseElement {
       // Forward elements to chained promise on success or failure.
       return bind
         .rescan(elements, removedElements, {'fast': true, 'update': true})
-        .then(() => elements, () => elements);
+        .then(
+          () => elements,
+          () => elements
+        );
     };
 
     // binding=refresh: Only do render-blocking update after initial render.
