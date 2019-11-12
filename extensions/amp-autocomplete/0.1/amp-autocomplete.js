@@ -28,9 +28,9 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {hasOwn, map, ownProperty} from '../../../src/utils/object';
-import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
+import {startsWith} from '../../../src/string';
 import {toggle} from '../../../src/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
