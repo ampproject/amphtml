@@ -472,21 +472,15 @@ describes.fakeWin(
         const expectedMapping = [
           {
             anchor: anchorList[0],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[0]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[0]['auction_id']}/?amp=true`,
           },
           {
             anchor: anchorList[1],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[1]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           },
           {
             anchor: anchorList[2],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[1]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           },
         ];
 
@@ -544,21 +538,15 @@ describes.fakeWin(
         const expectedMapping = [
           {
             anchor: anchorList[0],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[0]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[0]['auction_id']}/?amp=true`,
           },
           {
             anchor: anchorList[1],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[1]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           },
           {
             anchor: anchorList[2],
-            replacementUrl: `https://shop-links.co/${
-              linkmateResponse[1]['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           },
         ];
 
