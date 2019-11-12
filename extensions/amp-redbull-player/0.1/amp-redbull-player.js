@@ -79,7 +79,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     const {element} = this;
 
     /*
-     * Required Paramaters: data-params-videoid
+     * Required Paramaters: data-param-videoid
      * Break creation if required parameters are missing!
      */
     userAssert(

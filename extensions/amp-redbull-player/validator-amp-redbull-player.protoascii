@@ -29,7 +29,7 @@ tags: {  # <amp-redbull-player>
   tag_name: "AMP-REDBULL-PLAYER"
   requires_extension: "amp-redbull-player"
   attrs: {
-    name: "data-params-videoid"
+    name: "data-param-videoid"
     mandatory: true
   }
   attr_lists: "extended-amp-global"
