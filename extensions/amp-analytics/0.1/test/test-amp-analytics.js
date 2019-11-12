@@ -1804,7 +1804,6 @@ describes.realWin(
 
       it('does send a hit when parentPostMessage is provided for FIE', function() {
         const analytics = getAnalyticsTag({
-          'requests': {'foo': 'https://example.com/bar'},
           'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
         });
         analytics.element.classList.add('i-amphtml-fie');
