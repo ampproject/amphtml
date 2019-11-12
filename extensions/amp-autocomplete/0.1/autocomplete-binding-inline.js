@@ -25,19 +25,17 @@ import {tryFocus} from '../../../src/dom';
  */
 export class AutocompleteBindingInline {
   /**
-   *
+   * Stores the regex match value associated with the portion of the user input to suggest against.
+   * For use when "inline_" is true.
    */
   constructor() {
-    /**
-     * The regex match value associated with the portion of the user input to suggest against.
-     * For use when "inline_" is true.
-     * @private {?RegExpResult}
-     */
+    /** @private {?RegExpResult} */
     this.match_ = null;
   }
 
   /**
-   *
+   * Returns true if a match on the publisher-provided trigger is found in the input element value.
+   * Otherwise, should not display any suggestions.
    * @param {string} trigger
    * @param {!HTMLInputElement} inputEl
    * @return {boolean}
@@ -84,6 +82,8 @@ export class AutocompleteBindingInline {
   }
 
   /**
+   * Display suggestions based on the partial string following the trigger
+   * in the input element value.
    * @param {string} trigger
    * @param {!HTMLInputElement} unusedInputEl
    * @return {string}
@@ -96,6 +96,8 @@ export class AutocompleteBindingInline {
   }
 
   /**
+   * Replace the user input matched in the input element value with the
+   * selected item value from the autocomplete suggestions.
    * @param {string} selection
    * @param {!HTMLInputElement} inputEl
    * @param {number} inputLength
@@ -125,6 +127,7 @@ export class AutocompleteBindingInline {
   }
 
   /**
+   * Inline should always retrieve data before rendering
    * @return {boolean}
    */
   shouldFetch() {
@@ -138,7 +141,9 @@ export class AutocompleteBindingInline {
   resetValue(unusedUserInput, unusedInputEl) {}
 
   /**
-   *
+   * Always accept the "suggest-first" attribute regardless of filter type.
+   * This is because this binding does not perform any highlighting via the
+   * SelectionAPI when a user navigates to an unselected suggestion item.
    * @param {string} unusedFilter
    * @return {boolean}
    */
@@ -147,7 +152,7 @@ export class AutocompleteBindingInline {
   }
 
   /**
-   *
+   * Never show suggestions on focus because focus occurs every selection.
    * @return {boolean}
    */
   shouldShowOnFocus() {
@@ -155,18 +160,26 @@ export class AutocompleteBindingInline {
   }
 
   /**
-   *
+   * @param {!HTMLElement} unusedElement
+   * @param {!HTMLInputElement} unusedInputEl
+   * @param {number} unusedUserInputLength
+   * @param {boolean} unusedHighlight
    */
-  displayActiveItemInInput() {}
+  displayActiveItemInInput(
+    unusedElement,
+    unusedInputEl,
+    unusedUserInputLength,
+    unusedHighlight
+  ) {}
 
   /**
-   *
    * @param {HTMLInputElement} unusedInputEl
    */
   removeHighlighting(unusedInputEl) {}
 
   /**
-   *
+   * If results are not showing or there is no actively navigated-to suggestion item,
+   * the user should be able to 'Enter' to add a new line.
    * @param {Event} event
    * @param {boolean} resultsShowing
    * @param {boolean} unusedSubmitOnEnter

@@ -22,7 +22,7 @@
  */
 export class AutocompleteBindingSingle {
   /**
-   * @override
+   * Always try to autocomplete.
    * @param {string} unusedTrigger
    * @param {?HTMLInputElement} unusedInputEl
    * @return {boolean}
@@ -32,6 +32,7 @@ export class AutocompleteBindingSingle {
   }
 
   /**
+   * The user input for generating suggestions is the full entry in the input element so far.
    * @param {string} unusedTrigger
    * @param {?HTMLInputElement} inputEl
    * @return {string}
@@ -41,6 +42,7 @@ export class AutocompleteBindingSingle {
   }
 
   /**
+   * Returns the full selection.
    * @param {string} selection
    * @param {!HTMLInputElement} unusedInputEl
    * @param {number} unusedInputLength
@@ -57,6 +59,7 @@ export class AutocompleteBindingSingle {
   }
 
   /**
+   * Never fetch before rendering--use prefetched data.
    * @return {boolean}
    */
   shouldFetch() {
@@ -64,6 +67,7 @@ export class AutocompleteBindingSingle {
   }
 
   /**
+   * Input element value should be reset to the partially recorded user input.
    * @param {string} userInput
    * @param {!HTMLInputElement} inputEl
    */
@@ -72,7 +76,7 @@ export class AutocompleteBindingSingle {
   }
 
   /**
-   *
+   * Should only abide by "suggest-first" attribute if "filter" is "prefix".
    * @param {string} filter
    * @return {boolean}
    */
@@ -81,6 +85,7 @@ export class AutocompleteBindingSingle {
   }
 
   /**
+   * Always display suggestions if there are any on focus.
    * @return {boolean}
    */
   shouldShowOnFocus() {
@@ -88,6 +93,11 @@ export class AutocompleteBindingSingle {
   }
 
   /**
+   * Replace the input element value with the navigated-to suggestion item and
+   * highlight the difference between the possible selection and the user input.
+   *
+   * e.g. User input "ba" + navigation to "banana" will display "ba|nana|",
+   * where |nana| is highlighted in the input field via the SelectionAPI.
    * @param {!HTMLElement} element
    * @param {!HTMLInputElement} inputEl
    * @param {number} userInputLength
@@ -103,6 +113,7 @@ export class AutocompleteBindingSingle {
   }
 
   /**
+   * Remove any highlighting via the SelectionAPI.
    * @param {HTMLInputElement} inputEl
    */
   removeHighlighting(inputEl) {
@@ -111,6 +122,8 @@ export class AutocompleteBindingSingle {
   }
 
   /**
+   * If results are showing or the publisher provided "submit-on-enter",
+   * the user should only be able to 'Enter' to select a suggestion.
    * @param {Event} event
    * @param {boolean} resultsShowing
    * @param {boolean} submitOnEnter

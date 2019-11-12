@@ -30,6 +30,7 @@ export class AutocompleteBindingDef {
   shouldAutocomplete(unusedTrigger, unusedInputEl) {}
 
   /**
+   * The value to use as the partial user input when generating autocomplete suggestions
    * @param {string} unusedTrigger
    * @param {!HTMLInputElement} unusedInputEl
    * @return {string}
@@ -37,6 +38,7 @@ export class AutocompleteBindingDef {
   updateUserInput(unusedTrigger, unusedInputEl) {}
 
   /**
+   * The value to show in the user input element after a suggestion has been selected
    * @param {string} unusedSelection
    * @param {!HTMLInputElement} unusedInputEl
    * @param {number} unusedInputLength
@@ -51,28 +53,33 @@ export class AutocompleteBindingDef {
   ) {}
 
   /**
+   * Whether or not the autocomplete should refresh data when rendering suggestions
    * @return {boolean}
    */
   shouldFetch() {}
 
   /**
+   * Restore the input element to display the user's non-autocompleted partial string
    * @param {string} unusedUserInput
    * @param {!HTMLInputElement} unusedInputEl
    */
   resetValue(unusedUserInput, unusedInputEl) {}
 
   /**
+   * Whether or not the autocomplete can abide by the "suggest-first" attribute
    * @param {string} unusedFilter
    * @return {boolean}
    */
   shouldSuggestFirst(unusedFilter) {}
 
   /**
+   * Whether or not the autocomplete should show suggestions when the input element has been focused
    * @return {boolean}
    */
   shouldShowOnFocus() {}
 
   /**
+   * Updates the input element text with the user highlighted active suggestion (before selection)
    * @param {!HTMLElement} unusedElement
    * @param {!HTMLInputElement} unusedInputEl
    * @param {number} unusedUserInputLength
@@ -86,11 +93,13 @@ export class AutocompleteBindingDef {
   ) {}
 
   /**
+   * Resets any highlighting done by the SelectionAPI
    * @param {HTMLInputElement} unusedInputEl
    */
   removeHighlighting(unusedInputEl) {}
 
   /**
+   * Escapes the 'Enter' keydown event if appropriate
    * @param {Event} unusedEvent
    * @param {boolean} unusedResultsShowing
    * @param {boolean} unusedSubmitOnEnter
