@@ -309,7 +309,10 @@ export function isValidAttr(
 
     // No attributes with "<script" or "</script" in them.
     const normalized = attrValueWithoutWhitespace.toLowerCase();
-    if (normalized.includes('<script') || normalized.includes('</script')) {
+    if (
+      normalized.indexOf('<script') >= 0 ||
+      normalized.indexOf('</script') >= 0
+    ) {
       return false;
     }
 
