@@ -212,6 +212,26 @@ describes.realWin(
         expect(setInputsSpy).to.have.been.calledOnce;
       });
 
+      it('should init properly for required', function*() {
+        const ampSelector = getSelector({
+          attributes: {
+            required: true,
+          },
+          config: {
+            count: 4,
+            selectedCount: 2,
+          },
+        });
+        const impl = ampSelector.implementation_;
+        const initSpy = sandbox.spy(impl, 'init_');
+        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        yield ampSelector.build();
+        expect(impl.isRequired_).to.be.true;
+        expect(initSpy).to.have.been.calledOnce;
+        expect(impl.getSelectedElementsForTesting().length).to.equal(2);
+        expect(setInputsSpy).to.have.been.calledOnce;
+      });
+
       it('should init properly for selector with disabled options', function*() {
         const ampSelector = getSelector({
           attributes: {
