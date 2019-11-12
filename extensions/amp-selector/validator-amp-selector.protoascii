@@ -60,6 +60,10 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
     name: "multiple"
     value: ""
   }
+  attrs: {
+    name: "required"
+    value: ""
+  }
   # <amp-bind>
   attrs: { name: "[disabled]" }
   attrs: { name: "[selected]" }
