@@ -168,7 +168,7 @@
     "sinon-chai": "3.3.0",
     "sleep-promise": "8.0.1",
     "tempy": "0.3.0",
-    "terser": "4.3.9",
+    "terser": "4.4.0",
     "text-table": "0.2.0",
     "through2": "3.0.1",
     "topological-sort": "0.3.0",
