@@ -63,7 +63,10 @@ describes.realWin(
     function mockXhrResponse(url, response) {
       xhrMock
         .expects('fetchJson')
-        .withArgs(url, sandbox.match(init => init.credentials == 'include'))
+        .withArgs(
+          url,
+          sandbox.match(init => init.credentials == 'include')
+        )
         .returns(
           Promise.resolve({
             json() {

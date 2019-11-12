@@ -169,29 +169,29 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           );
           payload = JSON.parse(connectMessage[MESSAGE_FIELDS.PAYLOAD]);
           expect(Object.keys(payload)).to.deep.equal(['newGeometry', 'uid']);
-          expect(Object.keys(JSON.parse(payload['newGeometry']))).to.deep.equal(
-            [
-              'windowCoords_t',
-              'windowCoords_r',
-              'windowCoords_b',
-              'windowCoords_l',
-              'frameCoords_t',
-              'frameCoords_r',
-              'frameCoords_b',
-              'frameCoords_l',
-              'posCoords_t',
-              'posCoords_b',
-              'posCoords_r',
-              'posCoords_l',
-              'styleZIndex',
-              'allowedExpansion_r',
-              'allowedExpansion_b',
-              'allowedExpansion_t',
-              'allowedExpansion_l',
-              'yInView',
-              'xInView',
-            ]
-          );
+          expect(
+            Object.keys(JSON.parse(payload['newGeometry']))
+          ).to.deep.equal([
+            'windowCoords_t',
+            'windowCoords_r',
+            'windowCoords_b',
+            'windowCoords_l',
+            'frameCoords_t',
+            'frameCoords_r',
+            'frameCoords_b',
+            'frameCoords_l',
+            'posCoords_t',
+            'posCoords_b',
+            'posCoords_r',
+            'posCoords_l',
+            'styleZIndex',
+            'allowedExpansion_r',
+            'allowedExpansion_b',
+            'allowedExpansion_t',
+            'allowedExpansion_l',
+            'yInView',
+            'xInView',
+          ]);
         });
     });
   });

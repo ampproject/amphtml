@@ -1119,10 +1119,9 @@ describes.realWin(
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
               if (sendMessageStub.calledOnce) {
-                expect(sendMessageStub).to.be.calledWithExactly(
-                  'selectDocument',
-                  {next: true}
-                );
+                expect(
+                  sendMessageStub
+                ).to.be.calledWithExactly('selectDocument', {next: true});
                 return true;
               }
               return false;
@@ -1164,10 +1163,9 @@ describes.realWin(
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
               if (sendMessageStub.calledOnce) {
-                expect(sendMessageStub).to.be.calledWithExactly(
-                  'selectDocument',
-                  {previous: true}
-                );
+                expect(
+                  sendMessageStub
+                ).to.be.calledWithExactly('selectDocument', {previous: true});
                 return true;
               }
               return false;

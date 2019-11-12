@@ -693,7 +693,10 @@ async function createEmptyBuild() {
 
   await page
     .goto(`http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`)
-    .then(() => {}, () => {});
+    .then(
+      () => {},
+      () => {}
+    );
   await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
 }
 

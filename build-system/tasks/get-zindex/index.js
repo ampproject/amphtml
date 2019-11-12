@@ -22,7 +22,10 @@ const postcss = require('postcss');
 const table = require('text-table');
 const through = require('through2');
 
-const tableHeaders = [['selector', 'z-index', 'file'], ['---', '---', '---']];
+const tableHeaders = [
+  ['selector', 'z-index', 'file'],
+  ['---', '---', '---'],
+];
 
 const tableOptions = {
   align: ['l', 'l', 'l'],

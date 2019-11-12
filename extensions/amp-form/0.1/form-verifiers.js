@@ -267,5 +267,8 @@ function getResponseErrorData_(error) {
     return Promise.resolve([]);
   }
 
-  return response.json().then(json => json.verifyErrors || [], () => []);
+  return response.json().then(
+    json => json.verifyErrors || [],
+    () => []
+  );
 }

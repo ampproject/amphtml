@@ -1154,12 +1154,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
       // Fake layoutJank that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layoutJank')
-        .returns([
-          {entryType: 'layoutJank', fraction: 0.25},
-          {entryType: 'layoutJank', fraction: 0.3},
-        ]);
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank').returns([
+        {entryType: 'layoutJank', fraction: 0.25},
+        {entryType: 'layoutJank', fraction: 0.3},
+      ]);
 
       const perf = getPerformance();
       // visibilitychange/beforeunload listeners are now added.
@@ -1207,12 +1205,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
 
       // Fake layoutJank that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layoutJank')
-        .returns([
-          {entryType: 'layoutJank', fraction: 0.25},
-          {entryType: 'layoutJank', fraction: 0.3},
-        ]);
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank').returns([
+        {entryType: 'layoutJank', fraction: 0.25},
+        {entryType: 'layoutJank', fraction: 0.3},
+      ]);
       const perf = getPerformance();
       perf.coreServicesAvailable();
       viewerVisibilityState = VisibilityState.INACTIVE;
@@ -1324,12 +1320,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
       // Fake layoutShift that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layoutShift')
-        .returns([
-          {entryType: 'layoutShift', value: 0.25},
-          {entryType: 'layoutShift', value: 0.3},
-        ]);
+      fakeWin.performance.getEntriesByType.withArgs('layoutShift').returns([
+        {entryType: 'layoutShift', value: 0.25},
+        {entryType: 'layoutShift', value: 0.3},
+      ]);
 
       const perf = getPerformance();
       // visibilitychange/beforeunload listeners are now added.

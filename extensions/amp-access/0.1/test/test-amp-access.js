@@ -805,7 +805,10 @@ describes.fakeWin(
           clock.tick(2001);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -824,7 +827,10 @@ describes.fakeWin(
           scrolled.fire();
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -851,7 +857,10 @@ describes.fakeWin(
           document.documentElement.dispatchEvent(clickEvent);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -904,7 +913,10 @@ describes.fakeWin(
           visibilityChanged.fire();
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.have.not.been.called;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -962,7 +974,10 @@ describes.fakeWin(
           visibilityChanged.fire();
           return p1;
         })
-        .then(() => 'SUCCESS', () => 'ERROR')
+        .then(
+          () => 'SUCCESS',
+          () => 'ERROR'
+        )
         .then(result => {
           expect(result).to.equal('ERROR');
           expect(service.reportViewToServer_).to.have.not.been.called;
@@ -982,7 +997,10 @@ describes.fakeWin(
             return p2;
           });
         })
-        .then(() => 'SUCCESS', reason => reason)
+        .then(
+          () => 'SUCCESS',
+          reason => reason
+        )
         .then(result => {
           expect(result).to.equal('SUCCESS');
           expect(service.reportViewToServer_).to.be.calledOnce;
@@ -1070,7 +1088,10 @@ describes.fakeWin(
           clock.tick(2001);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(broadcastStub).to.be.calledOnce;
@@ -1461,7 +1482,10 @@ describes.fakeWin(
         .once();
       return service
         .loginWithType_('')
-        .then(() => 'S', () => 'ERROR')
+        .then(
+          () => 'S',
+          () => 'ERROR'
+        )
         .then(result => {
           expect(result).to.equal('ERROR');
           expect(source.loginPromise_).to.not.exist;
@@ -1545,7 +1569,10 @@ describes.fakeWin(
       // Rejecting the first login attempt does not reject the current promise.
       p1Reject();
       return p1Promise
-        .then(() => 'SUCCESS', () => 'ERROR')
+        .then(
+          () => 'SUCCESS',
+          () => 'ERROR'
+        )
         .then(res => {
           expect(res).to.equal('ERROR');
           expect(source.loginPromise_).to.equal(p3);
