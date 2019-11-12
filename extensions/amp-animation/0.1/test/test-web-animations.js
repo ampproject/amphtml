@@ -1214,7 +1214,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           selector: '.target',
           animation: 'animation2',
           delay: 'calc((index() + 1) * 1s)',
-          subtargets: [{index: 0, '--y': '11px'}, {index: 1, '--y': '12px'}],
+          subtargets: [
+            {index: 0, '--y': '11px'},
+            {index: 1, '--y': '12px'},
+          ],
         })
         .then(requests => {
           expect(requests).to.have.length(2);
@@ -1228,7 +1231,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     it('should propagate vars and index by selector from child', () => {
       animation2Spec = {
         delay: 'calc((index() + 1) * 1s)',
-        subtargets: [{index: 0, '--y': '11px'}, {index: 1, '--y': '12px'}],
+        subtargets: [
+          {index: 0, '--y': '11px'},
+          {index: 1, '--y': '12px'},
+        ],
         duration: 2000,
         keyframes: {},
       };

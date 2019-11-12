@@ -248,21 +248,39 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(1);
     root.dispose();
-    spec = {visiblePercentageThresholds: [[0, 10], [10, 100]]};
+    spec = {
+      visiblePercentageThresholds: [
+        [0, 10],
+        [10, 100],
+      ],
+    };
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(2);
     root.dispose();
-    spec = {visiblePercentageThresholds: [[-1, 10], [10, 101]]};
+    spec = {
+      visiblePercentageThresholds: [
+        [-1, 10],
+        [10, 101],
+      ],
+    };
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(0);
     root.dispose();
-    spec = {visiblePercentageThresholds: [[1, 2, 3], ['invalid', 3]]};
+    spec = {
+      visiblePercentageThresholds: [
+        [1, 2, 3],
+        ['invalid', 3],
+      ],
+    };
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(0);
     root.dispose();
     spec = {
       visiblePercentageMin: 0,
-      visiblePercentageThresholds: [[0, 10], [10, 100]],
+      visiblePercentageThresholds: [
+        [0, 10],
+        [10, 100],
+      ],
     };
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(1);
@@ -277,12 +295,22 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(1);
     root.dispose();
-    spec = {visiblePercentageThresholds: [[0, 0], [100, 100]]};
+    spec = {
+      visiblePercentageThresholds: [
+        [0, 0],
+        [100, 100],
+      ],
+    };
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(2);
     root.dispose();
     spec = {
-      visiblePercentageThresholds: [[0, 0], [0, 50], [50, 100], [100, 100]],
+      visiblePercentageThresholds: [
+        [0, 0],
+        [0, 50],
+        [50, 100],
+        [100, 100],
+      ],
     };
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(4);
@@ -298,7 +326,13 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     });
     expect(root.models_).to.have.length(0);
     root.dispose();
-    spec = {visiblePercentageThresholds: [[0, 10], [10, 10], [30, 30]]};
+    spec = {
+      visiblePercentageThresholds: [
+        [0, 10],
+        [10, 10],
+        [30, 30],
+      ],
+    };
     allowConsoleError(() => {
       // On the [10, 10] and [30, 30] only, again expect user().error(TAG,
       //   'visiblePercentageThresholds entry invalid min/max value')
@@ -1437,7 +1471,10 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     visibility.listenElement(
       ampElement,
       {
-        'visiblePercentageThresholds': [[0, 30], [50, 100]],
+        'visiblePercentageThresholds': [
+          [0, 30],
+          [50, 100],
+        ],
       },
       Promise.resolve(),
       null,

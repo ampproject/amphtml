@@ -147,7 +147,7 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   }
 
   const isExtCss =
-    !isRuntimeCss && (ext && ext != 'amp-custom' && ext != 'amp-keyframes');
+    !isRuntimeCss && ext && ext != 'amp-custom' && ext != 'amp-keyframes';
   const key = isRuntimeCss
     ? 'amp-runtime'
     : isExtCss

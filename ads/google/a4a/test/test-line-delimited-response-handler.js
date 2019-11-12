@@ -203,7 +203,10 @@ describe('#line-delimited-response-handler', () => {
     it.configure().skipSafari(
       'should handle multiple no fill responses properly',
       () => {
-        slotData = [{headers: {}, creative: ''}, {headers: {}, creative: ''}];
+        slotData = [
+          {headers: {}, creative: ''},
+          {headers: {}, creative: ''},
+        ];
         setup();
         return executeAndVerifyResponse();
       }

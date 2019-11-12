@@ -186,9 +186,7 @@ export class Linkmate {
         ) {
           mappings.push({
             anchor,
-            replacementUrl: `https://shop-links.co/${
-              smartLink['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${smartLink['auction_id']}/?amp=true`,
           });
         }
       });

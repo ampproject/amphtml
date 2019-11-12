@@ -226,7 +226,10 @@ class ScrollContentBlocker {
   check() {
     Services.xhrFor(this.ampdoc_.win)
       .fetchJson('https://block.scroll.com/check.json')
-      .then(() => false, e => this.blockedByScrollApp_(e.message))
+      .then(
+        () => false,
+        e => this.blockedByScrollApp_(e.message)
+      )
       .then(blockedByScrollApp => {
         if (blockedByScrollApp === true) {
           // TODO(dbow): Ideally we would automatically redirect to the page

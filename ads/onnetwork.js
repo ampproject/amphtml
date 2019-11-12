@@ -36,7 +36,10 @@ export function onnetwork(global, data) {
 
   // Custom movie url using "data-src" attribute
   if (src) {
-    validateSrcPrefix(Object.keys(hosts).map(type => hosts[type]), src);
+    validateSrcPrefix(
+      Object.keys(hosts).map(type => hosts[type]),
+      src
+    );
     url = src;
   }
   // Movie tag using "data-sid" attribute

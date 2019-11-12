@@ -37,8 +37,6 @@ export function speakol(global, data) {
 
   loadScript(
     global,
-    `https://crawler.speakol.com/sdk/speakol-widget.js?wid=wi-${
-      data['widgetid']
-    }&eid=spk-wi-${data['widgetid']}`
+    `https://crawler.speakol.com/sdk/speakol-widget.js?wid=wi-${data['widgetid']}&eid=spk-wi-${data['widgetid']}`
   );
 }
