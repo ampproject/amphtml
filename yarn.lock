@@ -3522,10 +3522,10 @@ commander@~2.1.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.1.0.tgz#d121bbae860d9992a3d517ba96f56588e47c6781"
   integrity sha1-0SG7roYNmZKj1Re6lvVliOR8Z4E=
 
-comment-parser@^0.6.2:
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/comment-parser/-/comment-parser-0.6.2.tgz#b71e8fcacad954bea616779391838150d0096dcb"
-  integrity sha512-Wdms0Q8d4vvb2Yk72OwZjwNWtMklbC5Re7lD9cjCP/AG1fhocmc0TrxGBBAXPLy8fZQPrfHGgyygwI0lA7pbzA==
+comment-parser@^0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/comment-parser/-/comment-parser-0.7.0.tgz#9dc1f689a60d81fbcaf867d3c9eba3eb061ccfc1"
+  integrity sha512-m0SGP0RFO4P3hIBlIor4sBFPe5Y4HUeGgo/UZK/1Zdea5eUiqxroQ3lFqBDDSfWo9z9Q6LLnt2u0JqwacVEd/A==
 
 common-path-prefix@^1.0.0:
   version "1.0.0"
@@ -4985,14 +4985,14 @@ eslint-plugin-jasmine@4.0.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-4.0.0.tgz#9dce4b5256a32874bfe8a57a4b7f1857f8ee6d14"
   integrity sha512-hbTm2cGx9VZjJeGAmF+JmKJyphTQgMVa+HNPtDaUEzXs+TRHA4r5wxBArZ3AJO8eSisBIETKhRzEmJp5ADXNGg==
 
-eslint-plugin-jsdoc@17.0.0:
-  version "17.0.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-17.0.0.tgz#e440b13661bc39c0d9a7e45ddbf16390eac70703"
-  integrity sha512-/eBXikzrGLXTzseEG4MqX28bO69LgFThM02Xa7OpeOeoZwZ/vQjh3Div2+u3RJ7Mtv00jFlXUpnl772ov9fdGQ==
+eslint-plugin-jsdoc@17.1.2:
+  version "17.1.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-17.1.2.tgz#1d2bcdd918c2665dfabe1d60714663f4afe4ae88"
+  integrity sha512-x3XbsYUF8VFTMi+Ssdezh4g77PodQyFcZ0DPQOeSkvI5EyHGV31yH3ekcD69JChEb5BkmcUu07FtLFuaxE97PQ==
   dependencies:
-    comment-parser "^0.6.2"
+    comment-parser "^0.7.0"
     debug "^4.1.1"
-    jsdoctypeparser "^5.1.1"
+    jsdoctypeparser "^6.0.0"
     lodash "^4.17.15"
     object.entries-ponyfill "^1.0.1"
     regextras "^0.6.1"
@@ -8182,10 +8182,10 @@ jsbn@~0.1.0:
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"
   integrity sha1-peZUwuWi3rXyAdls77yoDA7y9RM=
 
-jsdoctypeparser@^5.1.1:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/jsdoctypeparser/-/jsdoctypeparser-5.1.1.tgz#99c57412fe736c70024bf54204ed1bb93cf4a49f"
-  integrity sha512-APGygIJrT5bbz5lsVt8vyLJC0miEbQf/z9ZBfTr4RYvdia8AhWMRlYgivvwHG5zKD/VW3d6qpChCy64hpQET3A==
+jsdoctypeparser@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/jsdoctypeparser/-/jsdoctypeparser-6.0.0.tgz#b6778772339138cbddb6c7b0d182d105afe1d8ae"
+  integrity sha512-61VtBXLkHfOFSIdp/VDVNMksxK0ID0cPTNvxDR92tPA6K7r2AX0OcJegYxhJIwtpWKU4p3D9L3U02hhlP1kQLQ==
 
 jsdom@15.2.1:
   version "15.2.1"
