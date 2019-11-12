@@ -3524,8 +3524,9 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
   } else if (
-    height.isSet && width.isSet &&
-    (sizesAttr !== undefined || heightsAttr !== undefined)) {
+      height.isSet && width.isSet &&
+      ((sizesAttr !== undefined && sizesAttr !== '') ||
+       (heightsAttr !== undefined && heightsAttr !== ''))) {
     return amp.validator.AmpLayout.Layout.RESPONSIVE;
   } else {
     return amp.validator.AmpLayout.Layout.FIXED;
