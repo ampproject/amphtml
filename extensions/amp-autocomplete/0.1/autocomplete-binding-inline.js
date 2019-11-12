@@ -39,13 +39,10 @@ export class AutocompleteBindingInline {
   /**
    *
    * @param {string} trigger
-   * @param {?HTMLInputElement} inputEl
+   * @param {!HTMLInputElement} inputEl
    * @return {boolean}
    */
   shouldAutocomplete(trigger, inputEl) {
-    if (!inputEl) {
-      return false;
-    }
     const match = this.getClosestPriorMatch_(trigger, inputEl);
     this.match_ = match;
     return !!match;
@@ -60,6 +57,10 @@ export class AutocompleteBindingInline {
    * @private
    */
   getClosestPriorMatch_(trigger, inputEl) {
+    if (trigger === '') {
+      return null;
+    }
+
     const delimiter = trigger.replace(/([()[{*+.$^\\|?])/g, '\\$1');
     const pattern = `((${delimiter}|^${delimiter})(\\w+)?)`;
     const regex = new RegExp(pattern, 'gm');
@@ -84,11 +85,11 @@ export class AutocompleteBindingInline {
 
   /**
    * @param {string} trigger
-   * @param {?HTMLInputElement} unusedInputEl
+   * @param {!HTMLInputElement} unusedInputEl
    * @return {string}
    */
   updateUserInput(trigger, unusedInputEl) {
-    if (!this.match_) {
+    if (!this.match_ || !this.match_[0]) {
       return '';
     }
     return this.match_[0].slice(trigger.length);
@@ -102,6 +103,9 @@ export class AutocompleteBindingInline {
    * @return {string}
    */
   updateInputWithSelection(selection, inputEl, inputLength, trigger) {
+    if (!this.match_) {
+      return inputEl.value;
+    }
     let cursor = inputEl.selectionStart;
     const startIndex = Number(ownProperty(this.match_, 'index'));
     if (cursor >= startIndex + inputLength) {
@@ -129,7 +133,7 @@ export class AutocompleteBindingInline {
 
   /**
    * @param {string} unusedUserInput
-   * @param {?HTMLInputElement} unusedInputEl
+   * @param {!HTMLInputElement} unusedInputEl
    */
   resetValue(unusedUserInput, unusedInputEl) {}
 

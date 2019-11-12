@@ -15,6 +15,7 @@
  */
 
 import '../amp-autocomplete';
+import {AutocompleteBindingInline} from '../autocomplete-binding-inline';
 import {Keys} from '../../../../src/utils/key-codes';
 
 describes.realWin(
@@ -397,7 +398,50 @@ describes.realWin(
     });
 
     describe('inputHandler_() on input', () => {
-      let renderSpy, toggleResultsSpy, updateActiveSpy;
+      let renderSpy,
+        toggleResultsSpy,
+        updateActiveSpy,
+        clearAllItemsSpy,
+        remoteDataSpy;
+
+      it('should only clear items if binding should not autocomplete', () => {
+        impl.binding_ = new AutocompleteBindingInline();
+        impl.trigger_ = '@';
+        return element
+          .layoutCallback()
+          .then(() => {
+            renderSpy = sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+            clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(clearAllItemsSpy).to.have.been.calledOnce;
+            expect(renderSpy).not.to.have.been.called;
+            expect(toggleResultsSpy).not.to.have.been.called;
+          });
+      });
+
+      it('should maybe fetch data when autocompleting', () => {
+        impl.binding_ = new AutocompleteBindingInline();
+        impl.trigger_ = '@';
+        sandbox.stub(impl.binding_, 'getClosestPriorMatch_').returns(['abc']);
+        return element
+          .layoutCallback()
+          .then(() => {
+            renderSpy = sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+            remoteDataSpy = sandbox
+              .stub(impl, 'getRemoteData_')
+              .resolves(['abc']);
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(remoteDataSpy).to.have.been.calledOnce;
+            expect(renderSpy).to.have.been.calledOnce;
+            expect(toggleResultsSpy).to.have.been.calledOnce;
+          });
+      });
 
       it('should record and respond to input', () => {
         return element
@@ -466,7 +510,22 @@ describes.realWin(
           });
       });
 
-      it('should displayUserInput_ when looping on Down arrow', () => {
+      it('should displayUserInput_ when looping on Down arrow for single', () => {
+        impl.binding_ = new AutocompleteBindingInline();
+        sandbox.stub(impl, 'resultsShowing_').returns(true);
+        return element
+          .layoutCallback()
+          .then(() => {
+            return impl.keyDownHandler_(event);
+          })
+          .then(() => {
+            expect(eventPreventSpy).to.have.been.calledOnce;
+            expect(displayInputSpy).to.have.been.calledOnce;
+            expect(updateActiveSpy).not.to.have.been.called;
+          });
+      });
+
+      it('should displayUserInput_ when looping on Down arrow for inline', () => {
         sandbox.stub(impl, 'resultsShowing_').returns(true);
         return element
           .layoutCallback()
@@ -547,9 +606,24 @@ describes.realWin(
         });
       }
 
-      it('should do nothing when there is no active item', () => {
+      it('should do nothing when there is no active item for single', () => {
         return layoutAndSetSpies()
           .then(() => {
+            return impl.keyDownHandler_(event);
+          })
+          .then(() => {
+            expect(impl.inputElement_.value).to.equal('');
+            expect(selectItemSpy).not.to.have.been.called;
+            expect(clearAllSpy).not.to.have.been.called;
+            expect(resetSpy).not.to.have.been.called;
+            expect(eventPreventSpy).not.to.have.been.called;
+          });
+      });
+
+      it('should do nothing when there is no active item for inline', () => {
+        return layoutAndSetSpies()
+          .then(() => {
+            impl.binding_ = new AutocompleteBindingInline();
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -578,10 +652,10 @@ describes.realWin(
           });
       });
 
-      it('should call event.preventDefault when submitOnEnter_ is true', () => {
+      it('should call event.preventDefault when submitOnEnter_ is false for single', () => {
         return layoutAndSetSpies()
           .then(() => {
-            impl.submitOnEnter_ = true;
+            impl.submitOnEnter_ = false;
             impl.activeElement_ = impl.createElementFromItem_('abc');
             sandbox.stub(impl, 'resultsShowing_').returns(true);
             return impl.keyDownHandler_(event);
@@ -591,7 +665,24 @@ describes.realWin(
             expect(selectItemSpy).to.have.been.calledOnce;
             expect(clearAllSpy).to.have.been.calledOnce;
             expect(resetSpy).to.have.been.calledOnce;
-            expect(eventPreventSpy).not.to.have.been.called;
+            expect(eventPreventSpy).to.have.been.called;
+          });
+      });
+
+      it('should call event.preventDefault when active element exists for inline', () => {
+        return layoutAndSetSpies()
+          .then(() => {
+            impl.binding_ = new AutocompleteBindingInline();
+            impl.submitOnEnter_ = true;
+            impl.activeElement_ = impl.createElementFromItem_('abc');
+            sandbox.stub(impl, 'resultsShowing_').returns(true);
+            return impl.keyDownHandler_(event);
+          })
+          .then(() => {
+            expect(selectItemSpy).to.have.been.calledOnce;
+            expect(clearAllSpy).to.have.been.calledOnce;
+            expect(resetSpy).to.have.been.calledOnce;
+            expect(eventPreventSpy).to.have.been.called;
             expect(impl.submitOnEnter_).to.be.true;
           });
       });
@@ -788,6 +879,54 @@ describes.realWin(
       });
     });
 
+    it('should do nothing on select for inline with empty trigger', () => {
+      impl.binding_ = new AutocompleteBindingInline();
+      impl.trigger_ = '';
+      const mockEl = doc.createElement('div');
+      const updateSpy = sandbox.spy(impl.binding_, 'updateInputWithSelection');
+      return element
+        .layoutCallback()
+        .then(() => {
+          impl.inputElement_.value = impl.userInput_ = 'hello @har';
+          impl.toggleResults_(true);
+          mockEl.setAttribute('data-value', 'harrypotter');
+          impl.binding_.match_ = {0: 'har', index: 7};
+          sandbox.stub(impl, 'getRemoteData_').resolves([]);
+          return impl.inputHandler_();
+        })
+        .then(() => {
+          expect(impl.inputElement_.value).to.equal('hello @har');
+          impl.selectItem_(mockEl);
+          expect(updateSpy).to.have.been.calledOnce;
+          expect(impl.userInput_).to.equal('');
+          expect(impl.inputElement_.value).to.equal('hello @har');
+        });
+    });
+
+    it('should partially replace input on select for inline with reasonable trigger', () => {
+      impl.binding_ = new AutocompleteBindingInline();
+      impl.trigger_ = '@';
+      const mockEl = doc.createElement('div');
+      const updateSpy = sandbox.spy(impl.binding_, 'updateInputWithSelection');
+      return element
+        .layoutCallback()
+        .then(() => {
+          impl.inputElement_.value = impl.userInput_ = 'hello @har';
+          impl.toggleResults_(true);
+          mockEl.setAttribute('data-value', 'harrypotter');
+          impl.binding_.match_ = {0: 'har', index: 7};
+          sandbox.stub(impl, 'getRemoteData_').resolves([]);
+          return impl.inputHandler_();
+        })
+        .then(() => {
+          expect(impl.inputElement_.value).to.equal('hello @har');
+          impl.selectItem_(mockEl);
+          expect(updateSpy).to.have.been.calledOnce;
+          expect(impl.userInput_).to.equal('');
+          expect(impl.inputElement_.value).to.equal('hello @harrypotter ');
+        });
+    });
+
     it('should support marking active items', () => {
       let resetSpy;
       return element
@@ -936,6 +1075,17 @@ describes.realWin(
             expect(toggleFallbackSpy).to.have.been.calledWith(true);
           });
         });
+      });
+    });
+
+    it('should generate expected src values from "query" attribute', () => {
+      return element.layoutCallback().then(() => {
+        impl.queryKey_ = 'q';
+        impl.srcBase_ = 'https://www.data.com/';
+        expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
+        expect(impl.generateSrc_('abc')).to.equal(
+          'https://www.data.com/?q=abc'
+        );
       });
     });
   }

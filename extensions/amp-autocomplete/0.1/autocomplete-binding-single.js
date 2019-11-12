@@ -65,12 +65,9 @@ export class AutocompleteBindingSingle {
 
   /**
    * @param {string} userInput
-   * @param {?HTMLInputElement} inputEl
+   * @param {!HTMLInputElement} inputEl
    */
   resetValue(userInput, inputEl) {
-    if (!inputEl) {
-      return;
-    }
     inputEl.value = userInput;
   }
 
@@ -91,7 +88,10 @@ export class AutocompleteBindingSingle {
   }
 
   /**
-   *
+   * @param {!HTMLElement} element
+   * @param {!HTMLInputElement} inputEl
+   * @param {number} userInputLength
+   * @param {boolean} highlight
    */
   displayActiveItemInInput(element, inputEl, userInputLength, highlight) {
     const value = element.getAttribute('data-value');

@@ -24,14 +24,14 @@ export class AutocompleteBindingDef {
    * Whether the binding should attempt to display
    * autocomplete suggestions on user input.
    * @param {string} unusedTrigger
-   * @param {?HTMLInputElement} unusedInputEl
+   * @param {!HTMLInputElement} unusedInputEl
    * @return {boolean}
    */
   shouldAutocomplete(unusedTrigger, unusedInputEl) {}
 
   /**
    * @param {string} unusedTrigger
-   * @param {?HTMLInputElement} unusedInputEl
+   * @param {!HTMLInputElement} unusedInputEl
    * @return {string}
    */
   updateUserInput(unusedTrigger, unusedInputEl) {}
@@ -57,7 +57,7 @@ export class AutocompleteBindingDef {
 
   /**
    * @param {string} unusedUserInput
-   * @param {?HTMLInputElement} unusedInputEl
+   * @param {!HTMLInputElement} unusedInputEl
    */
   resetValue(unusedUserInput, unusedInputEl) {}
 
@@ -73,10 +73,10 @@ export class AutocompleteBindingDef {
   shouldShowOnFocus() {}
 
   /**
-   * @param {*} unusedElement
-   * @param {*} unusedInputEl
-   * @param {*} unusedUserInputLength
-   * @param {*} unusedHighlight
+   * @param {!HTMLElement} unusedElement
+   * @param {!HTMLInputElement} unusedInputEl
+   * @param {number} unusedUserInputLength
+   * @param {boolean} unusedHighlight
    */
   displayActiveItemInInput(
     unusedElement,

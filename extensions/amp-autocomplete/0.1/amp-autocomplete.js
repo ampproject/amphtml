@@ -237,6 +237,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
       `Experiment ${TAG} is not turned on for "inline" attr. %s`,
       this.element
     );
+    userAssert(
+      this.trigger_ !== '',
+      `${TAG} currently does not support an empty value for the "inline" attr. %s`,
+      this.element
+    );
 
     this.queryKey_ = this.element.getAttribute('query');
     this.srcBase_ = this.element.getAttribute('src');
@@ -521,7 +526,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   inputHandler_() {
-    if (!this.binding_.shouldAutocomplete(this.trigger_, this.inputElement_)) {
+    if (
+      !this.binding_.shouldAutocomplete(
+        this.trigger_,
+        dev().assertElement(this.inputElement_)
+      )
+    ) {
       return this.mutateElement(() => {
         this.clearAllItems_();
       });
@@ -532,7 +542,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.userInput_.length === 0 && this.inputElement_.value.length === 1;
     this.userInput_ = this.binding_.updateUserInput(
       this.trigger_,
-      this.inputElement_
+      dev().assertElement(this.inputElement_)
     );
 
     return this.maybeFetchAndAutocomplete_(firstInteraction);
@@ -984,7 +994,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.binding_.displayActiveItemInInput(
       newActiveElement,
-      this.inputElement_,
+      dev().assertElement(this.inputElement_),
       this.userInput_.length,
       this.suggestFirst_
     );
@@ -1044,7 +1054,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   displayUserInput_() {
-    this.binding_.resetValue(this.userInput_, this.inputElement_);
+    this.binding_.resetValue(
+      this.userInput_,
+      dev().assertElement(this.inputElement_)
+    );
     this.resetActiveElement_();
   }
 
