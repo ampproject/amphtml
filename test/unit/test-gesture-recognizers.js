@@ -481,14 +481,20 @@ describe('SwipeXYRecognizer', () => {
     expect(recognizer.lastY_).to.equal(211);
 
     res = recognizer.onTouchStart({
-      touches: [{clientX: 111, clientY: 211}, {clientX: 122, clientY: 254}],
+      touches: [
+        {clientX: 111, clientY: 211},
+        {clientX: 122, clientY: 254},
+      ],
     });
 
     // Additional touch start should not have any effect
     expect(res).to.equal(true);
 
     res = recognizer.onTouchMove({
-      touches: [{clientX: 111, clientY: 211}, {clientX: 122, clientY: 234}],
+      touches: [
+        {clientX: 111, clientY: 211},
+        {clientX: 122, clientY: 234},
+      ],
     });
 
     // Additional touch move should not have any effect
@@ -771,7 +777,10 @@ describe('PinchRecognizer', () => {
 
   it('should allow two-point touchstart', () => {
     const res = recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     expect(res).to.equal(true);
     expect(recognizer.startX1_).to.equal(90);
@@ -783,7 +792,10 @@ describe('PinchRecognizer', () => {
   it('should allow small drift before requesting ready', () => {
     gesturesMock.expects('signalReady_').never();
     let res = recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     expect(res).to.equal(true);
     expect(recognizer.startX1_).to.equal(90);
@@ -792,7 +804,10 @@ describe('PinchRecognizer', () => {
     expect(recognizer.startY2_).to.equal(120);
 
     res = recognizer.onTouchMove({
-      touches: [{clientX: 89, clientY: 79}, {clientX: 112, clientY: 122}],
+      touches: [
+        {clientX: 89, clientY: 79},
+        {clientX: 112, clientY: 122},
+      ],
     });
     expect(res).to.equal(true);
     expect(recognizer.lastX1_).to.equal(89);
@@ -808,12 +823,18 @@ describe('PinchRecognizer', () => {
       .once();
 
     let res = recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     expect(res).to.equal(true);
 
     res = recognizer.onTouchMove({
-      touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}],
+      touches: [
+        {clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+      ],
     });
     expect(res).to.equal(true);
   });
@@ -821,19 +842,28 @@ describe('PinchRecognizer', () => {
   it('should allow small drift before cancelling and then cancel', () => {
     gesturesMock.expects('signalReady_').never();
     let res = recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     expect(res).to.equal(true);
 
     // Move in the same direction by 2px.
     res = recognizer.onTouchMove({
-      touches: [{clientX: 88, clientY: 78}, {clientX: 108, clientY: 118}],
+      touches: [
+        {clientX: 88, clientY: 78},
+        {clientX: 108, clientY: 118},
+      ],
     });
     expect(res).to.equal(true);
 
     // Move in the same direction by 10px.
     res = recognizer.onTouchMove({
-      touches: [{clientX: 80, clientY: 70}, {clientX: 100, clientY: 110}],
+      touches: [
+        {clientX: 80, clientY: 70},
+        {clientX: 100, clientY: 110},
+      ],
     });
     expect(res).to.equal(false);
   });
@@ -841,10 +871,16 @@ describe('PinchRecognizer', () => {
   it('should emit on start', () => {
     clock.tick(1);
     recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     recognizer.onTouchMove({
-      touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}],
+      touches: [
+        {clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+      ],
     });
     gesturesMock
       .expects('signalEmit_')
@@ -890,20 +926,33 @@ describe('PinchRecognizer', () => {
   it('should emit on touchmove after start', () => {
     clock.tick(1);
     recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     recognizer.onTouchMove({
-      touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}],
+      touches: [
+        {clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+      ],
     });
     gesturesMock
       .expects('signalEmit_')
-      .withExactArgs(recognizer, sinon.match(unusedData => true), null)
+      .withExactArgs(
+        recognizer,
+        sinon.match(unusedData => true),
+        null
+      )
       .once();
     clock.tick(10);
     recognizer.acceptStart();
 
     const event = {
-      touches: [{clientX: 70, clientY: 60}, {clientX: 130, clientY: 140}],
+      touches: [
+        {clientX: 70, clientY: 60},
+        {clientX: 130, clientY: 140},
+      ],
     };
     gesturesMock
       .expects('signalEmit_')
@@ -935,14 +984,24 @@ describe('PinchRecognizer', () => {
   it("should stop on touchend; velocity doesn't change", () => {
     clock.tick(1);
     recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     recognizer.onTouchMove({
-      touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}],
+      touches: [
+        {clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+      ],
     });
     gesturesMock
       .expects('signalEmit_')
-      .withExactArgs(recognizer, sinon.match(unusedData => true), null)
+      .withExactArgs(
+        recognizer,
+        sinon.match(unusedData => true),
+        null
+      )
       .once();
     clock.tick(10);
     recognizer.acceptStart();
@@ -976,14 +1035,24 @@ describe('PinchRecognizer', () => {
   it('should stop on touchend; velocity changes', () => {
     clock.tick(1);
     recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     recognizer.onTouchMove({
-      touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}],
+      touches: [
+        {clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+      ],
     });
     gesturesMock
       .expects('signalEmit_')
-      .withExactArgs(recognizer, sinon.match(unusedData => true), null)
+      .withExactArgs(
+        recognizer,
+        sinon.match(unusedData => true),
+        null
+      )
       .once();
     clock.tick(10);
     recognizer.acceptStart();
@@ -1017,12 +1086,18 @@ describe('PinchRecognizer', () => {
   it('should ignore additional touches if eventing', () => {
     clock.tick(1);
     let res = recognizer.onTouchStart({
-      touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}],
+      touches: [
+        {clientX: 90, clientY: 80},
+        {clientX: 110, clientY: 120},
+      ],
     });
     expect(res).to.equal(true);
 
     res = recognizer.onTouchMove({
-      touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}],
+      touches: [
+        {clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+      ],
     });
     expect(res).to.equal(true);
 
@@ -1101,7 +1176,10 @@ describe('PinchRecognizer', () => {
 
     // Trigger touch end; should not end since two touches are remaining
     res = recognizer.onTouchEnd({
-      touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}],
+      touches: [
+        {clientX: 80, clientY: 70},
+        {clientX: 120, clientY: 130},
+      ],
     });
 
     clock.tick(50);
