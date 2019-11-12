@@ -154,7 +154,7 @@ export class Xhr {
    *
    * @param {!Response} res fetch response to convert to json.
    * @param {string|undefined} prefix to strip away.
-   * @return {JsonObject}
+   * @return {Promise<*>}
    */
   xssiJson(res, prefix) {
     if (!prefix) {
