@@ -55,7 +55,7 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {boolean} */
     this.isRequired_ = false;
 
-    /** @private {?HTMLInputElement} */
+    /** @private {?Element} */
     this.hiddenRequiredInput_ = null;
 
     /** @private {!Array<!Element>} */
@@ -363,7 +363,7 @@ export class AmpSelector extends AMP.BaseElement {
       }
     });
     this.element.appendChild(fragment);
-    this.setValueIfRequired_(selectedValues);
+    this.setValueIfRequired_(selectedValues.toString());
     return selectedValues;
   }
 
