@@ -563,9 +563,11 @@ export class AmpList extends AMP.BaseElement {
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
-        return this.scheduleRender_(items, /*opt_append*/ false, data).then(
-          () => this.maybeSetLoadMore_()
-        );
+        return this.scheduleRender_(
+          items,
+          /*opt_append*/ false,
+          data
+        ).then(() => this.maybeSetLoadMore_());
       });
     }
 
