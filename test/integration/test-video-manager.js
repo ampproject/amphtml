@@ -260,6 +260,7 @@ describe
           klass = createFakeVideoPlayerClass(env.win);
           video = env.createAmpElement('amp-test-fake-videoplayer', klass);
           env.win.document.body.appendChild(video);
+          video.upgrade(klass);
           impl = video.implementation_;
           installVideoManagerForDoc(env.ampdoc);
           videoManager = Services.videoManagerForDoc(env.ampdoc);

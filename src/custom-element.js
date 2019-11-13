@@ -383,7 +383,7 @@ function createBaseCustomElementClass(win) {
         this.implementation_ = new newImplClass(this);
       } catch (e) {
         const TAG = this.tagName;
-        dev().error(TAG, 'Failed to constrcutor BaseElement', e);
+        dev().error(TAG, 'Failed to construct BaseElement', e);
         return;
       }
       if (this.everAttached) {

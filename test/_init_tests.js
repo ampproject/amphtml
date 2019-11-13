@@ -279,7 +279,8 @@ function printWarning(...messages) {
     }
   }
 
-  const errorMessage = message.split('\n', 1)[0]; // First line.
+  originalConsoleError(message);
+
   const helpMessage =
     '    The test "' +
     testName +
@@ -295,7 +296,7 @@ function printWarning(...messages) {
     'following pattern at the top of the test:\n' +
     "        'expectAsyncConsoleError(<string or regex>[, <number of" +
     ' times the error message repeats>]);';
-  originalConsoleError(errorMessage + "'\n" + helpMessage);
+  originalConsoleError(helpMessage);
 }
 
 /**
