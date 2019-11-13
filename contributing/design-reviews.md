@@ -27,7 +27,7 @@ Design reviews are a great way to discuss and refine your designs with knowledge
 
 The process for bringing a design to the design review is:
 
-- Determine if you need a design document; in many cases a fully detailed Intent-to-implement (I2I) GitHub issue or other GitHub issue describing the problem and proposed solution may be sufficient. If you have a reviewer work with them to decide what makes sense in your case, otherwise you can ask in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/) ([sign up](https://bit.ly/amp-slack-signup)).
+- Determine if you need a design document; in many cases a fully detailed Intent-to-implement (I2I) GitHub issue or other GitHub issue describing the problem and proposed solution may be sufficient. If you have a reviewer work with them to decide what makes sense in your case, otherwise you can ask in the [#contributing Slack channel](https://amphtml.slack.com/messages/contributing/) ([sign up](https://bit.ly/amp-slack-signup)).
 - If you are going to create a design document, create it as a shared Google Document open to public comments:
 
   - A short design doc is fine as long as it covers your design in sufficient detail to allow for a review by other members of the community.
@@ -46,7 +46,7 @@ The process for bringing a design to the design review is:
     See the License for the specific language governing permissions and limitations under the License.
     ```
 
-- Perform a design pre-review with your reviewer if you have one; they may include other people that know the areas your design affects in this pre-review as well. If you don't have a reviewer you can request a pre-review in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/) ([sign up](https://bit.ly/amp-slack-signup)). It is fine to request a pre-review before your design is complete.
+- Perform a design pre-review with your reviewer if you have one; they may include other people that know the areas your design affects in this pre-review as well. If you don't have a reviewer you can request a pre-review in the [#contributing Slack channel](https://amphtml.slack.com/messages/contributing) ([sign up](https://bit.ly/amp-slack-signup)). It is fine to request a pre-review before your design is complete.
 
 - When your design is ready to be discussed at a design review add a comment on the [Design Review GitHub issue](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review) for the date/time that works best for you. Make sure to pay attention to the time since we rotate between times that work for differents parts of the world. Post a link to your GitHub issue/design doc and a brief summary by **Monday** on the week of your design review. In your comment on the Design Review issue you may want to point out details of the design you'd particularly like to cover in the review.
 
