@@ -36,7 +36,7 @@ function getExtendedElements(win) {
 }
 
 /**
- * Returns the BaseElement implmementation that the element should upgrade to.
+ * Returns the BaseElement implementation that the element should upgrade to.
  * @param {!Window} win
  * @param {!Element} el
  * @return {function(new:../base-element.BaseElement, !Element)}
@@ -89,10 +89,10 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   knownElements[name] = toClass;
   let pointer = 0;
 
-  // The only elements in stubbedElements are the ones that were paresed or
+  // The only elements in stubbedElements are the ones that were parsed or
   // document.createElement-and-connected after registering the CE name (eg,
   // amp-img registered as ElementStub), but before the actual BaseElement
-  // implmementation was registered. We need to go through and "upgrade" the BE
+  // implementation was registered. We need to go through and "upgrade" the BE
   // implmementation on these elements.
   for (let i = 0; i < stubbedElements.length; i++) {
     const element = stubbedElements[i];
