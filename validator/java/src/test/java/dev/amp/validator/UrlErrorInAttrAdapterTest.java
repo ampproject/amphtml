@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Tests for {@link UrlErrorInAttrAdapter}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class UrlErrorInAttrAdapterTest {
 

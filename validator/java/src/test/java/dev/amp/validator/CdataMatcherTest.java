@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 /**
  * Tests for {@link CdataMatcher}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class CdataMatcherTest {
 

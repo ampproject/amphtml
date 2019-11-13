@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 /**
  * Test for {@link ParsedUrlSpec}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class ParsedUrlSpecTest {
 

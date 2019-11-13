@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * Tests for {@link TagSpecDispatch}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class TagSpecDispatchTest {
 

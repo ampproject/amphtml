@@ -37,7 +37,7 @@ import static org.mockito.Mockito.any;
 /**
  * Tests for {@link TagStack}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class TagStackTest {
 
