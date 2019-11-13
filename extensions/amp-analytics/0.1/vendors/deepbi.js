@@ -17,13 +17,14 @@
 import {jsonLiteral} from '../../../../src/json';
 
 const DEEPBI_CONFIG = jsonLiteral({
+  'requestOrigin':'https://${endpoint}/v1/pixel',
   'vars': {
     'gdpr': true,
     'endpoint': 'api.deep.bi',
   },
   'requests': {
     'base':
-      'https://${endpoint}/v1/pixel/${datasetKey}/p.gif?accessKey=${accessKey}&gdpr=${gdpr}&page_href=${sourceUrl}&referrer_href=${documentReferrer}&page_title=${title}&amp=true',
+      '/${datasetKey}/p.gif?accessKey=${accessKey}&gdpr=${gdpr}&page_href=${sourceUrl}&referrer_href=${documentReferrer}&page_title=${title}&amp=true',
     'pageview': '${base}&event_type=page-open',
     'event': '${base}&event_type=event',
   },
