@@ -29,7 +29,7 @@ const HAS_MORE_ITEMS_PAYLOAD = {
 };
 
 describes.realWin(
-  'amp-list component',
+  'amp-list with load-more',
   {
     amp: {
       ampdoc: 'single',
@@ -175,19 +175,15 @@ describes.realWin(
       });
 
       it('should update the next loading src', async () => {
-        const fetchListSpy = sandbox.spy(list, 'fetchList_');
         sandbox.stub(list, 'scheduleRender_').returns(Promise.resolve());
         await list.layoutCallback();
         expect(element.getAttribute('src')).to.equal(
           '/list/infinite-scroll?items=2&left=1'
         );
-        expect(fetchListSpy).to.be.calledOnce;
         await list.loadMoreCallback_();
         expect(element.getAttribute('src')).to.equal(
           '/list/infinite-scroll?items=2&left=0'
         );
-        expect(fetchListSpy).to.be.calledTwice;
-        expect(fetchListSpy).to.be.calledWith(true);
       });
 
       it('should append items to the existing list', async () => {
