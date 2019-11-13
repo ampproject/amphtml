@@ -417,7 +417,7 @@ class SandboxFixture {
 
   /** @override */
   setup(env) {
-    env.sandbox = sinon.createSandbox();
+    env.sandbox = sinon.createSandbox(); // eslint-disable-line no-undef
     env.sandbox.defineProperty = this.defineProperty_.bind(this);
     env.sandbox.deleteProperty = (obj, propertyKey) => {
       this.defineProperty_(obj, propertyKey, undefined);
