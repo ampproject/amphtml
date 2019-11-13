@@ -71,6 +71,8 @@ h3.i-amp-story-quiz-prompt {
 .i-amp-story-quiz-option-post-selection.i-amp-story-quiz-option-selected {
     border: none !important;
     color: white !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
 }
 
 .i-amp-story-quiz-answer-choice {
@@ -107,7 +109,7 @@ h3.i-amp-story-quiz-prompt {
 
 .i-amp-story-quiz-option-post-selection.i-amp-story-quiz-option-selected > .i-amp-story-quiz-answer-choice {
     border: none !important;
-    margin: 2px !important;
+    padding: 7px !important;
 }
 
 .i-amp-story-quiz-option-post-selection > .i-amp-story-quiz-answer-choice {

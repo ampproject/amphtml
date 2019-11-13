@@ -48,7 +48,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
 
-    /** @private {?ShadowRoot} */
+    /** @private {?ShadowRoot|HTMLDivElement} */
     this.shadowRoot_ = null;
   }
 
@@ -61,6 +61,19 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     );
 
     this.shadowRoot_ = this.element.shadowRoot;
+    if (!this.element.shadowRoot) {
+      const childrenLength = this.element.children.length;
+      // grab the last two elements
+      const shadowStyle = this.element.children[childrenLength - 2];
+      const shadowContent = this.element.children[childrenLength - 1];
+      // put them in a container for now
+      const tempShadowContainer = document.createElement('div');
+      tempShadowContainer.appendChild(shadowStyle);
+      tempShadowContainer.appendChild(shadowContent);
+      // set that container to shadowRoot_
+      this.shadowRoot_ = tempShadowContainer;
+    }
+
     this.attachContent_();
     this.attachOptionActionHandlers_();
 
@@ -70,6 +83,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /**
+   * @return {?ShadowRoot|HTMLDivElement}
+   */
+  getShadowRoot() {
+    return this.shadowRoot_;
   }
 
   /**
@@ -104,6 +124,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     if (this.element.children.length !== 0) {
       user().error(TAG, 'Too many children');
+    }
+
+    if (this.shadowRoot_ !== this.element.shadowRoot) {
+      this.element.append(this.shadowRoot);
     }
   }
 
