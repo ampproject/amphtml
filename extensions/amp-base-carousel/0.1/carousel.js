@@ -910,7 +910,7 @@ export class Carousel {
   isScrollAtRightEdge() {
     const el = this.scrollContainer_;
     const {width} = el./*OK*/ getBoundingClientRect();
-    return el./*OK*/ scrollLeft + width >= el./*OK*/ scrollWidth;
+    return el./*OK*/ scrollLeft + Math.ceil(width) >= el./*OK*/ scrollWidth;
   }
 
   /**
