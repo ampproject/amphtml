@@ -88,6 +88,9 @@ export class NextPageService {
     /** @private {boolean} */
     this.documentQueued_ = false;
 
+    /** @private {boolean} */
+    this.reachedEnd_ = false;
+
     /** @private {?../../../src/service/navigation.Navigation} */
     this.navigation_ = null;
 
@@ -290,6 +293,8 @@ export class NextPageService {
       // Don't fetch the next article if we've rendered the maximum on screen.
       // We just want the article links.
       if (this.nextArticle_ >= MAX_ARTICLES) {
+        this.documentQueued_ = false;
+        this.reachedEnd_ = true;
         return;
       }
 
@@ -432,7 +437,10 @@ export class NextPageService {
    * @private
    */
   scrollHandler_() {
-    if (this.documentQueued_) {
+    if (
+      this.documentQueued_ &&
+      this.activeDocumentRef_ !== this.documentRefs_[0]
+    ) {
       return;
     }
 
@@ -446,7 +454,15 @@ export class NextPageService {
     this.viewport_
       .getClientRectAsync(dev().assertElement(this.element_))
       .then(elementBox => {
-        if (this.documentQueued_) {
+        if (
+          elementBox.top >= 0 &&
+          elementBox.top <= viewportBox.height &&
+          this.activeDocumentRef_ !== this.documentRefs_[0]
+        ) {
+          this.setActiveDocument_(this.documentRefs_[0]);
+        }
+
+        if (this.documentQueued_ || this.reachedEnd_) {
           return;
         }
 
@@ -467,24 +483,29 @@ export class NextPageService {
    *     Position of the current recommendation unit in the viewport.
    */
   positionUpdate_(i, position) {
+    const isLastArticle = i === this.nextArticle_;
     // We're only interested when the recommendations exit the viewport
-    if (!position || position.positionRect !== null) {
+    if ((!position || position.positionRect !== null) && !isLastArticle) {
       return;
     }
 
-    let ref = this.documentRefs_[i];
+    let ref;
     let analyticsEvent = '';
 
-    switch (position.relativePos) {
-      case 'top':
-        ref = this.documentRefs_[i + 1];
-        analyticsEvent = 'amp-next-page-scroll';
-        break;
-      case 'bottom':
-        analyticsEvent = 'amp-next-page-scroll-back';
-        break;
-      default:
-        break;
+    const lastArticleIsShort =
+      isLastArticle &&
+      position.positionRect &&
+      position.positionRect.bottom <= position.viewportRect.height;
+
+    if (position.relativePos === 'top') {
+      ref = this.documentRefs_[i + 1];
+      analyticsEvent = 'amp-next-page-scroll';
+    } else if (position.relativePos === 'inside' && lastArticleIsShort) {
+      ref = this.documentRefs_[i];
+      analyticsEvent = 'amp-next-page-scroll';
+    } else if (position.relativePos === 'bottom') {
+      ref = this.documentRefs_[i];
+      analyticsEvent = 'amp-next-page-scroll-back';
     }
 
     if (ref && ref.amp) {
