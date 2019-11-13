@@ -23,6 +23,7 @@ import {
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {
+  NO_OP_EXP,
   RESPONSIVE_SIZING_HOLDBACK_BRANCH,
   getPlacementsFromConfigObj,
 } from './placement';
@@ -129,6 +130,10 @@ export class AmpAutoAds extends AMP.BaseElement {
           [RESPONSIVE_SIZING_EXP.control],
           [RESPONSIVE_SIZING_EXP.holdback],
         ],
+      },
+      [[NO_OP_EXP.branch]]: {
+        isTrafficEligible: () => isResponsiveEnabled,
+        branches: [[NO_OP_EXP.control], [NO_OP_EXP.experiment]],
       },
     });
     return randomlySelectUnsetExperiments(this.win, experimentInfoMap)[
