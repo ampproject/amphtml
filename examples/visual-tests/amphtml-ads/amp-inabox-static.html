@@ -74,39 +74,5 @@
     frameborder="0"
     width="300" height="200">
   </iframe>
-
-  <h1>AMPHTML ad - Inabox Data URL - amphtml-ads/amp-creative.html</h1>
-
-  <iframe
-      class="inabox-test"
-      id="iframe-6"
-      scrolling="no"
-      marginwidth="0"
-      marginheight="0"
-      frameborder="0"
-      width="300" height="200">
-  </iframe>
-
-  <script>
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-      var creative = xhr.responseText;
-
-      // The creative has relative URLs, which won't work in the null origin
-      // context of a data URL.  Make it use absolute URLs, which any real
-      // Inabox creative would do.
-      creative = creative.replace(
-        /src="\//g, 'src="' + document.location.origin + '/').
-        replace('"/${type}?', '"' + document.location.origin + '/${type}?');
-
-      document.getElementById("iframe-6").src =
-        "data:text/html," + encodeURIComponent(creative);
-    }
-  };
-  xhr.open("GET", "/test/fixtures/e2e/amphtml-ads/amp-creative.html", true);
-  xhr.send();
-  </script>
-
   <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
 </body>
