@@ -161,10 +161,7 @@ export class AmpList extends AMP.BaseElement {
       () => {
         if (this.layoutCompleted_) {
           this.resetIfNecessary_();
-          return this.fetchList_(
-            /* opt_append */ false,
-            /* opt_refresh */ true
-          );
+          return this.fetchList_(/* opt_refresh */ true);
         }
       },
       ActionTrust.HIGH
@@ -496,16 +493,64 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Given JSON payload data fetched from the server, modifies the
+   * data according to developer-defined parameters. Extracts the correct
+   * list items according to the 'items' attribute, asserts that this
+   * contains an array or object, put object in an array if the single-item
+   * attribute is set, and truncates the list-items to a length defined
+   * by max-items.
+   * @param {!JsonObject|!Array<JsonObject>} data
+   * @throws {!Error} If response is undefined
+   * @return {!Array}
+   */
+  computeListItems_(data) {
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    let items = data;
+    if (itemsExpr != '.') {
+      items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
+    }
+    userAssert(
+      typeof items !== 'undefined',
+      'Response must contain an array or object at "%s". %s',
+      itemsExpr,
+      this.element
+    );
+    if (this.element.hasAttribute('single-item') && !isArray(items)) {
+      items = [items];
+    }
+    items = user().assertArray(items);
+    if (this.element.hasAttribute('max-items')) {
+      items = this.truncateToMaxLen_(items);
+    }
+    return items;
+  }
+
+  /**
+   * Trigger a fetch-error event
+   * @param {*} error
+   */
+  triggerFetchErrorEvent_(error) {
+    const event = error
+      ? createCustomEvent(
+          this.win,
+          `${TAG}.error`,
+          dict({'response': error.response})
+        )
+      : null;
+    const actions = Services.actionServiceForDoc(this.element);
+    actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
+  }
+
+  /**
    * Request list data from `src` and return a promise that resolves when
    * the list has been populated with rendered list items. If the viewer is
    * capable of rendering the templates, then the fetching of the list and
    * transformation of the template is handled by the viewer.
-   * @param {boolean=} opt_append
    * @param {boolean=} opt_refresh
    * @return {!Promise}
    * @private
    */
-  fetchList_(opt_append = false, opt_refresh = false) {
+  fetchList_(opt_refresh = false) {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -513,47 +558,40 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isSupported()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      const itemsExpr = this.element.getAttribute('items') || 'items';
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
-        let items = data;
-        if (itemsExpr != '.') {
-          items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
-        }
-        userAssert(
-          typeof items !== 'undefined',
-          'Response must contain an array or object at "%s". %s',
-          itemsExpr,
-          this.element
-        );
-        if (this.element.hasAttribute('single-item') && !isArray(items)) {
-          items = [items];
-        }
-        items = user().assertArray(items);
-        if (this.element.hasAttribute('max-items')) {
-          items = this.truncateToMaxLen_(items);
-        }
+        const items = this.computeListItems_(data);
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
-        return this.scheduleRender_(items, opt_append, /* opt_payload */ data);
+        return this.scheduleRender_(items, /*opt_append*/ false, data).then(
+          () => this.maybeSetLoadMore_()
+        );
       });
     }
 
     return fetch.catch(error => {
-      const event = error
-        ? createCustomEvent(
-            this.win,
-            `${TAG}.error`,
-            dict({'response': error.response})
-          )
-        : null;
-      const actions = Services.actionServiceForDoc(this.element);
-      actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
+      this.triggerFetchErrorEvent_(error);
+      this.showFallback_();
+      throw error;
+    });
+  }
 
-      if (opt_append) {
-        throw error;
-      }
-      this.showFallbackOrThrow_(error);
+  /**
+   * Fetch and render items intended to be appended to the current list
+   * @return {!Promise}
+   */
+  fetchListAndAppend_() {
+    if (!this.element.getAttribute('src')) {
+      return Promise.resolve();
+    }
+    return this.prepareAndSendFetch_().then(data => {
+      const items = this.computeListItems_(data);
+      this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
+      return this.scheduleRender_(
+        items,
+        /*opt_append*/ true,
+        /*opt_payload*/ data
+      );
     });
   }
 
@@ -713,9 +751,9 @@ export class AmpList extends AMP.BaseElement {
       .then(elements => this.render_(elements, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
-      renderPromise = renderPromise
-        .then(() => this.maybeRenderLoadMoreTemplates_(payload))
-        .then(() => this.maybeSetLoadMore_());
+      renderPromise = renderPromise.then(() =>
+        this.maybeRenderLoadMoreTemplates_(payload)
+      );
     }
     renderPromise.then(onFulfilledCallback, onRejectedCallback);
   }
@@ -1108,6 +1146,10 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Sets up auto-load-more if automatic load-more is on. Otherwise, sets up
+   * manual load-more. In manual, shows the load-more button if there are more
+   * elements to load and the load-more-end element if otherwise. Called on
+   * the first fetch if load-more is on. Only called once.
    * @return {!Promise}
    * @private
    */
@@ -1155,7 +1197,7 @@ export class AmpList extends AMP.BaseElement {
     this.mutateElement(() => {
       this.getLoadMoreService_().toggleLoadMoreLoading(true);
     });
-    return this.fetchList_(/* opt_append */ true)
+    return this.fetchListAndAppend_()
       .then(() => {
         return this.mutateElement(() => {
           if (this.loadMoreSrc_) {
@@ -1172,7 +1214,8 @@ export class AmpList extends AMP.BaseElement {
         // Necessary since load-more elements are toggled in the above block
         this.attemptToFitLoadMore_(dev().assertElement(this.container_));
       })
-      .catch(() => {
+      .catch(error => {
+        this.triggerFetchErrorEvent_(error);
         this.handleLoadMoreFailed_();
       });
   }
@@ -1207,6 +1250,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Sets up a listener on viewport change to load more items
    * @private
    */
   setupLoadMoreAuto_() {
@@ -1280,11 +1324,9 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {*=} error
-   * @throws {!Error} If fallback element is not present.
    * @private
    */
-  showFallbackOrThrow_(error) {
+  showFallback_() {
     this.element.classList.add('i-amphtml-list-fetch-error');
     // Displaying [fetch-error] may offset initial content, so resize to fit.
     if (childElementByAttr(this.element, 'fetch-error')) {
@@ -1295,8 +1337,6 @@ export class AmpList extends AMP.BaseElement {
     if (this.getFallback()) {
       this.toggleFallback_(true);
       this.togglePlaceholder(false);
-    } else {
-      throw error;
     }
   }
 
