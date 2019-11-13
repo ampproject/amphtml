@@ -32,9 +32,18 @@ import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementLayoutBox} from './utils';
+import {getExperimentBranch} from '../../../src/experiments';
 
 /** @const */
 const TAG = 'amp-auto-ads';
+
+/** @const {!{branch: string, control: string, experiment: string}}
+ */
+export const NO_OP_EXP = {
+  branch: 'amp-auto-ads-no-op-experiment',
+  control: '44710302',
+  experiment: '44710303',
+};
 
 /** @const */
 export const RESPONSIVE_SIZING_HOLDBACK_BRANCH = '368226533';
@@ -229,6 +238,13 @@ export class Placement {
             this.responsiveSizingBranch_,
             this.adElement_
           );
+        }
+        const noOpExpBranch = getExperimentBranch(
+          this.ampdoc.win,
+          NO_OP_EXP.branch
+        );
+        if (noOpExpBranch) {
+          addExperimentIdToElement(noOpExpBranch, this.adElement_);
         }
         this.injector_(this.anchorElement_, this.getAdElement());
 

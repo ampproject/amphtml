@@ -17,9 +17,14 @@
 import '../../../amp-ad/0.1/amp-ad';
 import * as Utils from '../utils';
 import {AdTracker} from '../ad-tracker';
-import {PlacementState, getPlacementsFromConfigObj} from '../placement';
+import {
+  NO_OP_EXP,
+  PlacementState,
+  getPlacementsFromConfigObj,
+} from '../placement';
 import {RESPONSIVE_SIZING_EXP} from '../amp-auto-ads';
 import {Services} from '../../../../src/services';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 describes.realWin(
@@ -52,6 +57,52 @@ describes.realWin(
       sinon
         .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
+    });
+
+    describe('noOpExperiment', () => {
+      it('should set the correct ID on the ad element', () => {
+        forceExperimentBranch(
+          ampdoc.win,
+          NO_OP_EXP.branch,
+          NO_OP_EXP.experiment
+        );
+
+        const anchor = doc.createElement('div');
+        anchor.id = 'anId';
+        container.appendChild(anchor);
+
+        const placements = getPlacementsFromConfigObj(ampdoc, {
+          placements: [
+            {
+              anchor: {
+                selector: 'DIV#anId',
+              },
+              pos: 2,
+              type: 1,
+            },
+          ],
+        });
+        expect(placements).to.have.lengthOf(1);
+
+        const attributes = {
+          'type': '_ping_',
+        };
+
+        const sizing = {};
+
+        const adTracker = new AdTracker([], {
+          initialMinSpacing: 0,
+          subsequentMinSpacing: [],
+          maxAdCount: 10,
+        });
+
+        const result = placements[0].placeAd(attributes, sizing, adTracker);
+        env.flushVsync();
+        return result.then(() => {
+          const adElement = anchor.firstChild;
+          expect(isInExperiment(adElement, NO_OP_EXP.experiment)).to.be.true;
+        });
+      });
     });
 
     describe('getAdElement', () => {
