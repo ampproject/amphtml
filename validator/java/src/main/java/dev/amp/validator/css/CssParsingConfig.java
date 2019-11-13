@@ -80,7 +80,7 @@ public class CssParsingConfig {
         return config;
     }
 
-    /**
+  /**
      * Getter for underlying AtRule spec.
      *
      * @return the AtRule spec
