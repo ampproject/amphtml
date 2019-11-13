@@ -53,12 +53,6 @@ export class AutocompleteBindingDef {
   ) {}
 
   /**
-   * Whether or not the autocomplete should refresh data when rendering suggestions
-   * @return {boolean}
-   */
-  shouldFetch() {}
-
-  /**
    * Restore the input element to display the user's non-autocompleted partial string
    * @param {string} unusedUserInput
    * @param {!HTMLInputElement} unusedInputEl

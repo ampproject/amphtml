@@ -422,7 +422,7 @@ describes.realWin(
           });
       });
 
-      it('should maybe fetch data when autocompleting', () => {
+      it('should only fetch data when autocompleting for email', () => {
         impl.binding_ = new AutocompleteBindingInline();
         impl.trigger_ = '@';
         sandbox.stub(impl.binding_, 'getClosestPriorMatch_').returns(['abc']);
@@ -434,12 +434,20 @@ describes.realWin(
             remoteDataSpy = sandbox
               .stub(impl, 'getRemoteData_')
               .resolves(['abc']);
+            expect(impl.isEmail_).to.be.false;
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(remoteDataSpy).not.to.have.been.called;
+            expect(renderSpy).to.have.been.calledOnce;
+            expect(toggleResultsSpy).to.have.been.calledOnce;
+            impl.isEmail_ = true;
             return impl.inputHandler_();
           })
           .then(() => {
             expect(remoteDataSpy).to.have.been.calledOnce;
-            expect(renderSpy).to.have.been.calledOnce;
-            expect(toggleResultsSpy).to.have.been.calledOnce;
+            expect(renderSpy).to.have.been.calledTwice;
+            expect(toggleResultsSpy).to.have.been.calledTwice;
           });
       });
 

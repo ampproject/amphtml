@@ -59,14 +59,6 @@ export class AutocompleteBindingSingle {
   }
 
   /**
-   * Never fetch before rendering--use prefetched data.
-   * @return {boolean}
-   */
-  shouldFetch() {
-    return false;
-  }
-
-  /**
    * Input element value should be reset to the partially recorded user input.
    * @param {string} userInput
    * @param {!HTMLInputElement} inputEl

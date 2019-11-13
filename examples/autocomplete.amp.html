@@ -15,7 +15,7 @@
     body {
         padding: 15px;
     }
-    .custom-population {
+    .custom {
         padding-top: 4px;
         font: 8pt 'Courier New', Courier, monospace;
     }
@@ -32,7 +32,6 @@
       font: 8pt 'Arial', sans-serif;
       right: 0;
     }
-
     .autocomplete-partial {
       font-weight: bold;
     }
@@ -48,6 +47,17 @@
       color: blue;
       text-decoration: underline;
     }
+    .profile-pic {
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+        margin-left: -5px;
+    }
+    .close-friends {
+      display: flex;
+      align-items: center;
+      line-height: 18px;
+    }
   </style>
 </head>
 <body>
@@ -56,6 +66,7 @@
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete inline="@" min-characters="0" suggest-first filter="none" 
           src="/form/mention/query" query="q" on="select:AMP.setState({inlineInputSelect: event.value})">
+        <label>remote data</label><br>
         <textarea autoexpand class="wide" name="inlineInput" placeholder="Reply"></textarea>
         <template type="amp-mustache" id="amp-template-plain">
           <div data-value="{{ . }}">
@@ -63,10 +74,47 @@
           </div>
         </template>
       </amp-autocomplete>
+      <amp-autocomplete inline="+" min-characters="0" suggest-first filter="prefix" filter-value="email">
+        <label>local data</label><br>
+        <textarea autoexpand class="wide" rows="2" placeholder="Reply" name="inlineInput2"></textarea>
+        <template type="amp-mustache" id="amp-template-rich">
+          <div class="close-friends" data-value="{{ email }}">
+            <amp-img
+              class="profile-pic"
+              height="20"
+              width="20"
+              layout="responsive"
+              alt="Profile picture of owl"
+              src="./img/ampicon.png"
+            ></amp-img>
+            <div class="info">
+              <div>{{ name }}</div>
+              <div class="custom">{{ email }}</div>
+            </div>
+          </div>
+        </template>
+        <script type="application/json">
+          { "items" : [
+            {"email": "harrypotter@hogwarts.edu", "name": "Harry Potter"},
+            {"email": "albusdumbledore@hogwarts.edu", "name": "Albus Dumbledore"},
+            {"email": "voldemort@deatheater.org", "name": "Tom Marvolo Riddle"},
+            {"email": "severussnape@hogwarts.edu", "name": "Severus Snape"},
+            {"email": "siriusblack@hogwarts.edu", "name": "Sirius Black"},
+            {"email": "hermionegranger@hogwarts.edu", "name": "Hermione Granger"},
+            {"email": "ronweasley@hogwarts.edu", "name": "Ron Weasley"},
+            {"email": "dracomalfoy@hogwarts.edu", "name": "Draco Malfoy"},
+            {"email": "nevillelongbottom@hogwarts.edu", "name": "Neville Longbottom"},
+            {"email": "rubeushagrid@hogwarts.edu", "name": "Rubeus Hagrid"},
+            {"email": "dobby@hogwarts.edu", "name": "Dobby"},
+            {"email": "bellatrixlestrange@deatheater.org", "name": "Bellatrix Lestrange"},
+            {"email": "minervamcgonagall@hogwarts.edu", "name": "Minerva McGonagall"}
+          ] }
+        </script>
+      </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
       <div submit-success>
           <template type="amp-mustache">
-              Success! {{inlineInput}}
+              Success! {{inlineInput2}}
           </template>
       </div>
     </form>
@@ -624,7 +672,7 @@
                     <template type="amp-mustache" id="amp-template-default">
                         <div class="city-item" data-value="{{value}}">
                             <div>{{value}}</div>
-                            <div class="custom-population">Population: {{population}}</div>
+                            <div class="custom">Population: {{population}}</div>
                         </div>
                         </template>
                 </amp-autocomplete>
@@ -670,7 +718,7 @@
                     <template type="amp-mustache" id="amp-template-custom">
                         <div class="city-item" data-value="{{city}}, {{state}}">
                             <div>{{city}}, {{state}}</div>
-                            <div class="custom-population">Population: {{population}}</div>
+                            <div class="custom">Population: {{population}}</div>
                         </div>
                     </template>
                 </amp-autocomplete>

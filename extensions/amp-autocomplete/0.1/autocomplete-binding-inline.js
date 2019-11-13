@@ -127,14 +127,6 @@ export class AutocompleteBindingInline {
   }
 
   /**
-   * Inline should always retrieve data before rendering
-   * @return {boolean}
-   */
-  shouldFetch() {
-    return true;
-  }
-
-  /**
    * @param {string} unusedUserInput
    * @param {!HTMLInputElement} unusedInputEl
    */

@@ -70,6 +70,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.sourceData_ = null;
 
     /**
+     * Whether the data is statically provided via <script> tags.
+     * Otherwise it is dynamic and should be regularly fetched.
+     */
+    this.staticSrc_ = false;
+
+    /**
+     * Whether the autocomplete is being rendered in an AMP for Email context.
+     */
+    this.isEmail_ = false;
+
+    /**
      * The reference to the <input> or <textarea> provided as a child.
      * @private {?HTMLInputElement}
      */
@@ -256,11 +267,33 @@ export class AmpAutocomplete extends AMP.BaseElement {
     );
     if (jsonScript) {
       this.sourceData_ = this.getInlineData_(jsonScript);
+      this.staticSrc_ = true;
     } else if (!this.element.hasAttribute('src')) {
       user().warn(
         TAG,
         'Expected a <script type="application/json"> child or ' +
           'a URL specified in "src".'
+      );
+    }
+
+    const doc = this.element.ownerDocument;
+    // Client side filtering is disabled for email
+    if (doc && isAmp4Email(doc)) {
+      this.filter_ = FilterType.NONE;
+      this.isEmail_ = true;
+      userAssert(
+        !this.staticSrc_,
+        `${TAG} requires data to be provided via "src" attribute for AMP for Email context. %s`,
+        this.element
+      );
+    } else {
+      this.filter_ = userAssert(
+        this.element.getAttribute('filter'),
+        `${TAG} requires "filter" attribute.`
+      );
+      userAssert(
+        isEnumValue(FilterType, this.filter_),
+        `Unexpected filter: ${this.filter_}`
       );
     }
 
@@ -292,21 +325,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
             `${TAG} requires a "data-value" or "data-disabled" attribute.`
           );
         });
-    }
-
-    const doc = this.element.ownerDocument;
-    // Client side filtering is disabled for email
-    if (doc && isAmp4Email(doc)) {
-      this.filter_ = FilterType.NONE;
-    } else {
-      this.filter_ = userAssert(
-        this.element.getAttribute('filter'),
-        `${TAG} requires "filter" attribute.`
-      );
-      userAssert(
-        isEnumValue(FilterType, this.filter_),
-        `Unexpected filter: ${this.filter_}`
-      );
     }
 
     // Read configuration attributes
@@ -553,10 +571,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @return {!Promise}
    */
   maybeFetchAndAutocomplete_(firstInteraction) {
-    const maybeFetch = this.binding_.shouldFetch()
+    // Always fetch in email context, where data is required to be dynamic.
+    const fetchIfEmail = this.isEmail_
       ? this.getRemoteData_()
       : Promise.resolve(this.sourceData_);
-    return maybeFetch.then(data => {
+    return fetchIfEmail.then(data => {
       this.sourceData_ = data;
       return this.mutateElement(() => {
         this.filterDataAndRenderResults_(
