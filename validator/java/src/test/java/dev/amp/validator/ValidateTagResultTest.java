@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 /**
  * Test for {@link ValidateTagResult}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class ValidateTagResultTest {
 

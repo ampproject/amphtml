@@ -29,7 +29,7 @@ import org.xml.sax.Attributes;
 /**
  * Tests for {@link ParsedHtmlTag}
  *
- * @author sphatak
+ * @author sphatak01
  */
 
 public class ParsedHtmlTagTest {

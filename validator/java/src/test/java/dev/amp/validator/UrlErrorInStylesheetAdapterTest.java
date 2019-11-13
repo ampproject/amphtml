@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Tests for {@link UrlErrorInStylesheetAdapter}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class UrlErrorInStylesheetAdapterTest {
 

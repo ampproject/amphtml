@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 /**
  * Test for {@link ParsedTagSpec}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class ParsedTagSpecTest {
 

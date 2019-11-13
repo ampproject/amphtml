@@ -16,37 +16,27 @@
  */
 
 /*
- * Changes to the original project are Copyright 2019, Verizon Media Inc..
+ * Changes to the original project are Copyright 2019, Oath Inc..
  */
 
 package dev.amp.validator;
+
 
 import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Test for {@link ParsedUrlSpec}
- *
- * @author sphatak01
+ * Tests for {@link ExtensionMissingError}
  */
-public class ParsedUrlSpecTest {
+public class ExtensionMissingErrorTest {
 
     @Test
-    public void testGetterSetters() {
-        final Validator.UrlSpec.Builder specBuilder = Validator.UrlSpec.newBuilder();
-        specBuilder.addProtocol("http");
-        specBuilder.addProtocol("https");
+    public void testConstructor() {
+        final ExtensionMissingError error = new ExtensionMissingError("ext_missing",
+                Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE).build());
 
-        final Validator.UrlSpec spec = specBuilder.build();
-        final ParsedUrlSpec parsedSpec = new ParsedUrlSpec(spec);
-
-        Assert.assertEquals(parsedSpec.getSpec(), spec);
-        Assert.assertTrue(parsedSpec.isAllowedProtocol("http"));
-        Assert.assertTrue(parsedSpec.isAllowedProtocol("https"));
-        Assert.assertFalse(parsedSpec.isAllowedProtocol("random-http"));
-
-        parsedSpec.cleanup();
-
+        Assert.assertEquals(error.getMissingExtension(), "ext_missing");
+        Assert.assertEquals(error.getMaybeError().getCode(), Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE);
     }
 }
