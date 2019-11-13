@@ -523,7 +523,9 @@ class PuppeteerController {
     try {
       const {windowId} = await browser._connection.send(
         'Browser.getWindowForTarget',
-        {targetId}
+        {
+          targetId,
+        }
       );
 
       // Resize.

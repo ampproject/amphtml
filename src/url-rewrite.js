@@ -103,7 +103,12 @@ export function rewriteAttributeValue(tagName, attrName, attrValue) {
  * @return {boolean}
  */
 export function isUrlAttribute(attrName) {
-  return attrName == 'src' || attrName == 'href' || attrName == 'srcset';
+  return (
+    attrName == 'src' ||
+    attrName == 'href' ||
+    attrName == 'xlink:href' ||
+    attrName == 'srcset'
+  );
 }
 
 /**
