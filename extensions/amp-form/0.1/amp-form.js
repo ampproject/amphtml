@@ -22,7 +22,7 @@ import {
   AsyncInputClasses,
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {
   FORM_VERIFY_OPTOUT,
   FORM_VERIFY_PARAM,
@@ -929,12 +929,15 @@ export class AmpForm {
    */
   handleSubmitSuccess_(result, opt_eventData) {
     this.setState_(FormState.SUBMIT_SUCCESS);
-    return this.renderTemplate_(result || {}).then(() => {
-      this.triggerAction_(
-        FormEvents.SUBMIT_SUCCESS,
-        opt_eventData === undefined ? result : opt_eventData
-      );
-      this.dirtinessHandler_.onSubmitSuccess();
+    // TODO: Investigate if `tryResolve()` can be removed here.
+    return tryResolve(() => {
+      this.renderTemplate_(result || {}).then(() => {
+        this.triggerAction_(
+          FormEvents.SUBMIT_SUCCESS,
+          opt_eventData === undefined ? result : opt_eventData
+        );
+        this.dirtinessHandler_.onSubmitSuccess();
+      });
     });
   }
 
@@ -969,12 +972,15 @@ export class AmpForm {
   handleSubmitFailure_(error, json, opt_eventData) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
-    return this.renderTemplate_(json).then(() => {
-      this.triggerAction_(
-        FormEvents.SUBMIT_ERROR,
-        opt_eventData === undefined ? json : opt_eventData
-      );
-      this.dirtinessHandler_.onSubmitError();
+    // TODO: Investigate if `tryResolve()` can be removed here.
+    return tryResolve(() => {
+      this.renderTemplate_(json).then(() => {
+        this.triggerAction_(
+          FormEvents.SUBMIT_ERROR,
+          opt_eventData === undefined ? json : opt_eventData
+        );
+        this.dirtinessHandler_.onSubmitError();
+      });
     });
   }
 
