@@ -516,11 +516,13 @@ export class AmpStoryEmbeddedComponent {
 
     this.tooltip_.addEventListener(
       'click',
-      () =>
+      event => {
+        event.stopPropagation();
         this.analyticsService_.triggerEvent(
           StoryAnalyticsEvent.STORY_CLICK_THROUGH,
           this.triggeringTarget_
-        ),
+        );
+      },
       true /** capture */
     );
 
