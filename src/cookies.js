@@ -94,6 +94,7 @@ function tryGetDocumentCookie_(win) {
  *   highestAvailableDomain:(boolean|undefined),
  *   domain:(string|undefined),
  *   sameSite: (!SameSite|undefined),
+ *   secure: (boolean|undefined),
  * }=} options
  *     - highestAvailableDomain: If true, set the cookie at the widest domain
  *       scope allowed by the browser. E.g. on example.com if we are currently
@@ -101,6 +102,7 @@ function tryGetDocumentCookie_(win) {
  *     - domain: Explicit domain to set. domain overrides HigestAvailableDomain
  *     - allowOnProxyOrigin: Allow setting a cookie on the AMP Cache.
  *     - sameSite: The SameSite value to use when setting the cookie.
+ *     - secure: Whether the cookie should contain Secure (only sent over https).
  */
 export function setCookie(win, name, value, expirationTime, options = {}) {
   checkOriginForSettingCookie(win, options, name);
@@ -111,7 +113,15 @@ export function setCookie(win, name, value, expirationTime, options = {}) {
   } else if (options.highestAvailableDomain) {
     domain = /** @type {string} */ (getHighestAvailableDomain(win));
   }
-  trySetCookie(win, name, value, expirationTime, domain, options.sameSite);
+  trySetCookie(
+    win,
+    name,
+    value,
+    expirationTime,
+    domain,
+    options.sameSite,
+    options.secure
+  );
 }
 
 /**
@@ -181,8 +191,17 @@ export function getHighestAvailableDomain(win) {
  * @param {time} expirationTime
  * @param {string|undefined} domain
  * @param {!SameSite=} sameSite
+ * @param {boolean|undefined=} secure
  */
-function trySetCookie(win, name, value, expirationTime, domain, sameSite) {
+function trySetCookie(
+  win,
+  name,
+  value,
+  expirationTime,
+  domain,
+  sameSite,
+  secure
+) {
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
   // Note: we need to allow cdn.ampproject.org in order to optin to experiments
@@ -199,7 +218,8 @@ function trySetCookie(win, name, value, expirationTime, domain, sameSite) {
     (domain ? '; domain=' + domain : '') +
     '; expires=' +
     new Date(expirationTime).toUTCString() +
-    getSameSiteString(win, sameSite);
+    getSameSiteString(win, sameSite) +
+    (secure ? '; Secure' : '');
   try {
     win.document.cookie = cookie;
   } catch (ignore) {
@@ -241,7 +261,7 @@ function checkOriginForSettingCookie(win, options, name) {
   if (options.allowOnProxyOrigin) {
     userAssert(
       !options.highestAvailableDomain,
-      'Could not support higestAvailable Domain on proxy origin, ' +
+      'Could not support highestAvailable Domain on proxy origin, ' +
         'specify domain explicitly'
     );
     return;

@@ -635,7 +635,7 @@ describes.realWin(
               },
             ],
           },
-          RESPONSIVE_SIZING_EXP.experiment
+          RESPONSIVE_SIZING_EXP.control
         );
         expect(placements).to.have.lengthOf(1);
 
@@ -665,8 +665,8 @@ describes.realWin(
             expect(adElement.style.marginLeft).to.equal('');
             expect(adElement.style.marginRight).to.equal('');
             expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
-            expect(isInExperiment(adElement, RESPONSIVE_SIZING_EXP.experiment))
-              .to.be.true;
+            expect(isInExperiment(adElement, RESPONSIVE_SIZING_EXP.control)).to
+              .be.true;
           });
       });
 
@@ -686,17 +686,21 @@ describes.realWin(
           return Promise.resolve({left: 20});
         });
 
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
               },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
+            ],
+          },
+          RESPONSIVE_SIZING_EXP.holdback
+        );
         expect(placements).to.have.lengthOf(1);
 
         const attributes = {
@@ -713,12 +717,9 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
-              anchor.firstChild,
-              150,
-              300,
-              {left: -20}
-            );
+            expect(
+              resource.attemptChangeSize
+            ).to.have.been.calledWith(anchor.firstChild, 150, 300, {left: -20});
             expect(placementState).to.equal(PlacementState.PLACED);
           });
       });
@@ -739,17 +740,21 @@ describes.realWin(
           return Promise.resolve({left: 20});
         });
 
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
               },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
+            ],
+          },
+          RESPONSIVE_SIZING_EXP.holdback
+        );
         expect(placements).to.have.lengthOf(1);
 
         const attributes = {
@@ -766,12 +771,9 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
-              anchor.firstChild,
-              150,
-              300,
-              {right: 20}
-            );
+            expect(
+              resource.attemptChangeSize
+            ).to.have.been.calledWith(anchor.firstChild, 150, 300, {right: 20});
             expect(placementState).to.equal(PlacementState.PLACED);
           });
       });
@@ -832,17 +834,21 @@ describes.realWin(
           return Promise.reject(new Error('Resize failed'));
         });
 
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
               },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
+            ],
+          },
+          RESPONSIVE_SIZING_EXP.holdback
+        );
         expect(placements).to.have.lengthOf(1);
 
         const attributes = {

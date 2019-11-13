@@ -127,8 +127,11 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.registerAction(
       'setModelRotation',
       invocation => {
-        this.sendCommandWhenReady_('setModelRotation', invocation.args).catch(
-          e => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
+        this.sendCommandWhenReady_(
+          'setModelRotation',
+          invocation.args
+        ).catch(e =>
+          dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
       ActionTrust.LOW

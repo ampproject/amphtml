@@ -284,8 +284,8 @@ export class AmpImg extends BaseElement {
     // Interrupt retrieval of incomplete images to free network resources when
     // navigating pages in a PWA. Opt for tiny dataURI image instead of empty
     // src to prevent the viewer from detecting a load error.
-    const img = dev().assertElement(this.img_);
-    if (!img.complete) {
+    const img = this.img_;
+    if (img && !img.complete) {
       img.src =
         'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
       removeElement(img);
