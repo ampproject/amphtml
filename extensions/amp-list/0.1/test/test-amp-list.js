@@ -535,7 +535,7 @@ describes.repeated(
             yield list.layoutCallback();
 
             expect(actions.trigger).to.be.calledWithExactly(
-              list,
+              list.element,
               'fetch-error',
               sinon.match.any,
               ActionTrust.LOW
