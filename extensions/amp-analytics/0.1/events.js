@@ -456,18 +456,18 @@ export class AmpStoryEventTracker extends CustomEventTracker {
     const storySpec = config['storySpec'] || {};
     const repeat =
       storySpec['repeat'] === undefined ? true : storySpec['repeat'];
-    const pageDetails = vars['pageDetails'];
+    const eventDetails = vars['eventDetails'];
     const tagName = config['tagName'];
 
     if (
       tagName &&
-      pageDetails['tagName'] &&
-      tagName.toLowerCase() !== pageDetails['tagName']
+      eventDetails['tagName'] &&
+      tagName.toLowerCase() !== eventDetails['tagName']
     ) {
       return;
     }
 
-    if (repeat === false && pageDetails['repeated']) {
+    if (repeat === false && eventDetails['repeated']) {
       return;
     }
 

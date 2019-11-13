@@ -519,7 +519,7 @@ export class AmpStoryEmbeddedComponent {
       event => {
         event.stopPropagation();
         this.analyticsService_.triggerEvent(
-          StoryAnalyticsEvent.STORY_CLICK_THROUGH,
+          StoryAnalyticsEvent.CLICK_THROUGH,
           this.triggeringTarget_
         );
       },

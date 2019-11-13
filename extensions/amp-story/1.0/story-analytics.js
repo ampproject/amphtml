@@ -25,7 +25,7 @@ export const StoryAnalyticsEvent = {
   BOOKEND_CLICK: 'story-bookend-click',
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
-  STORY_CLICK_THROUGH: 'story-click-through',
+  CLICK_THROUGH: 'story-click-through',
   FOCUS: 'story-focus',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
@@ -161,7 +161,7 @@ export class StoryAnalyticsService {
     }
 
     return /** @type {!JsonObject} */ (Object.assign(
-      {pageDetails: details},
+      {eventDetails: details},
       vars
     ));
   }
