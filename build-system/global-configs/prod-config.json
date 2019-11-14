@@ -35,6 +35,7 @@
   "ios-fixed-no-transfer": 0,
   "macro-after-long-task": 0,
   "pump-early-frame": 1,
+  "remove-viewer-query-params-on-navigate": 1,
   "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
   "version-locking": 1
 }
