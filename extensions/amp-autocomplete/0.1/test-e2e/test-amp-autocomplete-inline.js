@@ -65,14 +65,26 @@ describes.endtoend(
       await expect(
         controller.getElementProperty(renderedResults, 'children')
       ).to.have.length(3);
+
+      // Does not display suggested items on blur.
       await expect(controller.getElementAttribute(renderedResults, 'hidden'))
         .not.to.be.null;
       const focusButton = await controller.findElement('#focusButton');
       await controller.click(focusButton);
 
-      // Displays all suggested items on focus.
+      // Does not display suggested items on focus.
       await expect(controller.getElementAttribute(renderedResults, 'hidden')).to
-        .be.null;
+        .not.to.be.null;
+      // Does not display suggested items on any input.
+      await controller.type(input, 'ap');
+      await expect(controller.getElementAttribute(renderedResults, 'hidden')).to
+        .not.to.be.null;
+
+      // Displays suggested items on trigger.
+      const input = await controller.findElement('#input');
+      await controller.type(input, ' @');
+      await expect(controller.getElementAttribute(renderedResults, 'hidden')).to
+        .to.be.null;
     });
 
     it('<amp-autocomplete inline> should narrow suggestions to input', async () => {
@@ -84,21 +96,22 @@ describes.endtoend(
         .not.to.be.null;
       await controller.click(focusButton);
 
-      // Displays all suggested items on focus.
+      // Displays all suggested items on trigger.
+      const input = await controller.findElement('#input');
+      await controller.type(input, '@');
       await expect(controller.getElementAttribute(renderedResults, 'hidden')).to
-        .be.null;
+        .to.be.null;
       await expect(
         controller.getElementProperty(renderedResults, 'children')
       ).to.have.length(3);
 
       // New input narrows down suggested items.
-      const input = await controller.findElement('#input');
-      await controller.type(input, 'an');
+      await controller.type(input, 'ap');
       await expect(controller.getElementAttribute(renderedResults, 'hidden')).to
         .be.null;
       await expect(
         controller.getElementProperty(renderedResults, 'children')
-      ).to.have.length(2);
+      ).to.have.length(1);
     });
 
     it('<amp-autocomplete inline> should select an item', async () => {
@@ -112,8 +125,10 @@ describes.endtoend(
         controller.getElementProperty(renderedResults, 'children')
       ).to.have.length(3);
 
-      // Displays all suggested items on focus.
+      // Displays all suggested items on trigger.
+      const input = await controller.findElement('#input');
       await controller.click(focusButton);
+      await controller.type(input, '@');
       await expect(controller.getElementAttribute(renderedResults, 'hidden')).to
         .be.null;
       const itemElements = await controller.findElements(
@@ -127,12 +142,8 @@ describes.endtoend(
       // Displays no items after selecting one.
       await expect(controller.getElementAttribute(renderedResults, 'hidden'))
         .not.to.be.null;
-      await expect(
-        controller.getElementProperty(renderedResults, 'children')
-      ).to.have.length(1);
-      const input = await controller.findElement('#input');
       await expect(controller.getElementProperty(input, 'value')).to.equal(
-        'apple'
+        '@apple '
       );
     });
   }
