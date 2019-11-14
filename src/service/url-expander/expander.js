@@ -25,10 +25,6 @@ const PARSER_IGNORE_FLAG = '`';
 /** @private @const {string} */
 const TAG = 'Expander';
 
-/** A whitelist for replacements whose values should not be %-encoded. */
-/** @const {Object<string, boolean>} */
-export const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
-
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
   /**

@@ -1144,22 +1144,6 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace ANCESTOR_ORIGIN', () => {
-    const win = getFakeWindow();
-    sandbox.stub(Services, 'viewerIntegrationVariableServiceForOrNull').returns(
-      Promise.resolve({
-        ancestorOrigin: () => {
-          return 'http://margarine-paradise.com';
-        },
-      })
-    );
-    return Services.urlReplacementsForDoc(win.document.documentElement)
-      .expandUrlAsync('ANCESTOR_ORIGIN/recipes')
-      .then(res => {
-        expect(res).to.equal('http://margarine-paradise.com/recipes');
-      });
-  });
-
   it('should replace FRAGMENT_PARAM with 2', () => {
     const win = getFakeWindow();
     win.location = {originalHash: '#margarine=1&ice=2&cream=3'};

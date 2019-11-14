@@ -114,7 +114,6 @@ const DEFAULT_CONFIG = jsonLiteral({
     'ampUserLocationPoll': 'AMP_USER_LOCATION_POLL',
     'ampState': 'AMP_STATE',
     'ampVersion': 'AMP_VERSION',
-    'ancestorOrigin': 'ANCESTOR_ORIGIN',
     'authdata': 'AUTHDATA',
     'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
     'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
