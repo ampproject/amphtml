@@ -583,7 +583,7 @@ export class AmpForm {
 
             this.handleNonXhrGet_(shouldSubmitFormElement);
             this.dirtinessHandler_.onSubmitSuccess();
-            return Promise.resolve();
+            return Promise.resolve({earlyReturn: true});
           }
 
           if (event) {
@@ -591,7 +591,10 @@ export class AmpForm {
           }
         }
       })
-      .then(() => {
+      .then(({earlyReturn = false} = {}) => {
+        if (earlyReturn) {
+          return;
+        }
         // Set ourselves to the SUBMITTING State
         this.setState_(FormState.SUBMITTING);
 
@@ -933,7 +936,7 @@ export class AmpForm {
     const json = /** @type {!Promise<!JsonObject>} */ (response.json());
     return this.handleSubmitSuccess_(json).then(() => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
-      this.maybeHandleRedirect_(response);
+      return this.maybeHandleRedirect_(response);
     });
   }
 
@@ -1072,10 +1075,11 @@ export class AmpForm {
    * Handles response redirect throught the AMP-Redirect-To response header.
    * Not applicable if viewer can render templates.
    * @param {?Response} response
+   * @return {!Promise}
    * @private
    */
   maybeHandleRedirect_(response) {
-    this.assertCsrTemplate_('Redirects not supported.').then(() => {
+    return this.assertCsrTemplate_('Redirects not supported.').then(() => {
       if (!response || !response.headers) {
         return;
       }
