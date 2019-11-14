@@ -155,8 +155,6 @@ describes.realWin(
                   .stub(ExpansionOptions.prototype, 'getVar')
                   .callsFake(function(name) {
                     let val = this.vars[name];
-                    console.log(name + ': ' + val);
-
                     // Vendor defined variable
                     if (val == null || val == '') {
                       val = '!' + name;
