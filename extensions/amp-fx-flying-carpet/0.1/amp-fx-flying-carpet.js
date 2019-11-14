@@ -56,12 +56,18 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
      */
     this.container_ = null;
 
-    this.firstLayoutCompleted_ = false;
+    /** @private {boolean} */
+    this.initialPositionChecked_ = false;
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED_HEIGHT;
+  }
+
+  /** @override */
+  isRelayoutNeeded() {
+    return true;
   }
 
   /** @override */
@@ -93,21 +99,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       container,
       /* opt_forceTransfer */ false
     );
-  }
-
-  /** @override */
-  onMeasureChanged() {
-    const width = this.getLayoutWidth();
-    this.mutateElement(() => {
-      setStyle(this.container_, 'width', width, 'px');
-    });
-    if (this.firstLayoutCompleted_) {
-      Services.ownersForDoc(this.element).scheduleLayout(
-        this.element,
-        this.children_
-      );
-      this.observeNewChildren_();
-    }
   }
 
   /** @override */
@@ -155,19 +146,24 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    try {
-      this.assertPosition_();
-    } catch (e) {
-      // Collapse the element if the effect is broken by the viewport location.
-      this./*OK*/ collapse();
-      throw e;
+    if (!this.initialPositionChecked_) {
+      try {
+        this.assertPosition_();
+      } catch (e) {
+        // Collapse the element if the effect is broken by the viewport location.
+        this./*OK*/ collapse();
+        throw e;
+      }
+      this.initialPositionChecked_ = true;
     }
+
+    const width = this.getLayoutWidth();
+    setStyle(this.container_, 'width', width, 'px');
     Services.ownersForDoc(this.element).scheduleLayout(
       this.element,
       this.children_
     );
     this.observeNewChildren_();
-    this.firstLayoutCompleted_ = true;
     return Promise.resolve();
   }
 
