@@ -27,6 +27,7 @@ import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {cancellation} from '../../../src/error';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
@@ -111,13 +112,31 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.development_ = this.element.hasAttribute('development');
+    /*
+     * Development mode is enabled by satisfying two constraints:
+     *   1. Root html element has 'data-ampdevmode'
+     *   2. The amp-script tag or any of its parents must also have 'data-ampdevmode'.
+     */
+    const htmlEl = this.element.ownerDocument.documentElement;
+    this.development_ =
+      this.element.hasAttribute('development') ||
+      (htmlEl.hasAttribute('data-ampdevmode') &&
+        closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
+          htmlEl);
+
     if (this.development_) {
       user().warn(
         TAG,
         'JavaScript size and script hash requirements are disabled in development mode.',
         this.element
       );
+      if (this.element.hasAttribute('development')) {
+        user().warn(
+          TAG,
+          "The 'development' flag is deprecated. Please use 'data-ampdevmode' on the root html element instead",
+          this.element
+        );
+      }
     }
 
     return getElementServiceForDoc(this.element, TAG, TAG).then(service => {

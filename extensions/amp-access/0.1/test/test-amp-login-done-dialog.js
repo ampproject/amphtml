@@ -182,7 +182,10 @@ describe('LoginDoneDialog', () => {
           succeed();
           return promise;
         })
-        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(
+          () => 'SUCCESS',
+          error => 'ERROR ' + error
+        )
         .then(res => {
           expect(res).to.equal('SUCCESS');
           expect(messageListener).to.not.exist;
@@ -195,7 +198,10 @@ describe('LoginDoneDialog', () => {
       windowApi.opener = null;
       return dialog
         .postbackOrRedirect_()
-        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(
+          () => 'SUCCESS',
+          error => 'ERROR ' + error
+        )
         .then(res => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
@@ -212,7 +218,10 @@ describe('LoginDoneDialog', () => {
       windowApi.opener = null;
       return dialog
         .postbackOrRedirect_()
-        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(
+          () => 'SUCCESS',
+          error => 'ERROR ' + error
+        )
         .then(res => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
@@ -228,7 +237,10 @@ describe('LoginDoneDialog', () => {
       windowApi.opener = null;
       return dialog
         .postbackOrRedirect_()
-        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(
+          () => 'SUCCESS',
+          error => 'ERROR ' + error
+        )
         .then(res => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
@@ -245,7 +257,10 @@ describe('LoginDoneDialog', () => {
       windowApi.opener = null;
       return dialog
         .postbackOrRedirect_()
-        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(
+          () => 'SUCCESS',
+          error => 'ERROR ' + error
+        )
         .then(res => {
           expect(res).to.equal('SUCCESS');
           expect(windowApi.location.replace).to.be.calledOnce;
@@ -287,7 +302,10 @@ describe('LoginDoneDialog', () => {
       windowApi.opener = null;
       return dialog
         .postbackOrRedirect_()
-        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(
+          () => 'SUCCESS',
+          error => 'ERROR ' + error
+        )
         .then(res => {
           expect(res).to.match(/No opener or return location available/);
           expect(messageListener).to.not.exist;
@@ -314,7 +332,10 @@ describe('LoginDoneDialog', () => {
           clock.tick(10000);
           return promise;
         })
-        .then(() => 'SUCCESS', error => 'ERROR ' + error)
+        .then(
+          () => 'SUCCESS',
+          error => 'ERROR ' + error
+        )
         .then(res => {
           expect(res).to.match(/Timed out/);
           expect(messageListener).to.not.exist;

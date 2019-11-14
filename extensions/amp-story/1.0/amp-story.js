@@ -39,7 +39,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
-  AnalyticsEvent,
+  StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
@@ -676,7 +676,9 @@ export class AmpStory extends AMP.BaseElement {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
         this.analyticsService_.triggerEvent(
-          isMuted ? AnalyticsEvent.STORY_MUTED : AnalyticsEvent.STORY_UNMUTED
+          isMuted
+            ? StoryAnalyticsEvent.STORY_MUTED
+            : StoryAnalyticsEvent.STORY_UNMUTED
         );
       },
       false /** callToInitialize */
@@ -804,28 +806,26 @@ export class AmpStory extends AMP.BaseElement {
 
     this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
 
-    if (isExperimentOn(this.win, 'amp-story-branching')) {
-      this.win.addEventListener('hashchange', () => {
-        const maybePageId = parseQueryString(this.win.location.hash)['page'];
-        if (!maybePageId || !this.isActualPage_(maybePageId)) {
-          return;
-        }
-        this.switchTo_(maybePageId, NavigationDirection.NEXT);
-        // Removes the page 'hash' parameter from the URL.
-        let href = this.win.location.href.replace(
-          new RegExp(`page=${maybePageId}&?`),
-          ''
-        );
-        if (endsWith(href, '#')) {
-          href = href.slice(0, -1);
-        }
-        this.win.history.replaceState(
-          (this.win.history && getState(this.win.history)) || {} /** data */,
-          this.win.document.title /** title */,
-          href /** URL */
-        );
-      });
-    }
+    this.win.addEventListener('hashchange', () => {
+      const maybePageId = parseQueryString(this.win.location.hash)['page'];
+      if (!maybePageId || !this.isActualPage_(maybePageId)) {
+        return;
+      }
+      this.switchTo_(maybePageId, NavigationDirection.NEXT);
+      // Removes the page 'hash' parameter from the URL.
+      let href = this.win.location.href.replace(
+        new RegExp(`page=${maybePageId}&?`),
+        ''
+      );
+      if (endsWith(href, '#')) {
+        href = href.slice(0, -1);
+      }
+      this.win.history.replaceState(
+        (this.win.history && getState(this.win.history)) || {} /** data */,
+        this.win.document.title /** title */,
+        href /** URL */
+      );
+    });
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -1094,11 +1094,9 @@ export class AmpStory extends AMP.BaseElement {
       HistoryState.PAGE_ID
     ));
 
-    if (isExperimentOn(this.win, 'amp-story-branching')) {
-      const maybePageId = parseQueryString(this.win.location.hash)['page'];
-      if (maybePageId && this.isActualPage_(maybePageId)) {
-        return maybePageId;
-      }
+    const maybePageId = parseQueryString(this.win.location.hash)['page'];
+    if (maybePageId && this.isActualPage_(maybePageId)) {
+      return maybePageId;
     }
 
     if (historyPage && this.isActualPage_(historyPage)) {
