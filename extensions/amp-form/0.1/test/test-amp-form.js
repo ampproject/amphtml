@@ -260,7 +260,10 @@ describes.repeated(
               expectAsyncConsoleError(errorRe);
               return Promise.resolve()
                 .then(() => ampForm.handleSubmitEvent_(event))
-                .then(() => Promise.reject(), () => Promise.resolve());
+                .then(
+                  () => Promise.reject(),
+                  () => Promise.resolve()
+                );
             });
           });
 
