@@ -68,45 +68,32 @@ describes.realWin(
       ampStoryQuiz = new AmpStoryQuiz(ampStoryQuizEl);
     });
 
-    it('should take the html and put it in the shadow DOM', async () => {
+    it('should take the html and reformat it', async () => {
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
-      expect(ampStoryQuiz.element).to.have.property('shadowRoot');
-      expect(ampStoryQuiz.getShadowRoot().children.length).to.equal(2);
-      expect(ampStoryQuiz.element.children).to.be.empty;
+      expect(ampStoryQuiz.getQuizElement().children.length).to.equal(2);
     });
 
-    it('should structure the content in the shadow DOM', async () => {
+    it('should structure the content in the quiz element', async () => {
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 
-      const shadowRootChildren = ampStoryQuiz.getShadowRoot().children;
-      // check shadow root structure
-      expect(shadowRootChildren[0]).to.be.a('HTMLStyleElement');
-      expect(shadowRootChildren[1]).to.be.a('HTMLDivElement');
-
-      // check quiz container structure
-      expect(shadowRootChildren[1].children).to.not.be.empty;
-      const shadowQuizContent = shadowRootChildren[1].children;
-      expect(shadowQuizContent[0]).to.be.a('HTMLDivElement');
-      expect(shadowQuizContent[0]).to.have.class(
-        'i-amp-story-quiz-prompt-container'
-      );
-      expect(shadowQuizContent[1]).to.have.class(
-        'i-amp-story-quiz-option-container'
-      );
+      const quizContent = ampStoryQuiz.getQuizElement().children;
+      expect(quizContent[0]).to.be.a('HTMLDivElement');
+      expect(quizContent[0]).to.have.class('i-amp-story-quiz-prompt-container');
+      expect(quizContent[1]).to.have.class('i-amp-story-quiz-option-container');
 
       // check prompt container structure
-      expect(shadowQuizContent[0].children.length).to.equal(1);
-      expect(shadowQuizContent[0].children[0]).to.have.class(
+      expect(quizContent[0].children.length).to.equal(1);
+      expect(quizContent[0].children[0]).to.have.class(
         'i-amp-story-quiz-prompt'
       );
 
       // check option container structure
-      expect(shadowQuizContent[1].childNodes.length).to.equal(4);
-      shadowQuizContent[1].childNodes.forEach(option => {
+      expect(quizContent[1].childNodes.length).to.equal(4);
+      quizContent[1].childNodes.forEach(option => {
         expect(option).to.have.class('i-amp-story-quiz-option');
       });
     });
