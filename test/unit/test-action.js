@@ -890,7 +890,7 @@ describes.sandboxed('Action method', {}, () => {
         expect(method).to.equal('method');
         expect(actionEventType).to.equal('tap');
         expect(args).to.deep.equal({realArgName: 'realArgValue'});
-        expect(trust).to.equal(100);
+        expect(trust).to.equal(ActionTrust.HIGH);
         expect(tagOrTarget).to.equal('AMP-ACTION-MACRO');
         expect(actionEventType).to.equal('tap');
         expect(source).to.equal(ampActionMacro);

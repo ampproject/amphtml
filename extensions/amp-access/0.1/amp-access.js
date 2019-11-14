@@ -682,7 +682,7 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'login') {

@@ -81,17 +81,13 @@ export class AmpState extends AMP.BaseElement {
       this.fetchAndUpdate_(/* isInit */ true);
     }
 
-    this.registerAction(
-      'refresh',
-      () => {
-        userAssert(
-          this.element.hasAttribute('src'),
-          'Can\'t refresh <amp-state> without "src" attribute.'
-        );
-        this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('refresh', () => {
+      userAssert(
+        this.element.hasAttribute('src'),
+        'Can\'t refresh <amp-state> without "src" attribute.'
+      );
+      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
+    });
   }
 
   /** @override */
