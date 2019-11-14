@@ -116,6 +116,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     expect(stub).to.not.be.called;
 
     const element = doc.createElement('amp-element2');
+    element.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(element);
     expect(stub).to.not.be.called;
   });
@@ -131,6 +132,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     expect(stub).to.not.be.called;
 
     const element = doc.createElement('amp-element1');
+    element.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(element);
     expect(stub).to.not.be.called;
   });

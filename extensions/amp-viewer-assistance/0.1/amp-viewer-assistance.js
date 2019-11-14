@@ -78,7 +78,6 @@ export class AmpViewerAssistance {
   actionHandler_(invocation) {
     const {method, args} = invocation;
     if (method == 'updateActionState') {
-      // "updateActionState" requires a low-trust event.
       if (invocation.satisfiesTrust(ActionTrust.LOW)) {
         this.validateAndTransformUpdateArgs_(args)
           .then(args => {
@@ -89,8 +88,7 @@ export class AmpViewerAssistance {
           });
       }
     } else if (method == 'signIn') {
-      // "signIn" requires a high-trust event.
-      if (invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      if (invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
         this.requestSignIn_();
       }
     }
@@ -177,7 +175,7 @@ export class AmpViewerAssistance {
             this.assistanceElement_,
             'signedIn',
             null,
-            ActionTrust.HIGH
+            ActionTrust.DEFAULT // DEFAULT because async after gesture.
           );
         } else {
           this.setIdTokenStatus_(/*available=*/ false);

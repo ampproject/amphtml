@@ -143,8 +143,8 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleAmpTarget_(invocation) {
-    // All global `AMP` actions require high trust.
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+    // All global `AMP` actions require default trust.
+    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
     const {node, method, args} = invocation;

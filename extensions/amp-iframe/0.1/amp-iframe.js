@@ -696,24 +696,20 @@ export class AmpIframe extends AMP.BaseElement {
 
     // Register action (even if targetOrigin_ is not available so we can
     // provide a helpful error message).
-    this.registerAction(
-      'postMessage',
-      invocation => {
-        if (this.targetOrigin_) {
-          this.iframe_.contentWindow./*OK*/ postMessage(
-            invocation.args,
-            this.targetOrigin_
-          );
-        } else {
-          user().error(
-            TAG_,
-            '"postMessage" action is only allowed with "src"' +
-              'attribute with an origin.'
-          );
-        }
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('postMessage', invocation => {
+      if (this.targetOrigin_) {
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          invocation.args,
+          this.targetOrigin_
+        );
+      } else {
+        user().error(
+          TAG_,
+          '"postMessage" action is only allowed with "src"' +
+            'attribute with an origin.'
+        );
+      }
+    });
 
     // However, don't listen for 'message' event if targetOrigin_ is null.
     if (!this.targetOrigin_) {
