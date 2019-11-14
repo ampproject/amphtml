@@ -401,10 +401,8 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('should replace SCROLL_TOP', () => {
       sandbox.stub(Services, 'viewportForDoc').returns({
-        'viewport': {
-          getScrollTop() {
-            return 10;
-          },
+        getScrollTop() {
+          return 10;
         },
       });
       return check('?scrollTop=SCROLL_TOP', '?scrollTop=10');
@@ -412,10 +410,8 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('should replace SCROLL_LEFT', () => {
       sandbox.stub(Services, 'viewportForDoc').returns({
-        'viewport': {
-          getScrollLeft() {
-            return 5;
-          },
+        getScrollLeft() {
+          return 5;
         },
       });
       return check('?scrollLeft=SCROLL_LEFT', '?scrollLeft=5');
