@@ -216,10 +216,14 @@ export class VariableService {
     );
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.register_('SCROLL_TOP', () => viewport.getScrollTop());
+    this.register_('SCROLL_TOP', () => {
+      return viewport.getScrollTop();
+    });
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.register_('SCROLL_LEFT', () => viewport.getScrollLeft());
+    this.register_('SCROLL_LEFT', () => {
+      return viewport.getScrollLeft();
+    });
   }
 
   /**

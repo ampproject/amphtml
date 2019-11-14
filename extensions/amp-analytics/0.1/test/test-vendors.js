@@ -64,10 +64,12 @@ describes.realWin(
   function(env) {
     let win, doc;
     let requestVerifier;
+    let analyticsElement;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      analyticsElement = doc.createElement('amp-analytics');
       const wi = mockWindowInterface(env.sandbox);
       wi.getLocation.returns(win.location);
       requestVerifier = new ImagePixelVerifier(wi);
@@ -153,13 +155,22 @@ describes.realWin(
                   .stub(urlReplacements.getVariableSource(), 'get')
                   .callsFake(function(name) {
                     expect(this.replacements_).to.have.property(name);
-                    console.log(JSON.stringify(this.replacements_));
-                    console.log(name);
                     const defaultValue = `_${name.toLowerCase()}_`;
+                    console.log(name);
                     return {
                       sync: () => defaultValue,
                     };
                   });
+
+                // sandbox
+                //   .stub(urlReplacements.getVariableSource(), 'get')
+                //   .callsFake(function(name) {
+                //     expect(this.replacements_).to.have.property(name);
+                //     const defaultValue = `_${name.toLowerCase()}_`;
+                //     return {
+                //       sync: () => defaultValue,
+                //     };
+                //   });
 
                 sandbox
                   .stub(ExpansionOptions.prototype, 'getVar')
