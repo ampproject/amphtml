@@ -1158,12 +1158,18 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     const promise = fie.installExtensionsInChildWindow(extensions, iframeWin, [
       'amp-test',
     ]);
+
     // Must be stubbed already.
+    const element = iframeWin.document.createElement('amp-test');
+    element.setAttribute('layout', 'nodisplay');
+    const elementSub = iframeWin.document.createElement('amp-test-sub');
+    elementSub.setAttribute('layout', 'nodisplay');
+    iframeWin.document.body.appendChild(element);
+    iframeWin.document.body.appendChild(elementSub);
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
-    expect(
-      iframeWin.document.createElement('amp-test').implementation_
-    ).to.be.instanceOf(ElementStub);
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
+    expect(element.isUpgraded()).to.be.false;
+
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
@@ -1175,30 +1181,33 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       },
       parentWin.AMP
     );
-    return promise.then(() => {
-      // Main extension.
-      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.be.undefined;
-      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
-      expect(iframeWin.document.querySelector('style[amp-extension=amp-test]'))
-        .to.exist;
-      // Must be upgraded already.
-      expect(
-        iframeWin.document.createElement('amp-test').implementation_
-      ).to.be.instanceOf(AmpTest);
+    return promise
+      .then(() => {
+        expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
+        expect(
+          iframeWin.document.querySelector('style[amp-extension=amp-test]')
+        ).to.exist;
 
-      // Secondary extension.
-      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
-      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
-        AmpTestSub
-      );
-      expect(
-        iframeWin.document.querySelector('style[amp-extension=amp-test-sub]')
-      ).to.not.exist;
-      // Must be upgraded already.
-      expect(
-        iframeWin.document.createElement('amp-test-sub').implementation_
-      ).to.be.instanceOf(AmpTestSub);
-    });
+        expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
+          AmpTestSub
+        );
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
+          AmpTestSub
+        );
+        expect(
+          iframeWin.document.querySelector('style[amp-extension=amp-test-sub]')
+        ).to.not.exist;
+
+        // Will upgrade.
+        return Promise.all([element.getImpl(false), elementSub.getImpl(false)]);
+      })
+      .then(() => {
+        expect(element.isUpgraded()).to.be.true;
+        expect(element.implementation_).to.be.instanceOf(AmpTest);
+        expect(elementSub.isUpgraded()).to.be.true;
+        expect(elementSub.implementation_).to.be.instanceOf(AmpTestSub);
+      });
   });
 
   it('should adopt extension services', () => {
@@ -1442,12 +1451,18 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
     const promise = fie.installExtensionsInFie(extensions, ampdoc, [
       'amp-test',
     ]);
+
     // Must be stubbed already.
+    const element = iframeWin.document.createElement('amp-test');
+    element.setAttribute('layout', 'nodisplay');
+    const elementSub = iframeWin.document.createElement('amp-test-sub');
+    elementSub.setAttribute('layout', 'nodisplay');
+    iframeWin.document.body.appendChild(element);
+    iframeWin.document.body.appendChild(elementSub);
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
-    expect(
-      iframeWin.document.createElement('amp-test').implementation_
-    ).to.be.instanceOf(ElementStub);
     expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
+    expect(element.isUpgraded()).to.be.false;
+
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
@@ -1459,30 +1474,31 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
       },
       parentWin.AMP
     );
-    return promise.then(() => {
-      // Main extension.
-      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.be.undefined;
-      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
-      expect(iframeWin.document.querySelector('style[amp-extension=amp-test]'))
-        .to.exist;
-      // Must be upgraded already.
-      expect(
-        iframeWin.document.createElement('amp-test').implementation_
-      ).to.be.instanceOf(AmpTest);
+    return promise
+      .then(() => {
+        expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.be.undefined;
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
+        expect(
+          iframeWin.document.querySelector('style[amp-extension=amp-test]')
+        ).to.exist;
 
-      // Secondary extension.
-      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
-      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
-        AmpTestSub
-      );
-      expect(
-        iframeWin.document.querySelector('style[amp-extension=amp-test-sub]')
-      ).to.not.exist;
-      // Must be upgraded already.
-      expect(
-        iframeWin.document.createElement('amp-test-sub').implementation_
-      ).to.be.instanceOf(AmpTestSub);
-    });
+        expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
+        expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
+          AmpTestSub
+        );
+        expect(
+          iframeWin.document.querySelector('style[amp-extension=amp-test-sub]')
+        ).to.not.exist;
+
+        // Will upgrade.
+        return Promise.all([element.getImpl(false), elementSub.getImpl(false)]);
+      })
+      .then(() => {
+        expect(element.isUpgraded()).to.be.true;
+        expect(element.implementation_).to.be.instanceOf(AmpTest);
+        expect(elementSub.isUpgraded()).to.be.true;
+        expect(elementSub.implementation_).to.be.instanceOf(AmpTestSub);
+      });
   });
 
   it('should adopt extension services', () => {

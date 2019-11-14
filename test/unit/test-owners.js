@@ -30,6 +30,7 @@ describes.realWin(
     let children;
     let sandbox;
     let scheduleLayoutOrPreloadStub;
+    let AmpTest;
 
     beforeEach(() => {
       win = env.win;
@@ -37,7 +38,9 @@ describes.realWin(
       sandbox = env.sandbox;
       owners = Services.ownersForDoc(env.ampdoc);
       resources = Services.resourcesForDoc(env.ampdoc);
-      resources.isRuntimeOn_ = false;
+
+      AmpTest = class AmpTest extends win.AMP.BaseElement {};
+
       // DOM tree (numbers are resource IDs):
       // body -- 0 -- div -- 3
       //                  -- 4
@@ -63,9 +66,9 @@ describes.realWin(
     });
 
     function createElement() {
-      const element = env.createAmpElement('amp-test');
-      sandbox.stub(element, 'isUpgraded').returns(true);
-      return element;
+      const el = env.createAmpElement('amp-test');
+      el.upgrade(AmpTest);
+      return el;
     }
 
     function createElementWithResource(
