@@ -155,10 +155,22 @@ describes.realWin(
                   .stub(ExpansionOptions.prototype, 'getVar')
                   .callsFake(function(name) {
                     let val = this.vars[name];
+                    console.log(name + ': ' + val);
+
+                    // Vendor defined variable
                     if (val == null || val == '') {
                       val = '!' + name;
                     }
-                    return val;
+                    // amp-analytics variable
+                    switch (name) {
+                      case 'timezoneCode':
+                        return `_${name
+                          .split(/(?=[A-Z])/)
+                          .join('_')
+                          .toLowerCase()}_`;
+                      default:
+                        return val;
+                    }
                   });
                 analytics.createdCallback();
                 analytics.buildCallback();
