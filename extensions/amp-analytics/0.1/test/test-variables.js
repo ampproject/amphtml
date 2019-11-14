@@ -399,7 +399,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
-    it.only('should replace TIMEZONE_CODE', () => {
+    it('should replace TIMEZONE_CODE', () => {
       win.Intl = {
         DateTimeFormat() {
           return {
