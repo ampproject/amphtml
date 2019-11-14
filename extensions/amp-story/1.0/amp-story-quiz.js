@@ -54,26 +54,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    createShadowRootWithStyle(
-      this.element,
-      buildQuizTemplate(this.element),
-      CSS
-    );
-
-    this.shadowRoot_ = this.element.shadowRoot;
-    if (!this.element.shadowRoot) {
-      const childrenLength = this.element.children.length;
-      // grab the last two elements
-      const shadowStyle = this.element.children[childrenLength - 2];
-      const shadowContent = this.element.children[childrenLength - 1];
-      // put them in a container for now
-      const tempShadowContainer = document.createElement('div');
-      tempShadowContainer.appendChild(shadowStyle);
-      tempShadowContainer.appendChild(shadowContent);
-      // set that container to shadowRoot_
-      this.shadowRoot_ = tempShadowContainer;
-    }
-
+    this.configureShadowRoot_();
     this.attachContent_();
     this.attachOptionActionHandlers_();
 
@@ -93,13 +74,38 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
+   * Sets up the shadow root for the component, including a light DOM fallback for unsupported browsers
+   * @private
+   */
+  configureShadowRoot_() {
+    createShadowRootWithStyle(
+      this.element,
+      buildQuizTemplate(this.element),
+      CSS
+    );
+
+    this.shadowRoot_ = this.element.shadowRoot;
+    if (!this.element.shadowRoot) {
+      const childrenLength = this.element.children.length;
+      // grab the last two elements (the style container and the content container)
+      const shadowStyle = this.element.children[childrenLength - 2];
+      const shadowContent = this.element.children[childrenLength - 1];
+      // put them together into a temp container
+      const tempShadowContainer = document.createElement('div');
+      tempShadowContainer.appendChild(shadowStyle);
+      tempShadowContainer.appendChild(shadowContent);
+      // set the shadowRoot_ equal to that container
+      this.shadowRoot_ = tempShadowContainer;
+    }
+  }
+
+  /**
    * Finds the prompt and options content
    * and adds it to the shadow DOM.
    * @private
    */
   attachContent_() {
-    // TODO(jackbsteinberg): Optional prompt behavior must be implemented
-    // alongside other validation efforts
+    // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const prompt = this.element.children[0];
     // First child must be heading h1-h3
     if (!['h1', 'h2', 'h3'].includes(prompt.tagName.toLowerCase())) {
@@ -127,7 +133,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
 
     if (this.shadowRoot_ !== this.element.shadowRoot) {
-      this.element.append(this.shadowRoot);
+      this.element.append(this.shadowRoot_);
     }
   }
 
@@ -176,30 +182,43 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.shadowRoot_.querySelectorAll('.i-amp-story-quiz-option')
     );
 
-    // Attach click listeners to each option to fire on selection
-    options.forEach(option => {
-      option.addEventListener('click', () => {
-        if (!this.hasReceivedResponse_) {
-          options.forEach(o => {
-            o.classList.add('i-amp-story-quiz-option-post-selection');
-            if (o === option) {
-              o.classList.add('i-amp-story-quiz-option-selected');
+    // Add a click listener to the element to handle option selection and navigation via tapping the prompt
+    this.element.addEventListener('click', e => {
+      let resolved = false;
+      e.composedPath().forEach(p => {
+        if (!resolved) {
+          // An option was selected
+          if (p.getAttribute('class').includes('i-amp-story-quiz-option')) {
+            if (!this.hasReceivedResponse_) {
+              p.classList.add('i-amp-story-quiz-option-selected');
+              options.forEach(o => {
+                o.classList.add('i-amp-story-quiz-option-post-selection');
+
+                const symbolContainer = o.querySelector(
+                  '.i-amp-story-quiz-answer-choice'
+                );
+
+                // TODO(jackbsteinberg): Replace text with icons when the assets are ready
+                if (o.hasAttribute('correct')) {
+                  symbolContainer.textContent = '✓';
+                } else {
+                  symbolContainer.textContent = '×';
+                  symbolContainer.setAttribute('aria-label', 'x');
+                }
+              });
+
+              this.hasReceivedResponse_ = true;
             }
-
-            const symbolContainer = o.querySelector(
-              '.i-amp-story-quiz-answer-choice'
-            );
-
-            // TODO(jackbsteinberg): Replace text with icons when the assets are ready
-            if (o.hasAttribute('correct')) {
-              symbolContainer.textContent = '✓';
-            } else {
-              symbolContainer.textContent = '×';
-              symbolContainer.setAttribute('aria-label', 'x');
-            }
-          });
-
-          this.hasReceivedResponse_ = true;
+            resolved = true;
+          }
+          // the prompt was tapped
+          else if (
+            p.getAttribute('class').includes('i-amp-story-quiz-prompt')
+          ) {
+            console.log('wrong!');
+            // TODO(jackbsteinberg): Initiate page navigation on prompt tap
+            resolved = true;
+          }
         }
       });
     });
