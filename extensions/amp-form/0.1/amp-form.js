@@ -946,7 +946,11 @@ export class AmpForm {
     return response
       .json()
       .then(
-        json => this.handleSubmitSuccess_(/** @type {!JsonObject} */ (json), incomingTrust),
+        json =>
+          this.handleSubmitSuccess_(
+            /** @type {!JsonObject} */ (json),
+            incomingTrust
+          ),
         error => user().error(TAG, 'Failed to parse response JSON: %s', error)
       )
       .then(() => {
