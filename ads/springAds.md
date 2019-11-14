@@ -14,32 +14,47 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# MediaImpact
+# Spring AdTechnology AmpAd Integration
 
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="mediaimpact"
-    data-site="67767"
-    data-page="amp"
-    data-format="4459"
-    data-target=""
-    data-slot="4459">
+<amp-ad
+  width="0"
+  height="0"
+  type="springAds"
+  data-adssetup='{
+    "view": "amp",
+    "partners": true,
+    "adPlacements": ["banner","mrec"],
+    "adSlotSizes": {
+      "banner": [{
+        "minWidth": 1,
+        "sizes": [[320, 50], [320, 160]]
+      }],
+      "mrec": [{
+        "minWidth": 1,
+        "sizes": [[300, 250], [300, 300], [250, 250], [320, 160], [300, 150], [320, 50], [320, 75], [320, 80], [320, 100], [300, 100], [300, 50], [300, 75]]
+      }]
+    },
+    "pageName": "demo_story",
+    "publisher": "adtechnology.axelspringer.com",
+    "target": "singleAds;multiAds;you;me;team=adtech,MIT;"
+  }'
+>
 </amp-ad>
+<amp-ad width="320" height="50" type="springAds" data-adslot="banner"></amp-ad>
+<amp-ad width="300" height="250" type="springAds" data-adslot="mrec"></amp-ad>
 ```
 
 ## Configuration
 
-for further information regarding this implementation, please contact adtechnology@axelspringer.de  or visit http://www.mediaimpact.de/ 
+for further information regarding this implementation, please contact adtechnology@axelspringer.de
 
 Supported parameters:
 
 - `data-site`: siteid given by mediaimpact
 - `data-page`: pageName given by mediaimpact
-- `data-format`: formatid e.g. 4459 (MREC)
-- `data-target`: for special targeting like "goodCustomer=true;"
-- `data-slot`: slotid without trailing sas_
 
 ## Optional features
 

@@ -6,6 +6,7 @@ teaser:
   text: Allows running custom JavaScript to render UI.
 experimental: true
 ---
+
 # amp-script
 
 Allows running custom JavaScript to render UI.
@@ -63,6 +64,7 @@ The `amp-script` component allows you run custom JavaScript to render UI element
 ### A simple example
 
 An `amp-script` element can load JavaScript in two ways:
+
 - Remotely, from a URL to a JavaScript file.
 - Locally, from a `script[type=text/plain][target=amp-script]` element on the page.
 
@@ -87,12 +89,13 @@ Use the `script` attribute to reference a local `script` element by `id`.
 <head>
   <meta
     name="amp-script-src"
-    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG">
+    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG"
+  />
 </head>
 
 ...
 
-<amp-script width=200 height=50 script="hello-world">
+<amp-script width="200" height="50" script="hello-world">
   <button>Hello amp-script!</button>
 </amp-script>
 
@@ -127,7 +130,7 @@ document.body.appendChild(p);
 Will be reflected on the page as a new child of the `amp-script` element:
 
 ```html
-<amp-script src="http://example.com/my-script.js" width=300 height=100>
+<amp-script src="http://example.com/my-script.js" width="300" height="100">
   <p>I am added to the body!</p>
 </amp-script>
 ```
@@ -162,8 +165,7 @@ AMP.getState(expr) {}
 ##### Example with WebSocket and AMP.setState()
 
 ```html
-<amp-script width=1 height=1 script="webSocketDemo">
-</amp-script>
+<amp-script width="1" height="1" script="webSocketDemo"> </amp-script>
 
 <!--
   <amp-state> doesn't support WebSocket URLs in its "src" attribute,
@@ -249,7 +251,7 @@ Example of script hashes:
 ```
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
+The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to both the top-level `html` element and the `amp-script` element (or any of its parent nodes).
 [/tip]
 
 ## Attributes
@@ -285,12 +287,6 @@ The value of `max-age` should be chosen carefully:
 - A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
 
 If you don't publish signed exchanges, `max-age` does nothing.
-
-**development (optional, invalid)**
-
-A boolean attribute that disables the JS size and security constraints for a more convenient development experience.
-
-This attribute is not allowed by the AMP Validator and should not be used on pages in production.
 
 **common attributes**
 

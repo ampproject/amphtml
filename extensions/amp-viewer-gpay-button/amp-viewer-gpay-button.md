@@ -12,14 +12,19 @@
 
   3. And remove this comment! (no empty lines before "---")
 -->
+
 ---
-$category: presentation
+
+\$category: presentation
 formats:
-  - websites
-  - email
-teaser:
+
+- websites
+- email
+  teaser:
   text: FILL THIS IN.
+
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -77,4 +82,5 @@ FILL THIS IN. Does this extension allow for properties to configure?
 </table>
 
 ## Validation
+
 See [amp-viewer-gpay-button rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-gpay-button/validator-amp-viewer-gpay-button.protoascii) in the AMP validator specification.

@@ -14,21 +14,19 @@
  limitations under the License.
  -->
 
-  # BeaverAds
+# BeaverAds
 
-  ## Example
+## Example
 
-  ```html
- <amp-ad width="300" height="250"
-     type="beaverads"
-     data-block-id="1001038">
- </amp-ad>
+```html
+<amp-ad width="300" height="250" type="beaverads" data-block-id="1001038">
+</amp-ad>
+```
 
-  ```
+## Configuration
 
-  ## Configuration
+For more information, please [see FAQ](https://www.beaverads.com/faq).
 
-  For more information, please [see FAQ](https://www.beaverads.com/faq).
+Required parameters:
 
-  Required parameters:
- - data-block-id
+- data-block-id

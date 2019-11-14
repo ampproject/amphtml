@@ -33,6 +33,7 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 
@@ -51,8 +52,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ackStub;
   let element;
   let entitlementResponse;
+  let win;
 
   beforeEach(() => {
+    win = env.win;
     ampdoc = env.ampdoc;
     element = env.win.document.createElement('script');
     element.id = 'amp-subscriptions';
@@ -100,7 +103,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       ),
       subscribeResponse: sandbox.stub(
         ConfiguredRuntime.prototype,
-        'setOnSubscribeResponse'
+        'setOnPaymentResponse'
       ),
     };
     methods = {
@@ -117,12 +120,15 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       linkAccount: sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
     };
     ackStub = sandbox.stub(Entitlements.prototype, 'ack');
+    toggleExperiment(win, 'swg-gpay-api', true);
+    toggleExperiment(win, 'nonswgexp', true);
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
   });
 
   afterEach(() => {
     serviceAdapterMock.verify();
     analyticsMock.verify();
+    toggleExperiment(win, 'swg-gpay-api', false);
   });
 
   function callback(stub) {
@@ -141,6 +147,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should scope the runtime to one ampdoc', () => {
     expect(platform.runtime_.doc_.ampdoc_).to.equal(ampdoc);
+  });
+
+  it('should propagate experiment', () => {
+    expect(platform.runtime_.payClient_.getType()).to.equal('PAYJS');
+    expect(platform.runtime_.config()['experiments']).to.have.members([
+      'gpay-api',
+    ]);
   });
 
   it('should proxy fetch via AMP fetcher', () => {
@@ -289,10 +302,18 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(methods.showAbbrvOffer).to.be.calledOnce;
   });
 
-  it('should start linking flow when requested', () => {
+  it('should start linking flow when requested', async () => {
+    serviceAdapterMock
+      .expects('getReaderId')
+      .withExactArgs('local')
+      .returns(Promise.resolve('ari1'))
+      .once();
     serviceAdapterMock.expects('delegateActionToLocal').never();
     callback(callbacks.loginRequest)({linkRequested: true});
-    expect(methods.linkAccount).to.be.calledOnce.calledWithExactly();
+    await 'Promises...';
+    expect(methods.linkAccount).to.be.calledOnce.calledWithExactly({
+      ampReaderId: 'ari1',
+    });
   });
 
   it('should delegate login when linking not requested', () => {
@@ -552,9 +573,15 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
-  it('should link accounts if login action is delegated', () => {
+  it('should link accounts if login action is delegated', async () => {
+    serviceAdapterMock
+      .expects('getReaderId')
+      .withExactArgs('local')
+      .returns(Promise.resolve('ari1'))
+      .once();
     const executeStub = platform.runtime_.linkAccount;
     platform.executeAction(Action.LOGIN);
+    await 'Promises...';
     expect(executeStub).to.be.calledWith();
   });
 

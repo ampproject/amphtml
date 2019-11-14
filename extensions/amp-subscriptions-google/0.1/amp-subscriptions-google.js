@@ -36,8 +36,10 @@ import {
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
+import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
+import {startsWith} from '../../../src/string';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
@@ -110,6 +112,14 @@ export class GoogleSubscriptionsPlatform {
       this.handleAnalyticsEvent_.bind(this)
     );
 
+    // Map AMP experiments prefixed with 'swg-' to SwG experiments.
+    const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
+      .filter(
+        exp => startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
+      )
+      .map(exp => exp.substring(4));
+
+    const swgConfig = {'experiments': ampExperimentsForSwg};
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
@@ -118,7 +128,8 @@ export class GoogleSubscriptionsPlatform {
       {
         fetcher: new AmpFetcher(ampdoc.win),
         configPromise: new Promise(resolve => (resolver = resolve)),
-      }
+      },
+      swgConfig
     );
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */
@@ -193,14 +204,14 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnNativeSubscribeRequest(() => {
       this.onNativeSubscribeRequest_();
     });
-    this.runtime_.setOnSubscribeResponse(promise => {
+    this.runtime_.setOnPaymentResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response, Action.SUBSCRIBE);
-      });
-    });
-    this.runtime_.setOnContributionResponse(promise => {
-      promise.then(response => {
-        this.onSubscribeResponse_(response, Action.CONTRIBUTE);
+        this.onSubscribeResponse_(
+          response,
+          response.productType === 'CONTRIBUTION'
+            ? Action.CONTRIBUTE
+            : Action.SUBSCRIBE
+        );
       });
     });
 
@@ -267,7 +278,7 @@ export class GoogleSubscriptionsPlatform {
    */
   onLoginRequest_(linkRequested) {
     if (linkRequested && this.isGoogleViewer_) {
-      this.runtime_.linkAccount();
+      this.loginWithAmpReaderId_();
       this.subscriptionAnalytics_.actionEvent(
         this.getServiceId(),
         Action.LINK,
@@ -281,6 +292,17 @@ export class GoogleSubscriptionsPlatform {
     } else {
       this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal('login'));
     }
+  }
+
+  /**
+   * Kicks off login flow for account linking, and passes AMP Reader ID to authorization URL.
+   * @private
+   */
+  loginWithAmpReaderId_() {
+    // Get local AMP reader ID, to match the ID sent to local entitlement endpoints.
+    this.serviceAdapter_.getReaderId('local').then(ampReaderId => {
+      this.runtime_.linkAccount({ampReaderId});
+    });
   }
 
   /** @private */
@@ -493,7 +515,7 @@ export class GoogleSubscriptionsPlatform {
       return Promise.resolve(true);
     }
     if (action == Action.LOGIN) {
-      this.runtime_.linkAccount();
+      this.loginWithAmpReaderId_();
       return Promise.resolve(true);
     }
     return Promise.resolve(false);

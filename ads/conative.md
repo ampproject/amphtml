@@ -23,15 +23,16 @@ CONATIVE support for AMP.
 - All CONATIVE `<amp-ad>` tags require the `width`, `height`, `layout`, `sizes` and `type="conative"` parameters.
 
 ```html
-  <amp-ad 
-    height="250"
-    width="300"
-    type="conative"
-    layout="responsive"
-    sizes="(min-width: 320px) 320px, 100vw"
-    data-domain="1"
-    data-adslot="12">
-  </amp-ad>
+<amp-ad
+  height="250"
+  width="300"
+  type="conative"
+  layout="responsive"
+  sizes="(min-width: 320px) 320px, 100vw"
+  data-domain="1"
+  data-adslot="12"
+>
+</amp-ad>
 ```
 
 ## Configuration
