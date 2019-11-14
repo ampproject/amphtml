@@ -1365,9 +1365,10 @@ describes.realWin(
         expect(ampdoc.getVisibilityState()).to.equal('visible');
 
         viewer.dispose = sandbox.spy();
-        amp.close();
-        expect(ampdoc.getVisibilityState()).to.equal('inactive');
-        expect(viewer.dispose).to.be.calledOnce;
+        amp.close().then(() => {
+          expect(ampdoc.getVisibilityState()).to.equal('inactive');
+          expect(viewer.dispose).to.be.calledOnce;
+        });
       });
 
       it('should expose head tag ', () => {
@@ -1766,9 +1767,10 @@ describes.realWin(
             expect(ampdoc.getVisibilityState()).to.equal('visible');
 
             viewer.dispose = sandbox.spy();
-            shadowDoc.close();
-            expect(ampdoc.getVisibilityState()).to.equal('inactive');
-            expect(viewer.dispose).to.be.calledOnce;
+            shadowDoc.close().then(() => {
+              expect(ampdoc.getVisibilityState()).to.equal('inactive');
+              expect(viewer.dispose).to.be.calledOnce;
+            });
           });
         });
       });

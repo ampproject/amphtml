@@ -68,6 +68,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
   },
   {
+    id: 'amp-nested-menu',
+    name: 'AMP extension for a nested drilldown menu',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25343',
+  },
+  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
@@ -124,12 +129,6 @@ export const EXPERIMENTS = [
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
-  },
-  {
-    id: 'ios-scrollable-iframe',
-    name: 'iOS 13 enables iframe scrolling per spec',
-    spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23379',
   },
   {
     id: 'chunked-amp',
