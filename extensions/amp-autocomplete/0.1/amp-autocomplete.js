@@ -138,11 +138,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.highlightUserEntry_ = false;
 
     /**
-     * If the "inline" attribute is present on amp-autocomplete.
-     */
-    this.inline_ = false;
-
-    /**
      * The value of the "inline" attribute on amp-autocomplete.
      * @private {string}
      */
@@ -238,13 +233,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
 
-    this.inline_ = this.element.hasAttribute('inline');
-    this.binding_ = this.inline_
+    const isInline = this.element.hasAttribute('inline');
+    this.binding_ = isInline
       ? new AutocompleteBindingInline()
       : new AutocompleteBindingSingle();
     this.trigger_ = this.element.getAttribute('inline');
     userAssert(
-      !this.inline_ || isExperimentOn(this.win, 'amp-autocomplete'),
+      !isInline || isExperimentOn(this.win, 'amp-autocomplete'),
       `Experiment ${TAG} is not turned on for "inline" attr. %s`,
       this.element
     );
@@ -539,38 +534,39 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Handle rendering results on user input.
+   * Displays autocomplete suggestions on user input if appropriate.
    * @return {!Promise}
    * @private
    */
   inputHandler_() {
     if (
-      !this.binding_.shouldAutocomplete(
+      this.binding_.shouldAutocomplete(
         this.trigger_,
         dev().assertElement(this.inputElement_)
       )
     ) {
-      return this.mutateElement(() => {
-        this.clearAllItems_();
-      });
+      return this.maybeFetchAndAutocomplete_();
     }
 
+    return this.mutateElement(() => {
+      this.clearAllItems_();
+    });
+  }
+
+  /**
+   * First fetch fresh data if the autocomplete is in an email.
+   * Then updates the user input and display autocomplete suggestions against it.
+   * @return {!Promise}
+   */
+  maybeFetchAndAutocomplete_() {
     // If the input is the first entry in the field.
-    const firstInteraction =
+    const isFirstInteraction =
       this.userInput_.length === 0 && this.inputElement_.value.length === 1;
     this.userInput_ = this.binding_.updateUserInput(
       this.trigger_,
       dev().assertElement(this.inputElement_)
     );
 
-    return this.maybeFetchAndAutocomplete_(firstInteraction);
-  }
-
-  /**
-   * @param {boolean} firstInteraction
-   * @return {!Promise}
-   */
-  maybeFetchAndAutocomplete_(firstInteraction) {
     // Always fetch in email context, where data is required to be dynamic.
     const fetchIfEmail = this.isEmail_
       ? this.getRemoteData_()
@@ -582,7 +578,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.sourceData_,
           this.userInput_
         ).then(() => {
-          this.displaySuggestions_(firstInteraction);
+          this.displaySuggestions_(isFirstInteraction);
         });
       });
     });
