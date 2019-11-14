@@ -30,14 +30,6 @@ import {macroTask} from '../../../../testing/yield';
 const VENDOR_REQUESTS = require('./vendor-requests.json');
 const AnalyticsConfig = Object.assign({}, ANALYTICS_CONFIG);
 
-/**
- * Right now any vendor test that sends a request using scrollLeft
- * or scrollTop dies. Because it was a url-replacement variable
- * and so those variables got changed to `_variable_name_`
- * but now they both get changed to `0` (because its resolved in
- * amp-anlytics variables).
- */
-
 describe('iframe transport', () => {
   it('Should not contain iframe transport if not whitelisted', () => {
     for (const vendor in AnalyticsConfig) {
@@ -64,12 +56,10 @@ describes.realWin(
   function(env) {
     let win, doc;
     let requestVerifier;
-    let analyticsElement;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      analyticsElement = doc.createElement('amp-analytics');
       const wi = mockWindowInterface(env.sandbox);
       wi.getLocation.returns(win.location);
       requestVerifier = new ImagePixelVerifier(wi);
@@ -156,30 +146,30 @@ describes.realWin(
                   .callsFake(function(name) {
                     expect(this.replacements_).to.have.property(name);
                     const defaultValue = `_${name.toLowerCase()}_`;
-                    console.log(name);
                     return {
                       sync: () => defaultValue,
                     };
                   });
 
-                // sandbox
-                //   .stub(urlReplacements.getVariableSource(), 'get')
-                //   .callsFake(function(name) {
-                //     expect(this.replacements_).to.have.property(name);
-                //     const defaultValue = `_${name.toLowerCase()}_`;
-                //     return {
-                //       sync: () => defaultValue,
-                //     };
-                //   });
-
                 sandbox
                   .stub(ExpansionOptions.prototype, 'getVar')
                   .callsFake(function(name) {
                     let val = this.vars[name];
+                    // Vendor defined variable
                     if (val == null || val == '') {
                       val = '!' + name;
                     }
-                    return val;
+                    // amp-analytics variable
+                    switch (name) {
+                      case 'scrollLeft':
+                      case 'scrollTop':
+                        return `_${name
+                          .split(/(?=[A-Z])/)
+                          .join('_')
+                          .toLowerCase()}_`;
+                      default:
+                        return val;
+                    }
                   });
                 analytics.createdCallback();
                 analytics.buildCallback();
