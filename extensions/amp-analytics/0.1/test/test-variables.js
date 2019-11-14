@@ -207,15 +207,13 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, opt_bindings, toMatch = false) {
+    function check(input, output, opt_bindings) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
       );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
-      return toMatch
-        ? expect(expanded).to.eventually.match(output)
-        : expect(expanded).to.eventually.equal(output);
+      return expect(expanded).to.eventually.equal(output);
     }
 
     it('handles consecutive macros in inner arguments', () => {
@@ -402,11 +400,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('should replace SCROLL_TOP', () => {
-      return check('?scrollTop=SCROLL_TOP', /scrollTop=\d+/, {}, true);
+      sandbox.stub(Services, 'viewportForDoc').returns({
+        'viewport': {
+          getScrollTop() {
+            return 10;
+          },
+        },
+      });
+      return check('?scrollTop=SCROLL_TOP', '?scrollTop=10');
     });
 
     it('should replace SCROLL_LEFT', () => {
-      return check('?scrollLeft=SCROLL_LEFT', /scrollLeft=\d+/, {}, true);
+      sandbox.stub(Services, 'viewportForDoc').returns({
+        'viewport': {
+          getScrollLeft() {
+            return 5;
+          },
+        },
+      });
+      return check('?scrollLeft=SCROLL_LEFT', '?scrollLeft=5');
     });
 
     describe('$MATCH', () => {
