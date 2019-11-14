@@ -25,6 +25,8 @@ const PARSER_IGNORE_FLAG = '`';
 /** @private @const {string} */
 const TAG = 'Expander';
 
+export const NOENCODE_WHITELIST = {};
+
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
   /**
