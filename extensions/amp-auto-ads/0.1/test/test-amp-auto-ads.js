@@ -50,7 +50,7 @@ describes.repeated(
   'responsive sizing experiment',
   {
     'control': {branch: RESPONSIVE_SIZING_EXP.control},
-    'experiment': {branch: RESPONSIVE_SIZING_EXP.experiment},
+    'holdback': {branch: RESPONSIVE_SIZING_EXP.holdback},
   },
   (name, variant) => {
     describes.realWin(

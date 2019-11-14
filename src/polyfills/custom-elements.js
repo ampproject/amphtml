@@ -887,17 +887,22 @@ export function install(win, opt_ctor) {
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.
     try {
-      const {Object, Reflect} = win;
+      const {Object, Reflect, Function} = win;
 
       // "Construct" ctor using ES5 idioms
       const instance = Object.create(opt_ctor.prototype);
-      opt_ctor.call(instance);
 
-      // If that succeeded, we're in a transpiled environment
+      // This will throw an error unless we're in a transpiled environemnt.
+      // Native classes must be called as `new Ctor`, not `Ctor.call(instance)`.
+      // We use `Function.call.call` because Closure is too smart for regular
+      // `Ctor.call`.
+      Function.call.call(opt_ctor, instance);
+
+      // If that didn't throw, we're transpiled.
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
       installWrapper = !!(Reflect && Reflect.construct);
     } catch (e) {
-      // The ctor threw when we constructed is via ES5, so it's a real class.
+      // The ctor threw when we constructed it via ES5, so it's a real class.
       // We're ok to not install the polyfill.
       install = false;
     }

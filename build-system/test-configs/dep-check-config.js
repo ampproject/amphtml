@@ -260,9 +260,10 @@ exports.rules = [
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/events.js',
       // TODO(#24080) Remove this when story ads have full ad network support.
-      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-ad-exit/0.1/config.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-ad-exit/0.1/config.js',
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/utils.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -391,6 +392,8 @@ exports.rules = [
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
         'src/service/origin-experiments-impl.js',
       'extensions/amp-script/0.1/amp-script.js->' +
+        'src/service/origin-experiments-impl.js',
+      'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +

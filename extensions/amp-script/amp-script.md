@@ -251,7 +251,7 @@ Example of script hashes:
 ```
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
+The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to both the top-level `html` element and the `amp-script` element (or any of its parent nodes).
 [/tip]
 
 ## Attributes
@@ -287,12 +287,6 @@ The value of `max-age` should be chosen carefully:
 - A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
 
 If you don't publish signed exchanges, `max-age` does nothing.
-
-**development (optional, invalid)**
-
-A boolean attribute that disables the JS size and security constraints for a more convenient development experience.
-
-This attribute is not allowed by the AMP Validator and should not be used on pages in production.
 
 **common attributes**
 

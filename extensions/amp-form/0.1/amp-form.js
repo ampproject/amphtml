@@ -943,20 +943,16 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
-    return response.json().then(
-      json => {
-        return this.handleSubmitSuccess_(
-          /** @type {!JsonObject} */ (json),
-          incomingTrust
-        ).then(() => {
-          this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
-          this.maybeHandleRedirect_(response);
-        });
-      },
-      error => {
-        user().error(TAG, 'Failed to parse response JSON: %s', error);
-      }
-    );
+    return response
+      .json()
+      .then(
+        json => this.handleSubmitSuccess_(/** @type {!JsonObject} */ (json), incomingTrust),
+        error => user().error(TAG, 'Failed to parse response JSON: %s', error)
+      )
+      .then(() => {
+        this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
+        this.maybeHandleRedirect_(response);
+      });
   }
 
   /**
@@ -969,6 +965,7 @@ export class AmpForm {
    */
   handleSubmitSuccess_(result, incomingTrust, opt_eventData) {
     this.setState_(FormState.SUBMIT_SUCCESS);
+    // TODO: Investigate if `tryResolve()` can be removed here.
     return tryResolve(() => {
       this.renderTemplate_(result || {}).then(() => {
         const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
@@ -1015,6 +1012,7 @@ export class AmpForm {
   handleSubmitFailure_(error, json, incomingTrust, opt_eventData) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
+    // TODO: Investigate if `tryResolve()` can be removed here.
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
         const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
