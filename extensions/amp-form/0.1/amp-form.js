@@ -287,7 +287,7 @@ export class AmpForm {
       }
     }
 
-    /** @type {!FetchRequestDef}*/
+    /** @type {!FetchRequestDef} */
     const request = {
       xhrUrl,
       fetchOpt: dict({
@@ -911,7 +911,14 @@ export class AmpForm {
     return response
       .json()
       .then(
-        json => this.handleSubmitSuccess_(/** @type {!JsonObject} */ (json)),
+        json => {
+          // Response.json() can return primitives e.g. bool, number.
+          const result =
+            typeof json === 'object'
+              ? /** @type {!JsonObject} */ (json)
+              : dict();
+          return this.handleSubmitSuccess_(result);
+        },
         error => user().error(TAG, 'Failed to parse response JSON: %s', error)
       )
       .then(() => {
@@ -925,13 +932,13 @@ export class AmpForm {
    * @param {!JsonObject} result
    * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
-   * @private visible for testing
+   * @private
    */
   handleSubmitSuccess_(result, opt_eventData) {
     this.setState_(FormState.SUBMIT_SUCCESS);
     // TODO: Investigate if `tryResolve()` can be removed here.
     return tryResolve(() => {
-      this.renderTemplate_(result || {}).then(() => {
+      this.renderTemplate_(result).then(() => {
         this.triggerAction_(
           FormEvents.SUBMIT_SUCCESS,
           opt_eventData === undefined ? result : opt_eventData
@@ -1159,11 +1166,8 @@ export class AmpForm {
    */
   renderTemplate_(data) {
     if (isArray(data)) {
+      user().warn(TAG, 'Expected JSON object. Found:', data);
       data = dict();
-      user().warn(
-        TAG,
-        `Unexpected data type: ${data}. Expected non JSON array.`
-      );
     }
     const container = this.form_./*OK*/ querySelector(`[${this.state_}]`);
     let p = Promise.resolve();
