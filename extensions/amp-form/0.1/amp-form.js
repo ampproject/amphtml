@@ -435,18 +435,21 @@ export class AmpForm {
    * @private
    */
   triggerFormSubmitInAnalytics_(eventType) {
-    this.assertSsrTemplate_(false, 'Form analytics not supported');
-    const formDataForAnalytics = dict({});
-    const formObject = this.getFormAsObject_();
+    this.assertCsrTemplate_('Form analytics not supported').then(() => {
+      const formDataForAnalytics = dict({});
+      const formObject = this.getFormAsObject_();
 
-    for (const k in formObject) {
-      if (Object.prototype.hasOwnProperty.call(formObject, k)) {
-        formDataForAnalytics['formFields[' + k + ']'] = formObject[k].join(',');
+      for (const k in formObject) {
+        if (Object.prototype.hasOwnProperty.call(formObject, k)) {
+          formDataForAnalytics['formFields[' + k + ']'] = formObject[k].join(
+            ','
+          );
+        }
       }
-    }
-    formDataForAnalytics['formId'] = this.form_.id;
+      formDataForAnalytics['formId'] = this.form_.id;
 
-    this.analyticsEvent_(eventType, formDataForAnalytics);
+      this.analyticsEvent_(eventType, formDataForAnalytics);
+    });
   }
 
   /**
@@ -552,67 +555,77 @@ export class AmpForm {
 
     this.dirtinessHandler_.onSubmitting();
 
-    // Do any assertions we may need to do
-    // For NonXhrGET
-    // That way we can determine if
-    // we can submit synchronously
-    if (!this.xhrAction_ && this.method_ == 'GET') {
-      this.assertSsrTemplate_(false, 'Non-XHR GETs not supported.');
-      this.assertNoSensitiveFields_();
-
-      // If we have no async inputs, we can just submit synchronously
-      if (asyncInputs.length === 0) {
-        for (let i = 0; i < varSubsFields.length; i++) {
-          this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
+    const nonXhrGet = !this.xhrAction_ && this.method_ === 'GET';
+    return Promise.resolve()
+      .then(() => {
+        // Do any assertions we may need to do
+        // For NonXhrGET
+        // That way we can determine if
+        // we can submit synchronously
+        if (nonXhrGet) {
+          this.assertNoSensitiveFields_();
+          return this.assertCsrTemplate_('Non-XHR GETs not supported.');
         }
+      })
+      .then(() => {
+        if (nonXhrGet) {
+          // If we have no async inputs, we can just submit synchronously
+          if (asyncInputs.length === 0) {
+            for (let i = 0; i < varSubsFields.length; i++) {
+              this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
+            }
 
-        /**
-         * If the submit was called with an event, then we shouldn't
-         * manually submit the form
-         */
-        const shouldSubmitFormElement = !event;
+            /**
+             * If the submit was called with an event, then we shouldn't
+             * manually submit the form
+             */
+            const shouldSubmitFormElement = !event;
 
-        this.handleNonXhrGet_(shouldSubmitFormElement);
-        this.dirtinessHandler_.onSubmitSuccess();
-        return Promise.resolve();
-      }
+            this.handleNonXhrGet_(shouldSubmitFormElement);
+            this.dirtinessHandler_.onSubmitSuccess();
+            return Promise.resolve();
+          }
 
-      if (event) {
-        event.preventDefault();
-      }
-    }
+          if (event) {
+            event.preventDefault();
+          }
+        }
+      })
+      .then(() => {
+        // Set ourselves to the SUBMITTING State
+        this.setState_(FormState.SUBMITTING);
 
-    // Set ourselves to the SUBMITTING State
-    this.setState_(FormState.SUBMITTING);
+        // Promises to run before submit without timeout.
+        const requiredActionPromises = [];
+        // Promises to run before submitting the form
+        const presubmitPromises = [];
+        presubmitPromises.push(this.doVarSubs_(varSubsFields));
+        iterateCursor(asyncInputs, asyncInput => {
+          const asyncCall = this.getValueForAsyncInput_(asyncInput);
+          if (
+            asyncInput.classList.contains(
+              AsyncInputClasses.ASYNC_REQUIRED_ACTION
+            )
+          ) {
+            requiredActionPromises.push(asyncCall);
+          } else {
+            presubmitPromises.push(asyncCall);
+          }
+        });
 
-    // Promises to run before submit without timeout.
-    const requiredActionPromises = [];
-    // Promises to run before submitting the form
-    const presubmitPromises = [];
-    presubmitPromises.push(this.doVarSubs_(varSubsFields));
-    iterateCursor(asyncInputs, asyncInput => {
-      const asyncCall = this.getValueForAsyncInput_(asyncInput);
-      if (
-        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
-      ) {
-        requiredActionPromises.push(asyncCall);
-      } else {
-        presubmitPromises.push(asyncCall);
-      }
-    });
-
-    return Promise.all(requiredActionPromises).then(
-      () => {
-        return this.waitOnPromisesOrTimeout_(
-          presubmitPromises,
-          SUBMIT_TIMEOUT
-        ).then(
-          () => this.handlePresubmitSuccess_(trust),
+        return Promise.all(requiredActionPromises).then(
+          () => {
+            return this.waitOnPromisesOrTimeout_(
+              presubmitPromises,
+              SUBMIT_TIMEOUT
+            ).then(
+              () => this.handlePresubmitSuccess_(trust),
+              error => this.handlePresubmitError_(error)
+            );
+          },
           error => this.handlePresubmitError_(error)
         );
-      },
-      error => this.handlePresubmitError_(error)
-    );
+      });
   }
 
   /**
@@ -899,13 +912,16 @@ export class AmpForm {
    * @private
    */
   doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
-    this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    return this.requestForFormFetch(
-      url,
-      method,
-      opt_extraFields,
-      opt_fieldBlacklist
-    ).then(request => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
+    return this.assertCsrTemplate_('XHRs should be proxied.')
+      .then(() =>
+        this.requestForFormFetch(
+          url,
+          method,
+          opt_extraFields,
+          opt_fieldBlacklist
+        )
+      )
+      .then(request => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
   }
 
   /**
@@ -1007,18 +1023,15 @@ export class AmpForm {
   }
 
   /**
-   * Asserts that SSR support is the same as value.
-   * @param {boolean} value
-   * @param {string} msg
+   * Asserts that standard client side rendering is being used as opposed to SSR.
+   *
    * @private
+   * @param {string} msg
+   * @return {!Promise}
    */
-  assertSsrTemplate_(value, msg) {
-    this.ssrTemplateHelper_.isSupported().then(supported => {
-      userAssert(
-        supported === value,
-        '[amp-form]: viewerRenderTemplate | %s',
-        msg
-      );
+  assertCsrTemplate_(msg) {
+    return this.ssrTemplateHelper_.isSupported().then(isSSR => {
+      userAssert(!isSSR, '[amp-form]: viewerRenderTemplate | %s', msg);
     });
   }
 
@@ -1062,33 +1075,34 @@ export class AmpForm {
    * @private
    */
   maybeHandleRedirect_(response) {
-    this.assertSsrTemplate_(false, 'Redirects not supported.');
-    if (!response || !response.headers) {
-      return;
-    }
-    const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
-    if (redirectTo) {
-      userAssert(
-        this.target_ != '_blank',
-        'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
-          'not supported, use target=_top instead. %s',
-        this.form_
-      );
-      try {
-        const urlService = Services.urlForDoc(this.form_);
-        urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
-        urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
-      } catch (e) {
-        userAssert(
-          false,
-          'The `AMP-Redirect-To` header value must be an ' +
-            'absolute URL starting with https://. Found %s',
-          redirectTo
-        );
+    this.assertCsrTemplate_('Redirects not supported.').then(() => {
+      if (!response || !response.headers) {
+        return;
       }
-      const navigator = Services.navigationForDoc(this.form_);
-      navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
-    }
+      const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
+      if (redirectTo) {
+        userAssert(
+          this.target_ != '_blank',
+          'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
+            'not supported, use target=_top instead. %s',
+          this.form_
+        );
+        try {
+          const urlService = Services.urlForDoc(this.form_);
+          urlService.assertAbsoluteHttpOrHttpsUrl(redirectTo);
+          urlService.assertHttpsUrl(redirectTo, 'AMP-Redirect-To', 'Url');
+        } catch (e) {
+          userAssert(
+            false,
+            'The `AMP-Redirect-To` header value must be an ' +
+              'absolute URL starting with https://. Found %s',
+            redirectTo
+          );
+        }
+        const navigator = Services.navigationForDoc(this.form_);
+        navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
+      }
+    });
   }
 
   /**
