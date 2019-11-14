@@ -1181,6 +1181,23 @@ describes.sandboxed('UrlReplacements', {}, () => {
       });
   });
 
+  it('should replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
+    sandbox.stub(Services, 'geoForDocOrNull').returns(
+      Promise.resolve({
+        'ISOCountry': 'unknown',
+        'ISOCountryGroups': ['nafta', 'waldo'],
+        'nafta': true,
+        'waldo': true,
+        'matchedISOCountryGroups': ['nafta', 'waldo'],
+      })
+    );
+    return expandUrlAsync('?geo=AMP_GEO,country=AMP_GEO(ISOCountry)').then(
+      res => {
+        expect(res).to.equal('?geo=nafta%2Cwaldo,country=unknown');
+      }
+    );
+  });
+
   it.configure()
     .skipFirefox()
     .run('should accept $expressions', () => {
