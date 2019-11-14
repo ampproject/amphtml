@@ -215,6 +215,7 @@ export class VariableService {
     // Returns the IANA timezone code
     this.register_('TIMEZONE_CODE', () => {
       let tzCode = '';
+      debugger;
       if (
         'Intl' in this.ampdoc_.win &&
         'DateTimeFormat' in this.ampdoc_.win.Intl

@@ -207,15 +207,13 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.body.appendChild(analyticsElement);
     });
 
-    function check(input, output, opt_bindings, toMatch = false) {
+    function check(input, output, opt_bindings) {
       const macros = Object.assign(
         variables.getMacros(analyticsElement),
         opt_bindings
       );
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
-      return toMatch
-        ? expect(expanded).to.eventually.match(output)
-        : expect(expanded).to.eventually.equal(output);
+      return expect(expanded).to.eventually.equal(output);
     }
 
     it('handles consecutive macros in inner arguments', () => {
@@ -401,11 +399,19 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
-    it('should replace TIMEZONE_CODE', () => {
-      // return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
-      //   expect(res).to.match(/tz_code=\w+|^$/);
-      // });
-      return check('?tz_code=TIMEZONE_CODE', /tz_code=\w+|^$/, {}, true);
+    it.only('should replace TIMEZONE_CODE', () => {
+      win.Intl = {
+        DateTimeFormat() {
+          return {
+            resolvedOptions() {
+              return {
+                'timeZone': 'America/Los_Angeles',
+              };
+            },
+          };
+        },
+      };
+      return check('?tz_code=TIMEZONE_CODE', '?tz_code=America/Los_Angeles');
     });
 
     describe('$MATCH', () => {
