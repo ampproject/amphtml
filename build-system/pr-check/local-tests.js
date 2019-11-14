@@ -69,11 +69,12 @@ function main() {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
-    const runIntegration = buildTargets.has('RUNTIME') ||
+    const runIntegration =
+      buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST');
-    const runUnit = buildTargets.has('RUNTIME') ||
-      buildTargets.has('UNIT_TEST');
+    const runUnit =
+      buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST');
 
     if (runIntegration) {
       postReport('integration/local', 'queued');

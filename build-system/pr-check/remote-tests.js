@@ -76,7 +76,8 @@ async function main() {
     timedExecOrDie('gulp update-packages');
     await startSauceConnect(FILENAME);
 
-    const runIntegration = buildTargets.has('RUNTIME') ||
+    const runIntegration =
+      buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST');
 
