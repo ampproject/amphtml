@@ -195,7 +195,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.element);
     this.ssrTemplateHelper_ = new SsrTemplateHelper(
       TAG,
       viewer,
@@ -570,8 +570,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         .then(rendered => {
           const elements = isArray(rendered)
             ? rendered
-            : this.getChildNodesAsArray_(dev().assertElement(rendered));
-          elements.map(child => {
+            : [].slice.call(rendered.children);
+          elements.forEach(child => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
             } else {
@@ -597,21 +597,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       });
     }
     return renderPromise;
-  }
-
-  /**
-   * Detaches the children nodes of the given element and returns them as an array.
-   * @param {!Element} element
-   * @return {!Array<!Element>}
-   * @private
-   */
-  getChildNodesAsArray_(element) {
-    const children = [];
-    let child;
-    while ((child = element.firstChild)) {
-      children.push(element.removeChild(child));
-    }
-    return children;
   }
 
   /**
