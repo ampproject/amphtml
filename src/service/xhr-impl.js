@@ -162,10 +162,13 @@ export class Xhr {
     }
 
     return res.text().then(txt => {
-      const stripped = startsWith(txt, dev().assertString(prefix))
-        ? txt.slice(prefix.length)
-        : txt;
-      return parseJson(stripped);
+      if (!startsWith(txt, dev().assertString(prefix))) {
+        user().warn(
+          `Attempted to strip prefix "${prefix}" from xhr request, but prefix was not present.`
+        );
+        return parseJson(txt);
+      }
+      return parseJson(txt.slice(prefix.length));
     });
   }
 
