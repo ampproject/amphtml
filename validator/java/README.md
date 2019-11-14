@@ -1,6 +1,6 @@
 # AMP HTML ⚡ Validator
 
- AMP HTML Validator takes input of HTML text and parses the text tag by tag, running the ruleset against every tag. Resultant from this process is validity of the input text and the errors generated while parsing.
+AMP HTML Validator takes input of HTML text and parses the text tag by tag, running the ruleset against every tag. Resultant from this process is validity of the input text and the errors generated while parsing.
 
 ## Table of Contents
 
@@ -12,7 +12,9 @@
 - [License](#License)
 - [Attribution](#Attribution)
 
-## Backgroud
+## Background
+
+@nhant01 and @GeorgeLuo own development and maintenance responsibility of the project. As such they will serve as the points of contact surrounding changes and modifications. The team will allocate resources to align the business with the implementations provided under the amphtml repo. With that in mind, should supporting this project become infeasible, we will publish a version of the codebase marked for deprecation and prepare for its removal from public repositories (every effort will be made to not have this happen).
 
 ### Install
 
@@ -27,6 +29,7 @@ AMP HTML Validator uses maven as tool for building and managing project. Add fol
   <version>1.0</version>
 </dependency>
 ```
+
 Here are the instructions to setup maven environment.
 https://maven.apache.org/what-is-maven.html
 https://maven.apache.org/guides/introduction/introduction-to-the-pom.html
@@ -50,12 +53,16 @@ bazel run //:amphtml_validator_test
 ```
 
 ## Usage
+
 Initialize the validator using
+
 ```
 final AMPHtmlParser ampHtmlParser = new AMPHtmlParser();
 final ValidationResult validationResult = ampHtmlParser.parse(inputHtml, htmlFormat, condition, maxNodes);
 ```
+
 The parser can be used beyond the first document, to truncate initialization time. The maxNode condition is the maximum number of tags reviewed by the validator before forcing exit on exception. The condition is an enumeration of type ExitCondition, either exit on first error or a full parsing attempt. The htmlFormat is an enumeration for the format of AMP to be validated against.
+
 ## Issues
 
 The are several known bugs in the validation output.
@@ -69,9 +76,11 @@ Importantly, this validator prioritizes amp4email html content, enforcement of v
 - CSS validation does not yet configure for a max nodes value
 
 ## Contribute
+
 Please refer to the [Contributing.md](Contributing.md) file for information about how to get involved. We welcome issues, questions, and pull requests. Pull Requests are welcome.
 
 ## License 
+
 This project is licensed under the terms of the [Apache 2.0](LICENSE-Apache-2.0) open source license. Please refer to [LICENSE](LICENSE) for the full terms.
 
 ## Attribution
