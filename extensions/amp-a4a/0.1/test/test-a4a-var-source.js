@@ -97,6 +97,6 @@ describe('A4AVariableSource', () => {
 
   // amp-bind state.
   // AMP_STATE() is not scoped to the FIE so this cannot be safely removed
-  // without refactoring the implementation in url-replacements-impl.js.
+  // without refactoring the implementation in amp-analytics/0.1/variables.js.
   undefinedVariable('AMP_STATE');
 });
