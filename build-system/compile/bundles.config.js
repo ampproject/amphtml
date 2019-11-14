@@ -311,6 +311,12 @@ exports.extensionBundles = [
     type: TYPES.AD,
   },
   {
+    name: 'amp-ad-network-mytarget-impl',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.AD,
+  },
+  {
     name: 'amp-ad-exit',
     version: '0.1',
     latestVersion: '0.1',
