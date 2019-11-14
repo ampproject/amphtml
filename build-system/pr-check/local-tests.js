@@ -31,6 +31,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
+const {postReport} = require('../tasks/report-test-status');
 
 const FILENAME = 'local-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -68,19 +69,29 @@ function main() {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
 
-    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+    const runIntegration = buildTargets.has('RUNTIME') ||
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST');
+    const runUnit = buildTargets.has('RUNTIME') ||
+      buildTargets.has('UNIT_TEST');
+
+    if (runIntegration) {
+      postReport('integration/local', 'queued');
+    }
+    if (runUnit) {
+      postReport('unit/local-changes', 'queued');
+      postReport('unit/local', 'queued');
+    }
+
+    if (runUnit) {
       timedExecOrDie('gulp unit --nobuild --headless --local_changes');
     }
 
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
+    if (runIntegration) {
       timedExecOrDie('gulp integration --nobuild --headless --coverage');
     }
 
-    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+    if (runUnit) {
       timedExecOrDie('gulp unit --nobuild --headless --coverage');
     }
 

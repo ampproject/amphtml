@@ -32,7 +32,6 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
-const {reportTestStarted} = require('../tasks/report-test-status');
 
 const FILENAME = 'visual-diff-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -41,7 +40,6 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  reportTestStarted();
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);

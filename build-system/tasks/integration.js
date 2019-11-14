@@ -25,7 +25,6 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {execOrDie} = require('../common/exec');
-const {reportTestStarted} = require('../tasks/report-test-status');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -55,7 +54,6 @@ async function integration() {
 
   const config = new RuntimeTestConfig('integration');
   const runner = new Runner(config);
-  reportTestStarted();
 
   await runner.setup();
   await runner.run();

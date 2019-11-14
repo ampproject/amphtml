@@ -30,6 +30,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
+const {postReport} = require('../tasks/report-test-status');
 
 const FILENAME = 'single-pass-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -53,6 +54,8 @@ function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
+      postReport('integration/single-pass', 'queued');
+
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting --single_pass');
       timedExecOrDie(
