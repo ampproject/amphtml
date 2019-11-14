@@ -16,6 +16,7 @@
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 
+import {Services} from '../../src/services';
 import {parseQueryString} from '../../src/url';
 
 describe('amp-analytics', function() {
@@ -62,7 +63,7 @@ describe('amp-analytics', function() {
       </amp-analytics>`,
       extensions: ['amp-analytics'],
     },
-    () => {
+    env => {
       afterEach(() => {
         // clean up written _cid cookie
         document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
@@ -79,7 +80,14 @@ describe('amp-analytics', function() {
           // cookie set via http response header when requesting
           // localhost:9876/amp4test/compose-doc
           expect(q['cookie']).to.equal('test');
-          expect(q['fcp']).to.not.be.null;
+          const platform = Services.platformFor(env.win);
+
+          // FCP only resolves for Chrome and Opera
+          if (platform.isChrome() || platform.isOpera()) {
+            expect(q['fcp']).to.not.be.null;
+          } else {
+            expect(q['fcp']).to.equal('');
+          }
           expect(q['fvr']).to.not.be.null;
           expect(q['mbv']).to.not.be.null;
           expect(
