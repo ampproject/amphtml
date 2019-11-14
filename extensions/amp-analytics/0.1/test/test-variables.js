@@ -411,7 +411,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
           };
         },
       };
-      return check('?tz_code=TIMEZONE_CODE', '?tz_code=America/Los_Angeles');
+      return check('?tz_code=TIMEZONE_CODE', '?tz_code=America%2FLos_Angeles');
     });
 
     describe('$MATCH', () => {
