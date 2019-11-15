@@ -29,7 +29,7 @@ const HAS_MORE_ITEMS_PAYLOAD = {
 };
 
 describes.realWin(
-  'amp-list component',
+  'amp-list with load-more',
   {
     amp: {
       ampdoc: 'single',
@@ -175,19 +175,15 @@ describes.realWin(
       });
 
       it('should update the next loading src', async () => {
-        const fetchListSpy = sandbox.spy(list, 'fetchList_');
         sandbox.stub(list, 'scheduleRender_').returns(Promise.resolve());
         await list.layoutCallback();
         expect(element.getAttribute('src')).to.equal(
           '/list/infinite-scroll?items=2&left=1'
         );
-        expect(fetchListSpy).to.be.calledOnce;
         await list.loadMoreCallback_();
         expect(element.getAttribute('src')).to.equal(
           '/list/infinite-scroll?items=2&left=0'
         );
-        expect(fetchListSpy).to.be.calledTwice;
-        expect(fetchListSpy).to.be.calledWith(true);
       });
 
       it('should append items to the existing list', async () => {
@@ -197,7 +193,7 @@ describes.realWin(
         const div2 = doc.createElement('div');
         div2.textContent = '2';
         sandbox
-          .stub(list.ssrTemplateHelper_, 'renderTemplate')
+          .stub(list.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
           .returns(Promise.resolve([]));
         const updateBindingsStub = sandbox.stub(list, 'updateBindings_');
         sandbox
@@ -228,7 +224,7 @@ describes.realWin(
       // TODO(cathyxz) Create a mirror test for automatic amp-list loading once the automatic tests are unskipped
       it('should call focus on the last element after load more is clicked', async () => {
         sandbox
-          .stub(list.ssrTemplateHelper_, 'renderTemplate')
+          .stub(list.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
           .returns(Promise.resolve([]));
         const updateBindingsStub = sandbox.stub(list, 'updateBindings_');
         sandbox

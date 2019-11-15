@@ -355,8 +355,35 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         newWidth: 400,
         margin: '-375px',
       },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 200,
+        margin: '',
+        isMultiSizeResponse: true,
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '',
+        isAlreadyCentered: true,
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '',
+        isAlreadyCentered: true,
+      },
     ].forEach((testCase, testNum) => {
       it(`should adjust slot CSS after expanding width #${testNum}`, () => {
+        if (testCase.isMultiSizeResponse) {
+          impl.parameterSize = '320x50,200x50';
+          impl.isFluidPrimaryRequest_ = true;
+        } else {
+          impl.paramterSize = '200x50';
+        }
         sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
           impl.element.style.width = `${width}px`;
           return {
@@ -375,6 +402,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           parentWidth: testCase.parentWidth,
           parentStyle: {
             [`padding${dirStr}`]: '50px',
+            ['textAlign']: testCase.isAlreadyCentered ? 'center' : 'start',
           },
         };
         impl.win.document.body.dir = testCase.direction;
@@ -390,8 +418,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         });
         expect(impl.element.style[`margin${dirStr}`]).to.equal(testCase.margin);
-        // We use a fixed '11' value for z-index.
-        expect(impl.element.style.zIndex).to.equal('11');
+        if (!testCase.isMultiSizeResponse) {
+          // We use a fixed '11' value for z-index.
+          expect(impl.element.style.zIndex).to.equal('11');
+        }
       });
     });
   });
@@ -1420,7 +1450,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
 describes.realWin(
   'additional amp-ad-network-doubleclick-impl',
-  realWinConfigAmpAd,
+  realWinConfig,
   env => {
     let doc;
     let impl;
@@ -1455,7 +1485,7 @@ describes.realWin(
       });
     });
 
-    describe('centering', () => {
+    describes.realWin('centering', realWinConfigAmpAd, env => {
       const size = {width: '300px', height: '150px'};
 
       /**
@@ -1558,7 +1588,7 @@ describes.realWin(
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.getAmpDoc = () => {};
+        impl.getAmpDoc = () => env.ampdoc;
         isSecureStub = sandbox.stub();
         sandbox.stub(Services, 'urlForDoc').returns({isSecure: isSecureStub});
       });

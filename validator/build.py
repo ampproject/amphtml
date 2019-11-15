@@ -439,9 +439,8 @@ def CompileParseCssTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/parse-css.js', 'engine/parse-url.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', 'engine/parse-css_test.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/tokenize-css.js', 'engine/json-testutil.js',
+          'engine/parse-css_test.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -461,9 +460,8 @@ def CompileParseUrlTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/parse-url.js', 'engine/parse-css.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', 'engine/parse-url_test.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/tokenize-css.js', 'engine/json-testutil.js',
+          'engine/parse-url_test.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -485,8 +483,7 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
           'engine/definitions.js', 'engine/amp4ads-parse-css_test.js',
           'engine/parse-css.js', 'engine/parse-url.js',
           'engine/amp4ads-parse-css.js', 'engine/tokenize-css.js',
-          'engine/css-selectors.js', 'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -508,8 +505,7 @@ def CompileKeyframesParseCssTestMinified(out_dir):
           'engine/definitions.js', 'engine/keyframes-parse-css_test.js',
           'engine/parse-css.js', 'engine/parse-url.js',
           'engine/keyframes-parse-css.js', 'engine/tokenize-css.js',
-          'engine/css-selectors.js', 'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],

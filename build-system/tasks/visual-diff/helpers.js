@@ -15,10 +15,10 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fancyLog = require('fancy-log');
 const sleep = require('sleep-promise');
-const {isTravisBuild} = require('../../common/travis');
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
@@ -54,10 +54,9 @@ function escapeHtml(html) {
 function log(mode, ...messages) {
   switch (mode) {
     case 'verbose':
-      if (isTravisBuild()) {
-        return;
+      if (argv.verbose) {
+        fancyLog.info(colors.green('VERBOSE:'), ...messages);
       }
-      fancyLog.info(colors.green('VERBOSE:'), ...messages);
       break;
     case 'info':
       fancyLog.info(colors.green('INFO:'), ...messages);
@@ -72,11 +71,6 @@ function log(mode, ...messages) {
       process.exitCode = 1;
       fancyLog.error(colors.red('FATAL:'), ...messages);
       throw new Error(messages.join(' '));
-    case 'travis':
-      if (isTravisBuild()) {
-        messages.forEach(message => process.stdout.write(message));
-      }
-      break;
   }
 }
 
