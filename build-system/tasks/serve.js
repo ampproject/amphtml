@@ -15,11 +15,11 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const connect = require('gulp-connect');
 const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
+const minimist = require('minimist');
 const morgan = require('morgan');
 const watch = require('gulp-watch');
 const {
@@ -30,29 +30,29 @@ const {
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
-const {getServeMode} = require('../server/app-utils');
+const {isRtvMode, getServeMode, setServeMode} = require('../server/app-utils');
 
-// Used for logging during server start / stop.
-let url = '';
+const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+
+// Used for logging.
+let url = null;
+let {quiet} = argv;
 
 const serverFiles = globby.sync(['build-system/server/**']);
 
 /**
- * Logs the server's mode (based on command line arguments).
+ * Logs the server's mode.
  */
 function logServeMode() {
-  switch (getServeMode()) {
-    case 'compiled':
-      log(green('Serving'), cyan('minified'), green('JS'));
-      break;
-    case 'cdn':
-      log(green('Serving'), cyan('current prod'), green('JS'));
-      break;
-    case 'rtv':
-      log(green('Serving JS from RTV'), cyan(`${argv.rtv}`));
-      break;
-    default:
-      log(green('Serving'), cyan('unminified'), green('JS'));
+  const serveMode = getServeMode();
+  if (serveMode == 'compiled') {
+    log(green('Serving'), cyan('minified'), green('JS'));
+  } else if (serveMode == 'cdn') {
+    log(green('Serving'), cyan('current prod'), green('JS'));
+  } else if (isRtvMode(serveMode)) {
+    log(green('Serving JS from RTV'), cyan(serveMode));
+  } else {
+    log(green('Serving'), cyan('unminified'), green('JS'));
   }
 }
 
@@ -62,7 +62,7 @@ function logServeMode() {
  */
 function getMiddleware() {
   const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
-  if (!argv.quiet) {
+  if (!quiet) {
     middleware.push(morgan('dev'));
   }
   if (argv.cache) {
@@ -77,13 +77,22 @@ function getMiddleware() {
 
 /**
  * Launches a server and waits for it to fully start up
+ *
  * @param {?Object} extraOptions
+ * @param {?boolean} logRequests
+ * @param {?Object} modeOptions
  */
-async function startServer(extraOptions = {}) {
+async function startServer(
+  extraOptions = {},
+  logRequests = true,
+  modeOptions = null
+) {
+  quiet = !logRequests;
   let started;
   const startedPromise = new Promise(resolve => {
     started = resolve;
   });
+  setServeMode(modeOptions);
   const options = Object.assign(
     {
       name: 'AMP Dev Server',
@@ -101,6 +110,7 @@ async function startServer(extraOptions = {}) {
   await startedPromise;
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
+  logServeMode();
 }
 
 /**
@@ -117,8 +127,11 @@ function resetServerFiles() {
  * Stops the currently running server
  */
 function stopServer() {
-  connect.serverClose();
-  log(green('Stopped server at'), cyan(url));
+  if (url) {
+    connect.serverClose();
+    log(green('Stopped server at'), cyan(url));
+    url = null;
+  }
 }
 
 /**
@@ -145,7 +158,6 @@ async function performPreBuildSteps() {
  */
 async function serve() {
   createCtrlcHandler('serve');
-  logServeMode();
   watch(serverFiles, restartServer);
   await startServer();
   await performPreBuildSteps();

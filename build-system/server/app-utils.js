@@ -16,29 +16,40 @@
 
 const minimist = require('minimist');
 
+let serveMode = 'default';
+
 /**
- * Determines the server's mode based on command line arguments.
+ * Returns a string representation of the server's mode.
  * @return {string}
  */
 function getServeMode() {
-  const argv = minimist(process.argv.slice(2), {string: ['rtv']});
-  if (argv.compiled) {
-    return 'compiled';
+  return serveMode;
+}
+
+/**
+ * Sets the server's mode. Uses command line arguments by default, but can be
+ * overridden by passing in a modeOptions object.
+ * @param {?Object} modeOptions
+ */
+function setServeMode(modeOptions) {
+  if (!modeOptions) {
+    modeOptions = minimist(process.argv.slice(2), {string: ['rtv']});
   }
-  if (argv.cdn) {
-    return 'cdn';
-  }
-  if (argv.rtv != undefined) {
-    const {rtv} = argv;
+
+  if (modeOptions.compiled) {
+    serveMode = 'compiled';
+  } else if (modeOptions.cdn) {
+    serveMode = 'cdn';
+  } else if (modeOptions.rtv) {
+    const {rtv} = modeOptions;
     if (isRtvMode(rtv)) {
-      return 'rtv';
+      serveMode = rtv;
     } else {
       const err = new Error(`Invalid rtv: ${rtv}. (Must be 15 digits long.)`);
       err.showStack = false;
       throw err;
     }
   }
-  return 'default';
 }
 
 /**
@@ -148,4 +159,5 @@ module.exports = {
   isRtvMode,
   replaceUrls,
   getServeMode,
+  setServeMode,
 };
