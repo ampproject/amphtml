@@ -26,7 +26,7 @@ import {
 } from '../../amp-base-carousel/0.1/responsive-attributes';
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert, userAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -648,8 +648,10 @@ class AmpStreamGallery extends AMP.BaseElement {
     // momentum scrolling can cause very broken behavior, since the carousel
     // is not aware that the user is touching the carousel.
     if (loop && Services.platformFor(this.win).isIos()) {
-      user().warn('amp-stream-gallery does not support looping on iOS due ' +
-          'to https://bugs.webkit.org/show_bug.cgi?id=191218.');
+      user().warn(
+        'amp-stream-gallery does not support looping on iOS due ' +
+          'to https://bugs.webkit.org/show_bug.cgi?id=191218.'
+      );
       return;
     }
 
