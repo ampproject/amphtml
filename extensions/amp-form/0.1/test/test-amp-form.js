@@ -258,11 +258,12 @@ describes.repeated(
 
               const errorRe = /Non-XHR GETs not supported./;
               expectAsyncConsoleError(errorRe);
-              try {
-                return ampForm.handleSubmitEvent_(event);
-              } catch (error) {
-                return Promise.resolve();
-              }
+              return Promise.resolve()
+                .then(() => ampForm.handleSubmitEvent_(event))
+                .then(
+                  () => Promise.reject(),
+                  () => Promise.resolve()
+                );
             });
           });
 
@@ -1393,6 +1394,46 @@ describes.repeated(
               });
             });
           });
+        });
+
+        it('should degrade trust across submit-* in AMP4EMAIL', async () => {
+          const form = getForm();
+          form.ownerDocument.documentElement.setAttribute('amp4email', '');
+
+          const actions = {
+            installActionHandler: () => {},
+            trigger: sandbox.spy(),
+          };
+          sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+
+          sandbox.stub(Services, 'xhrFor').returns({
+            fetch: () => Promise.resolve({json: () => Promise.resolve()}),
+          });
+
+          const ampForm = await getAmpForm(form);
+          await ampForm.handleSubmitEvent_(new Event('fake_submit'));
+
+          // 1x 'submit' and 1x 'submit-success'.
+          expect(actions.trigger.callCount).to.equal(2);
+          expect(actions.trigger.getCall(1)).to.be.calledWith(
+            form,
+            'submit-success',
+            /* CustomEvent */ sinon.match.has('detail'),
+            ActionTrust.DEFAULT // Expect: ActionTrust.HIGH - 1
+          );
+
+          await ampForm.handleSubmitAction_({
+            method: 'submit',
+            trust: ActionTrust.DEFAULT,
+          });
+
+          expect(actions.trigger.callCount).to.equal(4);
+          expect(actions.trigger.getCall(3)).to.be.calledWith(
+            form,
+            'submit-success',
+            /* CustomEvent */ sinon.match.has('detail'),
+            ActionTrust.LOW // Expect: ActionTrust.DEFAULT - 1
+          );
         });
 
         it('should manage form state classes (submitting, success)', () => {

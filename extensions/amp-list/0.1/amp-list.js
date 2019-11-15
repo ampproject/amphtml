@@ -156,21 +156,15 @@ export class AmpList extends AMP.BaseElement {
     /**@private {?UnlistenDef} */
     this.unlistenAutoLoadMore_ = null;
 
-    this.registerAction(
-      'refresh',
-      () => {
-        if (this.layoutCompleted_) {
-          this.resetIfNecessary_();
-          return this.fetchList_(/* opt_refresh */ true);
-        }
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('refresh', () => {
+      if (this.layoutCompleted_) {
+        this.resetIfNecessary_();
+        return this.fetchList_(/* opt_refresh */ true);
+      }
+    });
 
-    this.registerAction(
-      'changeToLayoutContainer',
-      () => this.changeToLayoutContainer_(),
-      ActionTrust.HIGH
+    this.registerAction('changeToLayoutContainer', () =>
+      this.changeToLayoutContainer_()
     );
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
