@@ -183,6 +183,18 @@ describe('amp-img', () => {
     });
   });
 
+  it('should propagate data attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      'data-foo': 'abc',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-foo')).to.equal('abc');
+    });
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
