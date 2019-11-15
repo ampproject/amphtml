@@ -64,6 +64,7 @@ import {
   removeAttributeInMutate,
   setAttributeInMutate,
   setHistoryState,
+  shouldShowStoryUrlInfo,
 } from './utils';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
@@ -1019,7 +1020,7 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = this.viewer_.isEmbedded()
+        const infoDialog = shouldShowStoryUrlInfo(this.viewer_)
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {

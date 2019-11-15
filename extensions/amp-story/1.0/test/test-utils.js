@@ -17,6 +17,7 @@
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
+  shouldShowStoryUrlInfo,
   timeStrToMillis,
 } from '../utils';
 
@@ -93,6 +94,40 @@ describes.fakeWin('amp-story utils', {}, () => {
 
     it('should return white for a light background', () => {
       expect(getTextColorForRGB({r: 200, g: 200, b: 200})).to.equal('#000');
+    });
+  });
+
+  describe('shouldShowStoryUrlInfo', () => {
+    it('should be true when isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => true,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
+    });
+
+    it('should be forced to false when isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => '0',
+        isEmbedded: () => true,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+    });
+
+    it('should be false when !isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => false,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+    });
+
+    it('should be forced to true when !isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => '1',
+        isEmbedded: () => false,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
     });
   });
 });
