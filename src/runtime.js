@@ -902,7 +902,7 @@ export class MultidocManager {
         'Timeout reached waiting for visibility state change callback'
       )
       .catch(error => {
-        user().warn(TAG, error);
+        user().info(TAG, error);
       });
   }
 
