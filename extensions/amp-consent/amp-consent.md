@@ -247,6 +247,31 @@ See the following section to understand the different amp-consent behavior for u
 If `useCache=true` & `checkConsentHref=endpoint`, it means AMP will check cache and server endpoint in pararell. If cache has a value, use it, otherwise wait for the server response. 
 
 
+
+Another Proposal (Feel free to remove afterwards)
+```json
+{
+  "consentRequiredGeoGroup": ["geo1", "geeo2"],
+  "promptIfUnknownForGeo": "geo1",
+  "checkConsentHref": "https://endpoint.com/check-consent",
+  "promptUI": "consent-ui",
+}
+```
+For users in `geo1`, geo will override `checkConsentHref`
+For users in `geo2`, need to wait for `checkConsentHref` 
+
+`checkConsentHref` returns
+```
+{
+  'promptIfUnknown': boolean, (only used to instruct prompt)
+  'sharedData': object //optional
+  'consentState': enum // optional, when value is set promptIfUnknow will be ignored.
+  'consentString': string //optional
+  'setDirty': boolean //optional
+}
+```
+
+
 ## Consent Management
 
 The `<amp-consent>` element supports customizing the consent prompt UI and post-prompt UI, which can be used to manage consent.
