@@ -49,7 +49,7 @@ export class AutocompleteBindingDef {
    * @param {string} unusedUserInput
    * @param {!HTMLInputElement} unusedInputEl
    */
-  resetValue(unusedUserInput, unusedInputEl) {}
+  resetInput(unusedUserInput, unusedInputEl) {}
 
   /**
    * Whether or not the autocomplete can abide by the "suggest-first" attribute

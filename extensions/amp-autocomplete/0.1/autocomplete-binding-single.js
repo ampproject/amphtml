@@ -23,7 +23,7 @@
 export class AutocompleteBindingSingle {
   /**
    * Always try to autocomplete.
-   * @param {?HTMLInputElement} unusedInputEl
+   * @param {!HTMLInputElement} unusedInputEl
    * @return {boolean}
    */
   shouldAutocomplete(unusedInputEl) {
@@ -55,7 +55,7 @@ export class AutocompleteBindingSingle {
    * @param {string} userInput
    * @param {!HTMLInputElement} inputEl
    */
-  resetValue(userInput, inputEl) {
+  resetInput(userInput, inputEl) {
     inputEl.value = userInput;
   }
 

@@ -1068,7 +1068,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   displayUserInput_() {
-    this.binding_.resetValue(
+    this.binding_.resetInput(
       this.userInput_,
       dev().assertElement(this.inputElement_)
     );

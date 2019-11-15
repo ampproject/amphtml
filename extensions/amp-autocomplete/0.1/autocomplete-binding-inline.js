@@ -131,7 +131,7 @@ export class AutocompleteBindingInline {
    * @param {string} unusedUserInput
    * @param {!HTMLInputElement} unusedInputEl
    */
-  resetValue(unusedUserInput, unusedInputEl) {}
+  resetInput(unusedUserInput, unusedInputEl) {}
 
   /**
    * Always accept the "suggest-first" attribute regardless of filter type.
