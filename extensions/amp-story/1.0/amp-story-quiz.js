@@ -77,8 +77,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.attachContent_();
     this.attachOptionActionHandlers_();
     createShadowRootWithStyle(this.element, this.quizElt_, CSS);
-
-    // TODO(jackbsteinberg): Add support for custom CSS to appropriate areas
   }
 
   /** @override */
@@ -170,7 +168,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     // Add a click listener to the element to handle option selection and navigation via tapping the prompt
     this.element.addEventListener('click', e => {
       let resolved = false;
-      console.log(e);
       e.composedPath().forEach(p => {
         if (resolved) {
           return;
