@@ -25,23 +25,23 @@ export function nativery(global, data) {
   const params = Object.assign({}, data);
 
   // push the two object into the '_nativery' global
-  window._nativery =
-    window._nativery ||
+  global._nativery =
+  global._nativery ||
     Object.assign(
       {},
       {
         wid: data.wid,
-        referrer: data.referrer || window.context.referrer,
-        url: data.url || window.context.canonicalUrl,
-        viewId: window.context.pageViewId,
+        referrer: data.referrer || global.context.referrer,
+        url: data.url || global.context.canonicalUrl,
+        viewId: global.context.pageViewId,
         params,
       }
     );
 
   // must add listener for resize
-  window.addEventListener('amp-widgetCreated', function(e) {
-    if (e && e.getDetail) {
-      global.context.requestResize(undefined, e.getDetail.height);
+  global.addEventListener('amp-widgetCreated', function(e) {
+    if (e && e.detail) {
+      global.context.requestResize(undefined, e.detail.height);
     }
   });
 
