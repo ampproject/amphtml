@@ -283,6 +283,41 @@ describes.realWin(
         execute(impl, 'close');
       });
 
+      it('close on history back', async () => {
+        const sidebarElement = await getAmpSidebar({'stubHistory': true});
+        const impl = sidebarElement.implementation_;
+
+        execute(impl, 'open');
+
+        // history "back"
+        const history = impl.getHistory_();
+        history.push.firstCall.args[0]();
+        await new Promise(resolve => {
+          sandbox.stub(impl.action_, 'trigger').callsFake((element, name) => {
+            if (name == 'sidebarClose') {
+              resolve();
+            }
+          });
+        });
+
+        expect(sidebarElement).to.have.display('none');
+      });
+
+      it('close on history back immediately for iOS', async () => {
+        sandbox.stub(platform, 'isIos').returns(true);
+        sandbox.stub(platform, 'isSafari').returns(true);
+
+        const sidebarElement = await getAmpSidebar({'stubHistory': true});
+        const impl = sidebarElement.implementation_;
+
+        execute(impl, 'open');
+        // history "back"
+        const history = impl.getHistory_();
+        history.push.firstCall.args[0]();
+
+        expect(sidebarElement).to.have.display('none');
+      });
+
       it('should close sidebar on button click', async () => {
         const sidebarElement = await getAmpSidebar({'stubHistory': true});
         const impl = sidebarElement.implementation_;

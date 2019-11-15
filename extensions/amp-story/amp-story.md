@@ -249,7 +249,7 @@ The `amp-story` component represents an entire story. The component itself imple
 
 <table>
   <tr id="standalone">
-    <td width="40%"><strong">standalone [required]</strong></td>
+    <td width="40%"><strong>standalone [required]</strong></td>
     <td>Identifies that the AMP document is a story.</td>
   </tr>
   <tr id="title">

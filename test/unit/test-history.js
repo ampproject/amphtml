@@ -669,10 +669,9 @@ describes.sandboxed('HistoryBindingVirtual', {}, () => {
     it('viewer does not support responses', () => {
       return history.push().then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1}
-        );
+        expect(
+          viewer.sendMessageAwaitResponse
+        ).to.be.calledWithMatch('pushHistory', {stackIndex: 1});
 
         expect(state.stackIndex).to.equal(1);
         expect(history.stackIndex_).to.equal(1);
@@ -690,10 +689,9 @@ describes.sandboxed('HistoryBindingVirtual', {}, () => {
 
       return history.push({title}).then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
+        expect(
+          viewer.sendMessageAwaitResponse
+        ).to.be.calledWithMatch('pushHistory', {stackIndex: 1, title});
 
         expect(state.stackIndex).to.equal(1);
         expect(history.stackIndex_).to.equal(1);
@@ -711,10 +709,9 @@ describes.sandboxed('HistoryBindingVirtual', {}, () => {
 
       return history.push({title}).then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
+        expect(
+          viewer.sendMessageAwaitResponse
+        ).to.be.calledWithMatch('pushHistory', {stackIndex: 1, title});
 
         expect(state.stackIndex).to.equal(1);
         expect(history.stackIndex_).to.equal(1);
@@ -885,10 +882,9 @@ describes.sandboxed('HistoryBindingVirtual', {}, () => {
 
       return history.push({title}).then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
+        expect(
+          viewer.sendMessageAwaitResponse
+        ).to.be.calledWithMatch('pushHistory', {stackIndex: 1, title});
 
         expect(state).to.deep.equal({stackIndex: 1, title});
         expect(onStateUpdated).to.be.calledOnce;

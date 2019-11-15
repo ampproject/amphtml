@@ -914,7 +914,11 @@ describe
                     headers: {
                       'Content-Type': 'multipart/form-data;charset=utf-8',
                     },
-                    body: [['a', '42'], ['b', '24'], ['b', 'true']],
+                    body: [
+                      ['a', '42'],
+                      ['b', '24'],
+                      ['b', 'true'],
+                    ],
                     method: 'POST',
                   },
                 },
@@ -963,7 +967,10 @@ describe
               init: {
                 status: 242,
                 statusText: 'Magic status',
-                headers: [['a', 2], ['b', false]],
+                headers: [
+                  ['a', 2],
+                  ['b', false],
+                ],
               },
             })
           );
@@ -1001,7 +1008,10 @@ describe
               init: {
                 status: 242,
                 statusText: 'Magic status',
-                headers: [['a', 2], ['b', false]],
+                headers: [
+                  ['a', 2],
+                  ['b', false],
+                ],
               },
             })
           );
@@ -1082,7 +1092,11 @@ describe
           sendMessageStub.returns(
             Promise.resolve({
               init: {
-                headers: [[1, true], [false, NaN], [undefined, null]],
+                headers: [
+                  [1, true],
+                  [false, NaN],
+                  [undefined, null],
+                ],
               },
             })
           );
