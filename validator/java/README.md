@@ -66,20 +66,21 @@ The parser can be used beyond the first document, to truncate initialization tim
 ## Issues
 
 The are several known bugs in the validation output.
+
 - the DOCTYPE tag is assumed to exist. Documents without the tag will fail to return an error.
 - Observance of afterbody mode is not implemented. Tags that appear following a body closing tag should be interpreted as within the body tag. Specs that mandate relationships between tags and ancestors related to the body tag will not account for this behavior and will return unexpected errors.
 - Attributes are de-duped by the internal html parser (the last value assigned to an attribute is the one returned to the handler). This leads to discrepancies in attribute validation to do with validation of the uniqueness of attributes and unexpected behavior in value validation.
 - Attributes are sanitized for disallowed characters. This affects operators with contextual meaning such as '{' or '['. This will affect amp-mustache tag validation.
 - Validation of URLs found within the HTML document may not return the same errors as the Node.js implementation. This stems from the fact that the internal URL library is lenient in terms of validating hostnames and characters used within the URL.
 - The parser obfuscates Unicode values, this is grievous as the amp symbol is never discovered (⚡), this package only handles the literal "amp4email."
-Importantly, this validator prioritizes amp4email html content, enforcement of validator logic for other formats is not guaranteed.
+  Importantly, this validator prioritizes amp4email html content, enforcement of validator logic for other formats is not guaranteed.
 - CSS validation does not yet configure for a max nodes value
 
 ## Contribute
 
 Please refer to the [Contributing.md](Contributing.md) file for information about how to get involved. We welcome issues, questions, and pull requests. Pull Requests are welcome.
 
-## License 
+## License
 
 This project is licensed under the terms of the [Apache 2.0](LICENSE-Apache-2.0) open source license. Please refer to [LICENSE](LICENSE) for the full terms.
 
