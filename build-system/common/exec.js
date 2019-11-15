@@ -21,8 +21,7 @@
 
 const childProcess = require('child_process');
 
-const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/sh';
-const shellFlag = process.platform == 'win32' ? '/C' : '-c';
+const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
 
 /**
  * Spawns the given command in a child process with the given options.
@@ -32,7 +31,7 @@ const shellFlag = process.platform == 'win32' ? '/C' : '-c';
  * @return {!Object}
  */
 function spawnProcess(cmd, options) {
-  return childProcess.spawnSync(shellCmd, [shellFlag, cmd], options);
+  return childProcess.spawnSync(cmd, Object.assign({shell: shellCmd}, options));
 }
 
 /**
@@ -56,7 +55,7 @@ function exec(cmd, options) {
  * @return {!Object}
  */
 function execScriptAsync(script, options) {
-  return childProcess.spawn(shellCmd, [shellFlag, script], options);
+  return childProcess.spawn(script, Object.assign({shell: shellCmd}, options));
 }
 
 /**

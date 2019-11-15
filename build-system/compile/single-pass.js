@@ -46,6 +46,7 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
@@ -715,8 +716,15 @@ function compile(flagsArray) {
         handleSinglePassCompilerError();
         reject(err);
       })
+      .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
+      .on('error', reject)
       .pipe(sourcemaps.write('.'))
-      .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
+      .pipe(
+        gulpIf(
+          /(\/amp-|\/_base)/,
+          rename(path => (path.dirname += '/v0'))
+        )
+      )
       .pipe(gulp.dest('.'))
       .on('end', resolve);
   });

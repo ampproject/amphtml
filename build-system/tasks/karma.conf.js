@@ -256,21 +256,19 @@ module.exports = {
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_Edge_17: Object.assign(
+    SL_Edge: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'MicrosoftEdge',
         platform: 'Windows 10',
-        version: '17.17134',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_IE_11: Object.assign(
+    SL_IE: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'internet explorer',
         platform: 'Windows 10',
-        version: '11.103',
       },
       SAUCE_TIMEOUT_CONFIG
     ),

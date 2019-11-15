@@ -40,7 +40,7 @@ import {
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
-import {disposeServicesForDoc} from './service';
+import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
 import {
@@ -53,6 +53,7 @@ import {
 } from './service/extensions-impl';
 import {installStylesForDoc} from './style-installer';
 import {internalRuntimeVersion} from './internal-version';
+import {isArray, isObject} from './types';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
@@ -65,6 +66,25 @@ setReportError(reportErrorForWin.bind(null, self));
 
 /** @const @private {string} */
 const TAG = 'runtime';
+
+/**
+ * @typedef {{
+ *  url: (string|undefined),
+ *  title: (string|undefined),
+ *  canonicalUrl: (string|undefined),
+ *  head: (Element|undefined),
+ *  ampdoc: (!./service/ampdoc-impl.AmpDoc | undefined),
+ *  setVisibilityState: (function(!VisibilityState)|undefined),
+ *  postMessage: (function()|undefined),
+ *  onMessage: (function()|undefined),
+ *  close: (function()|undefined),
+ *  getState: (function()|undefined),
+ *  setState: (function()|undefined),
+ *  toggleRuntime: (function()|undefined),
+ *  resources: (!./service/resources-interface.ResourcesInterface | undefined)
+ * }}
+ */
+export let ShadowDoc;
 
 /**
  * Applies the runtime to a given global scope for a single-doc mode. Multi
@@ -419,7 +439,7 @@ export class MultidocManager {
    * @param {!Object<string, string>|undefined} params
    * @param {function(!Object, !ShadowRoot,
    * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
-   * @return {!Object}
+   * @return {!ShadowDoc}
    * @private
    */
   attachShadowDoc_(hostElement, url, params, builder) {
@@ -429,6 +449,9 @@ export class MultidocManager {
     setStyle(hostElement, 'visibility', 'hidden');
     const shadowRoot = createShadowRoot(hostElement);
 
+    // TODO: closeShadowRoot_ is asynchronous. While this safety check is well
+    // intentioned, it leads to a race between unlayout and layout of custom
+    // elements.
     if (shadowRoot.AMP) {
       user().warn(TAG, "Shadow doc wasn't previously closed");
       this.closeShadowRoot_(shadowRoot);
@@ -502,16 +525,54 @@ export class MultidocManager {
     }, origin);
 
     /**
-     * Closes the document. The document can no longer be activated again.
+     * Closes the document, resolving when visibility changes and services have
+     * been cleand up. The document can no longer be activated again.
+     * @return {Promise}
      */
     amp['close'] = () => {
-      this.closeShadowRoot_(shadowRoot);
+      return this.closeShadowRoot_(shadowRoot);
     };
 
     if (getMode().development) {
       amp.toggleRuntime = viewer.toggleRuntime.bind(viewer);
       amp.resources = Services.resourcesForDoc(ampdoc);
     }
+
+    /**
+     * Expose amp-bind getState
+     * @param {string} name - Name of state or deep state
+     * @return {Promise<*>} - Resolves to a copy of the value of a state
+     */
+    amp['getState'] = name => {
+      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+        if (!bind) {
+          return Promise.reject('amp-bind is not available in this document');
+        }
+        return bind.getState(name);
+      });
+    };
+
+    /**
+     * Expose amp-bind setState
+     * @param {(!JsonObject|string)} state - State to be set
+     * @return {Promise} - Resolves after state and history have been updated
+     */
+    amp['setState'] = state => {
+      return Services.bindForDocOrNull(shadowRoot).then(bind => {
+        if (!bind) {
+          return Promise.reject('amp-bind is not available in this document');
+        }
+        if (typeof state === 'string') {
+          return bind.setStateWithExpression(
+            /** @type {string} */ (state),
+            /** @type {!JsonObject} */ ({})
+          );
+        } else if (isObject(state) || isArray(state)) {
+          return bind.setStateWithObject(/** @type {!JsonObject} */ (state));
+        }
+        return Promise.reject('Invalid state');
+      });
+    };
 
     // Start building the shadow doc DOM.
     builder(amp, shadowRoot, ampdoc).then(() => {
@@ -537,7 +598,7 @@ export class MultidocManager {
    * @param {!Document} doc
    * @param {string} url
    * @param {!Object<string, string>=} opt_initParams
-   * @return {!Object}
+   * @return {!ShadowDoc}
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
     dev().fine(TAG, 'Attach shadow doc:', doc);
@@ -805,6 +866,7 @@ export class MultidocManager {
 
   /**
    * @param {!ShadowRoot} shadowRoot
+   * @return {Promise}
    * @private
    */
   closeShadowRoot_(shadowRoot) {
@@ -814,6 +876,34 @@ export class MultidocManager {
     const {ampdoc} = amp;
     ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
+
+    // There is a race between the visibility state change finishing and
+    // resources.onNextPass firing, but this is intentional. closeShadowRoot_
+    // was traditionally introduced as a synchronous method, so PWAs in the wild
+    // do not expect to have to wait for a promise to resolve before the shadow
+    // is deemed 'closed'. Moving .overrideVisibilityState() and
+    // disposeServicesForDoc inside a promise could adversely affect sites that
+    // depend on at least the synchronous portions of those methods completing
+    // before proceeding. The promise race is designed to be very quick so that
+    // even if the pass callback completes before resources.onNextPass is called
+    // below, we only delay promise resolution by a few ms.
+    return this.timer_
+      .timeoutPromise(
+        15, // Delay for queued pass after visibility change is 10ms
+        new this.win.Promise(resolve => {
+          getServicePromiseOrNullForDoc(ampdoc, 'resources').then(resources => {
+            if (resources) {
+              resources.onNextPass(resolve);
+            } else {
+              resolve();
+            }
+          });
+        }),
+        'Timeout reached waiting for visibility state change callback'
+      )
+      .catch(error => {
+        user().warn(TAG, error);
+      });
   }
 
   /**

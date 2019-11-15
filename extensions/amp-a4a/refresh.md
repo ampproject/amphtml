@@ -15,6 +15,7 @@ limitations under the License.
 -->
 
 # AMP Ad Refresh
+
 AMP Ad Refresh permits amp-ad tags using Fast Fetch to undergo periodic refresh events. Each such event issues a new ad request and attempts to display the returned creative.
 
 ### Network Configuration
@@ -41,8 +42,13 @@ import {
 
 // ...
 
-const refreshConfig = { /* see table below for configuration parameters */ };
-const refreshInterval = getPublisherSpecifiedRefreshInterval(this.element, this.win);
+const refreshConfig = {
+  /* see table below for configuration parameters */
+};
+const refreshInterval = getPublisherSpecifiedRefreshInterval(
+  this.element,
+  this.win
+);
 const refreshManager = new RefreshManager(this, refreshConfig, refreshInterval);
 refreshManager.initiateRefreshCycle();
 ```

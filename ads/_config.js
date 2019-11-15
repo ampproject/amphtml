@@ -360,6 +360,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  'conative': {
+    renderStartImplemented: true,
+  },
+
   'connatix': {
     renderStartImplemented: true,
   },
@@ -415,6 +419,11 @@ const adConfig = jsonConfiguration({
 
   'eas': {
     prefetch: 'https://amp.emediate.eu/amp.v0.js',
+    renderStartImplemented: true,
+  },
+
+  'empower': {
+    prefetch: 'https://cdn.empower.net/sdk/amp-ad.min.js',
     renderStartImplemented: true,
   },
 
@@ -543,6 +552,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'insticator': {
+    preconnect: 'https://d3lcz8vpax4lo2.cloudfront.net', // can also be array if more than one URL needed
+    renderStartImplemented: true,
+  },
+
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     renderStartImplemented: true,
@@ -622,15 +636,6 @@ const adConfig = jsonConfiguration({
       'https://mantodea.mantisadnetwork.com',
       'https://resize.mantisadnetwork.com',
     ],
-  },
-
-  'mediaimpact': {
-    prefetch: 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
-    preconnect: [
-      'https://ww251.smartadserver.com',
-      'https://static.sascdn.com/',
-    ],
-    renderStartImplemented: true,
   },
 
   'medianet': {
@@ -981,6 +986,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'springAds': {
+    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
+    preconnect: ['https://ib.adnxs.com'],
+    renderStartImplemented: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
@@ -1024,6 +1035,11 @@ const adConfig = jsonConfiguration({
   },
 
   'torimochi': {
+    renderStartImplemented: true,
+  },
+
+  'tracdelight': {
+    prefetch: 'https://scripts.tracdelight.io/amp.js',
     renderStartImplemented: true,
   },
 

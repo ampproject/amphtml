@@ -30,7 +30,7 @@ SVK Native is a content discovery platform. Please visit our [svk-native.ru](htt
 
 ## Configuration
 
-For details on the configuration semantics, please contact your SVK Native personal manager. 
+For details on the configuration semantics, please contact your SVK Native personal manager.
 
 ### Required parameters
 
