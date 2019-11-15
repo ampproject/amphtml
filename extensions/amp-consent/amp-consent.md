@@ -107,7 +107,7 @@ AMP sends the consent instance ID in the `consentInstanceId` field with the POST
 ```html
 { 
   "consentInstanceId": "my-consent",
-  "matchedGeoGroup": "geo1", // (new)
+  "matchedGeoGroup": "geo1", // (new) the user's geoGroup detected by AMP.
 }
 ```
 
@@ -117,9 +117,11 @@ AMP expects the response to be a JSON object like the following:
 
 ```html
 { 
-  "promptIfUnknown": {boolean}, // instructs AMP whether to collect consent
+  "promptIfUnknown": {boolean} [default: true], // instructs AMP whether to collect consent
   "consentState": {enum} [default: null], // (new) the latest consent state known by the server
-  "useCache": {boolean} [default: true] // (new) whether to store consent state to client cache to avoid blocking request for user's next visit. Set to `false` if strict server-client syncing is required.
+  "setCache": {boolean} [default: true] // (new) whether to store consent state to local cache to 
+                                        // avoid blocking request for user's next visit. 
+                                        // Set to `false` if strict server-client syncing is required.
 }
 ```
 
@@ -144,7 +146,7 @@ current user to the 3rd party vendor extensions.
 Unlike consent state, this `shareData` is not persisted in client side storage.
 
 #### promptIfUnknown
-`promptIfUnknown`: Instructs AMP whether to collect consent if user consent is unknown. It takes boolean values. It also can be set to `promptIfUnknown: "waitForCheckConsent"` to read the value from the response of `checkConsentHref` XHR.
+`promptIfUnknown`: Instructs AMP whether to collect consent if previous consent is unknown. It takes boolean values. It also can be set to `promptIfUnknown: "fromCheckConsent"` to read from the server response of `checkConsentHref`.
 
 #### onUpdateHref
 
@@ -165,7 +167,7 @@ true/false, }
 
 #### geoOverride
 
-`geoOverride` provides a way to utilize the `<amp-geo>` component to detect user's geo location to assist on client side decisions. 
+`geoOverride` provides a way to utilize the `<amp-geo>` component to detect user's geo location to assist client side decisions. 
 
 `geoOverride` is a JSON object keyed by geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). Each geo override should be a valid `<amp-consent>` config object. AMP will take all the values in the corresponding `geoOverride` to override the existing config. 
 
@@ -188,7 +190,7 @@ Take the following config as an example:
     }, 
     "geo2": {
       "checkConsentHref": "https://example.com/check-consent",
-      "promptIfUnknown": "waitForCheckConsent",
+      "promptIfUnknown": "fromCheckConsent",
     },
     "unknown": {
       "checkConsentHref": "https://example.com/check-consent",
@@ -206,7 +208,7 @@ For users outside `geo1`, `geo2` & `uknown`, the merged config is
   "promptIfUnknown": false,
 }
 ```
-Because `checkConsentHref` is not specified, the consent decision will be made client side based local cache. No consent will be collected as `"promptIfUnknown": false`.
+The previous consent state is read from local cache as `checkConsentHref` is not specified. No consent will be collected even if cache is empty because `"promptIfUnknown": false`.
 
 
 For users in `geo1`, the merged config is
@@ -217,7 +219,7 @@ For users in `geo1`, the merged config is
   "promptIfUnknown": true,
 }
 ```
-Because `checkConsentHref` is not specified, the consent decision will be made client side based local cache. Consent will be collected if cache is empty.
+The previous consent state is read from local cache as `checkConsentHref` is not specified. Consent will be collected if cache is empty.
 
 
 For users in `geo2`, the merged config is
@@ -226,13 +228,13 @@ For users in `geo2`, the merged config is
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
   "checkConsentHref": "https://example.com/check-consent",
-  "promptIfUnknown": "waitForCheckConsent",
+  "promptIfUnknown": "fromCheckConsent",
 }
 ```
-Because `"promptIfUnknown": "waitForCheckConsent"`, AMP will wait for `checkConsentHref` request to return to decide if consent needs to be collected.
+AMP will wait for `checkConsentHref` response to decide whether collect consent. The consent state from server (if returned) takes precedence over the value from local cache.
 
 
-For users in `unknown`, , the merged config is
+For users in `unknown`, the merged config is
 ```
 {
   "onUpdateHref": "https://example.com/update-consent",
