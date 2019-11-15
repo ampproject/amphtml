@@ -27,8 +27,12 @@ export class AutocompleteBindingInline {
   /**
    * Stores the regex match value associated with the portion of the user input to suggest against.
    * For use when "inline_" is true.
+   * @param {string} trigger
    */
-  constructor() {
+  constructor(trigger) {
+    /** @private {string} */
+    this.trigger_ = trigger;
+
     /** @private {?RegExpResult} */
     this.match_ = null;
   }
@@ -36,12 +40,11 @@ export class AutocompleteBindingInline {
   /**
    * Returns true if a match on the publisher-provided trigger is found in the input element value.
    * Otherwise, should not display any suggestions.
-   * @param {string} trigger
    * @param {!HTMLInputElement} inputEl
    * @return {boolean}
    */
-  shouldAutocomplete(trigger, inputEl) {
-    const match = this.getClosestPriorMatch_(trigger, inputEl);
+  shouldAutocomplete(inputEl) {
+    const match = this.getClosestPriorMatch_(this.trigger_, inputEl);
     this.match_ = match;
     return !!match;
   }
@@ -84,15 +87,14 @@ export class AutocompleteBindingInline {
   /**
    * Display suggestions based on the partial string following the trigger
    * in the input element value.
-   * @param {string} trigger
    * @param {!HTMLInputElement} unusedInputEl
    * @return {string}
    */
-  updateUserInput(trigger, unusedInputEl) {
+  updateUserInput(unusedInputEl) {
     if (!this.match_ || !this.match_[0]) {
       return '';
     }
-    return this.match_[0].slice(trigger.length);
+    return this.match_[0].slice(this.trigger_.length);
   }
 
   /**
@@ -101,10 +103,9 @@ export class AutocompleteBindingInline {
    * @param {string} selection
    * @param {!HTMLInputElement} inputEl
    * @param {number} inputLength
-   * @param {string} trigger
    * @return {string}
    */
-  updateInputWithSelection(selection, inputEl, inputLength, trigger) {
+  updateInputWithSelection(selection, inputEl, inputLength) {
     if (!this.match_) {
       return inputEl.value;
     }
@@ -121,8 +122,8 @@ export class AutocompleteBindingInline {
 
     const {value} = inputEl;
 
-    const pre = value.slice(0, startIndex + trigger.length);
-    const post = value.slice(startIndex + trigger.length + inputLength);
+    const pre = value.slice(0, startIndex + this.trigger_.length);
+    const post = value.slice(startIndex + this.trigger_.length + inputLength);
     return pre + selection + ' ' + post;
   }
 

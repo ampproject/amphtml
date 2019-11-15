@@ -138,12 +138,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.highlightUserEntry_ = false;
 
     /**
-     * The value of the "inline" attribute on amp-autocomplete.
-     * @private {string}
-     */
-    this.trigger_ = '';
-
-    /**
      * The base value obtained from the "src" attribute on amp-autocomplete.
      * Used for creating static network endpoints. See generateSrc_.
      * @private {string}
@@ -233,19 +227,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
 
-    const isInline = this.element.hasAttribute('inline');
-    this.binding_ = isInline
-      ? new AutocompleteBindingInline()
-      : new AutocompleteBindingSingle();
-    this.trigger_ = this.element.getAttribute('inline');
+    const inlineTrigger = this.element.getAttribute('inline');
+    if (this.element.hasAttribute('inline')) {
+      userAssert(
+        inlineTrigger !== '',
+        `${TAG} currently does not support an empty value for the "inline" attr. %s`,
+        this.element
+      );
+    }
+    this.binding_ = this.createBinding_(inlineTrigger);
     userAssert(
-      !isInline || isExperimentOn(this.win, 'amp-autocomplete'),
+      !inlineTrigger || isExperimentOn(this.win, 'amp-autocomplete'),
       `Experiment ${TAG} is not turned on for "inline" attr. %s`,
-      this.element
-    );
-    userAssert(
-      this.trigger_ !== '',
-      `${TAG} currently does not support an empty value for the "inline" attr. %s`,
       this.element
     );
 
@@ -348,6 +341,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
+  }
+
+  /**
+   * Creates a binding associated with singular autocomplete or
+   * inline autocomplete depending on the given specification.
+   * @param {?string} inlineTrigger
+   * @return {AutocompleteBindingDef}
+   */
+  createBinding_(inlineTrigger) {
+    return inlineTrigger
+      ? new AutocompleteBindingInline(inlineTrigger)
+      : new AutocompleteBindingSingle();
   }
 
   /**
@@ -540,10 +545,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   inputHandler_() {
     if (
-      this.binding_.shouldAutocomplete(
-        this.trigger_,
-        dev().assertElement(this.inputElement_)
-      )
+      this.binding_.shouldAutocomplete(dev().assertElement(this.inputElement_))
     ) {
       return this.maybeFetchAndAutocomplete_();
     }
@@ -563,7 +565,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const isFirstInteraction =
       this.userInput_.length === 0 && this.inputElement_.value.length === 1;
     this.userInput_ = this.binding_.updateUserInput(
-      this.trigger_,
       dev().assertElement(this.inputElement_)
     );
 
@@ -964,13 +965,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.value = this.binding_.updateInputWithSelection(
       selectedValue,
       this.inputElement_,
-      this.userInput_.length,
-      this.trigger_
+      this.userInput_.length
     );
-    this.userInput_ = this.binding_.updateUserInput(
-      this.trigger_,
-      this.inputElement_
-    );
+    this.userInput_ = this.binding_.updateUserInput(this.inputElement_);
   }
 
   /**

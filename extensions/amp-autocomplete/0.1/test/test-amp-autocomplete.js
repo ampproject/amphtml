@@ -405,8 +405,7 @@ describes.realWin(
         remoteDataSpy;
 
       it('should only clear items if binding should not autocomplete', () => {
-        impl.binding_ = new AutocompleteBindingInline();
-        impl.trigger_ = '@';
+        impl.binding_ = new AutocompleteBindingInline('@');
         return element
           .layoutCallback()
           .then(() => {
@@ -423,8 +422,7 @@ describes.realWin(
       });
 
       it('should only fetch data when autocompleting for email', () => {
-        impl.binding_ = new AutocompleteBindingInline();
-        impl.trigger_ = '@';
+        impl.binding_ = new AutocompleteBindingInline('@');
         sandbox.stub(impl.binding_, 'getClosestPriorMatch_').returns(['abc']);
         return element
           .layoutCallback()
@@ -519,7 +517,7 @@ describes.realWin(
       });
 
       it('should displayUserInput_ when looping on Down arrow for single', () => {
-        impl.binding_ = new AutocompleteBindingInline();
+        impl.binding_ = new AutocompleteBindingInline('@');
         sandbox.stub(impl, 'resultsShowing_').returns(true);
         return element
           .layoutCallback()
@@ -631,7 +629,7 @@ describes.realWin(
       it('should do nothing when there is no active item for inline', () => {
         return layoutAndSetSpies()
           .then(() => {
-            impl.binding_ = new AutocompleteBindingInline();
+            impl.binding_ = new AutocompleteBindingInline('@');
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -680,7 +678,7 @@ describes.realWin(
       it('should call event.preventDefault when active element exists for inline', () => {
         return layoutAndSetSpies()
           .then(() => {
-            impl.binding_ = new AutocompleteBindingInline();
+            impl.binding_ = new AutocompleteBindingInline('@');
             impl.submitOnEnter_ = true;
             impl.activeElement_ = impl.createElementFromItem_('abc');
             sandbox.stub(impl, 'resultsShowing_').returns(true);
@@ -888,8 +886,7 @@ describes.realWin(
     });
 
     it('should do nothing on select for inline with empty trigger', () => {
-      impl.binding_ = new AutocompleteBindingInline();
-      impl.trigger_ = '';
+      impl.binding_ = new AutocompleteBindingInline('');
       const mockEl = doc.createElement('div');
       const updateSpy = sandbox.spy(impl.binding_, 'updateInputWithSelection');
       return element
@@ -912,8 +909,7 @@ describes.realWin(
     });
 
     it('should partially replace input on select for inline with reasonable trigger', () => {
-      impl.binding_ = new AutocompleteBindingInline();
-      impl.trigger_ = '@';
+      impl.binding_ = new AutocompleteBindingInline('@');
       const mockEl = doc.createElement('div');
       const updateSpy = sandbox.spy(impl.binding_, 'updateInputWithSelection');
       return element

@@ -23,21 +23,19 @@
 export class AutocompleteBindingSingle {
   /**
    * Always try to autocomplete.
-   * @param {string} unusedTrigger
    * @param {?HTMLInputElement} unusedInputEl
    * @return {boolean}
    */
-  shouldAutocomplete(unusedTrigger, unusedInputEl) {
+  shouldAutocomplete(unusedInputEl) {
     return true;
   }
 
   /**
    * The user input for generating suggestions is the full entry in the input element so far.
-   * @param {string} unusedTrigger
    * @param {?HTMLInputElement} inputEl
    * @return {string}
    */
-  updateUserInput(unusedTrigger, inputEl) {
+  updateUserInput(inputEl) {
     return inputEl.value || '';
   }
 
@@ -46,15 +44,9 @@ export class AutocompleteBindingSingle {
    * @param {string} selection
    * @param {!HTMLInputElement} unusedInputEl
    * @param {number} unusedInputLength
-   * @param {string} unusedTrigger
    * @return {string}
    */
-  updateInputWithSelection(
-    selection,
-    unusedInputEl,
-    unusedInputLength,
-    unusedTrigger
-  ) {
+  updateInputWithSelection(selection, unusedInputEl, unusedInputLength) {
     return selection;
   }
 

@@ -23,34 +23,26 @@ export class AutocompleteBindingDef {
   /**
    * Whether the binding should attempt to display
    * autocomplete suggestions on user input.
-   * @param {string} unusedTrigger
    * @param {!HTMLInputElement} unusedInputEl
    * @return {boolean}
    */
-  shouldAutocomplete(unusedTrigger, unusedInputEl) {}
+  shouldAutocomplete(unusedInputEl) {}
 
   /**
    * The value to use as the partial user input when generating autocomplete suggestions
-   * @param {string} unusedTrigger
    * @param {!HTMLInputElement} unusedInputEl
    * @return {string}
    */
-  updateUserInput(unusedTrigger, unusedInputEl) {}
+  updateUserInput(unusedInputEl) {}
 
   /**
    * The value to show in the user input element after a suggestion has been selected
    * @param {string} unusedSelection
    * @param {!HTMLInputElement} unusedInputEl
    * @param {number} unusedInputLength
-   * @param {string} unusedTrigger
    * @return {string}
    */
-  updateInputWithSelection(
-    unusedSelection,
-    unusedInputEl,
-    unusedInputLength,
-    unusedTrigger
-  ) {}
+  updateInputWithSelection(unusedSelection, unusedInputEl, unusedInputLength) {}
 
   /**
    * Restore the input element to display the user's non-autocompleted partial string
