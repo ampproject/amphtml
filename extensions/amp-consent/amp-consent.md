@@ -118,10 +118,12 @@ AMP expects the response to be a JSON object like the following:
 ```html
 { 
   "promptIfUnknown": {boolean} [default: true], // instructs AMP whether to collect consent
-  "consentState": {enum} [default: null], // (new) the latest consent state known by the server
-  "setCache": {boolean} [default: true] // (new) whether to store consent state to local cache to 
-                                        // avoid blocking request for user's next visit. 
-                                        // Set to `false` if strict server-client syncing is required.
+  "consentState": {accepted|rejected} [default: null], // (new) the latest consent state known by the server
+                                          // Set to `null` to only use client cache
+  "updateCache": {boolean} [default: true] // (new) whether to store consent state to client cache to 
+                                           // avoid this blocking request on user's next visit. 
+  "expireCache": {boolean} [default: false] // (new) clear the client cache immediately  
+                                            // Set to `true` to enforce a server side consent state. 
 }
 ```
 
@@ -147,6 +149,9 @@ Unlike consent state, this `shareData` is not persisted in client side storage.
 
 #### promptIfUnknown
 `promptIfUnknown`: Instructs AMP whether to collect consent if previous consent is unknown. It takes boolean values. It also can be set to `promptIfUnknown: "fromCheckConsent"` to read from the server response of `checkConsentHref`.
+
+#### consentStateUnknownFallback
+`consentStateUnknownFallback`: Takes value of `"accepted"` or `"rejected"`. If consent state is finally `unknown`, AMP will fallback to this value. This is useful combined with the `geoOverride`, so that different geo can interpret `unknown` differently.
 
 #### onUpdateHref
 
@@ -191,6 +196,7 @@ Take the following config as an example:
     "geo2": {
       "checkConsentHref": "https://example.com/check-consent",
       "promptIfUnknown": "fromCheckConsent",
+      "consentStateUnknownFallback": "accepted"
     },
     "unknown": {
       "checkConsentHref": "https://example.com/check-consent",
