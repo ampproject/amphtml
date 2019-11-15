@@ -8,7 +8,7 @@
 
 ---
 
-category: presentation
+\$category: presentation
 formats:
 
 - websites
