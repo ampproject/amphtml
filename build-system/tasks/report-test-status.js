@@ -141,7 +141,7 @@ function reportTestStarted() {
 }
 
 function reportTestQueued(testName) {
-  return postReport(testName, 'started');
+  return postReport(testName, 'queued');
 }
 
 async function reportAllExpectedTests(buildTargets) {
