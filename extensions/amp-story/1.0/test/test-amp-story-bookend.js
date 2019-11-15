@@ -32,6 +32,7 @@ import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {amp: true}, env => {
   let win;
+  let document;
   let storyElem;
   let bookend;
   let bookendElem;
@@ -123,14 +124,13 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    storyElem = win.document.createElement('amp-story');
-    storyElem.appendChild(win.document.createElement('amp-story-page'));
-    win.document.body.appendChild(storyElem);
-    bookendElem = createElementWithAttributes(
-      win.document,
-      'amp-story-bookend',
-      {'layout': 'nodisplay'}
-    );
+    document = win.document;
+    storyElem = document.createElement('amp-story');
+    storyElem.appendChild(document.createElement('amp-story-page'));
+    document.body.appendChild(storyElem);
+    bookendElem = createElementWithAttributes(document, 'amp-story-bookend', {
+      'layout': 'nodisplay',
+    });
     storyElem.appendChild(bookendElem);
 
     requestService = new AmpStoryRequestService(win, storyElem);
@@ -354,7 +354,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
     const clickSpy = sandbox.spy();
-    win.document.addEventListener('click', clickSpy);
+    document.addEventListener('click', clickSpy);
 
     bookend.build();
     await bookend.loadConfigAndMaybeRenderBookend();
@@ -1071,5 +1071,123 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
     expect(config.components.length).to.equal(0);
+  });
+
+  it('should rewrite article thumbnail image url for cached version', async () => {
+    const component = {
+      url: 'http://example.com/article.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example article',
+      image: 'assets/01-iconic-american-destinations.jpg',
+    };
+
+    const fakeDoc = {
+      createElement: document.createElement.bind(document),
+      body: document.body,
+      location: {
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const article = new ArticleComponent();
+    const el = article.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal(
+      'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/assets/01-iconic-american-destinations.jpg'
+    );
+  });
+
+  it('should rewrite landscape thumbnail image url for cached version', async () => {
+    const component = {
+      url: 'http://example.com/landscape.html',
+      domainName: 'example.com',
+      type: 'landscape',
+      title: 'This is an example landscape',
+      image: 'assets/01-iconic-american-destinations.jpg',
+    };
+
+    const fakeDoc = {
+      createElement: document.createElement.bind(document),
+      body: document.body,
+      location: {
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const landscape = new LandscapeComponent();
+    const el = landscape.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal(
+      'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/assets/01-iconic-american-destinations.jpg'
+    );
+  });
+
+  it('should rewrite portrait thumbnail image url for cached version', async () => {
+    const component = {
+      url: 'http://example.com/portrait.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example portrait',
+      image: 'assets/01-iconic-american-destinations.jpg',
+    };
+
+    const fakeDoc = {
+      createElement: document.createElement.bind(document),
+      body: document.body,
+      location: {
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const portrait = new PortraitComponent();
+    const el = portrait.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal(
+      'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/assets/01-iconic-american-destinations.jpg'
+    );
+  });
+
+  it('should not rewrite thumbnail image url when using absolute url', async () => {
+    const component = {
+      url: 'http://example.com/portrait.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example portrait',
+      image: 'http://placehold.it/256x128',
+    };
+
+    const fakeDoc = {
+      createElement: document.createElement.bind(document),
+      body: document.body,
+      location: {
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const portrait = new PortraitComponent();
+    const el = portrait.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal('http://placehold.it/256x128');
+  });
+
+  it('should not rewrite thumbnail image for origin documents', async () => {
+    const component = {
+      url: 'http://example.com/portrait.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example portrait',
+      image: 'assets/01-iconic-american-destinations.jpg',
+    };
+
+    const fakeDoc = {
+      createElement: document.createElement.bind(document),
+      body: document.body,
+      location: {
+        href:
+          'https://www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const portrait = new PortraitComponent();
+    const el = portrait.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal(
+      'http://localhost:9876/assets/01-iconic-american-destinations.jpg'
+    );
   });
 });

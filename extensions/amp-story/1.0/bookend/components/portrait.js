@@ -21,7 +21,12 @@ import {
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {
+  getSourceOriginForElement,
+  isAbsoluteUrl,
+  isServedFromCache,
+  userAssertValidProtocol,
+} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -126,7 +131,15 @@ export class PortraitComponent {
 
     category.textContent = portraitData.category;
     title.textContent = portraitData.title;
-    addAttributesToElement(image, dict({'src': portraitData.image}));
+    if (isServedFromCache(doc) && !isAbsoluteUrl(portraitData.image)) {
+      const fullUrl = doc.location.href + portraitData.image;
+      // TODO(Enriqe): add extra params for resized image, for example:
+      // (/ii/w${width}/s)
+      const optimizedUrl = fullUrl.replace('/c/s/', '/i/s/');
+      addAttributesToElement(image, dict({'src': optimizedUrl}));
+    } else {
+      addAttributesToElement(image, dict({'src': portraitData.image}));
+    }
     meta.textContent = portraitData.domainName;
 
     return el;

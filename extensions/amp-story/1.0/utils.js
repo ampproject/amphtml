@@ -231,6 +231,30 @@ export function getSourceOriginForElement(element, url) {
   return domainName;
 }
 
+/**
+ * Checks if document is being served from cache.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isServedFromCache(doc) {
+  const urlService = Services.urlForDoc(doc.body);
+  const url = doc.location.href;
+  const sourceOrigin = getSourceOrigin(url);
+  const {origin} = urlService.parse(url);
+
+  return sourceOrigin !== origin;
+}
+
+/**
+ * Checks if url is absolute.
+ * @param {string} url
+ * @return {boolean}
+ */
+export function isAbsoluteUrl(url) {
+  // Taken from: https://stackoverflow.com/questions/10687099/how-to-test-if-a-url-string-is-absolute-or-relative
+  return /^(?:[a-z]+:)?\/\//i.test(url);
+}
+
 /** @enum {string} */
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',

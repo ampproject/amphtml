@@ -21,7 +21,12 @@ import {
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {
+  getSourceOriginForElement,
+  isAbsoluteUrl,
+  isServedFromCache,
+  userAssertValidProtocol,
+} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -128,7 +133,17 @@ export class LandscapeComponent {
 
     category.textContent = landscapeData.category;
     title.textContent = landscapeData.title;
-    addAttributesToElement(image, dict({'src': landscapeData.image}));
+
+    if (isServedFromCache(doc) && !isAbsoluteUrl(landscapeData.image)) {
+      const fullUrl = doc.location.href + landscapeData.image;
+      // TODO(Enriqe): add extra params for resized image, for example:
+      // (/ii/w${width}/s)
+      const optimizedUrl = fullUrl.replace('/c/s/', '/i/s/');
+      addAttributesToElement(image, dict({'src': optimizedUrl}));
+    } else {
+      addAttributesToElement(image, dict({'src': landscapeData.image}));
+    }
+
     meta.textContent = landscapeData.domainName;
 
     return el;
