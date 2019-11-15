@@ -52,7 +52,7 @@ export const VIDEO_TAGS = {
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
-const CAROUSEL_TAGS = 'AMP-CAROUSEL, AMP-BASE-CAROUSEL';
+const CAROUSEL_TAGS = ['AMP-CAROUSEL', 'AMP-BASE-CAROUSEL'];
 const FIGURE_TAG = 'FIGURE';
 const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
 
