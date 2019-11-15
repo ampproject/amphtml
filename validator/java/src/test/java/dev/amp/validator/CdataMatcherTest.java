@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 /**
  * Tests for {@link CdataMatcher}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class CdataMatcherTest {
 
@@ -571,6 +571,162 @@ public class CdataMatcherTest {
                         Mockito.anyListOf(String.class),
                         Mockito.anyString(),
                         Mockito.any(Validator.ValidationResult.Builder.class));
+
+    }
+
+    @Test
+    public void testMatchCssMediaErrors() throws CssValidationException, IOException {
+        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        tagSpecBuilder.setSpecName("title");
+
+        final Validator.CssSpec cssSpec = Validator.CssSpec.newBuilder()
+                .addAtRuleSpec(Validator.AtRuleSpec.newBuilder()
+                        .setName("media").setMediaQuerySpec(Validator.MediaQuerySpec.newBuilder().setIssuesAsError(true)
+                                .build()).setType(Validator.AtRuleSpec.BlockType.PARSE_AS_ERROR).build())
+                .setValidateAmp4Ads(true).setValidateKeyframes(true).build();
+        final Validator.CdataSpec.Builder cDataBuilder = Validator.CdataSpec.newBuilder();
+        cDataBuilder.setMaxBytes(6);
+        cDataBuilder.addBlacklistedCdataRegex(Validator.BlackListedCDataRegex.newBuilder().setRegex("cdata1").build());
+        cDataBuilder.setCssSpec(cssSpec);
+        tagSpecBuilder.setCdata(cDataBuilder.build());
+
+        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+
+        final ParsedTagSpec mockParsedTagSpec = Mockito.mock(ParsedTagSpec.class);
+        Mockito.when(mockParsedTagSpec.getSpec()).thenReturn(tagSpecBuilder.build());
+        final Locator locator = new Locator() {
+            @Override
+            public String getPublicId() {
+                return "pubId1";
+            }
+
+            @Override
+            public String getSystemId() {
+                return "sysId1";
+            }
+
+            @Override
+            public int getLineNumber() {
+                return 24;
+            }
+
+            @Override
+            public int getColumnNumber() {
+                return 35;
+            }
+        };
+
+        final Context mockContext = Mockito.mock(Context.class);
+        Mockito.when(mockContext.getLineCol()).thenReturn(locator);
+
+        final TagStack mockTagStack = Mockito.mock(TagStack.class);
+        Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
+
+        final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
+        Mockito.when(mockParsedValidatorRules.getCombinedBlacklistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
+        String partialMatchRegex = "[0-9]";
+        Pattern pattern = Pattern.compile(partialMatchRegex);
+
+        Mockito.when(mockParsedValidatorRules.getPartialMatchCaseiRegex(Mockito.anyString())).thenReturn(pattern);
+        Mockito.when(mockContext.getRules()).thenReturn(mockParsedValidatorRules);
+        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+
+        final CdataMatcher cDataMatcher = new CdataMatcher(mockParsedTagSpec, locator);
+
+        cDataMatcher.matchCss("cdata", cssSpec, mockContext, result);
+
+        Mockito.verify(mockContext, Mockito.times(1))
+                .addError(errorCodeCapture.capture(),
+                        Mockito.anyInt(),
+                        Mockito.anyInt(),
+                        listCaptor.capture(),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+        final List<String> params = listCaptor.getValue();
+        Assert.assertEquals(params.size(), 1);
+        Assert.assertEquals(params.get(0), "title");
+
+        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE);
+
+    }
+
+    @Test
+    public void testMatchCssMediaWarnings() throws CssValidationException, IOException {
+        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        tagSpecBuilder.setSpecName("title");
+
+        final Validator.CssSpec cssSpec = Validator.CssSpec.newBuilder()
+                .addAtRuleSpec(Validator.AtRuleSpec.newBuilder()
+                        .setName("media").setMediaQuerySpec(Validator.MediaQuerySpec.newBuilder().setIssuesAsError(false)
+                                .build()).setType(Validator.AtRuleSpec.BlockType.PARSE_AS_ERROR).build())
+                .setValidateAmp4Ads(false).setValidateKeyframes(false).build();
+        final Validator.CdataSpec.Builder cDataBuilder = Validator.CdataSpec.newBuilder();
+        cDataBuilder.setMaxBytes(6);
+        cDataBuilder.addBlacklistedCdataRegex(Validator.BlackListedCDataRegex.newBuilder().setRegex("cdata1").build());
+        cDataBuilder.setCssSpec(cssSpec);
+        tagSpecBuilder.setCdata(cDataBuilder.build());
+
+        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+
+        final ParsedTagSpec mockParsedTagSpec = Mockito.mock(ParsedTagSpec.class);
+        Mockito.when(mockParsedTagSpec.getSpec()).thenReturn(tagSpecBuilder.build());
+        final Locator locator = new Locator() {
+            @Override
+            public String getPublicId() {
+                return "pubId1";
+            }
+
+            @Override
+            public String getSystemId() {
+                return "sysId1";
+            }
+
+            @Override
+            public int getLineNumber() {
+                return 24;
+            }
+
+            @Override
+            public int getColumnNumber() {
+                return 35;
+            }
+        };
+
+        final Context mockContext = Mockito.mock(Context.class);
+        Mockito.when(mockContext.getLineCol()).thenReturn(locator);
+
+        final TagStack mockTagStack = Mockito.mock(TagStack.class);
+        Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
+
+        final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
+        Mockito.when(mockParsedValidatorRules.getCombinedBlacklistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
+        String partialMatchRegex = "[0-9]";
+        Pattern pattern = Pattern.compile(partialMatchRegex);
+
+        Mockito.when(mockParsedValidatorRules.getPartialMatchCaseiRegex(Mockito.anyString())).thenReturn(pattern);
+        Mockito.when(mockContext.getRules()).thenReturn(mockParsedValidatorRules);
+        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+
+        final CdataMatcher cDataMatcher = new CdataMatcher(mockParsedTagSpec, locator);
+
+        cDataMatcher.matchCss("cdata", cssSpec, mockContext, result);
+
+        Mockito.verify(mockContext, Mockito.times(1))
+                .addError(errorCodeCapture.capture(),
+                        Mockito.anyInt(),
+                        Mockito.anyInt(),
+                        listCaptor.capture(),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+        final List<String> params = listCaptor.getValue();
+        Assert.assertEquals(params.size(), 1);
+        Assert.assertEquals(params.get(0), "title");
+
+        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE);
 
     }
 }

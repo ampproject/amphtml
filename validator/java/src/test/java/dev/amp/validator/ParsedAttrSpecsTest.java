@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Tests for {@link ParsedAttrSpecs}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class ParsedAttrSpecsTest {
 

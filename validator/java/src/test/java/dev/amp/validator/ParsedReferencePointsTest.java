@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 /**
  * Tests for {@link ParsedReferencePoints}
  *
- * @author sphatak
+ * @author sphatak01
  */
 
 public class ParsedReferencePointsTest {

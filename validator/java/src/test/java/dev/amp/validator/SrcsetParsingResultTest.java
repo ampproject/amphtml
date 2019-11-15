@@ -31,7 +31,7 @@ import java.util.Collections;
 /**
  * Tests for {@link SrcsetParsingResult}
  *
- * @author sphatak
+ * @author sphatak01
  */
 public class SrcsetParsingResultTest {
 
