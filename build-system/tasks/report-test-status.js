@@ -140,6 +140,10 @@ function reportTestStarted() {
   return postReport(inferTestType(), 'started');
 }
 
+function reportTestQueued(testName) {
+  return postReport(testName, 'started');
+}
+
 async function reportAllExpectedTests(buildTargets) {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
@@ -170,6 +174,7 @@ module.exports = {
   reportAllExpectedTests,
   reportTestErrored,
   reportTestFinished,
+  reportTestQueued,
   reportTestRunComplete,
   reportTestSkipped,
   reportTestStarted,

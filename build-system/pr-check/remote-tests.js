@@ -33,7 +33,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
-const {postReport} = require('../tasks/report-test-status');
+const {reportTestQueued} = require('../tasks/report-test-status');
 
 const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -82,12 +82,12 @@ async function main() {
       buildTargets.has('INTEGRATION_TEST');
 
     if (runIntegration) {
-      postReport('integration/saucelabs-stable', 'queued');
-      postReport('integration/saucelabs-beta', 'queued');
+      reportTestQueued('integration/saucelabs-stable');
+      reportTestQueued('integration/saucelabs-beta');
     }
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      postReport('unit/saucelabs', 'queued');
+      reportTestQueued('unit/saucelabs');
       timedExecOrDie('gulp unit --nobuild --saucelabs');
     }
 

@@ -31,7 +31,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
-const {postReport} = require('../tasks/report-test-status');
+const {reportTestQueued} = require('../tasks/report-test-status');
 
 const FILENAME = 'e2e-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -53,7 +53,7 @@ async function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('E2E_TEST')
     ) {
-      postReport('e2e/local', 'queued');
+      reportTestQueued('e2e/local');
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp e2e --nobuild --headless');

@@ -31,7 +31,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../common/travis');
-const {postReport} = require('../tasks/report-test-status');
+const {reportTestQueued} = require('../tasks/report-test-status');
 
 const FILENAME = 'local-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -77,11 +77,11 @@ function main() {
       buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST');
 
     if (runIntegration) {
-      postReport('integration/local', 'queued');
+      reportTestQueued('integration/local');
     }
     if (runUnit) {
-      postReport('unit/local-changes', 'queued');
-      postReport('unit/local', 'queued');
+      reportTestQueued('unit/local-changes');
+      reportTestQueued('unit/local');
     }
 
     if (runUnit) {
