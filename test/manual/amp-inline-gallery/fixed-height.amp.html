@@ -8,7 +8,7 @@
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js"></script>
   <script async custom-element="amp-inline-gallery" src="https://cdn.ampproject.org/v0/amp-inline-gallery-0.1.js"></script>
-  <script async custom-element="amp-truncate-text" src="https://cdn.ampproject.org/v0/amp-truncate-text-0.1.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <style amp-custom>
@@ -47,7 +47,12 @@
 <body>
   <h1>A fixed-height inline gallery</h1>
   <amp-inline-gallery class="gallery" layout="container">
-    <amp-base-carousel layout="fixed-height" height="200" snap-align="center" loop="true" mixed-length="true">
+    <amp-base-carousel
+        layout="fixed-height" height="200"
+        snap-align="center"
+        loop="true"
+        mixed-length="true"
+        lightbox>
       <amp-img class="slide" src="https://picsum.photos/600/400?foo=0" layout="fixed" width="300" height="200"></amp-img>
       <amp-img class="slide" src="https://picsum.photos/400/400?foo=1" layout="fixed" width="200" height="200"></amp-img>
       <amp-img class="slide" src="https://picsum.photos/600/400?foo=2" layout="fixed" width="300" height="200"></amp-img>
