@@ -239,32 +239,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
 
-    this.isSsr_ = this.ssrTemplateHelper_.isSupported();
-    this.hasTemplate_ = this.templates_.hasTemplate(
-      this.element,
-      'template, script[template]'
-    );
-    if (this.isSsr_) {
-      userAssert(
-        this.hasTemplate_,
-        `${TAG} should provide a <template> or <script type="plain/text"> element.`
-      );
-      userAssert(
-        !this.element.hasAttribute('filter'),
-        `${TAG} does not support client-side filter when server-side render is possible`
-      );
-      this.filter_ = FilterType.NONE;
-    } else {
-      this.filter_ = userAssert(
-        this.element.getAttribute('filter'),
-        `${TAG} requires "filter" attribute.`
-      );
-      userAssert(
-        isEnumValue(FilterType, this.filter_),
-        `Unexpected filter: ${this.filter_}`
-      );
-    }
-
     // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
       ? parseInt(this.element.getAttribute('min-characters'), 10)
@@ -273,21 +247,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       ? parseInt(this.element.getAttribute('max-entries'), 10)
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
-    if (this.element.hasAttribute('suggest-first')) {
-      if (this.filter_ === FilterType.PREFIX) {
-        this.suggestFirst_ = true;
-      } else {
-        user().error(
-          TAG,
-          '"suggest-first" requires "filter" to be prefix.' +
-            ' Unexpected "filter" type: ' +
-            this.filter_
-        );
-      }
-    }
-    this.suggestFirst_ =
-      this.element.hasAttribute('suggest-first') &&
-      this.filter_ === FilterType.PREFIX;
     this.highlightUserEntry_ = this.element.hasAttribute(
       'highlight-user-entry'
     );
@@ -296,6 +255,52 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
+
+    // Get SSR state to 1. enforce filter type and 2. set filter-dependent values
+    return Promise.resolve(this.ssrTemplateHelper_.isSupported()).then(
+      supported => {
+        this.isSsr_ = supported;
+        this.hasTemplate_ = this.templates_.hasTemplate(
+          this.element,
+          'template, script[template]'
+        );
+        if (this.isSsr_) {
+          userAssert(
+            this.hasTemplate_,
+            `${TAG} should provide a <template> or <script type="plain/text"> element.`
+          );
+          userAssert(
+            !this.element.hasAttribute('filter'),
+            `${TAG} does not support client-side filter when server-side render is possible`
+          );
+          this.filter_ = FilterType.NONE;
+        } else {
+          this.filter_ = userAssert(
+            this.element.getAttribute('filter'),
+            `${TAG} requires "filter" attribute.`
+          );
+          userAssert(
+            isEnumValue(FilterType, this.filter_),
+            `Unexpected filter: ${this.filter_}`
+          );
+        }
+        if (this.element.hasAttribute('suggest-first')) {
+          if (this.filter_ === FilterType.PREFIX) {
+            this.suggestFirst_ = true;
+          } else {
+            user().error(
+              TAG,
+              '"suggest-first" requires "filter" to be prefix.' +
+                ' Unexpected "filter" type: ' +
+                this.filter_
+            );
+          }
+        }
+        this.suggestFirst_ =
+          this.element.hasAttribute('suggest-first') &&
+          this.filter_ === FilterType.PREFIX;
+      }
+    );
   }
 
   /**
