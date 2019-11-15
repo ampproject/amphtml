@@ -199,7 +199,7 @@ Take the following config as an example:
 }
 ```
 
-For users outside `geo1` and `geo2`, the merged config is
+For users outside `geo1`, `geo2` & `uknown`, the merged config is
 ```
 {
   "onUpdateHref": "https://example.com/update-consent",
@@ -235,13 +235,14 @@ For users in `unknown`, , the merged config is
 }
 ```
 
+See the following section to understand the different amp-consent behavior for users in those different geo groups.
 
-### Examples
-`useCache` & `checkConsentHref` are the two only sources of any previous consent state. If both turned off, it means AMP  needs to collect consent for every pageview. But if `promptUI` is also off, then it means AMP needs to do nothing.
+### Behavior explained
+`useCache` & `checkConsentHref` are the two only sources of the previous consent state. If both turned off, it means AMP needs to collect consent for every pageview if `promptUI` is specified, or do nothing if `promptUI` is off.
 
-If `useCache=true` & `checkConsentHref=null`, it means all the decisions are made client side. If cache is empty or state=unknown, AMP will collect consent. But if `promptUI` is off, then it's more like a opt-out mode.
+`useCache=true` & `checkConsentHref=null` means all the decisions are made client side. If cache is empty or `consentState=unknown`, AMP will collect consent if `promptUI` is specified, or do nothing.
 
-If `useCache=false` & `checkConsentHref=endpoint`, it means AMP will make a blocking request to the endpoint to fetch a previous consent state, and let the response decide whether to collect consent.
+`useCache=false` & `checkConsentHref=endpoint` means AMP will make a blocking request to the endpoint to fetch a previous consent state, and let the response decide whether to collect consent.
 
 If `useCache=true` & `checkConsentHref=endpoint`, it means AMP will check cache and server endpoint in pararell. If cache has a value, use it, otherwise wait for the server response. 
 
