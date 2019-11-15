@@ -27,7 +27,6 @@ import {
 import {installIframeMessagingClient} from '../../../src/inabox/inabox-iframe-messaging-client';
 import {installPlatformService} from '../../../src/service/platform-impl';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {toggleExperiment} from '../../../src/experiments';
 
 const NOOP = () => {};
 
@@ -92,12 +91,10 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     };
     win.frameElement = iframeElement;
 
-    toggleExperiment(win, 'inabox-viewport-friendly', false);
     installIframeMessagingClient(win);
     installPlatformService(win);
     binding = new ViewportBindingInabox(win);
     sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
-    toggleExperiment(win, 'inabox-viewport-friendly', true);
     bindingFriendly = new ViewportBindingInabox(win);
     measureSpy = sandbox.spy();
     element = {

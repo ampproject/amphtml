@@ -35,10 +35,7 @@ export function iframeMessagingClientFor(win) {
  * @param {!Window} win
  */
 export function installIframeMessagingClient(win) {
-  if (
-    !isExperimentOn(win, 'inabox-viewport-friendly') ||
-    !canInspectWindow(win.top)
-  ) {
+  if (!canInspectWindow(win.top)) {
     registerServiceBuilder(
       win,
       'iframeMessagingClient',

@@ -46,7 +46,6 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
     .then(template => {
       let url;
       if (req.baseUrl == '/inabox-friendly') {
-        url = getInaboxUrl(req, 'inabox-viewport-friendly');
         template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
       } else {
         url = getInaboxUrl(req);
