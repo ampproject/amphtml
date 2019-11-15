@@ -98,9 +98,7 @@ Currently, the `consents` object only supports a single consent instance. A cons
 
 #### checkConsentHref
 
-`checkConsentHref`: Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to determine if a prompt UI should be shown if the consent state is unknown.
-
-`checkConsentHref` is required if [`promptIfUnknownForGeoGroup`](#promptifunknownforgeogroup) is not defined.
+`checkConsentHref`: Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to 1) determine if the page should prompt consent dialog and collect consent, 2) get the consentState from server.
 
 ##### Request
 
@@ -112,21 +110,27 @@ AMP sends the consent instance ID in the `consentInstanceId` field with the POST
 
 ##### Response
 
-AMP expects the response to be a JSON object with a `promptIfUnknown` value that tells AMP if a prompt should be displayed when the user consent state is unknown.
+AMP expects the response to be a JSON object like the following:
 
 ```html
-{ "promptIfUnknown": true/false }
+{ 
+  "promptIfUnknown": {boolean}, // deprecated
+  "collectConsent": {boolean} [default: false], // (new) whether to prompt consent dialog and collect consent
+  "consentState": {enum} [default: null], (new) // (new) the latest consent state known by the server
+  "updateCache": {boolean} [default: true] // (new) whether to update client cache with the new value
+}
 ```
-
-If the response doesn't have `promptIfUnknown` set or has `promptIfUnknown` set to false, no prompt UI will be displayed on page load.
-
-Currently, AMP will not show consent prompt with a known consent state (i.e. the user has already accepted or rejected the consent), and will only show a prompt if `promptIfUnknown = true` with a unknown consent state, or upon user action. See below for details on how to display a prompt.
 
 Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
 
 ```html
-{ "promptIfUnknown": true/false, "sharedData": { "a-key": "some-string-value",
-"key-with-bool-value": true, "key-with-numeric-value": 123 } }
+{ 
+  "sharedData": {
+    "a-key": "some-string-value",
+    "key-with-bool-value": true, 
+    "key-with-numeric-value": 123
+  } 
+}
 ```
 
 The `sharedData` is made available to other AMP extensions just like the consent
@@ -136,6 +140,11 @@ example use case is for the remote endpoint to convey extra consent related info
 current user to the 3rd party vendor extensions.
 
 Unlike consent state, this `shareData` is not persisted in client side storage.
+
+#### useCache
+For latency optimization, `useCache` can be used to instruct AMP to use client cached values to make the current consent decision, and then posibly turn `checkConsentHref` request into a non-blocking asynchrous syncing. It takes a boolean value.
+
+If cache is empty or the cached consent state is `unknown`, `checkConsentHref` will still be a blocking request.
 
 #### onUpdateHref
 
@@ -148,17 +157,94 @@ AMP sends the consent instance ID, a generated user id only for this usage and t
 true/false, }
 ```
 
-#### promptIfUnknownForGeoGroup
-
-`promptIfUnknownForGeoGroup` Provides an alternative way to instruct AMP to display consent prompt or not when consent state is unknown.
-
-To use `promptIfUnknownForGeoGroup`, a `<amp-geo>` component must be included and properly configured. The `promptIfUnknownForGeoGroup` then accepts a key of a geo group of country codes. More details on how `<amp-geo>` works can be found [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md).
-
-In the case that `checkConsentHref` and `promptIfUnknownForGeoGroup` are both defined. The value from `<amp-geo>` will be respected.
-
 #### promptUI
 
 `promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
+
+If `promptUI` is not given, AMP will not collect consent. This can actually be common for a website to collect consent in a central place, and those individual AMP pages should only get consent state from server.
+
+
+#### geoOverride
+
+`geoOverride` provides a way to utilize the `<amp-geo>` component to detect user's geo location and make client side decisions w/o involving a server endpoint roundtrip. 
+
+`geoOverride` is a JSON object the keyed by geo group codes that are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). Each geo override should be a valid amp-consent config object. AMP will take all the values in the corresponding `geoOverride` to override the existing config. 
+
+Two important tips when configuring `amp-geo`:
+
+- All geo groups should be mutually exclusive. The behavior is undetermined if a user falls into multiple geo override.
+- Provide an `unknown` override for users that are failed be be identified by `<amp-geo>`.
+
+Take the following config as an example:
+
+```json
+{
+  "onUpdateHref": "https://example.com/update-consent",
+  "useCache": false,
+  
+  "geoOverride": {
+    "geo1": {
+      "useCache": true,
+      "promptUI": "consent-ui",
+    }, 
+    "geo2": {
+      "checkConsentHref": "https://example.com/check-consent",
+    },
+    "unknown": {
+      "useCache": true,
+      "promptUI": "consent-ui",
+      "checkConsentHref": "https://example.com/check-consent",
+   }
+  }
+}
+```
+
+For users outside `geo1` and `geo2`, the merged config is
+```
+{
+  "onUpdateHref": "https://example.com/update-consent",
+  "useCache": false,
+}
+```
+
+For users in `geo1`, the merged config is
+```
+{
+  "onUpdateHref": "https://example.com/update-consent",
+  "useCache": true,
+  "promptUI": "consent-ui",
+}
+```
+
+For users in `geo2`, the merged config is
+```
+{
+  "onUpdateHref": "https://example.com/update-consent",
+  "useCache": false,
+  "checkConsentHref": "https://example.com/check-consent",
+}
+```
+
+For users in `unknown`, , the merged config is
+```
+{
+  "onUpdateHref": "https://example.com/update-consent",
+  "useCache": true,
+  "promptUI": "consent-ui",
+  "checkConsentHref": "https://example.com/check-consent",
+}
+```
+
+
+### Examples
+`useCache` & `checkConsentHref` are the two only sources of any previous consent state. If both turned off, it means AMP  needs to collect consent for every pageview. But if `promptUI` is also off, then it means AMP needs to do nothing.
+
+If `useCache=true` & `checkConsentHref=null`, it means all the decisions are made client side. If cache is empty or state=unknown, AMP will collect consent. But if `promptUI` is off, then it's more like a opt-out mode.
+
+If `useCache=false` & `checkConsentHref=endpoint`, it means AMP will make a blocking request to the endpoint to fetch a previous consent state, and let the response decide whether to collect consent.
+
+If `useCache=true` & `checkConsentHref=endpoint`, it means AMP will check cache and server endpoint in pararell. If cache has a value, use it, otherwise wait for the server response. 
+
 
 ## Consent Management
 
