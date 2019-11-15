@@ -417,8 +417,9 @@ export class Resource {
   /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
+   * @param {*} premeasuredBox
    */
-  measure() {
+  measure(premeasuredBox = null) {
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -438,9 +439,8 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    // TODO
     const oldBox = this.layoutBox_;
-    this.measureViaResources_();
+    this.layoutBox_ = this.measureViaResources_(premeasuredBox);
     const box = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -467,11 +467,21 @@ export class Resource {
     this.element.updateLayoutBox(box, sizeChanges);
   }
 
-  /** Use resources for measurement */
-  measureViaResources_() {
+  /**
+   * Use resources for measurement.
+   * @param {*} premeasuredBox
+   * @return {*}
+   */
+  measureViaResources_(premeasuredBox = null) {
     const viewport = Services.viewportForDoc(this.element);
-    const box = viewport.getLayoutRect(this.element);
-    this.layoutBox_ = box;
+    let box = premeasuredBox
+      ? layoutRectLtwh(
+          premeasuredBox.left + viewport.getScrollLeft(),
+          premeasuredBox.top + viewport.getScrollTop(),
+          premeasuredBox.width,
+          premeasuredBox.height
+        )
+      : viewport.getLayoutRect(this.element);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
@@ -498,12 +508,14 @@ export class Resource {
       // For fixed position elements, we need the relative position to the
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
-      this.layoutBox_ = moveLayoutRect(
+      box = moveLayoutRect(
         box,
         -viewport.getScrollLeft(),
         -viewport.getScrollTop()
       );
     }
+
+    return box;
   }
 
   /**
