@@ -165,7 +165,7 @@ export class Xhr {
       if (!startsWith(txt, dev().assertString(prefix))) {
         user().warn(
           'XHR',
-          `Attempted to strip prefix "${prefix}" from xhr request, but prefix was not present.`
+          `Failed to strip missing prefix "${prefix}" in fetch response.`
         );
         return parseJson(txt);
       }
