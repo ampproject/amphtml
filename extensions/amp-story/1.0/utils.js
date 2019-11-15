@@ -287,6 +287,16 @@ export function isMediaDisplayed(ampMediaEl, resource) {
 }
 
 /**
+ * Whether a Story should show the URL info dialog.
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
+ * @return {boolean}
+ */
+export function shouldShowStoryUrlInfo(viewer) {
+  const showStoryUrlInfo = viewer.getParam('showStoryUrlInfo');
+  return showStoryUrlInfo ? showStoryUrlInfo !== '0' : viewer.isEmbedded();
+}
+
+/**
  * The attribute name for text background color
  * @private @const {string}
  */
