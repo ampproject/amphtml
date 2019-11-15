@@ -176,14 +176,20 @@ export class AmpStoryQuiz extends AMP.BaseElement {
           return;
         }
 
+        // if the shadow root was reached, stop assessing
+        if (p instanceof ShadowRoot) {
+          resolved = true;
+          return;
+        }
+
         // An option was selected
-        if (p.getAttribute('class').includes('i-amp-story-quiz-option')) {
+        if (p.getAttribute('class') === 'i-amp-story-quiz-option') {
           this.handleOptionClick_(p, options);
           this.hasReceivedResponse_ = true;
           resolved = true;
         }
         // the prompt was tapped
-        else if (p.getAttribute('class').includes('i-amp-story-quiz-prompt')) {
+        else if (p.getAttribute('class') === 'i-amp-story-quiz-prompt') {
           // TODO(jackbsteinberg): Initiate page navigation on prompt tap
           resolved = true;
         }
@@ -204,18 +210,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     p.classList.add('i-amp-story-quiz-option-selected');
     options.forEach(o => {
       o.classList.add('i-amp-story-quiz-option-post-selection');
-
-      const symbolContainer = o.querySelector(
-        '.i-amp-story-quiz-answer-choice'
-      );
-
-      // TODO(jackbsteinberg): Replace text with icons when the assets are ready
-      if (o.hasAttribute('correct')) {
-        symbolContainer.textContent = '✓';
-      } else {
-        symbolContainer.textContent = '×';
-        symbolContainer.setAttribute('aria-label', 'x');
-      }
     });
   }
 }

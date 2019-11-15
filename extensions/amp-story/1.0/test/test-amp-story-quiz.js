@@ -81,21 +81,20 @@ describes.realWin(
       await ampStoryQuiz.layoutCallback();
 
       const quizContent = ampStoryQuiz.getQuizElement().children;
-      expect(quizContent[0]).to.be.a('HTMLDivElement');
       expect(quizContent[0]).to.have.class('i-amp-story-quiz-prompt-container');
       expect(quizContent[1]).to.have.class('i-amp-story-quiz-option-container');
 
       // check prompt container structure
       expect(quizContent[0].children.length).to.equal(1);
-      expect(quizContent[0].children[0]).to.have.class(
-        'i-amp-story-quiz-prompt'
-      );
+      expect(
+        quizContent[0].querySelectorAll('.i-amp-story-quiz-prompt')
+      ).to.have.length(1);
 
       // check option container structure
       expect(quizContent[1].childNodes.length).to.equal(4);
-      quizContent[1].childNodes.forEach(option => {
-        expect(option).to.have.class('i-amp-story-quiz-option');
-      });
+      expect(
+        quizContent[1].querySelectorAll('.i-amp-story-quiz-option')
+      ).to.have.length(4);
     });
 
     it('should throw an error with fewer than one prompt', async () => {
