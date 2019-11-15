@@ -258,11 +258,12 @@ describes.repeated(
 
               const errorRe = /Non-XHR GETs not supported./;
               expectAsyncConsoleError(errorRe);
-              try {
-                return ampForm.handleSubmitEvent_(event);
-              } catch (error) {
-                return Promise.resolve();
-              }
+              return Promise.resolve()
+                .then(() => ampForm.handleSubmitEvent_(event))
+                .then(
+                  () => Promise.reject(),
+                  () => Promise.resolve()
+                );
             });
           });
 
