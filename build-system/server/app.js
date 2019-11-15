@@ -33,6 +33,7 @@ const path = require('path');
 const request = require('request');
 const upload = require('multer')();
 const pc = process;
+const autocompleteEmailData = require('./autocomplete-test-data');
 const runVideoTestBench = require('./app-video-testbench');
 const {
   recaptchaFrameRequestHandler,
@@ -411,30 +412,14 @@ app.use('/form/autocomplete/error', (req, res) => {
   res(500);
 });
 
-const mentionNames = [
-  'harrypotter@hogwarts.edu',
-  'albusdumbledore@hogwarts.edu',
-  'voldemort@deatheater.org',
-  'severussnape@hogwarts.edu',
-  'siriusblack@hogwarts.edu',
-  'hermionegranger@hogwarts.edu',
-  'ronweasley@hogwarts.edu',
-  'dracomalfoy@hogwarts.edu',
-  'nevillelongbottom@hogwarts.edu',
-  'rubeushagrid@hogwarts.edu',
-  'dobby@hogwarts.edu',
-  'bellatrixlestrange@deatheater.org',
-  'minervamcgonagall@hogwarts.edu',
-];
-
 app.use('/form/mention/query', (req, res) => {
   const query = req.query.q;
   if (!query) {
-    res.json({items: mentionNames});
+    res.json({items: autocompleteEmailData});
     return;
   }
   const lowerCaseQuery = query.toLowerCase().trim();
-  const filtered = mentionNames.filter(l =>
+  const filtered = autocompleteEmailData.filter(l =>
     l.toLowerCase().startsWith(lowerCaseQuery)
   );
   res.json({items: filtered});

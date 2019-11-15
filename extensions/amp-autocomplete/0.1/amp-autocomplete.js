@@ -567,11 +567,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       dev().assertElement(this.inputElement_)
     );
 
-    // Always fetch in email context, where data is required to be dynamic.
-    const fetchIfEmail = this.isEmail_
-      ? this.getRemoteData_()
-      : Promise.resolve(this.sourceData_);
-    return fetchIfEmail.then(data => {
+    // Fetch if autocomplete data is dynamic.
+    // Required in all email contexts or when reliant on a query param.
+    const maybeFetch =
+      this.isEmail_ || this.queryKey_
+        ? this.getRemoteData_()
+        : Promise.resolve(this.sourceData_);
+    return maybeFetch.then(data => {
       this.sourceData_ = data;
       return this.mutateElement(() => {
         this.filterDataAndRenderResults_(
