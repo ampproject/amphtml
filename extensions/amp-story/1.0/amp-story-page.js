@@ -1399,6 +1399,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   onVideoVisibilityUpdate_(event) {
+    // AmpDoc visibility updates are handled by the PAUSED state. This method
+    // only handles video visiblity updates when the ampdoc is visible, eg:
+    // media query update.
+    if (!this.getAmpDoc().isVisible()) {
+      return;
+    }
+
     const ampVideoEl = dev().assertElement(event.target);
     const videoEl = dev().assertElement(
       childElement(ampVideoEl, el => el.tagName === 'VIDEO')
