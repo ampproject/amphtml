@@ -78,10 +78,10 @@ The are several known bugs in the validation output.
 
 ## Contribute
 
-Please refer to the [Contributing.md](Contributing.md) file for information about how to get involved. We welcome issues, questions, and pull requests. Pull Requests are welcome.
+Please refer to the [Contribute.md](Contribute.md) file for information about how to get involved. We welcome issues, questions, and pull requests. Pull Requests are welcome.
 
 ## License
 
-This project is licensed under the terms of the [Apache 2.0](LICENSE-Apache-2.0) open source license. Please refer to [LICENSE](LICENSE) for the full terms.
+This project is licensed under the terms of the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt) open source license. Please refer to [LICENSE](LICENSE) for the full terms.
 
 ## Attribution
