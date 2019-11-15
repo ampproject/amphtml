@@ -30,7 +30,7 @@ describe('amp-analytics', function() {
       </script>
       <!-- put amp-analytics > 3 viewports away from viewport -->
       <div style="height: 400vh">
-        <p>hello</p>
+        viewport
       </div>
       <amp-analytics>
         <script type="application/json">
