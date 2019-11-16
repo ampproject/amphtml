@@ -17,6 +17,9 @@
 import {Services} from '../../../src/services';
 import {px, setStyle, setStyles} from '../../../src/style';
 
+/** @const {number} Fixed button height from design spec. */
+const MAX_HEIGHT = 32;
+
 /** @enum {number} From design spec. */
 const FontSizes = {
   MIN: 12,
@@ -36,9 +39,6 @@ export class ButtonTextFitter {
 
     /** @private {!Element} */
     this.measurer_ = this.doc_.createElement('div');
-
-    /** @private {number} Fixed button height from design spec. */
-    this.maxHeight_ = 32;
 
     this.resources_.mutateElement(this.measurer_, () => {
       this.doc_.body.appendChild(this.measurer_);
@@ -67,7 +67,7 @@ export class ButtonTextFitter {
         this.measurer_.textContent = content;
         const fontSize = calculateFontSize(
           this.measurer_,
-          this.maxHeight_,
+          MAX_HEIGHT,
           this.getMaxWidth_(pageElement),
           FontSizes.MIN,
           FontSizes.MAX
