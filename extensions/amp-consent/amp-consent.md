@@ -98,7 +98,7 @@ Currently, the `consents` object only supports a single consent instance. A cons
 
 #### checkConsentHref
 
-`checkConsentHref`: Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to 1) determine if the page should prompt consent dialog and collect consent, 2) get the consentState from server.
+`checkConsentHref`: Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to 1) determine if the page should prompt consent dialog and collect consent, 2) get the consent state from server.
 
 ##### Request
 
@@ -106,8 +106,10 @@ AMP sends the consent instance ID in the `consentInstanceId` field with the POST
 
 ```html
 { 
-  "consentInstanceId": "my-consent",
-  "matchedGeoGroup": "geo1", // (new) the user's geoGroup detected by AMP.
+  "consentInstanceId": {string},
+  "consentStateValue": {enum}, // takes value of ["accepted", "rejected", "unknown"]
+  "consentString": {string},
+  "matchedGeoGroup": {string}, // (new) the user's geoGroup detected by AMP.
 }
 ```
 
@@ -118,7 +120,8 @@ AMP expects the response to be a JSON object like the following:
 ```html
 { 
   "consentRequired": {boolean}              // whether consent is required from the user. Previously named `promptIfUnknown`
-  "consentState": {accepted|rejected|unknown} [default: null], // (new) the latest consent state known by the server
+  "consentStateValue": {enum} [default: null], // (new) the latest consent state known by the server
+                                            // takes value of ["accepted", "rejected", "unknown"]
                                             // Set to `null` to only use client cache
   "expireCache": {boolean} [default: false] // (new) indicate that the cache needs to be cleared.  
                                             // Set to `true` to enforce server side consent state. 
@@ -157,8 +160,8 @@ Unlike consent state, this `shareData` is not persisted in client side storage.
 AMP sends the consent instance ID, a generated user id only for this usage and the consent state along with the POST request.
 
 ```html
-{ "consentInstanceId": "my-consent", "ampUserId": "xxx", "consentState":
-true/false, }
+{ "consentInstanceId": "my-consent", "ampUserId": "xxx", "consentStateValue":
+"accepted"/"rejected"/"unknown", }
 ```
 
 #### promptUI
