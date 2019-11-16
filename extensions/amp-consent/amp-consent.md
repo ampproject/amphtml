@@ -117,15 +117,14 @@ AMP expects the response to be a JSON object like the following:
 
 ```html
 { 
-  "promptIfUnknown": {boolean} [default: true], // instructs AMP whether to collect consent
-  "consentState": {accepted|rejected} [default: null], // (new) the latest consent state known by the server
-                                          // Set to `null` to only use client cache
-  "updateCache": {boolean} [default: true] // (new) whether to store consent state to client cache to 
-                                           // avoid this blocking request on user's next visit. 
-  "expireCache": {boolean} [default: false] // (new) clear the client cache immediately  
-                                            // Set to `true` to enforce a server side consent state. 
+  "consentRequired": {boolean}              // whether consent is required from the user. Previously named `promptIfUnknown`
+  "consentState": {accepted|rejected|unknown} [default: null], // (new) the latest consent state known by the server
+                                            // Set to `null` to only use client cache
+  "expireCache": {boolean} [default: false] // (new) indicate that the cache needs to be cleared.  
+                                            // Set to `true` to enforce server side consent state. 
 }
 ```
+
 
 Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
 
@@ -147,11 +146,9 @@ current user to the 3rd party vendor extensions.
 
 Unlike consent state, this `shareData` is not persisted in client side storage.
 
-#### promptIfUnknown
-`promptIfUnknown`: Instructs AMP whether to collect consent if previous consent is unknown. It takes boolean values. It also can be set to `promptIfUnknown: "fromCheckConsent"` to read from the server response of `checkConsentHref`.
+#### consentRequired
+`consentRequired`: Whether consent is required. It accepts boolean values. It also can be set to `remote` to fetch the value remotely from the `checkConsentHref` endpoint. 
 
-#### consentStateUnknownFallback
-`consentStateUnknownFallback`: Takes value of `"accepted"` or `"rejected"`. If consent state is finally `unknown`, AMP will fallback to this value. This is useful combined with the `geoOverride`, so that different geo can interpret `unknown` differently.
 
 #### onUpdateHref
 
@@ -179,7 +176,7 @@ true/false, }
 Two important tips when configuring `amp-geo`:
 
 - All geo groups should be mutually exclusive. The behavior is undetermined if a user falls into multiple geo override.
-- Provide an `unknown` override for users that are failed be be identified by `<amp-geo>`.
+- Provide an `unknownGeoGroup` override for users that are failed be be identified by `<amp-geo>`.
 
 Take the following config as an example:
 
@@ -187,20 +184,19 @@ Take the following config as an example:
 {
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
-  "promptIfUnknown": false,
+  "consentRequired": false,
 
   "geoOverride": {
     "geo1": {
-      "promptIfUnknown": true,
+      "consentRequired": true,
     }, 
     "geo2": {
       "checkConsentHref": "https://example.com/check-consent",
-      "promptIfUnknown": "fromCheckConsent",
-      "consentStateUnknownFallback": "accepted"
+      "consentRequired": "remote",
     },
-    "unknown": {
+    "unknownGeoGroup": {
       "checkConsentHref": "https://example.com/check-consent",
-      "promptIfUnknown": true,
+      "consentRequired": true,
    }
   }
 }
@@ -211,10 +207,10 @@ For users outside `geo1`, `geo2` & `uknown`, the merged config is
 {
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
-  "promptIfUnknown": false,
+  "consentRequired": "false",
 }
 ```
-The previous consent state is read from local cache as `checkConsentHref` is not specified. No consent will be collected even if cache is empty because `"promptIfUnknown": false`.
+The previous consent state is read from local cache as `checkConsentHref` is not specified. No consent will be collected even if cache is empty because `"consentRequired": false`.
 
 
 For users in `geo1`, the merged config is
@@ -222,7 +218,7 @@ For users in `geo1`, the merged config is
 {
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
-  "promptIfUnknown": true,
+  "consentRequired": true,
 }
 ```
 The previous consent state is read from local cache as `checkConsentHref` is not specified. Consent will be collected if cache is empty.
@@ -234,22 +230,22 @@ For users in `geo2`, the merged config is
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
   "checkConsentHref": "https://example.com/check-consent",
-  "promptIfUnknown": "fromCheckConsent",
+  "consentRequired": "remote",
 }
 ```
 AMP will wait for `checkConsentHref` response to decide whether collect consent. The consent state from server (if returned) takes precedence over the value from local cache.
 
 
-For users in `unknown`, the merged config is
+For users in `unknownGeoGroup`, the merged config is
 ```
 {
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
   "checkConsentHref": "https://example.com/check-consent",
-  "promptIfUnknown": true,
+  "consentRequired": true,
 }
 ```
-AMP will check local cache and server in parallel to find the previous consent state. Because `"promptIfUnknown": true` it will collect consent if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
+AMP will check local cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
 
 
 ## Consent Management
@@ -393,7 +389,7 @@ The `<amp-consent>` element can be used to block any other AMP components on the
 
 ### Basic blocking behaviors
 
-To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if the consent prompt has been skipped by the `checkConsentHref` response or `promptIfUnknownForGeoGroup` when consent is unknown. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
+To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required from the user. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
 
