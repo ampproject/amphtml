@@ -147,7 +147,7 @@ current user to the 3rd party vendor extensions.
 Unlike consent state, this `shareData` is not persisted in client side storage.
 
 #### consentRequired
-`consentRequired`: Whether consent is required. It accepts boolean values. It also can be set to `remote` to fetch the value remotely from the `checkConsentHref` endpoint. 
+`consentRequired`: Whether consent is required. It accepts boolean values. It also can be set to `remote` to fetch the value remotely from the `checkConsentHref` endpoint. Note that this value will be ignored if there is previous consent state stored in local cache. See [geoOverride](#geooverride) section for example use cases.
 
 
 #### onUpdateHref
@@ -176,7 +176,7 @@ true/false, }
 Two important tips when configuring `amp-geo`:
 
 - All geo groups should be mutually exclusive. The behavior is undetermined if a user falls into multiple geo override.
-- Provide an `unknownGeoGroup` override for users that are failed be be identified by `<amp-geo>`.
+- Provide an `geoGroupUnknown` override for users that are failed be be identified by `<amp-geo>`.
 
 Take the following config as an example:
 
@@ -187,14 +187,14 @@ Take the following config as an example:
   "consentRequired": false,
 
   "geoOverride": {
-    "geo1": {
+    "geoGroup1": {
       "consentRequired": true,
     }, 
-    "geo2": {
+    "geoGroup2": {
       "checkConsentHref": "https://example.com/check-consent",
       "consentRequired": "remote",
     },
-    "unknownGeoGroup": {
+    "geoGroupUnknown": {
       "checkConsentHref": "https://example.com/check-consent",
       "consentRequired": true,
    }
@@ -213,7 +213,7 @@ For users outside `geo1`, `geo2` & `uknown`, the merged config is
 `<amp-consent>` does nothing because `"consentRequired": false`.
 
 
-For users in `geo1`, the merged config is
+For users in `geoGroup1`, the merged config is
 ```
 {
   "onUpdateHref": "https://example.com/update-consent",
@@ -224,7 +224,7 @@ For users in `geo1`, the merged config is
 The previous consent state is read from local cache as `checkConsentHref` is not specified. Consent will be collected via the specified prompt UI if cache is empty.
 
 
-For users in `geo2`, the merged config is
+For users in `geoGroup2`, the merged config is
 ```
 {
   "onUpdateHref": "https://example.com/update-consent",
@@ -233,10 +233,10 @@ For users in `geo2`, the merged config is
   "consentRequired": "remote",
 }
 ```
-AMP will wait for `checkConsentHref` response to decide whether consent is required from the user. If the response contains `consentRequired: true` then AMP will collect consent via the specified prompt UI if consent state is `unknown`. The consent state from server (if returned) takes precedence over the value from local cache.
+If local cache is empty, AMP will wait for `checkConsentHref` response to decide whether a consent is required from the user. If the response contains `consentRequired: true` then AMP will collect consent via the specified prompt UI if consent state is `unknown`. The consent state from server (if returned) takes precedence over the value from local cache.
 
 
-For users in `unknownGeoGroup`, the merged config is
+For users in `geoGroupUnknown`, the merged config is
 ```
 {
   "onUpdateHref": "https://example.com/update-consent",
