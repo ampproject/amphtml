@@ -210,7 +210,7 @@ For users outside `geo1`, `geo2` & `uknown`, the merged config is
   "consentRequired": "false",
 }
 ```
-The previous consent state is read from local cache as `checkConsentHref` is not specified. No consent will be collected even if cache is empty because `"consentRequired": false`.
+`<amp-consent>` does nothing because `"consentRequired": false`.
 
 
 For users in `geo1`, the merged config is
@@ -221,7 +221,7 @@ For users in `geo1`, the merged config is
   "consentRequired": true,
 }
 ```
-The previous consent state is read from local cache as `checkConsentHref` is not specified. Consent will be collected if cache is empty.
+The previous consent state is read from local cache as `checkConsentHref` is not specified. Consent will be collected via the specified prompt UI if cache is empty.
 
 
 For users in `geo2`, the merged config is
@@ -233,7 +233,7 @@ For users in `geo2`, the merged config is
   "consentRequired": "remote",
 }
 ```
-AMP will wait for `checkConsentHref` response to decide whether collect consent. The consent state from server (if returned) takes precedence over the value from local cache.
+AMP will wait for `checkConsentHref` response to decide whether consent is required from the user. If the response contains `consentRequired: true` then AMP will collect consent via the specified prompt UI if consent state is `unknown`. The consent state from server (if returned) takes precedence over the value from local cache.
 
 
 For users in `unknownGeoGroup`, the merged config is
@@ -245,7 +245,7 @@ For users in `unknownGeoGroup`, the merged config is
   "consentRequired": true,
 }
 ```
-AMP will check local cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
+AMP will check local cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
 
 
 ## Consent Management
