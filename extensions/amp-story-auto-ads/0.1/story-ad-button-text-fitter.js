@@ -48,6 +48,8 @@ export class ButtonTextFitter {
         left: 0,
         zIndex: 1,
         visibility: 'hidden',
+        'font-weight': 'bold',
+        'letter-spacing': '0.2px',
       });
     });
   }
@@ -67,8 +69,7 @@ export class ButtonTextFitter {
           this.measurer_,
           this.maxHeight_,
           this.getMaxWidth_(pageElement),
-          // Less than real min so that we can find text that is too long.
-          FontSizes.MIN - 1,
+          FontSizes.MIN,
           FontSizes.MAX
         );
         if (fontSize >= FontSizes.MIN) {
@@ -102,7 +103,8 @@ export class ButtonTextFitter {
 }
 
 /**
- * Stolen from amp-fit-text.js
+ * This used to be binary search, but since range is so small just try the 3
+ * values. If range gets larger, reevaluate.
  * @param {Element} measurer
  * @param {number} expectedHeight
  * @param {number} expectedWidth
@@ -117,18 +119,15 @@ function calculateFontSize(
   minFontSize,
   maxFontSize
 ) {
-  maxFontSize++;
-  // Binomial search for the best font size.
-  while (maxFontSize - minFontSize > 1) {
-    const mid = Math.floor((minFontSize + maxFontSize) / 2);
-    setStyle(measurer, 'fontSize', px(mid));
+  let fontSize = maxFontSize;
+  while (fontSize >= minFontSize) {
+    setStyle(measurer, 'fontSize', px(fontSize));
     const height = measurer./*OK*/ offsetHeight;
     const width = measurer./*OK*/ offsetWidth;
-    if (height > expectedHeight || width > expectedWidth) {
-      maxFontSize = mid;
-    } else {
-      minFontSize = mid;
+    if (height <= expectedHeight && width <= expectedWidth) {
+      return fontSize;
     }
+    fontSize--;
   }
-  return minFontSize;
+  return fontSize;
 }
