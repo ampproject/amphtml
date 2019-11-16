@@ -17,7 +17,6 @@
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
 import {canInspectWindow} from '../iframe-helper';
 import {getExistingServiceOrNull, registerServiceBuilder} from '../service';
-import {isExperimentOn} from '../experiments';
 import {tryParseJson} from '../json';
 
 /**
