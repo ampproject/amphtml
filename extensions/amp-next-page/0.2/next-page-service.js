@@ -18,7 +18,6 @@ import {PositionObserverFidelity} from '../../../src/service/position-observer/p
 import {RelativePositions} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
-import {adoptShadowMode} from '../../../src/runtime';
 import {
   childElementByAttr,
   childElementsByTag,
@@ -94,8 +93,18 @@ export class Page {
    * @return {boolean}
    */
   isVisible() {
-    console.log(this.shadowDoc_);
     return this.visibilityState_ == VisibilityState.VISIBLE;
+  }
+
+  /**
+   * @return {VisibilityState}
+   */
+  getVisibilityState() {
+    return (
+      this.shadowDoc_ &&
+      this.shadowDoc_.ampdoc &&
+      this.shadowDoc_.ampdoc.getVisibilityState()
+    );
   }
 
   /**
@@ -114,6 +123,7 @@ export class Page {
   setHidden() {
     // TODO(wassgha): Handle history manipulation
     // TODO(wassgha): Handle manual visibility management
+    // TODO(wassgha): Unloading and re-loading of pages
     if (this.shadowDoc_) {
       this.shadowDoc_.setVisibilityState(VisibilityState.HIDDEN);
       this.visibilityState_ = VisibilityState.HIDDEN;
@@ -247,8 +257,6 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
-    adoptShadowMode(global);
-
     this.element_ = element;
     this.separator_ = this.getSeparatorElement_();
     this.moreBox_ = this.getMoreBoxElement_();
@@ -582,7 +590,8 @@ export class NextPageService {
         page.title,
         page.state_,
         page.isVisible() ? 'VISIBLE' : 'HIDDEN',
-        page.relativePos
+        page.relativePos,
+        page.getVisibilityState()
       );
     });
     // eslint-enable
