@@ -20,27 +20,41 @@ import {
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from '../../../src/url';
+import {removeElement} from '../../../src/dom';
 import {user, userAssert} from '../../../src/log';
 
 /**
- * @param {*} page
- * @param {string} documentUrl
+ * @param {string} url
+ * @param {string} hostUrl
+ * @return {!Location}
  */
-export function validatePage(page, documentUrl) {
+export function validateUrl(url, hostUrl) {
+  const parsedUrl = parseUrlDeprecated(url);
+  const {origin} = parseUrlDeprecated(hostUrl);
+  const sourceOrigin = getSourceOrigin(hostUrl);
+
+  userAssert(
+    parsedUrl.origin === origin || parsedUrl.origin === sourceOrigin,
+    'Invalid page URL supplied to amp-next-page, pages must be from the same origin as the current document'
+  );
+
+  return url;
+}
+
+/**
+ * @param {*} page
+ * @param {string} hostUrl
+ */
+export function validatePage(page, hostUrl) {
   user().assertString(page.url, 'page url must be a string');
 
   // Rewrite relative URLs to absolute, relative to the source URL.
-  const base = getSourceUrl(documentUrl);
+  const base = getSourceUrl(hostUrl);
   page.url = resolveRelativeUrl(page.url, base);
 
-  const url = parseUrlDeprecated(page.url);
-  const {origin} = parseUrlDeprecated(documentUrl);
-  const sourceOrigin = getSourceOrigin(documentUrl);
+  const sourceOrigin = getSourceOrigin(hostUrl);
 
-  userAssert(
-    url.origin === origin || url.origin === sourceOrigin,
-    'Invalid page URL supplied to amp-next-page, pages must be from the same origin as the current document'
-  );
+  const url = validateUrl(page.url, hostUrl);
   user().assertString(page.image, 'page image must be a string');
   user().assertString(page.title, 'page title must be a string');
 
@@ -53,5 +67,23 @@ export function validatePage(page, documentUrl) {
       url.pathname +
       (url.search || '') +
       (url.hash || '');
+  }
+}
+
+/**
+ * Removes redundancies and unauthorized extensions and elements
+ * @param {!Document} doc Document to attach.
+ */
+export function sanitizeDoc(doc) {
+  // TODO(wassgha): Implement handling of sticky elements
+  // TODO(wassgha): Implement persistence of repeating elements (e.g amp-sidebar)
+
+  // TODO(wassgha): Parse for more pages to queue
+
+  // TODO(wassgha): Allow amp-analytics after bug bash
+  const analytics = doc.querySelectorAll('amp-analytics');
+  for (let i = 0; i < analytics.length; i++) {
+    const item = analytics[i];
+    removeElement(item);
   }
 }

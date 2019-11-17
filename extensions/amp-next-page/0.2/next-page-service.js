@@ -17,18 +17,21 @@
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {RelativePositions} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+import {VisibilityState} from '../../../src/visibility-state';
+import {adoptShadowMode} from '../../../src/runtime';
 import {
   childElementByAttr,
   childElementsByTag,
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {sanitizeDoc, validatePage, validateUrl} from './utils';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {validatePage} from './utils';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
@@ -59,6 +62,7 @@ const PageBound = {
   FOOTER: 1,
 };
 
+// TODO(wassgha): Export to a separate file
 export class Page {
   /**
    * @param {!NextPageService} manager
@@ -70,12 +74,14 @@ export class Page {
     /** @private {!NextPageService} */
     this.manager_ = manager;
     /** @private {?../../../src/runtime.ShadowDoc} */
-    this.amp_ = null; // eslint-disable-line local/unused-private-field
+    this.shadowDoc_ = null;
     /** @private {PageState} */
     this.state_ = PageState.QUEUED;
-    /** @private {boolean} */
-    this.visibilityState_ = false;
+    // TODO(wassgha) Better typing
+    /** @private {Object} */
     this.boundPosition_ = {[PageBound.HEADER]: null, [PageBound.FOOTER]: null};
+    /** @private {boolean} */
+    this.visibilityState_ = VisibilityState.PRERENDER;
 
     // Public properties
     this.title = title;
@@ -88,22 +94,30 @@ export class Page {
    * @return {boolean}
    */
   isVisible() {
-    return !!this.visibilityState_;
-    // return this.amp_ && this.amp_.getVisibilityState() == VISIBLE;
+    console.log(this.shadowDoc_);
+    return this.visibilityState_ == VisibilityState.VISIBLE;
   }
 
   /**
    */
   setVisible() {
-    this.visibilityState_ = true;
-    // return this.amp_ && this.amp_.getVisibilityState();
+    // TODO(wassgha): Handle history manipulation
+    // TODO(wassgha): Handle manual visibility management
+    if (this.shadowDoc_) {
+      this.shadowDoc_.setVisibilityState(VisibilityState.VISIBLE);
+      this.visibilityState_ = VisibilityState.VISIBLE;
+    }
   }
 
   /**
    */
   setHidden() {
-    this.visibilityState_ = false;
-    // return this.amp_ && this.amp_.getVisibilityState();
+    // TODO(wassgha): Handle history manipulation
+    // TODO(wassgha): Handle manual visibility management
+    if (this.shadowDoc_) {
+      this.shadowDoc_.setVisibilityState(VisibilityState.HIDDEN);
+      this.visibilityState_ = VisibilityState.HIDDEN;
+    }
   }
 
   /**
@@ -123,16 +137,17 @@ export class Page {
   /**  */
   fetch() {
     this.state_ = PageState.FETCHING;
-    setTimeout(() => {
+
+    return this.manager_.fetchPageDocument(this).then(content => {
       this.state_ = PageState.LOADED;
 
-      const content = this.manager_.buildMockDocument(this.title);
-
-      if (this.manager_.appendAndObservePage(this, content)) {
+      const shadowDoc = this.manager_.appendAndObservePage(this, content);
+      if (shadowDoc) {
+        this.shadowDoc_ = shadowDoc;
         this.manager_.setLastFetchedPage(this);
         this.state_ = PageState.INSERTED;
       }
-    }, 1000);
+    });
   }
 
   /**
@@ -232,6 +247,8 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
+    adoptShadowMode(global);
+
     this.element_ = element;
     this.separator_ = this.getSeparatorElement_();
     this.moreBox_ = this.getMoreBoxElement_();
@@ -345,7 +362,7 @@ export class NextPageService {
    *
    * @param {Page} page
    * @param {Element} doc
-   * @return {boolean}
+   * @return {?../../../src/runtime.ShadowDoc}
    */
   appendAndObservePage(page, doc) {
     if (this.getViewportsAway_() >= 1) {
@@ -355,12 +372,14 @@ export class NextPageService {
       );
 
       const header = this.win_.document.createElement('div');
+      const shadowRoot = this.win_.document.createElement('div');
       const footer = this.win_.document.createElement('div');
 
       this.element_.insertBefore(header, this.moreBox_);
-      this.element_.insertBefore(doc, this.moreBox_);
+      this.element_.insertBefore(shadowRoot, this.moreBox_);
       this.element_.insertBefore(footer, this.moreBox_);
 
+      // TODO(wassgha): Unobserve
       this.getPositionObserver_().observe(
         header,
         PositionObserverFidelity.LOW,
@@ -371,10 +390,24 @@ export class NextPageService {
         PositionObserverFidelity.LOW,
         page.boundPositionChanged.bind(page, PageBound.FOOTER)
       );
-      return true;
+
+      // Handles extension deny-lists and sticky items
+      sanitizeDoc(doc);
+
+      const amp = this.win_.AMP.attachShadowDoc(shadowRoot, doc, '', {
+        visibilityState: VisibilityState.PRERENDER,
+      });
+
+      const ampdoc = devAssert(amp.ampdoc);
+      installStylesForDoc(ampdoc, CSS, null, false, TAG);
+
+      const body = ampdoc.getBody();
+      body.classList.add('i-amphtml-next-page-document');
+
+      return amp;
     } else {
       // this.element_.appendChild(this.moreBox_);
-      return false;
+      return null;
     }
   }
 
@@ -409,6 +442,29 @@ export class NextPageService {
   }
 
   /**
+   * @param {Page} page
+   * @return {Element}
+   */
+  fetchPageDocument(page) {
+    return Services.xhrFor(this.win_)
+      .fetch(page.url, {ampCors: false})
+      .then(response => {
+        validateUrl(response.url, this.ampdoc_.getUrl());
+        page.url = response.url;
+
+        return response.text();
+      })
+      .then(html => {
+        const doc = this.win_.document.implementation.createHTMLDocument('');
+        doc.open();
+        doc.write(html);
+        doc.close();
+        return doc;
+      })
+      .catch(e => user().error(TAG, 'failed to fetch %s', page.url, e));
+  }
+
+  /**
    * @return {!Promise<Array>} List of pages to fetch
    * @private
    */
@@ -422,11 +478,10 @@ export class NextPageService {
     );
 
     if (src) {
-      // fetchPromise = this.fetchConfig_().catch(error =>
-      //   user().error(TAG, 'Error fetching config', error)
-      // );
+      // TODO(wassgha): Implement loading pages from a URL
       return Promise.resolve([]);
     } else {
+      // TODO(wassgha): Implement recursively loading pages from subsequent documents
       return Promise.resolve(inlinePages);
     }
   }
@@ -473,6 +528,7 @@ export class NextPageService {
       this.getNextPageElement_(),
       'amp-next-page-separator'
     );
+    // TODO(wassgha): Use templates (amp-mustache) to render the separator
     if (providedSeparator) {
       removeElement(providedSeparator);
     }
@@ -494,6 +550,7 @@ export class NextPageService {
    * @return {!Element}
    */
   buildMockDocument(title) {
+    // TODO(wassgha): Clean up
     const getRandomColor = () => {
       const letters = '0123456789ABCDEF';
       let color = '#';
@@ -517,6 +574,7 @@ export class NextPageService {
    *
    */
   printPagesForTesting() {
+    // TODO(wassgha): Clean up
     // eslint-disable
     console.log('=======');
     this.pages_.forEach(page => {
@@ -539,6 +597,7 @@ export class NextPageService {
       this.getNextPageElement_(),
       'amp-next-page-more-box'
     );
+    // TODO(wassgha): Use templates (amp-mustache) to render the more box
     if (providedMoreBox) {
       removeElement(providedMoreBox);
     }
@@ -550,6 +609,7 @@ export class NextPageService {
    * @private
    */
   buildDefaultMoreBox_() {
+    // TODO(wassgha): Better default more box
     const moreBox = this.win_.document.createElement('div');
     moreBox.classList.add('amp-next-page-more-box');
     return moreBox;
