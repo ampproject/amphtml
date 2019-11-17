@@ -294,63 +294,67 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      this.xhr_
-        .fetch(next.ampUrl, {ampCors: false})
-        .then(response => {
-          // Update AMP URL in case we were redirected.
-          documentRef.ampUrl = response.url;
-          const url = this.urlService_.parse(response.url);
-          userAssert(
-            url.origin === this.origin_,
-            'ampUrl resolved to a different origin from the origin of the ' +
-              'current document'
-          );
-          return response.text();
-        })
-        .then(html => {
-          const doc = this.win_.document.implementation.createHTMLDocument('');
-          doc.open();
-          doc.write(html);
-          doc.close();
-          return doc;
-        })
-        .then(
-          doc =>
-            new Promise((resolve, reject) => {
-              if (documentRef.cancelled) {
-                // User has reached the end of the document already, don't render.
-                resolve();
-                return;
-              }
-
-              if (documentRef.recUnit.isObserving) {
-                this.positionObserver_.unobserve(articleLinks);
-                documentRef.recUnit.isObserving = true;
-              }
-              this.resources_.mutateElement(container, () => {
-                try {
-                  documentRef.amp = this.attachShadowDoc_(shadowRoot, doc);
-
-                  toggle(dev().assertElement(documentRef.recUnit.el), false);
-                  this.documentQueued_ = false;
+      setTimeout(() => {
+        this.xhr_
+          .fetch(next.ampUrl, {ampCors: false})
+          .then(response => {
+            // Update AMP URL in case we were redirected.
+            documentRef.ampUrl = response.url;
+            const url = this.urlService_.parse(response.url);
+            userAssert(
+              url.origin === this.origin_,
+              'ampUrl resolved to a different origin from the origin of the ' +
+                'current document'
+            );
+            return response.text();
+          })
+          .then(html => {
+            const doc = this.win_.document.implementation.createHTMLDocument(
+              ''
+            );
+            doc.open();
+            doc.write(html);
+            doc.close();
+            return doc;
+          })
+          .then(
+            doc =>
+              new Promise((resolve, reject) => {
+                if (documentRef.cancelled) {
+                  // User has reached the end of the document already, don't render.
                   resolve();
-                } catch (e) {
-                  reject(e);
+                  return;
                 }
-              });
-            }),
-          e => user().error(TAG, 'failed to fetch %s', next.ampUrl, e)
-        )
-        .catch(e =>
-          dev().error(
-            TAG,
-            'failed to attach shadow document for %s',
-            next.ampUrl,
-            e
+
+                if (documentRef.recUnit.isObserving) {
+                  this.positionObserver_.unobserve(articleLinks);
+                  documentRef.recUnit.isObserving = true;
+                }
+                this.resources_.mutateElement(container, () => {
+                  try {
+                    documentRef.amp = this.attachShadowDoc_(shadowRoot, doc);
+
+                    toggle(dev().assertElement(documentRef.recUnit.el), false);
+                    this.documentQueued_ = false;
+                    resolve();
+                  } catch (e) {
+                    reject(e);
+                  }
+                });
+              }),
+            e => user().error(TAG, 'failed to fetch %s', next.ampUrl, e)
           )
-        )
-        // The new page may be short and the next may already need fetching.
-        .then(() => this.scrollHandler_());
+          .catch(e =>
+            dev().error(
+              TAG,
+              'failed to attach shadow document for %s',
+              next.ampUrl,
+              e
+            )
+          )
+          // The new page may be short and the next may already need fetching.
+          .then(() => this.scrollHandler_());
+      }, 1000);
     }
   }
 
