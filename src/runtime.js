@@ -378,7 +378,7 @@ export function adoptShadowMode(global) {
  * Extends the runtime to add shadow mode.
  *
  * @param {!Window} global Global scope to adopt.
- * @param extensions
+ * @param {!./service/extensions-impl.Extensions} extensions
  * @return {!Promise}
  */
 export function dynamicallyAdoptShadowMode(global, extensions) {
