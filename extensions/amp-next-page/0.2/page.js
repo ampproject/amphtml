@@ -80,7 +80,7 @@ export class Page {
 
   /**
    * @return {!VisibilityState}
-   * @visiblefortesting
+   * @visibleForTesting
    */
   getVisibilityState() {
     return this.visibilityState_;

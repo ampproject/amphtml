@@ -41,8 +41,8 @@ export class AmpNextPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     userAssert(
-      isExperimentOn(this.win, 'amp-next-page'),
-      'Experiment amp-next-page disabled'
+      isExperimentOn(this.win, 'amp-next-page-v2'),
+      'Experiment amp-next-page-v2 disabled'
     );
 
     this.nextPageService_ = Services.nextPageServiceForDoc(this.getAmpDoc());
