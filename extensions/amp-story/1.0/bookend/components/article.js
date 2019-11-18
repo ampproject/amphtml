@@ -21,7 +21,11 @@ import {
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {
+  getSourceOriginForElement,
+  resolveImgSrc,
+  userAssertValidProtocol,
+} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -121,7 +125,12 @@ export class ArticleComponent {
           </div>`;
 
       const {image} = htmlRefs(imgEl);
-      addAttributesToElement(image, dict({'src': articleData.image}));
+
+      addAttributesToElement(
+        image,
+        dict({'src': resolveImgSrc(doc, articleData.image)})
+      );
+
       el.appendChild(imgEl);
     }
 

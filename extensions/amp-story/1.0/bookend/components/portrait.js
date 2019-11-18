@@ -21,7 +21,11 @@ import {
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {
+  getSourceOriginForElement,
+  resolveImgSrc,
+  userAssertValidProtocol,
+} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -126,7 +130,12 @@ export class PortraitComponent {
 
     category.textContent = portraitData.category;
     title.textContent = portraitData.title;
-    addAttributesToElement(image, dict({'src': portraitData.image}));
+
+    addAttributesToElement(
+      image,
+      dict({'src': resolveImgSrc(doc, portraitData.image)})
+    );
+
     meta.textContent = portraitData.domainName;
 
     return el;

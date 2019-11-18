@@ -21,7 +21,11 @@ import {
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {
+  getSourceOriginForElement,
+  resolveImgSrc,
+  userAssertValidProtocol,
+} from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -128,7 +132,12 @@ export class LandscapeComponent {
 
     category.textContent = landscapeData.category;
     title.textContent = landscapeData.title;
-    addAttributesToElement(image, dict({'src': landscapeData.image}));
+
+    addAttributesToElement(
+      image,
+      dict({'src': resolveImgSrc(doc, landscapeData.image)})
+    );
+
     meta.textContent = landscapeData.domainName;
 
     return el;
