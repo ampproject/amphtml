@@ -79,6 +79,22 @@ module.exports = function(babel) {
         if (parentPath.isVariableDeclarator()) {
           return declarator(path, parentPath);
         }
+
+        if (path.listKey === 'params') {
+          const body = parentPath.get('body');
+          if (
+            parentPath.isArrowFunctionExpression() &&
+            !body.isBlockStatement()
+          ) {
+            body.replaceWith(t.blockStatement([t.returnStatement(body.node)]));
+          }
+          const param = path.scope.generateUidIdentifier('param');
+          const declaration = t.variableDeclaration('let', [
+            t.variableDeclarator(path.node, param),
+          ]);
+          const declarationPath = body.unshiftContainer('body', declaration);
+          path.replaceWith(t.cloneNode(param));
+        }
       },
     },
   };
