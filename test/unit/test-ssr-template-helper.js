@@ -37,6 +37,7 @@ describes.fakeWin(
       win = env.win;
       templates = Services.templatesFor(win);
       viewer = Services.viewerForDoc(ampdoc);
+      viewer.isTrustedViewer = () => Promise.resolve(true);
       hasCapabilityStub = env.sandbox.stub(viewer, 'hasCapability');
       maybeFindTemplateStub = env.sandbox.stub(templates, 'maybeFindTemplate');
       ssrTemplateHelper = new SsrTemplateHelper(
@@ -155,14 +156,14 @@ describes.fakeWin(
 
       describe('applySsrOrCsrTemplate', () => {
         it('should set html template', () => {
-          ssrTemplateHelper.applySsrOrCsrTemplate(
-            {},
-            {html: '<div>some template</div>'}
-          );
-          expect(findAndSetHtmlForTemplate).to.have.been.calledWith(
-            {},
-            '<div>some template</div>'
-          );
+          return ssrTemplateHelper
+            .applySsrOrCsrTemplate({}, {html: '<div>some template</div>'})
+            .then(() => {
+              expect(findAndSetHtmlForTemplate).to.have.been.calledWith(
+                {},
+                '<div>some template</div>'
+              );
+            });
         });
 
         it('should throw error if html template is not defined', () => {
@@ -171,6 +172,19 @@ describes.fakeWin(
               ssrTemplateHelper.applySsrOrCsrTemplate({}, {html: null});
             }).to.throw(/Server side html response must be defined/);
           });
+        });
+
+        it('should throw if trying to ssr from an untrusted viewer', () => {
+          viewer.isTrustedViewer = () => Promise.resolve(false);
+          const errorMsg = /May only ssr from trusted viewers/;
+          expectAsyncConsoleError(errorMsg);
+
+          ssrTemplateHelper
+            .applySsrOrCsrTemplate({}, {html: '<div>some templates</div>'})
+            .then(
+              () => Promise.reject(),
+              error => expect(error).to.match(errorMsg)
+            );
         });
 
         it('should render template ', () => {

@@ -65,6 +65,15 @@ export class SsrTemplateHelper {
   }
 
   /**
+   * Whether the viewer is allowed to ssr templates. Based on whether or not
+   * it is from a trusted domain.
+   * @return {Promise<boolean>}
+   */
+  isAllowed() {
+    return this.viewer_.isTrustedViewer();
+  }
+
+  /**
    * Proxies xhr and template rendering to the viewer.
    * Returns the renderable response, for use with applySsrOrCsrTemplate.
    * @param {!Element} element
@@ -105,10 +114,13 @@ export class SsrTemplateHelper {
         typeof data['html'] === 'string',
         'Server side html response must be defined'
       );
-      renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
-        element,
-        /** @type {string} */ (data['html'])
-      );
+      renderTemplatePromise = this.isAllowed().then(allowed => {
+        userAssert(allowed, 'May only ssr from trusted viewers');
+        this.templates_.findAndSetHtmlForTemplate(
+          element,
+          /** @type {string} */ (data['html'])
+        );
+      });
     } else if (isArray(data)) {
       renderTemplatePromise = this.templates_.findAndRenderTemplateArray(
         element,
