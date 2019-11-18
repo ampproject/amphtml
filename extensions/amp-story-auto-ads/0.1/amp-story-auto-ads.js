@@ -20,6 +20,7 @@ import {
   STORY_AD_ANALYTICS,
   StoryAdAnalytics,
 } from './story-ad-analytics';
+import {ButtonTextFitter} from './story-ad-button-text-fitter';
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
@@ -130,6 +131,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.hasForcedRender_ = false;
+
+    /** @private {boolean} */
+    this.tryingToPlace_ = false;
+
+    /** @private {?./story-ad-button-text-fitter.ButtonTextFitter} */
+    this.buttonFitter_ = null;
   }
 
   /** @override */
@@ -151,6 +158,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const ampdoc = this.getAmpDoc();
       const extensionService = Services.extensionsFor(this.win);
       extensionService./*OK*/ installExtensionForDoc(ampdoc, AD_TAG);
+
+      this.buttonFitter_ = new ButtonTextFitter(ampdoc);
 
       return ampStoryElement.getImpl().then(impl => {
         this.ampStory_ = impl;
@@ -366,7 +375,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.getAmpDoc(),
       this.config_,
       index,
-      this.localizationService_
+      this.localizationService_,
+      devAssert(this.buttonFitter_)
     );
 
     this.maybeForceAdPlacement_(page);
@@ -453,24 +463,30 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     // If there is already an ad inserted, but not viewed it doesn't matter how
     // many pages we have seen, we should not keep trying to insert more ads.
-    if (!this.pendingAdView_ && this.enoughContentPagesViewed_()) {
-      const adState = this.tryToPlaceAdAfterPage_(pageId);
+    if (
+      !this.pendingAdView_ &&
+      this.enoughContentPagesViewed_() &&
+      !this.tryingToPlace_
+    ) {
+      this.tryToPlaceAdAfterPage_(pageId).then(adState => {
+        this.tryingToPlace_ = false;
 
-      if (adState === AD_STATE.INSERTED) {
-        this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_INSERTED, {
-          [AnalyticsVars.AD_INSERTED]: Date.now(),
-        });
-        this.adsPlaced_++;
-        // We have an ad inserted that has yet to be viewed.
-        this.pendingAdView_ = true;
-      }
+        if (adState === AD_STATE.INSERTED) {
+          this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_INSERTED, {
+            [AnalyticsVars.AD_INSERTED]: Date.now(),
+          });
+          this.adsPlaced_++;
+          // We have an ad inserted that has yet to be viewed.
+          this.pendingAdView_ = true;
+        }
 
-      if (adState === AD_STATE.FAILED) {
-        this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_DISCARDED, {
-          [AnalyticsVars.AD_DISCARDED]: Date.now(),
-        });
-        this.startNextAdPage_(/* failure */ true);
-      }
+        if (adState === AD_STATE.FAILED) {
+          this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_DISCARDED, {
+            [AnalyticsVars.AD_DISCARDED]: Date.now(),
+          });
+          this.startNextAdPage_(/* failure */ true);
+        }
+      });
     }
   }
 
@@ -546,66 +562,71 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Place ad based on user config
    * @param {string} pageBeforeAdId
-   * @return {AD_STATE}
+   * @return {Promise<AD_STATE>}
    * @private
    */
   tryToPlaceAdAfterPage_(pageBeforeAdId) {
-    const nextAdPage = lastItem(this.adPages_);
-    if (!nextAdPage.isLoaded() && nextAdPage.hasTimedOut()) {
-      // Timeout fail.
-      return AD_STATE.FAILED;
-    }
+    this.tryingToPlace_ = true;
 
-    let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
-    let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
+    return Promise.resolve().then(() => {
+      const nextAdPage = lastItem(this.adPages_);
+      if (!nextAdPage.isLoaded() && nextAdPage.hasTimedOut()) {
+        // Timeout fail.
+        return AD_STATE.FAILED;
+      }
 
-    if (!pageAfterAd) {
-      return AD_STATE.PENDING;
-    }
+      let pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
+      let pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
 
-    if (this.isDesktopView_()) {
-      // If we are in desktop view the ad must be inserted 2 pages away because
-      // the next page will already be in view
-      pageBeforeAd = pageAfterAd;
-      pageBeforeAdId = pageAfterAd.element.id;
-      pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
-    }
+      if (!pageAfterAd) {
+        return AD_STATE.PENDING;
+      }
 
-    if (!pageAfterAd) {
-      return AD_STATE.PENDING;
-    }
+      if (this.isDesktopView_()) {
+        // If we are in desktop view the ad must be inserted 2 pages away because
+        // the next page will already be in view
+        pageBeforeAd = pageAfterAd;
+        pageBeforeAdId = pageAfterAd.element.id;
+        pageAfterAd = this.ampStory_.getNextPage(pageAfterAd);
+      }
 
-    // There are three checks here that we check before inserting an ad. If
-    // any of these fail we will try again on next page navigation.
-    if (
-      !nextAdPage.isLoaded() || // 1. Ad must be loaded.
-      // 2. Pubs can opt out of ad placement using 'next-page-no-ad' attribute
-      this.nextPageNoAd_(pageBeforeAd) ||
-      // 3. We will not show two ads in a row.
-      pageBeforeAd.isAd() ||
-      pageAfterAd.isAd()
-    ) {
-      return AD_STATE.PENDING;
-    }
+      if (!pageAfterAd) {
+        return AD_STATE.PENDING;
+      }
 
-    const ctaCreated = nextAdPage.maybeCreateCta();
-    if (!ctaCreated) {
-      // Failed on outlink creation.
-      return AD_STATE.FAILED;
-    }
+      // There are three checks here that we check before inserting an ad. If
+      // any of these fail we will try again on next page navigation.
+      if (
+        !nextAdPage.isLoaded() || // 1. Ad must be loaded.
+        // 2. Pubs can opt out of ad placement using 'next-page-no-ad' attribute
+        this.nextPageNoAd_(pageBeforeAd) ||
+        // 3. We will not show two ads in a row.
+        pageBeforeAd.isAd() ||
+        pageAfterAd.isAd()
+      ) {
+        return AD_STATE.PENDING;
+      }
 
-    const nextAdPageId = nextAdPage.getId();
-    this.ampStory_.insertPage(pageBeforeAdId, nextAdPageId);
+      return nextAdPage.maybeCreateCta().then(ctaCreated => {
+        if (!ctaCreated) {
+          // Failed on outlink creation.
+          return AD_STATE.FAILED;
+        }
 
-    // If we are inserted we now have a `position` macro available for any
-    // analytics events moving forward.
-    const adIndex = this.adPageIds_[nextAdPageId];
-    const pageNumber = this.ampStory_.getPageIndexById(pageBeforeAdId);
-    this.analytics_.then(analytics =>
-      analytics.setVar(adIndex, AnalyticsVars.POSITION, pageNumber + 1)
-    );
+        const nextAdPageId = nextAdPage.getId();
+        this.ampStory_.insertPage(pageBeforeAdId, nextAdPageId);
 
-    return AD_STATE.INSERTED;
+        // If we are inserted we now have a `position` macro available for any
+        // analytics events moving forward.
+        const adIndex = this.adPageIds_[nextAdPageId];
+        const pageNumber = this.ampStory_.getPageIndexById(pageBeforeAdId);
+        this.analytics_.then(analytics =>
+          analytics.setVar(adIndex, AnalyticsVars.POSITION, pageNumber + 1)
+        );
+
+        return AD_STATE.INSERTED;
+      });
+    });
   }
 
   /**
