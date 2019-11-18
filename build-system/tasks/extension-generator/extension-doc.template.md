@@ -1,11 +1,12 @@
 ---
-\$category: presentation
+\$category@: presentation
 formats:
   - websites
   - email
 teaser:
-  text: FILL THIS IN.
+  text: Fill this in with teaser text to improve SEO.
 ---
+
 <!--
   All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
   and improves SEO.
@@ -13,7 +14,6 @@ teaser:
   * List applicable format(s): websites, ads, stories, email
   * Remove this comment!
 -->
-
 
 <!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
