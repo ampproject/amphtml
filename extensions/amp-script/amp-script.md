@@ -204,6 +204,10 @@ The rules for mutations are as follows:
 2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
 3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height < 300px`.
 
+#### Creating AMP elements
+
+With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on [#25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
+
 #### Security features
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
