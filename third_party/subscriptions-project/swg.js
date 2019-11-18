@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.83 */
+/** Version: 0.1.22.84 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -3046,11 +3046,46 @@ class ActivityIframePort$1 {
 
 class ActivityPorts$1 {
   /**
-   * @param {!Window} win
+   * @param {!../runtime/deps.DepsDef} deps
    */
-  constructor(win) {
+  constructor(deps) {
+    /** @private @const {!../runtime/deps.DepsDef} */
+    this.deps_ = deps;
+
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = new activityPorts_1(win);
+    this.activityPorts_ = new activityPorts_1(deps.win());
+  }
+
+  /**
+   * Adds client version, publication, product and logging context information.
+   * @param {?Object=} args
+   * @return {!Object}
+   */
+  addDefaultArguments(args) {
+    const deps = this.deps_;
+    const pageConfig = deps.pageConfig();
+    const context = deps.analytics().getContext();
+    return Object.assign(
+      {
+        'analyticsContext': context.toArray(),
+        'publicationId': pageConfig.getPublicationId(),
+        'productId': pageConfig.getProductId(),
+        '_client': 'SwG 0.1.22.84',
+      },
+      args || {}
+    );
+  }
+
+  /*
+   * Start an activity within the specified iframe.
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} args
+   * @return {!Promise<!ActivityIframePort>}
+   */
+  openActivityIframePort_(iframe, url, args) {
+    const activityPort = new ActivityIframePort$1(iframe, url, args);
+    return activityPort.connect().then(() => activityPort);
   }
 
   /**
@@ -3058,11 +3093,14 @@ class ActivityPorts$1 {
    * @param {!HTMLIFrameElement} iframe
    * @param {string} url
    * @param {?Object=} args
+   * @param {boolean=} addDefaultArguments
    * @return {!Promise<!ActivityIframePort>}
    */
-  openIframe(iframe, url, args) {
-    const activityPort = new ActivityIframePort$1(iframe, url, args);
-    return activityPort.connect().then(() => activityPort);
+  openIframe(iframe, url, args, addDefaultArguments = false) {
+    if (addDefaultArguments) {
+      args = this.addDefaultArguments(args);
+    }
+    return this.openActivityIframePort_(iframe, url, args);
   }
 
   /**
@@ -3088,9 +3126,13 @@ class ActivityPorts$1 {
    * @param {string} target
    * @param {?Object=} args
    * @param {?web-activities/activity-ports.ActivityOpenOptions=} options
+   * @param {boolean=} addDefaultArguments
    * @return {{targetWin: ?Window}}
    */
-  open(requestId, url, target, args, options) {
+  open(requestId, url, target, args, options, addDefaultArguments = false) {
+    if (addDefaultArguments) {
+      args = this.addDefaultArguments(args);
+    }
     return this.activityPorts_.open(requestId, url, target, args, options);
   }
 
@@ -4195,7 +4237,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.83',
+    '_client': 'SwG 0.1.22.84',
   });
 }
 
@@ -13689,6 +13731,8 @@ function setInternalParam(paymentRequest, param, value) {
  * limitations under the License.
  */
 
+const NO_PROMISE_ERR = 'No account promise provided';
+
 class WaitForSubscriptionLookupApi {
   /**
    * @param {!./deps.DepsDef} deps
@@ -13710,8 +13754,8 @@ class WaitForSubscriptionLookupApi {
     /** @private {?Promise} */
     this.openViewPromise_ = null;
 
-    /** @private {?Promise} */
-    this.accountPromise_ = accountPromise || null;
+    /** @private {!Promise} */
+    this.accountPromise_ = accountPromise || Promise.reject(NO_PROMISE_ERR);
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
@@ -14871,6 +14915,23 @@ class AnalyticsService {
   }
 
   /**
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @return {boolean}
+   */
+  shouldAlwaysLogEvent_(event) {
+    /* AMP_CLIENT events are considered publisher events and we generally only
+     * log those if the publisher decided to enable publisher event logging for
+     * privacy purposes.  The page load event is not private and is necessary
+     * just so we know the user is in AMP, so we will log it regardless of
+     * configuration.
+     */
+    return (
+      event.eventType === AnalyticsEvent.IMPRESSION_PAGE_LOAD &&
+      event.eventOriginator === EventOriginator.AMP_CLIENT
+    );
+  }
+
+  /**
    *  Listens for new events from the events manager and handles logging
    * @param {!../api/client-event-manager-api.ClientEvent} event
    */
@@ -14883,7 +14944,8 @@ class AnalyticsService {
 
     if (
       ClientEventManager.isPublisherEvent(event) &&
-      !this.shouldLogPublisherEvents_()
+      !this.shouldLogPublisherEvents_() &&
+      !this.shouldAlwaysLogEvent_(event)
     ) {
       return;
     }
@@ -15493,16 +15555,13 @@ class ConfiguredRuntime {
     /** @private @const {!DialogManager} */
     this.dialogManager_ = new DialogManager(this.doc_);
 
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = new ActivityPorts$1(this.win_);
-
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
 
-    //NOTE: 'this' is passed in as a DepsDef.  Do not pass in 'this' before
-    //analytics service and entitlements manager are constructed unless
-    //you are certain they do not rely on them because they are part of that
-    //definition.
+    // WARNING: DepsDef ('this') is being progressively defined below.
+    // Constructors will crash if they rely on something that doesn't exist yet.
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = new ActivityPorts$1(this);
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
@@ -15527,6 +15586,8 @@ class ConfiguredRuntime {
       this, // See note about 'this' above
       this.fetcher_
     );
+
+    // ALL CLEAR: DepsDef definition now complete.
 
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.pageConfig_, this.fetcher_);
