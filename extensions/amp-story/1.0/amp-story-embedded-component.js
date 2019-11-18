@@ -22,7 +22,11 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
+import {
+  AdvancementMode,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -286,6 +290,9 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
 
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
+
     /** @private @const {!../../../src/service/owners-interface.OwnersInterface} */
     this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
 
@@ -384,6 +391,10 @@ export class AmpStoryEmbeddedComponent {
       case EmbeddedComponentState.FOCUSED:
         this.state_ = state;
         this.onFocusedStateUpdate_(component);
+        this.analyticsService_.triggerEvent(
+          StoryAnalyticsEvent.FOCUS,
+          this.triggeringTarget_
+        );
         break;
       case EmbeddedComponentState.HIDDEN:
         this.state_ = state;
@@ -501,6 +512,18 @@ export class AmpStoryEmbeddedComponent {
 
     this.focusedStateOverlay_.addEventListener('click', event =>
       this.onOutsideTooltipClick_(event)
+    );
+
+    this.tooltip_.addEventListener(
+      'click',
+      event => {
+        event.stopPropagation();
+        this.analyticsService_.triggerEvent(
+          StoryAnalyticsEvent.CLICK_THROUGH,
+          this.triggeringTarget_
+        );
+      },
+      true /** capture */
     );
 
     return this.shadowRoot_;

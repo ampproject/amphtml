@@ -70,7 +70,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledOnceWith('story-page-visible');
 
     const details = analytics.updateDetails('story-page-visible');
-    expect(details.pageDetails).to.deep.equal({});
+    expect(details.eventDetails).to.deep.equal({});
   });
 
   it('should mark event as repeated when fired more than once', () => {
@@ -94,7 +94,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledWith('story-page-visible');
     expect(trigger).to.have.been.calledThrice;
     expect(
-      analytics.updateDetails('story-page-visible').pageDetails
+      analytics.updateDetails('story-page-visible').eventDetails
     ).to.deep.include({
       'repeated': true,
     });
