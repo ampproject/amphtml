@@ -105,7 +105,7 @@ export class SsrTemplateHelper {
         typeof data['html'] === 'string',
         'Server side html response must be defined'
       );
-      renderTemplatePromise = this.isTrustedViewer().then(trusted => {
+      renderTemplatePromise = this.viewer_.isTrustedViewer().then(trusted => {
         userAssert(trusted, 'May only ssr from trusted viewers');
         this.templates_.findAndSetHtmlForTemplate(
           element,
