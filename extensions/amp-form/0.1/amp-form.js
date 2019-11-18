@@ -1241,7 +1241,9 @@ export class AmpForm {
  * @return {boolean} Whether the form is currently valid or not.
  */
 function checkUserValidityOnSubmission(form) {
-  const elements = form.querySelectorAll('input,select,textarea,fieldset');
+  const elements = form.querySelectorAll(
+    'input,select,textarea,fieldset,amp-selector'
+  );
   iterateCursor(elements, element => checkUserValidity(element));
   return checkUserValidity(form);
 }
@@ -1311,8 +1313,6 @@ function removeValidityStateClasses(form) {
  * @return {boolean} Whether the element is valid or not.
  */
 function checkUserValidity(element, propagate = false) {
-  // TODO(mkhatib, #6930): Implement basic validation for custom inputs like
-  // amp-selector.
   // If this is not a field type with checkValidity don't do anything.
   if (!element.checkValidity) {
     return true;

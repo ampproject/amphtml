@@ -40,8 +40,8 @@
     <form method="post" action-xhr="/form/echo-json/post" target="_blank"
       custom-validation-reporting="show-all-on-submit">
       <span visible-when-invalid="valueMissing"
-      validation-for="amp-selector-required-val">Selection required</span>
-      <amp-selector layout="container"
+      validation-for="requiredSample">Selection required</span>
+      <amp-selector layout="container" id="requiredSample"
       class="sample-selector" name="val"
       required>
       <ul>
@@ -54,7 +54,7 @@
       <input name="submit-button" type="submit" value="Submit">
       <div submit-success>
         <template type="amp-mustache">
-              Success! {{valRequired}} should be the same as {{val}}
+              Success! {{val}}
         </template>
       </div>
     </form>
@@ -63,7 +63,7 @@
     <form method="post" action-xhr="/form/echo-json/post" target="_blank"
       custom-validation-reporting="show-all-on-submit">
       <span visible-when-invalid="valueMissing"
-      validation-for="amp-selector-required-actions">Selection required</span>
+      validation-for="actionsSample">Selection required</span>
       <amp-selector id="actionsSample" name="actions"
       layout="container"
       class="sample-selector"
@@ -87,7 +87,7 @@
       <input name="submit-button" type="submit" value="Submit">
       <div submit-success>
         <template type="amp-mustache">
-            Success! {{actionsRequired}} should be the same as {{actions}}
+            Success! {{actions}}
         </template>
       </div>
     </form>

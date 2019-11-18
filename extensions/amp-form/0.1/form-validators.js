@@ -115,7 +115,7 @@ export class FormValidator {
 
   /** @return {!NodeList} */
   inputs() {
-    return this.form.querySelectorAll('input,select,textarea');
+    return this.form.querySelectorAll('input,select,textarea,amp-selector');
   }
 
   /**

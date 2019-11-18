@@ -52,12 +52,6 @@ export class AmpSelector extends AMP.BaseElement {
     /** @private {boolean} */
     this.isMultiple_ = false;
 
-    /** @private {boolean} */
-    this.isRequired_ = false;
-
-    /** @private {?Element} */
-    this.hiddenRequiredInput_ = null;
-
     /** @private {!Array<!Element>} */
     this.selectedElements_ = [];
 
@@ -91,7 +85,6 @@ export class AmpSelector extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
-    this.isRequired_ = this.element.hasAttribute('required');
 
     if (!this.element.hasAttribute('role')) {
       this.element.setAttribute('role', 'listbox');
@@ -99,22 +92,6 @@ export class AmpSelector extends AMP.BaseElement {
 
     if (this.isMultiple_) {
       this.element.setAttribute('aria-multiselectable', 'true');
-    }
-
-    if (this.isRequired_) {
-      this.element.setAttribute('aria-required', 'true');
-      this.hiddenRequiredInput_ = document.createElement('input');
-      const name = this.element.getAttribute('name');
-      this.hiddenRequiredInput_.setAttribute('name', `${name}Required`);
-      this.hiddenRequiredInput_.setAttribute(
-        'id',
-        `amp-selector-required-${name}`
-      );
-      this.hiddenRequiredInput_.setAttribute('required', '');
-      this.hiddenRequiredInput_.setAttribute('tabIndex', '-1');
-      this.hiddenRequiredInput_.setAttribute('aria-hidden', 'true');
-      this.hiddenRequiredInput_.setAttribute('aria-required', 'true');
-      this.element.appendChild(this.hiddenRequiredInput_);
     }
 
     if (this.element.hasAttribute('disabled')) {
@@ -141,6 +118,12 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.element.addEventListener('click', this.clickHandler_.bind(this));
     this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
+    this.element.checkValidity = () => {
+      const isRequired = this.element.hasAttribute('required');
+      const selectionHasBeenMade = !!this.element.querySelectorAll('input')
+        .length;
+      return !isRequired || selectionHasBeenMade;
+    };
 
     this.registerAction(
       'selectUp',
@@ -302,6 +285,14 @@ export class AmpSelector extends AMP.BaseElement {
   init_(opt_elements) {
     this.selectedElements_.length = 0;
 
+    const getAmpSelector = el => {
+      if (!el) {
+        return;
+      }
+      const parent = el.parentElement;
+      return parent.tagName == 'AMP-SELECTOR' ? parent : getAmpSelector(parent);
+    };
+
     const elements = opt_elements
       ? opt_elements
       : toArray(this.element.querySelectorAll('[option]'));
@@ -318,6 +309,9 @@ export class AmpSelector extends AMP.BaseElement {
         this.clearSelection_(el);
       }
       el.tabIndex = 0;
+      el.checkValidity = () => {
+        return getAmpSelector(el).checkValidity();
+      };
     });
     this.elements_ = elements;
 
@@ -344,7 +338,6 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.removeChild(input);
     });
     this.inputs_ = [];
-    this.setValueIfRequired_('');
     const doc = this.win.document;
     const fragment = doc.createDocumentFragment();
     this.selectedElements_.forEach(option => {
@@ -363,19 +356,14 @@ export class AmpSelector extends AMP.BaseElement {
       }
     });
     this.element.appendChild(fragment);
-    this.setValueIfRequired_(selectedValues.toString());
-    return selectedValues;
-  }
 
-  /**
-   * Sets the value of the hidden input element if the "required" attribute is present.
-   * @param {string} value
-   */
-  setValueIfRequired_(value) {
-    if (!this.isRequired_) {
-      return;
+    const noInput = !selectedValues.length;
+    this.element.validity = {'badInput': false, 'valueMissing': noInput};
+    if (this.element.validity['valueMissing']) {
+      this.element.validityMessage = 'Selection is required on amp-selector';
     }
-    this.hiddenRequiredInput_.value = value;
+
+    return selectedValues;
   }
 
   /**

@@ -226,7 +226,7 @@ describes.realWin(
         const initSpy = sandbox.spy(impl, 'init_');
         const setInputsSpy = sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
-        expect(impl.isRequired_).to.be.true;
+        expect(impl.element.checkValidity).not.to.be.undefined;
         expect(initSpy).to.have.been.calledOnce;
         expect(impl.getSelectedElementsForTesting().length).to.equal(1);
         expect(setInputsSpy).to.have.been.calledThrice; // once to set, twice to clear
