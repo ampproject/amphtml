@@ -149,7 +149,7 @@ current user to the 3rd party vendor extensions.
 
 Unlike consent state, this `shareData` is not persisted in client side storage.
 
-##### Local caching
+##### Client caching
 As mentioned in the response section, the consent state returned in the response will be stored in `localStorage` as a client
 side cache. The cached value will be used to avoid an extra server roundtrip on user's next visit. Note that this cached value, i.e user's previous consent decision ("accepted" or "rejected"), will always be respected in prior to all other things. 
 A couple of implications with this behavior:
@@ -159,10 +159,10 @@ A couple of implications with this behavior:
 
 If the above behavior is unwanted, publishers can return `expireCache: true` all the time to completely disable client cache, with a tradeoff on increased latency.
 
-Note that the any locally collected consent decisions via the prompt UI are also stored in the same local cache overriding any previous consent state.
+Note that the any locally collected consent decisions via the prompt UI are also stored in the same client cache overriding any previous consent state.
 
 #### consentRequired
-`consentRequired`: It accepts a boolean value indicating if a consent is required. `<amp-consent>` releases the lock immediately if `consentRequired: false`. It makes sense mostly with a combination of  [geoOverride](#geooverride) config. It  can also be set to `consentRequired: "remote"` to fetch the value remotely from the `checkConsentHref` endpoint. Note that this value will be ignored if there is previous consent state stored in local cache (see [Local caching](#local_caching) section for examples). 
+`consentRequired`: It accepts a boolean value indicating if a consent is required. `<amp-consent>` releases the lock immediately if `consentRequired: false`. It makes sense mostly with a combination of  [geoOverride](#geooverride) config. It  can also be set to `consentRequired: "remote"` to fetch the value remotely from the `checkConsentHref` endpoint. Note that this value will be ignored if there is previous consent state stored in client cache (see [Client caching](#client-caching) section for examples). 
 
 
 #### onUpdateHref
@@ -180,7 +180,7 @@ AMP sends the consent instance ID, a generated user id only for this usage and t
 
 `promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
 
-The consent decisions collected from user via this prompt UI will be stored in `localStorage` as client cache. See the [Local caching](#local_caching) section for how the cache is used.
+The consent decisions collected from user via this prompt UI will be stored in `localStorage` as client cache. See the [Client caching](#client-caching) section for how the cache is used.
 
 
 #### geoOverride
