@@ -21,7 +21,11 @@ import {
 } from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
+import {
+  getSourceOrigin,
+  isProxyOrigin,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {getState} from '../../../src/history';
 import {setStyle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
@@ -229,6 +233,22 @@ export function getSourceOriginForElement(element, url) {
     domainName = Services.urlForDoc(element).parse(url).hostname;
   }
   return domainName;
+}
+
+/**
+ * Resolves an image url and optimizes it if served from the cache.
+ * @param {!Document} doc
+ * @param {string} url
+ * @return {string}
+ */
+export function resolveImgSrc(doc, url) {
+  let urlSrc = resolveRelativeUrl(url, doc.location);
+  if (isProxyOrigin(doc.location.href)) {
+    // TODO(Enriqe): add extra params for resized image, for example:
+    // (/ii/w${width}/s)
+    urlSrc = urlSrc.replace('/c/s/', '/i/s/');
+  }
+  return urlSrc;
 }
 
 /** @enum {string} */
