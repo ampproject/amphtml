@@ -817,7 +817,7 @@ describes.realWin('Events', {amp: 1}, env => {
           'storyPageIndex': '0',
           'storyPageId': 'p4',
           'storyPageCount': '4',
-          'pageDetails': {'repeated': false},
+          'eventDetails': {'repeated': false},
         };
 
         tracker.add(
@@ -842,7 +842,7 @@ describes.realWin('Events', {amp: 1}, env => {
         'storyPageIndex': '0',
         'storyPageId': 'p4',
         'storyPageCount': '4',
-        'pageDetails': {'repeated': true},
+        'eventDetails': {'repeated': true},
       };
 
       tracker.add(target, 'story-page-visible', storyAnalyticsConfig, handler);
@@ -859,7 +859,7 @@ describes.realWin('Events', {amp: 1}, env => {
         'storyPageIndex': '0',
         'storyPageId': 'p4',
         'storyPageCount': '4',
-        'pageDetails': {'repeated': true},
+        'eventDetails': {'repeated': true},
       };
 
       tracker.add(target, 'story-page-visible', storyAnalyticsConfig, handler);
