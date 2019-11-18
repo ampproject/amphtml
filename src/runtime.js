@@ -384,7 +384,7 @@ export function adoptShadowMode(global) {
 export function dynamicallyAdoptShadowMode(global, extensions) {
   // shadow mode already adopted
   if (global.AMP.attachShadowDoc) {
-    return;
+    return Promise.resolve();
   }
 
   const manager = new MultidocManager(
