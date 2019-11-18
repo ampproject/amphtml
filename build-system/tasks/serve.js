@@ -36,9 +36,13 @@ const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
 // Used for logging.
 let url = null;
-let {quiet} = argv;
+let quiet = !!argv.quiet;
 
+// Used for live reload.
 const serverFiles = globby.sync(['build-system/server/**']);
+
+// Used to enable / disable lazy building.
+let lazyBuild = false;
 
 /**
  * Returns a list of middleware handler functions to use while serving
@@ -52,7 +56,7 @@ function getMiddleware() {
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
   }
-  if (!argv._.includes('serve')) {
+  if (lazyBuild) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
   }
@@ -62,16 +66,22 @@ function getMiddleware() {
 /**
  * Launches a server and waits for it to fully start up
  *
- * @param {?Object} extraOptions
- * @param {?boolean} logRequests
+ * @param {?Object} connectOptions
+ * @param {?Object} serverOptions
  * @param {?Object} modeOptions
  */
 async function startServer(
-  extraOptions = {},
-  logRequests = true,
-  modeOptions = null
+  connectOptions = {},
+  serverOptions = {},
+  modeOptions = {}
 ) {
-  quiet = !logRequests;
+  if (serverOptions.lazyBuild) {
+    lazyBuild = serverOptions.lazyBuild;
+  }
+  if (serverOptions.quiet) {
+    quiet = serverOptions.quiet;
+  }
+
   let started;
   const startedPromise = new Promise(resolve => {
     started = resolve;
@@ -88,7 +98,7 @@ async function startServer(
       silent: true,
       middleware: getMiddleware,
     },
-    extraOptions
+    connectOptions
   );
   connect.server(options, started);
   await startedPromise;
@@ -131,24 +141,33 @@ function restartServer() {
  * Performs pre-build steps requested via command line args.
  */
 async function performPreBuildSteps() {
-  if (!argv._.includes('serve')) {
-    await preBuildRuntimeFiles();
-    await preBuildExtensions();
-  }
+  await preBuildRuntimeFiles();
+  await preBuildExtensions();
+}
+
+/**
+ * Entry point of the `gulp serve` task.
+ */
+async function serve() {
+  await doServe();
 }
 
 /**
  * Starts a webserver at the repository root to serve built files.
+ * @param {boolean=} lazyBuild
  */
-async function serve() {
+async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
   watch(serverFiles, restartServer);
-  await startServer();
-  await performPreBuildSteps();
+  await startServer({}, {lazyBuild}, {});
+  if (lazyBuild) {
+    await performPreBuildSteps();
+  }
 }
 
 module.exports = {
   serve,
+  doServe,
   startServer,
   stopServer,
 };

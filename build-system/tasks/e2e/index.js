@@ -46,7 +46,11 @@ function buildRuntime_() {
 }
 
 async function launchWebServer_() {
-  await startServer({host: HOST, port: PORT}, !!argv.debug, {compiled: true});
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.debug},
+    {compiled: true}
+  );
 }
 
 function cleanUp_() {

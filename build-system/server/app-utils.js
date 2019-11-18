@@ -31,10 +31,10 @@ function getServeMode() {
 /**
  * Sets the server's mode. Uses command line arguments by default, but can be
  * overridden by passing in a modeOptions object.
- * @param {?Object} modeOptions
+ * @param {!Object} modeOptions
  */
 function setServeMode(modeOptions) {
-  if (!modeOptions) {
+  if (Object.keys(modeOptions).length == 0) {
     modeOptions = minimist(process.argv.slice(2), {string: ['rtv']});
   }
 

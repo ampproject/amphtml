@@ -142,8 +142,11 @@ async function launchPercyAgent() {
  * Launches an AMP webserver for minified js.
  */
 async function launchWebServer() {
-  const logRequests = !!argv.webserver_debug;
-  await startServer({host: HOST, port: PORT}, logRequests, {compiled: true});
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.webserver_debug},
+    {compiled: true}
+  );
 }
 
 /**
@@ -775,10 +778,9 @@ function setupCleanup_() {
 }
 
 async function exitPercyAgent_() {
-  let percyAgentExited_;
   if (percyAgentProcess_ && !percyAgentProcess_.killed) {
     let resolver;
-    percyAgentExited_ = new Promise(resolverIn => {
+    const percyAgentExited_ = new Promise(resolverIn => {
       resolver = resolverIn;
     });
     percyAgentProcess_.on('exit', () => {
