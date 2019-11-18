@@ -395,7 +395,7 @@ describes.sandboxed('StandardActions', {}, () => {
   });
 
   describe('"toggleClass" action', () => {
-    const dummyClass = 'i-amphtml-test-class-toggle';
+    const dummyClass = 'test-class-toggle';
 
     it('should add class when not in classList', () => {
       const element = createElement();
@@ -422,6 +422,81 @@ describes.sandboxed('StandardActions', {}, () => {
       };
       standardActions.handleToggleClass_(invocation);
       expectElementToDropClass(element, dummyClass);
+    });
+
+    it('should add classes with amp- and -amp- prefixes', () => {
+      const element = createElement();
+      const invocation1 = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': 'amp-test-class-toggle',
+        },
+      };
+      standardActions.handleToggleClass_(invocation1);
+      expect(element.classList.contains('amp-test-class-toggle')).to.be.true;
+      const invocation2 = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': '-amp-test-class-toggle',
+        },
+      };
+      standardActions.handleToggleClass_(invocation2);
+      expect(element.classList.contains('-amp-test-class-toggle')).to.be.true;
+    });
+
+    it('should delete classes with amp- and -amp- prefixes', () => {
+      const element = createElement();
+      element.classList.add('amp-test-class-toggle');
+      const invocation1 = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': 'amp-test-class-toggle',
+        },
+      };
+      standardActions.handleToggleClass_(invocation1);
+      expect(element.classList.contains('amp-test-class-toggle')).to.be.false;
+      element.classList.add('-amp-test-class-toggle');
+      const invocation2 = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': '-amp-test-class-toggle',
+        },
+      };
+      standardActions.handleToggleClass_(invocation2);
+      expect(element.classList.contains('amp-test-class-toggle')).to.be.false;
+    });
+
+    it('should not add amp internal classes', () => {
+      const element = createElement();
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': 'i-amphtml-test-class-toggle',
+        },
+      };
+      standardActions.handleToggleClass_(invocation);
+      expect(element.classList.contains('i-amphtml-test-class-toggle')).to.be
+        .false;
+    });
+
+    it('should not delete amp internal classes', () => {
+      const element = createElement();
+      element.classList.add('i-amphtml-test-class-toggle');
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'class': 'i-amphtml-test-class-toggle',
+        },
+      };
+      standardActions.handleToggleClass_(invocation);
+      expect(element.classList.contains('i-amphtml-test-class-toggle')).to.be
+        .true;
     });
 
     it('should add class when not in classList, when force=true', () => {

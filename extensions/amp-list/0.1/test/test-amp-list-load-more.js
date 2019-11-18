@@ -29,7 +29,7 @@ const HAS_MORE_ITEMS_PAYLOAD = {
 };
 
 describes.realWin(
-  'amp-list component',
+  'amp-list with load-more',
   {
     amp: {
       ampdoc: 'single',
@@ -175,19 +175,15 @@ describes.realWin(
       });
 
       it('should update the next loading src', async () => {
-        const fetchListSpy = sandbox.spy(list, 'fetchList_');
         sandbox.stub(list, 'scheduleRender_').returns(Promise.resolve());
         await list.layoutCallback();
         expect(element.getAttribute('src')).to.equal(
           '/list/infinite-scroll?items=2&left=1'
         );
-        expect(fetchListSpy).to.be.calledOnce;
         await list.loadMoreCallback_();
         expect(element.getAttribute('src')).to.equal(
           '/list/infinite-scroll?items=2&left=0'
         );
-        expect(fetchListSpy).to.be.calledTwice;
-        expect(fetchListSpy).to.be.calledWith(true);
       });
 
       it('should append items to the existing list', async () => {
@@ -197,7 +193,7 @@ describes.realWin(
         const div2 = doc.createElement('div');
         div2.textContent = '2';
         sandbox
-          .stub(list.ssrTemplateHelper_, 'renderTemplate')
+          .stub(list.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
           .returns(Promise.resolve([]));
         const updateBindingsStub = sandbox.stub(list, 'updateBindings_');
         sandbox
@@ -223,6 +219,39 @@ describes.realWin(
 
         list.container_;
         expect(list.container_.children).to.have.lengthOf(4);
+      });
+
+      // TODO(cathyxz) Create a mirror test for automatic amp-list loading once the automatic tests are unskipped
+      it('should call focus on the last element after load more is clicked', async () => {
+        sandbox
+          .stub(list.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
+          .returns(Promise.resolve([]));
+        const updateBindingsStub = sandbox.stub(list, 'updateBindings_');
+        sandbox
+          .stub(list, 'maybeRenderLoadMoreTemplates_')
+          .returns(Promise.resolve([]));
+
+        const div1 = doc.createElement('div');
+        div1.textContent = '1';
+        const div2 = doc.createElement('div');
+        div2.textContent = '2';
+        updateBindingsStub.onCall(0).returns(Promise.resolve([div1, div2]));
+        const focusSpy = sandbox.spy(div2, 'focus');
+
+        await list.layoutCallback();
+
+        const div3 = doc.createElement('div');
+        div3.textContent = '3';
+        const div4 = doc.createElement('div');
+        div4.textContent = '4';
+        updateBindingsStub.onCall(1).returns(Promise.resolve([div3, div4]));
+
+        await list.loadMoreCallback_(
+          /* opt_reload */ false,
+          /* opt_fromClick */ true
+        );
+
+        await expect(focusSpy).to.have.been.called;
       });
     });
   }

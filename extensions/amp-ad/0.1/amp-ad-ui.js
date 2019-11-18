@@ -16,9 +16,6 @@
 
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
-import {user} from '../../../src/log';
-
-const TAG = 'amp-ad';
 
 export class AmpAdUIHandler {
   /**
@@ -56,14 +53,6 @@ export class AmpAdUIHandler {
         this.baseInstance_.element.appendChild(fallback);
       }
     }
-  }
-
-  /**
-   * Create a default placeholder if not provided.
-   * Should be called in baseElement createPlaceholderCallback.
-   */
-  createPlaceholder() {
-    return this.addDefaultUiComponent_('placeholder');
   }
 
   /**
@@ -199,23 +188,15 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    user().expectedError(TAG, 'RESIZE_REQUEST');
-    return this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(
-      () => {
-        return resizeInfo;
-      },
-      () => {
-        user().expectedError(TAG, 'RESIZE_REJECT');
-        const activated =
-          event && event.userActivation && event.userActivation.hasBeenActive;
-        if (activated) {
-          // Report false negatives.
-          user().expectedError(TAG, 'RESIZE_REJECT_ACTIVE');
+    return this.baseInstance_
+      .attemptChangeSize(newHeight, newWidth, event)
+      .then(
+        () => resizeInfo,
+        () => {
+          resizeInfo.success = false;
+          return resizeInfo;
         }
-        resizeInfo.success = false;
-        return resizeInfo;
-      }
-    );
+      );
   }
 }
 

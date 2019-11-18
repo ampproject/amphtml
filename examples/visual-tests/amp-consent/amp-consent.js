@@ -32,10 +32,6 @@ module.exports = {
   'reject consent': async (page, name) => {
     await page.tap('#consent-ui #reject');
 
-    await page.evaluate(() => {
-      document.querySelector('#consent-ui #reject').click();
-    });
-
     await verifySelectorsVisible(page, name, [
         'amp-img[data-block-on-consent="_till_responded"] img'
     ]);

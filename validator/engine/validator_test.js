@@ -20,13 +20,13 @@ goog.require('amp.validator.CssLength');
 goog.require('amp.validator.HtmlFormat');
 goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
-goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
 goog.require('amp.validator.renderErrorMessage');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.sortAndUniquify');
 goog.require('amp.validator.subtractDiff');
 goog.require('amp.validator.validateString');
+goog.require('goog.asserts');
 goog.require('goog.uri.utils');
 
 /**
@@ -143,6 +143,8 @@ function findHtmlFilesRelativeToTestdata() {
 /**
  * An AMP Validator test case. This constructor will load the AMP HTML file
  * and also find the adjacent .out file.
+ * TODO(alabiaga): rid of htmlFormat property based on directory path as it
+ * should be read from the ampHtmlFile. Also address nodejs validator changes.
  * @constructor
  * @param {string} ampHtmlFile
  * @param {string=} opt_ampUrl
@@ -224,9 +226,6 @@ function renderErrorWithPosition(filenameOrUrl, error) {
   if (error.specUrl) {
     errorLine += ' (see ' + error.specUrl + ')';
   }
-  if (error.category !== null) {
-    errorLine += ' [' + error.category + ']';
-  }
   return errorLine;
 }
 
@@ -278,7 +277,6 @@ function renderInlineResult(validationResult, filename, filecontents) {
 ValidatorTestCase.prototype.run = function() {
   const results =
       amp.validator.validateString(this.ampHtmlFileContents, this.htmlFormat);
-  amp.validator.annotateWithErrorCategories(results);
   const observed = this.inlineOutput ?
     renderInlineResult(results, this.ampUrl, this.ampHtmlFileContents) :
     amp.validator.renderValidationResult(results, this.ampUrl).join('\n');
@@ -303,7 +301,7 @@ ValidatorTestCase.prototype.run = function() {
                ' is incorrect, please run `gulp validator --update_tests` to ' +
                'regenerate it based on its corresponding .html file.';
   }
-  assert.fail('', '', message, '');
+  goog.asserts.fail(message);
 };
 
 /**
@@ -335,15 +333,112 @@ describe('ValidatorOutput', () => {
         'feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
     const results =
-        amp.validator.validateString(test.ampHtmlFileContents, test.htmlFormat);
-    amp.validator.annotateWithErrorCategories(results);
+        amp.validator.validateString(test.ampHtmlFileContents);
     const observed =
         amp.validator.renderValidationResult(results, test.ampUrl).join('\n');
     const expectedSubstr = 'http://google.com/foo.html:28:3';
     if (observed.indexOf(expectedSubstr) === -1)
-    {assert.fail(
-        '', '', 'expectedSubstr:\n' + expectedSubstr +
-          '\nsaw:\n' + observed, '');}
+    {goog.asserts.fail('expectedSubstr:\n' + expectedSubstr +
+          '\nsaw:\n' + observed);}
+  });
+
+  it('validate amp format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,'
+        + 'end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 '
+        + 'normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@'
+        + '-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:'
+        + 'visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visib'
+        + 'ility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{'
+        + 'visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}</style><noscript><style amp-boilerplate>body'
+        + '{-webkit-animation:none;-moz-animation:none;-ms-animation:none;'
+        + 'animation:none}</style></noscript>'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP world.</body></html>', 'amp');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+    it('default to validating the amp format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,'
+        + 'end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 '
+        + 'normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@'
+        + '-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:'
+        + 'visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visib'
+        + 'ility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{'
+        + 'visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}'
+        + 'to{visibility:visible}}</style><noscript><style amp-boilerplate>body'
+        + '{-webkit-animation:none;-moz-animation:none;-ms-animation:none;'
+        + 'animation:none}</style></noscript>'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP world.</body></html>');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate amp4email format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡4email><head><meta charset="utf-8">'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '<style amp4email-boilerplate>body{visibility:hidden}</style>'
+        + '</head><body>Hello, AMP4EMAIL world.</body></html>', 'amp4email');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate amp4email format with error', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡4email><head><meta charset="utf-8">'
+        + '<script async src="https://cdn.ampproject.org/v0.js"></script>'
+        + '</head><body>Hello, AMP4EMAIL world.</body></html>', 'amp4email');
+    assertStrictEqual(results.status, 'FAIL');
+    assertStrictEqual(results.errors[0].params.toString(),
+                      'head > style[amp4email-boilerplate]');
+    assertStrictEqual(results.errors.length, 1);
+  });
+
+  it('validate amp4ads format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html data-some-attribute ⚡4ads>'
+        + '<head><meta charset="utf-8">'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp4ads-boilerplate>body{visibility:hidden}</style>'
+        + '<script async src="https://cdn.ampproject.org/amp4ads-v0.js">'
+        + '</script></head><body>Hello, AMP4ADS world.</body></html>',
+        'amp4ads');
+    assertStrictEqual(results.status, 'PASS');
+  });
+
+  it('validate actions format', () => {
+    const results = amp.validator.validateString(
+        '<!doctype html><html ⚡ actions><head><meta charset="utf-8">'
+        + '<link rel="canonical" href="self.html" />'
+        + '<meta name="viewport" content="width=device-width,minimum-scale=1">'
+        + '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s '
+        + 'steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) '
+        + '0s 1 normal both}@-webkit-keyframes -amp-start{from'
+        + '{visibility:hidden}to{visibility:visible}}@-moz-keyframes '
+        + '-amp-start{from{visibility:hidden}to{visibility:visible}}'
+        + '@-ms-keyframes -amp-start{from{visibility:hidden}to'
+        + '{visibility:visible}}@-o-keyframes -amp-start{from'
+        + '{visibility:hidden}to{visibility:visible}}@keyframes '
+        + '-amp-start{from{visibility:hidden}to{visibility:visible}}</style>'
+        + '<noscript><style amp-boilerplate>body{-webkit-animation:none;'
+        + '-moz-animation:none;-ms-animation:none;animation:none}</style>'
+        + '</noscript><script async src="https://cdn.ampproject.org/v0.js">'
+        + '</script></head><body>Hello, AMP world.</body></html>', 'actions');
+    assertStrictEqual(results.status, 'PASS');
   });
 });
 
@@ -404,11 +499,11 @@ describe('ValidatorCssLength', () => {
            .replace('replace_inline_style', '');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-       'feature_tests/css_length.html:28:2 The author stylesheet ' +
-       'specified in tag \'style amp-custom\' is too long - document ' +
-       'contains 50001 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -425,11 +520,11 @@ describe('ValidatorCssLength', () => {
            .replace('replace_inline_style', '');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-       'feature_tests/css_length.html:28:2 The author stylesheet ' +
-       'specified in tag \'style amp-custom\' is too long - document ' +
-       'contains 50002 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:28:2 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' is too long - document ' +
+        'contains 50002 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -446,8 +541,7 @@ describe('ValidatorCssLength', () => {
            'feature_tests/css_length.html:34:2 The inline style specified in ' +
            'tag \'div\' is too long - it contains 50000 bytes whereas the ' +
            'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
-           '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
-           '[AUTHOR_STYLESHEET_PROBLEM]';
+           '-and-tutorials/learn/spec/amphtml#maximum-size)';
        test.run();
      });
 
@@ -466,14 +560,13 @@ describe('ValidatorCssLength', () => {
         'feature_tests/css_length.html:34:2 The inline style specified in ' +
         'tag \'div\' is too long - it contains 50001 bytes whereas the ' +
         'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
-        '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]\n' +
+        '-and-tutorials/learn/spec/amphtml#maximum-size)\n' +
         'feature_tests/css_length.html:36:6 The author stylesheet ' +
         'specified in tag \'style amp-custom\' and the combined inline ' +
         'styles is too large - document contains 50001 bytes whereas the ' +
         'limit is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -489,12 +582,12 @@ describe('ValidatorCssLength', () => {
            .replace('.replace_amp_custom {}', stylesheet)
            .replace('replace_inline_style', 'display:block;');
     test.expectedOutput = 'FAIL\n' +
-       'feature_tests/css_length.html:5036:6 The author stylesheet ' +
-       'specified in tag \'style amp-custom\' and the combined inline ' +
-       'styles is too large - document contains 50014 bytes whereas the ' +
-       'limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:5036:6 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' and the combined inline ' +
+        'styles is too large - document contains 50014 bytes whereas the ' +
+        'limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 });
@@ -535,7 +628,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -561,7 +654,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 
@@ -587,7 +680,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 });
@@ -675,7 +768,7 @@ describe('ValidatorTransformedAmpCssLengthWithUrls', () => {
         'is too long - document contains 50010 bytes whereas the limit ' +
         'is 50000 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/' +
-        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'learn/spec/amphtml#maximum-size)';
     test.run();
   });
 });
@@ -1169,74 +1262,110 @@ describe('ValidatorRulesMakeSense', () => {
         namedIdIsUnique[tagSpec.namedId] = 0;
       }
     });
-    // Verify AMP4ADS extensions are whitelisted.
+    // Verify AMP4ADS extensions are approved.
     if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
         (tagSpec.htmlFormat.indexOf(
             amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) {
-      // AMP4ADS Creative Format document is the source of this whitelist.
+      // AMP4ADS format lists approved extensions.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
-      const whitelistedAmp4AdsExtensions = {
-        'amp-accordion': 0,
-        'amp-ad-exit': 0,
-        'amp-analytics': 0,
-        'amp-anim': 0,
-        'amp-animation': 0,
-        'amp-audio': 0,
-        'amp-bind': 0,
-        'amp-carousel': 0,
-        'amp-fit-text': 0,
-        'amp-font': 0,
-        'amp-form': 0,
-        'amp-gwd-animation': 0,
-        'amp-img': 0,
-        'amp-layout': 0,
-        'amp-lightbox': 0,
-        'amp-mraid': 0,
-        'amp-mustache': 0,
-        'amp-pixel': 0,
-        'amp-position-observer': 0,
-        'amp-social-share': 0,
-        'amp-video': 0,
-        'amp-youtube': 0,
+      // Changes to the following map must be approved by the Ads Working
+      // Group, @wg-ads.
+      const approvedAmp4AdsExtensions = {
+        'amp-accordion': ['0.1', 'latest'],
+        'amp-ad-exit': ['0.1', 'latest'],
+        'amp-analytics': ['0.1', 'latest'],
+        'amp-anim': ['0.1', 'latest'],
+        'amp-animation': ['0.1', 'latest'],
+        'amp-audio': ['0.1', 'latest'],
+        'amp-bind': ['0.1', 'latest'],
+        'amp-carousel': ['0.1', '0.2', 'latest'],
+        'amp-fit-text': ['0.1', 'latest'],
+        'amp-font': ['0.1', 'latest'],
+        'amp-form': ['0.1', 'latest'],
+        'amp-gwd-animation': ['0.1', 'latest'],
+        'amp-img': ['0.1', 'latest'],
+        'amp-layout': ['0.1', 'latest'],
+        'amp-lightbox': ['0.1', 'latest'],
+        'amp-mraid': ['0.1', 'latest'],
+        'amp-mustache': ['0.1', '0.2', 'latest'],
+        'amp-pixel': ['0.1', 'latest'],
+        'amp-position-observer': ['0.1', 'latest'],
+        'amp-social-share': ['0.1', 'latest'],
+        'amp-video': ['0.1', 'latest'],
       };
+      // Verify extension is approved.
       const extension = tagSpec.extensionSpec.name;
       it(extension + ' has html_format either explicitly or implicitly' +
-          ' set for AMP4ADS but ' + extension + ' is not whitelisted' +
+          ' set for AMP4ADS but ' + extension + ' is not approved' +
           ' for AMP4ADS', () => {
-        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(extension))
+        expect(approvedAmp4AdsExtensions.hasOwnProperty(extension))
             .toBe(true);
       });
+      // Extension is approved. Verify extension version is approved.
+      if (approvedAmp4AdsExtensions.hasOwnProperty(extension)) {
+        for (const version of tagSpec.extensionSpec.version) {
+          it(extension + ' has html_format either explicitly or implicitly' +
+              ' set for AMP4ADS but ' + extension + ' version ' + version +
+              ' is not approved for AMP4ADS. If this version is intended' +
+              ' for AMP4ADS please get approval from @wg-ads and then' +
+              ' update this test. Otherwise remove the version for' +
+              ' AMP4ADS from the tagspec', () => {
+                expect(approvedAmp4AdsExtensions[extension].indexOf(version))
+                    .toBeGreaterThan(-1);
+          });
+        }
+      }
     }
-    // Verify AMP4EMAIL extensions are whitelisted.
+    // Verify AMP4EMAIL extensions and their usage are approved.
     if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
         (tagSpec.htmlFormat.indexOf(
             amp.validator.HtmlFormat.Code.AMP4EMAIL) !== -1)) {
-      // AMP4EMAIL format is the source of this whitelist.
-      const whitelistedAmp4EmailExtensions = {
-        'AMP-ACCORDION': 0,
-        'AMP-ANIM': 0,
-        'AMP-BIND-MACRO': 0,
-        'AMP-CAROUSEL': 0,
-        'AMP-FIT-TEXT': 0,
-        'AMP-IMG': 0,
-        'AMP-IMAGE-LIGHTBOX': 0,
-        'AMP-LAYOUT': 0,
-        'AMP-LIGHTBOX': 0,
-        'AMP-LIST': 0,
-        'AMP-SELECTOR': 0,
-        'AMP-SIDEBAR': 0,
-        'AMP-STATE': 0,
-        'AMP-TIMEAGO': 0,
+      // AMP4EMAIL format lists approved extensions.
+      // Changes to the following map must be approved by the AMP4Email
+      // Working Group, @wg-amp4email.
+      const approvedAmp4EmailExtensions = {
+        'AMP-ACCORDION': ['0.1'],
+        'AMP-ANIM': ['0.1'],
+        'AMP-BIND-MACRO': ['0.1'],
+        'AMP-CAROUSEL': ['0.1'],
+        'AMP-FIT-TEXT': ['0.1'],
+        'AMP-IMG': ['0.1'],
+        'AMP-IMAGE-LIGHTBOX': ['0.1'],
+        'AMP-LAYOUT': ['0.1'],
+        'AMP-LIGHTBOX': ['0.1'],
+        'AMP-LIST': ['0.1'],
+        'AMP-SELECTOR': ['0.1'],
+        'AMP-SIDEBAR': ['0.1'],
+        'AMP-STATE': ['0.1'],
+        'AMP-TIMEAGO': ['0.1'],
       };
+      // Verify extension and it's usage is approved.
       it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
              ' set for AMP4EMAIL but ' + tagSpec.tagName +
-             ' is not whitelisted' +
-             ' for AMP4EMAIL',
+             ' is not approved for AMP4EMAIL',
       () => {
         expect(
-            whitelistedAmp4EmailExtensions.hasOwnProperty(tagSpec.tagName))
+            approvedAmp4EmailExtensions.hasOwnProperty(tagSpec.tagName))
             .toBe(true);
       });
+      // Extension is approved. Verify extension version is approved.
+      // Only care about SCRIPT tags since only those are versioned.
+      if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
+          approvedAmp4EmailExtensions.hasOwnProperty(
+              tagSpec.extensionSpec.name)) {
+        const extension = tagSpec.extensionSpec.name;
+        for (const version of tagSpec.extensionSpec.version) {
+          it(extension + ' has html_format either explicitly or implicitly' +
+              ' set for AMP4EMAIL but ' + extension + ' version ' + version +
+              ' is not approved for AMP4EMAIL. If this version is intended' +
+              ' for AMP4EMAIL please get approval from @wg-amp4email and' +
+              ' then update this test. Otherwise remove the version for' +
+              ' AMP4EMAIL from the tagspec', () => {
+                expect(approvedAmp4EmailExtensions[extension].indexOf(version))
+                    .toBeGreaterThan(-1);
+          });
+        }
+      }
     }
     // mandatory_parent
     if (tagSpec.mandatoryParent !== null) {
@@ -1326,11 +1455,15 @@ describe('ValidatorRulesMakeSense', () => {
       it('extension must have a name field value', () => {
         expect(extensionSpec.name).toBeDefined();
       });
-      it('extension ' + extensionSpec.name + ' must have at least two ' +
-             'versions, latest and a numeric version, e.g `1.0`',
-      () => {
-        expect(extensionSpec.version.length).toBeGreaterThan(1);
-      });
+      // AMP4EMAIL extensions must support at least one version.
+      if (tagSpec.htmlFormat.includes(
+              amp.validator.HtmlFormat.Code.AMP4EMAIL)) {
+        it('extension ' + extensionSpec.name + ' must have at least one ' +
+               'version',
+           () => {
+             expect(extensionSpec.version.length).toBeGreaterThan(0);
+           });
+      }
       it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
              'or a numeric value',
       () => {
@@ -1367,8 +1500,8 @@ describe('ValidatorRulesMakeSense', () => {
     if (tagSpec.cdata !== null) {
       let usefulCdataSpec = false;
       // max_bytes
-      it('max_bytes are greater than or equal to -1', () => {
-        expect(tagSpec.cdata.maxBytes).toBeGreaterThan(-2);
+      it('max_bytes are greater than or equal to -2', () => {
+        expect(tagSpec.cdata.maxBytes).toBeGreaterThan(-3);
       });
       if (tagSpec.cdata.maxBytes >= 0) {
         usefulCdataSpec = true;
@@ -1438,6 +1571,7 @@ describe('ValidatorRulesMakeSense', () => {
               (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
               tagSpec.cdata.cdataRegex !== null ||
               tagSpec.cdata.mandatoryCdata !== null ||
+              tagSpec.cdata.maxBytes === -1 ||
               tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
         });

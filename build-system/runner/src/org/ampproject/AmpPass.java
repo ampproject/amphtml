@@ -15,47 +15,29 @@
  */
 package org.ampproject;
 
-import java.util.LinkedList;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableMap;
 import com.google.javascript.jscomp.AbstractCompiler;
 import com.google.javascript.jscomp.HotSwapCompilerPass;
 import com.google.javascript.jscomp.NodeTraversal;
 import com.google.javascript.jscomp.NodeTraversal.AbstractPostOrderCallback;
-import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 
 /**
- * Does a `stripTypeSuffix` which currently can't be done through
- * the normal `strip` mechanisms provided by closure compiler.
- * Some of the known mechanisms we tried before writing our own compiler pass
- * are setStripTypes, setStripTypePrefixes, setStripNameSuffixes, setStripNamePrefixes.
- * The normal mechanisms found in closure compiler can't strip the expressions we want because
- * they are either prefix based and/or operate on the es6 translated code which would mean they
- * operate on a qualifier string name that looks like
- * "module$__$__$__$extensions$amp_test$0_1$log.dev.fine".
- *
- * Other custom pass examples found inside closure compiler src:
- * https://github.com/google/closure-compiler/blob/master/src/com/google/javascript/jscomp/PolymerPass.java
- * https://github.com/google/closure-compiler/blob/master/src/com/google/javascript/jscomp/AngularPass.java
+ * Eliminates removable calls like `assert`, `assertElement`, `assertString`, etc.
  */
 class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   final AbstractCompiler compiler;
   private final ImmutableSet<String> stripTypeSuffixes;
   final boolean isProd;
-  private final String amp_version;
 
   public AmpPass(AbstractCompiler compiler, boolean isProd,
-        ImmutableSet<String> stripTypeSuffixes,
-        String amp_version) {
+        ImmutableSet<String> stripTypeSuffixes) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
     this.isProd = isProd;
-    this.amp_version = amp_version;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -69,95 +51,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
     if (isCallRemovable(n)) {
       maybeEliminateCallExceptFirstParam(n, parent);
-    } else if (isAmpExtensionCall(n)) {
-      inlineAmpExtensionCall(n, parent);
-    // Remove any `getMode().localDev` and `getMode().test` calls and replace it with `false`.
-    } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
-        ImmutableSet.of("localDev", "test"))) {
-      replaceWithBooleanExpression(false, n, parent);
-    // Remove any `getMode().minified` calls and replace it with `true`.
-    } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
-        ImmutableSet.of("minified"))) {
-      replaceWithBooleanExpression(true, n, parent);
     }
-  }
-
-  /**
-   * We don't care about the deep GETPROP. What we care about is finding a
-   * call which has an `extension` name which then has `AMP` as its
-   * previous getprop or name, and has a function as the 2nd argument.
-   *
-   * CALL 3 [length: 96] [source_file: input0]
-   *   GETPROP 3 [length: 37] [source_file: input0]
-   *     GETPROP 3 [length: 24] [source_file: input0]
-   *       GETPROP 3 [length: 20] [source_file: input0]
-   *         NAME self 3 [length: 4] [source_file: input0]
-   *         STRING someproperty 3 [length: 15] [source_file: input0]
-   *       STRING AMP 3 [length: 3] [source_file: input0]
-   *     STRING extension 3 [length: 12] [source_file: input0]
-   *   STRING some-string 3 [length: 9] [source_file: input0]
-   *   FUNCTION  3 [length: 46] [source_file: input0]
-   */
-  private boolean isAmpExtensionCall(Node n) {
-    if (n != null && n.isCall()) {
-      Node getprop = n.getFirstChild();
-
-      // The AST has the last getprop higher in the hierarchy.
-      if (isGetPropName(getprop, "extension")) {
-        Node firstChild = getprop.getFirstChild();
-        // We have to handle both explicit/implicit top level `AMP`
-        if ((firstChild != null && firstChild.isName() &&
-               firstChild.getString() == "AMP") ||
-            isGetPropName(firstChild, "AMP")) {
-          // Child at index 1 should be the "string" value (first argument)
-          Node func = getAmpExtensionCallback(n);
-          return func != null && func.isFunction();
-        }
-      }
-    }
-    return false;
-  }
-
-  private boolean isGetPropName(Node n, String name) {
-    if (n != null && n.isGetProp()) {
-      Node nodeName = n.getSecondChild();
-      return nodeName != null && nodeName.isString() &&
-          nodeName.getString() == name;
-    }
-    return false;
-  }
-
-  /**
-   * This operation should be guarded stringently by `isAmpExtensionCall`
-   * predicate.
-   *
-   * AMP.extension('some-name', '0.1', function(AMP) {
-   *   // BODY...
-   * });
-   *
-   * is turned into:
-   * (function(AMP) {
-   *   // BODY...
-   * })(self.AMP);
-   */
-  private void inlineAmpExtensionCall(Node n, Node expr) {
-    if (expr == null || !expr.isExprResult()) {
-      return;
-    }
-    Node func = getAmpExtensionCallback(n);
-    func.detachFromParent();
-    Node arg1 = IR.getprop(IR.name("self"), IR.string("AMP"));
-    arg1.setLength("self.AMP".length());
-    arg1.useSourceInfoIfMissingFromForTree(func);
-    Node newcall = IR.call(func);
-    newcall.putBooleanProp(Node.FREE_CALL, true);
-    newcall.addChildToBack(arg1);
-    expr.replaceChild(n, newcall);
-    compiler.reportChangeToEnclosingScope(expr);
-  }
-
-  private Node getAmpExtensionCallback(Node n) {
-    return n.getLastChild();
   }
 
   /**
@@ -173,75 +67,6 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
         return true;
       }
     }
-    return false;
-  }
-
-  private void maybeReplaceCallWithVersion(Node n, Node parent) {
-    if (n == null || !n.isCall() || amp_version.isEmpty()) {
-      return;
-    }
-
-    String name = buildQualifiedName(n);
-    if (!name.equals("internalRuntimeVersion$$module$src$internal_version()")) {
-      return;
-    }
-
-    Node version =  IR.string(amp_version);
-    version.useSourceInfoIfMissingFrom(n);
-    parent.replaceChild(n, version);
-    compiler.reportChangeToEnclosingScope(parent);
-  }
-
-  private void maybeReplaceRValueInVar(Node n, Map<String, Node> map) {
-    if (n != null && (n.isVar() || n.isLet() || n.isConst())) {
-      Node varNode = n.getFirstChild();
-      if (varNode != null) {
-        for (Map.Entry<String, Node> mapping : map.entrySet()) {
-          if (varNode.getString() == mapping.getKey()) {
-            varNode.replaceChild(varNode.getFirstChild(), mapping.getValue());
-            compiler.reportChangeToEnclosingScope(varNode);
-            return;
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Predicate for any <code>fnQualifiedName</code>.<code>props</code> call.
-   * example:
-   *   isFunctionInvokeAndPropAccess(n, "getMode", "test"); // matches `getMode().test`
-   */
-  private boolean isFunctionInvokeAndPropAccess(Node n, String fnQualifiedName, Set<String> props) {
-    // mode.getMode().localDev
-    // mode [property] ->
-    //   getMode [call]
-    //   ${property} [string]
-    if (!n.isGetProp()) {
-      return false;
-    }
-    Node call = n.getFirstChild();
-    if (!call.isCall()) {
-      return false;
-    }
-    Node fullQualifiedFnName = call.getFirstChild();
-    if (fullQualifiedFnName == null) {
-      return false;
-    }
-
-    String qualifiedName = fullQualifiedFnName.getQualifiedName();
-    if (qualifiedName != null && qualifiedName.endsWith(fnQualifiedName)) {
-      Node maybeProp = n.getSecondChild();
-      if (maybeProp != null && maybeProp.isString()) {
-         String name = maybeProp.getString();
-         for (String prop : props) {
-           if (prop == name) {
-             return true;
-           }
-         }
-      }
-    }
-
     return false;
   }
 
@@ -272,13 +97,6 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     } else {
       sb.append("UNKNOWN");
     }
-  }
-
-  private void replaceWithBooleanExpression(boolean bool, Node n, Node parent) {
-    Node booleanNode = bool ? IR.trueNode() : IR.falseNode();
-    booleanNode.useSourceInfoIfMissingFrom(n);
-    parent.replaceChild(n, booleanNode);
-    compiler.reportChangeToEnclosingScope(parent);
   }
 
   private void removeExpression(Node n, Node parent) {

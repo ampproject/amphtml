@@ -25,12 +25,11 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    const viewer = win.services.viewer.obj;
     whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolver = resolve;
     });
     sandbox
-      .stub(viewer, 'whenFirstVisible')
+      .stub(env.ampdoc, 'whenFirstVisible')
       .callsFake(() => whenFirstVisiblePromise);
     createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
   });
@@ -164,21 +163,19 @@ describes.realWin(
       }
     }
 
-    let win, parentWin;
+    let win;
     let whenFirstVisiblePromise, whenFirstVisibleResolver;
     let pixel;
     let implementation;
 
     beforeEach(() => {
       win = env.win;
-      parentWin = env.parentWin;
 
-      const viewer = parentWin.services.viewer.obj;
       whenFirstVisiblePromise = new Promise(resolve => {
         whenFirstVisibleResolver = resolve;
       });
       sandbox
-        .stub(viewer, 'whenFirstVisible')
+        .stub(env.ampdoc, 'whenFirstVisible')
         .callsFake(() => whenFirstVisiblePromise);
 
       installUrlReplacementsForEmbed(env.ampdoc, win, new TestVariableSource());

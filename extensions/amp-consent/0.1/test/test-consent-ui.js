@@ -16,6 +16,7 @@
 
 import {CONSENT_ITEM_STATE, constructConsentInfo} from '../consent-info';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
+import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
@@ -74,12 +75,12 @@ describes.realWin(
             },
           };
         },
-        scheduleLayout: () => {},
         mutateElement: callback => {
           callback();
           return Promise.resolve();
         },
       };
+      Services.ownersForDoc(doc).scheduleLayout = sandbox.mock();
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function() {
         return Promise.resolve({
@@ -522,6 +523,29 @@ describes.realWin(
           expect(consentUI.scrollEnabled_).to.be.true;
         });
       });
+
+      it(
+        'should hide the viewer on enterFullscreen, ' +
+          'and show the viewer on hide',
+        () => {
+          return getReadyIframeCmpConsentUi().then(consentUI => {
+            const sendMessageStub = sandbox.stub(
+              consentUI.viewer_,
+              'sendMessage'
+            );
+
+            consentUI.enterFullscreen_();
+
+            expect(sendMessageStub).to.be.calledOnce;
+
+            sandbox
+              .stub(consentUI, 'baseInstance_')
+              .callsFake(callback => callback());
+            consentUI.hide();
+            expect(sendMessageStub).to.be.calledTwice;
+          });
+        }
+      );
     });
   }
 );

@@ -40,6 +40,11 @@
       color: #147bc1;
     }
 
+    .version {
+      color: gray;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
     .content {
       margin: 16px;
       display: block;
@@ -187,6 +192,15 @@
 
   <section class="hero">
     <h1>AMP Experiments</h1>
+  </section>
+
+  <section class="desc">
+    <h2>Version</h2>
+    <p>
+      This is version <span class="version">$internalRuntimeVersion$</span> of the AMP runtime.
+      For a list of commits contained in this release, click
+      <a target="_blank" href="https://github.com/ampproject/amphtml/releases/tag/$internalRuntimeVersion$">here</a>.
+    </p>
   </section>
 
   <section class="desc">

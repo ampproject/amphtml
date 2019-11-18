@@ -23,7 +23,7 @@ import {WebAnimationService} from './web-animation-service';
 import {childElementByTag} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
 import {getDetail, listen} from '../../../src/event-helper';
-import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
@@ -141,10 +141,9 @@ export class AmpAnimation extends AMP.BaseElement {
       });
       listen(this.embed_.win, 'resize', () => this.onResize_());
     } else {
-      const viewer = Services.viewerForDoc(ampdoc);
-      this.setVisible_(viewer.isVisible());
-      viewer.onVisibilityChanged(() => {
-        this.setVisible_(viewer.isVisible());
+      this.setVisible_(ampdoc.isVisible());
+      ampdoc.onVisibilityChanged(() => {
+        this.setVisible_(ampdoc.isVisible());
       });
       this.getViewport().onResize(e => {
         if (e.relayoutAll) {
@@ -502,7 +501,7 @@ export class AmpAnimation extends AMP.BaseElement {
         this.getRootNode_(),
         baseUrl,
         this.getVsync(),
-        this.element.getResources()
+        Services.ownersForDoc(this.element.getAmpDoc())
       );
       return builder.createRunner(configJson, args, opt_positionObserverData);
     });

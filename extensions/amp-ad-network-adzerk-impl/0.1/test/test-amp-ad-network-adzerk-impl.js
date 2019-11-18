@@ -35,7 +35,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    win.AMP_MODE = {localDev: false};
+    win.__AMP_MODE = {localDev: false};
     win.AMP.registerTemplate('amp-mustache', AmpMustache);
     doc = win.document;
     fetchTextMock = sandbox.stub(Xhr.prototype, 'fetchText');

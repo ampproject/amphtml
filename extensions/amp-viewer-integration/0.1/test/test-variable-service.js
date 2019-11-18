@@ -35,8 +35,4 @@ describes.fakeWin('amp-viewer-integration variable service', {}, () => {
       'http://margarine-paradise.com'
     );
   });
-
-  it('should return the fragment param', () => {
-    expect(variableService.get()['fragmentParam']('ice')).to.equal('2');
-  });
 });

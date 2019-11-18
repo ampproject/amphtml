@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getStyle, setStyles} from '../../../src/style';
@@ -169,7 +169,7 @@ export class SafeframeHostApi {
     /** @protected {?Promise} */
     this.delay_ = null;
 
-    /** @private {../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = this.baseInstance_.getViewport();
 
     /** @private {boolean} */
@@ -600,6 +600,7 @@ export class SafeframeHostApi {
    * @param {number} width In pixels.
    * @param {string} messageType
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
+   * @return {*} TODO(#23582): Specify return type
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
     return this.viewport_
@@ -746,9 +747,10 @@ export class SafeframeHostApi {
         this.onFluidResize_(newHeight);
       })
       .catch(err => {
-        if (err.message == 'CANCELLED') {
-          dev().error(TAG, err);
-          return;
+        user().warn(TAG, err);
+        const {width, height} = this.baseInstance_.getSlotSize();
+        if (width && height) {
+          this.onFluidResize_(height);
         }
       });
   }

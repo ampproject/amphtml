@@ -21,6 +21,7 @@ const path = require('path');
 const {build} = require('./build');
 const {clean} = require('./clean');
 const {dist} = require('./dist');
+const {enableLocalTesting} = require('./helpers');
 
 async function walk(dest) {
   const filelist = [];
@@ -47,16 +48,6 @@ async function copyAndReplaceUrls(src, dest) {
   await Promise.all(promises);
 }
 
-async function modifyThirdPartyUrl() {
-  const filePath = 'firebase/dist/amp.js';
-  const data = await fs.readFile('firebase/dist/amp.js', 'utf8');
-  const result = data.replace(
-    'self.AMP_CONFIG={',
-    'self.AMP_CONFIG={"thirdPartyUrl":location.origin,'
-  );
-  await fs.writeFile(filePath, result, 'utf8');
-}
-
 async function firebase() {
   if (!argv.nobuild) {
     await clean();
@@ -75,6 +66,7 @@ async function firebase() {
     });
     await replaceUrls('firebase/index.html');
   } else {
+    log(colors.green('Copying test/manual and examples folders.'));
     await Promise.all([
       copyAndReplaceUrls('test/manual', 'firebase/manual'),
       copyAndReplaceUrls('examples', 'firebase/examples'),
@@ -85,8 +77,15 @@ async function firebase() {
     fs.copy('dist', 'firebase/dist', {overwrite: true}),
     fs.copy('dist.3p/current', 'firebase/dist.3p/current', {overwrite: true}),
   ]);
+
+  if (argv.fortesting) {
+    await Promise.all([
+      enableLocalTesting('firebase/dist.3p/current/integration.js'),
+      enableLocalTesting('firebase/dist/amp.js'),
+    ]);
+  }
+
   await Promise.all([
-    modifyThirdPartyUrl(),
     fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js', {
       overwrite: true,
     }),
@@ -122,4 +121,6 @@ firebase.flags = {
   'file': 'File to deploy to firebase as index.html',
   'min': 'Source from minified files',
   'nobuild': 'Skips the gulp build|dist step.',
+  'fortesting':
+    'Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
 };

@@ -184,7 +184,6 @@ describe('JwtHelper', () => {
 
       windowApi = {
         crypto: {subtle},
-        services: {},
       };
       helper = new JwtHelper(windowApi);
     });

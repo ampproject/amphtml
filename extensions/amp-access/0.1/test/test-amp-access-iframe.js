@@ -30,9 +30,11 @@ describes.fakeWin(
     let validConfig;
     let context;
     let contextMock;
+    let sandbox;
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
+      sandbox = env.sandbox;
       clock = lolex.install({
         target: ampdoc.win,
         toFake: ['Date', 'setTimeout', 'clearTimeout'],
@@ -179,7 +181,7 @@ describes.fakeWin(
           removeItem: () => {},
         };
         storageMock = sandbox.mock(storage);
-        Object.defineProperty(ampdoc.win, 'sessionStorage', {
+        sandbox.defineProperty(ampdoc.win, 'sessionStorage', {
           get: () => storage,
         });
         adapter = new AccessIframeAdapter(ampdoc, validConfig, context);

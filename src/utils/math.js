@@ -134,3 +134,33 @@ export function magnitude(deltaX, deltaY) {
 export function distance(x1, y1, x2, y2) {
   return magnitude(x2 - x1, y2 - y1);
 }
+
+/**
+ * @param {number} centerX
+ * @param {number} centerY
+ * @param {number} radius
+ * @param {number} angleInDegrees
+ * @return {{
+ *  x: number,
+ *  y: number,
+ * }}
+ */
+export function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+
+  return {
+    x: centerX + radius * Math.cos(angleInRadians),
+    y: centerY + radius * Math.sin(angleInRadians),
+  };
+}
+
+/**
+ * Sums up the values of the given array and returns the result
+ * @param {Array<number>} values
+ * @return {number}
+ */
+export function sum(values) {
+  return values.reduce(function(a, b) {
+    return a + b;
+  });
+}

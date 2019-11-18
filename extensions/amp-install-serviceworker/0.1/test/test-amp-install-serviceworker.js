@@ -25,7 +25,6 @@ import {
 } from '../../../../src/url';
 import {loadPromise} from '../../../../src/event-helper';
 import {
-  registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
@@ -55,7 +54,6 @@ describes.realWin(
     let container;
     let ampdoc;
     let maybeInstallUrlRewriteStub;
-    let whenVisible;
 
     beforeEach(() => {
       doc = env.win.document;
@@ -94,13 +92,9 @@ describes.realWin(
           },
         },
       };
-      whenVisible = Promise.resolve();
-      registerServiceBuilder(implementation.win, 'viewer', function() {
-        return {
-          whenFirstVisible: () => whenVisible,
-          isVisible: () => true,
-        };
-      });
+      const whenVisible = Promise.resolve();
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
       implementation.buildCallback();
       expect(calledSrc).to.be.undefined;
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
@@ -137,13 +131,9 @@ describes.realWin(
           },
         },
       };
-      whenVisible = Promise.resolve();
-      registerServiceBuilder(implementation.win, 'viewer', function() {
-        return {
-          whenFirstVisible: () => whenVisible,
-          isVisible: () => true,
-        };
-      });
+      const whenVisible = Promise.resolve();
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
       implementation.buildCallback();
       expect(calledSrc).to.be.undefined;
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
@@ -207,13 +197,9 @@ describes.realWin(
           },
         },
       };
-      whenVisible = Promise.resolve();
-      registerServiceBuilder(implementation.win, 'viewer', function() {
-        return {
-          whenFirstVisible: () => whenVisible,
-          isVisible: () => true,
-        };
-      });
+      const whenVisible = Promise.resolve();
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
       implementation.buildCallback();
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
         () => {
@@ -279,13 +265,9 @@ describes.realWin(
             },
           },
         };
-        whenVisible = Promise.resolve();
-        registerServiceBuilder(implementation.win, 'viewer', function() {
-          return {
-            whenFirstVisible: () => whenVisible,
-            isVisible: () => true,
-          };
-        });
+        const whenVisible = Promise.resolve();
+        sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+        sandbox.stub(ampdoc, 'isVisible').returns(true);
         implementation.buildCallback();
         return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
           () => {
@@ -418,12 +400,8 @@ describes.realWin(
           };
         });
         whenVisible = Promise.resolve();
-        registerServiceBuilder(win, 'viewer', function() {
-          return {
-            whenFirstVisible: () => whenVisible,
-            isVisible: () => true,
-          };
-        });
+        sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+        sandbox.stub(ampdoc, 'isVisible').returns(true);
       });
 
       function testIframe(callCount = 1) {
@@ -521,7 +499,7 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      viewer = win.services.viewer.obj;
+      viewer = win.__AMP_SERVICES.viewer.obj;
       stubUrlService(sandbox);
       element = win.document.createElement('amp-install-serviceworker');
       element.setAttribute('src', 'https://example.com/sw.js');
@@ -660,7 +638,7 @@ describes.fakeWin(
         expect(preloadStub).to.not.be.called;
         return loadPromise(win)
           .then(() => {
-            return viewer.whenFirstVisible();
+            return ampdoc.whenFirstVisible();
           })
           .then(() => {
             expect(preloadStub).to.be.calledOnce;

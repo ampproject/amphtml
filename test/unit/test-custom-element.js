@@ -22,6 +22,7 @@ import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
+import {chunkInstanceForTesting} from '../../src/chunk';
 import {createAmpElementForTesting} from '../../src/custom-element';
 
 describes.realWin('CustomElement', {amp: true}, env => {
@@ -30,7 +31,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
     .configure()
     .skipSafari()
     .run('CustomElement', () => {
-      let win, doc, ampdoc;
+      let win, doc, ampdoc, sandbox;
       let resources;
       let resourcesMock;
       let clock;
@@ -107,6 +108,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       beforeEach(() => {
         win = env.win;
         doc = win.document;
+        sandbox = env.sandbox;
         ampdoc = env.ampdoc;
         clock = lolex.install({target: win});
         resources = Services.resourcesForDoc(doc);
@@ -114,6 +116,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         resourcesMock = sandbox.mock(resources);
         container = doc.createElement('div');
         doc.body.appendChild(container);
+        chunkInstanceForTesting(env.ampdoc);
 
         ElementClass = createAmpElementForTesting(win, 'amp-test', TestElement);
         StubElementClass = createAmpElementForTesting(
@@ -125,8 +128,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
         win.customElements.define('amp-test', ElementClass);
         win.customElements.define('amp-stub', StubElementClass);
 
-        win.ampExtendedElements['amp-test'] = TestElement;
-        win.ampExtendedElements['amp-stub'] = ElementStub;
+        win.__AMP_EXTENDED_ELEMENTS['amp-test'] = TestElement;
+        win.__AMP_EXTENDED_ELEMENTS['amp-stub'] = ElementStub;
         ampdoc.declareExtension('amp-stub');
 
         testElementCreatedCallback = sandbox.spy();
@@ -169,7 +172,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('Element - createdCallback', () => {
         const element = new ElementClass();
-        const build = sandbox.stub(element, 'build');
+        const build = sandbox.stub(element, 'build').returns(Promise.resolve());
 
         expect(element.isBuilt()).to.equal(false);
         expect(element.hasAttributes()).to.equal(false);
@@ -222,9 +225,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('Element - should only add classes on first attachedCallback', () => {
         const element = new ElementClass();
         const buildPromise = Promise.resolve();
-        const buildStub = sandbox
-          .stub(element, 'build')
-          .callsFake(() => buildPromise);
+        const buildStub = sandbox.stub(element, 'build').returns(buildPromise);
 
         expect(element).to.not.have.class('i-amphtml-element');
         expect(element).to.not.have.class('i-amphtml-notbuilt');
@@ -250,7 +251,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('Element - handles async connectedCallback when disconnected', () => {
         const element = new ElementClass();
-        Object.defineProperty(element, 'isConnected', {
+        sandbox.defineProperty(element, 'isConnected', {
           value: false,
         });
 
@@ -269,9 +270,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         clock.tick(1);
         const element = new ElementClass();
         const buildPromise = Promise.resolve();
-        const buildStub = sandbox
-          .stub(element, 'build')
-          .callsFake(() => buildPromise);
+        const buildStub = sandbox.stub(element, 'build').returns(buildPromise);
         container.appendChild(element);
         container.removeChild(element);
 
@@ -295,7 +294,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('Element - should NOT reset on 2nd attachedCallback w/o request', () => {
         clock.tick(1);
         const element = new ElementClass();
-        sandbox.stub(element, 'build');
+        sandbox.stub(element, 'build').returns(Promise.resolve());
         container.appendChild(element);
         container.removeChild(element);
 
@@ -521,10 +520,11 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
 
       it('Element - re-upgrade with a failed promised', () => {
+        expectAsyncConsoleError('upgrade failed', 1);
         const element = new ElementClass();
         expect(element.isUpgraded()).to.equal(false);
         const oldImpl = element.implementation_;
-        const promise = Promise.reject();
+        const promise = Promise.reject(new Error('upgrade failed'));
         oldImpl.upgradeCallback = () => promise;
 
         container.appendChild(element);
@@ -733,15 +733,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
         return element.buildingPromise_.then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementBuildCallback).to.be.calledOnce;
-          expect(testElementPreconnectCallback).to.have.not.been.called;
 
           // Call again.
           return element.build().then(() => {
             expect(element.isBuilt()).to.equal(true);
             expect(testElementBuildCallback).to.be.calledOnce;
-            expect(testElementPreconnectCallback).to.have.not.been.called;
-            clock.tick(1);
-            expect(testElementPreconnectCallback).to.be.calledOnce;
+            setTimeout(() => {
+              expect(testElementPreconnectCallback).to.be.calledOnce;
+            }, 0);
           });
         });
       });
@@ -904,7 +903,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .expects('remove')
           .withExactArgs(element)
           .never();
-        Object.defineProperty(element, 'isConnected', {
+        sandbox.defineProperty(element, 'isConnected', {
           value: true,
         });
         container.removeChild(element);
@@ -967,16 +966,15 @@ describes.realWin('CustomElement', {amp: true}, env => {
         return element.build().then(() => {
           expect(element.isBuilt()).to.equal(true);
           expect(testElementLayoutCallback).to.have.not.been.called;
-          clock.tick(1);
-          expect(testElementPreconnectCallback).to.be.calledOnce;
-          expect(testElementPreconnectCallback.getCall(0).args[0]).to.be.false;
 
           const p = element.layoutCallback();
           expect(testElementLayoutCallback).to.be.calledOnce;
-          expect(testElementPreconnectCallback).to.have.callCount(2);
-          expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
           expect(element.signals().get(CommonSignals.LOAD_START)).to.be.ok;
           expect(element.signals().get(CommonSignals.LOAD_END)).to.be.null;
+          setTimeout(() => {
+            expect(testElementPreconnectCallback).to.have.callCount(2);
+            expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
+          }, 0);
           return p.then(() => {
             expect(element.readyState).to.equal('complete');
             expect(element.signals().get(CommonSignals.LOAD_END)).to.be.ok;
@@ -1306,14 +1304,38 @@ describes.realWin('CustomElement', {amp: true}, env => {
         const sizer = doc.createElement('div');
         element.sizerElement = sizer;
         element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
-        expect(parseInt(sizer.style.paddingTop, 10)).to.equal(0);
-        expect(element.sizerElement).to.be.null;
         expect(element.style.height).to.equal('111px');
         expect(element.style.width).to.equal('222px');
         expect(element.style.marginTop).to.equal('1px');
         expect(element.style.marginRight).to.equal('2px');
         expect(element.style.marginBottom).to.equal('3px');
         expect(element.style.marginLeft).to.equal('4px');
+      });
+
+      it('should reset sizer for responsive layout', () => {
+        const element = new ElementClass();
+        element.layout_ = Layout.RESPONSIVE;
+        const sizer = doc.createElement('div');
+        element.sizerElement = sizer;
+        element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
+        expect(sizer.style.paddingTop).to.equal('0px');
+        expect(element.sizerElement).to.be.null;
+      });
+
+      it('should reset sizer for intrinsic layout', () => {
+        const element = new ElementClass();
+        element.layout_ = Layout.INTRINSIC;
+        const sizer = doc.createElement('i-amphtml-sizer');
+        const intrinsicSizer = doc.createElement('img');
+        intrinsicSizer.classList.add('i-amphtml-intrinsic-sizer');
+        intrinsicSizer.setAttribute(
+          'src',
+          'data:image/svg+xml;charset=utf-8,<svg height=&quot;610&quot; width=&quot;1080&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>'
+        );
+        sizer.appendChild(intrinsicSizer);
+        element.appendChild(sizer);
+        element.changeSize(111);
+        expect(intrinsicSizer.getAttribute('src')).to.equal('');
       });
 
       it('should NOT apply media condition in template', () => {
@@ -1715,20 +1737,18 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       },
     };
     element.resources_ = {
-      scheduleLayout(el, fb) {
-        if (el == element && fb == fallback) {
-          resourcesSpy();
-        }
-      },
       getResourceForElement: element => {
         return element.resource;
       },
     };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = sandbox.mock();
     const fallback = element.appendChild(createWithAttr('fallback'));
-    const resourcesSpy = sandbox.spy();
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
-    expect(resourcesSpy).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.be.calledOnce;
+    expect(owners.scheduleLayout).to.have.been.calledWith(element, fallback);
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
@@ -1742,11 +1762,14 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
       },
     };
     element.resources_ = {
-      scheduleLayout: () => {},
       getResourceForElement: element => {
         return element.resource;
       },
     };
+    element.getAmpDoc = () => doc;
+    const owners = Services.ownersForDoc(doc);
+    owners.scheduleLayout = sandbox.mock();
+
     element.appendChild(createWithAttr('fallback'));
     element.toggleFallback(true);
     expect(element).to.not.have.class('amp-notsupported');
@@ -1803,7 +1826,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
           TestElement
         );
         win.customElements.define('amp-test-loader', ElementClass);
-        win.ampExtendedElements['amp-test-loader'] = TestElement;
+        win.__AMP_EXTENDED_ELEMENTS['amp-test-loader'] = TestElement;
         LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
         resources = Services.resourcesForDoc(doc);
         resources.isBuildOn_ = true;
@@ -1853,12 +1876,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
-      it('should disable when not measured or too small', () => {
+      it('should disable when not measured', () => {
         stubInA4A(false);
         element.layoutWidth_ = 0;
-        expect(element.isLoadingEnabled_()).to.be.false;
-
-        element.layoutWidth_ = 10;
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
@@ -1923,6 +1943,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should create and turn on', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.toggleLoading(true);
 
         expect(element.loadingContainer_).to.not.be.null;
@@ -1933,21 +1955,25 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should turn on already created', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.prepareLoading_();
         const {
-          loadingContainer_: container,
-          loadingElement_: indicator,
+          loadingContainer_: prevLoadingContainer,
+          loadingElement_: prevLoadingElement_,
         } = element;
         element.toggleLoading(true);
 
-        expect(element.loadingContainer_).to.equal(container);
+        expect(element.loadingContainer_).to.equal(prevLoadingContainer);
         expect(element.loadingContainer_).to.not.have.class('amp-hidden');
-        expect(element.loadingElement_).to.equal(indicator);
+        expect(element.loadingElement_).to.equal(prevLoadingElement_);
         expect(element.loadingElement_).to.have.class('amp-active');
       });
 
       it('should turn off', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.prepareLoading_();
         element.toggleLoading(false);
 
@@ -1959,6 +1985,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should turn off and cleanup', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.prepareLoading_();
         element.toggleLoading(false, {cleanup: true});
 
@@ -1968,6 +1996,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should NOT cleanup if re-used', () => {
         stubInA4A(false);
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.prepareLoading_();
         sandbox
           .stub(element.implementation_, 'isLoadingReused')
@@ -2009,6 +2039,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('should turn on when enters viewport', () => {
         stubInA4A(false);
         const toggle = sandbox.spy(element, 'toggleLoading');
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.viewportCallback(true);
         clock.tick(1000);
         expect(toggle).to.be.calledOnce;
@@ -2028,6 +2060,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
         stubInA4A(false);
         const toggle = sandbox.spy(element, 'toggleLoading');
         element.isInViewport_ = true;
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.updateLayoutBox({top: 0, width: 300});
         expect(toggle).to.be.calledOnce;
         expect(toggle.firstCall.args[0]).to.equal(true);
@@ -2036,6 +2070,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('should create loading when measured if in the top window', () => {
         stubInA4A(false);
         const toggle = sandbox.spy(element, 'toggleLoading');
+        element.setAttribute('layout', 'fill');
+        container.appendChild(element);
         element.updateLayoutBox({top: 0, width: 300});
         expect(toggle).to.have.not.been.called;
         expect(element.loadingContainer_).to.not.be.null;

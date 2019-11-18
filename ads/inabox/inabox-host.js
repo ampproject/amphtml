@@ -107,9 +107,10 @@ export class InaboxHost {
 function validateMessage(message) {
   const valid = !!(message.source && message.source.postMessage);
   if (!valid) {
-    user().error(
+    user().warn(
       TAG,
-      'Missing message.source. message.data=' + JSON.stringify(getData(message))
+      'Ignoring an inabox message. Likely the requester iframe has been removed. message.data=' +
+        JSON.stringify(getData(message))
     );
   }
   return valid;

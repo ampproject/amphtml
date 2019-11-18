@@ -32,7 +32,8 @@
   */
   "asset_globs": [
     "examples/visual-tests/**",
-    "examples/inabox-tag-integration.js"
+    "examples/amphtml-ads/ads-tag-integration.js",
+    "test/fixtures/e2e/amphtml-ads/**"
   ],
 
   /**
@@ -126,6 +127,13 @@
    *   //   };
    *   "interactive_tests": "examples/visual-tests/foo/foo-test.js",
    *
+   *   // [optional, EXPERIMENTAL] If interactive_tests have been specified, both
+   *   // interactive tests and the base page without any interactive tests will
+   *   // be executed by default. However, if the result of the base execution
+   *   // is of no interest, setting no_base_test to true will cause the base test
+   *   // not to be executed.
+   *   "no_base_test": true,
+   *
    *   // [optional] Add this key and set to true to skip this test. You should
    *   // also add an explanation and a link to an example of a previous
    *   // snapshot on Percy that demonstrate the flakiness of this test.
@@ -202,8 +210,8 @@
       "name": "AMP Article",
       "loading_complete_selectors": [
         ".article-body",
-        ".ad-one div[placeholder].amp-hidden",
-        ".ad-two div[placeholder].amp-hidden"
+        ".ad-one :not(.i-amphtml-loading-container) + iframe",
+        ".ad-two :not(.i-amphtml-loading-container) + iframe"
       ]
     },
     {
@@ -356,15 +364,14 @@
       ]
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
@@ -462,15 +469,14 @@
       ]
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/478011222#L634
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
       "name": "amp-story: consent (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
@@ -520,15 +526,14 @@
       ]
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (rtl)",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       "url": "examples/visual-tests/amp-story/basic.rtl.html",
@@ -551,15 +556,14 @@
       ]
     },
     {
-      "flaky": true,
-      // See https://travis-ci.org/ampproject/amphtml/jobs/456056607#L640
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
       "name": "amp-story: consent (desktop) (rtl)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
         ".i-amphtml-story-consent"
-      ]
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
       // The url here should not matter; this UI should be triggered for all
@@ -672,8 +676,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-live-story.js"
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-vertical-rendering.html",
-      "name": "amp-story: vertical rendering",
+      "url": "examples/visual-tests/amp-story/amp-story-bot-rendering.html",
+      "name": "amp-story: bot rendering",
       "viewport": {"width": 360, "height": 4500},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
@@ -722,17 +726,37 @@
       "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-ad.html",
-      "name": "AMP ad",
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js"
+      "url": "examples/visual-tests/amphtml-ads/amp-fie-adchoices.html",
+      "name": "amphtml-ads: friendly iframe adchoices",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/adchoices.js",
+      "no_base_test": true
     },
     {
-      "url": "examples/visual-tests/amp-ad/amp-inabox.html",
-      "name": "AMP Inabox ad",
+      "url": "examples/visual-tests/amphtml-ads/amp-inabox-adchoices.html",
+      "name": "amphtml-ads: inabox adchoices",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/adchoices.js",
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amphtml-ads/amp-inabox-static.html",
+      "name": "amphtml-ads: inabox static",
       "loading_complete_selectors": [
         ".view", ".activeview"
       ],
-      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js"
-    }
+      "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu.amp.html",
+      "name": "amp-mega-menu: basic usage",
+      "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],
+      "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu-with-list.amp.html",
+      "name": "amp-mega-menu: template render",
+      "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],
+      "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
+    },
   ]
 }

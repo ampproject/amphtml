@@ -40,7 +40,7 @@ import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
-import {isInFie} from '../../../src/friendly-iframe-embed';
+import {isInFie} from '../../../src/iframe-helper';
 import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
@@ -102,6 +102,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?./linker-manager.LinkerManager} */
     this.linkerManager_ = null;
+
+    /** @private {?boolean} */
+    this.isInFie_ = null;
   }
 
   /** @override */
@@ -182,7 +185,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
+    if (this.getAmpDoc().isVisible()) {
       // amp-analytics tag was just set to display:none. Page is still loaded.
       return false;
     }
@@ -207,7 +210,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     toggle(this.element, false);
 
-    this.iniPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       // Rudimentary "idle" signal.
       .then(() => Services.timerFor(this.win).promise(1))
@@ -238,6 +241,23 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
     return this.iniPromise_;
+  }
+
+  /**
+   * @return {boolean} whether parent post messages are allowed.
+   *
+   * <p>Parent post messages are only allowed for ads.
+   *
+   * @private
+   */
+  allowParentPostMessage_() {
+    if (this.isInabox_) {
+      return true;
+    }
+    if (this.isInFie_ == null) {
+      this.isInFie_ = isInFie(this.element);
+    }
+    return this.isInFie_;
   }
 
   /**
@@ -298,9 +318,11 @@ export class AmpAnalytics extends AMP.BaseElement {
         }
         const hasRequestOrPostMessage =
           trigger['request'] ||
-          (trigger['parentPostMessage'] && this.isInabox_);
+          (trigger['parentPostMessage'] && this.allowParentPostMessage_());
         if (!trigger['on'] || !hasRequestOrPostMessage) {
-          const errorMsgSeg = this.isInabox_ ? '/"parentPostMessage"' : '';
+          const errorMsgSeg = this.allowParentPostMessage_()
+            ? '/"parentPostMessage"'
+            : '';
           this.user().error(
             TAG,
             '"on" and "request"' +
@@ -342,17 +364,17 @@ export class AmpAnalytics extends AMP.BaseElement {
               }
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
-              this.addTriggerNoInline_(trigger);
+              this.addTrigger_(trigger);
             } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(trigger['selector'], expansionOptions)
                 .then(selector => {
                   trigger['selector'] = selector;
-                  this.addTriggerNoInline_(trigger);
+                  this.addTrigger_(trigger);
                 });
             } else {
-              this.addTriggerNoInline_(trigger);
+              this.addTrigger_(trigger);
             }
           })
         );
@@ -374,13 +396,12 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * Calls `AnalyticsGroup.addTrigger` and reports any errors. "NoInline" is
-   * to avoid inlining this method so that `try/catch` does it veto
-   * optimizations.
+   * Calls `AnalyticsGroup.addTrigger` and reports any errors.
    * @param {!JsonObject} config
    * @private
+   * @noinline
    */
-  addTriggerNoInline_(config) {
+  addTrigger_(config) {
     if (!this.analyticsGroup_) {
       // No need to handle trigger for component that has already been detached
       // from DOM
@@ -476,7 +497,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   generateRequests_() {
     if (!this.config_['requests']) {
-      if (!this.isInabox_) {
+      if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
         this.user().error(
           TAG,
@@ -577,7 +598,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     const request = this.requests_[requestName];
-    const hasPostMessage = this.isInabox_ && trigger['parentPostMessage'];
+    const hasPostMessage =
+      this.allowParentPostMessage_() && trigger['parentPostMessage'];
 
     if (requestName != undefined && !request) {
       const TAG = this.getName_();
@@ -622,8 +644,8 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expandAndPostMessage_(trigger, event) {
     const msg = trigger['parentPostMessage'];
-    if (!msg || !this.isInabox_) {
-      // Only send message in inabox runtime with parentPostMessage specified.
+    if (!msg || !this.allowParentPostMessage_()) {
+      // Only send message for AMP ad with parentPostMessage specified.
       return;
     }
     const expansionOptions = this.expansionOptions_(event, trigger);
@@ -636,7 +658,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.element
     ).then(message => {
       if (isIframed(this.win)) {
-        // Only post message with explict `parentPostMessage` to inabox host
+        // Only post message with explict `parentPostMessage`
         this.win.parent./*OK*/ postMessage(message, '*');
       }
     });
@@ -738,7 +760,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(key =>
         Services.urlReplacementsForDoc(this.element).expandUrlAsync(
           key,
-          this.variableService_.getMacros()
+          this.variableService_.getMacros(this.element)
         )
       );
   }

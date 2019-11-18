@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -55,13 +59,8 @@ export class HeadingComponent {
     };
   }
 
-  /**
-   * @param {!../bookend-component.BookendComponentDef} headingData
-   * @param {!Document} doc
-   * @return {!Element}
-   * @override
-   * */
-  buildElement(headingData, doc) {
+  /** @override */
+  buildElement(headingData, doc, data) {
     const html = htmlFor(doc);
     const template = html`
       <h3
@@ -69,6 +68,10 @@ export class HeadingComponent {
         i-amphtml-story-bookend-heading"
       ></h3>
     `;
+    template[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.HEADING,
+    };
 
     template.textContent = headingData.text;
 

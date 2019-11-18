@@ -305,6 +305,125 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
       expect(impl.sandboxHTMLCreativeFrame()).to.be.true;
     });
+
+    [
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 250,
+        margin: '-25px',
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 250,
+        margin: '-25px',
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '-50px',
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '-50px',
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 380,
+        margin: '-15px',
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 380,
+        margin: '-365px',
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 400,
+        margin: '-25px',
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 400,
+        margin: '-375px',
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 200,
+        margin: '',
+        isMultiSizeResponse: true,
+      },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '',
+        isAlreadyCentered: true,
+      },
+      {
+        direction: 'rtl',
+        parentWidth: 300,
+        newWidth: 300,
+        margin: '',
+        isAlreadyCentered: true,
+      },
+    ].forEach((testCase, testNum) => {
+      it(`should adjust slot CSS after expanding width #${testNum}`, () => {
+        if (testCase.isMultiSizeResponse) {
+          impl.parameterSize = '320x50,200x50';
+          impl.isFluidPrimaryRequest_ = true;
+        } else {
+          impl.paramterSize = '200x50';
+        }
+        sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
+          impl.element.style.width = `${width}px`;
+          return {
+            catch: () => {},
+          };
+        });
+        sandbox.stub(impl, 'getViewport').callsFake(() => ({
+          getRect: () => ({width: 400}),
+        }));
+        sandbox.stub(impl.element, 'getPageLayoutBox').callsFake(() => ({
+          left: 25,
+          right: 25,
+        }));
+        const dirStr = testCase.direction == 'ltr' ? 'Left' : 'Right';
+        impl.flexibleAdSlotData_ = {
+          parentWidth: testCase.parentWidth,
+          parentStyle: {
+            [`padding${dirStr}`]: '50px',
+            ['textAlign']: testCase.isAlreadyCentered ? 'center' : 'start',
+          },
+        };
+        impl.win.document.body.dir = testCase.direction;
+        impl.extractSize({
+          get(name) {
+            switch (name) {
+              case 'X-CreativeSize':
+                return `${testCase.newWidth}x50`;
+            }
+          },
+          has(name) {
+            return !!this.get(name);
+          },
+        });
+        expect(impl.element.style[`margin${dirStr}`]).to.equal(testCase.margin);
+        if (!testCase.isMultiSizeResponse) {
+          // We use a fixed '11' value for z-index.
+          expect(impl.element.style.zIndex).to.equal('11');
+        }
+      });
+    });
   });
 
   describe('#onCreativeRender', () => {
@@ -535,6 +654,12 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('returns the right URL', () => {
+      const viewer = Services.viewerForDoc(element);
+      // inabox-viewer.getReferrerUrl() returns Promise<string>.
+      sandbox
+        .stub(viewer, 'getReferrerUrl')
+        .returns(Promise.resolve('http://fake.example/?foo=bar'));
+
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       const impl2 = new AmpAdNetworkDoubleclickImpl(element);
       impl.setPageviewStateToken('abc');
@@ -575,7 +700,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           /(\?|&)eid=([^&]+%2C)*12345678(%2C[^&]+)*(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%-]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
-          /(\?|&)ref=https?%3A%2F%2Flocalhost%3A9876%2F[a-zA-Z0-9.:%-]+(&|$)/,
+          /(\?|&)ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/,
           /(\?|&)dtd=[0-9]+(&|$)/,
           /(\?|&)vis=[0-5]+(&|$)/,
           /(\?|&)psts=([^&]+%2C)*def(%2C[^&]+)*(&|$)/,
@@ -860,37 +985,37 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
       }));
 
-    it('should include msz/psz/fws if in experiment', () => {
-      sandbox
-        .stub(impl, 'randomlySelectUnsetExperiments_')
-        .returns({flexAdSlots: '21063174'});
-      impl.setPageLevelExperiments();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
-        expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
-        expect(url).to.match(/(\?|&)fws=[0-9]+(&|$)/);
-        expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
-      });
-    });
-
-    it('should not include msz/psz if not in flexAdSlots control', () => {
+    it('should include msz/psz/fws if in holdback control', () => {
       sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')
         .returns({flexAdSlots: '21063173'});
       impl.setPageLevelExperiments();
       return impl.getAdUrl().then(url => {
-        expect(url).to.not.match(/(\?|&)msz=/);
-        expect(url).to.not.match(/(\?|&)psz=/);
-        expect(url).to.not.match(/(\?|&)fws=/);
+        expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)fws=[0-9]+(&|$)/);
         expect(url).to.match(/(=|%2C)21063173(%2C|&|$)/);
       });
     });
 
-    it('should not include msz/psz if not in flexAdSlots experiment', () => {
+    it('should not include msz/psz if not in holdback experiment', () => {
+      sandbox
+        .stub(impl, 'randomlySelectUnsetExperiments_')
+        .returns({flexAdSlots: '21063174'});
+      impl.setPageLevelExperiments();
       return impl.getAdUrl().then(url => {
         expect(url).to.not.match(/(\?|&)msz=/);
         expect(url).to.not.match(/(\?|&)psz=/);
         expect(url).to.not.match(/(\?|&)fws=/);
+        expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
+      });
+    });
+
+    it('should include msz/psz by default', () => {
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)fws=[0-9]+(&|$)/);
         expect(url).to.not.match(/(=|%2C)2106317(3|4)(%2C|&|$)/);
       });
     });
@@ -1212,20 +1337,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should attempt resize for fluid request + fixed response case', () => {
       impl.isFluidRequest_ = true;
-      impl.handleResize_(350, 300);
-      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
-      expect(impl.element.getAttribute('style')).to.match(/height: 300/);
-    });
-
-    it('should attempt resize for larger width response', () => {
-      impl.handleResize_(350, 50);
-      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
-      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
-    });
-
-    it('should not attempt resize for larger height response', () => {
-      impl.handleResize_(350, 300);
-      expect(impl.element.getAttribute('style')).to.match(/width: 200/);
+      impl.handleResize_(150, 50);
+      expect(impl.element.getAttribute('style')).to.match(/width: 150/);
       expect(impl.element.getAttribute('style')).to.match(/height: 50/);
     });
   });
@@ -1337,7 +1450,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
 describes.realWin(
   'additional amp-ad-network-doubleclick-impl',
-  realWinConfigAmpAd,
+  realWinConfig,
   env => {
     let doc;
     let impl;
@@ -1372,7 +1485,7 @@ describes.realWin(
       });
     });
 
-    describe('centering', () => {
+    describes.realWin('centering', realWinConfigAmpAd, env => {
       const size = {width: '300px', height: '150px'};
 
       /**
@@ -1475,7 +1588,7 @@ describes.realWin(
           'type': 'doubleclick',
         });
         impl = new AmpAdNetworkDoubleclickImpl(element);
-        impl.getAmpDoc = () => {};
+        impl.getAmpDoc = () => env.ampdoc;
         isSecureStub = sandbox.stub();
         sandbox.stub(Services, 'urlForDoc').returns({isSecure: isSecureStub});
       });
@@ -1656,26 +1769,12 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        sandbox.stub(impl, 'getAmpDoc').returns({});
-        sandbox
-          .stub(Services, 'viewerForDoc')
-          .returns({whenFirstVisible: () => new Deferred().promise});
+        sandbox.stub(impl, 'getAmpDoc').returns({
+          whenFirstVisible: () => new Deferred().promise,
+        });
       });
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
-      });
-
-      it('should set invalid origin fix experiment if on canonical', () => {
-        randomlySelectUnsetExperimentsStub.returns({});
-        impl.setPageLevelExperiments();
-        expect(impl.experimentIds.includes('21060933')).to.be.true;
-      });
-
-      it('should not set invalid origin fix if exp on', () => {
-        toggleExperiment(env.win, 'envDfpInvOrigDeprecated', true);
-        randomlySelectUnsetExperimentsStub.returns({});
-        impl.setPageLevelExperiments();
-        expect(impl.experimentIds.includes('21060933')).to.be.true;
       });
 
       it('should select SRA experiments', () => {

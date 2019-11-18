@@ -203,6 +203,7 @@ describes.realWin(
           allow: 'microphone; camera',
           referrerpolicy: 'no-referrer',
           frameborder: 3,
+          tabindex: -1,
           longdesc: 'foo',
           marginwidth: 5,
         });
@@ -214,6 +215,7 @@ describes.realWin(
         expect(iframe.getAttribute('allow')).to.equal('microphone; camera');
         expect(iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
         expect(iframe.getAttribute('frameborder')).to.equal('3');
+        expect(iframe.getAttribute('tabindex')).to.equal('-1');
         // unsupproted attributes
         expect(iframe.getAttribute('longdesc')).to.be.null;
         expect(iframe.getAttribute('marginwidth')).to.be.null;
@@ -1036,6 +1038,108 @@ describes.realWin(
             eventMatcher,
             ActionTrust.HIGH
           );
+        });
+      });
+
+      describe('pause/resume', () => {
+        beforeEach(() => {
+          toggleExperiment(win, 'pausable-iframe', true, true);
+        });
+
+        function setPolicyAllowed(iframe, allowed) {
+          env.sandbox.defineProperty(iframe, 'featurePolicy', {
+            value: {
+              features() {
+                return ['execution-while-not-rendered'];
+              },
+              allowsFeature() {
+                return allowed;
+              },
+            },
+          });
+        }
+
+        it('should not be pausable without an experiment', function*() {
+          toggleExperiment(win, 'pausable-iframe', false, false);
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            width: 100,
+            height: 100,
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const iframe = ampIframe.querySelector('iframe');
+          expect(iframe.getAttribute('allow') || '').to.not.have.string(
+            "execution-while-not-rendered 'none'"
+          );
+          expect(ampIframe.unlayoutOnPause()).to.be.true;
+        });
+
+        it('should be configureed pausable with an experiment', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            width: 100,
+            height: 100,
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const iframe = ampIframe.querySelector('iframe');
+          expect(iframe.getAttribute('allow') || '').to.have.string(
+            "execution-while-not-rendered 'none'"
+          );
+        });
+
+        it('should allow pausing when configured and supported', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            width: 100,
+            height: 100,
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const iframe = ampIframe.querySelector('iframe');
+          setPolicyAllowed(iframe, false);
+          expect(ampIframe.unlayoutOnPause()).to.be.false;
+          ampIframe.pauseCallback();
+          expect(iframe).to.have.attribute('hidden');
+          ampIframe.resumeCallback();
+          expect(iframe).to.not.have.attribute('hidden');
+        });
+
+        it('should not allow pausing before loaded', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            width: 100,
+            height: 100,
+          });
+          expect(ampIframe.querySelector('iframe')).to.not.exist;
+          expect(ampIframe.unlayoutOnPause()).to.be.true;
+        });
+
+        it('should not pause/resume when not allowed', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            width: 100,
+            height: 100,
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const iframe = ampIframe.querySelector('iframe');
+          setPolicyAllowed(iframe, true);
+          expect(ampIframe.unlayoutOnPause()).to.be.true;
+          ampIframe.pauseCallback();
+          expect(iframe).to.not.have.attribute('hidden');
+        });
+
+        it('should not pause/resume w/o experiment', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            width: 100,
+            height: 100,
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const iframe = ampIframe.querySelector('iframe');
+          setPolicyAllowed(iframe, false);
+          toggleExperiment(win, 'pausable-iframe', false, false);
+          expect(ampIframe.unlayoutOnPause()).to.be.true;
+          ampIframe.pauseCallback();
+          expect(iframe).to.not.have.attribute('hidden');
         });
       });
     });

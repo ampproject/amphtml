@@ -49,7 +49,7 @@ describes.realWin(
       };
     });
 
-    const createElement = () => {
+    const createElement = async () => {
       const amp3dGltfEl = doc.createElement('amp-3d-gltf');
       amp3dGltfEl.setAttribute('src', 'https://fake.com/fake.gltf');
       amp3dGltfEl.setAttribute('layout', 'fixed');
@@ -57,59 +57,54 @@ describes.realWin(
       amp3dGltfEl.setAttribute('height', '240');
 
       doc.body.appendChild(amp3dGltfEl);
+      await amp3dGltfEl.build();
 
-      return amp3dGltfEl.build().then(() => {
-        const amp3dGltf = amp3dGltfEl.implementation_;
-        sandbox
-          .stub(amp3dGltf, 'iframe_')
-          .get(() => iframe)
-          .set(() => {});
+      const amp3dGltf = amp3dGltfEl.implementation_;
+      sandbox
+        .stub(amp3dGltf, 'iframe_')
+        .get(() => iframe)
+        .set(() => {});
 
-        const willLayout = amp3dGltfEl.layoutCallback();
+      const willLayout = amp3dGltfEl.layoutCallback();
 
-        return sendFakeMessage('ready')
-          .then(() => sendFakeMessage('loaded'))
-          .then(() => willLayout)
-          .then(() => amp3dGltf);
-      });
+      await sendFakeMessage('ready');
+      await sendFakeMessage('loaded');
+      await willLayout;
+      return amp3dGltf;
     };
 
     // TODO (#16080): this test keeps timing out for some reason.
     // Unskip when we figure out root cause.
-    it.skip('renders iframe', () => {
-      return createElement().then(() => {
-        expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
-      });
+    it.skip('renders iframe', async () => {
+      await createElement();
+      expect(!!doc.body.querySelector('amp-3d-gltf > iframe')).to.be.true;
     });
 
     // TODO (#16080): this test times out on Travis. Re-enable when fixed.
-    it.skip('sends toggleAmpViewport(false) when exiting viewport', () => {
-      return createElement().then(amp3dGltf => {
-        const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
-        return amp3dGltf.viewportCallback(false).then(() => {
-          expect(postMessageSpy.calledOnce).to.be.true;
-          expect(postMessageSpy.firstCall.args[0]).to.equal('action');
-          expect(postMessageSpy.firstCall.args[1].action).to.equal(
-            'toggleAmpViewport'
-          );
-          expect(postMessageSpy.firstCall.args[1].args).to.be.false;
-        });
-      });
+    it.skip('sends toggleAmpViewport(false) when exiting viewport', async () => {
+      const amp3dGltf = await createElement();
+
+      const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
+      await amp3dGltf.viewportCallback(false);
+      expect(postMessageSpy.calledOnce).to.be.true;
+      expect(postMessageSpy.firstCall.args[0]).to.equal('action');
+      expect(postMessageSpy.firstCall.args[1].action).to.equal(
+        'toggleAmpViewport'
+      );
+      expect(postMessageSpy.firstCall.args[1].args).to.be.false;
     });
 
     // TODO (#16080): this test times out on Travis. Re-enable when fixed.
-    it.skip('sends toggleAmpViewport(true) when entering viewport', () => {
-      return createElement().then(amp3dGltf => {
-        const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
-        return amp3dGltf.viewportCallback(true).then(() => {
-          expect(postMessageSpy.calledOnce).to.be.true;
-          expect(postMessageSpy.firstCall.args[0]).to.equal('action');
-          expect(postMessageSpy.firstCall.args[1].action).to.equal(
-            'toggleAmpViewport'
-          );
-          expect(postMessageSpy.firstCall.args[1].args).to.be.true;
-        });
-      });
+    it.skip('sends toggleAmpViewport(true) when entering viewport', async () => {
+      const amp3dGltf = await createElement();
+      const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
+      await amp3dGltf.viewportCallback(true);
+      expect(postMessageSpy.calledOnce).to.be.true;
+      expect(postMessageSpy.firstCall.args[0]).to.equal('action');
+      expect(postMessageSpy.firstCall.args[1].action).to.equal(
+        'toggleAmpViewport'
+      );
+      expect(postMessageSpy.firstCall.args[1].args).to.be.true;
     });
   }
 );

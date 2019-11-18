@@ -111,6 +111,37 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
 /**
  * @param {!Object} env
  * @param {!Bind} bind
+ * @param {!JsonObject} state
+ * @return {!Promise}
+ */
+function onBindReadyAndSetStateWithObject(env, bind, state) {
+  return bind
+    .initializePromiseForTesting()
+    .then(() => {
+      return bind.setStateWithObject(state);
+    })
+    .then(() => {
+      env.flushVsync();
+      return bind.setStatePromiseForTesting();
+    });
+}
+
+/**
+ * @param {!Object} env
+ * @param {!Bind} bind
+ * @param {string} name
+ * @return {!Promise}
+ */
+function onBindReadyAndGetState(env, bind, name) {
+  return bind.initializePromiseForTesting().then(() => {
+    env.flushVsync();
+    return bind.getState(name);
+  });
+}
+
+/**
+ * @param {!Object} env
+ * @param {!Bind} bind
  * @param {!Array<!Element>} added
  * @param {!Array<!Element>} removed
  * @param {!BindRescanOptions=} options
@@ -401,6 +432,17 @@ describe
           });
         });
 
+        it('should not update attribute for non-primitive new values', () => {
+          const list = createElement(env, container, `[src]="x"`, 'amp-list');
+          list.setAttribute('src', 'https://foo.example/data.json');
+
+          return onBindReadyAndSetState(env, bind, {x: [1, 2, 3]}).then(() => {
+            expect(list.getAttribute('src')).to.equal(
+              'https://foo.example/data.json'
+            );
+          });
+        });
+
         it('should scan fixed layer for bindings', () => {
           // Mimic FixedLayer by creating a sibling <body> element.
           const doc = env.win.document;
@@ -499,7 +541,7 @@ describe
         });
 
         it('should verify class bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           createElement(env, container, '[class]="\'foo\'" class="foo"');
           createElement(env, container, '[class]="\'foo\'" class=" foo "');
           createElement(env, container, '[class]="\'\'"');
@@ -512,7 +554,7 @@ describe
         });
 
         it('should verify string attribute bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           // Only the initial value for [a] binding does not match.
           createElement(
             env,
@@ -527,7 +569,7 @@ describe
         });
 
         it('should verify boolean attribute bindings in dev mode', () => {
-          window.AMP_MODE = {development: true, test: true};
+          window.__AMP_MODE = {development: true, test: true};
           createElement(env, container, '[disabled]="true" disabled', 'button');
           createElement(env, container, '[disabled]="false"', 'button');
           createElement(env, container, '[disabled]="true"', 'button'); // Mismatch.
@@ -887,6 +929,34 @@ describe
                 });
               });
             });
+          });
+        });
+
+        it('should support setting object state in setStateWithObject()', () => {
+          const element = createElement(
+            env,
+            container,
+            '[text]="mystate.mykey"'
+          );
+          expect(element.textContent).to.equal('');
+          const promise = onBindReadyAndSetStateWithObject(env, bind, {
+            mystate: {mykey: 'myval'},
+          });
+          return promise.then(() => {
+            expect(element.textContent).to.equal('myval');
+          });
+        });
+
+        it('should support getting state with getState()', () => {
+          const promise = onBindReadyAndSetStateWithObject(env, bind, {
+            mystate: {mykey: 'myval'},
+          });
+          return promise.then(() => {
+            return onBindReadyAndGetState(env, bind, 'mystate.mykey').then(
+              result => {
+                expect(result).to.equal('myval');
+              }
+            );
           });
         });
 

@@ -17,8 +17,19 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-list-0.1.css';
+import {
+  DIFFABLE_AMP_ELEMENTS,
+  DIFF_IGNORE,
+  DIFF_KEY,
+  markElementForDiffing,
+} from '../../../src/sanitation';
 import {Deferred} from '../../../src/utils/promise';
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {
+  Layout,
+  getLayoutClass,
+  isLayoutSizeDefined,
+  parseLayout,
+} from '../../../src/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
@@ -28,6 +39,14 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
+import {
+  childElementByAttr,
+  matches,
+  removeChildren,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+  tryFocus,
+} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -41,21 +60,26 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
-import {removeChildren} from '../../../src/dom';
-import setDOM from 'set-dom/dist/set-dom.js';
+import {setDOM} from '../../../third_party/set-dom/set-dom';
+import {startsWith} from '../../../src/string';
 
 /** @const {string} */
 const TAG = 'amp-list';
 
-/** @typedef {{
-  data:(?JsonObject|string|undefined|!Array),
-  resolver:!Function,
-  rejecter:!Function,
-  append:boolean,
-  payload: (?JsonObject|Array<JsonObject>),
-}} */
+/** @const {string} */
+const TABBABLE_ELEMENTS_QUERY =
+  'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"]), audio[controls], video[controls], [contenteditable]:not([contenteditable="false"])';
+
+/**
+ * @typedef {{
+ *   data:(?JsonObject|string|undefined|!Array),
+ *   resolver:!Function,
+ *   rejecter:!Function,
+ *   append:boolean,
+ *   payload: (?JsonObject|Array<JsonObject>)
+ * }}
+ */
 export let RenderItems;
 
 /**
@@ -70,7 +94,7 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {boolean} */
@@ -108,6 +132,12 @@ export class AmpList extends AMP.BaseElement {
      */
     this.initialSrc_ = null;
 
+    /**
+     * Does the amp-list have initial content that's not a placeholder?
+     * @private {boolean}
+     */
+    this.hasInitialContent_ = false;
+
     /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
     this.bind_ = null;
 
@@ -126,24 +156,15 @@ export class AmpList extends AMP.BaseElement {
     /**@private {?UnlistenDef} */
     this.unlistenAutoLoadMore_ = null;
 
-    this.registerAction(
-      'refresh',
-      () => {
-        if (this.layoutCompleted_) {
-          this.resetIfNecessary_();
-          return this.fetchList_(
-            /* opt_append */ false,
-            /* opt_refresh */ true
-          );
-        }
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('refresh', () => {
+      if (this.layoutCompleted_) {
+        this.resetIfNecessary_();
+        return this.fetchList_(/* opt_refresh */ true);
+      }
+    });
 
-    this.registerAction(
-      'changeToLayoutContainer',
-      () => this.changeToLayoutContainer_(),
-      ActionTrust.HIGH
+    this.registerAction('changeToLayoutContainer', () =>
+      this.changeToLayoutContainer_()
     );
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
@@ -171,8 +192,22 @@ export class AmpList extends AMP.BaseElement {
     // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
 
-    this.container_ = this.createContainer_();
-    this.element.appendChild(this.container_);
+    if (this.element.hasAttribute('diffable')) {
+      // Set container to the initial content, if it exists. This allows
+      // us to DOM diff with the rendered result.
+      const initialContent = scopedQuerySelector(
+        this.element,
+        '> div[role=list]:not([placeholder]):not([fallback]):not([fetch-error])'
+      );
+      if (initialContent) {
+        this.container_ = initialContent;
+        this.hasInitialContent_ = true;
+      }
+    }
+    if (!this.container_) {
+      this.container_ = this.createContainer_();
+      this.element.appendChild(this.container_);
+    }
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
@@ -189,6 +224,10 @@ export class AmpList extends AMP.BaseElement {
           ' soon. Please see https://github.com/ampproject/amphtml/issues/18849'
       );
     }
+
+    // Override default attributes used for setDOM customization.
+    setDOM['KEY'] = DIFF_KEY;
+    setDOM['IGNORE'] = DIFF_IGNORE;
 
     Services.bindForDocOrNull(this.element).then(bind => {
       this.bind_ = bind;
@@ -208,6 +247,8 @@ export class AmpList extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     if (placeholder) {
       this.attemptToFit_(placeholder);
+    } else if (this.hasInitialContent_) {
+      this.attemptToFit_(dev().assertElement(this.container_));
     }
 
     this.viewport_.onResize(() => {
@@ -238,12 +279,14 @@ export class AmpList extends AMP.BaseElement {
       listen(
         this.getLoadMoreService_().getLoadMoreFailedClickable(),
         'click',
-        () => this.loadMoreCallback_(/*opt_reload*/ true)
+        () =>
+          this.loadMoreCallback_(/*opt_reload*/ true, /*opt_fromClick*/ true)
       );
       listen(
         this.getLoadMoreService_().getLoadMoreButtonClickable(),
         'click',
-        () => this.loadMoreCallback_()
+        () =>
+          this.loadMoreCallback_(/*opt_reload*/ false, /*opt_fromClick*/ true)
       );
     });
   }
@@ -380,6 +423,12 @@ export class AmpList extends AMP.BaseElement {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');
       }
+      if (
+        !element.hasAttribute('tabindex') &&
+        !this.isTabbable_(dev().assertElement(element))
+      ) {
+        element.setAttribute('tabindex', '0');
+      }
       container.appendChild(element);
     });
   }
@@ -430,8 +479,60 @@ export class AmpList extends AMP.BaseElement {
           });
         }
         removeChildren(dev().assertElement(this.container_));
+        if (this.loadMoreEnabled_) {
+          this.getLoadMoreService_().hideAllLoadMoreElements();
+        }
       });
     }
+  }
+
+  /**
+   * Given JSON payload data fetched from the server, modifies the
+   * data according to developer-defined parameters. Extracts the correct
+   * list items according to the 'items' attribute, asserts that this
+   * contains an array or object, put object in an array if the single-item
+   * attribute is set, and truncates the list-items to a length defined
+   * by max-items.
+   * @param {!JsonObject|!Array<JsonObject>} data
+   * @throws {!Error} If response is undefined
+   * @return {!Array}
+   */
+  computeListItems_(data) {
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    let items = data;
+    if (itemsExpr != '.') {
+      items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
+    }
+    userAssert(
+      typeof items !== 'undefined',
+      'Response must contain an array or object at "%s". %s',
+      itemsExpr,
+      this.element
+    );
+    if (this.element.hasAttribute('single-item') && !isArray(items)) {
+      items = [items];
+    }
+    items = user().assertArray(items);
+    if (this.element.hasAttribute('max-items')) {
+      items = this.truncateToMaxLen_(items);
+    }
+    return items;
+  }
+
+  /**
+   * Trigger a fetch-error event
+   * @param {*} error
+   */
+  triggerFetchErrorEvent_(error) {
+    const event = error
+      ? createCustomEvent(
+          this.win,
+          `${TAG}.error`,
+          dict({'response': error.response})
+        )
+      : null;
+    const actions = Services.actionServiceForDoc(this.element);
+    actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
   }
 
   /**
@@ -439,12 +540,11 @@ export class AmpList extends AMP.BaseElement {
    * the list has been populated with rendered list items. If the viewer is
    * capable of rendering the templates, then the fetching of the list and
    * transformation of the template is handled by the viewer.
-   * @param {boolean=} opt_append
    * @param {boolean=} opt_refresh
    * @return {!Promise}
    * @private
    */
-  fetchList_(opt_append = false, opt_refresh = false) {
+  fetchList_(opt_refresh = false) {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -452,47 +552,42 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isSupported()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      const itemsExpr = this.element.getAttribute('items') || 'items';
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
-        let items = data;
-        if (itemsExpr != '.') {
-          items = getValueForExpr(/**@type {!JsonObject}*/ (data), itemsExpr);
-        }
-        userAssert(
-          typeof items !== 'undefined',
-          'Response must contain an array or object at "%s". %s',
-          itemsExpr,
-          this.element
-        );
-        if (this.element.hasAttribute('single-item') && !isArray(items)) {
-          items = [items];
-        }
-        items = user().assertArray(items);
-        if (this.element.hasAttribute('max-items')) {
-          items = this.truncateToMaxLen_(items);
-        }
+        const items = this.computeListItems_(data);
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
-        return this.scheduleRender_(items, opt_append, /* opt_payload */ data);
+        return this.scheduleRender_(
+          items,
+          /*opt_append*/ false,
+          data
+        ).then(() => this.maybeSetLoadMore_());
       });
     }
 
     return fetch.catch(error => {
-      const event = error
-        ? createCustomEvent(
-            this.win,
-            `${TAG}.error`,
-            dict({'response': error.response})
-          )
-        : null;
-      const actions = Services.actionServiceForDoc(this.element);
-      actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
+      this.triggerFetchErrorEvent_(error);
+      this.showFallback_();
+      throw error;
+    });
+  }
 
-      if (opt_append) {
-        throw error;
-      }
-      this.showFallbackOrThrow_(error);
+  /**
+   * Fetch and render items intended to be appended to the current list
+   * @return {!Promise}
+   */
+  fetchListAndAppend_() {
+    if (!this.element.getAttribute('src')) {
+      return Promise.resolve();
+    }
+    return this.prepareAndSendFetch_().then(data => {
+      const items = this.computeListItems_(data);
+      this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
+      return this.scheduleRender_(
+        items,
+        /*opt_append*/ true,
+        /*opt_payload*/ data
+      );
     });
   }
 
@@ -547,7 +642,7 @@ export class AmpList extends AMP.BaseElement {
             'maxItems': this.element.getAttribute('max-items'),
           },
         });
-        return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+        return this.ssrTemplateHelper_.ssr(
           this.element,
           request,
           /* opt_templates */ null,
@@ -557,7 +652,22 @@ export class AmpList extends AMP.BaseElement {
       .then(
         response => {
           userAssert(
-            response && typeof response['html'] === 'string',
+            response,
+            'Error proxying amp-list templates, received no response.'
+          );
+          const init = response['init'];
+          if (init) {
+            const status = init['status'];
+            if (status >= 300) {
+              /** HTTP status codes of 300+ mean redirects and errors. */
+              throw user().createError(
+                'Error proxying amp-list templates with status: ',
+                status
+              );
+            }
+          }
+          userAssert(
+            typeof response['html'] === 'string',
             'Expected response with format {html: <string>}. Received: ',
             response
           );
@@ -632,14 +742,14 @@ export class AmpList extends AMP.BaseElement {
     };
     const isSSR = this.ssrTemplateHelper_.isSupported();
     let renderPromise = this.ssrTemplateHelper_
-      .renderTemplate(this.element, current.data)
+      .applySsrOrCsrTemplate(this.element, current.data)
       .then(result => this.updateBindings_(result, current.append))
       .then(elements => this.render_(elements, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
-      renderPromise = renderPromise
-        .then(() => this.maybeRenderLoadMoreTemplates_(payload))
-        .then(() => this.maybeSetLoadMore_());
+      renderPromise = renderPromise.then(() =>
+        this.maybeRenderLoadMoreTemplates_(payload)
+      );
     }
     renderPromise.then(onFulfilledCallback, onRejectedCallback);
   }
@@ -729,7 +839,10 @@ export class AmpList extends AMP.BaseElement {
       // Forward elements to chained promise on success or failure.
       return bind
         .rescan(elements, removedElements, {'fast': true, 'update': true})
-        .then(() => elements, () => elements);
+        .then(
+          () => elements,
+          () => elements
+        );
     };
 
     // binding=refresh: Only do render-blocking update after initial render.
@@ -772,17 +885,8 @@ export class AmpList extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.hideFallbackAndPlaceholder_();
 
-      const diffing = isExperimentOn(this.win, 'amp-list-diffing');
-      if (diffing && container.hasChildNodes()) {
-        const newContainer = this.createContainer_();
-        this.addElementsToContainer_(elements, newContainer);
-
-        // Necessary to support both browserify and CC import semantics.
-        const diff = setDOM.default || setDOM;
-        // Use `i-amphtml-key` as a node key for identifying when to skip
-        // DOM diffing and replace. Needed for AMP elements, for example.
-        diff.KEY = 'i-amphtml-key';
-        diff(container, newContainer);
+      if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
+        this.diff_(container, elements);
       } else {
         if (!opt_append) {
           removeChildren(container);
@@ -807,6 +911,95 @@ export class AmpList extends AMP.BaseElement {
 
       this.maybeResizeListToFitItems_();
     });
+  }
+
+  /**
+   * Updates `this.container_` by DOM diffing its children against `elements`.
+   * @param {!Element} container
+   * @param {!Array<!Element>} elements
+   * @private
+   */
+  diff_(container, elements) {
+    const newContainer = this.createContainer_();
+    this.addElementsToContainer_(elements, newContainer);
+
+    // Typically, diff-marking elements happens during template sanitization.
+    // This obviously doesn't apply to initial content, so we mark them manually
+    // here to enable diffing in the first render.
+    if (this.hasInitialContent_) {
+      this.markContainerForDiffing_(container);
+    }
+
+    // setDOM does in-place DOM diffing for all non-AMP elements.
+    const ignored = setDOM(container, newContainer);
+
+    // Manually process ignored (AMP) elements.
+    for (let i = 0; i < ignored.length; i += 2) {
+      const before = dev().assertElement(ignored[i]);
+      const after = dev().assertElement(ignored[i + 1]);
+      this.manuallyDiffElement_(before, after);
+    }
+  }
+
+  /**
+   * @param {!Element} container
+   * @private
+   */
+  markContainerForDiffing_(container) {
+    // amp-mustache starts at 1 and increments, so start at -1 and decrement
+    // to guarantee uniqueness.
+    let key = -1;
+    // (1) AMP elements and (2) elements with bindings need diff marking.
+    // But, we only need to do (1) here because bindings in initial content
+    // are inert by design (as are bindings in placeholder content).
+    const elements = container.querySelectorAll('.i-amphtml-element');
+    elements.forEach(element => {
+      markElementForDiffing(element, () => String(key--));
+    });
+  }
+
+  /**
+   * @param {!Element} before
+   * @param {!Element} after
+   * @private
+   */
+  manuallyDiffElement_(before, after) {
+    devAssert(before.nodeName == after.nodeName, 'Mismatched nodeName.');
+    const replacementAttrs = DIFFABLE_AMP_ELEMENTS[before.nodeName];
+    if (!replacementAttrs) {
+      return;
+    }
+    const shouldReplace = replacementAttrs.some(
+      attr => before.getAttribute(attr) !== after.getAttribute(attr)
+    );
+    // Use the new element if there's a mismatched attribute value.
+    if (shouldReplace) {
+      before.parentElement.replaceChild(after, before);
+    } else {
+      // TODO(#23470): Support more attributes to manually diff by calling
+      // mutatedAttributesCallback() and changeSize().
+
+      // Add new classes.
+      for (let i = 0; i < after.classList.length; i++) {
+        before.classList.add(after.classList[i]);
+      }
+      // Remove missing, non-internal classes.
+      for (let i = 0; i < before.classList.length; i++) {
+        const c = before.classList[i];
+        if (!startsWith(c, 'i-amphtml-') && !after.classList.contains(c)) {
+          before.classList.remove(c);
+        }
+      }
+      // Concatenate instead of overwrite [style] since width/height are set
+      // by AMP's layout engine.
+      if (after.hasAttribute('style')) {
+        const afterStyle = after.getAttribute('style');
+        before.setAttribute(
+          'style',
+          `${before.getAttribute('style') || ''};${afterStyle}`
+        );
+      }
+    }
   }
 
   /**
@@ -879,45 +1072,31 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Undoes previous size-defined layout, must be called in mutation context.
-   * @param {string} previousLayout
+   * @param {string} layoutString
+   * @see src/layout.js
    */
-  undoPreviousLayout_(previousLayout) {
-    switch (previousLayout) {
-      case Layout.RESPONSIVE:
-        this.element.classList.remove('i-amphtml-layout-responsive');
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.FLEX_ITEM:
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.FIXED:
-        this.element.classList.remove('i-amphtml-layout-fixed');
-        setStyles(this.element, {
-          height: '',
-        });
-        break;
-      case Layout.FIXED_HEIGHT:
-        this.element.classList.remove('i-amphtml-layout-fixed-height');
-        setStyles(this.element, {
-          height: '',
-          width: '',
-        });
-        break;
-      case Layout.INTRINSIC:
-        this.element.classList.remove('i-amphtml-layout-intrinsic');
-        break;
-      default:
-      // fall through, always remove sizer and size-defined class
+  undoLayout_(layoutString) {
+    const layout = parseLayout(layoutString);
+    const layoutClass = getLayoutClass(devAssert(layout));
+    this.element.classList.remove(layoutClass, 'i-amphtml-layout-size-defined');
+
+    // TODO(amphtml): Remove [width] and [height] attributes too?
+    if (
+      [
+        Layout.FIXED,
+        Layout.FLEX_ITEM,
+        Layout.FLUID,
+        Layout.INTRINSIC,
+        Layout.RESPONSIVE,
+      ].includes(layout)
+    ) {
+      setStyles(this.element, {width: '', height: ''});
+    } else if (layout == Layout.FIXED_HEIGHT) {
+      setStyles(this.element, {height: ''});
     }
+
     // The changeSize() call removes the sizer element.
     this.element./*OK*/ changeSize();
-    this.element.classList.remove('i-amphtml-layout-size-defined');
   }
 
   /**
@@ -927,27 +1106,27 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
-    const previousLayout = this.element.getAttribute('layout');
+    const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
       return Promise.resolve();
     }
-
     return this.mutateElement(() => {
-      this.undoPreviousLayout_(previousLayout);
+      this.undoLayout_(previousLayout);
       this.container_.classList.remove(
         'i-amphtml-fill-content',
         'i-amphtml-replaced-content'
       );
       // The overflow element is generally hidden with visibility hidden,
       // but after changing to layout container, this causes an undesirable
-      // empty white space so we hide it with display none instead.
+      // empty white space so we hide it with "display: none" instead.
       const overflowElement = this.getOverflowElement();
       if (overflowElement) {
         toggle(overflowElement, false);
       }
-      this.element.classList.add('i-amphtml-layout-container');
       this.element.setAttribute('layout', 'container');
+      this.element.setAttribute('i-amphtml-layout', 'container');
+      this.element.classList.add('i-amphtml-layout-container');
     });
   }
 
@@ -963,6 +1142,10 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Sets up auto-load-more if automatic load-more is on. Otherwise, sets up
+   * manual load-more. In manual, shows the load-more button if there are more
+   * elements to load and the load-more-end element if otherwise. Called on
+   * the first fetch if load-more is on. Only called once.
    * @return {!Promise}
    * @private
    */
@@ -992,10 +1175,11 @@ export class AmpList extends AMP.BaseElement {
    * manually on clicking the load-more-button element. Sets the amp-list
    * src to the bookmarked src and fetches data from it.
    * @param {boolean=} opt_reload
+   * @param {boolean=} opt_fromClick
    * @return {!Promise}
    * @private
    */
-  loadMoreCallback_(opt_reload = false) {
+  loadMoreCallback_(opt_reload = false, opt_fromClick = false) {
     if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
       // Clear url to avoid repeated fetches from same url
@@ -1004,14 +1188,19 @@ export class AmpList extends AMP.BaseElement {
       // Nothing more to load or previous fetch still inflight
       return Promise.resolve();
     }
+    const container = dev().assertElement(this.container_);
+    const lastTabbableChild = this.lastTabbableChild_(container);
     this.mutateElement(() => {
       this.getLoadMoreService_().toggleLoadMoreLoading(true);
     });
-    return this.fetchList_(/* opt_append */ true)
+    return this.fetchListAndAppend_()
       .then(() => {
         return this.mutateElement(() => {
           if (this.loadMoreSrc_) {
             this.getLoadMoreService_().toggleLoadMoreLoading(false);
+            if (lastTabbableChild && opt_fromClick) {
+              tryFocus(lastTabbableChild);
+            }
           } else {
             this.getLoadMoreService_().setLoadMoreEnded();
           }
@@ -1021,7 +1210,8 @@ export class AmpList extends AMP.BaseElement {
         // Necessary since load-more elements are toggled in the above block
         this.attemptToFitLoadMore_(dev().assertElement(this.container_));
       })
-      .catch(() => {
+      .catch(error => {
+        this.triggerFetchErrorEvent_(error);
         this.handleLoadMoreFailed_();
       });
   }
@@ -1041,23 +1231,22 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {boolean=} opt_refresh
+   * @param {boolean=} refresh
    * @param {string=} token
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
    */
-  fetch_(opt_refresh = false, token = undefined) {
-    return batchFetchJsonFor(
-      this.getAmpDoc(),
-      this.element,
-      '.',
-      this.getPolicy_(),
-      opt_refresh,
-      token
-    );
+  fetch_(refresh = false, token = undefined) {
+    return batchFetchJsonFor(this.getAmpDoc(), this.element, {
+      expr: '.',
+      urlReplacement: this.getPolicy_(),
+      refresh,
+      token,
+    });
   }
 
   /**
+   * Sets up a listener on viewport change to load more items
    * @private
    */
   setupLoadMoreAuto_() {
@@ -1122,6 +1311,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   hideFallbackAndPlaceholder_() {
+    this.element.classList.remove('i-amphtml-list-fetch-error');
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(false);
@@ -1130,18 +1320,56 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {*=} error
-   * @throws {!Error} If fallback element is not present.
    * @private
    */
-  showFallbackOrThrow_(error) {
+  showFallback_() {
+    this.element.classList.add('i-amphtml-list-fetch-error');
+    // Displaying [fetch-error] may offset initial content, so resize to fit.
+    if (childElementByAttr(this.element, 'fetch-error')) {
+      // Note that we're measuring against the element instead of the container.
+      this.attemptToFit_(this.element);
+    }
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(true);
       this.togglePlaceholder(false);
-    } else {
-      throw error;
     }
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {?Element}
+   * @private
+   */
+  lastTabbableChild_(element) {
+    const allTabbableChildren = scopedQuerySelectorAll(
+      element,
+      TABBABLE_ELEMENTS_QUERY
+    );
+    return allTabbableChildren
+      ? allTabbableChildren[allTabbableChildren.length - 1]
+      : null;
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {?Element}
+   * @private
+   */
+  firstTabbableChild_(element) {
+    return scopedQuerySelector(element, TABBABLE_ELEMENTS_QUERY);
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  isTabbable_(element) {
+    return (
+      matches(element, TABBABLE_ELEMENTS_QUERY) ||
+      !!this.firstTabbableChild_(element)
+    );
   }
 }
 

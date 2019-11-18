@@ -158,8 +158,8 @@ export class AmpConsent extends AMP.BaseElement {
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       toggle(child, false);
-      // <amp-consent> will manualy schedule layout for its children.
-      this.setAsOwner(child);
+      // <amp-consent> will manually schedule layout for its children.
+      Services.ownersForDoc(this.element).setOwner(child, this.element);
     }
 
     const consentPolicyManagerPromise = getServicePromiseForDoc(
@@ -536,8 +536,7 @@ export class AmpConsent extends AMP.BaseElement {
         const ampdoc = this.getAmpDoc();
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
-        const viewer = Services.viewerForDoc(ampdoc);
-        return viewer.whenFirstVisible().then(() => {
+        return ampdoc.whenFirstVisible().then(() => {
           return Services.xhrFor(this.win)
             .fetchJson(resolvedHref, init)
             .then(res => res.json());

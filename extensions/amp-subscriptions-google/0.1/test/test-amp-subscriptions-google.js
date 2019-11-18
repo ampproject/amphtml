@@ -33,6 +33,7 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 
@@ -51,8 +52,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ackStub;
   let element;
   let entitlementResponse;
+  let win;
 
   beforeEach(() => {
+    win = env.win;
     ampdoc = env.ampdoc;
     element = env.win.document.createElement('script');
     element.id = 'amp-subscriptions';
@@ -60,7 +63,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     serviceAdapter = new ServiceAdapter(null);
     serviceAdapterMock = sandbox.mock(serviceAdapter);
     sandbox.stub(serviceAdapter, 'getPageConfig').callsFake(() => pageConfig);
@@ -100,7 +103,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       ),
       subscribeResponse: sandbox.stub(
         ConfiguredRuntime.prototype,
-        'setOnSubscribeResponse'
+        'setOnPaymentResponse'
       ),
     };
     methods = {
@@ -117,12 +120,15 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       linkAccount: sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
     };
     ackStub = sandbox.stub(Entitlements.prototype, 'ack');
+    toggleExperiment(win, 'swg-gpay-api', true);
+    toggleExperiment(win, 'nonswgexp', true);
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
   });
 
   afterEach(() => {
     serviceAdapterMock.verify();
     analyticsMock.verify();
+    toggleExperiment(win, 'swg-gpay-api', false);
   });
 
   function callback(stub) {
@@ -143,10 +149,20 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(platform.runtime_.doc_.ampdoc_).to.equal(ampdoc);
   });
 
+  it('should propagate experiment', () => {
+    expect(platform.runtime_.payClient_.getType()).to.equal('PAYJS');
+    expect(platform.runtime_.config()['experiments']).to.have.members([
+      'gpay-api',
+    ]);
+  });
+
   it('should proxy fetch via AMP fetcher', () => {
     const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
       expect(url).to.match(/publication\/example.org/);
-      expect(init).to.deep.equal({credentials: 'include'});
+      expect(init).to.deep.equal({
+        credentials: 'include',
+        prerenderSafe: true,
+      });
       return Promise.resolve({
         json: () => {
           return Promise.resolve({entitlements: entitlementResponse});
@@ -159,16 +175,38 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
   });
 
+  it('should proxy fetch non-granting response', () => {
+    const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
+      expect(url).to.match(/publication\/example.org/);
+      expect(init).to.deep.equal({
+        credentials: 'include',
+        prerenderSafe: true,
+      });
+      return Promise.resolve({
+        json: () => {
+          return Promise.resolve({
+            entitlements: {
+              source: 'subscribe.google.com',
+              products: ['example.org:registered_user'],
+              subscriptionToken: 'tok1',
+            },
+          });
+        },
+      });
+    });
+    return platform.getEntitlements().then(ents => {
+      expect(ents.source).to.equal(PLATFORM_ID);
+      expect(ents.granted).to.be.false;
+      expect(fetchStub).to.be.calledOnce;
+    });
+  });
+
   it('should proxy fetch empty response', () => {
     sandbox.stub(xhr, 'fetchJson').callsFake(() => {
       return Promise.resolve({
         json: () => {
           return Promise.resolve({
-            entitlements: {
-              source: 'google',
-              products: ['example.org:other'],
-              subscriptionToken: 'tok1',
-            },
+            entitlements: {},
           });
         },
       });
@@ -264,10 +302,18 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(methods.showAbbrvOffer).to.be.calledOnce;
   });
 
-  it('should start linking flow when requested', () => {
+  it('should start linking flow when requested', async () => {
+    serviceAdapterMock
+      .expects('getReaderId')
+      .withExactArgs('local')
+      .returns(Promise.resolve('ari1'))
+      .once();
     serviceAdapterMock.expects('delegateActionToLocal').never();
     callback(callbacks.loginRequest)({linkRequested: true});
-    expect(methods.linkAccount).to.be.calledOnce.calledWithExactly();
+    await 'Promises...';
+    expect(methods.linkAccount).to.be.calledOnce.calledWithExactly({
+      ampReaderId: 'ari1',
+    });
   });
 
   it('should delegate login when linking not requested', () => {
@@ -403,17 +449,17 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should infer the viewer from viewerUrl', () => {
-    delete viewer.params_['viewerUrl'];
+    delete ampdoc.params_['viewerUrl'];
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
     expect(platform.isGoogleViewer_).to.be.false;
 
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
     expect(platform.isGoogleViewer_).to.be.true;
   });
 
   it('should infer the viewer from origin', () => {
-    delete viewer.params_['viewerUrl'];
+    delete ampdoc.params_['viewerUrl'];
     let viewerOrigin = null;
     sandbox.stub(viewer, 'getViewerOrigin').callsFake(() => viewerOrigin);
 
@@ -445,11 +491,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should allow prerender if in a google viewer', () => {
-    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
-    // TODO(#23102): restore safe prerendering mode. This will be `true` once
-    // it's restored.
-    expect(platform.isPrerenderSafe()).to.be.false;
+    expect(platform.isPrerenderSafe()).to.be.true;
   });
 
   it('should attach button given to decorateUI', () => {
@@ -529,9 +573,15 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
-  it('should link accounts if login action is delegated', () => {
+  it('should link accounts if login action is delegated', async () => {
+    serviceAdapterMock
+      .expects('getReaderId')
+      .withExactArgs('local')
+      .returns(Promise.resolve('ari1'))
+      .once();
     const executeStub = platform.runtime_.linkAccount;
     platform.executeAction(Action.LOGIN);
+    await 'Promises...';
     expect(executeStub).to.be.calledWith();
   });
 
@@ -552,7 +602,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       });
     });
 
-    it('should convert non granted entitlements to null', () => {
+    it('should convert non granted internal shape with granted == false', () => {
       sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
@@ -567,7 +617,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         });
       });
       return platform.getEntitlements().then(entitlement => {
-        expect(entitlement).to.be.equal(null);
+        expect(entitlement.source).to.be.equal('google');
+        expect(entitlement.granted).to.be.equal(false);
+        expect(entitlement.grantReason).to.be.null;
       });
     });
   });

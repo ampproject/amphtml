@@ -33,7 +33,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getReddit(src, type) {
+    async function getReddit(src, type) {
       const ampReddit = doc.createElement('amp-reddit');
       ampReddit.setAttribute('height', 400);
       ampReddit.setAttribute('width', 400);
@@ -42,23 +42,21 @@ describes.realWin(
       ampReddit.setAttribute('layout', 'responsive');
 
       doc.body.appendChild(ampReddit);
-      return ampReddit
-        .build()
-        .then(() => ampReddit.layoutCallback())
-        .then(() => ampReddit);
+      await ampReddit.build();
+      await ampReddit.layoutCallback();
+      return ampReddit;
     }
 
-    it('renders post iframe', () => {
-      return getReddit(
+    it('renders post iframe', async () => {
+      const ampReddit = await getReddit(
         'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed',
         'post'
-      ).then(ampReddit => {
-        const iframe = ampReddit.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.getAttribute('width')).to.equal('400');
-        expect(iframe.getAttribute('height')).to.equal('400');
-      });
+      );
+      const iframe = ampReddit.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.getAttribute('width')).to.equal('400');
+      expect(iframe.getAttribute('height')).to.equal('400');
     });
 
     it('adds post embed', () => {
@@ -78,17 +76,16 @@ describes.realWin(
       expect(embedlyEmbed).not.to.be.undefined;
     });
 
-    it('renders comment iframe', () => {
-      return getReddit(
+    it('renders comment iframe', async () => {
+      const ampReddit = await getReddit(
         'https://www.reddit.com/r/sports/comments/54loj1/50_cents_awful_1st_pitch_given_a_historical/d8306kw',
         'comment'
-      ).then(ampReddit => {
-        const iframe = ampReddit.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.tagName).to.equal('IFRAME');
-        expect(iframe.getAttribute('width')).to.equal('400');
-        expect(iframe.getAttribute('height')).to.equal('400');
-      });
+      );
+      const iframe = ampReddit.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.getAttribute('width')).to.equal('400');
+      expect(iframe.getAttribute('height')).to.equal('400');
     });
 
     it('adds comment embed', () => {

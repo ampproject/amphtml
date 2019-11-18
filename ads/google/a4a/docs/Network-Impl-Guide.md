@@ -4,41 +4,40 @@ This guide outlines the requirements and steps for ad networks to implement Fast
 Fetch for early ad request and support for AMP ads returned by the ad network to
 be given preferential rendering.
 
-* *Status: Draft*
-* *Authors: [kjwright@google.com](mailto:kjwright@google.com),
-[bradfrizzell@google.com](mailto:bradfrizzell@google.com)*
-* *Last Updated: 1-27-2016*
+- _Status: Draft_
+- _Authors: [kjwright@google.com](mailto:kjwright@google.com),
+  [bradfrizzell@google.com](mailto:bradfrizzell@google.com)_
+- _Last Updated: 1-27-2016_
 
 ## Contents
 
-* [Background](#background)
-* [Overview](#overview)
-* [Detailed design](#detailed-design)
-  + [Ad server requirements](#ad-server-requirements)
+- [Background](#background)
+- [Overview](#overview)
+- [Detailed design](#detailed-design)
+  - [Ad server requirements](#ad-server-requirements)
     - [SSL](#ssl)
     - [AMPHTML ad creative signature](#amphtml-ad-creative-signature)
     - [Ad response headers](#ad-response-headers)
-  + [Creating an AMPHTML ad extension implementation](#creating-an-amphtml-ad-extension-implementation)
+  - [Creating an AMPHTML ad extension implementation](#creating-an-amphtml-ad-extension-implementation)
     - [Create the implementation script](#create-the-implementation-script)
     - [Create the configuration file](#create-the-configuration-file)
     - [Create documentation](#create-documentation)
     - [Create tests](#create-tests)
-* [Checklist for ad network implementation](#checklist-for-ad-network-implementation)
-
+- [Checklist for ad network implementation](#checklist-for-ad-network-implementation)
 
 ## Background
 
 If you haven’t already, please read the [AMPHTML ads readme](./a4a-readme.md) to
 learn about why all networks should implement Fast Fetch.
 
-Relevant design documents:  [AMPHTML ads readme](./a4a-readme.md),
+Relevant design documents: [AMPHTML ads readme](./a4a-readme.md),
 [AMPHTML ads spec](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md)
 & [intent to implement](https://github.com/ampproject/amphtml/issues/3133).
 
 ## Overview
 
 Fast Fetch provides preferential treatment to verified AMPHTML ads over legacy
-ads, unlike the current 3P rendering flow which treats AMPHTML ads  and legacy
+ads, unlike the current 3P rendering flow which treats AMPHTML ads and legacy
 ads the same. Within Fast Fetch, if an ad fails validation, that ad is wrapped
 in a cross-domain iframe to sandbox it from the rest of the AMP document.
 Conversely, an AMPHTML ad passing validation is written directly into the page.
@@ -49,19 +48,19 @@ To support Fast Fetch, ad networks are required to implement the following:
 
 1. An [XHR CORS](https://www.w3.org/TR/cors/) for the ad request.
 2. The JavaScript to build the ad request, which must be located within the AMP
-HTML GitHub repository (example implementations:
-[AdSense](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-adsense-impl)
-& [Google Ad Manager](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-doubleclick-impl)).
+   HTML GitHub repository (example implementations:
+   [AdSense](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-adsense-impl)
+   & [Google Ad Manager](https://github.com/ampproject/amphtml/tree/master/extensions/amp-ad-network-doubleclick-impl)).
 
 ## Detailed design
 
-*Figure 1: Fast Fetch rendering flow*
+_Figure 1: Fast Fetch rendering flow_
 
 <amp-img alt="Rendering Flow" layout="responsive" src="./1.png"
     width="1280" height="960">
-  <noscript>
-    <img alt="Rendering Flow" src="./1.png" />
-  </noscript>
+<noscript>
+<img alt="Rendering Flow" src="./1.png" />
+</noscript>
 </amp-img>
 
 ### Ad server requirements
@@ -74,14 +73,14 @@ All network communication via the AMP HTML runtime (resources or XHR) require SS
 
 For the AMP runtime to know that a creative is valid [AMP](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md),
 and thus receive preferential ad rendering, it must pass a client-side,
-validation check.  The creative must be sent by the ad network to a validation
+validation check. The creative must be sent by the ad network to a validation
 service which verifies that the creative conforms to the
 [AMPHTML ad specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md).
 If the ad conforms, the creative is rewritten by the validation service and the
 rewritten creative and a cryptographic signature are returned to the ad network.
 The rewritten creative and signature must be included in the response to the AMP
 runtime from the ad network. The AMP runtime then parses out the creative and
-the signature from the ad response.  Lack of, or invalid signature causes the
+the signature from the ad response. Lack of, or invalid signature causes the
 runtime to treat it as a legacy ad, rendering it within a cross domain iframe
 and using delayed ad rendering.
 
@@ -92,7 +91,7 @@ this case, the ad will simply be guaranteed to render in a cross-domain iframe.
 
 #### Ad response headers
 
-*See [Figure 1 above, Part C](#detailed-design)*
+_See [Figure 1 above, Part C](#detailed-design)_
 
 Fast Fetch requires that the ad request be sent via [XHR CORS](https://www.w3.org/TR/cors/)
 as this allows for direct communication with the ad network without the
@@ -123,9 +122,12 @@ element differentiates between different ad network implementations via the
 ad network:
 
 ```html
-<amp-ad width="320" height="50"
-   type="doubleclick"
-   data-slot="/43821041/mobile_ad_banner"></amp-ad>
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/43821041/mobile_ad_banner"
+></amp-ad>
 ```
 
 To create an ad network implementation, you must perform the following:
@@ -135,32 +137,32 @@ To create an ad network implementation, you must perform the following:
     whose path and name match the `type` attribute given for the amp-ad element
     as follows:
 
-    *Figure 2: File hierarchy for an AMPHTML ad implementation*
+    _Figure 2: File hierarchy for an AMPHTML ad implementation_
 
     <amp-img alt="File hierarchy" layout="responsive" src="./2.png"
         width="1280" height="960">
-      <noscript>
-        <img alt="File hierarchy" src="./2.png"/>
-      </noscript>
+    <noscript>
+    <img alt="File hierarchy" src="./2.png"/>
+    </noscript>
     </amp-img>
 
-2. Ad networks that want to add support for Fast Fetch within AMP must add the
-  file hierarchy to the AMP repository as show in Figure 2, with `<TYPE>`
-  replaced by their own network. Files must implement all requirements as
-  specified below. Anything not specified, i.e. helper functions etc are at the
-  discretion of the ad network, but must be approved using the [process required
-  for all AMP contributions](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md).
+2.  Ad networks that want to add support for Fast Fetch within AMP must add the
+    file hierarchy to the AMP repository as show in Figure 2, with `<TYPE>`
+    replaced by their own network. Files must implement all requirements as
+    specified below. Anything not specified, i.e. helper functions etc are at the
+    discretion of the ad network, but must be approved using the [process required
+    for all AMP contributions](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md).
 
 #### Create the implementation script
 
-*For reference, see [Figure 1 Parts B and D](#detailed-design).*
+_For reference, see [Figure 1 Parts B and D](#detailed-design)._
 
 1.  Create a file named `amp-ad-network-<TYPE>-impl.js`, which implement the
     `AmpAdNetwork<TYPE>Impl` class.
 2.  This class must extend [AmpA4A](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/amp-a4a.js).
 3.  This class must overwrite the super class method **getAdUrl()**.
 
-    ``` javascript
+    ```javascript
     getAdUrl() - must construct and return the ad url for ad request.
       // @return {string} - the ad url
     ```
@@ -171,23 +173,23 @@ Usage of `getAdUrl` can be seen within the `this.adPromise_ promise` chain in
 
 #### Create the configuration file
 
-*For reference, see [Figure 1: Part A](#figure-1-fast-fetch-rendering-flow)*.
+_For reference, see [Figure 1: Part A](#figure-1-fast-fetch-rendering-flow)_.
 
 1.  Create a `<TYPE>-a4a-config.js` file that implements and exports the
     following function:
 
-    ``` javascript
+    ```javascript
     <TYPE>IsA4AEnabled(win, element)
       // @param (Window) win Window where AMP runtime is running.
       // @param (HTML Element) element ****The amp-ad element.
       // @return (boolean) Whether or not A4A should be used in this context.
     ```
 
-2.  Once this file is implemented, you must also update [amphtml/ads/_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
+2.  Once this file is implemented, you must also update [amphtml/ads/\_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
     Specifically, `<TYPE>IsA4AEnabled()` must be imported, and it must be mapped
     to the ad network type in the a4aRegistry mapping.
 
-    ``` javascript
+    ```javascript
     /**amphtml/ads/_a4a-config.js */
     …
     import {
@@ -202,7 +204,7 @@ Usage of `getAdUrl` can be seen within the `this.adPromise_ promise` chain in
     ```
 
 Example configs: [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js#L68).
-Usage of Google Ad Manager and AdSense configs can be seen in [_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
+Usage of Google Ad Manager and AdSense configs can be seen in [\_a4a-config.js](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js).
 
 #### Create documentation
 

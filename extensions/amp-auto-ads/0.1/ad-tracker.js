@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {endsWith} from '../../../src/string';
+import {getElementLayoutBox} from './utils';
 import {user} from '../../../src/log';
 
 /** @const */
@@ -135,18 +136,16 @@ export class AdTracker {
    * @private
    */
   getDistanceFromAd_(yPosition, ad) {
-    return Services.resourcesForDoc(ad)
-      .getElementLayoutBox(ad)
-      .then(box => {
-        if (yPosition >= box.top && yPosition <= box.bottom) {
-          return 0;
-        } else {
-          return Math.min(
-            Math.abs(yPosition - box.top),
-            Math.abs(yPosition - box.bottom)
-          );
-        }
-      });
+    return getElementLayoutBox(ad).then(box => {
+      if (yPosition >= box.top && yPosition <= box.bottom) {
+        return 0;
+      } else {
+        return Math.min(
+          Math.abs(yPosition - box.top),
+          Math.abs(yPosition - box.bottom)
+        );
+      }
+    });
   }
 
   /**

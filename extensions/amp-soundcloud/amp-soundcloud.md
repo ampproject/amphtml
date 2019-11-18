@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Soundcloud clip.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -32,7 +33,7 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed-height</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -44,20 +45,30 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
 
 ## Examples
 
+With the responsive layout, the `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio embeds:
+
 Visual Mode:
+
 ```html
-<amp-soundcloud height=657
-    layout="fixed-height"
-    data-trackid="243169232"
-    data-visual="true"></amp-soundcloud>
+<amp-soundcloud
+  width="480"
+  height="480"
+  layout="responsive"
+  data-trackid="243169232"
+  data-visual="true"
+></amp-soundcloud>
 ```
 
 Classic Mode:
+
 ```html
-<amp-soundcloud height=657
-    layout="fixed-height"
-    data-trackid="243169232"
-    data-color="ff5500"></amp-soundcloud>
+<amp-soundcloud
+  width="480"
+  height="480"
+  layout="responsive"
+  data-trackid="243169232"
+  data-color="ff5500"
+></amp-soundcloud>
 ```
 
 ## Attributes

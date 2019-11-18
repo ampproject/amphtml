@@ -101,7 +101,10 @@ export class AbstractAppBanner extends AMP.BaseElement {
     );
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {string}
+   */
   getStorageKey_() {
     const elementId = userAssert(
       this.element.id,
@@ -110,7 +113,10 @@ export class AbstractAppBanner extends AMP.BaseElement {
     return 'amp-app-banner:' + elementId;
   }
 
-  /** @protected */
+  /**
+   * @protected
+   * @return {*} TODO(#23582): Specify return type
+   */
   isDismissed() {
     return Services.storageForDoc(this.getAmpDoc())
       .then(storage => storage.get(this.getStorageKey_()))
@@ -136,7 +142,10 @@ export class AbstractAppBanner extends AMP.BaseElement {
     });
   }
 
-  /** @protected */
+  /**
+   * @protected
+   * @return {*} TODO(#23582): Specify return type
+   */
   hide_() {
     return this.getVsync().runPromise(
       {
@@ -200,7 +209,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
     /** @private {?Element} */
@@ -466,9 +475,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     for (let i = 0; i < apps.length; i++) {
       const app = apps[i];
       if (app['platform'] == 'play') {
-        const installAppUrl = `https://play.google.com/store/apps/details?id=${
-          app['id']
-        }`;
+        const installAppUrl = `https://play.google.com/store/apps/details?id=${app['id']}`;
         const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
         this.setupOpenButton_(
           dev().assertElement(this.openButton_),

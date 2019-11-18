@@ -51,10 +51,6 @@ describes.realWin(
         script.setAttribute('type', 'application/json');
         script.innerHTML = json;
         ampAutocomplete.appendChild(script);
-      } else {
-        sandbox
-          .stub(ampAutocomplete.implementation_, 'getRemoteData_')
-          .resolves(json.items);
       }
 
       return ampAutocomplete;
@@ -108,7 +104,7 @@ describes.realWin(
         });
     });
 
-    it('should render', () => {
+    it('should render inline data before first user interaction', () => {
       let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
       return getAutocomplete({
         'filter': 'substring',
@@ -131,8 +127,39 @@ describes.realWin(
           expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
           expect(filterAndRenderSpy).to.have.been.calledOnce;
           expect(clearAllSpy).to.have.been.calledOnce;
-          expect(filterSpy).to.have.been.calledOnce;
-          expect(renderSpy).to.have.been.calledOnce;
+          expect(filterSpy).to.have.been.called;
+          expect(renderSpy).to.have.been.called;
+        });
+    });
+
+    it('should not render remote data before first user interaction', () => {
+      let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'min-characters': '0',
+        },
+        '{ "items" : ["apple", "banana", "orange"] }',
+        false
+      )
+        .then(ampAutocomplete => {
+          impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).to.be.null;
+          expect(impl.inputElement_).not.to.be.null;
+          expect(impl.container_).not.to.be.null;
+          expect(impl.filter_).to.equal('substring');
+          filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
+          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+          filterSpy = sandbox.spy(impl, 'filterData_');
+          renderSpy = sandbox.spy(impl, 'renderResults_');
+          return ampAutocomplete.layoutCallback();
+        })
+        .then(() => {
+          expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
+          expect(filterAndRenderSpy).to.have.been.calledOnce;
+          expect(clearAllSpy).to.have.been.calledOnce;
+          expect(filterSpy).not.to.have.been.called;
+          expect(renderSpy).not.to.have.been.called;
         });
     });
 
@@ -210,7 +237,24 @@ describes.realWin(
       });
     });
 
-    it('should fetch remote data when specified in src', () => {
+    it('should accept different item property from JSON script', () => {
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'items': 'fruit',
+        },
+        '{ "fruit" : [ "apples", "bananas", "pears" ] }'
+      ).then(ampAutocomplete => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.sourceData_).to.have.ordered.members([
+          'apples',
+          'bananas',
+          'pears',
+        ]);
+      });
+    });
+
+    it('should not fetch remote data when specified in src before first user interaction', () => {
       const data = {
         items: [
           'Albany, New York',
@@ -230,7 +274,63 @@ describes.realWin(
       ).then(ampAutocomplete => {
         ampAutocomplete.layoutCallback().then(() => {
           const impl = ampAutocomplete.implementation_;
-          expect(impl.sourceData_).to.have.ordered.members(data.items);
+          expect(impl.sourceData_).to.be.null;
+        });
+      });
+    });
+
+    it('should not fetch remote data when specified in src and using items property before first user interaction', () => {
+      const data = {
+        cities: [
+          'Albany, New York',
+          'Annapolis, Maryland',
+          'Atlanta, Georgia',
+          'Augusta, Maine',
+          'Austin, Texas',
+        ],
+      };
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'src': 'https://examples.com/json',
+          'items': 'cities',
+        },
+        data,
+        false
+      ).then(ampAutocomplete => {
+        ampAutocomplete.layoutCallback().then(() => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).to.be.null;
+        });
+      });
+    });
+
+    it('should not fetch remote data when specified in src and using nested items property before first user interactino', () => {
+      const data = {
+        deeply: {
+          nested: {
+            cities: [
+              'Albany, New York',
+              'Annapolis, Maryland',
+              'Atlanta, Georgia',
+              'Augusta, Maine',
+              'Austin, Texas',
+            ],
+          },
+        },
+      };
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'src': 'https://examples.com/json',
+          'items': 'deeply.nested.cities',
+        },
+        data,
+        false
+      ).then(ampAutocomplete => {
+        ampAutocomplete.layoutCallback().then(() => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).be.null;
         });
       });
     });

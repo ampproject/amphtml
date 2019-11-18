@@ -121,10 +121,15 @@
       <button load-more-clickable>Click me to reload!</button>
     </amp-list-load-more>
   </amp-list>
-  <!-- Valid amp-list with [is-layout-container] attribute -->
+  <!-- Valid amp-list with is-layout-container attribute -->
   <amp-list width=10 height=10
     src="https://data.com/articles.json?ref=CANONICAL_URL"
     [is-layout-container]="containerState"></amp-list>
+  </amp-list>
+  <!-- Valid amp-list with diffable attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    diffable></amp-list>
   </amp-list>
   <!-- Invalid: unsupported "binding" attribute value -->
   <amp-list width=10 height=10
@@ -173,7 +178,19 @@
     src="https://data.com/articles.json?ref=CANONICAL_URL"
     load-more="manual"
     load-more-bookmark="next">
-  <button></button>
-</amp-list>
+    <button></button>
+  </amp-list>
+  <!-- References to template elements -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    template="missing">
+    <div></div>
+  </amp-list>
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    template="found">
+    <div></div>
+  </amp-list>
+  <template id="found"></template>
 </body>
 </html>

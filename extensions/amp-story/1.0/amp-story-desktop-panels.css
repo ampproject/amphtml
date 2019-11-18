@@ -61,21 +61,21 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"] {
-  transform: scale(0.9) translateX(calc(-250% - 128px)) translateY(0%) !important;
+  transform: perspective(1px) scale(0.9) translateX(calc(-250% - 128px)) translateY(0%) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
 .i-amphtml-story-desktop-panels .prev-container > .i-amphtml-story-page-sentinel,
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
 [dir=rtl] .i-amphtml-story-desktop-panels .next-container > .i-amphtml-story-page-sentinel {
-  transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
+  transform: perspective(1px) scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[active],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[active],
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="0"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="0"] {
-  transform: scale(1.0) translateX(-50%) translateY(0%) !important;
+  transform: perspective(1px) scale(1.0) translateX(-50%) translateY(0%) !important;
   opacity: 1 !important;
 }
 
@@ -83,12 +83,12 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 .i-amphtml-story-desktop-panels .next-container > .i-amphtml-story-page-sentinel,
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
 [dir=rtl] .i-amphtml-story-desktop-panels .prev-container > .i-amphtml-story-page-sentinel {
-  transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
+  transform: perspective(1px) scale(0.9) translate(calc(50% + 64px), 0%) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"] {
-  transform: scale(0.9) translate(calc(150% + 128px), 0%) !important;
+  transform: perspective(1px) scale(0.9) translate(calc(150% + 128px), 0%) !important;
 }
 
 .i-amphtml-story-prev-hover > amp-story-page[i-amphtml-desktop-position="-1"] {

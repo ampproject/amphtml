@@ -15,14 +15,17 @@
  */
 
 import {Services} from '../../src/services';
-import {Viewer} from '../../src/service/viewer-impl';
+import {ViewerImpl} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {parseUrlDeprecated, removeFragment} from '../../src/url';
+import {
+  parseQueryString,
+  parseUrlDeprecated,
+  removeFragment,
+} from '../../src/url';
 
 describes.sandboxed('Viewer', {}, () => {
   let windowMock;
@@ -33,6 +36,7 @@ describes.sandboxed('Viewer', {}, () => {
   let events;
   let errorStub;
   let expectedErrorStub;
+  let params;
 
   /**
    * Change the current visibility state.
@@ -51,11 +55,24 @@ describes.sandboxed('Viewer', {}, () => {
     }
   }
 
+  /** @param {string} href */
+  function setUrl(href) {
+    const url = parseUrlDeprecated(href);
+    windowApi.location.href = url.href;
+    windowApi.location.search = url.search;
+    windowApi.location.hash = url.hash;
+    if (url.hash) {
+      Object.assign(params, parseQueryString(url.hash));
+    }
+  }
+
   beforeEach(() => {
     clock = sandbox.useFakeTimers();
+    events = {};
     const WindowApi = function() {};
     windowApi = new WindowApi();
     windowApi.Math = window.Math;
+    windowApi.crypto = window.crypto;
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
     windowApi.Promise = window.Promise;
@@ -94,49 +111,37 @@ describes.sandboxed('Viewer', {}, () => {
         windowApi.location.href = url;
       });
     installDocService(windowApi, /* isSingleDoc */ true);
-    installGlobalDocumentStateService(windowApi);
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
+
+    params = {'origin': 'g.com'};
+    sandbox
+      .stub(ampdoc, 'getParam')
+      .callsFake(name => (name in params ? params[name] : null));
+
     installPlatformService(windowApi);
     installTimerService(windowApi);
     installDocumentInfoServiceForDoc(windowApi.document);
-    events = {};
     errorStub = sandbox.stub(dev(), 'error');
     expectedErrorStub = sandbox.stub(dev(), 'expectedError');
     windowMock = sandbox.mock(windowApi);
-    viewer = new Viewer(ampdoc);
+    viewer = new ViewerImpl(ampdoc);
   });
 
   afterEach(() => {
     windowMock.verify();
   });
 
-  it('should configure correctly based on window name and hash', () => {
-    windowApi.name = '__AMP__viewportType=natural';
-    windowApi.location.hash = '#paddingTop=17&other=something';
-    const viewer = new Viewer(ampdoc);
-
-    // All of the startup params are also available via getParam.
+  it('should configure correctly based on ampdoc', () => {
+    params['paddingTop'] = '17';
+    params['other'] = 'something';
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('paddingTop')).to.equal('17');
     expect(viewer.getParam('other')).to.equal('something');
   });
 
-  it('should configure ignore name and hash with explicit params', () => {
-    const params = {
-      'paddingTop': '171',
-    };
-    windowApi.name = '__AMP__other=something';
-    windowApi.location.hash = '#paddingTop=17';
-    const viewer = new Viewer(ampdoc, params);
-
-    // All of the startup params are also available via getParam.
-    expect(viewer.getParam('paddingTop')).to.equal('171');
-    expect(viewer.getParam('other')).to.not.exist;
-  });
-
   it('should expose viewer capabilities', () => {
-    windowApi.name = '__AMP__viewportType=natural';
-    windowApi.location.hash = '#paddingTop=17&cap=foo,bar';
-    const viewer = new Viewer(ampdoc);
+    params['cap'] = 'foo,bar';
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.hasCapability('foo')).to.be.true;
     expect(viewer.hasCapability('bar')).to.be.true;
     expect(viewer.hasCapability('other')).to.be.false;
@@ -144,9 +149,8 @@ describes.sandboxed('Viewer', {}, () => {
 
   it('should not clear fragment in non-embedded mode', () => {
     windowApi.parent = windowApi;
-    windowApi.location.href = 'http://www.example.com#test=1';
-    windowApi.location.hash = '#test=1';
-    const viewer = new Viewer(ampdoc);
+    setUrl('http://www.example.com#test=1');
+    const viewer = new ViewerImpl(ampdoc);
     expect(windowApi.history.replaceState).to.have.not.been.called;
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.hasCapability('foo')).to.be.false;
@@ -154,21 +158,21 @@ describes.sandboxed('Viewer', {}, () => {
 
   it('should not clear fragment in embedded mode', () => {
     windowApi.parent = {};
-    windowApi.location.href = 'http://www.example.com#test=1';
-    windowApi.location.hash = '#origin=g.com&test=1';
-    const viewer = new Viewer(ampdoc);
+    setUrl('http://www.example.com#origin=g.com&test=1');
+    const viewer = new ViewerImpl(ampdoc);
     expect(windowApi.history.replaceState).to.not.be.called;
     expect(viewer.getParam('test')).to.equal('1');
   });
 
   it('should set ampshare fragment within custom tab', function*() {
     windowApi.parent = windowApi;
-    windowApi.location.href = 'http://www.example.com/';
-    windowApi.location.hash = '';
-    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-    const viewer = new Viewer(ampdoc);
+    setUrl('http://www.example.com/?amp_gsa=1&amp_js_v=a0');
+    // windowApi.location.href = 'http://www.example.com/';
+    // windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    // windowApi.location.hash = '';
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -178,13 +182,11 @@ describes.sandboxed('Viewer', {}, () => {
 
   it('should merge fragments within custom tab', function*() {
     windowApi.parent = windowApi;
-    windowApi.location.href = 'http://www.example.com/#test=1';
-    windowApi.location.hash = '#test=1';
-    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-    const viewer = new Viewer(ampdoc);
+    setUrl('http://www.example.com/?amp_gsa=1&amp_js_v=a0#test=1');
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -194,13 +196,15 @@ describes.sandboxed('Viewer', {}, () => {
 
   it('should not duplicate ampshare when merging', function*() {
     windowApi.parent = windowApi;
-    windowApi.location.href = 'http://www.example.com/#test=1&ampshare=old';
-    windowApi.location.hash = '#test=1&ampshare=old';
-    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-    const viewer = new Viewer(ampdoc);
+    setUrl(
+      'http://www.example.com/' +
+        '?amp_gsa=1&amp_js_v=a0' +
+        '#test=1&ampshare=old'
+    );
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -210,14 +214,14 @@ describes.sandboxed('Viewer', {}, () => {
 
   it('should remove multiple ampshares when merging', function*() {
     windowApi.parent = windowApi;
-    windowApi.location.href =
-      'http://www.example.com/#test=1&ampshare=a&ampshare=b&ampshare=c';
-    windowApi.location.hash = '#test=1&ampshare=a&ampshare=b&ampshare=c';
-    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-    const viewer = new Viewer(ampdoc);
+    setUrl(
+      'http://www.example.com/?amp_gsa=1&amp_js_v=a0' +
+        '#test=1&ampshare=a&ampshare=b&ampshare=c'
+    );
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -227,13 +231,20 @@ describes.sandboxed('Viewer', {}, () => {
 
   it("should remove extra ampshare even when it's first", function*() {
     windowApi.parent = windowApi;
-    windowApi.location.href = 'http://www.example.com/#ampshare=old&test=1';
-    windowApi.location.hash = '#ampshare=old&test=1';
-    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-    const viewer = new Viewer(ampdoc);
+    setUrl(
+      'http://www.example.com/' +
+        '?amp_gsa=1&amp_js_v=a0' +
+        '#ampshare=old&test=1'
+    );
+    // windowApi.location.href = 'http://www.example.com/#ampshare=old&test=1';
+    // windowApi.location.hash = '#ampshare=old&test=1';
+    // windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
+    // params['test'] = '1';
+    // params['ampshare'] = 'old';
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -243,15 +254,16 @@ describes.sandboxed('Viewer', {}, () => {
 
   it("should remove extra ampshare even when it's sandwiched", function*() {
     windowApi.parent = windowApi;
-    windowApi.location.href =
-      'http://www.example.com/#note=ok&ampshare=old&test=1';
-    windowApi.location.hash = '#note=ok&ampshare=old&test=1';
-    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-    const viewer = new Viewer(ampdoc);
+    setUrl(
+      'http://www.example.com/' +
+        '?amp_gsa=1&amp_js_v=a0' +
+        '#note=ok&ampshare=old&test=1'
+    );
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.getParam('note')).to.equal('ok');
     expect(viewer.isCctEmbedded()).to.be.true;
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -261,28 +273,25 @@ describes.sandboxed('Viewer', {}, () => {
 
   it('should clear fragment when click param is present', () => {
     windowApi.parent = windowApi;
-    windowApi.location.href = 'http://www.example.com#click=abc';
-    windowApi.location.hash = '#click=abc';
-    const viewer = new Viewer(ampdoc);
+    setUrl('http://www.example.com/#click=abc');
+    const viewer = new ViewerImpl(ampdoc);
     expect(windowApi.history.replaceState).to.be.calledOnce;
     const replace = windowApi.history.replaceState.lastCall;
-    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com/']);
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
   it('should restore fragment within custom tab with click param', function*() {
     windowApi.parent = windowApi;
-    windowApi.location.href = 'http://www.example.com#click=abc';
-    windowApi.location.hash = '#click=abc';
-    windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-    const viewer = new Viewer(ampdoc);
+    setUrl('http://www.example.com/?amp_gsa=1&amp_js_v=a0#click=abc');
+    const viewer = new ViewerImpl(ampdoc);
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
-      'http://www.example.com'
+      'http://www.example.com/?amp_gsa=1&amp_js_v=a0'
     );
     expect(viewer.getParam('click')).to.equal('abc');
-    yield viewer.whenFirstVisible();
+    yield ampdoc.whenFirstVisible();
     expect(windowApi.history.replaceState).to.be.calledWith(
       {},
       '',
@@ -290,78 +299,64 @@ describes.sandboxed('Viewer', {}, () => {
     );
   });
 
-  it('should configure visibilityState visible by default', () => {
-    expect(viewer.getVisibilityState()).to.equal('visible');
-    expect(viewer.isVisible()).to.equal(true);
+  it('should configure prerenderSize by default', () => {
     expect(viewer.getPrerenderSize()).to.equal(1);
-    expect(viewer.getFirstVisibleTime()).to.equal(0);
-    expect(viewer.getLastVisibleTime()).to.equal(0);
   });
 
   it('should return promise that resolve on visible', function*() {
-    const viewer = new Viewer(ampdoc);
-    expect(viewer.isVisible()).to.be.true;
-    let promise = viewer.whenNextVisible();
+    const viewer = new ViewerImpl(ampdoc);
+    expect(ampdoc.isVisible()).to.be.true;
+    let promise = ampdoc.whenNextVisible();
     yield promise;
     viewer.receiveMessage('visibilitychange', {
       state: 'hidden',
     });
-    promise = viewer.whenNextVisible();
-    expect(viewer.isVisible()).to.be.false;
+    promise = ampdoc.whenNextVisible();
+    expect(ampdoc.isVisible()).to.be.false;
     viewer.receiveMessage('visibilitychange', {
       state: 'visible',
     });
     return promise;
   });
 
-  it('should initialize firstVisibleTime for initially visible doc', () => {
-    clock.tick(1);
-    const viewer = new Viewer(ampdoc);
-    expect(viewer.isVisible()).to.be.true;
-    expect(viewer.getFirstVisibleTime()).to.equal(1);
-    expect(viewer.getLastVisibleTime()).to.equal(1);
-  });
-
   it('should initialize firstVisibleTime when doc becomes visible', () => {
-    clock.tick(1);
-    windowApi.location.hash = '#visibilityState=prerender&prerenderSize=3';
-    const viewer = new Viewer(ampdoc);
-    expect(viewer.isVisible()).to.be.false;
-    expect(viewer.getFirstVisibleTime()).to.be.null;
-    expect(viewer.getLastVisibleTime()).to.be.null;
+    params['prerenderSize'] = '3';
+    const viewer = new ViewerImpl(ampdoc);
+    expect(ampdoc.isVisible()).to.be.true;
+    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getLastVisibleTime()).to.equal(0);
 
-    // Becomes visible.
-    viewer.receiveMessage('visibilitychange', {
-      state: 'visible',
-    });
-    expect(viewer.isVisible()).to.be.true;
-    expect(viewer.getFirstVisibleTime()).to.equal(1);
-    expect(viewer.getLastVisibleTime()).to.equal(1);
-
-    // Back to invisible.
+    // Becomes invisible.
     clock.tick(1);
     viewer.receiveMessage('visibilitychange', {
       state: 'hidden',
     });
-    expect(viewer.isVisible()).to.be.false;
-    expect(viewer.getFirstVisibleTime()).to.equal(1);
-    expect(viewer.getLastVisibleTime()).to.equal(1);
+    expect(ampdoc.isVisible()).to.be.false;
+    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getLastVisibleTime()).to.equal(0);
 
-    // Back to visible again.
+    // Back to visible.
     clock.tick(1);
     viewer.receiveMessage('visibilitychange', {
       state: 'visible',
     });
-    expect(viewer.isVisible()).to.be.true;
-    expect(viewer.getFirstVisibleTime()).to.equal(1);
-    expect(viewer.getLastVisibleTime()).to.equal(3);
+    expect(ampdoc.isVisible()).to.be.true;
+    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getLastVisibleTime()).to.equal(2);
+
+    // Back to invisible again.
+    clock.tick(1);
+    viewer.receiveMessage('visibilitychange', {
+      state: 'hidden',
+    });
+    expect(ampdoc.isVisible()).to.be.false;
+    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getLastVisibleTime()).to.equal(2);
   });
 
-  it('should configure visibilityState and prerender', () => {
-    windowApi.location.hash = '#visibilityState=prerender&prerenderSize=3';
-    const viewer = new Viewer(ampdoc);
-    expect(viewer.getVisibilityState()).to.equal('prerender');
-    expect(viewer.isVisible()).to.equal(false);
+  it('should configure prerenderSize', () => {
+    params['prerenderSize'] = '3';
+    const viewer = new ViewerImpl(ampdoc);
     expect(viewer.getPrerenderSize()).to.equal(3);
   });
 
@@ -377,17 +372,10 @@ describes.sandboxed('Viewer', {}, () => {
   });
 
   describe('replaceUrl', () => {
-    /** @param {string} href */
-    function setUrl(href) {
-      const url = parseUrlDeprecated(href);
-      windowApi.location.href = url.href;
-      windowApi.location.hash = url.hash;
-    }
-
     it('should replace URL for the same non-proxy origin', () => {
       const fragment = '#replaceUrl=http://www.example.com/two%3Fa%3D1&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith(
@@ -406,7 +394,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should ignore replacement fragment', () => {
       const fragment = '#replaceUrl=http://www.example.com/two%23b=2&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith(
@@ -422,7 +410,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should replace relative URL for the same non-proxy origin', () => {
       const fragment = '#replaceUrl=/two&b=1';
       setUrl(removeFragment(window.location.href) + fragment);
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith(
@@ -438,7 +426,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should fail to replace URL for a wrong non-proxy origin', () => {
       const fragment = '#replaceUrl=http://other.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.not.be.called;
       expect(windowApi.location.originalHref).to.be.undefined;
@@ -451,7 +439,7 @@ describes.sandboxed('Viewer', {}, () => {
       sandbox.stub(windowApi.history, 'replaceState').callsFake(() => {
         throw new Error('intentional');
       });
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(() => {
         viewer.replaceUrl(viewer.getParam('replaceUrl'));
       }).to.not.throw();
@@ -462,7 +450,7 @@ describes.sandboxed('Viewer', {}, () => {
       const fragment =
         '#replaceUrl=https://cdn.ampproject.org/c/www.example.com/two&b=1';
       setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
       expect(windowApi.history.replaceState).to.be.calledWith(
@@ -479,7 +467,7 @@ describes.sandboxed('Viewer', {}, () => {
       const fragment =
         '#replaceUrl=https://cdn.ampproject.org/c/other.example.com/two&b=1';
       setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.not.be.called;
       expect(windowApi.location.originalHref).to.be.undefined;
@@ -489,7 +477,7 @@ describes.sandboxed('Viewer', {}, () => {
       const fragment = '#replaceUrl=http://www.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
       sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.not.be.called;
     });
@@ -507,42 +495,37 @@ describes.sandboxed('Viewer', {}, () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('paused');
     });
 
     it('should receive "paused" visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('paused');
     });
 
     it('should receive "inactive" visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'inactive',
       });
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
     });
 
     it('should parse "hidden" as "prerender" before first visible', () => {
-      viewer.hasBeenVisible_ = false;
+      sandbox.stub(ampdoc, 'getLastVisibleTime').callsFake(() => null);
       viewer.receiveMessage('visibilitychange', {
         state: 'hidden',
       });
-      expect(viewer.getVisibilityState()).to.equal('prerender');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
     });
 
     it('should parse "hidden" as "inactive" after first visible', () => {
-      viewer.hasBeenVisible_ = true;
+      sandbox.stub(ampdoc, 'getLastVisibleTime').callsFake(() => 1);
       viewer.receiveMessage('visibilitychange', {
         state: 'hidden',
       });
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
     });
 
     it('should reject unknown values', () => {
@@ -556,30 +539,25 @@ describes.sandboxed('Viewer', {}, () => {
           });
         }).to.throw('Unknown VisibilityState value');
       });
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('paused');
     });
 
     it('should be inactive when the viewer tells us we are inactive', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'inactive',
       });
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
     });
 
     it('should be prerender when the viewer tells us we are prerender', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'prerender',
       });
-      expect(viewer.getVisibilityState()).to.equal('prerender');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('prerender');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
     });
 
     it('should be hidden when the browser document is hidden', () => {
@@ -587,18 +565,15 @@ describes.sandboxed('Viewer', {}, () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'visible',
       });
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       viewer.receiveMessage('visibilitychange', {
         state: 'visible',
       });
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
     });
 
     it(
@@ -609,8 +584,7 @@ describes.sandboxed('Viewer', {}, () => {
         viewer.receiveMessage('visibilitychange', {
           state: 'paused',
         });
-        expect(viewer.getVisibilityState()).to.equal('paused');
-        expect(viewer.isVisible()).to.equal(false);
+        expect(ampdoc.getVisibilityState()).to.equal('paused');
       }
     );
 
@@ -619,68 +593,47 @@ describes.sandboxed('Viewer', {}, () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'visible',
       });
-      expect(viewer.getVisibilityState()).to.equal('visible');
-      expect(viewer.isVisible()).to.equal(true);
-    });
-
-    it('should be hidden when the browser document is unknown state', () => {
-      changeVisibility('what is this');
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
-      viewer.receiveMessage('visibilitychange', {
-        state: 'paused',
-      });
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('visible');
     });
 
     it('should change visibility on visibilitychange event', () => {
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('visible');
-      expect(viewer.isVisible()).to.equal(true);
+      expect(ampdoc.getVisibilityState()).to.equal('visible');
 
+      clock.tick(1);
       viewer.receiveMessage('visibilitychange', {
         state: 'hidden',
       });
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
 
       viewer.receiveMessage('visibilitychange', {
         state: 'inactive',
       });
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('inactive');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('inactive');
 
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('paused');
 
       viewer.receiveMessage('visibilitychange', {
         state: 'visible',
       });
       changeVisibility('hidden');
-      expect(viewer.getVisibilityState()).to.equal('hidden');
-      expect(viewer.isVisible()).to.equal(false);
+      expect(ampdoc.getVisibilityState()).to.equal('hidden');
       changeVisibility('visible');
-      expect(viewer.getVisibilityState()).to.equal('visible');
-      expect(viewer.isVisible()).to.equal(true);
+      expect(ampdoc.getVisibilityState()).to.equal('visible');
     });
   });
 
@@ -714,7 +667,7 @@ describes.sandboxed('Viewer', {}, () => {
   describe('Messaging embedded', () => {
     beforeEach(() => {
       windowApi.parent = {};
-      viewer = new Viewer(ampdoc);
+      viewer = new ViewerImpl(ampdoc);
     });
 
     it('should receive broadcast event', () => {
@@ -946,70 +899,70 @@ describes.sandboxed('Viewer', {}, () => {
   describe('isEmbedded', () => {
     it('should NOT be embedded when not iframed', () => {
       windowApi.parent = windowApi;
-      windowApi.location.hash = '#origin=g.com';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.false;
+      params = {'origin': 'g.com'};
+      expect(new ViewerImpl(ampdoc).isEmbedded()).to.be.false;
     });
 
     it('should be embedded when iframed w/ "origin" in URL hash', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#origin=g.com';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+      params = {'origin': 'g.com'};
+      expect(new ViewerImpl(ampdoc).isEmbedded()).to.be.true;
     });
 
     it('should be embedded when iframed w/ "visibilityState"', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#visibilityState=hidden';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+      params = {'visibilityState': 'hidden'};
+      expect(new ViewerImpl(ampdoc).isEmbedded()).to.be.true;
     });
 
-    it('should NOT be embedded when iframed w/o "origin" in URL hash', () => {
+    it('should NOT be embedded when iframed w/o "origin" param', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.false;
+      params = {};
+      expect(new ViewerImpl(ampdoc).isEmbedded()).to.be.false;
     });
 
     it('should be embedded with "webview=1" param', () => {
       windowApi.parent = windowApi;
-      windowApi.location.hash = '#webview=1';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+      params = {'webview': '1'};
+      expect(new ViewerImpl(ampdoc).isEmbedded()).to.be.true;
     });
 
     it('should be embedded with query param', () => {
       windowApi.parent = {};
       windowApi.location.search = '?amp_js_v=1';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+      expect(new ViewerImpl(ampdoc).isEmbedded()).to.be.true;
     });
 
     it('should be embedded when isCctEmbedded', () => {
       windowApi.parent = {};
       windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.true;
+      expect(new ViewerImpl(ampdoc).isEmbedded()).to.be.true;
     });
   });
 
   describe('isWebviewEmbedded', () => {
     it('should be webview w/ "webview=1"', () => {
       windowApi.parent = windowApi;
-      windowApi.location.hash = '#webview=1';
-      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.true;
+      params = {'webview': '1'};
+      expect(new ViewerImpl(ampdoc).isWebviewEmbedded()).to.be.true;
     });
 
     it('should NOT be webview w/o "webview=1"', () => {
       windowApi.parent = windowApi;
-      windowApi.location.hash = '#foo=1';
-      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.false;
+      params = {'foo': '1'};
+      expect(new ViewerImpl(ampdoc).isWebviewEmbedded()).to.be.false;
     });
 
     it('should NOT be webview w/ "webview=0"', () => {
       windowApi.parent = windowApi;
-      windowApi.location.hash = '#webview=0';
-      expect(new Viewer(ampdoc).isWebviewEmbedded()).to.be.false;
+      params = {'webview': '0'};
+      expect(new ViewerImpl(ampdoc).isWebviewEmbedded()).to.be.false;
     });
 
     it('should NOT be webview if iframed regardless of "webview=1"', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#webview=1';
-      expect(new Viewer(ampdoc).isEmbedded()).to.be.false;
+      params = {'webview': '1'};
+      expect(new ViewerImpl(ampdoc).isEmbedded()).to.be.false;
     });
   });
 
@@ -1017,31 +970,31 @@ describes.sandboxed('Viewer', {}, () => {
     it('should be CCT embedded with "amp_gsa=1" and "amp_js_v=a\\d*"', () => {
       windowApi.parent = windowApi;
       windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
-      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.true;
+      expect(new ViewerImpl(ampdoc).isCctEmbedded()).to.be.true;
     });
 
     it('should NOT be CCT embedded w/o "amp_gsa=1"', () => {
       windowApi.parent = windowApi;
       windowApi.location.search = '?amp_js_v=a0';
-      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+      expect(new ViewerImpl(ampdoc).isCctEmbedded()).to.be.false;
     });
 
     it('should NOT be CCT embedded w/ "amp_gsa=0"', () => {
       windowApi.parent = windowApi;
       windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
-      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+      expect(new ViewerImpl(ampdoc).isCctEmbedded()).to.be.false;
     });
 
     it('should NOT be CCT embedded w/ "amp_js_v" not starting with "a"', () => {
       windowApi.parent = windowApi;
       windowApi.location.search = '?amp_gsa=1&amp_js_v=0';
-      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+      expect(new ViewerImpl(ampdoc).isCctEmbedded()).to.be.false;
     });
 
     it('should NOT be CCT embedded if iframed regardless of "amp_gsa=1"', () => {
       windowApi.parent = {};
       windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
-      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+      expect(new ViewerImpl(ampdoc).isCctEmbedded()).to.be.false;
     });
   });
 
@@ -1049,7 +1002,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should consider non-trusted when not iframed', () => {
       windowApi.parent = windowApi;
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      return new Viewer(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
         expect(res).to.be.false;
       });
     });
@@ -1057,7 +1010,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should consider trusted by ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      return new Viewer(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
         expect(res).to.be.true;
       });
     });
@@ -1065,7 +1018,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should consider trusted by ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://gmail.dev'];
-      return new Viewer(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
         expect(res).to.be.true;
       });
     });
@@ -1073,7 +1026,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should consider non-trusted without ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = [];
-      return new Viewer(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
         expect(res).to.be.false;
       });
     });
@@ -1081,7 +1034,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should consider non-trusted with wrong ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://untrusted.com'];
-      return new Viewer(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
         expect(res).to.be.false;
       });
     });
@@ -1089,7 +1042,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should decide trusted on connection with origin', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.setMessageDeliverer(() => {}, 'https://google.com');
       return viewer.isTrustedViewer().then(res => {
         expect(res).to.be.true;
@@ -1099,7 +1052,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should NOT allow channel without origin', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(() => {
         viewer.setMessageDeliverer(() => {});
       }).to.throw(/message channel must have an origin/);
@@ -1108,7 +1061,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should allow channel without origin thats an empty string', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(() => {
         viewer.setMessageDeliverer(() => {}, '');
       }).to.not.throw(/message channel must have an origin/);
@@ -1117,7 +1070,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should decide non-trusted on connection with wrong origin', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
       return viewer.isTrustedViewer().then(res => {
         expect(res).to.be.false;
@@ -1127,7 +1080,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should give precedence to ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
       return viewer.isTrustedViewer().then(res => {
         expect(res).to.be.true;
@@ -1137,9 +1090,9 @@ describes.sandboxed('Viewer', {}, () => {
     describe('when in webview', () => {
       it('should decide trusted on connection with origin', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1';
+        params = {'webview': '1'};
         windowApi.location.ancestorOrigins = [];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.true;
@@ -1148,9 +1101,9 @@ describes.sandboxed('Viewer', {}, () => {
 
       it('should NOT allow channel without origin', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1';
+        params = {'webview': '1'};
         windowApi.location.ancestorOrigins = [];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         expect(() => {
           viewer.setMessageDeliverer(() => {});
         }).to.throw(/message channel must have an origin/);
@@ -1158,9 +1111,9 @@ describes.sandboxed('Viewer', {}, () => {
 
       it('should decide non-trusted on connection with wrong origin', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1';
+        params = {'webview': '1'};
         windowApi.location.ancestorOrigins = [];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.false;
@@ -1169,9 +1122,9 @@ describes.sandboxed('Viewer', {}, () => {
 
       it('should NOT give precedence to ancestor', () => {
         windowApi.parent = windowApi;
-        windowApi.location.hash = '#webview=1';
+        params = {'webview': '1'};
         windowApi.location.ancestorOrigins = ['https://google.com'];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.false;
@@ -1184,7 +1137,7 @@ describes.sandboxed('Viewer', {}, () => {
         windowApi.parent = windowApi;
         windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
         windowApi.location.ancestorOrigins = [];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.true;
@@ -1195,7 +1148,7 @@ describes.sandboxed('Viewer', {}, () => {
         windowApi.parent = windowApi;
         windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
         windowApi.location.ancestorOrigins = [];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         expect(() => {
           viewer.setMessageDeliverer(() => {});
         }).to.throw(/message channel must have an origin/);
@@ -1205,7 +1158,7 @@ describes.sandboxed('Viewer', {}, () => {
         windowApi.parent = windowApi;
         windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
         windowApi.location.ancestorOrigins = [];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.false;
@@ -1216,7 +1169,7 @@ describes.sandboxed('Viewer', {}, () => {
         windowApi.parent = windowApi;
         windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
         windowApi.location.ancestorOrigins = ['https://google.com'];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.false;
@@ -1227,36 +1180,36 @@ describes.sandboxed('Viewer', {}, () => {
     describe('when in a fake webview (a bad actor iframe)', () => {
       it('should consider trusted by ancestor', () => {
         windowApi.parent = {};
-        windowApi.location.hash = '#origin=g.com&webview=1';
+        params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = ['https://google.com'];
-        return new Viewer(ampdoc).isTrustedViewer().then(res => {
+        return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
           expect(res).to.be.true;
         });
       });
 
       it('should consider non-trusted without ancestor', () => {
         windowApi.parent = {};
-        windowApi.location.hash = '#origin=g.com&webview=1';
+        params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = [];
-        return new Viewer(ampdoc).isTrustedViewer().then(res => {
+        return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
           expect(res).to.be.false;
         });
       });
 
       it('should consider non-trusted with wrong ancestor', () => {
         windowApi.parent = {};
-        windowApi.location.hash = '#origin=g.com&webview=1';
+        params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = ['https://untrusted.com'];
-        return new Viewer(ampdoc).isTrustedViewer().then(res => {
+        return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
           expect(res).to.be.false;
         });
       });
 
       it('should decide trusted on connection with origin', () => {
         windowApi.parent = {};
-        windowApi.location.hash = '#origin=g.com&webview=1';
+        params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = null;
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.true;
@@ -1265,9 +1218,9 @@ describes.sandboxed('Viewer', {}, () => {
 
       it('should NOT allow channel without origin', () => {
         windowApi.parent = {};
-        windowApi.location.hash = '#origin=g.com&webview=1';
+        params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = null;
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         expect(() => {
           viewer.setMessageDeliverer(() => {});
         }).to.throw(/message channel must have an origin/);
@@ -1275,9 +1228,9 @@ describes.sandboxed('Viewer', {}, () => {
 
       it('should decide non-trusted on connection with wrong origin', () => {
         windowApi.parent = {};
-        windowApi.location.hash = '#origin=g.com&webview=1';
+        params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = null;
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.false;
@@ -1286,9 +1239,9 @@ describes.sandboxed('Viewer', {}, () => {
 
       it('should give precedence to ancestor', () => {
         windowApi.parent = {};
-        windowApi.location.hash = '#origin=g.com&webview=1';
+        params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = ['https://google.com'];
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
         return viewer.isTrustedViewer().then(res => {
           expect(res).to.be.true;
@@ -1304,7 +1257,7 @@ describes.sandboxed('Viewer', {}, () => {
      */
     function testHasRoughlySameOrigin(first, second) {
       it('should find ' + first + ' and ' + second + ' to match', () => {
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         expect(viewer.hasRoughlySameOrigin_(first, second)).to.be.true;
       });
     }
@@ -1317,7 +1270,7 @@ describes.sandboxed('Viewer', {}, () => {
      */
     function testHasRoughlyDifferentOrigin(first, second) {
       it('should NOT find ' + first + ' and ' + second + ' to match', () => {
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         expect(viewer.hasRoughlySameOrigin_(first, second)).to.be.false;
       });
     }
@@ -1418,7 +1371,7 @@ describes.sandboxed('Viewer', {}, () => {
      */
     function test(origin, toBeTrusted, opt_inWebView) {
       it('testing ' + origin, () => {
-        const viewer = new Viewer(ampdoc);
+        const viewer = new ViewerImpl(ampdoc);
         viewer.isWebviewEmbedded_ = !!opt_inWebView;
         expect(viewer.isTrustedViewerOrigin_(origin)).to.equal(toBeTrusted);
       });
@@ -1462,9 +1415,9 @@ describes.sandboxed('Viewer', {}, () => {
   describe('referrer', () => {
     it('should return document referrer if not overriden', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#';
+      setUrl('#');
       windowApi.document.referrer = 'https://acme.org/docref';
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/docref'
       );
@@ -1476,10 +1429,9 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should NOT allow override if not iframed', () => {
       windowApi.parent = windowApi;
-      windowApi.location.hash =
-        '#referrer=' + encodeURIComponent('https://acme.org/viewer');
+      setUrl('#referrer=' + encodeURIComponent('https://acme.org/viewer'));
       windowApi.document.referrer = 'https://acme.org/docref';
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/docref'
       );
@@ -1496,7 +1448,7 @@ describes.sandboxed('Viewer', {}, () => {
         encodeURIComponent('https://acme.org/viewer');
       windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.ancestorOrigins = ['https://untrusted.com'];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/docref'
       );
@@ -1513,7 +1465,7 @@ describes.sandboxed('Viewer', {}, () => {
         encodeURIComponent('https://acme.org/viewer');
       windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.ancestorOrigins = [];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/docref'
       );
@@ -1525,11 +1477,12 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should allow partial override if async not trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash =
+      setUrl(
         '#origin=g.com&referrer=' +
-        encodeURIComponent('https://acme.org/viewer');
+          encodeURIComponent('https://acme.org/viewer')
+      );
       windowApi.document.referrer = 'https://acme.org/docref';
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       // Unconfirmed referrer is overriden, but not confirmed yet.
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/viewer'
@@ -1555,11 +1508,12 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should allow full override if async trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash =
+      setUrl(
         '#origin=g.com&referrer=' +
-        encodeURIComponent('https://acme.org/viewer');
+          encodeURIComponent('https://acme.org/viewer')
+      );
       windowApi.document.referrer = 'https://acme.org/docref';
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       // Unconfirmed referrer is overriden and will be confirmed next.
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/viewer'
@@ -1577,12 +1531,13 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should allow override if iframed and trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash =
+      setUrl(
         '#origin=g.com&referrer=' +
-        encodeURIComponent('https://acme.org/viewer');
+          encodeURIComponent('https://acme.org/viewer')
+      );
       windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/viewer'
       );
@@ -1594,10 +1549,10 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should allow override to empty if iframed and trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#origin=g.com&referrer=';
+      setUrl('#origin=g.com&referrer=');
       windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal('');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('');
@@ -1608,15 +1563,15 @@ describes.sandboxed('Viewer', {}, () => {
 
   describe('viewerUrl', () => {
     it('should initially always return current location', () => {
-      windowApi.location.href = 'https://acme.org/doc1#hash';
-      const viewer = new Viewer(ampdoc);
+      setUrl('https://acme.org/doc1#hash');
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
     });
 
     it('should always return current location for top-level window', () => {
       windowApi.parent = windowApi;
-      windowApi.location.href = 'https://acme.org/doc1#hash';
-      const viewer = new Viewer(ampdoc);
+      setUrl('https://acme.org/doc1#hash');
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
@@ -1627,11 +1582,11 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should NOT allow override if not iframed', () => {
       windowApi.parent = windowApi;
-      windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash =
-        '#origin=g.com&viewerUrl=' +
-        encodeURIComponent('https://acme.org/viewer');
-      const viewer = new Viewer(ampdoc);
+      setUrl(
+        'https://acme.org/doc1#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer')
+      );
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
@@ -1642,12 +1597,12 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should NOT allow override if not trusted', () => {
       windowApi.parent = {};
-      windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash =
-        '#origin=g.com&viewerUrl=' +
-        encodeURIComponent('https://acme.org/viewer');
+      setUrl(
+        'https://acme.org/doc1#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer')
+      );
       windowApi.location.ancestorOrigins = ['https://untrusted.com'];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
@@ -1666,12 +1621,12 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should NOT allow override if ancestor is empty', () => {
       windowApi.parent = {};
-      windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash =
-        '#origin=g.com&viewerUrl=' +
-        encodeURIComponent('https://acme.org/viewer');
+      setUrl(
+        'https://acme.org/doc1#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer')
+      );
       windowApi.location.ancestorOrigins = [];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
@@ -1690,11 +1645,11 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should allow partial override if async not trusted', () => {
       windowApi.parent = {};
-      windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash =
-        '#origin=g.com&viewerUrl=' +
-        encodeURIComponent('https://acme.org/viewer');
-      const viewer = new Viewer(ampdoc);
+      setUrl(
+        'https://acme.org/doc1#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer')
+      );
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
       return viewer.getViewerUrl().then(viewerUrl => {
@@ -1714,11 +1669,11 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should allow full override if async trusted', () => {
       windowApi.parent = {};
-      windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash =
-        '#origin=g.com&viewerUrl=' +
-        encodeURIComponent('https://acme.org/viewer');
-      const viewer = new Viewer(ampdoc);
+      setUrl(
+        'https://acme.org/doc1#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer')
+      );
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       viewer.setMessageDeliverer(() => {}, 'https://google.com');
       return viewer.getViewerUrl().then(viewerUrl => {
@@ -1732,12 +1687,12 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should allow override if iframed and trusted', () => {
       windowApi.parent = {};
-      windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash =
-        '#origin=g.com&viewerUrl=' +
-        encodeURIComponent('https://acme.org/viewer');
+      setUrl(
+        'https://acme.org/doc1#origin=g.com&viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer')
+      );
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
@@ -1750,10 +1705,9 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should ignore override to empty if iframed and trusted', () => {
       windowApi.parent = {};
-      windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash = '#origin=g.com&viewerUrl=';
+      setUrl('https://acme.org/doc1#origin=g.com&viewerUrl=');
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
@@ -1765,7 +1719,7 @@ describes.sandboxed('Viewer', {}, () => {
 
   describe('viewerOrigin', () => {
     it('should return empty string if origin is not known', () => {
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       return viewer.getViewerOrigin().then(viewerOrigin => {
         expect(viewerOrigin).to.equal('');
       });
@@ -1774,7 +1728,7 @@ describes.sandboxed('Viewer', {}, () => {
     it('should return ancestor origin if known', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       return viewer.getViewerOrigin().then(viewerOrigin => {
         expect(viewerOrigin).to.equal('https://google.com');
       });
@@ -1782,7 +1736,7 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should return viewer origin if set via handshake', () => {
       windowApi.parent = {};
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       const result = viewer.getViewerOrigin().then(viewerOrigin => {
         expect(viewerOrigin).to.equal('https://foobar.com');
       });
@@ -1792,7 +1746,7 @@ describes.sandboxed('Viewer', {}, () => {
 
     it('should return empty string if handshake does not happen', () => {
       windowApi.parent = {};
-      const viewer = new Viewer(ampdoc);
+      const viewer = new ViewerImpl(ampdoc);
       const result = viewer.getViewerOrigin().then(viewerOrigin => {
         expect(viewerOrigin).to.equal('');
       });

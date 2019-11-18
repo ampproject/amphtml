@@ -47,7 +47,7 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {?Promise} */
@@ -286,6 +286,7 @@ class AmpImaVideo extends AMP.BaseElement {
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
+      this.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {

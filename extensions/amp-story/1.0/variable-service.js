@@ -24,7 +24,10 @@ import {registerServiceBuilder} from '../../../src/service';
 export let StoryVariableDef;
 
 /** @enum {string} */
-export const Variable = {
+export const AnalyticsVariable = {
+  BOOKEND_COMPONENT_POSITION: 'storyBookendComponentPosition',
+  BOOKEND_COMPONENT_TYPE: 'storyBookendComponentType',
+  BOOKEND_TARGET_HREF: 'storyBookendTargetHref',
   STORY_PAGE_ID: 'storyPageId',
   STORY_PAGE_INDEX: 'storyPageIndex',
   STORY_PAGE_COUNT: 'storyPageCount',
@@ -64,13 +67,16 @@ export class AmpStoryVariableService {
   constructor(win) {
     /** @private {!StoryVariableDef} */
     this.variables_ = dict({
-      [Variable.STORY_PAGE_INDEX]: null,
-      [Variable.STORY_PAGE_ID]: null,
-      [Variable.STORY_PAGE_COUNT]: null,
-      [Variable.STORY_PROGRESS]: null,
-      [Variable.STORY_IS_MUTED]: null,
-      [Variable.STORY_PREVIOUS_PAGE_ID]: null,
-      [Variable.STORY_ADVANCEMENT_MODE]: null,
+      [AnalyticsVariable.BOOKEND_COMPONENT_POSITION]: null,
+      [AnalyticsVariable.BOOKEND_COMPONENT_TYPE]: null,
+      [AnalyticsVariable.BOOKEND_TARGET_HREF]: null,
+      [AnalyticsVariable.STORY_PAGE_INDEX]: null,
+      [AnalyticsVariable.STORY_PAGE_ID]: null,
+      [AnalyticsVariable.STORY_PAGE_COUNT]: null,
+      [AnalyticsVariable.STORY_PROGRESS]: null,
+      [AnalyticsVariable.STORY_IS_MUTED]: null,
+      [AnalyticsVariable.STORY_PREVIOUS_PAGE_ID]: null,
+      [AnalyticsVariable.STORY_ADVANCEMENT_MODE]: null,
     });
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -82,7 +88,7 @@ export class AmpStoryVariableService {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(StateProperty.PAGE_IDS, pageIds => {
-      this.variables_[Variable.STORY_PAGE_COUNT] = pageIds.length;
+      this.variables_[AnalyticsVariable.STORY_PAGE_COUNT] = pageIds.length;
     });
 
     this.storeService_.subscribe(
@@ -92,21 +98,22 @@ export class AmpStoryVariableService {
           return;
         }
 
-        this.variables_[Variable.STORY_PREVIOUS_PAGE_ID] = this.variables_[
-          Variable.STORY_PAGE_ID
-        ];
+        this.variables_[
+          AnalyticsVariable.STORY_PREVIOUS_PAGE_ID
+        ] = this.variables_[AnalyticsVariable.STORY_PAGE_ID];
 
-        this.variables_[Variable.STORY_PAGE_ID] = pageId;
+        this.variables_[AnalyticsVariable.STORY_PAGE_ID] = pageId;
 
         const pageIndex = /** @type {number} */ (this.storeService_.get(
           StateProperty.CURRENT_PAGE_INDEX
         ));
-        this.variables_[Variable.STORY_PAGE_INDEX] = pageIndex;
+        this.variables_[AnalyticsVariable.STORY_PAGE_INDEX] = pageIndex;
 
         const numberOfPages = this.storeService_.get(StateProperty.PAGE_IDS)
           .length;
         if (numberOfPages > 0) {
-          this.variables_[Variable.STORY_PROGRESS] = pageIndex / numberOfPages;
+          this.variables_[AnalyticsVariable.STORY_PROGRESS] =
+            pageIndex / numberOfPages;
         }
       },
       true /* callToInitialize */
@@ -114,17 +121,12 @@ export class AmpStoryVariableService {
   }
 
   /**
-   * @param {boolean} isMuted
+   * Updates a variable with a new value
+   * @param {string} name
+   * @param {*} update
    */
-  onMutedStateChange(isMuted) {
-    this.variables_[Variable.STORY_IS_MUTED] = isMuted;
-  }
-
-  /**
-   * @param {string} advancementMode
-   */
-  onAdvancementModeStateChange(advancementMode) {
-    this.variables_[Variable.STORY_ADVANCEMENT_MODE] = advancementMode;
+  onVariableUpdate(name, update) {
+    this.variables_[name] = update;
   }
 
   /**

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const QUANTCAST_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const QUANTCAST_CONFIG = jsonLiteral({
   'vars': {
     'labels': '',
   },
@@ -38,3 +40,5 @@ export const QUANTCAST_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {QUANTCAST_CONFIG};

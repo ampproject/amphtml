@@ -58,6 +58,7 @@ export class ConsentConfig {
   /**
    * Convert the inline config to new format
    * @param {!JsonObject} config
+   * @return {!Object}
    */
   convertInlineConfigFormat_(config) {
     const consentsConfigDepr = config['consents'];

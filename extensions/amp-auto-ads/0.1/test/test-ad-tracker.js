@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as Utils from '../utils';
 import {
   AdTracker,
   getAdConstraintsFromConfigObj,
@@ -24,15 +25,13 @@ import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describes.realWin('ad-tracker', {amp: true}, env => {
   let win, doc;
-  let resources;
   let container;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
 
-    resources = Services.resourcesForDoc(doc);
-    sandbox.stub(resources, 'getElementLayoutBox').callsFake(element => {
+    sandbox.stub(Utils, 'getElementLayoutBox').callsFake(element => {
       return Promise.resolve(element.layoutBox);
     });
 

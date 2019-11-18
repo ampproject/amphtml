@@ -16,7 +16,7 @@
 
 import {Action, getStoreService} from '../amp-story-store-service';
 import {AdvancementMode} from '../story-analytics';
-import {getVariableService} from '../variable-service';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
 
 describes.fakeWin('amp-story variable service', {}, env => {
   let variableService;
@@ -39,7 +39,8 @@ describes.fakeWin('amp-story variable service', {}, env => {
   });
 
   it('should update storyAdvancementMode on change', () => {
-    variableService.onAdvancementModeStateChange(
+    variableService.onVariableUpdate(
+      AnalyticsVariable.STORY_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
 

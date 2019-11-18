@@ -83,7 +83,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
-    storyConsentEl.getResources = () => win.services.resources.obj;
+    storyConsentEl.getResources = () => win.__AMP_SERVICES.resources.obj;
     storyConsentEl.appendChild(storyConsentConfigEl);
 
     storyEl.appendChild(consentEl);
@@ -296,7 +296,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     );
   });
 
-  it('should set the consent ID in the store if right amp-geo group', () => {
+  it('should set the consent ID in the store if right amp-geo group', async () => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
@@ -306,14 +306,13 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     storyConsent.buildCallback();
 
-    return Promise.resolve().then(() => {
-      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
-        CONSENT_ID
-      );
-    });
+    await Promise.resolve();
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
+      CONSENT_ID
+    );
   });
 
-  it('should not set consent ID in the store if wrong amp-geo group', () => {
+  it('should not set consent ID in the store if wrong amp-geo group', async () => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
@@ -323,10 +322,8 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     storyConsent.buildCallback();
 
-    return Promise.resolve().then(() => {
-      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.be
-        .null;
-    });
+    await Promise.resolve();
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.be.null;
   });
 
   it('should set the font color to black if background is white', () => {

@@ -34,7 +34,6 @@ describes.fakeWin(
     },
   },
   env => {
-    let sandbox;
     let clock;
     let bindingMock;
     let onStateUpdated;
@@ -42,7 +41,6 @@ describes.fakeWin(
 
     beforeEach(() => {
       installTimerService(env.win);
-      sandbox = env.sandbox;
       clock = sandbox.useFakeTimers();
 
       const binding = {
@@ -308,7 +306,7 @@ describes.sandboxed('History install', {}, () => {
 
     installTimerService(window);
     win = {
-      services: {
+      __AMP_SERVICES: {
         'viewer': {obj: viewer},
         'timer': {obj: Services.timerFor(window)},
       },
@@ -331,9 +329,9 @@ describes.sandboxed('History install', {}, () => {
   it('should create natural binding and make it singleton', () => {
     const history = Services.historyForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingNatural_);
-    expect(win.services.history.obj).to.equal(history);
+    expect(win.__AMP_SERVICES.history.obj).to.equal(history);
     // Ensure that binding is installed as a singleton.
-    expect(win.services['global-history-binding'].obj).to.equal(
+    expect(win.__AMP_SERVICES['global-history-binding'].obj).to.equal(
       history.binding_
     );
   });
@@ -342,9 +340,9 @@ describes.sandboxed('History install', {}, () => {
     viewer.isOvertakeHistory = () => true;
     const history = Services.historyForDoc(ampdoc);
     expect(history.binding_).to.be.instanceOf(HistoryBindingVirtual_);
-    expect(win.services.history.obj).to.equal(history);
+    expect(win.__AMP_SERVICES.history.obj).to.equal(history);
     // Ensure that the global singleton has not been created.
-    expect(win.services['global-history-binding']).to.not.exist;
+    expect(win.__AMP_SERVICES['global-history-binding']).to.not.exist;
   });
 });
 
@@ -633,9 +631,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
   });
 });
 
-describes.sandboxed('HistoryBindingVirtual', {}, env => {
-  let sandbox;
-
+describes.sandboxed('HistoryBindingVirtual', {}, () => {
   let history;
   let viewer;
   let capabilityStub;
@@ -644,7 +640,6 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
   let onHistoryPopped;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     onStateUpdated = sandbox.spy();
     capabilityStub = sandbox.stub();
     viewer = {
@@ -660,7 +655,6 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
 
   afterEach(() => {
     history.cleanup();
-    sandbox.restore();
   });
 
   it('should initialize correctly', () => {
@@ -675,10 +669,9 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
     it('viewer does not support responses', () => {
       return history.push().then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1}
-        );
+        expect(
+          viewer.sendMessageAwaitResponse
+        ).to.be.calledWithMatch('pushHistory', {stackIndex: 1});
 
         expect(state.stackIndex).to.equal(1);
         expect(history.stackIndex_).to.equal(1);
@@ -696,10 +689,9 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
 
       return history.push({title}).then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
+        expect(
+          viewer.sendMessageAwaitResponse
+        ).to.be.calledWithMatch('pushHistory', {stackIndex: 1, title});
 
         expect(state.stackIndex).to.equal(1);
         expect(history.stackIndex_).to.equal(1);
@@ -717,10 +709,9 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
 
       return history.push({title}).then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
+        expect(
+          viewer.sendMessageAwaitResponse
+        ).to.be.calledWithMatch('pushHistory', {stackIndex: 1, title});
 
         expect(state.stackIndex).to.equal(1);
         expect(history.stackIndex_).to.equal(1);
@@ -891,10 +882,9 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
 
       return history.push({title}).then(state => {
         expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
-        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
-          'pushHistory',
-          {stackIndex: 1, title}
-        );
+        expect(
+          viewer.sendMessageAwaitResponse
+        ).to.be.calledWithMatch('pushHistory', {stackIndex: 1, title});
 
         expect(state).to.deep.equal({stackIndex: 1, title});
         expect(onStateUpdated).to.be.calledOnce;
@@ -925,6 +915,11 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
       expect(onStateUpdated).to.be.calledOnce;
       expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 123});
     });
+
+    it('sends invalid data', () => {
+      onHistoryPopped({invalid: 'data'});
+      expect(onStateUpdated).to.not.be.called;
+    });
   });
 });
 
@@ -936,13 +931,11 @@ describes.fakeWin(
     },
   },
   env => {
-    let sandbox;
     let clock;
     let history;
 
     beforeEach(() => {
       installTimerService(env.win);
-      sandbox = env.sandbox;
       clock = sandbox.useFakeTimers();
     });
 
@@ -1011,14 +1004,12 @@ describes.fakeWin(
   }
 );
 describes.fakeWin('Get and update fragment', {}, env => {
-  let sandbox;
   let history;
   let viewer;
   let viewerMock;
 
   beforeEach(() => {
     installTimerService(env.win);
-    sandbox = env.sandbox;
     viewer = {
       onMessage: () => {
         return () => {};

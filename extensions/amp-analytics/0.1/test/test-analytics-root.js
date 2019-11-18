@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import * as IniLoad from '../../../../src/ini-load';
 import {AmpDocShadow} from '../../../../src/service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
-import {CustomEventTracker} from '../events';
+import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {HostServices} from '../../../../src/inabox/host-services';
 import {ScrollManager} from '../scroll-manager';
 import {
@@ -28,7 +29,7 @@ import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   let win;
   let ampdoc;
-  let resources, viewport;
+  let viewport;
   let root;
   let body, target, child, other;
   let mockVisibilityInterface;
@@ -36,8 +37,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    resources = win.services.resources.obj;
-    viewport = win.services.viewport.obj;
+    viewport = win.__AMP_SERVICES.viewport.obj;
     root = new AmpdocAnalyticsRoot(ampdoc);
     body = win.document.body;
 
@@ -72,19 +72,26 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should add tracker, reuse and dispose', () => {
-    const tracker = root.getTracker('custom', CustomEventTracker);
+    const tracker = root.getTracker(
+      AnalyticsEventType.CUSTOM,
+      CustomEventTracker
+    );
     expect(tracker).to.be.instanceOf(CustomEventTracker);
     expect(tracker.root).to.equal(root);
 
     // Reused.
-    expect(root.getTracker('custom', CustomEventTracker)).to.equal(tracker);
-    expect(root.getTrackerOptional('custom')).to.equal(tracker);
+    expect(
+      root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+    ).to.equal(tracker);
+    expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.equal(
+      tracker
+    );
 
     // Dispose.
     const stub = sandbox.stub(tracker, 'dispose');
     root.dispose();
     expect(stub).to.be.calledOnce;
-    expect(root.getTrackerOptional('custom')).to.be.null;
+    expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.be.null;
   });
 
   it('should init with ampdoc signals', () => {
@@ -97,39 +104,40 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should provide the correct rect for ini-load for main doc', () => {
-    const stub = sandbox
-      .stub(resources, 'getResourcesInRect')
-      .callsFake(() => Promise.resolve([]));
+    const spy = sandbox.spy(IniLoad, 'whenContentIniLoad');
     root.whenIniLoaded();
-    expect(stub).to.be.calledOnce;
-    expect(stub.args[0][0]).to.equal(win);
-    expect(stub.args[0][1]).to.contain({
-      top: 0,
-      left: 0,
-      width: win.innerWidth,
-      height: win.innerHeight,
-    });
+    expect(spy).to.be.calledWith(
+      ampdoc,
+      win,
+      sinon.match({
+        top: 0,
+        left: 0,
+        width: win.innerWidth,
+        height: win.innerHeight,
+      })
+    );
   });
 
   it('should provide the correct rect for ini-load for inabox', () => {
-    win.AMP_MODE = {runtime: 'inabox'};
+    win.__AMP_MODE = {runtime: 'inabox'};
     sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == win.document.documentElement) {
         return {left: 10, top: 11, width: 100, height: 200};
       }
     });
-    const stub = sandbox
-      .stub(resources, 'getResourcesInRect')
-      .callsFake(() => Promise.resolve([]));
+    const spy = sandbox.spy(IniLoad, 'whenContentIniLoad');
+
     root.whenIniLoaded();
-    expect(stub).to.be.calledOnce;
-    expect(stub.args[0][0]).to.equal(win);
-    expect(stub.args[0][1]).to.contain({
-      left: 10,
-      top: 11,
-      width: 100,
-      height: 200,
-    });
+    expect(spy).to.be.calledWith(
+      ampdoc,
+      win,
+      sinon.match({
+        left: 10,
+        top: 11,
+        width: 100,
+        height: 200,
+      })
+    );
   });
 
   it('should create visibility root', () => {
@@ -467,7 +475,7 @@ describes.realWin(
       ampdoc = env.ampdoc;
       embed.host = ampdoc.win.document.createElement('amp-embed-host');
       parentRoot = new AmpdocAnalyticsRoot(ampdoc);
-      root = new EmbedAnalyticsRoot(ampdoc, embed, parentRoot);
+      root = new EmbedAnalyticsRoot(ampdoc, embed);
       body = win.document.body;
 
       target = win.document.createElement('target');
@@ -489,7 +497,6 @@ describes.realWin(
     it('should initialize correctly', () => {
       expect(root.ampdoc).to.equal(ampdoc);
       expect(root.getType()).to.equal('embed');
-      expect(root.parent).to.equal(parentRoot);
       expect(root.getHostElement()).to.be.equal(embed.iframe);
       expect(root.getRoot()).to.equal(win.document);
       expect(root.getRootElement()).to.equal(win.document.documentElement);
@@ -498,38 +505,48 @@ describes.realWin(
     });
 
     it('should add tracker, reuse and dispose', () => {
-      const tracker = root.getTracker('custom', CustomEventTracker);
+      const tracker = root.getTracker(
+        AnalyticsEventType.CUSTOM,
+        CustomEventTracker
+      );
       expect(tracker).to.be.instanceOf(CustomEventTracker);
       expect(tracker.root).to.equal(root);
 
       // Reused.
-      expect(root.getTracker('custom', CustomEventTracker)).to.equal(tracker);
-      expect(root.getTrackerOptional('custom')).to.equal(tracker);
+      expect(
+        root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+      ).to.equal(tracker);
+      expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.equal(
+        tracker
+      );
 
       // Dispose.
       const stub = sandbox.stub(tracker, 'dispose');
       root.dispose();
       expect(stub).to.be.calledOnce;
-      expect(root.getTrackerOptional('custom')).to.be.null;
+      expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.be.null;
     });
 
     it('should create and reuse trackers, but not if not in whitelist', () => {
       const whitelist = {
         'custom': CustomEventTracker,
       };
-      const customTracker = root.getTrackerForWhitelist('custom', whitelist);
+      const customTracker = root.getTrackerForWhitelist(
+        AnalyticsEventType.CUSTOM,
+        whitelist
+      );
       expect(customTracker).to.be.instanceOf(CustomEventTracker);
       expect(customTracker.root).to.equal(root);
 
       const noneTracker = root.getTrackerForWhitelist('none', whitelist);
       expect(noneTracker).to.be.null;
 
-      expect(root.getTrackerForWhitelist('custom', whitelist)).to.equal(
-        customTracker
-      );
-      expect(root.getTracker('custom', CustomEventTracker)).to.equal(
-        customTracker
-      );
+      expect(
+        root.getTrackerForWhitelist(AnalyticsEventType.CUSTOM, whitelist)
+      ).to.equal(customTracker);
+      expect(
+        root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)
+      ).to.equal(customTracker);
     });
 
     it('should init with embed signals', () => {

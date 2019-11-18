@@ -24,11 +24,14 @@ You have to contact our account manager to create ad spot at first.
 ### Basic
 
 ```html
-  <amp-ad width="300" height="250"
-             type="aja"
-             layout="responsive"
-             data-asi="ZZZZZ">
-  </amp-ad>
+<amp-ad
+  width="300"
+  height="250"
+  type="aja"
+  layout="responsive"
+  data-asi="ZZZZZ"
+>
+</amp-ad>
 ```
 
 ## Configuration

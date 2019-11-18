@@ -46,7 +46,7 @@ describes.realWin(
       doc = win.document;
     });
 
-    function createAmpVkElement(dataParams, layout) {
+    async function createAmpVkElement(dataParams, layout) {
       const element = doc.createElement('amp-vk');
 
       for (const param in dataParams) {
@@ -62,14 +62,11 @@ describes.realWin(
 
       doc.body.appendChild(element);
 
-      return element
-        .build()
-        .then(() => {
-          const resource = Resource.forElement(element);
-          resource.measure();
-          return element.layoutCallback();
-        })
-        .then(() => element);
+      await element.build();
+      const resource = Resource.forElement(element);
+      resource.measure();
+      await element.layoutCallback();
+      return element;
     }
 
     it('requires data-embedtype', () => {
@@ -82,16 +79,15 @@ describes.realWin(
       });
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return createAmpVkElement(POST_PARAMS).then(vkPost => {
-        const iframe = vkPost.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        const obj = vkPost.implementation_;
-        obj.unlayoutCallback();
-        expect(vkPost.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
-        expect(obj.unlayoutOnPause()).to.be.true;
-      });
+    it('removes iframe after unlayoutCallback', async () => {
+      const vkPost = await createAmpVkElement(POST_PARAMS);
+      const iframe = vkPost.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = vkPost.implementation_;
+      obj.unlayoutCallback();
+      expect(vkPost.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.unlayoutOnPause()).to.be.true;
     });
 
     // Post tests
@@ -126,39 +122,34 @@ describes.realWin(
       });
     });
 
-    it('post::renders iframe in amp-vk', () => {
-      return createAmpVkElement(POST_PARAMS).then(vkPost => {
-        const iframe = vkPost.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-      });
+    it('post::renders iframe in amp-vk', async () => {
+      const vkPost = await createAmpVkElement(POST_PARAMS);
+      const iframe = vkPost.querySelector('iframe');
+      expect(iframe).to.not.be.null;
     });
 
-    it('post::renders responsively', () => {
-      return createAmpVkElement(POST_PARAMS, Layout.RESPONSIVE).then(vkPost => {
-        const iframe = vkPost.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+    it('post::renders responsively', async () => {
+      const vkPost = await createAmpVkElement(POST_PARAMS, Layout.RESPONSIVE);
+      const iframe = vkPost.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
-    it('post::sets correct src url to the vk iFrame', () => {
-      return createAmpVkElement(POST_PARAMS, Layout.RESPONSIVE).then(vkPost => {
-        const impl = vkPost.implementation_;
-        const iframe = vkPost.querySelector('iframe');
-        const referrer = encodeURIComponent(vkPost.ownerDocument.referrer);
-        const url = encodeURIComponent(
-          vkPost.ownerDocument.location.href.replace(/#.*$/, '')
-        );
-        impl.onLayoutMeasure();
-        const startWidth = impl.getLayoutWidth();
-        const correctIFrameSrc = `https://vk.com/widget_post.php?app=0&width=100%25\
-&_ver=1&owner_id=1&post_id=45616&hash=Yc8_Z9pnpg8aKMZbVcD-jK45eAk&amp=1\
-&startWidth=${startWidth}&url=${url}&referrer=${referrer}&title=AMP%20Post`;
-        expect(iframe).to.not.be.null;
-        const timeArgPosition = iframe.src.lastIndexOf('&');
-        const iframeSrcWithoutTime = iframe.src.substr(0, timeArgPosition);
-        expect(iframeSrcWithoutTime).to.equal(correctIFrameSrc);
-      });
+    it('post::sets correct src url to the vk iFrame', async () => {
+      const vkPost = await createAmpVkElement(POST_PARAMS, Layout.RESPONSIVE);
+      const impl = vkPost.implementation_;
+      const iframe = vkPost.querySelector('iframe');
+      const referrer = encodeURIComponent(vkPost.ownerDocument.referrer);
+      const url = encodeURIComponent(
+        vkPost.ownerDocument.location.href.replace(/#.*$/, '')
+      );
+      impl.onLayoutMeasure();
+      const startWidth = impl.getLayoutWidth();
+      const correctIFrameSrc = `https://vk.com/widget_post.php?app=0&width=100%25&_ver=1&owner_id=1&post_id=45616&hash=Yc8_Z9pnpg8aKMZbVcD-jK45eAk&amp=1&startWidth=${startWidth}&url=${url}&referrer=${referrer}&title=AMP%20Post`;
+      expect(iframe).to.not.be.null;
+      const timeArgPosition = iframe.src.lastIndexOf('&');
+      const iframeSrcWithoutTime = iframe.src.substr(0, timeArgPosition);
+      expect(iframeSrcWithoutTime).to.equal(correctIFrameSrc);
     });
 
     // Poll tests
@@ -183,53 +174,43 @@ describes.realWin(
       });
     });
 
-    it('poll::renders iframe in amp-vk', () => {
-      return createAmpVkElement(POLL_PARAMS).then(vkPoll => {
-        const iframe = vkPoll.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-      });
+    it('poll::renders iframe in amp-vk', async () => {
+      const vkPoll = await createAmpVkElement(POLL_PARAMS);
+      const iframe = vkPoll.querySelector('iframe');
+      expect(iframe).to.not.be.null;
     });
 
-    it('poll::renders responsively', () => {
-      return createAmpVkElement(POLL_PARAMS, Layout.RESPONSIVE).then(vkPoll => {
-        const iframe = vkPoll.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+    it('poll::renders responsively', async () => {
+      const vkPoll = await createAmpVkElement(POLL_PARAMS, Layout.RESPONSIVE);
+      const iframe = vkPoll.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
-    it('poll::sets correct src url to the vk iFrame', () => {
-      return createAmpVkElement(POLL_PARAMS, Layout.RESPONSIVE).then(vkPoll => {
-        const iframe = vkPoll.querySelector('iframe');
-        const referrer = encodeURIComponent(vkPoll.ownerDocument.referrer);
-        const url = encodeURIComponent(
-          vkPoll.ownerDocument.location.href.replace(/#.*$/, '')
-        );
-        const correctIFrameSrc = `https://vk.com/al_widget_poll.php?\
-app=6183531&width=100%25&_ver=1&poll_id=274086843_1a2a465f60fff4699f&amp=1\
-&url=${url}&title=AMP%20Poll&description=&referrer=${referrer}`;
-
-        expect(iframe).to.not.be.null;
-        const timeArgPosition = iframe.src.lastIndexOf('&');
-        const iframeSrcWithoutTime = iframe.src.substr(0, timeArgPosition);
-        expect(iframeSrcWithoutTime).to.equal(correctIFrameSrc);
-      });
+    it('poll::sets correct src url to the vk iFrame', async () => {
+      const vkPoll = await createAmpVkElement(POLL_PARAMS, Layout.RESPONSIVE);
+      const iframe = vkPoll.querySelector('iframe');
+      const referrer = encodeURIComponent(vkPoll.ownerDocument.referrer);
+      const url = encodeURIComponent(
+        vkPoll.ownerDocument.location.href.replace(/#.*$/, '')
+      );
+      const correctIFrameSrc = `https://vk.com/al_widget_poll.php?app=6183531&width=100%25&_ver=1&poll_id=274086843_1a2a465f60fff4699f&amp=1&url=${url}&title=AMP%20Poll&description=&referrer=${referrer}`;
+      expect(iframe).to.not.be.null;
+      const timeArgPosition = iframe.src.lastIndexOf('&');
+      const iframeSrcWithoutTime = iframe.src.substr(0, timeArgPosition);
+      expect(iframeSrcWithoutTime).to.equal(correctIFrameSrc);
     });
 
-    it('both::resizes amp-vk element in response to postmessages', () => {
-      return createAmpVkElement(POLL_PARAMS).then(vkPoll => {
-        const impl = vkPoll.implementation_;
-        const iframe = vkPoll.querySelector('iframe');
-        const changeHeight = sandbox.spy(impl, 'changeHeight');
-        const fakeHeight = 555;
-
-        expect(iframe).to.not.be.null;
-
-        generatePostMessage(vkPoll, iframe, fakeHeight);
-
-        expect(changeHeight).to.be.calledOnce;
-        expect(changeHeight.firstCall.args[0]).to.equal(fakeHeight);
-      });
+    it('both::resizes amp-vk element in response to postmessages', async () => {
+      const vkPoll = await createAmpVkElement(POLL_PARAMS);
+      const impl = vkPoll.implementation_;
+      const iframe = vkPoll.querySelector('iframe');
+      const changeHeight = sandbox.spy(impl, 'changeHeight');
+      const fakeHeight = 555;
+      expect(iframe).to.not.be.null;
+      generatePostMessage(vkPoll, iframe, fakeHeight);
+      expect(changeHeight).to.be.calledOnce;
+      expect(changeHeight.firstCall.args[0]).to.equal(fakeHeight);
     });
 
     function generatePostMessage(ins, iframe, height) {

@@ -223,6 +223,13 @@ describes.sandboxed('fetch', {}, () => {
       expect(response.status).to.be.equals(500);
     });
 
+    it('should provide url', () => {
+      const response = new Response(TEST_TEXT, {
+        responseURL: 'https://foo.example',
+      });
+      expect(response.url).to.equal('https://foo.example');
+    });
+
     it('should provide text', () => {
       const response = new Response(TEST_TEXT);
       return response.text().then(result => {

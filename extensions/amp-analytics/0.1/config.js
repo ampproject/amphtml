@@ -17,11 +17,13 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {calculateScriptBaseUrl} from '../../../src/service/extension-location';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
+import {isCanary} from '../../../src/experiments';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -64,9 +66,93 @@ export class AnalyticsConfig {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
-    return this.fetchRemoteConfig_()
+    return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
       .then(this.processConfigs_.bind(this))
+      .then(this.checkWarningMessage_.bind(this))
+      .then(this.addExperimentParams_.bind(this))
       .then(() => this.config_);
+  }
+
+  /**
+   * Constructs the URL where the given vendor config is located
+   * @private
+   * @param {string} vendor the vendor name
+   * @return {string} the URL to request the vendor config file from
+   */
+  getVendorUrl_(vendor) {
+    const baseUrl = calculateScriptBaseUrl(
+      this.win_.location,
+      getMode().localDev
+    );
+    // bg has a special canary config
+    const canary = vendor === 'bg' && isCanary(self) ? '.canary' : '';
+    return `${baseUrl}/rtv/${
+      getMode().rtvVersion
+    }/v0/analytics-vendors/${vendor}${canary}.json`;
+  }
+
+  /**
+   * Returns a promise that resolves when vendor config is ready (or
+   * immediately if no vendor config is specified)
+   * @private
+   * @return {!Promise<undefined>}
+   */
+  fetchVendorConfig_() {
+    if (!ANALYTICS_VENDOR_SPLIT) {
+      return Promise.resolve();
+    }
+
+    const type = this.element_.getAttribute('type');
+    if (!type) {
+      return Promise.resolve();
+    }
+
+    const vendorUrl = this.getVendorUrl_(type);
+
+    const TAG = this.getName_();
+    dev().fine(TAG, 'Fetching vendor config', vendorUrl);
+
+    return Services.xhrFor(toWin(this.win_))
+      .fetchJson(vendorUrl)
+      .then(res => res.json())
+      .then(
+        jsonValue => {
+          this.predefinedConfig_[type] = jsonValue;
+          dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
+        },
+        err => {
+          user().error(TAG, 'Error loading vendor config: ', vendorUrl, err);
+        }
+      );
+  }
+
+  /**
+   * TODO: cleanup #22757 @jonathantyng
+   * Append special param to pageview request for RC and experiment builds
+   * for the googleanalytics component. This is to track pageview changes
+   * in AB experiment
+   */
+  addExperimentParams_() {
+    const type = this.element_.getAttribute('type');
+    const rtv = getMode().rtvVersion;
+    const isRc = rtv ? rtv.substring(0, 2) === '03' : false;
+
+    if (
+      type === 'googleanalytics' &&
+      (isRc || ANALYTICS_VENDOR_SPLIT) &&
+      this.config_['requests']
+    ) {
+      if (this.config_['requests']['pageview']) {
+        this.config_['requests']['pageview'][
+          'baseUrl'
+        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
+      }
+      if (this.config_['requests']['timing']) {
+        this.config_['requests']['timing'][
+          'baseUrl'
+        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
+      }
+    }
   }
 
   /**
@@ -123,7 +209,7 @@ export class AnalyticsConfig {
     const configRewriterUrl = this.getConfigRewriter_()['url'];
 
     const config = dict({});
-    const inlineConfig = this.getInlineConfigNoInline();
+    const inlineConfig = this.getInlineConfig_();
     this.validateTransport_(inlineConfig);
     mergeObjects(inlineConfig, config);
     mergeObjects(this.remoteConfig_, config);
@@ -141,6 +227,7 @@ export class AnalyticsConfig {
    * Handles logic if configRewriter is enabled.
    * @param {!JsonObject} config
    * @param {string} configRewriterUrl
+   * @return {!Promise<undefined>}
    */
   handleConfigRewriter_(config, configRewriterUrl) {
     assertHttpsUrl(configRewriterUrl, this.element_);
@@ -181,6 +268,28 @@ export class AnalyticsConfig {
           }
         );
     });
+  }
+
+  /**
+   * Check if config has warning, display on console and
+   * remove the property.
+   * @private
+   */
+  checkWarningMessage_() {
+    if (this.config_['warningMessage']) {
+      const TAG = this.getName_();
+      const type = this.element_.getAttribute('type');
+      const remoteConfigUrl = this.element_.getAttribute('config');
+
+      user().warn(
+        TAG,
+        'Warning from analytics vendor%s%s: %s',
+        type ? ' ' + type : '',
+        remoteConfigUrl ? ' with remote config url ' + remoteConfigUrl : '',
+        String(this.config_['warningMessage'])
+      );
+      delete this.config_['warningMessage'];
+    }
   }
 
   /**
@@ -301,8 +410,9 @@ export class AnalyticsConfig {
   /**
    * @private
    * @return {!JsonObject}
+   * @noinline
    */
-  getInlineConfigNoInline() {
+  getInlineConfig_() {
     if (this.element_.CONFIG) {
       // If the analytics element is created by runtime, return cached config.
       return this.element_.CONFIG;
@@ -378,7 +488,7 @@ export class AnalyticsConfig {
   /**
    * Expands all key value pairs asynchronously and returns a promise that will
    * resolve with the expanded object.
-   * @param {!Element|!ShadowRoot} element
+   * @param {!Element} element
    * @param {!Object} obj
    * @return {!Promise<!Object>}
    */
@@ -388,7 +498,7 @@ export class AnalyticsConfig {
     const expansionPromises = [];
 
     const urlReplacements = Services.urlReplacementsForDoc(element);
-    const bindings = variableServiceForDoc(element).getMacros();
+    const bindings = variableServiceForDoc(element).getMacros(element);
 
     Object.keys(obj).forEach(key => {
       keys.push(key);
@@ -410,6 +520,7 @@ export class AnalyticsConfig {
  * @param {Object|Array} from Object or array to merge from
  * @param {Object|Array} to Object or Array to merge into
  * @param {boolean=} opt_predefinedConfig
+ * @return {*} TODO(#23582): Specify return type
  */
 export function mergeObjects(from, to, opt_predefinedConfig) {
   if (to === null || to === undefined) {
@@ -464,6 +575,7 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
 /**
  * Expand config's request to object
  * @param {!JsonObject} config
+ * @return {?JsonObject}
  * @visibleForTesting
  */
 export function expandConfigRequest(config) {
@@ -482,6 +594,7 @@ export function expandConfigRequest(config) {
 /**
  * Expand single request to an object
  * @param {!JsonObject} request
+ * @return {*} TODO(#23582): Specify return type
  */
 function expandRequestStr(request) {
   if (isObject(request)) {

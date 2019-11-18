@@ -198,6 +198,7 @@ describe('reportErrorToServerOrViewer', () => {
         expect(data['a']).to.not.be.undefined;
         expect(data['s']).to.not.be.undefined;
         expect(data['el']).to.not.be.undefined;
+        expect(data['ex']).to.not.be.undefined;
         expect(data['v']).to.not.be.undefined;
         expect(data['jse']).to.not.be.undefined;
       });
@@ -215,7 +216,7 @@ describe('getErrorReportData', () => {
     sandbox = sinon.sandbox;
     nextRandomNumber = 0;
     sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
-    self.AMP_MODE = undefined;
+    self.__AMP_MODE = undefined;
   });
 
   afterEach(() => {
@@ -777,7 +778,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept string and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('error');
@@ -789,7 +790,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept number and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError(101);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('101');
@@ -801,7 +802,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept null and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('Unknown error');

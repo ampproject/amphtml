@@ -29,7 +29,6 @@ import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/am
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {installExtensionsService} from '../../src/service/extensions-impl';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -39,8 +38,7 @@ import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
 
-describe('cid', () => {
-  let sandbox;
+describes.sandboxed('cid', {}, () => {
   let clock;
   let fakeWin;
   let ampdoc;
@@ -54,13 +52,13 @@ describe('cid', () => {
   let trustedViewer;
   let shouldSendMessageTimeout;
   let storageGetStub;
+  let seed;
 
   const hasConsent = Promise.resolve();
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    let call = 1;
-    sandbox = sinon.sandbox;
+    seed = 1;
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     trustedViewer = true;
@@ -86,7 +84,7 @@ describe('cid', () => {
       },
       crypto: {
         getRandomValues: array => {
-          array[0] = call++;
+          array[0] = seed;
           array[1] = 2;
           array[2] = 3;
           array[15] = 15;
@@ -105,7 +103,6 @@ describe('cid', () => {
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
-    installGlobalDocumentStateService(fakeWin);
     ampdoc = Services.ampdocServiceFor(fakeWin).getSingleDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
@@ -123,7 +120,7 @@ describe('cid', () => {
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
     viewer = Services.viewerForDoc(ampdoc);
-    sandbox.stub(viewer, 'whenFirstVisible').callsFake(function() {
+    sandbox.stub(ampdoc, 'whenFirstVisible').callsFake(function() {
       return whenFirstVisible;
     });
     sandbox
@@ -153,7 +150,6 @@ describe('cid', () => {
 
   afterEach(() => {
     window.localStorage.removeItem('amp-cid');
-    sandbox.restore();
   });
 
   describe('with real crypto', () => {
@@ -276,14 +272,14 @@ describe('cid', () => {
       const expected =
         'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       return compare('e2', expected).then(() => {
+        seed = 2;
         return compare('e2', expected).then(() => {
           storage['amp-cid'] = undefined;
           removeMemoryCacheOfCid();
           return compare(
             'e2',
             'sha384(sha384([' +
-              // 2 because we increment the first value on each random
-              // call.
+              // 2 because we set the seed to 2
               '2' +
               ',2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)'
           );
@@ -324,7 +320,7 @@ describe('cid', () => {
         .then(() => {
           expect(viewerSendMessageStub).to.be.calledOnce;
           expect(viewerSendMessageStub).to.be.calledWith('cid');
-
+          seed = 2;
           // Ensure it's called only once since we cache it in memory.
           return compare(
             'e3',
@@ -392,7 +388,7 @@ describe('cid', () => {
               cid: expectedBaseCid,
             })
           );
-
+          seed = 2;
           // Ensure it's called only once since we cache it in memory.
           return compare(
             'e3',
@@ -419,14 +415,14 @@ describe('cid', () => {
         'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
       return compare('e2', expected).then(() => {
         clock.tick(364 * DAY);
+        seed = 2;
         return compare('e2', expected).then(() => {
           clock.tick(365 * DAY + 1);
           removeMemoryCacheOfCid();
           return compare(
             'e2',
             'sha384(sha384([' +
-              // 2 because we increment the first value on each random
-              // call.
+              // 2 because we set the seed to 2
               '2' +
               ',2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)'
           );
@@ -464,6 +460,7 @@ describe('cid', () => {
       }
       clock.tick(100);
       return compare('e2', expected).then(() => {
+        seed = 2;
         expect(getStoredTime()).to.equal(100);
         removeMemoryCacheOfCid();
         clock.tick(3600);
@@ -488,6 +485,7 @@ describe('cid', () => {
       }
       clock.tick(100);
       return compare('e2', expected).then(() => {
+        seed = 2;
         expect(getStoredTime()).to.equal(100);
         removeMemoryCacheOfCid();
         clock.tick(3600);
@@ -783,14 +781,12 @@ describes.realWin('cid', {amp: true}, env => {
   let cid;
   let win;
   let ampdoc;
-  let sandbox;
   let clock;
   const hasConsent = Promise.resolve();
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    sandbox = env.sandbox;
     clock = lolex.install({
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],

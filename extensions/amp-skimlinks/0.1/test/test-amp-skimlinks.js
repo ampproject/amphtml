@@ -31,9 +31,10 @@ describes.fakeWin(
     },
   },
   env => {
-    let ampSkimlinks, helpers;
+    let ampSkimlinks, helpers, ampdoc;
 
     beforeEach(() => {
+      ampdoc = env.ampdoc;
       helpers = helpersFactory(env);
       ampSkimlinks = helpers.createAmpSkimlinks({
         'publisher-code': 'pubIdXdomainId',
@@ -43,6 +44,10 @@ describes.fakeWin(
     afterEach(() => {
       env.sandbox.restore();
     });
+
+    function nextMicroTask() {
+      return Promise.resolve().then(() => Promise.resolve());
+    }
 
     describe('skimOptions', () => {
       it('Should raise an error if publisher-code is missing', () => {
@@ -293,29 +298,32 @@ describes.fakeWin(
         });
 
         it('Should send the impression tracking if visible', () => {
-          return ampSkimlinks.onPageScanned_().then(() => {
-            const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
-            expect(stub.calledOnce).to.be.true;
-          });
+          return ampSkimlinks
+            .onPageScanned_()
+            .then(nextMicroTask)
+            .then(() => {
+              const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
+              expect(stub.calledOnce).to.be.true;
+            });
         });
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          const fakeViewer = {
-            whenFirstVisible: env.sandbox
-              .stub()
-              .returns(isVisibleDefer.promise),
-          };
-          helpers.mockServiceGetter('viewerForDoc', fakeViewer);
+          sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(isVisibleDefer.promise);
 
-          return ampSkimlinks.onPageScanned_().then(() => {
-            const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
-            expect(stub.called).to.be.false;
-            isVisibleDefer.resolve();
-            return isVisibleDefer.promise.then(() => {
-              expect(stub.calledOnce).to.be.true;
+          return ampSkimlinks
+            .onPageScanned_()
+            .then(nextMicroTask)
+            .then(() => {
+              const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
+              expect(stub.called).to.be.false;
+              isVisibleDefer.resolve();
+              return isVisibleDefer.promise.then(() => {
+                expect(stub.calledOnce).to.be.true;
+              });
             });
-          });
         });
 
         it('Should update tracking info with the guid', () => {
@@ -350,20 +358,20 @@ describes.fakeWin(
         });
 
         it('Should send the impression tracking if visible', () => {
-          return ampSkimlinks.onPageScanned_().then(() => {
-            const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
-            expect(stub.calledOnce).to.be.true;
-          });
+          return ampSkimlinks
+            .onPageScanned_()
+            .then(nextMicroTask)
+            .then(() => {
+              const stub = ampSkimlinks.trackingService_.sendImpressionTracking;
+              expect(stub.calledOnce).to.be.true;
+            });
         });
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          const fakeViewer = {
-            whenFirstVisible: env.sandbox
-              .stub()
-              .returns(isVisibleDefer.promise),
-          };
-          helpers.mockServiceGetter('viewerForDoc', fakeViewer);
+          sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(isVisibleDefer.promise);
 
           return ampSkimlinks.onPageScanned_().then(() => {
             const stub = ampSkimlinks.trackingService_.sendImpressionTracking;

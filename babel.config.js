@@ -26,31 +26,42 @@
 'use strict';
 
 const minimist = require('minimist');
-const {isTravisBuild} = require('./build-system/travis');
+const {isTravisBuild} = require('./build-system/common/travis');
 const argv = minimist(process.argv.slice(2));
 
-// eslint-disable-next-line amphtml-internal/no-module-exports
+const isDist = argv._.includes('dist');
+const {esm} = argv;
+const noModuleTarget = {
+  'browsers': isTravisBuild()
+    ? ['Last 2 versions', 'safari >= 9']
+    : ['Last 2 versions'],
+};
+
+// eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
   api.cache(true);
-  // `dist` builds do not use any of the default settings below. (Both
-  // Multipass and Singlepass)
-  if (argv._.includes('dist')) {
+  // `dist` builds do not use any of the default settings below until its
+  // an esm build. (Both Multipass and Singlepass)
+  if (isDist && !esm) {
     return {};
   }
   return {
     'presets': [
-      [
-        '@babel/env',
-        {
-          'modules': 'commonjs',
-          'loose': true,
-          'targets': {
-            'browsers': isTravisBuild()
-              ? ['Last 2 versions', 'safari >= 9']
-              : ['Last 2 versions'],
-          },
-        },
-      ],
+      esm
+        ? [
+            'babel-preset-modules',
+            {
+              'loose': true,
+            },
+          ]
+        : [
+            '@babel/preset-env',
+            {
+              'modules': isDist ? false : 'commonjs',
+              'loose': true,
+              'targets': noModuleTarget,
+            },
+          ],
     ],
     'compact': false,
     'sourceType': 'module',

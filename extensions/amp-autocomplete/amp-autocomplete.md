@@ -1,10 +1,11 @@
 ---
 $category: dynamic-content
 formats:
- - websites
+  - websites
 teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -42,7 +43,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example coming soon.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-autocomplete/">amp-autocomplete</a> sample.</td>
   </tr>
 </table>
 
@@ -53,13 +54,14 @@ The `amp-autocomplete` extension should be used for suggesting completed items b
 This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
 
 Example:
+
 ```html
-  <amp-autocomplete filter="substring" id="myAutocomplete">
-    <input>
-    <script type="application/json">
-      { "items": ["a", "b", "c"] }
-    </script>
-  </amp-autocomplete>
+<amp-autocomplete filter="substring" id="myAutocomplete">
+  <input />
+  <script type="application/json">
+    { "items": ["a", "b", "c"] }
+  </script>
+</amp-autocomplete>
 ```
 
 ## Attributes
@@ -79,11 +81,8 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>src (optional)</strong></td>
-    <td>The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec.
-
-    The src attribute may be omitted if the <code>[src]</code> attribute exists.
-
-    If fetching the data at the src URL fails, the <amp-autocomplete> triggers a fallback.</td>
+    <td>The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec. If fetching the data at the src URL fails, the <code>amp-autocomplete</code> triggers a fallback. The src attribute may be omitted if the <code>[src]</code> attribute exists.
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>filter-expr (optional)</strong></td>
@@ -121,6 +120,32 @@ Example:
   <tr>
     <td width="40%"><strong>highlight-user-entry (optional)</strong></td>
     <td>If present, exposes the <code>autocomplete-partial</code> class on the substring within the suggested item that resulted in its match with the user input. This can be used to stylize the corresponding match to stand out to the user. <strong>Defaults to false.</strong>
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>items (optional)</strong></td>
+    <td>Specifies the key to the data array within the JSON response. Nested keys can be expressed with a dot-notated value such as <code>field1.field2.</code> The default value is <code>"items"</code>. The following are examples with and without usage:
+    <pre lang="html">
+
+      <amp-autocomplete filter="prefix">
+          <input type="text">
+          <script type=application/json>
+            { "items" : ["apples", "bananas", "pears"] }
+           </script>
+      </amp-autocomplete>
+
+  </pre>
+  <pre lang="html">
+
+      <amp-autocomplete filter="prefix" items="fruit">
+        <input type="text">
+        <script type=application/json>
+          { "fruit" : ["apples", "bananas", "pears"] }
+          </script>
+      </amp-autocomplete>
+
+  </pre>
+      In the first example, the JSON payload is queued by the "items" key, and thus no component attribute is needed because the default value corresponds. In the second example, the JSON payload is queued by the "fruit" key, so the <code>items</code> attribute is given the value <code>"fruit"</code> so as to accurately etrieve the intended datasource. In both examples, the end user interaction is the same.
     </td>
   </tr>
 </table>

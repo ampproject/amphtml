@@ -35,16 +35,15 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     xhrMock = sandbox.mock(requestService.xhr_);
   });
 
-  it('should not load the bookend config if no attribute is set', () => {
+  it('should not load the bookend config if no attribute is set', async () => {
     xhrMock.expects('fetchJson').never();
 
-    return requestService.loadBookendConfig().then(config => {
-      expect(config).to.be.null;
-      xhrMock.verify();
-    });
+    const config = await requestService.loadBookendConfig();
+    expect(config).to.be.null;
+    xhrMock.verify();
   });
 
-  it('should use the URL provided in the attribute to load the config', () => {
+  it('should use the URL provided in the attribute to load the config', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
     bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
@@ -59,12 +58,11 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
       })
       .once();
 
-    return requestService.loadBookendConfig().then(() => {
-      xhrMock.verify();
-    });
+    await requestService.loadBookendConfig();
+    xhrMock.verify();
   });
 
-  it('should return the expected bookend config', () => {
+  it('should return the expected bookend config', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
     const fetchedConfig = 'amazingConfig';
 
@@ -79,13 +77,12 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
       })
       .once();
 
-    return requestService.loadBookendConfig().then(config => {
-      expect(config).to.equal(fetchedConfig);
-      xhrMock.verify();
-    });
+    const config = await requestService.loadBookendConfig();
+    expect(config).to.equal(fetchedConfig);
+    xhrMock.verify();
   });
 
-  it('should fetch the bookend config once if called multiple times', () => {
+  it('should fetch the bookend config once if called multiple times', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
     bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
@@ -99,15 +96,12 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
       })
       .once();
 
-    return requestService
-      .loadBookendConfig()
-      .then(() => requestService.loadBookendConfig())
-      .then(() => {
-        xhrMock.verify();
-      });
+    await requestService.loadBookendConfig();
+    await requestService.loadBookendConfig();
+    xhrMock.verify();
   });
 
-  it('should fetch the bookend config with credentials', () => {
+  it('should fetch the bookend config with credentials', async () => {
     const bookendUrl = 'https://publisher.com/bookend';
 
     bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
@@ -125,8 +119,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
       })
       .once();
 
-    return requestService.loadBookendConfig().then(() => {
-      xhrMock.verify();
-    });
+    await requestService.loadBookendConfig();
+    xhrMock.verify();
   });
 });

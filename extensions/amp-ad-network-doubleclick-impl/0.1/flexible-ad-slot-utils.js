@@ -65,8 +65,16 @@ function getElementWidthVisitor(setWidth) {
         setWidth(0);
         return true;
       default:
-        // If no layout is provided, we must use getComputedStyle.
-        setWidth(parseInt(style.width, 10) || 0);
+        // If no layout is provided, we must use getComputedStyle. Padding and
+        // border is not included in the overall computed width, so we must
+        // manually include them.
+        const paddingLeft = parseInt(style.paddingLeft, 10) || 0;
+        const paddingRight = parseInt(style.paddingRight, 10) || 0;
+        const totalPadding = paddingLeft + paddingRight;
+        const borderLeft = parseInt(style.borderLeftWidth, 10) || 0;
+        const borderRight = parseInt(style.borderRightWidth, 10) || 0;
+        const totalBorder = borderLeft + borderRight;
+        setWidth((parseInt(style.width, 10) || 0) + totalPadding + totalBorder);
         return true;
     }
   };
@@ -93,26 +101,28 @@ function getFullWidthSignalVisitor(setSignal) {
 }
 
 /** @typedef {{
- *    fwSignal: ?number,
- *    slotWidth: ?number,
- *    parentWidth: ?number,
+ *    fwSignal: number,
+ *    slotWidth: number,
+ *    parentWidth: number,
+ *    parentStyle: ?Object<string, string>,
  * }}
  */
-let ParamsTypeDef;
+export let FlexibleAdSlotDataTypeDef;
 
 /**
  * Returns the fixed size of the given element, or the fixed size of its nearest
  * ancestor that has a fixed size, if the given element has none.
  * @param {!Window} win
  * @param {?Element} element
- * @return {!ParamsTypeDef} The width of the given
- *    element, or of the nearest ancestor with a fixed size, if the given
- *    element has none.
+ * @return {!FlexibleAdSlotDataTypeDef} A record containing data needed for
+ *   generating flex ad slot ad requests, and for adjusting the slot
+ *   post-response. See type def for more details.
  */
-export function getFlexibleAdSlotRequestParams(win, element) {
+export function getFlexibleAdSlotData(win, element) {
   let fwSignal = 0;
   let slotWidth = -1;
   let parentWidth = -1;
+  let parentStyle = null;
   const setFws = val => (fwSignal = val);
   const setMsz = val => (slotWidth = val);
   const setPsz = val => (parentWidth = val);
@@ -120,6 +130,8 @@ export function getFlexibleAdSlotRequestParams(win, element) {
     .addVisitor(getElementWidthVisitor(setMsz), 1 /* maxDepth */)
     .addVisitor(getElementWidthVisitor(setPsz), 100 /* maxDepth */)
     .addVisitor(getFullWidthSignalVisitor(setFws), 100 /* maxDepth */)
+    // Used to acquire the parentStyle object so as to not recompute it later
+    .addVisitor((el, style) => (parentStyle = style), 1 /* maxDepth */)
     .visitAncestorsStartingFrom(element);
-  return {fwSignal, slotWidth, parentWidth};
+  return {fwSignal, slotWidth, parentWidth, parentStyle};
 }

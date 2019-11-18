@@ -33,7 +33,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with local mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -50,7 +50,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -67,7 +67,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should allow no versions', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -84,7 +84,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should handles single pass experiment', () => {
-      window.AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
+      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -96,7 +96,7 @@ describes.sandboxed('Extension Location', {}, () => {
         true
       );
       expect(script).to.equal(
-        'http://localhost:8000/dist/rtv/123/sp/v0/no-version.js'
+        'http://localhost:8000/dist/rtv/123/v0/no-version.js'
       );
     });
   });
@@ -125,7 +125,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -139,7 +139,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode & rtv', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -154,7 +154,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should handle single pass experiment', () => {
-      window.AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
+      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -165,7 +165,7 @@ describes.sandboxed('Extension Location', {}, () => {
         /* isLocalDev */ false,
         /* opt_rtv */ true
       );
-      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/sp/ww.js');
+      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/ww.js');
     });
   });
 

@@ -21,11 +21,6 @@ const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
 const {
-  compileAccessExpr,
-  compileBindExpr,
-  compileCssExpr,
-} = require('./build-system/tasks/compile-expr');
-const {
   generateVendorJsons,
 } = require('./build-system/tasks/generate-vendor-jsons');
 const {
@@ -39,12 +34,14 @@ const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
 const {build, defaultTask, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
-const {cachesJson, jsonSyntax} = require('./build-system/tasks/json-check');
+const {cachesJson} = require('./build-system/tasks/caches-json');
 const {changelog, changelogUpdate} = require('./build-system/tasks/changelog');
 const {checkLinks} = require('./build-system/tasks/check-links');
+const {checkOwners} = require('./build-system/tasks/check-owners');
 const {checkTypes} = require('./build-system/tasks/check-types');
 const {clean} = require('./build-system/tasks/clean');
 const {codecovUpload} = require('./build-system/tasks/codecov-upload');
+const {compileJison} = require('./build-system/tasks/compile-jison');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
@@ -61,10 +58,10 @@ const {nailgunStart, nailgunStop} = require('./build-system/tasks/nailgun');
 const {prCheck} = require('./build-system/tasks/pr-check');
 const {prependGlobal} = require('./build-system/tasks/prepend-global');
 const {presubmit} = require('./build-system/tasks/presubmit-checks');
+const {prettify} = require('./build-system/tasks/prettify');
 const {releaseTag} = require('./build-system/tasks/release-tagging');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
-const {test} = require('./build-system/tasks/runtime-test');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
@@ -83,12 +80,11 @@ gulp.task('changelog', changelog);
 gulp.task('changelog:update', changelogUpdate);
 gulp.task('check-exact-versions', checkExactVersions);
 gulp.task('check-links', checkLinks);
+gulp.task('check-owners', checkOwners);
 gulp.task('check-types', checkTypes);
 gulp.task('clean', clean);
 gulp.task('codecov-upload', codecovUpload);
-gulp.task('compile-access-expr', compileAccessExpr);
-gulp.task('compile-bind-expr', compileBindExpr);
-gulp.task('compile-css-expr', compileCssExpr);
+gulp.task('compile-jison', compileJison);
 gulp.task('create-golden-css', createGoldenCss);
 gulp.task('css', css);
 gulp.task('csvify-size', csvifySize);
@@ -101,7 +97,6 @@ gulp.task('firebase', firebase);
 gulp.task('generate-vendor-jsons', generateVendorJsons);
 gulp.task('get-zindex', getZindex);
 gulp.task('integration', integration);
-gulp.task('json-syntax', jsonSyntax);
 gulp.task('lint', lint);
 gulp.task('make-extension', makeExtension);
 gulp.task('nailgun-start', nailgunStart);
@@ -109,12 +104,12 @@ gulp.task('nailgun-stop', nailgunStop);
 gulp.task('pr-check', prCheck);
 gulp.task('prepend-global', prependGlobal);
 gulp.task('presubmit', presubmit);
+gulp.task('prettify', prettify);
 gulp.task('process-3p-github-pr', process3pGithubPr);
 gulp.task('process-github-issues', processGithubIssues);
 gulp.task('release:tag', releaseTag);
 gulp.task('serve', serve);
 gulp.task('size', size);
-gulp.task('test', test);
 gulp.task('todos:find-closed', todosFindClosed);
 gulp.task('unit', unit);
 gulp.task('update-packages', updatePackages);

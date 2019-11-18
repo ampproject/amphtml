@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
-const {gitCommitterEmail} = require('../git');
-const {isTravisBuild, travisJobNumber} = require('../travis');
+const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
+const {gitCommitterEmail} = require('../common/git');
+const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
 const TEST_SERVER_PORT = 8081;
 
@@ -28,17 +28,22 @@ const COMMON_CHROME_FLAGS = [
   '--autoplay-policy=no-user-gesture-required',
 ];
 
-// Reduces the odds of Sauce labs timing out during tests. See #16135.
+// Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
 const SAUCE_TIMEOUT_CONFIG = {
   maxDuration: 10 * 60,
   commandTimeout: 10 * 60,
-  idleTimeout: 5 * 60,
+  idleTimeout: 10 * 60,
 };
 
-const BABELIFY_CONFIG = Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {
-  sourceMapsAbsolute: true,
-});
+const BABELIFY_CONFIG = Object.assign(
+  {},
+  BABELIFY_GLOBAL_TRANSFORM,
+  BABELIFY_PLUGINS,
+  {
+    sourceMapsAbsolute: true,
+  }
+);
 
 const preprocessors = ['browserify'];
 
@@ -73,6 +78,7 @@ module.exports = {
   browserify: {
     watch: true,
     debug: true,
+    fast: true,
     basedir: __dirname + '/../../',
     transform: [['babelify', BABELIFY_CONFIG]],
     // Prevent "cannot find module" errors on Travis. See #14166.
@@ -151,10 +157,14 @@ module.exports = {
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
-      flags: ['--no-sandbox --remote-debugging-port=9222'].concat(
-        COMMON_CHROME_FLAGS
-      ),
+      flags: [
+        // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+        '--no-sandbox',
+        '--remote-debugging-port=9222',
+        // https://github.com/karma-runner/karma-chrome-launcher/issues/175
+        "--proxy-server='direct://'",
+        '--proxy-bypass-list=*',
+      ].concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
@@ -246,21 +256,19 @@ module.exports = {
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_Edge_17: Object.assign(
+    SL_Edge: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'MicrosoftEdge',
         platform: 'Windows 10',
-        version: '17.17134',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_IE_11: Object.assign(
+    SL_IE: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'internet explorer',
         platform: 'Windows 10',
-        version: '11.103',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
@@ -293,13 +301,14 @@ module.exports = {
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
 
-  // AMP tests on Sauce take ~9 minutes, so don't fail if the browser doesn't
-  // communicate with the proxy for up to 10 minutes.
-  // TODO(rsimha): Reduce this number once keepalives are implemented by
-  // karma-sauce-launcher.
-  // See https://github.com/karma-runner/karma-sauce-launcher/pull/161.
-  browserDisconnectTimeout: 10 * 60 * 1000,
-  browserNoActivityTimeout: 10 * 60 * 1000,
+  // Give a disconnected browser 2 minutes to reconnect with Karma.
+  // This allows a browser to retry 2 times per `browserDisconnectTolerance`
+  // on Travis before stalling out after 10 minutes.
+  browserDisconnectTimeout: 2 * 60 * 1000,
+
+  // If there's no message from the browser, make Karma wait 2 minutes
+  // until it disconnects.
+  browserNoActivityTimeout: 2 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
@@ -328,7 +337,7 @@ module.exports = {
       'middleware:custom': [
         'factory',
         function() {
-          return require(require.resolve('../app.js'));
+          return require(require.resolve('../server/app.js'));
         },
       ],
     },

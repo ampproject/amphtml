@@ -15,6 +15,7 @@
  */
 import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
+import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
@@ -24,6 +25,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   let win, doc;
   let vsync;
   let resources;
+  let owners;
   let requireLayoutSpy;
   let target1, target2;
   let warnStub;
@@ -54,12 +56,13 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
     warnStub = sandbox.stub(user(), 'warn');
 
-    vsync = win.services.vsync.obj;
+    vsync = Services.vsyncFor(win);
     sandbox.stub(vsync, 'measurePromise').callsFake(callback => {
       return Promise.resolve(callback());
     });
-    resources = win.services.resources.obj;
-    requireLayoutSpy = sandbox.spy(resources, 'requireLayout');
+    resources = Services.resourcesForDoc(env.ampdoc);
+    owners = Services.ownersForDoc(env.ampdoc);
+    requireLayoutSpy = sandbox.spy(owners, 'requireLayout');
 
     target1 = doc.createElement('div');
     target1.id = 'target1';
@@ -82,7 +85,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       /* vsync */ null,
-      /* resources */ null
+      /* owners */ null
     );
     sandbox.stub(builder, 'requireLayout');
     const scanner = builder.createScanner_([]);
@@ -796,7 +799,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       vsync,
-      /* resources */ null
+      /* owners */ null
     );
     const cssContext = builder.css_;
     expect(cssContext.supports('supported: 0')).to.be.false;
@@ -975,7 +978,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       vsync,
-      /* resources */ null
+      /* owners */ null
     );
     sandbox.stub(builder, 'requireLayout');
     const spec = {target: target1, delay: 101, keyframes: {}};
@@ -1010,7 +1013,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       animation2.id = 'animation2';
       doc.body.appendChild(animation2);
 
-      builder = new Builder(win, doc, 'https://acme.org/', vsync, resources);
+      builder = new Builder(win, doc, 'https://acme.org/', vsync, owners);
       sandbox.stub(builder, 'requireLayout');
       scanner = builder.createScanner_([]);
     });
@@ -1211,7 +1214,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           selector: '.target',
           animation: 'animation2',
           delay: 'calc((index() + 1) * 1s)',
-          subtargets: [{index: 0, '--y': '11px'}, {index: 1, '--y': '12px'}],
+          subtargets: [
+            {index: 0, '--y': '11px'},
+            {index: 1, '--y': '12px'},
+          ],
         })
         .then(requests => {
           expect(requests).to.have.length(2);
@@ -1225,7 +1231,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     it('should propagate vars and index by selector from child', () => {
       animation2Spec = {
         delay: 'calc((index() + 1) * 1s)',
-        subtargets: [{index: 0, '--y': '11px'}, {index: 1, '--y': '12px'}],
+        subtargets: [
+          {index: 0, '--y': '11px'},
+          {index: 1, '--y': '12px'},
+        ],
         duration: 2000,
         keyframes: {},
       };
@@ -1255,7 +1264,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         doc,
         'https://acme.org/',
         /* vsync */ null,
-        /* resources */ null
+        /* owners */ null
       );
       css = builder.css_;
       parseSpy = sandbox.spy(css, 'resolveAsNode_');
@@ -1557,13 +1566,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     }
 
     function createRunner(spec) {
-      const builder = new Builder(
-        win,
-        doc,
-        'https://acme.org/',
-        vsync,
-        resources
-      );
+      const builder = new Builder(win, doc, 'https://acme.org/', vsync, owners);
       return builder.createRunner(spec);
     }
 
