@@ -30,7 +30,7 @@ const {
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
-const {isRtvMode, getServeMode, setServeMode} = require('../server/app-utils');
+const {logServeMode, setServeMode} = require('../server/app-utils');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
@@ -39,22 +39,6 @@ let url = null;
 let {quiet} = argv;
 
 const serverFiles = globby.sync(['build-system/server/**']);
-
-/**
- * Logs the server's mode.
- */
-function logServeMode() {
-  const serveMode = getServeMode();
-  if (serveMode == 'compiled') {
-    log(green('Serving'), cyan('minified'), green('JS'));
-  } else if (serveMode == 'cdn') {
-    log(green('Serving'), cyan('current prod'), green('JS'));
-  } else if (isRtvMode(serveMode)) {
-    log(green('Serving JS from RTV'), cyan(serveMode));
-  } else {
-    log(green('Serving'), cyan('unminified'), green('JS'));
-  }
-}
 
 /**
  * Returns a list of middleware handler functions to use while serving

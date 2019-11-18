@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+const log = require('fancy-log');
 const minimist = require('minimist');
+const {cyan, green} = require('ansi-colors');
 
 let serveMode = 'default';
 
@@ -49,6 +51,22 @@ function setServeMode(modeOptions) {
       err.showStack = false;
       throw err;
     }
+  }
+}
+
+/**
+ * Logs the server's mode.
+ */
+function logServeMode() {
+  const serveMode = getServeMode();
+  if (serveMode == 'compiled') {
+    log(green('Serving'), cyan('minified'), green('JS'));
+  } else if (serveMode == 'cdn') {
+    log(green('Serving'), cyan('current prod'), green('JS'));
+  } else if (isRtvMode(serveMode)) {
+    log(green('Serving JS from RTV'), cyan(serveMode));
+  } else {
+    log(green('Serving'), cyan('unminified'), green('JS'));
   }
 }
 
@@ -156,8 +174,9 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
 };
 
 module.exports = {
-  isRtvMode,
-  replaceUrls,
   getServeMode,
+  isRtvMode,
+  logServeMode,
+  replaceUrls,
   setServeMode,
 };

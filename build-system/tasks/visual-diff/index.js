@@ -139,10 +139,11 @@ async function launchPercyAgent() {
 }
 
 /**
- * Launches an AMP webserver for unminified js.
+ * Launches an AMP webserver for minified js.
  */
 async function launchWebServer() {
-  await startServer({host: HOST, port: PORT}, argv.webserver_debug);
+  const logRequests = !!argv.webserver_debug;
+  await startServer({host: HOST, port: PORT}, logRequests, {compiled: true});
 }
 
 /**
