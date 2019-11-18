@@ -201,8 +201,8 @@ export class InaboxMessagingHost {
     source./*OK*/ postMessage(
       serializeMessage(MessageType.POSITION, request.sentinel, data),
       // We don't need to restrict what origin we send the data to because (a)
-      // this is position information that we're happy to give to any frame
-      // that requests it, and (b) we're post messaging back directly to the
+      // we've already verified that this iframe is whitelisted and allowed to
+      // learn its position, and (b) we're post messaging back directly to the
       // requesting frame.  If we did restrict the origin this would not work
       // with implementations that use a null origin to render ads.
       '*'
