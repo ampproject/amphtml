@@ -21,7 +21,11 @@ import {
 } from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
+import {
+  getSourceOrigin,
+  isProxyOrigin,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {getState} from '../../../src/history';
 import {setStyle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
@@ -232,27 +236,19 @@ export function getSourceOriginForElement(element, url) {
 }
 
 /**
- * Checks if document is being served from cache.
+ * Resolves an image url and optimizes it if served from the cache.
  * @param {!Document} doc
- * @return {boolean}
- */
-export function isServedFromCache(doc) {
-  const urlService = Services.urlForDoc(doc.body);
-  const url = doc.location.href;
-  const sourceOrigin = getSourceOrigin(url);
-  const {origin} = urlService.parse(url);
-
-  return sourceOrigin !== origin;
-}
-
-/**
- * Checks if url is absolute.
  * @param {string} url
- * @return {boolean}
+ * @return {string}
  */
-export function isAbsoluteUrl(url) {
-  // Taken from: https://stackoverflow.com/questions/10687099/how-to-test-if-a-url-string-is-absolute-or-relative
-  return /^(?:[a-z]+:)?\/\//i.test(url);
+export function resolveImgSrc(doc, url) {
+  let urlSrc = resolveRelativeUrl(url, doc.location);
+  if (isProxyOrigin(doc.location.href)) {
+    // TODO(Enriqe): add extra params for resized image, for example:
+    // (/ii/w${width}/s)
+    urlSrc = urlSrc.replace('/c/s/', '/i/s/');
+  }
+  return urlSrc;
 }
 
 /** @enum {string} */

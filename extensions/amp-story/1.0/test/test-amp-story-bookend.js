@@ -32,7 +32,7 @@ import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {amp: true}, env => {
   let win;
-  let document;
+  let doc;
   let storyElem;
   let bookend;
   let bookendElem;
@@ -124,11 +124,11 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    document = win.document;
-    storyElem = document.createElement('amp-story');
-    storyElem.appendChild(document.createElement('amp-story-page'));
-    document.body.appendChild(storyElem);
-    bookendElem = createElementWithAttributes(document, 'amp-story-bookend', {
+    doc = win.document;
+    storyElem = doc.createElement('amp-story');
+    storyElem.appendChild(doc.createElement('amp-story-page'));
+    doc.body.appendChild(storyElem);
+    bookendElem = createElementWithAttributes(doc, 'amp-story-bookend', {
       'layout': 'nodisplay',
     });
     storyElem.appendChild(bookendElem);
@@ -354,7 +354,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
     const clickSpy = sandbox.spy();
-    document.addEventListener('click', clickSpy);
+    doc.addEventListener('click', clickSpy);
 
     bookend.build();
     await bookend.loadConfigAndMaybeRenderBookend();
@@ -1079,12 +1079,12 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       domainName: 'example.com',
       type: 'small',
       title: 'This is an example article',
-      image: 'assets/01-iconic-american-destinations.jpg',
+      image: '../../assets/01-iconic-american-destinations.jpg',
     };
 
     const fakeDoc = {
-      createElement: document.createElement.bind(document),
-      body: document.body,
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
       location: {
         href:
           'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
@@ -1093,7 +1093,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     const article = new ArticleComponent();
     const el = article.buildElement(component, fakeDoc, {position: 0});
     expect(el.querySelector('img').src).to.equal(
-      'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/assets/01-iconic-american-destinations.jpg'
+      'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/assets/01-iconic-american-destinations.jpg'
     );
   });
 
@@ -1103,12 +1103,12 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       domainName: 'example.com',
       type: 'landscape',
       title: 'This is an example landscape',
-      image: 'assets/01-iconic-american-destinations.jpg',
+      image: './assets/01-iconic-american-destinations.jpg',
     };
 
     const fakeDoc = {
-      createElement: document.createElement.bind(document),
-      body: document.body,
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
       location: {
         href:
           'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
@@ -1131,8 +1131,8 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     };
 
     const fakeDoc = {
-      createElement: document.createElement.bind(document),
-      body: document.body,
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
       location: {
         href:
           'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
@@ -1155,8 +1155,8 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     };
 
     const fakeDoc = {
-      createElement: document.createElement.bind(document),
-      body: document.body,
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
       location: {
         href:
           'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
@@ -1173,12 +1173,12 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       domainName: 'example.com',
       type: 'small',
       title: 'This is an example portrait',
-      image: 'assets/01-iconic-american-destinations.jpg',
+      image: '../../assets/01-iconic-american-destinations.jpg',
     };
 
     const fakeDoc = {
-      createElement: document.createElement.bind(document),
-      body: document.body,
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
       location: {
         href:
           'https://www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
@@ -1187,7 +1187,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     const portrait = new PortraitComponent();
     const el = portrait.buildElement(component, fakeDoc, {position: 0});
     expect(el.querySelector('img').src).to.equal(
-      'http://localhost:9876/assets/01-iconic-american-destinations.jpg'
+      'https://www.nationalgeographic.com/amp-stories/assets/01-iconic-american-destinations.jpg'
     );
   });
 });

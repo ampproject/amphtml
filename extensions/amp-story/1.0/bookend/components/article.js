@@ -23,8 +23,7 @@ import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {
   getSourceOriginForElement,
-  isAbsoluteUrl,
-  isServedFromCache,
+  resolveImgSrc,
   userAssertValidProtocol,
 } from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
@@ -127,15 +126,11 @@ export class ArticleComponent {
 
       const {image} = htmlRefs(imgEl);
 
-      if (isServedFromCache(doc) && !isAbsoluteUrl(articleData.image)) {
-        const fullUrl = doc.location.href + articleData.image;
-        // TODO(Enriqe): add extra params for resized image, for example:
-        // (/ii/w${width}/s)
-        const optimizedUrl = fullUrl.replace('/c/s/', '/i/s/');
-        addAttributesToElement(image, dict({'src': optimizedUrl}));
-      } else {
-        addAttributesToElement(image, dict({'src': articleData.image}));
-      }
+      addAttributesToElement(
+        image,
+        dict({'src': resolveImgSrc(doc, articleData.image)})
+      );
+
       el.appendChild(imgEl);
     }
 

@@ -23,8 +23,7 @@ import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {
   getSourceOriginForElement,
-  isAbsoluteUrl,
-  isServedFromCache,
+  resolveImgSrc,
   userAssertValidProtocol,
 } from '../../utils';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
@@ -134,15 +133,10 @@ export class LandscapeComponent {
     category.textContent = landscapeData.category;
     title.textContent = landscapeData.title;
 
-    if (isServedFromCache(doc) && !isAbsoluteUrl(landscapeData.image)) {
-      const fullUrl = doc.location.href + landscapeData.image;
-      // TODO(Enriqe): add extra params for resized image, for example:
-      // (/ii/w${width}/s)
-      const optimizedUrl = fullUrl.replace('/c/s/', '/i/s/');
-      addAttributesToElement(image, dict({'src': optimizedUrl}));
-    } else {
-      addAttributesToElement(image, dict({'src': landscapeData.image}));
-    }
+    addAttributesToElement(
+      image,
+      dict({'src': resolveImgSrc(doc, landscapeData.image)})
+    );
 
     meta.textContent = landscapeData.domainName;
 
