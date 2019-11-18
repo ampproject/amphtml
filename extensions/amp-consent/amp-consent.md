@@ -107,8 +107,9 @@ AMP sends the consent instance ID in the `consentInstanceId` field with the POST
 ```html
 { 
   "consentInstanceId": {string},
-  "consentStateValue": {enum}, // takes value of ["accepted", "rejected", "unknown"]
-  "consentString": {string},
+  "consentStateValue": {enum}, // the stored consent state in client cache
+                               // takes value of ["accepted", "rejected", "unknown"]
+  "consentString": {string},   // the stored consent string in client cache
   "matchedGeoGroup": {string}, // (new) the user's geoGroup detected by AMP.
 }
 ```
@@ -124,6 +125,7 @@ AMP expects the response to be a JSON object like the following:
                                             // takes value of ["accepted", "rejected", "unknown"]
                                             // The value will be automatically used to update the client cache
                                             // if it's one of ["accepted", "rejected"]
+  "consentString": {string},                // (new) the latest consent string known by the server
   "expireCache": {boolean} [default: false] // (new) indicate that the cache needs to be cleared.  
                                             // Set to `true` to enforce server side consent state. 
 }
@@ -154,15 +156,20 @@ As mentioned in the response section, the consent state returned in the response
 side cache. The cached value will be used to avoid an extra server roundtrip on user's next visit. Note that this cached value, i.e user's previous consent decision ("accepted" or "rejected"), will always be respected in prior to all other things. 
 A couple of implications with this behavior:
 
-- If a login user can make consent decisions elsewhere, any decision changes will be one-time-off due to the client side cache.
+- If a user can make consent decisions elsewhere, any decision changes will be one-time off due to the client cache.
 - When the user is travelling away from a consent enforced region, the user's very first visit in the new region will still take user's previous consent decision in cache. It's the `checkConsentHref` endpoint's job to decide if the same decision should still be respected for all future visits by echoing back user's consent, or consent is no longer required for the user  by responding `consentRequire: false, expireCache: true`.
 
 If the above behavior is unwanted, publishers can return `expireCache: true` all the time to completely disable client cache, with a tradeoff on increased latency.
 
-Note that the any locally collected consent decisions via the prompt UI are also stored in the same client cache overriding any previous consent state.
+Note that any locally collected consent decisions via AMP's prompt UI are also stored in the same client cache overriding any previous consent state.
 
 #### consentRequired
-`consentRequired`: It accepts a boolean value indicating if a consent is required. `<amp-consent>` releases the lock immediately if `consentRequired: false`. It makes sense mostly with a combination of  [geoOverride](#geooverride) config. It  can also be set to `consentRequired: "remote"` to fetch the value remotely from the `checkConsentHref` endpoint. Note that this value will be ignored if there is previous consent state stored in client cache (see [Client caching](#client-caching) section for examples). 
+`consentRequired`: It accepts a boolean value indicating if a consent is required. `<amp-consent>` releases the lock immediately if `consentRequired: false`. It makes sense mostly with a combination of [geoOverride](#geooverride) config so that only a certain regions require consent. 
+
+It can also be set to `consentRequired: "remote"` to fetch the value remotely from the `checkConsentHref` endpoint. This is
+useful when publishers want to use their own server to decide if consent is required. For example, they want to have their own geo detection, or use the existing consent state for a known user.
+
+Note that this value will be ignored if there is previous consent state stored in client cache (see [Client caching](#client-caching) section for examples). 
 
 
 #### onUpdateHref
