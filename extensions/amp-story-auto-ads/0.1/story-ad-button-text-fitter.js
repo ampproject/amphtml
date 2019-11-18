@@ -119,15 +119,14 @@ function calculateFontSize(
   minFontSize,
   maxFontSize
 ) {
-  let fontSize = maxFontSize;
-  while (fontSize >= minFontSize) {
+  for (let fontSize = maxFontSize; fontSize >= minFontSize; fontSize--) {
     setStyle(measurer, 'fontSize', px(fontSize));
     const height = measurer./*OK*/ offsetHeight;
     const width = measurer./*OK*/ offsetWidth;
-    if (height <= expectedHeight && width <= expectedWidth) {
+    if (height < expectedHeight && width < expectedWidth) {
       return fontSize;
     }
-    fontSize--;
   }
-  return fontSize;
+  // Did not fit within design spec.
+  return minFontSize - 1;
 }
