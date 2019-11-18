@@ -16,13 +16,13 @@
 
 import {CSS} from '../../../build/amp-next-page-0.2.css';
 import {Layout} from '../../../src/layout';
-import {NextPageService} from './next-page-service';
+import {NextPageService} from './service';
 import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-next-page';
-const SERVICE_ID = 'next-page';
+const SERVICE = 'next-page';
 
 export class AmpNextPage extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -59,6 +59,6 @@ export class AmpNextPage extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.2', AMP => {
-  AMP.registerServiceForDoc(SERVICE_ID, NextPageService);
+  AMP.registerServiceForDoc(SERVICE, NextPageService);
   AMP.registerElement(TAG, AmpNextPage, CSS);
 });

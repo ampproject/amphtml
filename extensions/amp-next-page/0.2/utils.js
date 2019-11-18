@@ -38,7 +38,7 @@ export function validateUrl(url, hostUrl) {
     'Invalid page URL supplied to amp-next-page, pages must be from the same origin as the current document'
   );
 
-  return url;
+  return parsedUrl;
 }
 
 /**
