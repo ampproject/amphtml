@@ -209,28 +209,32 @@ describes.realWin(
     });
 
     describe('analytics triggers', () => {
-      it('should fire "story-ad-insert" upon insertion', () => {
+      it('should fire "story-ad-insert" upon insertion', async () => {
         autoAds.uniquePagesCount_ = 10;
         autoAds.adPagesCreated_ = 1;
         sandbox.stub(autoAds, 'startNextAdPage_');
-        sandbox.stub(autoAds, 'tryToPlaceAdAfterPage_').returns(/* placed */ 1);
+        sandbox
+          .stub(autoAds, 'tryToPlaceAdAfterPage_')
+          .resolves(/* placed */ 1);
         const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
         autoAds.handleActivePageChange_(3, 'fakePage');
+        await macroTask();
         expect(analyticsStub).to.be.called;
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-insert', {
           'insertTime': sinon.match.number,
         });
       });
 
-      it('should fire "story-ad-discard" upon discarded ad', () => {
+      it('should fire "story-ad-discard" upon discarded ad', async () => {
         autoAds.uniquePagesCount_ = 10;
         autoAds.adPagesCreated_ = 1;
         sandbox.stub(autoAds, 'startNextAdPage_');
         sandbox
           .stub(autoAds, 'tryToPlaceAdAfterPage_')
-          .returns(/* discard */ 2);
+          .resolves(/* discard */ 2);
         const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
         autoAds.handleActivePageChange_(3, 'fakePage');
+        await macroTask();
         expect(analyticsStub).to.be.called;
         expect(analyticsStub).to.have.been.calledWithMatch('story-ad-discard', {
           'discardTime': sinon.match.number,
@@ -244,6 +248,7 @@ describes.realWin(
         };
         autoAds.setVisibleAttribute_ = NOOP;
         autoAds.adPagesCreated_ = 1;
+        sandbox.stub(autoAds, 'startNextAdPage_');
         const analyticsStub = sandbox.stub(autoAds, 'analyticsEvent_');
         autoAds.adPageIds_ = {'ad-page-1': 1};
         autoAds.handleActivePageChange_(1, 'ad-page-1');
@@ -297,7 +302,7 @@ describes.realWin(
 
         sandbox
           .stub(StoryAdPage.prototype, 'maybeCreateCta')
-          .returns(/* success */ true);
+          .resolves(/* success */ true);
 
         await autoAds.buildCallback();
         await autoAds.layoutCallback();

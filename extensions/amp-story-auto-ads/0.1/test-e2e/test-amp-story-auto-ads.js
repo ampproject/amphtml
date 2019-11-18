@@ -155,7 +155,7 @@ async function validateCta(controller, ctaUrl) {
   });
   // TODO(ccordry): write e2e test for dynamic font scaling when launched.
   await expect(controller.getElementCssValue(ctaButton, 'font-size')).to.equal(
-    '13px'
+    '14px'
   );
 }
 

@@ -38,7 +38,6 @@ import {dict} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
-import {setStyles} from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -75,8 +74,9 @@ export class StoryAdPage {
    * @param {!JsonObject} config
    * @param {number} index
    * @param {!./story-ad-localization.StoryAdLocalization} localization
+   * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
    */
-  constructor(ampdoc, config, index, localization) {
+  constructor(ampdoc, config, index, localization, buttonFitter) {
     /** @private @const {!JsonObject} */
     this.config_ = config;
 
@@ -121,6 +121,9 @@ export class StoryAdPage {
 
     /** @private @const {!Array<Function>} */
     this.loadCallbacks_ = [];
+
+    /** @private @const {./story-ad-button-text-fitter.ButtonTextFitter} */
+    this.buttonFitter_ = buttonFitter;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -215,56 +218,64 @@ export class StoryAdPage {
   /**
    * Try to create CTA (Click-To-Action) before showing the ad. Will fail if
    * not enough metadata to create the outlink button.
-   * @return {boolean}
+   * @return {Promise<boolean>}
    */
   maybeCreateCta() {
-    // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
-    if (this.adDoc_) {
-      this.extractA4AVars_();
-      this.readAmpAdExit_();
-    }
+    return Promise.resolve().then(() => {
+      // FIE only. Template ads have no iframe, and we can't access x-domain iframe.
+      if (this.adDoc_) {
+        this.extractA4AVars_();
+        this.readAmpAdExit_();
+      }
 
-    // If making a CTA layer we need a button name & outlink url.
-    const ctaUrl =
-      this.ampAdExitOutlink_ ||
-      this.a4aVars_[A4AVarNames.CTA_URL] ||
-      this.adElement_.getAttribute(DataAttrs.CTA_URL);
+      // If making a CTA layer we need a button name & outlink url.
+      const ctaUrl =
+        this.ampAdExitOutlink_ ||
+        this.a4aVars_[A4AVarNames.CTA_URL] ||
+        this.adElement_.getAttribute(DataAttrs.CTA_URL);
 
-    const ctaType =
-      this.a4aVars_[A4AVarNames.CTA_TYPE] ||
-      this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
+      const ctaType =
+        this.a4aVars_[A4AVarNames.CTA_TYPE] ||
+        this.adElement_.getAttribute(DataAttrs.CTA_TYPE);
 
-    if (!ctaUrl || !ctaType) {
-      user().error(TAG, 'Both CTA Type & CTA Url are required in ad response.');
-      return false;
-    }
+      if (!ctaUrl || !ctaType) {
+        user().error(
+          TAG,
+          'Both CTA Type & CTA Url are required in ad response.'
+        );
+        return false;
+      }
 
-    const ctaLocalizedStringId = CtaTypes[ctaType];
-    const ctaText = this.localizationService_.getLocalizedString(
-      ctaLocalizedStringId
-    );
-    if (!ctaText) {
-      user().error(TAG, 'invalid "CTA Type" in ad response');
-      return false;
-    }
+      let ctaText;
+      // CTA picked from predefined choices.
+      if (CtaTypes[ctaType]) {
+        const ctaLocalizedStringId = CtaTypes[ctaType];
+        ctaText = this.localizationService_.getLocalizedString(
+          ctaLocalizedStringId
+        );
+      } else {
+        // Custom CTA text - Should already be localized.
+        ctaText = ctaType;
+      }
 
-    // Store the cta-type as an accesible var for any further pings.
-    this.analytics_.then(analytics =>
-      analytics.setVar(
-        this.index_, // adIndex
-        AnalyticsVars.CTA_TYPE,
-        ctaType
-      )
-    );
+      // Store the cta-type as an accesible var for any further pings.
+      this.analytics_.then(analytics =>
+        analytics.setVar(
+          this.index_, // adIndex
+          AnalyticsVars.CTA_TYPE,
+          ctaText
+        )
+      );
 
-    try {
-      this.maybeCreateAttribution_();
-    } catch (e) {
-      // Failure due to missing adchoices icon or url.
-      return false;
-    }
+      try {
+        this.maybeCreateAttribution_();
+      } catch (e) {
+        // Failure due to missing adchoices icon or url.
+        return false;
+      }
 
-    return this.createCtaLayer_(ctaUrl, ctaText);
+      return this.createCtaLayer_(ctaUrl, ctaText);
+    });
   }
 
   /**
@@ -325,39 +336,55 @@ export class StoryAdPage {
    * Create layer to contain outlink button.
    * @param {string} ctaUrl
    * @param {string} ctaText
-   * @return {boolean}
+   * @return {Promise<boolean>}
    */
   createCtaLayer_(ctaUrl, ctaText) {
     // TODO(ccordry): Move button to shadow root.
-    const a = this.doc_.createElement('a');
-    a.className = 'i-amphtml-story-ad-link';
-    a.setAttribute('target', '_blank');
-    setStyles(a, {
-      'font-size': '0',
-      opactiy: '0',
-      transform: 'scale(0)',
+    const a = createElementWithAttributes(
+      this.doc_,
+      'a',
+      dict({
+        'class': 'i-amphtml-story-ad-link',
+        'target': '_blank',
+        'href': ctaUrl,
+      })
+    );
+
+    const fitPromise = this.buttonFitter_.fit(
+      dev().assertElement(this.pageElement_),
+      a, // Container
+      ctaText // Content
+    );
+
+    return fitPromise.then(success => {
+      if (!success) {
+        user().warn(TAG, 'CTA button text is too long. Ad was discarded.');
+        return false;
+      }
+
+      a.href = ctaUrl;
+      a.textContent = ctaText;
+
+      if (a.protocol !== 'https:' && a.protocol !== 'http:') {
+        user().warn(TAG, 'CTA url is not valid. Ad was discarded');
+        return false;
+      }
+
+      // Click listener so that we can fire `story-ad-click` analytics trigger at
+      // the appropriate time.
+      a.addEventListener('click', () => {
+        const vars = {
+          [AnalyticsVars.AD_CLICKED]: Date.now(),
+        };
+        this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
+      });
+
+      const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
+      ctaLayer.className = 'i-amphtml-cta-container';
+      ctaLayer.appendChild(a);
+      this.pageElement_.appendChild(ctaLayer);
+      return true;
     });
-    a.href = ctaUrl;
-    a.textContent = ctaText;
-
-    if (a.protocol !== 'https:' && a.protocol !== 'http:') {
-      user().warn(TAG, 'CTA url is not valid. Ad was discarded');
-      return false;
-    }
-
-    // Click listener so that we can fire `story-ad-click` analytics trigger at
-    // the appropriate time.
-    a.addEventListener('click', () => {
-      const vars = {
-        [AnalyticsVars.AD_CLICKED]: Date.now(),
-      };
-      this.analyticsEvent_(AnalyticsEvents.AD_CLICKED, vars);
-    });
-
-    const ctaLayer = this.doc_.createElement('amp-story-cta-layer');
-    ctaLayer.appendChild(a);
-    this.pageElement_.appendChild(ctaLayer);
-    return true;
   }
 
   /**
