@@ -15,17 +15,17 @@
  */
 
 module.exports = function(babel) {
-  const { types: t } = babel;
+  const {types: t} = babel;
 
   function cloneDeepWithoutLoc(node) {
     const str = JSON.stringify(node);
     return JSON.parse(str, (key, value) => {
-      return key === "loc" ? undefined : value;
+      return key === 'loc' ? undefined : value;
     });
   }
 
   function declarator(path, parentPath) {
-    const init = parentPath.get("init");
+    const init = parentPath.get('init');
     let from = init.node;
     if (!init.isPure()) {
       from = path.scope.generateUidIdentifierBasedOnNode(init.node);
@@ -34,16 +34,16 @@ module.exports = function(babel) {
       );
     }
 
-    const properties = path.get("properties");
+    const properties = path.get('properties');
     for (const prop of properties) {
-      const { key, value, computed } = prop.node;
+      const {key, value, computed} = prop.node;
       const member = t.memberExpression(t.cloneWithoutLoc(from), key, computed);
       let expression = member;
       let newValue = value;
       if (t.isAssignmentPattern(value)) {
         newValue = t.identifier(value.left.name);
         expression = t.conditionalExpression(
-          t.binaryExpression("===", member, path.scope.buildUndefinedNode()),
+          t.binaryExpression('===', member, path.scope.buildUndefinedNode()),
           value.right,
           member
         );
@@ -53,14 +53,14 @@ module.exports = function(babel) {
     }
     // NOTE: this is a hack to remove the original path as `parentPath.remove()` causes
     // an unexplained error.
-    path.replaceWith(path.scope.generateUidIdentifier("foo"));
+    path.replaceWith(path.scope.generateUidIdentifier('foo'));
     // We try to eliminate any side effects since the original
     // initializer might have had some (method call, etc.);
     parentPath.node.init = path.scope.buildUndefinedNode();
   }
 
   return {
-    name: "simple-object-destructure",
+    name: 'simple-object-destructure',
 
     pre() {
       this.file.opts.generatorOpts.retainLines = true;
@@ -71,15 +71,15 @@ module.exports = function(babel) {
         // NOTE: We don't transform destructure operation in params as this causes
         // type parameter mismatch errors.
 
-        const { parentPath } = path;
+        const {parentPath} = path;
         if (parentPath.isObjectProperty()) {
-          throw path.buildCodeFrameError("encountered deep object destructure");
+          throw path.buildCodeFrameError('encountered deep object destructure');
         }
 
         if (parentPath.isVariableDeclarator()) {
           return declarator(path, parentPath);
         }
-      }
-    }
+      },
+    },
   };
 };

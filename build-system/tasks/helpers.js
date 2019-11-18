@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
@@ -22,6 +23,7 @@ const conf = require('../compile/build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
+const globby = require('globby');
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
 const log = require('fancy-log');
@@ -37,13 +39,11 @@ const {
 } = require('../compile/internal-version');
 const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
-const globby = require('globby');
-const babel = require('@babel/core');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
