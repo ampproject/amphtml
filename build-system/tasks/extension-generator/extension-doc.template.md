@@ -1,11 +1,3 @@
-<!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
-  and improves SEO.
-  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
-  * List applicable format(s): websites, ads, stories, email
-  * Remove this comment! (no empty lines before "---")
--->
-
 ---
 \$category: presentation
 formats:
@@ -14,6 +6,14 @@ formats:
 teaser:
   text: FILL THIS IN.
 ---
+<!--
+  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
+  and improves SEO.
+  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
+  * List applicable format(s): websites, ads, stories, email
+  * Remove this comment!
+-->
+
 
 <!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
