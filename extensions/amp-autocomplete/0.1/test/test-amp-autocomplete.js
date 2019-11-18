@@ -885,30 +885,7 @@ describes.realWin(
       });
     });
 
-    it('should do nothing on select for inline with empty trigger', () => {
-      impl.binding_ = new AutocompleteBindingInline('');
-      const mockEl = doc.createElement('div');
-      const updateSpy = sandbox.spy(impl.binding_, 'updateInputWithSelection');
-      return element
-        .layoutCallback()
-        .then(() => {
-          impl.inputElement_.value = impl.userInput_ = 'hello @har';
-          impl.toggleResults_(true);
-          mockEl.setAttribute('data-value', 'harrypotter');
-          impl.binding_.match_ = {0: 'har', index: 7};
-          sandbox.stub(impl, 'getRemoteData_').resolves([]);
-          return impl.inputHandler_();
-        })
-        .then(() => {
-          expect(impl.inputElement_.value).to.equal('hello @har');
-          impl.selectItem_(mockEl);
-          expect(updateSpy).to.have.been.calledOnce;
-          expect(impl.userInput_).to.equal('');
-          expect(impl.inputElement_.value).to.equal('hello @har');
-        });
-    });
-
-    it('should partially replace input on select for inline with reasonable trigger', () => {
+    it('should partially replace input on select for inline with trigger', () => {
       impl.binding_ = new AutocompleteBindingInline('@');
       const mockEl = doc.createElement('div');
       const updateSpy = sandbox.spy(impl.binding_, 'updateInputWithSelection');

@@ -16,6 +16,7 @@
 
 import {ownProperty} from '../../../src/utils/object';
 import {tryFocus} from '../../../src/dom';
+import {userAssert} from '../../../src/log';
 
 /**
  * Inline implementation of autocomplete. This supports autocompleting
@@ -30,11 +31,20 @@ export class AutocompleteBindingInline {
    * @param {string} trigger
    */
   constructor(trigger) {
+    userAssert(
+      trigger !== '',
+      `AutocompleteBindingInline does not support an empty value in the constructor.`
+    );
+
     /** @private {string} */
     this.trigger_ = trigger;
 
     /** @private {?RegExpResult} */
     this.match_ = null;
+
+    const delimiter = trigger.replace(/([()[{*+.$^\\|?])/g, '\\$1');
+    const pattern = `((${delimiter}|^${delimiter})(\\w+)?)`;
+    this.regex_ = new RegExp(pattern, 'gm');
   }
 
   /**
@@ -44,7 +54,7 @@ export class AutocompleteBindingInline {
    * @return {boolean}
    */
   shouldAutocomplete(inputEl) {
-    const match = this.getClosestPriorMatch_(this.trigger_, inputEl);
+    const match = this.getClosestPriorMatch_(this.regex_, inputEl);
     this.match_ = match;
     return !!match;
   }
@@ -52,19 +62,16 @@ export class AutocompleteBindingInline {
   /**
    * Finds the closest string in the user input prior to the cursor
    * to display suggestions.
-   * @param {string} trigger
+   * @param {RegExp} regex
    * @param {!HTMLInputElement} inputEl
    * @return {?RegExpResult}
    * @private
    */
-  getClosestPriorMatch_(trigger, inputEl) {
-    if (trigger === '') {
+  getClosestPriorMatch_(regex, inputEl) {
+    if (!regex) {
       return null;
     }
 
-    const delimiter = trigger.replace(/([()[{*+.$^\\|?])/g, '\\$1');
-    const pattern = `((${delimiter}|^${delimiter})(\\w+)?)`;
-    const regex = new RegExp(pattern, 'gm');
     const {value, selectionStart: cursor} = inputEl;
     let match, lastMatch;
 
