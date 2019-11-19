@@ -21,7 +21,6 @@ import {parseQueryString_} from './url-parse-query-string';
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   filter: (string|undefined),
  *   minified: boolean,
  *   lite: boolean,
  *   test: boolean,
@@ -74,7 +73,6 @@ function getMode_(win) {
   const localDevEnabled = !!AMP_CONFIG.localDev;
   const runningTests =
     !!AMP_CONFIG.test || (IS_DEV && !!(win.__AMP_TEST || win.__karma__));
-  const runningTestsOnIe = win.__karma__ && win.__karma__.config.amp.testOnIe;
   const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
@@ -105,9 +103,6 @@ function getMode_(win) {
       ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
-    // Allows filtering validation errors by error category. For the
-    // available categories, see ErrorCategory in validator/validator.proto.
-    filter: hashQuery['filter'],
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     // amp-user-location override
@@ -117,7 +112,6 @@ function getMode_(win) {
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
-    testIe: runningTestsOnIe,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
     rtvVersion,

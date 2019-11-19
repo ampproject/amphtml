@@ -301,11 +301,12 @@ describes.fakeWin(
       elementError.setAttribute('amp-access-hide', '');
       document.body.appendChild(elementError);
 
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+      sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
       service.viewer_ = {
-        isVisible: () => true,
-        whenFirstVisible: () => Promise.resolve(),
-        onVisibilityChanged: () => {},
         broadcast: () => {},
         onBroadcast: () => {},
       };
@@ -711,6 +712,7 @@ describes.fakeWin(
     let configElement;
     let adapterMock;
     let cidMock;
+    let isVisibleStub;
     let visibilityChanged;
     let scrolled;
     let service;
@@ -736,6 +738,13 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      isVisibleStub = sandbox.stub(ampdoc, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+      visibilityChanged = new Observable();
+      sandbox
+        .stub(ampdoc, 'onVisibilityChanged')
+        .callsFake(callback => visibilityChanged.add(callback));
+
       service = new AccessService(ampdoc);
 
       const adapter = {
@@ -757,11 +766,7 @@ describes.fakeWin(
         onReady: callback => callback(),
       };
 
-      visibilityChanged = new Observable();
       service.viewer_ = {
-        isVisible: () => true,
-        whenFirstVisible: () => Promise.resolve(),
-        onVisibilityChanged: callback => visibilityChanged.add(callback),
         broadcast: () => {},
       };
 
@@ -800,7 +805,10 @@ describes.fakeWin(
           clock.tick(2001);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -819,7 +827,10 @@ describes.fakeWin(
           scrolled.fire();
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -846,7 +857,10 @@ describes.fakeWin(
           document.documentElement.dispatchEvent(clickEvent);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -895,11 +909,14 @@ describes.fakeWin(
       const p = service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
         .then(() => {
-          service.viewer_.isVisible = () => false;
+          isVisibleStub.returns(false);
           visibilityChanged.fire();
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.have.not.been.called;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -953,11 +970,14 @@ describes.fakeWin(
         .then(() => {
           p1 = service.reportViewPromise_;
           expect(p1).to.exist;
-          service.viewer_.isVisible = () => false;
+          isVisibleStub.returns(false);
           visibilityChanged.fire();
           return p1;
         })
-        .then(() => 'SUCCESS', () => 'ERROR')
+        .then(
+          () => 'SUCCESS',
+          () => 'ERROR'
+        )
         .then(result => {
           expect(result).to.equal('ERROR');
           expect(service.reportViewToServer_).to.have.not.been.called;
@@ -965,7 +985,7 @@ describes.fakeWin(
         })
         .then(() => {
           // 2. Second attempt is rescheduled and will complete.
-          service.viewer_.isVisible = () => true;
+          isVisibleStub.returns(true);
           visibilityChanged.fire();
           const p2 = service.reportViewPromise_;
           expect(p2).to.exist;
@@ -977,7 +997,10 @@ describes.fakeWin(
             return p2;
           });
         })
-        .then(() => 'SUCCESS', reason => reason)
+        .then(
+          () => 'SUCCESS',
+          reason => reason
+        )
         .then(result => {
           expect(result).to.equal('SUCCESS');
           expect(service.reportViewToServer_).to.be.calledOnce;
@@ -1065,7 +1088,10 @@ describes.fakeWin(
           clock.tick(2001);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(broadcastStub).to.be.calledOnce;
@@ -1109,6 +1135,9 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
 
       const cid = {
@@ -1125,8 +1154,6 @@ describes.fakeWin(
 
       service.viewer_ = {
         broadcast: () => {},
-        isVisible: () => true,
-        onVisibilityChanged: () => {},
       };
     });
 
@@ -1192,6 +1219,9 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      sandbox.stub(ampdoc, 'isVisible').returns(true);
+      sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
 
       const cid = {
@@ -1210,8 +1240,6 @@ describes.fakeWin(
 
       service.viewer_ = {
         broadcast: () => {},
-        isVisible: () => true,
-        onVisibilityChanged: () => {},
       };
     });
 
@@ -1454,7 +1482,10 @@ describes.fakeWin(
         .once();
       return service
         .loginWithType_('')
-        .then(() => 'S', () => 'ERROR')
+        .then(
+          () => 'S',
+          () => 'ERROR'
+        )
         .then(result => {
           expect(result).to.equal('ERROR');
           expect(source.loginPromise_).to.not.exist;
@@ -1538,7 +1569,10 @@ describes.fakeWin(
       // Rejecting the first login attempt does not reject the current promise.
       p1Reject();
       return p1Promise
-        .then(() => 'SUCCESS', () => 'ERROR')
+        .then(
+          () => 'SUCCESS',
+          () => 'ERROR'
+        )
         .then(res => {
           expect(res).to.equal('ERROR');
           expect(source.loginPromise_).to.equal(p3);

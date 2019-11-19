@@ -89,8 +89,8 @@ describes.repeated(
 
           ssrTemplateHelper = {
             isSupported: () => false,
-            fetchAndRenderTemplate: () => Promise.resolve(),
-            renderTemplate: sandbox.stub(),
+            ssr: () => Promise.resolve(),
+            applySsrOrCsrTemplate: sandbox.stub(),
           };
 
           list = createAmpList(element);
@@ -172,7 +172,7 @@ describes.repeated(
           } else if (opts.maxItems > 0) {
             itemsToRender = fetched[opts.expr].slice(0, opts.maxItems);
           }
-          ssrTemplateHelper.renderTemplate
+          ssrTemplateHelper.applySsrOrCsrTemplate
             .withArgs(element, itemsToRender)
             .returns(Promise.resolve(rendered));
 
@@ -229,7 +229,7 @@ describes.repeated(
             expect(resource.resetPendingChangeSize).calledOnce;
           });
 
-          it('should attemptChangeHeight the placeholder, if present', () => {
+          it('should attemptChangeHeight placeholder, if present', () => {
             const itemElement = doc.createElement('div');
             const placeholder = doc.createElement('div');
             placeholder.style.height = '1337px';
@@ -535,7 +535,7 @@ describes.repeated(
             yield list.layoutCallback();
 
             expect(actions.trigger).to.be.calledWithExactly(
-              list,
+              list.element,
               'fetch-error',
               sinon.match.any,
               ActionTrust.LOW
@@ -559,7 +559,7 @@ describes.repeated(
               ]);
               await list.layoutCallback().then(() => rendered);
 
-              ssrTemplateHelper.renderTemplate
+              ssrTemplateHelper.applySsrOrCsrTemplate
                 .withArgs(element, newData)
                 .returns(Promise.resolve([second]));
               await list.mutatedAttributesCallback({src: newData});
@@ -628,21 +628,48 @@ describes.repeated(
               expect(list.container_.contains(newImg)).to.be.true;
             });
 
+            it('should attemptChangeHeight initial content', async () => {
+              const initialContent = doc.createElement('div');
+              initialContent.setAttribute('role', 'list');
+              initialContent.style.height = '1337px';
+
+              // Initial content must be set before buildCallback(), so use
+              // a new test AmpList instance.
+              element = createAmpListElement();
+              element.setAttribute('diffable', '');
+              element.style.height = '10px';
+              element.appendChild(initialContent);
+              doc.body.appendChild(element);
+
+              list = createAmpList(element);
+              // Expect attemptChangeHeight() twice: once to resize to initial
+              // content, once to resize to rendered contents.
+              listMock
+                .expects('attemptChangeHeight')
+                .withExactArgs(1337)
+                .returns(Promise.resolve())
+                .twice();
+
+              const itemElement = doc.createElement('div');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+              await list.layoutCallback();
+            });
+
             it('should diff against initial content', async () => {
               const img = createAmpImg('foo.jpg');
               img.setAttribute('class', 'i-amphtml-element');
               const newImg = createAmpImg('foo.jpg'); // Same src.
               newImg.setAttribute('class', 'bar');
 
-              const initialContainer = doc.createElement('div');
-              initialContainer.setAttribute('role', 'list');
-              initialContainer.appendChild(img);
+              const initialContent = doc.createElement('div');
+              initialContent.setAttribute('role', 'list');
+              initialContent.appendChild(img);
 
               // Initial content must be set before buildCallback(), so use
               // a new test AmpList instance.
               element = createAmpListElement();
               element.setAttribute('diffable', '');
-              element.appendChild(initialContainer);
+              element.appendChild(initialContent);
               list = createAmpList(element);
 
               const rendered = expectFetchAndRender(DEFAULT_FETCHED_DATA, [
@@ -665,9 +692,7 @@ describes.repeated(
             });
 
             it('should error if proxied fetch fails', () => {
-              sandbox
-                .stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
-                .returns(Promise.reject());
+              sandbox.stub(ssrTemplateHelper, 'ssr').returns(Promise.reject());
 
               listMock
                 .expects('toggleLoading')
@@ -682,9 +707,9 @@ describes.repeated(
             });
 
             it('should error if proxied fetch returns invalid data', () => {
-              expectAsyncConsoleError(/Expected response with format/, 1);
+              expectAsyncConsoleError(/received no response/, 1);
               sandbox
-                .stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
+                .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve(undefined));
               listMock
                 .expects('toggleLoading')
@@ -692,7 +717,23 @@ describes.repeated(
                 .once();
               return expect(
                 list.layoutCallback()
-              ).to.eventually.be.rejectedWith(/Expected response with format/);
+              ).to.eventually.be.rejectedWith(/received no response/);
+            });
+
+            it('should error if proxied fetch returns non-2xx status (error) in the response', () => {
+              expectAsyncConsoleError(/received no response/, 1);
+              sandbox
+                .stub(ssrTemplateHelper, 'ssr')
+                .returns(Promise.resolve({init: {status: 400}}));
+              listMock
+                .expects('toggleLoading')
+                .withExactArgs(false)
+                .once();
+              return expect(
+                list.layoutCallback()
+              ).to.eventually.be.rejectedWith(
+                /Error proxying amp-list templates with status/
+              );
             });
 
             it('should delegate template rendering to viewer', function*() {
@@ -712,9 +753,9 @@ describes.repeated(
               listItem.setAttribute('role', 'item');
               listContainer.appendChild(listItem);
               sandbox
-                .stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
+                .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve({html}));
-              ssrTemplateHelper.renderTemplate.returns(
+              ssrTemplateHelper.applySsrOrCsrTemplate.returns(
                 Promise.resolve(listContainer)
               );
               listMock
@@ -726,7 +767,7 @@ describes.repeated(
                 .withExactArgs(listContainer, false)
                 .returns(Promise.resolve());
 
-              ssrTemplateHelper.renderTemplate
+              ssrTemplateHelper.applySsrOrCsrTemplate
                 .withArgs(element, html)
                 .returns(Promise.resolve(rendered));
 
@@ -748,10 +789,13 @@ describes.repeated(
                   singleItem: false,
                 }),
               });
-              expect(ssrTemplateHelper.fetchAndRenderTemplate).to.be.calledOnce;
-              expect(
-                ssrTemplateHelper.fetchAndRenderTemplate
-              ).to.be.calledWithExactly(element, request, null, attrs);
+              expect(ssrTemplateHelper.ssr).to.be.calledOnce;
+              expect(ssrTemplateHelper.ssr).to.be.calledWithExactly(
+                element,
+                request,
+                null,
+                attrs
+              );
             });
           });
 
@@ -895,7 +939,7 @@ describes.repeated(
 
               // Stub the rendering of the template.
               const itemsToRender = fetched[opts.expr];
-              ssrTemplateHelper.renderTemplate
+              ssrTemplateHelper.applySsrOrCsrTemplate
                 .withArgs(element, itemsToRender)
                 .returns(Promise.resolve(rendered));
 

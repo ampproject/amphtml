@@ -28,12 +28,13 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
-const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
-const {isTravisBuild} = require('../travis');
+const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
+const {isTravisBuild} = require('../common/travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -62,19 +63,22 @@ exports.closureCompile = async function(
   entryModuleFilename,
   outputDir,
   outputFilename,
-  options
+  options,
+  timeInfo
 ) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve, reject) {
     function start() {
       inProgress++;
-      compile(entryModuleFilename, outputDir, outputFilename, options).then(
+      compile(
+        entryModuleFilename,
+        outputDir,
+        outputFilename,
+        options,
+        timeInfo
+      ).then(
         function() {
-          if (isTravisBuild()) {
-            // Print a progress dot after each task to avoid Travis timeouts.
-            process.stdout.write('.');
-          }
           inProgress--;
           next();
           resolve();
@@ -99,14 +103,19 @@ function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
   del.sync('build/parsers');
-  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
-function compile(entryModuleFilenames, outputDir, outputFilename, options) {
+function compile(
+  entryModuleFilenames,
+  outputDir,
+  outputFilename,
+  options,
+  timeInfo
+) {
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -123,12 +132,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'build/patched-module/',
   ];
   const baseExterns = [
-    'build-system/amp.extern.js',
-    'build-system/dompurify.extern.js',
-    'build-system/event-timing.extern.js',
-    'build-system/layout-jank.extern.js',
-    'build-system/layout-shift.extern.js',
-    'build-system/performance-observer.extern.js',
+    'build-system/externs/amp.extern.js',
+    'build-system/externs/dompurify.extern.js',
+    'build-system/externs/layout-jank.extern.js',
+    'build-system/externs/performance-observer.extern.js',
     'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -155,7 +162,11 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     console /*OK*/
       .assert(typeof entryModuleFilenames == 'string');
-    return singlePassCompile(entryModuleFilenames, compilationOptions);
+    return singlePassCompile(
+      entryModuleFilenames,
+      compilationOptions,
+      timeInfo
+    );
   }
 
   return new Promise(function(resolve, reject) {
@@ -252,7 +263,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.externs) {
       externs = externs.concat(options.externs);
     }
-    externs.push('build-system/amp.multipass.extern.js');
+    externs.push('build-system/externs/amp.multipass.extern.js');
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
@@ -261,7 +272,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       assume_function_wrapper: true,
       // Transpile from ES6 to ES5 if not running with `--esm`
       // otherwise transpilation is done by Babel
-      language_in: 'ECMASCRIPT6',
+      language_in: argv.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
@@ -324,7 +335,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         'unknownDefines'
       );
       compilerOptions.conformance_configs =
-        'build-system/conformance-config.textproto';
+        'build-system/test-configs/conformance-config.textproto';
     } else {
       compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
       compilerOptions.jscomp_off.push('unknownDefines');
@@ -367,6 +378,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     } else {
       const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
       const gulpBase = argv.single_pass ? '.' : SRC_TEMP_DIR;
+      timeInfo.startTime = Date.now();
       return gulp
         .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
@@ -377,6 +389,13 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           reject(err);
         })
         .pipe(rename(outputFilename))
+        .pipe(
+          gulpIf(
+            !argv.pseudo_names && !options.skipUnknownDepsCheck,
+            checkForUnknownDeps()
+          )
+        )
+        .on('error', reject)
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);

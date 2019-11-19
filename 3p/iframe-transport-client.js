@@ -52,8 +52,7 @@ export class IframeTransportClient {
     );
 
     /** @protected {!IframeMessagingClient} */
-    this.iframeMessagingClient_ = new IframeMessagingClient(win);
-    this.iframeMessagingClient_.setHostWindow(this.win_.parent);
+    this.iframeMessagingClient_ = new IframeMessagingClient(win, win.parent);
     this.iframeMessagingClient_.setSentinel(
       dev().assertString(
         parsedFrameName['sentinel'],

@@ -528,7 +528,10 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
       .once();
     return binding
       .loadBlob('https://acme.com')
-      .then(() => 'SUCCESS', () => 'ERROR')
+      .then(
+        () => 'SUCCESS',
+        () => 'ERROR'
+      )
       .then(res => {
         expect(res).to.equal('ERROR');
       });
@@ -543,7 +546,10 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
       .once();
     return binding
       .loadBlob('https://acme.com')
-      .then(res => `SUCCESS ${res}`, () => 'ERROR')
+      .then(
+        res => `SUCCESS ${res}`,
+        () => 'ERROR'
+      )
       .then(res => {
         // Resolves with null
         expect(res).to.equal('SUCCESS null');
@@ -559,7 +565,10 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
     localStorageMock.expects('getItem').never();
     return binding
       .loadBlob('https://acme.com')
-      .then(() => 'SUCCESS', () => 'ERROR')
+      .then(
+        () => 'SUCCESS',
+        () => 'ERROR'
+      )
       .then(res => {
         expect(res).to.equal('SUCCESS');
       });
@@ -581,7 +590,10 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
       .once();
     return binding
       .saveBlob('https://acme.com', 'BLOB1')
-      .then(() => 'SUCCESS', () => 'ERROR')
+      .then(
+        () => 'SUCCESS',
+        () => 'ERROR'
+      )
       .then(res => {
         expect(res).to.equal('ERROR');
       });
@@ -597,7 +609,10 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
     // Never reaches setItem
     return binding
       .saveBlob('https://acme.com', 'BLOB1')
-      .then(() => 'SUCCESS', () => 'ERROR')
+      .then(
+        () => 'SUCCESS',
+        () => 'ERROR'
+      )
       .then(res => {
         expect(res).to.equal('SUCCESS');
       });
@@ -614,7 +629,10 @@ describes.sandboxed('LocalStorageBinding', {}, () => {
     // Never reaches setItem
     return binding
       .saveBlob('https://acme.com', 'BLOB1')
-      .then(() => 'SUCCESS', () => 'ERROR')
+      .then(
+        () => 'SUCCESS',
+        () => 'ERROR'
+      )
       .then(res => {
         expect(setItemSpy).to.have.not.been.called;
         expect(res).to.equal('SUCCESS');
@@ -680,7 +698,10 @@ describes.sandboxed('ViewerStorageBinding', {}, () => {
       .once();
     return binding
       .loadBlob('https://acme.com')
-      .then(() => 'SUCCESS', () => 'ERROR')
+      .then(
+        () => 'SUCCESS',
+        () => 'ERROR'
+      )
       .then(res => {
         expect(res).to.equal('ERROR');
       });
@@ -703,12 +724,18 @@ describes.sandboxed('ViewerStorageBinding', {}, () => {
   it('should reject on save store failure', () => {
     viewerMock
       .expects('sendMessageAwaitResponse')
-      .withExactArgs('saveStore', sinon.match(() => true))
+      .withExactArgs(
+        'saveStore',
+        sinon.match(() => true)
+      )
       .returns(Promise.reject('unknown'))
       .once();
     return binding
       .saveBlob('https://acme.com', 'BLOB1')
-      .then(() => 'SUCCESS', () => 'ERROR')
+      .then(
+        () => 'SUCCESS',
+        () => 'ERROR'
+      )
       .then(res => {
         expect(res).to.equal('ERROR');
       });

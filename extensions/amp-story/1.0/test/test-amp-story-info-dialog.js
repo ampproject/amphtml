@@ -71,73 +71,65 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     infoDialog = new InfoDialog(win, parentEl);
   });
 
-  it('should build the info dialog', () => {
-    return infoDialog.build().then(() => {
-      expect(infoDialog.isBuilt()).to.be.true;
-      expect(infoDialog.element_).to.exist;
-    });
+  it('should build the info dialog', async () => {
+    await infoDialog.build();
+    expect(infoDialog.isBuilt()).to.be.true;
+    expect(infoDialog.element_).to.exist;
   });
 
-  it('should hide more info link when there is no viewer messaging', () => {
+  it('should hide more info link when there is no viewer messaging', async () => {
     embedded = false;
 
-    return infoDialog.build().then(() => {
-      expect(
-        infoDialog.element_.querySelector(MOREINFO_CLASS)
-      ).not.to.have.class(MOREINFO_VISIBLE_CLASS);
-    });
+    await infoDialog.build();
+    expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).not.to.have.class(
+      MOREINFO_VISIBLE_CLASS
+    );
   });
 
-  it('should hide more info link when the viewer does not supply it', () => {
+  it('should hide more info link when the viewer does not supply it', async () => {
     moreInfoLinkUrl = null;
 
-    return infoDialog.build().then(() => {
-      expect(
-        infoDialog.element_.querySelector(MOREINFO_CLASS)
-      ).not.to.have.class(MOREINFO_VISIBLE_CLASS);
-    });
+    await infoDialog.build();
+    expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).not.to.have.class(
+      MOREINFO_VISIBLE_CLASS
+    );
   });
 
-  it('should show more info link when the viewer supplies it', () => {
+  it('should show more info link when the viewer supplies it', async () => {
     moreInfoLinkUrl = 'https://example.com/more-info.html';
 
-    return infoDialog.build().then(() => {
-      expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).to.have.class(
-        MOREINFO_VISIBLE_CLASS
-      );
-    });
+    await infoDialog.build();
+    expect(infoDialog.element_.querySelector(MOREINFO_CLASS)).to.have.class(
+      MOREINFO_VISIBLE_CLASS
+    );
   });
 
-  it('should append the info dialog in the parentEl on build', () => {
-    return infoDialog.build().then(() => {
-      expect(parentEl.childElementCount).to.equal(1);
-    });
+  it('should append the info dialog in the parentEl on build', async () => {
+    await infoDialog.build();
+    expect(parentEl.childElementCount).to.equal(1);
   });
 
-  it('should show the info dialog on store property update', () => {
-    return infoDialog.build().then(() => {
-      storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
-      expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
-    });
+  it('should show the info dialog on store property update', async () => {
+    await infoDialog.build();
+    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
   });
 
-  it('should hide the info dialog on click on the overlay', () => {
-    return infoDialog.build().then(() => {
-      storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
-      infoDialog.element_.dispatchEvent(new Event('click'));
+  it('should hide the info dialog on click on the overlay', async () => {
+    await infoDialog.build();
+    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    infoDialog.element_.dispatchEvent(new Event('click'));
 
-      expect(infoDialog.element_).not.to.have.class(DIALOG_VISIBLE_CLASS);
-      expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.false;
-    });
+    expect(infoDialog.element_).not.to.have.class(DIALOG_VISIBLE_CLASS);
+    expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.false;
   });
 
-  it('should not hide the info dialog on click on the inner container', () => {
-    return infoDialog.build().then(() => {
-      storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
-      infoDialog.innerContainerEl_.dispatchEvent(new Event('click'));
+  it('should not hide the info dialog on click on the inner container', async () => {
+    await infoDialog.build();
+    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    infoDialog.innerContainerEl_.dispatchEvent(new Event('click'));
 
-      expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
-      expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.true;
-    });
+    expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
+    expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.true;
   });
 });

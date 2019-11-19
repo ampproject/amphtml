@@ -148,11 +148,11 @@ describes.realWin(
         };
         impl.getLayoutWidth = () => width;
 
-        impl.onMeasureChanged();
+        impl.layoutCallback();
         expect(container.style.width).to.equal(width + 'px');
 
         width++;
-        impl.onMeasureChanged();
+        impl.layoutCallback();
         expect(container.style.width).to.equal(width + 'px');
       });
     });
@@ -225,7 +225,7 @@ describes.realWin(
       });
     });
 
-    it('should relayout the content on onMeasureChanged', () => {
+    it('should relayout the content', () => {
       return getAmpFlyingCarpet().then(flyingCarpet => {
         const impl = flyingCarpet.implementation_;
         const scheduleLayoutSpy_ = sandbox.spy(
@@ -236,7 +236,7 @@ describes.realWin(
         impl.mutateElement = function(callback) {
           callback();
         };
-        impl.onMeasureChanged();
+        impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
           impl.element,
           impl.children_

@@ -18,7 +18,9 @@ import {Deferred} from '../utils/promise';
 import {InaboxMutator} from './inabox-mutator';
 import {Observable} from '../observable';
 import {Pass} from '../pass';
+import {READY_SCAN_SIGNAL} from '../service/resources-interface';
 import {Resource, ResourceState} from '../service/resource';
+import {Services} from '../services';
 import {dev} from '../log';
 import {registerServiceBuilderForDoc} from '../service';
 
@@ -57,6 +59,9 @@ export class InaboxResources {
 
     /** @const @private {!InaboxMutator} */
     this.mutator_ = new InaboxMutator(ampdoc, this);
+
+    const input = Services.inputFor(this.win);
+    input.setupInputModeClasses(ampdoc);
   }
 
   /** @override */
@@ -116,7 +121,7 @@ export class InaboxResources {
 
   /** @override */
   scheduleLayoutOrPreload(unusedResource) {
-    // all elements are immediately scheduled for layout after being added
+    this.pass_.schedule();
   }
 
   /** @override */
@@ -216,6 +221,8 @@ export class InaboxResources {
         resource.startLayout();
       }
     });
+
+    this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
   }

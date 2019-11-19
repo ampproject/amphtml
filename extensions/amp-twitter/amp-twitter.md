@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Displays a Twitter tweet.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -45,18 +46,22 @@ Displays a Twitter Tweet or Moment.
 
 ## Behavior
 
-The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.  
+The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.
 
 Here's an example of a basic embedded Tweet:
 
 [example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+
 ```html
-<amp-twitter width="375"
+<amp-twitter
+  width="375"
   height="472"
   layout="responsive"
-  data-tweetid="885634330868850689">
+  data-tweetid="885634330868850689"
+>
 </amp-twitter>
 ```
+
 [/example]
 
 ## Appearance
@@ -65,48 +70,65 @@ Twitter does not currently provide an API that yields fixed aspect ratio for emb
 
 ## Placeholders & fallbacks
 
-An element marked with a `placeholder` attribute displays while the content for the Tweet or Moment is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet or Moment doesn't exist or has been deleted.
+An element marked with a `placeholder` attribute displays while the content for the Tweet or Moment is loading or initializing. Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet or Moment doesn't exist or has been deleted.
 
 Visit the [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
 
-*Example: Specifying a placeholder*
+_Example: Specifying a placeholder_
 
 [example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+
 ```html
-<amp-twitter width="375"
+<amp-twitter
+  width="375"
   height="472"
   layout="responsive"
-  data-tweetid="638793490521001985">
+  data-tweetid="638793490521001985"
+>
   <blockquote placeholder>
-    <p>I only needed to change some CSS.
+    <p>
+      I only needed to change some CSS.
       <a href="http://t.co/LvjLbjgY9F">pic.twitter.com/LvjLbjgY9F</a>
-    </p>&mdash; Malte Ubl (@cramforce)
-    <a href="https://twitter.com/cramforce/status/638793490521001985">September 1, 2015</a>
+    </p>
+    &mdash; Malte Ubl (@cramforce)
+    <a href="https://twitter.com/cramforce/status/638793490521001985"
+      >September 1, 2015</a
+    >
   </blockquote>
 </amp-twitter>
 ```
+
 [/example]
 
-*Example: Specifying a placeholder and a fallback*
+_Example: Specifying a placeholder and a fallback_
 
 [example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+
 ```html
-<amp-twitter width="390"
+<amp-twitter
+  width="390"
   height="330"
   layout="responsive"
-  data-tweetid="855178606556856320">
+  data-tweetid="855178606556856320"
+>
   <blockquote placeholder>
-    <p>What are 5 common misconceptions people often have about AMP? Find out on today&#39;s installment of Amplify:
+    <p>
+      What are 5 common misconceptions people often have about AMP? Find out on
+      today&#39;s installment of Amplify:
       <a href="https://t.co/kaSvV8SQtI">https://t.co/kaSvV8SQtI</a>
       <a href="https://t.co/Cu9VYOmiKV">pic.twitter.com/Cu9VYOmiKV</a>
-    </p>&mdash; AMP Project (@AMPhtml)
-    <a href="https://twitter.com/AMPhtml/status/855178606556856320">April 20, 2017</a>
+    </p>
+    &mdash; AMP Project (@AMPhtml)
+    <a href="https://twitter.com/AMPhtml/status/855178606556856320"
+      >April 20, 2017</a
+    >
   </blockquote>
   <div fallback>
     An error occurred while retrieving the Tweet. It might have been deleted.
   </div>
 </amp-twitter>
 ```
+
 [/example]
 
 ## Attributes

@@ -196,8 +196,8 @@ export class HighlightHandler {
   onVisibleOnce(handler) {
     // TODO(yunabe): Unregister the handler.
     handler = once(handler);
-    this.viewer_.onVisibilityChanged(() => {
-      if (this.viewer_.getVisibilityState() != 'visible') {
+    this.ampdoc_.onVisibilityChanged(() => {
+      if (this.ampdoc_.getVisibilityState() != 'visible') {
         return;
       }
       handler();
@@ -237,7 +237,7 @@ export class HighlightHandler {
       });
     }
 
-    const visibility = this.viewer_.getVisibilityState();
+    const visibility = this.ampdoc_.getVisibilityState();
     if (!highlightInfo.skipScrollAnimation) {
       if (visibility == 'visible') {
         this.animateScrollToTop_(scrollTop);

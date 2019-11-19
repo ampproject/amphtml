@@ -18,7 +18,7 @@ const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
+const conf = require('./build.conf');
 const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
@@ -41,17 +41,17 @@ const {
   extensionBundles,
   altMainBundles,
   TYPES,
-} = require('../../bundles.config');
+} = require('./bundles.config');
 const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
-const {isTravisBuild} = require('../travis');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
-const wrappers = require('../compile-wrappers');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const wrappers = require('./compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
@@ -106,14 +106,16 @@ exports.getFlags = function(config) {
     source_map_include_content: !!argv.full_sourcemaps,
     source_map_location_mapping: ['|/'],
     //new_type_inf: true,
-    language_in: 'ES6',
     // By default closure puts all of the public exports on the global, but
     // because of the wrapper modules (to mitigate async loading of scripts)
     // that we add to the js binaries this prevents other js binaries from
     // accessing the symbol, we remedy this by attaching all public exports
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
-    language_out: config.language_out || 'ES5',
+    language_in: config.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+    language_out: config.esm
+      ? 'NO_TRANSPILE'
+      : config.language_out || 'ECMASCRIPT5',
     chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
     process_common_js_modules: true,
@@ -457,15 +459,11 @@ function setupBundles(graph) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  if (isTravisBuild()) {
-    // New line after all the compilation progress dots on Travis.
-    console.log('\n');
-  }
   log(
     'Performing single-pass',
     colors.cyan('babel'),
     'transforms in',
-    colors.cyan(graph.tmp)
+    colors.cyan(graph.tmp) + '...'
   );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
@@ -551,11 +549,13 @@ function isAltMainBundle(name) {
   });
 }
 
-exports.singlePassCompile = async function(entryModule, options) {
+exports.singlePassCompile = async function(entryModule, options, timeInfo) {
+  timeInfo.startTime = Date.now();
   return exports
     .getFlags({
       modules: [entryModule].concat(extensions),
       writeTo: singlePassDest,
+      esm: options.esm,
       define: options.define,
       externs: options.externs,
       hideWarningsFor: options.hideWarningsFor,
@@ -704,9 +704,7 @@ function cleanupWeakModuleFiles() {
 }
 
 function compile(flagsArray) {
-  if (isTravisBuild()) {
-    log('Minifying single-pass JS with', colors.cyan('closure-compiler'));
-  }
+  log('Minifying single-pass JS with', colors.cyan('closure-compiler') + '...');
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp
@@ -718,8 +716,15 @@ function compile(flagsArray) {
         handleSinglePassCompilerError();
         reject(err);
       })
+      .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
+      .on('error', reject)
       .pipe(sourcemaps.write('.'))
-      .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
+      .pipe(
+        gulpIf(
+          /(\/amp-|\/_base)/,
+          rename(path => (path.dirname += '/v0'))
+        )
+      )
       .pipe(gulp.dest('.'))
       .on('end', resolve);
   });

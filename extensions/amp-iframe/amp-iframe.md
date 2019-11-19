@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an iframe.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -51,14 +52,17 @@ Displays an iframe.
 - An `amp-iframe` must only request resources via HTTPS, from a data-URI, or via the `srcdoc` attribute.
 - An `amp-iframe` must not be in the same origin as the container unless they do not allow `allow-same-origin` in the `sandbox` attribute. See the ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) doc for further details on allowed origins for iframes.
 
-*Example: Embedded a Google Map in an amp-iframe*
+_Example: Embedded a Google Map in an amp-iframe_
 
 ```html
-<amp-iframe width="200" height="100"
-    sandbox="allow-scripts allow-same-origin"
-    layout="responsive"
-    frameborder="0"
-    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland">
+<amp-iframe
+  width="200"
+  height="100"
+  sandbox="allow-scripts allow-same-origin"
+  layout="responsive"
+  frameborder="0"
+  src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland"
+>
 </amp-iframe>
 ```
 
@@ -126,24 +130,30 @@ It is possible to have an `amp-iframe` appear at the top of a document when the 
 - The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder until the iframe is ready to be displayed.
 - Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` `postMessage`, which would be sent by the iframe document, whichever comes first.
 
-*Example: Iframe with a placeholder*
+_Example: Iframe with a placeholder_
 
 ```html
-<amp-iframe width=300 height=300
-   layout="responsive"
-   sandbox="allow-scripts allow-same-origin"
-   src="https://foo.com/iframe">
- <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
+<amp-iframe
+  width="300"
+  height="300"
+  layout="responsive"
+  sandbox="allow-scripts allow-same-origin"
+  src="https://foo.com/iframe"
+>
+  <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
 </amp-iframe>
 ```
 
-*Example: Iframe embed-ready request*
+_Example: Iframe embed-ready request_
 
 ```javascript
-window.parent.postMessage({
-  sentinel: 'amp',
-  type: 'embed-ready'
-}, '*');
+window.parent.postMessage(
+  {
+    sentinel: 'amp',
+    type: 'embed-ready',
+  },
+  '*'
+);
 ```
 
 ## Iframe resizing
@@ -159,26 +169,34 @@ it's possible to resize an `amp-iframe` at runtime. To do so:
 
 Notice that `resizable` overrides the value of `scrolling` to `no`.
 
-*Example: `amp-iframe` with `overflow` element*
+_Example: `amp-iframe` with `overflow` element_
 
 ```html
-<amp-iframe width=300 height=300
-    layout="responsive"
-    sandbox="allow-scripts allow-same-origin"
-    resizable
-    src="https://foo.com/iframe">
-  <div overflow tabindex=0 role=button aria-label="Read more">Read more!</div>
+<amp-iframe
+  width="300"
+  height="300"
+  layout="responsive"
+  sandbox="allow-scripts allow-same-origin"
+  resizable
+  src="https://foo.com/iframe"
+>
+  <div overflow tabindex="0" role="button" aria-label="Read more">
+    Read more!
+  </div>
 </amp-iframe>
 ```
 
-*Example: iframe resize request*
+_Example: iframe resize request_
 
 ```javascript
-window.parent.postMessage({
-  sentinel: 'amp',
-  type: 'embed-size',
-  height: document.body.scrollHeight
-}, '*');
+window.parent.postMessage(
+  {
+    sentinel: 'amp',
+    type: 'embed-size',
+    height: document.body.scrollHeight,
+  },
+  '*'
+);
 ```
 
 Once this message is received, the AMP runtime tries to accommodate the request as soon as possible, but it takes into account where the reader is currently reading, whether the scrolling is ongoing and any other UX or performance factors. If the runtime cannot satisfy the resize request,
@@ -194,31 +212,36 @@ Here are some factors that affect how fast the resize will be executed:
 
 Iframes can send a `send-intersections` message to their parents to start receiving IntersectionObserver style [change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
 
-*Note: In the following examples, we assume the script is in the created iframe, where `window.parent` is the top window. If the script lives in a nested iframe, change `window.parent` to the top AMP window.*
+_Note: In the following examples, we assume the script is in the created iframe, where `window.parent` is the top window. If the script lives in a nested iframe, change `window.parent` to the top AMP window._
 
-*Example: iframe `send-intersections` request*
+_Example: iframe `send-intersections` request_
 
 ```javascript
-window.parent.postMessage({
-  sentinel: 'amp',
-  type: 'send-intersections'
-}, '*');
+window.parent.postMessage(
+  {
+    sentinel: 'amp',
+    type: 'send-intersections',
+  },
+  '*'
+);
 ```
 
 The iframe can listen to an `intersection` message from the parent window to receive the intersection data.
 
-*Example: iframe `send-intersections` request*
+_Example: iframe `send-intersections` request_
 
 ```javascript
 window.addEventListener('message', function(event) {
-  if (event.source != window.parent ||
-      event.origin == window.location.origin ||
-      !event.data ||
-      event.data.sentinel != 'amp' ||
-      event.data.type != 'intersection') {
+  if (
+    event.source != window.parent ||
+    event.origin == window.location.origin ||
+    !event.data ||
+    event.data.sentinel != 'amp' ||
+    event.data.type != 'intersection'
+  ) {
     return;
   }
-  event.data.changes.forEach(function (change) {
+  event.data.changes.forEach(function(change) {
     console.log(change);
   });
 });
@@ -241,7 +264,7 @@ The `amp-iframe` component should be considered a fallback if the required user 
 - Better resource management and performance
 - Custom components can provide built-in placeholder images in some cases. This means getting, say, the right video thumbnail before a video loads, and reduces the coding effort to add a placeholder manually.
 - Built-in resizing. This means that iframe content with unpredictable size can more often appear to the user as if it were native to the page, rather than in a scrollable frame
-- Other additional features  can be built in (for instance, auto-play for video players)
+- Other additional features can be built in (for instance, auto-play for video players)
 
 ## Validation
 

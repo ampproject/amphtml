@@ -297,15 +297,6 @@ export class Services {
   }
 
   /**
-   * @param {!Window} window
-   * @return {!./service/document-state.DocumentState}
-   * @restricted  Only to be used for global document services, such as vsync.
-   */
-  static globalDocumentStateFor(window) {
-    return getService(window, 'documentState');
-  }
-
-  /**
    * Returns service to listen for `hidden` attribute mutations.
    * @param {!Element|!ShadowRoot} element
    * @return {!./service/hidden-observer-impl.HiddenObserver}

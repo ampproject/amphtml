@@ -19,11 +19,11 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
-  MAX_HEIGHT_EXP,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
 import {
@@ -62,7 +62,6 @@ describes.realWin(
     let win, doc, ampdoc, viewer;
     let impl;
     let element;
-    let isResponsiveStub;
 
     beforeEach(() => {
       win = env.win;
@@ -90,7 +89,14 @@ describes.realWin(
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.win['goog_identity_prom'] = Promise.resolve({});
-      isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
+      sandbox.stub(Services, 'timerFor').returns({
+        timeoutPromise: (unused, promise) => {
+          if (promise) {
+            return promise;
+          }
+          return Promise.reject(new Error('No token'));
+        },
+      });
     });
 
     /**
@@ -123,30 +129,38 @@ describes.realWin(
         expect(impl.isValidElement()).to.be.true;
       });
       it('should be valid (responsive)', () => {
-        isResponsiveStub.callsFake(() => true);
+        element.setAttribute('data-auto-format', 'rspv');
         element.setAttribute('data-full-width', 'true');
         element.setAttribute('height', '320');
         element.setAttribute('width', '100vw');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.true;
       });
       it('should NOT be valid (responsive with wrong height)', () => {
-        isResponsiveStub.callsFake(() => true);
+        element.setAttribute('data-auto-format', 'rspv');
         element.setAttribute('data-full-width', 'true');
         element.setAttribute('height', '666');
         element.setAttribute('width', '100vw');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.false;
       });
       it('should NOT be valid (responsive with wrong width)', () => {
-        isResponsiveStub.callsFake(() => true);
+        element.setAttribute('data-auto-format', 'rspv');
         element.setAttribute('data-full-width', 'true');
         element.setAttribute('height', '320');
         element.setAttribute('width', '666');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.false;
       });
       it('should NOT be valid (responsive with missing data-full-width)', () => {
-        isResponsiveStub.callsFake(() => true);
+        element.setAttribute('data-auto-format', 'rspv');
         element.setAttribute('height', '320');
         element.setAttribute('width', '100vw');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.false;
       });
       it('should NOT be valid (impl tag name)', () => {
@@ -161,6 +175,8 @@ describes.realWin(
       it('should NOT be valid (missing ad client)', () => {
         element.setAttribute('data-ad-client', '');
         element.setAttribute('type', 'adsense');
+        impl = new AmpAdNetworkAdsenseImpl(element);
+
         expect(impl.isValidElement()).to.be.false;
       });
       it('should be valid (amp-embed)', () => {
@@ -422,6 +438,48 @@ describes.realWin(
           'abc'
         );
         expect(impl.iframe.id).to.equal('google_ads_iframe_3');
+      });
+
+      it('should write auto ad size data to localstorage', async () => {
+        const storage = await Services.storageForDoc(doc);
+        let promiseResolver;
+        const savePromise = new Promise(resolve => {
+          promiseResolver = resolve;
+        });
+        const storageContent = {};
+        sandbox.stub(storage, 'set').callsFake((key, value) => {
+          storageContent[key] = value;
+          promiseResolver();
+          return Promise.resolve();
+        });
+
+        forceExperimentBranch(
+          impl.win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        impl.iframe = {
+          contentWindow: window,
+          nodeType: 1,
+          style: {},
+        };
+        impl.element.setAttribute('data-ad-client', 'ca-adsense');
+
+        impl.size_ = {width: 123, height: 456};
+
+        impl.onCreativeRender();
+
+        const data = {
+          'googMsgType': 'adsense-settings',
+          'adClient': 'ca-adsense',
+          'enableAutoAdSize': '1',
+        };
+
+        win.postMessage(data, '*');
+
+        await savePromise;
+
+        expect(storageContent).to.deep.equal({'aas-ca-adsense': true});
       });
     });
 
@@ -876,9 +934,11 @@ describes.realWin(
       const VIEWPORT_HEIGHT = 667;
 
       let iframe;
+      let didAttemptSizeChange;
 
       function constructImpl(config) {
         config.type = 'adsense';
+        config['data-ad-client'] = 'ca-adsense';
         element = createElementWithAttributes(doc, 'amp-ad', config);
         iframe = env.win.document.createElement('iframe');
         element.appendChild(iframe);
@@ -893,89 +953,162 @@ describes.realWin(
           width: VIEWPORT_WIDTH,
           height: VIEWPORT_HEIGHT,
         });
+        didAttemptSizeChange = false;
+        env.sandbox.stub(element, 'getImpl').returns(
+          Promise.resolve({
+            attemptChangeSize: () => {
+              didAttemptSizeChange = true;
+              return Promise.resolve();
+            },
+          })
+        );
         return impl;
       }
 
-      it('should do nothing for non-responsive', () => {
+      it('should do nothing for non-responsive', async () => {
         const adsense = constructImpl({
           width: '320',
           height: '150',
         });
-        expect(adsense.buildCallback()).to.be.undefined;
+        const promise = adsense.buildCallback();
+        expect(promise).to.exist;
+        await promise;
+
+        expect(didAttemptSizeChange).to.be.false;
       });
 
-      it('should schedule a resize for responsive', function*() {
+      it('should schedule a resize for responsive', async () => {
         const adsense = constructImpl({
           width: '100vw',
           height: '100',
           'data-auto-format': 'rspv',
         });
-        env.sandbox
-          .stub(adsense, 'attemptChangeSize')
-          .returns(Promise.resolve());
 
         const promise = adsense.buildCallback();
         expect(promise).to.exist;
-        yield promise;
+        await promise;
 
-        expect(adsense.attemptChangeSize).to.be.calledWith(300, VIEWPORT_WIDTH);
+        expect(didAttemptSizeChange).to.be.true;
       });
 
-      it('should schedule a resize with the right height for max height responsive experiment', function*() {
-        forceExperimentBranch(
-          impl.win,
-          MAX_HEIGHT_EXP.branch,
-          MAX_HEIGHT_EXP.experiment
-        );
-
-        const adsense = constructImpl({
-          width: '100vw',
-          height: '100',
-          'data-auto-format': 'rspv',
-        });
-        env.sandbox
-          .stub(adsense, 'attemptChangeSize')
-          .returns(Promise.resolve());
-
-        const promise = adsense.buildCallback();
-        expect(promise).to.exist;
-        yield promise;
-
-        expect(adsense.attemptChangeSize).to.be.calledWith(313, VIEWPORT_WIDTH);
-      });
-
-      it('should call divertExperiments after isResponsive', () => {
-        const adsense = constructImpl({
-          width: '320',
-          height: '150',
-        });
-        const isResponsiveSpy = env.sandbox.spy(adsense, 'isResponsive_');
-        const divertExperimentsSpy = env.sandbox.spy(
-          adsense,
-          'divertExperiments'
-        );
-        adsense.buildCallback();
-        expect(isResponsiveSpy.calledBefore(divertExperimentsSpy)).to.be.true;
-      });
-
-      it('should schedule a resize for matched content responsive', function*() {
+      it('should schedule a resize for matched content responsive', async () => {
         const adsense = constructImpl({
           width: '100vw',
           height: '100',
           'data-auto-format': 'mcrspv',
         });
-        env.sandbox
-          .stub(adsense, 'attemptChangeSize')
-          .returns(Promise.resolve());
 
         const promise = adsense.buildCallback();
         expect(promise).to.exist;
-        yield promise;
+        await promise;
+        expect(didAttemptSizeChange).to.be.true;
+      });
 
-        expect(adsense.attemptChangeSize).to.be.calledWith(
-          1386,
-          VIEWPORT_WIDTH
-        );
+      describe('for publisher opted in to auto ad size optimization', () => {
+        beforeEach(async () => {
+          const storage = await Services.storageForDoc(doc);
+          const storageContent = {'aas-ca-adsense': true};
+
+          sandbox.stub(storage, 'get').callsFake(key => {
+            return Promise.resolve(storageContent[key]);
+          });
+        });
+
+        it('does nothing if experiment is disabled', async () => {
+          forceExperimentBranch(
+            impl.win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.control
+          );
+          const adsense = constructImpl({
+            width: '320',
+            height: '150',
+          });
+
+          const promise = adsense.buildCallback();
+          expect(promise).to.exist;
+          await promise;
+
+          expect(didAttemptSizeChange).to.be.false;
+          expect(adsense.element.hasAttribute('data-auto-format')).to.be.false;
+        });
+
+        it('does nothing if ad unit is responsive already', async () => {
+          forceExperimentBranch(
+            impl.win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.experiment
+          );
+          const adsense = constructImpl({
+            width: '100vw',
+            height: '100',
+            'data-auto-format': 'mcrspv',
+          });
+          const promise = adsense.buildCallback();
+          expect(promise).to.exist;
+          await promise;
+
+          expect(adsense.element.getAttribute('data-auto-format')).to.be.equal(
+            'mcrspv'
+          );
+          expect(didAttemptSizeChange).to.be.true;
+        });
+
+        it('upgrades manual ad units to responsive if experiment is enabled', async () => {
+          forceExperimentBranch(
+            impl.win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.experiment
+          );
+          const adsense = constructImpl({
+            width: '320',
+            height: '150',
+          });
+          env.sandbox
+            .stub(adsense, 'attemptChangeSize')
+            .returns(Promise.resolve());
+
+          const promise = adsense.buildCallback();
+          expect(promise).to.exist;
+          await promise;
+
+          expect(adsense.element.getAttribute('data-auto-format')).to.be.equal(
+            'rspv'
+          );
+          expect(didAttemptSizeChange).to.be.true;
+        });
+      });
+      describe('for publisher not opted in to auto ad size optimization', () => {
+        beforeEach(async () => {
+          const storage = await Services.storageForDoc(doc);
+          const storageContent = {'aas-ca-adsense': false};
+
+          sandbox.stub(storage, 'get').callsFake(key => {
+            return Promise.resolve(storageContent[key]);
+          });
+        });
+
+        it('does not upgrade manual ad units to responsive if experiment is enabled', async () => {
+          forceExperimentBranch(
+            impl.win,
+            AD_SIZE_OPTIMIZATION_EXP.branch,
+            AD_SIZE_OPTIMIZATION_EXP.experiment
+          );
+          const adsense = constructImpl({
+            width: '320',
+            height: '150',
+          });
+          env.sandbox
+            .stub(adsense, 'attemptChangeSize')
+            .returns(Promise.resolve());
+
+          const promise = adsense.buildCallback();
+          expect(promise).to.exist;
+          await promise;
+
+          expect(adsense.attemptChangeSize).to.not.be.called;
+          expect(adsense.element.hasAttribute('data-auto-format')).to.be.false;
+        });
       });
     });
 
@@ -1034,6 +1167,7 @@ describes.realWin(
       }
 
       beforeEach(() => {
+        Services.timerFor.restore();
         viewer.toggleRuntime(); // Turn runtime on for these tests.
       });
 
@@ -1079,74 +1213,6 @@ describes.realWin(
           expect(element.style.marginRight).to.be.equal('-109px');
           expect(element.style.marginLeft).to.be.equal('');
         });
-      });
-    });
-
-    describe('#getResponsiveHeightForContext', () => {
-      it('should return 100px height for very small viewports', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'rspv',
-            {width: 100, height: 667},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(100);
-      });
-
-      it('should return 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'rspv',
-            {width: 320, height: 568},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(267);
-      });
-
-      it('should return 300px height for wide viewports without the responsive height fix', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'rspv',
-            {width: 500, height: 667},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(300);
-      });
-
-      it('should return 500px height for wide viewports with the responsive height fix', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'rspv',
-            {width: 1000, height: 1000},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ true
-          )
-        ).to.be.equal(500);
-      });
-
-      it('get matched content responsive height for iPhone 6', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'mcrspv',
-            {width: 375, height: 320},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(1386);
-      });
-
-      it('get matched content responsive height for iPhone 5', () => {
-        expect(
-          AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-            'mcrspv',
-            {width: 320, height: 320},
-            doc.createElement('div'),
-            /* isInResponsiveHeightFixExperimentBranch= */ false
-          )
-        ).to.be.equal(1200);
       });
     });
 

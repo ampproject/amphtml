@@ -52,11 +52,10 @@ export function getAutofocusElementForShowAction(element) {
 const TAG = 'STANDARD-ACTIONS';
 
 /**
- * Regular expression that identifies AMP CSS classes.
- * Includes 'i-amphtml-', '-amp-', and 'amp-' prefixes.
+ * Regular expression that identifies AMP CSS classes with 'i-amphtml-' prefixes.
  * @type {!RegExp}
  */
-const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
+const AMP_CSS_RE = /^i-amphtml-/;
 
 /**
  * This service contains implementations of some of the most typical actions,
@@ -144,8 +143,8 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleAmpTarget_(invocation) {
-    // All global `AMP` actions require high trust.
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+    // All global `AMP` actions require default trust.
+    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
     const {node, method, args} = invocation;

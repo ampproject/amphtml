@@ -19,7 +19,7 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {mockServiceForDoc} from '../../../../testing/test-helper';
+import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -483,6 +483,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'cover',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectFit).to.equal('cover');
@@ -492,6 +493,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'foo 80%',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectFit).to.be.empty;
@@ -501,6 +503,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-position': '20% 80%',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectPosition).to.equal('20% 80%');
@@ -510,6 +513,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-position': 'url("example.com")',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectPosition).to.be.empty;
@@ -650,18 +654,18 @@ describes.realWin(
       let makeVisible;
       let visiblePromise;
       let video;
-      let viewerMock;
+      let visibilityStubs;
 
       beforeEach(() => {
-        viewerMock = mockServiceForDoc(sandbox, env.ampdoc, 'viewer', [
-          'getVisibilityState',
-          'whenFirstVisible',
-        ]);
-        viewerMock.getVisibilityState.returns(VisibilityState.PRERENDER);
+        visibilityStubs = {
+          getVisibilityState: sandbox.stub(env.ampdoc, 'getVisibilityState'),
+          whenFirstVisible: sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+        };
+        visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
         visiblePromise = new Promise(resolve => {
           makeVisible = resolve;
         });
-        viewerMock.whenFirstVisible.returns(visiblePromise);
+        visibilityStubs.whenFirstVisible.returns(visiblePromise);
       });
 
       describe('should not prerender if no cached sources', () => {
@@ -792,6 +796,105 @@ describes.realWin(
               }
             );
           });
+        });
+      });
+
+      describe('should prerender poster image', () => {
+        it('with just cached src', () => {
+          return new Promise(resolve => {
+            getVideo(
+              {
+                src: 'https://example.com/video.mp4',
+                poster: 'https://example.com/poster.jpg',
+                width: 160,
+                height: 90,
+              },
+              null,
+              element => {
+                expect(element.implementation_.prerenderAllowed()).to.be.true;
+                resolve();
+              }
+            );
+          });
+        });
+      });
+
+      describe('should preconnect to the first cached source', () => {
+        let fakePreconnect;
+
+        beforeEach(() => {
+          fakePreconnect = {url: () => {}};
+          registerServiceBuilder(win, 'preconnect', () => fakePreconnect);
+        });
+
+        it('no cached source', async () => {
+          const preloadStub = sandbox.stub(fakePreconnect, 'url');
+
+          await getVideo({
+            src: 'https://example.com/video.mp4',
+            poster: 'https://example.com/poster.jpg',
+            width: 160,
+            height: 90,
+          });
+
+          expect(preloadStub).to.not.have.been.called;
+        });
+
+        it('cached source', async () => {
+          const preloadStub = sandbox.stub(fakePreconnect, 'url');
+
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+
+          await getVideo(
+            {
+              poster: 'https://example.com/poster.jpg',
+              width: 160,
+              height: 90,
+            },
+            [cachedSource]
+          );
+
+          expect(preloadStub).to.have.been.calledOnce;
+          expect(preloadStub.getCall(0).args[1]).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+        });
+
+        it('mixed sources', async () => {
+          const preloadStub = sandbox.stub(fakePreconnect, 'url');
+
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+          await getVideo(
+            {
+              poster: 'https://example.com/poster.jpg',
+              width: 160,
+              height: 90,
+            },
+            [source, cachedSource]
+          );
+          expect(preloadStub).to.have.been.calledOnce;
+          expect(preloadStub.getCall(0).args[1]).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
         });
       });
 

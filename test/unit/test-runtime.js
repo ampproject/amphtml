@@ -29,7 +29,6 @@ import {
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
 import {installAmpdocServices} from '../../src/service/core-services';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
@@ -68,7 +67,6 @@ describes.fakeWin(
       const ampdoc = new AmpDocSingle(win);
       ampdocService.getSingleDoc = () => ampdoc;
       ampdocService.getAmpDoc = () => ampdoc;
-      installGlobalDocumentStateService(win);
       installPlatformService(win);
       installTimerService(win);
       vsyncForTesting(win);
@@ -542,7 +540,9 @@ describes.fakeWin(
       toggleExperiment(win, 'version-locking', true);
       function addExisting(index) {
         const s = document.createElement('script');
-        s.setAttribute('custom-element', 'amp-test-element' + index);
+        const name = 'amp-test-element' + index;
+        s.setAttribute('custom-element', name);
+        s.setAttribute('src', `/${name}-0.1.js`);
         win.document.head.appendChild(s);
         return s;
       }
@@ -623,9 +623,6 @@ describes.fakeWin(
       yield waitNext(promise);
       expect(progress).to.equal('134');
       expect(queueExtensions).to.have.length(0);
-      expect(s1.getAttribute('custom-element')).to.be.null;
-      expect(s2.getAttribute('custom-element')).to.be.null;
-      expect(s3.getAttribute('custom-element')).to.be.null;
       expect(s1.getAttribute('i-amphtml-loaded-new-version')).to.equal(
         'amp-test-element1'
       );
@@ -1342,38 +1339,36 @@ describes.realWin(
 
       it('should start as visible by default', () => {
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
-        const viewer = getServiceForDoc(ampdoc, 'viewer');
-        expect(viewer.getVisibilityState()).to.equal('visible');
+        expect(ampdoc.getVisibilityState()).to.equal('visible');
       });
 
       it('should start as prerender when requested', () => {
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl, {
           'visibilityState': 'prerender',
         });
-        const viewer = getServiceForDoc(ampdoc, 'viewer');
-        expect(viewer.getVisibilityState()).to.equal('prerender');
+        expect(ampdoc.getVisibilityState()).to.equal('prerender');
       });
 
       it('should expose visibility method', () => {
         const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
-        const viewer = getServiceForDoc(ampdoc, 'viewer');
         expect(amp.setVisibilityState).to.be.a('function');
-        expect(viewer.getVisibilityState()).to.equal('visible');
+        expect(ampdoc.getVisibilityState()).to.equal('visible');
 
         amp.setVisibilityState('inactive');
-        expect(viewer.getVisibilityState()).to.equal('inactive');
+        expect(ampdoc.getVisibilityState()).to.equal('inactive');
       });
 
       it('should expose close method and dispose services', () => {
         const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
         const viewer = getServiceForDoc(ampdoc, 'viewer');
         expect(amp.close).to.be.a('function');
-        expect(viewer.getVisibilityState()).to.equal('visible');
+        expect(ampdoc.getVisibilityState()).to.equal('visible');
 
         viewer.dispose = sandbox.spy();
-        amp.close();
-        expect(viewer.getVisibilityState()).to.equal('inactive');
-        expect(viewer.dispose).to.be.calledOnce;
+        amp.close().then(() => {
+          expect(ampdoc.getVisibilityState()).to.equal('inactive');
+          expect(viewer.dispose).to.be.calledOnce;
+        });
       });
 
       it('should expose head tag ', () => {
@@ -1734,8 +1729,7 @@ describes.realWin(
           writer = shadowDoc.writer;
           writer.write('<body>');
           return ampdoc.waitForBodyOpen().then(() => {
-            const viewer = getServiceForDoc(ampdoc, 'viewer');
-            expect(viewer.getVisibilityState()).to.equal('visible');
+            expect(ampdoc.getVisibilityState()).to.equal('visible');
           });
         });
 
@@ -1746,8 +1740,7 @@ describes.realWin(
           writer = shadowDoc.writer;
           writer.write('<body>');
           return ampdoc.waitForBodyOpen().then(() => {
-            const viewer = getServiceForDoc(ampdoc, 'viewer');
-            expect(viewer.getVisibilityState()).to.equal('prerender');
+            expect(ampdoc.getVisibilityState()).to.equal('prerender');
           });
         });
 
@@ -1756,12 +1749,11 @@ describes.realWin(
           writer = shadowDoc.writer;
           writer.write('<body>');
           return ampdoc.waitForBodyOpen().then(() => {
-            const viewer = getServiceForDoc(ampdoc, 'viewer');
             expect(shadowDoc.setVisibilityState).to.be.a('function');
-            expect(viewer.getVisibilityState()).to.equal('visible');
+            expect(ampdoc.getVisibilityState()).to.equal('visible');
 
             shadowDoc.setVisibilityState('inactive');
-            expect(viewer.getVisibilityState()).to.equal('inactive');
+            expect(ampdoc.getVisibilityState()).to.equal('inactive');
           });
         });
 
@@ -1772,12 +1764,13 @@ describes.realWin(
           return ampdoc.waitForBodyOpen().then(() => {
             const viewer = getServiceForDoc(ampdoc, 'viewer');
             expect(shadowDoc.close).to.be.a('function');
-            expect(viewer.getVisibilityState()).to.equal('visible');
+            expect(ampdoc.getVisibilityState()).to.equal('visible');
 
             viewer.dispose = sandbox.spy();
-            shadowDoc.close();
-            expect(viewer.getVisibilityState()).to.equal('inactive');
-            expect(viewer.dispose).to.be.calledOnce;
+            shadowDoc.close().then(() => {
+              expect(ampdoc.getVisibilityState()).to.equal('inactive');
+              expect(viewer.dispose).to.be.calledOnce;
+            });
           });
         });
       });

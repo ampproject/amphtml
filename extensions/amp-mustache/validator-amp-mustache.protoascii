@@ -36,10 +36,9 @@ tags: {  # amp-mustache
 }
 tags: {  # amp-mustache
   html_format: AMP4ADS
-  html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "SCRIPT"
-  spec_name: "SCRIPT[custom-element=amp-mustache] (AMP4ADS/AMP4EMAIL)"
+  spec_name: "SCRIPT[custom-template=amp-mustache] (AMP4ADS/ACTIONS)"
   extension_spec: {
     name: "amp-mustache"
     extension_type: CUSTOM_TEMPLATE
@@ -50,7 +49,21 @@ tags: {  # amp-mustache
   }
   attr_lists: "common-extension-attrs"
 }
-# The script element.
+tags: {  # amp-mustache
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-template=amp-mustache] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-mustache"
+    extension_type: CUSTOM_TEMPLATE
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+    version: "0.2"
+    deprecated_version: "0.1"
+  }
+  attr_lists: "common-extension-attrs"
+}
+# Templates using script[type=text/plain].
 tags: {
   html_format: AMP
   html_format: AMP4ADS
