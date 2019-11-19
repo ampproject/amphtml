@@ -287,11 +287,11 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   var unauthorized = 'Unauthorized Request';
   var origin;
   var allowedOrigins = [
-     "https://example.com",
-     "https://example-com.cdn.ampproject.org",
-     "https://example.com.amp.cloudflare.com",
-     "https://cdn.ampproject.org" ];
-  var allowedSourceOrigin = "https://example.com";  //publisher's origin
+     'https://example.com',
+     'https://example-com.cdn.ampproject.org',
+     'https://example.com.amp.cloudflare.com',
+     'https://cdn.ampproject.org' ];
+  var allowedSourceOrigin = 'https://example.com';  //publisher's origin
   var sourceOrigin = req.query.__amp_source_origin;
 
 
@@ -369,16 +369,20 @@ Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: https://example-com.cdn.ampproject.org
 ```
 ## Working with cached fonts
-Google AMP Cache caches AMP HTML documents, images and fonts to optimize the speed of the AMP page. While making the AMP page fast, we also want to be careful in securing the cached resources. We will be making a change in how AMP cache responds it’s cached resources, 
+
+Google AMP Cache caches AMP HTML documents, images and fonts to optimize the speed of the AMP page. 
+While making the AMP page fast, we also want to be careful in securing the cached resources. We will be making a change in how AMP cache responds it’s cached resources, 
 typically for fonts, by respecting the origin’s `Access-Control-Allow-Origin` value.
 
 ### Past behavior (before October 2019)
+
 When an AMP page was loading [https://example.com/some/font.ttf](https://example.com/some/font.ttf) from `@font-face src` attribute, AMP Cache will cache the font file and serve the resource as below with having the wild card `Access-Control-Allow-Origin`.
 
 - URL [https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff](https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff)
 - Access-Control-Allow-Origin: *
 
 ### New behavior (October 2019 and after)
+
 While the current implementation is permissive, this could lead to unexpected use of the fonts from cross-origin sites. In this change AMP Cache will start to respond with the exact same `Access-Control-Allow-Origin` value the origin server responds. 
 To properly load the fonts from the cached AMP document, you will need to accept the AMP Cache origin via the header.
 
