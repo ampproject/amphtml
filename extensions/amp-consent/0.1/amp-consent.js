@@ -136,6 +136,14 @@ export class AmpConsent extends AMP.BaseElement {
     // ConsentConfig has verified that there's one and only one consent instance
     this.consentId_ = this.consentConfig_['consentInstanceId'];
 
+    this.consentUI_ = new ConsentUI(
+      this,
+      /** @type {!JsonObject} */ (devAssert(
+        this.consentConfig_,
+        'consent config not found'
+      ))
+    );
+
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ = new ConsentUI(
         this,
@@ -210,15 +218,12 @@ export class AmpConsent extends AMP.BaseElement {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
-    // Assert that if we're using new version we have consentRequired
+    // (TODO): Assert that if we're using new version we have consentRequired
     // otherwise we're using old version and we should migrate to new
     // version here.
     // E.g: promptIfUnknownForGeo: geoGroup -> geoOverride: {geoGroup: {consentRequired: true}}
 
-    // If geoGroups are defined, iterate through them
-    // to check if we are in the correct geoGroup.
-    // If we are in the defined geoGroup, override the
-    // top level defaults.
+    // Iterate through geoGroups, and override toplevel `checkConsentHref` and `consentRequire` if we are in the group
     const geoServicePromise = this.consentConfig_['geoOverride']
       ? Services.geoForDocOrNull(this.element).then(geo => {
           userAssert(
@@ -455,6 +460,11 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Init the amp-consent by registering and initiate consent instance.
+   * 1.) Get local storage values
+   * 2.) Maybe prompt
+   * 3.) Sync server data with local storage
+   * 4.) Maybe prompt post ui
+   * 5.) Enable timeout and interactions
    */
   init_() {
     this.consentStateManager_
@@ -528,15 +538,6 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   showPromptOrNot_(hasLocalStorageValue) {
-    // Might need to just unblock instantly...
-    this.consentUI_ = new ConsentUI(
-      this,
-      /** @type {!JsonObject} */ (devAssert(
-        this.consentConfig_,
-        'consent config not found'
-      ))
-    );
-
     // Remote case
     if (this.consentConfig_['consentRequired'] === 'remote') {
       userAssert(
@@ -560,11 +561,6 @@ export class AmpConsent extends AMP.BaseElement {
             // Prompt (and eligible for postPromptUi)
             this.scheduleDisplay_(false);
             this.promptShown_ = true;
-            // otherwise, if consent is not needed
-          } else if (constentRequiredResponse === false) {
-            this.consentStateManager_.updateConsentInstanceState(
-              CONSENT_ITEM_STATE.NOT_REQUIRED
-            );
           }
           // last case is if consent is required but there `consentStateValueResponse` is not `unknown`
           // then we don't do anything.
@@ -579,10 +575,6 @@ export class AmpConsent extends AMP.BaseElement {
         // Race condition on consent state change between schedule to
         // display and display. Add one more check before display
       }
-    } else {
-      this.consentStateManager_.updateConsentInstanceState(
-        CONSENT_ITEM_STATE.NOT_REQUIRED
-      );
     }
   }
 

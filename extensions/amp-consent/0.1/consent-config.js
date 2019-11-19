@@ -150,13 +150,15 @@ export class ConsentConfig {
       }
     }
 
-    // Do I need to guard against incorrect geoOverride implementation?
+    // Do I need to guard against incorrect geoOverride?
     if (config['geoOverride']) {
       const geoKeys = Object.keys(config['geoOverride']);
       if (geoKeys.length == 0) {
         delete config['geoOverride'];
       }
-      // for (let i = 0; i < geoKeys.length; i++) {}
+      // for (let i = 0; i < geoKeys.length; i++) {
+      // check that they're objects
+      //}
     }
 
     return config;
