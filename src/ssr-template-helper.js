@@ -65,7 +65,8 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * Proxies xhr and template rendering to the viewer and renders the response.
+   * Proxies xhr and template rendering to the viewer.
+   * Returns the renderable response, for use with applySsrOrCsrTemplate.
    * @param {!Element} element
    * @param {!FetchRequestDef} request The fetch/XHR related data.
    * @param {?SsrTemplateDef=} opt_templates Response templates to pass into
@@ -74,12 +75,7 @@ export class SsrTemplateHelper {
    * @param {!Object=} opt_attributes Additional JSON to send to viewer.
    * @return {!Promise<?JsonObject|string|undefined>}
    */
-  fetchAndRenderTemplate(
-    element,
-    request,
-    opt_templates = null,
-    opt_attributes = {}
-  ) {
+  ssr(element, request, opt_templates = null, opt_attributes = {}) {
     let mustacheTemplate;
     if (!opt_templates) {
       mustacheTemplate = this.templates_.maybeFindTemplate(element);
@@ -96,11 +92,13 @@ export class SsrTemplateHelper {
   }
 
   /**
+   * Render provided data for the template in the given element.
+   * If SSR is supported, data is assumed to be from ssr() above.
    * @param {!Element} element
    * @param {(?JsonObject|string|undefined|!Array)} data
    * @return {!Promise}
    */
-  renderTemplate(element, data) {
+  applySsrOrCsrTemplate(element, data) {
     let renderTemplatePromise;
     if (this.isSupported()) {
       userAssert(

@@ -37,5 +37,5 @@ export function speakol(global, data) {
 
   global.document.getElementById('c').appendChild(d);
 
-  loadScript(global, 'https://js-widget-v2.test/dist/speakol-widget-v2.js');
+  loadScript(global, 'https://cdn.speakol.com/widget/js/speakol-widget-v2.js');
 }

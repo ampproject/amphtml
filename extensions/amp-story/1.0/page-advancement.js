@@ -140,6 +140,14 @@ export class AdvancementConfig {
   }
 
   /**
+   * Returns whether the advancement configuration will automatically advance
+   * @return {boolean}
+   */
+  isAutoAdvance() {
+    return false;
+  }
+
+  /**
    * @return {boolean}
    * @protected
    */
@@ -305,6 +313,13 @@ class ManualAdvancement extends AdvancementConfig {
       this.maybePerformNavigation_.bind(this),
       true
     );
+  }
+
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return false;
   }
 
   /**
@@ -537,6 +552,7 @@ class ManualAdvancement extends AdvancementConfig {
     const pageRect = this.element_.getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
+      event.stopPropagation();
       event.preventDefault();
       const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
@@ -713,6 +729,13 @@ class TimeBasedAdvancement extends AdvancementConfig {
     this.remainingDelayMs_ = canResume
       ? this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_()
       : null;
+  }
+
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return true;
   }
 
   /** @override */
@@ -969,6 +992,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
     this.unlistenFns_.forEach(fn => fn());
   }
 
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return true;
+  }
+
   /** @override */
   getProgress() {
     if (this.isVideoInterfaceVideo_()) {
@@ -1004,6 +1034,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
           #${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (!elements.length) {
+        if (autoAdvanceStr) {
+          user().warn(
+            'AMP-STORY-PAGE',
+            `Element with ID ${element.id} has no media element ` +
+              'supported for automatic advancement.'
+          );
+        }
         return null;
       }
 

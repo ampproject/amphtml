@@ -7,9 +7,9 @@
       owners: [
         {
           name: 'ampproject/wg-approvers',
-          requestReviews: false
-        }
-      ]
-    }
-  ]
+          requestReviews: false,
+        },
+      ],
+    },
+  ],
 }

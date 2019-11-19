@@ -145,8 +145,7 @@ describes.realWin(
 
       expect(ampState.registerAction).calledWithExactly(
         'refresh',
-        sinon.match.any,
-        ActionTrust.HIGH
+        sinon.match.any
       );
     });
 

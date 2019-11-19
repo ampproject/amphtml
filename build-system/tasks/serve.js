@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const connect = require('gulp-connect');
-const deglob = require('globs-to-files');
+const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
 const morgan = require('morgan');
@@ -25,8 +25,8 @@ const watch = require('gulp-watch');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
-  preBuildCoreRuntime,
-  preBuildSomeExtensions,
+  preBuildRuntimeFiles,
+  preBuildExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
@@ -35,7 +35,7 @@ const {getServeMode} = require('../server/app-utils');
 // Used for logging during server start / stop.
 let url = '';
 
-const serverFiles = deglob.sync(['build-system/server/**']);
+const serverFiles = globby.sync(['build-system/server/**']);
 
 /**
  * Logs the server's mode (based on command line arguments).
@@ -131,14 +131,12 @@ function restartServer() {
 }
 
 /**
- * Initiates pre-build steps requested via command line args.
+ * Performs pre-build steps requested via command line args.
  */
-function initiatePreBuildSteps() {
+async function performPreBuildSteps() {
   if (!argv._.includes('serve')) {
-    preBuildCoreRuntime();
-    if (argv.extensions || argv.extensions_from) {
-      preBuildSomeExtensions();
-    }
+    await preBuildRuntimeFiles();
+    await preBuildExtensions();
   }
 }
 
@@ -150,7 +148,7 @@ async function serve() {
   logServeMode();
   watch(serverFiles, restartServer);
   await startServer();
-  initiatePreBuildSteps();
+  await performPreBuildSteps();
 }
 
 module.exports = {

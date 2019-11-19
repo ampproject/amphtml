@@ -33,6 +33,7 @@ import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
+import {VisibilityState} from '../../../../src/visibility-state';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {poll} from '../../../../testing/iframe';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -224,11 +225,15 @@ describes.realWin(
       const oldPage = pages[0];
       const newPage = pages[1];
 
-      const pauseOldPageStub = sandbox.stub(oldPage, 'pauseCallback');
-      const resumeNewPageStub = sandbox.stub(newPage, 'resumeCallback');
+      const setStateOldPageStub = sandbox.stub(oldPage, 'setState');
+      const setStateNewPageStub = sandbox.stub(newPage, 'setState');
       await story.switchTo_('page-1');
-      expect(pauseOldPageStub).to.have.been.calledOnce;
-      expect(resumeNewPageStub).to.have.been.calledOnce;
+      expect(setStateOldPageStub).to.have.been.calledOnceWithExactly(
+        PageState.NOT_ACTIVE
+      );
+      expect(setStateNewPageStub).to.have.been.calledOnceWithExactly(
+        PageState.PLAYING
+      );
     });
 
     // TODO(#11639): Re-enable this test.
@@ -698,18 +703,56 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.pauseCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+      });
+
+      it('should pause the story when viewer becomes hidden', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+      });
+
+      it('should pause the story when viewer becomes paused', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+      });
+
+      it('should pause the story page when viewer becomes paused', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        const setStateStub = sandbox.stub(story.activePage_, 'setState');
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        expect(setStateStub).to.have.been.calledOnceWithExactly(
+          PageState.PAUSED
+        );
       });
 
       it('should play the story when viewer becomes active', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+        await story.layoutCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
+      });
+
+      it('should play the story page when viewer becomes active', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.resumeCallback();
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
+        const setStateStub = sandbox.stub(story.activePage_, 'setState');
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
+          PageState.PLAYING
+        );
       });
 
       it('should keep the story paused on resume when previously paused', async () => {
@@ -718,8 +761,8 @@ describes.realWin(
         story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
         await story.layoutCallback();
-        story.pauseCallback();
-        story.resumeCallback();
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -1076,10 +1119,9 @@ describes.realWin(
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
               if (sendMessageStub.calledOnce) {
-                expect(sendMessageStub).to.be.calledWithExactly(
-                  'selectDocument',
-                  {next: true}
-                );
+                expect(
+                  sendMessageStub
+                ).to.be.calledWithExactly('selectDocument', {next: true});
                 return true;
               }
               return false;
@@ -1121,10 +1163,9 @@ describes.realWin(
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
               if (sendMessageStub.calledOnce) {
-                expect(sendMessageStub).to.be.calledWithExactly(
-                  'selectDocument',
-                  {previous: true}
-                );
+                expect(
+                  sendMessageStub
+                ).to.be.calledWithExactly('selectDocument', {previous: true});
                 return true;
               }
               return false;
@@ -1532,195 +1573,156 @@ describes.realWin(
           );
         });
       });
+    });
 
-      describe('amp-story branching', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-story-branching', true);
+    describe('amp-story branching', () => {
+      it('should advance to specified page with advanced-to attribute', async () => {
+        toggleExperiment(win, 'amp-story-branching', true);
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+        await story.layoutCallback();
+        expect(story.activePage_.element.id).to.equal('cover');
+
+        story.getPageById('cover').element.setAttribute('advance-to', 'page-3');
+
+        story.activePage_.element.dispatchEvent(
+          new MouseEvent('click', {clientX: 200})
+        );
+        expect(story.activePage_.element.id).to.equal('page-3');
+        toggleExperiment(win, 'amp-story-branching', false);
+      });
+
+      it('should navigate to the target page when a goToPage action is executed', async () => {
+        toggleExperiment(win, 'amp-story-branching', true);
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+        story.buildCallback();
+
+        await story.layoutCallback();
+        story.element.setAttribute('id', 'story');
+        const actionButton = createElementWithAttributes(
+          win.document,
+          'button',
+          {'id': 'actionButton', 'on': 'tap:story.goToPage(id=page-2)'}
+        );
+        element.querySelector('#cover').appendChild(actionButton);
+        // Click on the actionButton to trigger the goToPage action.
+        actionButton.click();
+        // Next tick.
+        await Promise.resolve();
+        expect(story.activePage_.element.id).to.equal('page-2');
+        toggleExperiment(win, 'amp-story-branching', false);
+      });
+
+      it('should navigate back to the correct previous page after goToPage', async () => {
+        toggleExperiment(win, 'amp-story-branching', true);
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+        story.buildCallback();
+
+        await story.layoutCallback();
+        story.element.setAttribute('id', 'story');
+
+        const actionButton = createElementWithAttributes(
+          win.document,
+          'button',
+          {'id': 'actionButton', 'on': 'tap:story.goToPage(id=page-2)'}
+        );
+        element.querySelector('#cover').appendChild(actionButton);
+        // Click on the actionButton to trigger the goToPage action.
+        actionButton.click();
+
+        // Moves backwards.
+        story.activePage_.element.dispatchEvent(
+          new MouseEvent('click', {clientX: 0})
+        );
+        expect(story.activePage_.element.id).to.equal('cover');
+        toggleExperiment(win, 'amp-story-branching', false);
+      });
+
+      it('should navigate back to the correct previous page after advance-to', async () => {
+        toggleExperiment(win, 'amp-story-branching', true);
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+        await story.layoutCallback();
+        story.getPageById('cover').element.setAttribute('advance-to', 'page-3');
+
+        expect(story.activePage_.element.id).to.equal('cover');
+
+        story.activePage_.element.dispatchEvent(
+          new MouseEvent('click', {clientX: 200})
+        );
+
+        // Move backwards.
+        story.activePage_.element.dispatchEvent(
+          new MouseEvent('click', {clientX: 0})
+        );
+        expect(story.activePage_.element.id).to.equal('cover');
+        toggleExperiment(win, 'amp-story-branching', false);
+      });
+
+      it('should begin at the specified page fragment parameter value', async () => {
+        win.location.hash = 'page=page-1';
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+        await story.layoutCallback();
+        expect(story.activePage_.element.id).to.equal('page-1');
+      });
+
+      it('should begin at initial page when fragment parameter value is wrong', async () => {
+        win.location.hash = 'page=BADVALUE';
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+
+        await story.layoutCallback();
+        expect(story.activePage_.element.id).to.equal('cover');
+      });
+
+      it('should update browser history with the story navigation path', async () => {
+        const pageCount = 2;
+        await createStoryWithPages(pageCount, ['cover', 'page-1']);
+
+        await story.layoutCallback();
+        story.activePage_.element.dispatchEvent(
+          new MouseEvent('click', {clientX: 200})
+        );
+        expect(replaceStateStub).to.have.been.calledWith({
+          ampStoryNavigationPath: ['cover', 'page-1'],
         });
-        afterEach(() => {
-          toggleExperiment(win, 'amp-story-branching', false);
-        });
+      });
 
-        it('should advance to specified page with advanced-to attribute', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
+      it('should correctly mark goToPage pages are distance 1', async () => {
+        toggleExperiment(win, 'amp-story-branching', true);
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+        story.buildCallback();
 
-          await story.layoutCallback();
-          expect(story.activePage_.element.id).to.equal('cover');
+        await story.layoutCallback();
+        story.element.setAttribute('id', 'story');
 
-          story
-            .getPageById('cover')
-            .element.setAttribute('advance-to', 'page-3');
+        const actionButton = createElementWithAttributes(
+          win.document,
+          'button',
+          {'id': 'actionButton', 'on': 'tap:story.goToPage(id=page-2)'}
+        );
 
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          expect(story.activePage_.element.id).to.equal('page-3');
-        });
+        story.element.querySelector('#cover').appendChild(actionButton);
 
-        it('should navigate to the target page when a goToPage action is executed', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-          story.buildCallback();
+        const distanceGraph = story.getPagesByDistance_();
+        expect(distanceGraph[1].includes('page-2')).to.be.true;
+        toggleExperiment(win, 'amp-story-branching', false);
+      });
 
-          await story.layoutCallback();
-          story.element.setAttribute('id', 'story');
-          const actionButton = createElementWithAttributes(
-            win.document,
-            'button',
-            {'id': 'actionButton', 'on': 'tap:story.goToPage(id=page-2)'}
-          );
-          element.querySelector('#cover').appendChild(actionButton);
-          // Click on the actionButton to trigger the goToPage action.
-          actionButton.click();
-          expect(story.activePage_.element.id).to.equal('page-2');
-        });
+      it('should correctly mark previous pages in the stack as distance 1', async () => {
+        toggleExperiment(win, 'amp-story-branching', true);
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
 
-        it('should navigate back to the correct previous page after goToPage', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-          story.buildCallback();
+        await story.layoutCallback();
+        story.getPageById('cover').element.setAttribute('advance-to', 'page-3');
 
-          await story.layoutCallback();
-          story.element.setAttribute('id', 'story');
+        story.activePage_.element.dispatchEvent(
+          new MouseEvent('click', {clientX: 200})
+        );
 
-          const actionButton = createElementWithAttributes(
-            win.document,
-            'button',
-            {'id': 'actionButton', 'on': 'tap:story.goToPage(id=page-2)'}
-          );
-          element.querySelector('#cover').appendChild(actionButton);
-          // Click on the actionButton to trigger the goToPage action.
-          actionButton.click();
-
-          // Moves backwards.
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 0})
-          );
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it.skip('should navigate back to the correct previous page after advance-to', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          story
-            .getPageById('cover')
-            .element.setAttribute('advance-to', 'page-3');
-
-          expect(story.activePage_.element.id).to.equal('cover');
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-
-          // Move backwards.
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 0})
-          );
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should begin at the specified page fragment parameter value', async () => {
-          win.location.hash = 'page=page-1';
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          expect(story.activePage_.element.id).to.equal('page-1');
-        });
-
-        it('should begin at initial page when fragment parameter value is wrong', async () => {
-          win.location.hash = 'page=BADVALUE';
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should update browser history with the story navigation path', async () => {
-          const pageCount = 2;
-          await createStoryWithPages(pageCount, ['cover', 'page-1']);
-
-          await story.layoutCallback();
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          expect(replaceStateStub).to.have.been.calledWith({
-            ampStoryNavigationPath: ['cover', 'page-1'],
-          });
-        });
-
-        it('should correctly mark goToPage pages are distance 1', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-          story.buildCallback();
-
-          await story.layoutCallback();
-          story.element.setAttribute('id', 'story');
-
-          const actionButton = createElementWithAttributes(
-            win.document,
-            'button',
-            {'id': 'actionButton', 'on': 'tap:story.goToPage(id=page-2)'}
-          );
-
-          story.element.querySelector('#cover').appendChild(actionButton);
-
-          const distanceGraph = story.getPagesByDistance_();
-          expect(distanceGraph[1].includes('page-2')).to.be.true;
-        });
-
-        it('should correctly mark previous pages in the stack as distance 1', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          story
-            .getPageById('cover')
-            .element.setAttribute('advance-to', 'page-3');
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-
-          const distanceGraph = story.getPagesByDistance_();
-          expect(distanceGraph[1].includes('cover')).to.be.true;
-        });
+        const distanceGraph = story.getPagesByDistance_();
+        expect(distanceGraph[1].includes('cover')).to.be.true;
+        toggleExperiment(win, 'amp-story-branching', false);
       });
     });
   }
