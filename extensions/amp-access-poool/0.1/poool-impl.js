@@ -208,14 +208,14 @@ export class PooolVendor {
    * @private
    */
   onRelease_() {
-    const articlePreview = this.ampdoc.getRootNode().querySelector(
-      '[poool-access-preview]'
-    );
+    const articlePreview = this.ampdoc
+      .getRootNode()
+      .querySelector('[poool-access-preview]');
     articlePreview.setAttribute('amp-access-hide', '');
 
-    const articleContent = this.ampdoc.getRootNode().querySelector(
-      '[poool-access-content]'
-    );
+    const articleContent = this.ampdoc
+      .getRootNode()
+      .querySelector('[poool-access-content]');
     articleContent.removeAttribute('amp-access-hide');
 
     resetStyles(this.iframe_, ['transform']);
