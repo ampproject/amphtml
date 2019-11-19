@@ -20,9 +20,9 @@ const log = require('fancy-log');
 const path = require('path');
 const request = require('request-promise');
 const {cyan, green} = require('ansi-colors');
-const {gitCommitHash} = require('../git');
+const {gitCommitHash} = require('../common/git');
 const {replaceUrls: replaceUrlsAppUtil} = require('../server/app-utils');
-const {travisBuildNumber} = require('../travis');
+const {travisBuildNumber} = require('../common/travis');
 
 const hostNamePrefix = 'https://storage.googleapis.com/amp-test-website-1';
 

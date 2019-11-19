@@ -21,26 +21,10 @@
  * @type {RegExp}
  */
 const ORIGIN_REGEX = new RegExp(
-  '^https?://localhost:8000|^https?://.+.localhost:8000'
+  '^https?://localhost:8000|^https?://.+\\.localhost:8000'
 );
 
-/**
- * In practice this would be the publishers origin.
- * Please see AMP CORS docs for more details:
- *    https://goo.gl/F6uCAY
- * @type {RegExp}
- */
-const SOURCE_ORIGIN_REGEX = new RegExp(
-  '^https?://localhost:8000|^https?://.+.localhost:8000'
-);
-
-function assertCors(
-  req,
-  res,
-  opt_validMethods,
-  opt_exposeHeaders,
-  opt_ignoreMissingSourceOrigin
-) {
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
   if (req.query.cors == '0') {
     return;
@@ -49,7 +33,6 @@ function assertCors(
   const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
   const invalidMethod = req.method + ' method is not allowed. Use POST.';
   const invalidOrigin = 'Origin header is invalid.';
-  const invalidSourceOrigin = '__amp_source_origin parameter is invalid.';
   const unauthorized = 'Unauthorized Request';
   let origin;
 
@@ -62,23 +45,14 @@ function assertCors(
   if (req.headers.origin) {
     origin = req.headers.origin;
     if (!ORIGIN_REGEX.test(req.headers.origin)) {
-      res.statusCode = 500;
+      res.statusCode = 403;
       res.end(JSON.stringify({message: invalidOrigin}));
       throw invalidOrigin;
-    }
-
-    if (
-      !opt_ignoreMissingSourceOrigin &&
-      !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)
-    ) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidSourceOrigin}));
-      throw invalidSourceOrigin;
     }
   } else if (req.headers['amp-same-origin'] == 'true') {
     origin = getUrlPrefix(req);
   } else {
-    res.statusCode = 401;
+    res.statusCode = 403;
     res.end(JSON.stringify({message: unauthorized}));
     throw unauthorized;
   }

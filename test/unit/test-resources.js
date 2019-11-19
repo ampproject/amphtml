@@ -282,7 +282,7 @@ describe('Resources', () => {
       };
       resources.visible_ = false;
       sandbox
-        .stub(resources.viewer_, 'getVisibilityState')
+        .stub(resources.ampdoc, 'getVisibilityState')
         .returns(VisibilityState.PRERENDER);
       resources.scheduleLayoutOrPreload(resource, true);
       expect(resources.queue_.getSize()).to.equal(0);
@@ -305,7 +305,7 @@ describe('Resources', () => {
     };
     resources.visible_ = false;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
     resources.scheduleLayoutOrPreload(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
@@ -328,7 +328,7 @@ describe('Resources', () => {
     };
     resources.visible_ = false;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.HIDDEN);
     resources.scheduleLayoutOrPreload(resource, true);
     expect(resources.queue_.getSize()).to.equal(0);
@@ -706,7 +706,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   it('should measure unbuilt elements', () => {
     resources.visible_ = true;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.VISIBLE);
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
     resource1.isBuilt = () => false;
@@ -723,7 +723,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   it('should render two screens when visible', () => {
     resources.visible_ = true;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.VISIBLE);
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
 
@@ -739,7 +739,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource2.state_ = ResourceState.LAYOUT_COMPLETE;
     resources.visible_ = true;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.VISIBLE);
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
 
@@ -759,7 +759,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
       layoutRectLtwh(10, 1010, 100, 101);
     resources.visible_ = true;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.VISIBLE);
     resources.relayoutAll_ = false;
     resources.relayoutTop_ = 1000;
@@ -777,7 +777,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   it('should prerender only one screen with prerenderSize = 1', () => {
     resources.visible_ = false;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
     resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 1009));
@@ -791,7 +791,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   it('should NOT prerender anything with prerenderSize = 0', () => {
     resources.visible_ = false;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
     resources.prerenderSize_ = 0;
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
@@ -807,7 +807,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource2.state_ = ResourceState.LAYOUT_COMPLETE;
     resources.visible_ = true;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.VISIBLE);
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
 
@@ -862,7 +862,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource1.unlayoutCallback = () => true;
 
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.VISIBLE);
     viewportMock
       .expects('getRect')
@@ -962,7 +962,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
 
     resources.visible_ = false;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .callsFake(() => 'prerender');
     sandbox.stub(resource1, 'isInViewport').callsFake(() => true);
     sandbox.stub(resource1, 'prerenderAllowed').callsFake(() => true);
@@ -983,7 +983,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
 
     resources.visible_ = false;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .callsFake(() => 'prerender');
     sandbox.stub(resource1, 'isInViewport').callsFake(() => true);
     sandbox.stub(resource1, 'prerenderAllowed').callsFake(() => false);
@@ -1004,7 +1004,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
 
     resources.visible_ = false;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .callsFake(() => 'hidden');
     sandbox.stub(resource1, 'isInViewport').callsFake(() => true);
     sandbox.stub(resource1, 'prerenderAllowed').callsFake(() => true);
@@ -1023,7 +1023,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   it.skip('should update inViewport before scheduling layouts', () => {
     resources.visible_ = true;
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.VISIBLE);
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
     const setInViewport = sandbox.spy(resource1, 'setInViewport');
@@ -1085,7 +1085,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
 
   it('should NOT build non-prerenderable resources in prerender', () => {
     sandbox
-      .stub(resources.viewer_, 'getVisibilityState')
+      .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
@@ -1102,7 +1102,7 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
   });
 
   it('should NOT build when quota reached', () => {
-    sandbox.stub(resources.viewer_, 'hasBeenVisible').callsFake(() => false);
+    sandbox.stub(resources.ampdoc, 'hasBeenVisible').callsFake(() => false);
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
     resources.buildAttemptsCount_ = 21; // quota is 20
@@ -1110,11 +1110,29 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
     resource1.element.isBuilt = () => false;
     resource1.element.idleRenderOutsideViewport = () => true;
     resource1.prerenderAllowed = () => true;
+    resource1.isBuildRenderBlocking = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
     resources.buildOrScheduleBuildForResource_(resource1);
     expect(resource1.build).to.not.be.called;
+  });
+
+  it('should build render blocking resource even if quota is reached', () => {
+    sandbox.stub(resources.ampdoc, 'hasBeenVisible').callsFake(() => false);
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+    resources.buildAttemptsCount_ = 21; // quota is 20
+
+    resource1.element.isBuilt = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
+    resource1.prerenderAllowed = () => true;
+    resource1.isBuildRenderBlocking = () => true;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+
+    resources.buildOrScheduleBuildForResource_(resource1);
+    expect(resource1.build).to.be.called;
   });
 
   it('should layout resource if outside viewport but idle', () => {
@@ -1158,99 +1176,6 @@ describes.realWin('Resources discoverWork', {amp: true}, env => {
       /* schedulePass */ true,
       /* force */ true
     );
-  });
-
-  describe('getResourcesInRect', () => {
-    beforeEach(() => {
-      resources.isRuntimeOn_ = false;
-      resources.ampdoc.signals().signal('ready-scan');
-    });
-
-    it.skip('should wait until ready-scan', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      resources.ampdoc.signals().reset('ready-scan');
-      expect(resource1.hasBeenMeasured()).to.be.false;
-      const promise = resources.getResourcesInRect(window, rect);
-      resource1.measure();
-      const stub = sandbox.stub(resource1, 'measure');
-      resources.ampdoc.signals().signal('ready-scan');
-      return promise.then(() => {
-        expect(stub).to.not.be.called;
-      });
-    });
-
-    it('should measure when needed only', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      expect(resource1.hasBeenMeasured()).to.be.false;
-      expect(resource2.hasBeenMeasured()).to.be.false;
-      resource1.measure();
-      const stub1 = sandbox.stub(resource1, 'measure');
-      const stub2 = sandbox.stub(resource2, 'measure');
-      return resources.getResourcesInRect(env.win, rect).then(() => {
-        expect(stub1).to.not.be.called;
-        expect(stub2).to.be.calledOnce;
-      });
-    });
-
-    it('should measure only filtered elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      expect(resource1.hasBeenMeasured()).to.be.false;
-      expect(resource2.hasBeenMeasured()).to.be.false;
-      resource1.hostWin = {};
-      resource2.hasOwner = () => true;
-      const stub1 = sandbox.stub(resource1, 'measure');
-      const stub2 = sandbox.stub(resource2, 'measure');
-      return resources.getResourcesInRect(env.win, rect).then(() => {
-        expect(stub1).to.not.be.called;
-        expect(stub2).to.not.be.called;
-      });
-    });
-
-    it('should resolve visible elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(2);
-        expect(res[0]).to.equal(resource1);
-        expect(res[1]).to.equal(resource2);
-      });
-    });
-
-    it('should ignore invisible elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
-      resource2.element.getBoundingClientRect = () =>
-        layoutRectLtwh(0, 0, 0, 0);
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(1);
-        expect(res[0]).to.equal(resource1);
-      });
-    });
-
-    it('should ignore out-of-rect elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(1);
-        expect(res[0]).to.equal(resource1);
-      });
-    });
-
-    it('should allow out-of-rect fixed elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 100);
-      resource2.isFixed = () => true;
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(2);
-        expect(res[0]).to.equal(resource1);
-        expect(res[1]).to.equal(resource2);
-      });
-    });
-
-    it('should filter out elements', () => {
-      const rect = layoutRectLtwh(0, 0, 100, 1500);
-      resource1.hostWin = {};
-      resource2.hasOwner = () => true;
-      return resources.getResourcesInRect(env.win, rect).then(res => {
-        expect(res).to.have.length(0);
-      });
-    });
   });
 
   describe('onNextPass', () => {
@@ -1838,7 +1763,7 @@ describe('Resources changeSize', () => {
       .run('should change size when document is invisible', () => {
         resources.visible_ = false;
         sandbox
-          .stub(resources.viewer_, 'getVisibilityState')
+          .stub(resources.ampdoc, 'getVisibilityState')
           .returns(VisibilityState.PRERENDER);
         resources.scheduleChangeSize_(
           resource1,
@@ -1870,6 +1795,53 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize).to.be.calledOnce;
       expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+    });
+
+    it('should NOT change size via activation if has not been active', () => {
+      viewportMock
+        .expects('getContentHeight')
+        .returns(10000)
+        .atLeast(0);
+      const event = {
+        userActivation: {
+          hasBeenActive: false,
+        },
+      };
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        event,
+        false
+      );
+      resources.mutateWork_();
+      expect(resource1.changeSize).to.not.be.called;
+      expect(overflowCallbackSpy).to.be.calledOnce.calledWith(true);
+    });
+
+    it('should change size via activation if has been active', () => {
+      viewportMock
+        .expects('getContentHeight')
+        .returns(10000)
+        .atLeast(0);
+      const event = {
+        userActivation: {
+          hasBeenActive: true,
+        },
+      };
+      resources.scheduleChangeSize_(
+        resource1,
+        111,
+        222,
+        undefined,
+        event,
+        false
+      );
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce.calledWith(false);
     });
 
     it('should change size when below the viewport', () => {
@@ -2367,7 +2339,8 @@ describe('Resources changeSize', () => {
       expect(overflowCallbackSpy).to.not.been.called;
     });
 
-    it(
+    // TODO(#25518): investigate failure on Travis Safari
+    it.configure().skipSafari(
       'in viewport should change size if in the last 15% and ' +
         'in the last 1000px',
       () => {

@@ -125,6 +125,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
 
+  'adglare': {
+    renderStartImplemented: true,
+  },
+
   'adhese': {
     renderStartImplemented: true,
   },
@@ -193,6 +197,11 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://ad.ad-stir.com',
   },
 
+  'adstyle': {
+    prefetch: 'https://widgets.ad.style/amp.js',
+    preconnect: ['https://w.ad.style'],
+  },
+
   'adtech': {
     prefetch: 'https://s.aolcdn.com/os/ads/adsWrapper3.js',
     preconnect: ['https://mads.at.atwola.com', 'https://aka-cdn.adtechus.com'],
@@ -238,7 +247,7 @@ const adConfig = jsonConfiguration({
 
   'adyoulike': {
     consentHandlingOverride: true,
-    prefetch: 'https://pixels.omnitagjs.com/amp.js',
+    prefetch: 'https://fo-static.omnitagjs.com/amp.js',
     renderStartImplemented: true,
   },
 
@@ -351,6 +360,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  'conative': {
+    renderStartImplemented: true,
+  },
+
   'connatix': {
     renderStartImplemented: true,
   },
@@ -406,6 +419,11 @@ const adConfig = jsonConfiguration({
 
   'eas': {
     prefetch: 'https://amp.emediate.eu/amp.v0.js',
+    renderStartImplemented: true,
+  },
+
+  'empower': {
+    prefetch: 'https://cdn.empower.net/sdk/amp-ad.min.js',
     renderStartImplemented: true,
   },
 
@@ -534,6 +552,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'insticator': {
+    preconnect: 'https://d3lcz8vpax4lo2.cloudfront.net', // can also be array if more than one URL needed
+    renderStartImplemented: true,
+  },
+
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     renderStartImplemented: true,
@@ -613,15 +636,6 @@ const adConfig = jsonConfiguration({
       'https://mantodea.mantisadnetwork.com',
       'https://resize.mantisadnetwork.com',
     ],
-  },
-
-  'mediaimpact': {
-    prefetch: 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
-    preconnect: [
-      'https://ww251.smartadserver.com',
-      'https://static.sascdn.com/',
-    ],
-    renderStartImplemented: true,
   },
 
   'medianet': {
@@ -809,6 +823,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'puffnetwork': {
+    prefetch: 'https://static.puffnetwork.com/amp_ad.js',
+    renderStartImplemented: true,
+  },
+
   'pulsepoint': {
     prefetch: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
     preconnect: 'https://tag.contextweb.com',
@@ -880,11 +899,26 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'seedingalliance': {},
+
   'sekindo': {
     renderStartImplemented: true,
   },
 
   'sharethrough': {
+    renderStartImplemented: true,
+  },
+
+  'shemedia': {
+    prefetch: [
+      'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+      'https://ads.shemedia.com/static/amp.js',
+    ],
+    preconnect: [
+      'https://partner.googleadservices.com',
+      'https://tpc.googlesyndication.com',
+      'https://ads.blogherads.com',
+    ],
     renderStartImplemented: true,
   },
 
@@ -917,6 +951,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'smilewanted': {
+    prefetch: 'https://prebid.smilewanted.com/amp/amp.js',
+    preconnect: 'https://static.smilewanted.com',
+    renderStartImplemented: true,
+  },
+
   'sogouad': {
     prefetch: 'https://theta.sogoucdn.com/wap/js/aw.js',
     renderStartImplemented: true,
@@ -943,6 +983,12 @@ const adConfig = jsonConfiguration({
 
   'spotx': {
     preconnect: 'https://js.spotx.tv',
+    renderStartImplemented: true,
+  },
+
+  'springAds': {
+    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
+    preconnect: ['https://ib.adnxs.com'],
     renderStartImplemented: true,
   },
 
@@ -989,6 +1035,11 @@ const adConfig = jsonConfiguration({
   },
 
   'torimochi': {
+    renderStartImplemented: true,
+  },
+
+  'tracdelight': {
+    prefetch: 'https://scripts.tracdelight.io/amp.js',
     renderStartImplemented: true,
   },
 

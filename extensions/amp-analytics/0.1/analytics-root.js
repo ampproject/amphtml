@@ -29,7 +29,7 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {provideVisibilityManager} from './visibility-manager';
 import {tryResolve} from '../../../src/utils/promise';
-import {whenContentIniLoad} from '../../../src/friendly-iframe-embed';
+import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';
 
@@ -201,7 +201,7 @@ export class AnalyticsRoot {
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
+   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.ScrollEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)|function(new:./events.AmpStoryEventTracker, !AnalyticsRoot)} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {

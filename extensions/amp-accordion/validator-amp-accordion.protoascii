@@ -16,13 +16,25 @@
 tags: {  # amp-accordion
   html_format: AMP
   html_format: AMP4ADS
-  html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-accordion"
     version: "0.1"
     version: "latest"
+    requires_usage: GRANDFATHERED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-accordion
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-accordion] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-accordion"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }

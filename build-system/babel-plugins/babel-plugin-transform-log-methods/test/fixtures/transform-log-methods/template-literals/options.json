@@ -1,5 +1,10 @@
 {
-  "plugins": [["../../../../../babel-plugin-transform-log-methods", {
-    "messagesPath": "dist/.log-messages.template-literals.temp"
-  }]]
+  "plugins": [
+    [
+      "../../../../../babel-plugin-transform-log-methods",
+      {
+        "messagesPath": "dist/.log-messages.template-literals.temp"
+      }
+    ]
+  ]
 }

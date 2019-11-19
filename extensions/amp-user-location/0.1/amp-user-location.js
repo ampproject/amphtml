@@ -72,10 +72,8 @@ export class AmpUserLocation extends AMP.BaseElement {
 
     this.action_ = Services.actionServiceForDoc(this.element);
 
-    this.registerAction(
-      AmpUserLocationAction.REQUEST,
-      () => this.userLocationInteraction_(),
-      ActionTrust.HIGH
+    this.registerAction(AmpUserLocationAction.REQUEST, () =>
+      this.userLocationInteraction_()
     );
   }
 

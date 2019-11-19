@@ -16,8 +16,8 @@
 'use strict';
 
 const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
-const {gitCommitterEmail} = require('../git');
-const {isTravisBuild, travisJobNumber} = require('../travis');
+const {gitCommitterEmail} = require('../common/git');
+const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
 const TEST_SERVER_PORT = 8081;
 
@@ -157,10 +157,14 @@ module.exports = {
     },
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
-      // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
-      flags: ['--no-sandbox --remote-debugging-port=9222'].concat(
-        COMMON_CHROME_FLAGS
-      ),
+      flags: [
+        // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
+        '--no-sandbox',
+        '--remote-debugging-port=9222',
+        // https://github.com/karma-runner/karma-chrome-launcher/issues/175
+        "--proxy-server='direct://'",
+        '--proxy-bypass-list=*',
+      ].concat(COMMON_CHROME_FLAGS),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
@@ -252,21 +256,19 @@ module.exports = {
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_Edge_17: Object.assign(
+    SL_Edge: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'MicrosoftEdge',
         platform: 'Windows 10',
-        version: '17.17134',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_IE_11: Object.assign(
+    SL_IE: Object.assign(
       {
         base: 'SauceLabs',
         browserName: 'internet explorer',
         platform: 'Windows 10',
-        version: '11.103',
       },
       SAUCE_TIMEOUT_CONFIG
     ),
@@ -299,12 +301,13 @@ module.exports = {
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
 
-  // AMP tests on Sauce can take upto 12-13 minutes, so don't fail if the
-  // browser doesn't communicate with the proxy for up to 15 minutes.
-  // TODO(rsimha): Reduce this number once keepalives are implemented by
-  // karma-sauce-launcher.
-  // See https://github.com/karma-runner/karma-sauce-launcher/pull/161.
-  browserDisconnectTimeout: 15 * 60 * 1000,
+  // Give a disconnected browser 2 minutes to reconnect with Karma.
+  // This allows a browser to retry 2 times per `browserDisconnectTolerance`
+  // on Travis before stalling out after 10 minutes.
+  browserDisconnectTimeout: 2 * 60 * 1000,
+
+  // If there's no message from the browser, make Karma wait 2 minutes
+  // until it disconnects.
   browserNoActivityTimeout: 2 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
