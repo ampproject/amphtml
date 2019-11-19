@@ -100,6 +100,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?string} */
     this.consentId_ = null;
+
+    /** @private {?string} */
+    this.matchedGeoGroup_ = null;
   }
 
   /** @override */
@@ -196,10 +199,50 @@ export class AmpConsent extends AMP.BaseElement {
       this.notificationUiManager_ = /** @type {!NotificationUiManager} */ (manager);
     });
 
+    // Assert that if we're using new version we have consentRequired
+    // otherwise we're using old version and we should migrate to new
+    // version here.
+    // E.g: promptIfUnknownForGeo: geoGroup -> geoOverride: {geoGroup: {consentRequired: true}}
+
+    // If geoGroups are defined, iterate through them
+    // to check if we are in the correct geoGroup.
+    // If we are in the defined geoGroup, override the
+    // top level defaults.
+    const geoServicePromise = this.consentConfig_['geoOverride']
+      ? Services.geoForDocOrNull(this.element).then(geo => {
+          userAssert(
+            geo,
+            'requires <amp-geo> to use promptIfUnknownForGeoGroup'
+          );
+          const geoGroups = Object.keys(this.consentConfig_['geoOverride']);
+          for (let i = 0; i < geoGroups.length; i++) {
+            // Maybe I should be using merge configs here?
+            if (geo.isInCountryGroup(geoGroups[i]) == GEO_IN_GROUP.IN) {
+              this.consentConfig_['consentRequired'] =
+                this.consentConfig_['geoOverride'][geoGroups[i]][
+                  'consentRequired'
+                ] || this.consentConfig_['consentRequired'];
+              this.consentConfig_['checkConsentHref'] =
+                this.consentConfig_['geoOverride'][geoGroups[i]][
+                  'checkConsentHref'
+                ] || this.consentConfig_['checkConsentHref'];
+              this.matchedGeoGroup_ = geoGroups[i];
+            }
+            delete this.consentConfig_['geoOverride'][geoGroups[i]][
+              'consentRequired'
+            ];
+            delete this.consentConfig_['geoOverride'][geoGroups[i]][
+              'checkConsentHref'
+            ];
+          }
+        })
+      : Promise.resolve();
+
     Promise.all([
       consentStateManagerPromise,
       notificationUiManagerPromise,
       consentPolicyManagerPromise,
+      geoServicePromise,
     ]).then(() => {
       this.init_();
     });
@@ -403,24 +446,25 @@ export class AmpConsent extends AMP.BaseElement {
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
-    this.passSharedData_();
-    this.maybeSetDirtyBit_();
+    if (!NEW_FEATURE_FLAG) {
+      // Even if consent isn't required, we are still following local storage decision
+      this.consentStateManager_
+        .getConsentInstanceInfo()
+        .then(info => {
+          return this.showPromptOrNot_(hasStoredValue(info));
+        })
+        .then(isPostPromptUIRequired => {
+          if (isPostPromptUIRequired) {
+            this.handlePostPromptUI_();
+          }
+          this.consentPolicyManager_.enableTimeout();
+        })
+        .catch(unusedError => {
+          // TODO: Handle errors
+        });
 
-    this.getConsentRequiredPromise_()
-      .then(isConsentRequired => {
-        return this.initPromptUI_(isConsentRequired);
-      })
-      .then(isPostPromptUIRequired => {
-        if (isPostPromptUIRequired) {
-          this.handlePostPromptUI_();
-        }
-        this.consentPolicyManager_.enableTimeout();
-      })
-      .catch(unusedError => {
-        // TODO: Handle errors
-      });
-
-    this.enableInteractions_();
+      this.enableInteractions_();
+    }
   }
 
   /**
@@ -461,6 +505,91 @@ export class AmpConsent extends AMP.BaseElement {
     return consentRequiredPromise.then(required => {
       return !!required;
     });
+  }
+
+  /**
+   * @param {string} hasLocalStorageValue
+   * @return {Promise<boolean>}
+   */
+  showPromptOrNot_(hasLocalStorageValue) {
+    // Might need to just unblock instantly...
+    this.consentUI_ = new ConsentUI(
+      this,
+      /** @type {!JsonObject} */ (devAssert(
+        this.consentConfig_,
+        'consent config not found'
+      ))
+    );
+    let showPostPromptUi = false;
+    // Remote case
+    if (this.consentConfig_['consentRequired'] === 'remote') {
+      userAssert(
+        this.consentConfig_['checkConsentHref'],
+        'checkConsentHref must be a valid endpoint, when using remote'
+      );
+      // If no local storage, then wait for this to tell us if consent is required
+      if (!hasLocalStorageValue) {
+        // get remote consent
+        this.getConsentRemote_().then(consentInfo => {
+          const constentRequiredResponse = consentInfo['consentRequired'];
+          const consentStateValueResponse = consentInfo['consentStateValue'];
+
+          // check if consentRequired
+          if (
+            constentRequiredResponse === true &&
+            consentStateValueResponse === 'unknown'
+          ) {
+            // prompt
+            this.scheduleDisplay_(false);
+            showPostPromptUi = true;
+            // otherwise consent is not needed
+          } else if (constentRequiredResponse === false) {
+            this.consentStateManager_.updateConsentInstanceState(
+              CONSENT_ITEM_STATE.NOT_REQUIRED
+            );
+          }
+        });
+      }
+    } else if (this.consentConfig_['consentRequired']) {
+      if (!hasLocalStorageValue) {
+        // Prompt
+        this.scheduleDisplay_(false);
+        showPostPromptUi = true;
+        // TODO(@zhouyx):
+        // Race condition on consent state change between schedule to
+        // display and display. Add one more check before display
+      }
+    } else {
+      // Might not need this
+      this.consentStateManager_.updateConsentInstanceState(
+        CONSENT_ITEM_STATE.NOT_REQUIRED
+      );
+    }
+    return this.syncServerData_().then(() => showPostPromptUi);
+  }
+
+  /**
+   * Checks if we need to sync server data
+   */
+  syncServerData_() {
+    if (this.consentConfig_['checkConsentHref']) {
+      // This is where passSharedData and clearCache will be
+      // as well as syncing with the cache
+      this.getConsentRequiredPromise_();
+
+      // pass shared data and make request, potentially wait for request
+      this.passSharedData_();
+      // sync values and clean up cache
+      this.maybeSetDirtyBit_();
+      // if (
+      //   consentStateValueResponse === 'accepted' ||
+      //   consentStateValueResponse === 'rejected'
+      // ) {
+      //   // update client cache
+      // }
+      // parse out consent string and update (if necessary)
+      // parse out clearCache and clear if true
+    }
   }
 
   /**
@@ -516,12 +645,22 @@ export class AmpConsent extends AMP.BaseElement {
     } else {
       const storeConsentPromise = this.consentStateManager_.getLastConsentInstanceInfo();
       this.remoteConfigPromise_ = storeConsentPromise.then(storedInfo => {
+        // If we have localStored value for consentState, use it
+        // and immedeatly unblock rendering
+        const previousConset = getConsentStateValue(storedInfo['consentState']);
+        if (hasStoredValue(storedInfo)) {
+          // Unblock
+          // this.unblocked_ = true.. something like that
+        }
+
         // Note: Expect the request to look different in following versions.
         const request = /** @type {!JsonObject} */ ({
           'consentInstanceId': this.consentId_,
-          'consentStateValue': getConsentStateValue(storedInfo['consentState']),
+          'consentStateValue': previousConset,
           'consentString': storedInfo['consentString'],
+          // isDirty will be deprecated
           'isDirty': !!storedInfo['isDirty'],
+          'matchedGeoGroup': this.matchedGeoGroup_,
         });
         if (this.consentConfig_['clientConfig']) {
           request['clientConfig'] = this.consentConfig_['clientConfig'];
@@ -544,43 +683,6 @@ export class AmpConsent extends AMP.BaseElement {
       });
     }
     return this.remoteConfigPromise_;
-  }
-
-  /**
-   * Handle Prompt UI.
-   * @param {boolean} isConsentRequired
-   * @return {Promise<boolean>}
-   */
-  initPromptUI_(isConsentRequired) {
-    this.consentUI_ = new ConsentUI(
-      this,
-      /** @type {!JsonObject} */ (devAssert(
-        this.consentConfig_,
-        'consent config not found'
-      ))
-    );
-
-    // Get current consent state
-    return this.consentStateManager_.getConsentInstanceInfo().then(info => {
-      if (hasStoredValue(info)) {
-        // Has user stored value, no need to prompt
-        return true;
-      }
-      if (!isConsentRequired) {
-        // no need to prompt if remote reponse say so
-        // Also no need to display postPromptUI
-        this.consentStateManager_.updateConsentInstanceState(
-          CONSENT_ITEM_STATE.NOT_REQUIRED
-        );
-        return false;
-      }
-      // Prompt
-      this.scheduleDisplay_(false);
-      return true;
-      // TODO(@zhouyx):
-      // Race condition on consent state change between schedule to
-      // display and display. Add one more check before display
-    });
   }
 
   /**
