@@ -15,10 +15,11 @@
  */
 
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {toArray} from '../../../src/types';
 
 /** @const {!Array<string>} */
@@ -29,8 +30,8 @@ const TAG = 'amp-story-quiz';
 
 /**
  * Generates the template for the quiz
- * @param {HTMLElement} element
- * @return {HTMLElement}
+ * @param {!Element} element
+ * @return {!Element}
  */
 const buildQuizTemplate = element => {
   const html = htmlFor(element);
@@ -45,8 +46,8 @@ const buildQuizTemplate = element => {
 /**
  * Generates the template for each option
  *
- * @param {HTMLElement} option
- * @return {HTMLElement}
+ * @param {!Element} option
+ * @return {!Element}
  */
 const buildOptionTemplate = option => {
   const html = htmlFor(option);
@@ -68,27 +69,46 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.hasReceivedResponse_ = false;
 
     /** @private {?ShadowRoot|HTMLDivElement} */
-    this.quizElt_ = null;
+    this.quizEl_ = null;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
   }
 
   /** @override */
   buildCallback() {
-    this.quizElt_ = buildQuizTemplate(this.element);
+    this.quizEl_ = buildQuizTemplate(this.element);
     this.attachContent_();
-    this.attachOptionActionHandlers_();
-    createShadowRootWithStyle(this.element, this.quizElt_, CSS);
+    this.initializeListeners_();
+    createShadowRootWithStyle(this.element, this.quizEl_, CSS);
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    const mutator = () => {
+      console.log('wahooooooo');
+      rtlState
+        ? this.quizEl_.setAttribute('dir', 'rtl')
+        : this.quizEl_.removeAttribute('dir');
+    };
+
+    this.mutateElement(mutator, this.quizEl_);
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return layout === 'flex-item';
   }
 
   /**
-   * @return {?ShadowRoot|HTMLDivElement}
+   * @return {?Element}
    */
   getQuizElement() {
-    return this.quizElt_;
+    return this.quizEl_;
   }
 
   /**
@@ -98,23 +118,26 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   attachContent_() {
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
-    const prompt = this.element.children[0];
+    const promptInput = this.element.children[0];
     // First child must be heading h1-h3
-    if (!['h1', 'h2', 'h3'].includes(prompt.tagName.toLowerCase())) {
+    if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
       dev().error(
         TAG,
         'The first child must be a heading element <h1>, <h2>, or <h3>'
       );
     }
 
+    const prompt = document.createElement(promptInput.tagName);
+    prompt.textContent = promptInput.textContent;
     prompt.classList.add('i-amp-story-quiz-prompt');
+    promptInput.remove();
 
     const options = toArray(this.element.querySelectorAll('option'));
     if (options.length < 2 || options.length > 4) {
       dev().error(TAG, 'Improper number of options');
     }
 
-    this.quizElt_
+    this.quizEl_
       .querySelector('.i-amp-story-quiz-prompt-container')
       .appendChild(prompt);
 
@@ -151,7 +174,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     option.remove();
 
     // Add the option to the quiz element
-    this.quizElt_
+    this.quizEl_
       .querySelector('.i-amp-story-quiz-option-container')
       .appendChild(convertedOption);
   }
@@ -160,53 +183,43 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * Attaches functions to each option to handle state transition.
    * @private
    */
-  attachOptionActionHandlers_() {
-    const options = toArray(
-      this.quizElt_.querySelectorAll('.i-amp-story-quiz-option')
+  initializeListeners_() {
+    // Add a listener for changes in the RTL state
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      rtlState => {
+        this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
     );
 
     // Add a click listener to the element to handle option selection and navigation via tapping the prompt
-    this.element.addEventListener('click', e => {
-      let resolved = false;
-      e.composedPath().forEach(p => {
-        if (resolved) {
-          return;
-        }
+    this.quizEl_.addEventListener('click', e => {
+      const optionElement = closest(
+        e.target,
+        element => {
+          return element.classList.contains('i-amp-story-quiz-option');
+        },
+        this.quizEl_
+      );
 
-        // if the shadow root was reached, stop assessing
-        if (p instanceof ShadowRoot) {
-          resolved = true;
-          return;
-        }
-
-        // An option was selected
-        if (p.getAttribute('class') === 'i-amp-story-quiz-option') {
-          this.handleOptionClick_(p, options);
-          this.hasReceivedResponse_ = true;
-          resolved = true;
-        }
-        // the prompt was tapped
-        else if (p.getAttribute('class') === 'i-amp-story-quiz-prompt') {
-          // TODO(jackbsteinberg): Initiate page navigation on prompt tap
-          resolved = true;
-        }
-      });
+      if (optionElement) {
+        this.handleOptionClick_(optionElement);
+        this.hasReceivedResponse_ = true;
+      }
     });
   }
 
   /**
-   * @param {HTMLElement} p
-   * @param {Array<HTMLElement>} options
+   * @param {!Element} p
    * @private
    */
-  handleOptionClick_(p, options) {
+  handleOptionClick_(p) {
     if (this.hasReceivedResponse_) {
       return;
     }
 
     p.classList.add('i-amp-story-quiz-option-selected');
-    options.forEach(o => {
-      o.classList.add('i-amp-story-quiz-option-post-selection');
-    });
+    this.quizEl_.classList.add('i-amp-story-quiz-post-selection');
   }
 }
