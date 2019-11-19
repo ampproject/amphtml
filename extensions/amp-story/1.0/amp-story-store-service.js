@@ -81,7 +81,6 @@ export let InteractiveComponentDef;
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
  *    canShowSystemLayerButtons: boolean,
- *    autoplayState: boolean,
  *    accessState: boolean,
  *    adState: boolean,
  *    affiliateLinkState: !Element,
@@ -123,7 +122,6 @@ export const StateProperty = {
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
 
   // App States.
-  AUTOPLAY_STATE: 'autoplayState',
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   BOOKEND_STATE: 'bookendState',
@@ -160,7 +158,6 @@ export const StateProperty = {
 
 /** @private @const @enum {string} */
 export const Action = {
-  AUTOPLAY_STORY: 'autoplayStory',
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
@@ -216,10 +213,6 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
-    case Action.AUTOPLAY_STORY:
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.AUTOPLAY_STATE]: data,
-      }));
     case Action.ADD_NEW_PAGE_ID:
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
@@ -474,7 +467,6 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
-      [StateProperty.AUTOPLAY_STATE]: false,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,

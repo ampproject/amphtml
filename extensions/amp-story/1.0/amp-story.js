@@ -154,7 +154,6 @@ const Attributes = {
   ADVANCE_TO: 'i-amphtml-advance-to',
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
   AUTO_ADVANCE_TO: 'auto-advance-to',
-  AUTOPLAY: 'autoplay-story',
   DESKTOP_POSITION: 'i-amphtml-desktop-position',
   ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
@@ -1284,9 +1283,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializePages_() {
-    if (this.isAutoplay_()) {
-      this.storeService_.dispatch(Action.AUTOPLAY_STORY, true);
-    }
     const pageImplPromises = Array.prototype.map.call(
       this.element.querySelectorAll('amp-story-page'),
       pageEl => pageEl.getImpl()
@@ -1938,15 +1934,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   isLandscapeSupported_() {
     return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE);
-  }
-
-  /**
-   * Whether the story should be autoplayed.
-   * @return {boolean}
-   * @private
-   */
-  isAutoplay_() {
-    return this.element.hasAttribute(Attributes.AUTOPLAY);
   }
 
   /**
