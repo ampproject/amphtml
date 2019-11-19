@@ -115,6 +115,13 @@ export class AmpConsent extends AMP.BaseElement {
       'amp-consent should have an id'
     );
 
+    const expOn = isExperimentOn(this.win, 'amp-consent-ccpa');
+    if (expOn) {
+      console.log('CCPA flag is on');
+    } else {
+      console.log('nope not on');
+    }
+
     const config = new ConsentConfig(this.element);
 
     this.consentConfig_ = config.getConsentConfig();
