@@ -274,21 +274,21 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   var unauthorized = 'Unauthorized Request';
   var origin;
   var allowedOrigins = [
-     'https://example.com',
-     'https://example-com.cdn.ampproject.org',
-     'https://example.com.amp.cloudflare.com',
-     'https://cdn.ampproject.org' ];
-  var allowedSourceOrigin = 'https://example.com';  //publisher's origin
-  var sourceOrigin = req.query.__amp_source_origin;
-
-
+    'https://example.com',
+    'https://example-com.cdn.ampproject.org',
+    'https://example.com.amp.cloudflare.com',
+    'https://cdn.ampproject.org',
+  ];
+  var allowedSourceOrigin = 'https://example.com'; //publisher's origin
   // If same origin
   if (req.headers['amp-same-origin'] == 'true') {
-      origin = sourceOrigin;
-  // If allowed CORS origin & allowed source origin
-  } else if (allowedOrigins.indexOf(req.headers.origin) != -1 &&
-      sourceOrigin == allowedSourceOrigin) {
-      origin = req.headers.origin;
+    origin = sourceOrigin;
+    // If allowed CORS origin & allowed source origin
+  } else if (
+    allowedOrigins.indexOf(req.headers.origin) != -1 &&
+    sourceOrigin == allowedSourceOrigin
+  ) {
+    origin = req.headers.origin;
   } else {
     res.statusCode = 403;
     res.end(JSON.stringify({message: unauthorized}));
@@ -357,8 +357,8 @@ Access-Control-Allow-Origin: https://example-com.cdn.ampproject.org
 ```
 ## Working with cached fonts
 
-Google AMP Cache caches AMP HTML documents, images and fonts to optimize the speed of the AMP page. 
-While making the AMP page fast, we also want to be careful in securing the cached resources. We will be making a change in how AMP cache responds it’s cached resources, 
+Google AMP Cache caches AMP HTML documents, images and fonts to optimize the speed of the AMP page.
+While making the AMP page fast, we also want to be careful in securing the cached resources. We will be making a change in how AMP cache responds it’s cached resources,
 typically for fonts, by respecting the origin’s `Access-Control-Allow-Origin` value.
 
 ### Past behavior (before October 2019)
@@ -370,7 +370,7 @@ When an AMP page was loading [https://example.com/some/font.ttf](https://example
 
 ### New behavior (October 2019 and after)
 
-While the current implementation is permissive, this could lead to unexpected use of the fonts from cross-origin sites. In this change AMP Cache will start to respond with the exact same `Access-Control-Allow-Origin` value the origin server responds. 
+While the current implementation is permissive, this could lead to unexpected use of the fonts from cross-origin sites. In this change AMP Cache will start to respond with the exact same `Access-Control-Allow-Origin` value the origin server responds.
 To properly load the fonts from the cached AMP document, you will need to accept the AMP Cache origin via the header.
 
 A sample implementation would be:
@@ -379,16 +379,16 @@ A sample implementation would be:
 function assertFontCors(req, res, opt_validMethods, opt_exposeHeaders) {
   var unauthorized = 'Unauthorized Request';
   var allowedOrigins = [
-     "https://example.com",
-     "https://example-com.cdn.ampproject.org"];
-
+    'https://example.com',
+    'https://example-com.cdn.ampproject.org',
+  ];
   // If allowed CORS origin
   if (allowedOrigins.indexOf(req.headers.origin) != -1) {
-      res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
   } else {
-      res.statusCode = 403;
-      res.end(JSON.stringify({message: unauthorized}));
-      throw unauthorized;
+    res.statusCode = 403;
+    res.end(JSON.stringify({message: unauthorized}));
+    throw unauthorized;
   }
 }
 ```
