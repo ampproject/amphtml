@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!doctype html>
 |  <html ⚡>
 |  <head>
@@ -16,6 +16,12 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-quicktext layout="responsive" width="150" height="80"></amp-quicktext>
+|  <amp-quicktext license="8mxHy-jBUk" tags="amp-demo,test" layout="nodisplay"></amp-quicktext>
+>> ^~~~~~~~~
+amp-quicktext/0.1/test/validator-amp-quicktext.html:18:0 The specified layout 'NODISPLAY' is not supported by tag 'amp-quicktext'. (see https://amp.dev/documentation/components/amp-quicktext)
+>> ^~~~~~~~~
+amp-quicktext/0.1/test/validator-amp-quicktext.html:18:0 The attribute 'license' may not appear in tag 'amp-quicktext'. (see https://amp.dev/documentation/components/amp-quicktext)
+>> ^~~~~~~~~
+amp-quicktext/0.1/test/validator-amp-quicktext.html:18:0 The attribute 'tags' may not appear in tag 'amp-quicktext'. (see https://amp.dev/documentation/components/amp-quicktext)
 |  </body>
 |  </html>

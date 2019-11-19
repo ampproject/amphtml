@@ -14,32 +14,87 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {userAssert} from '../../../src/log';
 
 export class AmpQuicktext extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private {string} */
-    this.myText_ = 'hello world';
+    /** @private {string}  */
+    this.license_ = '';
 
-    /** @private {?Element} */
-    this.container_ = null;
+    /** @private {(string|Object)}  */
+    this.lang_ = null;
+
+    /** @private {(string|Object)}  */
+    this.url_ = null;
+
+    /** @private {(string|Object)}  */
+    this.tags_ = null;
+
+    window._qt = {
+      license: null,
+      lang: null,
+      options: {tags: []},
+    };
   }
 
   /** @override */
   buildCallback() {
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.textContent = this.myText_;
-    this.element.appendChild(this.container_);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    this.license_ = userAssert(
+      this.element.getAttribute('license'),
+      'The license attribute is required for <amp-quicktext> %s',
+      this.element
+    );
+    this.url_ = this.element.getAttribute('url');
+    this.lang_ = this.element.getAttribute('lang');
+    this.tags_ = this.element.getAttribute('tags');
+
+    if (this.lang_) {
+      window._qt.lang = this.lang_;
+    }
+    if (this.tags_) {
+      window._qt.options.tags = this.element.getAttribute('tags').split(',');
+    }
+    if (this.license_) {
+      window._qt.license = this.license_;
+      if (this.url_) {
+        this.loadScript(this.url_);
+      } else {
+        this.loadScript('https://cdn.qt.im/qt.min.js');
+      }
+    }
+  }
+
+  /**
+   * Load external JavaScript.
+   *
+   * @param {string} url external document source.
+   */
+  loadScript(url) {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    if (script.readyState) {
+      script.onreadystatechange = function() {
+        if (
+          script.readyState === 'loaded' ||
+          script.readyState === 'complete'
+        ) {
+          script.onreadystatechange = null;
+        }
+      };
+    } else {
+      script.onload = function() {};
+    }
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return isLayoutSizeDefined(layout);
   }
 }
 

@@ -16,23 +16,38 @@
 
 import '../amp-quicktext';
 
-describes.realWin('amp-quicktext', {
-  amp: {
-    extensions: ['amp-quicktext'],
+describes.realWin(
+  'amp-quicktext',
+  {
+    amp: {
+      extensions: ['amp-quicktext'],
+    },
   },
-}, env => {
+  env => {
+    let win;
+    let element;
 
-  let win;
-  let element;
+    beforeEach(() => {
+      win = env.win;
+      element = win.document.createElement('amp-quicktext');
+      element.setAttribute('license', '8mxHy-jBUk');
+      element.setAttribute('tags', 'amp-demo,test');
+      element.setAttribute('layout', 'nodisplay');
+      win.document.body.appendChild(element);
+    });
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-quicktext');
-    win.document.body.appendChild(element);
-  });
+    it('should render component', () => {
+      win = env.win;
+      element.build();
+      expect(element).to.be.ok;
+    });
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
-});
+    it('should pass attributes', () => {
+      element.build();
+      expect(element.hasAttribute('license')).to.equal(true);
+      expect(element.hasAttribute('lang')).to.equal(false);
+      expect(element.hasAttribute('tags')).to.equal(true);
+      expect(element.hasAttribute('url')).to.equal(false);
+    });
+  }
+);
