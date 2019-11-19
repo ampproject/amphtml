@@ -245,7 +245,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         viewportRect: layoutRectLtwh(10, 10, 100, 100),
         targetRect: layoutRectLtwh(5, 5, 20, 20),
       });
-      expect(targetOrigin).to.equal('www.example.com');
+      expect(targetOrigin).to.equal('*');
     });
   });
 
@@ -289,7 +289,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
         sentinel: '0-123',
         x: 1,
       });
-      expect(targetOrigin).to.equal('www.example.com');
+      expect(targetOrigin).to.equal('*');
     });
 
     it('should not double register', () => {
