@@ -2,6 +2,7 @@
 
 The `APPROVERS.json` file is a listing of compiled AMP runtime and extensions
 files. Each rule has two parts:
+
 - `approvers`: list of GitHub project teams, members of which are allowed to
   approve pull requests that increase the file's bundle size (Brotli-compressed
   size)
