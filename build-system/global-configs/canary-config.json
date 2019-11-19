@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["amp-next-page", "inabox-viewport-friendly"],
+  "allow-doc-opt-in": ["amp-next-page"],
   "allow-url-opt-in": [
     "pump-early-frame",
     "macro-after-long-task",
