@@ -268,16 +268,22 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 ### Running Visual Diff Tests Locally
 
-You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`. Once the environment variable is set up, you can run the AMP visual diff tests as described below.
+You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
+
+```sh
+export PERCY_TOKEN="<unique-percy-token>"
+```
+
+Once the environment variable is set up, you can run the AMP visual diff tests.
 
 First, build the AMP runtime and run the gulp task that invokes the visual diff script:
 
 ```sh
-gulp build
+gulp dist --fortesting
 gulp visual-diff --nobuild
 ```
 
-Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp build` on each execution.
+Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp dist --fortesting` on each execution.
 
 The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome in headless mode. You can see the results at `https://percy.io/<org>/<project>`.
 
