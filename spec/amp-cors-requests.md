@@ -364,9 +364,9 @@ typically for fonts, by respecting the origin’s `Access-Control-Allow-Origin` 
 
 ### Past behavior (before October 2019)
 
-When an AMP page was loading [https://example.com/some/font.ttf](https://example.com/some/font.ttf) from `@font-face src` attribute, AMP Cache will cache the font file and serve the resource as below with having the wild card `Access-Control-Allow-Origin`.
+When an AMP page was loading `https://example.com/some/font.ttf` from `@font-face src` attribute, AMP Cache will cache the font file and serve the resource as below with having the wild card `Access-Control-Allow-Origin`.
 
-- URL [https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff](https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff)
+- URL `https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff`
 - Access-Control-Allow-Origin: \*
 
 ### New behavior (October 2019 and after)
@@ -394,7 +394,7 @@ function assertFontCors(req, res, opt_validMethods, opt_exposeHeaders) {
 }
 ```
 
-As an example, if you wanted to load /some/font.ttf in https://example.com/amp.html, the origin server should respond with the Access-Control-Allow-Origin header as below.
+As an example, if you wanted to load /some/font.ttf in `https://example.com/amp.html`, the origin server should respond with the Access-Control-Allow-Origin header as below.
 
 <amp-img alt="CORS font example" layout="responsive" src="https://amp.dev/static/img/docs/cors-font.jpg" width="2268" height="1594">
   <noscript>
