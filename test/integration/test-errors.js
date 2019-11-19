@@ -29,35 +29,47 @@ const t = describe
   // TODO(@cramforce): Find out why it does not work with obfuscated props.
   .skipIfPropertiesObfuscated();
 
-t.run('error page', function() {
+t.run('errors displayed on page on #development mode', function() {
   this.timeout(TIMEOUT);
 
   let fixture;
-  beforeEach(() => {
-    return createFixtureIframe('test/fixtures/errors.html', 1000, win => {
-      // Trigger dev mode.
-      try {
-        win.history.pushState({}, '', 'test2.html#development=1');
-      } catch (e) {
-        // Some browsers do not allow this.
-        win.AMP_DEV_MODE = true;
-      }
-    }).then(f => {
-      fixture = f;
-      return poll(
-        'errors to happen',
-        () => {
-          return fixture.doc.querySelectorAll('[error-message]').length >= 2;
-        },
-        () => {
-          return new Error(
-            'Failed to find errors. HTML\n' +
-              fixture.doc.documentElement./*TEST*/ innerHTML
-          );
-        },
-        TIMEOUT - 1000
+  let messagesById = {};
+
+  beforeEach(async () => {
+    // Errors are printed as URLs when `transform-log-messages` is on.
+    // Fetch table to find URL ids for expected messages.
+    try {
+      messagesById = Object.freeze(
+        await (await fetch('/dist/log-messages.simple.json')).json()
       );
-    });
+    } catch (_) {
+      // We might be using binaries created with `gulp build`, which don't go
+      // through the transform that outputs the table we're attempting to read.
+    }
+
+    fixture = await createFixtureIframe(
+      'test/fixtures/errors.html',
+      1000,
+      win => {
+        // Trigger dev mode.
+        try {
+          win.history.pushState({}, '', 'test2.html#development=1');
+        } catch (e) {
+          // Some browsers do not allow this.
+          win.AMP_DEV_MODE = true;
+        }
+      }
+    );
+
+    return poll(
+      'errors to appear on page',
+      () => fixture.doc.querySelectorAll('[error-message]').length >= 2,
+      () => {
+        const {innerHTML} = fixture.doc.documentElement;
+        return new Error(`Failed to find errors. HTML:\n${innerHTML}`);
+      },
+      TIMEOUT - 1000
+    );
   });
 
   it.configure()
@@ -67,18 +79,28 @@ t.run('error page', function() {
       return expectBodyToBecomeVisible(fixture.win, TIMEOUT);
     });
 
+  /** Regex disjunction of message URLs that contain substr or substr itself. */
+  const messageOrUrlRe = messageSubstr =>
+    new RegExp(
+      Object.keys(messagesById)
+        .filter(id => messagesById[id].indexOf(messageSubstr) > -1)
+        .map(id => `&id=${id}&`)
+        .concat(messageSubstr)
+        .map(escapeForRe)
+        .join('|')
+    );
+
+  const escapeForRe = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
   function shouldFail(id) {
     // Skip for issue #110
     it.configure()
       .ifChrome()
-      .run('should fail to load #' + id, () => {
+      .run(`should fail to load #${id}`, () => {
         const e = fixture.doc.getElementById(id);
-        expect(fixture.errors.join('\n')).to.contain(
-          e.getAttribute('data-expectederror')
-        );
-        expect(e.getAttribute('error-message')).to.contain(
-          e.getAttribute('data-expectederror')
-        );
+        const errorRe = messageOrUrlRe(e.getAttribute('data-expectederror'));
+        expect(fixture.errors.join('\n')).to.match(errorRe);
+        expect(e.getAttribute('error-message')).to.match(errorRe);
         expect(e.className).to.contain('i-amphtml-element-error');
       });
   }

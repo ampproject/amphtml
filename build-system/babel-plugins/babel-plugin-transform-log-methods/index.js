@@ -55,7 +55,7 @@ const {
 
 // Considered default for this transform, configurable only for tests.
 // For other files output from this transform see linked module.
-const {extractedPath} = require('../../compile/log-messages');
+const {extractedPath} = require('../../compile/log-messages-formats');
 
 /**
  * Approximate length of a nested argument to determine whether a message

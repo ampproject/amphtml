@@ -100,16 +100,33 @@ export function overrideLogLevel(level) {
 const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
 
 /**
- * Gets a URL to display a message on amp.dev.
+ * Returns an argument set to print a URL containing a message on amp.dev
+ *
+ * If existent, the first element part will be appended at the end of the
+ * message. This associates them so that the message is rendered inside the
+ * element in #development mode.
  * @param {string} id
  * @param {!Array} interpolatedParts
- * @return {string}
+ * @return {!Array}
  */
-const externalMessageUrl = (id, interpolatedParts) =>
-  interpolatedParts.reduce(
-    (prefix, arg) => `${prefix}&s[]=${messageArgToEncodedComponent(arg)}`,
-    `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
-  );
+function externalMessageUrlParts(id, interpolatedParts) {
+  let optAssociatedElement;
+
+  const externalUrl = interpolatedParts.reduce((prefix, part) => {
+    if (!optAssociatedElement && part && part.tagName) {
+      optAssociatedElement = part;
+    }
+    return `${prefix}&s[]=${encodeURIComponent(messagePartToString(part))}`;
+  }, `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`);
+
+  const externalUrlMessage = `More info at ${externalUrl}`;
+
+  if (optAssociatedElement) {
+    return [`${externalUrlMessage} %s`, optAssociatedElement];
+  }
+
+  return [externalUrlMessage];
+}
 
 /**
  * URL to simple log messages table JSON file, which contains an Object<string, string>
@@ -120,11 +137,26 @@ const externalMessagesSimpleTableUrl = () =>
   `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
 
 /**
- * @param {*} arg
+ * Serializes any interpolated message part to a string that can be used in an
+ * extracted message URL.
+ * @param {*} part
  * @return {string}
  */
-const messageArgToEncodedComponent = arg =>
-  encodeURIComponent(String(elementStringOrPassthru(arg)));
+function messagePartToString(part) {
+  const asElementStringOptional = elementStringOrPassthru(part);
+  try {
+    // `null` and `undefined` don't have a `toString()` method.
+    return String(asElementStringOptional);
+  } catch (_) {
+    // Some objects won't serialize with the `String` constructor.
+    if (typeof asElementStringOptional.toString == 'function') {
+      return asElementStringOptional.toString();
+    }
+    // Objects created with e.g. `Object.create(null)` don't implement
+    // `toString()`.
+    return Object.prototype.toString.call(asElementStringOptional);
+  }
+}
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -607,7 +639,7 @@ export class Log {
     if (this.messages_ && id in this.messages_) {
       return [this.messages_[id]].concat(parts);
     }
-    return [`More info at ${externalMessageUrl(id, parts)}`];
+    return externalMessageUrlParts(id, parts);
   }
 
   /**

@@ -14,27 +14,12 @@
  * limitations under the License.
  */
 const fs = require('fs-extra');
-const log = require('fancy-log');
-const {cyan} = require('colors');
+const {endBuildStep} = require('../tasks/helpers');
+const {extractedPath, formats} = require('./log-messages-formats');
 
-const pathPrefix = 'dist/log-messages';
-
-/**
- * Source of truth for extracted messages during build, but should not be
- * deployed. Shaped `{message: {id, message, ...}}`.
- */
-const extractedPath = `${pathPrefix}.by-message.json`;
-
-const formats = {
-  // Consumed by logging server. Format may allow further fields.
-  [`${pathPrefix}.json`]: ({id: unused, ...other}) => other,
-
-  // Consumed by runtime function in `#development`.
-  [`${pathPrefix}.simple.json`]: ({message}) => message,
-};
-
-/** @return {!Promise<!Array<!Object>>} */
-const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
+/** @return {!Promise<?Array<!Object>>} */
+const extractedItems = () =>
+  fs.readJson(extractedPath).then(Object.values, () => null);
 
 /**
  * Format extracted messages table in multiple outputs, keyed by id.
@@ -42,14 +27,17 @@ const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
  */
 async function formatExtractedMessages() {
   const items = await extractedItems();
-  return Promise.all(
-    Object.entries(formats).map(async ([path, format]) => {
-      const formatted = {};
-      items.forEach(item => (formatted[item.id] = format(item)));
-      await fs.outputJson(path, formatted);
-      log('Formatted', cyan(path));
-    })
-  );
+  if (!items) {
+    return;
+  }
+  const startTime = Date.now();
+  for (const path in formats) {
+    const format = formats[path];
+    const formatted = {};
+    items.forEach(item => (formatted[item.id] = format(item)));
+    await fs.outputJson(path, formatted);
+  }
+  endBuildStep('Formatted', Object.keys(formats).join(', '), startTime);
 }
 
 module.exports = {extractedPath, formatExtractedMessages};
