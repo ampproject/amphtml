@@ -25,6 +25,8 @@ export const StoryAnalyticsEvent = {
   BOOKEND_CLICK: 'story-bookend-click',
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  CLICK_THROUGH: 'story-click-through',
+  FOCUS: 'story-focus',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
@@ -127,23 +129,25 @@ export class StoryAnalyticsService {
 
   /**
    * @param {!StoryAnalyticsEvent} eventType
+   * @param {Element=} element
    */
-  triggerEvent(eventType) {
+  triggerEvent(eventType, element = null) {
     this.incrementPageEventCount_(eventType);
     triggerAnalyticsEvent(
       this.element_,
       eventType,
-      this.updateDetails(eventType)
+      this.updateDetails(eventType, element)
     );
   }
 
   /**
    * Updates event details.
    * @param {!StoryAnalyticsEvent} eventType
+   * @param {Element=} element
    * @visibleForTesting
    * @return {!JsonObject}}
    */
-  updateDetails(eventType) {
+  updateDetails(eventType, element = null) {
     const details = {};
     const vars = this.variableService_.get();
     const pageId = vars['storyPageId'];
@@ -152,8 +156,12 @@ export class StoryAnalyticsService {
       details.repeated = true;
     }
 
+    if (element) {
+      details.tagName = element.tagName.toLowerCase();
+    }
+
     return /** @type {!JsonObject} */ (Object.assign(
-      {pageDetails: details},
+      {eventDetails: details},
       vars
     ));
   }
