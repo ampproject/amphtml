@@ -31,7 +31,12 @@ import {
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
-import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
+import {
+  SOURCE_ORIGIN_PARAM,
+  addParamsToUrl,
+  isProxyOrigin,
+  parseQueryString,
+} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -215,6 +220,7 @@ export class AmpForm {
     );
     this.installEventHandlers_();
     this.installInputMasking_();
+    this.maybeInitializeFromUrl_();
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
@@ -1269,6 +1275,91 @@ export class AmpForm {
     if (previousRender) {
       removeElement(previousRender);
     }
+  }
+
+  /**
+   * Initialize form fields from query parameter values if attribute
+   * 'data-initialize-from-url' is present on the form and attribute
+   * 'data-allow-initialization' is present on the field.
+   * @private
+   */
+  maybeInitializeFromUrl_() {
+    if (
+      isProxyOrigin(this.win_.location) ||
+      !this.form_.hasAttribute('data-initialize-from-url')
+    ) {
+      return;
+    }
+
+    const valueTags = ['SELECT', 'TEXTAREA'];
+    const valueInputTypes = [
+      'color',
+      'date',
+      'datetime-local',
+      'email',
+      'hidden',
+      'month',
+      'number',
+      'range',
+      'search',
+      'tel',
+      'text',
+      'time',
+      'url',
+      'week',
+    ];
+    const checkedInputTypes = ['checkbox', 'radio'];
+
+    const maybeFillField = (field, name) => {
+      // Do not interfere with form fields that utilize variable substitutions.
+      // These fields are populated at time of form submission.
+      if (field.hasAttribute('data-amp-replace')) {
+        return;
+      }
+      // Form fields must be whitelisted
+      if (!field.hasAttribute('data-allow-initialization')) {
+        return;
+      }
+
+      const value = queryParams[name] || '';
+      const type = field.getAttribute('type') || 'text';
+      const tag = field.tagName;
+
+      if (tag === 'INPUT') {
+        if (valueInputTypes.includes(type.toLocaleLowerCase())) {
+          if (field.value !== value) {
+            field.value = value;
+          }
+        } else if (checkedInputTypes.includes(type)) {
+          const checked = field.value === value;
+          if (field.checked !== checked) {
+            field.checked = checked;
+          }
+        }
+      } else if (valueTags.includes(tag)) {
+        if (field.value !== value) {
+          field.value = value;
+        }
+      }
+    };
+
+    const queryParams = parseQueryString(this.win_.location.search);
+    Object.keys(queryParams).forEach(key => {
+      // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
+      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
+        .elements[key]);
+      if (!formControls) {
+        return;
+      }
+
+      if (formControls.nodeType === Node.ELEMENT_NODE) {
+        const field = dev().assertElement(formControls);
+        maybeFillField(field, key);
+      } else if (formControls.length) {
+        const fields = /** @type {!NodeList} */ (formControls);
+        iterateCursor(fields, field => maybeFillField(field, key));
+      }
+    });
   }
 
   /**

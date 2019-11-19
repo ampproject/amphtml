@@ -129,6 +129,30 @@ The value for `action-xhr` can be the same or a different endpoint than `action`
 
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
+##### data-initialize-from-url
+
+Initializes form fields from the window URL's search string, where the query parameter name matches the field's name. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields can optionally be initialized.
+
+Individual fields are opted-in if they contain attribute `data-allow-initialization`. On page load, if the URL contains a query parameter with name matching an opted-in field's `name` attribute, the value or checked-state of that field will be updated based on the value of that query parameter. For example, `<input type="search" name="q" data-allow-initialization>` would display "my search" if the AMP page is visited with URL `https://example.com/search?q=my+search`.
+
+Sample:
+
+```html
+<form data-initialize-from-url
+    method="get"
+    action="https://example.com/search"{% if not format=='email'%}
+    target="_top"{% endif %}>
+  <label>Search: <input type="search" name="q" data-allow-initialization></label>
+</form>
+<!-- display search results using amp-list -->
+```
+
+Limitations:
+
+- Supported `<input>` types include `checkbox`, `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `radio`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
+- Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
+- This feature is not supported on AMP pages delivered by an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/). The `data-initialize-from-url` and `data-allow-initialization` attributes will not cause AMP validation failures, but the form fields will not be initialized from the URL.
+
 ##### Other form attributes
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.

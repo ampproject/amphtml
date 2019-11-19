@@ -3148,5 +3148,163 @@ describes.repeated(
         });
       }
     );
+
+    describes.fakeWin(
+      'Initialize from URL',
+      {
+        amp: {
+          ampdoc: variant.ampdoc,
+          extensions: ['amp-form'],
+        },
+        win: {
+          location:
+            'https://example.com/amps.html?textNoInit=1&hiddenAmpReplace=1&text=1&radio=1&checkbox=on&select=1&textarea=1',
+          top: {
+            location: 'https://example-top.com',
+          },
+        },
+      },
+      env => {
+        let doc;
+        let createElement;
+
+        beforeEach(() => {
+          doc = env.ampdoc.getRootNode();
+          const ownerDoc = doc.ownerDocument || doc;
+          createElement = ownerDoc.createElement.bind(ownerDoc);
+        });
+
+        function getAmpFormWithInitialization(initFromUrl) {
+          const form = createElement('form');
+          form.setAttribute('method', 'GET');
+          if (initFromUrl) {
+            form.setAttribute('data-initialize-from-url', '');
+          }
+
+          // Create inputs that do not support initialization from URL
+          const textNoInit = createElement('input');
+          textNoInit.setAttribute('type', 'text');
+          textNoInit.setAttribute('name', 'textNoInit');
+          textNoInit.setAttribute('value', '0');
+          form.appendChild(textNoInit);
+
+          const hiddenAmpReplace = createElement('input');
+          hiddenAmpReplace.setAttribute('type', 'hidden');
+          hiddenAmpReplace.setAttribute('name', 'hiddenAmpReplace');
+          hiddenAmpReplace.setAttribute('value', '0');
+          hiddenAmpReplace.setAttribute('data-amp-replace', '');
+          hiddenAmpReplace.setAttribute('data-allow-initialization', '');
+          form.appendChild(hiddenAmpReplace);
+
+          // Create inputs that support initialization from URL
+          const text = createElement('input');
+          text.setAttribute('type', 'text');
+          text.setAttribute('name', 'text');
+          text.setAttribute('value', '0');
+          text.setAttribute('data-allow-initialization', '');
+          form.appendChild(text);
+
+          const radio0 = createElement('input');
+          radio0.setAttribute('type', 'radio');
+          radio0.setAttribute('name', 'radio');
+          radio0.setAttribute('checked', '');
+          radio0.setAttribute('value', '0');
+          radio0.setAttribute('data-allow-initialization', '');
+          form.appendChild(radio0);
+
+          const radio1 = createElement('input');
+          radio1.setAttribute('type', 'radio');
+          radio1.setAttribute('name', 'radio');
+          radio1.setAttribute('value', '1');
+          radio1.setAttribute('data-allow-initialization', '');
+          form.appendChild(radio1);
+
+          const checkbox = createElement('input');
+          checkbox.setAttribute('type', 'checkbox');
+          checkbox.setAttribute('name', 'checkbox');
+          checkbox.setAttribute('data-allow-initialization', '');
+          form.appendChild(checkbox);
+
+          const select = createElement('select');
+          select.setAttribute('name', 'select');
+          select.setAttribute('data-allow-initialization', '');
+          const option1 = createElement('option');
+          option1.setAttribute('value', '0');
+          option1.setAttribute('selected', '');
+          const option2 = createElement('option');
+          option2.setAttribute('value', '1');
+          select.appendChild(option1);
+          select.appendChild(option2);
+          form.appendChild(select);
+
+          const textarea = createElement('textarea');
+          textarea.setAttribute('name', 'textarea');
+          textarea.setAttribute('data-allow-initialization', '');
+          textarea.innerHTML = '0';
+          form.appendChild(textarea);
+
+          env.ampdoc.getBody().appendChild(form);
+          const ampForm = new AmpForm(form, 'amp-form-test-id');
+          return Promise.resolve({
+            ampForm,
+            fields: {
+              textNoInit,
+              hiddenAmpReplace,
+              text,
+              radio0,
+              radio1,
+              checkbox,
+              select,
+              textarea,
+            },
+          });
+        }
+
+        it('should not be dirty', () => {
+          return getAmpFormWithInitialization(true).then(response => {
+            const {ampForm} = response;
+            const form = ampForm.form_;
+
+            expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+          });
+        });
+
+        it('should selectively initialize fields', () => {
+          return getAmpFormWithInitialization(true).then(response => {
+            const {fields} = response;
+
+            // URL: ?textNoInit=1&hiddenAmpReplace=1&text=1&radio=1&checkbox=on&select=1&textarea=1
+
+            // field value/checked should not change
+            expect(fields['textNoInit'].value).to.equal('0');
+            expect(fields['hiddenAmpReplace'].value).to.equal('0');
+
+            // field value/checked should change
+            expect(fields['text'].value).to.equal('1');
+            expect(fields['radio0'].checked).to.be.false;
+            expect(fields['radio1'].checked).to.be.true;
+            expect(fields['checkbox'].checked).to.be.true;
+            expect(fields['select'].value).to.equal('1');
+            expect(fields['textarea'].value).to.equal('1');
+          });
+        });
+
+        it('should not initialize fields in unsupported form', () => {
+          return getAmpFormWithInitialization(false).then(response => {
+            const {fields} = response;
+
+            // field value/checked should not change
+            expect(fields['textNoInit'].value).to.equal('0');
+            expect(fields['hiddenAmpReplace'].value).to.equal('0');
+            expect(fields['text'].value).to.equal('0');
+            expect(fields['radio0'].checked).to.be.true;
+            expect(fields['radio1'].checked).to.be.false;
+            expect(fields['checkbox'].checked).to.be.false;
+            expect(fields['select'].value).to.equal('0');
+            expect(fields['textarea'].value).to.equal('0');
+          });
+        });
+      }
+    );
   }
 );
