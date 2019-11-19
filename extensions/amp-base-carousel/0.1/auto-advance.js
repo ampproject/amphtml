@@ -15,8 +15,9 @@
  */
 
 import {ActionSource} from './action-source';
+import {CarouselEvents} from './carousel-events';
 import {debounce} from '../../../src/utils/rate-limit';
-import {listen, listenOnce} from '../../../src/event-helper';
+import {getDetail, listen, listenOnce} from '../../../src/event-helper';
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
@@ -41,11 +42,12 @@ export class AutoAdvance {
   /**
    * @param {{
    *   win: !Window,
+   *   element: !Element,
    *   scrollContainer: !Element,
    *   advanceable: !AdvanceDef
    * }} config
    */
-  constructor({win, scrollContainer, advanceable}) {
+  constructor({win, element, scrollContainer, advanceable}) {
     /** @private @const */
     this.win_ = win;
 
@@ -91,6 +93,9 @@ export class AutoAdvance {
       () => this.handleTouchStart_(),
       {capture: true, passive: true}
     );
+    listen(element, CarouselEvents.INDEX_CHANGE, event => {
+      this.handleIndexChange_(event);
+    });
   }
 
   /**
@@ -171,11 +176,18 @@ export class AutoAdvance {
    * @private
    */
   createDebouncedAdvance_(interval) {
-    this.debouncedAdvance_ = debounce(
+    const debouncedAdvance = debounce(
       this.win_,
-      () => this.advance_(),
+      () => {
+        if (debouncedAdvance != this.debouncedAdvance_) {
+          return;
+        }
+
+        this.advance_();
+      },
       interval
     );
+    this.debouncedAdvance_ = debouncedAdvance;
   }
 
   /**
@@ -212,6 +224,18 @@ export class AutoAdvance {
    */
   handleScroll_() {
     this.resetAutoAdvance_();
+  }
+
+  /**
+   * @param {!Event} event
+   */
+  handleIndexChange_(event) {
+    const detail = getDetail(event);
+    const actionSource = detail['actionSource'];
+
+    if (actionSource && actionSource !== ActionSource.AUTOPLAY) {
+      this.stop();
+    }
   }
 
   /**

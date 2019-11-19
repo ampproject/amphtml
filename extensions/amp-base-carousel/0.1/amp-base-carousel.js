@@ -20,6 +20,7 @@ import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 import {Carousel} from './carousel.js';
 import {CarouselEvents} from './carousel-events';
 import {ChildLayoutManager} from './child-layout-manager';
+import {Keys} from '../../../src/utils/key-codes';
 import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
@@ -31,11 +32,21 @@ import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {
+  isRTL,
   iterateCursor,
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
 import {toArray} from '../../../src/types';
+
+/**
+ * @enum {number}
+ */
+const Controls = {
+  ALWAYS: 0,
+  NEVER: 1,
+  AUTO: 2,
+};
 
 /**
  * @param {!Element} el The Element to check.
@@ -83,6 +94,9 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
+
+    /** @private {!Controls} */
+    this.controls_ = Controls.AUTO;
   }
 
   /**
@@ -106,6 +120,9 @@ class AmpCarousel extends AMP.BaseElement {
       },
       'auto-advance-loops': newValue => {
         this.carousel_.updateAutoAdvanceLoops(Number(newValue) || 0);
+      },
+      'controls': newValue => {
+        this.updateControls_(newValue);
       },
       'dir': newValue => {
         this.carousel_.updateForwards(newValue != 'rtl');
@@ -210,8 +227,8 @@ class AmpCarousel extends AMP.BaseElement {
    * Moves the Carousel to a given index.
    * @param {number} index
    */
-  goToSlide(index) {
-    this.carousel_.goToSlide(index, {smoothScroll: false});
+  goToSlide(index, {smoothScroll = false, actionSource} = {}) {
+    this.carousel_.goToSlide(index, {smoothScroll, actionSource});
   }
 
   /**
@@ -278,7 +295,7 @@ class AmpCarousel extends AMP.BaseElement {
     const html = htmlFor(this.element);
     return html`
       <div class="i-amphtml-carousel-content">
-        <div class="i-amphtml-carousel-scroll"></div>
+        <div class="i-amphtml-carousel-scroll" tabindex="-1"></div>
         <div class="i-amphtml-base-carousel-arrows">
           <div class="i-amphtml-base-carousel-arrow-prev-slot"></div>
           <div class="i-amphtml-base-carousel-arrow-next-slot"></div>
@@ -295,9 +312,22 @@ class AmpCarousel extends AMP.BaseElement {
     const html = htmlFor(this.element);
     return html`
       <button
-        class="i-amphtml-base-carousel-next"
+        class="i-amphtml-base-carousel-arrow"
         aria-label="Next item in carousel"
-      ></button>
+      >
+        <div class="i-amphtml-base-carousel-arrow-frosting"></div>
+        <div class="i-amphtml-base-carousel-arrow-backdrop"></div>
+        <div class="i-amphtml-base-carousel-arrow-background"></div>
+        <svg class="i-amphtml-base-carousel-arrow-icon" viewBox="0 0 24 24">
+          <path
+            d="M10,7.4 L14.6,12 L10,16.6"
+            fill="none"
+            stroke-width="2px"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
     `;
   }
 
@@ -309,9 +339,22 @@ class AmpCarousel extends AMP.BaseElement {
     const html = htmlFor(this.element);
     return html`
       <button
-        class="i-amphtml-base-carousel-prev"
+        class="i-amphtml-base-carousel-arrow"
         aria-label="Previous item in carousel"
-      ></button>
+      >
+        <div class="i-amphtml-base-carousel-arrow-frosting"></div>
+        <div class="i-amphtml-base-carousel-arrow-backdrop"></div>
+        <div class="i-amphtml-base-carousel-arrow-background"></div>
+        <svg class="i-amphtml-base-carousel-arrow-icon" viewBox="0 0 24 24">
+          <path
+            d="M14,7.4 L9.4,12 L14,16.6"
+            fill="none"
+            stroke-width="2px"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
     `;
   }
 
@@ -414,6 +457,9 @@ class AmpCarousel extends AMP.BaseElement {
       const detail = getDetail(event);
       this.carousel_.goToSlide(detail['index']);
     });
+    this.element.addEventListener('keydown', event => {
+      this.onKeydown_(event);
+    });
     this.prevArrowSlot_.addEventListener('click', event => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
@@ -428,6 +474,35 @@ class AmpCarousel extends AMP.BaseElement {
         this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
       }
     });
+  }
+
+  /**
+   * @return {boolean} Whether or not controls should be hidden.
+   */
+  shouldHideControls_() {
+    if (this.controls_ == Controls.NEVER) {
+      return true;
+    }
+
+    if (this.controls_ == Controls.ALWAYS) {
+      return false;
+    }
+
+    return this.hadTouch_;
+  }
+
+  /**
+   * @param {string} controls
+   * @private
+   */
+  updateControls_(controls) {
+    this.controls_ =
+      controls === 'always'
+        ? Controls.ALWAYS
+        : controls === 'never'
+        ? Controls.NEVER
+        : Controls.AUTO;
+    this.updateUi_();
   }
 
   /**
@@ -451,7 +526,7 @@ class AmpCarousel extends AMP.BaseElement {
     toggleAttribute(
       this.element,
       'i-amphtml-base-carousel-hide-buttons',
-      this.hadTouch_
+      this.shouldHideControls_()
     );
   }
 
@@ -474,6 +549,31 @@ class AmpCarousel extends AMP.BaseElement {
     this.childLayoutManager_.setQueueChanges(false);
 
     this.updateUi_();
+  }
+
+  /**
+   * Handle a keyup, potentially going to the next/previous set of slides,
+   * depending on the carousel configuration.
+   * @param {!KeyboardEvent} event
+   */
+  onKeydown_(event) {
+    const isRight = event.key === Keys.RIGHT_ARROW;
+    const isLeft = event.key === Keys.LEFT_ARROW;
+
+    if (!isRight && !isLeft) {
+      return;
+    }
+
+    const rtl = isRTL(this.element.ownerDocument);
+    const next = (isRight && !rtl) || (isLeft && rtl);
+
+    if (next) {
+      this.carousel_.next();
+    } else {
+      this.carousel_.prev();
+    }
+
+    event.preventDefault();
   }
 
   /**
