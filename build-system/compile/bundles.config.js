@@ -783,6 +783,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-quicktext',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-reach-player',
     version: '0.1',
     latestVersion: '0.1',
