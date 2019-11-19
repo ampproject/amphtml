@@ -57,6 +57,26 @@ public class CanonicalizerTest {
 
   @Test
   public void testParseAListOfRules() {
+    try {
+      final List<ErrorToken> cssErrors = new ArrayList<>();
+      List<com.steadystate.css.parser.Token> tokens = new LinkedList<>();
+      tokens.add(new com.steadystate.css.parser.Token(22, "amp-img"));
+      tokens.add(new com.steadystate.css.parser.Token(55, "{"));
+      tokens.add(new Token(1, ""));
+      tokens.add(new Token(56, "}"));
+      tokens.add(new Token(1, ""));
+      tokens.add(new Token(0, ""));
+      TokenStream tokenStream = new TokenStream(tokens);
+      tokenStream.consume();
+
+      List<Rule> rules = canonicalizer.parseAListOfRules(tokens, true, cssErrors);
+
+      Assert.assertEquals(rules.size(), 1);
+      Assert.assertEquals(rules.get(0).toString(), "QUALIFIED_RULE");
+
+    } catch (CssValidationException e) {
+      e.printStackTrace();
+    }
 
   }
 
@@ -117,11 +137,42 @@ public class CanonicalizerTest {
       List<com.steadystate.css.parser.Token> tokensEmpty = new LinkedList<>();
       Assert.assertTrue(Canonicalizer.consumeAComponentValue(tokenStream, tokensEmpty, 3));
       Assert.assertEquals(tokensEmpty.size(), 7);
+
+      Assert.assertFalse(Canonicalizer.consumeAComponentValue(tokenStream, tokensEmpty, 100000));
     } catch (CssValidationException e) {
       e.printStackTrace();
     }
+  }
 
-//    Canonicalizer.consumeAComponentValue();
+  @Test
+  public void testConsumeAFunction() {
+    try {
+      List<com.steadystate.css.parser.Token> tokens = new LinkedList<>();
+      tokens.add(new com.steadystate.css.parser.Token(SACParserCSS3Constants.FUNCTION, "and"));
+      tokens.add(new com.steadystate.css.parser.Token(SACParserCSS3Constants.EOF, ""));
+
+      TokenStream tokenStream = new TokenStream(tokens);
+      tokenStream.consume();
+
+      List<com.steadystate.css.parser.Token> tokensEmpty = new LinkedList<>();
+      Canonicalizer.consumeAComponentValue(tokenStream, tokensEmpty, 3);
+
+      Assert.assertEquals(tokensEmpty, tokens);
+
+      tokens = new LinkedList<>();
+      tokensEmpty = new LinkedList<>();
+      tokens.add(new com.steadystate.css.parser.Token(SACParserCSS3Constants.FUNCTION, "and"));
+      tokens.add(new com.steadystate.css.parser.Token(SACParserCSS3Constants.IDENT, "blue"));
+      tokens.add(new com.steadystate.css.parser.Token(SACParserCSS3Constants.EOF, ""));
+      tokenStream = new TokenStream(tokens);
+      tokenStream.consume();
+
+      Canonicalizer.consumeAComponentValue(tokenStream, tokensEmpty, 3);
+      Assert.assertEquals(tokensEmpty, tokens);
+
+    } catch (CssValidationException e) {
+      e.printStackTrace();
+    }
   }
 
   private Validator.AtRuleSpec.BlockType defaultSpec;
@@ -139,6 +190,9 @@ public class CanonicalizerTest {
     + "        content:\".\";\n"
     + "    }\n"
     + "}";
+  private static final String CSS_BODY = "        ul {\n"
+    + "            list-style: square url(());\n"
+    + "        }\n";
   private static final String A_DECLARATION = "color: red;";
 
 }

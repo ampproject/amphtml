@@ -18,35 +18,41 @@
 /*
  * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
+
 package dev.amp.validator.css;
 
+import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Test for {@link ParsedCssUrl}
+ * Test for {@link ErrorToken}
  *
- * @author GeorgeLuo
+ * @author gluo17
  */
 
-public class ParsedCssUrlTest {
+public class ErrorTokenTest {
 
-    @Test
-    public void testGetAtRuleScope() {
-        ParsedCssUrl parsedCssUrl = new ParsedCssUrl();
-        Assert.assertEquals(parsedCssUrl.getAtRuleScope(), "");
-    }
+  @Test
+  public void testGetters() {
+    try {
+      final String param = "param";
+      final List<String> params = new ArrayList<>();
+      params.add(param);
 
-    @Test
-    public void testGetUtf8Url() {
-        ParsedCssUrl parsedCssUrl = new ParsedCssUrl();
-        parsedCssUrl.setUtf8Url("https://www.someurl.com");
-        Assert.assertEquals(parsedCssUrl.getUtf8Url(), "https://www.someurl.com");
-    }
+      final ErrorToken errorToken
+        = new ErrorToken(Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING, params);
 
-    @Test
-    public void testGetTokenType() {
-        ParsedCssUrl parsedCssUrl = new ParsedCssUrl();
-        Assert.assertEquals(parsedCssUrl.getTokenType(), TokenType.PARSED_CSS_URL);
+      Assert.assertEquals(errorToken.getParams(), params);
+      Assert.assertEquals(errorToken.getCode(), Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING);
+
+      Assert.assertEquals(errorToken.getTokenType(), TokenType.ERROR);
+
+    } catch (CssValidationException e) {
+      e.printStackTrace();
     }
+  }
 }

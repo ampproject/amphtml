@@ -20,26 +20,16 @@
  */
 package dev.amp.validator.css;
 
-import com.steadystate.css.parser.SACParserCSS3Constants;
-import com.steadystate.css.parser.Token;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
 
 /**
  * Test for {@link Token}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class TokenTest {
-
-    @BeforeClass
-    public void init() {
-        token = new Token(SACParserCSS3Constants.S, " ");
-    }
 
     @Test
     public void testGetTokenType() {
@@ -63,8 +53,8 @@ public class TokenTest {
 
     @Test
     public void testGetValue() {
-        Token token = new Declaration("h1");
-        Assert.assertEquals(token.getValue(), new ArrayList<>());
+        final Token token = new EOFToken();
+        Assert.assertEquals(token.getValue(), "EOF_TOKEN");
     }
 
     @Test

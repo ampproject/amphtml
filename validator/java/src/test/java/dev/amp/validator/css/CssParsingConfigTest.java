@@ -29,6 +29,12 @@ import org.testng.annotations.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Test for {@link CssParsingConfig}
+ *
+ * @author GeorgeLuo
+ */
+
 public class CssParsingConfigTest {
 
   @BeforeTest

@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Test for {@link TokenStream}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class TokenStreamTest {

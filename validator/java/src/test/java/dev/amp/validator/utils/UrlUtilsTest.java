@@ -18,35 +18,29 @@
 /*
  * Changes to the original project are Copyright 2019, Verizon Media Inc..
  */
-package dev.amp.validator.css;
+
+package dev.amp.validator.utils;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import static org.testng.Assert.*;
+
 /**
- * Test for {@link ParsedCssUrl}
+ * Test for {@link UrlUtils}
  *
- * @author GeorgeLuo
+ * @author gluo17
  */
 
-public class ParsedCssUrlTest {
+public class UrlUtilsTest {
 
-    @Test
-    public void testGetAtRuleScope() {
-        ParsedCssUrl parsedCssUrl = new ParsedCssUrl();
-        Assert.assertEquals(parsedCssUrl.getAtRuleScope(), "");
-    }
-
-    @Test
-    public void testGetUtf8Url() {
-        ParsedCssUrl parsedCssUrl = new ParsedCssUrl();
-        parsedCssUrl.setUtf8Url("https://www.someurl.com");
-        Assert.assertEquals(parsedCssUrl.getUtf8Url(), "https://www.someurl.com");
-    }
-
-    @Test
-    public void testGetTokenType() {
-        ParsedCssUrl parsedCssUrl = new ParsedCssUrl();
-        Assert.assertEquals(parsedCssUrl.getTokenType(), TokenType.PARSED_CSS_URL);
-    }
+  @Test
+  public void testIsDataUrl() {
+    Assert.assertTrue(UrlUtils.isDataUrl("data://somedata.com"));
+    Assert.assertFalse(UrlUtils.isDataUrl("https://somenotdata.com"));
+    Assert.assertFalse(UrlUtils.isDataUrl("www.somenotdata.com"));
+  }
 }

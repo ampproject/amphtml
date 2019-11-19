@@ -28,53 +28,59 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Test for {@link Stylesheet}
+ *
+ * @author gluo17
+ */
+
 public class StylesheetTest {
 
-    @Test
-    public void testAccept() {
-        try {
-            final Stylesheet stylesheet = new Stylesheet();
-            final List<ErrorToken> cssErrors = new ArrayList<>();
-
-            final List<ParsedCssUrl> parsedCssUrls = new ArrayList<>();
-
-            final ParsedCssUrl parsedCssUrl1 = new ParsedCssUrl();
-            parsedCssUrl1.setUtf8Url("https://www.someurl1.com");
-
-            parsedCssUrls.add(parsedCssUrl1);
-
-            final ParsedCssUrl parsedCssUrl2 = new ParsedCssUrl();
-            parsedCssUrl2.setUtf8Url("https://www.someurl2.com");
-
-            parsedCssUrls.add(parsedCssUrl2);
-
-            final UrlFunctionVisitor visitor = new UrlFunctionVisitor(parsedCssUrls, cssErrors);
-
-            Declaration declaration = new Declaration("background-image");
-            declaration.setLine(0);
-            declaration.setCol(1);
-            declaration.getValue().add(new EOFToken());
-
-          List<Declaration> declarations = new ArrayList<>();
-            declarations.add(declaration);
-
-            QualifiedRule qualifiedRule = new QualifiedRule();
-            qualifiedRule.setDeclarations(declarations);
-
-            List<Rule> rules = new ArrayList<>();
-            rules.add(qualifiedRule);
-
-            stylesheet.setRules(rules);
-            stylesheet.accept(visitor);
-
-        } catch (CssValidationException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void testGetTokenType() {
+  @Test
+  public void testAccept() {
+    try {
       final Stylesheet stylesheet = new Stylesheet();
-      Assert.assertEquals(stylesheet.getTokenType(), TokenType.STYLESHEET);
+      final List<ErrorToken> cssErrors = new ArrayList<>();
+
+      final List<ParsedCssUrl> parsedCssUrls = new ArrayList<>();
+
+      final ParsedCssUrl parsedCssUrl1 = new ParsedCssUrl();
+      parsedCssUrl1.setUtf8Url("https://www.someurl1.com");
+
+      parsedCssUrls.add(parsedCssUrl1);
+
+      final ParsedCssUrl parsedCssUrl2 = new ParsedCssUrl();
+      parsedCssUrl2.setUtf8Url("https://www.someurl2.com");
+
+      parsedCssUrls.add(parsedCssUrl2);
+
+      final UrlFunctionVisitor visitor = new UrlFunctionVisitor(parsedCssUrls, cssErrors);
+
+      Declaration declaration = new Declaration("background-image");
+      declaration.setLine(0);
+      declaration.setCol(1);
+      declaration.getValue().add(new EOFToken());
+
+      List<Declaration> declarations = new ArrayList<>();
+      declarations.add(declaration);
+
+      QualifiedRule qualifiedRule = new QualifiedRule();
+      qualifiedRule.setDeclarations(declarations);
+
+      List<Rule> rules = new ArrayList<>();
+      rules.add(qualifiedRule);
+
+      stylesheet.setRules(rules);
+      stylesheet.accept(visitor);
+
+    } catch (CssValidationException e) {
+      e.printStackTrace();
     }
+  }
+
+  @Test
+  public void testGetTokenType() {
+    final Stylesheet stylesheet = new Stylesheet();
+    Assert.assertEquals(stylesheet.getTokenType(), TokenType.STYLESHEET);
+  }
 }
