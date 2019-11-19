@@ -17,8 +17,10 @@
 const app = require('express').Router();
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
+const log = require('fancy-log');
 const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
+const {red} = require('ansi-colors');
 
 // In-a-box envelope.
 // Examples:
@@ -42,12 +44,10 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
   const templatePath = '/build-system/server/server-inabox-template.html';
   fs.readFileAsync(process.cwd() + templatePath, 'utf8')
     .then(template => {
-      let url;
+      const url = getInaboxUrl(req);
       if (req.baseUrl == '/inabox-friendly') {
-        url = getInaboxUrl(req, 'inabox-viewport-friendly');
         template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
       } else {
-        url = getInaboxUrl(req);
         template = template
           .replace(
             /NAME/g,
@@ -62,6 +62,11 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
     })
     .then(result => {
       res.end(result);
+    })
+    .catch(err => {
+      log(red('Error:'), err);
+      res.status(500);
+      res.end();
     });
 });
 
@@ -126,6 +131,7 @@ function requestFromUrl(template, url, query) {
     request(url, (error, response, body) => {
       if (error) {
         reject(error);
+        return;
       }
       if (
         !response.headers['content-type'] ||

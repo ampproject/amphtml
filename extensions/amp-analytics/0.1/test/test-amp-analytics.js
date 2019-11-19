@@ -222,7 +222,7 @@ describes.realWin(
         el.setAttribute('trigger', 'immediate');
         el.textContent = config;
         const whenFirstVisibleStub = sandbox
-          .stub(viewer, 'whenFirstVisible')
+          .stub(ampdoc, 'whenFirstVisible')
           .callsFake(() => new Promise(function() {}));
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
@@ -534,6 +534,9 @@ describes.realWin(
       });
 
       it('expands platform vars', () => {
+        sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
@@ -543,7 +546,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html/
+            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/
           );
         });
       });
@@ -679,6 +682,9 @@ describes.realWin(
       });
 
       it('expands url-replacements vars', () => {
+        sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
@@ -697,7 +703,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html&title=Test%20Title/
+            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar&title=Test%20Title/
           );
         });
       });
@@ -1462,7 +1468,7 @@ describes.realWin(
             return Promise.reject();
           });
 
-          sandbox.stub(viewer, 'isVisible').returns(false);
+          sandbox.stub(ampdoc, 'isVisible').returns(false);
           analytics.layoutCallback();
           analytics.resumeCallback();
           analytics.unlayoutCallback();
@@ -1756,7 +1762,7 @@ describes.realWin(
       });
     });
 
-    describe('parentPostMessage in inabox case', () => {
+    describe('parentPostMessage', () => {
       let postMessageSpy;
 
       function waitForParentPostMessage(opt_max) {
@@ -1790,6 +1796,17 @@ describes.realWin(
           'requests': {'foo': 'https://example.com/bar'},
           'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
         });
+        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        return waitForNoSendRequest(analytics).then(() => {
+          return waitForParentPostMessage();
+        });
+      });
+
+      it('does send a hit when parentPostMessage is provided for FIE', function() {
+        const analytics = getAnalyticsTag({
+          'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
+        });
+        analytics.element.classList.add('i-amphtml-fie');
         postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForNoSendRequest(analytics).then(() => {
           return waitForParentPostMessage();

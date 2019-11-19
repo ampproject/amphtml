@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as IniLoad from '../../src/ini-load';
 import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
@@ -283,7 +284,7 @@ describes.realWin('performance', {amp: true}, env => {
 
           return Promise.all([
             perf.coreServicesAvailable(),
-            viewer.whenFirstVisible(),
+            ampdoc.whenFirstVisible(),
           ]).then(() => {
             expect(flushSpy).to.have.callCount(4);
             expect(perf.isMessagingReady_).to.be.false;
@@ -301,7 +302,7 @@ describes.realWin('performance', {amp: true}, env => {
           tickDeltaStub = sandbox.stub(perf, 'tickDelta');
           firstVisibleTime = null;
           sandbox
-            .stub(viewer, 'getFirstVisibleTime')
+            .stub(ampdoc, 'getFirstVisibleTime')
             .callsFake(() => firstVisibleTime);
         });
 
@@ -481,7 +482,7 @@ describes.realWin('performance', {amp: true}, env => {
         it('should call the flush callback', () => {
           // Make sure "first visible" arrives after "channel ready".
           const firstVisiblePromise = new Promise(() => {});
-          sandbox.stub(viewer, 'whenFirstVisible').returns(firstVisiblePromise);
+          sandbox.stub(ampdoc, 'whenFirstVisible').returns(firstVisiblePromise);
           expect(viewerSendMessageStub.withArgs('sendCsi')).to.have.callCount(
             0
           );
@@ -519,27 +520,16 @@ describes.realWin('performance', {amp: true}, env => {
     });
 
   it('should wait for visible resources', () => {
-    function resource() {
-      const res = {
-        loadedComplete: false,
-      };
-      res.loadedOnce = () =>
-        Promise.resolve().then(() => {
-          res.loadedComplete = true;
-        });
-      return res;
-    }
-
     const resources = Services.resourcesForDoc(ampdoc);
-    const resourcesMock = sandbox.mock(resources);
+    sandbox.stub(resources, 'whenFirstPass').returns(Promise.resolve());
+    const whenContentIniLoadStub = sandbox
+      .stub(IniLoad, 'whenContentIniLoad')
+      .returns(Promise.resolve());
     perf.resources_ = resources;
 
-    const res1 = resource();
-    const res2 = resource();
-
-    resourcesMock
-      .expects('getResourcesInRect')
-      .withExactArgs(
+    return perf.whenViewportLayoutComplete_().then(() => {
+      expect(whenContentIniLoadStub).to.be.calledWith(
+        perf.win.document.documentElement,
         perf.win,
         sinon.match(
           arg =>
@@ -549,17 +539,7 @@ describes.realWin('performance', {amp: true}, env => {
             arg.height == perf.win.innerHeight
         ),
         /* inPrerender */ true
-      )
-      .returns(Promise.resolve([res1, res2]))
-      .once();
-    resourcesMock
-      .expects('whenFirstPass')
-      .returns(Promise.resolve())
-      .once();
-
-    return perf.whenViewportLayoutComplete_().then(() => {
-      expect(res1.loadedComplete).to.be.true;
-      expect(res2.loadedComplete).to.be.true;
+      );
     });
   });
 
@@ -573,7 +553,7 @@ describes.realWin('performance', {amp: true}, env => {
     let whenViewportLayoutCompleteResolve;
 
     function stubHasBeenVisible(visibility) {
-      sandbox.stub(viewer, 'hasBeenVisible').returns(visibility);
+      sandbox.stub(ampdoc, 'hasBeenVisible').returns(visibility);
     }
 
     function getPerformanceMarks() {
@@ -595,7 +575,7 @@ describes.realWin('performance', {amp: true}, env => {
         whenViewportLayoutCompleteResolve = resolve;
       });
 
-      sandbox.stub(viewer, 'whenFirstVisible').returns(whenFirstVisiblePromise);
+      sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenFirstVisiblePromise);
       sandbox
         .stub(perf, 'whenViewportLayoutComplete_')
         .returns(whenViewportLayoutCompletePromise);
@@ -617,7 +597,7 @@ describes.realWin('performance', {amp: true}, env => {
           .withArgs('csi')
           .returns('1');
         sandbox.stub(viewer, 'isEmbedded').returns(true);
-        return viewer.whenFirstVisible().then(() => {
+        return ampdoc.whenFirstVisible().then(() => {
           clock.tick(400);
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
@@ -644,7 +624,7 @@ describes.realWin('performance', {amp: true}, env => {
           .stub(viewer, 'getParam')
           .withArgs('csi')
           .returns(null);
-        return viewer.whenFirstVisible().then(() => {
+        return ampdoc.whenFirstVisible().then(() => {
           clock.tick(400);
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
@@ -663,7 +643,7 @@ describes.realWin('performance', {amp: true}, env => {
           clock.tick(100);
           whenFirstVisibleResolve();
           expect(tickSpy).to.have.callCount(3);
-          return viewer.whenFirstVisible().then(() => {
+          return ampdoc.whenFirstVisible().then(() => {
             clock.tick(400);
             expect(tickSpy).to.have.callCount(4);
             whenViewportLayoutCompleteResolve();
@@ -1129,13 +1109,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
       const unresolvedPromise = new Promise(() => {});
       const viewportSize = {width: 0, height: 0};
-      sandbox.stub(Services, 'viewerForDoc').returns({
-        isEmbedded: () => {},
+      sandbox.stub(Services, 'ampdoc').returns({
         hasBeenVisible: () => {},
         onVisibilityChanged: () => {},
         whenFirstVisible: () => unresolvedPromise,
-        whenMessagingReady: () => {},
         getVisibilityState: () => viewerVisibilityState,
+      });
+      sandbox.stub(Services, 'viewerForDoc').returns({
+        isEmbedded: () => {},
+        whenMessagingReady: () => {},
       });
       sandbox.stub(Services, 'resourcesForDoc').returns({
         getResourcesInRect: () => unresolvedPromise,
@@ -1172,12 +1154,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
       // Fake layoutJank that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layoutJank')
-        .returns([
-          {entryType: 'layoutJank', fraction: 0.25},
-          {entryType: 'layoutJank', fraction: 0.3},
-        ]);
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank').returns([
+        {entryType: 'layoutJank', fraction: 0.25},
+        {entryType: 'layoutJank', fraction: 0.3},
+      ]);
 
       const perf = getPerformance();
       // visibilitychange/beforeunload listeners are now added.
@@ -1225,16 +1205,14 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
 
       // Fake layoutJank that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layoutJank')
-        .returns([
-          {entryType: 'layoutJank', fraction: 0.25},
-          {entryType: 'layoutJank', fraction: 0.3},
-        ]);
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank').returns([
+        {entryType: 'layoutJank', fraction: 0.25},
+        {entryType: 'layoutJank', fraction: 0.3},
+      ]);
       const perf = getPerformance();
       perf.coreServicesAvailable();
       viewerVisibilityState = VisibilityState.INACTIVE;
-      perf.onViewerVisibilityChange_();
+      perf.onAmpDocVisibilityChange_();
 
       expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0]).to.be.jsonEqual({
@@ -1294,13 +1272,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
       const unresolvedPromise = new Promise(() => {});
       const viewportSize = {width: 0, height: 0};
-      sandbox.stub(Services, 'viewerForDoc').returns({
-        isEmbedded: () => {},
+      sandbox.stub(Services, 'ampdoc').returns({
         hasBeenVisible: () => {},
         onVisibilityChanged: () => {},
         whenFirstVisible: () => unresolvedPromise,
-        whenMessagingReady: () => {},
         getVisibilityState: () => viewerVisibilityState,
+      });
+      sandbox.stub(Services, 'viewerForDoc').returns({
+        isEmbedded: () => {},
+        whenMessagingReady: () => {},
       });
       sandbox.stub(Services, 'resourcesForDoc').returns({
         getResourcesInRect: () => unresolvedPromise,
@@ -1340,12 +1320,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       expect(fakeWin.document.visibilityState).to.equal('visible');
 
       // Fake layoutShift that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType
-        .withArgs('layoutShift')
-        .returns([
-          {entryType: 'layoutShift', value: 0.25},
-          {entryType: 'layoutShift', value: 0.3},
-        ]);
+      fakeWin.performance.getEntriesByType.withArgs('layoutShift').returns([
+        {entryType: 'layoutShift', value: 0.25},
+        {entryType: 'layoutShift', value: 0.3},
+      ]);
 
       const perf = getPerformance();
       // visibilitychange/beforeunload listeners are now added.
@@ -1486,7 +1464,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       });
 
       viewerVisibilityState = VisibilityState.INACTIVE;
-      perf.onViewerVisibilityChange_();
+      perf.onAmpDocVisibilityChange_();
 
       expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0]).to.be.jsonEqual({

@@ -115,10 +115,12 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   firstAttachedCallback() {
-    // Only allow prerender if video sources are cached on CDN. Set this value
-    // in `firstAttachedCallback` since `buildCallback` is too late and the
-    // element children may not be available in the constructor.
-    this.prerenderAllowed_ = this.hasAnyCachedSources_();
+    // Only allow prerender if video sources are cached on CDN, or if video has
+    // a poster image. Set this value in `firstAttachedCallback` since
+    // `buildCallback` is too late and the element children may not be available
+    // in the constructor.
+    const posterAttr = this.element.getAttribute('poster');
+    this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
   }
 
   /**
@@ -162,9 +164,13 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {string}
+   * @return {?string}
    */
   getVideoSourceForPreconnect_() {
+    if (this.getAmpDoc().getVisibilityState() === VisibilityState.PRERENDER) {
+      const source = this.getFirstCachedSource_();
+      return (source && source.getAttribute('src')) || null;
+    }
     let videoSrc = this.element.getAttribute('src');
     if (!videoSrc) {
       const source = elementByTag(this.element, 'source');
@@ -312,14 +318,15 @@ class AmpVideo extends AMP.BaseElement {
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
+    if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      viewer.whenFirstVisible().then(() => {
-        this.propagateLayoutChildren_();
-      });
+      this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.propagateLayoutChildren_();
+        });
     } else {
       this.propagateLayoutChildren_();
     }
@@ -447,15 +454,23 @@ class AmpVideo extends AMP.BaseElement {
    * @return {boolean}
    */
   hasAnyCachedSources_() {
+    return !!this.getFirstCachedSource_();
+  }
+
+  /**
+   * @private
+   * @return {?Element}
+   */
+  getFirstCachedSource_() {
     const {element} = this;
     const sources = toArray(childElementsByTag(element, 'source'));
     sources.push(element);
     for (let i = 0; i < sources.length; i++) {
       if (this.isCachedByCDN_(sources[i])) {
-        return true;
+        return sources[i];
       }
     }
-    return false;
+    return null;
   }
 
   /**

@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -46,24 +47,21 @@ other AMP components.
 
 ## Overview
 
-The `amp-orientation-observer` component monitors the orientation of a device, and dispatches low-trust level events (`alpha`, `beta`, `gamma`) that report changes in the device's orientation along the `alpha`, `beta` and `gamma` axises in terms of `angle` and `percent`. These can be used to trigger actions (*Only Low Trust Actions*) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation)).
+The `amp-orientation-observer` component monitors the orientation of a device, and dispatches low-trust level events (`alpha`, `beta`, `gamma`) that report changes in the device's orientation along the `alpha`, `beta` and `gamma` axises in terms of `angle` and `percent`. These can be used to trigger actions (_Only Low Trust Actions_) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation)).
 
 {% call callout('Note', type='note') %}
 The `amp-orientation-observer` component is only useful when used with other components and does not do anything on its own.
 {% endcall %}
 
-
 #### Events
 
 These are the low-trust level events that the `amp-orientation-observer` component dispatches:
 
-
-| Event    | Description                                            |
-| ---------| -------------------------------------------------------|
-| `alpha`  | Represents the motion of the device around the z axis. |
-| `beta`   | Represents the motion of the device around the x axis. |
-| `gamma`  | Represents the motion of the device around the y axis. This represents a left to right motion of the device. |
-
+| Event   | Description                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------ |
+| `alpha` | Represents the motion of the device around the z axis.                                                       |
+| `beta`  | Represents the motion of the device around the x axis.                                                       |
+| `gamma` | Represents the motion of the device around the y axis. This represents a left to right motion of the device. |
 
 ## What can I do with amp-orientation-observer?
 
@@ -81,20 +79,20 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
 -->
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
-    {
-    "duration": "3s",
-    "fill": "both",
-    "direction": "alternate",
-    "animations": [
       {
-        "selector": "#clock-scene .clock-hand",
-        "keyframes": [
-          { "transform": "rotate(-180deg)" },
-          { "transform": "rotate(0deg)" }
-        ]
-      }
-    ]
-  }
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#clock-scene .clock-hand",
+          "keyframes": [
+            { "transform": "rotate(-180deg)" },
+            { "transform": "rotate(0deg)" }
+          ]
+        }
+      ]
+    }
   </script>
 </amp-animation>
 
@@ -106,13 +104,13 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
   -->
   <amp-orientation-observer
     on="beta:clockAnim1.seekTo(percent=event.percent)"
-    layout="nodisplay">
+    layout="nodisplay"
+  >
   </amp-orientation-observer>
-  <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+  <amp-img layout="responsive" width="2" height="1.5" src="./img/clock.jpg">
     <div class="clock-hand"></div>
   </amp-img>
 </div>
-
 ```
 
 ## Attributes
@@ -125,7 +123,7 @@ Specifies that the associated action should only take place for changes between 
 
 Specifies that the associated action should only take place for changes between the specified range along the x axis. Specified as a space separated list of 2 values (e.g., `beta-range="0 180"`). By default, the related action is triggered for all changes between `0` and `360 degrees`.
 
-*Example: Using beta-range to limit the range of degrees to watch along the x axis*
+_Example: Using beta-range to limit the range of degrees to watch along the x axis_
 
 Imagine an animation where the hour hand of a clock rotates as the user scrolls the page.
 
@@ -133,13 +131,18 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
 <amp-orientation-observer
   beta-range="0 180"
   on="beta:clockAnim1.seekTo(percent=event.percent)"
-  layout="nodisplay">
+  layout="nodisplay"
+>
 </amp-orientation-observer>
 ```
 
 ##### gamma-range (optional)
 
 Specifies that the associated action should only take place for changes between the specified range along the y axis. Specified as a space separated list of 2 values (e.g., `gamma-range="0 90"`. By default the related action is triggered for all changes between `0` and `360 degrees`.
+
+##### smoothing (optional)
+
+When enabled, outputs a moving average of the last `n` values instead of the raw value read from the sensor. By default, when activated, smoothing will be set to 4 points.
 
 ## Validation
 

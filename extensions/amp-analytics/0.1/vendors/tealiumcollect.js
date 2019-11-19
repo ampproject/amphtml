@@ -31,7 +31,7 @@ const TEALIUMCOLLECT_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://collect.tealiumiq.com',
     'base':
-      '${host}/event?${tealium}&' +
+      '${host}/event/?${tealium}&' +
       '${dom1}&${dom2}&${datetime}&' +
       'tealium_event=${tealium_event}&' +
       'amp_version=${ampVersion}&' +

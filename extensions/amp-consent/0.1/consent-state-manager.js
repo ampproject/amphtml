@@ -456,14 +456,12 @@ export class ConsentInstance {
         body: request,
         ampCors: false,
       };
-      Services.viewerForDoc(this.ampdoc_)
-        .whenFirstVisible()
-        .then(() => {
-          Services.xhrFor(this.ampdoc_.win).fetchJson(
-            /** @type {string} */ (this.onUpdateHref_),
-            init
-          );
-        });
+      this.ampdoc_.whenFirstVisible().then(() => {
+        Services.xhrFor(this.ampdoc_.win).fetchJson(
+          /** @type {string} */ (this.onUpdateHref_),
+          init
+        );
+      });
     });
   }
 }

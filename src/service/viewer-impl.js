@@ -257,7 +257,7 @@ export class ViewerImpl {
 
     // This fragment may get cleared by impression tracking. If so, it will be
     // restored afterward.
-    this.whenFirstVisible().then(() => {
+    this.ampdoc.whenFirstVisible().then(() => {
       this.maybeUpdateFragmentForCct();
     });
   }
@@ -421,9 +421,84 @@ export class ViewerImpl {
     return this.overtakeHistory_;
   }
 
-  /** @override */
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
   getVisibilityState() {
     return this.ampdoc.getVisibilityState();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  isVisible() {
+    return this.ampdoc.isVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  hasBeenVisible() {
+    return this.ampdoc.hasBeenVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  whenFirstVisible() {
+    return this.ampdoc.whenFirstVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  whenNextVisible() {
+    return this.ampdoc.whenNextVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  getFirstVisibleTime() {
+    return this.ampdoc.getFirstVisibleTime();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  getLastVisibleTime() {
+    return this.ampdoc.getLastVisibleTime();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  onVisibilityChanged(handler) {
+    return this.ampdoc.onVisibilityChanged(handler);
   }
 
   /**
@@ -449,37 +524,11 @@ export class ViewerImpl {
     }
 
     this.ampdoc.overrideVisibilityState(state);
-    dev().fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
-  }
-
-  /** @override */
-  isVisible() {
-    return this.ampdoc.isVisible();
-  }
-
-  /** @override */
-  hasBeenVisible() {
-    return this.ampdoc.getLastVisibleTime() != null;
-  }
-
-  /** @override */
-  whenFirstVisible() {
-    return this.ampdoc.whenFirstVisible();
-  }
-
-  /** @override */
-  whenNextVisible() {
-    return this.ampdoc.whenNextVisible();
-  }
-
-  /** @override */
-  getFirstVisibleTime() {
-    return this.ampdoc.getFirstVisibleTime();
-  }
-
-  /** @override */
-  getLastVisibleTime() {
-    return this.ampdoc.getLastVisibleTime();
+    dev().fine(
+      TAG_,
+      'visibilitychange event:',
+      this.ampdoc.getVisibilityState()
+    );
   }
 
   /** @override */
@@ -600,11 +649,6 @@ export class ViewerImpl {
       return false;
     }
     return urls.trustedViewerHosts.some(th => th.test(url.hostname));
-  }
-
-  /** @override */
-  onVisibilityChanged(handler) {
-    return this.ampdoc.onVisibilityChanged(handler);
   }
 
   /** @override */

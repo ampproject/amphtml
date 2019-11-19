@@ -16,7 +16,7 @@
 
 const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
-const deglob = require('globs-to-files');
+const globby = require('globby');
 const gulp = require('gulp');
 const gulpif = require('gulp-if');
 const gulpWatch = require('gulp-watch');
@@ -72,7 +72,7 @@ async function vendorConfigs(opt_options) {
       )
       .pipe(gulp.dest(destPath))
   ).then(() => {
-    if (deglob.sync(srcPath).length > 0) {
+    if (globby.sync(srcPath).length > 0) {
       endBuildStep(
         'Compiled all analytics vendor configs into',
         destPath,

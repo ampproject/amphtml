@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 954
+spec_file_revision: 971
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -4868,6 +4868,10 @@ tags: {
     value: ""
   }
   attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
+  attrs: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
@@ -4897,6 +4901,10 @@ tags: {
     name: "async"
     mandatory: true
     value: ""
+  }
+  attrs: {
+    name: "crossorigin"
+    value: "anonymous"
   }
   attrs: {
     name: "src"
@@ -5362,6 +5370,10 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
+  attrs: {
     disabled_by: "transformed"
     disabled_by: "amp4email"
     name: "nonce"
@@ -5379,7 +5391,7 @@ attr_lists: {
     name: "id"
     mandatory: true
     # When updating this blacklisted_value_regex, also update the entry for
-    # "id" in $GLOBAL_ATTRS.
+    # "id" in $GLOBAL_ATTRS and "id" in "amp-script extension local script".
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"

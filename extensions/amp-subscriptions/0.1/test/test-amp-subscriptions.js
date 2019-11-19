@@ -615,7 +615,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     beforeEach(() => {
       serviceAdapter = new ServiceAdapter(subscriptionService);
       firstVisibleStub = sandbox
-        .stub(subscriptionService.viewer_, 'whenFirstVisible')
+        .stub(ampdoc, 'whenFirstVisible')
         .callsFake(() => Promise.resolve());
       subscriptionService.pageConfig_ = pageConfig;
       platform = localSubscriptionPlatformFactory(

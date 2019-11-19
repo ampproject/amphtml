@@ -30,11 +30,7 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
-import {
-  createLegacyLoaderElement,
-  createNewLoaderElement,
-  isNewLoaderExperimentEnabled,
-} from '../src/loader.js';
+import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
@@ -47,15 +43,6 @@ import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
 
 const TAG = 'CustomElement';
-
-/**
- * This is the minimum width of the element needed to trigger `loading`
- * animation. This value is justified as about 1/3 of a smallish mobile
- * device viewport. Trying to put a loading indicator into a small element
- * is meaningless.
- * @private @const {number}
- */
-const MIN_WIDTH_FOR_LOADING = 100;
 
 /**
  * The elements positioned ahead of this threshold may have their loading
@@ -577,7 +564,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        startupChunk(self.document, () => {
+        startupChunk(this.getAmpDoc(), () => {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
             dev().error(TAG, 'preconnect without ownerDocument');
@@ -628,7 +615,8 @@ function createBaseCustomElementClass(win) {
           this.toggleLoading(true);
         } else if (
           layoutBox.top < PREPARE_LOADING_THRESHOLD &&
-          layoutBox.top >= 0
+          layoutBox.top >= 0 &&
+          !this.loadingContainer_
         ) {
           // Few top elements will also be pre-initialized with a loading
           // element.
@@ -1024,6 +1012,15 @@ function createBaseCustomElementClass(win) {
      */
     prerenderAllowed() {
       return this.implementation_.prerenderAllowed();
+    }
+
+    /**
+     * Whether the element has render-blocking service.
+     * @return {boolean}
+     * @final
+     */
+    isBuildRenderBlocking() {
+      return this.implementation_.isBuildRenderBlocking();
     }
 
     /**
@@ -1663,7 +1660,6 @@ function createBaseCustomElementClass(win) {
         this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         this.loadingDisabled_ ||
         !isLoadingAllowed(this) ||
-        isTooSmallForLoader(this) ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
       ) {
@@ -1702,21 +1698,12 @@ function createBaseCustomElementClass(win) {
         const container = htmlFor(/** @type {!Document} */ (doc))`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
-
-        let loadingElement;
-        if (isNewLoaderExperimentEnabled(this)) {
-          loadingElement = createNewLoaderElement(
-            devAssert(this.ampdoc_),
-            this,
-            this.layoutWidth_,
-            this.layoutHeight_
-          );
-        } else {
-          loadingElement = createLegacyLoaderElement(
-            /** @type {!Document} */ (doc),
-            this.elementName()
-          );
-        }
+        const loadingElement = createLoaderElement(
+          this.getAmpDoc(),
+          this,
+          this.layoutWidth_,
+          this.layoutHeight_
+        );
 
         container.appendChild(loadingElement);
 
@@ -1917,20 +1904,6 @@ function isInternalOrServiceNode(node) {
     return true;
   }
   return false;
-}
-
-/**
- * Whether element size is too small to show loader.
- * @param {!Element} element
- * @return {boolean}
- */
-function isTooSmallForLoader(element) {
-  // New loaders experiments has its own sizing heuristics
-  if (isNewLoaderExperimentEnabled(element)) {
-    return false;
-  }
-
-  return element.layoutWidth_ < MIN_WIDTH_FOR_LOADING;
 }
 
 /**

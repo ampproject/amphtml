@@ -286,6 +286,7 @@ class AmpImaVideo extends AMP.BaseElement {
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
       this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
+      this.element.dispatchCustomEvent(VideoEvents.LOADEDMETADATA);
       return;
     }
     if (videoEvent == 'fullscreenchange') {

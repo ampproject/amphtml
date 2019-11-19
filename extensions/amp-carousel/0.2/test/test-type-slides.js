@@ -16,6 +16,7 @@
 
 import '../amp-carousel';
 import {ActionTrust} from '../../../../src/action-constants';
+import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -30,7 +31,7 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
-  const event = await listenOncePromise(el, 'indexchange');
+  const event = await listenOncePromise(el, CarouselEvents.INDEX_CHANGE);
   await el.implementation_.mutateElement(() => {});
   await el.implementation_.mutateElement(() => {});
 
@@ -197,6 +198,27 @@ describes.realWin(
         expect(getNextButton(carousel).getAttribute('aria-disabled')).to.equal(
           'true'
         );
+      });
+    });
+
+    describe('slideChange event', () => {
+      it('should not dispatch on initial render', async () => {
+        const eventSpy = sandbox.spy();
+        container.addEventListener('slideChange', eventSpy);
+        await getCarousel({loop: false});
+
+        expect(eventSpy).to.have.not.been.called;
+      });
+
+      it('should dispatch when changing slides', async () => {
+        const eventSpy = sandbox.spy();
+        container.addEventListener('slideChange', eventSpy);
+        const carousel = await getCarousel({loop: false});
+
+        carousel.implementation_.interactionNext();
+        await afterIndexUpdate(carousel);
+
+        expect(eventSpy).to.have.been.calledOnce;
       });
     });
 

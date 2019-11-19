@@ -175,4 +175,104 @@ router.get('/infinite-scroll-state', function(req, res) {
   res.json(results);
 });
 
+router.get('/ecommerce-nested-menu', function(req, res) {
+  res.json({
+    'menu': [
+      {
+        'title': 'Clothing, Shoes, Jewelry \u0026 Watches',
+        'image': 'https://picsum.photos/id/535/367/267',
+        'content': [
+          {
+            'title': 'Clothing, Shoes, Jewelry \u0026 Watches',
+            'content': [
+              'Women',
+              'Men',
+              'Girls',
+              'Boys',
+              'Baby',
+              'Luggage',
+              'Accessories',
+            ],
+          },
+          {'title': 'More to Explore', 'content': ['Our Brands']},
+        ],
+      },
+      {
+        'title': 'Movies, Music \u0026 Games',
+        'image': 'https://picsum.photos/id/452/367/267',
+        'content': [
+          {
+            'title': 'Movies, Music \u0026 Games',
+            'content': [
+              'Movies \u0026 TV',
+              'Blue-ray',
+              'CDs \u0026 Vinyl',
+              'Digital Music',
+              'Video Games',
+              'Headphones',
+              'Musical Instruments',
+              'Entertainment Collectibles',
+            ],
+          },
+        ],
+      },
+      {
+        'title': 'Sports \u0026 Outdoors',
+        'image': 'https://picsum.photos/id/469/367/267',
+        'content': [
+          {
+            'title': 'Sports',
+            'content': [
+              'Athletic Clothing',
+              'Exercise \u0026 Fitness',
+              'Hunting \u0026 Fishing',
+              'Team Sports',
+              'Sports Collectibles',
+            ],
+          },
+          {
+            'title': 'Outdoors',
+            'content': [
+              'Camping \u0026 Hiking',
+              'Cycling',
+              'Outdoor Clothing',
+              'Climbing',
+              'Accessories',
+            ],
+          },
+        ],
+      },
+      {
+        'title': 'Home, Garden \u0026 Tools',
+        'image': 'https://picsum.photos/id/491/367/267',
+        'content': [
+          {
+            'title': 'Home, Garden \u0026 Pets',
+            'content': [
+              'Furniture',
+              'Kitchen \u0026 Dining',
+              'Bed \u0026 Bath',
+              'Garden \u0026 Outdoor',
+              'Mattresses',
+              'Lighting',
+              'Appliances',
+              'Pet Supplies',
+            ],
+          },
+          {
+            'title': 'Tools, Home Improvement',
+            'content': [
+              'Home Improvment',
+              'Power \u0026 Hand Tools',
+              'Cookware',
+              'Hardware',
+              'Smart Home',
+            ],
+          },
+        ],
+      },
+    ],
+  });
+});
+
 module.exports = router;

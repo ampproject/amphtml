@@ -96,7 +96,7 @@ describes.sandboxed('Extension Location', {}, () => {
         true
       );
       expect(script).to.equal(
-        'http://localhost:8000/dist/rtv/123/sp/v0/no-version.js'
+        'http://localhost:8000/dist/rtv/123/v0/no-version.js'
       );
     });
   });
@@ -165,7 +165,7 @@ describes.sandboxed('Extension Location', {}, () => {
         /* isLocalDev */ false,
         /* opt_rtv */ true
       );
-      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/sp/ww.js');
+      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/ww.js');
     });
   });
 

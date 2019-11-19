@@ -74,9 +74,7 @@ function createContainer(global, data) {
 
   setStyles(container, {
     width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'block',
   });
 
   return container;
