@@ -2,12 +2,10 @@
 // https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
 
 {
-  rules: [
-    {
-      owners: [
-        {name: 'dvoytenko'},
-        {name: 'jpettitt'),
-      ],
-    },
-  ],
+  rules: [{
+    owners: [
+      {name: 'dvoytenko'},
+      {name: 'jpettitt'},
+    ],
+  }],
 }
