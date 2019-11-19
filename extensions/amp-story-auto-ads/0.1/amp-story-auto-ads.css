@@ -76,6 +76,7 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   z-index: 1 !important;
 }
 
+/* TODO(ccordry): refactor centering logic in amp-ad.css and remove this hack.  */
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
 amp-ad[type="adsense"] > iframe {
   top: 0 !important;
