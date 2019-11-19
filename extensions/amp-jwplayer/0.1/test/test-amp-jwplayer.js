@@ -109,19 +109,6 @@ describes.realWin(
         'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true'
       );
     });
-    it('renders with a playlist and contextual, backfill parameters', async () => {
-      const jw = await getjwplayer({
-        'data-playlist-id': '482jsTAr',
-        'data-player-id': 'sDZEo0ea',
-        'data-content-backfill': true,
-      });
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?backfill=true'
-      );
-    });
     it('fails if no media is specified', () => {
       return allowConsoleError(() => {
         return getjwplayer({
