@@ -4,10 +4,9 @@ The `APPROVERS.json` file is a listing of compiled AMP runtime and extensions
 files. Each rule has two parts:
 
 - `approvers`: list of GitHub project teams, members of which are allowed to
-  approve pull requests that increase the file's bundle size (Brotli-compressed
-  size)
-- `threshold`: number of KBs that the file can increase before requiring an
-  approval from the above team members.
+  approve pull requests that fail the check
+- `threshold`: number of KBs that the file bundle size (Brotli-compressed size)
+  can increase before failing the check
 
 Approval from any single member of any of the file's approval-teams is enough to
 satisfy the check.
