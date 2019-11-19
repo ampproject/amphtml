@@ -175,7 +175,7 @@ export class PooolVendor {
    * @private
    */
   renderPoool_() {
-    const pooolContainer = this.ampdoc.win.document.getElementById('poool');
+    const pooolContainer = this.ampdoc.getElementById('poool');
     const urlPromise = this.accessSource_.buildUrl(
       addParamsToUrl(
         this.iframeUrl_,
@@ -208,12 +208,12 @@ export class PooolVendor {
    * @private
    */
   onRelease_() {
-    const articlePreview = this.ampdoc.win.document.querySelector(
+    const articlePreview = this.ampdoc.getRootNode().querySelector(
       '[poool-access-preview]'
     );
     articlePreview.setAttribute('amp-access-hide', '');
 
-    const articleContent = this.ampdoc.win.document.querySelector(
+    const articleContent = this.ampdoc.getRootNode().querySelector(
       '[poool-access-content]'
     );
     articleContent.removeAttribute('amp-access-hide');
