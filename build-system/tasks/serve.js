@@ -15,11 +15,11 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const connect = require('gulp-connect');
 const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
+const minimist = require('minimist');
 const morgan = require('morgan');
 const watch = require('gulp-watch');
 const {
@@ -30,31 +30,19 @@ const {
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
-const {getServeMode} = require('../server/app-utils');
+const {logServeMode, setServeMode} = require('../server/app-utils');
 
-// Used for logging during server start / stop.
-let url = '';
+const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
+// Used for logging.
+let url = null;
+let quiet = !!argv.quiet;
+
+// Used for live reload.
 const serverFiles = globby.sync(['build-system/server/**']);
 
-/**
- * Logs the server's mode (based on command line arguments).
- */
-function logServeMode() {
-  switch (getServeMode()) {
-    case 'compiled':
-      log(green('Serving'), cyan('minified'), green('JS'));
-      break;
-    case 'cdn':
-      log(green('Serving'), cyan('current prod'), green('JS'));
-      break;
-    case 'rtv':
-      log(green('Serving JS from RTV'), cyan(`${argv.rtv}`));
-      break;
-    default:
-      log(green('Serving'), cyan('unminified'), green('JS'));
-  }
-}
+// Used to enable / disable lazy building.
+let lazyBuild = false;
 
 /**
  * Returns a list of middleware handler functions to use while serving
@@ -62,13 +50,13 @@ function logServeMode() {
  */
 function getMiddleware() {
   const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
-  if (!argv.quiet) {
+  if (!quiet) {
     middleware.push(morgan('dev'));
   }
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
   }
-  if (!argv._.includes('serve')) {
+  if (lazyBuild) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
   }
@@ -77,13 +65,28 @@ function getMiddleware() {
 
 /**
  * Launches a server and waits for it to fully start up
- * @param {?Object} extraOptions
+ *
+ * @param {?Object} connectOptions
+ * @param {?Object} serverOptions
+ * @param {?Object} modeOptions
  */
-async function startServer(extraOptions = {}) {
+async function startServer(
+  connectOptions = {},
+  serverOptions = {},
+  modeOptions = {}
+) {
+  if (serverOptions.lazyBuild) {
+    lazyBuild = serverOptions.lazyBuild;
+  }
+  if (serverOptions.quiet) {
+    quiet = serverOptions.quiet;
+  }
+
   let started;
   const startedPromise = new Promise(resolve => {
     started = resolve;
   });
+  setServeMode(modeOptions);
   const options = Object.assign(
     {
       name: 'AMP Dev Server',
@@ -95,12 +98,13 @@ async function startServer(extraOptions = {}) {
       silent: true,
       middleware: getMiddleware,
     },
-    extraOptions
+    connectOptions
   );
   connect.server(options, started);
   await startedPromise;
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
+  logServeMode();
 }
 
 /**
@@ -117,8 +121,11 @@ function resetServerFiles() {
  * Stops the currently running server
  */
 function stopServer() {
-  connect.serverClose();
-  log(green('Stopped server at'), cyan(url));
+  if (url) {
+    connect.serverClose();
+    log(green('Stopped server at'), cyan(url));
+    url = null;
+  }
 }
 
 /**
@@ -134,25 +141,33 @@ function restartServer() {
  * Performs pre-build steps requested via command line args.
  */
 async function performPreBuildSteps() {
-  if (!argv._.includes('serve')) {
-    await preBuildRuntimeFiles();
-    await preBuildExtensions();
-  }
+  await preBuildRuntimeFiles();
+  await preBuildExtensions();
+}
+
+/**
+ * Entry point of the `gulp serve` task.
+ */
+async function serve() {
+  await doServe();
 }
 
 /**
  * Starts a webserver at the repository root to serve built files.
+ * @param {boolean=} lazyBuild
  */
-async function serve() {
+async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  logServeMode();
   watch(serverFiles, restartServer);
-  await startServer();
-  await performPreBuildSteps();
+  await startServer({}, {lazyBuild}, {});
+  if (lazyBuild) {
+    await performPreBuildSteps();
+  }
 }
 
 module.exports = {
   serve,
+  doServe,
   startServer,
   stopServer,
 };

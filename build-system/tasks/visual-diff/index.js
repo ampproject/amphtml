@@ -21,7 +21,10 @@ const fs = require('fs');
 const JSON5 = require('json5');
 const path = require('path');
 const sleep = require('sleep-promise');
-const tryConnect = require('try-net-connect');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../../common/ctrlcHandler');
 const {
   escapeHtml,
   log,
@@ -37,6 +40,7 @@ const {
 } = require('../../common/git');
 const {execOrDie, execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
+const {startServer, stopServer} = require('../serve');
 
 // optional dependencies for local development (outside of visual diff tests)
 let puppeteer;
@@ -49,7 +53,6 @@ const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
-const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 30000;
 const MAX_PARALLEL_TABS = 5;
 const WAIT_FOR_TABS_MS = 1000;
@@ -77,7 +80,6 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
 );
 
 let browser_;
-let webServerProcess_;
 let percyAgentProcess_;
 
 /**
@@ -137,49 +139,14 @@ async function launchPercyAgent() {
 }
 
 /**
- * Launches a background AMP webserver for unminified js using gulp.
- *
- * Waits until the server is up and reachable, and ties its lifecycle to this
- * process's lifecycle.
- *
- * @return {!Promise} a Promise that resolves when the web server is launched
- *     and reachable.
+ * Launches an AMP webserver for minified js.
  */
 async function launchWebServer() {
-  const stdio = argv.webserver_debug
-    ? ['ignore', process.stdout, process.stderr]
-    : 'ignore';
-  webServerProcess_ = execScriptAsync(
-    `gulp serve --compiled --host ${HOST} --port ${PORT}`,
-    {stdio}
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.webserver_debug},
+    {compiled: true}
   );
-
-  webServerProcess_.on('close', code => {
-    code = code || 0;
-    if (code != 0) {
-      log(
-        'fatal',
-        colors.cyan("'serve'"),
-        `errored with code ${code}. Cannot continue with visual diff tests`
-      );
-    }
-  });
-
-  let resolver, rejecter;
-  const deferred = new Promise((resolverIn, rejecterIn) => {
-    resolver = resolverIn;
-    rejecter = rejecterIn;
-  });
-  tryConnect({
-    host: HOST,
-    port: PORT,
-    retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
-  })
-    .on('connected', () => {
-      return resolver(webServerProcess_);
-    })
-    .on('timeout', rejecter);
-  return deferred;
 }
 
 /**
@@ -705,6 +672,7 @@ async function createEmptyBuild() {
  * @return {!Promise}
  */
 async function visualDiff() {
+  const handlerProcess = createCtrlcHandler('visual-diff');
   ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
   setupCleanup_();
@@ -717,7 +685,8 @@ async function visualDiff() {
   }
 
   await performVisualTests();
-  return await cleanup_();
+  await cleanup_();
+  exitCtrlcHandler(handlerProcess);
 }
 
 /**
@@ -808,29 +777,27 @@ function setupCleanup_() {
   process.on('unhandledRejection', cleanup_);
 }
 
+async function exitPercyAgent_() {
+  if (percyAgentProcess_ && !percyAgentProcess_.killed) {
+    let resolver;
+    const percyAgentExited_ = new Promise(resolverIn => {
+      resolver = resolverIn;
+    });
+    percyAgentProcess_.on('exit', () => {
+      resolver();
+    });
+    // Explicitly exit the process by "Ctrl+C"-ing it.
+    await percyAgentProcess_.kill('SIGINT');
+    await percyAgentExited_;
+  }
+}
+
 async function cleanup_() {
   if (browser_) {
     await browser_.close();
   }
-
-  const processesExited = [];
-  for (const subprocess of [percyAgentProcess_, webServerProcess_]) {
-    if (subprocess && !subprocess.killed) {
-      let resolver;
-      processesExited.push(
-        new Promise(resolverIn => {
-          resolver = resolverIn;
-        })
-      );
-      subprocess.on('exit', () => {
-        resolver();
-      });
-
-      // Explicitly exit the processes by "Ctrl+C"-ing them.
-      await subprocess.kill('SIGINT');
-    }
-    await Promise.all(processesExited);
-  }
+  stopServer();
+  await exitPercyAgent_();
 }
 
 module.exports = {
