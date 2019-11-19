@@ -355,6 +355,7 @@ Our response headers would be:
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: https://example-com.cdn.ampproject.org
 ```
+
 ## Working with cached fonts
 
 Google AMP Cache caches AMP HTML documents, images and fonts to optimize the speed of the AMP page.
@@ -392,6 +393,7 @@ function assertFontCors(req, res, opt_validMethods, opt_exposeHeaders) {
   }
 }
 ```
+
 As an example, if you wanted to load /some/font.ttf in https://example.com/amp.html, the origin server should respond with the Access-Control-Allow-Origin header as below.
 
 <amp-img alt="CORS font example" layout="responsive" src="https://amp.dev/static/img/docs/cors-font.jpg" width="2268" height="1594">
