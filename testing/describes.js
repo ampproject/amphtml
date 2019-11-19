@@ -110,6 +110,7 @@ import {maybeTrackImpression} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
 import fetchMock from 'fetch-mock';
+import sinon from 'sinon'; // eslint-disable-line local/no-import
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -417,7 +418,7 @@ class SandboxFixture {
 
   /** @override */
   setup(env) {
-    env.sandbox = sinon.createSandbox(); // eslint-disable-line no-undef
+    env.sandbox = sinon.createSandbox();
     env.sandbox.defineProperty = this.defineProperty_.bind(this);
     env.sandbox.deleteProperty = (obj, propertyKey) => {
       this.defineProperty_(obj, propertyKey, undefined);
