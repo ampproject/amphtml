@@ -58,12 +58,10 @@ limitations under the License.
 
 <!--
   If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple code samples.
+  formats, include and filter multiple content blocks and code samples.
 -->
 
-[filter formats=“websites”]
-
-[example preview=“inline” playground=“true” imports=“amp-component-name”]
+[filter formats=“websites”][example preview=“inline” playground=“true” imports=“amp-component-name”]
 
 ```html
 <amp-component-name required-attribute>
@@ -72,6 +70,11 @@ limitations under the License.
 ```
 
 [/example][/filter]
+
+<!--
+  * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
+  * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
+ -->
 
 [filter formats=“ads”][example preview=“inline” playground=“true” imports=“amp-component-name”]
 
@@ -85,30 +88,16 @@ limitations under the License.
 
 ## Usage
 
-One to three paragraph explaining the component usage.
+One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
 
-List important functionality.
-
-Explain why developers care about it.
-
-### Common thing users need to know to do for ads
-
-Explanation of how to do this thing
-
-[example preview=“inline” playground=“true” imports=“amp-component-name”]
-
-```html
-Code sample of this usage
-```
-
-[/example]
-
-### Behavior users should be aware of
+### Behavior users should be aware of (optional)
 
 What to do if they want behavior. How to work around it.
 
 ```html
-Code sample of behavior or behavior workaround.
+<amp-component-name required-attribute>
+  Code sample of behavior or behavior workaround.
+</amp-component-name>
 ```
 
 ### Behavior restrictions
@@ -121,8 +110,8 @@ What is allowed, what isn't.
 
 Description of attribute. Use cases for this attribute.
 
-- attribute-value-option-one (default): attribute-option-one-value does this to amp-component-name.
-- attribute-value-option-two: attribute-option-two-value does this to amp-component-name.
+- `attribute-value-option-one` (default): `attribute-option-one-value` does this to amp-component-name.
+- `attribute-value-option-two`: `attribute-option-two-value` does this to amp-component-name.
 
 [example preview=”top-frame” playground=”true”]
 
@@ -151,9 +140,9 @@ Description of attribute. Use cases for this attribute.
   </tr>
 </table>
 
-### optional-attribute-name (optional)
+### `optional-attribute-name` (optional)
 
-Here, I write what optional-attribute-name will do to amp-component-name.
+Here, I write what `optional-attribute-name` will do to amp-component-name.
 
 [example preview=”top-frame” playground=”true”]
 
@@ -171,11 +160,11 @@ Here, I write what optional-attribute-name will do to amp-component-name.
 
 [/example]
 
-Actions
+## Actions(optional)
 
 ### action-name
 
-Description of action. Use cases of action-name. Include all the nuances, such as: amp-component-name needs to be identified with an `id` to work.
+Description of action. Use cases of `action-name`. Include all the nuances, such as: amp-component-name needs to be identified with an `id` to work.
 
 [example preview=”top-frame” playground=”true”]
 
@@ -195,7 +184,7 @@ Description of action. Use cases of action-name. Include all the nuances, such a
 
 [/example]
 
-## Events
+## Events (optional)
 
 ### event-name
 
@@ -220,7 +209,7 @@ Description of event. Use cases of event-name. Include all the nuances, such as:
 
 [/example]
 
-## Styling
+## Styling (optional)
 
 Explain how to style the element.
 
@@ -247,7 +236,7 @@ Explain how to style the element.
 
 [/example]
 
-## Analytics (if applicable)
+## Analytics (optional)
 
 Explain analytics.
 
@@ -255,7 +244,7 @@ Explain analytics.
 "configuration": {}
 ```
 
-## Accessibility
+## Accessibility (optional)
 
 Accessibility information related to `amp-component-name`.
 
