@@ -1,27 +1,19 @@
-<!--
-  1. Change "category" below to one of:
-       ads-analytics
-       dynamic-content
-       layout
-       media
-       presentation
-       social
-  2. Remove any of the "formats" that don't apply.
-     You can also add the "ads" and "stories" formats if they apply.
-  3. And remove this comment! (no empty lines before "---")
--->
-
 ---
-
-\$category: presentation
+\$category@: presentation
 formats:
-
-- websites
-- email
-  teaser:
-  text: FILL THIS IN.
-
+  - websites
+  - email
+teaser:
+  text: Fill this in with teaser text to improve SEO.
 ---
+
+<!--
+  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
+  and improves SEO.
+  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
+  * List applicable format(s): websites, ads, stories, email
+  * Remove this comment!
+-->
 
 <!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
@@ -64,20 +56,121 @@ limitations under the License.
   </tr>
 </table>
 
-## Behavior
+<!--
+  If the component is relevant for more than one format and operates differently between these
+  formats, include and filter multiple content blocks and code samples.
+-->
 
-FILL THIS IN. What does this extension do?
+[filter formats=“websites”]
+
+Below is an example for websites.
+
+[example preview="inline" playground="true" imports="amp-component-name"]
+
+```html
+<amp-component-name required-attribute>
+  I am a hello world inline executable code sample for websites!
+</amp-component-name>
+```
+
+[/example][/filter]
+
+<!--
+  * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
+  * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
+ -->
+
+[filter formats=“ads”]
+
+Below is an example for ads.
+
+[example preview=“inline” playground=“true” imports="amp-component-name"]
+
+```html
+<amp-component-name required-attribute>
+  I am a hello world inline executable code sample for ads!
+</amp-component-name>
+```
+
+[/example][/filter]
+
+## Usage
+
+One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
+
+### Behavior users should be aware of (optional)
+
+What to do if they want behavior. How to work around it.
+
+```html
+<amp-component-name required-attribute>
+  Code sample of behavior or behavior workaround.
+</amp-component-name>
+```
+
+### Behavior restrictions
+
+What is allowed, what isn't.
 
 ## Attributes
 
-FILL THIS IN. Does this extension allow for properties to configure?
+### attribute-name
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-my-attribute</strong></td>
-    <td>FILL THIS IN. This table <strong>must</strong> be written in HTML.</td>
-  </tr>
-</table>
+Description of attribute. Use cases for this attribute.
+
+- `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-component-name`.
+- `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-component-name`.
+
+### `optional-attribute-name` (optional)
+
+Here, I write what `optional-attribute-name` will do to `amp-component-name`.
+
+## Actions (optional)
+
+### action-name
+
+Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-component-name` needs to be identified with an `id` to work.
+
+## Events (optional)
+
+### event-name
+
+Description of event. Use cases of event-name. Include all the nuances, such as: `amp-component-name` needs to be identified with an `id` to work.
+
+[example preview=”top-frame” playground=”true”]
+
+```html
+<head>
+     <amp-component-name script tag>
+</head>
+<body>
+     <amp-component-name required-attribute
+       on="event-name: my-button.show">
+          Hello World!
+     </amp-component-name>
+     <button id="my-button" hidden>
+         Here I am!
+    </button>
+</body>
+```
+
+[/example]
+
+## Styling (optional)
+
+Explain how to style the element.
+
+## Analytics (optional)
+
+Explain analytics.
+
+```html
+"configuration": {}
+```
+
+## Accessibility (optional)
+
+Accessibility information related to `amp-component-name`.
 
 ## Validation
 
