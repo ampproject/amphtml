@@ -96,7 +96,7 @@ export class SsrTemplateHelper {
    * If SSR is supported, data is assumed to be from ssr() above.
    * @param {!Element} element
    * @param {(?JsonObject|string|undefined|!Array)} data
-   * @return {!Promise}
+   * @return {!Promise<!Element>}
    */
   applySsrOrCsrTemplate(element, data) {
     let renderTemplatePromise;
@@ -107,7 +107,7 @@ export class SsrTemplateHelper {
       );
       renderTemplatePromise = this.viewer_.isTrustedViewer().then(trusted => {
         userAssert(trusted, 'May only ssr from trusted viewers');
-        this.templates_.findAndSetHtmlForTemplate(
+        return this.templates_.findAndSetHtmlForTemplate(
           element,
           /** @type {string} */ (data['html'])
         );

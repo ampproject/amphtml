@@ -156,13 +156,20 @@ describes.fakeWin(
 
       describe('applySsrOrCsrTemplate', () => {
         it('should set html template', () => {
+          // Not a real document element. This variable is used to ensure the
+          // value returned by findAndSetHtmlForTemplate is returned by
+          // applySsrOrCsrTemplate.
+          const element = {};
+          findAndSetHtmlForTemplate.returns(element);
+
           return ssrTemplateHelper
             .applySsrOrCsrTemplate({}, {html: '<div>some template</div>'})
-            .then(() => {
+            .then(renderedHTML => {
               expect(findAndSetHtmlForTemplate).to.have.been.calledWith(
                 {},
                 '<div>some template</div>'
               );
+              expect(renderedHTML).to.equal(element);
             });
         });
 
