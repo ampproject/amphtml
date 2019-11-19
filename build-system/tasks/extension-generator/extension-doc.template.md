@@ -61,7 +61,11 @@ limitations under the License.
   formats, include and filter multiple content blocks and code samples.
 -->
 
-[filter formats=“websites”][example preview=“inline” playground=“true” imports=“amp-component-name”]
+[filter formats=“websites”]
+
+Below is an example for websites.
+
+[example preview="inline" playground="true" imports="amp-component-name"]
 
 ```html
 <amp-component-name required-attribute>
@@ -76,7 +80,11 @@ limitations under the License.
   * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
  -->
 
-[filter formats=“ads”][example preview=“inline” playground=“true” imports=“amp-component-name”]
+[filter formats=“ads”]
+
+Below is an example for ads.
+
+[example preview=“inline” playground=“true” imports="amp-component-name"]
 
 ```html
 <amp-component-name required-attribute>
@@ -110,24 +118,24 @@ What is allowed, what isn't.
 
 Description of attribute. Use cases for this attribute.
 
-- `attribute-value-option-one` (default): `attribute-option-one-value` does this to amp-component-name.
-- `attribute-value-option-two`: `attribute-option-two-value` does this to amp-component-name.
+- `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-component-name`.
+- `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-component-name`.
 
 ### `optional-attribute-name` (optional)
 
-Here, I write what `optional-attribute-name` will do to amp-component-name.
+Here, I write what `optional-attribute-name` will do to `amp-component-name`.
 
-## Actions(optional)
+## Actions (optional)
 
 ### action-name
 
-Description of action. Use cases of `action-name`. Include all the nuances, such as: amp-component-name needs to be identified with an `id` to work.
+Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-component-name` needs to be identified with an `id` to work.
 
 ## Events (optional)
 
 ### event-name
 
-Description of event. Use cases of event-name. Include all the nuances, such as: amp-component-name needs to be identified with an `id` to work.
+Description of event. Use cases of event-name. Include all the nuances, such as: `amp-component-name` needs to be identified with an `id` to work.
 
 [example preview=”top-frame” playground=”true”]
 
