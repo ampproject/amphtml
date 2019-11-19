@@ -53,7 +53,14 @@ const ActionIcon = {
 /** @private @const {number} */
 const TOOLTIP_CLOSE_ANIMATION_MS = 100;
 
-/** @private @const {number} */
+/**
+ * Since we don't know the actual width of the content inside the iframe
+ * and in responsive environments the iframe takes the whole width, we
+ * hardcode a limit based on what we know of how the embed behaves (only true
+ * for Twitter embeds). See #22334.
+ * @const {number}
+ * @private
+ */
 const MAX_EMBED_WIDTH_PX = 500;
 
 /**
@@ -209,8 +216,7 @@ function updateEmbedStyleEl(embedStyleEl, embedData) {
   embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"] {
       width: ${px(embedData.width)} !important;
       transform: ${embedData.transform} !important;
-      margin-left: ${embedData.horizontalMargin}px !important;
-      margin-right: ${embedData.horizontalMargin}px !important;
+      margin: 0 ${embedData.horizontalMargin}px !important;
       }`;
 }
 
@@ -788,7 +794,7 @@ export class AmpStoryEmbeddedComponent {
         // TODO(#20832): Store DOMRect for the page in the store to avoid
         // having to call getBoundingClientRect().
         const pageRect = this.componentPage_./*OK*/ getBoundingClientRect();
-        const realHeight = target.scrollHeight;
+        const realHeight = target./*OK*/ offsetHeight;
         const maxHeight = pageRect.height - VERTICAL_PADDING;
         state.scaleFactor = 1;
         if (realHeight > maxHeight) {
@@ -860,13 +866,9 @@ export class AmpStoryEmbeddedComponent {
 
         // If screen is very wide and story has supports-landscape attribute,
         // we don't want it to take the whole width. We take the maximum width
-        // that the embed can actually take instead.
+        // that the embed can actually use instead.
         state.newWidth = Math.min(pageRect.width, MAX_EMBED_WIDTH_PX);
 
-        // Since we don't know the actual width of the content inside the iframe
-        // and in responsive environments the iframe takes the whole width. We
-        // hardcode a limit based on how we know the content behaves. See
-        // #22334.
         state.scaleFactor =
           Math.min(elRect.width, MAX_EMBED_WIDTH_PX) / state.newWidth;
 
