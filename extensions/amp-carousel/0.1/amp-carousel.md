@@ -61,9 +61,9 @@ The carousel advances between items if the user swipes or clicks an optional nav
 [example preview="inline" playground="true" imports="amp-carousel"]
 
 ```html
-+<amp-carousel width="450" height="300" layout="responsive" type="slides">
-+  <amp-img
-+    src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+<amp-carousel width="450" height="300" layout="responsive" type="slides">
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
     height="300"
   ></amp-img>
