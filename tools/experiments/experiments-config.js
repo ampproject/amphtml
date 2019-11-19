@@ -68,7 +68,7 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
   },
   {
-    id: 'amp-consent-ccpa',
+    id: 'amp-consent-geo-override',
     name: 'AMP consent modified to support CCPA',
     spec:
       'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
