@@ -53,6 +53,9 @@ const ActionIcon = {
 /** @private @const {number} */
 const TOOLTIP_CLOSE_ANIMATION_MS = 100;
 
+/** @private @const {number} */
+const MAX_EMBED_WIDTH_PX = 500;
+
 /**
  * Components that can be expanded.
  * @const {!Object}
@@ -205,10 +208,9 @@ function updateEmbedStyleEl(embedStyleEl, embedData) {
 
   embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"] {
       width: ${px(embedData.width)} !important;
-      height: ${px(embedData.height)} !important;
       transform: ${embedData.transform} !important;
-      margin: ${embedData.verticalMargin}px ${embedData.horizontalMargin}px
-          !important;
+      margin-left: ${embedData.horizontalMargin}px !important;
+      margin-right: ${embedData.horizontalMargin}px !important;
       }`;
 }
 
@@ -786,6 +788,12 @@ export class AmpStoryEmbeddedComponent {
         // TODO(#20832): Store DOMRect for the page in the store to avoid
         // having to call getBoundingClientRect().
         const pageRect = this.componentPage_./*OK*/ getBoundingClientRect();
+        const realHeight = target.scrollHeight;
+        const maxHeight = pageRect.height - VERTICAL_PADDING;
+        state.scaleFactor = 1;
+        if (realHeight > maxHeight) {
+          state.scaleFactor = maxHeight / realHeight;
+        }
 
         // Gap on the left of the element between full-screen size and
         // current size.
@@ -798,11 +806,12 @@ export class AmpStoryEmbeddedComponent {
 
         // Gap on the top of the element between full-screen size and
         // current size.
-        const topGap = (embedData.height - targetRect.height) / 2;
+        const topGap = (realHeight * state.scaleFactor - targetRect.height) / 2;
         // Distance from top of page to what will be the top of the element in
         // full-screen.
         const fullScreenTop = targetRect.top - topGap - pageRect.top;
-        const centeredTop = pageRect.height / 2 - embedData.height / 2;
+        const centeredTop =
+          pageRect.height / 2 - (realHeight * state.scaleFactor) / 2;
         state.translateY = centeredTop - fullScreenTop;
       },
       /** mutate */
@@ -810,7 +819,7 @@ export class AmpStoryEmbeddedComponent {
         target.classList.toggle('i-amphtml-expanded-component', true);
 
         embedData.transform = `translate3d(${state.translateX}px,
-            ${state.translateY}px, 0) scale(1)`;
+            ${state.translateY}px, 0) scale(${state.scaleFactor})`;
 
         updateEmbedStyleEl(embedStyleEl, embedData);
       }
@@ -849,21 +858,18 @@ export class AmpStoryEmbeddedComponent {
         const pageRect = pageEl./*OK*/ getBoundingClientRect();
         const elRect = element./*OK*/ getBoundingClientRect();
 
-        if (elRect.width >= elRect.height) {
-          state.newWidth = pageRect.width;
-          state.scaleFactor = elRect.width / state.newWidth;
-          state.newHeight = (elRect.height / elRect.width) * state.newWidth;
-        } else {
-          const maxHeight = pageRect.height - VERTICAL_PADDING;
-          state.newWidth = Math.min(
-            (elRect.width / elRect.height) * maxHeight,
-            pageRect.width
-          );
-          state.newHeight = (elRect.height / elRect.width) * state.newWidth;
-          state.scaleFactor = elRect.height / state.newHeight;
-        }
+        // If screen is very wide and story has supports-landscape attribute,
+        // we don't want it to take the whole width. We take the maximum width
+        // that the embed can actually take instead.
+        state.newWidth = Math.min(pageRect.width, MAX_EMBED_WIDTH_PX);
 
-        state.verticalMargin = -1 * ((state.newHeight - elRect.height) / 2);
+        // Since we don't know the actual width of the content inside the iframe
+        // and in responsive environments the iframe takes the whole width. We
+        // hardcode a limit based on how we know the content behaves. See
+        // #22334.
+        state.scaleFactor =
+          Math.min(elRect.width, MAX_EMBED_WIDTH_PX) / state.newWidth;
+
         state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
       },
       /** mutate */
@@ -886,10 +892,8 @@ export class AmpStoryEmbeddedComponent {
           {
             id: elId,
             width: state.newWidth,
-            height: state.newHeight,
             scaleFactor: state.scaleFactor,
             transform: `scale(${state.scaleFactor})`,
-            verticalMargin: state.verticalMargin,
             horizontalMargin: state.horizontalMargin,
           }
         );
