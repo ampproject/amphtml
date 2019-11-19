@@ -271,22 +271,24 @@ Here's a sample JavaScript function that we could use to handle CORS requests an
 
 ```javascript
 function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
-  const unauthorized = 'Unauthorized Request';
-  const allowedOrigins = [
+  var unauthorized = 'Unauthorized Request';
+  var origin;
+  var allowedOrigins = [
     'https://example.com',
     'https://example-com.cdn.ampproject.org',
     'https://example.com.amp.cloudflare.com',
     'https://cdn.ampproject.org',
   ];
-
-  let origin;
-  if (allowedOrigins.indexOf(req.headers.origin) != -1) {
-    // Check if the requesting CORS origin is in the allowed set.
+  var allowedSourceOrigin = 'https://example.com'; //publisher's origin
+  // If same origin
+  if (req.headers['amp-same-origin'] == 'true') {
+    origin = sourceOrigin;
+    // If allowed CORS origin & allowed source origin
+  } else if (
+    allowedOrigins.indexOf(req.headers.origin) != -1 &&
+    sourceOrigin == allowedSourceOrigin
+  ) {
     origin = req.headers.origin;
-  } else if (req.headers['amp-same-origin'] == 'true') {
-    // Check if same origin (only a same-origin request can set a
-    // custom header).
-    origin = req.protocol + '://' + req.headers.host;
   } else {
     res.statusCode = 403;
     res.end(JSON.stringify({message: unauthorized}));
@@ -353,6 +355,66 @@ Our response headers would be:
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: https://example-com.cdn.ampproject.org
 ```
+
+## Working with cached fonts
+
+Google AMP Cache caches AMP HTML documents, images and fonts to optimize the speed of the AMP page.
+While making the AMP page fast, we also want to be careful in securing the cached resources. We will be making a change in how AMP cache responds it’s cached resources,
+typically for fonts, by respecting the origin’s `Access-Control-Allow-Origin` value.
+
+### Past behavior (before October 2019)
+
+When an AMP page was loading `https://example.com/some/font.ttf` from `@font-face src` attribute, AMP Cache will cache the font file and serve the resource as below with having the wild card `Access-Control-Allow-Origin`.
+
+- URL `https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff`
+- Access-Control-Allow-Origin: \*
+
+### New behavior (October 2019 and after)
+
+While the current implementation is permissive, this could lead to unexpected use of the fonts from cross-origin sites. In this change AMP Cache will start to respond with the exact same `Access-Control-Allow-Origin` value the origin server responds.
+To properly load the fonts from the cached AMP document, you will need to accept the AMP Cache origin via the header.
+
+A sample implementation would be:
+
+```javascript
+function assertFontCors(req, res, opt_validMethods, opt_exposeHeaders) {
+  var unauthorized = 'Unauthorized Request';
+  var allowedOrigins = [
+    'https://example.com',
+    'https://example-com.cdn.ampproject.org',
+  ];
+  // If allowed CORS origin
+  if (allowedOrigins.indexOf(req.headers.origin) != -1) {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  } else {
+    res.statusCode = 403;
+    res.end(JSON.stringify({message: unauthorized}));
+    throw unauthorized;
+  }
+}
+```
+
+As an example, if you wanted to load /some/font.ttf in `https://example.com/amp.html`, the origin server should respond with the Access-Control-Allow-Origin header as below.
+
+<amp-img alt="CORS font example" layout="responsive" src="https://amp.dev/static/img/docs/cors-font.jpg" width="2268" height="1594">
+  <noscript>
+    <img alt="CORS font example" src="https://amp.dev/static/img/docs/cors-font.jpg" />
+  </noscript>
+</amp-img>
+
+[tip type="note]
+If your font file is okay to be accessible from any origin, you can respond with a wild card `Access-Control-Allow-Origin`, AMP cache will also echo that value meaning it will be responding with `Access-Control-Allow-Origin: *`. If you already have this setting, there is no need in changing anything.
+[/tip]
+
+We are planning to make this change around mid October 2019 and would expect every AMP publishers using self-hosted fonts to check if it’s affected.
+
+#### Roll out plan
+
+- 2019-09-30: release contains more precise control over which domains this change applies to. This build should roll out over the course of this week.
+- 2019-10-07: test domains will be enabled for manual testing.
+- 2019-10-14: (but depending on how testing goes): the feature will be rolled out generally.
+
+Follow the related [issue here.](https://github.com/ampproject/amphtml/issues/24834)
 
 ## Testing CORS in AMP
 
