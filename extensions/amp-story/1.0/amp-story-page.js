@@ -54,6 +54,7 @@ import {Services} from '../../../src/services';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {VideoUtils} from '../../../src/utils/video';
 import {
+  addAttributesToElement,
   childElement,
   closestAncestorElementBySelector,
   createElementWithAttributes,
@@ -128,6 +129,9 @@ const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
+
+/** @private @const {number} */
+const DEFAULT_AUTO_ADVANCE_DURATION = '7s';
 
 /**
  * @param {!Element} element
@@ -325,6 +329,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.maybeAutoplay_();
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
@@ -343,6 +348,33 @@ export class AmpStoryPage extends AMP.BaseElement {
       true /* callToInitialize */
     );
     this.setPageDescription_();
+  }
+
+  /** @private */
+  maybeAutoplay_() {
+    if (this.element.parentElement.hasAttribute('autoplay-story')) {
+      let autoPlayAfterAttr = DEFAULT_AUTO_ADVANCE_DURATION;
+
+      const ampVideoEl = this.element.querySelector('amp-video');
+      if (ampVideoEl) {
+        ampVideoEl.removeAttribute('loop');
+        ampVideoEl.getImpl().then(ampVid => {
+          ampVid.propagateAttributes(
+            'loop',
+            ampVideoEl.firstElementChild,
+            /* opt_removeMissingAttrs */ true
+          );
+        });
+        ampVideoEl.id = ampVideoEl.id || 'vid-' + this.element.id;
+        autoPlayAfterAttr = ampVideoEl.id;
+      }
+
+      addAttributesToElement(this.element, {
+        'auto-advance-after': autoPlayAfterAttr,
+      });
+
+      this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    }
   }
 
   /**
