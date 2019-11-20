@@ -71,7 +71,7 @@ If you also include an `<amp-user-notification>` element on the page, the UI ass
 
 ## Consent configuration
 
-The `<amp-consent>` element requires a JSON configuration object that specifies the extension's behavior. A `consents` object is required within the JSON object.
+The `<amp-consent>` element requires a JSON configuration object that specifies the extension's behavior.
 
 Example:
 
@@ -80,10 +80,17 @@ Example:
   <script type="application/json">
     {
       "consentInstanceId": "my-consent",
+      "consentRequired": "remote",
       "checkConsentHref": "https://example.com/api/check-consent",
-      "promptUI": "consent-ui"
+      "promptUI": "consent-ui",
+      "onUpdateHref": "https://example.com/update-consent",
     }
   </script>
+  <div id="consent-ui">
+    <button on="tap:consent-element.accept" role="button">Accept</button>
+    <button on="tap:consent-element.reject" role="button">Reject</button>
+    <button on="tap:consent-element.dismiss" role="button">Dismiss</button>
+  </div>
 </amp-consent>
 ```
 
@@ -177,8 +184,11 @@ Note that this value will be ignored if there is previous consent state stored i
 AMP sends the consent instance ID, a generated user id only for this usage and the consent state along with the POST request.
 
 ```html
-{ "consentInstanceId": "my-consent", "ampUserId": "xxx", "consentStateValue":
-"accepted"/"rejected"/"unknown", }
+{ 
+  "consentInstanceId": "my-consent",
+  "ampUserId": "xxx", 
+  "consentStateValue": "accepted"/"rejected"/"unknown"
+}
 ```
 
 #### promptUI
@@ -242,7 +252,7 @@ For users in `geoGroup1`, the merged config is
   "consentRequired": true,
 }
 ```
-The previous consent state is read from local cache as `checkConsentHref` is not specified. Consent will be collected via the specified prompt UI if cache is empty.
+Because `checkConsentHref` is not specified, both consent collection and storage are completely handled at client side. AMP will prompt the consent UI if and only if the client cache is empty.
 
 
 For users in `geoGroup2`, the merged config is
@@ -254,7 +264,7 @@ For users in `geoGroup2`, the merged config is
   "consentRequired": "remote",
 }
 ```
-If local cache is empty, AMP will wait for `checkConsentHref` response to decide whether a consent is required from the user. If the response contains `consentRequired: true` and `consentStateValue: unknown`, then AMP will collect consent via the specified prompt UI. If `consentStateValue` is 'accepted' or 'rejected', then it will use this value and also sync to cache.
+If client cache is empty, AMP will wait for `checkConsentHref` response to decide whether a consent is required from the user. If the response contains `consentRequired: true` and `consentStateValue: unknown`, then AMP will collect consent via the specified prompt UI. If `consentStateValue` is 'accepted' or 'rejected', then it will use this value and also sync to cache.
 
 
 For users in `geoGroupUnknown`, the merged config is
@@ -266,7 +276,7 @@ For users in `geoGroupUnknown`, the merged config is
   "consentRequired": true,
 }
 ```
-AMP will check local cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
+AMP will check client cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
 
 
 ## Consent Management
