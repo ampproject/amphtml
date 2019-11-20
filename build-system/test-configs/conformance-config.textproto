@@ -398,20 +398,3 @@ requirement: {
   value: 'DocumentType.prototype.after'
   value: 'CharacterData.prototype.after'
 }
-
-# Document: most of properties should be access via ampdoc for proper scoping.
-requirement: {
-  type: BANNED_PROPERTY
-  error_message: 'Use ampdoc instead'
-  value: 'Document.prototype.head'
-  whitelist: '3p/'
-  whitelist: 'ads/'
-  whitelist: 'src/service/ampdoc-impl.js'
-  whitelist: 'src/validator-integration.js'
-  whitelist: 'src/style-installer.js'
-  whitelist: 'src/shadow-embed.js'
-  whitelist: 'src/service/extensions-impl.js'
-  whitelist: 'src/preconnect.js'
-  whitelist: 'src/experiments.js'
-  whitelist: 'extensions/amp-install-serviceworker/0.1/amp-install-serviceworker.js'
-}
