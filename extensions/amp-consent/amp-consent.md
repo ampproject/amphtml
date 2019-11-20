@@ -79,12 +79,9 @@ Example:
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
     {
-      "consents": {
-        "my-consent": {
-          "checkConsentHref": "https://example.com/api/show-consent",
-          "promptUI": "consent-ui"
-        }
-      }
+      "consentInstanceId": "my-consent",
+      "checkConsentHref": "https://example.com/api/check-consent",
+      "promptUI": "consent-ui"
     }
   </script>
 </amp-consent>
@@ -94,7 +91,7 @@ Example:
 
 #### Consent instance ID
 
-Currently, the `consents` object only supports a single consent instance. A consent instance must have an ID specified within the `consents` object (in the example above, "my-consent" is the id). The consent instance ID is used to generate a key when storing the user consent state.
+`consentInstanceId`: The identifier of a consent configuration.
 
 #### checkConsentHref
 
