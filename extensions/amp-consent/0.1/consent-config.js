@@ -173,6 +173,7 @@ export class ConsentConfig {
       };
     }
 
+    // Then merge and validate config, taken care of in previous pr
     return config;
   }
 

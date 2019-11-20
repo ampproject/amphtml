@@ -431,20 +431,18 @@ export class AmpConsent extends AMP.BaseElement {
   getConsentRequiredPromise_() {
     let consentRequiredPromise = null;
     // Should I use feature flag here?
-    if (
-      this.consentConfig_['consentRequired'] === 'remote' &&
-      this.consentConfig_['checkConsentHref']
-    ) {
+    if (this.consentConfig_['consentRequired'] === 'remote') {
       this.getConsentRemote_().then(consentInfo => {
         const constentRequiredResponse = consentInfo['consentRequired'];
-        const consentStateValueResponse = getConsentStateForValue(
-          consentInfo['consentStateValue']
+
+        userAssert(
+          constentRequiredResponse === true ||
+            constentRequiredResponse === false,
+          'consentRequired from endpoint must be true or false'
         );
+
         consentRequiredPromise =
-          constentRequiredResponse === true &&
-          consentStateValueResponse === CONSENT_ITEM_STATE.UNKNOWN
-            ? true
-            : false;
+          constentRequiredResponse === false ? false : true;
       });
     } else {
       consentRequiredPromise = this.consentConfig_['consentRequired'];
