@@ -28,16 +28,16 @@ const {
   gitCommitHash,
   gitTravisMasterBaseline,
   shortSha,
-} = require('../common/git');
+} = require('../../common/git');
 const {
   isTravisPullRequestBuild,
   isTravisPushBuild,
   travisPushBranch,
   travisRepoSlug,
-} = require('../common/travis');
+} = require('../../common/travis');
 const {
   VERSION: internalRuntimeVersion,
-} = require('../compile/internal-version');
+} = require('../../compile/internal-version');
 const {cyan, green, red, yellow} = require('ansi-colors');
 
 const fileGlobs = ['dist/*.js', 'dist/v0/*-?.?.js'];
