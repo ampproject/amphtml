@@ -124,7 +124,8 @@ AMP expects the response to be a JSON object like the following:
                                             // if it's one of ["accepted", "rejected"]
   "consentString": {string},                // (new) the latest consent string known by the server
   "expireCache": {boolean} [default: false] // (new) indicate that the cache needs to be cleared.  
-                                            // Set to `true` to enforce server side consent state. 
+                                            // Set to `true` in conjunction with consentStateValue='accepted'/'rejected' 
+                                            // to enforce server side consent state 
 }
 ```
 
