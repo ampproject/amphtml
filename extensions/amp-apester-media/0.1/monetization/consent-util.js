@@ -28,12 +28,13 @@ import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 
 const TAG = 'amp-apester-media';
 
-const awaitPromiseTimeout = response => {
+const AWAIT_TIME_OUT_FOR_RESPONSE = 3000;
+
+const awaitPromiseTimeout = () => {
   return new Promise(resolve => {
-    const wait = setTimeout(() => {
-      clearTimeout(wait);
-      resolve(response);
-    }, 3000);
+    setTimeout(() => {
+      resolve([CONSENT_POLICY_STATE.UNKNOWN, undefined]);
+    }, AWAIT_TIME_OUT_FOR_RESPONSE);
   });
 };
 /**
@@ -41,22 +42,25 @@ const awaitPromiseTimeout = response => {
  * @return {Promise<!JsonObject>}
  * */
 export function getConsentData(apesterElement) {
-  const consentStatePromise = Promise.race([
-    getConsentPolicyState(apesterElement, 'default'),
-    awaitPromiseTimeout(CONSENT_POLICY_STATE.UNKNOWN),
-  ]).catch(err => {
+  const consentStatePromise = getConsentPolicyState(
+    apesterElement,
+    'default'
+  ).catch(err => {
     dev().error(TAG, 'Error determining consent state', err);
     return CONSENT_POLICY_STATE.UNKNOWN;
   });
-  const consentStringPromise = Promise.race([
-    getConsentPolicyInfo(apesterElement, 'default').catch(err => {
-      dev().error(TAG, 'Error determining consent string', err);
-      return null;
-    }),
-    awaitPromiseTimeout(),
+  const consentStringPromise = getConsentPolicyInfo(
+    apesterElement,
+    'default'
+  ).catch(err => {
+    dev().error(TAG, 'Error determining consent string', err);
+    return null;
+  });
+  const consentDataPromise = Promise.all([
+    consentStatePromise,
+    consentStringPromise,
   ]);
-
-  return Promise.all([consentStatePromise, consentStringPromise]).then(
+  return Promise.race([consentDataPromise, awaitPromiseTimeout()]).then(
     consentDataResponse => {
       const consentStatus = consentDataResponse[0];
       const gdprString = consentDataResponse[1];

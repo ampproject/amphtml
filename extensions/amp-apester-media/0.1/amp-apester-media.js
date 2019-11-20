@@ -291,18 +291,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Element}
-   */
-  constructUnitContainer_() {
-    const container = this.element.ownerDocument.createElement('div');
-    setStyles(container, {
-      position: 'relative',
-      height: `${this.height_}px`,
-    });
-    return container;
-  }
-
-  /**
    * @param {JsonObject} publisher
    */
   report3rdPartyPixel_(publisher) {
@@ -338,7 +326,6 @@ class AmpApesterMedia extends AMP.BaseElement {
         const interactionId = media['interactionId'];
         const usePlayer = media['usePlayer'];
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
-        const unitContainer = this.constructUnitContainer_();
         const iframe = this.constructIframe_(src);
         this.intersectionObserverApi_ = new IntersectionObserverApi(
           this,
@@ -352,14 +339,11 @@ class AmpApesterMedia extends AMP.BaseElement {
         return vsync
           .mutatePromise(() => {
             const overflow = this.constructOverflow_();
-            unitContainer.appendChild(iframe);
-            iframe.appendChild(overflow);
-            this.element.appendChild(unitContainer);
+            this.element.appendChild(overflow);
+            this.element.appendChild(iframe);
+            handleCompanionAds(media, this.element);
           })
           .then(() => {
-            return handleCompanionAds(media, this.element);
-          })
-          .then(adsHeight => {
             return this.loadPromise(iframe).then(() => {
               return vsync.mutatePromise(() => {
                 if (this.iframe_) {
@@ -381,8 +365,7 @@ class AmpApesterMedia extends AMP.BaseElement {
                 if (media && media['data'] && media['data']['size']) {
                   height = media['data']['size']['height'];
                 }
-                height += adsHeight;
-                if (height !== this.height_) {
+                if (height != this.height_) {
                   this.height_ = height;
                   if (this.random_) {
                     this./*OK*/ attemptChangeHeight(height);

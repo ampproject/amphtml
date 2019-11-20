@@ -18,42 +18,14 @@ import {Services} from '../../../../../src/services';
 const ALLOWED_AD_PROVIDER = 'sr';
 import {MARGIN_AD_HEIGHT} from '../monetization-utils';
 import {getValueForExpr} from '../../../../../src/json';
-import {setStyle} from '../../../../../src/style';
+import {setStyles} from '../../../../../src/style';
 
 /**
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
  * @param {!JsonObject} consentObj
- * @return {number}
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
-  const adInfo = getVideoAdData(media);
-  if (!isVideoAdShouldPlay(adInfo)) {
-    return 0;
-  }
-  const {companionCampaignOptions, videoSettings, position} = adInfo;
-  const macros = getSrMacros(
-    media,
-    companionCampaignOptions['companionCampaignId'],
-    apesterElement,
-    consentObj
-  );
-  const videoAdSize = constructCompanionSrElement(
-    videoSettings['videoTag'],
-    position,
-    /** @type {!JsonObject} */ (macros),
-    apesterElement
-  );
-
-  const heightAdWithMargin = MARGIN_AD_HEIGHT * 2 + videoAdSize.height;
-  return heightAdWithMargin;
-}
-
-/**
- * @param {!JsonObject} media
- * @return {?JsonObject}
- */
-export function getVideoAdData(media) {
   const companionCampaignOptions = getValueForExpr(
     media,
     'campaignData.companionCampaignOptions'
@@ -64,15 +36,6 @@ export function getVideoAdData(media) {
   );
   const position = getCompanionPosition(videoSettings);
 
-  return {companionCampaignOptions, videoSettings, position};
-}
-
-/**
- * @param {!JsonObject} adInfo
- * @return {boolean}
- */
-function isVideoAdShouldPlay(adInfo) {
-  const {companionCampaignOptions, videoSettings, position} = adInfo;
   if (
     !companionCampaignOptions ||
     !videoSettings ||
@@ -81,9 +44,20 @@ function isVideoAdShouldPlay(adInfo) {
     !position ||
     position === 'floating'
   ) {
-    return false;
+    return;
   }
-  return true;
+  const macros = getSrMacros(
+    media,
+    companionCampaignOptions['companionCampaignId'],
+    apesterElement,
+    consentObj
+  );
+  constructCompanionSrElement(
+    videoSettings['videoTag'],
+    position,
+    /** @type {!JsonObject} */ (macros),
+    apesterElement
+  );
 }
 
 /**
@@ -109,7 +83,6 @@ function getCompanionPosition(video) {
  * @param {string} position
  * @param {!JsonObject} macros
  * @param {AmpElement} apesterElement
- * @return {JsonObject}
  */
 function constructCompanionSrElement(
   videoTag,
@@ -118,24 +91,29 @@ function constructCompanionSrElement(
   apesterElement
 ) {
   const size = getCompanionVideoAdSize(apesterElement);
-  const ampAd = apesterElement.ownerDocument.createElement('amp-ad');
-  ampAd.setAttribute('type', 'blade');
-  ampAd.setAttribute('data-blade_player_type', 'bladex');
-  ampAd.setAttribute('servingDomain', 'ssr.streamrail.net');
-  ampAd.setAttribute('height', size.height);
-  ampAd.setAttribute('width', size.width);
-  ampAd.setAttribute('layout', 'responsive');
-  ampAd.setAttribute('data-blade_macros', JSON.stringify(macros));
-  ampAd.setAttribute('data-blade_player_id', videoTag);
-  ampAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
-  ampAd.classList.add('amp-apester-companion');
-  setStyle(ampAd, 'margin', `${MARGIN_AD_HEIGHT}px auto`);
 
-  position === 'below'
-    ? apesterElement.appendChild(ampAd)
-    : apesterElement.insertBefore(ampAd, apesterElement.firstChild);
+  const ampBladeAd = apesterElement.ownerDocument.createElement('amp-ad');
+  ampBladeAd.setAttribute('type', 'blade');
+  ampBladeAd.setAttribute('data-blade_player_type', 'bladex');
+  ampBladeAd.setAttribute('servingDomain', 'ssr.streamrail.net');
+  ampBladeAd.setAttribute('height', 0);
+  ampBladeAd.setAttribute('width', size.width);
+  ampBladeAd.setAttribute('layout', 'responsive');
+  ampBladeAd.setAttribute('data-blade_macros', JSON.stringify(macros));
+  ampBladeAd.setAttribute('data-blade_player_id', videoTag);
+  ampBladeAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
+  ampBladeAd.classList.add('amp-apester-companion');
 
-  return size;
+  setStyles(ampBladeAd, {
+    margin: `${MARGIN_AD_HEIGHT}px auto`,
+    backgroundColor: 'green',
+  });
+
+  const relativeElement =
+    position === 'below' ? apesterElement.nextSibling : apesterElement;
+  apesterElement.parentNode.insertBefore(ampBladeAd, relativeElement);
+
+  ampBladeAd.getResources().attemptChangeSize(ampBladeAd, 250);
 }
 
 /**

@@ -15,85 +15,59 @@
  */
 
 import {MARGIN_AD_HEIGHT} from '../monetization-utils';
+import {createElementWithAttributes} from '../../../../../src/dom';
 import {getValueForExpr} from '../../../../../src/json';
 import {setStyle} from '../../../../../src/style';
-const allowedAdProvider = 'gdt';
+const ALLOWED_AD_PROVIDER = 'gdt';
 
 /**
  * @param {!JsonObject} media
  * @param {AmpElement} apesterElement
- * @return {number}
  */
 export function handleCompanionDisplay(media, apesterElement) {
-  const adInfo = getDisplayAdInfo(media);
-  if (adInfo) {
-    const {size, slot} = adInfo;
-    constructCompanionDisplayAd(slot, size, apesterElement);
-    const heightAdWithMargin = MARGIN_AD_HEIGHT * 2 + size.height;
-    return heightAdWithMargin;
-  }
-  return 0;
-}
-
-/**
- * @param {!JsonObject} media
- * @return {?JsonObject}
- */
-export function getDisplayAdInfo(media) {
-  const adInfo = getAdParameters_(media);
-  const isAdEnabled = isAdShouldPlay(adInfo);
-  const {settings} = adInfo;
-
-  if (isAdEnabled && settings) {
-    const slot = settings['slot'];
-    const defaultBannerSizes = [[300, 250]];
-    const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
-    const size = {width: bannerSizes[0][0], height: bannerSizes[0][1]};
-    return {size, slot};
-  }
-}
-
-/**
- * @param {!JsonObject} media
- * @return {?JsonObject}
- */
-function getAdParameters_(media) {
   const companionOptions = getValueForExpr(
     media,
     'campaignData.companionOptions'
   );
-  const settings = getValueForExpr(companionOptions, 'settings');
-  return {companionOptions, settings};
-}
-
-/**
- * @param {JsonObject} adInfo
- * @return {boolean}
- */
-function isAdShouldPlay(adInfo) {
-  const {companionOptions, settings} = adInfo;
-
   const enabledDisplayAd = getValueForExpr(companionOptions, 'enabled');
-  return (
+  const settings = getValueForExpr(companionOptions, 'settings');
+
+  if (
     enabledDisplayAd &&
     settings &&
-    settings['bannerAdProvider'] === allowedAdProvider
-  );
+    settings['bannerAdProvider'] === ALLOWED_AD_PROVIDER
+  ) {
+    const slot = settings['slot'];
+    const defaultBannerSizes = [[300, 250]];
+    const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
+    // const size = {width: 300, height: 250};
+    constructCompanionDisplayAd(slot, bannerSizes, apesterElement);
+  }
 }
 
 /**
  * @param {string} slot
  * @param {{width: number, height:number}} size
+ * @param bannerSizes
  * @param {AmpElement} apesterElement
+ * @return {ampAd}
  */
-function constructCompanionDisplayAd(slot, size, apesterElement) {
-  const {width, height} = size;
-  const ampAd = apesterElement.ownerDocument.createElement('amp-ad');
-  ampAd.setAttribute('type', 'doubleclick');
-  ampAd.setAttribute('data-slot', slot);
-  ampAd.setAttribute('width', width);
-  ampAd.setAttribute('height', height);
+function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
+  const ampAd = createElementWithAttributes(
+    apesterElement.ownerDocument,
+    'amp-ad',
+    {
+      'width': `300`,
+      'height': `${0}`,
+      'type': 'doubleclick',
+      'layout': 'fixed',
+      'data-slot': `${slot}`,
+      'data-multi-size': '300x250',
+    }
+  );
   setStyle(ampAd, 'margin', `${MARGIN_AD_HEIGHT}px auto`);
   ampAd.classList.add('amp-apester-companion');
-  apesterElement.appendChild(ampAd);
+  apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
+  ampAd.getResources().attemptChangeSize(ampAd, 250);
+  return ampAd;
 }

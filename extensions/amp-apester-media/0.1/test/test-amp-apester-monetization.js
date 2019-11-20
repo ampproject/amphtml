@@ -25,9 +25,9 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
   let baseElement;
   let docInfo;
   const queryAmpAdBladeSelector = myDoc =>
-    myDoc.querySelector('amp-apester-media > amp-ad[type=blade]');
+    myDoc.querySelector('amp-ad[type=blade]');
   const queryAmpAdDisplaySelector = myDoc =>
-    myDoc.querySelector('amp-apester-media > amp-ad[type=doubleclick]');
+    myDoc.querySelector('amp-ad[type=doubleclick]');
 
   beforeEach(() => {
     win = env.win;
@@ -54,7 +54,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     await handleCompanionAds(media, baseElement);
     const displayAd = queryAmpAdDisplaySelector(doc);
     expect(displayAd).to.exist;
-    expect(baseElement.lastElementChild).to.be.equal(displayAd);
+    expect(baseElement.nextSibling).to.be.equal(displayAd);
   });
   it('Should show an SR companion ad below', async () => {
     const media = createCampaignData({
@@ -65,7 +65,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     await handleCompanionAds(media, baseElement);
     const srAdBelow = queryAmpAdBladeSelector(doc);
     expect(srAdBelow).to.exist;
-    expect(baseElement.lastElementChild).to.be.equal(srAdBelow);
+    expect(baseElement.nextSibling).to.be.equal(srAdBelow);
   });
   it('Should show an SR companion ad above', async () => {
     const media = createCampaignData({
@@ -76,7 +76,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     await handleCompanionAds(media, baseElement);
     const srAboveAd = queryAmpAdBladeSelector(doc);
     expect(srAboveAd).to.exist;
-    expect(baseElement.firstChild).to.be.equal(srAboveAd);
+    expect(baseElement.previousSibling).to.be.equal(srAboveAd);
   });
   it('Should show an SR companion above with display companion', async () => {
     const media = createCampaignData({
@@ -87,10 +87,10 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     await handleCompanionAds(media, baseElement);
     const displayAd = queryAmpAdDisplaySelector(doc);
     expect(displayAd).to.exist;
-    expect(baseElement.lastElementChild).to.be.equal(displayAd);
+    expect(baseElement.nextSibling).to.be.equal(displayAd);
     const srAboveAd = queryAmpAdBladeSelector(doc);
     expect(srAboveAd).to.exist;
-    expect(baseElement.firstChild).to.be.equal(srAboveAd);
+    expect(baseElement.previousSibling).to.be.equal(srAboveAd);
   });
   it('Should not show ads if disabled amp companion ads', async () => {
     const media = createCampaignData({
