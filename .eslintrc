@@ -188,8 +188,7 @@
         "extensions/**/test/**/*.js",
         "extensions/**/test-e2e/*.js",
         "ads/**/test/**/*.js",
-        "testing/**/*.js",
-        "build-system/**/*.js"
+        "testing/**/*.js"
       ],
       "rules": {
         "require-jsdoc": 0,
