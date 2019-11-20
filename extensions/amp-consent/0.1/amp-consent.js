@@ -47,6 +47,7 @@ import {toggle} from '../../../src/style';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
+const GEO_OVERRIDE_TAG = 'amp-consent-geo-override';
 
 /**
  * @enum {string}
@@ -117,7 +118,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     const expOn = isExperimentOn(this.win, 'amp-consent-geo-override');
     if (expOn) {
-      dev().info('amp-consent-geo-override experiment', 'enabled');
+      dev().info(GEO_OVERRIDE_TAG, 'enabled');
     }
 
     const config = new ConsentConfig(this.element);
