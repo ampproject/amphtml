@@ -76,7 +76,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentUI_ = null;
 
     /** @private {?JsonObject} */
-    this.consentConfig_ = null;
+    this.this.consentConfig_ = null;
 
     /** @private {?JsonObject} */
     this.policyConfig_ = null;
@@ -117,12 +117,22 @@ export class AmpConsent extends AMP.BaseElement {
 
     const config = new ConsentConfig(this.element);
 
-    config.getConsentConfig().then(validatedConfig => {
-      this.consentConfig_ = validatedConfig;
+    config.getConsentConfigPromise().then(validatedConfig => {
+      this.initialize_(validatedConfig);
     });
+  }
+
+  /**
+   *
+   * @param {!JsonObject} config
+   */
+  initialize_(config) {
+    this.consentConfig_ = config;
 
     // ConsentConfig has verified that there's one and only one consent instance
-    this.consentId_ = this.consentConfig_['consentInstanceId'];
+    this.consentId_ = this.consentConfigPromise_.then(
+      consentConfig => consentConfig['consentInstanceId']
+    );
 
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ = new ConsentUI(
