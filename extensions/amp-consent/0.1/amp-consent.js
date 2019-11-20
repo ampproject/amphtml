@@ -16,7 +16,6 @@
 
 import {
   CONSENT_ITEM_STATE,
-  getConsentStateForValue,
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
