@@ -42,11 +42,10 @@ export class ConsentConfig {
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
 
-    /** @private {?JsonObject} */
-    this.config_ = null;
-
     /** @private {?string} */
     this.matchedGeoGroups_ = null;
+    /** @private {?Promise<?JsonObject>} */
+    this.configPromise_ = null;
   }
 
   /**
@@ -55,12 +54,9 @@ export class ConsentConfig {
    */
   getConsentConfigPromise() {
     if (!this.config_) {
-      return this.validateAndParseConfig_().then(validatedConfig => {
-        this.config_ = validatedConfig;
-        return this.config_;
-      });
+      this.configPromise_ = this.validateAndParseConfig_();
     }
-    return Promise.resolve(this.config_);
+    return this.configPromise_;
   }
 
   /**
