@@ -335,16 +335,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.element,
         policy,
         /* refresh */ false
-      ).then(r => {
-        const request = r;
-
+      ).then(request => {
         request.xhrUrl = setupInput(this.win, request.xhrUrl, request.fetchOpt);
         request.fetchOpt = setupAMPCors(
           this.win,
           request.xhrUrl,
           request.fetchOpt
         );
-        setupJsonFetchInit(r.fetchOpt);
+        setupJsonFetchInit(request.fetchOpt);
 
         const attributes = dict({
           'ampAutocompleteAttributes': {
