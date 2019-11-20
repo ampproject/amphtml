@@ -444,7 +444,7 @@ export class AmpConsent extends AMP.BaseElement {
         );
 
         consentRequiredPromise =
-          constentRequiredResponse === false ? false : true;
+          constentRequiredResponse === true ? true : false;
       });
     }
     return consentRequiredPromise.then(required => {

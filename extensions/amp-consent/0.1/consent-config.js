@@ -16,7 +16,7 @@
 
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {deepMerge} from '../../../src/utils/object';
+import {deepMerge, hasOwn} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
@@ -150,30 +150,23 @@ export class ConsentConfig {
       }
     }
 
-    userAssert(
-      config['checkConsentHref'] ||
-        config['promptIfUnknownForGeoGroup'] ||
-        config['consentRequired'],
-      'neither checkConsentHref, promptIfUnknownForGeoGroup, nor consentRequired is defined'
-    );
-
-    // consentRequired must not be null
-    if (config['checkConsentHref'] && !config['consentRequired']) {
-      config['consentRequired'] = 'remote';
-    } else if (!config['consentRequired']) {
-      // Should we be conservative and make it true?
-      config['consentRequired'] = false;
-    }
-
     const group = config['promptIfUnknownForGeoGroup'];
     if (group) {
+      config['consentRequired'] = false;
       config['geoOverride'] = {
-        group: {
+        [group]: {
           'consentRequired': true,
         },
       };
     }
 
+    if (config['checkConsentHref'] && !hasOwn(config, 'consentRequired')) {
+      config['consentRequired'] = 'remote';
+    } else if (!hasOwn(config, 'consentRequired')) {
+      config['consentRequired'] = false;
+    }
+
+    console.log(config);
     // Then merge and validate config, taken care of in previous pr
     return config;
   }
