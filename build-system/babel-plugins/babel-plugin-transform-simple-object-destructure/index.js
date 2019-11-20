@@ -56,7 +56,7 @@ module.exports = function(babel) {
     path.replaceWith(path.scope.generateUidIdentifier('foo'));
     // We try to eliminate any side effects since the original
     // initializer might have had some (method call, etc.);
-    parentPath.node.init = path.scope.buildUndefinedNode();
+    parentPath.get('init').replaceWith(path.scope.buildUndefinedNode());
   }
 
   return {
