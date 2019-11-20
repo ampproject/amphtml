@@ -26,10 +26,6 @@ import {toWin} from '../../../src/types';
 
 const TAG = 'amp-consent/consent-config';
 
-const UNKNOWN_GEO_GROUP = 'unknown';
-
-const CONFIG_UNKNOWN_GEO_GROUP = 'geoGroupUnknown';
-
 const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
   'promptUI': true,
   'checkConsentHref': true,
@@ -48,6 +44,9 @@ export class ConsentConfig {
 
     /** @private {?JsonObject} */
     this.config_ = null;
+
+    /** @private {?string} */
+    this.matchedGeoGroups_ = null;
   }
 
   /**
@@ -62,6 +61,15 @@ export class ConsentConfig {
       });
     }
     return Promise.resolve(this.config_);
+  }
+
+  /**
+   * Returns the matched geoGroup. Call after getConsentConfigPromise
+   * has resolved.
+   * @return {?string}
+   */
+  getMatchedGeoGroups() {
+    return this.matchedGeoGroups_;
   }
 
   /**
@@ -170,21 +178,17 @@ export class ConsentConfig {
    */
   mergeGeoOverride_(config) {
     if (config['geoOverride']) {
-      userAssert(
-        config['geoOverride'][CONFIG_UNKNOWN_GEO_GROUP],
-        '%s must be specified in geoOverride',
-        CONFIG_UNKNOWN_GEO_GROUP
-      );
       Services.geoForDocOrNull(this.element_).then(geoService => {
         userAssert(geoService, 'requires <amp-geo> to use geoOverride');
-        if (geoService.ISOCountry === UNKNOWN_GEO_GROUP) {
-          this.mergeGeoFields_(config, CONFIG_UNKNOWN_GEO_GROUP);
-        } else {
-          const geoGroups = Object.keys(config['geoOverride']);
-          for (let i = 0; i < geoGroups.length; i++) {
-            if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-              this.mergeGeoFields_(config, geoGroups[i]);
-            }
+        const geoGroups = Object.keys(config['geoOverride']);
+        for (let i = 0; i < geoGroups.length; i++) {
+          if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+            config = /** @type {!JsonObject} */ (deepMerge(
+              config,
+              config['geoOverride'][geoGroups[i]],
+              1
+            ));
+            this.matchedGeoGroups_ = geoGroups[i];
           }
         }
         delete config['geoOverride'];
@@ -198,20 +202,6 @@ export class ConsentConfig {
       config['consentRequired'] = true;
     }
     return Promise.resolve();
-  }
-
-  /**
-   * Config manipulation
-   * @param {string} config
-   * @param {string} countryGroup
-   */
-  mergeGeoFields_(config, countryGroup) {
-    config = /** @type {!JsonObject} */ (deepMerge(
-      config,
-      config['geoOverride'][countryGroup],
-      1
-    ));
-    config['matchedGeoGroups'] = countryGroup;
   }
 
   /**
