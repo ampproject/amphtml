@@ -161,6 +161,7 @@ export class ConsentConfig {
     if (config['checkConsentHref'] && !config['consentRequired']) {
       config['consentRequired'] = 'remote';
     } else if (!config['consentRequired']) {
+      // Should we be conservative and make it true?
       config['consentRequired'] = false;
     }
 
