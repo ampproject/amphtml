@@ -166,6 +166,11 @@ export class ConsentConfig {
    */
   mergeGeoOverride_(config) {
     if (config['geoOverride']) {
+      userAssert(
+        config['geoOverride']['geoGroupUnknown'],
+        'geoGroupUnknown must be specified in geoOverride'
+      );
+      // Need to check if geoService failed... -> then user geoGroupUnknown
       Services.geoForDocOrNull(this.element_).then(geoService => {
         userAssert(geoService, 'requires <amp-geo> to use geoOverride');
         const geoGroups = Object.keys(config['geoOverride']);
