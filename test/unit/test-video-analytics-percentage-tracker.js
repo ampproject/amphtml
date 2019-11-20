@@ -91,7 +91,7 @@ describes.fakeWin(
         },
       };
 
-      sandbox.stub(Services, 'timerFor').returns(mockTimer);
+      env.sandbox.stub(Services, 'timerFor').returns(mockTimer);
 
       tracker = new AnalyticsPercentageTracker(win, mockEntry);
     });

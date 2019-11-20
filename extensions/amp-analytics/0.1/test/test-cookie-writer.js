@@ -31,18 +31,16 @@ describes.realWin(
     runtimeOn: true,
   },
   env => {
-    let sandbox;
     let win;
     let doc;
     let setCookieSpy;
     let element;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
-      setCookieSpy = sandbox.spy();
+      setCookieSpy = env.sandbox.spy();
       win = env.win;
       doc = win.document;
-      sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
+      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
         setCookieSpy(name, value);
       });
       element = doc.createElement('div');
@@ -57,7 +55,7 @@ describes.realWin(
       it('Resolve when no config', () => {
         const config = dict({});
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -69,7 +67,7 @@ describes.realWin(
         });
         expectAsyncConsoleError(TAG + ' cookies config must be an object');
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -88,7 +86,7 @@ describes.realWin(
         doc.body.appendChild(parent);
         parent.appendChild(element);
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -108,7 +106,7 @@ describes.realWin(
         installLinkerReaderService(mockWin);
         installVariableServiceForTesting(doc);
         const cookieWriter = new CookieWriter(mockWin, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -124,7 +122,7 @@ describes.realWin(
           },
         });
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -140,7 +138,7 @@ describes.realWin(
           },
         });
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -151,7 +149,7 @@ describes.realWin(
           'cookies': {},
         });
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -167,7 +165,7 @@ describes.realWin(
           TAG + ' cookieValue must be configured in an object'
         );
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -185,7 +183,7 @@ describes.realWin(
           TAG + ' value is required in the cookieValue object'
         );
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });
@@ -200,7 +198,7 @@ describes.realWin(
           },
         });
         const cookieWriter = new CookieWriter(win, element, config);
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
           expect(expandAndWriteSpy).to.not.be.called;
         });

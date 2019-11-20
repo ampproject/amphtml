@@ -646,7 +646,7 @@ describes.realWin(
         });
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
-        const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
+        const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
         impl.updateSize_(217, '114' /* be tolerant to string number */);
         expect(attemptChangeSize).to.be.calledWith(217, 114);
       });
@@ -661,7 +661,7 @@ describes.realWin(
         });
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
-        const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
+        const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
         impl.updateSize_(217);
         expect(attemptChangeSize).to.be.calledOnce;
         expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
@@ -679,7 +679,7 @@ describes.realWin(
         });
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
-        const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
+        const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
         impl.updateSize_(50, 114);
         expect(attemptChangeSize).to.have.not.been.called;
       });
@@ -694,13 +694,13 @@ describes.realWin(
         });
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
-        const attemptChangeSize = sandbox.spy(impl, 'attemptChangeSize');
+        const attemptChangeSize = env.sandbox.spy(impl, 'attemptChangeSize');
         impl.updateSize_(217, 114);
         expect(attemptChangeSize).to.have.not.been.called;
       });
 
       it('should listen for embed-ready event', function*() {
-        const activateIframeSpy_ = sandbox./*OK*/ spy(
+        const activateIframeSpy_ = window.sandbox./*OK*/ spy(
           AmpIframe.prototype,
           'activateIframe_'
         );
@@ -851,7 +851,7 @@ describes.realWin(
         });
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
-        const stub = sandbox.stub(impl, 'getLayoutBox');
+        const stub = env.sandbox.stub(impl, 'getLayoutBox');
         const box = {
           top: 100,
           bottom: 200,
@@ -969,8 +969,8 @@ describes.realWin(
           });
           yield waitForAmpIframeLayoutPromise(doc, ampIframe);
 
-          const userError = sandbox.stub(user(), 'error');
-          const addEventListener = sandbox.stub(win, 'addEventListener');
+          const userError = env.sandbox.stub(user(), 'error');
+          const addEventListener = env.sandbox.stub(win, 'addEventListener');
           ampIframe.implementation_.executeAction({
             method: 'postMessage',
             args: 'foo-123',
@@ -1000,9 +1000,9 @@ describes.realWin(
           });
           yield waitForAmpIframeLayoutPromise(doc, ampIframe);
 
-          const userError = sandbox.stub(user(), 'error');
-          const actions = {trigger: sandbox.spy()};
-          sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+          const userError = env.sandbox.stub(user(), 'error');
+          const actions = {trigger: env.sandbox.spy()};
+          env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
           const impl = ampIframe.implementation_;
           impl.executeAction({
@@ -1018,7 +1018,7 @@ describes.realWin(
             /may only be triggered from a user gesture/
           );
 
-          sandbox.stub(impl, 'isUserGesture_').returns(true);
+          env.sandbox.stub(impl, 'isUserGesture_').returns(true);
           impl.executeAction({
             method: 'postMessage',
             args: 'bar-456',
@@ -1028,9 +1028,9 @@ describes.realWin(
           yield waitForJsInIframe(2);
           // Once for 'loaded-iframe' and once for 'content-iframe'.
           expect(actions.trigger).to.be.calledTwice;
-          const eventMatcher = sinon.match({
+          const eventMatcher = env.sandbox.match({
             type: 'amp-iframe:message',
-            detail: sinon.match({data: 'content-iframe:bar-456'}),
+            detail: env.sandbox.match({data: 'content-iframe:bar-456'}),
           });
           expect(actions.trigger).to.be.calledWith(
             ampIframe,
