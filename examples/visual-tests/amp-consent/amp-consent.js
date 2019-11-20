@@ -15,25 +15,28 @@
  */
 'use strict';
 
-const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {
+  verifySelectorsVisible,
+} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
+  'flaky': true,
   'accept consent': async (page, name) => {
     await page.tap('#consent-ui #accept');
 
     await verifySelectorsVisible(page, name, [
-        'amp-img[data-block-on-consent="_till_responded"] img',
-        'amp-img[data-block-on-consent="_till_accepted"] img',
-        'amp-img[data-block-on-consent="default"] img',
-        '#not-specified img'
-      ]);
+      'amp-img[data-block-on-consent="_till_responded"] img',
+      'amp-img[data-block-on-consent="_till_accepted"] img',
+      'amp-img[data-block-on-consent="default"] img',
+      '#not-specified img',
+    ]);
   },
 
   'reject consent': async (page, name) => {
     await page.tap('#consent-ui #reject');
 
     await verifySelectorsVisible(page, name, [
-        'amp-img[data-block-on-consent="_till_responded"] img'
+      'amp-img[data-block-on-consent="_till_responded"] img',
     ]);
   },
 
@@ -45,10 +48,10 @@ module.exports = {
     await page.reload();
 
     await verifySelectorsVisible(page, name, [
-        'amp-img[data-block-on-consent="_till_responded"] img',
-        'amp-img[data-block-on-consent="_till_accepted"] img',
-        'amp-img[data-block-on-consent="default"] img',
-        '#not-specified img'
+      'amp-img[data-block-on-consent="_till_responded"] img',
+      'amp-img[data-block-on-consent="_till_accepted"] img',
+      'amp-img[data-block-on-consent="default"] img',
+      '#not-specified img',
     ]);
-  }
+  },
 };
