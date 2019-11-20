@@ -268,16 +268,27 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 ### Running Visual Diff Tests Locally
 
-You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`. Once the environment variable is set up, you can run the AMP visual diff tests as described below.
-
-First, build the AMP runtime and run the gulp task that invokes the visual diff script:
+You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
 
 ```sh
-gulp build
+export PERCY_TOKEN="<unique-percy-token>"
+```
+
+Once the environment variable is set up, you can run the AMP visual diff tests.
+
+First, build the AMP runtime:
+
+```sh
+gulp dist --fortesting
+```
+
+Next, run the `gulp` task that invokes the visual diff tests:
+
+```sh
 gulp visual-diff --nobuild
 ```
 
-Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp build` on each execution.
+Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp dist --fortesting` on each execution.
 
 The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome in headless mode. You can see the results at `https://percy.io/<org>/<project>`.
 
@@ -285,6 +296,12 @@ To see debugging info during Percy runs, you can run:
 
 ```sh
  gulp visual-diff --chrome_debug --webserver_debug
+```
+
+To run tests without uploading snapshots to Percy, you can run:
+
+```sh
+gulp visual-diff --percy_disabled
 ```
 
 The debug flags `--chrome_debug` and `--webserver_debug` can be used independently. To enable both debug flags, you can also run:
