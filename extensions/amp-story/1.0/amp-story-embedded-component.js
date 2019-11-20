@@ -29,6 +29,7 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
+import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest, matches} from '../../../src/dom';
@@ -630,6 +631,19 @@ export class AmpStoryEmbeddedComponent {
       while (this.embedsToBePaused_.length > 0) {
         const embedEl = this.embedsToBePaused_.pop();
         this.owners_.schedulePause(this.storyEl_, embedEl);
+      }
+    });
+
+    this.win_.addEventListener('keyup', event => {
+      if (
+        event.key === Keys.ESCAPE &&
+        this.state_ === EmbeddedComponentState.EXPANDED
+      ) {
+        event.preventDefault();
+        this.maybeCloseExpandedView_(
+          null /** target */,
+          true /** forceClose */
+        );
       }
     });
   }
