@@ -33,7 +33,7 @@ config.run('amp-story analytics', () => {
       <amp-story-page id="page-1">
         <amp-story-grid-layer template="horizontal">
           <p>First page</p>
-          <p>Center</p>
+          <a href="google.com" data-vars-link-id="myLink" id="link-1">Link</a>
           <p id="right-1">Click me</p>
         </amp-story-grid-layer>
       </amp-story-page>
@@ -112,6 +112,14 @@ config.run('amp-story analytics', () => {
             "extraUrlParams": {
               "bookendExit": true
             }
+          },
+          "trackFocusedState": {
+            "on": "story-focus",
+            "request": "endpoint",
+            "tagName": "a",
+            "extraUrlParams": {
+              "focusedLink": "\${linkId}"
+            }
           }
         },
         "extraUrlParams": {
@@ -119,7 +127,8 @@ config.run('amp-story analytics', () => {
           "bookendEnter": false,
           "bookendExit": false,
           "muted": false,
-          "unmuted": false
+          "unmuted": false,
+          "focusedLink": "\${linkId}"
         }
       }
       </script>
@@ -212,6 +221,16 @@ config.run('amp-story analytics', () => {
         const req = await RequestBank.withdraw();
         const q = parseQueryString(req.url.substr(1));
         expect(q['pageVisible']).to.equal('page-1');
+      });
+
+      it('should send data vars attribute when specified', async () => {
+        await browser.waitForElementLayout('#page-1[active]');
+        browser.click('#link-1');
+        await browser.wait(1000);
+
+        const req = await RequestBank.withdraw();
+        const q = parseQueryString(req.url.substr(1));
+        expect(q['focusedLink']).to.equal('myLink');
       });
     }
   );
