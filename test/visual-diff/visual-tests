@@ -168,6 +168,8 @@
       "loading_complete_selectors": [".login-section"]
     },
     {
+      // TODO(wg-analytics, #25105) fix flaky test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-consent/amp-consent.amp.html",
       "name": "amp-consent",
       "interactive_tests": "examples/visual-tests/amp-consent/amp-consent.js"
