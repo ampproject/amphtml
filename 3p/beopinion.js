@@ -87,6 +87,9 @@ function createContainer(global, data) {
  */
 function getBeOpinionAsyncInit(global, accountId) {
   const {context} = global;
+  context.onResizeDenied(function(requestedHeight, requestedWidth) {
+    context.requestResize(requestedWidth, requestedHeight);
+  });
   return function() {
     global.BeOpinionSDK.init({
       account: accountId,
@@ -100,7 +103,6 @@ function getBeOpinionAsyncInit(global, accountId) {
       onHeightChange: function(newHeight) {
         const c = global.document.getElementById('c');
         const boundingClientRect = c./*REVIEW*/ getBoundingClientRect();
-        context.onResizeDenied(context.requestResize.bind(context));
         context.requestResize(boundingClientRect.width, newHeight);
       },
     });
