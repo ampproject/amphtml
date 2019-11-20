@@ -119,14 +119,15 @@ export class ChildLayoutManager {
    *  viewportIntersectionCallback: (function(!Element, boolean)|undefined)
    * }} config
    */
-  constructor({
-    ampElement,
-    intersectionElement,
-    intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
-    nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
-    viewportIntersectionThreshold = intersectionThreshold,
-    viewportIntersectionCallback = () => {},
-  }) {
+  constructor(config) {
+    const {
+      ampElement,
+      intersectionElement,
+      intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
+      nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
+      viewportIntersectionThreshold = intersectionThreshold,
+      viewportIntersectionCallback = () => {},
+    } = config;
     /** @private @const */
     this.ampElement_ = ampElement;
 

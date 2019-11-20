@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+const selector =
+  'ObjectPattern[parent.type=FunctionDeclaration],' +
+  'ObjectPattern[parent.type=FunctionExpression]';
+
 module.exports = function(context) {
   return {
-    ['ObjectPattern[parent.type=FunctionDeclaration]']: function(node) {
+    [selector]: function(node) {
       context.report({
         node,
         message:
