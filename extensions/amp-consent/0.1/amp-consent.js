@@ -100,6 +100,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?string} */
     this.consentId_ = null;
+
+    /** @private {?string} */
+    this.this.matchedGeoGroups_ = null;
   }
 
   /** @override */
@@ -131,6 +134,8 @@ export class AmpConsent extends AMP.BaseElement {
 
     // ConsentConfig has verified that there's one and only one consent instance
     this.consentId_ = this.consentConfig_['consentInstanceId'];
+
+    this.matchedGeoGroups_ = this.consentConfig_['matchedGeoGroups'];
 
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ = new ConsentUI(
@@ -532,6 +537,7 @@ export class AmpConsent extends AMP.BaseElement {
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentString': storedInfo['consentString'],
           'isDirty': !!storedInfo['isDirty'],
+          'matchedGeoGroups': this.matchedGeoGroups_,
         });
         if (this.consentConfig_['clientConfig']) {
           request['clientConfig'] = this.consentConfig_['clientConfig'];
