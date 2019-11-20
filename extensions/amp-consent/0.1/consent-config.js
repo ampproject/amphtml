@@ -150,6 +150,15 @@ export class ConsentConfig {
       }
     }
 
+    // (TODO): Migrate `promptIfUnknownForGeoGroup`
+    // E.g: promptIfUnknownForGeo: geoGroup -> geoOverride: {geoGroup: {consentRequired: true}}
+    userAssert(
+      config['checkConsentHref'] ||
+        config['promptIfUnknownForGeoGroup'] ||
+        config['consentRequired'],
+      'neither checkConsentHref, promptIfUnknownForGeoGroup, nor consentRequired is defined'
+    );
+
     return config;
   }
 
