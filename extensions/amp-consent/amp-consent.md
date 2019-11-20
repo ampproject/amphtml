@@ -102,7 +102,7 @@ Example:
 
 #### checkConsentHref
 
-`checkConsentHref`: Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose is to 1) determine if consent is required for the user, 2) get the consent state from server, 3) get extra `sharedData` from server to share with AMP components.
+`checkConsentHref`: Instructs AMP to make a CORS POST request with credentials to the specified URL to remotely configure the consent. The purpose can be any of 1) determine if consent is required for the user, 2) get the consent state from server, 3) get extra `sharedData` from server to share with AMP components.
 
 ##### Request
 
