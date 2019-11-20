@@ -150,14 +150,28 @@ export class ConsentConfig {
       }
     }
 
-    // (TODO): Migrate `promptIfUnknownForGeoGroup`
-    // E.g: promptIfUnknownForGeo: geoGroup -> geoOverride: {geoGroup: {consentRequired: true}}
     userAssert(
       config['checkConsentHref'] ||
         config['promptIfUnknownForGeoGroup'] ||
         config['consentRequired'],
       'neither checkConsentHref, promptIfUnknownForGeoGroup, nor consentRequired is defined'
     );
+
+    // consentRequired must not be null
+    if (config['checkConsentHref'] && !config['consentRequired']) {
+      config['consentRequired'] = 'remote';
+    } else if (!config['consentRequired']) {
+      config['consentRequired'] = false;
+    }
+
+    const group = config['promptIfUnknownForGeoGroup'];
+    if (group) {
+      config['geoOverride'] = {
+        group: {
+          'consentRequired': true,
+        },
+      };
+    }
 
     return config;
   }

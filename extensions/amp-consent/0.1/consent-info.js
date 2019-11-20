@@ -282,3 +282,20 @@ export function getConsentStateValue(enumState) {
 
   return 'unknown';
 }
+
+/**
+ * Convert the string into CONSENT_ITEM_STATE
+ * @param {string} value
+ * @return {!CONSENT_ITEM_STATE}
+ */
+export function getConsentStateForValue(value) {
+  if (value === 'accepted') {
+    return CONSENT_ITEM_STATE.ACCEPTED;
+  }
+
+  if (value === 'rejected') {
+    return CONSENT_ITEM_STATE.REJECTED;
+  }
+
+  return CONSENT_ITEM_STATE.UNKNOWN;
+}
