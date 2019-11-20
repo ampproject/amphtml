@@ -155,9 +155,7 @@ export class ConsentConfig {
       }
     }
 
-    // (TODO): Assert that if we're using new version we have consentRequired
-    // otherwise we're using old version and we should migrate to new
-    // version here.
+    // (TODO): Migrate from prompIfUnknownForGeo to geoOverride
     // E.g: promptIfUnknownForGeo: geoGroup -> geoOverride: {geoGroup: {consentRequired: true}}
 
     // Do I need to guard against incorrect geoOverride?
@@ -170,20 +168,18 @@ export class ConsentConfig {
    */
   mergeGeoOverride_(config) {
     if (config['geoOverride']) {
-      Services.geoForDocOrNull(this.element_).then(geo => {
-        userAssert(geo, 'requires <amp-geo> to use geoOVerride');
-        const geoGroups = Object.keys(this.consentConfig_['geoOverride']);
+      Services.geoForDocOrNull(this.element_).then(geoService => {
+        userAssert(geoService, 'requires <amp-geo> to use geoOVerride');
+        const geoGroups = Object.keys(config['geoOverride']);
         for (let i = 0; i < geoGroups.length; i++) {
           // Maybe I should be using merge configs here?
-          if (geo.isInCountryGroup(geoGroups[i]) == GEO_IN_GROUP.IN) {
-            this.consentConfig_['consentRequired'] =
-              this.consentConfig_['geoOverride'][geoGroups[i]][
-                'consentRequired'
-              ] || this.consentConfig_['consentRequired'];
-            this.consentConfig_['checkConsentHref'] =
-              this.consentConfig_['geoOverride'][geoGroups[i]][
-                'checkConsentHref'
-              ] || this.consentConfig_['checkConsentHref'];
+          if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+            config['consentRequired'] =
+              config['geoOverride'][geoGroups[i]]['consentRequired'] ||
+              config['consentRequired'];
+            config['checkConsentHref'] =
+              config['geoOverride'][geoGroups[i]]['checkConsentHref'] ||
+              config['checkConsentHref'];
           }
         }
         delete config['geoOverride'];
