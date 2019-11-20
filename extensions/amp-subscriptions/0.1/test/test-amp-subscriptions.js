@@ -99,33 +99,33 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('scenic-2017.appspot.com:news', true);
-    sandbox
+    env.sandbox
       .stub(PageConfigResolver.prototype, 'resolveConfig')
       .callsFake(function() {
         configResolver = this;
         return Promise.resolve(pageConfig);
       });
-    sandbox
+    env.sandbox
       .stub(subscriptionService, 'getPlatformConfig_')
       .callsFake(() => Promise.resolve(serviceConfig));
-    analyticsEventStub = sandbox.stub(
+    analyticsEventStub = env.sandbox.stub(
       subscriptionService.subscriptionAnalytics_,
       'event'
     );
     // isStoryDocument needs to resolve synchronously because of how some of the
     // tests are built.
     isStory = false;
-    sandbox
+    env.sandbox
       .stub(utilsStory, 'isStoryDocument')
       .returns({then: fn => fn(isStory)});
   });
 
   it('should call `initialize_` on start', () => {
-    const localPlatformStub = sandbox.stub(
+    const localPlatformStub = env.sandbox.stub(
       subscriptionService,
       'initializeLocalPlatforms_'
     );
-    const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
+    const initializeStub = env.sandbox.spy(subscriptionService, 'initialize_');
     subscriptionService.start();
     expect(initializeStub).to.be.calledOnce;
     return subscriptionService.initialize_().then(() => {
@@ -138,8 +138,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
   describe('start', () => {
     it('should setup store and page on start', () => {
-      sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
-      const renderLoadingStub = sandbox.spy(
+      env.sandbox.stub(subscriptionService, 'initializeLocalPlatforms_');
+      const renderLoadingStub = env.sandbox.spy(
         subscriptionService.renderer_,
         'toggleLoading'
       );
@@ -156,15 +156,15 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
 
     it('should start auth flow for short circuiting', () => {
-      const authFlowStub = sandbox.stub(
+      const authFlowStub = env.sandbox.stub(
         subscriptionService,
         'startAuthorizationFlow_'
       );
-      const delegateStub = sandbox.stub(
+      const delegateStub = env.sandbox.stub(
         subscriptionService,
         'delegateAuthToViewer_'
       );
-      sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
         subscriptionService.platformConfig_ = serviceConfig;
         subscriptionService.pageConfig_ = pageConfig;
         subscriptionService.doesViewerProvideAuth_ = true;
@@ -178,11 +178,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
 
     it('should skip everything and unlock document for alwaysGrant', () => {
-      const processStateStub = sandbox.stub(
+      const processStateStub = env.sandbox.stub(
         subscriptionService,
         'processGrantState_'
       );
-      sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
         subscriptionService.platformConfig_ = {
           alwaysGrant: true,
         };
@@ -199,19 +199,19 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       'should not skip everything and unlock document for alwaysGrant ' +
         'if viewer provides authorization',
       () => {
-        const processStateStub = sandbox.stub(
+        const processStateStub = env.sandbox.stub(
           subscriptionService,
           'processGrantState_'
         );
-        const authFlowStub = sandbox.stub(
+        const authFlowStub = env.sandbox.stub(
           subscriptionService,
           'startAuthorizationFlow_'
         );
-        const delegateStub = sandbox.stub(
+        const delegateStub = env.sandbox.stub(
           subscriptionService,
           'delegateAuthToViewer_'
         );
-        sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
           subscriptionService.platformConfig_ = {
             alwaysGrant: true,
           };
@@ -231,15 +231,15 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     it('should delay the platform selection and activation if story', () => {
       isStory = true;
 
-      const processStateStub = sandbox.stub(
+      const processStateStub = env.sandbox.stub(
         subscriptionService,
         'processGrantState_'
       );
-      const authFlowStub = sandbox.stub(
+      const authFlowStub = env.sandbox.stub(
         subscriptionService,
         'startAuthorizationFlow_'
       );
-      const delegateStub = sandbox.stub(
+      const delegateStub = env.sandbox.stub(
         subscriptionService,
         'delegateAuthToViewer_'
       );
@@ -258,7 +258,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
     beforeEach(() => {
       return Services.cidForDoc(ampdoc).then(cid => {
-        cidGet = sandbox
+        cidGet = env.sandbox
           .stub(cid, 'get')
           .callsFake(() => Promise.resolve('cid1'));
       });
@@ -316,16 +316,16 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       grantReason: GrantReason.SUBSCRIBER,
     };
     const entitlement = Entitlement.parseFromJson(entitlementData);
-    const factoryStub = sandbox.stub().callsFake(() => platform);
+    const factoryStub = env.sandbox.stub().callsFake(() => platform);
 
     subscriptionService.platformStore_ = new PlatformStore([
       serviceData.serviceId,
     ]);
 
-    platform.getEntitlements = sandbox
+    platform.getEntitlements = env.sandbox
       .stub()
       .callsFake(() => Promise.resolve(entitlement));
-    platform.getServiceId = sandbox.stub().callsFake(() => 'local');
+    platform.getServiceId = env.sandbox.stub().callsFake(() => 'local');
 
     subscriptionService.platformConfig_ = serviceConfig;
     subscriptionService.registerPlatform(serviceData.serviceId, factoryStub);
@@ -423,23 +423,23 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         : null;
       const granted = !!grantEntitlementSpec;
       const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
-      sandbox
+      env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
         .callsFake(() => Promise.resolve(granted));
-      sandbox
+      env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
         .callsFake(() => Promise.resolve(grantEntitlement));
       subscriptionService.platformStore_.resolveEntitlement(
         entitlementSpec.source,
         entitlement
       );
-      sandbox
+      env.sandbox
         .stub(subscriptionService.platformStore_, 'selectPlatform')
         .callsFake(() => Promise.resolve(localPlatform));
     }
 
     it('should wait for grantStatus/ent and selectPlatform promise', () => {
-      sandbox.stub(subscriptionService, 'fetchEntitlements_');
+      env.sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
@@ -450,7 +450,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
         const selectPlatformStub =
           subscriptionService.platformStore_.selectPlatform;
-        const activateStub = sandbox.stub(localPlatform, 'activate');
+        const activateStub = env.sandbox.stub(localPlatform, 'activate');
         expect(localPlatform).to.be.not.null;
         return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
@@ -477,7 +477,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
 
     it('should activate with a different grant entitlement', () => {
-      sandbox.stub(subscriptionService, 'fetchEntitlements_');
+      env.sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
@@ -495,7 +495,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
         const selectPlatformStub =
           subscriptionService.platformStore_.selectPlatform;
-        const activateStub = sandbox.stub(localPlatform, 'activate');
+        const activateStub = env.sandbox.stub(localPlatform, 'activate');
         expect(localPlatform).to.be.not.null;
         return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(activateStub).to.be.calledOnce;
@@ -522,7 +522,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
 
     it('should call selectPlatform with preferViewerSupport config', () => {
-      sandbox.stub(subscriptionService, 'fetchEntitlements_');
+      env.sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
@@ -540,13 +540,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
 
     it('should send paywall activation event', () => {
-      sandbox.stub(subscriptionService, 'fetchEntitlements_');
+      env.sandbox.stub(subscriptionService, 'fetchEntitlements_');
       subscriptionService.start();
       subscriptionService.viewTrackerPromise_ = Promise.resolve();
       return subscriptionService.initialize_().then(() => {
         resolveRequiredPromises({granted: false});
         const localPlatform = subscriptionService.platformStore_.getLocalPlatform();
-        sandbox.stub(localPlatform, 'activate');
+        env.sandbox.stub(localPlatform, 'activate');
         return subscriptionService.selectAndActivatePlatform_().then(() => {
           expect(analyticsEventStub).to.be.calledWith(
             SubscriptionAnalyticsEvents.PLATFORM_ACTIVATED,
@@ -574,14 +574,14 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   describe('startAuthorizationFlow_', () => {
     it('should start grantStatus and platform selection', () => {
       subscriptionService.platformStore_ = new PlatformStore(products);
-      const getGrantStatusStub = sandbox
+      const getGrantStatusStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
         .callsFake(() => Promise.resolve());
-      const selectAndActivateStub = sandbox.stub(
+      const selectAndActivateStub = env.sandbox.stub(
         subscriptionService,
         'selectAndActivatePlatform_'
       );
-      const performPingbackStub = sandbox.stub(
+      const performPingbackStub = env.sandbox.stub(
         subscriptionService,
         'performPingback_'
       );
@@ -595,10 +595,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
     it('should not call selectAndActivatePlatform based on param', () => {
       subscriptionService.platformStore_ = new PlatformStore(products);
-      const getGrantStatusStub = sandbox
+      const getGrantStatusStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
         .callsFake(() => Promise.resolve());
-      const selectAndActivateStub = sandbox.stub(
+      const selectAndActivateStub = env.sandbox.stub(
         subscriptionService,
         'selectAndActivatePlatform_'
       );
@@ -614,7 +614,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     let firstVisibleStub;
     beforeEach(() => {
       serviceAdapter = new ServiceAdapter(subscriptionService);
-      firstVisibleStub = sandbox
+      firstVisibleStub = env.sandbox
         .stub(ampdoc, 'whenFirstVisible')
         .callsFake(() => Promise.resolve());
       subscriptionService.pageConfig_ = pageConfig;
@@ -629,10 +629,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(firstVisibleStub).to.be.called;
     });
     it('should report failure if platform timeouts', done => {
-      sandbox
+      env.sandbox
         .stub(platform, 'getEntitlements')
         .callsFake(() => new Promise(resolve => setTimeout(resolve, 8000)));
-      const failureStub = sandbox.stub(
+      const failureStub = env.sandbox.stub(
         subscriptionService.platformStore_,
         'reportPlatformFailureAndFallback'
       );
@@ -643,10 +643,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     }).timeout(7000);
 
     it('should report failure if platform reject promise', done => {
-      sandbox
+      env.sandbox
         .stub(platform, 'getEntitlements')
         .callsFake(() => Promise.reject());
-      const failureStub = sandbox.stub(
+      const failureStub = env.sandbox.stub(
         subscriptionService.platformStore_,
         'reportPlatformFailureAndFallback'
       );
@@ -666,10 +666,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         granted: true,
         grantReason: GrantReason.SUBSCRIBER,
       });
-      sandbox
+      env.sandbox
         .stub(platform, 'getEntitlements')
         .callsFake(() => Promise.resolve(entitlement));
-      const resolveStub = sandbox.stub(
+      const resolveStub = env.sandbox.stub(
         subscriptionService.platformStore_,
         'resolveEntitlement'
       );
@@ -695,11 +695,11 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.platformStore_ = new PlatformStore(['local']);
       subscriptionService.initializeLocalPlatforms_(service);
       subscriptionService.platformStore_.resolvePlatform('local', platform);
-      const resetSubscriptionPlatformSpy = sandbox.spy(
+      const resetSubscriptionPlatformSpy = env.sandbox.spy(
         subscriptionService.platformStore_,
         'resetPlatformStore'
       );
-      sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
+      env.sandbox.stub(subscriptionService, 'startAuthorizationFlow_');
       const origPlatforms = subscriptionService.platformStore_.serviceIds_;
       subscriptionService.resetPlatforms();
       expect(resetSubscriptionPlatformSpy).to.be.calledOnce;
@@ -717,14 +717,14 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.pageConfig_ = pageConfig;
       subscriptionService.platformConfig_ = serviceConfig;
       subscriptionService.doesViewerProvideAuth_ = true;
-      sandbox
+      env.sandbox
         .stub(subscriptionService, 'initialize_')
         .callsFake(() => Promise.resolve());
       sendMessageAwaitResponsePromise = Promise.resolve();
-      sandbox
+      env.sandbox
         .stub(subscriptionService.viewer_, 'sendMessageAwaitResponse')
         .callsFake(() => sendMessageAwaitResponsePromise);
-      fetchEntitlementsStub = sandbox.stub(
+      fetchEntitlementsStub = env.sandbox.stub(
         subscriptionService,
         'fetchEntitlements_'
       );
@@ -788,18 +788,18 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       subscriptionService.doesViewerProvidePaywall_ = true;
       subscriptionService.doesViewerProvideAuth_ = true;
       subscriptionService.platformStore_ = new PlatformStore(products);
-      const getGrantStatusStub = sandbox
+      const getGrantStatusStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantStatus')
         .callsFake(() => Promise.resolve());
-      const selectAndActivateStub = sandbox.stub(
+      const selectAndActivateStub = env.sandbox.stub(
         subscriptionService,
         'selectAndActivatePlatform_'
       );
-      const performPingbackStub = sandbox.stub(
+      const performPingbackStub = env.sandbox.stub(
         subscriptionService,
         'performPingback_'
       );
-      const setGrantStateStub = sandbox.stub(
+      const setGrantStateStub = env.sandbox.stub(
         subscriptionService.renderer_,
         'setGrantState'
       );
@@ -823,7 +823,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       yield subscriptionService.initialize_();
       // Local platform store not created until initialization.
       const platformStore = subscriptionService.platformStore_;
-      sandbox.stub(platformStore, 'reportPlatformFailureAndFallback');
+      env.sandbox.stub(platformStore, 'reportPlatformFailureAndFallback');
       rejecter();
       // Wait for sendMessageAwaitResponse() to be rejected.
       yield sendMessageAwaitResponsePromise;
@@ -848,7 +848,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         'local',
         new SubscriptionPlatform()
       );
-      const entitlementStub = sandbox
+      const entitlementStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
         .callsFake(() => Promise.resolve(entitlement));
       return subscriptionService.performPingback_().then(() => {
@@ -868,10 +868,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       const platform = new SubscriptionPlatform();
       platform.isPingbackEnabled = () => true;
       subscriptionService.platformStore_.resolvePlatform('local', platform);
-      sandbox
+      env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
         .callsFake(() => Promise.resolve(entitlement));
-      const pingbackStub = sandbox.stub(platform, 'pingback');
+      const pingbackStub = env.sandbox.stub(platform, 'pingback');
       return subscriptionService.performPingback_().then(() => {
         expect(pingbackStub).to.be.calledWith(entitlement);
       });
@@ -890,10 +890,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       platform.isPingbackEnabled = () => true;
       platform.pingbackReturnsAllEntitlements = () => true;
       subscriptionService.platformStore_.resolvePlatform('local', platform);
-      const entitlementStub = sandbox
+      const entitlementStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'getAllPlatformsEntitlements')
         .callsFake(() => Promise.resolve([entitlement]));
-      const pingbackStub = sandbox.stub(platform, 'pingback');
+      const pingbackStub = env.sandbox.stub(platform, 'pingback');
       return subscriptionService.performPingback_().then(() => {
         expect(entitlementStub).to.be.called;
         expect(pingbackStub).to.be.calledWith([entitlement]);
@@ -906,10 +906,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       const platform = new SubscriptionPlatform();
       platform.isPingbackEnabled = () => true;
       subscriptionService.platformStore_.resolvePlatform('local', platform);
-      sandbox
+      env.sandbox
         .stub(subscriptionService.platformStore_, 'getGrantEntitlement')
         .callsFake(() => Promise.resolve(null));
-      const pingbackStub = sandbox.stub(platform, 'pingback');
+      const pingbackStub = env.sandbox.stub(platform, 'pingback');
       return subscriptionService.performPingback_().then(() => {
         expect(pingbackStub).to.be.calledWith(Entitlement.empty('local'));
       });
@@ -934,7 +934,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
   describe('action delegation', () => {
     it('should call delegateActionToService with serviceId local', () => {
-      const delegateStub = sandbox.stub(
+      const delegateStub = env.sandbox.stub(
         subscriptionService,
         'delegateActionToService'
       );
@@ -950,8 +950,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         null
       );
       const platform = new SubscriptionPlatform();
-      const executeActionStub = sandbox.stub(platform, 'executeAction');
-      const getPlatformStub = sandbox
+      const executeActionStub = env.sandbox.stub(platform, 'executeAction');
+      const getPlatformStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'onPlatformResolves')
         .callsFake((serviceId, callback) => callback(platform));
       const action = action;
@@ -974,10 +974,10 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         'local',
         'swg-google',
       ]);
-      const whenResolveStub = sandbox
+      const whenResolveStub = env.sandbox
         .stub(subscriptionService.platformStore_, 'onPlatformResolves')
         .callsFake((serviceId, callback) => callback(platform));
-      const decorateUIStub = sandbox.stub(platform, 'decorateUI');
+      const decorateUIStub = env.sandbox.stub(platform, 'decorateUI');
       subscriptionService.decorateServiceAction(element, 'swg-google', 'login');
       expect(whenResolveStub).to.be.calledWith(platform.getServiceId());
       expect(decorateUIStub).to.be.calledWith(element);
@@ -990,7 +990,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         'local',
         'swg-google',
       ]);
-      const loginStub = sandbox.stub(
+      const loginStub = env.sandbox.stub(
         subscriptionService.platformStore_,
         'selectPlatformForLogin'
       );
@@ -1021,7 +1021,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
 
     it('should try to decrypt document', () => {
-      const stub = sandbox.stub(
+      const stub = env.sandbox.stub(
         subscriptionService.cryptoHandler_,
         'tryToDecryptDocument'
       );
@@ -1039,7 +1039,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           test: 'a1',
         },
       });
-      const stub = sandbox.stub(
+      const stub = env.sandbox.stub(
         subscriptionService.cryptoHandler_,
         'tryToDecryptDocument'
       );
@@ -1067,7 +1067,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
 
     it('should return local reader ID', () => {
-      const stub = sandbox
+      const stub = env.sandbox
         .stub(subscriptionService, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
       return subscriptionService.getAccessReaderId().then(readerId => {
