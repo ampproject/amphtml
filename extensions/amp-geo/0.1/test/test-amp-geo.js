@@ -65,7 +65,7 @@ describes.realWin(
     let userErrorStub;
 
     beforeEach(() => {
-      userErrorStub = sandbox.stub(user(), 'error');
+      userErrorStub = env.sandbox.stub(user(), 'error');
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
@@ -376,7 +376,7 @@ describes.realWin(
 
     it('geo should log an error if unpatched in production. ', () => {
       expectAsyncConsoleError(/GEONOTPATCHED/);
-      sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
       addConfigElement('script');
 
       geo.buildCallback();

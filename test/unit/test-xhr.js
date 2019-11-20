@@ -30,7 +30,6 @@ describe
   .configure()
   .skipSafari()
   .run('XHR', function() {
-    let sandbox;
     let ampdocServiceForStub;
     let ampdoc;
     let ampdocViewerStub;
@@ -63,7 +62,7 @@ describe
     ];
 
     function setupMockXhr() {
-      const mockXhr = sandbox.useFakeXMLHttpRequest();
+      const mockXhr = window.sandbox.useFakeXMLHttpRequest();
       xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
     }
 
@@ -77,8 +76,7 @@ describe
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+      ampdocServiceForStub = window.sandbox.stub(Services, 'ampdocServiceFor');
       ampdoc = {
         getRootNode: () => null,
         whenFirstVisible: () => Promise.resolve(),
@@ -88,14 +86,10 @@ describe
         getAmpDoc: () => ampdoc,
         getSingleDoc: () => ampdoc,
       });
-      ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
+      ampdocViewerStub = window.sandbox.stub(Services, 'viewerForDoc');
       ampdocViewerStub.returns({});
 
       location.href = 'https://acme.com/path';
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     scenarios.forEach(test => {
@@ -153,14 +147,14 @@ describe
 
           it('should allow FormData as body', () => {
             const fakeWin = null;
-            sandbox.stub(Services, 'platformFor').returns({
+            window.sandbox.stub(Services, 'platformFor').returns({
               isIos() {
                 return false;
               },
             });
 
             const formData = createFormDataWrapper(fakeWin);
-            sandbox.stub(JSON, 'stringify');
+            window.sandbox.stub(JSON, 'stringify');
             formData.append('name', 'John Miller');
             formData.append('age', 56);
             const post = xhr.fetchJson.bind(xhr, '/post', {
@@ -263,13 +257,13 @@ describe
               test.win.fetch.restore();
             });
             it('should not call fetch if view is not visible ', () => {
-              const fetchCall = sandbox.spy(test.win, 'fetch');
+              const fetchCall = window.sandbox.spy(test.win, 'fetch');
               ampdoc.whenFirstVisible = () => Promise.reject();
               xhr.fetchJson('/get', {ampCors: false});
               expect(fetchCall.notCalled).to.be.true;
             });
             it('should call fetch if view is visible ', () => {
-              const fetchCall = sandbox.spy(test.win, 'fetch');
+              const fetchCall = window.sandbox.spy(test.win, 'fetch');
               ampdoc.whenFirstVisible = () => Promise.resolve();
               const fetch = xhr.fetchJson('/get', {ampCors: false});
               fetch.then(() => {
@@ -375,7 +369,7 @@ describe
         });
 
         it.skip('should do simple JSON fetch', () => {
-          sandbox.stub(user(), 'assert');
+          window.sandbox.stub(user(), 'assert');
           return xhr
             .fetchJson(`${baseUrl}/get?k=v1`)
             .then(res => res.json())
@@ -488,7 +482,7 @@ describe
 
         beforeEach(() => {
           xhr = xhrServiceForTesting(test.win);
-          fetchStub = sandbox
+          fetchStub = window.sandbox
             .stub(xhr, 'fetchAmpCors_')
             .callsFake(() => Promise.resolve(new Response(TEST_TEXT)));
         });
@@ -679,7 +673,10 @@ describe
           sendMessageAwaitResponse: getDefaultResponsePromise,
           whenFirstVisible: () => Promise.resolve(),
         };
-        sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
+        sendMessageStub = window.sandbox.stub(
+          viewer,
+          'sendMessageAwaitResponse'
+        );
         sendMessageStub.returns(getDefaultResponsePromise());
         ampdocViewerStub.returns(viewer);
         interceptionEnabledWin = {
@@ -738,7 +735,7 @@ describe
       });
 
       it('should not intercept if viewer is not capable', () => {
-        sandbox
+        window.sandbox
           .stub(viewer, 'hasCapability')
           .withArgs('xhrInterceptor')
           .returns(false);
@@ -750,7 +747,9 @@ describe
       });
 
       it('should not intercept if viewer untrusted and non-dev mode', () => {
-        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+        window.sandbox
+          .stub(viewer, 'isTrustedViewer')
+          .returns(Promise.resolve(false));
         interceptionEnabledWin.AMP_DEV_MODE = false;
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -777,8 +776,10 @@ describe
       });
 
       it('should intercept if viewer untrusted but in local dev mode', () => {
-        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-        sandbox.stub(mode, 'getMode').returns({localDev: true});
+        window.sandbox
+          .stub(viewer, 'isTrustedViewer')
+          .returns(Promise.resolve(false));
+        window.sandbox.stub(mode, 'getMode').returns({localDev: true});
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -788,9 +789,11 @@ describe
       });
 
       it('should intercept if untrusted-xhr-interception experiment enabled', () => {
-        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-        sandbox.stub(mode, 'getMode').returns({localDev: false});
-        sandbox
+        window.sandbox
+          .stub(viewer, 'isTrustedViewer')
+          .returns(Promise.resolve(false));
+        window.sandbox.stub(mode, 'getMode').returns({localDev: false});
+        window.sandbox
           .stub(viewer, 'hasCapability')
           .withArgs('xhrInterceptor')
           .returns(true);
@@ -808,7 +811,9 @@ describe
       });
 
       it('should intercept if non-dev mode but viewer trusted', () => {
-        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(true));
+        window.sandbox
+          .stub(viewer, 'isTrustedViewer')
+          .returns(Promise.resolve(true));
         interceptionEnabledWin.AMP_DEV_MODE = false;
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -826,7 +831,7 @@ describe
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
               'xhr',
-              sinon.match.any
+              window.sandbox.match.any
             )
           );
       });
@@ -836,7 +841,7 @@ describe
 
         return xhr.fetch('https://www.some-url.org/some-resource/').then(() =>
           expect(sendMessageStub).to.have.been.calledWithMatch(
-            sinon.match.any,
+            window.sandbox.match.any,
             {
               originalRequest: {
                 input:
@@ -863,7 +868,7 @@ describe
           })
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
-              sinon.match.any,
+              window.sandbox.match.any,
               {
                 originalRequest: {
                   input:
@@ -886,7 +891,7 @@ describe
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
         const fakeWin = null;
-        sandbox.stub(Services, 'platformFor').returns({
+        window.sandbox.stub(Services, 'platformFor').returns({
           isIos() {
             return false;
           },
@@ -904,7 +909,7 @@ describe
           })
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
-              sinon.match.any,
+              window.sandbox.match.any,
               {
                 originalRequest: {
                   input:

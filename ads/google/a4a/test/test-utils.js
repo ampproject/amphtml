@@ -112,16 +112,6 @@ describe('Google A4A utils', () => {
   });
 
   describe('#ActiveView AmpAnalytics integration', () => {
-    let sandbox;
-
-    beforeEach(() => {
-      sandbox = sinon.sandbox;
-    });
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-
     const builtConfig = {
       transport: {beacon: false, xhrpost: false},
       requests: {
@@ -194,7 +184,9 @@ describe('Google A4A utils', () => {
     });
 
     it('should add the correct CSI signals', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({pageViewId: 777});
+      window.sandbox
+        .stub(Services, 'documentInfoForDoc')
+        .returns({pageViewId: 777});
       const mockElement = {
         getAttribute: function(name) {
           switch (name) {
@@ -315,16 +307,6 @@ describe('Google A4A utils', () => {
   });
 
   describe('#googleAdUrl', () => {
-    let sandbox;
-
-    beforeEach(() => {
-      sandbox = sinon.sandbox;
-    });
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-
     it('should set ad position', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
@@ -338,7 +320,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
             expect(url1).to.match(/ady=11/);
@@ -359,7 +341,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         const getRect = () => {
           return {'width': 100, 'height': 200};
         };
@@ -368,7 +350,7 @@ describe('Google A4A utils', () => {
         };
         const getScrollLeft = () => 12;
         const getScrollTop = () => 34;
-        const viewportStub = sandbox.stub(Services, 'viewportForDoc');
+        const viewportStub = window.sandbox.stub(Services, 'viewportForDoc');
         viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
@@ -392,7 +374,7 @@ describe('Google A4A utils', () => {
           'data-experiment-id': '123,456',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, ['789', '098']).then(url1 => {
             expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
@@ -412,7 +394,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
         return fixture.addElement(elem).then(() => {
@@ -434,7 +416,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url => {
@@ -456,8 +438,8 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
-        const createElementStub = sandbox.stub(
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        const createElementStub = window.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -485,8 +467,8 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
-        const createElementStub = sandbox.stub(
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        const createElementStub = window.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -512,9 +494,9 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.SVGElement = undefined;
-        const createElementStub = sandbox.stub(
+        const createElementStub = window.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -542,11 +524,11 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
-        sandbox
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        window.sandbox
           .stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
           .returns(new Promise(() => {}));
-        const createElementStub = sandbox.stub(
+        const createElementStub = window.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -571,7 +553,7 @@ describe('Google A4A utils', () => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, fixture.ampdoc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
@@ -663,11 +645,11 @@ describe('Google A4A utils', () => {
     });
   });
 
-  describes.fakeWin('#getIdentityTokenRequestUrl', {}, () => {
+  describes.fakeWin('#getIdentityTokenRequestUrl', {}, env => {
     let doc;
     let fakeWin;
     beforeEach(() => {
-      const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
+      const documentInfoStub = env.sandbox.stub(Services, 'documentInfoForDoc');
       doc = {};
       fakeWin = {location: {}};
       documentInfoStub
@@ -719,7 +701,7 @@ describe('Google A4A utils', () => {
   describes.fakeWin('#getIdentityToken', {amp: true, mockFetch: true}, env => {
     beforeEach(() => {
       installXhrService(env.win);
-      const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
+      const documentInfoStub = env.sandbox.stub(Services, 'documentInfoForDoc');
       documentInfoStub
         .withArgs(env.ampdoc)
         .returns({canonicalUrl: 'http://f.blah.com?some_site'});
@@ -818,7 +800,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should handle fetch error', () => {
-      sandbox
+      env.sandbox
         .stub(Services, 'xhrFor')
         .returns({fetchJson: () => Promise.reject('some network failure')});
       return getIdentityToken(env.win, env.ampdoc).then(result =>
@@ -837,7 +819,7 @@ describe('Google A4A utils', () => {
           validLifetimeSecs: '5678',
         })
       );
-      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
         })
@@ -850,7 +832,7 @@ describe('Google A4A utils', () => {
     it.configure()
       .skipFirefox()
       .run('should not fetch if INSUFFICIENT consent', () => {
-        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
             whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
           })
@@ -863,7 +845,7 @@ describe('Google A4A utils', () => {
     it.configure()
       .skipFirefox()
       .run('should not fetch if UNKNOWN consent', () => {
-        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
             whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
           })
@@ -876,11 +858,9 @@ describe('Google A4A utils', () => {
 
   describe('variables for amp-analytics', () => {
     let a4a;
-    let sandbox;
     let ampdoc;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {
@@ -893,10 +873,6 @@ describe('Google A4A utils', () => {
         element.getAmpDoc = () => ampdoc;
         a4a = new MockA4AImpl(element);
       });
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should include the correlator', () => {
@@ -934,7 +910,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should include viewer lastVisibleTime', () => {
-      sandbox.stub(ampdoc, 'getLastVisibleTime').returns(300);
+      window.sandbox.stub(ampdoc, 'getLastVisibleTime').returns(300);
 
       const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
       expect(vars['viewerLastVisibleTime']).to.be.a('number');
@@ -983,7 +959,7 @@ describe('Google A4A utils', () => {
 
     it('should calculate correlator from PVID and CID if possible', () => {
       const pageViewId = '818181';
-      sandbox.stub(Services, 'documentInfoForDoc').callsFake(() => {
+      env.sandbox.stub(Services, 'documentInfoForDoc').callsFake(() => {
         return {pageViewId};
       });
       const cid = '12345678910';
@@ -1021,7 +997,7 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       createResource({type: 'blah'}),
       createResource({}, 'amp-foo'),
     ];
-    sandbox
+    env.sandbox
       .stub(IniLoad, 'getMeasuredResources')
       .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(ampdoc, 'doubleclick', () => 'foo').then(
@@ -1051,7 +1027,7 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       stickyResource.element
     );
     ampAdResource.element.createdCallback = true;
-    sandbox
+    env.sandbox
       .stub(IniLoad, 'getMeasuredResources')
       .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
@@ -1082,7 +1058,7 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       stickyResource.element
     );
     ampAdResource.element.createdCallback = true;
-    sandbox
+    env.sandbox
       .stub(IniLoad, 'getMeasuredResources')
       .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', element =>

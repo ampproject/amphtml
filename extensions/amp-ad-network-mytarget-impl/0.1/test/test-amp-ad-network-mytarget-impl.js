@@ -86,7 +86,7 @@ describes.realWin(
       mytargetImplElem.setAttribute('type', 'mytarget');
       mytargetImplElem.setAttribute('data-ad-slot', '197378');
       mytargetImplElem.setAttribute('data-use-a4a', 'true');
-      sandbox
+      env.sandbox
         .stub(AmpAdNetworkMyTargetImpl.prototype, 'getSigningServiceNames')
         .callsFake(() => {
           return ['cloudflare'];
