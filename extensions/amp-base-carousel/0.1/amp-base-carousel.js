@@ -498,13 +498,13 @@ class AmpCarousel extends AMP.BaseElement {
   updateControls_(controls) {
     switch (controls) {
       case 'always':
-        this.controls_ = controls.ALWAYS;
+        this.controls_ = Controls.ALWAYS;
         break;
       case 'never':
-        this.controls_ = controls.NEVER;
+        this.controls_ = Controls.NEVER;
         break;
       default:
-        this.controls_ = controls.AUTO;
+        this.controls_ = Controls.AUTO;
         break;
     }
     this.updateUi_();
