@@ -15,6 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getVariableService} from './variable-service';
 import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
@@ -133,6 +134,7 @@ export class StoryAnalyticsService {
    */
   triggerEvent(eventType, element = null) {
     this.incrementPageEventCount_(eventType);
+
     triggerAnalyticsEvent(
       this.element_,
       eventType,
@@ -158,6 +160,14 @@ export class StoryAnalyticsService {
 
     if (element) {
       details.tagName = element.tagName.toLowerCase();
+      Object.assign(
+        vars,
+        getDataParamsFromAttributes(
+          element,
+          /* computeParamNameFunc */ undefined,
+          /^vars(.+)/
+        )
+      );
     }
 
     return /** @type {!JsonObject} */ (Object.assign(
