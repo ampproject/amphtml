@@ -260,8 +260,12 @@ export class ChildLayoutManager {
    */
   processNearingChanges_(entries) {
     entries
-      .filter(({isIntersecting}) => isIntersecting)
-      .forEach(({target}) => {
+      .filter(entry => {
+        const {isIntersecting} = entry;
+        return isIntersecting;
+      })
+      .forEach(entry => {
+        const {target} = entry;
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
       });
 
@@ -277,8 +281,12 @@ export class ChildLayoutManager {
    */
   processBackingAwayChanges_(entries) {
     entries
-      .filter(({isIntersecting}) => !isIntersecting)
-      .forEach(({target}) => {
+      .filter(entry => {
+        const {isIntersecting} = entry;
+        return !isIntersecting;
+      })
+      .forEach(entry => {
+        const {target} = entry;
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
       });
 
@@ -293,7 +301,8 @@ export class ChildLayoutManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   processInViewportChanges_(entries) {
-    entries.forEach(({target, isIntersecting}) => {
+    entries.forEach(entry => {
+      const {target, isIntersecting} = entry;
       target[IN_VIEWPORT_FLAG] = isIntersecting
         ? ViewportChangeState.ENTER
         : ViewportChangeState.LEAVE;
