@@ -76,7 +76,7 @@ public final class TagSpecUtils {
         }
 
         final String extensionSpecUrlPrefix = "https://amp.dev/documentation/components/";
-        if (tagSpec.getExtensionSpec() != null && tagSpec.getExtensionSpec().getName() != null) {
+        if (tagSpec.hasExtensionSpec() && tagSpec.getExtensionSpec().getName() != null) {
             return extensionSpecUrlPrefix + tagSpec.getExtensionSpec().getName();
         }
 
@@ -97,7 +97,7 @@ public final class TagSpecUtils {
      * @return return the tag spec name.
      */
     public static String getTagSpecName(@Nonnull final Validator.TagSpec tagSpec) {
-        return (tagSpec.getSpecName() != null) ? tagSpec.getSpecName() : tagSpec.getTagName().toLowerCase();
+        return (tagSpec.hasSpecName()) ? tagSpec.getSpecName() : tagSpec.getTagName().toLowerCase();
     }
 
     /**

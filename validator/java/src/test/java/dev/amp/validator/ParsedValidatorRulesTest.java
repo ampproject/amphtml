@@ -61,6 +61,8 @@ public class ParsedValidatorRulesTest {
                 .addAlsoRequiresTagWarning("amp-ad extension .js script")
                 .setSpecName("SCRIPT")
                 .setTagName("SCRIPT")
+                .addRequires("requires")
+                .addExcludes("excludes")
                 .setMandatory(true)
                 .build());
         // different html format
@@ -73,16 +75,25 @@ public class ParsedValidatorRulesTest {
                 .build());
         rulesBuilder.addTags(Validator.TagSpec.newBuilder()
                 .addHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
+                .setMandatoryAlternatives("alternatives")
                 .setSpecName("AMP-CAROUSEL lightbox")
                 .build());
         rulesBuilder.addTags(Validator.TagSpec.newBuilder()
                 .addHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
+                .setMandatory(true)
+                .addDisabledBy("transformed")
                 .setSpecName("amp-consent [type]")
+                .setMandatoryAlternatives("not-alternatives")
                 .build());
         rulesBuilder.addTags(Validator.TagSpec.newBuilder()
                 .setTagName("$REFERENCE_POINT")
                 .setSpecName("AMP-SELECTOR option")
                 .addHtmlFormat(Validator.HtmlFormat.Code.AMP)
+                .build());
+        rulesBuilder.addTags(Validator.TagSpec.newBuilder()
+                .addHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
+                .setSpecName("amp-ad extension .js script")
+                .setTagName("amp-ad extension .js script")
                 .build());
 
         rulesBuilder.addErrorFormats(Validator.ErrorFormat.newBuilder()
@@ -123,6 +134,10 @@ public class ParsedValidatorRulesTest {
         rulesBuilder.setTemplateSpecUrl(TEMPLATE_SPEC_URL);
         rulesBuilder.addCssLengthSpec(Validator.CssLengthSpec.newBuilder()
                 .setHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
+                .setMaxBytes(MAX_BYTES)
+                .build());
+        rulesBuilder.addCssLengthSpec(Validator.CssLengthSpec.newBuilder()
+                .setHtmlFormat(Validator.HtmlFormat.Code.AMP)
                 .build());
 
         Mockito.when(mockValidationManager.getRules()).thenReturn(rulesBuilder);
@@ -620,6 +635,209 @@ public class ParsedValidatorRulesTest {
         Mockito.verify(mockContext, Mockito.times(1)).addBuiltError(mismatchError, result);
     }
 
+    @Test
+    public void testMaybeEmitCssLengthSpecErrors() throws TagValidationException {
+        final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
+
+        Context mockContext = Mockito.mock(Context.class);
+
+        Mockito.when(mockContext.getInlineStyleByteSize()).thenReturn(MAX_BYTES);
+        Mockito.when(mockContext.getStyleAmpCustomByteSize()).thenReturn(MAX_BYTES);
+
+        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+
+        rules.maybeEmitCssLengthSpecErrors(mockContext, result);
+
+        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+
+        Mockito.verify(mockContext, Mockito.times(1))
+                .addError(errorCodeCapture.capture(),
+                        Mockito.any(Locator.class),
+                        listCaptor.capture(),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.STYLESHEET_AND_INLINE_STYLE_TOO_LONG);
+        final List<String> params = listCaptor.getValue();
+        Assert.assertEquals(params.size(), 2);
+        Assert.assertEquals(params.get(0), "2000");
+        Assert.assertEquals(params.get(1), "1000");
+
+        mockContext = Mockito.mock(Context.class);
+
+        Mockito.when(mockContext.getInlineStyleByteSize()).thenReturn(0);
+        rules.maybeEmitCssLengthSpecErrors(mockContext, result);
+
+        Mockito.verify(mockContext, Mockito.times(0))
+                .addError(Mockito.any(Validator.ValidationError.Code.class),
+                        Mockito.any(Locator.class),
+                        Mockito.anyListOf(String.class),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+    }
+
+    @Test
+    public void testMaybeEmitMandatoryAlternativesSatisfiedErrors() throws TagValidationException {
+        final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
+
+        Context mockContext = Mockito.mock(Context.class);
+
+        Mockito.when(mockContext.getMandatoryAlternativesSatisfied()).thenReturn(ImmutableList.of("alternatives"));
+
+        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+
+        rules.maybeEmitMandatoryAlternativesSatisfiedErrors(mockContext, result);
+
+        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+
+        Mockito.verify(mockContext, Mockito.times(1))
+                .addError(errorCodeCapture.capture(),
+                        Mockito.any(Locator.class),
+                        listCaptor.capture(),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+
+        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.MANDATORY_TAG_MISSING);
+        final List<String> params = listCaptor.getValue();
+        Assert.assertEquals(params.size(), 1);
+        Assert.assertEquals(params.get(0), "not-alternatives");
+
+    }
+
+    @Test
+    public void testMaybeEmitMandatoryTagValidationErrors() throws TagValidationException {
+        final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
+
+        Context mockContext = Mockito.mock(Context.class);
+        Mockito.when(mockContext.getTypeIdentifiers()).thenReturn(ImmutableList.of("transformed"));
+
+        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+
+        rules.maybeEmitMandatoryTagValidationErrors(mockContext, result);
+
+        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+
+        Mockito.verify(mockContext, Mockito.times(1))
+                .addError(errorCodeCapture.capture(),
+                        Mockito.any(Locator.class),
+                        listCaptor.capture(),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+
+        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.MANDATORY_TAG_MISSING);
+        final List<String> params = listCaptor.getValue();
+        Assert.assertEquals(params.size(), 1);
+        Assert.assertEquals(params.get(0), "SCRIPT");
+
+
+    }
+
+
+    @Test
+    public void testMaybeEmitAlsoRequiresTagValidationErrors() throws TagValidationException {
+        final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
+
+        Context mockContext = Mockito.mock(Context.class);
+        Mockito.when(mockContext.satisfiesCondition("requires")).thenReturn(false);
+        Mockito.when(mockContext.satisfiesCondition("excludes")).thenReturn(true);
+        Mockito.when(mockContext.getTagspecsValidated()).thenReturn(ImmutableMap.of(0, true,
+                1, true,
+                2, true,
+                3, true,
+                4, true));
+        final ExtensionsContext mockExtContext = Mockito.mock(ExtensionsContext.class);
+        Mockito.when(mockExtContext.unusedExtensionsRequired()).thenReturn(ImmutableList.of("unused_ext_1"));
+
+        Mockito.when(mockContext.getExtensions()).thenReturn(mockExtContext);
+
+        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+
+        rules.maybeEmitAlsoRequiresTagValidationErrors(mockContext, result);
+
+        ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+
+        Mockito.verify(mockContext, Mockito.times(3))
+                .addError(errorCodeCapture.capture(),
+                        Mockito.any(Locator.class),
+                        listCaptor.capture(),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+        Mockito.verify(mockContext, Mockito.times(1))
+                .addWarning(errorCodeCapture.capture(),
+                        Mockito.any(Locator.class),
+                        listCaptor.capture(),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+        final List<Validator.ValidationError.Code> errorCodes = errorCodeCapture.getAllValues();
+        final List<List> params = listCaptor.getAllValues();
+
+        Assert.assertEquals(errorCodes.size(), 4);
+        Assert.assertEquals(errorCodes.get(0), Validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING);
+        Assert.assertEquals(errorCodes.get(1), Validator.ValidationError.Code.TAG_EXCLUDED_BY_TAG);
+        Assert.assertEquals(errorCodes.get(2), Validator.ValidationError.Code.EXTENSION_UNUSED);
+        Assert.assertEquals(errorCodes.get(3), Validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING);
+
+        Assert.assertEquals(params.size(), 4);
+        Assert.assertEquals(params.get(0).size(), 2);
+        Assert.assertEquals(params.get(0).get(0), "requires");
+        Assert.assertEquals(params.get(0).get(1), "SCRIPT");
+
+        Assert.assertEquals(params.get(1).size(), 2);
+        Assert.assertEquals(params.get(1).get(0), "SCRIPT");
+        Assert.assertEquals(params.get(1).get(1), "excludes");
+
+        Assert.assertEquals(params.get(2).size(), 1);
+        Assert.assertEquals(params.get(2).get(0), "unused_ext_1");
+
+        Assert.assertEquals(params.get(3).size(), 2);
+        Assert.assertEquals(params.get(3).get(0), "amp-ad extension .js script");
+        Assert.assertEquals(params.get(3).get(1), "SCRIPT");
+    }
+
+    @Test
+    public void testmMybeEmitGlobalTagValidationErrors() throws TagValidationException {
+        final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
+
+        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+        Context mockContext = Mockito.mock(Context.class);
+        final ExtensionsContext mockExtContext = Mockito.mock(ExtensionsContext.class);
+        Mockito.when(mockExtContext.unusedExtensionsRequired()).thenReturn(ImmutableList.of("unused_ext_1"));
+        Mockito.when(mockContext.getExtensions()).thenReturn(mockExtContext);
+
+        rules.maybeEmitGlobalTagValidationErrors(mockContext, result);
+
+        Mockito.verify(mockContext, Mockito.times(5))
+                .addError(Mockito.any(Validator.ValidationError.Code.class),
+                        Mockito.any(Locator.class),
+                        Mockito.anyListOf(String.class),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+        Mockito.verify(mockContext, Mockito.times(0))
+                .addWarning(Mockito.any(Validator.ValidationError.Code.class),
+                        Mockito.any(Locator.class),
+                        Mockito.anyListOf(String.class),
+                        Mockito.anyString(),
+                        Mockito.any(Validator.ValidationResult.Builder.class));
+
+    }
+
+
+    @Test
+    public void testGetParsedAttrSpecs() {
+        final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
+
+        Assert.assertNotNull(rules.getParsedAttrSpecs());
+    }
 
     private Validator.ValidatorRules.Builder rulesBuilder;
 
@@ -632,6 +850,8 @@ public class ParsedValidatorRulesTest {
     private static final String TEMPLATE_SPEC_URL = "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags";
 
     private static final String SCRIPT_SPEC_URL = "https://amp.dev/documentation/components/amp-mustache";
+
+    private static final int MAX_BYTES = 1000;
 
 
 

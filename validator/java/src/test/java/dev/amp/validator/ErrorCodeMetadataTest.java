@@ -18,27 +18,27 @@
 /*
  * Changes to the original project are Copyright 2019, Oath Inc..
  */
-
 package dev.amp.validator;
 
-
-import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Tests for {@link ExtensionMissingError}
+ * Test for class {@link ErrorCodeMetadata}
  *
  * @author sphatak01
  */
-public class ExtensionMissingErrorTest {
+public class ErrorCodeMetadataTest {
 
     @Test
-    public void testConstructor() {
-        final ExtensionMissingError error = new ExtensionMissingError("ext_missing",
-                Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE).build());
+    public void testGettersSetters() {
+        final ErrorCodeMetadata errorCodeMetadata = new ErrorCodeMetadata();
 
-        Assert.assertEquals(error.getMissingExtension(), "ext_missing");
-        Assert.assertEquals(error.getMaybeError().getCode(), Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE);
+        errorCodeMetadata.setFormat("html");
+        errorCodeMetadata.setSpecificity(10);
+
+        Assert.assertEquals(errorCodeMetadata.getFormat(), "html");
+        Assert.assertEquals(errorCodeMetadata.getSpecificity(), 10);
     }
+
 }
