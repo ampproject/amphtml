@@ -470,7 +470,7 @@ describes.sandboxed('AmpDocService', {}, () => {
   });
 });
 
-describes.sandboxed('AmpDoc.visibilityState', {}, () => {
+describes.sandboxed('AmpDoc.visibilityState', {}, env => {
   const EMBED_URL = 'https://example.com/embed';
   let clock;
   let win, doc;
@@ -478,22 +478,22 @@ describes.sandboxed('AmpDoc.visibilityState', {}, () => {
   let top, embedSameWindow, embedOtherWindow, embedChild;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
 
     doc = {
       body: null,
       visibilityState: 'visible',
-      addEventListener: sandbox.spy(),
-      removeEventListener: sandbox.spy(),
+      addEventListener: env.sandbox.spy(),
+      removeEventListener: env.sandbox.spy(),
     };
     win = {document: doc};
 
     childDoc = {
       body: null,
       visibilityState: 'visible',
-      addEventListener: sandbox.spy(),
-      removeEventListener: sandbox.spy(),
+      addEventListener: env.sandbox.spy(),
+      removeEventListener: env.sandbox.spy(),
     };
     childWin = {document: childDoc};
 
@@ -846,7 +846,7 @@ describes.sandboxed('AmpDoc.visibilityState', {}, () => {
   });
 });
 
-describes.sandboxed('AmpDocSingle', {}, () => {
+describes.sandboxed('AmpDocSingle', {}, env => {
   let ampdoc;
 
   beforeEach(() => {
@@ -895,17 +895,17 @@ describes.sandboxed('AmpDocSingle', {}, () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {
+    env.sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {
       return new Promise(resolve => {
         bodyCallback = resolve;
       });
     });
     let ready = false;
-    sandbox.stub(docready, 'isDocumentReady').callsFake(() => {
+    env.sandbox.stub(docready, 'isDocumentReady').callsFake(() => {
       return ready;
     });
     let readyCallback;
-    sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
+    env.sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
       return new Promise(resolve => {
         readyCallback = resolve;
       });

@@ -46,24 +46,15 @@ describes.repeated(
   (name, variant) => {
     let form;
     let inputs;
-    let sandbox;
 
-    before(() => {
-      sandbox = sinon.sandbox;
-
+    beforeEach(() => {
       // Stub only to work around the fact that there's no Ampdoc, so the service
       // cannot be retrieved.
       // Otherwise this test would barf because `form` is detached.
-      sandbox.stub(Services, 'urlForDoc').returns({
+      window.sandbox.stub(Services, 'urlForDoc').returns({
         parse: parseUrlDeprecated,
       });
-    });
 
-    after(() => {
-      sandbox.restore();
-    });
-
-    beforeEach(() => {
       form = document.createElement('form');
       form.id = 'form1';
       form.action = 'https://example.org/submit';

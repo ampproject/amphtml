@@ -43,17 +43,17 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     ampdoc = env.ampdoc;
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
-    sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
-    sandbox
+    env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
+    env.sandbox
       .stub(serviceAdapter, 'getPageConfig')
       .callsFake(() => new PageConfig('example.org:basic', true));
-    sandbox
+    env.sandbox
       .stub(serviceAdapter, 'getDialog')
       .callsFake(() => new Dialog(ampdoc));
-    sandbox
+    env.sandbox
       .stub(serviceAdapter, 'getReaderId')
       .callsFake(() => Promise.resolve('reader1'));
-    sandbox
+    env.sandbox
       .stub(serviceAdapter, 'getEncryptedDocumentKey')
       .callsFake(() => null);
     serviceConfig.services = [
@@ -84,11 +84,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       protocol: 'amp-subscriptions',
     };
 
-    builderMock = sandbox.mock(UrlBuilder.prototype);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    builderMock = env.sandbox.mock(UrlBuilder.prototype);
   });
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
@@ -97,7 +93,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       serviceConfig.services[0],
       serviceAdapter
     );
-    const domStub = sandbox.stub(
+    const domStub = env.sandbox.stub(
       localSubscriptionPlatform.rootNode_,
       'addEventListener'
     );
@@ -178,7 +174,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
 
   describe('runtime connect', () => {
     it('should NOT connect until necessary', () => {
-      const connectStub = sandbox.stub(Messenger.prototype, 'connect');
+      const connectStub = env.sandbox.stub(Messenger.prototype, 'connect');
       localSubscriptionPlatform = localSubscriptionPlatformFactory(
         ampdoc,
         serviceConfig.services[0],
@@ -190,7 +186,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     });
 
     it('should connect on first and only first authorize', () => {
-      const connectStub = sandbox.stub(Messenger.prototype, 'connect');
+      const connectStub = env.sandbox.stub(Messenger.prototype, 'connect');
       localSubscriptionPlatform = localSubscriptionPlatformFactory(
         ampdoc,
         serviceConfig.services[0],
@@ -221,7 +217,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
         serviceConfig.services[0],
         serviceAdapter
       );
-      const sendStub = sandbox
+      const sendStub = env.sandbox
         .stub(localSubscriptionPlatform.messenger_, 'sendCommandRsvp')
         .returns(Promise.resolve({}));
       const promise = localSubscriptionPlatform.connect();
@@ -242,7 +238,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     let localSubscriptionPlatform;
 
     beforeEach(() => {
-      messengerMock = sandbox.mock(Messenger.prototype);
+      messengerMock = env.sandbox.mock(Messenger.prototype);
       localSubscriptionPlatform = localSubscriptionPlatformFactory(
         ampdoc,
         serviceConfig.services[0],

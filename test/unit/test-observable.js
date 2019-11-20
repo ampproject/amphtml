@@ -17,16 +17,10 @@
 import {Observable} from '../../src/observable';
 
 describe('Observable', () => {
-  let sandbox;
   let observable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     observable = new Observable();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('add-remove-fire', () => {

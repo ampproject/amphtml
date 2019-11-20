@@ -33,7 +33,7 @@ describes.realWin(
     let attributes;
 
     beforeEach(() => {
-      const viewportMock = sandbox.mock(
+      const viewportMock = env.sandbox.mock(
         Services.viewportForDoc(env.win.document)
       );
       viewportMock

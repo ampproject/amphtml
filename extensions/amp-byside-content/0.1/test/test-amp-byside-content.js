@@ -31,7 +31,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      urlMock = mockServiceForDoc(sandbox, env.ampdoc, 'url-replace', [
+      urlMock = mockServiceForDoc(env.sandbox, env.ampdoc, 'url-replace', [
         'expandUrlAsync',
       ]);
     });
@@ -55,7 +55,7 @@ describes.realWin(
         .then(() => {
           urlMock.expandUrlAsync
             .returns(Promise.resolve(elem.implementation_.baseUrl_))
-            .withArgs(sinon.match.any);
+            .withArgs(env.sandbox.match.any);
           if (opt_beforeLayoutCallback) {
             opt_beforeLayoutCallback(elem);
           }

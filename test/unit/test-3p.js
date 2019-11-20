@@ -24,17 +24,14 @@ import {
 } from '../../3p/3p';
 
 describe('3p', () => {
-  let sandbox;
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
   });
 
   afterEach(() => {
     clock.tick(1000);
-    sandbox.restore();
   });
 
   describe('validateSrcPrefix()', () => {

@@ -58,10 +58,13 @@ describes.realWin(
       let filterAndRenderSpy;
 
       beforeEach(() => {
-        remoteDataSpy = sandbox
+        remoteDataSpy = env.sandbox
           .stub(impl, 'getRemoteData_')
           .resolves(['a', 'b', 'c']);
-        filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
+        filterAndRenderSpy = env.sandbox.spy(
+          impl,
+          'filterDataAndRenderResults_'
+        );
       });
 
       it('should resolve when param is {}', () => {
@@ -182,9 +185,9 @@ describes.realWin(
       beforeEach(() => {
         expect(impl.container_).not.to.be.null;
         expect(impl.container_.children.length).to.equal(0);
-        clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
-        filterDataSpy = sandbox.spy(impl, 'filterData_');
-        renderSpy = sandbox.spy(impl, 'renderResults_');
+        clearAllItemsSpy = env.sandbox.spy(impl, 'clearAllItems_');
+        filterDataSpy = env.sandbox.spy(impl, 'filterData_');
+        renderSpy = env.sandbox.spy(impl, 'renderResults_');
       });
 
       it('should only clear if input < minChars_', () => {
@@ -233,7 +236,7 @@ describes.realWin(
     });
 
     it('renderResults_() should update the container_ with plain text', () => {
-      const createSpy = sandbox.spy(impl, 'createElementFromItem_');
+      const createSpy = env.sandbox.spy(impl, 'createElementFromItem_');
       return impl.renderResults_(['apple'], impl.container_).then(() => {
         expect(impl.container_.children.length).to.equal(1);
         expect(impl.container_.children[0].innerText).to.equal('apple');
@@ -251,7 +254,7 @@ describes.realWin(
         renderedChild.setAttribute('data-value', item.value);
         renderedChildren.push(renderedChild);
       });
-      const renderTemplateSpy = sandbox
+      const renderTemplateSpy = env.sandbox
         .stub(impl.templates_, 'renderTemplateArray')
         .returns(Promise.resolve(renderedChildren));
 
@@ -404,9 +407,9 @@ describes.realWin(
           .layoutCallback()
           .then(() => {
             impl.inputElement_.value = 'a';
-            renderSpy = sandbox.spy(impl, 'renderResults_');
-            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-            updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
+            renderSpy = env.sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
             expect(impl.suggestFirst_).to.be.false;
             return impl.inputHandler_();
           })
@@ -423,9 +426,9 @@ describes.realWin(
           .layoutCallback()
           .then(() => {
             impl.inputElement_.value = 'a';
-            renderSpy = sandbox.spy(impl, 'renderResults_');
-            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-            updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
+            renderSpy = env.sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
             impl.suggestFirst_ = true;
             return impl.inputHandler_();
           })
@@ -443,13 +446,13 @@ describes.realWin(
       let displayInputSpy, updateActiveSpy, eventPreventSpy;
 
       beforeEach(() => {
-        displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
-        updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
-        eventPreventSpy = sandbox.spy(event, 'preventDefault');
+        displayInputSpy = env.sandbox.spy(impl, 'displayUserInput_');
+        updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
+        eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
       });
 
       it('should updateActiveItem_ when results showing on Down arrow', () => {
-        sandbox
+        env.sandbox
           .stub(impl, 'resultsShowing_')
           .onFirstCall()
           .returns(true);
@@ -467,7 +470,7 @@ describes.realWin(
       });
 
       it('should displayUserInput_ when looping on Down arrow', () => {
-        sandbox.stub(impl, 'resultsShowing_').returns(true);
+        env.sandbox.stub(impl, 'resultsShowing_').returns(true);
         return element
           .layoutCallback()
           .then(() => {
@@ -485,11 +488,11 @@ describes.realWin(
         return element
           .layoutCallback()
           .then(() => {
-            filterAndRenderSpy = sandbox.spy(
+            filterAndRenderSpy = env.sandbox.spy(
               impl,
               'filterDataAndRenderResults_'
             );
-            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -540,10 +543,10 @@ describes.realWin(
       let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
       function layoutAndSetSpies() {
         return element.layoutCallback().then(() => {
-          eventPreventSpy = sandbox.spy(event, 'preventDefault');
-          selectItemSpy = sandbox.spy(impl, 'selectItem_');
-          resetSpy = sandbox.spy(impl, 'resetActiveElement_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+          eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
+          selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
+          resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
         });
       }
 
@@ -565,7 +568,7 @@ describes.realWin(
         return layoutAndSetSpies()
           .then(() => {
             impl.activeElement_ = impl.createElementFromItem_('abc');
-            sandbox.stub(impl, 'resultsShowing_').returns(true);
+            env.sandbox.stub(impl, 'resultsShowing_').returns(true);
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -606,11 +609,11 @@ describes.realWin(
       return element
         .layoutCallback()
         .then(() => {
-          eventPreventSpy = sandbox.spy(event, 'preventDefault');
-          selectItemSpy = sandbox.spy(impl, 'selectItem_');
-          resetSpy = sandbox.spy(impl, 'resetActiveElement_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
-          sandbox.stub(impl, 'resultsShowing_').returns(true);
+          eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
+          selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
+          resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
+          env.sandbox.stub(impl, 'resultsShowing_').returns(true);
           return impl.keyDownHandler_(event);
         })
         .then(() => {
@@ -645,9 +648,9 @@ describes.realWin(
 
     it('should call keyDownHandler_() on Esc', () => {
       const event = {key: Keys.ESCAPE};
-      const displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
-      const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
-      const toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+      const displayInputSpy = env.sandbox.spy(impl, 'displayUserInput_');
+      const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+      const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
       return element
         .layoutCallback()
         .then(() => {
@@ -674,7 +677,7 @@ describes.realWin(
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
-      const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
       return element
         .layoutCallback()
         .then(() => {
@@ -724,8 +727,8 @@ describes.realWin(
     });
 
     it('should call toggleResultsHandler_()', () => {
-      const toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-      const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
+      const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+      const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
       return element
         .layoutCallback()
         .then(() => {
@@ -748,8 +751,8 @@ describes.realWin(
     });
 
     it('should call selectHandler_() on mousedown', () => {
-      const getItemSpy = sandbox.spy(impl, 'getItemElement_');
-      const selectItemSpy = sandbox.spy(impl, 'selectItem_');
+      const getItemSpy = env.sandbox.spy(impl, 'getItemElement_');
+      const selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
       let mockEl = doc.createElement('div');
       return element
         .layoutCallback()
@@ -773,8 +776,8 @@ describes.realWin(
     });
 
     it('should fire select event from selectItem_', () => {
-      const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
-      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+      const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
       const mockEl = doc.createElement('div');
       return element.layoutCallback().then(() => {
         impl.toggleResults_(true);
@@ -803,7 +806,7 @@ describes.realWin(
           expect(impl.resetActiveElement_()).to.equal();
           expect(impl.activeElement_).to.be.null;
           impl.toggleResults_(true);
-          resetSpy = sandbox.spy(impl, 'resetActiveElement_');
+          resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
           return impl.updateActiveItem_(1);
         })
         .then(() => {
@@ -882,7 +885,7 @@ describes.realWin(
         return renderedChild;
       });
       renderedChildren[2].setAttribute('data-disabled', '');
-      sandbox
+      env.sandbox
         .stub(impl.templates_, 'renderTemplateArray')
         .returns(Promise.resolve(renderedChildren));
 
@@ -901,9 +904,9 @@ describes.realWin(
 
       beforeEach(() => {
         impl.element.setAttribute('src', 'invalid-path');
-        fallbackSpy = sandbox.spy(impl, 'displayFallback_');
-        toggleFallbackSpy = sandbox.spy(impl, 'toggleFallback');
-        getDataSpy = sandbox
+        fallbackSpy = env.sandbox.spy(impl, 'displayFallback_');
+        toggleFallbackSpy = env.sandbox.spy(impl, 'toggleFallback');
+        getDataSpy = env.sandbox
           .stub(impl, 'getRemoteData_')
           .returns(Promise.reject('Error for test'));
       });
@@ -917,7 +920,7 @@ describes.realWin(
       });
 
       it('should not display fallback before user interaction', () => {
-        sandbox.stub(impl, 'getFallback').returns(true);
+        env.sandbox.stub(impl, 'getFallback').returns(true);
         return element.layoutCallback().then(() => {
           expect(getDataSpy).not.to.have.been.called;
           expect(fallbackSpy).not.to.have.been.called;
@@ -926,7 +929,7 @@ describes.realWin(
       });
 
       it('should display fallback after user interaction if provided', () => {
-        sandbox.stub(impl, 'getFallback').returns(true);
+        env.sandbox.stub(impl, 'getFallback').returns(true);
         return element.layoutCallback().then(() => {
           impl.checkFirstInteractionAndMaybeFetchData_().then(() => {
             expect(getDataSpy).to.have.been.calledOnce;

@@ -84,7 +84,7 @@ describes.realWin(
 
           ampSelector.appendChild(child);
         }
-        sandbox
+        env.sandbox
           .stub(ampSelector.implementation_, 'getElementsSizes_')
           .resolves(rectArray);
         win.document.body.appendChild(ampSelector);
@@ -104,7 +104,7 @@ describes.realWin(
       it('should build properly', function*() {
         let ampSelector = getSelector({});
         let impl = ampSelector.implementation_;
-        let initSpy = sandbox.spy(impl, 'init_');
+        let initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.be.calledOnce;
@@ -119,7 +119,7 @@ describes.realWin(
           },
         });
         impl = ampSelector.implementation_;
-        initSpy = sandbox.spy(impl, 'init_');
+        initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.be.calledOnce;
@@ -135,7 +135,7 @@ describes.realWin(
           },
         });
         impl = ampSelector.implementation_;
-        initSpy = sandbox.spy(impl, 'init_');
+        initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.be.calledOnce;
@@ -165,8 +165,8 @@ describes.realWin(
         let ampSelector = getSelector({});
         let impl = ampSelector.implementation_;
         impl.mutateElement = fn => fn();
-        let setInputsSpy = sandbox.spy(impl, 'setInputs_');
-        let initSpy = sandbox.spy(impl, 'init_');
+        let setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
+        let initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.have.been.calledOnce;
@@ -180,8 +180,8 @@ describes.realWin(
           },
         });
         impl = ampSelector.implementation_;
-        setInputsSpy = sandbox.spy(impl, 'setInputs_');
-        initSpy = sandbox.spy(impl, 'init_');
+        setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
+        initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.have.been.calledOnce;
@@ -203,8 +203,8 @@ describes.realWin(
           },
         });
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.have.been.calledOnce;
@@ -224,8 +224,8 @@ describes.realWin(
           },
         });
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
 
         expect(impl.isMultiple_).to.be.true;
@@ -244,9 +244,9 @@ describes.realWin(
         });
 
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
-        const clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
+        const clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
         yield ampSelector.build();
 
         const options = impl.getElementsForTesting();
@@ -276,8 +276,8 @@ describes.realWin(
         });
 
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
 
         const options = impl.getElementsForTesting();
@@ -308,8 +308,8 @@ describes.realWin(
         });
 
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
 
         const options = impl.getElementsForTesting();
@@ -467,8 +467,8 @@ describes.realWin(
         yield ampSelector.build();
 
         let options = impl.getElementsForTesting();
-        let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        let clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        let setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
         let e = {
           target: options[3],
         };
@@ -511,8 +511,8 @@ describes.realWin(
         yield ampSelector.build();
 
         options = impl.getElementsForTesting();
-        clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         e = {
           target: options[4],
@@ -553,8 +553,8 @@ describes.realWin(
         impl = ampSelector.implementation_;
         impl.mutateElement = fn => fn();
         yield ampSelector.build();
-        clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         e = {
           target: impl.element.children[0],
@@ -580,8 +580,8 @@ describes.realWin(
         yield ampSelector.build();
 
         let options = impl.getElementsForTesting();
-        let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        let clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        let setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         keyPress(ampSelector, Keys.ENTER, options[3]);
         expect(options[3].hasAttribute('selected')).to.be.true;
@@ -610,8 +610,8 @@ describes.realWin(
         yield ampSelector.build();
 
         options = impl.getElementsForTesting();
-        clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         keyPress(ampSelector, Keys.SPACE, options[4]);
         expect(options[4].hasAttribute('selected')).to.be.true;
@@ -645,8 +645,8 @@ describes.realWin(
         impl = ampSelector.implementation_;
         impl.mutateElement = fn => fn();
         yield ampSelector.build();
-        clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         keyPress(ampSelector, Keys.SPACE, impl.element.children[0]);
         expect(setSelectionSpy).to.not.have.been.called;
@@ -665,7 +665,7 @@ describes.realWin(
         ampSelector.build();
 
         const options = impl.getElementsForTesting();
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
 
         expect(options[0].hasAttribute('selected')).to.be.true;
         expect(options[3].hasAttribute('selected')).to.be.false;
@@ -836,7 +836,7 @@ describes.realWin(
         impl.mutateElement = fn => fn();
 
         const options = impl.getElementsForTesting();
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         impl.clickHandler_({target: options[3]});
 
         expect(triggerSpy).to.be.calledOnce;
@@ -862,7 +862,7 @@ describes.realWin(
         const impl = ampSelector.implementation_;
         impl.mutateElement = fn => fn();
 
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         const args = {'index': 3, 'value': true};
         await impl.executeAction({
           method: 'toggle',
@@ -900,7 +900,7 @@ describes.realWin(
         impl.mutateElement = fn => fn();
 
         const options = impl.getElementsForTesting();
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         impl.clickHandler_({target: options[2]});
 
         expect(triggerSpy).to.be.calledOnce;
@@ -934,7 +934,7 @@ describes.realWin(
           ampSelector.children[0].setAttribute('selected', '');
           ampSelector.build();
           const impl = ampSelector.implementation_;
-          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+          const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
@@ -975,7 +975,7 @@ describes.realWin(
           ampSelector.children[0].setAttribute('selected', '');
           ampSelector.build();
           const impl = ampSelector.implementation_;
-          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+          const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
@@ -1146,7 +1146,7 @@ describes.realWin(
               count: 3,
             },
           });
-          const spy = sandbox.spy(
+          const spy = env.sandbox.spy(
             ampSelector.implementation_,
             'navigationKeyDownHandler_'
           );

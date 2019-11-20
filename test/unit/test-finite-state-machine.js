@@ -18,23 +18,17 @@ import {FiniteStateMachine} from '../../src/finite-state-machine';
 
 describe('Finite State Machine', () => {
   describe('simple machines', () => {
-    let sandbox;
     let fsm;
     let spy;
     let other;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       fsm = new FiniteStateMachine('init');
-      spy = sandbox.spy();
-      other = sandbox.spy();
+      spy = window.sandbox.spy();
+      other = window.sandbox.spy();
 
       fsm.addTransition('init', 'start', spy);
       fsm.addTransition('init', 'other', other);
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('invokes callbacks on transition', () => {

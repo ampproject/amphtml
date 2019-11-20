@@ -28,22 +28,20 @@ describes.realWin(
       .run('font-stylesheet-timeout', () => {
         let clock;
         let win;
-        let sandbox;
         let readyState;
         let responseStart;
         beforeEach(() => {
-          sandbox = env.sandbox;
-          clock = sandbox.useFakeTimers();
+          clock = env.sandbox.useFakeTimers();
           win = env.win;
           win.setTimeout = self.setTimeout;
           readyState = 'interactive';
           responseStart = 0;
-          sandbox.defineProperty(win.document, 'readyState', {
+          env.sandbox.defineProperty(win.document, 'readyState', {
             get() {
               return readyState;
             },
           });
-          sandbox.defineProperty(win.performance.timing, 'responseStart', {
+          env.sandbox.defineProperty(win.performance.timing, 'responseStart', {
             get() {
               return responseStart;
             },
@@ -198,7 +196,7 @@ describes.realWin(
               null,
             ];
             let index = 0;
-            sandbox.defineProperty(win.document, 'fonts', {
+            env.sandbox.defineProperty(win.document, 'fonts', {
               get: () => {
                 return {
                   values: () => {

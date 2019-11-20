@@ -51,19 +51,22 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    buildSlidesSpy = sandbox.spy();
-    onViewportCallbackSpy = sandbox.spy();
-    hasPrevSpy = sandbox.spy();
-    hasNextSpy = sandbox.spy();
-    goCallbackSpy = sandbox.spy();
-    setupAutoplaySpy = sandbox.spy(BaseSlides.prototype, 'setupAutoplay_');
-    buildButtonsSpy = sandbox.spy(BaseSlides.prototype, 'buildButtons');
-    setupGesturesSpy = sandbox.spy(BaseSlides.prototype, 'setupGestures');
-    setControlsStateSpy = sandbox.spy(BaseSlides.prototype, 'setControlsState');
-    hintControlsSpy = sandbox.spy(BaseSlides.prototype, 'hintControls');
-    autoplaySpy = sandbox.spy(BaseSlides.prototype, 'autoplay_');
-    clearAutoplaySpy = sandbox.spy(BaseSlides.prototype, 'clearAutoplay');
-    onViewportCallbackSpy = sandbox.spy(
+    buildSlidesSpy = env.sandbox.spy();
+    onViewportCallbackSpy = env.sandbox.spy();
+    hasPrevSpy = env.sandbox.spy();
+    hasNextSpy = env.sandbox.spy();
+    goCallbackSpy = env.sandbox.spy();
+    setupAutoplaySpy = env.sandbox.spy(BaseSlides.prototype, 'setupAutoplay_');
+    buildButtonsSpy = env.sandbox.spy(BaseSlides.prototype, 'buildButtons');
+    setupGesturesSpy = env.sandbox.spy(BaseSlides.prototype, 'setupGestures');
+    setControlsStateSpy = env.sandbox.spy(
+      BaseSlides.prototype,
+      'setControlsState'
+    );
+    hintControlsSpy = env.sandbox.spy(BaseSlides.prototype, 'hintControls');
+    autoplaySpy = env.sandbox.spy(BaseSlides.prototype, 'autoplay_');
+    clearAutoplaySpy = env.sandbox.spy(BaseSlides.prototype, 'clearAutoplay');
+    onViewportCallbackSpy = env.sandbox.spy(
       BaseSlides.prototype,
       'onViewportCallback'
     );

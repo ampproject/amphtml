@@ -34,11 +34,9 @@ describes.realWin(
   },
   env => {
     let doc;
-    let sandbox;
     beforeEach(() => {
       doc = env.ampdoc.getRootNode();
       installStylesForDoc(env.ampdoc, CSS, () => {}, false, 'amp-form');
-      sandbox = env.sandbox;
     });
 
     describe('handleInitialOverflowElements', () => {
@@ -95,7 +93,7 @@ describes.realWin(
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
 
         const initialHeight = textarea.clientHeight;
         return maybeResizeTextarea(textarea).then(() => {
@@ -117,7 +115,7 @@ describes.realWin(
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
 
         const initialHeight = textarea.clientHeight;
         return maybeResizeTextarea(textarea).then(() => {
@@ -139,7 +137,7 @@ describes.realWin(
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
 
         const initialHeight = textarea.clientHeight;
         let increasedHeight;
@@ -178,8 +176,8 @@ describes.realWin(
             return mutator() || Promise.resolve();
           },
         };
-        sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
-        sandbox
+        env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox
           .stub(eventHelper, 'listenOncePromise')
           .returns(Promise.resolve());
 
@@ -190,7 +188,9 @@ describes.realWin(
           mouseDownEvent = doc.createEventObject();
           mouseDownEvent.type = 'mousedown';
         }
-        sandbox.defineProperty(mouseDownEvent, 'target', {value: textarea});
+        env.sandbox.defineProperty(mouseDownEvent, 'target', {
+          value: textarea,
+        });
         // Given 2 mousedown events on the textarea.
         doc.dispatchEvent(mouseDownEvent);
         doc.dispatchEvent(mouseDownEvent);

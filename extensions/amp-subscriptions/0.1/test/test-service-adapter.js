@@ -56,7 +56,7 @@ describes.realWin(
 
     describe('getEncryptedDocumentKey', () => {
       it('should call getEncryptedDocumentKey of subscription service', () => {
-        const stub = sandbox.stub(
+        const stub = env.sandbox.stub(
           subscriptionService,
           'getEncryptedDocumentKey'
         );
@@ -68,7 +68,7 @@ describes.realWin(
 
     describe('getPageConfig', () => {
       it('should call getPageConfig of subscription service', () => {
-        const stub = sandbox
+        const stub = env.sandbox
           .stub(subscriptionService, 'getPageConfig')
           .callsFake(() => pageConfig);
         serviceAdapter.getPageConfig();
@@ -79,7 +79,7 @@ describes.realWin(
     describe('delegateAction', () => {
       it('should call delegateActionToLocal of subscription service', () => {
         const p = Promise.resolve();
-        const stub = sandbox
+        const stub = env.sandbox
           .stub(serviceAdapter, 'delegateActionToService')
           .callsFake(() => p);
         const action = 'action';
@@ -90,7 +90,7 @@ describes.realWin(
 
       it('should call delegateActionToService of subscription service', () => {
         const p = Promise.resolve();
-        const stub = sandbox
+        const stub = env.sandbox
           .stub(subscriptionService, 'delegateActionToService')
           .callsFake(() => p);
         const action = 'action';
@@ -102,7 +102,7 @@ describes.realWin(
 
     describe('resetPlatforms', () => {
       it('should call initializePlatformStore_', () => {
-        const stub = sandbox.stub(subscriptionService, 'resetPlatforms');
+        const stub = env.sandbox.stub(subscriptionService, 'resetPlatforms');
         serviceAdapter.resetPlatforms();
         expect(stub).to.be.calledOnce;
       });
@@ -110,7 +110,7 @@ describes.realWin(
 
     describe('getDialog', () => {
       it('should call getDialog of subscription service', () => {
-        const stub = sandbox.stub(subscriptionService, 'getDialog');
+        const stub = env.sandbox.stub(subscriptionService, 'getDialog');
         serviceAdapter.getDialog();
         expect(stub).to.be.calledOnce;
       });
@@ -120,7 +120,10 @@ describes.realWin(
       it('should call decorateServiceAction of subscription service', () => {
         const element = win.document.createElement('div');
         const serviceId = 'local';
-        const stub = sandbox.stub(subscriptionService, 'decorateServiceAction');
+        const stub = env.sandbox.stub(
+          subscriptionService,
+          'decorateServiceAction'
+        );
         serviceAdapter.decorateServiceAction(element, serviceId, 'action');
         expect(stub).to.be.calledWith(element, serviceId, 'action');
       });
@@ -129,7 +132,7 @@ describes.realWin(
     describe('getReaderId', () => {
       it('should delegate call to getReaderId', () => {
         const readerIdPromise = Promise.resolve();
-        const stub = sandbox
+        const stub = env.sandbox
           .stub(subscriptionService, 'getReaderId')
           .returns(readerIdPromise);
         const promise = serviceAdapter.getReaderId('service1');

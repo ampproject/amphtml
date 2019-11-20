@@ -24,14 +24,12 @@ const RETURN_URL_ESC = encodeURIComponent(
     encodeURIComponent('http://localhost:8000/test-login-dialog')
 );
 
-describes.sandboxed('ViewerLoginDialog', {}, () => {
+describes.sandboxed('ViewerLoginDialog', {}, env => {
   let ampdoc;
   let viewer;
   let windowApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     viewer = {
       sendMessageAwaitResponse: () => {},
     };
@@ -61,7 +59,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
     windowApi.document.defaultView = windowApi;
     installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
-    sandbox.stub(ampdoc, 'getParam').callsFake(param => {
+    env.sandbox.stub(ampdoc, 'getParam').callsFake(param => {
       if (param == 'dialog') {
         return '1';
       }
@@ -69,12 +67,8 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
     });
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should delegate to viewer with url', () => {
-    const stub = sandbox
+    const stub = env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.resolve('#success=yes'));
     return openLoginDialog(ampdoc, 'http://acme.com/login').then(res => {
@@ -88,7 +82,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should delegate to viewer with url promise', () => {
-    const stub = sandbox
+    const stub = env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.resolve('#success=yes'));
     const urlPromise = Promise.resolve('http://acme.com/login');
@@ -103,7 +97,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should fail when url promise fails', () => {
-    sandbox
+    env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.resolve('#success=yes'));
     const urlPromise = Promise.reject('expected');
@@ -118,7 +112,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should fail when viewer fails', () => {
-    sandbox
+    env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.reject('expected'));
     return openLoginDialog(ampdoc, 'http://acme.com/login').then(
@@ -132,7 +126,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should have correct URL with other parameters', () => {
-    const stub = sandbox
+    const stub = env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.resolve('#success=yes'));
     const url = 'http://acme.com/login?a=b';
@@ -144,7 +138,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should allow alternative form of return URL', () => {
-    const stub = sandbox
+    const stub = env.sandbox
       .stub(viewer, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.resolve('#success=yes'));
     const url = 'http://acme.com/login?a=b&ret1=RETURN_URL';
@@ -156,7 +150,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 });
 
-describes.sandboxed('WebLoginDialog', {}, () => {
+describes.sandboxed('WebLoginDialog', {}, env => {
   let clock;
   let viewer;
   let windowApi;
@@ -167,7 +161,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
   let dialogMock;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     viewer = {
       getResolvedViewerUrl: () => 'http://localhost:8000/test-login-dialog',
@@ -202,10 +196,10 @@ describes.sandboxed('WebLoginDialog', {}, () => {
     };
     windowApi = windowObj;
     windowApi.document.defaultView = windowApi;
-    windowMock = sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
     installDocService(windowApi, /* isSingleDoc */ true);
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
-    sandbox.stub(ampdoc, 'getParam').returns(null);
+    env.sandbox.stub(ampdoc, 'getParam').returns(null);
 
     dialogUrl = null;
     dialog = {
@@ -217,7 +211,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
       },
       postMessage: () => {},
     };
-    dialogMock = sandbox.mock(dialog);
+    dialogMock = env.sandbox.mock(dialog);
   });
 
   afterEach(() => {
@@ -236,7 +230,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
   }
 
   it('should call window.open in the same microtask with url', () => {
-    sandbox.stub(windowApi, 'open').callsFake(() => dialog);
+    env.sandbox.stub(windowApi, 'open').callsFake(() => dialog);
     openLoginDialog(ampdoc, 'http://acme.com/login');
     expect(windowApi.open).to.be.calledOnce;
     expect(windowApi.open.firstCall.args[0]).to.match(
@@ -245,7 +239,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
   });
 
   it('should call window.open in the same microtask with promise', () => {
-    sandbox.stub(windowApi, 'open').callsFake(() => dialog);
+    env.sandbox.stub(windowApi, 'open').callsFake(() => dialog);
     openLoginDialog(ampdoc, Promise.resolve('http://acme.com/login'));
     expect(windowApi.open).to.be.calledOnce;
     expect(windowApi.open.firstCall.args[0]).to.equal('');
@@ -333,7 +327,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
     dialogMock
       .expects('postMessage')
       .withExactArgs(
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           return arg.sentinel == 'amp' && arg.type == 'result-ack';
         }),
         'http://localhost:8000'

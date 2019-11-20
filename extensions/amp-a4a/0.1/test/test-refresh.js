@@ -26,7 +26,6 @@ import {Services} from '../../../../src/services';
 
 describe('refresh', () => {
   let mockA4a;
-  let sandbox;
   const config = {
     visiblePercentageMin: 50,
     totalTimeMin: 0,
@@ -38,21 +37,16 @@ describe('refresh', () => {
     div.setAttribute('style', 'width:1px; height:1px;');
     div.setAttribute('type', 'doubleclick');
     div.setAttribute(DATA_ATTR_NAME, '35');
-    sandbox.replaceGetter(div, 'isConnected', () => true);
+    window.sandbox.replaceGetter(div, 'isConnected', () => true);
     return div;
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     mockA4a = {
       win: window,
       element: getTestElement(),
       refresh: () => {},
     };
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('refresh-manager', () => {
@@ -93,7 +87,7 @@ describe('refresh', () => {
     });
 
     it('should call convertConfiguration_ and set proper units', () => {
-      const getConfigurationSpy = sandbox.spy(
+      const getConfigurationSpy = window.sandbox.spy(
         RefreshManager.prototype,
         'convertAndSanitizeConfiguration_'
       );
@@ -157,7 +151,7 @@ describe('refresh', () => {
     it('should execute the refresh event correctly', () => {
       // Attach element to DOM, as is necessary for request ampdoc.
       window.document.body.appendChild(mockA4a.element);
-      const refreshSpy = sandbox.spy(mockA4a, 'refresh');
+      const refreshSpy = window.sandbox.spy(mockA4a, 'refresh');
 
       // Ensure initial call to initiateRefreshCycle doesn't trigger refresh, as
       // this can have flaky results.
@@ -202,12 +196,12 @@ describe('refresh', () => {
         y: 0,
       });
 
-      sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+      window.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
         return {
           getRect,
         };
       });
-      sandbox.stub(Services, 'ampdoc').callsFake(() => {
+      window.sandbox.stub(Services, 'ampdoc').callsFake(() => {
         return {
           getRootNode: () => {
             return window.document;
@@ -268,7 +262,7 @@ describe('refresh', () => {
     });
 
     it('should not invoke callback', () => {
-      const callbackSpy = sandbox.spy(callback);
+      const callbackSpy = window.sandbox.spy(callback);
       observerWrapper.viewport_ = {
         getRect: () => ({
           top: 10,

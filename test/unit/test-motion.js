@@ -51,15 +51,13 @@ describe('Motion calcVelocity', () => {
 });
 
 describe('Motion continueMotion', () => {
-  let sandbox;
   let clock;
   let vsync;
   let vsyncTasks;
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
       runAnimMutateSeries: (unusedContextNode, mutator) => {
@@ -68,10 +66,6 @@ describe('Motion continueMotion', () => {
       },
     };
     contextNode = document.createElement('div');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function testContinuation(maxVelocity, haltAfterTime) {

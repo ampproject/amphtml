@@ -59,7 +59,6 @@ describes.realWin(
     allowExternalResources: true,
   },
   env => {
-    let sandbox;
     let ad3p;
     let win;
     let registryBackup;
@@ -72,13 +71,14 @@ describes.realWin(
         delete adConfig[k];
       });
       adConfig['_ping_'] = Object.assign({}, registryBackup['_ping_']);
-      sandbox = env.sandbox;
       win = env.win;
       ad3p = createAmpAd(win);
       win.document.body.appendChild(ad3p.element);
       ad3p.buildCallback();
       // Turn the doc to visible so prefetch will be proceeded.
-      sandbox.stub(env.ampdoc, 'whenFirstVisible').returns(whenFirstVisible);
+      env.sandbox
+        .stub(env.ampdoc, 'whenFirstVisible')
+        .returns(whenFirstVisible);
     });
 
     afterEach(() => {
@@ -120,7 +120,7 @@ describes.realWin(
       });
 
       it('should propagete CID to ad iframe', () => {
-        sandbox.stub(adCid, 'getAdCid').resolves('sentinel123');
+        env.sandbox.stub(adCid, 'getAdCid').resolves('sentinel123');
 
         return ad3p.layoutCallback().then(() => {
           const frame = ad3p.element.querySelector('iframe[src]');
@@ -133,7 +133,7 @@ describes.realWin(
       });
 
       it('should proceed w/o CID', () => {
-        sandbox.stub(adCid, 'getAdCid').resolves(undefined);
+        env.sandbox.stub(adCid, 'getAdCid').resolves(undefined);
         return ad3p.layoutCallback().then(() => {
           const frame = ad3p.element.querySelector('iframe[src]');
           expect(frame).to.be.ok;
@@ -146,10 +146,10 @@ describes.realWin(
 
       it('should propagate consent state to ad iframe', () => {
         ad3p.element.setAttribute('data-block-on-consent', '');
-        sandbox
+        env.sandbox
           .stub(consent, 'getConsentPolicyState')
           .resolves(CONSENT_POLICY_STATE.SUFFICIENT);
-        sandbox
+        env.sandbox
           .stub(consent, 'getConsentPolicySharedData')
           .resolves({a: 1, b: 2});
 
@@ -249,7 +249,7 @@ describes.realWin(
         win.document.head.appendChild(meta);
         ad3p.config.remoteHTMLDisabled = true;
         ad3p.onLayoutMeasure();
-        sandbox.stub(user(), 'error');
+        env.sandbox.stub(user(), 'error');
         return ad3p.layoutCallback().then(() => {
           expect(
             win.document.querySelector(
@@ -286,25 +286,33 @@ describes.realWin(
         });
 
         it('should require unlayout if iframe is not pausable', () => {
-          sandbox
+          env.sandbox
             ./*OK*/ stub(xOriginIframeHandler, 'isPausable')
             .returns(false);
           expect(ad3p.unlayoutOnPause()).to.be.true;
         });
 
         it('should NOT require unlayout if iframe is pausable', () => {
-          sandbox./*OK*/ stub(xOriginIframeHandler, 'isPausable').returns(true);
+          window.sandbox
+            ./*OK*/ stub(xOriginIframeHandler, 'isPausable')
+            .returns(true);
           expect(ad3p.unlayoutOnPause()).to.be.false;
         });
 
         it('should pause iframe', () => {
-          const stub = sandbox./*OK*/ stub(xOriginIframeHandler, 'setPaused');
+          const stub = window.sandbox./*OK*/ stub(
+            xOriginIframeHandler,
+            'setPaused'
+          );
           ad3p.pauseCallback();
           expect(stub).to.be.calledOnce.calledWith(true);
         });
 
         it('should resume iframe', () => {
-          const stub = sandbox./*OK*/ stub(xOriginIframeHandler, 'setPaused');
+          const stub = window.sandbox./*OK*/ stub(
+            xOriginIframeHandler,
+            'setPaused'
+          );
           ad3p.resumeCallback();
           expect(stub).to.be.calledOnce.calledWith(false);
         });
@@ -444,7 +452,7 @@ describes.realWin(
           iframe.style.display = 'block';
           iframe.style.minHeight = '0px';
 
-          const stub = sandbox.stub(ad3p, 'getLayoutBox');
+          const stub = env.sandbox.stub(ad3p, 'getLayoutBox');
           const box = {
             top: 100,
             bottom: 200,
@@ -506,7 +514,10 @@ describes.realWin(
             width: '280',
             height: '280',
           });
-          const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
+          const attemptChangeSizeSpy = env.sandbox.spy(
+            impl,
+            'attemptChangeSize'
+          );
           expect(impl.buildCallback()).to.be.undefined;
           expect(attemptChangeSizeSpy).to.not.be.called;
         });
@@ -518,7 +529,7 @@ describes.realWin(
             'data-auto-format': 'rspv',
             'data-full-width': '',
           });
-          const attemptChangeSizeSpy = sandbox
+          const attemptChangeSizeSpy = env.sandbox
             .stub(impl, 'attemptChangeSize')
             .callsFake((height, width) => {
               expect(width).to.equal(VIEWPORT_WIDTH);
@@ -538,7 +549,7 @@ describes.realWin(
             'data-auto-format': 'mcrspv',
             'data-full-width': '',
           });
-          const attemptChangeSizeSpy = sandbox
+          const attemptChangeSizeSpy = env.sandbox
             .stub(impl, 'attemptChangeSize')
             .callsFake((height, width) => {
               expect(width).to.equal(VIEWPORT_WIDTH);

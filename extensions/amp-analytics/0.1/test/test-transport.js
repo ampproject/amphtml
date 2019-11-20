@@ -31,7 +31,6 @@ describes.realWin(
     allowExternalResources: true,
   },
   env => {
-    let sandbox;
     let win;
     let doc;
     let openXhrStub;
@@ -40,12 +39,11 @@ describes.realWin(
     let imagePixelVerifier;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       win = env.win;
       doc = win.document;
-      openXhrStub = sandbox.stub();
-      sendXhrStub = sandbox.stub();
-      sendBeaconStub = sandbox.stub();
+      openXhrStub = env.sandbox.stub();
+      sendXhrStub = env.sandbox.stub();
+      sendBeaconStub = env.sandbox.stub();
     });
 
     it('prefers beacon over xhrpost and image', () => {
@@ -388,7 +386,7 @@ describes.realWin(
 
         const ampAnalyticsEl = null;
 
-        const preconnectSpy = sandbox.spy();
+        const preconnectSpy = env.sandbox.spy();
         transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
           preload: preconnectSpy,
         });
@@ -414,7 +412,7 @@ describes.realWin(
           'amp-analytics'
         );
 
-        const preconnectSpy = sandbox.spy();
+        const preconnectSpy = env.sandbox.spy();
         transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
           preload: preconnectSpy,
         });
@@ -444,7 +442,7 @@ describes.realWin(
           'amp-analytics'
         );
 
-        const preconnectSpy = sandbox.spy();
+        const preconnectSpy = env.sandbox.spy();
         transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
           preload: preconnectSpy,
         });
@@ -463,7 +461,7 @@ describes.realWin(
           image: true,
           iframe: '//test',
         });
-        const iframeTransportSendRequestSpy = sandbox.spy();
+        const iframeTransportSendRequestSpy = env.sandbox.spy();
         transport.iframeTransport_ = {
           sendRequest: iframeTransportSendRequestSpy,
         };
@@ -476,7 +474,7 @@ describes.realWin(
     });
 
     function setupStubs(beacon, xhr) {
-      const wi = mockWindowInterface(sandbox);
+      const wi = mockWindowInterface(env.sandbox);
       wi.getSendBeacon.returns(beacon ? sendBeaconStub : undefined);
 
       const FakeXMLHttpRequest = () => {

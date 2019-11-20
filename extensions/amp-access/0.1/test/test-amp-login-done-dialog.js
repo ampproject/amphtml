@@ -17,7 +17,6 @@
 import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 
 describe('LoginDoneDialog', () => {
-  let sandbox;
   let clock;
   let windowApi;
   let windowMock;
@@ -27,8 +26,7 @@ describe('LoginDoneDialog', () => {
   let closeButton;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
 
     messageListener = undefined;
     closeButton = {};
@@ -40,7 +38,7 @@ describe('LoginDoneDialog', () => {
       location: {
         hash: '#result1',
         search: '',
-        replace: sandbox.spy(),
+        replace: window.sandbox.spy(),
       },
       addEventListener: (type, callback) => {
         if (type == 'message') {
@@ -74,14 +72,10 @@ describe('LoginDoneDialog', () => {
         },
       },
     };
-    windowMock = sandbox.mock(windowApi);
-    openerMock = sandbox.mock(windowApi.opener);
+    windowMock = window.sandbox.mock(windowApi);
+    openerMock = window.sandbox.mock(windowApi.opener);
 
     dialog = new LoginDoneDialog(windowApi);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function succeed() {
@@ -166,7 +160,7 @@ describe('LoginDoneDialog', () => {
       openerMock
         .expects('postMessage')
         .withExactArgs(
-          sinon.match(arg => {
+          window.sandbox.match(arg => {
             return (
               arg.sentinel == 'amp' &&
               arg.type == 'result' &&
@@ -316,7 +310,7 @@ describe('LoginDoneDialog', () => {
       openerMock
         .expects('postMessage')
         .withExactArgs(
-          sinon.match(arg => {
+          window.sandbox.match(arg => {
             return (
               arg.sentinel == 'amp' &&
               arg.type == 'result' &&
@@ -344,7 +338,7 @@ describe('LoginDoneDialog', () => {
 
     it('should revert to error mode if window is not closed', () => {
       windowMock.expects('close').once();
-      dialog.postbackError_ = sandbox.spy();
+      dialog.postbackError_ = window.sandbox.spy();
       dialog.postbackSuccess_();
       expect(dialog.postbackError_).to.have.not.been.called;
 

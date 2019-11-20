@@ -28,13 +28,11 @@ describes.realWin(
     let owners;
     let parent;
     let children;
-    let sandbox;
     let scheduleLayoutOrPreloadStub;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox = env.sandbox;
       owners = Services.ownersForDoc(env.ampdoc);
       resources = Services.resourcesForDoc(env.ampdoc);
       resources.isRuntimeOn_ = false;
@@ -56,7 +54,7 @@ describes.realWin(
           children[0].appendChild(children[i]);
         }
       }
-      scheduleLayoutOrPreloadStub = sandbox.stub(
+      scheduleLayoutOrPreloadStub = env.sandbox.stub(
         resources,
         'scheduleLayoutOrPreload'
       );
@@ -64,7 +62,7 @@ describes.realWin(
 
     function createElement() {
       const element = env.createAmpElement('amp-test');
-      sandbox.stub(element, 'isUpgraded').returns(true);
+      env.sandbox.stub(element, 'isUpgraded').returns(true);
       return element;
     }
 
@@ -75,11 +73,11 @@ describes.realWin(
       const element = createElement();
       const resource = new Resource(id, element, resources);
       resource.state_ = state;
-      sandbox.stub(resource, 'measure').callsFake(() => {
+      env.sandbox.stub(resource, 'measure').callsFake(() => {
         resource.state_ = ResourceState.READY_FOR_LAYOUT;
       });
       resource.isDisplayedForTesting = true;
-      sandbox
+      env.sandbox
         .stub(resource, 'isDisplayed')
         .callsFake(() => resource.isDisplayedForTesting);
       resource.isInViewport = () => true;
@@ -121,8 +119,8 @@ describes.realWin(
       });
 
       it('should call pauseCallback on custom element', () => {
-        const stub1 = sandbox.stub(children[1], 'pauseCallback');
-        const stub2 = sandbox.stub(children[2], 'pauseCallback');
+        const stub1 = env.sandbox.stub(children[1], 'pauseCallback');
+        const stub2 = env.sandbox.stub(children[2], 'pauseCallback');
 
         owners.schedulePause(parent, children);
         expect(stub1.calledOnce).to.be.true;
@@ -130,9 +128,9 @@ describes.realWin(
       });
 
       it('should call unlayoutCallback when unlayoutOnPause', () => {
-        const stub1 = sandbox.stub(children[1], 'unlayoutCallback');
-        const stub2 = sandbox.stub(children[2], 'unlayoutCallback');
-        sandbox.stub(children[1], 'unlayoutOnPause').returns(true);
+        const stub1 = env.sandbox.stub(children[1], 'unlayoutCallback');
+        const stub2 = env.sandbox.stub(children[2], 'unlayoutCallback');
+        env.sandbox.stub(children[1], 'unlayoutOnPause').returns(true);
 
         owners.schedulePause(parent, children);
         expect(stub1.calledOnce).to.be.true;
@@ -166,14 +164,14 @@ describes.realWin(
       });
 
       it('should call resumeCallback on paused custom elements', () => {
-        const stub1 = sandbox.stub(children[1], 'resumeCallback');
+        const stub1 = env.sandbox.stub(children[1], 'resumeCallback');
 
         owners.scheduleResume(parent, children);
         expect(stub1.calledOnce).to.be.true;
       });
 
       it('should call resumeCallback on non-paused custom elements', () => {
-        const stub2 = sandbox.stub(children[2], 'resumeCallback');
+        const stub2 = env.sandbox.stub(children[2], 'resumeCallback');
 
         owners.scheduleResume(parent, children);
         expect(stub2.calledOnce).to.be.true;
@@ -200,7 +198,7 @@ describes.realWin(
           ResourceState.NOT_BUILT
         );
         let buildResource;
-        sandbox.stub(resource1, 'whenBuilt').returns(
+        env.sandbox.stub(resource1, 'whenBuilt').returns(
           new Promise(resolve => {
             buildResource = resolve;
           })
@@ -233,8 +231,8 @@ describes.realWin(
       });
 
       it('should schedule on custom element with multiple children', () => {
-        const stub1 = sandbox.stub(children[1], 'unlayoutCallback');
-        const stub2 = sandbox.stub(children[2], 'unlayoutCallback');
+        const stub1 = env.sandbox.stub(children[1], 'unlayoutCallback');
+        const stub2 = env.sandbox.stub(children[2], 'unlayoutCallback');
         owners.scheduleUnlayout(parent, children);
         expect(stub1.called).to.be.true;
         expect(stub2.called).to.be.true;
@@ -310,8 +308,8 @@ describes.realWin(
           if (!resource) {
             return;
           }
-          sandbox.stub(resource, 'whenBuilt').returns(Promise.resolve());
-          sandbox.stub(resource, 'loadedOnce').returns(Promise.resolve());
+          env.sandbox.stub(resource, 'whenBuilt').returns(Promise.resolve());
+          env.sandbox.stub(resource, 'loadedOnce').returns(Promise.resolve());
         });
       });
 

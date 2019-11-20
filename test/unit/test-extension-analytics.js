@@ -40,18 +40,12 @@ describes.realWin(
     let win;
 
     describe('insertAnalyticsElement', () => {
-      let sandbox;
       class MockInstrumentation {}
 
       beforeEach(() => {
-        sandbox = sinon.sandbox;
         timer = Services.timerFor(env.win);
         ampdoc = env.ampdoc;
         win = env.win;
-      });
-
-      afterEach(() => {
-        sandbox.restore();
       });
 
       [true, false].forEach(disableImmediate => {
@@ -111,16 +105,10 @@ describes.realWin(
     describe('CustomEventReporterBuilder', () => {
       let builder;
       let parent;
-      let sandbox;
 
       beforeEach(() => {
-        sandbox = sinon.sandbox;
         parent = document.createElement('div');
         builder = new CustomEventReporterBuilder(parent);
-      });
-
-      afterEach(() => {
-        sandbox.restore();
       });
 
       it('track event with one request', () => {
@@ -250,7 +238,6 @@ describes.realWin(
       let builder;
       let parentEle;
       let reporter;
-      let sandbox;
       let ampdoc;
       let triggerEventSpy;
 
@@ -262,8 +249,7 @@ describes.realWin(
 
       beforeEach(() => {
         ampdoc = env.ampdoc;
-        sandbox = sinon.sandbox;
-        triggerEventSpy = sandbox.spy();
+        triggerEventSpy = env.sandbox.spy();
         resetServiceForTesting(env.win, 'amp-analytics-instrumentation');
         registerServiceBuilderForDoc(
           ampdoc,
@@ -281,10 +267,6 @@ describes.realWin(
         builder = new CustomEventReporterBuilder(parentEle);
         reporter = builder.track('test', 'fake.com').build();
         return buildPromise;
-      });
-
-      afterEach(() => {
-        sandbox.restore();
       });
 
       it('replace eventType with new name', function*() {

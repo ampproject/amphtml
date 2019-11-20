@@ -27,7 +27,7 @@ describes.fakeWin('vsync', {}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     installTimerService(win);
 
@@ -45,8 +45,8 @@ describes.fakeWin('vsync', {}, env => {
     beforeEach(() => {
       installDocService(win, /* isSingleDoc */ true);
       ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      isVisibleStub = sandbox.stub(ampdoc, 'isVisible').returns(true);
-      onVisibilityChangedStub = sandbox.stub(ampdoc, 'onVisibilityChanged');
+      isVisibleStub = env.sandbox.stub(ampdoc, 'isVisible').returns(true);
+      onVisibilityChangedStub = env.sandbox.stub(ampdoc, 'onVisibilityChanged');
       iniVisibilityEventCount = 0;
       iniVisibilityEventCount = getVisibilityEventCount();
       vsync = new Vsync(win);
@@ -209,8 +209,8 @@ describes.fakeWin('vsync', {}, env => {
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.
     it.skip('should return a promise from runPromise that executes "run"', () => {
-      const measureSpy = sandbox.spy();
-      const mutateSpy = sandbox.spy();
+      const measureSpy = env.sandbox.spy();
+      const mutateSpy = env.sandbox.spy();
       return vsync
         .runPromise({measure: measureSpy, mutate: mutateSpy})
         .then(() => {
@@ -233,7 +233,7 @@ describes.fakeWin('vsync', {}, env => {
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.
     it.skip('should return a promise from mutatePromisethat runs mutator', () => {
-      const mutator = sandbox.spy();
+      const mutator = env.sandbox.spy();
       return vsync.mutatePromise(mutator).then(() => {
         expect(mutator).to.be.calledOnce;
       });
@@ -482,7 +482,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should reject mutate series when invisible', () => {
       isVisibleStub.returns(false);
-      const mutatorSpy = sandbox.spy();
+      const mutatorSpy = env.sandbox.spy();
 
       const promise = vsync.runAnimMutateSeries(contextNode, mutatorSpy);
       return promise
@@ -544,8 +544,8 @@ describes.fakeWin('vsync', {}, env => {
       root = doc.createElement('i-amphtml-shadow-root');
       doc.body.appendChild(root);
       ampdoc = new AmpDocShadow(win, 'https://acme.org/', root);
-      isVisibleStub = sandbox.stub(ampdoc, 'isVisible').returns(true);
-      onVisibilityChangedStub = sandbox.stub(ampdoc, 'onVisibilityChanged');
+      isVisibleStub = env.sandbox.stub(ampdoc, 'isVisible').returns(true);
+      onVisibilityChangedStub = env.sandbox.stub(ampdoc, 'onVisibilityChanged');
       contextNode.ampdoc_ = ampdoc;
       iniVisibilityEventCount = 0;
       iniVisibilityEventCount = getVisibilityEventCount();
@@ -762,7 +762,7 @@ describes.fakeWin('vsync', {}, env => {
 
     it('should reject mutate series when invisible', () => {
       doc.visibilityState = 'hidden';
-      const mutatorSpy = sandbox.spy();
+      const mutatorSpy = env.sandbox.spy();
 
       const promise = vsync.runAnimMutateSeries(contextNode, mutatorSpy);
       return promise

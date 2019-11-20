@@ -71,7 +71,7 @@ describe('Platform', () => {
         standalone: standAloneBoolean,
         userAgent: userAgentString,
       },
-      matchMedia: sandbox.stub().returns({matches: true}),
+      matchMedia: window.sandbox.stub().returns({matches: true}),
     });
     expect(platform.isStandalone()).to.equal(isStandalone);
   }

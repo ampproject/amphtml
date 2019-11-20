@@ -26,8 +26,8 @@ describes.sandboxed('document-visibility', {}, env => {
 
   beforeEach(() => {
     doc = {
-      addEventListener: sandbox.spy(),
-      removeEventListener: sandbox.spy(),
+      addEventListener: env.sandbox.spy(),
+      removeEventListener: env.sandbox.spy(),
     };
   });
 

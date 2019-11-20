@@ -65,12 +65,14 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     viewer = Services.viewerForDoc(ampdoc);
     ampdoc.params_['viewerUrl'] = 'https://www.google.com/other';
     serviceAdapter = new ServiceAdapter(null);
-    serviceAdapterMock = sandbox.mock(serviceAdapter);
-    sandbox.stub(serviceAdapter, 'getPageConfig').callsFake(() => pageConfig);
+    serviceAdapterMock = env.sandbox.mock(serviceAdapter);
+    env.sandbox
+      .stub(serviceAdapter, 'getPageConfig')
+      .callsFake(() => pageConfig);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
-    sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
-    analyticsMock = sandbox.mock(analytics);
-    getEncryptedDocumentKeyStub = sandbox
+    env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
+    analyticsMock = env.sandbox.mock(analytics);
+    getEncryptedDocumentKeyStub = env.sandbox
       .stub(serviceAdapter, 'getEncryptedDocumentKey')
       .callsFake(() => {
         return null;
@@ -81,45 +83,45 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       subscriptionToken: 'tok1',
     };
     callbacks = {
-      loginRequest: sandbox.stub(
+      loginRequest: env.sandbox.stub(
         ConfiguredRuntime.prototype,
         'setOnLoginRequest'
       ),
-      linkComplete: sandbox.stub(
+      linkComplete: env.sandbox.stub(
         ConfiguredRuntime.prototype,
         'setOnLinkComplete'
       ),
-      flowStarted: sandbox.stub(
+      flowStarted: env.sandbox.stub(
         ConfiguredRuntime.prototype,
         'setOnFlowStarted'
       ),
-      flowCanceled: sandbox.stub(
+      flowCanceled: env.sandbox.stub(
         ConfiguredRuntime.prototype,
         'setOnFlowCanceled'
       ),
-      subscribeRequest: sandbox.stub(
+      subscribeRequest: env.sandbox.stub(
         ConfiguredRuntime.prototype,
         'setOnNativeSubscribeRequest'
       ),
-      subscribeResponse: sandbox.stub(
+      subscribeResponse: env.sandbox.stub(
         ConfiguredRuntime.prototype,
         'setOnPaymentResponse'
       ),
     };
     methods = {
-      reset: sandbox.stub(ConfiguredRuntime.prototype, 'reset'),
-      showContributionOptions: sandbox.stub(
+      reset: env.sandbox.stub(ConfiguredRuntime.prototype, 'reset'),
+      showContributionOptions: env.sandbox.stub(
         ConfiguredRuntime.prototype,
         'showContributionOptions'
       ),
-      showOffers: sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
-      showAbbrvOffer: sandbox.stub(
+      showOffers: env.sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
+      showAbbrvOffer: env.sandbox.stub(
         ConfiguredRuntime.prototype,
         'showAbbrvOffer'
       ),
-      linkAccount: sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
+      linkAccount: env.sandbox.stub(ConfiguredRuntime.prototype, 'linkAccount'),
     };
-    ackStub = sandbox.stub(Entitlements.prototype, 'ack');
+    ackStub = env.sandbox.stub(Entitlements.prototype, 'ack');
     toggleExperiment(win, 'swg-gpay-api', true);
     toggleExperiment(win, 'nonswgexp', true);
     platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
@@ -157,18 +159,20 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should proxy fetch via AMP fetcher', () => {
-    const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
-      expect(url).to.match(/publication\/example.org/);
-      expect(init).to.deep.equal({
-        credentials: 'include',
-        prerenderSafe: true,
+    const fetchStub = env.sandbox
+      .stub(xhr, 'fetchJson')
+      .callsFake((url, init) => {
+        expect(url).to.match(/publication\/example.org/);
+        expect(init).to.deep.equal({
+          credentials: 'include',
+          prerenderSafe: true,
+        });
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({entitlements: entitlementResponse});
+          },
+        });
       });
-      return Promise.resolve({
-        json: () => {
-          return Promise.resolve({entitlements: entitlementResponse});
-        },
-      });
-    });
     return platform.getEntitlements().then(ents => {
       expect(ents.service).to.equal(PLATFORM_ID);
       expect(fetchStub).to.be.calledOnce;
@@ -176,24 +180,26 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should proxy fetch non-granting response', () => {
-    const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake((url, init) => {
-      expect(url).to.match(/publication\/example.org/);
-      expect(init).to.deep.equal({
-        credentials: 'include',
-        prerenderSafe: true,
+    const fetchStub = env.sandbox
+      .stub(xhr, 'fetchJson')
+      .callsFake((url, init) => {
+        expect(url).to.match(/publication\/example.org/);
+        expect(init).to.deep.equal({
+          credentials: 'include',
+          prerenderSafe: true,
+        });
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              entitlements: {
+                source: 'subscribe.google.com',
+                products: ['example.org:registered_user'],
+                subscriptionToken: 'tok1',
+              },
+            });
+          },
+        });
       });
-      return Promise.resolve({
-        json: () => {
-          return Promise.resolve({
-            entitlements: {
-              source: 'subscribe.google.com',
-              products: ['example.org:registered_user'],
-              subscriptionToken: 'tok1',
-            },
-          });
-        },
-      });
-    });
     return platform.getEntitlements().then(ents => {
       expect(ents.source).to.equal(PLATFORM_ID);
       expect(ents.granted).to.be.false;
@@ -202,7 +208,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should proxy fetch empty response', () => {
-    sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+    env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
       return Promise.resolve({
         json: () => {
           return Promise.resolve({
@@ -217,7 +223,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should ack matching entitlements', () => {
-    sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+    env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
       return Promise.resolve({
         json: () => {
           return Promise.resolve({entitlements: entitlementResponse});
@@ -230,7 +236,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should NOT ack non-matching entitlements', () => {
-    sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+    env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
       return Promise.resolve({
         json: () => {
           return Promise.resolve({
@@ -391,7 +397,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       () => promise
     );
     const resetPlatformsPromise = new Promise(resolve => {
-      sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
+      env.sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
         resolve();
       });
     });
@@ -461,7 +467,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should infer the viewer from origin', () => {
     delete ampdoc.params_['viewerUrl'];
     let viewerOrigin = null;
-    sandbox.stub(viewer, 'getViewerOrigin').callsFake(() => viewerOrigin);
+    env.sandbox.stub(viewer, 'getViewerOrigin').callsFake(() => viewerOrigin);
 
     return Promise.resolve()
       .then(() => {
@@ -498,7 +504,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should attach button given to decorateUI', () => {
     const elem = env.win.document.createElement('div');
-    const decorateStub = sandbox.stub(platform.runtime_.buttonApi_, 'attach');
+    const decorateStub = env.sandbox.stub(
+      platform.runtime_.buttonApi_,
+      'attach'
+    );
     elem.textContent = 'some html';
     platform.decorateUI(elem, 'subscribe');
     expect(elem.textContent).to.be.equal('');
@@ -507,7 +516,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should attach smartbutton given to decorateUI', () => {
     const elem = env.win.document.createElement('div');
-    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    const attachStub = env.sandbox.stub(platform.runtime_, 'attachSmartButton');
     elem.textContent = 'some html';
     elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton');
@@ -517,7 +526,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should use light smartbutton theme', () => {
     const elem = env.win.document.createElement('div');
-    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    const attachStub = env.sandbox.stub(platform.runtime_, 'attachSmartButton');
     elem.textContent = 'some html';
     elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton-light');
@@ -527,7 +536,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should use dark smartbutton theme', () => {
     const elem = env.win.document.createElement('div');
-    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    const attachStub = env.sandbox.stub(platform.runtime_, 'attachSmartButton');
     elem.textContent = 'some html';
     elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton-dark');
@@ -537,7 +546,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   it('should use message text color', () => {
     const elem = env.win.document.createElement('div');
-    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    const attachStub = env.sandbox.stub(platform.runtime_, 'attachSmartButton');
     elem.textContent = 'some html';
     elem.setAttribute('subscriptions-lang', 'en');
     elem.setAttribute('subscriptions-message-text-color', '#09f');
@@ -587,7 +596,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   describe('getEntitlements', () => {
     it('should convert granted entitlements to internal shape', () => {
-      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
             return Promise.resolve({entitlements: entitlementResponse});
@@ -603,7 +612,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
 
     it('should convert non granted internal shape with granted == false', () => {
-      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
             return Promise.resolve({
@@ -641,7 +650,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     }
 
     it('should treat missing isReadyToPay as false', () => {
-      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
             return Promise.resolve({entitlements: entitlementResponse});
@@ -658,7 +667,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
 
     it('should handle isReadyToPay true', () => {
-      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
             return Promise.resolve({
@@ -669,7 +678,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         });
       });
       //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
-      sandbox
+      env.sandbox
         .stub(platform.runtime_, 'getEntitlements')
         .resolves(fakeEntitlements(true));
 
@@ -683,7 +692,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
 
     it('should handle isReadyToPay false', () => {
-      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
             return Promise.resolve({
@@ -694,7 +703,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         });
       });
       //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
-      sandbox
+      env.sandbox
         .stub(platform.runtime_, 'getEntitlements')
         .resolves(fakeEntitlements(false));
 
@@ -708,7 +717,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
 
     it('should call getEncryptedDocumentKey with google.com', () => {
-      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
             return Promise.resolve({entitlements: {}});
@@ -721,7 +730,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
 
     it('should not add encryptedDocumentKey parameter to url', () => {
-      const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
             return Promise.resolve({entitlements: {}});
@@ -736,7 +745,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
 
     it('should add encryptedDocumentKey parameter to url', () => {
-      const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+      const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
             return Promise.resolve({entitlements: {}});

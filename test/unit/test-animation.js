@@ -17,7 +17,6 @@
 import {Animation} from '../../src/animation';
 
 describe('Animation', () => {
-  let sandbox;
   let vsync;
   let vsyncTasks;
   let anim;
@@ -25,8 +24,7 @@ describe('Animation', () => {
   let contextNode;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
       canAnimate: () => true,
@@ -42,7 +40,6 @@ describe('Animation', () => {
 
   afterEach(() => {
     expect(vsyncTasks.length).to.equal(0);
-    sandbox.restore();
   });
 
   function runVsync() {

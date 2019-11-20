@@ -44,18 +44,18 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     registerServiceBuilder(win, 'story-store', () => storeService);
 
     // Making sure resource tasks run synchronously.
-    sandbox.stub(Services, 'resourcesForDoc').returns({
+    env.sandbox.stub(Services, 'resourcesForDoc').returns({
       mutateElement: (element, callback) => {
         callback();
         return Promise.resolve();
       },
     });
 
-    sandbox.stub(Services, 'localizationServiceV01').returns({
+    env.sandbox.stub(Services, 'localizationServiceV01').returns({
       getLocalizedString: localizedStringId => `string(${localizedStringId})`,
     });
 
-    sandbox.stub(Services, 'viewerForDoc').returns({
+    env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => embedded,
       sendMessageAwaitResponse: eventType => {
         if (eventType === 'moreInfoLinkUrl') {

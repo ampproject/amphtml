@@ -108,7 +108,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
   describe('#hasTimedOut', () => {
     it('should timeout after > 10 seconds', () => {
-      const clock = sandbox.useFakeTimers(1555555555555);
+      const clock = window.sandbox.useFakeTimers(1555555555555);
       storyAdPage.build();
       expect(storyAdPage.hasTimedOut()).to.be.false;
       clock.tick(10009); // 10 second timeout.
@@ -140,7 +140,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
   describe('#registerLoadCallback', () => {
     it('registers given functions and executes when loaded', async () => {
-      const someFunc = sandbox.spy();
+      const someFunc = window.sandbox.spy();
       const pageElement = storyAdPage.build();
       // Stub delegateVideoAutoplay.
       pageElement.getImpl = () => Promise.resolve(pageImplMock);
@@ -363,7 +363,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         'https://googleads.g.doubleclick.net/pagead/images/mtad/ad_choices_blue.png'
       );
 
-      const openWindowDialogStub = sandbox.stub(dom, 'openWindowDialog');
+      const openWindowDialogStub = window.sandbox.stub(dom, 'openWindowDialog');
       attribution.click();
       expect(openWindowDialogStub).to.be.calledOnce;
       expect(openWindowDialogStub).to.be.calledWithExactly(
@@ -421,8 +421,10 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
     beforeEach(() => {
       const storyAnalytics = new StoryAdAnalytics(env.ampdoc);
-      fireEventStub = sandbox.stub(storyAnalytics, 'fireEvent');
-      sandbox.stub(service, 'getServicePromiseForDoc').resolves(storyAnalytics);
+      fireEventStub = window.sandbox.stub(storyAnalytics, 'fireEvent');
+      window.sandbox
+        .stub(service, 'getServicePromiseForDoc')
+        .resolves(storyAnalytics);
       storyAdPage = new StoryAdPage(
         storyAutoAdsEl.getAmpDoc(),
         baseConfig,
@@ -439,7 +441,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         pageElement,
         1, // adIndex
         'story-ad-request',
-        {requestTime: sinon.match.number}
+        {requestTime: window.sandbox.match.number}
       );
     });
 
@@ -456,7 +458,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         pageElement,
         1, // adIndex
         'story-ad-load',
-        {loadTime: sinon.match.number}
+        {loadTime: window.sandbox.match.number}
       );
     });
 
@@ -482,7 +484,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         pageElement,
         1, // adIndex
         'story-ad-click',
-        {clickTime: sinon.match.number}
+        {clickTime: window.sandbox.match.number}
       );
     });
   });

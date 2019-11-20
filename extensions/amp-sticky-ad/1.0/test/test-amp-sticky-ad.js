@@ -37,7 +37,6 @@ describes.realWin(
   },
   env => {
     let win;
-    let sandbox;
     let ampStickyAd;
     let ampAd;
     let impl;
@@ -46,7 +45,6 @@ describes.realWin(
     describe('with valid child 1.0', () => {
       beforeEach(() => {
         win = env.win;
-        sandbox = env.sandbox;
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
         ampAd = createElementWithAttributes(win.document, 'amp-ad', {
@@ -59,14 +57,14 @@ describes.realWin(
         ampStickyAd.build();
         impl = ampStickyAd.implementation_;
         addToFixedLayerPromise = Promise.resolve();
-        addToFixedLayerStub = sandbox
+        addToFixedLayerStub = env.sandbox
           .stub(impl.viewport_, 'addToFixedLayer')
           .callsFake(() => addToFixedLayerPromise);
       });
 
       // TODO(#16916): Make this test work with synchronous throws.
       it.skip('should listen to scroll event', function*() {
-        const spy = sandbox.spy(impl, 'removeOnScrollListener_');
+        const spy = env.sandbox.spy(impl, 'removeOnScrollListener_');
         expect(impl.scrollUnlisten_).to.be.null;
         yield macroTask();
         // Hack to handle possible unexpected page scroll
@@ -78,16 +76,16 @@ describes.realWin(
       });
 
       it('should not build when scrollTop not greater than 1', () => {
-        const scheduleLayoutSpy = sandbox.spy(
+        const scheduleLayoutSpy = env.sandbox.spy(
           Services.ownersForDoc(impl.element),
           'scheduleLayout'
         );
-        const removeOnScrollListenerSpy = sandbox.spy(
+        const removeOnScrollListenerSpy = env.sandbox.spy(
           impl,
           'removeOnScrollListener_'
         );
-        const getScrollTopSpy = sandbox.spy();
-        const getScrollHeightSpy = sandbox.spy();
+        const getScrollTopSpy = env.sandbox.spy();
+        const getScrollHeightSpy = env.sandbox.spy();
 
         impl.viewport_.getScrollTop = function() {
           getScrollTopSpy();
@@ -108,21 +106,24 @@ describes.realWin(
       });
 
       it('should display once user scroll', () => {
-        const scheduleLayoutSpy = sandbox
+        const scheduleLayoutSpy = env.sandbox
           .stub(impl, 'scheduleLayoutForAd_')
           .callsFake(() => {});
-        const removeOnScrollListenerSpy = sandbox.spy(
+        const removeOnScrollListenerSpy = env.sandbox.spy(
           impl,
           'removeOnScrollListener_'
         );
 
-        const getScrollTopStub = sandbox.stub(impl.viewport_, 'getScrollTop');
+        const getScrollTopStub = env.sandbox.stub(
+          impl.viewport_,
+          'getScrollTop'
+        );
         getScrollTopStub.returns(2);
-        const getSizeStub = sandbox.stub(impl.viewport_, 'getSize');
+        const getSizeStub = env.sandbox.stub(impl.viewport_, 'getSize');
         getSizeStub.returns({
           height: 50,
         });
-        const getScrollHeightStub = sandbox.stub(
+        const getScrollHeightStub = env.sandbox.stub(
           impl.viewport_,
           'getScrollHeight'
         );
@@ -172,8 +173,8 @@ describes.realWin(
       });
 
       it('should create a close button', () => {
-        const addCloseButtonSpy = sandbox.spy(impl, 'addCloseButton_');
-        sandbox.stub(impl, 'scheduleLayoutForAd_').callsFake(() => {});
+        const addCloseButtonSpy = env.sandbox.spy(impl, 'addCloseButton_');
+        env.sandbox.stub(impl, 'scheduleLayoutForAd_').callsFake(() => {});
 
         impl.viewport_.getScrollTop = function() {
           return 100;
@@ -213,7 +214,7 @@ describes.realWin(
         impl.vsync_.mutate = function(callback) {
           callback();
         };
-        const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
+        const layoutAdSpy = env.sandbox.spy(impl, 'layoutAd_');
         impl.scheduleLayoutForAd_();
         expect(layoutAdSpy).to.not.been.called;
         impl.ad_.signals().signal('built');
@@ -349,7 +350,7 @@ describes.realWin(
       ampStickyAd.build();
       impl = ampStickyAd.implementation_;
       addToFixedLayerPromise = Promise.resolve();
-      sandbox
+      env.sandbox
         .stub(impl.viewport_, 'addToFixedLayer')
         .callsFake(() => addToFixedLayerPromise);
       return ampAd.implementation_.upgradeCallback();
@@ -372,7 +373,7 @@ describes.realWin(
       impl.vsync_.mutate = function(callback) {
         callback();
       };
-      sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
+      env.sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
 
       impl.display_();
       impl.ad_.signals().signal('built');
@@ -417,7 +418,7 @@ describes.realWin(
       impl.vsync_.mutate = function(callback) {
         callback();
       };
-      sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
+      env.sandbox.defineProperty(impl.element, 'offsetHeight', {value: 20});
 
       impl.display_();
       impl.ad_.signals().signal('built');

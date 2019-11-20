@@ -101,7 +101,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     resourceTimingSpec,
     expectedResult
   ) {
-    sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
+    env.sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
     return getResourceTiming(ampdoc, resourceTimingSpec, Date.now()).then(
       result => {
         expect(result).to.equal(expectedResult);
@@ -143,7 +143,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const spec = newResourceTimingSpec();
-    sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
+    env.sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
     return getResourceTiming(win, spec, Date.now() - 60 * 1000).then(result => {
       expect(result).to.equal('');
     });
@@ -590,11 +590,14 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
     // Stub performance.now so that it returns a timestamp after the resource
     // timing entry.
-    const nowStub = sandbox.stub(win.performance, 'now');
+    const nowStub = env.sandbox.stub(win.performance, 'now');
     nowStub.onCall(0).returns(600);
     nowStub.onCall(1).returns(800);
 
-    const getEntriesStub = sandbox.stub(win.performance, 'getEntriesByType');
+    const getEntriesStub = env.sandbox.stub(
+      win.performance,
+      'getEntriesByType'
+    );
     getEntriesStub.onCall(0).returns([initialEntry]);
     getEntriesStub.onCall(1).returns([initialEntry, laterEntry]);
 
@@ -618,7 +621,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
   it('should not update responseAfter if greater', () => {
     const spec = newResourceTimingSpec();
     spec['responseAfter'] = 1000;
-    sandbox.stub(win.performance, 'now').returns(500);
+    env.sandbox.stub(win.performance, 'now').returns(500);
     return runSerializeTest([], spec, '').then(() => {
       // responseAfter is greater than performance.now(), so it should not be
       // modified.
@@ -638,7 +641,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     const entries = new Array(150).fill(entry);
     // Stub performance.now so that it returns a timestamp after the resource
     // timing entry.
-    sandbox.stub(win.performance, 'now').returns(700);
+    env.sandbox.stub(win.performance, 'now').returns(700);
     const spec = newResourceTimingSpec();
     return runSerializeTest(entries, spec, '').then(() => {
       expect(spec['done']).to.be.true;

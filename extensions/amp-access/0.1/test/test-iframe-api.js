@@ -32,9 +32,9 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       const controller = new AccessController();
-      controllerMock = sandbox.mock(controller);
+      controllerMock = env.sandbox.mock(controller);
       iframeApi = new AmpAccessIframeApi(controller, win);
-      messengerMock = sandbox.mock(iframeApi.messenger_);
+      messengerMock = env.sandbox.mock(iframeApi.messenger_);
     });
 
     afterEach(() => {

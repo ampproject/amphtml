@@ -205,7 +205,7 @@ describes.realWin(
       const vkPoll = await createAmpVkElement(POLL_PARAMS);
       const impl = vkPoll.implementation_;
       const iframe = vkPoll.querySelector('iframe');
-      const changeHeight = sandbox.spy(impl, 'changeHeight');
+      const changeHeight = env.sandbox.spy(impl, 'changeHeight');
       const fakeHeight = 555;
       expect(iframe).to.not.be.null;
       generatePostMessage(vkPoll, iframe, fakeHeight);

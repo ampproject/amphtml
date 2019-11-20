@@ -45,11 +45,11 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
       isSystemShareSupported: () => isSystemShareSupported,
       loadRequiredExtensions: () => {},
     };
-    shareWidgetMock = sandbox.mock(shareWidget);
-    sandbox.stub(ShareWidget, 'create').returns(shareWidget);
+    shareWidgetMock = env.sandbox.mock(shareWidget);
+    env.sandbox.stub(ShareWidget, 'create').returns(shareWidget);
 
     // Making sure the vsync tasks run synchronously.
-    sandbox.stub(Services, 'vsyncFor').returns({
+    env.sandbox.stub(Services, 'vsyncFor').returns({
       mutate: fn => fn(),
       run: (vsyncTaskSpec, vsyncState) => {
         vsyncTaskSpec.measure(vsyncState);
@@ -160,7 +160,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
 
     shareMenu.build();
 
-    const clickCallbackSpy = sandbox.spy();
+    const clickCallbackSpy = env.sandbox.spy();
     shareMenu.element_.addEventListener('click', clickCallbackSpy);
 
     // Toggling the share menu dispatches a click event on the amp-social-share

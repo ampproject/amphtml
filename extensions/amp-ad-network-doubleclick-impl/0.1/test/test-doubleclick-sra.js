@@ -64,12 +64,10 @@ const config = {amp: true, allowExternalResources: true};
   tests to fail.
 */
 describes.realWin('Doubleclick SRA', config, env => {
-  let sandbox;
   let doc;
 
   beforeEach(() => {
     doc = env.win.document;
-    sandbox = env.sandbox;
     // ensures window location == AMP cache passes
     env.win.__AMP_MODE.test = true;
   });
@@ -355,9 +353,11 @@ describes.realWin('Doubleclick SRA', config, env => {
         };
         const element1 = createElementWithAttributes(doc, 'amp-ad', config1);
         const impl1 = new AmpAdNetworkDoubleclickImpl(element1);
-        sandbox.stub(impl1, 'getPageLayoutBox').returns({top: 123, left: 456});
+        env.sandbox
+          .stub(impl1, 'getPageLayoutBox')
+          .returns({top: 123, left: 456});
         impl1.experimentIds = [MANUAL_EXPERIMENT_ID];
-        sandbox
+        env.sandbox
           .stub(impl1, 'generateAdKey_')
           .withArgs('50x320')
           .returns('13579');
@@ -384,8 +384,10 @@ describes.realWin('Doubleclick SRA', config, env => {
         };
         const element2 = createElementWithAttributes(doc, 'amp-ad', config2);
         const impl2 = new AmpAdNetworkDoubleclickImpl(element2);
-        sandbox.stub(impl2, 'getPageLayoutBox').returns({top: 789, left: 101});
-        sandbox
+        env.sandbox
+          .stub(impl2, 'getPageLayoutBox')
+          .returns({top: 789, left: 101});
+        env.sandbox
           .stub(impl2, 'generateAdKey_')
           .withArgs('250x300')
           .returns('2468');
@@ -456,12 +458,12 @@ describes.realWin('Doubleclick SRA', config, env => {
           .splice(1)
           .join()
       );
-      sandbox
+      env.sandbox
         .stub(validInstances[0], 'getLocationQueryParameterValue')
         .withArgs('google_preview')
         .returns('abcdef');
       const xhrWithArgs = xhrMock.withArgs(
-        sinon.match(
+        env.sandbox.match(
           new RegExp(
             '^https://securepubads\\.g\\.doubleclick\\.net' +
               '/gampad/ads\\?output=ldjh&impl=fifs&iu_parts=' +
@@ -514,7 +516,7 @@ describes.realWin('Doubleclick SRA', config, env => {
           `\/gampad\/ads\\?iu=${iu}&`
       );
       xhrMock
-        .withArgs(sinon.match(urlRegexp), {
+        .withArgs(env.sandbox.match(urlRegexp), {
           mode: 'cors',
           method: 'GET',
           credentials: 'include',
@@ -565,7 +567,7 @@ describes.realWin('Doubleclick SRA', config, env => {
       const networkValidity = {};
       const doubleclickInstances = [];
       const networkNestHeaders = [];
-      const attemptCollapseSpy = sandbox.spy(
+      const attemptCollapseSpy = env.sandbox.spy(
         BaseElement.prototype,
         'attemptCollapse'
       );
@@ -580,9 +582,9 @@ describes.realWin('Doubleclick SRA', config, env => {
           for (let i = 0; i < instanceCount; i++) {
             const impl = createA4aSraInstance(network.networkId);
             doubleclickInstances.push(impl);
-            sandbox.stub(impl, 'isValidElement').returns(!invalid);
-            sandbox.stub(impl, 'promiseErrorHandler_');
-            sandbox.stub(impl, 'warnOnError');
+            env.sandbox.stub(impl, 'isValidElement').returns(!invalid);
+            env.sandbox.stub(impl, 'promiseErrorHandler_');
+            env.sandbox.stub(impl, 'warnOnError');
             if (invalid) {
               impl.element.setAttribute('data-test-invalid', 'true');
             }
@@ -607,7 +609,7 @@ describes.realWin('Doubleclick SRA', config, env => {
           groupingPromises[networkId] || (groupingPromises[networkId] = [])
         ).push(Promise.resolve(impl));
       });
-      sandbox
+      env.sandbox
         .stub(AmpAdNetworkDoubleclickImpl.prototype, 'groupSlotsForSra')
         .returns(Promise.resolve(groupingPromises));
       let idx = 0;
@@ -692,11 +694,11 @@ describes.realWin('Doubleclick SRA', config, env => {
     }
 
     beforeEach(() => {
-      xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
-      sandbox
+      xhrMock = env.sandbox.stub(Xhr.prototype, 'fetch');
+      env.sandbox
         .stub(AmpA4A.prototype, 'getSigningServiceNames')
         .returns(['google']);
-      sandbox
+      env.sandbox
         .stub(SignatureVerifier.prototype, 'loadKeyset')
         .callsFake(() => {});
     });
