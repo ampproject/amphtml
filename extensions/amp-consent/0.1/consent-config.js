@@ -201,8 +201,8 @@ export class ConsentConfig {
   }
 
   /**
-   * Config manipulation
-   * @param {string} config
+   * Helper method for config merge and assigning `matchedGeoGroups` 
+   * @param {JsonObject} config
    * @param {string} countryGroup
    */
   mergeGeoFields_(config, countryGroup) {
