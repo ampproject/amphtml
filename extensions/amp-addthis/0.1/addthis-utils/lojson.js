@@ -69,7 +69,7 @@ let LojsonDataDef;
  *   track_textcopy: boolean
  * }}
  */
-let AtConfigDef;
+export let AtConfigDef;
 
 /**
  * @param {!LojsonDataDef} param1

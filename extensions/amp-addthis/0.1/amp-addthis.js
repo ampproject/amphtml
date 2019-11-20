@@ -53,8 +53,8 @@ import {PostMessageDispatcher} from './post-message-dispatcher';
 import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
 import {Services} from '../../../src/services';
 
+import {AtConfigDef, callLojson} from './addthis-utils/lojson';
 import {callEng} from './addthis-utils/eng';
-import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
