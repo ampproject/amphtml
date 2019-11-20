@@ -17,8 +17,7 @@
 import {adplugg} from '../../../ads/adplugg';
 import {createIframePromise} from '../../../testing/iframe';
 
-describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
-  let sandbox;
+describes.fakeWin('amp-ad-adplugg-impl', {}, env => {
   let win;
   let testData;
 
@@ -27,7 +26,6 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
    */
   beforeEach(() => {
     // Set up our test sandbox.
-    sandbox = sinon.sandbox;
     return createIframePromise(true).then(iframe => {
       // Simulate the iframe that adplugg will be called inside.
       win = iframe.win;
@@ -64,7 +62,6 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
   afterEach(() => {
     // Reset window properties.
     win.context = {};
-    sandbox.restore();
   });
 
   describe('adplugg', () => {
@@ -105,13 +102,13 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
 
     it('implement the renderStart API', () => {
       // Set up mocks, spys, etc.
-      const renderStartSpy = sandbox.stub(win.context, 'renderStart');
+      const renderStartSpy = env.sandbox.stub(win.context, 'renderStart');
       win.AdPlugg = {
         push: function() {},
         on: function() {},
       };
-      const AdPluggPushSpy = sandbox.spy(win.AdPlugg, 'push');
-      const AdPluggOnSpy = sandbox.spy(win.AdPlugg, 'on');
+      const AdPluggPushSpy = env.sandbox.spy(win.AdPlugg, 'push');
+      const AdPluggOnSpy = env.sandbox.spy(win.AdPlugg, 'on');
 
       // Call the function.
       adplugg(win, testData);
@@ -134,7 +131,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
 
       // Get the listener function and spy on it
       const listenerFunc = args[2];
-      const listenerFuncSpy = sandbox.spy(listenerFunc);
+      const listenerFuncSpy = env.sandbox.spy(listenerFunc);
 
       // Call the listener function (with a mock Event)
       const event = win.document.createEvent('Event');
@@ -152,7 +149,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
 
     it('implement the noContentAvailable API', () => {
       // Set up mocks, spys, etc.
-      const noContentAvailableSpy = sandbox.stub(
+      const noContentAvailableSpy = env.sandbox.stub(
         win.context,
         'noContentAvailable'
       );
@@ -160,8 +157,8 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
         push: function() {},
         on: function() {},
       };
-      const AdPluggPushSpy = sandbox.spy(win.AdPlugg, 'push');
-      const AdPluggOnSpy = sandbox.spy(win.AdPlugg, 'on');
+      const AdPluggPushSpy = env.sandbox.spy(win.AdPlugg, 'push');
+      const AdPluggOnSpy = env.sandbox.spy(win.AdPlugg, 'on');
 
       // Call the function.
       adplugg(win, testData);
@@ -184,7 +181,7 @@ describes.fakeWin('amp-ad-adplugg-impl', {}, () => {
 
       // Get the listener function and spy on it
       const listenerFunc = args[2];
-      const listenerFuncSpy = sandbox.spy(listenerFunc);
+      const listenerFuncSpy = env.sandbox.spy(listenerFunc);
 
       // Call the listener function (with a mock Event)
       const event = win.document.createEvent('Event');

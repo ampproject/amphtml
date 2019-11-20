@@ -49,7 +49,6 @@ const realWinConfig = {
 describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
   let doubleclickImpl;
   let ampAd;
-  let sandbox;
   let safeframeHost;
   let doc;
   const safeframeChannel = '61393';
@@ -57,7 +56,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
   const ampAdWidth = 300;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     env.win.__AMP_MODE.test = true;
     doc = env.win.document;
     setup(ampAdHeight, ampAdWidth, ampAdHeight, ampAdWidth);
@@ -122,11 +120,11 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {});
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      const connectMessagingChannelSpy = sandbox./*OK*/ spy(
+      const connectMessagingChannelSpy = env.sandbox./*OK*/ spy(
         safeframeHost,
         'connectMessagingChannel'
       );
-      const postMessageStub = sandbox./*OK*/ stub(
+      const postMessageStub = env.sandbox./*OK*/ stub(
         safeframeMock.contentWindow,
         'postMessage'
       );
@@ -198,7 +196,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('getSafeframeNameAttr', () => {
     it('should return name attributes', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical',
       });
       const attrs = safeframeHost.getSafeframeNameAttr();
@@ -265,7 +263,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should not pass canonicalUrl if referrer policy same-origin', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical',
       });
       const meta = env.win.document.createElement('meta');
@@ -285,7 +283,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should not pass canonicalUrl if referrer policy no-referrer', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical',
       });
       const meta = env.win.document.createElement('meta');
@@ -305,7 +303,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should pass canonicalUrl domain if referrer policy origin', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({
+      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
         canonicalUrl: 'http://example.org/canonical/foo?bleh',
       });
       const meta = env.win.document.createElement('meta');
@@ -328,14 +326,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('getCurrentGeometry', () => {
     beforeEach(() => {
-      sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
+      env.sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
         height: 1000,
         width: 500,
       });
     });
 
     it('should get current geometry when safeframe fills amp-ad', () => {
-      sandbox
+      env.sandbox
         ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
         .returns({
           top: 0,
@@ -360,7 +358,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
-      const sendMessageStub = sandbox./*OK*/ stub(
+      const sendMessageStub = env.sandbox./*OK*/ stub(
         safeframeHost,
         'sendMessage_'
       );
@@ -387,7 +385,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should get geometry when safeframe does not fill amp-ad', () => {
-      sandbox
+      env.sandbox
         ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
         .returns({
           top: 0,
@@ -412,7 +410,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
-      const sendMessageStub = sandbox./*OK*/ stub(
+      const sendMessageStub = env.sandbox./*OK*/ stub(
         safeframeHost,
         'sendMessage_'
       );
@@ -440,7 +438,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
     it('should handle cancellation', () => {
       expectAsyncConsoleError(/cancellation/i, 1);
-      sandbox
+      env.sandbox
         ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
         .returns({
           top: 0,
@@ -464,7 +462,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
-      const sendMessageStub = sandbox./*OK*/ stub(
+      const sendMessageStub = env.sandbox./*OK*/ stub(
         safeframeHost,
         'sendMessage_'
       );
@@ -478,7 +476,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should get geometry when scrolled', () => {
-      sandbox
+      env.sandbox
         ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
         .returns({
           top: 0,
@@ -506,7 +504,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       // Scroll 100 px
       safeframeHost.viewport_.setScrollTop(50);
 
-      const sendMessageStub = sandbox./*OK*/ stub(
+      const sendMessageStub = env.sandbox./*OK*/ stub(
         safeframeHost,
         'sendMessage_'
       );
@@ -538,11 +536,11 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
 
-      const onScrollStub = sandbox./*OK*/ stub(
+      const onScrollStub = env.sandbox./*OK*/ stub(
         safeframeHost.viewport_,
         'onScroll'
       );
-      const onChangedStub = sandbox./*OK*/ stub(
+      const onChangedStub = env.sandbox./*OK*/ stub(
         safeframeHost.viewport_,
         'onChanged'
       );
@@ -551,7 +549,10 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendSetupMessage();
       const maybeUpdateGeometry1 = onScrollStub.firstCall.args[0];
       const maybeUpdateGeometry2 = onChangedStub.firstCall.args[0];
-      const sendMessageStub = sandbox./*OK*/ spy(safeframeHost, 'sendMessage_');
+      const sendMessageStub = env.sandbox./*OK*/ spy(
+        safeframeHost,
+        'sendMessage_'
+      );
       maybeUpdateGeometry1();
       maybeUpdateGeometry2();
 
@@ -584,7 +585,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('formatGeom', () => {
     it('should build proper geometry update', () => {
-      sandbox
+      env.sandbox
         ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
         .returns({
           top: 200,
@@ -600,7 +601,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         width: 300,
         height: 700,
       };
-      sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
+      env.sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
         width: 500,
         height: 1000,
       });
@@ -634,7 +635,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('sendResizeResponse', () => {
     it('should handle cancellation', () => {
-      const sendMessageStub = sandbox./*OK*/ stub(
+      const sendMessageStub = env.sandbox./*OK*/ stub(
         safeframeHost,
         'sendMessage_'
       );
@@ -650,7 +651,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('resizeAmpAdAndSafeframe', () => {
     it('should handle cancellation', () => {
-      const sendMessageStub = sandbox./*OK*/ stub(
+      const sendMessageStub = env.sandbox./*OK*/ stub(
         safeframeHost,
         'sendMessage_'
       );
@@ -666,7 +667,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('handleFluidMessage', () => {
     it('should handle cancellation', () => {
-      const sendMessageStub = sandbox./*OK*/ stub(
+      const sendMessageStub = env.sandbox./*OK*/ stub(
         safeframeHost,
         'sendMessage_'
       );
@@ -691,7 +692,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     function setupForResize() {
-      sandbox.restore();
+      env.sandbox.restore();
       const css = createElementWithAttributes(doc, 'style');
       css.innerHTML =
         '.safeframe' +
@@ -706,12 +707,15 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      resizeSafeframeSpy = sandbox./*OK*/ spy(safeframeHost, 'resizeSafeframe');
-      sendResizeResponseSpy = sandbox./*OK*/ spy(
+      resizeSafeframeSpy = env.sandbox./*OK*/ spy(
+        safeframeHost,
+        'resizeSafeframe'
+      );
+      sendResizeResponseSpy = env.sandbox./*OK*/ spy(
         safeframeHost,
         'sendResizeResponse'
       );
-      resizeAmpAdAndSafeframeSpy = sandbox./*OK*/ spy(
+      resizeAmpAdAndSafeframeSpy = env.sandbox./*OK*/ spy(
         safeframeHost,
         'resizeAmpAdAndSafeframe'
       );
@@ -719,11 +723,11 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       safeframeHost.initialWidth_ = ampAdWidth;
       sendSetupMessage();
       sendRegisterDoneMessage();
-      attemptChangeSizeStub = sandbox.stub(
+      attemptChangeSizeStub = env.sandbox.stub(
         doubleclickImpl,
         'attemptChangeSize'
       );
-      sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
+      env.sandbox./*OK*/ stub(safeframeHost.viewport_, 'getSize').returns({
         height: 1000,
         width: 1000,
       });

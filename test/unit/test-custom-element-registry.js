@@ -85,7 +85,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     const script = document.createElement('script');
     script.setAttribute('custom-element', 'amp-element2');
     head.appendChild(script);
-    sandbox.stub(ampdoc, 'getHeadNode').callsFake(() => head);
+    env.sandbox.stub(ampdoc, 'getHeadNode').callsFake(() => head);
 
     stubElementsForDoc(ampdoc);
     expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
@@ -93,7 +93,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
   });
 
   it('should install pre-stubbed element extension', () => {
-    const stub = sandbox.stub(extensions, 'installExtensionForDoc');
+    const stub = env.sandbox.stub(extensions, 'installExtensionForDoc');
 
     stubElementIfNotKnown(win, 'amp-element2');
     expect(win.__AMP_EXTENDED_ELEMENTS['amp-element2']).to.equal(ElementStub);
@@ -108,7 +108,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
   it('should not install declared pre-stubbed element extension', () => {
     ampdoc.declareExtension('amp-element2');
-    const stub = sandbox.stub(extensions, 'installExtensionForDoc');
+    const stub = env.sandbox.stub(extensions, 'installExtensionForDoc');
 
     stubElementIfNotKnown(win, 'amp-element2');
     expect(win.__AMP_EXTENDED_ELEMENTS['amp-element2']).to.equal(ElementStub);
@@ -122,7 +122,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
   });
 
   it('should not install declared pre-installed element', () => {
-    const stub = sandbox.stub(extensions, 'installExtensionForDoc');
+    const stub = env.sandbox.stub(extensions, 'installExtensionForDoc');
 
     registerElement(win, 'amp-element1', ConcreteElement);
     expect(win.__AMP_EXTENDED_ELEMENTS['amp-element1']).to.equal(
@@ -200,7 +200,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       win = {
         document: doc,
         customElements: {
-          define: sandbox.spy(),
+          define: env.sandbox.spy(),
         },
         Object: {
           create: proto => Object.create(proto),
@@ -278,7 +278,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     it('should copy or stub element definitions in a child window', () => {
       stubElementIfNotKnown(win, 'amp-test1');
 
-      const define = sandbox.spy();
+      const define = env.sandbox.spy();
       const childWin = {
         Object,
         HTMLElement,

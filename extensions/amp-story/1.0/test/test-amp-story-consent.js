@@ -53,7 +53,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
-    getComputedStyleStub = sandbox
+    getComputedStyleStub = env.sandbox
       .stub(win, 'getComputedStyle')
       .returns(styles);
 
@@ -263,7 +263,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   });
 
   it('should broadcast the amp actions', () => {
-    sandbox.stub(storyConsent.actions_, 'trigger');
+    env.sandbox.stub(storyConsent.actions_, 'trigger');
 
     storyConsent.buildCallback();
 
@@ -300,7 +300,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
-    sandbox
+    env.sandbox
       .stub(Services, 'geoForDocOrNull')
       .resolves({matchedISOCountryGroups: ['eea']});
 
@@ -316,7 +316,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
-    sandbox
+    env.sandbox
       .stub(Services, 'geoForDocOrNull')
       .resolves({matchedISOCountryGroups: ['othergroup']});
 

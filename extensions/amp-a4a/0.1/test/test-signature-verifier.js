@@ -36,7 +36,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
   /** @param {string} signingServiceName */
   const expectSigningServiceError = signingServiceName => {
     mockDevError
-      .withExactArgs('AMP-A4A', sinon.match(signingServiceName))
+      .withExactArgs('AMP-A4A', env.sandbox.match(signingServiceName))
       .once();
   };
 
@@ -364,7 +364,9 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
         env
           .stubService('crypto', 'verifyPkcs')
           .returns(Promise.reject(new Error(errorMessage)));
-        mockDevError.withExactArgs('AMP-A4A', sinon.match(errorMessage)).once();
+        mockDevError
+          .withExactArgs('AMP-A4A', env.sandbox.match(errorMessage))
+          .once();
         verifier.loadKeyset('service-1');
         return expect(
           verifier.verifyCreativeAndSignature(

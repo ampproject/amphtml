@@ -38,7 +38,7 @@ const fakeAmpDoc = {
 };
 installHiddenObserverForDoc(fakeAmpDoc);
 
-describes.sandboxed('IntersectionObserverApi', {}, () => {
+describes.sandboxed('IntersectionObserverApi', {}, env => {
   let onScrollSpy;
   let onChangeSpy;
   let testDoc;
@@ -78,11 +78,11 @@ describes.sandboxed('IntersectionObserverApi', {}, () => {
   }
 
   beforeEach(() => {
-    onScrollSpy = sandbox.spy();
-    onChangeSpy = sandbox.spy();
+    onScrollSpy = env.sandbox.spy();
+    onChangeSpy = env.sandbox.spy();
     testIframe = getIframe(iframeSrc);
-    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
-    sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+    env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
+    env.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
       return mockViewport;
     });
     testDoc = {defaultView: window};
@@ -120,7 +120,7 @@ describes.sandboxed('IntersectionObserverApi', {}, () => {
     };
     ioApi = new IntersectionObserverApi(baseElement, testIframe);
     insert(testIframe);
-    tickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
+    tickSpy = env.sandbox.spy(ioApi.intersectionObserver_, 'tick');
   });
 
   afterEach(() => {
@@ -144,7 +144,10 @@ describes.sandboxed('IntersectionObserverApi', {}, () => {
     };
     ioApi = new IntersectionObserverApi(baseElement, testIframe);
     insert(testIframe);
-    const inViewportTickSpy = sandbox.spy(ioApi.intersectionObserver_, 'tick');
+    const inViewportTickSpy = env.sandbox.spy(
+      ioApi.intersectionObserver_,
+      'tick'
+    );
     ioApi.startSendingIntersection_();
     expect(inViewportTickSpy).to.be.calledOnce;
     expect(onChangeSpy).to.be.calledTwice;
@@ -168,11 +171,11 @@ describes.sandboxed('IntersectionObserverApi', {}, () => {
   });
 
   it('should destroy correctly', () => {
-    const subscriptionApiDestroySpy = sandbox.spy(
+    const subscriptionApiDestroySpy = env.sandbox.spy(
       ioApi.subscriptionApi_,
       'destroy'
     );
-    const polyfillDisconnectSpy = sandbox.spy(
+    const polyfillDisconnectSpy = env.sandbox.spy(
       ioApi.intersectionObserver_,
       'disconnect'
     );
@@ -186,10 +189,10 @@ describes.sandboxed('IntersectionObserverApi', {}, () => {
   });
 });
 
-describes.sandboxed('getIntersectionChangeEntry', {}, () => {
+describes.sandboxed('getIntersectionChangeEntry', {}, env => {
   beforeEach(() => {
-    sandbox.stub(performance, 'now').callsFake(() => 100);
-    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
+    env.sandbox.stub(performance, 'now').callsFake(() => 100);
+    env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
   });
 
   it('without owner', () => {
@@ -237,11 +240,11 @@ describes.sandboxed('getIntersectionChangeEntry', {}, () => {
   });
 });
 
-describes.sandboxed('IntersectionObserverPolyfill', {}, () => {
+describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
   beforeEach(() => {
-    sandbox.stub(performance, 'now').callsFake(() => 100);
-    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
-    sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
+    env.sandbox.stub(performance, 'now').callsFake(() => 100);
+    env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
+    env.sandbox.stub(Services, 'ampdoc').callsFake(() => fakeAmpDoc);
   });
 
   describe('threshold', () => {
@@ -333,17 +336,17 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, () => {
 
     let io;
     beforeEach(() => {
-      callbackSpy = sandbox.spy();
+      callbackSpy = env.sandbox.spy();
       io = new IntersectionObserverPolyfill(callbackSpy);
 
-      sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+      env.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
         return {
           getRect: () => {
             return layoutRectLtwh(50, 100, 150, 200);
           },
         };
       });
-      sandbox.stub(Services, 'resourcesForDoc').callsFake(() => {
+      env.sandbox.stub(Services, 'resourcesForDoc').callsFake(() => {
         return {
           onNextPass: callback => {
             callback();

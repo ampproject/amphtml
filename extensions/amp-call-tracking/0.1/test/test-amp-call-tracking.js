@@ -32,7 +32,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      xhrMock = sandbox.mock(Services.xhrFor(win));
+      xhrMock = env.sandbox.mock(Services.xhrFor(win));
     });
 
     afterEach(() => {
@@ -65,7 +65,7 @@ describes.realWin(
         .expects('fetchJson')
         .withArgs(
           url,
-          sandbox.match(init => init.credentials == 'include')
+          env.sandbox.match(init => init.credentials == 'include')
         )
         .returns(
           Promise.resolve({

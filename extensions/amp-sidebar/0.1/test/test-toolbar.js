@@ -24,7 +24,6 @@ import {toArray} from '../../../../src/types';
 adopt(window);
 
 describe('amp-sidebar - toolbar', () => {
-  let sandbox;
   let timer;
 
   function getToolbars(options) {
@@ -44,7 +43,7 @@ describe('amp-sidebar - toolbar', () => {
         },
       };
 
-      sandbox.stub(timer, 'delay').callsFake(function(callback) {
+      window.sandbox.stub(timer, 'delay').callsFake(function(callback) {
         callback();
       });
 
@@ -96,14 +95,6 @@ describe('amp-sidebar - toolbar', () => {
     iframeObject.win.innerWidth;
     callback();
   }
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 
   it('toolbar header should error if target element \
    could not be found as it is required.', () => {

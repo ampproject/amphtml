@@ -32,7 +32,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     storyElement.appendChild(bookendElement);
     env.win.document.body.appendChild(storyElement);
     requestService = new AmpStoryRequestService(env.win, storyElement);
-    xhrMock = sandbox.mock(requestService.xhr_);
+    xhrMock = env.sandbox.mock(requestService.xhr_);
   });
 
   it('should not load the bookend config if no attribute is set', async () => {

@@ -32,18 +32,12 @@ const realWinConfig = {
 
 describes.realWin('CryptographicValidator', realWinConfig, env => {
   const headers = {'Content-Type': 'application/jwk-set+json'};
-  let sandbox;
   let userErrorStub;
   let validator;
 
   beforeEach(() => {
     validator = new CryptographicValidator();
-    sandbox = sinon.sandbox;
-    userErrorStub = sandbox.stub(user(), 'error');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    userErrorStub = env.sandbox.stub(user(), 'error');
   });
 
   it('should have AMP validator result', () => {

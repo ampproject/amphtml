@@ -37,7 +37,6 @@ describe('EventHelper', () => {
     return event;
   }
 
-  let sandbox;
   let element;
   let loadObservable;
   let errorObservable;
@@ -45,7 +44,6 @@ describe('EventHelper', () => {
   let removeEventListenerStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {
@@ -84,8 +82,6 @@ describe('EventHelper', () => {
     // Very important that all listeners are removed.
     expect(loadObservable.getHandlerCount()).to.equal(0);
     expect(errorObservable.getHandlerCount()).to.equal(0);
-
-    sandbox.restore();
   });
 
   it('listen', () => {
@@ -297,7 +293,7 @@ describe('EventHelper', () => {
     expect(native.type).to.equal('foo');
     expect(native.detail).to.deep.equal({bar: 123});
 
-    const initCustomEventSpy = sandbox.spy();
+    const initCustomEventSpy = window.sandbox.spy();
     const win = {};
     win.CustomEvent = {};
     win.document = {};
@@ -320,11 +316,11 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that accepts options
-    addEventListenerStub = sandbox
+    addEventListenerStub = window.sandbox
       .stub(self, 'addEventListener')
       .callsFake(eventListenerStubAcceptOpts);
     // Simulate a removeEventListener that accepts options
-    removeEventListenerStub = sandbox
+    removeEventListenerStub = window.sandbox
       .stub(self, 'removeEventListener')
       .callsFake(eventListenerStubAcceptOpts);
     resetEvtListenerOptsSupportForTesting();
@@ -352,11 +348,11 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that does not accept options
-    addEventListenerStub = sandbox
+    addEventListenerStub = window.sandbox
       .stub(self, 'addEventListener')
       .callsFake(eventListenerStubRejectOpts);
     // Simulate a removeEventListener that does not accept options
-    removeEventListenerStub = sandbox
+    removeEventListenerStub = window.sandbox
       .stub(self, 'removeEventListener')
       .callsFake(eventListenerStubRejectOpts);
     resetEvtListenerOptsSupportForTesting();

@@ -79,7 +79,6 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           },
         },
         env => {
-          let sandbox;
           let ampdoc;
           let element;
           let impl;
@@ -90,7 +89,6 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           let runtime;
 
           beforeEach(() => {
-            sandbox = sinon.sandbox;
             ampdoc = env.ampdoc;
             embed = env.embed;
             win = variant.ampdoc == 'fie' ? embed.win : ampdoc.win;
@@ -465,7 +463,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             const triggeredEvents = [];
 
             const actionService = Services.actionServiceForDoc(element);
-            sandbox
+            env.sandbox
               .stub(actionService, 'trigger')
               .callsFake((target, name, event) => {
                 triggeredAmpEventNames.push(name);
@@ -509,9 +507,9 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
     let actionService;
 
     beforeEach(() => {
-      actionService = {setActions: sandbox.stub()};
+      actionService = {setActions: window.sandbox.stub()};
       element = document.createElement('div');
-      sandbox
+      window.sandbox
         .stub(Services, 'actionServiceForDoc')
         .withArgs(element)
         .returns(actionService);
@@ -547,7 +545,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       const target = document.createElement('div');
       target.setAttribute('on', 'event2:node2.hide');
       // FIE should have its own ActionService.
-      const fieActionService = {setActions: sandbox.stub()};
+      const fieActionService = {setActions: window.sandbox.stub()};
       Services.actionServiceForDoc.withArgs(target).returns(fieActionService);
       // Provide `target` as the service context to simulate FIE case.
       addAction(target, target, 'event1', 'node1.foo()');

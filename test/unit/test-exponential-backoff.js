@@ -20,17 +20,11 @@ import {
 } from '../../src/exponential-backoff';
 
 describe('exponentialBackoff', () => {
-  let sandbox;
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
-    sandbox.stub(Math, 'random').callsFake(() => 1);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    clock = window.sandbox.useFakeTimers();
+    window.sandbox.stub(Math, 'random').callsFake(() => 1);
   });
 
   it('should backoff exponentially', () => {

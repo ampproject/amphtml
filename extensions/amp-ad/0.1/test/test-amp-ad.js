@@ -63,7 +63,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
 
       beforeEach(() => {
         const getUserNotificationStub = stubService(
-          sandbox,
+          window.sandbox,
           win,
           'userNotificationManager',
           'get'
@@ -125,12 +125,12 @@ describes.realWin('Ad loader', {amp: true}, env => {
         };
         ampAdElement.setAttribute('type', 'zort');
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.reject(new Error('I failed!')));
         ampAd = new AmpAd(ampAdElement);
-        sandbox.stub(ampAd.user(), 'error');
+        env.sandbox.stub(ampAd.user(), 'error');
         return ampAd.upgradeCallback().then(baseElement => {
           expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute('data-a4a-upgrade-type')).to.equal(
@@ -165,7 +165,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return zortInstance;
         };
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.resolve(zortConstructor));
@@ -194,7 +194,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return zortInstance;
         };
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.resolve(zortConstructor));
@@ -223,7 +223,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return zortInstance;
         };
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.resolve(zortConstructor));
@@ -247,7 +247,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return zortInstance;
         };
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.resolve(zortConstructor));

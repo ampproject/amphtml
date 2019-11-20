@@ -118,7 +118,7 @@ describes.realWin(
     });
 
     it('should listen to build callback of children', () => {
-      const scheduleLayoutStub = sandbox.stub(
+      const scheduleLayoutStub = env.sandbox.stub(
         Services.ownersForDoc(doc),
         'scheduleLayout'
       );
@@ -214,7 +214,7 @@ describes.realWin(
         const posttext = doc.createTextNode('\n');
         return [pretext, img, posttext];
       }).then(flyingCarpet => {
-        const attemptCollapse = sandbox
+        const attemptCollapse = env.sandbox
           .stub(flyingCarpet.implementation_, 'attemptCollapse')
           .callsFake(() => {
             return Promise.resolve();
@@ -228,7 +228,7 @@ describes.realWin(
     it('should relayout the content', () => {
       return getAmpFlyingCarpet().then(flyingCarpet => {
         const impl = flyingCarpet.implementation_;
-        const scheduleLayoutSpy_ = sandbox.spy(
+        const scheduleLayoutSpy_ = env.sandbox.spy(
           Services.ownersForDoc(impl.element),
           'scheduleLayout'
         );

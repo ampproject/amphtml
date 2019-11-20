@@ -46,15 +46,15 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
   });
 
   describe('AMP Result', () => {
-    let sandbox;
     let validatorPromise;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
-        expect(url).to.equal(templateUrl);
-        return Promise.resolve(data.adTemplate);
-      });
+      env.sandbox
+        .stub(getAmpAdTemplateHelper(env.win), 'fetch')
+        .callsFake(url => {
+          expect(url).to.equal(templateUrl);
+          return Promise.resolve(data.adTemplate);
+        });
 
       validatorPromise = validator.validate(
         {win: env.win},
@@ -69,7 +69,7 @@ describes.realWin('TemplateValidator', realWinConfig, env => {
       );
     });
 
-    afterEach(() => sandbox.restore());
+    afterEach(() => env.sandbox.restore());
 
     it('should have AMP validator result', () => {
       return validatorPromise.then(validatorOutput => {

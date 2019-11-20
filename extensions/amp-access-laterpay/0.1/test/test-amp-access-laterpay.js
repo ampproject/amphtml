@@ -58,7 +58,7 @@ describes.fakeWin(
         getSource: () => accessSource,
       };
 
-      accessSourceMock = sandbox.mock(accessSource);
+      accessSourceMock = env.sandbox.mock(accessSource);
 
       articleTitle = document.createElement('h1');
       articleTitle.id = 'laterpay-test-title';
@@ -66,7 +66,7 @@ describes.fakeWin(
       document.body.appendChild(articleTitle);
 
       vendor = new LaterpayVendor(accessService, accessSource);
-      xhrMock = sandbox.mock(vendor.xhr_);
+      xhrMock = env.sandbox.mock(vendor.xhr_);
     });
 
     afterEach(() => {
@@ -78,8 +78,8 @@ describes.fakeWin(
     describe('authorize', () => {
       let emptyContainerStub;
       beforeEach(() => {
-        emptyContainerStub = sandbox.stub(vendor, 'emptyContainer_');
-        sandbox.stub(vendor, 'renderPurchaseOverlay_');
+        emptyContainerStub = env.sandbox.stub(vendor, 'emptyContainer_');
+        env.sandbox.stub(vendor, 'renderPurchaseOverlay_');
       });
 
       it('uses a non default region', () => {

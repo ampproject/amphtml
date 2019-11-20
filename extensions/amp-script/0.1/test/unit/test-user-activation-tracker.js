@@ -37,7 +37,7 @@ describes.realWin('UserActivationTracker', {}, env => {
     doc.body.appendChild(root);
 
     tracker = new UserActivationTracker(root);
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
   });
 

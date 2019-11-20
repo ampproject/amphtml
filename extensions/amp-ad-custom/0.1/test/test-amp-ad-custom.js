@@ -73,7 +73,6 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
   });
 
   afterEach(() => {
-    sandbox.restore();
     doc.body.removeChild(containerElement);
   });
 
@@ -105,10 +104,12 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
         },
       });
 
-      sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
-        expect(url).to.equal(templateUrl);
-        return Promise.resolve(data.adTemplate);
-      });
+      env.sandbox
+        .stub(getAmpAdTemplateHelper(env.win), 'fetch')
+        .callsFake(url => {
+          expect(url).to.equal(templateUrl);
+          return Promise.resolve(data.adTemplate);
+        });
 
       impl.buildCallback();
       impl.getRequestUrl();

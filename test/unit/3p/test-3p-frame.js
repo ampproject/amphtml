@@ -40,13 +40,11 @@ describe
   .ifChrome()
   .run('3p-frame', () => {
     let clock;
-    let sandbox;
     let container;
     let preconnect;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      clock = sandbox.useFakeTimers();
+      clock = window.sandbox.useFakeTimers();
       container = document.createElement('div');
       document.body.appendChild(container);
       preconnect = preconnectForElement(container);
@@ -54,7 +52,6 @@ describe
 
     afterEach(() => {
       resetBootstrapBaseUrlForTesting(window);
-      sandbox.restore();
       resetCountForTesting();
       const m = document.querySelector('[name="amp-3p-iframe-src"]');
       if (m) {
@@ -162,7 +159,7 @@ describe
       setupElementFunctions(div);
 
       const viewer = Services.viewerForDoc(window.document);
-      const viewerMock = sandbox.mock(viewer);
+      const viewerMock = window.sandbox.mock(viewer);
       viewerMock
         .expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/')
@@ -170,7 +167,7 @@ describe
 
       container.appendChild(div);
 
-      sandbox
+      window.sandbox
         .stub(DomFingerprint, 'generate')
         .callsFake(() => 'MY-MOCK-FINGERPRINT');
 
@@ -484,7 +481,9 @@ describe
     });
 
     it('uses a unique name based on domain', () => {
-      const viewerMock = sandbox.mock(Services.viewerForDoc(window.document));
+      const viewerMock = window.sandbox.mock(
+        Services.viewerForDoc(window.document)
+      );
       viewerMock
         .expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/')
@@ -620,13 +619,13 @@ describe
       });
 
       it('should return null if the input is not a json', () => {
-        const errorStub = sandbox.stub(dev(), 'error');
+        const errorStub = window.sandbox.stub(dev(), 'error');
         expect(deserializeMessage('amp-other')).to.be.null;
         expect(errorStub).to.not.be.called;
       });
 
       it('should return null if failed to parse the input', () => {
-        const errorStub = sandbox.stub(dev(), 'error');
+        const errorStub = window.sandbox.stub(dev(), 'error');
         expect(deserializeMessage('amp-{"type","sentinel":"msgsentinel"}')).to
           .be.null;
         expect(errorStub).to.be.calledOnce;

@@ -89,7 +89,7 @@ describes.realWin('form-dirtiness', {}, env => {
   beforeEach(() => {
     doc = env.win.document;
     form = getForm(doc);
-    sandbox.stub(Services, 'platformFor').returns({
+    env.sandbox.stub(Services, 'platformFor').returns({
       isIos() {
         return false;
       },

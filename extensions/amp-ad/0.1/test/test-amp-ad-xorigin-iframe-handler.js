@@ -27,7 +27,6 @@ import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describe('amp-ad-xorigin-iframe-handler', () => {
-  let sandbox;
   let ampdoc;
   let adImpl;
   let signals;
@@ -37,7 +36,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   let testIndex = 0;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     const ampdocService = Services.ampdocServiceFor(window);
     ampdoc = ampdocService.getSingleDoc();
     const adElement = document.createElement('container-element');
@@ -47,7 +45,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     };
     signals = new Signals();
     adElement.signals = () => signals;
-    renderStartedSpy = sandbox.spy();
+    renderStartedSpy = window.sandbox.spy();
     adElement.renderStarted = () => {
       renderStartedSpy();
       signals.signal('render-start');
@@ -70,7 +68,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   });
 
   afterEach(() => {
-    sandbox.restore();
     document.body.removeChild(adImpl.element);
   });
 
@@ -82,14 +79,17 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
       beforeEach(() => {
         adImpl.config = {renderStartImplemented: true};
-        sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
+        window.sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
           return Promise.resolve({
             success: true,
             newWidth: 114,
             newHeight: 217,
           });
         });
-        noContentSpy = sandbox./*OK*/ spy(iframeHandler, 'freeXOriginIframe');
+        noContentSpy = window.sandbox./*OK*/ spy(
+          iframeHandler,
+          'freeXOriginIframe'
+        );
 
         initPromise = iframeHandler.init(iframe);
       });
@@ -201,7 +201,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           sentinel: 'amp3ptest' + testIndex,
           type: 'bootstrap-loaded',
         }).then(() => {
-          const clock = sandbox.useFakeTimers();
+          const clock = window.sandbox.useFakeTimers();
           clock.tick(0);
           const timeoutPromise = Services.timerFor(window).timeoutPromise(
             2000,
@@ -233,7 +233,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       it('should be able to use user-error API', () => {
         const err = new Error();
         err.message = 'error test';
-        const userErrorReportSpy = sandbox./*OK*/ spy(
+        const userErrorReportSpy = window.sandbox./*OK*/ spy(
           iframeHandler,
           'userErrorForAnalytics_'
         );
@@ -266,7 +266,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     );
 
     it('should trigger visibility on timeout', () => {
-      const clock = sandbox.useFakeTimers();
+      const clock = window.sandbox.useFakeTimers();
       iframe.name = 'test_master';
       initPromise = iframeHandler.init(iframe);
       return new Promise(resolve => {
@@ -298,7 +298,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-state API', () => {
-      sandbox./*OK*/ stub(ampdoc, 'isVisible').returns(true);
+      window.sandbox./*OK*/ stub(ampdoc, 'isVisible').returns(true);
       iframe.postMessageToParent({
         type: 'send-embed-state',
         sentinel: 'amp3ptest' + testIndex,
@@ -314,7 +314,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-size API, change size deny', () => {
-      sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
+      window.sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
         return Promise.resolve({
           success: false,
           newWidth: 114,
@@ -338,7 +338,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-size API, change size succeed', () => {
-      sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
+      window.sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
         return Promise.resolve({
           success: true,
           newWidth: 114,
@@ -362,7 +362,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-size API to resize height only', () => {
-      sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
+      window.sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
         return Promise.resolve({
           success: true,
           newWidth: undefined,
@@ -391,14 +391,16 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
       iframe.name = 'test_nomaster';
       iframeHandler.init(iframe);
-      sandbox
+      window.sandbox
         ./*OK*/ stub(iframeHandler.viewport_, 'getClientRectAsync')
         .callsFake(() => {
           return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
         });
-      sandbox./*OK*/ stub(iframeHandler.viewport_, 'getRect').callsFake(() => {
-        return layoutRectLtwh(1, 1, 1, 1);
-      });
+      window.sandbox
+        ./*OK*/ stub(iframeHandler.viewport_, 'getRect')
+        .callsFake(() => {
+          return layoutRectLtwh(1, 1, 1, 1);
+        });
       iframe.postMessageToParent({
         type: 'send-positions',
         sentinel: 'amp3ptest' + testIndex,

@@ -41,7 +41,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       installTimerService(env.win);
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
 
       const binding = {
         cleanup: () => {},
@@ -56,7 +56,7 @@ describes.fakeWin(
         getFragment: () => {},
         updateFragment: () => {},
       };
-      bindingMock = sandbox.mock(binding);
+      bindingMock = env.sandbox.mock(binding);
 
       history = new History(new AmpDocSingle(env.win), binding);
     });
@@ -72,7 +72,7 @@ describes.fakeWin(
     });
 
     it('should push new state', () => {
-      const onPop = sandbox.spy();
+      const onPop = env.sandbox.spy();
       bindingMock
         .expects('push')
         .returns(Promise.resolve({stackIndex: 11}))
@@ -86,7 +86,7 @@ describes.fakeWin(
     });
 
     it('should pop previously pushed state', () => {
-      const onPop = sandbox.spy();
+      const onPop = env.sandbox.spy();
       bindingMock
         .expects('push')
         .returns(Promise.resolve({stackIndex: 11}))
@@ -111,7 +111,7 @@ describes.fakeWin(
     });
 
     it('should return and call callback when history popped', () => {
-      const onPop = sandbox.spy();
+      const onPop = env.sandbox.spy();
       bindingMock
         .expects('push')
         .withExactArgs(undefined)
@@ -135,7 +135,7 @@ describes.fakeWin(
     });
 
     it('should return and call callback with state when history popped', () => {
-      const onPop = sandbox.spy();
+      const onPop = env.sandbox.spy();
       const title = 'TITLE';
       bindingMock
         .expects('push')
@@ -163,7 +163,7 @@ describes.fakeWin(
     });
 
     it('should replace previously pushed state', () => {
-      const onPop = sandbox.spy();
+      const onPop = env.sandbox.spy();
       const pushState = {title: 'pushState'};
       const replaceState = {title: 'replaceState'};
       bindingMock
@@ -192,7 +192,7 @@ describes.fakeWin(
     });
 
     it('should get previously pushed state', () => {
-      const onPop = sandbox.spy();
+      const onPop = env.sandbox.spy();
       const state = {title: 'title'};
       bindingMock
         .expects('push')
@@ -236,7 +236,7 @@ describes.fakeWin(
     });
 
     it('should pop previously pushed state via goBack', () => {
-      const onPop = sandbox.spy();
+      const onPop = env.sandbox.spy();
       const popState = {title: 'title'};
       bindingMock
         .expects('push')
@@ -346,14 +346,14 @@ describes.sandboxed('History install', {}, () => {
   });
 });
 
-describes.sandboxed('HistoryBindingNatural', {}, () => {
+describes.sandboxed('HistoryBindingNatural', {}, env => {
   let clock;
   let onStateUpdated;
   let history;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
-    onStateUpdated = sandbox.spy();
+    clock = env.sandbox.useFakeTimers();
+    onStateUpdated = env.sandbox.spy();
     history = new HistoryBindingNatural_(window);
     history.setOnStateUpdated(onStateUpdated);
   });
@@ -425,7 +425,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
     'should not pass in `url` argument to original replace state if ' +
       'parameter is undefined',
     () => {
-      const replaceStateSpy = sandbox.spy();
+      const replaceStateSpy = env.sandbox.spy();
       const windowStub = {
         history: {
           replaceState: replaceStateSpy,
@@ -631,7 +631,7 @@ describes.sandboxed('HistoryBindingNatural', {}, () => {
   });
 });
 
-describes.sandboxed('HistoryBindingVirtual', {}, () => {
+describes.sandboxed('HistoryBindingVirtual', {}, env => {
   let history;
   let viewer;
   let capabilityStub;
@@ -640,11 +640,11 @@ describes.sandboxed('HistoryBindingVirtual', {}, () => {
   let onHistoryPopped;
 
   beforeEach(() => {
-    onStateUpdated = sandbox.spy();
-    capabilityStub = sandbox.stub();
+    onStateUpdated = env.sandbox.spy();
+    capabilityStub = env.sandbox.stub();
     viewer = {
-      onMessage: sandbox.stub().returns(() => {}),
-      sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve()),
+      onMessage: env.sandbox.stub().returns(() => {}),
+      sendMessageAwaitResponse: env.sandbox.stub().returns(Promise.resolve()),
       hasCapability: capabilityStub,
     };
     history = new HistoryBindingVirtual_(window, viewer);
@@ -735,7 +735,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, () => {
 
     it('viewer supports responses', () => {
       viewer.sendMessageAwaitResponse
-        .withArgs('popHistory', sinon.match({stackIndex: 0}))
+        .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
         .returns(Promise.resolve({stackIndex: -123, title: 'title'}));
 
       return history.pop(0).then(state => {
@@ -752,7 +752,7 @@ describes.sandboxed('HistoryBindingVirtual', {}, () => {
 
     it('handles bad viewer responses', () => {
       viewer.sendMessageAwaitResponse
-        .withArgs('popHistory', sinon.match({stackIndex: 0}))
+        .withArgs('popHistory', env.sandbox.match({stackIndex: 0}))
         .returns(Promise.resolve(true));
 
       return history.pop(0).then(state => {
@@ -936,7 +936,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       installTimerService(env.win);
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
     });
 
     afterEach(() => {
@@ -973,7 +973,7 @@ describes.fakeWin(
         },
         sendMessageAwaitResponse: () => Promise.resolve(),
       };
-      const viewerMock = sandbox.mock(viewer);
+      const viewerMock = env.sandbox.mock(viewer);
       history = new History(
         new AmpDocSingle(env.win),
         new HistoryBindingVirtual_(env.win, viewer)
@@ -1017,7 +1017,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
       hasCapability: () => {},
       sendMessageAwaitResponse: () => {},
     };
-    viewerMock = sandbox.mock(viewer);
+    viewerMock = env.sandbox.mock(viewer);
   });
 
   afterEach(() => {
@@ -1040,7 +1040,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
 
   it('should update fragment on Natural', () => {
     env.win.location.href = 'http://www.example.com#foo';
-    const replaceStateSpy = sandbox.spy();
+    const replaceStateSpy = env.sandbox.spy();
     env.win.history.replaceState = replaceStateSpy;
     history = new History(
       new AmpDocSingle(env.win),
@@ -1061,7 +1061,7 @@ describes.fakeWin('Get and update fragment', {}, env => {
       'if the url does not contain fragment previously',
     () => {
       env.win.location.href = 'http://www.example.com';
-      const replaceStateSpy = sandbox.spy();
+      const replaceStateSpy = env.sandbox.spy();
       env.win.history.replaceState = replaceStateSpy;
       history = new History(
         new AmpDocSingle(env.win),

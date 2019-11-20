@@ -51,7 +51,7 @@ describes.realWin(
           page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
           const storyPage = new AmpStoryPage(page);
           page.getImpl = () => Promise.resolve(storyPage);
-          sandbox.stub(storyPage, 'mutateElement').callsFake(fn => fn());
+          env.sandbox.stub(storyPage, 'mutateElement').callsFake(fn => fn());
           container.appendChild(page);
           return page;
         });
@@ -60,8 +60,8 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       const viewer = Services.viewerForDoc(env.ampdoc);
-      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
-      sandbox.stub(win.history, 'replaceState');
+      env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      env.sandbox.stub(win.history, 'replaceState');
 
       registerServiceBuilder(win, 'performance', () => ({
         isPerformanceTrackingOn: () => false,
@@ -129,7 +129,7 @@ describes.realWin(
 
       await ampStory.layoutCallback();
       await ampStory.element.signals().signal(CommonSignals.LOAD_END);
-      const dispatchSpy = sandbox.spy(ampStory.storeService_, 'dispatch');
+      const dispatchSpy = env.sandbox.spy(ampStory.storeService_, 'dispatch');
 
       const newPage = win.document.createElement('amp-story-page');
       // This would normally get added by AmpLiveList.

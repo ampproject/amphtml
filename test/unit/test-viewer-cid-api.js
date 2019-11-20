@@ -21,13 +21,11 @@ import {mockServiceForDoc} from '../../testing/test-helper';
 describes.realWin('viewerCidApi', {amp: true}, env => {
   let ampdoc;
   let api;
-  let sandbox;
   let viewerMock;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    sandbox = env.sandbox;
-    viewerMock = mockServiceForDoc(sandbox, ampdoc, 'viewer', [
+    viewerMock = mockServiceForDoc(env.sandbox, ampdoc, 'viewer', [
       'sendMessageAwaitResponse',
       'hasCapability',
       'isTrustedViewer',

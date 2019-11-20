@@ -36,12 +36,10 @@ describes.realWin(
     this.timeout(5000);
     let win, doc;
     let timer;
-    let sandbox;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox = env.sandbox;
       timer = Services.timerFor(win);
     });
 
@@ -93,7 +91,7 @@ describes.realWin(
 
       it('should pause if the video is playing', async () => {
         const yt = await getYt({'data-videoid': datasource});
-        sandbox.spy(yt.implementation_, 'pause');
+        env.sandbox.spy(yt.implementation_, 'pause');
         yt.implementation_.pauseCallback();
         expect(yt.implementation_.pause.called).to.be.true;
       });
@@ -164,7 +162,10 @@ describes.realWin(
           'data-param-playsinline': '0',
         });
         const {src} = yt.querySelector('iframe');
-        const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'url');
+        const preloadSpy = env.sandbox.spy(
+          yt.implementation_.preconnect,
+          'url'
+        );
         yt.implementation_.preconnectCallback();
         preloadSpy.should.have.been.calledWithExactly(src);
       });
@@ -311,12 +312,12 @@ describes.realWin(
         expect(imgPlaceholder).to.not.be.null;
         expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
         // Fake out the 404 image response dimensions of YT.
-        sandbox.defineProperty(imgPlaceholder, 'naturalWidth', {
+        env.sandbox.defineProperty(imgPlaceholder, 'naturalWidth', {
           get() {
             return 120;
           },
         });
-        sandbox.defineProperty(imgPlaceholder, 'naturalHeight', {
+        env.sandbox.defineProperty(imgPlaceholder, 'naturalHeight', {
           get() {
             return 90;
           },
@@ -333,12 +334,12 @@ describes.realWin(
 
     it('should propagate attribute mutations for videoid', async () => {
       const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID});
-      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      const spy = env.sandbox.spy(yt.implementation_, 'sendCommand_');
       yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
       yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
       expect(spy).to.be.calledWith(
         'loadVideoById',
-        sinon.match(['lBTCB7yLs8Y'])
+        env.sandbox.match(['lBTCB7yLs8Y'])
       );
     });
 
@@ -346,7 +347,7 @@ describes.realWin(
       const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID});
       const placeholder = yt.querySelector('[placeholder]');
       const obj = yt.implementation_;
-      const unlistenSpy = sandbox.spy(obj, 'unlistenMessage_');
+      const unlistenSpy = env.sandbox.spy(obj, 'unlistenMessage_');
       obj.unlayoutCallback();
       expect(unlistenSpy).to.have.been.called;
       expect(yt.querySelector('iframe')).to.be.null;

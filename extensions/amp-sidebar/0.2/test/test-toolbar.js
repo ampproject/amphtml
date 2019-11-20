@@ -20,8 +20,7 @@ import {Toolbar} from '../toolbar';
 import {createIframePromise} from '../../../../testing/iframe';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('amp-sidebar - toolbar', {}, () => {
-  let sandbox;
+describes.realWin('amp-sidebar - toolbar', {}, env => {
   let timer;
 
   function getToolbars(options) {
@@ -41,7 +40,7 @@ describes.realWin('amp-sidebar - toolbar', {}, () => {
         },
       };
 
-      sandbox.stub(timer, 'delay').callsFake(function(callback) {
+      env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
         callback();
       });
 
@@ -93,14 +92,6 @@ describes.realWin('amp-sidebar - toolbar', {}, () => {
     iframeObject.win.innerWidth;
     callback();
   }
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 
   it('toolbar header should error if target element \
    could not be found as it is required.', () => {

@@ -392,7 +392,7 @@ describe('long tasks', () => {
       beforeEach(() => {
         postMessageCalls = 0;
         subscriptions = {};
-        clock = sandbox.useFakeTimers();
+        clock = env.sandbox.useFakeTimers();
         installDocService(env.win, /* isSingleDoc */ true);
         toggleExperiment(env.win, 'macro-after-long-task', true);
 
@@ -488,12 +488,10 @@ describe('onIdle', () => {
   let win;
   let calls;
   let callbackCalled;
-  let sandbox;
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
     calls = [];
     callbackCalled = false;
     win = {
@@ -509,10 +507,6 @@ describe('onIdle', () => {
         });
       },
     };
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function markCalled() {

@@ -25,7 +25,6 @@ import {macroTask} from '../../testing/yield';
 
 describe('waitForServices', () => {
   let win;
-  let sandbox;
   let clock;
   let dynamicCssResolve;
   let experimentResolve;
@@ -34,8 +33,7 @@ describe('waitForServices', () => {
   let variantStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    const getService = sandbox.stub(service, 'getServicePromise');
+    const getService = window.sandbox.stub(service, 'getServicePromise');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
     experimentResolve = waitForService(getService, 'amp-experiment');
 
@@ -45,7 +43,7 @@ describe('waitForServices', () => {
       },
     };
     variantResolve = waitForService(getService, 'variant', variantService);
-    variantStub = sandbox
+    variantStub = window.sandbox
       .stub(variantService, 'whenReady')
       .returns(Promise.resolve());
 
@@ -57,7 +55,6 @@ describe('waitForServices', () => {
 
   afterEach(() => {
     clock.uninstall();
-    sandbox.restore();
   });
 
   it('should resolve if no blocking services is presented', () => {
@@ -128,7 +125,7 @@ describe('waitForServices', () => {
 
 function waitForService(getService, serviceId, service) {
   let resolve = null;
-  getService.withArgs(sinon.match.any, serviceId).returns(
+  getService.withArgs(window.sandbox.match.any, serviceId).returns(
     new Promise(r => {
       resolve = r.bind(this, service);
     })

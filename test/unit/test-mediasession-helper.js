@@ -55,7 +55,7 @@ const schemaTemplate = `
 }
 `;
 
-describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
+describes.sandboxed('MediaSessionAPI Helper Functions', {}, env => {
   let element;
   let ampdoc;
   let favicon;
@@ -65,7 +65,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
 
   beforeEach(() => {
     element = {};
-    sandbox
+    env.sandbox
       .stub(Services, 'urlForDoc')
       .withArgs(element)
       .returns({isProtocolValid});

@@ -24,7 +24,6 @@ import {
 } from '../../src/preconnect';
 
 describe('preconnect', () => {
-  let sandbox;
   let iframeClock;
   let clock;
   let preconnect;
@@ -57,7 +56,7 @@ describe('preconnect', () => {
       const element = document.createElement('div');
       iframe.win.document.body.appendChild(element);
       preconnect = preconnectForElement(element);
-      sandbox.stub(preconnect, 'getAmpdoc_').returns({
+      window.sandbox.stub(preconnect, 'getAmpdoc_').returns({
         whenFirstVisible: () => visiblePromise,
       });
       return iframe;
@@ -71,20 +70,18 @@ describe('preconnect', () => {
     // to test for preload/preconnect support.
     preloadSupported = false;
     preconnectSupported = false;
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
   });
 
   afterEach(() => {
     clock.tick(200000);
-    sandbox.restore();
     setPreconnectFeaturesForTesting(null);
   });
 
   it('should preconnect', () => {
     isSafari = false;
     return getPreconnectIframe().then(iframe => {
-      const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
+      const open = window.sandbox.spy(XMLHttpRequest.prototype, 'open');
       preconnect.url('https://a.preconnect.com/foo/bar');
       preconnect.url('https://a.preconnect.com/other');
       preconnect.url(javascriptUrlPrefix + ':alert()');
@@ -120,7 +117,7 @@ describe('preconnect', () => {
   it('should preconnect to origins', async function() {
     isSafari = false;
     const iframe = await getPreconnectIframe();
-    sandbox.stub(Services, 'documentInfoForDoc').returns({
+    window.sandbox.stub(Services, 'documentInfoForDoc').returns({
       sourceUrl: 'https://sourceurl.com/',
       canonicalUrl: 'https://canonicalurl.com/',
     });
@@ -136,7 +133,7 @@ describe('preconnect', () => {
     isSafari = false;
     preconnectSupported = true;
     return getPreconnectIframe().then(iframe => {
-      const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
+      const open = window.sandbox.spy(XMLHttpRequest.prototype, 'open');
       preconnect.url('https://a.preconnect.com/foo/bar');
       preconnect.url('https://a.preconnect.com/other');
       preconnect.url(javascriptUrlPrefix + ':alert()');
@@ -170,8 +167,8 @@ describe('preconnect', () => {
     isSafari = true;
     return getPreconnectIframe().then(iframe => {
       clock.tick(1485531293690);
-      const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
-      const send = sandbox.spy(XMLHttpRequest.prototype, 'send');
+      const open = window.sandbox.spy(XMLHttpRequest.prototype, 'open');
+      const send = window.sandbox.spy(XMLHttpRequest.prototype, 'send');
       preconnect.url('https://s.preconnect.com/foo/bar');
       preconnect.url('https://s.preconnect.com/other');
       preconnect.url(javascriptUrlPrefix + ':alert()');

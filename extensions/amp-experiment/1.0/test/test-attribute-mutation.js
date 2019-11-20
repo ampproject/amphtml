@@ -313,7 +313,7 @@ describes.realWin(
         const element1 = document.createElement('amp-img');
         const element2 = document.createElement('a');
         elements = [element1, element2];
-        const mutatedAttributesCallbackSpy = sandbox.spy();
+        const mutatedAttributesCallbackSpy = env.sandbox.spy();
         element1.mutatedAttributesCallback = () => {
           mutatedAttributesCallbackSpy();
         };

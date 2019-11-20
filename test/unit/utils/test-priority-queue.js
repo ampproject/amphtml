@@ -18,10 +18,8 @@ import PriorityQueue from '../../../src/utils/priority-queue';
 
 describe('PriorityQueue', function() {
   let pq;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     pq = new PriorityQueue();
   });
 
@@ -93,7 +91,7 @@ describe('PriorityQueue', function() {
   });
 
   it('should iterate through queue', () => {
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     pq.enqueue('p', 1);
     pq.enqueue('m', 2);
     pq.enqueue('a', 3);

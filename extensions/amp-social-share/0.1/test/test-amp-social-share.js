@@ -49,14 +49,14 @@ describes.realWin(
       isIos = false;
       isSafari = false;
       platform = Services.platformFor(win);
-      sandbox.stub(platform, 'isIos').callsFake(() => isIos);
-      sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
-      sandbox./*OK*/ stub(win, 'open').returns(true);
+      env.sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+      env.sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
+      env.sandbox./*OK*/ stub(win, 'open').returns(true);
     });
 
     function getShare(type, opt_endpoint, opt_params, opt_target) {
       const share = doc.createElement('amp-social-share');
-      share.addEventListener = sandbox.spy();
+      share.addEventListener = env.sandbox.spy();
       if (opt_endpoint) {
         share.setAttribute('data-share-endpoint', opt_endpoint);
       }

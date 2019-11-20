@@ -29,7 +29,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
     let postMessageStub;
     let hostWindow;
     beforeEach(() => {
-      postMessageStub = sandbox.stub();
+      postMessageStub = env.sandbox.stub();
       hostWindow = {postMessage: postMessageStub};
       client = new IframeMessagingClient(win, hostWindow);
       client.setSentinel('sentinel-123');
@@ -38,7 +38,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
 
     describe('getData', () => {
       it('should get data', () => {
-        const callbackSpy = sandbox.spy();
+        const callbackSpy = env.sandbox.spy();
         client.getData('type-a', {a: 1}, callbackSpy);
         expect(postMessageStub).to.be.calledWith(
           serializeMessage(
@@ -67,7 +67,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
       });
 
       it('should not get data with wrong messageId', () => {
-        const callbackSpy = sandbox.spy();
+        const callbackSpy = env.sandbox.spy();
         client.getData('type-a', {a: 1}, callbackSpy);
         expect(postMessageStub).to.be.calledWith(
           serializeMessage(
@@ -96,7 +96,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
       });
 
       it('should not get data with wrong response type', () => {
-        const callbackSpy = sandbox.spy();
+        const callbackSpy = env.sandbox.spy();
         client.getData('type-a', {a: 1}, callbackSpy);
         expect(postMessageStub).to.be.calledWith(
           serializeMessage(
@@ -125,7 +125,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
       });
 
       it('should have callback called once', () => {
-        const callbackSpy = sandbox.spy();
+        const callbackSpy = env.sandbox.spy();
         client.getData('type-a', {a: 1}, callbackSpy);
         expect(postMessageStub).to.be.calledWith(
           serializeMessage(
@@ -167,7 +167,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
 
     describe('makeRequest', () => {
       it('should send the request via postMessage', () => {
-        const callbackSpy = sandbox.spy();
+        const callbackSpy = env.sandbox.spy();
         client.makeRequest('request-type', 'response-type', callbackSpy);
         expect(postMessageStub).to.be.calledWith(
           serializeMessage(
@@ -193,7 +193,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
 
     describe('requestOnce', () => {
       it('should unlisten after message received', () => {
-        const callbackSpy = sandbox.spy();
+        const callbackSpy = env.sandbox.spy();
         client.requestOnce('request-type', 'response-type', callbackSpy);
         expect(postMessageStub).to.be.calledWith(
           serializeMessage(
@@ -222,7 +222,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
         'should invoke callback on receiving a message of' +
           ' expected response type',
         () => {
-          const callbackSpy = sandbox.spy();
+          const callbackSpy = env.sandbox.spy();
           client.registerCallback('response-type', callbackSpy);
 
           postAmpMessage(
@@ -248,9 +248,9 @@ describes.realWin('iframe-messaging-client', {}, env => {
         'should invoke multiple callbacks on receiving a message of' +
           ' expected response type',
         () => {
-          const callbackSpy1 = sandbox.spy();
-          const callbackSpy2 = sandbox.spy();
-          const irrelevantCallbackSpy = sandbox.spy();
+          const callbackSpy1 = env.sandbox.spy();
+          const callbackSpy2 = env.sandbox.spy();
+          const irrelevantCallbackSpy = env.sandbox.spy();
 
           const expectedResponseObject = {
             type: 'response-type',
@@ -284,7 +284,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
         'should not invoke callback on receiving a message of' +
           ' irrelevant response type',
         () => {
-          const callbackSpy = sandbox.spy();
+          const callbackSpy = env.sandbox.spy();
           client.registerCallback('response-type', callbackSpy);
 
           postAmpMessage(
@@ -296,7 +296,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
       );
 
       it('should not invoke callback on receiving a non-AMP message', () => {
-        const callbackSpy = sandbox.spy();
+        const callbackSpy = env.sandbox.spy();
         client.registerCallback('response-type', callbackSpy);
 
         win.eventListeners.fire({
@@ -317,7 +317,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
         'should not invoke callback on receiving a message ' +
           'not from host window',
         () => {
-          const callbackSpy = sandbox.spy();
+          const callbackSpy = env.sandbox.spy();
           client.registerCallback('response-type', callbackSpy);
           const randomWindow = {};
 
@@ -333,7 +333,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
         'should not invoke callback on receiving a message ' +
           'containing no sentinel',
         () => {
-          const callbackSpy = sandbox.spy();
+          const callbackSpy = env.sandbox.spy();
           client.registerCallback('response-type', callbackSpy);
 
           postAmpMessage({type: 'response-type'}, hostWindow);
@@ -345,7 +345,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
         'should not invoke callback on receiving a message ' +
           'containing wrong sentinel',
         () => {
-          const callbackSpy = sandbox.spy();
+          const callbackSpy = env.sandbox.spy();
           client.registerCallback('response-type', callbackSpy);
 
           postAmpMessage(
@@ -378,9 +378,9 @@ describes.realWin('iframe-messaging-client', {}, env => {
     let hostWindow2;
     let postMessageStub2;
     beforeEach(() => {
-      postMessageStub1 = sandbox.stub();
+      postMessageStub1 = env.sandbox.stub();
       hostWindow1 = {postMessage: postMessageStub1};
-      postMessageStub2 = sandbox.stub();
+      postMessageStub2 = env.sandbox.stub();
       hostWindow2 = {postMessage: postMessageStub2};
       win.parent = hostWindow1;
       hostWindow1.parent = hostWindow2;
@@ -392,7 +392,7 @@ describes.realWin('iframe-messaging-client', {}, env => {
 
     describe('makeRequest', () => {
       it('should broadcast the request via postMessage', () => {
-        const callbackSpy = sandbox.spy();
+        const callbackSpy = env.sandbox.spy();
         client.makeRequest('request-type', 'response-type', callbackSpy);
         expect(postMessageStub1).to.be.calledWith(
           serializeMessage(

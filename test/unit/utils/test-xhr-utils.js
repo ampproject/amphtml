@@ -25,12 +25,6 @@ import {
 } from '../../../src/utils/xhr-utils';
 
 describes.sandboxed('utils/xhr-utils', {}, env => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = env.sandbox;
-  });
-
   describe('setupAMPCors', () => {
     it('should set AMP-Same-Origin header', () => {
       // Given a same origin request.
@@ -103,7 +97,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
         getRootNode() {
           return {documentElement: doc};
         },
-        whenFirstVisible: sandbox.stub().returns(Promise.resolve()),
+        whenFirstVisible: env.sandbox.stub().returns(Promise.resolve()),
       };
       doc = document.createElement('html');
       doc.setAttribute('allow-xhr-interception', 'true');
@@ -112,9 +106,11 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       viewer = {
         hasCapability: unusedParam => true,
         isTrustedViewer: () => Promise.resolve(true),
-        sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve({})),
+        sendMessageAwaitResponse: env.sandbox
+          .stub()
+          .returns(Promise.resolve({})),
       };
-      viewerForDoc = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      viewerForDoc = env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       win = {
         __AMP_MODE: {
           localDev: false,
@@ -236,7 +232,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     );
 
     it('should return an auth token if one is present', () => {
-      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
         Promise.resolve({
           getIdTokenPromise: () => Promise.resolve('idToken'),
         })
@@ -249,7 +245,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     });
 
     it('should return an empty auth token if there is not one present', () => {
-      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
         Promise.resolve({
           getIdTokenPromise: () => Promise.resolve(undefined),
         })
@@ -265,7 +261,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       'should return an empty auth token if there is an issue retrieving ' +
         'the identity token',
       () => {
-        sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+        env.sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
           Promise.reject({
             getIdTokenPromise: () => Promise.reject(),
           })
@@ -279,7 +275,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     );
 
     it('should assert that amp-viewer-assistance extension is present', () => {
-      sandbox
+      window.sandbox
         .stub(Services, 'viewerAssistanceForDocOrNull')
         .returns(Promise.resolve());
       const el = document.createElement('html');

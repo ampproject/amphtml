@@ -128,7 +128,7 @@ describes.realWin(
     it('should replace iframe after tweetid mutation', async () => {
       const newTweetId = '638793490521001985';
       const ampTwitter = await getAmpTwitter(tweetId);
-      const spy = sandbox.spy(ampTwitter.implementation_, 'toggleLoading');
+      const spy = env.sandbox.spy(ampTwitter.implementation_, 'toggleLoading');
       const iframe = ampTwitter.querySelector('iframe');
       ampTwitter.setAttribute('data-tweetid', newTweetId);
       ampTwitter.mutatedAttributesCallback({'data-tweetid': newTweetId});

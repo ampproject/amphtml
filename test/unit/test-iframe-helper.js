@@ -31,7 +31,6 @@ describe
       '/test/fixtures/served/iframe-intersection-outer.html';
 
     let testIframe;
-    let sandbox;
     let container;
 
     function insert(iframe) {
@@ -39,17 +38,12 @@ describe
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       return createIframePromise().then(c => {
         container = c;
         const i = c.doc.createElement('iframe');
         i.src = iframeSrc;
         testIframe = i;
       });
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should assert src in iframe', () => {
@@ -212,9 +206,10 @@ describe
       });
     });
 
-    it('should set sentinel on postMessage data', () => {
+    // TODO(wg-runtime, #25587): Results in a cross-origin frame error.
+    it.skip('should set sentinel on postMessage data', () => {
       insert(testIframe);
-      const postMessageSpy = sinon /*OK*/
+      const postMessageSpy = window.sandbox /*OK*/
         .spy(testIframe.contentWindow, 'postMessage');
       IframeHelper.postMessage(
         testIframe,

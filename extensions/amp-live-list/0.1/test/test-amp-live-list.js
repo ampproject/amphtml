@@ -28,7 +28,6 @@ describes.realWin(
   },
   function(env) {
     let win;
-    let sandbox;
     let ampdoc;
     let liveList;
     let elem;
@@ -37,7 +36,6 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      sandbox = sinon.sandbox;
       ampdoc = new AmpDocSingle(win);
       elem = document.createElement('amp-live-list');
       elem.getAmpDoc = () => ampdoc;
@@ -54,10 +52,6 @@ describes.realWin(
         'data-max-items-per-page': 5,
         'data-sort-time': Date.now(),
       };
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     function buildElement(elem, attrs) {
@@ -143,7 +137,7 @@ describes.realWin(
       const child = document.createElement('div');
       elem.querySelector('[items]').appendChild(child);
       buildElement(elem, dftAttrs);
-      const stub = sandbox.stub(liveList, 'countAndCacheValidItems_');
+      const stub = env.sandbox.stub(liveList, 'countAndCacheValidItems_');
       expect(stub).to.have.not.been.called;
       liveList.buildCallback();
       expect(stub).to.be.calledOnce;
@@ -159,7 +153,7 @@ describes.realWin(
       elem.querySelector('[items]').appendChild(invalidChild);
 
       buildElement(elem, dftAttrs);
-      const spy = sandbox.spy(liveList, 'countAndCacheValidItems_');
+      const spy = env.sandbox.spy(liveList, 'countAndCacheValidItems_');
       liveList.buildCallback();
       expect(spy).to.have.returned(1);
     });
@@ -312,7 +306,7 @@ describes.realWin(
       it('sends amp-dom-update event on new items', () => {
         buildElement(elem, dftAttrs);
         liveList.buildCallback();
-        const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+        const spy = env.sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
         const fromServer1 = createFromServer([{id: 'id0'}]);
         liveList.update(fromServer1);
         return liveList.updateAction_().then(() => {
@@ -333,9 +327,9 @@ describes.realWin(
         liveList.buildCallback();
 
         const fromServer1 = createFromServer([{id: 'id1', updateTime: 125}]);
-        const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+        const spy = env.sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
         // We stub and restore to not trigger `update` calling `updateAction_`.
-        const stub = sinon./*OK*/ stub(liveList, 'updateAction_');
+        const stub = env.sandbox./*OK*/ stub(liveList, 'updateAction_');
         liveList.update(fromServer1);
         stub./*OK*/ restore();
         return liveList.updateAction_().then(() => {
@@ -356,9 +350,9 @@ describes.realWin(
         liveList.buildCallback();
 
         const fromServer1 = createFromServer([{id: 'id1', tombstone: null}]);
-        const spy = sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
+        const spy = env.sandbox.spy(liveList, 'sendAmpDomUpdateEvent_');
         // We stub and restore to not trigger `update` calling `updateAction_`.
-        const stub = sinon./*OK*/ stub(liveList, 'updateAction_');
+        const stub = env.sandbox./*OK*/ stub(liveList, 'updateAction_');
         liveList.update(fromServer1);
         stub./*OK*/ restore();
         return liveList.updateAction_().then(() => {
@@ -379,9 +373,9 @@ describes.realWin(
         liveList.buildCallback();
 
         const fromServer1 = createFromServer([{id: 'id1', updateTime: 125}]);
-        const spy = sandbox.spy(liveList.itemsSlot_, 'dispatchEvent');
+        const spy = env.sandbox.spy(liveList.itemsSlot_, 'dispatchEvent');
         // We stub and restore to not trigger `update` calling `updateAction_`.
-        const stub = sinon./*OK*/ stub(liveList, 'updateAction_');
+        const stub = env.sandbox./*OK*/ stub(liveList, 'updateAction_');
         liveList.update(fromServer1);
         stub./*OK*/ restore();
         return liveList.updateAction_().then(() => {
@@ -399,7 +393,7 @@ describes.realWin(
         updateLiveListItems.setAttribute('items', '');
         update.appendChild(updateLiveListItems);
         updateLiveListItems.appendChild(document.createElement('div'));
-        const stub = sandbox.stub(liveList, 'countAndCacheValidItems_');
+        const stub = env.sandbox.stub(liveList, 'countAndCacheValidItems_');
         expect(stub).to.have.not.been.called;
         liveList.update(update);
         expect(stub).to.be.calledOnce;
@@ -408,7 +402,7 @@ describes.realWin(
       it('should call updateFixedLayer on update with inserts', () => {
         buildElement(elem, dftAttrs);
         liveList.buildCallback();
-        const spy = sandbox.spy(liveList.viewport_, 'updateFixedLayer');
+        const spy = env.sandbox.spy(liveList.viewport_, 'updateFixedLayer');
         expect(liveList.itemsSlot_.childElementCount).to.equal(0);
         const fromServer1 = createFromServer([{id: 'id0'}]);
         expect(spy).to.have.not.been.called;
@@ -671,7 +665,7 @@ describes.realWin(
         {id: 'id3'},
       ]);
 
-      const spy = sandbox.spy(liveList, 'updateAction_');
+      const spy = env.sandbox.spy(liveList, 'updateAction_');
       liveList.update(fromServer1);
 
       expect(liveList.pendingItemsInsert_).to.have.length(1);
@@ -704,7 +698,7 @@ describes.realWin(
         {id: 'id3'},
       ]);
 
-      const spy = sandbox.spy(liveList, 'updateAction_');
+      const spy = env.sandbox.spy(liveList, 'updateAction_');
       liveList.update(fromServer1);
 
       expect(liveList.pendingItemsInsert_).to.have.length(1);
@@ -727,7 +721,7 @@ describes.realWin(
 
       const fromServer1 = createFromServer([{id: 'id1', updateTime: 125}]);
 
-      const spy = sandbox.spy(liveList, 'updateAction_');
+      const spy = env.sandbox.spy(liveList, 'updateAction_');
       liveList.update(fromServer1);
 
       expect(liveList.pendingItemsInsert_).to.have.length(0);
@@ -754,7 +748,7 @@ describes.realWin(
         {id: 'id3'},
       ]);
 
-      const spy = sandbox.spy(liveList, 'updateAction_');
+      const spy = env.sandbox.spy(liveList, 'updateAction_');
       liveList.update(fromServer1);
 
       expect(liveList.pendingItemsReplace_).to.have.length(1);
@@ -1048,9 +1042,12 @@ describes.realWin(
         elem,
         Object.assign({}, dftAttrs, {'data-max-items-per-page': 2})
       );
-      sandbox.stub(liveList, 'isElementBelowViewport_').returns(true);
+      env.sandbox.stub(liveList, 'isElementBelowViewport_').returns(true);
       liveList.buildCallback();
-      const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+      const removeChildSpy = env.sandbox.spy(
+        liveList.itemsSlot_,
+        'removeChild'
+      );
 
       const fromServer1 = createFromServer([{id: 'id3', sortTime: '122'}]);
 
@@ -1095,13 +1092,16 @@ describes.realWin(
         elem,
         Object.assign({}, dftAttrs, {'data-max-items-per-page': 2})
       );
-      const pred = sandbox.stub(liveList, 'isElementBelowViewport_');
+      const pred = env.sandbox.stub(liveList, 'isElementBelowViewport_');
       // id1
       pred.onCall(0).returns(true);
       // Anything else
       pred.returns(false);
       liveList.buildCallback();
-      const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+      const removeChildSpy = env.sandbox.spy(
+        liveList.itemsSlot_,
+        'removeChild'
+      );
 
       const fromServer1 = createFromServer([
         {id: 'id3'},
@@ -1159,8 +1159,11 @@ describes.realWin(
       itemsSlot.appendChild(child1);
       buildElement(elem, dftAttrs);
       liveList.buildCallback();
-      sandbox.stub(liveList, 'isElementBelowViewport_').returns(true);
-      const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+      env.sandbox.stub(liveList, 'isElementBelowViewport_').returns(true);
+      const removeChildSpy = env.sandbox.spy(
+        liveList.itemsSlot_,
+        'removeChild'
+      );
 
       const fromServer = createFromServer([
         {id: 'id3', sortTime: 110},
@@ -1347,9 +1350,12 @@ describes.realWin(
             'sort': 'ascending',
           })
         );
-        sandbox.stub(liveList, 'isElementAboveViewport_').returns(true);
+        env.sandbox.stub(liveList, 'isElementAboveViewport_').returns(true);
         liveList.buildCallback();
-        const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+        const removeChildSpy = env.sandbox.spy(
+          liveList.itemsSlot_,
+          'removeChild'
+        );
 
         const fromServer1 = createFromServer([{id: 'id3', sortTime: '125'}]);
 
@@ -1397,13 +1403,16 @@ describes.realWin(
             'sort': 'ascending',
           })
         );
-        const pred = sandbox.stub(liveList, 'isElementAboveViewport_');
+        const pred = env.sandbox.stub(liveList, 'isElementAboveViewport_');
         // id1
         pred.onCall(0).returns(true);
         // Anything else
         pred.returns(false);
         liveList.buildCallback();
-        const removeChildSpy = sandbox.spy(liveList.itemsSlot_, 'removeChild');
+        const removeChildSpy = env.sandbox.spy(
+          liveList.itemsSlot_,
+          'removeChild'
+        );
 
         const fromServer1 = createFromServer([
           {id: 'id3'},

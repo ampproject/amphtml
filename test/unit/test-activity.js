@@ -26,7 +26,6 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {markElementScheduledForTesting} from '../../src/service/custom-element-registry';
 
 describe('Activity getTotalEngagedTime', () => {
-  let sandbox;
   let clock;
   let fakeDoc;
   let fakeWin;
@@ -39,8 +38,7 @@ describe('Activity getTotalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
 
     // start at something other than 0
     clock.tick(123456);
@@ -109,15 +107,17 @@ describe('Activity getTotalEngagedTime', () => {
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
     });
-    sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenFirstVisiblePromise);
-    sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
+    window.sandbox
+      .stub(ampdoc, 'whenFirstVisible')
+      .returns(whenFirstVisiblePromise);
+    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
       return visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    sandbox.stub(viewport, 'onScroll').callsFake(handler => {
+    window.sandbox.stub(viewport, 'onScroll').callsFake(handler => {
       scrollObservable.add(handler);
     });
 
@@ -127,10 +127,6 @@ describe('Activity getTotalEngagedTime', () => {
     return Services.activityForDoc(ampdoc.getHeadNode()).then(a => {
       activity = a;
     });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should have 0 engaged time if there is no activity', () => {
@@ -176,7 +172,9 @@ describe('Activity getTotalEngagedTime', () => {
   });
 
   it('should not accumulate engaged time after inactivity', () => {
-    const isVisibleStub = sandbox.stub(ampdoc, 'isVisible').returns(true);
+    const isVisibleStub = window.sandbox
+      .stub(ampdoc, 'isVisible')
+      .returns(true);
     whenFirstVisibleResolve();
     return ampdoc.whenFirstVisible().then(() => {
       clock.tick(3000);
@@ -207,7 +205,10 @@ describe('Activity getTotalEngagedTime', () => {
     'should set event listeners on the document for' +
       ' "mousedown", "mouseup", "mousemove", "keyup", "keydown"',
     () => {
-      const addEventListenerSpy = sandbox.spy(fakeDoc, 'addEventListener');
+      const addEventListenerSpy = window.sandbox.spy(
+        fakeDoc,
+        'addEventListener'
+      );
       expect(addEventListenerSpy).to.not.have.been.calledWith(
         'mousedown',
         activity.boundHandleActivity_
@@ -241,7 +242,6 @@ describe('Activity getTotalEngagedTime', () => {
 });
 
 describe('Activity getIncrementalEngagedTime', () => {
-  let sandbox;
   let clock;
   let fakeDoc;
   let fakeWin;
@@ -254,8 +254,7 @@ describe('Activity getIncrementalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
 
     // start at something other than 0
     clock.tick(123456);
@@ -324,15 +323,17 @@ describe('Activity getIncrementalEngagedTime', () => {
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
     });
-    sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenFirstVisiblePromise);
-    sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
+    window.sandbox
+      .stub(ampdoc, 'whenFirstVisible')
+      .returns(whenFirstVisiblePromise);
+    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
       return visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    sandbox.stub(viewport, 'onScroll').callsFake(handler => {
+    window.sandbox.stub(viewport, 'onScroll').callsFake(handler => {
       scrollObservable.add(handler);
     });
 
@@ -342,10 +343,6 @@ describe('Activity getIncrementalEngagedTime', () => {
     return Services.activityForDoc(ampdoc.getHeadNode()).then(a => {
       activity = a;
     });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should have 0 seconds of incremental engaged time with no activity', () => {

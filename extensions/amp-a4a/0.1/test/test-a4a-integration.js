@@ -79,14 +79,12 @@ function expectRenderedInXDomainIframe(element, src) {
 }
 
 describe('integration test: a4a', () => {
-  let sandbox;
   let fixture;
   let fetchMock;
   let adResponse;
   let a4aElement;
   let a4aRegistry;
   beforeEach(async () => {
-    sandbox = sinon.sandbox;
     a4aRegistry = getA4ARegistry();
     a4aRegistry['mock'] = () => {
       return true;
@@ -123,7 +121,6 @@ describe('integration test: a4a', () => {
 
   afterEach(() => {
     fetchMock./*OK*/ restore();
-    sandbox.restore();
     resetScheduledElementForTesting(window, 'amp-a4a');
     delete a4aRegistry['mock'];
   });
@@ -151,7 +148,7 @@ describe('integration test: a4a', () => {
     // TODO(tdrl) Currently layoutCallback rejects, even though something *is*
     // rendered.  This should be fixed in a refactor, and we should change this
     // .catch to a .then.
-    const forceCollapseStub = sandbox.spy(
+    const forceCollapseStub = window.sandbox.spy(
       MockA4AImpl.prototype,
       'forceCollapse'
     );
@@ -169,7 +166,7 @@ describe('integration test: a4a', () => {
   it('should collapse slot when creative response has code 204', async () => {
     adResponse.status = 204;
     adResponse.body = null;
-    const forceCollapseStub = sandbox.spy(
+    const forceCollapseStub = window.sandbox.spy(
       MockA4AImpl.prototype,
       'forceCollapse'
     );
@@ -179,7 +176,7 @@ describe('integration test: a4a', () => {
 
   it('should collapse slot when creative response.arrayBuffer() is empty', async () => {
     adResponse.body = '';
-    const forceCollapseStub = sandbox.spy(
+    const forceCollapseStub = window.sandbox.spy(
       MockA4AImpl.prototype,
       'forceCollapse'
     );
@@ -191,7 +188,7 @@ describe('integration test: a4a', () => {
     await fixture.addElement(a4aElement);
     await expectRenderedInFriendlyIframe(a4aElement, 'Hello, world.');
     const a4a = new MockA4AImpl(a4aElement);
-    const initiateAdRequestMock = sandbox
+    const initiateAdRequestMock = window.sandbox
       .stub(MockA4AImpl.prototype, 'initiateAdRequest')
       .callsFake(() => {
         a4a.adPromise_ = Promise.resolve();
@@ -199,13 +196,16 @@ describe('integration test: a4a', () => {
         // up any unrelated asserts.
         a4a.isRefreshing = false;
       });
-    const tearDownSlotMock = sandbox.stub(
+    const tearDownSlotMock = window.sandbox.stub(
       MockA4AImpl.prototype,
       'tearDownSlot'
     );
     tearDownSlotMock.returns(undefined);
-    const destroyFrameSpy = sandbox.spy(MockA4AImpl.prototype, 'destroyFrame');
-    const callback = sandbox.spy();
+    const destroyFrameSpy = window.sandbox.spy(
+      MockA4AImpl.prototype,
+      'destroyFrame'
+    );
+    const callback = window.sandbox.spy();
     await a4a.refresh(callback);
     expect(initiateAdRequestMock).to.be.called;
     expect(tearDownSlotMock).to.be.called;

@@ -210,8 +210,6 @@
         "before": false,
         "after": false,
         "assert": false,
-        "sinon": true,
-        "sandbox": true,
         "describes": true,
         "allowConsoleError": false,
         "expectAsyncConsoleError": false,

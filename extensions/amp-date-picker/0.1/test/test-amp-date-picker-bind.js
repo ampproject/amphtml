@@ -111,8 +111,8 @@ describes.realWin(
         const {picker, layoutCallback} = createDatePicker({
           src: 'https://localhost:8000/examples/date-picker.json',
         });
-        sandbox.stub(picker, 'fetchSrc_').resolves();
-        const setStateSpy = sandbox.spy(picker, 'setState_');
+        env.sandbox.stub(picker, 'fetchSrc_').resolves();
+        const setStateSpy = env.sandbox.spy(picker, 'setState_');
         await layoutCallback();
 
         await picker.mutatedAttributesCallback({

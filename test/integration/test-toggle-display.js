@@ -23,12 +23,9 @@ describe
   .retryOnSaucelabs()
   .run('toggle display helper', () => {
     let fixture;
-    let sandbox;
     let img;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-
       return createFixtureIframe('test/fixtures/images.html', 500)
         .then(f => {
           fixture = f;
@@ -39,10 +36,6 @@ describe
         .then(() => {
           img = fixture.doc.querySelector('amp-img');
         });
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     describes.repeated(

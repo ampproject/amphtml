@@ -35,8 +35,8 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
     vsync = Services.vsyncFor(ampdoc.win);
     viewport = Services.viewportForDoc(ampdoc);
-    addToFixedLayerSpy = sandbox.stub(viewport, 'addToFixedLayer');
-    updatePaddingSpy = sandbox.stub(viewport, 'updatePaddingBottom');
+    addToFixedLayerSpy = env.sandbox.stub(viewport, 'addToFixedLayer');
+    updatePaddingSpy = env.sandbox.stub(viewport, 'updatePaddingBottom');
     dialog = new Dialog(ampdoc);
     content = createElementWithAttributes(doc, 'div', {
       style: 'height:17px',

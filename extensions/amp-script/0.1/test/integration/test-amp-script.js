@@ -64,7 +64,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => true);
           browser.click('button#hello');
 
           yield poll('mutations applied', () => {
@@ -82,7 +84,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => false);
           browser.click('button#hello');
 
           // Give mutations time to apply.
@@ -101,10 +105,12 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => true);
           // TODO(dvoytenko): Find a way to test this with the race condition when
           // the resource is fetched before the first polling iteration.
-          const stub = sandbox.stub(impl.userActivation_, 'expandLongTask');
+          const stub = env.sandbox.stub(impl.userActivation_, 'expandLongTask');
           browser.click('button#long');
           yield poll('long task started', () => {
             return stub.callCount > 0;
@@ -143,7 +149,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => true);
           browser.click('button#script');
 
           yield poll('mutations applied', () => {
@@ -164,7 +172,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => true);
           browser.click('button#img');
 
           yield poll('mutations applied', () => {
@@ -207,7 +217,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => false);
           browser.click('button#hello');
           yield poll('mutations applied', () => {
             const h1 = doc.querySelector('h1');
@@ -246,7 +258,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => false);
           browser.click('button#hello');
 
           // Give mutations time to apply.

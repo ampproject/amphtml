@@ -715,7 +715,7 @@ describes.fakeWin('Action hasResolvableAction', {amp: true}, env => {
   });
 });
 
-describes.sandboxed('Action method', {}, () => {
+describes.sandboxed('Action method', {}, env => {
   let action;
   let getDefaultActionAlias;
   let id;
@@ -724,8 +724,8 @@ describes.sandboxed('Action method', {}, () => {
 
   beforeEach(() => {
     action = actionService();
-    onEnqueue = sandbox.spy();
-    getDefaultActionAlias = sandbox.spy();
+    onEnqueue = env.sandbox.spy();
+    getDefaultActionAlias = env.sandbox.spy();
     targetElement = document.createElement('target');
     id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
@@ -857,8 +857,8 @@ describes.sandboxed('Action method', {}, () => {
 
     it('should invoke proper action', () => {
       // Given that an amp action macro is triggered.
-      const invoke_ = sandbox.stub(action, 'invoke_');
-      sandbox
+      const invoke_ = env.sandbox.stub(action, 'invoke_');
+      env.sandbox
         .stub(action.root_, 'getElementById')
         .withArgs('action-macro-id')
         .returns(ampActionMacro);
@@ -899,7 +899,7 @@ describes.sandboxed('Action method', {}, () => {
   });
 });
 
-describes.sandboxed('installActionHandler', {}, () => {
+describes.sandboxed('installActionHandler', {}, env => {
   let action;
 
   beforeEach(() => {
@@ -907,7 +907,7 @@ describes.sandboxed('installActionHandler', {}, () => {
   });
 
   it('should invoke on non-AMP but whitelisted element', () => {
-    const handlerSpy = sandbox.spy();
+    const handlerSpy = env.sandbox.spy();
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy);
     action.invoke_(
@@ -933,7 +933,7 @@ describes.sandboxed('installActionHandler', {}, () => {
   });
 
   it('should not check trust level (handler should check)', () => {
-    const handlerSpy = sandbox.spy();
+    const handlerSpy = env.sandbox.spy();
     const target = document.createElement('form');
     action.installActionHandler(target, handlerSpy);
 
@@ -955,7 +955,7 @@ describes.sandboxed('installActionHandler', {}, () => {
   });
 });
 
-describes.sandboxed('Multiple handlers action method', {}, () => {
+describes.sandboxed('Multiple handlers action method', {}, env => {
   let action;
   let getDefaultActionAlias;
   let onEnqueue1, onEnqueue2;
@@ -963,9 +963,9 @@ describes.sandboxed('Multiple handlers action method', {}, () => {
 
   beforeEach(() => {
     action = actionService();
-    onEnqueue1 = sandbox.spy();
-    onEnqueue2 = sandbox.spy();
-    getDefaultActionAlias = sandbox.spy();
+    onEnqueue1 = env.sandbox.spy();
+    onEnqueue2 = env.sandbox.spy();
+    getDefaultActionAlias = env.sandbox.spy();
     targetElement = document.createElement('target');
     targetElement.setAttribute('on', 'tap:foo.method1,bar.method2');
     parent = document.createElement('parent');
@@ -1009,14 +1009,14 @@ describes.sandboxed('Multiple handlers action method', {}, () => {
     const promiseAbc = new Promise(resolve => {
       resolveAbc = resolve;
     });
-    const abc = sandbox.stub().returns(promiseAbc);
+    const abc = env.sandbox.stub().returns(promiseAbc);
     action.addGlobalTarget('ABC', abc);
 
     let resolveXyz;
     const promiseXyz = new Promise(resolve => {
       resolveXyz = resolve;
     });
-    const xyz = sandbox.stub().returns(promiseXyz);
+    const xyz = env.sandbox.stub().returns(promiseXyz);
     action.addGlobalTarget('XYZ', xyz);
 
     const element = document.createElement('target');
@@ -1057,13 +1057,13 @@ describes.sandboxed('Multiple handlers action method', {}, () => {
   });
 });
 
-describes.sandboxed('Action interceptor', {}, () => {
+describes.sandboxed('Action interceptor', {}, env => {
   let clock;
   let action;
   let target;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     action = actionService();
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
@@ -1150,7 +1150,7 @@ describes.sandboxed('Action interceptor', {}, () => {
     expect(getActionHandler()).to.be.undefined;
     expect(getQueue()).to.have.length(2);
 
-    const handler = sandbox.spy();
+    const handler = env.sandbox.spy();
     action.installActionHandler(target, handler);
     expect(getActionHandler()).to.exist;
     expect(handler).to.have.not.been.called;
@@ -1193,7 +1193,7 @@ describes.sandboxed('Action interceptor', {}, () => {
   });
 });
 
-describes.sandboxed('Action common handler', {}, () => {
+describes.sandboxed('Action common handler', {}, env => {
   let action;
   let target;
 
@@ -1206,8 +1206,8 @@ describes.sandboxed('Action common handler', {}, () => {
   });
 
   it('should execute actions registered', () => {
-    const action1 = sandbox.spy();
-    const action2 = sandbox.spy();
+    const action1 = env.sandbox.spy();
+    const action2 = env.sandbox.spy();
     action.addGlobalMethodHandler('action1', action1);
     action.addGlobalMethodHandler('action2', action2);
 
@@ -1243,7 +1243,7 @@ describes.sandboxed('Action common handler', {}, () => {
   });
 
   it('should check trust before invoking action', () => {
-    const handler = sandbox.spy();
+    const handler = env.sandbox.spy();
     action.addGlobalMethodHandler('foo', handler, ActionTrust.HIGH);
 
     action.invoke_(
@@ -1276,7 +1276,7 @@ describes.sandboxed('Action common handler', {}, () => {
   });
 });
 
-describes.sandboxed('Action global target', {}, () => {
+describes.sandboxed('Action global target', {}, env => {
   let action;
 
   beforeEach(() => {
@@ -1284,8 +1284,8 @@ describes.sandboxed('Action global target', {}, () => {
   });
 
   it('should register global target', () => {
-    const target1 = sandbox.spy();
-    const target2 = sandbox.spy();
+    const target1 = env.sandbox.spy();
+    const target2 = env.sandbox.spy();
     const event = {};
     action.addGlobalTarget('target1', target1);
     action.addGlobalTarget('target2', target2);
@@ -1343,12 +1343,12 @@ describes.fakeWin('Core events', {amp: true}, env => {
   beforeEach(() => {
     window = env.win;
     document = window.document;
-    sandbox.stub(window.document, 'addEventListener');
+    env.sandbox.stub(window.document, 'addEventListener');
     const {ampdoc} = env;
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
     triggerPromise = new Promise((resolve, reject) => {
-      sandbox.stub(action, 'trigger').callsFake(() => {
+      env.sandbox.stub(action, 'trigger').callsFake(() => {
         try {
           originalTrigger.apply(action, action.trigger.getCall(0).args);
           resolve();
@@ -1384,7 +1384,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       const event = {
         target: element,
         key: Keys.ENTER,
-        preventDefault: sandbox.stub(),
+        preventDefault: env.sandbox.stub(),
       };
       handler(event);
       expect(event.preventDefault).to.not.have.been.called;
@@ -1405,7 +1405,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       const event = {
         target: element,
         key: Keys.ENTER,
-        preventDefault: sandbox.stub(),
+        preventDefault: env.sandbox.stub(),
       };
       handler(event);
       // Expect prevent default to have been called.
@@ -1428,7 +1428,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       const event = {
         target: element,
         key: Keys.ENTER,
-        preventDefault: sandbox.stub(),
+        preventDefault: env.sandbox.stub(),
       };
       handler(event);
       expect(event.preventDefault).to.not.have.been.called;
@@ -1496,7 +1496,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      sinon.match(
+      env.sandbox.match(
         object => object.detail.checked && object.detail.value == 'foo'
       )
     );
@@ -1514,7 +1514,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      sinon.match(e => {
+      env.sandbox.match(e => {
         const {min, max, value, valueAsNumber} = e.detail;
         return (
           min === '0' && max === '10' && value === '5' && valueAsNumber === 5
@@ -1533,7 +1533,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      sinon.match(e => e.detail.value == 'foo')
+      env.sandbox.match(e => e.detail.value == 'foo')
     );
   });
 
@@ -1550,7 +1550,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      sinon.match(object => {
+      env.sandbox.match(object => {
         const {detail} = object;
         return detail.value == 'qux';
       })
@@ -1567,7 +1567,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     expect(action.trigger).to.have.been.calledWith(
       element,
       'change',
-      sinon.match(object => {
+      env.sandbox.match(object => {
         const {detail} = object;
         return detail.value == 'foo';
       })
@@ -1575,7 +1575,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
   });
 
   it('should trigger input-debounced event on input', () => {
-    sandbox.stub(action, 'invoke_');
+    env.sandbox.stub(action, 'invoke_');
     const handler = window.document.addEventListener.getCall(4).args[1];
     const element = document.createElement('input');
     element.id = 'test';
@@ -1589,7 +1589,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       expect(action.trigger).to.have.been.calledWith(
         element,
         'input-debounced',
-        sinon.match(event => {
+        env.sandbox.match(event => {
           const {value} = event.target;
           return value == 'foo bar baz';
         })
@@ -1598,7 +1598,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
   });
 
   it('should trigger input-throttled event on input', () => {
-    sandbox.stub(action, 'invoke_');
+    env.sandbox.stub(action, 'invoke_');
     const handler = window.document.addEventListener.getCall(5).args[1];
     const element = document.createElement('input');
     element.id = 'test';
@@ -1612,7 +1612,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       expect(action.trigger).to.have.been.calledWith(
         element,
         'input-throttled',
-        sinon.match(event => {
+        env.sandbox.match(event => {
           const {value} = event.target;
           return value == 'foo bar baz';
         })
@@ -1766,7 +1766,7 @@ describes.realWin(
           'tap',
           'AMP'
         );
-        sandbox.stub(action, 'error_');
+        env.sandbox.stub(action, 'error_');
         expect(action.invoke_(i)).to.be.null;
         expect(action.error_).to.be.calledWith(
           '"AMP.print" is not whitelisted ' +
@@ -1813,7 +1813,7 @@ describes.realWin(
         'tap',
         'AMP'
       );
-      sandbox.stub(action, 'error_');
+      env.sandbox.stub(action, 'error_');
       expect(action.invoke_(i)).to.be.null;
       expect(action.error_).to.be.calledWith(
         '"AMP.print" is not whitelisted [].'

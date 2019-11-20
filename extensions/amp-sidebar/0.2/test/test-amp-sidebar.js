@@ -97,19 +97,19 @@ describes.realWin(
         .then(() => {
           const impl = ampSidebar.implementation_;
           if (options.toolbars) {
-            sandbox.stub(timer, 'delay').callsFake(function(callback) {
+            env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
               callback();
             });
           }
-          sandbox.stub(impl, 'mutateElement').callsFake(callback => {
+          env.sandbox.stub(impl, 'mutateElement').callsFake(callback => {
             callback();
             return Promise.resolve();
           });
 
           if (options.stubHistory) {
-            sandbox.stub(impl, 'getHistory_').returns({
-              push: sandbox.stub().resolves(11),
-              pop: sandbox.stub().resolves(11),
+            env.sandbox.stub(impl, 'getHistory_').returns({
+              push: env.sandbox.stub().resolves(11),
+              pop: env.sandbox.stub().resolves(11),
             });
           }
           return ampSidebar;
@@ -201,7 +201,7 @@ describes.realWin(
       it('should create an invisible close button for screen readers only', () => {
         return getAmpSidebar().then(sidebarElement => {
           const impl = sidebarElement.implementation_;
-          impl.close_ = sandbox.spy();
+          impl.close_ = env.sandbox.spy();
           const closeButton = sidebarElement.lastElementChild;
           expect(closeButton).to.exist;
           expect(closeButton.tagName).to.equal('BUTTON');
@@ -223,9 +223,9 @@ describes.realWin(
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });
-        const historyPushSpy = sandbox.spy();
-        const historyPopSpy = sandbox.spy();
-        owners.scheduleLayout = sandbox.spy();
+        const historyPushSpy = env.sandbox.spy();
+        const historyPopSpy = env.sandbox.spy();
+        owners.scheduleLayout = env.sandbox.spy();
         impl.getHistory_ = function() {
           return {
             push() {
@@ -293,10 +293,10 @@ describes.realWin(
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });
-        owners.schedulePause = sandbox.spy();
-        const historyPushSpy = sandbox.spy();
-        const historyPopSpy = sandbox.spy();
-        owners.scheduleLayout = sandbox.spy();
+        owners.schedulePause = env.sandbox.spy();
+        const historyPushSpy = env.sandbox.spy();
+        const historyPopSpy = env.sandbox.spy();
+        owners.scheduleLayout = env.sandbox.spy();
         impl.getHistory_ = function() {
           return {
             push() {
@@ -341,8 +341,8 @@ describes.realWin(
           target: impl.win,
           toFake: ['Date', 'setTimeout'],
         });
-        owners.scheduleLayout = sandbox.spy();
-        owners.schedulePause = sandbox.spy();
+        owners.scheduleLayout = env.sandbox.spy();
+        owners.schedulePause = env.sandbox.spy();
 
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
@@ -376,7 +376,7 @@ describes.realWin(
             target: impl.win,
             toFake: ['Date', 'setTimeout'],
           });
-          owners.schedulePause = sandbox.spy();
+          owners.schedulePause = env.sandbox.spy();
 
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           execute(impl, 'open');
@@ -409,8 +409,8 @@ describes.realWin(
             target: impl.win,
             toFake: ['Date', 'setTimeout'],
           });
-          owners.schedulePause = sandbox.spy();
-          owners.scheduleResume = sandbox.spy();
+          owners.schedulePause = env.sandbox.spy();
+          owners.scheduleResume = env.sandbox.spy();
 
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           clock.tick(600);
@@ -448,28 +448,31 @@ describes.realWin(
       });
 
       it.skip('should fix scroll leaks on ios safari', () => {
-        sandbox.stub(platform, 'isIos').returns(true);
-        sandbox.stub(platform, 'isSafari').returns(true);
+        env.sandbox.stub(platform, 'isIos').returns(true);
+        env.sandbox.stub(platform, 'isSafari').returns(true);
         return getAmpSidebar().then(sidebarElement => {
           const impl = sidebarElement.implementation_;
-          sandbox.stub(timer, 'delay').callsFake(function(callback) {
+          env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
             callback();
           });
-          const scrollLeakSpy = sandbox.spy(impl, 'fixIosElasticScrollLeak_');
+          const scrollLeakSpy = env.sandbox.spy(
+            impl,
+            'fixIosElasticScrollLeak_'
+          );
           impl.buildCallback();
           expect(scrollLeakSpy).to.be.calledOnce;
         });
       });
 
       it.skip('should adjust for IOS safari bottom bar', () => {
-        sandbox.stub(platform, 'isIos').returns(true);
-        sandbox.stub(platform, 'isSafari').returns(true);
+        env.sandbox.stub(platform, 'isIos').returns(true);
+        env.sandbox.stub(platform, 'isSafari').returns(true);
         return getAmpSidebar().then(sidebarElement => {
           const impl = sidebarElement.implementation_;
-          sandbox.stub(timer, 'delay').callsFake(function(callback) {
+          env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
             callback();
           });
-          const compensateIosBottombarSpy = sandbox.spy(
+          const compensateIosBottombarSpy = env.sandbox.spy(
             impl,
             'compensateIosBottombar_'
           );
@@ -492,7 +495,7 @@ describes.realWin(
             target: impl.win,
             toFake: ['Date', 'setTimeout'],
           });
-          owners.schedulePause = sandbox.spy();
+          owners.schedulePause = env.sandbox.spy();
           expect(sidebarElement.hasAttribute('open')).to.be.false;
           execute(impl, 'open');
           expect(sidebarElement.hasAttribute('open')).to.be.true;
@@ -504,7 +507,7 @@ describes.realWin(
             eventObj.initEvent('click', true, true);
           }
           const ampDoc = sidebarElement.getAmpDoc();
-          sandbox.stub(ampDoc, 'getUrl').returns(window.location.href);
+          env.sandbox.stub(ampDoc, 'getUrl').returns(window.location.href);
           anchor.dispatchEvent
             ? anchor.dispatchEvent(eventObj)
             : anchor.fireEvent('onkeydown', eventObj);
@@ -521,8 +524,8 @@ describes.realWin(
           const anchor = sidebarElement.getElementsByTagName('a')[0];
           anchor.href = '#newloc';
           const impl = sidebarElement.implementation_;
-          owners.schedulePause = sandbox.spy();
-          sandbox.stub(timer, 'delay').callsFake(function(callback) {
+          owners.schedulePause = env.sandbox.spy();
+          env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
             callback();
           });
           expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -537,7 +540,7 @@ describes.realWin(
           }
           const ampDoc = sidebarElement.getAmpDoc();
           // Mocking navigating from example.com -> localhost:9876
-          sandbox.stub(ampDoc, 'getUrl').returns('http://example.com');
+          env.sandbox.stub(ampDoc, 'getUrl').returns('http://example.com');
           anchor.dispatchEvent
             ? anchor.dispatchEvent(eventObj)
             : anchor.fireEvent('onkeydown', eventObj);
@@ -553,9 +556,9 @@ describes.realWin(
           const anchor = sidebarElement.getElementsByTagName('a')[0];
           anchor.href = '#newloc';
           const impl = sidebarElement.implementation_;
-          owners.schedulePause = sandbox.spy();
+          owners.schedulePause = env.sandbox.spy();
 
-          sandbox.stub(timer, 'delay').callsFake(function(callback) {
+          env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
             callback();
           });
           expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -570,7 +573,7 @@ describes.realWin(
           }
           const ampDoc = sidebarElement.getAmpDoc();
           // Mocking navigating from /context.html?old=context -> /context.html
-          sandbox
+          env.sandbox
             .stub(ampDoc, 'getUrl')
             .returns('http://localhost:9876/context.html?old=context');
 
@@ -588,9 +591,9 @@ describes.realWin(
         return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
           const li = sidebarElement.getElementsByTagName('li')[0];
           const impl = sidebarElement.implementation_;
-          owners.schedulePause = sandbox.spy();
+          owners.schedulePause = env.sandbox.spy();
 
-          sandbox.stub(timer, 'delay').callsFake(function(callback) {
+          env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
             callback();
           });
           expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -616,18 +619,18 @@ describes.realWin(
       it('should trigger actions on open and close', () => {
         return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
           const impl = sidebarElement.implementation_;
-          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
-          sandbox.stub(timer, 'delay').callsFake(function(callback) {
+          const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
+          env.sandbox.stub(timer, 'delay').callsFake(function(callback) {
             callback();
           });
-          owners.scheduleLayout = sandbox.stub();
+          owners.scheduleLayout = env.sandbox.stub();
 
           execute(impl, 'open', /* trust */ 123);
           expect(triggerSpy).to.be.calledOnce;
           expect(triggerSpy).to.be.calledWith(
             impl.element,
             'sidebarOpen',
-            sinon.match.any,
+            env.sandbox.match.any,
             /* trust */ 123
           );
 
@@ -636,7 +639,7 @@ describes.realWin(
           expect(triggerSpy).to.be.calledWith(
             impl.element,
             'sidebarClose',
-            sinon.match.any,
+            env.sandbox.match.any,
             /* trust */ 456
           );
         });

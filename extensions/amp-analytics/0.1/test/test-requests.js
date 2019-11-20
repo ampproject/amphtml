@@ -34,7 +34,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     installVariableServiceForTesting(ampdoc);
     ampdoc.defaultView = env.win;
     clock = lolex.install({target: ampdoc.win});
-    preconnectSpy = sandbox.spy();
+    preconnectSpy = env.sandbox.spy();
     preconnect = {
       url: preconnectSpy,
     };
@@ -61,7 +61,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     describe('send with request origin', () => {
       let spy;
       beforeEach(() => {
-        spy = sandbox.spy();
+        spy = env.sandbox.spy();
       });
 
       it('should prepend request origin', function*() {
@@ -185,7 +185,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
     describe('batch', () => {
       it('should batch multiple send', function*() {
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r2', 'batchInterval': 1};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -199,7 +199,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should work properly with no batch', function*() {
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -211,7 +211,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
       it('should preconnect', function*() {
         const r = {'baseUrl': 'r2?cid=CLIENT_ID(scope)&var=${test}'};
-        const handler = createRequestHandler(r, sandbox.spy());
+        const handler = createRequestHandler(r, env.sandbox.spy());
         const expansionOptions = new ExpansionOptions({'test': 'expanded'});
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
@@ -224,7 +224,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     describe('batch with batchInterval', () => {
       let spy;
       beforeEach(() => {
-        spy = sandbox.spy();
+        spy = env.sandbox.spy();
       });
 
       it('should support number', () => {
@@ -340,7 +340,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     describe('reportWindow', () => {
       let spy;
       beforeEach(() => {
-        spy = sandbox.spy();
+        spy = env.sandbox.spy();
       });
 
       it('should accept reportWindow with number', () => {
@@ -418,7 +418,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
     describe('batch segments', () => {
       it('should respect config extraUrlParam', function*() {
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1', 'batchInterval': 1};
         const handler = createRequestHandler(r, spy);
 
@@ -434,7 +434,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should respect trigger extraUrlParam', function*() {
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1', 'batchInterval': 1};
         const handler = createRequestHandler(r, spy);
 
@@ -469,7 +469,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should keep extraUrlParam', function*() {
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1&${extraUrlParams}&r2', 'batchInterval': 1};
         const handler = createRequestHandler(r, spy);
 
@@ -497,7 +497,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
     describe('batch plugin', () => {
       it('should throw error when defined on non batched request', () => {
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r', 'batchPlugin': '_ping_'};
         try {
           createRequestHandler(r, spy);
@@ -509,7 +509,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should throw error with unsupported batchPlugin', () => {
-        const spy = sandbox.spy();
+        const spy = env.sandbox.spy();
         const r = {
           'baseUrl': 'r',
           'batchInterval': 1,
@@ -525,13 +525,13 @@ describes.realWin('Requests', {amp: 1}, env => {
   });
 
   it('should replace dynamic bindings RESOURCE_TIMING', function*() {
-    const spy = sandbox.spy();
+    const spy = env.sandbox.spy();
     const r = {'baseUrl': 'r1&${resourceTiming}'};
     const handler = createRequestHandler(r, spy);
     const expansionOptions = new ExpansionOptions({
       'resourceTiming': 'RESOURCE_TIMING',
     });
-    sandbox
+    env.sandbox
       .stub(ResourceTiming, 'getResourceTiming')
       .returns(Promise.resolve('resource-timing'));
     handler.send({}, {}, expansionOptions);
@@ -540,7 +540,7 @@ describes.realWin('Requests', {amp: 1}, env => {
   });
 
   it('should replace dynamic bindings CONSENT_STATE', function*() {
-    const spy = sandbox.spy();
+    const spy = env.sandbox.spy();
     const r = {'baseUrl': 'r1&$CONSENT_STATEtest&${consentState}test2'};
     const handler = createRequestHandler(r, spy);
     const expansionOptions = new ExpansionOptions({
@@ -552,7 +552,7 @@ describes.realWin('Requests', {amp: 1}, env => {
   });
 
   it('COOKIE read cookie value', function*() {
-    const spy = sandbox.spy();
+    const spy = env.sandbox.spy();
     const r = {'baseUrl': 'r1&c1=COOKIE(test)&c2=${cookie(test)}'};
     let handler = createRequestHandler(r, spy);
     const expansionOptions = new ExpansionOptions({

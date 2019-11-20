@@ -37,9 +37,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     storageValue = {};
-    storageGetSpy = sandbox.spy();
-    storageSetSpy = sandbox.spy();
-    storageRemoveSpy = sandbox.spy();
+    storageGetSpy = env.sandbox.spy();
+    storageSetSpy = env.sandbox.spy();
+    storageRemoveSpy = env.sandbox.spy();
 
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function() {
@@ -169,7 +169,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
       beforeEach(() => {
         manager.registerConsentInstance('test', {});
-        spy = sandbox.spy();
+        spy = env.sandbox.spy();
       });
 
       it('should call handler when consent state changes', () => {
@@ -385,7 +385,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       let requestBody;
       let requestSpy;
       beforeEach(() => {
-        requestSpy = sandbox.spy();
+        requestSpy = env.sandbox.spy();
         resetServiceForTesting(win, 'xhr');
         registerServiceBuilder(win, 'xhr', function() {
           return {
@@ -603,7 +603,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           const e = new Error('intentional');
           throw e;
         };
-        sandbox.stub(dev(), 'error');
+        env.sandbox.stub(dev(), 'error');
         storageValue['amp-consent:test'] = true;
         return instance.get().then(value => {
           expect(value).to.deep.equal(

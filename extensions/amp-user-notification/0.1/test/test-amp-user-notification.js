@@ -67,10 +67,10 @@ describes.realWin(
         Services.storageForDoc(el),
       ]).then(services => {
         const userNotificationManager = services[0];
-        sandbox.stub(userNotificationManager, 'registerUserNotification');
+        env.sandbox.stub(userNotificationManager, 'registerUserNotification');
 
         const storage = services[1];
-        storageMock = sandbox.mock(storage);
+        storageMock = env.sandbox.mock(storage);
       });
     });
 
@@ -217,7 +217,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
 
-      sandbox.stub(impl, 'getAsyncCid_').throws();
+      env.sandbox.stub(impl, 'getAsyncCid_').throws();
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
@@ -241,10 +241,10 @@ describes.realWin(
         .returns(Promise.resolve(true))
         .never();
 
-      const cidStub = sandbox
+      const cidStub = env.sandbox
         .stub(impl, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-      const showEndpointStub = sandbox
+      const showEndpointStub = env.sandbox
         .stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
@@ -289,10 +289,10 @@ describes.realWin(
         .returns(Promise.resolve(false))
         .once();
 
-      const cidStub = sandbox
+      const cidStub = env.sandbox
         .stub(impl, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-      const showEndpointStub = sandbox
+      const showEndpointStub = env.sandbox
         .stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
@@ -315,10 +315,10 @@ describes.realWin(
         .returns(Promise.resolve(false))
         .once();
 
-      const cidStub = sandbox
+      const cidStub = env.sandbox
         .stub(impl, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-      const showEndpointStub = sandbox
+      const showEndpointStub = env.sandbox
         .stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: false}));
 
@@ -335,7 +335,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
 
-      sandbox.stub(impl, 'getAsyncCid_').throws();
+      env.sandbox.stub(impl, 'getAsyncCid_').throws();
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
@@ -361,10 +361,10 @@ describes.realWin(
         .returns(Promise.reject('intentional'))
         .once();
 
-      const cidStub = sandbox
+      const cidStub = env.sandbox
         .stub(impl, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-      const showEndpointStub = sandbox
+      const showEndpointStub = env.sandbox
         .stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
@@ -384,7 +384,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
 
-      sandbox.stub(impl, 'getAsyncCid_').throws();
+      env.sandbox.stub(impl, 'getAsyncCid_').throws();
       storageMock
         .expects('get')
         .withExactArgs('amp-user-notification:n1')
@@ -406,7 +406,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1', true)
         .returns(Promise.resolve())
         .once();
-      const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
+      const postDismissStub = env.sandbox.stub(impl, 'postDismissEnpoint_');
 
       impl.dismiss();
       expect(postDismissStub).to.be.calledOnce;
@@ -425,7 +425,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1', true)
         .returns(Promise.resolve())
         .once();
-      const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
+      const postDismissStub = env.sandbox.stub(impl, 'postDismissEnpoint_');
 
       impl.dismiss();
       expect(postDismissStub).to.have.not.been.called;
@@ -445,7 +445,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1', true)
         .returns(Promise.resolve())
         .never();
-      const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
+      const postDismissStub = env.sandbox.stub(impl, 'postDismissEnpoint_');
 
       impl.dismiss();
       expect(postDismissStub).to.be.calledOnce;
@@ -587,7 +587,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1', true)
         .returns(Promise.resolve())
         .never();
-      const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
+      const postDismissStub = env.sandbox.stub(impl, 'postDismissEnpoint_');
 
       impl.dismiss();
       expect(postDismissStub).to.be.calledOnce;
@@ -597,10 +597,10 @@ describes.realWin(
     });
 
     it('should have class `amp-active`', () => {
-      sandbox
+      env.sandbox
         .stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-      sandbox
+      env.sandbox
         .stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
@@ -608,7 +608,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
       impl.dialogPromise_ = Promise.resolve();
-      const addToFixedLayerStub = sandbox.stub(
+      const addToFixedLayerStub = env.sandbox.stub(
         impl.getViewport(),
         'addToFixedLayer'
       );
@@ -626,10 +626,10 @@ describes.realWin(
     });
 
     it('should not have `amp-active`', () => {
-      sandbox
+      env.sandbox
         .stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-      sandbox
+      env.sandbox
         .stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: false}));
 
@@ -651,13 +651,13 @@ describes.realWin(
     });
 
     it('should have `amp-hidden` and no `amp-active`', () => {
-      sandbox
+      env.sandbox
         .stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-      sandbox
+      env.sandbox
         .stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
-      const stub2 = sandbox
+      const stub2 = env.sandbox
         .stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
         .returns(Promise.resolve());
 
@@ -666,7 +666,7 @@ describes.realWin(
       impl.buildCallback();
       impl.dialogPromise_ = Promise.resolve();
       impl.dialogResolve_ = function() {};
-      const removeFromFixedLayerStub = sandbox.stub(
+      const removeFromFixedLayerStub = env.sandbox.stub(
         impl.getViewport(),
         'removeFromFixedLayer'
       );
@@ -798,13 +798,13 @@ describes.realWin(
           resolve2 = resolve;
         });
 
-        const show1 = sandbox.stub(tag, 'show').callsFake(() => {
+        const show1 = env.sandbox.stub(tag, 'show').callsFake(() => {
           return s1;
         });
-        const show2 = sandbox.stub(tag1, 'show').callsFake(() => {
+        const show2 = env.sandbox.stub(tag1, 'show').callsFake(() => {
           return s2;
         });
-        const show3 = sandbox.spy(tag2, 'show');
+        const show3 = env.sandbox.spy(tag2, 'show');
 
         service.registerUserNotification('n1', tag);
         service.registerUserNotification('n2', tag1);
@@ -843,7 +843,7 @@ describes.realWin(
       let optOutOfCidStub;
 
       beforeEach(() => {
-        optOutOfCidStub = sandbox.spy(cidMock, 'optOut');
+        optOutOfCidStub = env.sandbox.spy(cidMock, 'optOut');
       });
 
       it('should call cid.optOut() and dismiss', () => {
@@ -854,7 +854,7 @@ describes.realWin(
         impl.getCidService_ = () => {
           return Promise.resolve(cidMock);
         };
-        dismissSpy = sandbox.spy(impl, 'dismiss');
+        dismissSpy = env.sandbox.spy(impl, 'dismiss');
 
         return impl.optoutOfCid_().then(() => {
           expect(dismissSpy).to.be.calledWithExactly(false);
@@ -874,7 +874,7 @@ describes.realWin(
         impl.getCidService_ = () => {
           return Promise.resolve(cidMock);
         };
-        dismissSpy = sandbox.spy(impl, 'dismiss');
+        dismissSpy = env.sandbox.spy(impl, 'dismiss');
 
         return impl.optoutOfCid_().then(() => {
           expect(dismissSpy).to.be.calledWithExactly(true);

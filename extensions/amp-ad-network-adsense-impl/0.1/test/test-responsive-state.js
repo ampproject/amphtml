@@ -66,10 +66,10 @@ describes.realWin(
       };
       const storage = await Services.storageForDoc(doc);
       storageContent = {};
-      sandbox.stub(storage, 'get').callsFake(key => {
+      env.sandbox.stub(storage, 'get').callsFake(key => {
         return Promise.resolve(storageContent[key]);
       });
-      sandbox.stub(storage, 'set').callsFake((key, value) => {
+      env.sandbox.stub(storage, 'set').callsFake((key, value) => {
         storageContent[key] = value;
         return Promise.resolve();
       });

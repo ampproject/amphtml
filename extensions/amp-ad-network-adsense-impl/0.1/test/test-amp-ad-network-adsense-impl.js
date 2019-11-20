@@ -67,13 +67,13 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-      sandbox
+      env.sandbox
         .stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames')
         .callsFake(() => {
           return ['google'];
         });
       viewer = win.__AMP_SERVICES.viewer.obj;
-      sandbox
+      env.sandbox
         .stub(viewer, 'getReferrerUrl')
         .callsFake(() => Promise.resolve('https://acme.org/'));
       element = createAdsenseImplElement(
@@ -85,11 +85,11 @@ describes.realWin(
         },
         doc
       );
-      sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
+      env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.win['goog_identity_prom'] = Promise.resolve({});
-      sandbox.stub(Services, 'timerFor').returns({
+      env.sandbox.stub(Services, 'timerFor').returns({
         timeoutPromise: (unused, promise) => {
           if (promise) {
             return promise;
@@ -116,7 +116,7 @@ describes.realWin(
       // amp-ad.
       const iframe = doc.createElement('iframe');
       element.appendChild(iframe);
-      sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
+      env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.buildCallback();
@@ -201,9 +201,9 @@ describes.realWin(
           'layout': 'fixed',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
-        sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
         const extensions = Services.extensionsFor(impl.win);
-        preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
+        preloadExtensionSpy = env.sandbox.spy(extensions, 'preloadExtension');
       });
 
       it('without analytics', () => {
@@ -276,8 +276,10 @@ describes.realWin(
         impl = new AmpAdNetworkAdsenseImpl(element);
         impl.getA4aAnalyticsConfig = () => {};
         impl.buildCallback();
-        sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
-        sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox
+          .stub(env.ampdocService, 'getAmpDoc')
+          .callsFake(() => ampdoc);
       });
 
       [true, false].forEach(exp => {
@@ -377,13 +379,13 @@ describes.realWin(
         const ev1 = new Event('click', {bubbles: true});
         ev1.pageX = 10;
         ev1.pageY = 20;
-        sandbox.stub(impl, 'getResource').returns({
+        env.sandbox.stub(impl, 'getResource').returns({
           getUpgradeDelayMs: () => 1,
         });
 
         // Make sure the ad iframe (FIE) has a local URL replacements service.
         const urlReplacements = Services.urlReplacementsForDoc(element);
-        sandbox
+        env.sandbox
           .stub(Services, 'urlReplacementsForDoc')
           .withArgs(a)
           .returns(urlReplacements);
@@ -416,7 +418,7 @@ describes.realWin(
         const ev1 = new Event('click', {bubbles: true});
         ev1.pageX = 10;
         ev1.pageY = 20;
-        sandbox.stub(impl, 'getResource').returns({
+        env.sandbox.stub(impl, 'getResource').returns({
           getUpgradeDelayMs: () => 1,
         });
         impl.buildCallback();
@@ -447,7 +449,7 @@ describes.realWin(
           promiseResolver = resolve;
         });
         const storageContent = {};
-        sandbox.stub(storage, 'set').callsFake((key, value) => {
+        env.sandbox.stub(storage, 'set').callsFake((key, value) => {
           storageContent[key] = value;
           promiseResolver();
           return Promise.resolve();
@@ -669,7 +671,7 @@ describes.realWin(
           .then(url => expect(url).to.match(/eid=[^&]*21062003/));
       });
       it('returns the right URL', () => {
-        sandbox.stub(impl, 'isXhrAllowed').returns(true);
+        env.sandbox.stub(impl, 'isXhrAllowed').returns(true);
         element.setAttribute('data-ad-slot', 'some_slot');
         element.setAttribute('data-language', 'lxz');
         return impl.getAdUrl().then(url => {
@@ -736,7 +738,7 @@ describes.realWin(
           });
         });
         it('sets appropriate is_amp for canonical', () => {
-          sandbox.stub(impl, 'isXhrAllowed').returns(false);
+          env.sandbox.stub(impl, 'isXhrAllowed').returns(false);
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)is_amp=5(&|$)/
           );
@@ -1009,7 +1011,7 @@ describes.realWin(
           const storage = await Services.storageForDoc(doc);
           const storageContent = {'aas-ca-adsense': true};
 
-          sandbox.stub(storage, 'get').callsFake(key => {
+          env.sandbox.stub(storage, 'get').callsFake(key => {
             return Promise.resolve(storageContent[key]);
           });
         });
@@ -1083,7 +1085,7 @@ describes.realWin(
           const storage = await Services.storageForDoc(doc);
           const storageContent = {'aas-ca-adsense': false};
 
-          sandbox.stub(storage, 'get').callsFake(key => {
+          env.sandbox.stub(storage, 'get').callsFake(key => {
             return Promise.resolve(storageContent[key]);
           });
         });
@@ -1234,7 +1236,7 @@ describes.realWin(
 
     describe('#preconnect', () => {
       it('should preload nameframe', () => {
-        const preloadSpy = sandbox.spy(Preconnect.prototype, 'preload');
+        const preloadSpy = env.sandbox.spy(Preconnect.prototype, 'preload');
         expect(impl.getPreconnectUrls()).to.deep.equal([
           'https://googleads.g.doubleclick.net',
         ]);
@@ -1269,7 +1271,7 @@ describes.realWin(
 
     describe('#checksumVerification', () => {
       it('should call super if missing Algorithm header', () => {
-        sandbox
+        env.sandbox
           .stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
           .returns(Promise.resolve('foo'));
         const creative = '<html><body>This is some text</body></html>';

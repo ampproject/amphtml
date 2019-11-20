@@ -25,12 +25,10 @@ import {user} from '../../../../src/log';
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
   let win;
   let doc;
-  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    sandbox = env.sandbox;
   });
 
   afterEach(() => {
@@ -895,7 +893,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         {'type': 'test-vendor', 'id': 'analyticsId'}
       );
       const usrObj = user();
-      const spy = sandbox.spy(usrObj, 'warn');
+      const spy = env.sandbox.spy(usrObj, 'warn');
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(spy).callCount(1);
@@ -924,7 +922,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         {'type': 'test-vendor', 'id': 'analyticsId'}
       );
       const usrObj = user();
-      const spy = sandbox.spy(usrObj, 'warn');
+      const spy = env.sandbox.spy(usrObj, 'warn');
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(spy).callCount(1);
@@ -946,7 +944,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       );
 
       const usrObj = user();
-      const spy = sandbox.spy(usrObj, 'warn');
+      const spy = env.sandbox.spy(usrObj, 'warn');
       const xhrStub = stubXhr();
       xhrStub.returns(
         Promise.resolve({
@@ -990,7 +988,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   function stubXhr() {
     installDocService(win, true);
 
-    const expandStringStub = sandbox.stub();
+    const expandStringStub = env.sandbox.stub();
     expandStringStub.withArgs('CLIENT_ID(foo)').resolves('amp12345');
     expandStringStub.resolvesArg(0);
 
@@ -998,15 +996,18 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       a: 'b',
     };
     expandStringStub.withArgs('$NOT(foo)', macros).resolves('false');
-    stubService(sandbox, win, 'amp-analytics-variables', 'getMacros').returns(
-      macros
-    );
+    stubService(
+      env.sandbox,
+      win,
+      'amp-analytics-variables',
+      'getMacros'
+    ).returns(macros);
 
-    sandbox.stub(Services, 'urlReplacementsForDoc').returns({
+    env.sandbox.stub(Services, 'urlReplacementsForDoc').returns({
       'expandUrlAsync': url => Promise.resolve(url),
       'expandStringAsync': expandStringStub,
     });
 
-    return stubService(sandbox, win, 'xhr', 'fetchJson');
+    return stubService(env.sandbox, win, 'xhr', 'fetchJson');
   }
 });

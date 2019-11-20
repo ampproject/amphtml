@@ -42,7 +42,6 @@ describes.fakeWin(
   },
   env => {
     let win;
-    let sandbox;
     let clock;
     let ampdocService;
     let ampdocServiceMock;
@@ -50,8 +49,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
-      sandbox = env.sandbox;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       extensionElementIndex = 0;
       ampdocService = {
         isSingleDoc: () => true,
@@ -59,7 +57,7 @@ describes.fakeWin(
         getAmpDoc: () => null,
         installShadowDoc_: () => null,
       };
-      ampdocServiceMock = sandbox.mock(ampdocService);
+      ampdocServiceMock = env.sandbox.mock(ampdocService);
       win.AMP = [];
       win.__AMP_SERVICES = {
         ampdoc: {obj: ampdocService},
@@ -124,21 +122,21 @@ describes.fakeWin(
 
     it('should NOT set cursor:pointer on document element on non-IOS', () => {
       const platform = Services.platformFor(win);
-      sandbox.stub(platform, 'isIos').returns(false);
+      env.sandbox.stub(platform, 'isIos').returns(false);
       adopt(win);
       expect(win.document.documentElement.style.cursor).to.not.be.ok;
     });
 
     it('should set cursor:pointer on document element on IOS', () => {
       const platform = Services.platformFor(win);
-      sandbox.stub(platform, 'isIos').returns(true);
+      env.sandbox.stub(platform, 'isIos').returns(true);
       adopt(win);
       expect(win.document.documentElement.style.cursor).to.equal('pointer');
     });
 
     it('should set cursor:pointer on IOS in shadow-doc', () => {
       const platform = Services.platformFor(win);
-      sandbox.stub(platform, 'isIos').returns(true);
+      env.sandbox.stub(platform, 'isIos').returns(true);
       adoptShadowMode(win);
       expect(win.document.documentElement.style.cursor).to.equal('pointer');
     });
@@ -208,7 +206,7 @@ describes.fakeWin(
       // JS executing before the rest of the doc has been parsed.
       const {body} = win.document;
       let accessedOnce = false;
-      sandbox.defineProperty(win.document, 'body', {
+      env.sandbox.defineProperty(win.document, 'body', {
         get: () => {
           if (accessedOnce) {
             return body;
@@ -476,7 +474,9 @@ describes.fakeWin(
       const bodyPromise = new Promise(resolve => {
         bodyResolver = resolve;
       });
-      sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => bodyPromise);
+      env.sandbox
+        .stub(dom, 'waitForBodyOpenPromise')
+        .callsFake(() => bodyPromise);
 
       function skipMicro() {
         return Promise.resolve().then(() => Promise.resolve());
@@ -554,7 +554,9 @@ describes.fakeWin(
       const bodyPromise = new Promise(resolve => {
         bodyResolver = resolve;
       });
-      sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => bodyPromise);
+      env.sandbox
+        .stub(dom, 'waitForBodyOpenPromise')
+        .callsFake(() => bodyPromise);
 
       function skipMicro() {
         return Promise.resolve().then(() => Promise.resolve());
@@ -701,7 +703,10 @@ describes.fakeWin(
       it('should register element without CSS', function*() {
         const ampdoc = ampdocService.getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
-        const installStylesStub = sandbox.stub(styles, 'installStylesForDoc');
+        const installStylesStub = env.sandbox.stub(
+          styles,
+          'installStylesForDoc'
+        );
 
         ampdoc.declareExtension('amp-ext');
         win.AMP.push({
@@ -739,7 +744,7 @@ describes.fakeWin(
         const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
         const servicePromise = getServicePromise(win, 'amp-ext');
         let installStylesCallback;
-        const installStylesStub = sandbox
+        const installStylesStub = env.sandbox
           .stub(styles, 'installStylesForDoc')
           .callsFake((doc, cssText, cb) => {
             installStylesCallback = cb;
@@ -872,7 +877,10 @@ describes.fakeWin(
 
       it('should register element without CSS', function*() {
         const servicePromise = getServicePromise(win, 'amp-ext');
-        const installStylesStub = sandbox.stub(styles, 'installStylesForDoc');
+        const installStylesStub = env.sandbox.stub(
+          styles,
+          'installStylesForDoc'
+        );
 
         win.AMP.push({
           n: 'amp-ext',
@@ -915,7 +923,7 @@ describes.fakeWin(
       it('should register element with CSS', function*() {
         const servicePromise = getServicePromise(win, 'amp-ext');
         let installStylesCallback;
-        const installStylesStub = sandbox
+        const installStylesStub = env.sandbox
           .stub(styles, 'installStylesForDoc')
           .callsFake((doc, cssText, cb) => {
             installStylesCallback = cb;
@@ -1012,7 +1020,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       extensions = env.extensions;
-      extensionsMock = sandbox.mock(extensions);
+      extensionsMock = env.sandbox.mock(extensions);
       ampdocService = env.ampdocService;
     });
 
@@ -1030,21 +1038,21 @@ describes.realWin(
 
       beforeEach(() => {
         deactivateChunking();
-        clock = sandbox.useFakeTimers();
+        clock = env.sandbox.useFakeTimers();
         hostElement = win.document.createElement('div');
         importDoc = win.document.implementation.createHTMLDocument('');
         importDoc.body.appendChild(win.document.createElement('child'));
         createShadowRoot(hostElement);
         ampdoc = null;
 
-        sandbox
+        env.sandbox
           .stub(ampdocService, 'installShadowDoc')
           .callsFake((url, shadowRoot, options) => {
             expect(url).to.equal(docUrl);
             expect(shadowRoot).to.equal(getShadowRoot(hostElement));
             return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
           });
-        sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+        env.sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
           expect(node).to.equal(getShadowRoot(hostElement));
           return ampdoc;
         });
@@ -1364,7 +1372,7 @@ describes.realWin(
         expect(amp.close).to.be.a('function');
         expect(ampdoc.getVisibilityState()).to.equal('visible');
 
-        viewer.dispose = sandbox.spy();
+        viewer.dispose = env.sandbox.spy();
         amp.close().then(() => {
           expect(ampdoc.getVisibilityState()).to.equal('inactive');
           expect(viewer.dispose).to.be.calledOnce;
@@ -1397,14 +1405,14 @@ describes.realWin(
           createShadowRoot(hostElement);
           ampdoc = null;
 
-          sandbox
+          env.sandbox
             .stub(ampdocService, 'installShadowDoc')
             .callsFake((url, shadowRoot, options) => {
               expect(url).to.equal(docUrl);
               expect(shadowRoot).to.equal(getShadowRoot(hostElement));
               return (ampdoc = new AmpDocShadow(win, url, shadowRoot, options));
             });
-          sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
+          env.sandbox.stub(ampdocService, 'getAmpDoc').callsFake(node => {
             expect(node).to.equal(getShadowRoot(hostElement));
             return ampdoc;
           });
@@ -1766,7 +1774,7 @@ describes.realWin(
             expect(shadowDoc.close).to.be.a('function');
             expect(ampdoc.getVisibilityState()).to.equal('visible');
 
-            viewer.dispose = sandbox.spy();
+            viewer.dispose = env.sandbox.spy();
             shadowDoc.close().then(() => {
               expect(ampdoc.getVisibilityState()).to.equal('inactive');
               expect(viewer.dispose).to.be.calledOnce;
@@ -1786,13 +1794,13 @@ describes.realWin(
         let ampdocServiceMock;
 
         beforeEach(() => {
-          ampdocServiceMock = sandbox.mock(env.ampdocService);
+          ampdocServiceMock = env.sandbox.mock(env.ampdocService);
 
           if (isStubbedDocumentContains) {
             // Some browsers implement document.contains wrong, and it returns
             // `false` even when this is incorrect. Repeat these tests with the
             // faulty implementation.
-            sandbox.stub(win.document, 'contains').returns(false);
+            env.sandbox.stub(win.document, 'contains').returns(false);
           }
 
           doc1 = attach('https://example.org/doc1');
@@ -1815,23 +1823,23 @@ describes.realWin(
             .expects('installShadowDoc')
             .withArgs(
               docUrl,
-              sinon.match(arg => arg == getShadowRoot(hostElement))
+              env.sandbox.match(arg => arg == getShadowRoot(hostElement))
             )
             .returns(ampdoc)
             .atLeast(0);
           ampdocServiceMock
             .expects('getAmpDoc')
             .withExactArgs(
-              sinon.match(arg => arg == getShadowRoot(hostElement))
+              env.sandbox.match(arg => arg == getShadowRoot(hostElement))
             )
             .returns(ampdoc)
             .atLeast(0);
 
           const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
           const viewer = getServiceForDoc(ampdoc, 'viewer');
-          const broadcastReceived = sandbox.spy();
+          const broadcastReceived = env.sandbox.spy();
           viewer.onBroadcast(broadcastReceived);
-          const onMessage = sandbox.stub();
+          const onMessage = env.sandbox.stub();
           amp.onMessage(function(eventType, data) {
             if (eventType == 'ignore') {
               return Promise.resolve();

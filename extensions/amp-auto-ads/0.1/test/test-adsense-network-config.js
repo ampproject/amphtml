@@ -71,7 +71,7 @@ describes.realWin(
           'http://foo.bar/a'.repeat(4050) + 'shouldnt_be_included';
 
         const docInfo = Services.documentInfoForDoc(ampAutoAdsElem);
-        sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);
+        env.sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);
 
         const url = adNetwork.getConfigUrl();
         expect(url).to.contain('ama_t=amp');
@@ -99,7 +99,7 @@ describes.realWin(
       });
 
       it('should get the default ad constraints', () => {
-        const viewportMock = sandbox.mock(
+        const viewportMock = env.sandbox.mock(
           Services.viewportForDoc(env.win.document)
         );
         viewportMock
