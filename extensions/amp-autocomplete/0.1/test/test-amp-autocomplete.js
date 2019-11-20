@@ -16,6 +16,7 @@
 
 import '../amp-autocomplete';
 import {Keys} from '../../../../src/utils/key-codes';
+import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin(
   'amp-autocomplete unit tests',
@@ -52,6 +53,17 @@ describes.realWin(
         impl = element.implementation_;
       });
     });
+
+    function getRenderedSuggestions() {
+      const html = htmlFor(doc);
+      return html`
+        <div>
+          <div data-value="apple"></div>
+          <div data-value="mango"></div>
+          <div data-value="pear"></div>
+        </div>
+      `;
+    }
 
     describe('mutatedAttributesCallback_()', () => {
       let remoteDataSpy;
@@ -235,85 +247,73 @@ describes.realWin(
       });
     });
 
-    it('getRemoteData_() should proxy XHR to viewer', () => {
-      impl.isSsr_ = true;
-      impl.element.setAttribute('src', '');
-      const html =
-        '<div> <div>apple</div> <div>mango</div> <div>pear</div> </div>';
-      env.sandbox
-        .stub(impl.ssrTemplateHelper_, 'ssr')
-        .returns(Promise.resolve({html}));
-      return impl.getRemoteData_().then(() => {
+    describe('getRemoteData_()', () => {
+      it('should proxy XHR to viewer', async () => {
+        impl.isSsr_ = true;
+        impl.element.setAttribute('src', '');
+        const html =
+          '<div> <div>apple</div> <div>mango</div> <div>pear</div> </div>';
+        env.sandbox
+          .stub(impl.ssrTemplateHelper_, 'ssr')
+          .returns(Promise.resolve({html}));
+        await impl.getRemoteData_();
         expect(impl.ssrTemplateHelper_.ssr).to.be.calledOnce;
       });
     });
 
-    it('renderResults() should delegate template rendering to viewer', () => {
-      impl.hasTemplate_ = true;
-      const items = ['apple', 'mango', 'pear'];
-      const html =
-        '<div> <div>apple</div> <div>mango</div> <div>pear</div> </div>';
-      const sourceData = {html};
-      const rendered = doc.createElement('div');
-      items.forEach(item => {
-        const child = doc.createElement('div');
-        child.setAttribute('data-value', item);
-        rendered.appendChild(child);
-      });
-      env.sandbox
-        .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
-        .returns(Promise.resolve(rendered));
-      return impl.renderResults_(sourceData, impl.container_).then(() => {
+    describe('renderResults()', () => {
+      it('should delegate template rendering to viewer', async () => {
+        impl.hasTemplate_ = true;
+        const data = ['apple', 'mango', 'pear'];
+        env.sandbox
+          .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
+          .returns(Promise.resolve(getRenderedSuggestions()));
+        await impl.renderResults_(data, impl.container_);
         expect(impl.ssrTemplateHelper_.applySsrOrCsrTemplate).to.be.calledOnce;
         expect(
           impl.ssrTemplateHelper_.applySsrOrCsrTemplate
-        ).to.have.been.calledWith(impl.element, sourceData);
+        ).to.have.been.calledWith(impl.element, data);
         expect(impl.container_.children[0].getAttribute('data-value')).to.equal(
-          'apple'
+          data[0]
         );
         expect(impl.container_.children[1].getAttribute('data-value')).to.equal(
-          'mango'
+          data[1]
         );
         expect(impl.container_.children[2].getAttribute('data-value')).to.equal(
-          'pear'
+          data[2]
         );
         expect(impl.container_.children.length).to.equal(3);
       });
-    });
 
-    it('renderResults_() should update the container_ with plain text', () => {
-      const createSpy = env.sandbox.spy(impl, 'createElementFromItem_');
-      return impl.renderResults_(['apple'], impl.container_).then(() => {
+      it('should update the container_ with plain text', async () => {
+        const createSpy = env.sandbox.spy(impl, 'createElementFromItem_');
+        await impl.renderResults_(['apple'], impl.container_);
         expect(impl.container_.children.length).to.equal(1);
         expect(impl.container_.children[0].innerText).to.equal('apple');
         expect(createSpy).to.have.been.calledOnce;
         expect(createSpy).to.have.been.calledWith('apple');
       });
-    });
 
-    it('renderResults_() should update the container_ with rich text', () => {
-      const sourceData = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
-      impl.hasTemplate_ = true;
-      const renderedChildren = [];
-      sourceData.forEach(item => {
-        const renderedChild = doc.createElement('div');
-        renderedChild.setAttribute('data-value', item.value);
-        renderedChildren.push(renderedChild);
-      });
-      const renderTemplateSpy = sandbox
-        .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
-        .returns(Promise.resolve(renderedChildren));
-
-      return impl.renderResults_(sourceData, impl.container_).then(() => {
+      it('should update the container_ with rich text', async () => {
+        const sourceData = [
+          {value: 'apple'},
+          {value: 'mango'},
+          {value: 'pear'},
+        ];
+        impl.hasTemplate_ = true;
+        const renderTemplateSpy = env.sandbox
+          .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
+          .returns(Promise.resolve(getRenderedSuggestions()));
+        await impl.renderResults_(sourceData, impl.container_);
         expect(impl.container_.children.length).to.equal(3);
         expect(impl.container_.children[0].getAttribute('data-value')).to.equal(
-          'apple'
+          sourceData[0].value
         );
         expect(impl.container_.children[1].getAttribute('data-value')).to.equal(
-          'mango'
+          sourceData[1].value
         );
         expect(impl.container_.children[2].getAttribute('data-value')).to.equal(
-          'pear'
+          sourceData[2].value
         );
         expect(renderTemplateSpy).to.have.been.calledOnce;
       });
@@ -922,25 +922,21 @@ describes.realWin(
       expect(impl.selectItem_(disabledItem)).to.be.undefined;
     });
 
-    it('should not return disabled items from getEnabledItems_()', () => {
+    it('should not return disabled items from getEnabledItems_()', async () => {
       impl.hasTemplate_ = true;
       const sourceData = ['apple', 'mango', 'pear'];
-      const renderedChildren = sourceData.map(item => {
-        const renderedChild = doc.createElement('div');
-        renderedChild.setAttribute('data-value', item);
-        return renderedChild;
-      });
-      renderedChildren[2].setAttribute('data-disabled', '');
+      const rendered = getRenderedSuggestions();
+      rendered.children[2].removeAttribute('data-value', '');
+      rendered.children[2].setAttribute('data-disabled', '');
       env.sandbox
         .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
-        .returns(Promise.resolve(renderedChildren));
+        .returns(Promise.resolve(rendered));
 
-      return impl.renderResults_(sourceData, impl.container_).then(() => {
-        expect(impl.container_.children.length).to.equal(3);
-        expect(impl.getEnabledItems_().length).to.equal(2);
-        expect(impl.container_.children[2].hasAttribute('aria-disabled')).to.be
-          .true;
-      });
+      await impl.renderResults_(sourceData, impl.container_);
+      expect(impl.container_.children.length).to.equal(3);
+      expect(impl.getEnabledItems_().length).to.equal(2);
+      expect(impl.container_.children[2].hasAttribute('aria-disabled')).to.be
+        .true;
     });
 
     describe('fallback on error', () => {
