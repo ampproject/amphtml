@@ -329,6 +329,9 @@ export class AmpStoryEmbeddedComponent {
       }
     );
 
+    /** @type {!../../../src/service/history-impl.History} */
+    this.historyService_ = Services.historyForDoc(this.storyEl_);
+
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
 
@@ -406,6 +409,7 @@ export class AmpStoryEmbeddedComponent {
         this.onFocusedStateUpdate_(null);
         this.scheduleEmbedToPause_(component.element);
         this.toggleExpandedView_(component.element);
+        this.historyService_.push(() => this.close_());
         break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
@@ -487,14 +491,7 @@ export class AmpStoryEmbeddedComponent {
       (target && matches(target, '.i-amphtml-expanded-view-close-button')) ||
       forceClose
     ) {
-      // Target is expanded and going into hidden mode.
-      this.close_();
-      this.toggleExpandedView_(null);
-      this.tooltip_.removeEventListener(
-        'click',
-        this.expandComponentHandler_,
-        true /** capture */
-      );
+      this.historyService_.goBack();
     }
   }
 
@@ -544,6 +541,13 @@ export class AmpStoryEmbeddedComponent {
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
+
+    this.toggleExpandedView_(null);
+    this.tooltip_.removeEventListener(
+      'click',
+      this.expandComponentHandler_,
+      true /** capture */
+    );
   }
 
   /**
