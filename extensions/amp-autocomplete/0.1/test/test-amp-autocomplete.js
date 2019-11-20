@@ -240,7 +240,7 @@ describes.realWin(
       impl.element.setAttribute('src', '');
       const html =
         '<div> <div>apple</div> <div>mango</div> <div>pear</div> </div>';
-      sandbox
+      env.sandbox
         .stub(impl.ssrTemplateHelper_, 'ssr')
         .returns(Promise.resolve({html}));
       return impl.getRemoteData_().then(() => {
@@ -260,7 +260,7 @@ describes.realWin(
         child.setAttribute('data-value', item);
         rendered.appendChild(child);
       });
-      sandbox
+      env.sandbox
         .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(rendered));
       return impl.renderResults_(sourceData, impl.container_).then(() => {
@@ -931,7 +931,7 @@ describes.realWin(
         return renderedChild;
       });
       renderedChildren[2].setAttribute('data-disabled', '');
-      sandbox
+      env.sandbox
         .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(renderedChildren));
 
