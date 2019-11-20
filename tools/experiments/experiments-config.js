@@ -68,13 +68,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
   },
   {
-    id: 'amp-consent-ccpa',
-    name: 'AMP consent modified to support CCPA',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
-  },
-  {
     id: 'amp-nested-menu',
     name: 'AMP extension for a nested drilldown menu',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25343',
