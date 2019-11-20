@@ -19,6 +19,7 @@ const {
   verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
+// TODO(wg-analytics, #25105) flaky test.
 module.exports = {
   'flaky': true,
   'accept consent': async (page, name) => {
