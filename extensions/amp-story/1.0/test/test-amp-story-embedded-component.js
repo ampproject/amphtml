@@ -79,7 +79,10 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
       clientY: 50,
     };
 
-    analyticsTriggerStub = sandbox.stub(analyticsApi, 'triggerAnalyticsEvent');
+    analyticsTriggerStub = env.sandbox.stub(
+      analyticsApi,
+      'triggerAnalyticsEvent'
+    );
     storeService = getStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
   });
