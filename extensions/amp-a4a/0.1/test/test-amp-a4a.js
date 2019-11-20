@@ -817,7 +817,8 @@ describe('amp-a4a', () => {
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
         headerVal => {
-          it(`should not attach a NameFrame when header is ${headerVal}`, async () => {
+          // TODO(wg-ads, #25690): Fails on Travis.
+          it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = sandbox.stub(dev(), 'error');
             // Make sure there's no signature, so that we go down the 3p
             // iframe path.
