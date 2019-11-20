@@ -276,10 +276,15 @@ export PERCY_TOKEN="<unique-percy-token>"
 
 Once the environment variable is set up, you can run the AMP visual diff tests.
 
-First, build the AMP runtime and run the gulp task that invokes the visual diff script:
+First, build the AMP runtime:
 
 ```sh
 gulp dist --fortesting
+```
+
+Next, run the `gulp` task that invokes the visual diff tests:
+
+```sh
 gulp visual-diff --nobuild
 ```
 
@@ -291,6 +296,12 @@ To see debugging info during Percy runs, you can run:
 
 ```sh
  gulp visual-diff --chrome_debug --webserver_debug
+```
+
+To run tests without uploading snapshots to Percy, you can run:
+
+```sh
+gulp visual-diff --percy_disabled
 ```
 
 The debug flags `--chrome_debug` and `--webserver_debug` can be used independently. To enable both debug flags, you can also run:
