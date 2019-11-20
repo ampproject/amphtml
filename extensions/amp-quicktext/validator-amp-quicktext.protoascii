@@ -30,7 +30,23 @@ tags: {  # <amp-quicktext>
   requires_extension: "amp-quicktext"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-quicktext"
+  attrs: {
+    name: "license"
+    mandatory: true
+  }
+  attrs: {
+    name: "lang"
+    mandatory: false
+  }
+  attrs: {
+    name: "url"
+    mandatory: false
+  }
+  attrs: {
+    name: "tags"
+    mandatory: false
+  }
   amp_layout: {
-    supported_layouts: RESPONSIVE
+    supported_layouts: NODISPLAY
   }
 }

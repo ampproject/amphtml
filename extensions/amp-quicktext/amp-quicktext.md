@@ -3,7 +3,7 @@ $category: social
 formats:
   - websites
 teaser:
-  text: A container to display a chatbot and live chat widget.
+  text: A container to display Quicktext chatbot and live chat widget.
 ---
 
 <!--
@@ -24,7 +24,7 @@ limitations under the License.
 
 # `amp-quicktext`
 
-Displays a <a href="https://www.quicktext.im/">Quicktext</a> live chat widget.
+Displays <a href="https://www.quicktext.im/">Quicktext</a> live chat widget.
 
 <table>
   <tr>
@@ -37,7 +37,13 @@ Displays a <a href="https://www.quicktext.im/">Quicktext</a> live chat widget.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td>
+      <ul>
+        <li><a href="https://amp.dev/documentation/examples/components/amp-quicktext/">Annotated code example for amp-quicktext</a></li>
+        <li>Other example: <a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-quicktext.amp.html">Source</a>,
+        <a href="https://raw.githack.com/ampproject/amphtml/master/examples/amp-quicktext.amp.html">Rendered</a></li>
+      </ul>
+    </td>
   </tr>
 </table>
 
@@ -47,7 +53,7 @@ This extension will allow you to integrate and show the <a href="https://www.qui
 
 ## Examples
 
-Basic example, since `license` and `layout` are the only mandatory attributes, you can just use:
+Basic example, since `license` and `layout` are the only mandatory attributes, you can simply use:
 
 Basic:
 
@@ -58,15 +64,14 @@ Basic:
   ></amp-quicktext>
 ```
 
-If you want to choose display language or to customise any other setting you want, you can add the related attribute, so the code became something like:
-
+If you want to choose display language (attribute `lang`) or to customize any other setting you want, you can add the related attribute, so, the code could become something like:
 Custom:
 
 ```html
   <amp-quicktext
     license="XXXXX-XXXX"
     lang="fr"
-    url="http://cdn.qt.im/1.4.30/qt.min.js"
+    url="http://cdn.quicktext.im/qt.min.js"
     tags="home,group-1"
     layout="nodisplay"
   ></amp-quicktext>
@@ -77,19 +82,19 @@ Custom:
 <table>
   <tr>
     <td width="40%"><strong>license</strong></td>
-    <td>This attribute is required, Its value is your unique <strong>identifier and authorisation</strong> to use Quicktext services. If you don't have a license, please <a href="https://www.quicktext.im/contact/">contact the service provider</a>.</td>
+    <td>This attribute is required, Its value is your unique <strong>identifier and authorization</strong> to use Quicktext services. If you don't have a license, or you need a trial, please <a href="https://www.quicktext.im/contact/">contact the service provider</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>lang (optional)</strong></td>
-    <td>This attribute is optional, It let you choose the language that you want the widget to display with. If you don't specify one, The widget will take the browser's language as default language.<br/>You can use <strong>ISO 639-1</strong> (eg: pt, en) or <strong>IETF language tag code</strong> (eg: pt-BR, en-US) as value. The widget supports 11 languages Czech, Dutch, English, Spanish, French, Italian, German, Portuguese, Brazilian Portuguese, Russian and Simplified Chinese.</td>
+    <td>This attribute is optional, It let you choose the language that you want the widget to display with. If you don't specify one, The widget will take the browser's language as the default language.<br/>You can use <strong>ISO 639-1</strong> (eg: pt, en) or <strong>IETF language tag code</strong> (eg: pt-BR, en-US) as value. The widget supports 11 languages Czech, Dutch, English, Spanish, French, Italian, German, Portuguese, Brazilian Portuguese, Russian and Simplified Chinese.</td>
   </tr>
   <tr>
     <td width="40%"><strong>url (optional)</strong></td>
-    <td>This attribute is optional, It let you specify which version of widget you want to integrate in your website. The value of this attribute is the resource link of the widget source code. If you don't specify one, the latest stable version will take place.</td>
+    <td>This attribute is optional, It let you specify which version of the widget you want to integrate into your website. The value of this attribute is the resource link of the widget source code. If you don't specify one, the latest stable version will take place.</td>
   </tr>
   <tr>
     <td width="40%"><strong>tags (optional)</strong></td>
-    <td>This attribute is optional, It defines a tag or tags list that would help you to determine (as example) in which page/website your customer is using the widget. this attribute will be very useful in case you integrate the widget with the same license in many websites. you can add many tags separated with commas</td>
+    <td>This attribute is optional, It defines a tag or tags list that would help you to determine (as for an example) in which page/website your customer is using the widget. this attribute will be very useful in case you integrate the widget with the same license on many websites. you can add many tags separated with commas.</td>
   </tr>
 </table>
 
