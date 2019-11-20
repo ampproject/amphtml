@@ -50,7 +50,7 @@ export class ConsentConfig {
    * Read validate and return the config
    * @return {!Promise<JsonObject>}
    */
-  getConsentConfig() {
+  getConsentConfigPromise() {
     if (!this.config_) {
       return this.validateAndParseConfig_().then(validatedConfig => {
         this.config_ = validatedConfig;
@@ -155,35 +155,38 @@ export class ConsentConfig {
       }
     }
 
-    // (TODO): Migrate from prompIfUnknownForGeo to geoOverride
-    // E.g: promptIfUnknownForGeo: geoGroup -> geoOverride: {geoGroup: {consentRequired: true}}
-
-    // Do I need to guard against incorrect geoOverride?
     return this.mergeGeoOverride_(config).then(() => config);
   }
 
   /**
+   * Merge correct geoOverride object into toplevel config, then
+   * validate.
    * @param {JsonObject} config
    * @return {!Promise}
    */
   mergeGeoOverride_(config) {
     if (config['geoOverride']) {
       Services.geoForDocOrNull(this.element_).then(geoService => {
-        userAssert(geoService, 'requires <amp-geo> to use geoOVerride');
+        userAssert(geoService, 'requires <amp-geo> to use geoOverride');
         const geoGroups = Object.keys(config['geoOverride']);
         for (let i = 0; i < geoGroups.length; i++) {
-          // Maybe I should be using merge configs here?
           if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-            config['consentRequired'] =
-              config['geoOverride'][geoGroups[i]]['consentRequired'] ||
-              config['consentRequired'];
-            config['checkConsentHref'] =
-              config['geoOverride'][geoGroups[i]]['checkConsentHref'] ||
-              config['checkConsentHref'];
+            config = /** @type {!JsonObject} */ (deepMerge(
+              config,
+              config['geoOverride'][geoGroups[i]],
+              1
+            ));
           }
         }
         delete config['geoOverride'];
       });
+    }
+    if (config['consentRequired'] === 'remote') {
+      userAssert(
+        config['checkConsentHref'],
+        'checkConsentHref must be specified if consentRequired is remote'
+      );
+      config['consentRequired'] = true;
     }
     return Promise.resolve();
   }
