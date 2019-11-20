@@ -244,26 +244,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.element,
       'template, script[template]'
     );
-    if (this.isSsr_) {
-      userAssert(
-        this.hasTemplate_,
-        `${TAG} should provide a <template> or <script type="plain/text"> element.`
-      );
-      userAssert(
-        !this.element.hasAttribute('filter'),
-        `${TAG} does not support client-side filter when server-side render is possible`
-      );
-      this.filter_ = FilterType.NONE;
-    } else {
-      this.filter_ = userAssert(
-        this.element.getAttribute('filter'),
-        `${TAG} requires "filter" attribute.`
-      );
-      userAssert(
-        isEnumValue(FilterType, this.filter_),
-        `Unexpected filter: ${this.filter_}`
-      );
-    }
+    userAssert(
+      !this.isSsr || this.hasTemplate_,
+      `${TAG} should provide a <template> or <script type="plain/text"> element.`
+    );
+    userAssert(
+      !this.isSsr || !this.element.hasAttribute('filter'),
+      `${TAG} does not support client-side filter when server-side render is possible`
+    );
+    this.filter_ = this.isSsr
+      ? FilterType.NONE
+      : userAssert(
+          this.element.getAttribute('filter'),
+          `${TAG} requires "filter" attribute.`
+        );
+    userAssert(
+      isEnumValue(FilterType, this.filter_),
+      `Unexpected filter: ${this.filter_}`
+    );
 
     // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
