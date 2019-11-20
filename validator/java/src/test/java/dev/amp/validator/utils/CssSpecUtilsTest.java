@@ -43,7 +43,7 @@ import static org.mockito.Mockito.doAnswer;
 /**
  * Test for {@link CssSpecUtils}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class CssSpecUtilsTest {

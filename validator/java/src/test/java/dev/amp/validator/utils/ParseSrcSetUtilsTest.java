@@ -21,21 +21,17 @@
 
 package dev.amp.validator.utils;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Test for {@link UrlUtils}
+ * Test for {@link ParseSrcSetUtils}
  *
  * @author GeorgeLuo
  */
 
-public class UrlUtilsTest {
+public class ParseSrcSetUtilsTest {
 
   @Test
-  public void testIsDataUrl() {
-    Assert.assertTrue(UrlUtils.isDataUrl("data://somedata.com"));
-    Assert.assertFalse(UrlUtils.isDataUrl("https://somenotdata.com"));
-    Assert.assertFalse(UrlUtils.isDataUrl("www.somenotdata.com"));
+  public void testParseSrcset() {
   }
 }
