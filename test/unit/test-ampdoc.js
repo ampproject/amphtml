@@ -55,18 +55,18 @@ describes.sandboxed('AmpDocService', {}, () => {
     });
 
     it('should read params from window name and fragment', () => {
-      win.name = '__AMP__viewportType=natural&other=one';
+      win.name = '__AMP__param1=value1&other=one';
       win.location.hash = '#paddingTop=17&other=two';
       const ampdoc = new AmpDocService(win, true).getSingleDoc();
 
       // Fragment parameters take precedence.
-      expect(ampdoc.getParam('viewportType')).to.equal('natural');
+      expect(ampdoc.getParam('param1')).to.equal('value1');
       expect(ampdoc.getParam('other')).to.equal('two');
       expect(ampdoc.getParam('paddingTop')).to.equal('17');
     });
 
     it('should ignore window name and fragment with explicit params', () => {
-      win.name = '__AMP__viewportType=natural&other=one';
+      win.name = '__AMP__param1=value1&other=one';
       win.location.hash = '#paddingTop=17&other=two';
       const ampdoc = new AmpDocService(win, true, {
         'other': 'zero',
@@ -74,7 +74,7 @@ describes.sandboxed('AmpDocService', {}, () => {
 
       // Fragment parameters take precedence.
       expect(ampdoc.getParam('other')).to.equal('three');
-      expect(ampdoc.getParam('viewportType')).to.be.null;
+      expect(ampdoc.getParam('param1')).to.be.null;
       expect(ampdoc.getParam('paddingTop')).to.be.null;
     });
   });
