@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Test for {@link AttributeSpecUtils}
@@ -142,20 +143,29 @@ public class AttributeSpecUtilsTest {
 
     ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
     ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+    ArgumentCaptor<Validator.ValidationError.Code> warningCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
     Mockito.verify(context, Mockito.times(1)).addError(errorCodeCapture.capture(),
       Mockito.any(Locator.class),
       listCaptor.capture(),
       Mockito.anyString(),
       Mockito.any(Validator.ValidationResult.Builder.class));
 
+    Mockito.verify(context, Mockito.times(1)).addWarning(warningCodeCapture.capture(),
+      Mockito.any(Locator.class),
+      listCaptor.capture(),
+      Mockito.anyString(),
+      Mockito.any(Validator.ValidationResult.Builder.class));
+
+
     Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID);
+    Assert.assertEquals(warningCodeCapture.getValue(), Validator.ValidationError.Code.DEPRECATED_ATTR);
 
     // DISALLOWED_ATTR
 
     tagSpecBuilder = Validator.TagSpec.newBuilder();
 
     attrSpecBuilder = Validator.AttrSpec.newBuilder();
-    attrSpecBuilder.setDeprecation("deprecationString");
+//    attrSpecBuilder.setDeprecation("deprecationString");
     attrSpecs = new ArrayList<>();
     attrSpecs.add(attrSpecBuilder.build());
 
@@ -211,6 +221,135 @@ public class AttributeSpecUtilsTest {
       Mockito.any(Validator.ValidationResult.Builder.class));
 
     Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.DISALLOWED_ATTR);
+
+    // INVALID_ATTR_VALUE
+
+    tagSpecBuilder = Validator.TagSpec.newBuilder();
+
+    attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    attrSpecBuilder.setBlacklistedValueRegex("");
+    attrSpecs = new ArrayList<>();
+    attrSpecs.add(attrSpecBuilder.build());
+
+    attrsByName = new HashMap<>();
+    attrsByName.put("HTML", attrSpecBuilder.build());
+
+    parsedTagSpec = Mockito.mock(ParsedTagSpec.class);
+    Mockito.when(parsedTagSpec.getSpec()).thenReturn(tagSpecBuilder.build());
+    Mockito.when(parsedTagSpec.getImplicitAttrspecs()).thenReturn(attrSpecs);
+    Mockito.when(parsedTagSpec.getAttrsByName()).thenReturn(attrsByName);
+
+    bestMatchReferencePoint = Mockito.mock(ParsedTagSpec.class);
+
+    tagStack = Mockito.mock(TagStack.class);
+
+    parsedAttrSpec = Mockito.mock(ParsedAttrSpec.class);
+    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.<String>anyList())).thenReturn(true);
+    Mockito.when(parsedAttrSpec.getSpec()).thenReturn(attrSpecBuilder.build());
+
+    parsedAttrSpecs = Mockito.mock(ParsedAttrSpecs.class);
+    Mockito.when(parsedAttrSpecs.getParsedAttrSpec("HTML", "htmlValue", attrSpecBuilder.build())).thenReturn(parsedAttrSpec);
+
+    parsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
+    Mockito.when(parsedValidatorRules.getParsedAttrSpecs()).thenReturn(parsedAttrSpecs);
+    Mockito.when(parsedValidatorRules.getPartialMatchCaseiRegex(Mockito.anyString())).thenReturn(Pattern.compile(""));
+
+    context = Mockito.mock(Context.class);
+    Mockito.when(context.getTagStack()).thenReturn(tagStack);
+    Mockito.when(context.getRules()).thenReturn(parsedValidatorRules);
+
+    attributes = Mockito.mock(Attributes.class);
+    Mockito.when(attributes.getLength()).thenReturn(1);
+    Mockito.when(attributes.getLocalName(0)).thenReturn("HTML");
+    Mockito.when(attributes.getValue(0)).thenReturn("htmlValue");
+
+    encounteredTag = Mockito.mock(ParsedHtmlTag.class);
+    Mockito.when(encounteredTag.upperName()).thenReturn("HTML");
+    Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
+
+    result = Validator.ValidationResult.newBuilder();
+
+    try {
+      AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
+    } catch (TagValidationException | IOException | CssValidationException e) {
+      e.printStackTrace();
+    }
+
+    listCaptor = ArgumentCaptor.forClass(List.class);
+    errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+    Mockito.verify(context, Mockito.times(1)).addError(errorCodeCapture.capture(),
+      Mockito.any(Locator.class),
+      listCaptor.capture(),
+      Mockito.anyString(),
+      Mockito.any(Validator.ValidationResult.Builder.class));
+
+    Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.INVALID_ATTR_VALUE);
+
+    // BASE_TAG_MUST_PRECEED_ALL_URLS
+
+    tagSpecBuilder = Validator.TagSpec.newBuilder();
+    tagSpecBuilder.setTagName("BASE");
+
+    attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    attrSpecs = new ArrayList<>();
+    attrSpecs.add(attrSpecBuilder.build());
+
+    attrsByName = new HashMap<>();
+    attrsByName.put("attr", attrSpecBuilder.build());
+    attrsByName.put("href", attrSpecBuilder.build());
+
+    parsedTagSpec = Mockito.mock(ParsedTagSpec.class);
+    Mockito.when(parsedTagSpec.getSpec()).thenReturn(tagSpecBuilder.build());
+    Mockito.when(parsedTagSpec.getImplicitAttrspecs()).thenReturn(attrSpecs);
+    Mockito.when(parsedTagSpec.getAttrsByName()).thenReturn(attrsByName);
+
+    bestMatchReferencePoint = Mockito.mock(ParsedTagSpec.class);
+
+    tagStack = Mockito.mock(TagStack.class);
+
+    parsedAttrSpec = Mockito.mock(ParsedAttrSpec.class);
+    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.<String>anyList())).thenReturn(true);
+    Mockito.when(parsedAttrSpec.getSpec()).thenReturn(attrSpecBuilder.build());
+
+    parsedAttrSpecs = Mockito.mock(ParsedAttrSpecs.class);
+    Mockito.when(parsedAttrSpecs.getParsedAttrSpec("attr", "attrValue", attrSpecBuilder.build())).thenReturn(parsedAttrSpec);
+    Mockito.when(parsedAttrSpecs.getParsedAttrSpec("href", "hrefValue", attrSpecBuilder.build())).thenReturn(parsedAttrSpec);
+
+    parsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
+    Mockito.when(parsedValidatorRules.getParsedAttrSpecs()).thenReturn(parsedAttrSpecs);
+    Mockito.when(parsedValidatorRules.getPartialMatchCaseiRegex(Mockito.anyString())).thenReturn(Pattern.compile(""));
+
+    context = Mockito.mock(Context.class);
+    Mockito.when(context.getTagStack()).thenReturn(tagStack);
+    Mockito.when(context.getRules()).thenReturn(parsedValidatorRules);
+    Mockito.when(context.hasSeenUrl()).thenReturn(true);
+
+    attributes = Mockito.mock(Attributes.class);
+    Mockito.when(attributes.getLength()).thenReturn(1);
+    Mockito.when(attributes.getLocalName(0)).thenReturn("href");
+    Mockito.when(attributes.getValue(0)).thenReturn("hrefValue");
+
+    encounteredTag = Mockito.mock(ParsedHtmlTag.class);
+    Mockito.when(encounteredTag.upperName()).thenReturn("BASE");
+    Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
+
+    result = Validator.ValidationResult.newBuilder();
+
+    try {
+      AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
+    } catch (TagValidationException | IOException | CssValidationException e) {
+      e.printStackTrace();
+    }
+
+    listCaptor = ArgumentCaptor.forClass(List.class);
+    errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+    Mockito.verify(context, Mockito.times(1)).addError(errorCodeCapture.capture(),
+      Mockito.any(Locator.class),
+      listCaptor.capture(),
+      Mockito.anyString(),
+      Mockito.any(Validator.ValidationResult.Builder.class));
+
+    Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS);
   }
 
   @Test
