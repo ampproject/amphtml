@@ -253,7 +253,7 @@ For users in `geoGroup2`, the merged config is
   "consentRequired": "remote",
 }
 ```
-If local cache is empty, AMP will wait for `checkConsentHref` response to decide whether a consent is required from the user. If the response contains `consentRequired: true` then AMP will collect consent via the specified prompt UI if consent state is `unknown`.
+If local cache is empty, AMP will wait for `checkConsentHref` response to decide whether a consent is required from the user. If the response contains `consentRequired: true` and `consentStateValue: unknown`, then AMP will collect consent via the specified prompt UI. If `consentStateValue` is 'accepted' or 'rejected', then it will use this value and also sync to cache.
 
 
 For users in `geoGroupUnknown`, the merged config is
