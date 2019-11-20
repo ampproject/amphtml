@@ -53,7 +53,7 @@ const Controls = {
  * @return {boolean} Whether or not the Element is a sizer Element.
  */
 function isSizer(el) {
-  return el.tagName == 'I-AMPHTML-SIZER';
+  return el.tagName === 'I-AMPHTML-SIZER';
 }
 
 class AmpCarousel extends AMP.BaseElement {
@@ -110,7 +110,7 @@ class AmpCarousel extends AMP.BaseElement {
         this.carousel_.updateAdvanceCount(Number(newValue) || 0);
       },
       'auto-advance': newValue => {
-        this.carousel_.updateAutoAdvance(newValue == 'true');
+        this.carousel_.updateAutoAdvance(newValue === 'true');
       },
       'auto-advance-count': newValue => {
         this.carousel_.updateAutoAdvanceCount(Number(newValue) || 0);
@@ -128,19 +128,19 @@ class AmpCarousel extends AMP.BaseElement {
         this.carousel_.updateForwards(newValue != 'rtl');
       },
       'horizontal': newValue => {
-        this.carousel_.updateHorizontal(newValue == 'true');
+        this.carousel_.updateHorizontal(newValue === 'true');
       },
       'loop': newValue => {
-        this.carousel_.updateLoop(newValue == 'true');
+        this.carousel_.updateLoop(newValue === 'true');
       },
       'mixed-length': newValue => {
-        this.carousel_.updateMixedLength(newValue == 'true');
+        this.carousel_.updateMixedLength(newValue === 'true');
       },
       'slide': newValue => {
         this.carousel_.goToSlide(Number(newValue));
       },
       'snap': newValue => {
-        this.carousel_.updateSnap(newValue == 'true');
+        this.carousel_.updateSnap(newValue === 'true');
       },
       'snap-align': newValue => {
         this.carousel_.updateAlignment(newValue);
@@ -258,9 +258,9 @@ class AmpCarousel extends AMP.BaseElement {
     // Figure out which "slot" the children go into.
     children.forEach(c => {
       const slot = c.getAttribute('slot');
-      if (slot == 'prev-arrow') {
+      if (slot === 'prev-arrow') {
         prevArrow = c;
-      } else if (slot == 'next-arrow') {
+      } else if (slot === 'next-arrow') {
         nextArrow = c;
       } else if (!isSizer(c)) {
         this.slides_.push(c);
@@ -480,11 +480,11 @@ class AmpCarousel extends AMP.BaseElement {
    * @return {boolean} Whether or not controls should be hidden.
    */
   shouldHideControls_() {
-    if (this.controls_ == Controls.NEVER) {
+    if (this.controls_ === Controls.NEVER) {
       return true;
     }
 
-    if (this.controls_ == Controls.ALWAYS) {
+    if (this.controls_ === Controls.ALWAYS) {
       return false;
     }
 
@@ -496,12 +496,17 @@ class AmpCarousel extends AMP.BaseElement {
    * @private
    */
   updateControls_(controls) {
-    this.controls_ =
-      controls === 'always'
-        ? Controls.ALWAYS
-        : controls === 'never'
-        ? Controls.NEVER
-        : Controls.AUTO;
+    switch (controls) {
+      case 'always':
+        this.controls_ = controls.ALWAYS;
+        break;
+      case 'never':
+        this.controls_ = controls.NEVER;
+        break;
+      default:
+        this.controls_ = controls.AUTO;
+        break;
+    }
     this.updateUi_();
   }
 
@@ -516,11 +521,11 @@ class AmpCarousel extends AMP.BaseElement {
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
     iterateCursor(this.prevArrowSlot_.children, child => {
-      const disabled = !loop && index == 0;
+      const disabled = !loop && index === 0;
       toggleAttribute(child, 'disabled', disabled);
     });
     iterateCursor(this.nextArrowSlot_.children, child => {
-      const disabled = !loop && index == this.slides_.length - 1;
+      const disabled = !loop && index === this.slides_.length - 1;
       toggleAttribute(child, 'disabled', disabled);
     });
     toggleAttribute(
@@ -592,9 +597,9 @@ class AmpCarousel extends AMP.BaseElement {
    */
   isHighTrustActionSource_(actionSource) {
     return (
-      actionSource == ActionSource.WHEEL ||
-      actionSource == ActionSource.TOUCH ||
-      actionSource == ActionSource.GENERIC_HIGH_TRUST
+      actionSource === ActionSource.WHEEL ||
+      actionSource === ActionSource.TOUCH ||
+      actionSource === ActionSource.GENERIC_HIGH_TRUST
     );
   }
 
@@ -614,7 +619,7 @@ class AmpCarousel extends AMP.BaseElement {
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
     this.element.dispatchCustomEvent(name, data);
-    this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
+    this.hadTouch_ = this.hadTouch_ || actionSource === ActionSource.TOUCH;
     this.updateUi_();
   }
 

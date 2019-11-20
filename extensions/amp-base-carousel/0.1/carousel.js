@@ -832,6 +832,10 @@ export class Carousel {
     // The scrollend is likely triggered due to what causes
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1018842, though it
     // is unclear if this will ever be changed.
+    // TODO(https://bugs.chromium.org/p/chromium/issues/detail?id=1018842):
+    // Remove this if/when scrollend stops firing when adjusting the scroll
+    // position. We will want to make sure that this works if/when Safari
+    // impelemnts scrollend as well.
     if (this.requestedIndex_ !== null) {
       return;
     }
