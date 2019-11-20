@@ -117,7 +117,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     const expOn = isExperimentOn(this.win, 'amp-consent-geo-override');
     if (expOn) {
-      console.log('CCPA flag is on');
+      dev().info('amp-consent-geo-override experiment', 'enabled');
     }
 
     const config = new ConsentConfig(this.element);
