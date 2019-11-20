@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from '../../../src/experiments';
 import {ownProperty} from '../../../src/utils/object';
 import {tryFocus} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
+
+const TAG = 'amp-autocomplete';
 
 /**
  * Inline implementation of autocomplete. This supports autocompleting
@@ -28,9 +31,28 @@ export class AutocompleteBindingInline {
   /**
    * Stores the regex match value associated with the portion of the user input to suggest against.
    * For use when "inline_" is true.
-   * @param {string} trigger
+   * @param {!AMP.BaseElement} element
    */
-  constructor(trigger) {
+  constructor({element, win}) {
+    /** @private {!Element} */
+    this.element_ = element;
+    this.win_ = win;
+
+    const isInline = this.element_.hasAttribute('inline');
+    userAssert(
+      !isInline || isExperimentOn(this.win_, 'amp-autocomplete'),
+      'Experiment %s is not turned on for "inline" attr. %s',
+      TAG,
+      this.element_
+    );
+
+    const trigger = this.element_.getAttribute('inline');
+    userAssert(
+      trigger !== '',
+      'Empty value for the "inline" attr is unsupported, %s. %s',
+      TAG,
+      element
+    );
     userAssert(
       trigger !== '',
       `AutocompleteBindingInline does not support an empty value in the constructor.`
@@ -97,7 +119,7 @@ export class AutocompleteBindingInline {
    * @param {!HTMLInputElement} unusedInputEl
    * @return {string}
    */
-  updateUserInput(unusedInputEl) {
+  getUserInputForUpdate(unusedInputEl) {
     if (!this.match_ || !this.match_[0]) {
       return '';
     }
@@ -109,17 +131,18 @@ export class AutocompleteBindingInline {
    * selected item value from the autocomplete suggestions.
    * @param {string} selection
    * @param {!HTMLInputElement} inputEl
-   * @param {number} inputLength
+   * @param {string} userInput
    * @return {string}
    */
-  updateInputWithSelection(selection, inputEl, inputLength) {
+  getUserInputForUpdateWithSelection(selection, inputEl, userInput) {
     if (!this.match_) {
       return inputEl.value;
     }
     let cursor = inputEl.selectionStart;
     const startIndex = Number(ownProperty(this.match_, 'index'));
-    if (cursor >= startIndex + inputLength) {
-      cursor = cursor - inputLength;
+    const userInputLength = userInput.length;
+    if (cursor >= startIndex + userInputLength) {
+      cursor = cursor - userInputLength;
     }
 
     tryFocus(inputEl);
@@ -130,7 +153,9 @@ export class AutocompleteBindingInline {
     const {value} = inputEl;
 
     const pre = value.slice(0, startIndex + this.trigger_.length);
-    const post = value.slice(startIndex + this.trigger_.length + inputLength);
+    const post = value.slice(
+      startIndex + this.trigger_.length + userInputLength
+    );
     return pre + selection + ' ' + post;
   }
 
@@ -138,17 +163,16 @@ export class AutocompleteBindingInline {
    * @param {string} unusedUserInput
    * @param {!HTMLInputElement} unusedInputEl
    */
-  resetInput(unusedUserInput, unusedInputEl) {}
+  resetInputOnWrapAround(unusedUserInput, unusedInputEl) {}
 
   /**
    * Always accept the "suggest-first" attribute regardless of filter type.
    * This is because this binding does not perform any highlighting via the
    * SelectionAPI when a user navigates to an unselected suggestion item.
-   * @param {string} unusedFilter
    * @return {boolean}
    */
-  shouldSuggestFirst(unusedFilter) {
-    return true;
+  shouldSuggestFirst() {
+    return this.element_.hasAttribute('suggest-first');
   }
 
   /**
@@ -160,40 +184,24 @@ export class AutocompleteBindingInline {
   }
 
   /**
-   * @param {!HTMLElement} unusedElement
    * @param {!HTMLInputElement} unusedInputEl
-   * @param {number} unusedUserInputLength
-   * @param {boolean} unusedHighlight
+   * @param {string} unusedNewValue
+   * @param {string} unusedUserInput
    */
-  displayActiveItemInInput(
-    unusedElement,
-    unusedInputEl,
-    unusedUserInputLength,
-    unusedHighlight
-  ) {}
+  displayActiveItemInInput(unusedInputEl, unusedNewValue, unusedUserInput) {}
 
   /**
    * @param {HTMLInputElement} unusedInputEl
    */
-  removeHighlighting(unusedInputEl) {}
+  removeSelectionHighlighting(unusedInputEl) {}
 
   /**
    * If results are not showing or there is no actively navigated-to suggestion item,
    * the user should be able to 'Enter' to add a new line.
-   * @param {Event} event
-   * @param {boolean} resultsShowing
-   * @param {boolean} unusedSubmitOnEnter
    * @param {boolean} activeElement
+   * @return {boolean}
    */
-  maybePreventDefaultOnEnter(
-    event,
-    resultsShowing,
-    unusedSubmitOnEnter,
-    activeElement
-  ) {
-    if (!resultsShowing || !activeElement) {
-      return;
-    }
-    event.preventDefault();
+  shouldPreventFormSubmissionOnEnter(activeElement) {
+    return activeElement;
   }
 }

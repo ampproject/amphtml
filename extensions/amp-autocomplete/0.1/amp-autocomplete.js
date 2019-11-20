@@ -26,7 +26,6 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {childElementsByTag, removeChildren, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -36,6 +35,7 @@ import {isAmp4Email} from '../../../src/format';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
+import {removeChildren, tryFocus} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
@@ -109,11 +109,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?number}
      */
     this.maxEntries_ = null;
-
-    /**
-     * If the "submit-on-enter" attribute is present on <autocomplete>.
-     */
-    this.submitOnEnter_ = false;
 
     /**
      * If the "suggest-first" attribute is present on <autocomplete>
@@ -210,43 +205,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 
-    const inputElements = childElementsByTag(this.element, 'input');
-    const textareaElements = childElementsByTag(this.element, 'textarea');
+    this.inputElement_ = this.getSingleInputOrTextareaFrom_(this.element);
+    const inputType = this.inputElement_.getAttribute('type');
     userAssert(
-      inputElements.length + textareaElements.length === 1,
-      `${TAG} should contain exactly one <input> or <textarea> child`
-    );
-    this.inputElement_ =
-      /** @type {!HTMLInputElement} */ (inputElements[0] ||
-      textareaElements[0]);
-    if (this.inputElement_.hasAttribute('type')) {
-      const inputType = this.inputElement_.getAttribute('type');
-      userAssert(
-        inputType === 'text' || inputType === 'search',
-        `${TAG} requires the "type" attribute to be "text" or "search" if present on <input>`
-      );
-    }
-
-    const inlineTrigger = this.element.getAttribute('inline');
-    if (this.element.hasAttribute('inline')) {
-      userAssert(
-        inlineTrigger !== '',
-        `${TAG} currently does not support an empty value for the "inline" attr. %s`,
-        this.element
-      );
-    }
-    this.binding_ = this.createBinding_(inlineTrigger);
-    userAssert(
-      !inlineTrigger || isExperimentOn(this.win, 'amp-autocomplete'),
-      `Experiment ${TAG} is not turned on for "inline" attr. %s`,
+      !this.inputElement_.hasAttribute('type') ||
+        inputType === 'text' ||
+        inputType === 'search',
+      '%s requires the "type" attribute to be "text" or "search" if present on <input>. %s',
+      TAG,
       this.element
     );
+    this.binding_ = this.createBinding_();
 
     this.queryKey_ = this.element.getAttribute('query');
     this.srcBase_ = this.element.getAttribute('src');
     userAssert(
       !this.queryKey_ || isExperimentOn(this.win, 'amp-autocomplete'),
-      `Experiment ${TAG} is not turned on for "query" attr. %s`,
+      'Experiment %s is not turned on for "query" attr. %s',
+      TAG,
       this.element
     );
 
@@ -265,31 +241,38 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     const doc = this.element.ownerDocument;
-    // Client side filtering is disabled for email
-    if (doc && isAmp4Email(doc)) {
-      this.filter_ = FilterType.NONE;
-      this.isEmail_ = true;
-      userAssert(
-        !this.staticSrc_,
-        `${TAG} requires data to be provided via "src" attribute for AMP for Email context. %s`,
-        this.element
-      );
-    } else {
-      this.filter_ = userAssert(
-        this.element.getAttribute('filter'),
-        `${TAG} requires "filter" attribute.`
-      );
-      userAssert(
-        isEnumValue(FilterType, this.filter_),
-        `Unexpected filter: ${this.filter_}`
-      );
-    }
+    this.isEmail_ = doc && isAmp4Email(doc);
+    userAssert(
+      !this.isEmail_ || !this.staticSrc_,
+      '%s requires data to be provided via "src" attribute for AMP for Email context. %s',
+      TAG,
+      this.element
+    );
+    this.filter_ = this.isEmail_
+      ? FilterType.NONE // client side filtering disabled for email
+      : userAssert(
+          this.element.getAttribute('filter'),
+          '%s requires "filter" attribute. %s',
+          TAG,
+          this.element
+        );
+    userAssert(
+      isEnumValue(FilterType, this.filter_),
+      'Unexpected filter: %s. %s',
+      this.filter_,
+      this.element
+    );
 
     this.inputElement_.setAttribute('dir', 'auto');
     this.inputElement_.setAttribute('aria-autocomplete', 'both');
     this.inputElement_.setAttribute('role', 'combobox');
 
-    userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
+    userAssert(
+      this.inputElement_.form,
+      '%s should be inside a <form> tag. %s',
+      TAG,
+      this.element
+    );
     if (this.inputElement_.form.hasAttribute('autocomplete')) {
       this.initialAutocompleteAttr_ = this.inputElement_.form.getAttribute(
         'autocomplete'
@@ -310,7 +293,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
           userAssert(
             renderedEl.hasAttribute('data-value') ||
               renderedEl.hasAttribute('data-disabled'),
-            `${TAG} requires a "data-value" or "data-disabled" attribute.`
+            '%s requires a "data-value" or "data-disabled" attribute. %s',
+            TAG,
+            this.element
           );
         });
     }
@@ -322,17 +307,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = this.element.hasAttribute('max-entries')
       ? parseInt(this.element.getAttribute('max-entries'), 10)
       : null;
-    this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
-    if (this.element.hasAttribute('suggest-first')) {
-      this.suggestFirst_ = this.binding_.shouldSuggestFirst(this.filter_);
-      userAssert(
-        this.suggestFirst_,
-        '"suggest-first" requires "filter" type "prefix" unless "inline" is present. ' +
-          ' Unexpected "filter" type: %s, %s',
-        this.filter_,
-        this.element
-      );
-    }
+    this.suggestFirst_ = this.binding_.shouldSuggestFirst();
     this.highlightUserEntry_ = this.element.hasAttribute(
       'highlight-user-entry'
     );
@@ -344,15 +319,29 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Element} element
+   * @return {!HTMLInputElement}
+   */
+  getSingleInputOrTextareaFrom_(element) {
+    const possibleElements = element.querySelectorAll('input,textarea');
+    userAssert(
+      possibleElements.length == 1,
+      '%s should contain exactly one <input> or <textarea> descendant %s',
+      TAG,
+      element
+    );
+    return /** @type {!HTMLInputElement} */ (possibleElements[0]);
+  }
+
+  /**
    * Creates a binding associated with singular autocomplete or
-   * inline autocomplete depending on the given specification.
-   * @param {?string} inlineTrigger
+   * inline autocomplete depending on the presence of the given element's "inline" attribute.
    * @return {AutocompleteBindingDef}
    */
-  createBinding_(inlineTrigger) {
-    return inlineTrigger
-      ? new AutocompleteBindingInline(inlineTrigger)
-      : new AutocompleteBindingSingle();
+  createBinding_() {
+    return this.element.hasAttribute('inline')
+      ? new AutocompleteBindingInline(this)
+      : new AutocompleteBindingSingle(this);
   }
 
   /**
@@ -389,10 +378,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
-    if (this.srcBase_) {
-      const src = this.generateSrc_(this.userInput_);
-      this.element.setAttribute('src', src);
-    }
+    this.maybeSetSrcFromInput_();
     return batchFetchJsonFor(ampdoc, this.element, {
       expr: itemsExpr,
       urlReplacement: policy,
@@ -407,10 +393,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
+   * Update value of "src" attribute if the "query" attribute is provided.
+   */
+  maybeSetSrcFromInput_() {
+    if (!this.queryKey_) {
+      return;
+    }
+    const src = this.generateSrc_(this.userInput_);
+    this.element.setAttribute('src', src);
+  }
+
+  /**
    * Takes the given input and returns the constructed server endpoint for it.
-   * For use when publishers provide "src" and "query" attributes
-   * in the AMP4Email context only.
-   * @param {string=} opt_query
+   * For use when publishers provide "src" and "query" attributes.
+   * @param {string} opt_query
    * @return {string}
    * @private
    */
@@ -556,20 +552,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * First fetch fresh data if the autocomplete is in an email.
-   * Then updates the user input and display autocomplete suggestions against it.
+   * First fetches if data is dynamic, then updates user input and
+   * displays autocomplete suggestions against it.
    * @return {!Promise}
    */
   maybeFetchAndAutocomplete_() {
     // If the input is the first entry in the field.
     const isFirstInteraction =
       this.userInput_.length === 0 && this.inputElement_.value.length === 1;
-    this.userInput_ = this.binding_.updateUserInput(
+    this.userInput_ = this.binding_.getUserInputForUpdate(
       dev().assertElement(this.inputElement_)
     );
 
     // Fetch if autocomplete data is dynamic.
-    // Required in all email contexts or when reliant on a query param.
+    // Required when email context or otherwise reslies on a query key.
     const maybeFetch =
       this.isEmail_ || this.queryKey_
         ? this.getRemoteData_()
@@ -590,12 +586,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Toggle the container of suggestions to show.
    * If the publisher has opted to autosuggest the first option, do this as well.
-   * @param {boolean} firstInteraction
+   * @param {boolean} isFirstInteraction
    */
-  displaySuggestions_(firstInteraction) {
+  displaySuggestions_(isFirstInteraction) {
     this.toggleResults_(true);
     if (this.suggestFirst_) {
-      if (!this.detectBackspace_ || firstInteraction) {
+      if (!this.detectBackspace_ || isFirstInteraction) {
         this.updateActiveItem_(1);
       }
       this.detectBackspace_ = false;
@@ -616,7 +612,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Filter the source data according to the given opt_input and render it in
+   * Filter the source data according to the given input and render it in
    * the results container_.
    * @param {?Array<!JsonObject|string>} sourceData
    * @param {string} input
@@ -664,7 +660,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       filteredData.forEach(item => {
         userAssert(
           typeof item === 'string',
-          `${TAG} data must provide template for non-string items.`
+          '%s data must provide template for non-string items. %s',
+          TAG,
+          this.element
         );
         container.appendChild(
           this.createElementFromItem_(/** @type {string} */ (item), input)
@@ -696,7 +694,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       }
       userAssert(
         typeof item === 'string',
-        `${TAG} data property "${itemsExpr}" must map to string type.`
+        '%s data property "%s" must map to string type. %s',
+        TAG,
+        itemsExpr,
+        this.element
       );
       item = item.toLocaleLowerCase();
       switch (this.filter_) {
@@ -709,9 +710,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.FUZZY:
           return fuzzysearch(input, item);
         case FilterType.CUSTOM:
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
+          throw new Error(
+            'Filter not yet supported: %s',
+            this.filter_,
+            this.element
+          );
         default:
-          throw new Error(`Unexpected filter: ${this.filter_}`);
+          throw new Error('Unexpected filter: %s', this.filter_, this.element);
       }
     });
 
@@ -923,7 +928,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @return {boolean}
    * @private
    */
-  resultsShowing_() {
+  areResultsDisplayed_() {
     return (
       !this.container_.hasAttribute('hidden') &&
       this.container_.children.length > 0
@@ -962,12 +967,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.clearAllItems_();
     this.toggleResults_(false);
 
-    this.inputElement_.value = this.binding_.updateInputWithSelection(
+    this.inputElement_.value = this.binding_.getUserInputForUpdateWithSelection(
       selectedValue,
       this.inputElement_,
-      this.userInput_.length
+      this.userInput_
     );
-    this.userInput_ = this.binding_.updateUserInput(this.inputElement_);
+    this.userInput_ = this.binding_.getUserInputForUpdate(this.inputElement_);
   }
 
   /**
@@ -993,7 +998,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   updateActiveItem_(delta) {
-    if (delta === 0 || !this.resultsShowing_() || this.fallbackDisplayed_) {
+    if (
+      delta === 0 ||
+      !this.areResultsDisplayed_() ||
+      this.fallbackDisplayed_
+    ) {
       return Promise.resolve();
     }
     // Active element logic
@@ -1007,10 +1016,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const newActiveElement = enabledElements[activeIndex];
 
     this.binding_.displayActiveItemInInput(
-      newActiveElement,
       dev().assertElement(this.inputElement_),
-      this.userInput_.length,
-      this.suggestFirst_
+      newActiveElement.getAttribute('data-value'),
+      this.userInput_
     );
 
     // Element visibility logic
@@ -1068,7 +1076,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   displayUserInput_() {
-    this.binding_.resetInput(
+    this.binding_.resetInputOnWrapAround(
       this.userInput_,
       dev().assertElement(this.inputElement_)
     );
@@ -1116,7 +1124,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     switch (event.key) {
       case Keys.DOWN_ARROW:
         event.preventDefault();
-        if (this.resultsShowing_()) {
+        if (this.areResultsDisplayed_()) {
           // Disrupt loop around to display user input.
           if (this.activeIndex_ === this.getEnabledItems_().length - 1) {
             this.displayUserInput_();
@@ -1137,15 +1145,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
-        this.binding_.maybePreventDefaultOnEnter(
-          event,
-          this.resultsShowing_(),
-          this.submitOnEnter_,
+        const shouldPreventSubmit = this.binding_.shouldPreventFormSubmissionOnEnter(
           !!this.activeElement_
         );
-        this.binding_.removeHighlighting(this.inputElement_);
+        if (this.areResultsDisplayed_() && shouldPreventSubmit) {
+          event.preventDefault();
+        }
+        this.binding_.removeSelectionHighlighting(this.inputElement_);
         return this.mutateElement(() => {
-          if (this.resultsShowing_() && this.activeElement_) {
+          if (this.areResultsDisplayed_() && !!this.activeElement_) {
             this.selectItem_(this.activeElement_);
             this.resetActiveElement_();
             return Promise.resolve();
@@ -1162,7 +1170,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           }
         });
       case Keys.TAB:
-        if (this.resultsShowing_() && this.activeElement_) {
+        if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
           this.selectItem_(this.activeElement_);
         }

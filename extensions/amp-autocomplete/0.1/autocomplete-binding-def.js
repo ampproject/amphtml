@@ -33,30 +33,33 @@ export class AutocompleteBindingDef {
    * @param {!HTMLInputElement} unusedInputEl
    * @return {string}
    */
-  updateUserInput(unusedInputEl) {}
+  getUserInputForUpdate(unusedInputEl) {}
 
   /**
    * The value to show in the user input element after a suggestion has been selected
    * @param {string} unusedSelection
    * @param {!HTMLInputElement} unusedInputEl
-   * @param {number} unusedInputLength
+   * @param {string} unusedInput
    * @return {string}
    */
-  updateInputWithSelection(unusedSelection, unusedInputEl, unusedInputLength) {}
+  getUserInputForUpdateWithSelection(
+    unusedSelection,
+    unusedInputEl,
+    unusedInput
+  ) {}
 
   /**
    * Restore the input element to display the user's non-autocompleted partial string
    * @param {string} unusedUserInput
    * @param {!HTMLInputElement} unusedInputEl
    */
-  resetInput(unusedUserInput, unusedInputEl) {}
+  resetInputOnWrapAround(unusedUserInput, unusedInputEl) {}
 
   /**
    * Whether or not the autocomplete can abide by the "suggest-first" attribute
-   * @param {string} unusedFilter
    * @return {boolean}
    */
-  shouldSuggestFirst(unusedFilter) {}
+  shouldSuggestFirst() {}
 
   /**
    * Whether or not the autocomplete should show suggestions when the input element has been focused
@@ -66,35 +69,23 @@ export class AutocompleteBindingDef {
 
   /**
    * Updates the input element text with the user highlighted active suggestion (before selection)
-   * @param {!HTMLElement} unusedElement
+   *
    * @param {!HTMLInputElement} unusedInputEl
-   * @param {number} unusedUserInputLength
-   * @param {boolean} unusedHighlight
+   * @param {string} unusedNewValue
+   * @param {string} unusedUserInput
    */
-  displayActiveItemInInput(
-    unusedElement,
-    unusedInputEl,
-    unusedUserInputLength,
-    unusedHighlight
-  ) {}
+  displayActiveItemInInput(unusedInputEl, unusedNewValue, unusedUserInput) {}
 
   /**
    * Resets any highlighting done by the SelectionAPI
    * @param {HTMLInputElement} unusedInputEl
    */
-  removeHighlighting(unusedInputEl) {}
+  removeSelectionHighlighting(unusedInputEl) {}
 
   /**
-   * Escapes the 'Enter' keydown event if appropriate
-   * @param {Event} unusedEvent
-   * @param {boolean} unusedResultsShowing
-   * @param {boolean} unusedSubmitOnEnter
+   * Whether the autocomplete should escape the 'Enter' keydown event
    * @param {boolean} unusedActiveElement
+   * @return {boolean}
    */
-  maybePreventDefaultOnEnter(
-    unusedEvent,
-    unusedResultsShowing,
-    unusedSubmitOnEnter,
-    unusedActiveElement
-  ) {}
+  shouldPreventFormSubmissionOnEnter(unusedActiveElement) {}
 }

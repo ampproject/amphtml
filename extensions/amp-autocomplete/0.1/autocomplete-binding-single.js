@@ -1,3 +1,5 @@
+import {userAssert} from '../../../src/log';
+
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -22,6 +24,29 @@
  */
 export class AutocompleteBindingSingle {
   /**
+   * @param {!AMP.BaseElement} element
+   */
+  constructor({element}) {
+    /** @private {!Element} */
+    this.element_ = element;
+
+    /**
+     * The Single implementation of autocomplete will highlight
+     * the diff between the user input and the active suggestion.
+     * See displayActiveItemInInput() for more.
+     * @private {boolean}
+     */
+    this.shouldHighlight_ = element.hasAttribute('suggest-first');
+
+    /**
+     * The Single implementation of autocomplete will allow form
+     * submission with selection when "submit-on-enter" is present.
+     * @private {boolean}
+     */
+    this.submitOnEnter_ = element.hasAttribute('submit-on-enter');
+  }
+
+  /**
    * Always try to autocomplete.
    * @param {!HTMLInputElement} unusedInputEl
    * @return {boolean}
@@ -35,7 +60,7 @@ export class AutocompleteBindingSingle {
    * @param {?HTMLInputElement} inputEl
    * @return {string}
    */
-  updateUserInput(inputEl) {
+  getUserInputForUpdate(inputEl) {
     return inputEl.value || '';
   }
 
@@ -43,10 +68,10 @@ export class AutocompleteBindingSingle {
    * Returns the full selection.
    * @param {string} selection
    * @param {!HTMLInputElement} unusedInputEl
-   * @param {number} unusedInputLength
+   * @param {string} unusedInput
    * @return {string}
    */
-  updateInputWithSelection(selection, unusedInputEl, unusedInputLength) {
+  getUserInputForUpdateWithSelection(selection, unusedInputEl, unusedInput) {
     return selection;
   }
 
@@ -55,17 +80,25 @@ export class AutocompleteBindingSingle {
    * @param {string} userInput
    * @param {!HTMLInputElement} inputEl
    */
-  resetInput(userInput, inputEl) {
+  resetInputOnWrapAround(userInput, inputEl) {
     inputEl.value = userInput;
   }
 
   /**
    * Should only abide by "suggest-first" attribute if "filter" is "prefix".
-   * @param {string} filter
    * @return {boolean}
    */
-  shouldSuggestFirst(filter) {
-    return filter === 'prefix';
+  shouldSuggestFirst() {
+    const hasSuggestFirst = this.element_.hasAttribute('suggest-first');
+    const filter = this.element_.getAttribute('filter');
+    userAssert(
+      !hasSuggestFirst || filter === 'prefix',
+      '"suggest-first" requires "filter" type "prefix". ' +
+        ' Unexpected "filter" type: %s, %s',
+      filter,
+      this.element_
+    );
+    return hasSuggestFirst;
   }
 
   /**
@@ -82,17 +115,15 @@ export class AutocompleteBindingSingle {
    *
    * e.g. User input "ba" + navigation to "banana" will display "ba|nana|",
    * where |nana| is highlighted in the input field via the SelectionAPI.
-   * @param {!HTMLElement} element
    * @param {!HTMLInputElement} inputEl
-   * @param {number} userInputLength
-   * @param {boolean} highlight
+   * @param {string} newValue
+   * @param {string} userInput
    */
-  displayActiveItemInInput(element, inputEl, userInputLength, highlight) {
-    const value = element.getAttribute('data-value');
-    inputEl.value = value;
+  displayActiveItemInInput(inputEl, newValue, userInput) {
+    inputEl.value = newValue;
 
-    if (highlight) {
-      inputEl.setSelectionRange(userInputLength, value.length);
+    if (this.shouldHighlight_) {
+      inputEl.setSelectionRange(userInput.length, newValue.length);
     }
   }
 
@@ -100,7 +131,7 @@ export class AutocompleteBindingSingle {
    * Remove any highlighting via the SelectionAPI.
    * @param {HTMLInputElement} inputEl
    */
-  removeHighlighting(inputEl) {
+  removeSelectionHighlighting(inputEl) {
     const inputLength = inputEl.value.length;
     inputEl.setSelectionRange(inputLength, inputLength);
   }
@@ -108,20 +139,10 @@ export class AutocompleteBindingSingle {
   /**
    * If results are showing or the publisher provided "submit-on-enter",
    * the user should only be able to 'Enter' to select a suggestion.
-   * @param {Event} event
-   * @param {boolean} resultsShowing
-   * @param {boolean} submitOnEnter
    * @param {boolean} unusedActiveElement
+   * @return {boolean}
    */
-  maybePreventDefaultOnEnter(
-    event,
-    resultsShowing,
-    submitOnEnter,
-    unusedActiveElement
-  ) {
-    if (!resultsShowing || submitOnEnter) {
-      return;
-    }
-    event.preventDefault();
+  shouldPreventFormSubmissionOnEnter(unusedActiveElement) {
+    return !this.submitOnEnter_;
   }
 }

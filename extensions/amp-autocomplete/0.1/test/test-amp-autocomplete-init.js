@@ -15,8 +15,6 @@
  */
 
 import '../amp-autocomplete';
-import {AutocompleteBindingInline} from '../autocomplete-binding-inline';
-import {AutocompleteBindingSingle} from '../autocomplete-binding-single';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -80,21 +78,6 @@ describes.realWin(
       return ampAutocomplete.build().then(() => ampAutocomplete);
     }
 
-    it('should build with single binding by default', () => {
-      return getAutocomplete({'filter': 'substring'}).then(ampAutocomplete => {
-        const impl = ampAutocomplete.implementation_;
-        expect(impl.binding_ instanceof AutocompleteBindingSingle).to.be.true;
-      });
-    });
-
-    it('should require experiment when "inline" is specified', () => {
-      return allowConsoleError(() => {
-        return expect(getAutocomplete({'inline': 'true'})).to.be.rejectedWith(
-          /Experiment amp-autocomplete is not turned on/
-        );
-      });
-    });
-
     it('should require experiment when "query" is specified', () => {
       return allowConsoleError(() => {
         return expect(getAutocomplete({'query': 'q'})).to.be.rejectedWith(
@@ -106,46 +89,11 @@ describes.realWin(
     it('should build with "inline" and "query" when specified with experiment on', () => {
       toggleExperiment(win, 'amp-autocomplete', true);
       return getAutocomplete({
-        'inline': 'true',
         'filter': 'substring',
         'query': 'q',
       }).then(ampAutocomplete => {
         const impl = ampAutocomplete.implementation_;
-        expect(impl.binding_ instanceof AutocompleteBindingInline).to.be.true;
         expect(impl.queryKey_).to.equal('q');
-      });
-    });
-
-    it('should support "suggest-first" attribute for inline', () => {
-      toggleExperiment(win, 'amp-autocomplete', true);
-      return getAutocomplete({
-        'inline': 'true',
-        'filter': 'substring',
-        'suggest-first': 'true',
-      }).then(ampAutocomplete => {
-        const impl = ampAutocomplete.implementation_;
-        expect(impl.suggestFirst_).to.be.true;
-      });
-    });
-
-    it('should require "suggest-first" with "prefix" filter for single', () => {
-      return allowConsoleError(() => {
-        return expect(
-          getAutocomplete({
-            'filter': 'substring',
-            'suggest-first': 'true',
-          })
-        ).to.be.rejectedWith(/"suggest-first" requires "filter" type "prefix"/);
-      });
-    });
-
-    it('should support "suggest-first" with "prefix" filter for single', () => {
-      return getAutocomplete({
-        'filter': 'prefix',
-        'suggest-first': 'true',
-      }).then(ampAutocomplete => {
-        const impl = ampAutocomplete.implementation_;
-        expect(impl.suggestFirst_).to.be.true;
       });
     });
 
@@ -238,7 +186,7 @@ describes.realWin(
     it('should require filter attribute', () => {
       return allowConsoleError(() => {
         return expect(getAutocomplete({})).to.be.rejectedWith(
-          'amp-autocomplete requires "filter" attribute.​​​'
+          /requires "filter" attribute/
         );
       });
     });
