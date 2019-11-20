@@ -170,17 +170,24 @@ export class ConsentConfig {
         config['geoOverride']['geoGroupUnknown'],
         'geoGroupUnknown must be specified in geoOverride'
       );
-      // Need to check if geoService failed... -> then user geoGroupUnknown
       Services.geoForDocOrNull(this.element_).then(geoService => {
         userAssert(geoService, 'requires <amp-geo> to use geoOverride');
-        const geoGroups = Object.keys(config['geoOverride']);
-        for (let i = 0; i < geoGroups.length; i++) {
-          if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-            config = /** @type {!JsonObject} */ (deepMerge(
-              config,
-              config['geoOverride'][geoGroups[i]],
-              1
-            ));
+        if (geoService.ISOCountry === 'unknown') {
+          config = /** @type {!JsonObject} */ (deepMerge(
+            config,
+            config['geoOverride']['geoGroupUnknown'],
+            1
+          ));
+        } else {
+          const geoGroups = Object.keys(config['geoOverride']);
+          for (let i = 0; i < geoGroups.length; i++) {
+            if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+              config = /** @type {!JsonObject} */ (deepMerge(
+                config,
+                config['geoOverride'][geoGroups[i]],
+                1
+              ));
+            }
           }
         }
         delete config['geoOverride'];
