@@ -27,7 +27,7 @@ import {
 } from './responsive-attributes';
 import {Services} from '../../../src/services';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -554,7 +554,7 @@ class AmpCarousel extends AMP.BaseElement {
   /**
    * Handle a keyup, potentially going to the next/previous set of slides,
    * depending on the carousel configuration.
-   * @param {!KeyboardEvent} event
+   * @param {!Event} event
    */
   onKeydown_(event) {
     const isRight = event.key === Keys.RIGHT_ARROW;
@@ -564,7 +564,7 @@ class AmpCarousel extends AMP.BaseElement {
       return;
     }
 
-    const rtl = isRTL(this.element.ownerDocument);
+    const rtl = isRTL(devAssert(this.element.ownerDocument));
     const next = (isRight && !rtl) || (isLeft && rtl);
 
     if (next) {
