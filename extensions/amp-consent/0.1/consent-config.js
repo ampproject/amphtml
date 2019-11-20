@@ -42,8 +42,8 @@ export class ConsentConfig {
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
 
-    /** @private {?JsonObject} */
-    this.config_ = null;
+    /** @private {?Promise<?JsonObject>} */
+    this.configPromise_ = null;
   }
 
   /**
@@ -52,12 +52,9 @@ export class ConsentConfig {
    */
   getConsentConfigPromise() {
     if (!this.config_) {
-      return this.validateAndParseConfig_().then(validatedConfig => {
-        this.config_ = validatedConfig;
-        return this.config_;
-      });
+      this.configPromise_ = this.validateAndParseConfig_();
     }
-    return Promise.resolve(this.config_);
+    return this.configPromise_;
   }
 
   /**
@@ -166,28 +163,16 @@ export class ConsentConfig {
    */
   mergeGeoOverride_(config) {
     if (config['geoOverride']) {
-      userAssert(
-        config['geoOverride']['geoGroupUnknown'],
-        'geoGroupUnknown must be specified in geoOverride'
-      );
       Services.geoForDocOrNull(this.element_).then(geoService => {
         userAssert(geoService, 'requires <amp-geo> to use geoOverride');
-        if (geoService.ISOCountry === 'unknown') {
-          config = /** @type {!JsonObject} */ (deepMerge(
-            config,
-            config['geoOverride']['geoGroupUnknown'],
-            1
-          ));
-        } else {
-          const geoGroups = Object.keys(config['geoOverride']);
-          for (let i = 0; i < geoGroups.length; i++) {
-            if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-              config = /** @type {!JsonObject} */ (deepMerge(
-                config,
-                config['geoOverride'][geoGroups[i]],
-                1
-              ));
-            }
+        const geoGroups = Object.keys(config['geoOverride']);
+        for (let i = 0; i < geoGroups.length; i++) {
+          if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+            config = /** @type {!JsonObject} */ (deepMerge(
+              config,
+              config['geoOverride'][geoGroups[i]],
+              1
+            ));
           }
         }
         delete config['geoOverride'];
