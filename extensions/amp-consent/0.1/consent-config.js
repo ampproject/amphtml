@@ -16,6 +16,8 @@
 
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {Services} from '../../../src/services';
 import {deepMerge} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
@@ -46,13 +48,16 @@ export class ConsentConfig {
 
   /**
    * Read validate and return the config
-   * @return {!JsonObject}
+   * @return {!Promise<JsonObject>}
    */
   getConsentConfig() {
     if (!this.config_) {
-      this.config_ = this.validateAndParseConfig_();
+      return this.validateAndParseConfig_().then(validatedConfig => {
+        this.config_ = validatedConfig;
+        return this.config_;
+      });
     }
-    return this.config_;
+    return Promise.resolve(this.config_);
   }
 
   /**
@@ -110,7 +115,7 @@ export class ConsentConfig {
    *  "consentInstanceId": "ABC",
    *  "checkConsentHref": "https://fake.com"
    * }
-   * @return {!JsonObject}
+   * @return {!Promise<JsonObject>}
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
@@ -150,7 +155,41 @@ export class ConsentConfig {
       }
     }
 
-    return config;
+    // (TODO): Assert that if we're using new version we have consentRequired
+    // otherwise we're using old version and we should migrate to new
+    // version here.
+    // E.g: promptIfUnknownForGeo: geoGroup -> geoOverride: {geoGroup: {consentRequired: true}}
+
+    // Do I need to guard against incorrect geoOverride?
+    return this.mergeGeoOverride_(config).then(() => config);
+  }
+
+  /**
+   * @param {JsonObject} config
+   * @return {!Promise}
+   */
+  mergeGeoOverride_(config) {
+    if (config['geoOverride']) {
+      Services.geoForDocOrNull(this.element_).then(geo => {
+        userAssert(geo, 'requires <amp-geo> to use geoOVerride');
+        const geoGroups = Object.keys(this.consentConfig_['geoOverride']);
+        for (let i = 0; i < geoGroups.length; i++) {
+          // Maybe I should be using merge configs here?
+          if (geo.isInCountryGroup(geoGroups[i]) == GEO_IN_GROUP.IN) {
+            this.consentConfig_['consentRequired'] =
+              this.consentConfig_['geoOverride'][geoGroups[i]][
+                'consentRequired'
+              ] || this.consentConfig_['consentRequired'];
+            this.consentConfig_['checkConsentHref'] =
+              this.consentConfig_['geoOverride'][geoGroups[i]][
+                'checkConsentHref'
+              ] || this.consentConfig_['checkConsentHref'];
+          }
+        }
+        delete config['geoOverride'];
+      });
+    }
+    return Promise.resolve();
   }
 
   /**
