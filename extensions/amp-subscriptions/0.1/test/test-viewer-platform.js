@@ -59,21 +59,21 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     win = env.win;
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
-    sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
-    sandbox
+    env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
+    env.sandbox
       .stub(serviceAdapter, 'getPageConfig')
       .callsFake(() => new PageConfig(currentProductId, true));
-    sandbox
+    env.sandbox
       .stub(serviceAdapter, 'getDialog')
       .callsFake(() => new Dialog(ampdoc));
-    sandbox
+    env.sandbox
       .stub(serviceAdapter, 'getReaderId')
       .callsFake(() => Promise.resolve('reader1'));
-    sandbox
+    env.sandbox
       .stub(serviceAdapter, 'getEncryptedDocumentKey')
       .callsFake(() => Promise.resolve(null));
-    resetPlatformsStub = sandbox.stub(serviceAdapter, 'resetPlatforms');
-    sandbox
+    resetPlatformsStub = env.sandbox.stub(serviceAdapter, 'resetPlatforms');
+    env.sandbox
       .stub(Services.viewerForDoc(ampdoc), 'onMessage')
       .callsFake((message, cb) => {
         messageCallback = cb;
@@ -84,10 +84,10 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       serviceAdapter,
       origin
     );
-    sandbox
+    env.sandbox
       .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
       .callsFake(() => Promise.resolve(fakeAuthToken));
-    sendAuthTokenStub = sandbox.stub(
+    sendAuthTokenStub = env.sandbox.stub(
       viewerPlatform,
       'sendAuthTokenErrorToViewer_'
     );
@@ -96,7 +96,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   describe('getEntitlements', () => {
     it('should call verify() with authorization and decryptedDocKey', () => {
       const entitlement = {};
-      const verifyAuthTokenStub = sandbox
+      const verifyAuthTokenStub = env.sandbox
         .stub(viewerPlatform, 'verifyAuthToken_')
         .callsFake(() => Promise.resolve(entitlement));
       return viewerPlatform.getEntitlements().then(() => {
@@ -109,7 +109,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
 
     it('should send auth rejection message for rejected verification', () => {
       const reason = 'Payload is expired';
-      sandbox
+      env.sandbox
         .stub(viewerPlatform, 'verifyAuthToken_')
         .callsFake(() => Promise.reject(new Error(reason)));
       return viewerPlatform.getEntitlements().catch(() => {
@@ -134,7 +134,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     entitlement.service = 'local';
 
     it('should reject promise for expired payload', () => {
-      sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
         return {
           'aud': getWinOrigin(win),
           'exp': Date.now() / 1000 - 10,
@@ -147,7 +147,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     });
 
     it('should reject promise for audience mismatch', () => {
-      sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
         return {
           'aud': 'random origin',
           'exp': Math.floor(Date.now() / 1000) + 5 * 60,
@@ -162,7 +162,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     });
 
     it('should resolve promise with entitlement', () => {
-      sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
         return {
           'aud': getWinOrigin(win),
           'exp': Math.floor(Date.now() / 1000) + 5 * 60,
@@ -189,7 +189,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     });
 
     it('should resolve promise with entitlement and decryptedDocKey', () => {
-      sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
         return {
           'aud': getWinOrigin(win),
           'exp': Math.floor(Date.now() / 1000) + 5 * 60,
@@ -209,7 +209,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       'should resolve granted entitlement, with metering in data if ' +
         'viewer only sends metering',
       () => {
-        sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
+        env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
           return {
             'aud': getWinOrigin(win),
             'exp': Math.floor(Date.now() / 1000) + 5 * 60,
@@ -239,12 +239,15 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
 
   describe('proxy methods', () => {
     it('should delegate getServiceId', () => {
-      const proxyStub = sandbox.stub(viewerPlatform.platform_, 'getServiceId');
+      const proxyStub = env.sandbox.stub(
+        viewerPlatform.platform_,
+        'getServiceId'
+      );
       viewerPlatform.getServiceId();
       expect(proxyStub).to.be.called;
     });
     it('should delegate isPingbackEnabled', () => {
-      const proxyStub = sandbox.stub(
+      const proxyStub = env.sandbox.stub(
         viewerPlatform.platform_,
         'isPingbackEnabled'
       );
@@ -252,12 +255,12 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       expect(proxyStub).to.be.called;
     });
     it('should delegate pingback', () => {
-      const proxyStub = sandbox.stub(viewerPlatform.platform_, 'pingback');
+      const proxyStub = env.sandbox.stub(viewerPlatform.platform_, 'pingback');
       viewerPlatform.pingback();
       expect(proxyStub).to.be.called;
     });
     it('should delegate getSupportedScoreFactor', () => {
-      const proxyStub = sandbox.stub(
+      const proxyStub = env.sandbox.stub(
         viewerPlatform.platform_,
         'getSupportedScoreFactor'
       );

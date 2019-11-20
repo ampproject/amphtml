@@ -51,8 +51,8 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       'should call renderActions_ and renderDialog with ' +
         'the entitlements provided',
       () => {
-        const actionRenderStub = sandbox.stub(renderer, 'renderActions_');
-        const dialogRenderStub = sandbox.stub(renderer, 'renderDialog_');
+        const actionRenderStub = env.sandbox.stub(renderer, 'renderActions_');
+        const dialogRenderStub = env.sandbox.stub(renderer, 'renderDialog_');
         renderer.render(entitlementsForService1);
         expect(actionRenderStub).to.be.calledWith(entitlementsForService1);
         expect(dialogRenderStub).to.be.calledWith(entitlementsForService1);
@@ -85,7 +85,10 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     });
 
     beforeEach(() => {
-      delegateUIStub = sandbox.stub(serviceAdapter, 'decorateServiceAction');
+      delegateUIStub = env.sandbox.stub(
+        serviceAdapter,
+        'decorateServiceAction'
+      );
     });
 
     function isDisplayed(el) {
@@ -137,8 +140,8 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
     let dialog0, dialog1, dialog2, dialog3;
 
     beforeEach(() => {
-      templatesMock = sandbox.mock(Services.templatesFor(win));
-      dialogMock = sandbox.mock(renderer.dialog_);
+      templatesMock = env.sandbox.mock(Services.templatesFor(win));
+      dialogMock = env.sandbox.mock(renderer.dialog_);
       dialog0 = createElementWithAttributes(doc, 'div', {
         'id': 'dialog0',
         'subscriptions-dialog': '',
@@ -177,7 +180,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialogMock
         .expects('open')
         .withExactArgs(
-          sinon.match(arg => {
+          env.sandbox.match(arg => {
             content = arg;
             return true;
           }),
@@ -205,7 +208,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialogMock
         .expects('open')
         .withExactArgs(
-          sinon.match(arg => {
+          env.sandbox.match(arg => {
             content = arg;
             return true;
           }),

@@ -20,14 +20,12 @@ import {Services} from '../../../../src/services';
 import {createElementWithAttributes, removeChildren} from '../../../../src/dom';
 
 describes.realWin('Amp custom ad', {amp: true}, env => {
-  let sandbox;
   let win;
   let doc;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    sandbox = env.sandbox;
   });
 
   it('should get the correct full URLs', () => {
@@ -38,7 +36,7 @@ describes.realWin('Amp custom ad', {amp: true}, env => {
     const urlBase1 = '/examples/custom.ad.example.single.json';
     const elem1 = getCustomAd(doc, urlBase1);
     const ad1 = new AmpAdCustom(elem1);
-    sandbox.stub(ad1, 'getFallback').callsFake(() => {
+    env.sandbox.stub(ad1, 'getFallback').callsFake(() => {
       return null;
     });
     ad1.buildCallback();
@@ -48,7 +46,7 @@ describes.realWin('Amp custom ad', {amp: true}, env => {
     const slot = 'myslot2';
     const elem2 = getCustomAd(doc, urlBase2, slot);
     const ad2 = new AmpAdCustom(elem2);
-    sandbox.stub(ad2, 'getFallback').callsFake(() => {
+    env.sandbox.stub(ad2, 'getFallback').callsFake(() => {
       return null;
     });
     ad2.buildCallback();
@@ -59,7 +57,7 @@ describes.realWin('Amp custom ad', {amp: true}, env => {
     const slot3 = 'myslot3';
     const elem3 = getCustomAd(doc, urlBase34, slot3);
     const ad3 = new AmpAdCustom(elem3);
-    sandbox.stub(ad3, 'getFallback').callsFake(() => {
+    env.sandbox.stub(ad3, 'getFallback').callsFake(() => {
       return null;
     });
     ad3.buildCallback();
@@ -67,7 +65,7 @@ describes.realWin('Amp custom ad', {amp: true}, env => {
     const slot4 = 'myslot4';
     const elem4 = getCustomAd(doc, urlBase34, slot4);
     const ad4 = new AmpAdCustom(elem4);
-    sandbox.stub(ad4, 'getFallback').callsFake(() => {
+    env.sandbox.stub(ad4, 'getFallback').callsFake(() => {
       return null;
     });
     ad4.buildCallback();
@@ -82,7 +80,7 @@ describes.realWin('Amp custom ad', {amp: true}, env => {
   });
 
   it('should perform multiple requests if no `data-slot`', () => {
-    const stub = sandbox.stub(Services, 'xhrFor').callsFake(() => ({
+    const stub = env.sandbox.stub(Services, 'xhrFor').callsFake(() => ({
       fetchJson: () => Promise.resolve({'foo': 1}),
     }));
 

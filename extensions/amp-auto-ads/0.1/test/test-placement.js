@@ -54,7 +54,7 @@ describes.realWin(
       doc.body.appendChild(container);
       // Stub whenBuilt to resolve immediately to handle upgrade for AdSense
       // to FF impl.
-      sinon
+      env.sandbox
         .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
     });
@@ -465,7 +465,7 @@ describes.realWin(
         });
 
         const resources = Services.resourcesForDoc(anchor);
-        sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
           return Promise.reject();
         });
 
@@ -668,10 +668,10 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
-        sandbox.stub(resource.viewport_, 'getWidth').callsFake(() => 2000);
+        env.sandbox.stub(resource.viewport_, 'getWidth').callsFake(() => 2000);
 
         const placements = getPlacementsFromConfigObj(
           ampdoc,
@@ -727,13 +727,13 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
-        sandbox.stub(win, 'getComputedStyle').callsFake(() => {
+        env.sandbox.stub(win, 'getComputedStyle').callsFake(() => {
           return {direction: 'ltr'};
         });
-        sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
+        env.sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
           return Promise.resolve({left: 20});
         });
 
@@ -781,13 +781,13 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
-        sandbox.stub(win, 'getComputedStyle').callsFake(() => {
+        env.sandbox.stub(win, 'getComputedStyle').callsFake(() => {
           return {direction: 'rtl'};
         });
-        sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
+        env.sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
           return Promise.resolve({left: 20});
         });
 
@@ -835,7 +835,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
 
@@ -881,7 +881,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.reject(new Error('Resize failed'));
         });
 
@@ -932,7 +932,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.reject(new Error('Resize failed'));
         });
 

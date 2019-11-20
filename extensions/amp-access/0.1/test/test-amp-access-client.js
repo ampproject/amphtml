@@ -42,7 +42,7 @@ describes.realWin(
       context = {
         buildUrl: () => {},
       };
-      contextMock = sandbox.mock(context);
+      contextMock = env.sandbox.mock(context);
     });
 
     afterEach(() => {
@@ -77,7 +77,7 @@ describes.realWin(
       });
 
       it('should allow only lower-than-default timeout in production', () => {
-        sandbox.stub(mode, 'getMode').callsFake(() => {
+        env.sandbox.stub(mode, 'getMode').callsFake(() => {
           return {development: false, localDev: false};
         });
 
@@ -148,7 +148,7 @@ describes.realWin(
 
       beforeEach(() => {
         adapter = new AccessClientAdapter(ampdoc, validConfig, context);
-        xhrMock = sandbox.mock(adapter.xhr_);
+        xhrMock = env.sandbox.mock(adapter.xhr_);
       });
 
       afterEach(() => {
@@ -257,7 +257,7 @@ describes.realWin(
             .expects('sendSignal')
             .withExactArgs(
               'https://acme.com/p?rid=reader1',
-              sinon.match(init => {
+              env.sandbox.match(init => {
                 return (
                   init.method == 'POST' &&
                   init.credentials == 'include' &&
@@ -285,7 +285,7 @@ describes.realWin(
             .expects('sendSignal')
             .withExactArgs(
               'https://acme.com/p?rid=reader1',
-              sinon.match(init => {
+              env.sandbox.match(init => {
                 return (
                   init.method == 'POST' &&
                   init.credentials == 'include' &&
