@@ -196,7 +196,7 @@ describes.realWin(
 
       beforeEach(() => {
         expect(impl.container_).not.to.be.null;
-        expect(impl.container_.children.length).to.equal(0);
+        expect(impl.container_.children).to.have.length(0);
         clearAllItemsSpy = env.sandbox.spy(impl, 'clearAllItems_');
         filterDataSpy = env.sandbox.spy(impl, 'filterData_');
         renderSpy = env.sandbox.spy(impl, 'renderResults_');
@@ -241,7 +241,7 @@ describes.realWin(
               ['apple'],
               impl.container_
             );
-            expect(impl.container_.children.length).to.equal(1);
+            expect(impl.container_.children).to.have.length(1);
             expect(impl.container_.children[0].innerText).to.equal('apple');
           });
       });
@@ -282,13 +282,13 @@ describes.realWin(
         expect(impl.container_.children[2].getAttribute('data-value')).to.equal(
           data[2]
         );
-        expect(impl.container_.children.length).to.equal(3);
+        expect(impl.container_.children).to.have.length(3);
       });
 
       it('should update the container_ with plain text', async () => {
         const createSpy = env.sandbox.spy(impl, 'createElementFromItem_');
         await impl.renderResults_(['apple'], impl.container_);
-        expect(impl.container_.children.length).to.equal(1);
+        expect(impl.container_.children).to.have.length(1);
         expect(impl.container_.children[0].innerText).to.equal('apple');
         expect(createSpy).to.have.been.calledOnce;
         expect(createSpy).to.have.been.calledWith('apple');
@@ -305,7 +305,7 @@ describes.realWin(
           .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
           .returns(Promise.resolve(getRenderedSuggestions()));
         await impl.renderResults_(sourceData, impl.container_);
-        expect(impl.container_.children.length).to.equal(3);
+        expect(impl.container_.children).to.have.length(3);
         expect(impl.container_.children[0].getAttribute('data-value')).to.equal(
           sourceData[0].value
         );
@@ -462,7 +462,7 @@ describes.realWin(
           .then(() => {
             expect(renderSpy).to.have.been.calledOnce;
             expect(toggleResultsSpy).to.have.been.calledWith(true);
-            expect(impl.container_.children.length).to.equal(3);
+            expect(impl.container_.children).to.have.length(3);
             expect(updateActiveSpy).not.to.have.been.called;
           });
       });
@@ -481,7 +481,7 @@ describes.realWin(
           .then(() => {
             expect(renderSpy).to.have.been.calledOnce;
             expect(toggleResultsSpy).to.have.been.calledWith(true);
-            expect(impl.container_.children.length).to.equal(3);
+            expect(impl.container_.children).to.have.length(3);
             expect(updateActiveSpy).to.have.been.calledWith(1);
           });
       });
@@ -704,7 +704,7 @@ describes.realWin(
           return impl.renderResults_(impl.sourceData_, impl.container_);
         })
         .then(() => {
-          expect(impl.container_.children.length).to.equal(3);
+          expect(impl.container_.children).to.have.length(3);
           expect(resetSpy).to.have.been.calledOnce;
           impl.toggleResults_(true);
           expect(impl.resultsShowing_()).to.be.true;
@@ -846,7 +846,7 @@ describes.realWin(
           return impl.renderResults_(impl.sourceData_, impl.container_);
         })
         .then(() => {
-          expect(impl.container_.children.length).to.equal(3);
+          expect(impl.container_.children).to.have.length(3);
           impl.activeElement_ = doc.createElement('div');
           expect(impl.activeElement_).not.to.be.null;
           expect(impl.resetActiveElement_()).to.equal();
@@ -933,8 +933,8 @@ describes.realWin(
         .returns(Promise.resolve(rendered));
 
       await impl.renderResults_(sourceData, impl.container_);
-      expect(impl.container_.children.length).to.equal(3);
-      expect(impl.getEnabledItems_().length).to.equal(2);
+      expect(impl.container_.children).to.have.length(3);
+      expect(impl.getEnabledItems_()).to.have.length(2);
       expect(impl.container_.children[2].hasAttribute('aria-disabled')).to.be
         .true;
     });
