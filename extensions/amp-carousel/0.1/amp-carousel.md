@@ -38,7 +38,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
     <td>
       <ul>
         <li>carousel: fixed, fixed-height, and nodisplay.</li>
-        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive.</li>
+        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive. See best practices below for additional considerations about slides.</li>
       </ul>
     </td>
   </tr>
@@ -267,6 +267,14 @@ _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 ```
 
 Note that the SVG content needs to have certain characters, including `<`, `>` and `#` encoded. This can be done using a tool like [SVGO](https://github.com/svg/svgo) or using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
+
+## Supported Layouts for Slides
+
+As noted above, the `type="slides"` designation on `amp-carousel 0.1` supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
+
+Publishers should be aware that while this mode explictly supports `fixed` layout sizes, it also employs `display: flex;` in its styling. In other words nested elements can have `layout=fixed` sizing, though via styling it only respects absolute width up to 100%. One way to workaround this limitation is by using `flex-shrink: 0` on any fixed layout slides.
+
+For an accessible and smooth user experience, it is generally good practice when using `type="slides"` that all children of that carousel and the carousel itself share the same dimensional ratios as well as the same layout type.
 
 ## Validation
 
