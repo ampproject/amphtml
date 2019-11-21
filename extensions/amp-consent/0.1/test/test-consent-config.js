@@ -46,7 +46,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     it('read inline config', () => {
       appendConfigScriptElement(doc, element, defaultConfig);
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfig()).to.deep.equal(
+      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal(
         dict({
           'consentInstanceId': 'ABC',
           'checkConsentHref': 'https://response1',
@@ -58,7 +58,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       appendConfigScriptElement(doc, element, dict({}));
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfig()).to.deep.equal(
+      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal(
         dict({
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/get-consent-v1',
@@ -91,7 +91,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         })
       );
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfig()).to.deep.equal(
+      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal(
         dict({
           'consentInstanceId': 'ABC',
           'promptIfUnknownForGeoGroup': 'eea',
@@ -131,7 +131,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       );
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfig()).to.deep.equal(
+      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal(
         dict({
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/override',
@@ -175,18 +175,16 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       scriptElement.textContent = JSON.stringify(defaultConfig);
       scriptElement.setAttribute('type', '');
       element.appendChild(scriptElement);
-
-      expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
-        scriptTypeError
-      );
+      const config = new ConsentConfig(element);
+      expect(config.getConsentConfigPromise()).to.throw(scriptTypeError);
 
       // Check consent config exists
       scriptElement.setAttribute('type', 'application/json');
       scriptElement.textContent = JSON.stringify({});
       allowConsoleError(() => {
-        expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
-          consentExistError
-        );
+        expect(() =>
+          new ConsentConfig(element).getConsentConfigPromise()
+        ).to.eventually.throw(consentExistError);
       });
 
       scriptElement.textContent = JSON.stringify({
@@ -196,9 +194,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         },
       });
       allowConsoleError(() => {
-        expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
-          multiConsentError
-        );
+        expect(() =>
+          new ConsentConfig(element).getConsentConfigPromise()
+        ).to.eventually.throw(multiConsentError);
       });
 
       // Check invalid CMP
@@ -207,23 +205,23 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
       element.setAttribute('type', 'not_exist');
       allowConsoleError(() => {
-        expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
-          invalidCMPError
-        );
+        expect(() =>
+          new ConsentConfig(element).getConsentConfigPromise()
+        ).to.eventually.throw(invalidCMPError);
       });
 
       scriptElement.textContent = '"abc": {"a",}';
-      expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
-        invalidJsonError
-      );
+      expect(() =>
+        new ConsentConfig(element).getConsentConfigPromise()
+      ).to.eventually.throw(invalidJsonError);
 
       // Check there is only one script object
       scriptElement.textContent = JSON.stringify(defaultConfig);
       const script2 = doc.createElement('script');
       element.appendChild(script2);
-      expect(() => new ConsentConfig(element).getConsentConfig()).to.throw(
-        multiScriptError
-      );
+      expect(() =>
+        new ConsentConfig(element).getConsentConfigPromise()
+      ).to.eventually.throw(multiScriptError);
     });
 
     it('remove not supported policy', () => {
@@ -239,7 +237,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         })
       );
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfig()).to.deep.equal({
+      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal({
         'consentInstanceId': 'ABC',
         'policy': {},
       });

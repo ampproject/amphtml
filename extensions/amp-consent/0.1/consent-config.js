@@ -162,17 +162,19 @@ export class ConsentConfig {
    * @return {!Promise}
    */
   mergeGeoOverride_(config) {
-    if (config['geoOverride']) {
+    const mergedConfig = Object.assign({}, config);
+    if (mergedConfig['geoOverride']) {
       Services.geoForDocOrNull(this.element_).then(geoService => {
         userAssert(geoService, 'requires <amp-geo> to use geoOverride');
-        const geoGroups = Object.keys(config['geoOverride']);
+        const geoGroups = Object.keys(mergedConfig['geoOverride']);
         for (let i = 0; i < geoGroups.length; i++) {
           if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-            config = /** @type {!JsonObject} */ (deepMerge(
-              config,
-              config['geoOverride'][geoGroups[i]],
+            mergedConfig = /** @type {!JsonObject} */ (deepMerge(
+              mergedConfig,
+              mergedConfig['geoOverride'][geoGroups[i]],
               1
             ));
+            break;
           }
         }
         delete config['geoOverride'];
@@ -183,7 +185,6 @@ export class ConsentConfig {
         config['checkConsentHref'],
         'checkConsentHref must be specified if consentRequired is remote'
       );
-      config['consentRequired'] = true;
     }
     return Promise.resolve();
   }
