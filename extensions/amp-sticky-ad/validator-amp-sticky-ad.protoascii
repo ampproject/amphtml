@@ -22,7 +22,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
     version: "1.0"
     version: "latest"
     deprecated_version: "0.1"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
