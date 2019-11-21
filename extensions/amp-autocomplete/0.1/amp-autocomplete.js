@@ -246,7 +246,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       'template, script[template]'
     );
     userAssert(
-      !this.isSsr || this.hasTemplate_,
+      !this.isSsr_ || this.hasTemplate_,
       `${TAG} should provide a <template> or <script type="plain/text"> element.`
     );
     userAssert(
