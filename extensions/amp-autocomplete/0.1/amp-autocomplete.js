@@ -205,7 +205,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
 
-    this.inputElement_ = this.getSingleInputOrTextareaFrom_(this.element);
+    this.inputElement_ = this.getSingleInputOrTextarea_();
     const inputType = this.inputElement_.getAttribute('type');
     userAssert(
       !this.inputElement_.hasAttribute('type') ||
@@ -319,16 +319,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Element} element
+   * amp-autocomplete expects exactly one nested input or textarea.
    * @return {!HTMLInputElement}
    */
-  getSingleInputOrTextareaFrom_(element) {
-    const possibleElements = element.querySelectorAll('input,textarea');
+  getSingleInputOrTextarea_() {
+    const possibleElements = this.element.querySelectorAll('input,textarea');
     userAssert(
       possibleElements.length == 1,
       '%s should contain exactly one <input> or <textarea> descendant %s',
       TAG,
-      element
+      this.element
     );
     return /** @type {!HTMLInputElement} */ (possibleElements[0]);
   }
