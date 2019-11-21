@@ -82,9 +82,9 @@ export function ReactBaseElement(Component, opts = {}) {
     }
 
     /** @override */
-    isLayoutSupported() {
-      // TODO: Expose as an opts method?
-      return true;
+    isLayoutSupported(layout) {
+      const layoutSupported = opts.isLayoutSupported;
+      return layoutSupported ? layoutSupported(layout) : true;
     }
 
     /** @override */
