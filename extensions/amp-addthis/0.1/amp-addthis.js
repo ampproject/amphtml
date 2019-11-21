@@ -123,7 +123,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {(?JsonObject<string, string>|null)} */
     this.shareConfig_ = null;
 
-    /** @private {(?JsonObject<AtConfigDef>)} */
+    /** @private {(?JsonObject)} */
     this.atConfig_ = null;
 
     /** @private {string} */
