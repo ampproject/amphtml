@@ -192,9 +192,9 @@ function adoptShared(global, callback) {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
           extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
-          if (extensions.requiresShadowMode(fnOrStruct.n)) {
-            dynamicallyAdoptShadowMode(global, extensions);
-          }
+          // if (extensions.requiresShadowMode(fnOrStruct.n)) {
+          //   dynamicallyAdoptShadowMode(global, extensions);
+          // }
         }
       });
     };
