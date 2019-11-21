@@ -28,8 +28,8 @@ describes.fakeWin('validator-integration', {}, env => {
   describe('maybeValidate', () => {
     beforeEach(() => {
       win = env.win;
-      loadScriptStub = sandbox.stub(eventHelper, 'loadPromise');
-      modeStub = sandbox.stub(mode, 'getMode');
+      loadScriptStub = env.sandbox.stub(eventHelper, 'loadPromise');
+      modeStub = env.sandbox.stub(mode, 'getMode');
     });
 
     it('should not load validator script if not in dev mode', () => {

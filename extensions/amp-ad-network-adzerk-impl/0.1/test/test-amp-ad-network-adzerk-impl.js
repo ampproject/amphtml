@@ -38,7 +38,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     win.__AMP_MODE = {localDev: false};
     win.AMP.registerTemplate('amp-mustache', AmpMustache);
     doc = win.document;
-    fetchTextMock = sandbox.stub(Xhr.prototype, 'fetchText');
+    fetchTextMock = env.sandbox.stub(Xhr.prototype, 'fetchText');
     element = createElementWithAttributes(doc, 'amp-ad', {
       'type': 'adzerk',
       'width': '320',

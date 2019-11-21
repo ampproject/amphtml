@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <style amp-custom>
     amp-base-carousel img {
       object-fit: cover;
@@ -17,7 +18,7 @@
 </head>
 <body>
   <h1>A Basic carousel, with looping</h1>
-  <amp-base-carousel id="carousel-1" width="300" height="200" layout="responsive" loop="true">
+  <amp-base-carousel  id="carousel-1" width="300" height="200" layout="responsive" loop="true" lightbox>
     <amp-img src="./img/redgradient.png" layout="flex-item"></amp-img>
     <amp-img src="./img/greengradient.png" layout="flex-item"></amp-img>
     <amp-img src="./img/bluegradient.png" layout="flex-item"></amp-img>
