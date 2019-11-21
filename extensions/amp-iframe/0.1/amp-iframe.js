@@ -504,7 +504,7 @@ export class AmpIframe extends AMP.BaseElement {
    * Listen for Pym.js messages for 'height' and 'width'.
    *
    * @see http://blog.apps.npr.org/pym.js/
-   * @param {MessageEvent} event
+   * @param {!MessageEvent} event
    * @private
    */
   listenForPymMessage_(event) {
