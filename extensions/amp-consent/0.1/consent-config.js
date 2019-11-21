@@ -151,21 +151,24 @@ export class ConsentConfig {
         }
       }
     }
-
-    return this.mergeGeoOverride_(config).then(() => config);
+    return this.mergeGeoOverride_(config);
   }
 
   /**
    * Merge correct geoOverride object into toplevel config, then
    * validate.
-   * @param {JsonObject} config
-   * @return {!Promise}
+   * @param {?JsonObject} config
+   * @return {!Promise<?JsonObject>}
    */
   mergeGeoOverride_(config) {
     const mergedConfig = Object.assign({}, config);
     if (mergedConfig['geoOverride']) {
       Services.geoForDocOrNull(this.element_).then(geoService => {
-        userAssert(geoService, 'requires <amp-geo> to use geoOverride');
+        userAssert(
+          geoService,
+          '%s: requires <amp-geo> to use geoOverride',
+          TAG
+        );
         const geoGroups = Object.keys(mergedConfig['geoOverride']);
         for (let i = 0; i < geoGroups.length; i++) {
           if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
@@ -177,16 +180,17 @@ export class ConsentConfig {
             break;
           }
         }
-        delete config['geoOverride'];
+        delete mergedConfig['geoOverride'];
       });
     }
-    if (config['consentRequired'] === 'remote') {
+    if (mergedConfig['consentRequired'] === 'remote') {
       userAssert(
-        config['checkConsentHref'],
-        'checkConsentHref must be specified if consentRequired is remote'
+        mergedConfig['checkConsentHref'],
+        '%s: checkConsentHref must be specified if consentRequired is remote',
+        TAG
       );
     }
-    return Promise.resolve();
+    return Promise.resolve(mergedConfig);
   }
 
   /**

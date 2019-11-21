@@ -16,6 +16,8 @@
 
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {ConsentConfig, expandPolicyConfig} from '../consent-config';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
+import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -153,6 +155,134 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       );
     });
 
+    describe('merges geoOverride correctly', () => {
+      beforeEach(() => {
+        appendConfigScriptElement(
+          doc,
+          element,
+          dict({
+            'consentInstanceId': 'abc',
+            'consentRequired': false,
+            'checkConsentHref': '/override',
+            'geoOverride': {
+              'nafta': {
+                'consentRequired': true,
+              },
+              'waldo': {
+                'checkConsentHref': 'https://example.com/check-consent',
+                'consentRequired': 'remote',
+              },
+              'geoGroupUnknown': {
+                'checkConsentHref': 'https://example.com/check-consent',
+                'consentRequired': true,
+              },
+            },
+          })
+        );
+      });
+
+      it('does not merge', () => {
+        sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            isInCountryGroup() {
+              return false;
+            },
+          })
+        );
+
+        const consentConfig = new ConsentConfig(element);
+        expect(
+          consentConfig.getConsentConfigPromise()
+        ).to.eventually.deep.equal(
+          dict({
+            'consentInstanceId': 'abc',
+            'consentRequired': false,
+            'checkConsentHref': '/override',
+          })
+        );
+      });
+
+      it('Overrides single field', () => {
+        sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            isInCountryGroup(geoGroup) {
+              if (geoGroup === 'nafta') {
+                return GEO_IN_GROUP.IN;
+              }
+              return GEO_IN_GROUP.NOT_IN;
+            },
+          })
+        );
+
+        const consentConfig = new ConsentConfig(element);
+        expect(
+          consentConfig.getConsentConfigPromise()
+        ).to.eventually.deep.equal(
+          dict({
+            'consentInstanceId': 'abc',
+            'consentRequired': true,
+            'checkConsentHref': '/override',
+          })
+        );
+      });
+
+      it('Overrides both fields', () => {
+        sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            isInCountryGroup(geoGroup) {
+              if (geoGroup === 'waldo') {
+                return GEO_IN_GROUP.IN;
+              }
+              return GEO_IN_GROUP.NOT_IN;
+            },
+          })
+        );
+
+        const consentConfig = new ConsentConfig(element);
+        expect(
+          consentConfig.getConsentConfigPromise()
+        ).to.eventually.deep.equal(
+          dict({
+            'consentInstanceId': 'abc',
+            'checkConsentHref': 'https://example.com/check-consent',
+            'consentRequired': 'remote',
+          })
+        );
+      });
+
+      it('Overrides null fields', () => {
+        sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            isInCountryGroup(geoGroup) {
+              if (geoGroup === 'geoGroupUnknown') {
+                return GEO_IN_GROUP.IN;
+              }
+              return GEO_IN_GROUP.NOT_IN;
+            },
+          })
+        );
+
+        const json = JSON.parse(element.textContent);
+        delete json.consentRequired;
+        delete json.checkConsentHref;
+        element.innerHTML =
+          '"<script type="application/json">' +
+          JSON.stringify(json) +
+          '</script>';
+
+        const consentConfig = new ConsentConfig(element);
+        expect(
+          consentConfig.getConsentConfigPromise()
+        ).to.eventually.deep.equal(
+          dict({
+            'consentInstanceId': 'abc',
+            'checkConsentHref': 'https://example.com/check-consent',
+            'consentRequired': true,
+          })
+        );
+      });
+    });
+
     it('assert valid config', () => {
       const scriptTypeError =
         'amp-consent/consent-config: <script> child ' +
@@ -169,14 +299,25 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       const multiConsentError =
         'amp-consent/consent-config: ' +
         'only single consent instance is supported';
-      // Check script type equals to application/json
+      const checkConsentHrefError =
+        'amp-consent/consent-config: ' +
+        'checkConsentHref must be specified if consentRequired is remote';
+
+      sandbox.stub(Services, 'geoForDocOrNull').returns(
+        Promise.resolve({
+          isInCountryGroup() {
+            return false;
+          },
+        })
+      );
 
       const scriptElement = doc.createElement('script');
       scriptElement.textContent = JSON.stringify(defaultConfig);
       scriptElement.setAttribute('type', '');
       element.appendChild(scriptElement);
+
       const config = new ConsentConfig(element);
-      expect(config.getConsentConfigPromise()).to.throw(scriptTypeError);
+      expect(() => config.getConsentConfigPromise()).to.throw(scriptTypeError);
 
       // Check consent config exists
       scriptElement.setAttribute('type', 'application/json');
@@ -184,7 +325,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       allowConsoleError(() => {
         expect(() =>
           new ConsentConfig(element).getConsentConfigPromise()
-        ).to.eventually.throw(consentExistError);
+        ).to.throw(consentExistError);
       });
 
       scriptElement.textContent = JSON.stringify({
@@ -196,8 +337,17 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       allowConsoleError(() => {
         expect(() =>
           new ConsentConfig(element).getConsentConfigPromise()
-        ).to.eventually.throw(multiConsentError);
+        ).to.throw(multiConsentError);
       });
+
+      scriptElement.textContent = JSON.stringify({
+        'consentInstanceId': 'abc',
+        'geoOverride': {},
+        'consentRequired': 'remote',
+      });
+      expect(() =>
+        new ConsentConfig(element).getConsentConfigPromise()
+      ).to.throw(checkConsentHrefError);
 
       // Check invalid CMP
       scriptElement.textContent = JSON.stringify({
@@ -207,13 +357,13 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       allowConsoleError(() => {
         expect(() =>
           new ConsentConfig(element).getConsentConfigPromise()
-        ).to.eventually.throw(invalidCMPError);
+        ).to.throw(invalidCMPError);
       });
 
       scriptElement.textContent = '"abc": {"a",}';
       expect(() =>
         new ConsentConfig(element).getConsentConfigPromise()
-      ).to.eventually.throw(invalidJsonError);
+      ).to.throw(invalidJsonError);
 
       // Check there is only one script object
       scriptElement.textContent = JSON.stringify(defaultConfig);
@@ -221,7 +371,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       element.appendChild(script2);
       expect(() =>
         new ConsentConfig(element).getConsentConfigPromise()
-      ).to.eventually.throw(multiScriptError);
+      ).to.throw(multiScriptError);
     });
 
     it('remove not supported policy', () => {
