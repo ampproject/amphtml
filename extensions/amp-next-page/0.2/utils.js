@@ -21,6 +21,7 @@ import {
   resolveRelativeUrl,
 } from '../../../src/url';
 import {removeElement} from '../../../src/dom';
+import {toArray} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -48,15 +49,14 @@ export function validateUrl(url, hostUrl) {
 export function validatePage(page, hostUrl) {
   user().assertString(page.url, 'page url must be a string');
 
-  // Rewrite relative URLs to absolute, relative to the source URL.
   const base = getSourceUrl(hostUrl);
   page.url = resolveRelativeUrl(page.url, base);
-
-  const sourceOrigin = getSourceOrigin(hostUrl);
 
   const url = validateUrl(page.url, hostUrl);
   user().assertString(page.image, 'page image must be a string');
   user().assertString(page.title, 'page title must be a string');
+
+  const sourceOrigin = getSourceOrigin(hostUrl);
 
   // Rewrite canonical URLs to cache URLs, when served from the cache.
   if (sourceOrigin !== origin && url.origin === sourceOrigin) {
@@ -81,9 +81,5 @@ export function sanitizeDoc(doc) {
   // TODO(wassgha): Parse for more pages to queue
 
   // TODO(wassgha): Allow amp-analytics after bug bash
-  const analytics = doc.querySelectorAll('amp-analytics');
-  for (let i = 0; i < analytics.length; i++) {
-    const item = analytics[i];
-    removeElement(item);
-  }
+  toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
 }

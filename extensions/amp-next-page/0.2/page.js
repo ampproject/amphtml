@@ -17,6 +17,7 @@
 import {PositionInViewportEntryDef} from '../../../src/service/position-observer/position-observer-worker';
 import {RelativePositions} from '../../../src/layout-rect';
 import {VisibilityState} from '../../../src/visibility-state';
+import {dev} from '../../../src/log';
 
 /** @enum {string} */
 export const PageState = {
@@ -35,12 +36,6 @@ export const PageRelativePos = {
   CONTAINS_VIEWPORT: 'contains',
 };
 
-/** @enum */
-export const PageBound = {
-  HEADER: 0,
-  FOOTER: 1,
-};
-
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
@@ -49,33 +44,61 @@ export class Page {
    * @param {string} image
    */
   constructor(manager, url, title, image) {
-    /** @private {!./service.NextPageService} */
+    /** @private @const {!./service.NextPageService} */
     this.manager_ = manager;
+    /** @private @const {string} */
+    this.title_ = title;
+    /** @private {string} */
+    this.url_ = url;
+    /** @private @const {string} */
+    this.image_ = image;
+
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
-    /** @private {!Object<!PageBound, ?RelativePositions>} */
-    this.boundPosition_ = {[PageBound.HEADER]: null, [PageBound.FOOTER]: null};
+    /** @private {?RelativePositions} */
+    this.headerPosition_ = null;
+    /** @private {?RelativePositions} */
+    this.footerPosition_ = null;
     /** @private {!VisibilityState} */
     this.visibilityState_ = VisibilityState.PRERENDER;
+    /** @private {!PageRelativePos} */
+    this.relativePos_ = PageRelativePos.OUTSIDE_VIEWPORT;
+  }
 
-    // Public props
-    /** @type {string} */
-    this.title = title;
-    /** @type {string} */
-    this.url = url;
-    /** @type {string} */
-    this.image = image;
-    /** @type {!PageRelativePos} */
-    this.relativePos = PageRelativePos.OUTSIDE_VIEWPORT;
+  /** @return {string} */
+  get url() {
+    return this.url_;
+  }
+
+  /**
+   * @param {string} url
+   */
+  updateUrl(url) {
+    this.url_ = url;
+  }
+
+  /** @return {string} */
+  get image() {
+    return this.image_;
+  }
+
+  /** @return {string} */
+  get title() {
+    return this.title_;
+  }
+
+  /** @return {string} */
+  get relativePos() {
+    return this.relativePos_;
   }
 
   /**
    * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ == VisibilityState.VISIBLE;
+    return this.visibilityState_ === VisibilityState.VISIBLE;
   }
 
   /**
@@ -87,14 +110,11 @@ export class Page {
   }
 
   /**
-   * @param {boolean} visible
+   * @param {VisibilityState} visibilityState
    */
-  setVisible(visible) {
+  setVisible(visibilityState) {
     // TODO(wassgha): Handle history manipulation
     // TODO(wassgha): Handle manual visibility management
-    const visibilityState = visible
-      ? VisibilityState.VISIBLE
-      : VisibilityState.HIDDEN;
 
     // Update visibility internally and at the shadow doc level
     if (this.shadowDoc_ && visibilityState != this.visibilityState_) {
@@ -107,14 +127,16 @@ export class Page {
    * @return {boolean}
    */
   isFetching() {
-    return this.state_ == PageState.FETCHING;
+    return this.state_ === PageState.FETCHING;
   }
 
   /**
    * @return {boolean}
    */
   isLoaded() {
-    return this.state_ == PageState.LOADED || this.state_ == PageState.INSERTED;
+    return (
+      this.state_ === PageState.LOADED || this.state_ === PageState.INSERTED
+    );
   }
 
   /**
@@ -123,7 +145,13 @@ export class Page {
    * @return {!Promise}
    */
   fetch() {
-    if (this.state_ == PageState.INSERTED) {
+    // TOOD(wassgha): Should we re-fetch on failure? or show a failed state?
+    // or skip to the next available document? (currently breaks silently)
+    if (
+      this.state_ === PageState.INSERTED ||
+      this.state_ === PageState.FETCHING ||
+      this.state_ === PageState.FAILED
+    ) {
       return Promise.resolve();
     }
 
@@ -150,16 +178,29 @@ export class Page {
 
   /**
    * Called when a position change is detected on the injected
-   * header and footer elements
-   * @param {!PageBound} bound
+   * header element
    * @param {?PositionInViewportEntryDef} position
    */
-  boundPositionChanged(bound, position) {
-    const prevBoundPosition = this.boundPosition_[bound];
-    if (position.relativePos === prevBoundPosition) {
+  headerPositionChanged(position) {
+    const prevFooterPosition = this.footerPosition_;
+    if (position.relativePos === prevFooterPosition) {
       return;
     }
-    this.boundPosition_[bound] = position.relativePos;
+    this.footerPosition_ = position.relativePos;
+    this.updateRelativePos_();
+  }
+
+  /**
+   * Called when a position change is detected on the injected
+   * footer element
+   * @param {?PositionInViewportEntryDef} position
+   */
+  footerPositionChanged(position) {
+    const prevHeaderPosition = this.headerPosition_;
+    if (position.relativePos === prevHeaderPosition) {
+      return;
+    }
+    this.headerPosition_ = position.relativePos;
     this.updateRelativePos_();
   }
 
@@ -169,27 +210,40 @@ export class Page {
    * @private
    */
   updateRelativePos_() {
-    const header = this.boundPosition_[PageBound.HEADER];
-    const footer = this.boundPosition_[PageBound.FOOTER];
+    const {headerPosition_: header, footerPosition_: footer} = this;
+    const {INSIDE, TOP, BOTTOM} = RelativePositions;
 
-    if (
-      header == RelativePositions.INSIDE &&
-      footer == RelativePositions.INSIDE
-    ) {
-      this.relativePos = PageRelativePos.INSIDE_VIEWPORT;
+    dev().assert(
+      header || footer,
+      'next-page scroll triggered without a header or footer position'
+    );
+
+    if (header === INSIDE && footer === INSIDE) {
+      // Both the header and footer are within the viewport bounds
+      // meaning that the document is short enough to be
+      // contained inside the viewport
+      this.relativePos_ = PageRelativePos.INSIDE_VIEWPORT;
+    } else if ((!header || header === TOP) && (!footer || footer === BOTTOM)) {
+      // The head of the document is above the viewport and the
+      // footer of the document is below it, meaning that the viewport
+      // is looking at a section of the document
+      this.relativePos_ = PageRelativePos.CONTAINS_VIEWPORT;
     } else if (
-      header == RelativePositions.TOP &&
-      (!footer || footer == RelativePositions.BOTTOM)
+      (header === TOP && footer === TOP) ||
+      (header === BOTTOM && footer === BOTTOM)
     ) {
-      this.relativePos = PageRelativePos.CONTAINS_VIEWPORT;
-    } else if (
-      (header == RelativePositions.TOP && footer == RelativePositions.TOP) ||
-      (header == RelativePositions.BOTTOM && footer == RelativePositions.BOTTOM)
-    ) {
-      this.relativePos = PageRelativePos.OUTSIDE_VIEWPORT;
+      // Both the header and the footer of the document are either
+      // above or below the document meaning that the viewport hasn't
+      // reached the document yet or has passed it
+      this.relativePos_ = PageRelativePos.OUTSIDE_VIEWPORT;
     } else {
-      this.relativePos = PageRelativePos.LEAVING_VIEWPORT;
+      // The remaining case is the case where the document is halfway
+      // through being scrolling into/out of the viewport in which case
+      // we don't need to update the visibility
+      this.relativePos_ = PageRelativePos.LEAVING_VIEWPORT;
+      return;
     }
+
     this.manager_.updateVisibility();
   }
 }

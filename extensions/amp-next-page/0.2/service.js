@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.2.css';
-import {Page, PageBound, PageRelativePos} from './page';
+import {Page, PageRelativePos} from './page';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
@@ -30,10 +30,8 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {sanitizeDoc, validatePage, validateUrl} from './utils';
-import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 const TAG = 'amp-next-page';
@@ -167,24 +165,22 @@ export class NextPageService {
         page.relativePos === PageRelativePos.CONTAINS_VIEWPORT
       ) {
         if (!page.isVisible()) {
-          page.setVisible(true /** visible */);
+          page.setVisible(VisibilityState.VISIBLE);
         }
         // Hide the previous page
         const prevPage = this.pages_[index + this.scrollDirection_];
         if (
           prevPage &&
-          prevPage.relativePos == PageRelativePos.LEAVING_VIEWPORT &&
+          prevPage.relativePos === PageRelativePos.LEAVING_VIEWPORT &&
           prevPage.isVisible()
         ) {
-          prevPage.setVisible(false /** visible */);
+          prevPage.setVisible(VisibilityState.HIDDEN);
         }
       } else if (page.relativePos === PageRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
-          page.setVisible(false /** visible */);
+          page.setVisible(VisibilityState.VISIBLE);
         }
       }
-      // TODO(wassgha): Clean up
-      this.printPagesForTesting();
     });
   }
 
@@ -207,7 +203,6 @@ export class NextPageService {
    */
   setLastFetchedPage(page) {
     this.lastFetchedPage_ = page;
-    this.printPagesForTesting();
   }
 
   /**
@@ -218,31 +213,25 @@ export class NextPageService {
    */
   appendAndObservePage(page, doc) {
     // If the user already scrolled to the bottom, prevent rendering
-    if (this.getViewportsAway_() >= 1) {
+    if (this.getViewportsAway_() <= 1) {
       // TODO(wassgha): Append a "load next article" button
       return null;
     }
-
-    this.element_.insertBefore(this.separator_.cloneNode(true), this.moreBox_);
 
     const header = this.win_.document.createElement('div');
     const shadowRoot = this.win_.document.createElement('div');
     const footer = this.win_.document.createElement('div');
 
-    this.element_.insertBefore(header, this.moreBox_);
-    this.element_.insertBefore(shadowRoot, this.moreBox_);
-    this.element_.insertBefore(footer, this.moreBox_);
-
     // TODO(wassgha): Unobserve
     this.getPositionObserver_().observe(
       header,
       PositionObserverFidelity.LOW,
-      page.boundPositionChanged.bind(page, PageBound.HEADER)
+      () => page.headerPositionChanged(page)
     );
     this.getPositionObserver_().observe(
       footer,
       PositionObserverFidelity.LOW,
-      page.boundPositionChanged.bind(page, PageBound.FOOTER)
+      () => page.footerPositionChanged(page)
     );
 
     // Handles extension deny-lists and sticky items
@@ -259,6 +248,17 @@ export class NextPageService {
 
       const body = ampdoc.getBody();
       body.classList.add('i-amphtml-next-page-document');
+
+      // Insert the separator
+      this.element_.insertBefore(
+        this.separator_.cloneNode(true),
+        this.moreBox_
+      );
+
+      // Insert the shadow doc and two observer elements
+      this.element_.insertBefore(header, this.moreBox_);
+      this.element_.insertBefore(shadowRoot, this.moreBox_);
+      this.element_.insertBefore(footer, this.moreBox_);
 
       return amp;
     } catch (e) {
@@ -296,7 +296,7 @@ export class NextPageService {
    */
   getPageIndex_(desiredPage) {
     const pages = dev().assertArray(this.pages_);
-    return findIndex(pages, page => page === desiredPage);
+    return pages.indexOf(desiredPage);
   }
 
   /**
@@ -307,8 +307,10 @@ export class NextPageService {
     return Services.xhrFor(this.win_)
       .fetch(page.url, {ampCors: false})
       .then(response => {
+        // Make sure the response is coming from the same origin as the
+        // page and update the page's url in case of a redirection
         validateUrl(response.url, this.ampdoc_.getUrl());
-        page.url = response.url;
+        page.updateUrl(response.url);
 
         return response.text();
       })
@@ -338,10 +340,10 @@ export class NextPageService {
     if (src) {
       // TODO(wassgha): Implement loading pages from a URL
       return Promise.resolve([]);
-    } else {
-      // TODO(wassgha): Implement recursively loading pages from subsequent documents
-      return Promise.resolve(inlinePages);
     }
+
+    // TODO(wassgha): Implement recursively loading pages from subsequent documents
+    return Promise.resolve(inlinePages);
   }
 
   /**
@@ -369,7 +371,7 @@ export class NextPageService {
     );
 
     const pages = tryParseJson(scriptElement.textContent, error => {
-      user().error(TAG, 'failed to parse config', error);
+      user().error(TAG, 'failed to parse inline page list', error);
     });
 
     return user().assertArray(pages, `${TAG} page list should be an array`);
@@ -401,50 +403,6 @@ export class NextPageService {
     const separator = this.win_.document.createElement('div');
     separator.classList.add('amp-next-page-separator');
     return separator;
-  }
-
-  /**
-   * @param {string} title
-   * @return {!Element}
-   */
-  buildMockDocument(title) {
-    // TODO(wassgha): Clean up
-    const getRandomColor = () => {
-      const letters = '0123456789ABCDEF';
-      let color = '#';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
-    };
-
-    const page = this.win_.document.createElement('div');
-    page.innerText = title;
-    page.classList.add('amp-next-page-doc');
-    setStyles(page, {
-      backgroundColor: getRandomColor(),
-      height: `${Math.floor(Math.random() * 1600)}px`,
-    });
-    return page;
-  }
-
-  /**
-   * @visibleForTesting
-   */
-  printPagesForTesting() {
-    // TODO(wassgha): Clean up
-    // eslint-disable
-    console.log('==============================');
-    this.pages_.forEach(page => {
-      console.log(
-        page.title,
-        page.state_,
-        page.isVisible() ? 'VISIBLE' : 'HIDDEN',
-        page.relativePos,
-        page.getVisibilityState()
-      );
-    });
-    // eslint-enable
   }
 
   /**

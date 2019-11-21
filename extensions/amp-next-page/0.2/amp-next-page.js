@@ -35,7 +35,7 @@ export class AmpNextPage extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout === Layout.CONTAINER;
   }
 
   /** @override */
