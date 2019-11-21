@@ -17,7 +17,7 @@
 import {jsonLiteral} from '../../../../src/json';
 
 const DEEPBI_CONFIG = jsonLiteral({
-  'requestOrigin':'https://${endpoint}',
+  'requestOrigin': 'https://${endpoint}',
   'vars': {
     'gdpr': true,
     'endpoint': 'api.deep.bi',
