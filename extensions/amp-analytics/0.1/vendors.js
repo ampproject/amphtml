@@ -110,8 +110,6 @@ const DEFAULT_CONFIG = jsonLiteral({
     'ampdocHostname': 'AMPDOC_HOSTNAME',
     'ampdocUrl': 'AMPDOC_URL',
     'ampGeo': 'AMP_GEO',
-    'ampUserLocation': 'AMP_USER_LOCATION',
-    'ampUserLocationPoll': 'AMP_USER_LOCATION_POLL',
     'ampState': 'AMP_STATE',
     'ampVersion': 'AMP_VERSION',
     'ancestorOrigin': 'ANCESTOR_ORIGIN',

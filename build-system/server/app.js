@@ -50,7 +50,6 @@ app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
-app.use('/user-location/', require('./routes/user-location'));
 app.use('/test', require('./routes/test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.

@@ -105,8 +105,6 @@ function getMode_(win) {
     examiner: hashQuery['development'] == '2',
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    // amp-user-location override
-    userLocationOverride: hashQuery['amp-user-location'],
     minified: IS_MINIFIED,
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.

@@ -264,12 +264,11 @@ The tables below list the available URL variables grouped by type of usage. Furt
 
 ### AMP Components
 
-| Variable Name                    | Platform Variable   | amp-analytics Variable | Required AMP Components                                                                                                      |
-| -------------------------------- | ------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| [Variant](#experiment-variant)   | `VARIANT`           | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md)          |
-| [Variants](#experiment-variants) | `VARIANTS`          | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md)          |
-| [Geolocation](#geolocation)      | `AMP_GEO`           | `${ampGeo}`            | [`<amp-geo>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)                               |
-| [User Location](#user-location)  | `AMP_USER_LOCATION` | `${ampUserLocation}`   | [`<amp-user-location>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-location/amp-user-location.md) |
+| Variable Name                    | Platform Variable | amp-analytics Variable | Required AMP Components                                                                                             |
+| -------------------------------- | ----------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| [Variant](#experiment-variant)   | `VARIANT`         | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
+| [Variants](#experiment-variants) | `VARIANTS`        | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
+| [Geolocation](#geolocation)      | `AMP_GEO`         | `${ampGeo}`            | [`<amp-geo>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)                      |
 
 ### Miscellaneous
 
@@ -708,41 +707,6 @@ Provides the approximate, country level, location of the user provided by the [`
   ```
 - **amp-analytics variable**: `${ampGeo}`
   - Example value: `ca`
-
-#### User Location
-
-`AMP_USER_LOCATION` and `AMP_USER_LOCATION_POLL` provide the latitude and longitude coordinates exposed by [`amp-user-location`](../extensions/amp-user-location/amp-user-location.md#variable-substitution) extension. Note that this data is `undefined` until the user has approved location access. The `POLL` variant will not resolve until the user has interacted with a UI element that requests their location.
-
-- **platform variable**: `AMP_USER_LOCATION`
-  - Example: <br>
-  ```html
-  <!--
-     When the user encounters the pixel, the location will be sent
-     if the user has approved through the amp-user-location component.
-     If the user has not approved, the pixel will send the request
-     with the location as the empty string.
-    -->
-  <amp-pixel src="https://foo.com/pixel?location=AMP_USER_LOCATION"></amp-pixel>
-  ```
-- **platform variable**: `AMP_USER_LOCATION_POLL`
-- Example: <br>
-
-```html
-<!--
-    When the user encounters the pixel, the location will not be sent
-    until the user has requested their location  through the amp-user-location
-    component. If the user does not approve, the pixel will not send the
-    request. If the user denies, the pixel will send the empty string.
-  -->
-<amp-pixel
-  src="https://foo.com/pixel?location=AMP_USER_LOCATION_POLL"
-></amp-pixel>
-```
-
-- **amp-analytics variable**: `${ampUserLocation}`
-  - Example value: `40.712776,-74.005974`
-- **amp-analytics variable**: `${ampUserLocationPoll}`
-  - Example value: `40.712776,-74.005974`
 
 #### Horizontal Scroll Boundary
 
