@@ -63,7 +63,12 @@ export class AmpQuicktext extends AMP.BaseElement {
       if (this.url_) {
         this.loadScript(this.url_);
       } else {
-        this.loadScript('https://cdn.qt.im/qt.min.js');
+        console.log(document.location.protocol);
+        this.loadScript(
+          `${
+            document.location.protocol === 'https:' ? 'https://' : 'http://'
+          }cdn.qt.im/qt.min.js`
+        );
       }
     }
   }

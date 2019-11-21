@@ -71,7 +71,7 @@ Custom:
   <amp-quicktext
     license="XXXXX-XXXX"
     lang="fr"
-    url="http://cdn.quicktext.im/qt.min.js"
+    url="https://cdn.quicktext.im/qt.min.js"
     tags="home,group-1"
     layout="nodisplay"
   ></amp-quicktext>
