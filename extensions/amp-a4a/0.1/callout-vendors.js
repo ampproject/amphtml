@@ -155,6 +155,12 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['TAG_ID'],
     disableKeyAppend: true,
   },
+  prebidflux: {
+    url:
+      'https://prebid-server.flux-adserver.com/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests
