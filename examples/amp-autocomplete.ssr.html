@@ -1,6 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡ allow-viewer-render-template>
-<head>
+  <head>
     <meta charset="utf-8">
     <title>Forms Examples in AMP</title>
     <link rel="canonical" href="//example.com" >
@@ -10,28 +10,30 @@
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
-</head>
-<body>
-
-    <h4>Autocomplete Search (GET xhr cross origin current host > httpbin.org)</h4>
-    <form method="get"
-          action="https://httpbin.org/response-headers"
-          action-xhr="https://httpbin.org/response-headers"
-          target="_blank">
-          <amp-autocomplete src="https://lively-and-awesome.appspot.com/ssr_amp_list/" min-characters="0">
-              <input type="search" name="term" required>
-              <template type="amp-mustache">
-                  <div class="product">{{name}}</div>
-              </template>
-          </amp-autocomplete>
-        <input type="submit" value="Search">
-
-        <div submit-success>
-            <template type="amp-mustache">
-                <h1>You searched for: {{term}}</h1>
-            </template>
-        </div>
+  </head>
+  <body>
+    <h4>
+      Autocomplete Search (GET xhr cross origin current host > httpbin.org)
+    </h4>
+    <form
+      method="get"
+      action="https://httpbin.org/response-headers"
+      action-xhr="https://httpbin.org/response-headers"
+      target="_blank">
+      <amp-autocomplete
+        src="https://lively-and-awesome.appspot.com/ssr_amp_list/"
+        min-characters="0">
+        <input type="search" name="term" required />
+        <template type="amp-mustache">
+          <div class="product">{{name}}</div>
+        </template>
+      </amp-autocomplete>
+      <input type="submit" value="Search" />
+      <div submit-success>
+        <template type="amp-mustache">
+          <h1>You searched for: {{term}}</h1>
+        </template>
+      </div>
     </form>
-
-    </body>
-    </html>
+  </body>
+</html>
