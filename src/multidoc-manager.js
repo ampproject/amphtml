@@ -28,7 +28,6 @@ import {
 import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
-import {installAmpdocServices} from './service/core-services';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject} from './types';
 import {parseUrlDeprecated} from './url';
@@ -106,7 +105,7 @@ export class MultidocManager {
       /* opt_isRuntimeCss */ true
     );
     // Instal doc services.
-    installAmpdocServices(ampdoc);
+    AMP.installAmpdocServices(ampdoc);
 
     const viewer = Services.viewerForDoc(ampdoc);
 

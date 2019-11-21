@@ -29,10 +29,13 @@ import {config} from './config';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
 import {
+  installAmpdocServices,
+  installRuntimeServices,
+} from './service/core-services';
+import {
   installExtensionsService,
   stubLegacyElements,
 } from './service/extensions-impl';
-import {installRuntimeServices} from './service/core-services';
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error';
@@ -169,6 +172,12 @@ function adoptShared(global, callback) {
    * @export
    */
   global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
+
+  /**
+   * Installs services for the given AMP document (used for
+   * shadow documents and amp-next-page)
+   */
+  global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
 
   // Run specific setup for a single-doc or shadow-doc mode.
   const iniPromise = callback(global, extensions);
