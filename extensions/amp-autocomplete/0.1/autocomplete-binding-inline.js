@@ -31,40 +31,37 @@ export class AutocompleteBindingInline {
   /**
    * Stores the regex match value associated with the portion of the user input to suggest against.
    * For use when "inline_" is true.
-   * @param {!AMP.BaseElement} element
+   * @param {!AMP.BaseElement} ampElement
    */
   constructor({element, win}) {
     /** @private {!Element} */
     this.element_ = element;
     this.win_ = win;
 
-    const isInline = this.element_.hasAttribute('inline');
     userAssert(
-      !isInline || isExperimentOn(this.win_, 'amp-autocomplete'),
+      isExperimentOn(this.win_, 'amp-autocomplete'),
       'Experiment %s is not turned on for "inline" attr. %s',
       TAG,
       this.element_
     );
 
-    const trigger = this.element_.getAttribute('inline');
+    /** @private {string} */
+    this.trigger_ = this.element_.getAttribute('inline');
     userAssert(
-      trigger !== '',
+      this.trigger_ !== '',
       'Empty value for the "inline" attr is unsupported, %s. %s',
       TAG,
       element
     );
     userAssert(
-      trigger !== '',
+      this.trigger_ !== '',
       `AutocompleteBindingInline does not support an empty value in the constructor.`
     );
-
-    /** @private {string} */
-    this.trigger_ = trigger;
 
     /** @private {?RegExpResult} */
     this.match_ = null;
 
-    const delimiter = trigger.replace(/([()[{*+.$^\\|?])/g, '\\$1');
+    const delimiter = this.trigger_.replace(/([()[{*+.$^\\|?])/g, '\\$1');
     const pattern = `((${delimiter}|^${delimiter})(\\w+)?)`;
     this.regex_ = new RegExp(pattern, 'gm');
   }

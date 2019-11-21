@@ -677,6 +677,7 @@ describes.realWin(
 
     it('should call keyDownHandler_() on Tab', () => {
       const event = {key: Keys.TAB, preventDefault: () => {}};
+      const eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
@@ -690,6 +691,7 @@ describes.realWin(
         .then(() => {
           expect(impl.userInput_).to.equal(impl.inputElement_.value);
           expect(fireEventSpy).to.have.been.calledWith(impl.userInput_);
+          expect(eventPreventSpy).to.have.been.calledOnce;
         });
     });
 
