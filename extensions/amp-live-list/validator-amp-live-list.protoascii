@@ -23,7 +23,7 @@ tags: {  # amp-live-list
     name: "amp-live-list"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }

@@ -25,7 +25,7 @@ tags: {  # amp-form
     version: "0.1"
     version: "latest"
     deprecated_allow_duplicates: true
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -38,7 +38,7 @@ tags: {  # amp-form
     # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
     deprecated_allow_duplicates: true
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }

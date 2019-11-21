@@ -2231,7 +2231,7 @@ class ExtensionsContext {
      */
     this.extensionsLoaded_ = Object.create(null);
 
-    // AMP-AD is grandfathered in to not require the respective extension
+    // AMP-AD is exempted to not require the respective extension
     // javascript file for historical reasons. We still need to mark that
     // the extension is used if we see the tags.
     this.extensionsLoaded_['amp-ad'] = true;
@@ -2355,7 +2355,7 @@ class ExtensionsContext {
       this.extensionsLoaded_[extensionName] = true;
       switch (extensionSpec.requiresUsage) {
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement
-            .GRANDFATHERED: // Fallthrough intended:
+            .EXEMPTED: // Fallthrough intended:
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement.NONE:
           // This extension does not have usage demonstrated by a tag, for
           // example: amp-dynamic-css-classes
