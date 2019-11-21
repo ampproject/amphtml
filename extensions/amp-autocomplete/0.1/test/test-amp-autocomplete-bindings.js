@@ -27,143 +27,123 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc, input;
+    let win, doc, input, binding;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       input = doc.createElement('input');
+      binding = createElementWithAttributes();
     });
 
-    function getBindingStub(attributes) {
-      const ampAutocomplete = doc.createElement('amp-autocomplete');
-      ampAutocomplete.setAttribute('layout', 'container');
-      ampAutocomplete.setAttribute('filter', 'substring');
+    function createElementWithAttributes(attributes) {
+      const element = doc.createElement('div');
+      element.setAttribute('layout', 'container');
+      element.setAttribute('filter', 'substring');
       for (const key in attributes) {
-        ampAutocomplete.setAttribute(key, attributes[key]);
+        element.setAttribute(key, attributes[key]);
       }
-      ampAutocomplete.appendChild(input);
+      element.appendChild(input);
 
       const form = doc.createElement('form');
-      form.appendChild(ampAutocomplete);
+      form.appendChild(element);
       doc.body.appendChild(form);
-      return ampAutocomplete
-        .build()
-        .then(() =>
-          ampAutocomplete.hasAttribute('inline')
-            ? new AutocompleteBindingInline(ampAutocomplete.implementation_)
-            : new AutocompleteBindingSingle(ampAutocomplete.implementation_)
-        );
+
+      return element.hasAttribute('inline')
+        ? new AutocompleteBindingInline({element, win: env.win})
+        : new AutocompleteBindingSingle({
+            element,
+            win: env.win,
+          });
     }
 
     describe('Single binding', () => {
       it('should always intend to autocomplete', () => {
-        return getBindingStub().then(binding => {
-          expect(binding.shouldAutocomplete(input)).to.be.true;
-        });
+        expect(binding.shouldAutocomplete(input)).to.be.true;
       });
 
       it('should provide partial user input from the given input', () => {
-        return getBindingStub().then(binding => {
-          expect(binding.getUserInputForUpdate(input)).to.equal('');
-          input.value = 'hello';
-          expect(binding.getUserInputForUpdate(input)).to.equal('hello');
-        });
+        expect(binding.getUserInputForUpdate(input)).to.equal('');
+        input.value = 'hello';
+        expect(binding.getUserInputForUpdate(input)).to.equal('hello');
       });
 
       it('should set the input value to the given value', () => {
-        return getBindingStub().then(binding => {
-          input.value = 'selection';
-          binding.resetInputOnWrapAround('', input);
-          expect(input.value).to.equal('');
-          binding.resetInputOnWrapAround('asdf', input);
-          expect(input.value).to.equal('asdf');
-        });
+        input.value = 'selection';
+        binding.resetInputOnWrapAround('', input);
+        expect(input.value).to.equal('');
+        binding.resetInputOnWrapAround('asdf', input);
+        expect(input.value).to.equal('asdf');
       });
 
       it('should not suggest first when attribute is not present', () => {
-        return getBindingStub().then(binding => {
-          expect(binding.shouldSuggestFirst()).to.be.false;
-        });
+        expect(binding.shouldSuggestFirst()).to.be.false;
       });
 
       it('should error when suggest first is present without prefix filter', () => {
-        return allowConsoleError(() => {
-          return expect(
-            getBindingStub({
-              'suggest-first': 'true',
-            }).then(binding => {
-              binding.shouldSuggestFirst();
-            })
-          ).to.be.rejectedWith(
-            /"suggest-first" requires "filter" type "prefix"/
-          );
+        binding = createElementWithAttributes({
+          'suggest-first': 'true',
         });
+        expect(() =>
+          createElementWithAttributes({
+            'suggest-first': 'true',
+          }).shouldSuggestFirst()
+        ).to.throw(/"suggest-first" requires "filter" type "prefix"/);
       });
 
       it('should not suggest first when attribute is not present', () => {
-        return getBindingStub({
+        binding = createElementWithAttributes({
           'suggest-first': 'true',
           'filter': 'prefix',
-        }).then(binding => {
-          expect(binding.shouldSuggestFirst()).to.be.true;
         });
+        expect(binding.shouldSuggestFirst()).to.be.true;
       });
 
       it('should always show on focus', () => {
-        return getBindingStub().then(binding => {
-          expect(binding.shouldShowOnFocus()).to.be.true;
-        });
+        expect(binding.shouldShowOnFocus()).to.be.true;
       });
 
       it('should display active item in input', () => {
-        return getBindingStub().then(binding => {
-          input.focus();
-          const selectionSpy = env.sandbox.spy(input, 'setSelectionRange');
-          expect(input.value).to.equal('');
+        input.focus();
+        const selectionSpy = env.sandbox.spy(input, 'setSelectionRange');
+        expect(input.value).to.equal('');
 
-          binding.displayActiveItemInInput(input, 'apple', '');
-          expect(input.value).to.equal('apple');
-          expect(selectionSpy).not.to.have.been.called;
+        binding.displayActiveItemInInput(input, 'apple', '');
+        expect(input.value).to.equal('apple');
+        expect(selectionSpy).not.to.have.been.called;
 
-          binding.shouldHighlight_ = true;
-          binding.displayActiveItemInInput(input, 'apple', '');
-          expect(input.value).to.equal('apple');
-          expect(selectionSpy).to.have.been.calledWith(0, 5);
-        });
+        binding.shouldHighlight_ = true;
+        binding.displayActiveItemInInput(input, 'apple', '');
+        expect(input.value).to.equal('apple');
+        expect(selectionSpy).to.have.been.calledWith(0, 5);
       });
 
       it('should remove highlighting', () => {
-        return getBindingStub().then(binding => {
-          input.value = 'apple';
-          input.setSelectionRange(0, 5);
-          expect(input.selectionStart).to.equal(0);
-          binding.removeSelectionHighlighting(input);
-          expect(input.selectionEnd).to.equal(5);
-        });
+        input.value = 'apple';
+        input.setSelectionRange(0, 5);
+        expect(input.selectionStart).to.equal(0);
+        binding.removeSelectionHighlighting(input);
+        expect(input.selectionEnd).to.equal(5);
       });
 
       it('should prevent submission when "submit-on-enter" is absent', () => {
-        return getBindingStub().then(binding => {
-          expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.true;
-          expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.true;
-        });
+        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.true;
+        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.true;
       });
 
       it('should not prevent submission when "submit-on-enter" is true', () => {
-        return getBindingStub({'submit-on-enter': 'true'}).then(binding => {
-          expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.false;
-          expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
-        });
+        binding = createElementWithAttributes({'submit-on-enter': 'true'});
+        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.false;
+        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
       });
     });
 
     describe('Inline binding', () => {
-      let pre, userInput, match;
+      let pre, userInput, match, binding;
 
-      function getInlineBinding(attr = {}) {
+      function createInlineElementWithAttributes(attr = {}) {
         attr['inline'] = ['@'];
-        return getBindingStub(attr);
+        return createElementWithAttributes(attr);
       }
 
       beforeEach(() => {
@@ -171,117 +151,93 @@ describes.realWin(
         pre = 'My friend is ';
         userInput = 'har';
         match = {0: '@' + userInput, index: pre.length};
+        binding = createInlineElementWithAttributes();
       });
 
       it('should require experiment when "inline" is specified', () => {
         toggleExperiment(win, 'amp-autocomplete', false);
-        return allowConsoleError(() => {
-          return expect(getInlineBinding()).to.be.rejectedWith(
-            /Experiment amp-autocomplete is not turned on/
-          );
-        });
+        expect(() => createInlineElementWithAttributes()).to.throw(
+          /Experiment amp-autocomplete is not turned on/
+        );
       });
 
       it('should not always autocomplete', () => {
-        return getInlineBinding().then(binding => {
-          expect(binding.shouldAutocomplete(input)).to.be.false;
-        });
+        expect(binding.shouldAutocomplete(input)).to.be.false;
       });
 
       it('should autocomplete based on found matches', () => {
-        return getInlineBinding().then(binding => {
-          env.sandbox
-            .stub(binding, 'getClosestPriorMatch_')
-            .onFirstCall()
-            .returns(match)
-            .onSecondCall()
-            .returns(null);
-          expect(binding.shouldAutocomplete(input)).to.be.true;
-          expect(binding.match_).to.equal(match);
+        env.sandbox
+          .stub(binding, 'getClosestPriorMatch_')
+          .onFirstCall()
+          .returns(match)
+          .onSecondCall()
+          .returns(null);
+        expect(binding.shouldAutocomplete(input)).to.be.true;
+        expect(binding.match_).to.equal(match);
 
-          expect(binding.shouldAutocomplete(input)).to.be.false;
-          expect(binding.match_).to.equal(null);
-        });
+        expect(binding.shouldAutocomplete(input)).to.be.false;
+        expect(binding.match_).to.equal(null);
       });
 
       it('should provide partial user input based on the stored match', () => {
-        return getInlineBinding().then(binding => {
-          expect(binding.getUserInputForUpdate(input)).to.equal('');
-          binding.match_ = match;
-          expect(binding.getUserInputForUpdate(input)).to.equal(userInput);
-        });
+        expect(binding.getUserInputForUpdate(input)).to.equal('');
+        binding.match_ = match;
+        expect(binding.getUserInputForUpdate(input)).to.equal(userInput);
       });
 
       it('should provide new input value based on the stored match', () => {
-        return getInlineBinding().then(binding => {
-          const text = pre + '@' + userInput;
-          const selection = 'harrypotter@gmail.com';
+        const text = pre + '@' + userInput;
+        const selection = 'harrypotter@gmail.com';
 
-          expect(input.value).to.equal('');
-          expect(
-            binding.getUserInputForUpdateWithSelection(selection, input, '')
-          ).to.equal(input.value);
+        expect(input.value).to.equal('');
+        expect(
+          binding.getUserInputForUpdateWithSelection(selection, input, '')
+        ).to.equal(input.value);
 
-          input.value = text;
-          expect(
-            binding.getUserInputForUpdateWithSelection(
-              selection,
-              input,
-              match[0]
-            )
-          ).to.equal(text);
+        input.value = text;
+        expect(
+          binding.getUserInputForUpdateWithSelection(selection, input, match[0])
+        ).to.equal(text);
 
-          binding.match_ = match;
-          expect(
-            binding.getUserInputForUpdateWithSelection(
-              selection,
-              input,
-              match[0]
-            )
-          ).to.equal(pre + '@' + selection + ' ');
-        });
+        binding.match_ = match;
+        expect(
+          binding.getUserInputForUpdateWithSelection(selection, input, match[0])
+        ).to.equal(pre + '@' + selection + ' ');
       });
 
       it('should not do anything to input value', () => {
-        return getInlineBinding().then(binding => {
-          const initial = input.value;
-          const selectionSpy = env.sandbox.spy(input, 'setSelectionRange');
+        const initial = input.value;
+        const selectionSpy = env.sandbox.spy(input, 'setSelectionRange');
 
-          binding.resetInputOnWrapAround('', input);
-          binding.resetInputOnWrapAround('asdf', input);
+        binding.resetInputOnWrapAround('', input);
+        binding.resetInputOnWrapAround('asdf', input);
 
-          binding.displayActiveItemInInput(input, 'apple', '');
+        binding.displayActiveItemInInput(input, 'apple', '');
 
-          binding.removeSelectionHighlighting(input);
+        binding.removeSelectionHighlighting(input);
 
-          expect(input.value).to.equal(initial);
-          expect(selectionSpy).not.to.have.been.called;
-        });
+        expect(input.value).to.equal(initial);
+        expect(selectionSpy).not.to.have.been.called;
       });
 
       it('should not suggest first if attribute is absent', () => {
-        return getInlineBinding().then(binding => {
-          expect(binding.shouldSuggestFirst()).to.be.false;
-        });
+        expect(binding.shouldSuggestFirst()).to.be.false;
       });
 
       it('should suggest first if attribute is present', () => {
-        return getInlineBinding({'suggest-first': 'true'}).then(binding => {
-          expect(binding.shouldSuggestFirst()).to.be.true;
+        binding = createInlineElementWithAttributes({
+          'suggest-first': 'true',
         });
+        expect(binding.shouldSuggestFirst()).to.be.true;
       });
 
       it('should never show on focus', () => {
-        return getInlineBinding().then(binding => {
-          expect(binding.shouldShowOnFocus()).to.be.false;
-        });
+        expect(binding.shouldShowOnFocus()).to.be.false;
       });
 
       it('should prevent default whenever there are active suggestions shown', () => {
-        return getInlineBinding().then(binding => {
-          expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.true;
-          expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
-        });
+        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.true;
+        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
       });
     });
   }
