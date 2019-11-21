@@ -935,8 +935,9 @@ describes.realWin(
       await impl.renderResults_(sourceData, impl.container_);
       expect(impl.container_.children).to.have.length(3);
       expect(impl.getEnabledItems_()).to.have.length(2);
-      expect(impl.container_.children[2].hasAttribute('aria-disabled')).to.be
-        .true;
+      expect(
+        impl.container_.children[2].getAttribute('aria-disabled')
+      ).to.equal('true');
     });
 
     describe('fallback on error', () => {

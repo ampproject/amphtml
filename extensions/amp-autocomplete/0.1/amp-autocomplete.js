@@ -31,7 +31,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
-import {isArray, isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue, toArray} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
 import {
   setupAMPCors,
@@ -251,7 +251,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     );
     userAssert(
       !this.isSsr_ || !this.element.hasAttribute('filter'),
-      `${TAG} does not support client-side filter when server-side render is possible`
+      `${TAG} does not support client-side filter when server-side render is required.`
     );
     this.filter_ = this.isSsr_
       ? FilterType.NONE
@@ -567,7 +567,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         .then(rendered => {
           const elements = isArray(rendered)
             ? rendered
-            : [].slice.call(rendered.children);
+            : toArray(rendered.children);
           elements.forEach(child => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
