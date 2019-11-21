@@ -360,6 +360,9 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private @const */
     this.warnDaySizeOnce_ = once(this.warnDaySize_.bind(this));
+
+    /** @private */
+    this.hideKeyboardShortcutsPanel_ = false;
   }
 
   /** @override */
@@ -434,6 +437,8 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.openAfterClear_ = this.element.hasAttribute('open-after-clear');
 
     this.openAfterSelect_ = this.element.hasAttribute('open-after-select');
+
+    this.hideKeyboardShortcutsPanel_ = this.element.hasAttribute("hide-keyboard-shortcuts-panel");
 
     this.elementTemplates_ = this.parseElementTemplates_(
       this.element.querySelectorAll('[date-template][dates]')
@@ -1388,7 +1393,8 @@ export class AmpDatePicker extends AMP.BaseElement {
       props.orientation = 'verticalScrollable';
       props.withFullScreenPortal = true;
     }
-
+    
+    props.hideKeyboardShortcutsPanel = this.hideKeyboardShortcutsPanel_;
     props.reopenPickerOnClearDate = this.openAfterClear_;
     props.keepOpenOnDateSelect = this.openAfterSelect_;
 
