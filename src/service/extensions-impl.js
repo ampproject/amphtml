@@ -36,7 +36,6 @@ const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
-const REQUIRE_SHADOW_MODE = ['amp-next-page'];
 
 /**
  * Default milliseconds to wait for all extensions to load before erroring.
@@ -550,15 +549,6 @@ export class Extensions {
       holder.scriptPresent = !!scriptInHead;
     }
     return !holder.scriptPresent;
-  }
-
-  /**
-   * Determine the dependency of a doc on a specific extensions.
-   * @param {string} extensionId
-   * @return {boolean}
-   */
-  requiresShadowMode(extensionId) {
-    return REQUIRE_SHADOW_MODE.indexOf(extensionId) >= 0;
   }
 
   /**

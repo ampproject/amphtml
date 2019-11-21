@@ -201,9 +201,6 @@ function adoptShared(global, callback) {
           fnOrStruct(global.AMP, global.AMP._);
         } else {
           extensions.registerExtension(fnOrStruct.n, fnOrStruct.f, global.AMP);
-          // if (extensions.requiresShadowMode(fnOrStruct.n)) {
-          //   dynamicallyAdoptShadowMode(global, extensions);
-          // }
         }
       });
     };
@@ -377,54 +374,41 @@ export function adopt(global) {
  */
 export function adoptShadowMode(global) {
   return adoptShared(global, (global, extensions) => {
-    return dynamicallyAdoptShadowMode(global, extensions).then(() => {
-      return waitForBodyOpenPromise(global.document);
-    });
+    // shadow mode already adopted
+    if (global.AMP.attachShadowDoc) {
+      return Promise.resolve();
+    }
+
+    const manager = new MultidocManager(
+      global,
+      Services.ampdocServiceFor(global),
+      extensions,
+      Services.timerFor(global)
+    );
+
+    /**
+     * Registers a shadow root document via a fully fetched document.
+     * @param {!Element} hostElement
+     * @param {!Document} doc
+     * @param {string} url
+     * @param {!Object<string, string>=} opt_initParams
+     * @return {!Object}
+     */
+    global.AMP.attachShadowDoc = manager.attachShadowDoc.bind(manager);
+
+    /**
+     * Registers a shadow root document via a stream.
+     * @param {!Element} hostElement
+     * @param {string} url
+     * @param {!Object<string, string>=} opt_initParams
+     * @return {!Object}
+     */
+    global.AMP.attachShadowDocAsStream = manager.attachShadowDocAsStream.bind(
+      manager
+    );
+
+    return waitForBodyOpenPromise(global.document);
   });
-}
-
-/**
- * Extends the runtime to add shadow mode.
- *
- * @param {!Window} global Global scope to adopt.
- * @param {!./service/extensions-impl.Extensions} extensions
- * @return {!Promise}
- */
-export function dynamicallyAdoptShadowMode(global, extensions) {
-  // shadow mode already adopted
-  if (global.AMP.attachShadowDoc) {
-    return Promise.resolve();
-  }
-
-  const manager = new MultidocManager(
-    global,
-    Services.ampdocServiceFor(global),
-    extensions,
-    Services.timerFor(global)
-  );
-
-  /**
-   * Registers a shadow root document via a fully fetched document.
-   * @param {!Element} hostElement
-   * @param {!Document} doc
-   * @param {string} url
-   * @param {!Object<string, string>=} opt_initParams
-   * @return {!Object}
-   */
-  global.AMP.attachShadowDoc = manager.attachShadowDoc.bind(manager);
-
-  /**
-   * Registers a shadow root document via a stream.
-   * @param {!Element} hostElement
-   * @param {string} url
-   * @param {!Object<string, string>=} opt_initParams
-   * @return {!Object}
-   */
-  global.AMP.attachShadowDocAsStream = manager.attachShadowDocAsStream.bind(
-    manager
-  );
-
-  return Promise.resolve();
 }
 
 /**
