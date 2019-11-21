@@ -767,6 +767,22 @@ app.post('/get-consent-no-prompt/', (req, res) => {
   res.json(body);
 });
 
+app.post('/check-consent', (req, res) => {
+  cors.assertCors(req, res, ['POST']);
+  if (req.query.mode === 'not-required') {
+    res.json({
+      consentRequired: false,
+    });
+    return;
+  }
+  if (req.query.mode === 'always-expire') {
+    res.json({
+      'consentRequired': true,
+      'expireCache': true,
+    });
+  }
+});
+
 // Proxy with local JS.
 // Example:
 // http://localhost:8000/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
