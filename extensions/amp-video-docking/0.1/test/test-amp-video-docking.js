@@ -47,12 +47,10 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   let viewport;
   let docking;
   let querySelectorStub;
-
+  let any;
   let slotAttr = '';
 
   const viewportSize = {width: 0, height: 0};
-
-  const {any} = sinon.match;
 
   function createAmpElementMock(tag = 'div') {
     const element = env.win.document.createElement(tag);
@@ -86,9 +84,9 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
     video.element.signals = video.signals;
 
-    video.pause = sandbox.spy();
-    video.showControls = sandbox.spy();
-    video.hideControls = sandbox.spy();
+    video.pause = env.sandbox.spy();
+    video.showControls = env.sandbox.spy();
+    video.hideControls = env.sandbox.spy();
 
     return video;
   }
@@ -113,7 +111,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
   function mockAreaWidth(width) {
     viewportSize.width = width;
-    sandbox.stub(docking, 'getRightEdge_').returns(width);
+    env.sandbox.stub(docking, 'getRightEdge_').returns(width);
     return width;
   }
 
@@ -123,7 +121,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
   function mockAreaHeight(height) {
     viewportSize.height = height;
-    sandbox.stub(docking, 'getBottomEdge_').returns(height);
+    env.sandbox.stub(docking, 'getBottomEdge_').returns(height);
     return height;
   }
 
@@ -136,7 +134,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   }
 
   function stubDockInTransferLayerStep() {
-    return sandbox.stub(docking, 'dockInTransferLayerStep_');
+    return env.sandbox.stub(docking, 'dockInTransferLayerStep_');
   }
 
   function enableComputedStyle(el) {
@@ -146,17 +144,17 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   function stubControls() {
     const html = htmlFor(env.win.document);
     const controls = {
-      positionOnVsync: sandbox.spy(),
-      enable: sandbox.spy(),
-      disable: sandbox.spy(),
-      hide: sandbox.spy(),
-      setVideo: sandbox.spy(),
+      positionOnVsync: env.sandbox.spy(),
+      enable: env.sandbox.spy(),
+      disable: env.sandbox.spy(),
+      hide: env.sandbox.spy(),
+      setVideo: env.sandbox.spy(),
       overlay: html`
         <div></div>
       `,
     };
 
-    sandbox.stub(docking, 'getControls_').returns(controls);
+    env.sandbox.stub(docking, 'getControls_').returns(controls);
 
     return controls;
   }
@@ -169,8 +167,8 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-
-    querySelectorStub = sandbox.stub(ampdoc.getRootNode(), 'querySelector');
+    any = env.sandbox.match.any;
+    querySelectorStub = env.sandbox.stub(ampdoc.getRootNode(), 'querySelector');
 
     manager = {
       getPlayingState() {
@@ -186,14 +184,14 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       getSize: () => viewportSize,
     };
 
-    sandbox.stub(Services, 'viewportForDoc').returns(viewport);
-    sandbox.stub(Services, 'videoManagerForDoc').returns(manager);
+    env.sandbox.stub(Services, 'viewportForDoc').returns(viewport);
+    env.sandbox.stub(Services, 'videoManagerForDoc').returns(manager);
 
     const positionObserverMock = {};
 
     docking = new VideoDocking(ampdoc, positionObserverMock);
 
-    sandbox.stub(docking, 'getTimer_').returns({
+    env.sandbox.stub(docking, 'getTimer_').returns({
       promise: () => Promise.resolve(),
     });
   });
@@ -227,7 +225,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       video.element.appendChild(internalElement);
 
-      sandbox.stub(env.win, 'requestAnimationFrame').callsArg(0);
+      env.sandbox.stub(env.win, 'requestAnimationFrame').callsArg(0);
 
       getComputedStyle = el => env.win.getComputedStyle(el);
 
@@ -327,7 +325,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       stubControls();
       enableComputedStyle(video.element);
 
-      sandbox.stub(docking, 'getPosterImageSrc_').returns(posterSrc);
+      env.sandbox.stub(docking, 'getPosterImageSrc_').returns(posterSrc);
 
       const x = 30;
       const y = 60;
@@ -624,7 +622,9 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const video = {};
       const target = {};
 
-      const dock = sandbox.stub(docking, 'dock_').returns(Promise.resolve());
+      const dock = env.sandbox
+        .stub(docking, 'dock_')
+        .returns(Promise.resolve());
 
       yield docking.dockInTransferLayerStep_(video, target);
 
@@ -634,11 +634,11 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
   describe('getTargetArea_', () => {
     it('delegates for slot', () => {
-      const fromPos = sandbox
+      const fromPos = env.sandbox
         .stub(docking, 'getTargetAreaFromPos_')
         .returns('foo');
 
-      const fromSlot = sandbox
+      const fromSlot = env.sandbox
         .stub(docking, 'getTargetAreaFromSlot_')
         .returns('bar');
 
@@ -652,11 +652,11 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
     });
 
     it('delegates for corner', () => {
-      const fromPos = sandbox
+      const fromPos = env.sandbox
         .stub(docking, 'getTargetAreaFromPos_')
         .returns('foo');
 
-      const fromSlot = sandbox
+      const fromSlot = env.sandbox
         .stub(docking, 'getTargetAreaFromSlot_')
         .returns('bar');
 
@@ -787,7 +787,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const expectedX = slotX;
       const expectedY = slotY - scrollTop;
 
-      sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
+      env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
 
       const {x, y, width, height} = docking.getTargetAreaFromSlot_(
         video,
@@ -830,7 +830,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       const expectedY = slotY - scrollTop;
 
-      sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
+      env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
 
       const {x, y, width, height} = docking.getTargetAreaFromSlot_(
         video,
@@ -874,7 +874,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       const expectedX = slotX;
 
-      sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
+      env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
 
       const {x, y, width, height} = docking.getTargetAreaFromSlot_(
         video,
@@ -912,13 +912,13 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       video = createVideo();
       placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
 
-      targetAreaStub = sandbox.stub(docking, 'getTargetArea_');
+      targetAreaStub = env.sandbox.stub(docking, 'getTargetArea_');
 
       targetAreaStub.returns(
         layoutRectLtwh(targetX, targetY, targetWidth, targetHeight)
       );
 
-      sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
+      env.sandbox.stub(docking.viewport_, 'getScrollTop').returns(scrollTop);
     });
 
     it('returns starting position for step = 0', () => {
@@ -983,10 +983,12 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       placeElementLtwh(video, 0, 0, 400, 300, /* ratio */ 1);
 
-      setCurrentlyDocked = sandbox.stub(docking, 'setCurrentlyDocked_');
-      placeAt = sandbox.stub(docking, 'placeAt_').returns(Promise.resolve());
+      setCurrentlyDocked = env.sandbox.stub(docking, 'setCurrentlyDocked_');
+      placeAt = env.sandbox
+        .stub(docking, 'placeAt_')
+        .returns(Promise.resolve());
 
-      sandbox.stub(docking, 'getDims_').returns(targetDims);
+      env.sandbox.stub(docking, 'getDims_').returns(targetDims);
     });
 
     it('sets currently docked', function*() {
@@ -1052,9 +1054,9 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
     let trigger;
 
     beforeEach(() => {
-      trigger = sandbox.stub(docking, 'trigger_');
+      trigger = env.sandbox.stub(docking, 'trigger_');
 
-      sandbox
+      env.sandbox
         .stub(docking, 'getTargetArea_')
         .withArgs(video, target)
         .returns(targetArea);
@@ -1123,17 +1125,19 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       placeElementLtwh(video, 0, 0, 400, 300, /* ratio */ 1);
 
-      trigger = sandbox.stub(docking, 'trigger_');
-      resetOnUndock = sandbox.stub(docking, 'resetOnUndock_');
-      maybeUpdateStaleYAfterScroll = sandbox
+      trigger = env.sandbox.stub(docking, 'trigger_');
+      resetOnUndock = env.sandbox.stub(docking, 'resetOnUndock_');
+      maybeUpdateStaleYAfterScroll = env.sandbox
         .stub(docking, 'maybeUpdateStaleYAfterScroll_')
         .returns(Promise.resolve());
 
-      placeAt = sandbox.stub(docking, 'placeAt_').returns(Promise.resolve());
+      placeAt = env.sandbox
+        .stub(docking, 'placeAt_')
+        .returns(Promise.resolve());
 
       docking.currentlyDocked_ = {target: 'foo'};
 
-      sandbox
+      env.sandbox
         .stub(docking, 'getDims_')
         .withArgs(video, docking.currentlyDocked_.target, /* step */ 0)
         .returns(targetDims);
@@ -1285,7 +1289,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       it(`animates transition when >= ${inlinePercVis}`, function*() {
         const expectedTransitionDurationMs = 555;
 
-        sandbox
+        env.sandbox
           .stub(docking, 'calculateTransitionDuration_')
           .returns(expectedTransitionDurationMs);
 
@@ -1481,7 +1485,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
             /* ratio */ 1 / 3
           );
 
-          sandbox.stub(docking, 'getTopEdge_').returns(topBoundary);
+          env.sandbox.stub(docking, 'getTopEdge_').returns(topBoundary);
 
           docking.updateOnPositionChange_(video);
 
@@ -1512,8 +1516,8 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         const targetElementTextual = useSlot ? 'video' : 'slot';
 
         it(`triggers action from ${targetElementTextual} element`, () => {
-          const actions = {trigger: sandbox.spy()};
-          sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+          const actions = {trigger: env.sandbox.spy()};
+          env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
           const slot = maybeCreateSlotElementLtwh(0, 0, 0, 0);
           const video = createVideo();

@@ -37,6 +37,7 @@ import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen'
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
+import sinon from 'sinon'; // eslint-disable-line local/no-import
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
@@ -45,6 +46,7 @@ let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
 let rethrowAsyncSandbox;
+let consoleInfoLogWarnSandbox;
 const originalConsoleError = console /*OK*/.error;
 
 // Used to clean up global state between tests.
@@ -360,9 +362,10 @@ function restoreConsoleError() {
 function maybeStubConsoleInfoLogWarn() {
   const {verboseLogging} = window.__karma__.config;
   if (!verboseLogging) {
-    sinon.sandbox.stub(console, 'info').callsFake(() => {});
-    sinon.sandbox.stub(console, 'log').callsFake(() => {});
-    sinon.sandbox.stub(console, 'warn').callsFake(() => {});
+    consoleInfoLogWarnSandbox = sinon.createSandbox();
+    consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
+    consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
+    consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
   }
 }
 
@@ -400,7 +403,7 @@ beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  window.sandbox = sinon.sandbox = sinon.createSandbox();
+  window.sandbox = sinon.createSandbox();
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
@@ -430,7 +433,10 @@ afterEach(function() {
   that = this;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
-  sinon.sandbox.restore();
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
+  window.sandbox.restore();
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);

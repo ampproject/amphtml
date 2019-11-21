@@ -20,7 +20,7 @@ import {PositionError} from '../position-error';
 import {Services} from '../../../../src/services';
 import {UserLocationSource} from '../user-location';
 
-describes.sandboxed('user-location-service', {}, () => {
+describes.sandboxed('user-location-service', {}, env => {
   let win;
   let platformService;
   let viewerService;
@@ -47,23 +47,23 @@ describes.sandboxed('user-location-service', {}, () => {
   beforeEach(() => {
     win = {
       navigator: {
-        geolocation: {getCurrentPosition: sandbox.stub()},
+        geolocation: {getCurrentPosition: env.sandbox.stub()},
         permissions: {
-          query: sandbox.stub().resolves(new FakePermissionStatus()),
+          query: env.sandbox.stub().resolves(new FakePermissionStatus()),
         },
       },
     };
 
     FakeAmpdoc.prototype.win = win;
-    FakeViewerService.prototype.isEmbedded = sandbox.stub().returns(false);
-    FakePlatformService.prototype.isChrome = sandbox.stub().returns(false);
-    FakePermissionStatus.prototype.addEventListener = sandbox.stub();
+    FakeViewerService.prototype.isEmbedded = env.sandbox.stub().returns(false);
+    FakePlatformService.prototype.isChrome = env.sandbox.stub().returns(false);
+    FakePermissionStatus.prototype.addEventListener = env.sandbox.stub();
 
     platformService = new FakePlatformService();
     viewerService = new FakeViewerService();
-    sandbox.stub(Services, 'platformFor').returns(platformService);
-    sandbox.stub(Services, 'viewerForDoc').returns(viewerService);
-    getModeStub = sandbox.stub(mode, 'getMode').returns({});
+    env.sandbox.stub(Services, 'platformFor').returns(platformService);
+    env.sandbox.stub(Services, 'viewerForDoc').returns(viewerService);
+    getModeStub = env.sandbox.stub(mode, 'getMode').returns({});
   });
 
   describe('location requests', () => {

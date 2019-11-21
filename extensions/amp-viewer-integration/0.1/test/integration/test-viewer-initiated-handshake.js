@@ -16,7 +16,7 @@
 
 import {WebviewViewerForTesting} from '../../viewer-initiated-handshake-viewer-for-testing';
 
-describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
+describes.sandboxed('AmpWebviewViewerIntegration', {}, env => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
   // TODO(aghassemi): Investigate failure in beforeEach. #10974.
   describe.skip('Handshake', function() {
@@ -42,7 +42,7 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
 
     it('should handle unload correctly', () => {
       viewer.waitForHandshakeResponse().then(() => {
-        const stub = sandbox.stub(viewer, 'handleUnload_');
+        const stub = env.sandbox.stub(viewer, 'handleUnload_');
         window.eventListeners.fire({type: 'unload'});
         expect(stub).to.be.calledOnce;
       });

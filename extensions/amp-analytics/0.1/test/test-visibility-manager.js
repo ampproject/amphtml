@@ -78,11 +78,11 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
 
     viewer = win.__AMP_SERVICES.viewer.obj;
-    sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
+    env.sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
     viewport = win.__AMP_SERVICES.viewport.obj;
     startVisibilityHandlerCount = getVisibilityHandlerCount();
 
@@ -138,7 +138,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should resolve root layout box', () => {
     const rootElement = win.document.documentElement;
-    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+    env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == rootElement) {
         return layoutRectLtwh(0, 0, 101, 201);
       }
@@ -156,7 +156,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     win.__AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
     const rootElement = win.document.documentElement;
-    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+    env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == rootElement) {
         return layoutRectLtwh(11, 21, 101, 201);
       }
@@ -343,8 +343,8 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('should dispose everything', () => {
-    const modelsDisposed = sandbox.spy();
-    const modelsCalled = sandbox.spy();
+    const modelsDisposed = env.sandbox.spy();
+    const modelsCalled = env.sandbox.spy();
     const otherTarget = win.document.createElement('div');
     const spec = {totalTimeMin: 10};
     root.listenRoot(spec, null, null, modelsCalled);
@@ -360,7 +360,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.models_.forEach(model => {
       model.unsubscribe(modelsDisposed);
     });
-    const otherUnsubscribes = sandbox.spy();
+    const otherUnsubscribes = env.sandbox.spy();
     root.unsubscribe(otherUnsubscribes);
     root.unsubscribe(otherUnsubscribes);
     const inOb = root.intersectionObserver_;
@@ -428,10 +428,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(model.getVisibility_()).to.equal(0);
 
     // Trigger tick.
-    sandbox.stub(viewport, 'getRect').callsFake(() => {
+    env.sandbox.stub(viewport, 'getRect').callsFake(() => {
       return layoutRectLtwh(0, 0, 100, 100);
     });
-    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+    env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == rootElement) {
         return layoutRectLtwh(0, 50, 100, 100);
       }
@@ -453,10 +453,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should listen on root', () => {
     clock.tick(1);
-    const disposed = sandbox.spy();
+    const disposed = env.sandbox.spy();
     const spec = {totalTimeMin: 10};
     root.listenRoot(spec, null, null, eventResolver);
-    sandbox
+    env.sandbox
       .stub(root, 'getRootLayoutBox')
       .callsFake(() => layoutRectLtwh(11, 21, 101, 201));
 
@@ -474,7 +474,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.setRootVisibility(1);
     expect(model.getVisibility_()).to.equal(1);
 
-    sandbox.stub(model, 'reset_');
+    env.sandbox.stub(model, 'reset_');
     // Fire event.
     clock.tick(11);
     return eventPromise.then(state => {
@@ -498,7 +498,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should listen on root with ready signal', () => {
     clock.tick(1);
-    const disposed = sandbox.spy();
+    const disposed = env.sandbox.spy();
     const spec = {totalTimeMin: 0};
     const readyPromise = Promise.resolve().then(() => {
       clock.tick(21);
@@ -530,7 +530,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should pass func to create readyReportPromise to model', () => {
     let testPromiseResolver;
-    const disposed = sandbox.spy();
+    const disposed = env.sandbox.spy();
     const testPromise = new Promise(resolve => {
       testPromiseResolver = resolve;
     });
@@ -557,7 +557,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should unlisten root', () => {
     clock.tick(1);
-    const disposed = sandbox.spy();
+    const disposed = env.sandbox.spy();
     const spec = {totalTimeMin: 10};
     const unlisten = root.listenRoot(spec, null, null, eventResolver);
 
@@ -574,7 +574,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should listen on a element', () => {
     clock.tick(1);
-    const disposed = sandbox.spy();
+    const disposed = env.sandbox.spy();
     const target = win.document.createElement('div');
     const spec = {totalTimeMin: 10};
     root.listenElement(target, spec, null, null, eventResolver);
@@ -608,7 +608,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.setRootVisibility(1);
     expect(model.getVisibility_()).to.equal(0.3);
 
-    sandbox.stub(model, 'reset_');
+    env.sandbox.stub(model, 'reset_');
     // Fire event.
     clock.tick(11);
     return eventPromise.then(state => {
@@ -689,7 +689,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const target = win.document.createElement('div');
 
     // Listen to the first spec.
-    const disposed1 = sandbox.spy();
+    const disposed1 = env.sandbox.spy();
     const spec1 = {totalTimeMin: 10};
     root.listenElement(target, spec1, null, null, eventResolver);
     expect(root.models_).to.have.length(1);
@@ -714,7 +714,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(trackedElement.intersectionRatio).to.equal(0.3);
 
     // Second spec on the same element.
-    const disposed2 = sandbox.spy();
+    const disposed2 = env.sandbox.spy();
     const spec2 = {totalTimeMin: 20};
     let eventResolver2;
     const eventPromise2 = new Promise(resolve => {
@@ -724,13 +724,13 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.models_).to.have.length(2);
     const model2 = root.models_[1];
     expect(model2.spec_.totalTimeMin).to.equal(20);
-    sandbox.stub(model2, 'reset_');
+    env.sandbox.stub(model2, 'reset_');
     model2.unsubscribe(disposed2);
     expect(trackedElement.listeners).to.have.length(2);
     // Immediately visible.
     expect(model2.getVisibility_()).to.equal(0.3);
 
-    sandbox.stub(model1, 'reset_');
+    env.sandbox.stub(model1, 'reset_');
     // Fire the first event.
     clock.tick(11);
     return eventPromise
@@ -770,7 +770,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       },
     };
     const resources = win.__AMP_SERVICES.resources.obj;
-    sandbox
+    env.sandbox
       .stub(resources, 'getResourceForElementOptional')
       .callsFake(() => resource);
     const spec = {totalTimeMin: 10};
@@ -787,7 +787,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
-    sandbox.stub(model, 'reset_');
+    env.sandbox.stub(model, 'reset_');
 
     // Fire event.
     clock.tick(11);
@@ -824,12 +824,12 @@ describes.realWin(
       ampdoc = env.ampdoc;
       embed = env.embed;
       embed.host = ampdoc.win.document.createElement('amp-host');
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(1);
 
       viewport = parentWin.__AMP_SERVICES.viewport.obj;
       viewer = parentWin.__AMP_SERVICES.viewer.obj;
-      sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
+      env.sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
 
       parentRoot = new VisibilityManagerForDoc(ampdoc);
       parentWin.IntersectionObserver = IntersectionObserverStub;
@@ -841,7 +841,7 @@ describes.realWin(
     });
 
     it('should dispose with parent', () => {
-      const unsubscribeSpy = sandbox.spy();
+      const unsubscribeSpy = env.sandbox.spy();
       root.unsubscribe(unsubscribeSpy);
 
       expect(parentRoot.children_).to.have.length(1);
@@ -853,7 +853,7 @@ describes.realWin(
     });
 
     it('should remove from parent when disposed', () => {
-      const unsubscribeSpy = sandbox.spy();
+      const unsubscribeSpy = env.sandbox.spy();
       root.unsubscribe(unsubscribeSpy);
 
       expect(parentRoot.children_).to.have.length(1);
@@ -891,7 +891,7 @@ describes.realWin(
     });
 
     it('should resolve root layout box', () => {
-      sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+      env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
         if (element == embed.iframe) {
           return layoutRectLtwh(11, 21, 101, 201);
         }
@@ -915,12 +915,12 @@ describes.realWin(
 
     it('should delegate observation to parent', () => {
       const inOb = {
-        observe: sandbox.spy(),
-        unobserve: sandbox.spy(),
+        observe: env.sandbox.spy(),
+        unobserve: env.sandbox.spy(),
       };
       parentRoot.intersectionObserver_ = inOb;
 
-      const listener = sandbox.spy();
+      const listener = env.sandbox.spy();
       const target = win.document.createElement('div');
 
       // Observe.
@@ -938,7 +938,7 @@ describes.realWin(
     });
 
     it('should depend on parent for visibility', () => {
-      const callbackSpy = sandbox.spy();
+      const callbackSpy = env.sandbox.spy();
       const otherTarget = win.document.createElement('div');
       root.listenRoot({}, null, null, callbackSpy);
       expect(root.models_).to.have.length(1);
@@ -1059,8 +1059,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     viewer = win.__AMP_SERVICES.viewer.obj;
     resources = win.__AMP_SERVICES.resources.obj;
 
-    observeSpy = sandbox.stub();
-    unobserveSpy = sandbox.stub();
+    observeSpy = env.sandbox.stub();
+    unobserveSpy = env.sandbox.stub();
     const inob = callback => {
       inObCallback = callback;
       return {
@@ -1069,7 +1069,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       };
     };
     if (nativeIntersectionObserverSupported(ampdoc.win)) {
-      sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
+      env.sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
     } else {
       win.IntersectionObserver = inob;
       win.IntersectionObserverEntry = function() {};
@@ -1090,7 +1090,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       eventResolver2 = resolve;
     });
 
-    sandbox.stub(ampdoc, 'getFirstVisibleTime').callsFake(() => startTime);
+    env.sandbox.stub(ampdoc, 'getFirstVisibleTime').callsFake(() => startTime);
 
     ampElement = doc.createElement('amp-img');
     ampElement.id = 'abc';
@@ -1110,13 +1110,13 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         }, 4);
       }
     }).then(() => {
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       startTime = 10000;
       clock.tick(startTime);
 
       const resource = resources.getResourceForElement(ampElement);
       scrollTop = 10;
-      sandbox
+      env.sandbox
         .stub(resource, 'getLayoutBox')
         .callsFake(() => layoutRectLtwh(0, scrollTop, 100, 100));
     });
@@ -1467,7 +1467,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new VisibilityManagerForDoc(ampdoc);
 
-    const spy = sandbox.spy();
+    const spy = env.sandbox.spy();
     visibility.listenElement(
       ampElement,
       {
@@ -1618,7 +1618,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       expect(isModelResolved(model)).to.be.false;
       clock.tick(899); // not yet!
       expect(isModelResolved(model)).to.be.false;
-      sandbox.stub(model, 'reset_');
+      env.sandbox.stub(model, 'reset_');
       clock.tick(1); // now fire
       expect(isModelResolved(model)).to.be.true;
       return eventPromise.then(state => {
@@ -1700,8 +1700,8 @@ describes.realWin(
         'https://example.com',
         shadowRoot
       );
-      sandbox.stub(Services, 'resourcesForDoc').returns({});
-      sandbox.stub(Services, 'viewportForDoc').returns({
+      env.sandbox.stub(Services, 'resourcesForDoc').returns({});
+      env.sandbox.stub(Services, 'viewportForDoc').returns({
         onChanged() {},
       });
     });

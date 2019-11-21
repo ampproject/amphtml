@@ -40,26 +40,28 @@ describes.realWin('Actions', {amp: true}, env => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     readerIdPromise = Promise.resolve('RD');
     urlBuilder = new UrlBuilder(ampdoc, readerIdPromise);
     urlBuilder.setAuthResponse({
       'a': 'A',
     });
     analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
-    analyticsMock = sandbox.mock(analytics);
-    buildSpy = sandbox.spy(Actions.prototype, 'build');
+    analyticsMock = env.sandbox.mock(analytics);
+    buildSpy = env.sandbox.spy(Actions.prototype, 'build');
     actions = new Actions(ampdoc, urlBuilder, analytics, {
       [Action.LOGIN]: 'https://example.org/login?rid=READER_ID',
       [Action.SUBSCRIBE]:
         'https://example.org/subscribe?rid=READER_ID&a=AUTHDATA(a)',
     });
     openResolver = null;
-    openStub = sandbox.stub(WebLoginDialog.prototype, 'open').callsFake(() => {
-      return new Promise(resolve => {
-        openResolver = resolve;
+    openStub = env.sandbox
+      .stub(WebLoginDialog.prototype, 'open')
+      .callsFake(() => {
+        return new Promise(resolve => {
+          openResolver = resolve;
+        });
       });
-    });
   });
 
   afterEach(() => {

@@ -113,7 +113,7 @@ describes.fakeWin(
           null,
           'https://example.com/location'
         );
-        sandbox.stub(ConfigLoader.prototype, 'fetch_').resolves({});
+        env.sandbox.stub(ConfigLoader.prototype, 'fetch_').resolves({});
 
         const configLoader = new ConfigLoader(fakeAmpdoc, element);
         const config = await configLoader.getConfig();
@@ -133,7 +133,7 @@ describes.fakeWin(
           null,
           'https://example.com/location'
         );
-        sandbox.stub(ConfigLoader.prototype, 'fetch_').resolves(testConfig);
+        env.sandbox.stub(ConfigLoader.prototype, 'fetch_').resolves(testConfig);
 
         const configLoader = new ConfigLoader(fakeAmpdoc, element);
         const config = await configLoader.getConfig();
@@ -156,7 +156,7 @@ describes.fakeWin(
           null,
           'https://example.com/location'
         );
-        sandbox.stub(ConfigLoader.prototype, 'fetch_').resolves(testConfig);
+        env.sandbox.stub(ConfigLoader.prototype, 'fetch_').resolves(testConfig);
 
         const arrayConfigLoader = new ConfigLoader(fakeAmpdoc, element);
         await expect(
@@ -171,7 +171,9 @@ describes.fakeWin(
           {local: true},
           'https://example.com/location'
         );
-        sandbox.stub(ConfigLoader.prototype, 'fetch_').resolves({remote: true});
+        env.sandbox
+          .stub(ConfigLoader.prototype, 'fetch_')
+          .resolves({remote: true});
 
         const configLoader = new ConfigLoader(fakeAmpdoc, element);
         const config = await configLoader.getConfig();
@@ -184,7 +186,7 @@ describes.fakeWin(
           {local: true},
           'https://example.com/location'
         );
-        sandbox.stub(ConfigLoader.prototype, 'fetch_').callsFake(() => {
+        env.sandbox.stub(ConfigLoader.prototype, 'fetch_').callsFake(() => {
           return new Promise(resolve => {
             setTimeout(() => resolve({remote: true}, 16));
           });
@@ -201,7 +203,7 @@ describes.fakeWin(
           {local: true},
           'https://example.com/location'
         );
-        sandbox
+        env.sandbox
           .stub(ConfigLoader.prototype, 'fetch_')
           .callsFake(
             () =>
