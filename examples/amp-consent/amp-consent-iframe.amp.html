@@ -3,10 +3,8 @@
 <head>
   <meta charset="utf-8">
   <title>AMP Consent Test</title>
-  <link rel="canonical" href="amps.html" >
+  <link rel="canonical" href="amp-consent-iframe.amp.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <meta name="amp-consent-blocking" content="amp-ad">
-
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
 
   <style amp-custom>
@@ -142,10 +140,10 @@
     hr {
       margin: 0;
     }
-  </style>
+</style>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -156,31 +154,7 @@
     </div>
   </header>
   <main role="main">
-    <h3>Image that is blocked by '_till_responded' consent</h3>
-
-    <amp-analytics type="_ping_">
-      <script type="application/json">
-      {
-        "requests": {
-          "old": "https://fake.com/analytics?consent=CONSENT_STATE"
-        },
-        "vars": {
-          "abc": "${timestamp}.${requestCount}"
-        },
-        "triggers": {
-          "onetime": {
-            "on": "visible",
-            "request": "old"
-          }
-        },
-        "transport": {
-          "beacon": "false",
-          "xhrpost": "false",
-          "image": "true"
-        }
-      }
-      </script>
-    </amp-analytics>
+     <h3>Image that is blocked by '_till_responded' consent</h3>
     <amp-img
         data-block-on-consent='_till_responded'
         src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
@@ -209,39 +183,16 @@
     <amp-img
         src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
 
-     <amp-consent id='ABC' layout='nodisplay'>
-      <script type="application/json">{
-        "consentInstanceId": "myConsentId",
-        "checkConsentHref": "http://localhost:8000/get-consent-v1",
-        "promptUI": "ui1",
-        "clientConfig": {
-          "mytest": "test",
-          "anothertest": "test2"
-        },
-        "policy": {
-          "default": {
-            "waitFor": {
-              "myConsentId": []
-              },
-            "timeout": {
-              "seconds": 5,
-              "fallbackAction": "reject"
-            }
-          }
-        },
-        "postPromptUI": "postPromptUI"
-      }</script>
-      <div id="ui1">
-        Can I load the image??
-        <button on="tap:ABC.accept" role="button">Accept</button>
-        <button on="tap:ABC.reject" role="button">Reject</button>
-        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
-      </div>
-      <div id="postPromptUI">
-        Post Prompt UI
-        <button on="tap:ABC.prompt" role="button">Manage</button>
-      </div>
-    </amp-consent>
+    <h3>Image that is blocked by consent</h3>
+    <amp-img
+        data-block-on-consent
+        src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+
+    <h3>Image that is NOT blocked by consent</h3>
+    <amp-img
+        src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+
+
     <article>
 
 
@@ -282,6 +233,13 @@
             Maecenas sollicitudin felis aliquam tortor vulputate,
             ac posuere velit semper.
           </p>
+          <amp-ad width="320" height="50"
+                  data-block-on-consent
+                  type="doubleclick"
+                  data-slot="/4119129/mobile_ad_banner"
+                  rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistent-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1", "https://localhost:4443/abc?timeout=true", "https://broken.zzzzzz", "https://localhost:4443/zqq?slot_id=1"], "timeoutMillis": 500}'
+                  json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+          </amp-ad>
           <p>
             Fusce pretium tempor justo, vitae consequat dolor maximus eget.
             Aliquam iaculis tincidunt quam sed maximus. Suspendisse faucibus
@@ -308,9 +266,9 @@
             pellentesque, id placerat elit ornare.
           </p>
 
-          <h1>_ping_ Ad Blocked by metaTags</h1>
           <amp-ad width=300 height=250
               type="_ping_"
+              data-block-on-consent
               data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
               data-valid='true'>
           </amp-ad>
@@ -363,6 +321,42 @@
           </p>
         </div>
       </div>
+
+      <amp-iframe id='1234' width=300 height=50
+          on:"message:myConsentId.accept"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          layout="responsive"
+          frameborder="0"
+          src="http://ads.localhost:8000/test/manual/diy-consent.html">
+          <placeholder></placeholder>
+      </amp-iframe>
+
+      <amp-consent id='ABC' layout='nodisplay'>
+      <script type="application/json">{
+        "consents": {
+          "myConsentId": {
+            "checkConsentHref": "http://localhost:8000/get-consent-v1",
+            "promptUI": "ui1"
+          }
+        },
+        "postPromptUI": "postPromptUI"
+      }</script>
+      <div id="ui1">
+        Can I load the image??
+        <amp-iframe id='5678' width=300 height=50
+          on:"message:myConsentId.accept"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          layout="responsive"
+          frameborder="0"
+          src="http://ads.localhost:8000/test/manual/diy-consent.html">
+          <placeholder></placeholder>
+        </amp-iframe>
+      </div>
+      <div id="postPromptUI">
+        Post Prompt UI
+        <button on="tap:ABC.prompt" role="button">Manage</button>
+      </div>
+    </amp-consent>
     </article>
   </main>
 
