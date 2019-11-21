@@ -64,12 +64,13 @@ h3.i-amp-story-quiz-prompt {
 
 /* Truncate text and add an ellipsis after 2 lines. */
 .i-amp-story-quiz-option-text {
-    -webkit-box-orient: vertical !important;
-    -webkit-line-clamp: 2 !important;
-    display: -webkit-box !important;
+    max-height: 40px !important;
     overflow : hidden !important;
     text-overflow: ellipsis !important;
-    max-height: 40px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    visibility: visible !important;
 }
 
 .i-amp-story-quiz-post-selection .i-amp-story-quiz-option-selected {
