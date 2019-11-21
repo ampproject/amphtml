@@ -59,18 +59,20 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const ampdocService = {
       installFieDoc: () => {},
     };
-    extensionsMock = sandbox.mock(extensions);
-    resourcesMock = sandbox.mock(resources);
-    ampdocServiceMock = sandbox.mock(ampdocService);
-    sandbox.stub(Services, 'ampdocServiceFor').callsFake(() => ampdocService);
+    extensionsMock = env.sandbox.mock(extensions);
+    resourcesMock = env.sandbox.mock(resources);
+    ampdocServiceMock = env.sandbox.mock(ampdocService);
+    env.sandbox
+      .stub(Services, 'ampdocServiceFor')
+      .callsFake(() => ampdocService);
 
     iframe = document.createElement('iframe');
 
-    installExtensionsInChildWindowStub = sandbox
+    installExtensionsInChildWindowStub = env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'installExtensionsInChildWindow')
       .returns(Promise.resolve());
 
-    installExtensionsInFieStub = sandbox
+    installExtensionsInFieStub = env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'installExtensionsInFie')
       .returns(Promise.resolve());
   });
@@ -84,11 +86,10 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     ampdocServiceMock.verify();
     setSrcdocSupportedForTesting(undefined);
     toggleAmpdocFieForTesting(window, false);
-    sandbox.restore();
   });
 
   function stubViewportScrollTop(scrollTop) {
-    sandbox.stub(Services, 'viewportForDoc').returns({
+    env.sandbox.stub(Services, 'viewportForDoc').returns({
       getScrollTop: () => scrollTop,
     });
   }
@@ -175,7 +176,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     // AmpDoc is created.
     const ampdocSignals = new Signals();
     const ampdoc = {
-      setReady: sandbox.spy(),
+      setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
     };
     let childWinForAmpDoc;
@@ -183,12 +184,12 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       .expects('installFieDoc')
       .withExactArgs(
         'https://acme.org/url1',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           // Match childWin argument.
           childWinForAmpDoc = arg;
           return true;
         }),
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           // Match options with no signals.
           expect(arg && arg.signals).to.not.be.ok;
           return true;
@@ -208,7 +209,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const readyPromise = new Promise(resolve => {
       readyResolver = resolve;
     });
-    sandbox
+    env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'whenReady')
       .callsFake(() => readyPromise);
 
@@ -222,8 +223,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         expect(childWinForAmpDoc).to.equal(embed.win);
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installExtensionsInFieStub).to.be.calledWithMatch(
-          sinon.match.any,
-          sinon.match.same(ampdoc)
+          env.sandbox.match.any,
+          env.sandbox.match.same(ampdoc)
         );
         expect(ampdoc.setReady).to.not.be.called;
         readyResolver();
@@ -241,13 +242,13 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const hostSignals = new Signals();
     const host = document.createElement('div');
     host.signals = () => hostSignals;
-    host.renderStarted = sandbox.spy();
+    host.renderStarted = env.sandbox.spy();
     host.getLayoutBox = () => layoutRectLtwh(10, 10, 100, 200);
 
     // AmpDoc is created.
     let ampdocSignals = null;
     const ampdoc = {
-      setReady: sandbox.spy(),
+      setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
     };
     let childWinForAmpDoc;
@@ -255,12 +256,12 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       .expects('installFieDoc')
       .withExactArgs(
         'https://acme.org/url1',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           // Match childWin argument.
           childWinForAmpDoc = arg;
           return true;
         }),
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           // Match options with no signals.
           ampdocSignals = arg && arg.signals;
           expect(ampdocSignals).to.be.ok;
@@ -281,7 +282,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const readyPromise = new Promise(resolve => {
       readyResolver = resolve;
     });
-    sandbox
+    env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'whenReady')
       .callsFake(() => readyPromise);
 
@@ -296,8 +297,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         expect(childWinForAmpDoc).to.equal(embed.win);
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installExtensionsInFieStub).to.be.calledWithMatch(
-          sinon.match.any,
-          sinon.match.same(ampdoc)
+          env.sandbox.match.any,
+          env.sandbox.match.same(ampdoc)
         );
         expect(ampdoc.setReady).to.not.be.called;
         readyResolver();
@@ -325,8 +326,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     });
     return embedPromise.then(embed => {
       expect(installExtensionsInChildWindowStub).to.be.calledWith(
-        sinon.match.any,
-        sinon.match.same(embed.win)
+        env.sandbox.match.any,
+        env.sandbox.match.same(embed.win)
       );
     });
   });
@@ -349,7 +350,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
   });
 
   it.skip('should install and dispose services', () => {
-    const disposeSpy = sandbox.spy();
+    const disposeSpy = env.sandbox.spy();
     const embedService = {
       dispose: disposeSpy,
     };
@@ -378,9 +379,9 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     // AmpDoc is created.
     const ampdocSignals = new Signals();
     const ampdoc = {
-      setReady: sandbox.spy(),
+      setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
-      dispose: sandbox.spy(),
+      dispose: env.sandbox.spy(),
     };
     ampdocServiceMock
       .expects('installFieDoc')
@@ -394,7 +395,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       .returns(Promise.resolve())
       .once();
 
-    sandbox
+    env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'whenReady')
       .returns(Promise.resolve());
 
@@ -422,7 +423,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     return embedPromise.then(embed => {
       expect(installExtensionsInChildWindowStub).to.be.calledOnce;
       expect(embed.isVisible()).to.be.false;
-      const spy = sandbox.spy();
+      const spy = env.sandbox.spy();
       embed.onVisibilityChanged(spy);
 
       setFriendlyIframeEmbedVisible(embed, false);
@@ -440,7 +441,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const host = document.createElement('amp-host');
     const hostSignals = new Signals();
     host.signals = () => hostSignals;
-    host.renderStarted = sandbox.spy();
+    host.renderStarted = env.sandbox.spy();
     host.getLayoutBox = () => layoutRectLtwh(10, 10, 100, 200);
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
@@ -458,8 +459,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     resourcesMock
       .expects('getResourcesInRect')
       .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(
+        env.sandbox.match(arg => arg == iframe.contentWindow),
+        env.sandbox.match(
           arg =>
             arg.left == 0 &&
             arg.top == 0 &&
@@ -497,8 +498,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     resourcesMock
       .expects('getResourcesInRect')
       .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(
+        env.sandbox.match(arg => arg == iframe.contentWindow),
+        env.sandbox.match(
           arg =>
             arg.left == 10 &&
             arg.top == 10 &&
@@ -698,7 +699,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       const container = {
         appendChild: child => {
           document.body.appendChild(child);
-          eventListenerSpy = sandbox.spy(
+          eventListenerSpy = env.sandbox.spy(
             child.contentWindow,
             'addEventListener'
           );
@@ -729,7 +730,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     beforeEach(() => {
       setSrcdocSupportedForTesting(true);
 
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
 
       polls = [];
       win = {
@@ -778,7 +779,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       container = {
         appendChild: () => {},
       };
-      renderStartStub = sandbox.stub(
+      renderStartStub = env.sandbox.stub(
         FriendlyIframeEmbed.prototype,
         'startRender_'
       );
@@ -921,7 +922,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
 
       parent.appendChild(iframe);
 
-      sandbox
+      env.sandbox
         ./*OK*/ stub(iframe, 'getBoundingClientRect')
         .returns(layoutRectLtwh(x, y, w, h));
 
@@ -934,8 +935,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         Promise.resolve()
       );
 
-      sandbox.stub(fie, 'getResources_').returns(resourcesMock);
-      sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
+      env.sandbox.stub(fie, 'getResources_').returns(resourcesMock);
+      env.sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
 
       fie.win = win;
 
@@ -1052,7 +1053,7 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     resetScheduledElementForTesting(parentWin, 'amp-test');
     installExtensionsService(parentWin);
     extensions = Services.extensionsFor(parentWin);
-    extensionsMock = sandbox.mock(extensions);
+    extensionsMock = env.sandbox.mock(extensions);
 
     [
       'urlForDoc',
@@ -1064,8 +1065,8 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       class FakeService {
         static installInEmbedWindow() {}
       }
-      sandbox.stub(FakeService, 'installInEmbedWindow');
-      sandbox.stub(Services, s).returns(new FakeService());
+      env.sandbox.stub(FakeService, 'installInEmbedWindow');
+      env.sandbox.stub(Services, s).returns(new FakeService());
     });
 
     iframe = parentWin.document.createElement('iframe');
@@ -1205,7 +1206,7 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     class FooService {
       static installInEmbedWindow() {}
     }
-    sandbox.stub(FooService, 'installInEmbedWindow');
+    env.sandbox.stub(FooService, 'installInEmbedWindow');
     registerServiceBuilder(
       parentWin,
       'fake-service-foo',
@@ -1216,7 +1217,7 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     class BarService {
       static installInEmbedWindow() {}
     }
-    sandbox.stub(BarService, 'installInEmbedWindow');
+    env.sandbox.stub(BarService, 'installInEmbedWindow');
     registerServiceBuilder(
       parentWin,
       'fake-service-bar',
@@ -1330,7 +1331,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
     resetScheduledElementForTesting(parentWin, 'amp-test');
     installExtensionsService(parentWin);
     extensions = Services.extensionsFor(parentWin);
-    extensionsMock = sandbox.mock(extensions);
+    extensionsMock = env.sandbox.mock(extensions);
     const ampdocService = Services.ampdocServiceFor(parentWin);
     updateFieModeForTesting(ampdocService, true);
 
@@ -1486,7 +1487,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
   });
 
   it('should adopt extension services', () => {
-    const fooConstructorSpy = sandbox.spy();
+    const fooConstructorSpy = env.sandbox.spy();
     class FooService {
       constructor(arg) {
         fooConstructorSpy(arg);
@@ -1499,7 +1500,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
       /* opt_instantiate */ false
     );
 
-    const barConstructorSpy = sandbox.spy();
+    const barConstructorSpy = env.sandbox.spy();
     class BarService {
       constructor(arg) {
         barConstructorSpy(arg);

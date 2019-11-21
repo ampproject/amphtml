@@ -109,10 +109,13 @@ describes.realWin(
           expect(impl.inputElement_).not.to.be.null;
           expect(impl.container_).not.to.be.null;
           expect(impl.filter_).to.equal('substring');
-          filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
-          filterSpy = sandbox.spy(impl, 'filterData_');
-          renderSpy = sandbox.spy(impl, 'renderResults_');
+          filterAndRenderSpy = env.sandbox.spy(
+            impl,
+            'filterDataAndRenderResults_'
+          );
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
+          filterSpy = env.sandbox.spy(impl, 'filterData_');
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
           return ampAutocomplete.layoutCallback();
         })
         .then(() => {
@@ -137,10 +140,13 @@ describes.realWin(
           expect(impl.inputElement_).not.to.be.null;
           expect(impl.container_).not.to.be.null;
           expect(impl.filter_).to.equal('substring');
-          filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
-          filterSpy = sandbox.spy(impl, 'filterData_');
-          renderSpy = sandbox.spy(impl, 'renderResults_');
+          filterAndRenderSpy = env.sandbox.spy(
+            impl,
+            'filterDataAndRenderResults_'
+          );
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
+          filterSpy = env.sandbox.spy(impl, 'filterData_');
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
           return ampAutocomplete.layoutCallback();
         })
         .then(() => {
@@ -168,10 +174,13 @@ describes.realWin(
           expect(impl.inputElement_).not.to.be.null;
           expect(impl.container_).not.to.be.null;
           expect(impl.filter_).to.equal('substring');
-          filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
-          filterSpy = sandbox.spy(impl, 'filterData_');
-          renderSpy = sandbox.spy(impl, 'renderResults_');
+          filterAndRenderSpy = env.sandbox.spy(
+            impl,
+            'filterDataAndRenderResults_'
+          );
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
+          filterSpy = env.sandbox.spy(impl, 'filterData_');
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
           return ampAutocomplete.layoutCallback();
         })
         .then(() => {

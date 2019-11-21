@@ -101,7 +101,7 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
           iframeOrigin,
           'bar'
         ).then(messaging => {
-          const handlerStub = sandbox.stub();
+          const handlerStub = window.sandbox.stub();
           messaging.setDefaultHandler(handlerStub);
           expect(handlerStub).to.not.have.been.called;
         });
