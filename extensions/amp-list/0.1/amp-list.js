@@ -366,7 +366,7 @@ export class AmpList extends AMP.BaseElement {
           promise = this.fetchList_();
         }
       } else if (typeof src === 'object') {
-        promise = renderLocalData(src);
+        promise = renderLocalData(/** @type {!Object} */ (src));
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
