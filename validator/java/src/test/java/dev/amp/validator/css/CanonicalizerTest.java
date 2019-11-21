@@ -63,9 +63,9 @@ public class CanonicalizerTest {
   public void testParseAListOfRules() {
     try {
       final List<ErrorToken> cssErrors = new ArrayList<>();
-      List<com.steadystate.css.parser.Token> tokens = new LinkedList<>();
-      tokens.add(new com.steadystate.css.parser.Token(22, "amp-img"));
-      tokens.add(new com.steadystate.css.parser.Token(55, "{"));
+      List<Token> tokens = new LinkedList<>();
+      tokens.add(new Token(22, "amp-img"));
+      tokens.add(new Token(55, "{"));
       tokens.add(new Token(1, ""));
       tokens.add(new Token(56, "}"));
       tokens.add(new Token(1, ""));
@@ -81,7 +81,6 @@ public class CanonicalizerTest {
     } catch (CssValidationException e) {
       e.printStackTrace();
     }
-
   }
 
   @Test

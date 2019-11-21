@@ -110,11 +110,12 @@ public class AttributeSpecUtilsTest {
     TagStack tagStack = Mockito.mock(TagStack.class);
 
     ParsedAttrSpec parsedAttrSpec = Mockito.mock(ParsedAttrSpec.class);
-    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.<String>anyList())).thenReturn(true);
+    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.anyList())).thenReturn(true);
     Mockito.when(parsedAttrSpec.getSpec()).thenReturn(attrSpecBuilder.build());
 
     ParsedAttrSpecs parsedAttrSpecs = Mockito.mock(ParsedAttrSpecs.class);
-    Mockito.when(parsedAttrSpecs.getParsedAttrSpec("HTML", "htmlValue", attrSpecBuilder.build())).thenReturn(parsedAttrSpec);
+    Mockito.when(parsedAttrSpecs.getParsedAttrSpec("HTML", "htmlValue",
+      attrSpecBuilder.build())).thenReturn(parsedAttrSpec);
 
     ParsedValidatorRules parsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
     Mockito.when(parsedValidatorRules.getParsedAttrSpecs()).thenReturn(parsedAttrSpecs);
@@ -182,7 +183,7 @@ public class AttributeSpecUtilsTest {
     tagStack = Mockito.mock(TagStack.class);
 
     parsedAttrSpec = Mockito.mock(ParsedAttrSpec.class);
-    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.<String>anyList())).thenReturn(false);
+    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.anyList())).thenReturn(false);
     Mockito.when(parsedAttrSpec.getSpec()).thenReturn(attrSpecBuilder.build());
 
     parsedAttrSpecs = Mockito.mock(ParsedAttrSpecs.class);
@@ -244,7 +245,7 @@ public class AttributeSpecUtilsTest {
     tagStack = Mockito.mock(TagStack.class);
 
     parsedAttrSpec = Mockito.mock(ParsedAttrSpec.class);
-    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.<String>anyList())).thenReturn(true);
+    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.anyList())).thenReturn(true);
     Mockito.when(parsedAttrSpec.getSpec()).thenReturn(attrSpecBuilder.build());
 
     parsedAttrSpecs = Mockito.mock(ParsedAttrSpecs.class);
@@ -308,7 +309,7 @@ public class AttributeSpecUtilsTest {
     tagStack = Mockito.mock(TagStack.class);
 
     parsedAttrSpec = Mockito.mock(ParsedAttrSpec.class);
-    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.<String>anyList())).thenReturn(true);
+    Mockito.when(parsedAttrSpec.isUsedForTypeIdentifiers(Mockito.anyList())).thenReturn(true);
     Mockito.when(parsedAttrSpec.getSpec()).thenReturn(attrSpecBuilder.build());
 
     parsedAttrSpecs = Mockito.mock(ParsedAttrSpecs.class);
