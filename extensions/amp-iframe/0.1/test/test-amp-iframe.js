@@ -190,6 +190,8 @@ describes.realWin(
         expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
         yield timer.promise(IFRAME_MESSAGE_TIMEOUT);
         expect(ranJs).to.equal(0);
+        // TODO: remove. testing only.
+        expect(ranJs).to.equal(0);
       });
 
       it('should only propagate supported attributes', function*() {
