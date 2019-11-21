@@ -525,7 +525,7 @@ export class AmpIframe extends AMP.BaseElement {
     } else if ('width' === args[0]) {
       this.updateSize_(undefined, parseInt(args[1], 10));
     } else {
-      user().warn(`Unsupported Pym.js message: ${data}`);
+      user().warn(TAG_, `Unsupported Pym.js message: ${data}`);
     }
   }
 
