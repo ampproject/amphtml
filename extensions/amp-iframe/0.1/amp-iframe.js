@@ -508,12 +508,11 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   listenForPymMessage_(event) {
-    if (
-      !this.iframe_ ||
-      event.source !== this.iframe_.contentWindow ||
-      typeof event.data !== 'string' ||
-      'pym' !== event.data.substr(0, 3)
-    ) {
+    if (!this.iframe_ || event.source !== this.iframe_.contentWindow) {
+      return;
+    }
+    const data = getData(event);
+    if (typeof data !== 'string' || 'pym' !== data.substr(0, 3)) {
       return;
     }
 
@@ -522,7 +521,7 @@ export class AmpIframe extends AMP.BaseElement {
     // 'height', 'width', 'parentPositionInfo', 'navigateTo', and  'scrollToChildPos'.
     // Only the 'height' and 'width' messages are currently supported.
     // See <https://github.com/nprapps/pym.js/blob/57feb68/src/pym.js#L85-L102>
-    const args = event.data.split(/xPYMx/).splice(2);
+    const args = data.split(/xPYMx/).splice(2);
     if ('height' === args[0]) {
       this.updateSize_(parseInt(args[1], 10), undefined);
     } else if ('width' === args[0]) {
