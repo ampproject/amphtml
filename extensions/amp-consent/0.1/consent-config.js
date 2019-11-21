@@ -51,7 +51,7 @@ export class ConsentConfig {
    * @return {!Promise<JsonObject>}
    */
   getConsentConfigPromise() {
-    if (!this.config_) {
+    if (!this.configPromise_) {
       this.configPromise_ = this.validateAndParseConfig_();
     }
     return this.configPromise_;
@@ -151,22 +151,23 @@ export class ConsentConfig {
         }
       }
     }
-    return this.mergeGeoOverride_(config);
+    return this.mergeGeoOverride_(config).then(mergedConfig =>
+      this.validateMergedGeoOverride_(mergedConfig)
+    );
   }
 
   /**
-   * Merge correct geoOverride object into toplevel config, then
-   * validate.
+   * Merge correct geoOverride object into toplevel config.
    * @param {?JsonObject} config
    * @return {!Promise<?JsonObject>}
    */
   mergeGeoOverride_(config) {
-    const mergedConfig = Object.assign({}, config);
+    let mergedConfig = Object.assign({}, config);
     if (mergedConfig['geoOverride']) {
       Services.geoForDocOrNull(this.element_).then(geoService => {
         userAssert(
           geoService,
-          '%s: requires <amp-geo> to use geoOverride',
+          '%s: requires <amp-geo> to use `geoOverride`',
           TAG
         );
         const geoGroups = Object.keys(mergedConfig['geoOverride']);
@@ -183,14 +184,23 @@ export class ConsentConfig {
         delete mergedConfig['geoOverride'];
       });
     }
+    return Promise.resolve(mergedConfig);
+  }
+
+  /**
+   * Validate merged geoOverride
+   * @param {?JsonObject} mergedConfig
+   * @return {?JsonObject>}
+   */
+  validateMergedGeoOverride_(mergedConfig) {
     if (mergedConfig['consentRequired'] === 'remote') {
       userAssert(
         mergedConfig['checkConsentHref'],
-        '%s: checkConsentHref must be specified if consentRequired is remote',
+        '%s: `checkConsentHref` must be specified if `consentRequired` is remote',
         TAG
       );
     }
-    return Promise.resolve(mergedConfig);
+    return mergedConfig;
   }
 
   /**
@@ -203,7 +213,7 @@ export class ConsentConfig {
     try {
       return getChildJsonConfig(this.element_);
     } catch (e) {
-      throw user(this.element_).createError('%s: %s', TAG, e);
+      throw user(this.element_).createError(TAG, e);
     }
   }
 

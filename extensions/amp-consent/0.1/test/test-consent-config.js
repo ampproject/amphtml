@@ -48,7 +48,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     it('read inline config', () => {
       appendConfigScriptElement(doc, element, defaultConfig);
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal(
+      return expect(
+        consentConfig.getConsentConfigPromise()
+      ).to.eventually.deep.equal(
         dict({
           'consentInstanceId': 'ABC',
           'checkConsentHref': 'https://response1',
@@ -60,7 +62,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       appendConfigScriptElement(doc, element, dict({}));
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal(
+      return expect(
+        consentConfig.getConsentConfigPromise()
+      ).to.eventually.deep.equal(
         dict({
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/get-consent-v1',
@@ -93,7 +97,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         })
       );
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal(
+      return expect(
+        consentConfig.getConsentConfigPromise()
+      ).to.eventually.deep.equal(
         dict({
           'consentInstanceId': 'ABC',
           'promptIfUnknownForGeoGroup': 'eea',
@@ -133,7 +139,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       );
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal(
+      return expect(
+        consentConfig.getConsentConfigPromise()
+      ).to.eventually.deep.equal(
         dict({
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/override',
@@ -156,32 +164,30 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     });
 
     describe('merges geoOverride correctly', () => {
+      let geoConfig;
       beforeEach(() => {
-        appendConfigScriptElement(
-          doc,
-          element,
-          dict({
-            'consentInstanceId': 'abc',
-            'consentRequired': false,
-            'checkConsentHref': '/override',
-            'geoOverride': {
-              'nafta': {
-                'consentRequired': true,
-              },
-              'waldo': {
-                'checkConsentHref': 'https://example.com/check-consent',
-                'consentRequired': 'remote',
-              },
-              'geoGroupUnknown': {
-                'checkConsentHref': 'https://example.com/check-consent',
-                'consentRequired': true,
-              },
+        geoConfig = dict({
+          'consentInstanceId': 'abc',
+          'consentRequired': false,
+          'checkConsentHref': '/override',
+          'geoOverride': {
+            'nafta': {
+              'consentRequired': true,
             },
-          })
-        );
+            'waldo': {
+              'checkConsentHref': 'https://example.com/check-consent',
+              'consentRequired': 'remote',
+            },
+            'geoGroupUnknown': {
+              'checkConsentHref': 'https://example.com/check-consent',
+              'consentRequired': true,
+            },
+          },
+        });
       });
 
       it('does not merge', () => {
+        appendConfigScriptElement(doc, element, geoConfig);
         sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup() {
@@ -191,7 +197,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         );
 
         const consentConfig = new ConsentConfig(element);
-        expect(
+        return expect(
           consentConfig.getConsentConfigPromise()
         ).to.eventually.deep.equal(
           dict({
@@ -203,6 +209,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
 
       it('Overrides single field', () => {
+        appendConfigScriptElement(doc, element, geoConfig);
         sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup(geoGroup) {
@@ -215,7 +222,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         );
 
         const consentConfig = new ConsentConfig(element);
-        expect(
+        return expect(
           consentConfig.getConsentConfigPromise()
         ).to.eventually.deep.equal(
           dict({
@@ -227,6 +234,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
 
       it('Overrides both fields', () => {
+        appendConfigScriptElement(doc, element, geoConfig);
         sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup(geoGroup) {
@@ -239,7 +247,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         );
 
         const consentConfig = new ConsentConfig(element);
-        expect(
+        return expect(
           consentConfig.getConsentConfigPromise()
         ).to.eventually.deep.equal(
           dict({
@@ -251,6 +259,16 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
 
       it('Overrides null fields', () => {
+        geoConfig = dict({
+          'consentInstanceId': 'abc',
+          'geoOverride': {
+            'geoGroupUnknown': {
+              'checkConsentHref': 'https://example.com/check-consent',
+              'consentRequired': true,
+            },
+          },
+        });
+        appendConfigScriptElement(doc, element, geoConfig);
         sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup(geoGroup) {
@@ -262,16 +280,8 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           })
         );
 
-        const json = JSON.parse(element.textContent);
-        delete json.consentRequired;
-        delete json.checkConsentHref;
-        element.innerHTML =
-          '"<script type="application/json">' +
-          JSON.stringify(json) +
-          '</script>';
-
         const consentConfig = new ConsentConfig(element);
-        expect(
+        return expect(
           consentConfig.getConsentConfigPromise()
         ).to.eventually.deep.equal(
           dict({
@@ -283,7 +293,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
     });
 
-    it('assert valid config', () => {
+    it('assert valid config', async () => {
       const scriptTypeError =
         'amp-consent/consent-config: <script> child ' +
         'must have type="application/json"';
@@ -301,7 +311,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         'only single consent instance is supported';
       const checkConsentHrefError =
         'amp-consent/consent-config: ' +
-        'checkConsentHref must be specified if consentRequired is remote';
+        '`checkConsentHref` must be specified if `consentRequired` is remote';
 
       sandbox.stub(Services, 'geoForDocOrNull').returns(
         Promise.resolve({
@@ -345,9 +355,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         'geoOverride': {},
         'consentRequired': 'remote',
       });
-      expect(() =>
+      await expect(
         new ConsentConfig(element).getConsentConfigPromise()
-      ).to.throw(checkConsentHrefError);
+      ).to.be.rejectedWith(checkConsentHrefError);
 
       // Check invalid CMP
       scriptElement.textContent = JSON.stringify({
@@ -387,7 +397,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         })
       );
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getConsentConfigPromise()).to.eventually.deep.equal({
+      return expect(
+        consentConfig.getConsentConfigPromise()
+      ).to.eventually.deep.equal({
         'consentInstanceId': 'ABC',
         'policy': {},
       });
