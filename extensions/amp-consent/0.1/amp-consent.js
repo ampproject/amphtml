@@ -520,7 +520,7 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Returns a promise that if user is in the given geoGroup.
+   * Returns a promise that if user is in the given geoGroup
    * @param {string} geoGroup
    * @return {Promise<boolean>}
    */
