@@ -62,6 +62,16 @@ h3.i-amp-story-quiz-prompt {
     line-height: 20px !important;
 }
 
+/* Truncate text and add an ellipsis after 2 lines. */
+.i-amp-story-quiz-option-text {
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    display: -webkit-box !important;
+    overflow : hidden !important;
+    text-overflow: ellipsis !important;
+    max-height: 40px !important;
+}
+
 .i-amp-story-quiz-post-selection .i-amp-story-quiz-option-selected {
     color: white !important;
     border: solid 1px transparent !important;

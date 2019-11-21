@@ -89,14 +89,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
-    const mutator = () => {
-      console.log('wahooooooo');
+    this.mutateElement(() => {
       rtlState
         ? this.quizEl_.setAttribute('dir', 'rtl')
         : this.quizEl_.removeAttribute('dir');
-    };
-
-    this.mutateElement(mutator, this.quizEl_);
+    });
   }
 
   /** @override */
@@ -165,7 +162,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     ).textContent = answerChoiceOptions[index];
 
     // Transfer the option information into a span then remove the option
-    const optionText = document.createTextNode(option.textContent);
+    const optionText = document.createElement('span');
+    optionText.setAttribute('class', 'i-amp-story-quiz-option-text');
+    optionText.textContent = option.textContent;
+    // const optionText = document.createTextNode(option.textContent);
     convertedOption.append(optionText);
 
     if (option.hasAttribute('correct')) {
