@@ -28,16 +28,13 @@ import {
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
 } from '../web-animation-types';
-import {
-  assertDoesNotContainDisplay,
-  setStyles,
-} from '../../../../src/style';
-import {devAssert, userAssert} from '../../../../src/log';
+import {assertDoesNotContainDisplay, setStyles} from '../../../../src/style';
+import {devAssert} from '../../../../src/log';
+import {getTotalDuration} from './utils';
 
 /**
  */
 export class NativeWebAnimationRunner extends AnimationRunner {
-
   /**
    * @param {!Array<!../web-animation-types.InternalWebAnimationRequestDef>} requests
    */
@@ -83,11 +80,12 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
-        setStyles(request.target,
-            assertDoesNotContainDisplay(request.vars));
+        setStyles(request.target, assertDoesNotContainDisplay(request.vars));
       }
       const player = request.target.animate(
-          request.keyframes, request.timing);
+        /** @type {!Array<Object>} */ (request.keyframes),
+        request.timing
+      );
       player.pause();
       return player;
     });
@@ -139,8 +137,19 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.runningCount_ = 0;
     this.players_.forEach(player => {
-      if (oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
-          player.playState == WebAnimationPlayState.PAUSED) {
+      /**
+       * TODO(gharbiw):
+       * The playState on Safari and Edge sometimes gets stuck on
+       * the PENDING state (particularly when the animation's visibility
+       * gets toggled) so we add an exception to play even if the state
+       * is PENDING. Need to investigate why this happens, fix it and
+       * remove the exception below.
+       */
+      if (
+        oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
+        player.playState == WebAnimationPlayState.PAUSED ||
+        player.playState == WebAnimationPlayState.PENDING
+      ) {
         player.play();
         this.runningCount_++;
       }
@@ -228,23 +237,6 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    * @throws {Error} If timeline is infinite.
    */
   getTotalDuration_() {
-    let maxTotalDuration = 0;
-    for (let i = 0; i < this.requests_.length; i++) {
-      const {timing} = this.requests_[i];
-
-      userAssert(isFinite(timing.iterations), 'Animation has infinite ' +
-      'timeline, we can not seek to a relative position within an infinite ' +
-      'timeline. Use "time" for seekTo or remove infinite iterations');
-
-      const iteration = timing.iterations - timing.iterationStart;
-      const totalDuration = (timing.duration * iteration) +
-          timing.delay + timing.endDelay;
-
-      if (totalDuration > maxTotalDuration) {
-        maxTotalDuration = totalDuration;
-      }
-    }
-
-    return maxTotalDuration;
+    return getTotalDuration(this.requests_);
   }
 }

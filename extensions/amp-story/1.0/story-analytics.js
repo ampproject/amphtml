@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {StateChangeType} from './navigation-state';
-import {dev} from '../../../src/log';
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getVariableService} from './variable-service';
+import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-
 /** @enum {string} */
-export const StoryEventType = {
-  PAGE_VISIBLE: 'story-page-visible',
+export const StoryAnalyticsEvent = {
+  BOOKEND_CLICK: 'story-bookend-click',
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  CLICK_THROUGH: 'story-click-through',
+  FOCUS: 'story-focus',
+  LAST_PAGE_VISIBLE: 'story-last-page-visible',
+  PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
+  PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
+  PAGE_VISIBLE: 'story-page-visible',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
@@ -37,6 +44,12 @@ export const AdvancementMode = {
   MANUAL_ADVANCE: 'manualAdvance',
   ADVANCE_TO_ADS: 'manualAdvanceFromAd',
 };
+
+/** @typedef {!Object<string, !PageEventCountDef>} */
+let EventsPerPageDef;
+
+/** @typedef {!Object<string, number>} */
+let PageEventCountDef;
 
 /**
  * Util function to retrieve the analytics service. Ensures we can retrieve the
@@ -66,51 +79,115 @@ export class StoryAnalyticsService {
    * @param {!Element} element
    */
   constructor(win, element) {
-    /** @private @const {!Window} */
+    /** @protected @const {!Window} */
     this.win_ = win;
 
     /** @private @const {!Element} */
     this.element_ = element;
+
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(win);
+
+    /** @private {EventsPerPageDef} */
+    this.pageEventsMap_ = map();
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(win);
+
+    this.initializeListeners_();
+  }
+
+  /** @private */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+      this.triggerEvent(
+        isActive
+          ? StoryAnalyticsEvent.BOOKEND_ENTER
+          : StoryAnalyticsEvent.BOOKEND_EXIT
+      );
+    });
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      pageId => {
+        if (!pageId) {
+          return;
+        }
+
+        this.triggerEvent(StoryAnalyticsEvent.PAGE_VISIBLE);
+
+        const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
+        const pageIndex = this.storeService_.get(
+          StateProperty.CURRENT_PAGE_INDEX
+        );
+        if (pageIndex === pageIds.length - 1) {
+          this.triggerEvent(StoryAnalyticsEvent.LAST_PAGE_VISIBLE);
+        }
+      },
+      true /* callToInitialize */
+    );
   }
 
   /**
-   * @param {!./navigation-state.StateChangeEventDef} stateChangeEvent
+   * @param {!StoryAnalyticsEvent} eventType
+   * @param {Element=} element
    */
-  onNavigationStateChange(stateChangeEvent) {
-    switch (stateChangeEvent.type) {
-      case StateChangeType.ACTIVE_PAGE:
-        this.triggerEvent_(StoryEventType.PAGE_VISIBLE);
-        break;
-      case StateChangeType.BOOKEND_ENTER:
-        this.triggerEvent_(StoryEventType.BOOKEND_ENTER);
-        break;
-      case StateChangeType.BOOKEND_EXIT:
-        this.triggerEvent_(StoryEventType.BOOKEND_EXIT);
-        break;
+  triggerEvent(eventType, element = null) {
+    this.incrementPageEventCount_(eventType);
+
+    triggerAnalyticsEvent(
+      this.element_,
+      eventType,
+      this.updateDetails(eventType, element)
+    );
+  }
+
+  /**
+   * Updates event details.
+   * @param {!StoryAnalyticsEvent} eventType
+   * @param {Element=} element
+   * @visibleForTesting
+   * @return {!JsonObject}}
+   */
+  updateDetails(eventType, element = null) {
+    const details = {};
+    const vars = this.variableService_.get();
+    const pageId = vars['storyPageId'];
+
+    if (this.pageEventsMap_[pageId][eventType] > 1) {
+      details.repeated = true;
     }
+
+    if (element) {
+      details.tagName = element.tagName.toLowerCase();
+      Object.assign(
+        vars,
+        getDataParamsFromAttributes(
+          element,
+          /* computeParamNameFunc */ undefined,
+          /^vars(.+)/
+        )
+      );
+    }
+
+    return /** @type {!JsonObject} */ (Object.assign(
+      {eventDetails: details},
+      vars
+    ));
   }
 
   /**
-   * @param {boolean} isMuted
-   */
-  onMutedStateChange(isMuted) {
-    const event = isMuted ? StoryEventType.STORY_MUTED :
-      StoryEventType.STORY_UNMUTED;
-    this.triggerEvent_(event);
-  }
-
-  /**
-   * @param {!StoryEventType} eventType
+   * Keeps count of number of events emitted by page for an event type.
+   * @param {!StoryAnalyticsEvent} eventType
    * @private
    */
-  triggerEvent_(eventType) {
-    const variablesPromise = Services.storyVariableServiceForOrNull(this.win_);
-    variablesPromise.then(
-        variables => {
-          triggerAnalyticsEvent(this.element_, eventType,
-              /** @type {!JsonObject} */ (variables)); },
-        reason => {
-          dev().error('AMP-STORY', 'Could not get analytics variables', reason);
-        });
+  incrementPageEventCount_(eventType) {
+    const vars = this.variableService_.get();
+    const pageId = vars['storyPageId'];
+
+    this.pageEventsMap_[pageId] = this.pageEventsMap_[pageId] || {};
+    this.pageEventsMap_[pageId][eventType] =
+      this.pageEventsMap_[pageId][eventType] || 0;
+    this.pageEventsMap_[pageId][eventType]++;
   }
 }

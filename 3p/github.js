@@ -26,11 +26,11 @@ import {writeScript} from './3p';
  *
  * @param {!Window} global
  * @param {string} scriptSource The source of the script, different for post and comment embeds.
- * @param {function(*)} cb
+ * @param {function()} cb
  */
 function getGistJs(global, scriptSource, cb) {
   writeScript(global, scriptSource, function() {
-    cb(global.gist);
+    cb();
   });
 }
 
@@ -40,12 +40,13 @@ function getGistJs(global, scriptSource, cb) {
  */
 export function github(global, data) {
   userAssert(
-      data.gistid,
-      'The data-gistid attribute is required for <amp-gist> %s',
-      data.element);
+    data.gistid,
+    'The data-gistid attribute is required for <amp-gist> %s',
+    data.element
+  );
 
   let gistUrl =
-      'https://gist.github.com/' + encodeURIComponent(data.gistid) + '.js';
+    'https://gist.github.com/' + encodeURIComponent(data.gistid) + '.js';
 
   if (data.file) {
     gistUrl += '?file=' + encodeURIComponent(data.file);
@@ -65,8 +66,8 @@ export function github(global, data) {
     }
 
     context.updateDimensions(
-        gistContainer./*OK*/offsetWidth,
-        gistContainer./*OK*/offsetHeight
+      gistContainer./*OK*/ offsetWidth,
+      gistContainer./*OK*/ offsetHeight
     );
   });
 }

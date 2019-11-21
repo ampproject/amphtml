@@ -147,9 +147,11 @@ export class ConfigManager {
       'dashboardConfig': dashboardConfig,
     });
 
-    if (dashboardConfig &&
+    if (
+      dashboardConfig &&
       dashboardConfig.widgets &&
-      Object.keys(dashboardConfig.widgets).length > 0) {
+      Object.keys(dashboardConfig.widgets).length > 0
+    ) {
       const mode = getAddThisMode({pubId, widgetId, productCode});
       switch (mode) {
         case 1:
@@ -165,15 +167,18 @@ export class ConfigManager {
           }
           break;
         case 3:
-          // "wp anonymous mode" COMING SOON!
+          // "wp anonymous mode"
+          if (productCode) {
+            this.activeToolsMonitor_.recordProductCode(productCode);
+          }
           return;
         default:
           return;
-          // invalid tool configuration
+        // invalid tool configuration
       }
     }
 
-    iframe.contentWindow./*OK*/postMessage(JSON.stringify(jsonToSend), ORIGIN);
+    iframe.contentWindow./*OK*/ postMessage(JSON.stringify(jsonToSend), ORIGIN);
 
     if (configRequestStatus === RequestStatus.NOT_REQUESTED) {
       // If a config for this pubId has not been requested yet, then this iframe
@@ -236,15 +241,17 @@ export class ConfigManager {
       containerClassName,
     });
 
-    iframeLoadPromise.then(() => this.sendConfiguration_({
-      iframe,
-      pubId,
-      widgetId,
-      shareConfig,
-      atConfig,
-      productCode,
-      containerClassName,
-    }));
+    iframeLoadPromise.then(() =>
+      this.sendConfiguration_({
+        iframe,
+        pubId,
+        widgetId,
+        shareConfig,
+        atConfig,
+        productCode,
+        containerClassName,
+      })
+    );
   }
 
   /**
@@ -253,7 +260,7 @@ export class ConfigManager {
    */
   unregister({pubId, iframe}) {
     this.configProviderIframes_ = this.configProviderIframes_.filter(
-        providerFrame => providerFrame !== iframe
+      providerFrame => providerFrame !== iframe
     );
 
     const pubData = this.dataForPubId_[pubId] || {};
@@ -280,7 +287,9 @@ ConfigManager.PubIdData; // purely for typedef
  *   widgetId:string,
  *   productCode:string,
  *   shareConfig:(Object<string,string>|undefined),
- *   iframe: Element
+ *   iframe: Element,
+ *   atConfig: JsonObject,
+ *   containerClassName: string
  * }}
  */
 ConfigManager.IframeDatum; // purely for typedef

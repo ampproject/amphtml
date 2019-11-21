@@ -14,60 +14,63 @@
  * limitations under the License.
  */
 
-import {
-  computeInMasterFrame,
-  loadScript,
-  validateData,
-} from '../3p/3p';
+import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function yieldpro(global, data) {
-
-  validateData(data, ['sectionId', 'slot', 'pubnetwork'], [
-    'instance',
-    'custom',
-    'adServerUrl',
-    'cacheSafe',
-    'pageIdModifier',
-    'click3rd',
-    'debugsrc',
-  ]);
+  validateData(
+    data,
+    ['sectionId', 'slot', 'pubnetwork'],
+    [
+      'instance',
+      'custom',
+      'adServerUrl',
+      'cacheSafe',
+      'pageIdModifier',
+      'click3rd',
+      'debugsrc',
+    ]
+  );
   //TODO support dmp and cookie
 
   const SCRIPT_HOST = 'creatives.yieldpro.eu/showad_';
 
-  let scriptUrl = 'https://' + SCRIPT_HOST +
-      data['pubnetwork'] + '.js';
+  let scriptUrl = 'https://' + SCRIPT_HOST + data['pubnetwork'] + '.js';
 
   if (data['debugsrc']) {
     scriptUrl = data['debugsrc'];
   }
 
-  computeInMasterFrame(global, 'yieldpro-request', done => {
-    let success = false;
-    const masterWin = this;
-    if (!masterWin.showadAMPAdapter) {
-      masterWin.showadAMPAdapter = {
-        registerSlot: () => {},
-      };
-      loadScript(this, scriptUrl, () => {
-        if (masterWin.showadAMPAdapter.inited) {
-          success = true;
-        }
-        done(success);
-      });
-    } else {
-      done(true);
+  computeInMasterFrame(
+    global,
+    'yieldpro-request',
+    done => {
+      let success = false;
+      const masterWin = this;
+      if (!masterWin.showadAMPAdapter) {
+        masterWin.showadAMPAdapter = {
+          registerSlot: () => {},
+        };
+        loadScript(this, scriptUrl, () => {
+          if (masterWin.showadAMPAdapter.inited) {
+            success = true;
+          }
+          done(success);
+        });
+      } else {
+        done(true);
+      }
+    },
+    success => {
+      if (success) {
+        global.showadAMPAdapter = global.context.master.showadAMPAdapter;
+        global.showadAMPAdapter.registerSlot(data, global);
+      } else {
+        throw new Error('Yieldpro AdTag failed to load');
+      }
     }
-  }, success => {
-    if (success) {
-      global.showadAMPAdapter = global.context.master.showadAMPAdapter;
-      global.showadAMPAdapter.registerSlot(data, global);
-    } else {
-      throw new Error('Yieldpro AdTag failed to load');
-    }
-  });
+  );
 }

@@ -25,25 +25,28 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     viewTracker = new ViewerTracker(ampdoc);
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
   });
 
   describe('scheduleView', () => {
-    it('should call `reportWhenViewed_`, if viewer is visible' ,() => {
-      const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
-      sandbox.stub(viewTracker.viewer_, 'isVisible').callsFake(() => true);
+    it('should call `reportWhenViewed_`, if viewer is visible', () => {
+      const whenViewedStub = env.sandbox.stub(viewTracker, 'reportWhenViewed_');
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
       return viewTracker.scheduleView(2000).then(() => {
         expect(whenViewedStub).to.be.calledOnce;
       });
     });
 
-    it('should call `reportWhenViewed_`, when viewer gets visible' , () => {
+    it('should call `reportWhenViewed_`, when viewer gets visible', () => {
       let visibleState = false;
-      const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
-      const visibilityChangedStub =
-          sandbox.stub(viewTracker.viewer_, 'onVisibilityChanged');
-      const visibilitySandbox = sandbox.stub(viewTracker.viewer_, 'isVisible')
-          .callsFake(() => visibleState);
+      const whenViewedStub = env.sandbox.stub(viewTracker, 'reportWhenViewed_');
+      const visibilityChangedStub = env.sandbox.stub(
+        ampdoc,
+        'onVisibilityChanged'
+      );
+      const visibilitySandbox = env.sandbox
+        .stub(ampdoc, 'isVisible')
+        .callsFake(() => visibleState);
 
       const viewPromise = viewTracker.scheduleView(2000);
 
@@ -64,8 +67,9 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
 
   describe('reportWhenViewed_', () => {
     it('should call whenViewed_', () => {
-      const whenViewedStub = sandbox.stub(viewTracker, 'whenViewed_')
-          .callsFake(() => Promise.resolve());
+      const whenViewedStub = env.sandbox
+        .stub(viewTracker, 'whenViewed_')
+        .callsFake(() => Promise.resolve());
       viewTracker.reportWhenViewed_(2000);
       expect(whenViewedStub).to.be.calledOnce;
     });

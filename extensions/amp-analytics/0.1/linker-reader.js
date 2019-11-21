@@ -27,9 +27,7 @@ import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics/linker-reader';
 
-
-class LinkerReader {
-
+export class LinkerReader {
   /**
    * @param {!Window} win
    */
@@ -58,10 +56,7 @@ class LinkerReader {
     }
 
     if (this.linkerParams_[name] && this.linkerParams_[name][id]) {
-      // Return the id value and remove the id from the object
-      const value = this.linkerParams_[name][id];
-      delete this.linkerParams_[name][id];
-      return value;
+      return this.linkerParams_[name][id];
     }
 
     return null;
@@ -86,7 +81,6 @@ class LinkerReader {
     return parseLinker(value);
   }
 
-
   /**
    * Remove the linker param from the current url
    * @param {!Location} url
@@ -99,8 +93,11 @@ class LinkerReader {
     }
     const searchUrl = url.search;
     const removedLinkerParamSearchUrl = removeParamsFromSearch(searchUrl, name);
-    const newHref = url.origin + url.pathname +
-        removedLinkerParamSearchUrl + (url.hash || '');
+    const newHref =
+      url.origin +
+      url.pathname +
+      removedLinkerParamSearchUrl +
+      (url.hash || '');
     this.win_.history.replaceState(null, '', newHref);
   }
 }
@@ -109,8 +106,7 @@ class LinkerReader {
  * @param {!Window} win
  */
 export function installLinkerReaderService(win) {
-  registerServiceBuilder(win, 'amp-analyitcs-linker-reader',
-      LinkerReader);
+  registerServiceBuilder(win, 'amp-analytics-linker-reader', LinkerReader);
 }
 
 /**
@@ -118,5 +114,5 @@ export function installLinkerReaderService(win) {
  * @return {!LinkerReader}
  */
 export function linkerReaderServiceFor(win) {
-  return getService(win, 'amp-analyitcs-linker-reader');
+  return getService(win, 'amp-analytics-linker-reader');
 }

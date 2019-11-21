@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const COMSCORE_CONFIG = jsonLiteral({
   'vars': {
     'c2': '1000001',
   },
   'requests': {
     'host': 'https://sb.scorecardresearch.com',
     'base': '${host}/b?',
-    'pageview': '${base}c1=2' +
+    'pageview':
+      '${base}c1=2' +
       '&c2=${c2}' +
+      '&cs_ucfr=$IF($EQUALS(${consentState}, sufficient), 1)$IF($EQUALS(${consentState}, insufficient), 0)$IF($EQUALS(${consentState}, ), )' +
+      '&cs_amp_consent=${consentState}' +
       '&cs_pv=${pageViewId}' +
       '&c12=${clientId(comScore)}' +
       '&rn=${random}' +
@@ -43,3 +48,5 @@ export const COMSCORE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {COMSCORE_CONFIG};

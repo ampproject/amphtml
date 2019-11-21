@@ -58,7 +58,7 @@ tags: {  # <amp-ima-video>
     value: ""
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+  spec_url: "https://amp.dev/documentation/components/amp-ima-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

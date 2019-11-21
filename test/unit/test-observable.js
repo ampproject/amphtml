@@ -17,17 +17,10 @@
 import {Observable} from '../../src/observable';
 
 describe('Observable', () => {
-
-  let sandbox;
   let observable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     observable = new Observable();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('add-remove-fire', () => {
@@ -67,5 +60,4 @@ describe('Observable', () => {
     expect(observer1Called).to.equal(1);
     expect(observer2Called).to.equal(2);
   });
-
 });

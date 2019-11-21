@@ -17,7 +17,6 @@
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {ScrollManager} from '../scroll-manager';
 
-
 describes.realWin('ScrollManager', {amp: 1}, env => {
   let win;
   let ampdoc;
@@ -50,49 +49,52 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     scrollManager = new ScrollManager(ampdoc);
     root.scrollManager_ = scrollManager;
     fakeViewport = {
-      'getSize': sandbox.stub().returns(
-          {top: 0, left: 0, height: 200, width: 200}),
-      'getScrollTop': sandbox.stub().returns(0),
-      'getScrollLeft': sandbox.stub().returns(0),
-      'getScrollHeight': sandbox.stub().returns(500),
-      'getScrollWidth': sandbox.stub().returns(500),
+      'getSize': env.sandbox
+        .stub()
+        .returns({top: 0, left: 0, height: 200, width: 200}),
+      'getScrollTop': env.sandbox.stub().returns(0),
+      'getScrollLeft': env.sandbox.stub().returns(0),
+      'getScrollHeight': env.sandbox.stub().returns(500),
+      'getScrollWidth': env.sandbox.stub().returns(500),
       'onChanged': () => {
-        return sandbox.stub();
+        return env.sandbox.stub();
       },
     };
     scrollManager.viewport_ = fakeViewport;
-
   });
 
   it('should initalize, add listeners and dispose', () => {
     expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
 
-    scrollManager.addScrollHandler(sandbox.stub());
+    scrollManager.addScrollHandler(env.sandbox.stub());
     expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
 
     scrollManager.dispose();
     expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
   });
 
-  it('should add a viewport onChanged listener with scroll handlers, '
-    + 'and dispose when there are none', () => {
-    expect(scrollManager.viewportOnChangedUnlistener_).to.not.be.ok;
+  it(
+    'should add a viewport onChanged listener with scroll handlers, ' +
+      'and dispose when there are none',
+    () => {
+      expect(scrollManager.viewportOnChangedUnlistener_).to.not.be.ok;
 
-    const fn1 = sandbox.stub();
-    scrollManager.addScrollHandler(fn1);
+      const fn1 = env.sandbox.stub();
+      scrollManager.addScrollHandler(fn1);
 
-    expect(scrollManager.viewportOnChangedUnlistener_).to.be.ok;
-    const unlistenStub = scrollManager.viewportOnChangedUnlistener_;
+      expect(scrollManager.viewportOnChangedUnlistener_).to.be.ok;
+      const unlistenStub = scrollManager.viewportOnChangedUnlistener_;
 
-    scrollManager.removeScrollHandler(fn1);
+      scrollManager.removeScrollHandler(fn1);
 
-    expect(scrollManager.viewportOnChangedUnlistener_).to.not.be.ok;
-    expect(unlistenStub).to.have.callCount(1);
-  });
+      expect(scrollManager.viewportOnChangedUnlistener_).to.not.be.ok;
+      expect(unlistenStub).to.have.callCount(1);
+    }
+  );
 
   it('fires on scroll', () => {
-    const fn1 = sandbox.stub();
-    const fn2 = sandbox.stub();
+    const fn1 = env.sandbox.stub();
+    const fn2 = env.sandbox.stub();
     scrollManager.addScrollHandler(fn1);
     scrollManager.addScrollHandler(fn2);
 
@@ -124,21 +126,22 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
 
     expect(fn1).to.have.callCount(2);
     expect(
-        fn1.getCall(1)
-            .calledWithMatch(sinon.match(matcher(expectedScrollEvent)))
+      fn1
+        .getCall(1)
+        .calledWithMatch(env.sandbox.match(matcher(expectedScrollEvent)))
     ).to.be.true;
 
     expect(fn2).to.have.callCount(2);
     expect(
-        fn2.getCall(1)
-            .calledWithMatch(sinon.match(matcher(expectedScrollEvent)))
+      fn2
+        .getCall(1)
+        .calledWithMatch(env.sandbox.match(matcher(expectedScrollEvent)))
     ).to.be.true;
-
   });
 
   it('can remove specifc handlers', () => {
-    const fn1 = sandbox.stub();
-    const fn2 = sandbox.stub();
+    const fn1 = env.sandbox.stub();
+    const fn2 = env.sandbox.stub();
     scrollManager.addScrollHandler(fn1);
     scrollManager.addScrollHandler(fn2);
 
@@ -151,7 +154,6 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     fakeViewport.getScrollTop.returns(500);
     fakeViewport.getScrollLeft.returns(500);
     scrollManager.onScroll_({top: 500, left: 500, height: 250, width: 250});
-
 
     expect(fn1).to.have.callCount(2);
     expect(fn2).to.have.callCount(1);

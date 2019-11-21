@@ -18,8 +18,6 @@ import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
 import {parseUrlDeprecated} from '../../src/url';
 
 describe('alp-handler', () => {
-
-  let sandbox;
   let event;
   let anchor;
   let open;
@@ -27,7 +25,6 @@ describe('alp-handler', () => {
   let image;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     image = undefined;
     win = {
       location: {},
@@ -35,43 +32,45 @@ describe('alp-handler', () => {
       Image() {
         image = this;
       },
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'base-win',
     };
     win.parent = {
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'p0',
     };
     win.parent.parent = {
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'p1',
     };
     win.parent.parent.parent = {
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'p2',
     };
     win.parent.parent.parent.parent = {
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'p3',
     };
-    open = sandbox.stub(win, 'open').callsFake(() => {
+    open = window.sandbox.stub(win, 'open').callsFake(() => {
       return {};
     });
     const doc = {
       defaultView: win,
       head: {
-        appendChild: sandbox.spy(),
+        appendChild: window.sandbox.spy(),
       },
     };
     win.document = doc;
     anchor = {
       nodeType: 1,
       tagName: 'A',
-      href: 'https://test.com?adurl=' +
+      href:
+        'https://test.com?adurl=' +
         encodeURIComponent(
-            'https://cdn.ampproject.org/c/www.example.com/amp.html'),
+          'https://cdn.ampproject.org/c/www.example.com/amp.html'
+        ),
       ownerDocument: doc,
-      getAttribute: sandbox.stub(),
+      getAttribute: window.sandbox.stub(),
       get search() {
         return parseUrlDeprecated(this.href).search;
       },
@@ -80,13 +79,9 @@ describe('alp-handler', () => {
       trusted: true,
       buttons: 0,
       target: anchor,
-      preventDefault: sandbox.spy(),
+      preventDefault: window.sandbox.spy(),
       defaultPrevented: false,
     };
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function simpleSuccess() {
@@ -94,8 +89,8 @@ describe('alp-handler', () => {
     expect(open).to.be.calledOnce;
     expect(open.lastCall.args).to.jsonEqual([
       'https://cdn.ampproject.org/c/www.example.com/amp.html#click=' +
-          'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
-          'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html',
+        'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
+        'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html',
       '_top',
       undefined,
     ]);
@@ -107,11 +102,13 @@ describe('alp-handler', () => {
     expect(event.preventDefault).to.be.calledOnce;
     expect(ampParent.postMessage).to.be.calledOnce;
     expect(ampParent.postMessage.lastCall.args[0]).to.equal(
-        'a2a;{"url":"https://cdn.ampproject.org/c/www.example.com/amp.html' +
+      'a2a;{"url":"https://cdn.ampproject.org/c/www.example.com/amp.html' +
         '#click=https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%' +
-        '252Fcdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html"}');
+        '252Fcdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html"}'
+    );
     expect(ampParent.postMessage.lastCall.args[1]).to.equal(
-        'https://cdn.ampproject.org');
+      'https://cdn.ampproject.org'
+    );
     expect(open).to.have.not.been.called;
   }
 
@@ -193,13 +190,14 @@ describe('alp-handler', () => {
   });
 
   it('should perform special navigation if specially asked for', () => {
-    const navigateSpy = sandbox.spy();
+    const navigateSpy = window.sandbox.spy();
     const opt_navigate = val => {
       navigateSpy();
       expect(val).to.equal(
-          'https://cdn.ampproject.org/c/www.example.com/amp.html#click=' +
+        'https://cdn.ampproject.org/c/www.example.com/amp.html#click=' +
           'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
-          'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html');
+          'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html'
+      );
     };
     handleClick(event, opt_navigate);
     expect(event.preventDefault).to.be.calledOnce;
@@ -219,29 +217,33 @@ describe('alp-handler', () => {
 
   it('should support custom arg name', () => {
     anchor.getAttribute.withArgs('data-url-param-name').returns('TEST');
-    anchor.href = 'https://test.com?TEST=' +
-        encodeURIComponent(
-            'https://cdn.ampproject.org/c/www.example.com/amp.html');
+    anchor.href =
+      'https://test.com?TEST=' +
+      encodeURIComponent(
+        'https://cdn.ampproject.org/c/www.example.com/amp.html'
+      );
     handleClick(event);
     expect(open.lastCall.args).to.jsonEqual([
       'https://cdn.ampproject.org/c/www.example.com/amp.html#click=' +
-          'https%3A%2F%2Ftest.com%3Famp%3D1%26TEST%3Dhttps%253A%252F%252F' +
-          'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html',
+        'https%3A%2F%2Ftest.com%3Famp%3D1%26TEST%3Dhttps%253A%252F%252F' +
+        'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html',
       '_top',
       undefined,
     ]);
   });
 
   it('should support existing fragments', () => {
-    anchor.href = 'https://test.com?adurl=' +
-        encodeURIComponent(
-            'https://cdn.ampproject.org/c/www.example.com/amp.html#test=1');
+    anchor.href =
+      'https://test.com?adurl=' +
+      encodeURIComponent(
+        'https://cdn.ampproject.org/c/www.example.com/amp.html#test=1'
+      );
     handleClick(event);
     expect(open.lastCall.args).to.jsonEqual([
       'https://cdn.ampproject.org/c/www.example.com/amp.html#test=1&click=' +
-          'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
-          'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html' +
-          '%2523test%253D1',
+        'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
+        'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html' +
+        '%2523test%253D1',
       '_top',
       undefined,
     ]);
@@ -283,9 +285,9 @@ describe('alp-handler', () => {
   });
 
   it('should only navigate to AMP', () => {
-    anchor.href = 'https://test.com?adurl=' +
-        encodeURIComponent(
-            'https://notamp.com/c/www.example.com/amp.html');
+    anchor.href =
+      'https://test.com?adurl=' +
+      encodeURIComponent('https://notamp.com/c/www.example.com/amp.html');
     noNavigation();
   });
 
@@ -310,12 +312,14 @@ describe('alp-handler', () => {
     const link0 = win.document.head.appendChild.firstCall.args[0];
     expect(link0.rel).to.equal('preload');
     expect(link0.href).to.equal(
-        'https://cdn.ampproject.org/c/www.example.com/amp.html');
+      'https://cdn.ampproject.org/c/www.example.com/amp.html'
+    );
     const link1 = win.document.head.appendChild.secondCall.args[0];
     expect(link1.rel).to.equal('preload');
     expect(link1.as).to.equal('fetch');
     expect(link1.href).to.equal(
-        'https://cdn.ampproject.org/c/www.example.com/amp.html');
+      'https://cdn.ampproject.org/c/www.example.com/amp.html'
+    );
   });
 
   it('should ignore irrelevant events for warmup (bad target)', () => {

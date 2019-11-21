@@ -19,10 +19,16 @@
 <link rel="import" href="../polymer/polymer.html">
 <dom-module id="webui-statusbar">
   <style>
-    .ampproject-fail {
+    p.ampproject-fail {
+      display: none;
+    }
+    p.ampproject-pass {
+      display: block;
+    }
+    span.ampproject-fail {
       color: #F44336;
     }
-    .ampproject-pass {
+    span.ampproject-pass {
       color: #4CAF50;
     }
     .ampproject-result {
@@ -34,6 +40,9 @@
     <paper-material elevation="3">
       <div class="ampproject-result">Validation Status:
         <span class$="{{getClass(status)}}">{{status}}</span>
+        <p class$="{{getClass(status)}}">
+          Review our '<a href="https://go.amp.dev/publishing-checklist">publishing checklist</a>' to ensure successful AMP document distribution.
+        </p>
       </div>
     </paper-material>
   </template>

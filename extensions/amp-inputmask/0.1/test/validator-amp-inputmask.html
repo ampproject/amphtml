@@ -58,6 +58,8 @@
     <input mask="00000 00000-0000" type="tel">
     <!-- Valid: mask attr with named mask literal with escape char -->
     <input mask="00000 p\ayment-card" type="tel">
+    <!-- Valid: mask attr with numeric mask-trim-zeros -->
+    <input mask="00000" mask-trim-zeros="0" type="tel">
   </form>
 
 
@@ -89,6 +91,8 @@
     <!-- Invalid: mask attr with spaces named masks -->
     <input mask="payment-card "></div>
     <input mask=" payment-card "></div>
+    <!-- Invalid: mask attr with non-numeric mask-trim-zeros -->
+    <input mask="00000" mask-trim-zeros="wow" type="tel">
   </form>
   </form>
 

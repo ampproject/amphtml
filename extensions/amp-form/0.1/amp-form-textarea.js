@@ -21,6 +21,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '../../../src/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
+import {toArray} from '../../../src/types';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
@@ -74,10 +75,10 @@ export class AmpFormTextarea {
     const root = ampdoc.getRootNode();
 
     /** @private @const */
-    this.doc_ = (root.ownerDocument || root);
+    this.doc_ = root.ownerDocument || root;
 
     /** @private @const */
-    this.win_ = devAssert(this.doc_.defaultView);
+    this.win_ = /** @type {!Window} */ (devAssert(this.doc_.defaultView));
 
     /** @private @const */
     this.viewport_ = Services.viewportForDoc(ampdoc);
@@ -85,54 +86,55 @@ export class AmpFormTextarea {
     /** @private */
     this.unlisteners_ = [];
 
-    this.unlisteners_.push(listen(root, 'input', e => {
-      const element = dev().assertElement(e.target);
-      if (element.tagName != 'TEXTAREA' ||
-          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
-        return;
-      }
+    this.unlisteners_.push(
+      listen(root, 'input', e => {
+        const element = dev().assertElement(e.target);
+        if (
+          element.tagName != 'TEXTAREA' ||
+          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)
+        ) {
+          return;
+        }
 
-      maybeResizeTextarea(element);
-    }));
+        maybeResizeTextarea(element);
+      })
+    );
 
-    this.unlisteners_.push(listen(root, 'mousedown', e => {
-      if (e.which != 1) {
-        return;
-      }
+    this.unlisteners_.push(
+      listen(root, 'mousedown', e => {
+        if (e.which != 1) {
+          return;
+        }
 
-      const element = dev().assertElement(e.target);
-      if (element.tagName != 'TEXTAREA' ||
-          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
-        return;
-      }
+        const element = dev().assertElement(e.target);
+        // Handle all text area drag as we want to measure mutate and notify
+        // the viewer of possible doc height changes.
+        if (element.tagName != 'TEXTAREA') {
+          return;
+        }
 
-      handleTextareaDrag(element);
-    }));
+        handleTextareaDrag(element);
+      })
+    );
 
     let cachedTextareaElements = root.querySelectorAll('textarea');
-    this.unlisteners_.push(listen(root, AmpEvents.DOM_UPDATE, () => {
-      cachedTextareaElements = root.querySelectorAll('textarea');
-    }));
-    const throttledResize = throttle(this.win_, e => {
-      if (e.relayoutAll) {
-        resizeTextareaElements(cachedTextareaElements);
-      }
-    }, MIN_EVENT_INTERVAL_MS);
+    this.unlisteners_.push(
+      listen(root, AmpEvents.DOM_UPDATE, () => {
+        cachedTextareaElements = root.querySelectorAll('textarea');
+      })
+    );
+    const throttledResize = throttle(
+      this.win_,
+      e => {
+        if (e.relayoutAll) {
+          resizeTextareaElements(cachedTextareaElements);
+        }
+      },
+      MIN_EVENT_INTERVAL_MS
+    );
     this.unlisteners_.push(this.viewport_.onResize(throttledResize));
 
-    // For now, warn if textareas with initial overflow are present, and
-    // prevent them from becoming autoexpand textareas.
-    iterateCursor(cachedTextareaElements, element => {
-      getHasOverflow(element).then(hasOverflow => {
-        if (hasOverflow) {
-          user().warn('AMP-FORM',
-              '"textarea[autoexpand]" with initially scrolling content ' +
-              'will not autoexpand.\n' +
-              'See https://github.com/ampproject/amphtml/issues/20839');
-          element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
-        }
-      });
-    });
+    handleInitialOverflowElements(cachedTextareaElements);
   }
 
   /**
@@ -144,6 +146,30 @@ export class AmpFormTextarea {
 }
 
 /**
+ * For now, warn if textareas with initial overflow are present, and
+ * prevent them from becoming autoexpand textareas.
+ * @param {!IArrayLike<!Element>} textareas
+ * @return {!Promise}
+ */
+export function handleInitialOverflowElements(textareas) {
+  return Promise.all(
+    toArray(textareas).map(element => {
+      return getHasOverflow(element).then(hasOverflow => {
+        if (hasOverflow) {
+          user().warn(
+            'AMP-FORM',
+            '"textarea[autoexpand]" with initially scrolling content ' +
+              'will not autoexpand.\n' +
+              'See https://github.com/ampproject/amphtml/issues/20839'
+          );
+          element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
+        }
+      });
+    })
+  );
+}
+
+/**
  * Measure if any overflow is present on the element.
  * @param {!Element} element
  * @return {!Promise<boolean>}
@@ -152,7 +178,7 @@ export class AmpFormTextarea {
 export function getHasOverflow(element) {
   const resources = Services.resourcesForDoc(element);
   return resources.measureElement(() => {
-    return element./*OK*/scrollHeight > element./*OK*/clientHeight;
+    return element./*OK*/ scrollHeight > element./*OK*/ clientHeight;
   });
 }
 
@@ -162,8 +188,10 @@ export function getHasOverflow(element) {
  */
 function resizeTextareaElements(elements) {
   iterateCursor(elements, element => {
-    if (element.tagName != 'TEXTAREA' ||
-        !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+    if (
+      element.tagName != 'TEXTAREA' ||
+      !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)
+    ) {
       return;
     }
 
@@ -181,17 +209,21 @@ function handleTextareaDrag(element) {
   const resources = Services.resourcesForDoc(element);
 
   Promise.all([
-    resources.measureElement(() => element./*OK*/scrollHeight),
+    resources.measureElement(() => element./*OK*/ scrollHeight),
     listenOncePromise(element, 'mouseup'),
   ]).then(results => {
     const heightMouseDown = results[0];
     let heightMouseUp = 0;
 
-    return resources.measureMutateElement(element, () => {
-      heightMouseUp = element./*OK*/scrollHeight;
-    }, () => {
-      maybeRemoveResizeBehavior(element, heightMouseDown, heightMouseUp);
-    });
+    return resources.measureMutateElement(
+      element,
+      () => {
+        heightMouseUp = element./*OK*/ scrollHeight;
+      },
+      () => {
+        maybeRemoveResizeBehavior(element, heightMouseDown, heightMouseUp);
+      }
+    );
   });
 }
 
@@ -217,7 +249,9 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  */
 export function maybeResizeTextarea(element) {
   const resources = Services.resourcesForDoc(element);
-  const win = devAssert(element.ownerDocument.defaultView);
+  const win = /** @type {!Window} */ (devAssert(
+    element.ownerDocument.defaultView
+  ));
 
   let offset = 0;
   let scrollHeight = 0;
@@ -229,42 +263,48 @@ export function maybeResizeTextarea(element) {
   // element's content, or 2. the element itself.
   const minScrollHeightPromise = getShrinkHeight(element);
 
-  return resources.measureMutateElement(element, () => {
-    const computed = computedStyle(win, element);
-    scrollHeight = element./*OK*/scrollHeight;
+  return resources.measureMutateElement(
+    element,
+    () => {
+      const computed = computedStyle(win, element);
+      scrollHeight = element./*OK*/ scrollHeight;
 
-    const maybeMaxHeight =
-        parseInt(computed.getPropertyValue('max-height'), 10);
-    maxHeight = isNaN(maybeMaxHeight) ? Infinity : maybeMaxHeight;
+      const maybeMaxHeight = parseInt(
+        computed.getPropertyValue('max-height'),
+        10
+      );
+      maxHeight = isNaN(maybeMaxHeight) ? Infinity : maybeMaxHeight;
 
-    if (computed.getPropertyValue('box-sizing') == 'content-box') {
-      offset =
+      if (computed.getPropertyValue('box-sizing') == 'content-box') {
+        offset =
           -parseInt(computed.getPropertyValue('padding-top'), 10) +
           -parseInt(computed.getPropertyValue('padding-bottom'), 10);
-    } else {
-      offset =
+      } else {
+        offset =
           parseInt(computed.getPropertyValue('border-top-width'), 10) +
           parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-    }
-  }, () => {
-    return minScrollHeightPromise.then(minScrollHeight => {
-      const height = minScrollHeight + offset;
-      // Prevent the scrollbar from appearing
-      // unless the text is beyond the max-height
-      element.classList.toggle(AMP_FORM_TEXTAREA_MAX_CSS, height > maxHeight);
-
-      // Prevent the textarea from shrinking if it has not yet expanded.
-      const hasExpanded =
-          AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA in element.dataset;
-      const shouldResize = (hasExpanded || scrollHeight <= minScrollHeight);
-
-      if (shouldResize) {
-        element.dataset[AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA] = '';
-        // Set the textarea height to the height of the text
-        setStyle(element, 'height', px(minScrollHeight + offset));
       }
-    });
-  });
+    },
+    () => {
+      return minScrollHeightPromise.then(minScrollHeight => {
+        const height = minScrollHeight + offset;
+        // Prevent the scrollbar from appearing
+        // unless the text is beyond the max-height
+        element.classList.toggle(AMP_FORM_TEXTAREA_MAX_CSS, height > maxHeight);
+
+        // Prevent the textarea from shrinking if it has not yet expanded.
+        const hasExpanded =
+          AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA in element.dataset;
+        const shouldResize = hasExpanded || scrollHeight <= minScrollHeight;
+
+        if (shouldResize) {
+          element.dataset[AMP_FORM_TEXTAREA_HAS_EXPANDED_DATA] = '';
+          // Set the textarea height to the height of the text
+          setStyle(element, 'height', px(minScrollHeight + offset));
+        }
+      });
+    }
+  );
 }
 
 /**
@@ -276,36 +316,53 @@ export function maybeResizeTextarea(element) {
  * @return {!Promise<number>}
  */
 function getShrinkHeight(textarea) {
-  const doc = devAssert(textarea.ownerDocument);
-  const win = devAssert(doc.defaultView);
-  const body = devAssert(doc.body);
+  const doc = /** @type {!Document} */ (devAssert(textarea.ownerDocument));
+  const win = /** @type {!Window} */ (devAssert(doc.defaultView));
+  const body = /** @type {!HTMLBodyElement} */ (devAssert(doc.body));
   const resources = Services.resourcesForDoc(textarea);
 
   const clone = textarea.cloneNode(/*deep*/ false);
   clone.classList.add(AMP_FORM_TEXTAREA_CLONE_CSS);
 
-  let height = 0;
+  let cloneWidth = 0;
+  let resultingHeight = 0;
   let shouldKeepTop = false;
 
-  return resources.measureMutateElement(body, () => {
-    const computed = computedStyle(win, textarea);
-    const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10); // TODO(cvializ): what if it's a percent?
+  return resources
+    .measureMutateElement(
+      body,
+      () => {
+        const computed = computedStyle(win, textarea);
+        const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10); // TODO(cvializ): what if it's a percent?
+        cloneWidth = parseInt(computed.getPropertyValue('width'), 10);
+        // maxHeight is NaN if the max-height property is 'none'.
+        shouldKeepTop =
+          isNaN(maxHeight) || textarea./*OK*/ scrollHeight < maxHeight;
+      },
+      () => {
+        // Prevent a jump from the textarea element scrolling
+        if (shouldKeepTop) {
+          textarea./*OK*/ scrollTop = 0;
+        }
 
-    // maxHeight is NaN if the max-height property is 'none'.
-    shouldKeepTop =
-        (isNaN(maxHeight) || textarea./*OK*/scrollHeight < maxHeight);
-  }, () => {
-    // Prevent a jump from the textarea element scrolling
-    if (shouldKeepTop) {
-      textarea./*OK*/scrollTop = 0;
-    }
-    // Append the clone to the DOM so its scrollHeight can be read
-    doc.body.appendChild(clone);
-  }).then(() => {
-    return resources.measureMutateElement(body, () => {
-      height = clone./*OK*/scrollHeight;
-    }, () => {
-      removeElement(clone);
-    });
-  }).then(() => height);
+        // Keep the clone's width consistent if the textarea was sized relative
+        // to its parent element.
+        setStyle(clone, 'width', px(cloneWidth));
+
+        // Append the clone to the DOM so its scrollHeight can be read
+        doc.body.appendChild(clone);
+      }
+    )
+    .then(() => {
+      return resources.measureMutateElement(
+        body,
+        () => {
+          resultingHeight = clone./*OK*/ scrollHeight;
+        },
+        () => {
+          removeElement(clone);
+        }
+      );
+    })
+    .then(() => resultingHeight);
 }

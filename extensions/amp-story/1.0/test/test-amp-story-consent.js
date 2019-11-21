@@ -16,7 +16,7 @@
 
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
-import {LocalizationService} from '../localization';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -53,8 +53,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
-    getComputedStyleStub =
-        sandbox.stub(win, 'getComputedStyle').returns(styles);
+    getComputedStyleStub = env.sandbox
+      .stub(win, 'getComputedStyle')
+      .returns(styles);
 
     const localizationService = new LocalizationService(win);
     registerServiceBuilder(win, 'localization', () => localizationService);
@@ -82,7 +83,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
-    storyConsentEl.getResources = () => win.services.resources.obj;
+    storyConsentEl.getResources = () => win.__AMP_SERVICES.resources.obj;
     storyConsentEl.appendChild(storyConsentConfigEl);
 
     storyEl.appendChild(consentEl);
@@ -95,8 +96,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
   it('should parse the config', () => {
     storyConsent.buildCallback();
-    expect(storyConsent.storyConsentConfig_)
-        .to.deep.equal(defaultConfig);
+    expect(storyConsent.storyConsentConfig_).to.deep.equal(defaultConfig);
   });
 
   it('should require a story-consent title', () => {
@@ -160,8 +160,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     storyConsent.buildCallback();
 
-    const buttonEl = storyConsent.storyConsentEl_
-        .querySelector('.i-amphtml-story-consent-action-reject');
+    const buttonEl = storyConsent.storyConsentEl_.querySelector(
+      '.i-amphtml-story-consent-action-reject'
+    );
 
     // For some reason the win object provided by the test environment does not
     // return all the styles.
@@ -174,8 +175,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     storyConsent.buildCallback();
 
-    const buttonEl = storyConsent.storyConsentEl_
-        .querySelector('.i-amphtml-story-consent-action-reject');
+    const buttonEl = storyConsent.storyConsentEl_.querySelector(
+      '.i-amphtml-story-consent-action-reject'
+    );
 
     // For some reason the win object provided by the test environment does not
     // return all the styles.
@@ -185,8 +187,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   it('should hide the external link by default', () => {
     storyConsent.buildCallback();
 
-    const linkEl = storyConsent.storyConsentEl_
-        .querySelector('.i-amphtml-story-consent-external-link');
+    const linkEl = storyConsent.storyConsentEl_.querySelector(
+      '.i-amphtml-story-consent-external-link'
+    );
 
     expect(linkEl).to.have.display('none');
   });
@@ -232,8 +235,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
 
     storyConsent.buildCallback();
 
-    const linkEl = storyConsent.storyConsentEl_
-        .querySelector('.i-amphtml-story-consent-external-link');
+    const linkEl = storyConsent.storyConsentEl_.querySelector(
+      '.i-amphtml-story-consent-external-link'
+    );
 
     expect(linkEl).not.to.have.display('none');
   });
@@ -241,18 +245,25 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   it('should whitelist the <amp-consent> actions', () => {
     storyConsent.buildCallback();
 
-    const actions =
-        storyConsent.storeService_.get(StateProperty.ACTIONS_WHITELIST);
-    expect(actions)
-        .to.deep.contain({tagOrTarget: 'AMP-CONSENT', method: 'accept'});
-    expect(actions)
-        .to.deep.contain({tagOrTarget: 'AMP-CONSENT', method: 'prompt'});
-    expect(actions)
-        .to.deep.contain({tagOrTarget: 'AMP-CONSENT', method: 'reject'});
+    const actions = storyConsent.storeService_.get(
+      StateProperty.ACTIONS_WHITELIST
+    );
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'AMP-CONSENT',
+      method: 'accept',
+    });
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'AMP-CONSENT',
+      method: 'prompt',
+    });
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'AMP-CONSENT',
+      method: 'reject',
+    });
   });
 
   it('should broadcast the amp actions', () => {
-    sandbox.stub(storyConsent.actions_, 'trigger');
+    env.sandbox.stub(storyConsent.actions_, 'trigger');
 
     storyConsent.buildCallback();
 
@@ -271,47 +282,48 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   it('should render an accept button with the proper amp action', () => {
     storyConsent.buildCallback();
 
-    const buttonEl =
-        storyConsent.storyConsentEl_
-            .querySelector(`button[on="tap:${CONSENT_ID}.accept"]`);
+    const buttonEl = storyConsent.storyConsentEl_.querySelector(
+      `button[on="tap:${CONSENT_ID}.accept"]`
+    );
     expect(buttonEl).to.exist;
   });
 
   it('should set the consent ID in the store', () => {
     storyConsent.buildCallback();
 
-    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
-        .to.equal(CONSENT_ID);
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
+      CONSENT_ID
+    );
   });
 
-  it('should set the consent ID in the store if right amp-geo group', () => {
+  it('should set the consent ID in the store if right amp-geo group', async () => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
-    sandbox.stub(Services, 'geoForDocOrNull')
-        .resolves({matchedISOCountryGroups: ['eea']});
+    env.sandbox
+      .stub(Services, 'geoForDocOrNull')
+      .resolves({matchedISOCountryGroups: ['eea']});
 
     storyConsent.buildCallback();
 
-    return Promise.resolve().then(() => {
-      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
-          .to.equal(CONSENT_ID);
-    });
+    await Promise.resolve();
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
+      CONSENT_ID
+    );
   });
 
-  it('should not set consent ID in the store if wrong amp-geo group', () => {
+  it('should not set consent ID in the store if wrong amp-geo group', async () => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
-    sandbox.stub(Services, 'geoForDocOrNull')
-        .resolves({matchedISOCountryGroups: ['othergroup']});
+    env.sandbox
+      .stub(Services, 'geoForDocOrNull')
+      .resolves({matchedISOCountryGroups: ['othergroup']});
 
     storyConsent.buildCallback();
 
-    return Promise.resolve().then(() => {
-      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID))
-          .to.be.null;
-    });
+    await Promise.resolve();
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.be.null;
   });
 
   it('should set the font color to black if background is white', () => {
@@ -319,10 +331,12 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     getComputedStyleStub.returns(styles);
     storyConsent.buildCallback();
 
-    const buttonEl = storyConsent.storyConsentEl_
-        .querySelector('.i-amphtml-story-consent-action-accept');
-    expect(buttonEl.getAttribute('style'))
-        .to.equal('color: rgb(0, 0, 0) !important;');
+    const buttonEl = storyConsent.storyConsentEl_.querySelector(
+      '.i-amphtml-story-consent-action-accept'
+    );
+    expect(buttonEl.getAttribute('style')).to.equal(
+      'color: rgb(0, 0, 0) !important;'
+    );
   });
 
   it('should set the font color to white if background is black', () => {
@@ -330,10 +344,12 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     getComputedStyleStub.returns(styles);
     storyConsent.buildCallback();
 
-    const buttonEl = storyConsent.storyConsentEl_
-        .querySelector('.i-amphtml-story-consent-action-accept');
-    expect(buttonEl.getAttribute('style'))
-        .to.equal('color: rgb(255, 255, 255) !important;');
+    const buttonEl = storyConsent.storyConsentEl_.querySelector(
+      '.i-amphtml-story-consent-action-accept'
+    );
+    expect(buttonEl.getAttribute('style')).to.equal(
+      'color: rgb(255, 255, 255) !important;'
+    );
   });
 
   it('should require publisher-logo-src to be a URL', () => {
@@ -341,8 +357,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     allowConsoleError(() => {
       expect(() => {
         storyConsent.buildCallback();
-      }).to.throw('amp-story publisher-logo-src must start with ' +
-          '"https://" or "//"');
+      }).to.throw(
+        'amp-story publisher-logo-src must start with "https://" or "//"'
+      );
     });
   });
 });

@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-export const COLANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const COLANALYTICS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://ase.clmbtech.com',
     'base': '${host}/message',
-    'pageview': '${base}?cid=${id}' +
+    'pageview':
+      '${base}?cid=${id}' +
       '&val_101=${id}' +
       '&val_101=${canonicalPath}' +
       '&ch=${canonicalHost}' +
@@ -48,3 +51,5 @@ export const COLANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {COLANALYTICS_CONFIG};

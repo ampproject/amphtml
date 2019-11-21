@@ -24,77 +24,100 @@ import {
 } from '../consent-info';
 import {dict} from '../../../../src/utils/object';
 
-
 describes.fakeWin('ConsentInfo', {}, () => {
   describe('getStoredConsentInfo', () => {
     it('construct consentInfo from undefined', () => {
-      expect(getStoredConsentInfo(undefined)).to.deep.equal(dict({
-        'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-        'consentString': undefined,
-        'isDirty': undefined,
-      }));
+      expect(getStoredConsentInfo(undefined)).to.deep.equal(
+        dict({
+          'consentState': CONSENT_ITEM_STATE.UNKNOWN,
+          'consentString': undefined,
+          'isDirty': undefined,
+        })
+      );
     });
 
     it('construct consentInfo from legacy value', () => {
-      expect(getStoredConsentInfo(true)).to.deep.equal(dict({
-        'consentState': CONSENT_ITEM_STATE.ACCEPTED,
-        'consentString': undefined,
-        'isDirty': undefined,
-      }));
-      expect(getStoredConsentInfo(false)).to.deep.equal(dict({
-        'consentState': CONSENT_ITEM_STATE.REJECTED,
-        'consentString': undefined,
-        'isDirty': undefined,
-      }));
+      expect(getStoredConsentInfo(true)).to.deep.equal(
+        dict({
+          'consentState': CONSENT_ITEM_STATE.ACCEPTED,
+          'consentString': undefined,
+          'isDirty': undefined,
+        })
+      );
+      expect(getStoredConsentInfo(false)).to.deep.equal(
+        dict({
+          'consentState': CONSENT_ITEM_STATE.REJECTED,
+          'consentString': undefined,
+          'isDirty': undefined,
+        })
+      );
     });
 
     it('construct consentInfo from stored value', () => {
-      expect(getStoredConsentInfo({
-        's': 1,
-      })).to.deep.equal(dict({
-        'consentState': CONSENT_ITEM_STATE.ACCEPTED,
-        'consentString': undefined,
-        'isDirty': undefined,
-      }));
-      expect(getStoredConsentInfo({
-        's': 0,
-        'r': 'test',
-      })).to.deep.equal(dict({
-        'consentState': CONSENT_ITEM_STATE.REJECTED,
-        'consentString': 'test',
-        'isDirty': undefined,
-      }));
-      expect(getStoredConsentInfo({
-        's': -1,
-        'r': 'test',
-        'd': 1,
-      })).to.deep.equal(dict({
-        'consentState': CONSENT_ITEM_STATE.UNKNOWN,
-        'consentString': 'test',
-        'isDirty': true,
-      }));
+      expect(
+        getStoredConsentInfo({
+          's': 1,
+        })
+      ).to.deep.equal(
+        dict({
+          'consentState': CONSENT_ITEM_STATE.ACCEPTED,
+          'consentString': undefined,
+          'isDirty': undefined,
+        })
+      );
+      expect(
+        getStoredConsentInfo({
+          's': 0,
+          'r': 'test',
+        })
+      ).to.deep.equal(
+        dict({
+          'consentState': CONSENT_ITEM_STATE.REJECTED,
+          'consentString': 'test',
+          'isDirty': undefined,
+        })
+      );
+      expect(
+        getStoredConsentInfo({
+          's': -1,
+          'r': 'test',
+          'd': 1,
+        })
+      ).to.deep.equal(
+        dict({
+          'consentState': CONSENT_ITEM_STATE.UNKNOWN,
+          'consentString': 'test',
+          'isDirty': true,
+        })
+      );
     });
 
     it('throw error with invalid value', () => {
       expect(() => getStoredConsentInfo('invalid')).to.throw(
-          'Invalid stored consent value');
+        'Invalid stored consent value'
+      );
     });
   });
 
   it('composeStoreValue/getStoredConsentInfo', () => {
     let consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED);
-    expect(getStoredConsentInfo(composeStoreValue(consentInfo)))
-        .to.deep.equal(consentInfo);
+    expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
+      consentInfo
+    );
 
-    consentInfo =
-        constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
-    expect(getStoredConsentInfo(composeStoreValue(consentInfo)))
-        .to.deep.equal(consentInfo);
+    consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+    expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
+      consentInfo
+    );
 
-    consentInfo =
-        constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test', true);
-    expect(getStoredConsentInfo(composeStoreValue(consentInfo)))
-        .to.deep.equal(consentInfo);
+    consentInfo = constructConsentInfo(
+      CONSENT_ITEM_STATE.ACCEPTED,
+      'test',
+      true
+    );
+    expect(getStoredConsentInfo(composeStoreValue(consentInfo))).to.deep.equal(
+      consentInfo
+    );
   });
 
   describe('composeStoreValue', () => {
@@ -144,33 +167,42 @@ describes.fakeWin('ConsentInfo', {}, () => {
     let newState, previousState;
     newState = CONSENT_ITEM_STATE.ACCEPTED;
     previousState = CONSENT_ITEM_STATE.REJECTED;
-    expect(recalculateConsentStateValue(newState, previousState))
-        .to.equal(newState);
+    expect(recalculateConsentStateValue(newState, previousState)).to.equal(
+      newState
+    );
 
     // UNKNOWN/DISMISS/NOT_REQUIRED cannot override reject/accept
     newState = CONSENT_ITEM_STATE.UNKNOWN;
-    expect(recalculateConsentStateValue(newState, previousState))
-        .to.equal(previousState);
+    expect(recalculateConsentStateValue(newState, previousState)).to.equal(
+      previousState
+    );
     newState = CONSENT_ITEM_STATE.DISMISSED;
-    expect(recalculateConsentStateValue(newState, previousState))
-        .to.equal(previousState);
+    expect(recalculateConsentStateValue(newState, previousState)).to.equal(
+      previousState
+    );
     newState = CONSENT_ITEM_STATE.NOT_REQUIRED;
-    expect(recalculateConsentStateValue(newState, previousState))
-        .to.equal(previousState);
+    expect(recalculateConsentStateValue(newState, previousState)).to.equal(
+      previousState
+    );
 
     // UNKNOWN/DISMISS cannot override NOT_REQUIRED
     previousState = CONSENT_ITEM_STATE.NOT_REQUIRED;
     newState = CONSENT_ITEM_STATE.UNKNOWN;
-    expect(recalculateConsentStateValue(newState, previousState))
-        .to.equal(previousState);
+    expect(recalculateConsentStateValue(newState, previousState)).to.equal(
+      previousState
+    );
     newState = CONSENT_ITEM_STATE.DISMISSED;
-    expect(recalculateConsentStateValue(newState, previousState))
-        .to.equal(previousState);
+    expect(recalculateConsentStateValue(newState, previousState)).to.equal(
+      previousState
+    );
 
     // DISMISS is converted to UNKNOWN
-    expect(recalculateConsentStateValue(
-        CONSENT_ITEM_STATE.DISMISSED, CONSENT_ITEM_STATE.UNKNOWN))
-        .to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+    expect(
+      recalculateConsentStateValue(
+        CONSENT_ITEM_STATE.DISMISSED,
+        CONSENT_ITEM_STATE.UNKNOWN
+      )
+    ).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
   });
 
   it('isConsentInfoStoredValueSame', () => {

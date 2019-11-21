@@ -38,9 +38,6 @@ export class ViewerForTesting {
     this.alreadyLoaded_ = false;
 
     /** @private {string} */
-    this.viewportType_ = 'natural';
-
-    /** @private {string} */
     this.visibilityState_ = visible ? 'visible' : 'hidden';
 
     /** @type {Element} */
@@ -49,13 +46,7 @@ export class ViewerForTesting {
     /** @type {Element} */
     this.iframe = document.createElement('iframe');
     this.iframe.setAttribute('id', 'AMP_DOC_' + id);
-
-    const isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
-    if (this.viewportType_ == 'natural' && !isIos_) {
-      this.iframe.setAttribute('scrolling', 'yes');
-    } else {
-      this.iframe.setAttribute('scrolling', 'no');
-    }
+    this.iframe.setAttribute('scrolling', 'yes');
 
     /** @private @const {!Promise} */
     this.handshakeReceivedPromise_ = new Promise(resolve => {
@@ -77,14 +68,13 @@ export class ViewerForTesting {
   waitForHandshakeRequest() {
     const params = {
       history: 1,
-      viewportType: this.viewportType_,
-      width: this.containerEl./*OK*/offsetWidth,
-      height: this.containerEl./*OK*/offsetHeight,
+      width: this.containerEl./*OK*/ offsetWidth,
+      height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
-      cap: 'foo,a2a',
+      cap: 'foo,a2a,iframeScroll',
     };
 
     let ampdocUrl = this.ampdocUrl + '#' + serializeQueryString(params);
@@ -100,38 +90,43 @@ export class ViewerForTesting {
 
     // Listening for messages, hoping that I get a request for a handshake and
     // a notification that a document was loaded.
-    window.addEventListener('message', e => {
-      this.log('message received', e, e.data);
-      const target = this.iframe.contentWindow;
-      const targetOrigin = this.frameOrigin_;
-      // IMPORTANT: There could be many windows with the same origin!
-      // IMPORTANT: Event.source might not be available in all browsers!?
-      if (e.origin != targetOrigin ||
+    window.addEventListener(
+      'message',
+      e => {
+        this.log('message received', e, e.data);
+        const target = this.iframe.contentWindow;
+        const targetOrigin = this.frameOrigin_;
+        // IMPORTANT: There could be many windows with the same origin!
+        // IMPORTANT: Event.source might not be available in all browsers!?
+        if (
+          e.origin != targetOrigin ||
           e.source != target ||
-          e.data.app != APP) {
-        this.log('This message is not for us: ', e);
-        return;
-      }
-      if (e.data.name == 'channelOpen' &&
-          this.handshakeReceivedResolve_) {
-        // Send handshake confirmation.
-        const message = {
-          app: APP,
-          requestid: e.data.requestid,
-          data: {},
-          type: 's',
-        };
-        target./*OK*/postMessage(message, targetOrigin);
+          e.data.app != APP
+        ) {
+          this.log('This message is not for us: ', e);
+          return;
+        }
+        if (e.data.name == 'channelOpen' && this.handshakeReceivedResolve_) {
+          // Send handshake confirmation.
+          const message = {
+            app: APP,
+            requestid: e.data.requestid,
+            data: {},
+            type: 's',
+          };
+          target./*OK*/ postMessage(message, targetOrigin);
 
-        this.log('handshake request received!');
-        this.handshakeReceivedResolve_();
-        this.handshakeReceivedResolve_ = null;
-      }
-      if (e.data.name == 'documentLoaded') {
-        this.log('documentLoaded!');
-        this.documentLoadedResolve_();
-      }
-    }, false);
+          this.log('handshake request received!');
+          this.handshakeReceivedResolve_();
+          this.handshakeReceivedResolve_ = null;
+        }
+        if (e.data.name == 'documentLoaded') {
+          this.log('documentLoaded!');
+          this.documentLoadedResolve_();
+        }
+      },
+      false
+    );
 
     this.containerEl.appendChild(this.iframe);
 
@@ -143,13 +138,16 @@ export class ViewerForTesting {
    * well.
    */
   confirmHandshake() {
-    this.iframe.contentWindow./*OK*/postMessage(
-        'amp-handshake-response', this.frameOrigin_);
+    this.iframe.contentWindow./*OK*/ postMessage(
+      'amp-handshake-response',
+      this.frameOrigin_
+    );
   }
 
   /**
    * This is used in test-amp-viewer-integration to test the handshake and make
    * sure the test waits for everything to get executed.
+   * @return {*} TODO(#23582): Specify return type
    */
   waitForDocumentLoaded() {
     return this.documentLoadedPromise_;
@@ -157,6 +155,7 @@ export class ViewerForTesting {
 
   /**
    * This is only used for a unit test.
+   * @return {*} TODO(#23582): Specify return type
    */
   hasCapability() {
     return false;
@@ -165,8 +164,7 @@ export class ViewerForTesting {
   /**
    * This is only used for a unit test.
    */
-  setMessageDeliverer() {
-  }
+  setMessageDeliverer() {}
 
   /**
    * Fake docs for testing
@@ -174,6 +172,7 @@ export class ViewerForTesting {
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
     var_args.unshift('[VIEWER]');
-    console/*OK*/.log.apply(console, var_args);
+    console /*OK*/.log
+      .apply(console, var_args);
   }
 }

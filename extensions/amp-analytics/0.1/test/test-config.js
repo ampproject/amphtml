@@ -20,21 +20,110 @@ import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {map} from '../../../../src/utils/object';
 import {stubService} from '../../../../testing/test-helper';
+import {user} from '../../../../src/log';
 
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
-
   let win;
   let doc;
-  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    sandbox = env.sandbox;
   });
 
   afterEach(() => {
     delete ANALYTICS_CONFIG['-test-venfor'];
+  });
+
+  describe('handles top level fields correctly', () => {
+    it('propogates requestOrigin into each request object', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://example.com',
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: 'https://example.com',
+            baseUrl: '/test1',
+          },
+          'test2': {
+            origin: 'https://example.com',
+            baseUrl: '/test1/test2',
+          },
+        });
+      });
+    });
+
+    it('does not overwrite existing origin in request object', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': 'https://toplevel.com',
+        'requests': {
+          'test1': {
+            origin: 'https://nested.com',
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: 'https://nested.com',
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
+
+    it('handles empty string request origin', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': '',
+        'requests': {
+          'test1': {
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: '',
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
+
+    it('handles undefined request origin', () => {
+      ANALYTICS_CONFIG['-test-venfor'] = {
+        'requestOrigin': undefined,
+        'requests': {
+          'test1': {
+            baseUrl: '/test1',
+          },
+        },
+      };
+
+      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(config['requests']).to.deep.equal({
+          'test1': {
+            origin: undefined,
+            baseUrl: '/test1',
+          },
+        });
+      });
+    });
   });
 
   describe('merges requests correctly', () => {
@@ -43,10 +132,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'requests': {'foo': '/bar', 'bar': 'foobar'},
       };
 
-      const element = getAnalyticsTag({
-        'requests': {'foo': 'https://example.com/${bar}'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': 'https://example.com/${bar}'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor'}
+      );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -57,9 +149,12 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             baseUrl: 'foobar',
           },
         });
-        expect(config['triggers']).to.deep.equal([{
-          'on': 'visible', 'request': 'foo',
-        }]);
+        expect(config['triggers']).to.deep.equal([
+          {
+            'on': 'visible',
+            'request': 'foo',
+          },
+        ]);
       });
     });
 
@@ -73,13 +168,19 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': {
-          'baseUrl': 'https://example.com/${bar}',
-          'batchInterval': 0,
-        }, 'bar': 'bar-i'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {
+          'requests': {
+            'foo': {
+              'baseUrl': 'https://example.com/${bar}',
+              'batchInterval': 0,
+            },
+            'bar': 'bar-i',
+          },
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor'}
+      );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -92,9 +193,12 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             'batchInterval': 2,
           },
         });
-        expect(config['triggers']).to.deep.equal([{
-          'on': 'visible', 'request': 'foo',
-        }]);
+        expect(config['triggers']).to.deep.equal([
+          {
+            'on': 'visible',
+            'request': 'foo',
+          },
+        ]);
       });
     });
 
@@ -107,21 +211,24 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
           'bar': {
             'baseUrl': 'bar-v',
-          }},
-      };
-      const element = getAnalyticsTag({
-        'requests': {
-          'foo': {
-            'baseUrl': 'https://example.com/${bar}',
-            'batchInterval': 0,
-          },
-          'bar': {
-            'batchInterval': 3,
           },
         },
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor'});
-
+      };
+      const element = getAnalyticsTag(
+        {
+          'requests': {
+            'foo': {
+              'baseUrl': 'https://example.com/${bar}',
+              'batchInterval': 0,
+            },
+            'bar': {
+              'batchInterval': 3,
+            },
+          },
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor'}
+      );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -134,30 +241,38 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             'batchInterval': 3,
           },
         });
-        expect(config['triggers']).to.deep.equal([{
-          'on': 'visible', 'request': 'foo',
-        }]);
+        expect(config['triggers']).to.deep.equal([
+          {
+            'on': 'visible',
+            'request': 'foo',
+          },
+        ]);
       });
     });
 
     it('inline and remote both string', () => {
-      const element = getAnalyticsTag({
-        'vars': {'title': 'local'},
-        'requests': {'foo': 'https://example.com/${title}'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {
-        'config': '//config-rv2',
-      });
-
-      stubXhr().returns(Promise.resolve({
-        json() {
-          return Promise.resolve({
-            requests: {
-              foo: 'https://example.com/remote',
-            },
-          });
+      const element = getAnalyticsTag(
+        {
+          'vars': {'title': 'local'},
+          'requests': {'foo': 'https://example.com/${title}'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-      }));
+        {
+          'config': '//config-rv2',
+        }
+      );
+
+      stubXhr().returns(
+        Promise.resolve({
+          json() {
+            return Promise.resolve({
+              requests: {
+                foo: 'https://example.com/remote',
+              },
+            });
+          },
+        })
+      );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -165,9 +280,12 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             'baseUrl': 'https://example.com/remote',
           },
         });
-        expect(config['triggers']).to.deep.equal([{
-          'on': 'visible', 'request': 'foo',
-        }]);
+        expect(config['triggers']).to.deep.equal([
+          {
+            'on': 'visible',
+            'request': 'foo',
+          },
+        ]);
       });
     });
   });
@@ -175,29 +293,39 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   describe('mergeObjects', () => {
     it('merges objects correctly', function() {
       expect(mergeObjects({}, {})).to.deep.equal({});
-      expect(mergeObjects(map({'a': 0}), map({'b': 1})))
-          .to.deep.equal(map({'a': 0, 'b': 1}));
-      expect(mergeObjects({'foo': 1}, {'1': 1}))
-          .to.deep.equal({'foo': 1, '1': 1});
-      expect(mergeObjects({'1': 1}, {'bar': 'bar'}))
-          .to.deep.equal({'1': 1, 'bar': 'bar'});
-      expect(mergeObjects({'foo': [1, 2, 3, 4]}, {'bar': [4, 5, 6, 7]}))
-          .to.deep.equal({'foo': [1,2, 3, 4], 'bar': [4, 5, 6, 7]});
-      expect(mergeObjects(
-          null, {'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}}))
-          .to.deep.equal({'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}});
-      expect(mergeObjects(
-          undefined,
-          {'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}}))
-          .to.deep.equal({'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}});
-      expect(mergeObjects(
+      expect(mergeObjects(map({'a': 0}), map({'b': 1}))).to.deep.equal(
+        map({'a': 0, 'b': 1})
+      );
+      expect(mergeObjects({'foo': 1}, {'1': 1})).to.deep.equal({
+        'foo': 1,
+        '1': 1,
+      });
+      expect(mergeObjects({'1': 1}, {'bar': 'bar'})).to.deep.equal({
+        '1': 1,
+        'bar': 'bar',
+      });
+      expect(
+        mergeObjects({'foo': [1, 2, 3, 4]}, {'bar': [4, 5, 6, 7]})
+      ).to.deep.equal({'foo': [1, 2, 3, 4], 'bar': [4, 5, 6, 7]});
+      expect(
+        mergeObjects(null, {'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}})
+      ).to.deep.equal({'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}});
+      expect(
+        mergeObjects(undefined, {
+          'foo': 'bar',
+          'baz': {'foobar': ['abc', 'def']},
+        })
+      ).to.deep.equal({'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}});
+      expect(
+        mergeObjects(
           {'baz': 'bar', 'foobar': {'foobar': ['abc', 'def']}},
-          {'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}}))
-          .to.deep.equal({
-            'foo': 'bar',
-            'baz': 'bar',
-            'foobar': {'foobar': ['abc', 'def']},
-          });
+          {'foo': 'bar', 'baz': {'foobar': ['abc', 'def']}}
+        )
+      ).to.deep.equal({
+        'foo': 'bar',
+        'baz': 'bar',
+        'foobar': {'foobar': ['abc', 'def']},
+      });
     });
   });
 
@@ -227,8 +355,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'optout': 'foo.bar',
       });
-      return expect(new AnalyticsConfig(element).loadConfig()).to.be
-          .rejectedWith(/optout property is only available to vendor config/);
+      return expect(
+        new AnalyticsConfig(element).loadConfig()
+      ).to.be.rejectedWith(
+        /optout property is only available to vendor config/
+      );
     });
 
     it('succeeds for vendor iframePing config', () => {
@@ -261,8 +392,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'element': {'foo': 'https://example.com/bar'},
         'triggers': [{'on': 'visible', 'iframePing': true}],
       });
-      return expect(new AnalyticsConfig(element).loadConfig()).to.be
-          .rejectedWith(/iframePing config is only available to vendor config/);
+      return expect(
+        new AnalyticsConfig(element).loadConfig()
+      ).to.be.rejectedWith(
+        /iframePing config is only available to vendor config/
+      );
     });
 
     it('succeeds for vendor iframe transport config', () => {
@@ -296,10 +430,12 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
     it('fails for inlined iframe transport config', () => {
       expectAsyncConsoleError(
-          /Inline configs are not allowed to specify transport iframe/);
+        /Inline configs are not allowed to specify transport iframe/
+      );
       expectAsyncConsoleError(
-          '[AmpAnalytics <unknown id>] Inline or remote config ' +
-          'should not overwrite vendor transport settings');
+        '[AmpAnalytics <unknown id>] Inline or remote config ' +
+          'should not overwrite vendor transport settings'
+      );
       ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {
           'pageview': '//fake-url',
@@ -317,16 +453,19 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           iframe: '//fake-url',
         },
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': 'https://example.com/bar'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-        transport: {
-          image: false,
-          xhrpost: false,
-          beacon: false,
-          iframe: '//fake-url2',
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': 'https://example.com/bar'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+          transport: {
+            image: false,
+            xhrpost: false,
+            beacon: false,
+            iframe: '//fake-url2',
+          },
         },
-      }, {'type': '-test-venfor'});
+        {'type': '-test-venfor'}
+      );
       return new AnalyticsConfig(element).loadConfig();
     });
   });
@@ -334,32 +473,36 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   describe('remote config', () => {
     it('fetches and merges remote config', () => {
       expectAsyncConsoleError(
-          /Remote configs are not allowed to specify transport iframe/);
+        /Remote configs are not allowed to specify transport iframe/
+      );
 
-      const element = getAnalyticsTag({
-        'vars': {'title': 'local'},
-        'requests': {'foo': 'https://example.com/${title}'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {
-        'config': '//config1',
-      });
+      const element = getAnalyticsTag(
+        {
+          'vars': {'title': 'local'},
+          'requests': {'foo': 'https://example.com/${title}'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {
+          'config': '//config1',
+        }
+      );
 
       const xhrStub = stubXhr();
-      xhrStub.returns(Promise.resolve({
-        json: () => {
-          return {
-            vars: {'title': 'remote'},
-            transport: {
-              iframe: '//fake-url',
-            },
-          };
-        },
-      }));
+      xhrStub.returns(
+        Promise.resolve({
+          json: () => {
+            return {
+              vars: {'title': 'remote'},
+              transport: {
+                iframe: '//fake-url',
+              },
+            };
+          },
+        })
+      );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
-        expect(xhrStub).to.be.calledWith('//config1', {
-          requireAmpResponseSourceOrigin: false,
-        });
+        expect(xhrStub).to.be.calledWith('//config1', {});
         expect(config['vars']['title']).to.equal('remote');
         // iframe transport from remote config is ignored
         expect(config['transport']['iframe']).to.be.undefined;
@@ -367,43 +510,49 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should not fetch remote config if sandboxed', () => {
-      const element = getAnalyticsTag({
-        'vars': {'title': 'local'},
-        'requests': {'foo': 'https://example.com/${title}'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {
-        'config': '//config1',
-        'sandbox': 'true',
-      });
+      const element = getAnalyticsTag(
+        {
+          'vars': {'title': 'local'},
+          'requests': {'foo': 'https://example.com/${title}'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {
+          'config': '//config1',
+          'sandbox': 'true',
+        }
+      );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['vars']['title']).to.equal('local');
       });
     });
 
-
     it('fetches and merges remote config with credentials', () => {
-      const element = getAnalyticsTag({
-        'vars': {'title': 'local'},
-        'requests': {'foo': 'https://example.com/${title}'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {
-        'config': '//config1',
-        'data-credentials': 'include',
-      });
+      const element = getAnalyticsTag(
+        {
+          'vars': {'title': 'local'},
+          'requests': {'foo': 'https://example.com/${title}'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {
+          'config': '//config1',
+          'data-credentials': 'include',
+        }
+      );
 
       const xhrStub = stubXhr();
-      xhrStub.returns(Promise.resolve({
-        json: () => {
-          return {
-            vars: {'title': 'remote'},
-          };
-        },
-      }));
+      xhrStub.returns(
+        Promise.resolve({
+          json: () => {
+            return {
+              vars: {'title': 'remote'},
+            };
+          },
+        })
+      );
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(xhrStub).to.be.calledWith('//config1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: false,
         });
         expect(config['vars']['title']).to.equal('remote');
       });
@@ -411,7 +560,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   });
 
   describe('should re-write configuration if configured', () => {
-
     it('should fully rewrite a configuration', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
@@ -420,10 +568,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'url': '//rewriter',
         },
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': '//inlined'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': '//inlined'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor'}
+      );
 
       const xhrStub = stubXhr();
       xhrStub.callsFake(url => {
@@ -440,10 +591,9 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         expect(xhrStub).to.be.calledWith('//rewriter', {
           body: {
             requests: {foo: '//inlined'},
-            triggers: [{on: 'visible', request: 'foo'}] ,
+            triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
 
         expect(config['requests']['foo']).to.deep.equal({
@@ -469,15 +619,18 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': '//inlined'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-        'configRewriter': {
-          'varGroups': {
-            'feature1': {'enabled': true},
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': '//inlined'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+          'configRewriter': {
+            'varGroups': {
+              'feature1': {'enabled': true},
+            },
           },
         },
-      }, {'type': '-test-venfor'});
+        {'type': '-test-venfor'}
+      );
 
       const xhrStub = stubXhr();
 
@@ -485,7 +638,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         expect(xhrStub).to.be.calledWith('//rewriter', {
           body: {
             requests: {foo: '//inlined'},
-            triggers: [{on: 'visible', request: 'foo'}] ,
+            triggers: [{on: 'visible', request: 'foo'}],
             configRewriter: {
               vars: {
                 cid: 'amp12345',
@@ -494,7 +647,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -514,10 +666,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': '//inlined'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': '//inlined'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor'}
+      );
 
       const xhrStub = stubXhr();
 
@@ -525,7 +680,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         expect(xhrStub).to.be.calledWith('//rewriter', {
           body: {
             requests: {foo: '//inlined'},
-            triggers: [{on: 'visible', request: 'foo'}] ,
+            triggers: [{on: 'visible', request: 'foo'}],
             configRewriter: {
               vars: {
                 cid: 'amp12345',
@@ -534,7 +689,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -553,10 +707,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': '//inlined'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': '//inlined'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor'}
+      );
 
       const xhrStub = stubXhr();
 
@@ -564,14 +721,12 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         expect(xhrStub).to.be.calledWith('//rewriter', {
           body: {
             requests: {foo: '//inlined'},
-            triggers: [{on: 'visible', request: 'foo'}] ,
+            triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
-
 
     it('should support amp-analytics-variables macros in varGroups', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
@@ -587,10 +742,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': '//inlined'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': '//inlined'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor'}
+      );
 
       const xhrStub = stubXhr();
 
@@ -606,11 +764,9 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
-
 
     it('should merge rewritten configuration and use vendor', () => {
       ANALYTICS_CONFIG['-test-venfor'] = {
@@ -620,10 +776,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'url': '//rewriter',
         },
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': '//inlined'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor', 'config': '//remote'});
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': '//inlined'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor', 'config': '//remote'}
+      );
 
       const xhrStub = stubXhr();
       xhrStub.callsFake(url => {
@@ -640,10 +799,9 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         expect(xhrStub).to.be.calledWith('//rewriter', {
           body: {
             requests: {foo: '//remote'},
-            triggers: [{on: 'visible', request: 'foo'}] ,
+            triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
 
         expect(config['requests']['foo']).to.deep.equal({
@@ -656,13 +814,15 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       ANALYTICS_CONFIG['-test-venfor'] = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
-        'configRewriter': {
-        },
+        'configRewriter': {},
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': '//inlined'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-      }, {'type': '-test-venfor'});
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': '//inlined'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+        },
+        {'type': '-test-venfor'}
+      );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']['foo']).to.deep.equal({
@@ -676,13 +836,16 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       };
-      const element = getAnalyticsTag({
-        'requests': {'foo': '//inlined'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
-        'configRewriter': {
-          'url': '//rewriter',
+      const element = getAnalyticsTag(
+        {
+          'requests': {'foo': '//inlined'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
+          'configRewriter': {
+            'url': '//rewriter',
+          },
         },
-      }, {'type': '-test-venfor'});
+        {'type': '-test-venfor'}
+      );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']['foo']).to.deep.equal({
@@ -718,6 +881,96 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
   });
 
+  describe('warning message', () => {
+    it('shows the warning', () => {
+      ANALYTICS_CONFIG['test-vendor'] = {
+        'requests': {'test1': '/test1', 'test2': '/test1/test2'},
+        'warningMessage': 'I am a warning',
+      };
+
+      const element = getAnalyticsTag(
+        {},
+        {'type': 'test-vendor', 'id': 'analyticsId'}
+      );
+      const usrObj = user();
+      const spy = env.sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          ' test-vendor',
+          '',
+          'I am a warning'
+        );
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+
+    it('handles incorrect inputs', () => {
+      ANALYTICS_CONFIG['test-vendor'] = {
+        'requests': {'test1': '/test1', 'test2': '/test2'},
+        'warningMessage': {
+          'message': 'I am deprecated',
+          'configVersion': '0.1',
+        },
+      };
+
+      const element = getAnalyticsTag(
+        {},
+        {'type': 'test-vendor', 'id': 'analyticsId'}
+      );
+      const usrObj = user();
+      const spy = env.sandbox.spy(usrObj, 'warn');
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          ' test-vendor',
+          '',
+          '[object Object]'
+        );
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+
+    it('handles remote config', () => {
+      const element = getAnalyticsTag(
+        {},
+        {'config': 'www.vendorConfigLocation.com', 'id': 'analyticsId'}
+      );
+
+      const usrObj = user();
+      const spy = env.sandbox.spy(usrObj, 'warn');
+      const xhrStub = stubXhr();
+      xhrStub.returns(
+        Promise.resolve({
+          json: () => {
+            return {
+              'warningMessage':
+                'The config you are working with has been deprecated',
+            };
+          },
+        })
+      );
+
+      return new AnalyticsConfig(element).loadConfig().then(config => {
+        expect(spy).callCount(1);
+        expect(spy).to.have.been.calledWith(
+          'AmpAnalytics analyticsId',
+          'Warning from analytics vendor%s%s: %s',
+          '',
+          ' with remote config url www.vendorConfigLocation.com',
+          'The config you are working with has been deprecated'
+        );
+        expect(config['warningMessage']).to.be.undefined;
+      });
+    });
+  });
+
   function getAnalyticsTag(config, attrs) {
     config = JSON.stringify(config);
     const el = doc.createElement('amp-analytics');
@@ -735,7 +988,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
   function stubXhr() {
     installDocService(win, true);
 
-    const expandStringStub = sandbox.stub();
+    const expandStringStub = env.sandbox.stub();
     expandStringStub.withArgs('CLIENT_ID(foo)').resolves('amp12345');
     expandStringStub.resolvesArg(0);
 
@@ -743,15 +996,18 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       a: 'b',
     };
     expandStringStub.withArgs('$NOT(foo)', macros).resolves('false');
-    stubService(sandbox, win, 'amp-analytics-variables', 'getMacros').returns(
-        macros);
+    stubService(
+      env.sandbox,
+      win,
+      'amp-analytics-variables',
+      'getMacros'
+    ).returns(macros);
 
-    sandbox.stub(Services, 'urlReplacementsForDoc')
-        .returns({
-          'expandUrlAsync': url => Promise.resolve(url),
-          'expandStringAsync': expandStringStub,
-        });
+    env.sandbox.stub(Services, 'urlReplacementsForDoc').returns({
+      'expandUrlAsync': url => Promise.resolve(url),
+      'expandStringAsync': expandStringStub,
+    });
 
-    return stubService(sandbox, win, 'xhr', 'fetchJson');
+    return stubService(env.sandbox, win, 'xhr', 'fetchJson');
   }
 });

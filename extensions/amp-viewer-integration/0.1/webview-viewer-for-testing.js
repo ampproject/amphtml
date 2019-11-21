@@ -43,9 +43,6 @@ export class WebviewViewerForTesting {
     this.alreadyLoaded_ = false;
 
     /** @private {string} */
-    this.viewportType_ = 'natural';
-
-    /** @private {string} */
     this.visibilityState_ = visible ? 'visible' : 'hidden';
 
     /** @type {Element} */
@@ -59,13 +56,7 @@ export class WebviewViewerForTesting {
     /** @type {Element} */
     this.iframe = document.createElement('iframe');
     this.iframe.setAttribute('id', 'AMP_DOC_' + id);
-
-    const isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
-    if (this.viewportType_ == 'natural' && !isIos_) {
-      this.iframe.setAttribute('scrolling', 'yes');
-    } else {
-      this.iframe.setAttribute('scrolling', 'no');
-    }
+    this.iframe.setAttribute('scrolling', 'yes');
 
     this.pollingIntervalIds_ = [];
     this.intervalCtr = 0;
@@ -90,14 +81,13 @@ export class WebviewViewerForTesting {
   waitForHandshakeResponse() {
     const params = {
       history: 1,
-      viewportType: this.viewportType_,
-      width: this.containerEl./*OK*/offsetWidth,
-      height: this.containerEl./*OK*/offsetHeight,
+      width: this.containerEl./*OK*/ offsetWidth,
+      height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
-      cap: 'foo,a2a',
+      cap: 'foo,a2a,iframeScroll',
       webview: 1,
     };
 
@@ -110,8 +100,10 @@ export class WebviewViewerForTesting {
     const url = parsedUrl.href;
     this.iframe.setAttribute('src', url);
 
-    this.pollingIntervalIds_[this.intervalCtr] =
-        setInterval(this.pollAMPDoc_.bind(this, this.intervalCtr) , 1000);
+    this.pollingIntervalIds_[this.intervalCtr] = setInterval(
+      this.pollAMPDoc_.bind(this, this.intervalCtr),
+      1000
+    );
     this.intervalCtr++;
 
     this.containerEl.appendChild(this.iframe);
@@ -128,8 +120,11 @@ export class WebviewViewerForTesting {
         app: APP,
         name: 'handshake-poll',
       };
-      this.iframe.contentWindow./*OK*/postMessage(
-          JSON.stringify(message), '*', [channel.port2]);
+      this.iframe.contentWindow./*OK*/ postMessage(
+        JSON.stringify(message),
+        '*',
+        [channel.port2]
+      );
       channel.port1.onmessage = function(e) {
         if (this.isChannelOpen_(e)) {
           window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
@@ -144,11 +139,11 @@ export class WebviewViewerForTesting {
 
   /**
    * @param {!Event} e
+   * @return {*} TODO(#23582): Specify return type
    */
   isChannelOpen_(e) {
     const data = JSON.parse(e.data);
-    return e.type == 'message' && data.app == APP &&
-      data.name == 'channelOpen';
+    return e.type == 'message' && data.app == APP && data.name == 'channelOpen';
   }
 
   /**
@@ -164,7 +159,7 @@ export class WebviewViewerForTesting {
       type: MessageType.RESPONSE,
     };
     this.log('############## viewer posting1 Message', message);
-    channel.port1./*OK*/postMessage(JSON.stringify(message));
+    channel.port1./*OK*/ postMessage(JSON.stringify(message));
 
     class WindowPortEmulator {
       /**
@@ -193,26 +188,32 @@ export class WebviewViewerForTesting {
        */
       postMessage(data) {
         this.log_('############## viewer posting2 Message', data);
-        channel.port1./*OK*/postMessage(JSON.stringify(data));
+        channel.port1./*OK*/ postMessage(JSON.stringify(data));
       }
       /**
        * Fake docs for testing
        */
       start() {}
     }
-    this.messaging_ = new Messaging(this.win,
-        new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
+    this.messaging_ = new Messaging(
+      this.win,
+      new WindowPortEmulator(this.messageHandlers_, this.id, this.log)
+    );
 
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
-      console/*OK*/.log(
-          'viewer receiving message: ', type, payload, awaitResponse);
+      console /*OK*/
+        .log('viewer receiving message: ', type, payload, awaitResponse);
       return Promise.resolve();
     });
 
-    this.sendRequest_('visibilitychange', {
-      state: this.visibilityState_,
-      prerenderSize: this.prerenderSize,
-    }, true);
+    this.sendRequest_(
+      'visibilitychange',
+      {
+        state: this.visibilityState_,
+        prerenderSize: this.prerenderSize,
+      },
+      true
+    );
 
     this.handshakeResponseResolve_();
   }
@@ -222,6 +223,7 @@ export class WebviewViewerForTesting {
    * @param {*} type
    * @param {*} data
    * @param {*} awaitResponse
+   * @return {*} TODO(#23582): Specify return type
    */
   sendRequest_(type, data, awaitResponse) {
     this.log('Viewer.prototype.sendRequest_');
@@ -247,6 +249,7 @@ export class WebviewViewerForTesting {
   /**
    * This is used in test-amp-viewer-integration to test the handshake and make
    * sure the test waits for everything to get executed.
+   * @return {*} TODO(#23582): Specify return type
    */
   waitForDocumentLoaded() {
     return this.documentLoadedPromise_;
@@ -255,6 +258,7 @@ export class WebviewViewerForTesting {
   /**
    * Fake docs for testing
    * @param {*} eventData
+   * @return {*} TODO(#23582): Specify return type
    */
   processRequest_(eventData) {
     const data = JSON.parse(eventData);
@@ -286,6 +290,7 @@ export class WebviewViewerForTesting {
    */
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
-    console/*OK*/.log.apply(console, var_args);
+    console /*OK*/.log
+      .apply(console, var_args);
   }
 }

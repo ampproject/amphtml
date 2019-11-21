@@ -27,27 +27,28 @@ import {utf8Decode} from '../../../src/utils/bytes';
 export class NameFrameRenderer extends Renderer {
   /** @override */
   render(context, element, crossDomainData) {
-    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (
-      crossDomainData);
+    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (crossDomainData);
 
     if (!crossDomainData.creative && !crossDomainData.rawCreativeBytes) {
       // No creative, nothing to do.
       return Promise.resolve();
     }
 
-    const creative = crossDomainData.creative ||
-        // rawCreativeBytes must exist; if we're here, then `creative` must not
-        // exist, but the if-statement above guarantees that at least one of
-        // `creative` || `rawCreativeBytes` exists.
-        utf8Decode(/** @type {!ArrayBuffer} */ (
-          crossDomainData.rawCreativeBytes));
-    const srcPath =
-        getDefaultBootstrapBaseUrl(context.win, 'nameframe');
+    const creative =
+      crossDomainData.creative ||
+      // rawCreativeBytes must exist; if we're here, then `creative` must not
+      // exist, but the if-statement above guarantees that at least one of
+      // `creative` || `rawCreativeBytes` exists.
+      utf8Decode(
+        /** @type {!ArrayBuffer} */ (crossDomainData.rawCreativeBytes)
+      );
+    const srcPath = getDefaultBootstrapBaseUrl(context.win, 'nameframe');
     const contextMetadata = getContextMetadata(
-        context.win,
-        element,
-        context.sentinel,
-        crossDomainData.additionalContextMetadata);
+      context.win,
+      element,
+      context.sentinel,
+      crossDomainData.additionalContextMetadata
+    );
     contextMetadata['creative'] = creative;
     const attributes = dict({
       'src': srcPath,
@@ -65,8 +66,10 @@ export class NameFrameRenderer extends Renderer {
       attributes['data-amp-3p-sentinel'] = crossDomainData.sentinel;
     }
     const iframe = createElementWithAttributes(
-        /** @type {!Document} */ (element.ownerDocument), 'iframe',
-        /** @type {!JsonObject} */ (attributes));
+      /** @type {!Document} */ (element.ownerDocument),
+      'iframe',
+      /** @type {!JsonObject} */ (attributes)
+    );
     // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
     element.appendChild(iframe);
     return Promise.resolve();

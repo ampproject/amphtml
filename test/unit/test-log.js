@@ -30,45 +30,39 @@ import {
 } from '../../src/log';
 
 describe('Logging', () => {
-
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
   const RETURNS_WARN = () => LogLevel.WARN;
   const RETURNS_ERROR = () => LogLevel.ERROR;
   const RETURNS_OFF = () => LogLevel.OFF;
 
-  let sandbox;
   let mode;
   let win;
   let logSpy;
   let timeoutSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     mode = {};
-    window.AMP_MODE = mode;
+    window.__AMP_MODE = mode;
 
-    logSpy = sandbox.spy();
-    timeoutSpy = sandbox.spy();
+    logSpy = window.sandbox.spy();
+    timeoutSpy = window.sandbox.spy();
     win = {
       console: {
         log: logSpy,
       },
+      location: {hash: ''},
       setTimeout: timeoutSpy,
-      reportError: error => error,
+      __AMP_REPORT_ERROR: error => error,
     };
-    sandbox.stub(self, 'reportError').callsFake(error => error);
+    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
   });
 
   afterEach(() => {
-    sandbox.restore();
-    sandbox = null;
-    window.AMP_MODE = undefined;
+    window.__AMP_MODE = undefined;
   });
 
   describe('Level', () => {
-
     it('should be enabled when directly allowed', () => {
       expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel.FINE);
     });
@@ -113,10 +107,10 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(4);
-      expect(logSpy.args[0][0]).to.equal('fine');
-      expect(logSpy.args[1][0]).to.equal('info');
-      expect(logSpy.args[2][0]).to.equal('warn');
-      expect(logSpy.args[3][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] fine');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] info');
+      expect(logSpy.getCall(2)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(3)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -130,9 +124,9 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(3);
-      expect(logSpy.args[0][0]).to.equal('info');
-      expect(logSpy.args[1][0]).to.equal('warn');
-      expect(logSpy.args[2][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] info');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(2)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -146,8 +140,8 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(2);
-      expect(logSpy.args[0][0]).to.equal('warn');
-      expect(logSpy.args[1][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -161,7 +155,7 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.be.calledOnce;
-      expect(logSpy.args[0][0]).to.equal('error');
+      expect(logSpy).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -228,7 +222,6 @@ describe('Logging', () => {
   });
 
   describe('UserLog', () => {
-
     it('should be WARN by default', () => {
       expect(user().levelFunc_(mode)).to.equal(LogLevel.WARN);
     });
@@ -260,7 +253,6 @@ describe('Logging', () => {
   });
 
   describe('DevLog', () => {
-
     it('should be disabled by default', () => {
       expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
     });
@@ -291,7 +283,6 @@ describe('Logging', () => {
   });
 
   describe('asserts', () => {
-
     let log;
 
     beforeEach(() => {
@@ -536,7 +527,6 @@ describe('Logging', () => {
   });
 
   describe('assertEnumValue', () => {
-
     let log;
 
     beforeEach(() => {
@@ -552,15 +542,18 @@ describe('Logging', () => {
     it('should fail with unknown enum value', () => {
       const enum1 = {a: 'value1', b: 'value2'};
       expect(() => log.assertEnumValue(enum1, 'value3')).to.throw(
-          'Unknown enum value: "value3"');
+        'Unknown enum value: "value3"'
+      );
       expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum')).to.throw(
-          'Unknown MyEnum value: "value3"');
+        'Unknown MyEnum value: "value3"'
+      );
     });
 
     it('should fail with values of different case', () => {
       const enum1 = {a: 'value1', b: 'value2'};
       expect(() => log.assertEnumValue(enum1, 'VALUE1')).to.throw(
-          'Unknown enum value: "VALUE1"');
+        'Unknown enum value: "VALUE1"'
+      );
     });
   });
 
@@ -581,10 +574,8 @@ describe('Logging', () => {
     });
 
     it('should fail with non-array values', () => {
-      expect(() => log.assertArray('a')).to.throw(
-          'Array expected: a');
-      expect(() => log.assertArray(1)).to.throw(
-          'Array expected: 1');
+      expect(() => log.assertArray('a')).to.throw('Array expected: a');
+      expect(() => log.assertArray(1)).to.throw('Array expected: 1');
     });
   });
 
@@ -632,7 +623,7 @@ describe('Logging', () => {
     let clock;
 
     beforeEach(() => {
-      clock = sandbox.useFakeTimers();
+      clock = window.sandbox.useFakeTimers();
       restoreAsyncErrorThrows();
     });
 
@@ -736,20 +727,17 @@ describe('Logging', () => {
   });
 
   describe('embed error', () => {
-    let sandbox;
     let iframe;
     let element;
     let element1;
     let element2;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
     });
 
     afterEach(() => {
-      sandbox.restore();
       document.body.removeChild(iframe);
     });
 
@@ -777,5 +765,136 @@ describe('Logging', () => {
       expect(user()).to.not.equal(user(element1));
     });
   });
-});
 
+  describe('expandMessageArgs with URL', () => {
+    const prefixRe = 'https:\\/\\/log\\.amp\\.dev\\/\\?v=[^&]+&';
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('returns url without args', () => {
+      const id = 'foo';
+      const queryRe = `id=${id}`;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const messageArgs = log.expandMessageArgs_([id]);
+      expect(messageArgs).to.have.lengthOf(1);
+      const message = messageArgs[0];
+      expect(expectedRe.test(message), `${expectedRe}.test('${message}')`).to.be
+        .true;
+    });
+
+    it('returns url with one arg', () => {
+      const id = 'foo';
+      const arg1 = 'bar';
+      const queryRe = `id=${id}&s\\[\\]=${arg1}`;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const messageArgs = log.expandMessageArgs_([id, arg1]);
+      expect(messageArgs).to.have.lengthOf(1);
+      const message = messageArgs[0];
+      expect(expectedRe.test(message), `${expectedRe}.test('${message}')`).to.be
+        .true;
+    });
+
+    it('returns url with many args', () => {
+      const id = 'foo';
+      const arg1 = 'bar';
+      const arg2 = 'baz';
+      const arg3 = 'taquitos';
+      const queryRe = `id=${id}&s\\[\\]=${arg1}&s\\[\\]=${arg2}&s\\[\\]=${arg3}`;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const messageArgs = log.expandMessageArgs_([id, arg1, arg2, arg3]);
+      expect(messageArgs).to.have.lengthOf(1);
+      const message = messageArgs[0];
+      expect(expectedRe.test(message), `${expectedRe}.test('${message}')`).to.be
+        .true;
+    });
+  });
+
+  describe('Extracted messages by ids', () => {
+    let log;
+
+    // Promise.resolve would be nicer, but it won't resolve sync'ly.
+    const syncResolve = v => ({then: cb => cb(v)});
+
+    function mockExternalMessages(messageTemplates) {
+      win.fetch = () =>
+        syncResolve({json: () => syncResolve(messageTemplates)});
+
+      log.fetchExternalMessagesOnce_();
+    }
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('displays URL for assertString without messages', () => {
+      mockExternalMessages(null);
+      const notString = false;
+      expect(() => log.assertString(notString, ['a'])).to.throw(
+        /\?v=.+&id=a&s\[\]=false$/
+      );
+    });
+
+    it('expands message from table for assertString', () => {
+      mockExternalMessages({
+        'a': 'Foo: %s',
+        'foo': 'irrelevant',
+      });
+      const notString = false;
+      expect(() => log.assertString(notString, ['a'])).to.throw(/Foo: false/);
+    });
+
+    it('displays URL for assertNumber without messages', () => {
+      mockExternalMessages(null);
+      const notNumber = false;
+      expect(() => log.assertNumber(notNumber, ['x'])).to.throw(
+        /\?v=.+&id=x&s\[\]=false$/
+      );
+    });
+
+    it('expands message from table for assertNumber', () => {
+      mockExternalMessages({
+        'b': '%s Mundo',
+        'baz': 'tacos',
+      });
+      const notNumber = 'Hola';
+      expect(() => log.assertNumber(notNumber, ['b'])).to.throw(/Hola Mundo/);
+    });
+
+    it('displays URL for assertArray without messages', () => {
+      mockExternalMessages(null);
+      const notArray = 'xxx';
+      expect(() => log.assertArray(notArray, ['zzz'])).to.throw(
+        /\?v=.+&id=zzz&s\[\]=xxx$/
+      );
+    });
+
+    it('expands message from table for assertArray', () => {
+      mockExternalMessages({
+        'x': 'sas%s',
+        'baz': 'tacos',
+      });
+      const notArray = 'quatch';
+      expect(() => log.assertArray(notArray, ['x'])).to.throw(/sasquatch/);
+    });
+
+    it('displays URL for assertBoolean without messages', () => {
+      mockExternalMessages(null);
+      const notBoolean = 'bar';
+      expect(() => log.assertBoolean(notBoolean, ['lol'])).to.throw(
+        /\?v=.+&id=lol&s\[\]=bar$/
+      );
+    });
+
+    it('expands message from table for assertBoolean', () => {
+      mockExternalMessages({
+        'foo': '%s',
+        'baz': 'tacos',
+      });
+      const notBoolean = 'bar';
+      expect(() => log.assertBoolean(notBoolean, ['x'])).to.throw(/bar/);
+    });
+  });
+});

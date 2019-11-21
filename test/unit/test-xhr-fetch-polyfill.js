@@ -14,38 +14,33 @@
  * limitations under the License.
  */
 
-
 import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
 import {Services} from '../../src/services';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 
-describes.sandboxed('fetch', {}, () => {
-
+describes.sandboxed('fetch', {}, env => {
   describe('fetch method', () => {
     let xhrCreated;
 
     function setupMockXhr() {
-      const mockXhr = sandbox.useFakeXMLHttpRequest();
-      xhrCreated = new Promise(resolve => mockXhr.onCreate = resolve);
+      const mockXhr = env.sandbox.useFakeXMLHttpRequest();
+      xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
     }
 
     function mockOkResponse() {
-      xhrCreated.then(
-          xhr => xhr.respond(
-              200, {
-                'Content-Type': 'text/xml',
-                'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-              },
-              '<html></html>'));
+      xhrCreated.then(xhr =>
+        xhr.respond(
+          200,
+          {
+            'Content-Type': 'text/xml',
+          },
+          '<html></html>'
+        )
+      );
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       setupMockXhr();
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should allow GET method', () => {
@@ -69,42 +64,50 @@ describes.sandboxed('fetch', {}, () => {
 
     it('should not allow PUT method', () => {
       mockOkResponse();
-      return expect(fetchPolyfill('/post', {
-        method: 'PUT',
-        body: {
-          hello: 'world',
-        },
-      })).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
+      return expect(
+        fetchPolyfill('/post', {
+          method: 'PUT',
+          body: {
+            hello: 'world',
+          },
+        })
+      ).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
     });
 
     it('should not allow PATCH method', () => {
       mockOkResponse();
-      return expect(fetchPolyfill('/post', {
-        method: 'PATCH',
-        body: {
-          hello: 'world',
-        },
-      })).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
+      return expect(
+        fetchPolyfill('/post', {
+          method: 'PATCH',
+          body: {
+            hello: 'world',
+          },
+        })
+      ).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
     });
 
     it('should not allow DELETE method', () => {
       mockOkResponse();
-      return expect(fetchPolyfill('/post', {
-        method: 'DELETE',
-        body: {
-          hello: 'world',
-        },
-      })).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
+      return expect(
+        fetchPolyfill('/post', {
+          method: 'DELETE',
+          body: {
+            hello: 'world',
+          },
+        })
+      ).to.be.rejectedWith(/Only one of GET, POST is currently allowed./);
     });
 
     it('should allow FormData as body', () => {
       const fakeWin = null;
-      sandbox.stub(Services, 'platformFor').returns({
-        isIos() { return false; },
+      env.sandbox.stub(Services, 'platformFor').returns({
+        isIos() {
+          return false;
+        },
       });
 
       const formData = createFormDataWrapper(fakeWin);
-      sandbox.stub(JSON, 'stringify');
+      env.sandbox.stub(JSON, 'stringify');
       formData.append('name', 'John Miller');
       formData.append('age', 56);
       const post = fetchPolyfill.bind(this, '/post', {
@@ -175,13 +178,16 @@ describes.sandboxed('fetch', {}, () => {
       expect(response.status).to.be.equals(200);
     });
 
-    it('should default status as 200 OK when an explicit '
-        + 'for undefined status', () => {
-      let response = new Response(TEST_TEXT, {status: undefined});
-      expect(response.status).to.be.equals(200);
-      response = new Response(TEST_TEXT);
-      expect(response.status).to.be.equals(200);
-    });
+    it(
+      'should default status as 200 OK when an explicit ' +
+        'for undefined status',
+      () => {
+        let response = new Response(TEST_TEXT, {status: undefined});
+        expect(response.status).to.be.equals(200);
+        response = new Response(TEST_TEXT);
+        expect(response.status).to.be.equals(200);
+      }
+    );
 
     it('should construct with body and explicit header uses header', () => {
       const response = new Response(TEST_TEXT, {
@@ -191,10 +197,10 @@ describes.sandboxed('fetch', {}, () => {
         },
       });
       expect(response.status).to.be.equals(200);
-      expect(response.headers.get('content-type'))
-          .to.be.equal('application/json');
-      expect(response.headers.get('random'))
-          .to.be.equal('random-value');
+      expect(response.headers.get('content-type')).to.be.equal(
+        'application/json'
+      );
+      expect(response.headers.get('random')).to.be.equal('random-value');
     });
 
     it('should reflect given status', () => {
@@ -212,6 +218,13 @@ describes.sandboxed('fetch', {}, () => {
       expect(response.status).to.be.equals(500);
     });
 
+    it('should provide url', () => {
+      const response = new Response(TEST_TEXT, {
+        responseURL: 'https://foo.example',
+      });
+      expect(response.url).to.equal('https://foo.example');
+    });
+
     it('should provide text', () => {
       const response = new Response(TEST_TEXT);
       return response.text().then(result => {
@@ -223,8 +236,10 @@ describes.sandboxed('fetch', {}, () => {
       const response = new Response(TEST_TEXT);
       return response.text().then(result => {
         expect(result).to.equal(TEST_TEXT);
-        expect(response.text.bind(response), 'should throw').to.throw(Error,
-            /Body already used/);
+        expect(response.text.bind(response), 'should throw').to.throw(
+          Error,
+          /Body already used/
+        );
       });
     });
 
@@ -242,10 +257,7 @@ describes.sandboxed('fetch', {}, () => {
     it('should be cloneable and each instance should provide text', () => {
       const response = new Response(TEST_TEXT);
       const clone = response.clone();
-      return Promise.all([
-        response.text(),
-        clone.text(),
-      ]).then(results => {
+      return Promise.all([response.text(), clone.text()]).then(results => {
         expect(results[0]).to.equal(TEST_TEXT);
         expect(results[1]).to.equal(TEST_TEXT);
       });
@@ -253,13 +265,12 @@ describes.sandboxed('fetch', {}, () => {
 
     it('should not be cloneable if body is already accessed', () => {
       const response = new Response(TEST_TEXT);
-      return response.text()
-          .then(() => {
-            expect(() => response.clone(), 'should throw').to.throw(
-                Error,
-                /Body already used/);
-          });
+      return response.text().then(() => {
+        expect(() => response.clone(), 'should throw').to.throw(
+          Error,
+          /Body already used/
+        );
+      });
     });
   });
-
 });

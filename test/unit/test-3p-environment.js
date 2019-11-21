@@ -18,13 +18,9 @@ import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {loadPromise} from '../../src/event-helper';
-import {
-  manageWin,
-  setInViewportForTesting,
-} from '../../3p/environment';
+import {manageWin, setInViewportForTesting} from '../../3p/environment';
 
 describe('3p environment', () => {
-
   let testWin;
   let iframeCount;
   const timer = Services.timerFor(window);
@@ -106,11 +102,12 @@ describe('3p environment', () => {
     let clock;
     let progress;
 
-    function installTimer(win) {
+    beforeEach(() => {
       progress = '';
-      clock = lolex.install({target: win});
-      return clock;
-    }
+      // testWin is created before each test and destroyed when the iframe it
+      // comes from gets detached, causing bugs if we call clock.uninstall().
+      clock = lolex.install({target: testWin});
+    });
 
     function add(p) {
       return function(a, b) {
@@ -124,16 +121,7 @@ describe('3p environment', () => {
       };
     }
 
-    afterEach(() => {
-      if (clock) {
-        clock.tick(10000);
-        clock.uninstall();
-      }
-    });
-
-
     it('throttle setTimeout', () => {
-      installTimer(testWin);
       manageWin(testWin);
       testWin.setTimeout(add('a'), 50);
       testWin.setTimeout(add('b'), 60);
@@ -161,7 +149,6 @@ describe('3p environment', () => {
     });
 
     it('throttle setInterval', () => {
-      installTimer(testWin);
       manageWin(testWin);
       const ia = testWin.setInterval(add('a'), 1);
       testWin.setInterval(add('b'), 10);
@@ -176,12 +163,14 @@ describe('3p environment', () => {
       setInViewportForTesting(true);
       clock.tick(20);
       expect(progress).to.equal(
-          'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaaba');
+        'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaaba'
+      );
       testWin.clearInterval(ia);
       testWin.clearInterval(ic);
       clock.tick(20);
       expect(progress).to.equal(
-          'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaababb');
+        'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaababb'
+      );
       testWin.ran = false;
       testWin.setInterval('ran=true', 1);
       clock.tick(1);
@@ -190,7 +179,6 @@ describe('3p environment', () => {
     });
 
     it('should support multi arg forms', () => {
-      installTimer(testWin);
       manageWin(testWin);
       testWin.setTimeout(add('a'), 50, '!', '?');
       testWin.setTimeout(add('b'), 60, 'B');
@@ -200,7 +188,6 @@ describe('3p environment', () => {
     });
 
     it('should cancel uninstrumented timeouts', () => {
-      installTimer(testWin);
       const timeout = testWin.setTimeout(() => {
         throw new Error('should not happen: timeout');
       }, 0);
@@ -231,8 +218,11 @@ describe('3p environment', () => {
   }
 
   function waitForMutationObserver(iframe) {
-    if (iframe.contentWindow && iframe.contentWindow.document &&
-        iframe.contentWindow.document.body.childNodes.length) {
+    if (
+      iframe.contentWindow &&
+      iframe.contentWindow.document &&
+      iframe.contentWindow.document.body.childNodes.length
+    ) {
       return timer.promise(10);
     }
     return loadPromise(iframe).then(() => {
@@ -243,7 +233,7 @@ describe('3p environment', () => {
   function makeChildIframeSrcdoc(win) {
     const doc = win.document;
     const iframe = doc.createElement('iframe');
-    iframe.name = 'testChild' + (iframeCount++);
+    iframe.name = 'testChild' + iframeCount++;
     iframe.setAttribute('srcdoc', 'hello: ' + iframe.name);
     doc.body.appendChild(iframe);
     doc.body.appendChild(doc.createElement('hr'));
@@ -253,7 +243,7 @@ describe('3p environment', () => {
   function makeChildIframeDocWrite(win) {
     const doc = win.document;
     const iframe = doc.createElement('iframe');
-    iframe.name = 'testChild' + (iframeCount++);
+    iframe.name = 'testChild' + iframeCount++;
     iframe.src = 'about:blank';
     doc.body.appendChild(iframe);
     iframe.contentWindow.document.open();

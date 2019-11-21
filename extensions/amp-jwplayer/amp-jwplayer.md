@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a cloud-hosted JW Player.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -31,12 +32,12 @@ Displays a cloud-hosted <a href="https://www.jwplayer.com/">JW Player</a>.
     <td><code>&lt;script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-jwplayer/">Annotated code example for amp-jwplayer</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-jwplayer/">Annotated code example for amp-jwplayer</a></td>
   </tr>
 </table>
 
@@ -50,10 +51,12 @@ Example:
 
 ```html
 <amp-jwplayer
-    data-player-id="aBcD1234"
-    data-media-id="5678WxYz"
-    layout="responsive"
-    width="16" height="9">
+  data-player-id="aBcD1234"
+  data-media-id="5678WxYz"
+  layout="responsive"
+  width="16"
+  height="9"
+>
 </amp-jwplayer>
 ```
 
@@ -63,9 +66,11 @@ Example:
 
 ```html
 <amp-jwplayer
-    data-player-id="aBcD1234"
-    data-playlist-id="5678WxYz"
-    width="160" height="90">
+  data-player-id="aBcD1234"
+  data-playlist-id="5678WxYz"
+  width="160"
+  height="90"
+>
 </amp-jwplayer>
 ```
 
@@ -102,10 +107,10 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
-
 ## Validation
+
 See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/validator-amp-jwplayer.protoascii) in the AMP validator specification.

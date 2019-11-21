@@ -15,7 +15,7 @@
  * limitations under the license.
  */
 const globals = {};
-globals.amphtmlRegex = new RegExp('(^\s*)amphtml(\s*$)');
+globals.amphtmlRegex = new RegExp('(^\\s*)amphtml(\\s*$)');
 globals.ampCaches = [
   {
     'getAmpHref': function() {
@@ -30,7 +30,7 @@ globals.ampCaches = [
       }
     },
     'isAmpCache': function() {
-      return window.location.hostname.endsWith('cdn.ampproject.org');
+      return window.location.hostname.endsWith('cdn.ampproject.org'); // lgtm [js/incomplete-url-substring-sanitization]
     },
   },
 ];

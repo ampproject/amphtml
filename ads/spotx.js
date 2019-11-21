@@ -32,8 +32,8 @@ export function spotx(global, data) {
 
   data['spotx_content_width'] = data.spotx_content_width || data.width;
   data['spotx_content_height'] = data.spotx_content_height || data.height;
-  data['spotx_content_page_url'] = global.context.location.href ||
-      global.context.sourceUrl;
+  data['spotx_content_page_url'] =
+    global.context.location.href || global.context.sourceUrl;
 
   // Add data-* attribute for each data value passed in.
   for (const key in data) {

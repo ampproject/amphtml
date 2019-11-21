@@ -126,35 +126,64 @@ describe('BindValidator (allowUrlProperties=true)', () => {
     it('should NOT allow invalid "class" attribute values', () => {
       expect(val.isResultValid('DIV', 'class', 'foo')).to.be.true;
 
-      expect(val.isResultValid(
-          'DIV', 'class', 'i-amphtml-foo')).to.be.false;
-      expect(val.isResultValid(
-          'DIV', 'class', 'foo i-amphtml-bar')).to.be.false;
+      expect(val.isResultValid('DIV', 'class', 'i-amphtml-foo')).to.be.false;
+      expect(val.isResultValid('DIV', 'class', 'foo i-amphtml-bar')).to.be
+        .false;
     });
 
     it('should NOT sanitize "text" attribute values', () => {
       expect(val.isResultValid('P', 'text', 'Hello World')).to.be.true;
       expect(val.isResultValid('P', 'text', '')).to.be.true;
       expect(val.isResultValid('P', 'text', null)).to.be.true;
-      expect(val.isResultValid(
-          'P', 'text', '<script>alert(1);</script>')).to.be.true;
+      expect(val.isResultValid('P', 'text', '<script>alert(1);</script>')).to.be
+        .true;
     });
 
     it('should block dangerous attribute URLs in standard elements', () => {
-      expect(val.isResultValid('A', 'href',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
-      expect(val.isResultValid('A', 'href',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(
+        val.isResultValid(
+          'A',
+          'href',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)'
+        )
+      ).to.be.false;
+      expect(
+        val.isResultValid(
+          'A',
+          'href',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
 
-      expect(val.isResultValid('SOURCE', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
-      expect(val.isResultValid('SOURCE', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(
+        val.isResultValid(
+          'SOURCE',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)'
+        )
+      ).to.be.false;
+      expect(
+        val.isResultValid(
+          'SOURCE',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
 
-      expect(val.isResultValid('TRACK', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)')).to.be.false;
-      expect(val.isResultValid('TRACK', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(
+        val.isResultValid(
+          'TRACK',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)'
+        )
+      ).to.be.false;
+      expect(
+        val.isResultValid(
+          'TRACK',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
     });
 
     it('should NOT allow unsupported <input> "type" values', () => {
@@ -184,25 +213,39 @@ describe('BindValidator (allowUrlProperties=true)', () => {
     it('should support <amp-img>', () => {
       expect(val.canBind('AMP-IMG', 'src')).to.be.true;
 
-      expect(val.isResultValid(
-          'AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to.be.true;
-      expect(val.isResultValid('AMP-IMG', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
-      expect(val.isResultValid(
-          'AMP-IMG', 'src', '?__amp_source_origin=foo')).to.be.false;
-
-      expect(val.isResultValid(
-          'AMP-IMG',
-          'srcset',
-          'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x')).to.be.true;
-      expect(val.isResultValid(
-          'AMP-IMG',
-          'srcset',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1);')).to.be.false;
-      expect(val.isResultValid(
+      expect(val.isResultValid('AMP-IMG', 'src', 'http://foo.com/bar.jpg')).to
+        .be.true;
+      expect(
+        val.isResultValid(
           'AMP-IMG',
           'src',
-          'http://a.com/b.jpg 1x, ?__amp_source_origin=foo 2x')).to.be.false;
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
+      expect(val.isResultValid('AMP-IMG', 'src', '?__amp_source_origin=foo')).to
+        .be.false;
+
+      expect(
+        val.isResultValid(
+          'AMP-IMG',
+          'srcset',
+          'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x'
+        )
+      ).to.be.true;
+      expect(
+        val.isResultValid(
+          'AMP-IMG',
+          'srcset',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1);'
+        )
+      ).to.be.false;
+      expect(
+        val.isResultValid(
+          'AMP-IMG',
+          'src',
+          'http://a.com/b.jpg 1x, ?__amp_source_origin=foo 2x'
+        )
+      ).to.be.false;
     });
 
     it('should support <amp-carousel>', () => {
@@ -223,12 +266,12 @@ describe('BindValidator (allowUrlProperties=true)', () => {
     it('should support <amp-state>', () => {
       expect(val.canBind('AMP-STATE', 'src')).to.be.true;
 
-      expect(val.isResultValid(
-          'AMP-STATE', 'src', 'https://foo.com/bar.json')).to.be.true;
-      expect(val.isResultValid(
-          'AMP-STATE', 'src', 'http://foo.com/bar.json')).to.be.false;
-      expect(val.isResultValid(
-          'AMP-STATE', 'src', 'data://foo.com/bar.json')).to.be.false;
+      expect(val.isResultValid('AMP-STATE', 'src', 'https://foo.com/bar.json'))
+        .to.be.true;
+      expect(val.isResultValid('AMP-STATE', 'src', 'http://foo.com/bar.json'))
+        .to.be.false;
+      expect(val.isResultValid('AMP-STATE', 'src', 'data://foo.com/bar.json'))
+        .to.be.false;
     });
 
     it('should support <amp-video>', () => {
@@ -236,18 +279,28 @@ describe('BindValidator (allowUrlProperties=true)', () => {
       expect(val.canBind('AMP-VIDEO', 'poster')).to.be.true;
       expect(val.canBind('AMP-VIDEO', 'src')).to.be.true;
 
-      expect(val.isResultValid(
-          'AMP-VIDEO', 'src', 'https://foo.com/bar.mp4')).to.be.true;
-      expect(val.isResultValid(
-          'AMP-VIDEO', 'src', 'http://foo.com/bar.mp4')).to.be.false;
-      expect(val.isResultValid('AMP-VIDEO', 'src',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(val.isResultValid('AMP-VIDEO', 'src', 'https://foo.com/bar.mp4'))
+        .to.be.true;
+      expect(val.isResultValid('AMP-VIDEO', 'src', 'http://foo.com/bar.mp4')).to
+        .be.false;
+      expect(
+        val.isResultValid(
+          'AMP-VIDEO',
+          'src',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
     });
 
     it('should support (svg) image', () => {
       expect(val.canBind('IMAGE', 'xlink:href')).to.be.true;
-      expect(val.isResultValid('IMAGE', 'xlink:href',
-          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+      expect(
+        val.isResultValid(
+          'IMAGE',
+          'xlink:href',
+          /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;'
+        )
+      ).to.be.false;
     });
   });
 });
@@ -269,13 +322,16 @@ describe('BindValidator (allowUrlProperties=false)', () => {
 
   it('should not validate results of URL properties', () => {
     expect(val.isResultValid('A', 'href', 'https://google.com')).to.be.false;
-    expect(val.isResultValid('AMP-IMG', 'src', 'https://foo.com/bar.jpg'))
-        .to.be.false;
-    expect(val.isResultValid(
+    expect(val.isResultValid('AMP-IMG', 'src', 'https://foo.com/bar.jpg')).to.be
+      .false;
+    expect(
+      val.isResultValid(
         'AMP-IMG',
         'srcset',
-        'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x')).to.be.false;
+        'http://a.com/b.jpg 1x, http://c.com/d.jpg 2x'
+      )
+    ).to.be.false;
     expect(val.isResultValid('IMAGE', 'xlink:href', 'https://foo.com/bar.jpg'))
-        .to.be.false;
+      .to.be.false;
   });
 });

@@ -34,9 +34,10 @@ let animationHandler;
  * @param {!Function} cb
  */
 function getBodymovinAnimationSdk(global, renderer, cb) {
-  const scriptToLoad = renderer === 'svg' ?
-    'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js' :
-    'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
+  const scriptToLoad =
+    renderer === 'svg'
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
   loadScript(global, scriptToLoad, function() {
     cb(global.bodymovin);
   });
@@ -58,8 +59,9 @@ function parseMessage(event) {
     if (eventMessage['valueType'] === 'time') {
       animationHandler.goToAndStop(eventMessage['value']);
     } else {
-      const frameNumber =
-        Math.round(eventMessage['value'] * animationHandler.totalFrames);
+      const frameNumber = Math.round(
+        eventMessage['value'] * animationHandler.totalFrames
+      );
       animationHandler.goToAndStop(frameNumber, true);
     }
   }
@@ -89,11 +91,12 @@ export function bodymovinanimation(global) {
       autoplay: dataReceived['autoplay'],
       animationData: dataReceived['animationData'],
     });
-    const message = JSON.stringify(dict({
-      'action': 'ready',
-    }));
+    const message = JSON.stringify(
+      dict({
+        'action': 'ready',
+      })
+    );
     global.addEventListener('message', parseMessage, false);
-    global.parent. /*OK*/postMessage(message, '*');
+    global.parent./*OK*/ postMessage(message, '*');
   });
 }
-

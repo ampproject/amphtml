@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  AutoFullscreenManager,
-} from '../../src/service/video-manager-impl';
+import {AutoFullscreenManager} from '../../src/service/video-manager-impl';
 import {PlayingStates} from '../../src/video-interface';
 import {Services} from '../../src/services';
-
 
 describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   let ampdoc;
@@ -48,17 +45,17 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     autoFullscreenManager = new AutoFullscreenManager(ampdoc);
-    sandbox.stub(autoFullscreenManager, 'canFullscreen_').returns(true);
+    env.sandbox.stub(autoFullscreenManager, 'canFullscreen_').returns(true);
   });
 
   it('should enter fullscreen if a video is centered in portrait', () => {
     const video = createVideo();
     const entry = {video};
-    const enter = sandbox.stub(autoFullscreenManager, 'enter_');
+    const enter = env.sandbox.stub(autoFullscreenManager, 'enter_');
 
     mockCenteredVideo(video.element);
 
-    sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
+    env.sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
     autoFullscreenManager.register(entry);
     mockOrientation('landscape');
     autoFullscreenManager.onRotation_();
@@ -69,11 +66,11 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   it('should not enter fullscreen if no video is centered in portrait', () => {
     const video = createVideo();
     const entry = {video};
-    const enter = sandbox.stub(autoFullscreenManager, 'enter_');
+    const enter = env.sandbox.stub(autoFullscreenManager, 'enter_');
 
     mockCenteredVideo(null);
 
-    sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
+    env.sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
     autoFullscreenManager.register(entry);
     mockOrientation('landscape');
     autoFullscreenManager.onRotation_();
@@ -84,9 +81,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   it('should exit fullscreen on rotation', () => {
     const video = createVideo();
     const entry = {video};
-    const exit = sandbox.stub(autoFullscreenManager, 'exit_');
+    const exit = env.sandbox.stub(autoFullscreenManager, 'exit_');
 
-    sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
+    env.sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
     autoFullscreenManager.register(entry);
     autoFullscreenManager.currentlyInFullscreen_ = entry;
     mockOrientation('portrait');
@@ -98,9 +95,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   it('should not exit on rotation if no video was in fullscreen', () => {
     const video = createVideo();
     const entry = {video};
-    const exit = sandbox.stub(autoFullscreenManager, 'exit_');
+    const exit = env.sandbox.stub(autoFullscreenManager, 'exit_');
 
-    sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
+    env.sandbox.stub(autoFullscreenManager, 'selectBestCenteredInPortrait_');
     autoFullscreenManager.register(entry);
     autoFullscreenManager.currentlyInFullscreen_ = null;
     mockOrientation('portrait');
@@ -114,12 +111,12 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     const video2 = createVideo();
     const video3 = createVideo();
 
-    sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
+    env.sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
       width: 1000,
       height: 1000,
     });
 
-    sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -129,7 +126,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         height: 200,
       },
     });
-    sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -139,7 +136,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         height: 200,
       },
     });
-    sandbox.stub(video3.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video3.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -150,8 +147,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const getPlayingState =
-      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
+    const getPlayingState = env.sandbox.stub(
+      autoFullscreenManager,
+      'getPlayingState_'
+    );
 
     getPlayingState.withArgs(video1).returns(PlayingStates.PAUSED);
     getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_AUTO);
@@ -161,8 +160,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video3);
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
+      video3
+    );
   });
 
   it('selects center-most video among those visible and playing', () => {
@@ -170,12 +170,12 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     const video2 = createVideo();
     const video3 = createVideo();
 
-    sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
+    env.sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
       width: 1000,
       height: 600,
     });
 
-    sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -185,7 +185,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         height: 200,
       },
     });
-    sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -195,7 +195,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         height: 200,
       },
     });
-    sandbox.stub(video3.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video3.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -206,8 +206,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const getPlayingState =
-      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
+    const getPlayingState = env.sandbox.stub(
+      autoFullscreenManager,
+      'getPlayingState_'
+    );
 
     getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
     getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
@@ -217,20 +219,21 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video2);
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
+      video2
+    );
   });
 
   it('selects top-most video if two videos are equally centered', () => {
     const video1 = createVideo();
     const video2 = createVideo();
 
-    sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
+    env.sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
       width: 1000,
       height: 400,
     });
 
-    sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -240,7 +243,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         height: 200,
       },
     });
-    sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -251,8 +254,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const getPlayingState =
-      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
+    const getPlayingState = env.sandbox.stub(
+      autoFullscreenManager,
+      'getPlayingState_'
+    );
 
     getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
     getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
@@ -260,20 +265,21 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video1);
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
+      video1
+    );
   });
 
   it('selects the highest intersection ratio if two videos are visible', () => {
     const video1 = createVideo();
     const video2 = createVideo();
 
-    sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
+    env.sandbox.stub(Services.viewportForDoc(ampdoc), 'getSize').returns({
       width: 1000,
       height: 400,
     });
 
-    sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video1.element, 'getIntersectionChangeEntry').returns({
       intersectionRatio: 0.9,
       boundingClientRect: {
         top: -30,
@@ -282,7 +288,7 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
         height: 200,
       },
     });
-    sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
+    env.sandbox.stub(video2.element, 'getIntersectionChangeEntry').returns({
       // Visible:
       intersectionRatio: 1,
       boundingClientRect: {
@@ -293,8 +299,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const getPlayingState =
-      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
+    const getPlayingState = env.sandbox.stub(
+      autoFullscreenManager,
+      'getPlayingState_'
+    );
 
     getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
     getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
@@ -302,7 +310,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video2);
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
+      video2
+    );
   });
 });

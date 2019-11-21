@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {PositionObserver} from '../../../ads/inabox/position-observer';
+import {
+  PositionObserver,
+  getPositionObserver,
+} from '../../../ads/inabox/position-observer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
-
   let win;
   let observer;
   let target1;
@@ -61,9 +63,9 @@ describes.realWin('inabox-host:position-observer', {}, env => {
       viewportRect: layoutRectLtwh(0, 0, 200, 300),
       targetRect: layoutRectLtwh(3, 4, 30, 40),
     };
-    const callbackSpy11 = sandbox.stub();
-    const callbackSpy12 = sandbox.stub();
-    const callbackSpy21 = sandbox.stub();
+    const callbackSpy11 = env.sandbox.stub();
+    const callbackSpy12 = env.sandbox.stub();
+    const callbackSpy21 = env.sandbox.stub();
     observer.observe(target1, callbackSpy11);
     expect(callbackSpy11).to.be.calledWith(position1);
     observer.observe(target1, callbackSpy12);
@@ -103,7 +105,16 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     iframe1.getBoundingClientRect = () => layoutRectLtwh(1, 2, 70, 80);
     iframe2.getBoundingClientRect = () => layoutRectLtwh(5, 6, 30, 40);
     iframe3.getBoundingClientRect = () => layoutRectLtwh(7, 8, 10, 20);
-    expect(observer.getTargetRect(element))
-        .to.deep.equal(layoutRectLtwh(14, 18, 30, 40));
+    expect(observer.getTargetRect(element)).to.deep.equal(
+      layoutRectLtwh(14, 18, 30, 40)
+    );
+  });
+
+  it('should get existing observer', () => {
+    const observer1 = getPositionObserver(win);
+    const observer2 = getPositionObserver(win);
+    const observer3 = new PositionObserver(win);
+    expect(observer1).to.equal(observer2);
+    expect(observer2).to.not.equal(observer3);
   });
 });

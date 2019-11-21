@@ -17,29 +17,19 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {Services} from '../../src/services';
-import {
-  installActivityServiceForTesting,
-} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {
-  installViewportServiceForDoc,
-} from '../../src/service/viewport/viewport-impl';
+import {installViewportServiceForDoc} from '../../src/service/viewport/viewport-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
-import {
-  markElementScheduledForTesting,
-} from '../../src/service/custom-element-registry';
+import {markElementScheduledForTesting} from '../../src/service/custom-element-registry';
 
 describe('Activity getTotalEngagedTime', () => {
-
-  let sandbox;
   let clock;
   let fakeDoc;
   let fakeWin;
   let ampdoc;
-  let viewer;
   let viewport;
   let activity;
   let whenFirstVisibleResolve;
@@ -48,8 +38,7 @@ describe('Activity getTotalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
 
     // start at something other than 0
     clock.tick(123456);
@@ -85,7 +74,7 @@ describe('Activity getTotalEngagedTime', () => {
     };
 
     fakeWin = {
-      services: {},
+      __AMP_SERVICES: {},
       document: fakeDoc,
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
@@ -102,30 +91,33 @@ describe('Activity getTotalEngagedTime', () => {
     fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
-    fakeWin.services['ampdoc'] = {obj: {
-      getAmpDoc: () => ampdoc,
-      isSingleDoc: () => true,
-    }};
+    fakeWin.__AMP_SERVICES['ampdoc'] = {
+      obj: {
+        getAmpDoc: () => ampdoc,
+        isSingleDoc: () => true,
+        getSingleDoc: () => ampdoc,
+      },
+    };
 
-    installDocumentStateService(fakeWin);
     installTimerService(fakeWin);
     installVsyncService(fakeWin);
     installPlatformService(fakeWin);
     installViewerServiceForDoc(ampdoc);
-    viewer = Services.viewerForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
     });
-    sandbox.stub(viewer, 'whenFirstVisible').returns(whenFirstVisiblePromise);
-    sandbox.stub(viewer, 'onVisibilityChanged').callsFake(handler => {
-      visibilityObservable.add(handler);
+    window.sandbox
+      .stub(ampdoc, 'whenFirstVisible')
+      .returns(whenFirstVisiblePromise);
+    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
+      return visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    sandbox.stub(viewport, 'onScroll').callsFake(handler => {
+    window.sandbox.stub(viewport, 'onScroll').callsFake(handler => {
       scrollObservable.add(handler);
     });
 
@@ -137,22 +129,13 @@ describe('Activity getTotalEngagedTime', () => {
     });
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  it('should use the stubbed viewer in tests', () => {
-    return expect(activity.viewer_).to.equal(viewer);
-  });
-
   it('should have 0 engaged time if there is no activity', () => {
     return expect(activity.getTotalEngagedTime()).to.equal(0);
   });
 
-  it('should have 5 seconds of engaged time after viewer becomes' +
-     ' visible', () => {
+  it('should have 5 seconds of engaged time after doc becomes visible', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(10000);
       return expect(activity.getTotalEngagedTime()).to.equal(5);
     });
@@ -160,7 +143,7 @@ describe('Activity getTotalEngagedTime', () => {
 
   it('should have 4 seconds of engaged time 4 seconds after visible', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(4000);
       return expect(activity.getTotalEngagedTime()).to.equal(4);
     });
@@ -168,7 +151,7 @@ describe('Activity getTotalEngagedTime', () => {
 
   it('should have 10 seconds of engaged time', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(6000);
       mousedownObservable.fire();
       clock.tick(20000);
@@ -178,7 +161,7 @@ describe('Activity getTotalEngagedTime', () => {
 
   it('should have the same engaged time in separate requests', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(3456);
       mousedownObservable.fire();
       clock.tick(10232);
@@ -189,9 +172,11 @@ describe('Activity getTotalEngagedTime', () => {
   });
 
   it('should not accumulate engaged time after inactivity', () => {
-    const isVisibleStub = sandbox.stub(viewer, 'isVisible').returns(true);
+    const isVisibleStub = window.sandbox
+      .stub(ampdoc, 'isVisible')
+      .returns(true);
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(3000);
       mousedownObservable.fire();
       clock.tick(1000);
@@ -204,7 +189,7 @@ describe('Activity getTotalEngagedTime', () => {
 
   it('should accumulate engaged time over multiple activities', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(10000);
       mousedownObservable.fire();
       clock.tick(10000);
@@ -216,38 +201,51 @@ describe('Activity getTotalEngagedTime', () => {
     });
   });
 
-  it('should set event listeners on the document for' +
-     ' "mousedown", "mouseup", "mousemove", "keyup", "keydown"', () => {
-    const addEventListenerSpy = sandbox.spy(fakeDoc, 'addEventListener');
-    expect(addEventListenerSpy).to.not.have.been.calledWith('mousedown',
-        activity.boundHandleActivity_);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('mouseup',
-        activity.boundHandleActivity_);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('mousemove',
-        activity.boundHandleActivity_);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('keydown',
-        activity.boundHandleActivity_);
-    expect(addEventListenerSpy).to.not.have.been.calledWith('keyup',
-        activity.boundHandleActivity_);
-    whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
-      expect(addEventListenerSpy.getCall(0).args[0]).to.equal('mousedown');
-      expect(addEventListenerSpy.getCall(1).args[0]).to.equal('mouseup');
-      expect(addEventListenerSpy.getCall(2).args[0]).to.equal('mousemove');
-      expect(addEventListenerSpy.getCall(3).args[0]).to.equal('keydown');
-      expect(addEventListenerSpy.getCall(4).args[0]).to.equal('keyup');
-    });
-  });
+  it(
+    'should set event listeners on the document for' +
+      ' "mousedown", "mouseup", "mousemove", "keyup", "keydown"',
+    () => {
+      const addEventListenerSpy = window.sandbox.spy(
+        fakeDoc,
+        'addEventListener'
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'mousedown',
+        activity.boundHandleActivity_
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'mouseup',
+        activity.boundHandleActivity_
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'mousemove',
+        activity.boundHandleActivity_
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'keydown',
+        activity.boundHandleActivity_
+      );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'keyup',
+        activity.boundHandleActivity_
+      );
+      whenFirstVisibleResolve();
+      return ampdoc.whenFirstVisible().then(() => {
+        expect(addEventListenerSpy.getCall(0).args[0]).to.equal('mousedown');
+        expect(addEventListenerSpy.getCall(1).args[0]).to.equal('mouseup');
+        expect(addEventListenerSpy.getCall(2).args[0]).to.equal('mousemove');
+        expect(addEventListenerSpy.getCall(3).args[0]).to.equal('keydown');
+        expect(addEventListenerSpy.getCall(4).args[0]).to.equal('keyup');
+      });
+    }
+  );
 });
 
 describe('Activity getIncrementalEngagedTime', () => {
-
-  let sandbox;
   let clock;
   let fakeDoc;
   let fakeWin;
   let ampdoc;
-  let viewer;
   let viewport;
   let activity;
   let whenFirstVisibleResolve;
@@ -256,8 +254,7 @@ describe('Activity getIncrementalEngagedTime', () => {
   let scrollObservable;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
 
     // start at something other than 0
     clock.tick(123456);
@@ -293,7 +290,7 @@ describe('Activity getIncrementalEngagedTime', () => {
     };
 
     fakeWin = {
-      services: {},
+      __AMP_SERVICES: {},
       document: fakeDoc,
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
@@ -310,30 +307,33 @@ describe('Activity getIncrementalEngagedTime', () => {
     fakeDoc.head.defaultView = fakeWin;
 
     ampdoc = new AmpDocSingle(fakeWin);
-    fakeWin.services['ampdoc'] = {obj: {
-      getAmpDoc: () => ampdoc,
-      isSingleDoc: () => true,
-    }};
+    fakeWin.__AMP_SERVICES['ampdoc'] = {
+      obj: {
+        getAmpDoc: () => ampdoc,
+        isSingleDoc: () => true,
+        getSingleDoc: () => ampdoc,
+      },
+    };
 
-    installDocumentStateService(fakeWin);
     installTimerService(fakeWin);
     installVsyncService(fakeWin);
     installPlatformService(fakeWin);
     installViewerServiceForDoc(ampdoc);
-    viewer = Services.viewerForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
     });
-    sandbox.stub(viewer, 'whenFirstVisible').returns(whenFirstVisiblePromise);
-    sandbox.stub(viewer, 'onVisibilityChanged').callsFake(handler => {
-      visibilityObservable.add(handler);
+    window.sandbox
+      .stub(ampdoc, 'whenFirstVisible')
+      .returns(whenFirstVisiblePromise);
+    window.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
+      return visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    sandbox.stub(viewport, 'onScroll').callsFake(handler => {
+    window.sandbox.stub(viewport, 'onScroll').callsFake(handler => {
       scrollObservable.add(handler);
     });
 
@@ -345,28 +345,25 @@ describe('Activity getIncrementalEngagedTime', () => {
     });
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  it('should have 0 seconds of incremental engaged ' +
-  'time with no activity', () => {
+  it('should have 0 seconds of incremental engaged time with no activity', () => {
     return expect(activity.getIncrementalEngagedTime('tests')).to.equal(0);
   });
 
-  it('should have 5 seconds of incremental engaged time after viewer ' +
-    'becomes visible', () => {
-    whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
-      clock.tick(10000);
-      return expect(activity.getIncrementalEngagedTime('tests')).to.equal(5);
-    });
-  });
+  it(
+    'should have 5 seconds of incremental engaged time after doc ' +
+      'becomes visible',
+    () => {
+      whenFirstVisibleResolve();
+      return ampdoc.whenFirstVisible().then(() => {
+        clock.tick(10000);
+        return expect(activity.getIncrementalEngagedTime('tests')).to.equal(5);
+      });
+    }
+  );
 
-  it('should have 4 seconds of incremental engaged time after 4' +
-  ' seconds', () => {
+  it('should have 4 seconds of incremental engaged time after 4 seconds', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(4000);
       return expect(activity.getIncrementalEngagedTime('tests')).to.equal(4);
     });
@@ -374,7 +371,7 @@ describe('Activity getIncrementalEngagedTime', () => {
 
   it('should reset incremental engaged time after each poll', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(10000);
       mousedownObservable.fire();
       const first = activity.getIncrementalEngagedTime('tests');
@@ -390,7 +387,7 @@ describe('Activity getIncrementalEngagedTime', () => {
 
   it('should not reset incremental engaged time if reset is false', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       // don't reset
       mousedownObservable.fire();
       clock.tick(10000);
@@ -421,7 +418,7 @@ describe('Activity getIncrementalEngagedTime', () => {
 
   it('should keep individual incremental engaged times per name', () => {
     whenFirstVisibleResolve();
-    return viewer.whenFirstVisible().then(() => {
+    return ampdoc.whenFirstVisible().then(() => {
       clock.tick(10000);
       mousedownObservable.fire();
       const alpha = activity.getIncrementalEngagedTime('alpha');

@@ -21,43 +21,50 @@ import {openWindowDialog} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
 // Popup options
-const POP = 'status=no,resizable=yes,scrollbars=yes,' +
+const POP =
+  'status=no,resizable=yes,scrollbars=yes,' +
   'personalbar=no,directories=no,location=no,toolbar=no,' +
   'menubar=no,width=900,height=500,left=0,top=0';
 
 /**
  * Pinterest Save Button
- * @attr data-url: the source url for the Pin
- * @attr data-media: the url of the Pin image/media
- * @attr data-description: the description of the Pin
+ * data-url: the source url for the Pin
+ * data-media: the url of the Pin image/media
+ * data-description: the description of the Pin
  *
  * OPTIONAL
- * @attr data-color: the button color from [red, white, gray]
- * @attr data-count: the position of the Pin count from [beside, above]
- * @attr data-lang:  the language of the button from [en, ja]
- * @attr data-round: should the button be round (true if set)
- * @attr data-tall:  should the button be tall  (true if set)
+ * data-color: the button color from [red, white, gray]
+ * data-count: the position of the Pin count from [beside, above]
+ * data-lang:  the language of the button from [en, ja]
+ * data-round: should the button be round (true if set)
+ * data-tall:  should the button be tall  (true if set)
  */
 export class SaveButton {
-
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    userAssert(rootElement.getAttribute('data-url'),
-        'The data-url attribute is required for Save buttons');
-    userAssert(rootElement.getAttribute('data-media'),
-        'The data-media attribute is required for Save buttons');
-    userAssert(rootElement.getAttribute('data-description'),
-        'The data-description attribute is required for Save buttons');
+    userAssert(
+      rootElement.getAttribute('data-url'),
+      'The data-url attribute is required for Save buttons'
+    );
+    userAssert(
+      rootElement.getAttribute('data-media'),
+      'The data-media attribute is required for Save buttons'
+    );
+    userAssert(
+      rootElement.getAttribute('data-description'),
+      'The data-description attribute is required for Save buttons'
+    );
     this.element = rootElement;
     this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
     this.color = rootElement.getAttribute('data-color');
     this.count = rootElement.getAttribute('data-count');
     this.lang = rootElement.getAttribute('data-lang');
-    const hasOneToOneDimensions = rootElement.hasAttribute('height') &&
+    const hasOneToOneDimensions =
+      rootElement.hasAttribute('height') &&
       rootElement.hasAttribute('width') &&
       rootElement.getAttribute('height') === rootElement.getAttribute('width');
-    this.round = rootElement.getAttribute('data-round') ||
-      hasOneToOneDimensions;
+    this.round =
+      rootElement.getAttribute('data-round') || hasOneToOneDimensions;
     this.tall = rootElement.getAttribute('data-tall');
     this.description = rootElement.getAttribute('data-description');
     /** @type {?string} */
@@ -84,9 +91,7 @@ export class SaveButton {
    */
   fetchCount() {
     const url = `https://widgets.pinterest.com/v1/urls/count.json?return_jsonp=false&url=${this.url}`;
-    return this.xhr.fetchJson(url, {
-      requireAmpResponseSourceOrigin: false,
-    }).then(res => res.json());
+    return this.xhr.fetchJson(url, {}).then(res => res.json());
   }
 
   /**
@@ -117,10 +122,12 @@ export class SaveButton {
    */
   renderCount(count, heightClass) {
     Util.log('&type=pidget&button_count=1');
-    return Util.make(this.element.ownerDocument, {'span': {
-      class: `-amp-pinterest-bubble-${this.count}${heightClass}`,
-      textContent: this.formatPinCount(count),
-    }});
+    return Util.make(this.element.ownerDocument, {
+      'span': {
+        class: `-amp-pinterest-bubble-${this.count}${heightClass}`,
+        textContent: this.formatPinCount(count),
+      },
+    });
   }
 
   /**
@@ -151,11 +158,13 @@ export class SaveButton {
       }
     }
 
-    const saveButton = Util.make(this.element.ownerDocument, {'a': {
-      class: clazz.join(' '),
-      href: this.href,
-      textContent: this.round ? '' : (this.lang === 'ja' ? '保存' : 'Save'),
-    }});
+    const saveButton = Util.make(this.element.ownerDocument, {
+      'a': {
+        class: clazz.join(' '),
+        href: this.href,
+        textContent: this.round ? '' : this.lang === 'ja' ? '保存' : 'Save',
+      },
+    });
 
     if (countBubble) {
       saveButton.appendChild(countBubble);

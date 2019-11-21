@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-export const KRUX_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const KRUX_CONFIG = jsonLiteral({
   'requests': {
     'beaconHost': 'https://beacon.krxd.net',
-    'timing': 't_navigation_type=0&' +
+    'timing':
+      't_navigation_type=0&' +
       't_dns=${domainLookupTime}&' +
       't_tcp=${tcpConnectTime}&' +
       't_http_request=${serverResponseTime}&' +
@@ -25,7 +28,8 @@ export const KRUX_CONFIG = /** @type {!JsonObject} */ ({
       't_content_ready=${contentLoadTime}&' +
       't_window_load=${pageLoadTime}&' +
       't_redirect=${redirectTime}',
-    'common': 'source=amp&' +
+    'common':
+      'source=amp&' +
       'confid=${confid}&' +
       '_kpid=${pubid}&' +
       '_kcp_s=${site}&' +
@@ -50,3 +54,5 @@ export const KRUX_CONFIG = /** @type {!JsonObject} */ ({
     'page.': '_kpa_',
   },
 });
+
+export {KRUX_CONFIG};

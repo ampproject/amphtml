@@ -19,7 +19,6 @@ import {
   domFingerprintPlain,
 } from '../../../src/utils/dom-fingerprint';
 
-
 describes.realWin('domFingerprint', {}, env => {
   let body;
   let div1;
@@ -32,8 +31,7 @@ describes.realWin('domFingerprint', {}, env => {
     body.textContent = '';
     div1 = doc.createElement('div');
     div1.id = 'id1';
-    div1.innerHTML =
-      `<div id='id2'>
+    div1.innerHTML = `<div id='id2'>
          <table>                <!-- table:0 -->
            <tr>                 <!-- tr:0 -->
              <td></td>          <!-- td:0 -->
@@ -51,7 +49,8 @@ describes.realWin('domFingerprint', {}, env => {
 
   it('should map a sample DOM structure to the right string', () => {
     expect(domFingerprintPlain(ampAd)).to.equal(
-        'amp-ad.0,td.1,tr.0,tbody.0,table.0,div/id2.0,div/id1.0,body.0,html.0');
+      'amp-ad.0,td.1,tr.0,tbody.0,table.0,div/id2.0,div/id1.0,body.0,html.0'
+    );
   });
 
   it('should map a sample DOM structure to the right hashed value', () => {

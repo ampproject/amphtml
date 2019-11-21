@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {Action, getStoreService} from '../amp-story-store-service';
 import {AdvancementMode} from '../story-analytics';
-import {AmpStoryVariableService} from '../variable-service';
-import {StateChangeType} from '../navigation-state';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
 
-
-describes.fakeWin('amp-story variable service', {}, () => {
+describes.fakeWin('amp-story variable service', {}, env => {
   let variableService;
+  let storeService;
 
   beforeEach(() => {
-    variableService = new AmpStoryVariableService();
+    variableService = getVariableService(env.win);
+    storeService = getStoreService(env.win);
   });
 
   it('should update pageIndex and pageId on change', () => {
-    variableService.onNavigationStateChange({
-      type: StateChangeType.ACTIVE_PAGE,
-      value: {
-        pageIndex: 123,
-        pageId: 'my-page-id',
-      },
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'my-page-id',
+      index: 123,
     });
 
     const variables = variableService.get();
@@ -40,8 +39,10 @@ describes.fakeWin('amp-story variable service', {}, () => {
   });
 
   it('should update storyAdvancementMode on change', () => {
-    variableService
-        .onAdvancementModeStateChange(AdvancementMode.MANUAL_ADVANCE);
+    variableService.onVariableUpdate(
+      AnalyticsVariable.STORY_ADVANCEMENT_MODE,
+      AdvancementMode.MANUAL_ADVANCE
+    );
 
     const variables = variableService.get();
     expect(variables['storyAdvancementMode']).to.equal('manualAdvance');

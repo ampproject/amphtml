@@ -25,7 +25,6 @@ export const GrantReason = {
  * The single entitlement object.
  */
 export class Entitlement {
-
   /**
    * @param {string} service
    * @return {!Entitlement}
@@ -47,9 +46,17 @@ export class Entitlement {
    * @param {boolean} [input.granted]
    * @param {?GrantReason} [input.grantReason]
    * @param {?JsonObject} [input.dataObject]
+   * @param {?string} [input.decryptedDocumentKey]
    */
-  constructor({source, raw = '', service, granted = false,
-    grantReason = '', dataObject}) {
+  constructor({
+    source,
+    raw = '',
+    service,
+    granted = false,
+    grantReason = '',
+    dataObject,
+    decryptedDocumentKey,
+  }) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -62,6 +69,8 @@ export class Entitlement {
     this.grantReason = grantReason;
     /** @const {?JsonObject} */
     this.data = dataObject;
+    /** @const {?string} */
+    this.decryptedDocumentKey = decryptedDocumentKey;
   }
 
   /**
@@ -76,7 +85,7 @@ export class Entitlement {
       'grantReason': this.grantReason,
       'data': this.data,
     });
-    return (entitlementJson);
+    return entitlementJson;
   }
 
   /**
@@ -85,9 +94,11 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   jsonForPingback() {
-    return /** @type {!JsonObject} */ (Object.assign({},
-        {'raw': this.raw},
-        this.json()));
+    return /** @type {!JsonObject} */ (Object.assign(
+      {},
+      {'raw': this.raw},
+      this.json()
+    ));
   }
 
   /**
@@ -104,8 +115,16 @@ export class Entitlement {
     const granted = json['granted'] || false;
     const grantReason = json['grantReason'];
     const dataObject = json['data'] || null;
-    return new Entitlement({source, raw, service: '',
-      granted, grantReason, dataObject});
+    const decryptedDocumentKey = json['decryptedDocumentKey'] || null;
+    return new Entitlement({
+      source,
+      raw,
+      service: '',
+      granted,
+      grantReason,
+      dataObject,
+      decryptedDocumentKey,
+    });
   }
 
   /**

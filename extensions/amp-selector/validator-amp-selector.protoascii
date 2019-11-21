@@ -21,7 +21,7 @@ tags: {
     name: "amp-selector"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -32,9 +32,9 @@ tags: {
   spec_name: "SCRIPT[custom-element=amp-selector] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-selector"
+    # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
-    version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -109,7 +109,7 @@ tags: {
     name: "selected"
     value: ""
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-selector"
+  spec_url: "https://amp.dev/documentation/components/amp-selector"
 }
 tags: {
   html_format: AMP

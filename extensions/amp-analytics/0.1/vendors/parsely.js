@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-export const PARSELY_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const PARSELY_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://srv.pixel.parsely.com',
-    'basePrefix': '${host}/plogger/?' +
+    'basePrefix':
+      '${host}/plogger/?' +
       'rand=${timestamp}&' +
       'idsite=${apikey}&' +
       'url=${ampdocUrl}&' +
       'urlref=${documentReferrer}&' +
       'screen=${screenWidth}x${screenHeight}%7C' +
-        '${availableScreenWidth}x${availableScreenHeight}%7C' +
-        '${screenColorDepth}&' +
+      '${availableScreenWidth}x${availableScreenHeight}%7C' +
+      '${screenColorDepth}&' +
       'title=${title}&' +
       'date=${timestamp}&' +
       'ampid=${clientId(_parsely_visitor)}',
-    'pageview': '${basePrefix}&action=pageview&metadata=' +
-    '{\"canonical_url\":\"${canonicalUrl}\"}',
-    'heartbeat': '${basePrefix}&action=heartbeat' +
-    '&tt=${totalEngagedTime}&inc=${incrementalEngagedTime(parsely-js)}',
+    'pageview':
+      '${basePrefix}&action=pageview&metadata=' +
+      '{"canonical_url":"${canonicalUrl}"}',
+    'heartbeat':
+      '${basePrefix}&action=heartbeat' +
+      '&tt=${totalEngagedTime}&inc=${incrementalEngagedTime(parsely-js)}',
   },
   'triggers': {
     'defaultPageview': {
@@ -54,3 +59,5 @@ export const PARSELY_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {PARSELY_CONFIG};

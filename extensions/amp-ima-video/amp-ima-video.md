@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds a video player for instream video ads that are integrated with the IMA SDK.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -35,12 +36,12 @@ the
     <td><code>&lt;script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fixed, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
   </tr>
 </table>
 
@@ -53,24 +54,34 @@ VAST-compliant ad response (for examples, see
 [IMA Sample Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/tags)).
 
 The component HTML accepts the following types of HTML nodes as children:
-* `source` tags for content video, used in the same way as the standard `video` tag.
-* `track` tags for subtitles, in the same way as the standard `video` tag.
-* a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/apis#ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
+
+- `source` tags for content video, used in the same way as the standard `video` tag.
+- `track` tags for subtitles, in the same way as the standard `video` tag. If the track is hosted on a different origin than the document, you must add the `data-crossorigin` attribute to the `<amp-ima-video>` tag.
+- a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/apis#ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
 
 ## Example
 
 ```html
 <amp-ima-video
-    width=640 height=360 layout="responsive"
-    data-tag="ads.xml" data-poster="poster.png">
-  <source src="foo.mp4" type="video/mp4">
-  <source src="foo.webm" type="video/webm">
-  <track label="English subtitles" kind="subtitles" srclang="en" src="subtitles.vtt">
+  width="640"
+  height="360"
+  layout="responsive"
+  data-tag="ads.xml"
+  data-poster="poster.png"
+>
+  <source src="foo.mp4" type="video/mp4" />
+  <source src="foo.webm" type="video/webm" />
+  <track
+    label="English subtitles"
+    kind="subtitles"
+    srclang="en"
+    src="subtitles.vtt"
+  />
   <script type="application/json">
-  {
-    "locale": "en",
-    "numRedirects": 4
-  }
+    {
+      "locale": "en",
+      "numRedirects": 4
+    }
   </script>
 </amp-ima-video>
 ```
@@ -85,6 +96,10 @@ The component HTML accepts the following types of HTML nodes as children:
   <tr>
     <td width="40%"><strong>data-src</strong></td>
     <td>The URL of your video content. A relative URL or a URL that uses https protocol. This attribute is required if no <code>&lt;source&gt;</code> children are present.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-crossorigin</strong></td>
+    <td>Required if a <code>track</code> resource is hosted on a different origin than the document.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-poster (optional)</strong></td>
@@ -102,16 +117,15 @@ default, the first frame is displayed.</td>
   <tr>
     <td width="40%"><strong>dock</strong></td>
     <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
-    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
+    For more details, see <a href="https://amp.dev/documentation/components/amp-video-docking">documentation on the docking extension itself.</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes
-<a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a>
+<a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a>
 extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

@@ -37,5 +37,5 @@ tags: {  # <amp-riddle-quiz>
   amp_layout: {
       supported_layouts: RESPONSIVE
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-riddle-quiz"
+  spec_url: "https://amp.dev/documentation/components/amp-riddle-quiz"
 }

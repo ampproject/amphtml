@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-export const UPSCORE_CONFIG = /**@type {!JsonObject} */({
+import {jsonLiteral} from '../../../../src/json';
+
+const UPSCORE_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://hit-pool.upscore.com/amp?',
-    'basePrefix': 'u_id=${clientId(upscore)}&' +
-            'hit_id=${pageViewId}&' +
-            'scTop=${scrollTop}&' +
-            'scHeight=${scrollHeight}&' +
-            'vHeight=${viewportHeight}&' +
-            'domain=${domain}&' +
-            'load=${domInteractiveTime}&' +
-            'timespent=${totalEngagedTime}',
-    'initialHit': 'author=${author}&' +
-            'creator=${creator}&' +
-            'o_id=${object_id}&' +
-            'o_type=${object_type}&' +
-            'pubdate=${pubdate}&' +
-            'ref=${documentReferrer}&' +
-            'section=${section}&' +
-            'url=${ampdocUrl}&' +
-            'agent=${userAgent}&' +
-            'location=${ampGeo(ISOCountry)}',
+    'basePrefix':
+      'u_id=${clientId(upscore)}&' +
+      'hit_id=${pageViewId}&' +
+      'scTop=${scrollTop}&' +
+      'scHeight=${scrollHeight}&' +
+      'vHeight=${viewportHeight}&' +
+      'domain=${domain}&' +
+      'load=${domInteractiveTime}&' +
+      'timespent=${totalEngagedTime}',
+    'initialHit':
+      'author=${author}&' +
+      'creator=${creator}&' +
+      'o_id=${object_id}&' +
+      'o_type=${object_type}&' +
+      'pubdate=${pubdate}&' +
+      'ref=${documentReferrer}&' +
+      'section=${section}&' +
+      'url=${ampdocUrl}&' +
+      'agent=${userAgent}&' +
+      'location=${ampGeo(ISOCountry)}',
     'finalbeat': '${host}${basePrefix}&type=final',
     'heartbeat': '${host}${basePrefix}&type=pulse',
     'pageview': '${host}${basePrefix}&${initialHit}&type=init',
@@ -69,3 +73,5 @@ export const UPSCORE_CONFIG = /**@type {!JsonObject} */({
     'image': false,
   },
 });
+
+export {UPSCORE_CONFIG};

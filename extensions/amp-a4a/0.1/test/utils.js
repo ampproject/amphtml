@@ -18,8 +18,10 @@ import {AmpA4A} from '../amp-a4a';
 import {dict} from '../../../../src/utils/object';
 
 /** @type {string} @private */
-export const TEST_URL = 'http://iframe.localhost:' + location.port +
-    '/test/fixtures/served/iframe.html?args';
+export const TEST_URL =
+  'http://iframe.localhost:' +
+  location.port +
+  '/test/fixtures/served/iframe.html?args';
 
 export class MockA4AImpl extends AmpA4A {
   getAdUrl() {

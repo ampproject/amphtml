@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const SEGMENT_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -25,7 +27,8 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'host': 'https://api.segment.io/v1/pixel',
-    'base': '?writeKey=${writeKey}' +
+    'base':
+      '?writeKey=${writeKey}' +
       '&context.library.name=amp' +
       '&anonymousId=${anonymousId}' +
       '&context.locale=${browserLanguage}' +
@@ -58,3 +61,5 @@ export const SEGMENT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {SEGMENT_CONFIG};

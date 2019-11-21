@@ -23,18 +23,13 @@ import {
   StoryAnimationPresetDef,
 } from './animation-types';
 import {Services} from '../../../src/services';
-import {
-  WebAnimationPlayState,
-} from '../../amp-animation/0.1/web-animation-types';
+import {WebAnimationPlayState} from '../../amp-animation/0.1/web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getPresetDef, setStyleForPreset} from './animation-presets';
 import {map, omit} from '../../../src/utils/object';
-import {
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
@@ -46,6 +41,8 @@ const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 /** const {string} */
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 /** const {string} */
+const ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME = 'animate-in-timing-function';
+/** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /** const {string} */
 const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
@@ -55,6 +52,8 @@ const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
+/** const {string} */
+const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
 
 /**
  * @param {!Element} element
@@ -65,13 +64,11 @@ export function hasAnimations(element) {
   return !!scopedQuerySelector(element, ANIMATABLE_ELEMENTS_SELECTOR);
 }
 
-
 /** @enum {number} */
 const PlaybackActivity = {
   START: 0,
   FINISH: 1,
 };
-
 
 /** Wraps WebAnimationRunner for story page elements. */
 class AnimationRunner {
@@ -82,16 +79,11 @@ class AnimationRunner {
    *    !../../amp-animation/0.1/web-animations.Builder
    * >} webAnimationBuilderPromise
    * @param {!../../../src/service/vsync-impl.Vsync} vsync
-   * @param {!../../../src/service/timer-impl.Timer} timer
    * @param {!AnimationSequence} sequence
    */
-  constructor(
-    page, animationDef, webAnimationBuilderPromise, vsync, timer, sequence) {
+  constructor(page, animationDef, webAnimationBuilderPromise, vsync, sequence) {
     /** @private @const */
     this.page_ = page;
-
-    /** @private @const */
-    this.timer_ = timer;
 
     /** @private @const */
     this.vsync_ = vsync;
@@ -117,17 +109,24 @@ class AnimationRunner {
     /** @private @const */
     this.duration_ = animationDef.duration || this.presetDef_.duration || 0;
 
+    /** @private @const */
+    this.easing_ =
+      animationDef.easing || this.presetDef_.easing || DEFAULT_EASING;
+
     /**
      * @private @const {!Promise<
      *    !../../amp-animation/0.1/runners/animation-runner.AnimationRunner>}
      */
     this.runnerPromise_ = this.getWebAnimationDef_().then(webAnimDef =>
       webAnimationBuilderPromise.then(builder =>
-        builder.createRunner(webAnimDef)));
+        builder.createRunner(webAnimDef)
+      )
+    );
 
     /** @private @const {!Promise<!Object<string, *>>} */
-    this.firstFrameProps_ =
-        this.keyframes_.then(keyframes => omit(keyframes[0], ['offset']));
+    this.firstFrameProps_ = this.keyframes_.then(keyframes =>
+      omit(keyframes[0], ['offset'])
+    );
 
     /** @private {?../../amp-animation/0.1/runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
@@ -138,13 +137,17 @@ class AnimationRunner {
     /** @private {?Promise} */
     this.scheduledWait_ = null;
 
-    this.keyframes_.then(keyframes => devAssert(
+    this.keyframes_.then(keyframes =>
+      devAssert(
         !keyframes[0].offset,
-        'First keyframe offset for animation preset should be 0 or undefined'));
+        'First keyframe offset for animation preset should be 0 or undefined'
+      )
+    );
 
     userAssert(
-        this.delay_ >= 0,
-        'Negative delays are not allowed in amp-story entrance animations.');
+      this.delay_ >= 0,
+      'Negative delays are not allowed in amp-story entrance animations.'
+    );
 
     this.runnerPromise_.then(runner => this.onRunnerReady_(runner));
   }
@@ -190,8 +193,9 @@ class AnimationRunner {
     return this.keyframes_.then(keyframes => ({
       keyframes,
       target: this.target_,
+      delay: `${this.delay_}ms`,
       duration: `${this.duration_}ms`,
-      easing: this.presetDef_.easing,
+      easing: this.easing_,
       fill: 'forwards',
     }));
   }
@@ -209,7 +213,8 @@ class AnimationRunner {
     return this.firstFrameProps_.then(firstFrameProps =>
       this.vsync_.mutatePromise(() => {
         setStyles(this.target_, assertDoesNotContainDisplay(firstFrameProps));
-      }));
+      })
+    );
   }
 
   /** Starts or resumes the animation. */
@@ -229,13 +234,9 @@ class AnimationRunner {
     let promise = Promise.resolve();
 
     if (this.animationDef_.startAfterId) {
-      const startAfterId = /** @type {string} */(
-        this.animationDef_.startAfterId);
+      const startAfterId = /** @type {string} */ (this.animationDef_
+        .startAfterId);
       promise = promise.then(() => this.sequence_.waitFor(startAfterId));
-    }
-
-    if (this.delay_) {
-      promise = promise.then(() => this.timer_.promise(this.delay_));
     }
 
     return promise;
@@ -251,9 +252,11 @@ class AnimationRunner {
 
   /** @return {boolean} */
   hasStarted() {
-    return this.isActivityScheduled_(PlaybackActivity.START) ||
-        (!!this.runner_ && devAssert(this.runner_)
-            .getPlayState() == WebAnimationPlayState.RUNNING);
+    return (
+      this.isActivityScheduled_(PlaybackActivity.START) ||
+      (!!this.runner_ &&
+        devAssert(this.runner_).getPlayState() == WebAnimationPlayState.RUNNING)
+    );
   }
 
   /** Force-finishes all animations. */
@@ -264,12 +267,40 @@ class AnimationRunner {
     this.playback_(PlaybackActivity.FINISH);
   }
 
+  /** Pauses the animation. */
+  pause() {
+    // Animation hasn't started yet since it's waiting for a sequenced
+    // animation.
+    if (this.scheduledWait_ !== null) {
+      return;
+    }
+
+    if (this.runner_) {
+      devAssert(this.runner_).pause();
+    }
+  }
+
+  /** Resumes the animation. */
+  resume() {
+    // Animation hasn't started yet since it's waiting for a sequenced
+    // animation.
+    if (this.scheduledWait_ !== null) {
+      return;
+    }
+
+    if (this.runner_) {
+      devAssert(this.runner_).resume();
+    }
+  }
+
   /**
    * @param {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner} runner
    * @private
    */
   finishWhenReady_(runner) {
-    if (runner.getPlayState() == WebAnimationPlayState.RUNNING) {
+    if (this.runner_) {
+      // Init or no-op if the runner was already running.
+      runner.start();
       runner.finish();
     }
   }
@@ -308,12 +339,13 @@ class AnimationRunner {
    */
   playbackWhenReady_(activity, wait) {
     const runner =
-        /**
-         * @type {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner}
-         */
-        (devAssert(
-            this.runner_,
-            'Tried to execute playbackWhenReady_ before runner was resolved.'));
+      /**
+       * @type {!../../amp-animation/0.1/runners/animation-runner.AnimationRunner}
+       */
+      (devAssert(
+        this.runner_,
+        'Tried to execute playbackWhenReady_ before runner was resolved.'
+      ));
 
     (wait || Promise.resolve()).then(() => {
       if (!this.isActivityScheduled_(activity)) {
@@ -324,8 +356,10 @@ class AnimationRunner {
       this.scheduledWait_ = null;
 
       switch (activity) {
-        case PlaybackActivity.START: return this.startWhenReady_(runner);
-        case PlaybackActivity.FINISH: return this.finishWhenReady_(runner);
+        case PlaybackActivity.START:
+          return this.startWhenReady_(runner);
+        case PlaybackActivity.FINISH:
+          return this.finishWhenReady_(runner);
       }
     });
   }
@@ -349,8 +383,9 @@ class AnimationRunner {
     }
 
     this.playbackWhenReady_(
-        /** @type {!PlaybackActivity} */ (this.scheduledActivity_),
-        this.scheduledWait_);
+      /** @type {!PlaybackActivity} */ (this.scheduledActivity_),
+      this.scheduledWait_
+    );
   }
 
   /**
@@ -373,7 +408,6 @@ class AnimationRunner {
   }
 }
 
-
 // TODO(alanorozco): Looping animations
 /** Manager for animations in story pages. */
 export class AnimationManager {
@@ -392,9 +426,6 @@ export class AnimationManager {
 
     /** @private @const */
     this.vsync_ = Services.vsyncFor(this.ampdoc_.win);
-
-    /** @private @const */
-    this.timer_ = Services.timerFor(this.ampdoc_.win);
 
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
@@ -423,7 +454,8 @@ export class AnimationManager {
    */
   applyFirstFrame() {
     return Promise.all(
-        this.getOrCreateRunners_().map(runner => runner.applyFirstFrame()));
+      this.getOrCreateRunners_().map(runner => runner.applyFirstFrame())
+    );
   }
 
   /** Starts all entrance animations for the page. */
@@ -445,12 +477,35 @@ export class AnimationManager {
     this.getRunners_().forEach(runner => runner.cancel());
   }
 
-  /** Determines if there is an entrance animation running. */
+  /** Pauses all animations in the page. */
+  pauseAll() {
+    if (!this.runners_) {
+      return;
+    }
+    this.getRunners_().forEach(runner => runner.pause());
+  }
+
+  /** Resumes all animations in the page. */
+  resumeAll() {
+    if (!this.runners_) {
+      return;
+    }
+    this.getRunners_().forEach(runner => runner.resume());
+  }
+
+  /**
+   * Determines if there is an entrance animation running.
+   *
+   * @return {*} TODO(#23582): Specify return type
+   */
   hasAnimationStarted() {
     return this.getRunners_().some(runner => runner.hasStarted());
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   getRunners_() {
     return devAssert(this.runners_, 'Executed before applyFirstFrame');
   }
@@ -462,8 +517,9 @@ export class AnimationManager {
   getOrCreateRunners_() {
     if (!this.runners_) {
       this.runners_ = Array.prototype.map.call(
-          scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
-          el => this.createRunner_(el));
+        scopedQuerySelectorAll(this.root_, ANIMATABLE_ELEMENTS_SELECTOR),
+        el => this.createRunner_(el)
+      );
     }
     return devAssert(this.runners_);
   }
@@ -477,12 +533,12 @@ export class AnimationManager {
     const animationDef = this.createAnimationDef(el, preset);
 
     return new AnimationRunner(
-        this.root_,
-        animationDef,
-        devAssert(this.builderPromise_),
-        this.vsync_,
-        this.timer_,
-        this.sequence_);
+      this.root_,
+      animationDef,
+      devAssert(this.builderPromise_),
+      this.vsync_,
+      this.sequence_
+    );
   }
 
   /**
@@ -494,27 +550,37 @@ export class AnimationManager {
     const animationDef = {target: el, preset};
 
     if (el.hasAttribute(ANIMATE_IN_DURATION_ATTRIBUTE_NAME)) {
-      animationDef.duration =
-          timeStrToMillis(el.getAttribute(ANIMATE_IN_DURATION_ATTRIBUTE_NAME));
+      animationDef.duration = timeStrToMillis(
+        el.getAttribute(ANIMATE_IN_DURATION_ATTRIBUTE_NAME)
+      );
     }
 
     if (el.hasAttribute(ANIMATE_IN_DELAY_ATTRIBUTE_NAME)) {
-      animationDef.delay =
-          timeStrToMillis(el.getAttribute(ANIMATE_IN_DELAY_ATTRIBUTE_NAME));
+      animationDef.delay = timeStrToMillis(
+        el.getAttribute(ANIMATE_IN_DELAY_ATTRIBUTE_NAME)
+      );
     }
 
     if (el.hasAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME)) {
       const dependencyId = el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
 
       user().assertElement(
-          this.root_.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
-          `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
-              `'${el.tagName}' is set to the invalid value ` +
-              `'${dependencyId}'. No children of parenting 'amp-story-page' ` +
-              `exist with id ${dependencyId}.`);
+        this.root_.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
+        `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
+          `'${el.tagName}' is set to the invalid value ` +
+          `'${dependencyId}'. No children of parenting 'amp-story-page' ` +
+          `exist with id ${dependencyId}.`
+      );
 
-      animationDef.startAfterId =
-          el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
+      animationDef.startAfterId = el.getAttribute(
+        ANIMATE_IN_AFTER_ATTRIBUTE_NAME
+      );
+    }
+
+    if (el.hasAttribute(ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME)) {
+      animationDef.easing = el.getAttribute(
+        ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME
+      );
     }
 
     return animationDef;
@@ -526,9 +592,9 @@ export class AnimationManager {
    */
   createAnimationBuilderPromise_() {
     return Services.extensionsFor(this.ampdoc_.win)
-        .installExtensionForDoc(this.ampdoc_, 'amp-animation')
-        .then(() => Services.webAnimationServiceFor(this.root_))
-        .then(webAnimationService => webAnimationService.createBuilder());
+      .installExtensionForDoc(this.ampdoc_, 'amp-animation')
+      .then(() => Services.webAnimationServiceFor(this.root_))
+      .then(webAnimationService => webAnimationService.createBuilder());
   }
 
   /**
@@ -541,54 +607,68 @@ export class AnimationManager {
     setStyleForPreset(el, name);
 
     if (el.hasAttribute(SCALE_START_ATTRIBUTE_NAME)) {
-      options.scaleStart =
-        parseFloat(el.getAttribute(SCALE_START_ATTRIBUTE_NAME));
+      options.scaleStart = parseFloat(
+        el.getAttribute(SCALE_START_ATTRIBUTE_NAME)
+      );
 
-      userAssert(options.scaleStart > 0, '"%s" attribute must be a ' +
-        'positive number. Found negative or zero in element %s',
-      SCALE_START_ATTRIBUTE_NAME,
-      el);
+      userAssert(
+        options.scaleStart > 0,
+        '"%s" attribute must be a ' +
+          'positive number. Found negative or zero in element %s',
+        SCALE_START_ATTRIBUTE_NAME,
+        el
+      );
     }
 
     if (el.hasAttribute(SCALE_END_ATTRIBUTE_NAME)) {
-      options.scaleEnd =
-        parseFloat(el.getAttribute(SCALE_END_ATTRIBUTE_NAME));
+      options.scaleEnd = parseFloat(el.getAttribute(SCALE_END_ATTRIBUTE_NAME));
 
-      userAssert(options.scaleEnd > 0, '"%s" attribute must be a ' +
-        'positive number. Found negative or zero in element %s',
-      SCALE_END_ATTRIBUTE_NAME,
-      el);
+      userAssert(
+        options.scaleEnd > 0,
+        '"%s" attribute must be a ' +
+          'positive number. Found negative or zero in element %s',
+        SCALE_END_ATTRIBUTE_NAME,
+        el
+      );
     }
 
     if (el.hasAttribute(TRANSLATE_X_ATTRIBUTE_NAME)) {
-      options.translateX =
-        parseFloat(el.getAttribute(TRANSLATE_X_ATTRIBUTE_NAME));
+      options.translateX = parseFloat(
+        el.getAttribute(TRANSLATE_X_ATTRIBUTE_NAME)
+      );
 
-      userAssert(options.translateX > 0, '"%s" attribute must be a ' +
-        'positive number. Found negative or zero in element %s',
-      TRANSLATE_X_ATTRIBUTE_NAME,
-      el);
+      userAssert(
+        options.translateX > 0,
+        '"%s" attribute must be a ' +
+          'positive number. Found negative or zero in element %s',
+        TRANSLATE_X_ATTRIBUTE_NAME,
+        el
+      );
     }
 
     if (el.hasAttribute(TRANSLATE_Y_ATTRIBUTE_NAME)) {
-      options.translateY =
-        parseFloat(el.getAttribute(TRANSLATE_Y_ATTRIBUTE_NAME));
+      options.translateY = parseFloat(
+        el.getAttribute(TRANSLATE_Y_ATTRIBUTE_NAME)
+      );
 
-      userAssert(options.translateY > 0, '"%s" attribute must be a ' +
-        'positive number. Found negative or zero in element %s',
-      TRANSLATE_Y_ATTRIBUTE_NAME,
-      el);
+      userAssert(
+        options.translateY > 0,
+        '"%s" attribute must be a ' +
+          'positive number. Found negative or zero in element %s',
+        TRANSLATE_Y_ATTRIBUTE_NAME,
+        el
+      );
     }
 
-    return userAssert(
-        getPresetDef(name, options),
-        'Invalid %s preset "%s" for element %s',
-        ANIMATE_IN_ATTRIBUTE_NAME,
-        name,
-        el);
+    return /** @type {StoryAnimationPresetDef} */ (userAssert(
+      getPresetDef(name, options),
+      'Invalid %s preset "%s" for element %s',
+      ANIMATE_IN_ATTRIBUTE_NAME,
+      name,
+      el
+    ));
   }
 }
-
 
 /** Bus for animation sequencing. */
 class AnimationSequence {
@@ -603,7 +683,11 @@ class AnimationSequence {
     this.subscriptionResolvers_ = map();
   }
 
-  /** Decouples constructor for testing. */
+  /**
+   * Decouples constructor for testing.
+   *
+   * @return {!AnimationSequence}
+   */
   static create() {
     return new AnimationSequence();
   }

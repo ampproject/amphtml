@@ -21,7 +21,6 @@ import {user, userAssert} from '../../../src/log';
 /** @private @const {string} */
 export const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
-
 /**
  * Service to send XHRs.
  */
@@ -64,14 +63,13 @@ export class AmpStoryRequestService {
 
     const rawUrl = this.storyElement_.getAttribute(attributeName);
     const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
 
     return Services.urlReplacementsForDoc(this.storyElement_)
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => this.xhr_.fetchJson(url, opts))
-        .then(response => {
-          userAssert(response.ok, 'Invalid HTTP response');
-          return response.json();
-        });
+      .expandUrlAsync(user().assertString(rawUrl))
+      .then(url => this.xhr_.fetchJson(url, opts))
+      .then(response => {
+        userAssert(response.ok, 'Invalid HTTP response');
+        return response.json();
+      });
   }
 }

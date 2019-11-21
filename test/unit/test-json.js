@@ -142,11 +142,11 @@ describe('json', () => {
       expect(result.key).to.equal('value');
     });
 
-    it('should not throw and return undefined for invalid json', () => {
+    it('should not throw and return null for invalid json', () => {
       const json = '{"key": "val';
       expect(tryParseJson.bind(null, json)).to.not.throw;
       const result = tryParseJson(json);
-      expect(result).to.be.undefined;
+      expect(result).to.be.null;
     });
 
     it('should call onFailed for invalid and not call for valid json', () => {
@@ -189,19 +189,22 @@ describe('json', () => {
 
     it('throw if not one script', () => {
       expect(() => getChildJsonConfig(element)).to.throw(
-          'Found 0 <script> children. Expected 1');
+        'Found 0 <script> children. Expected 1'
+      );
       element.appendChild(script);
       const script2 = document.createElement('script');
       element.appendChild(script2);
       expect(() => getChildJsonConfig(element)).to.throw(
-          'Found 2 <script> children. Expected 1');
+        'Found 2 <script> children. Expected 1'
+      );
     });
 
     it('throw if type is not application/json', () => {
       script.setAttribute('type', '');
       element.appendChild(script);
       expect(() => getChildJsonConfig(element)).to.throw(
-          '<script> child must have type="application/json"');
+        '<script> child must have type="application/json"'
+      );
     });
 
     it('throw if cannot parse json', () => {
@@ -209,10 +212,10 @@ describe('json', () => {
       script.textContent = invalidText;
       element.appendChild(script);
       expect(() => getChildJsonConfig(element)).to.throw(
-          'Failed to parse <script> contents. Is it valid JSON?');
+        'Failed to parse <script> contents. Is it valid JSON?'
+      );
     });
   });
-
 
   describe('deepEquals', () => {
     it('should throw on non-finite depth arg', () => {

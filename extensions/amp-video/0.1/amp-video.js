@@ -1,18 +1,18 @@
 /**
-  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS-IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {Services} from '../../../src/services';
@@ -32,14 +32,13 @@ import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
+  propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
@@ -56,27 +55,25 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controls',
   'crossorigin',
   'disableremoteplayback',
-  'poster',
   'controlsList',
 ];
 
 /**
- * @note Do not propagate `autoplay`. Autoplay behavior is managed by
+ * Do not propagate `autoplay`. Autoplay behavior is managed by
  *       video manager since amp-video implements the VideoInterface.
  * @private {!Array<string>}
  */
-const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'preload'];
+const ATTRS_TO_PROPAGATE_ON_LAYOUT = ['loop', 'poster', 'preload'];
 
 /** @private {!Array<string>} */
-const ATTRS_TO_PROPAGATE =
-    ATTRS_TO_PROPAGATE_ON_BUILD.concat(ATTRS_TO_PROPAGATE_ON_LAYOUT);
-
+const ATTRS_TO_PROPAGATE = ATTRS_TO_PROPAGATE_ON_BUILD.concat(
+  ATTRS_TO_PROPAGATE_ON_LAYOUT
+);
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpVideo extends AMP.BaseElement {
-
   /**
    * @param {!AmpElement} element
    */
@@ -118,10 +115,12 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   firstAttachedCallback() {
-    // Only allow prerender if video sources are cached on CDN. Set this value
-    // in `firstAttachedCallback` since `buildCallback` is too late and the
-    // element children may not be available in the constructor.
-    this.prerenderAllowed_ = this.hasAnyCachedSources_();
+    // Only allow prerender if video sources are cached on CDN, or if video has
+    // a poster image. Set this value in `firstAttachedCallback` since
+    // `buildCallback` is too late and the element children may not be available
+    // in the constructor.
+    const posterAttr = this.element.getAttribute('poster');
+    this.prerenderAllowed_ = !!posterAttr || this.hasAnyCachedSources_();
   }
 
   /**
@@ -165,9 +164,13 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {string}
+   * @return {?string}
    */
   getVideoSourceForPreconnect_() {
+    if (this.getAmpDoc().getVisibilityState() === VisibilityState.PRERENDER) {
+      const source = this.getFirstCachedSource_();
+      return (source && source.getAttribute('src')) || null;
+    }
     let videoSrc = this.element.getAttribute('src');
     if (!videoSrc) {
       const source = elementByTag(this.element, 'source');
@@ -193,8 +196,8 @@ class AmpVideo extends AMP.BaseElement {
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
-      console/*OK*/.error(
-          'No "poster" attribute has been provided for amp-video.');
+      console /*OK*/
+        .error('No "poster" attribute has been provided for amp-video.');
     }
 
     // Enable inline play for iOS.
@@ -202,15 +205,16 @@ class AmpVideo extends AMP.BaseElement {
     this.video_.setAttribute('webkit-playsinline', '');
     // Disable video preload in prerender mode.
     this.video_.setAttribute('preload', 'none');
-    this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_BUILD, this.video_,
-        /* opt_removeMissingAttrs */ true);
+    this.propagateAttributes(
+      ATTRS_TO_PROPAGATE_ON_BUILD,
+      this.video_,
+      /* opt_removeMissingAttrs */ true
+    );
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
+    propagateObjectFitStyles(this.element, this.video_);
 
-    this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
-
-    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
     // Gather metadata
     const artist = element.getAttribute('artist');
@@ -221,9 +225,7 @@ class AmpVideo extends AMP.BaseElement {
       'title': title || '',
       'artist': artist || '',
       'album': album || '',
-      'artwork': [
-        {'src': artwork || poster || ''},
-      ],
+      'artwork': [{'src': artwork || poster || ''}],
     };
 
     installVideoManagerForDoc(element);
@@ -237,12 +239,11 @@ class AmpVideo extends AMP.BaseElement {
     if (!descendsFromStory(element)) {
       return;
     }
-    [
-      'i-amphtml-disable-mediasession',
-      'i-amphtml-poolbound',
-    ].forEach(className => {
-      element.classList.add(className);
-    });
+    ['i-amphtml-disable-mediasession', 'i-amphtml-poolbound'].forEach(
+      className => {
+        element.classList.add(className);
+      }
+    );
   }
 
   /** @override */
@@ -257,20 +258,20 @@ class AmpVideo extends AMP.BaseElement {
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
-        value => mutations[value] !== undefined);
+      value => mutations[value] !== undefined
+    );
     this.propagateAttributes(
-        attrs,
-        dev().assertElement(this.video_),
-        /* opt_removeMissingAttrs */ true);
+      attrs,
+      dev().assertElement(this.video_),
+      /* opt_removeMissingAttrs */ true
+    );
     if (mutations['src']) {
       element.dispatchCustomEvent(VideoEvents.RELOAD);
     }
     if (mutations['artwork'] || mutations['poster']) {
       const artwork = element.getAttribute('artwork');
       const poster = element.getAttribute('poster');
-      this.metadata_['artwork'] = [
-        {'src': artwork || poster || ''},
-      ];
+      this.metadata_['artwork'] = [{'src': artwork || poster || ''}];
     }
     if (mutations['album']) {
       const album = element.getAttribute('album');
@@ -303,31 +304,44 @@ class AmpVideo extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT,
-        dev().assertElement(this.video_),
-        /* opt_removeMissingAttrs */ true);
+    this.propagateAttributes(
+      ATTRS_TO_PROPAGATE_ON_LAYOUT,
+      dev().assertElement(this.video_),
+      /* opt_removeMissingAttrs */ true
+    );
+
+    this.createPosterForAndroidBug_();
+    this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
 
     this.propagateCachedSources_();
 
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
+    if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      viewer.whenFirstVisible().then(() => {
-        this.propagateLayoutChildren_();
-      });
+      this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.propagateLayoutChildren_();
+        });
     } else {
       this.propagateLayoutChildren_();
     }
 
-    // loadPromise for media elements listens to `loadstart`
-    return this.loadPromise(this.video_).then(() => {
+    // loadPromise for media elements listens to `loadedmetadata`.
+    const promise = this.loadPromise(this.video_).then(() => {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
+
+    // Resolve layoutCallback right away if the video won't preload.
+    if (this.element.getAttribute('preload') === 'none') {
+      return;
+    }
+
+    return promise;
   }
 
   /**
@@ -375,8 +389,7 @@ class AmpVideo extends AMP.BaseElement {
     const urlService = this.getUrlService_();
 
     // If the `src` of `amp-video` itself is NOT cached, set it on video
-    if (element.hasAttribute('src') &&
-        !this.isCachedByCDN_(element)) {
+    if (element.hasAttribute('src') && !this.isCachedByCDN_(element)) {
       urlService.assertHttpsUrl(element.getAttribute('src'), element);
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
@@ -395,8 +408,11 @@ class AmpVideo extends AMP.BaseElement {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
-      insertAfterOrAtStart(dev().assertElement(this.video_),
-          origSource, cachedSource);
+      insertAfterOrAtStart(
+        dev().assertElement(this.video_),
+        origSource,
+        cachedSource
+      );
     });
 
     const tracks = toArray(childElementsByTag(element, 'track'));
@@ -438,15 +454,23 @@ class AmpVideo extends AMP.BaseElement {
    * @return {boolean}
    */
   hasAnyCachedSources_() {
+    return !!this.getFirstCachedSource_();
+  }
+
+  /**
+   * @private
+   * @return {?Element}
+   */
+  getFirstCachedSource_() {
     const {element} = this;
     const sources = toArray(childElementsByTag(element, 'source'));
     sources.push(element);
     for (let i = 0; i < sources.length; i++) {
       if (this.isCachedByCDN_(sources[i])) {
-        return true;
+        return sources[i];
       }
     }
-    return false;
+    return null;
   }
 
   /**
@@ -455,12 +479,15 @@ class AmpVideo extends AMP.BaseElement {
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
 
-    const forwardEventsUnlisten = this.forwardEvents([
-      VideoEvents.ENDED,
-      VideoEvents.LOADEDMETADATA,
-      VideoEvents.PAUSE,
-      VideoEvents.PLAYING,
-    ], video);
+    const forwardEventsUnlisten = this.forwardEvents(
+      [
+        VideoEvents.ENDED,
+        VideoEvents.LOADEDMETADATA,
+        VideoEvents.PAUSE,
+        VideoEvents.PLAYING,
+      ],
+      video
+    );
 
     const mutedOrUnmutedEventUnlisten = listen(video, 'volumechange', () => {
       const {muted} = this.video_;
@@ -471,9 +498,7 @@ class AmpVideo extends AMP.BaseElement {
       this.element.dispatchCustomEvent(mutedOrUnmutedEvent(this.muted_));
     });
 
-    this.unlisteners_.push(
-        forwardEventsUnlisten,
-        mutedOrUnmutedEventUnlisten);
+    this.unlisteners_.push(forwardEventsUnlisten, mutedOrUnmutedEventUnlisten);
   }
 
   /** @private */
@@ -490,8 +515,9 @@ class AmpVideo extends AMP.BaseElement {
    */
   resetOnDomChange() {
     this.video_ = dev().assertElement(
-        childElementByTag(this.element, 'video'),
-        'Tried to reset amp-video without an underlying <video>.');
+      childElementByTag(this.element, 'video'),
+      'Tried to reset amp-video without an underlying <video>.'
+    );
 
     this.uninstallEventHandlers_();
     this.installEventHandlers_();
@@ -713,8 +739,10 @@ class AmpVideo extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
     if (placeholder) {
-      if (placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-        isExperimentOn(this.win, 'blurry-placeholder')) {
+      if (
+        placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
+        isExperimentOn(this.win, 'blurry-placeholder')
+      ) {
         setImportantStyles(placeholder, {'opacity': 0.0});
         return true;
       }
@@ -745,7 +773,6 @@ class AmpVideo extends AMP.BaseElement {
     this.video_.currentTime = timeSeconds;
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpVideo);

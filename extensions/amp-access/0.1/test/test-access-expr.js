@@ -16,9 +16,7 @@
 
 import {evaluateAccessExpr} from '../access-expr';
 
-
 describe('evaluateAccessExpr', () => {
-
   it('should NOT allow double equal', () => {
     expect(() => {
       evaluateAccessExpr('access == true', {});
@@ -107,25 +105,25 @@ describe('evaluateAccessExpr', () => {
 
   it('should evaluate simple string expressions', () => {
     expect(evaluateAccessExpr('str = "A"', {str: 'A'})).to.be.true;
-    expect(evaluateAccessExpr('str = \'A\'', {str: 'A'})).to.be.true;
+    expect(evaluateAccessExpr("str = 'A'", {str: 'A'})).to.be.true;
     expect(evaluateAccessExpr('str != "A"', {str: 'A'})).to.be.false;
   });
 
   it('should evaluate string expressions with wrong type', () => {
     expect(evaluateAccessExpr('str = "A"', {})).to.be.false;
-    expect(evaluateAccessExpr('str = \'A\'', {})).to.be.false;
+    expect(evaluateAccessExpr("str = 'A'", {})).to.be.false;
     expect(evaluateAccessExpr('str != "A"', {})).to.be.true;
 
     expect(evaluateAccessExpr('str = "A"', {str: 1})).to.be.false;
-    expect(evaluateAccessExpr('str = \'A\'', {str: 1})).to.be.false;
+    expect(evaluateAccessExpr("str = 'A'", {str: 1})).to.be.false;
     expect(evaluateAccessExpr('str != "A"', {str: 1})).to.be.true;
 
     expect(evaluateAccessExpr('str = ""', {str: false})).to.be.false;
-    expect(evaluateAccessExpr('str = \'\'', {str: false})).to.be.false;
+    expect(evaluateAccessExpr("str = ''", {str: false})).to.be.false;
     expect(evaluateAccessExpr('str != ""', {str: false})).to.be.true;
 
     expect(evaluateAccessExpr('str = "A"', {str: true})).to.be.false;
-    expect(evaluateAccessExpr('str = \'A\'', {str: true})).to.be.false;
+    expect(evaluateAccessExpr("str = 'A'", {str: true})).to.be.false;
     expect(evaluateAccessExpr('str != "A"', {str: true})).to.be.true;
   });
 
@@ -173,10 +171,10 @@ describe('evaluateAccessExpr', () => {
   it('should evaluate NOT expressions', () => {
     expect(evaluateAccessExpr('NOT (access = true)', {})).to.be.true;
 
-    expect(evaluateAccessExpr('NOT (access = true)', {access: true}))
-        .to.be.false;
-    expect(evaluateAccessExpr('NOT (access = true)', {access: false}))
-        .to.be.true;
+    expect(evaluateAccessExpr('NOT (access = true)', {access: true})).to.be
+      .false;
+    expect(evaluateAccessExpr('NOT (access = true)', {access: false})).to.be
+      .true;
 
     expect(evaluateAccessExpr('NOT (access = 1)', {access: 1})).to.be.false;
     expect(evaluateAccessExpr('NOT (access = 1)', {access: 0})).to.be.true;
@@ -194,8 +192,8 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('a = 1 OR b = 2', {a: 1, b: 2})).to.be.true;
     expect(evaluateAccessExpr('a = 1 OR b != 2', {a: 1, b: 2})).to.be.true;
 
-    expect(evaluateAccessExpr('NOT (a = 1 OR b != 2)', {a: 1, b: 2}))
-        .to.be.false;
+    expect(evaluateAccessExpr('NOT (a = 1 OR b != 2)', {a: 1, b: 2})).to.be
+      .false;
 
     expect(evaluateAccessExpr('a AND b = 2', {a: 1, b: 2})).to.be.true;
     expect(evaluateAccessExpr('a AND b', {a: 1, b: 2})).to.be.true;
@@ -246,6 +244,58 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('obj.child2.other = NULL', resp)).to.be.true;
     expect(evaluateAccessExpr('obj.child2.other.x = NULL', resp)).to.be.true;
     expect(evaluateAccessExpr('obj2.child2.other.x = NULL', resp)).to.be.true;
+  });
+
+  it('should evaluate nested expressions with brackets', () => {
+    const resp = {
+      obj: {
+        str: 'A',
+        'a str': 'A',
+        num: 11,
+        'a num': 11,
+        bool: true,
+        'a bool': true,
+      },
+    };
+
+    expect(evaluateAccessExpr('obj["bool"] = true', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["a bool"] = true', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["num"] = 11', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["a num"] = 11', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["str"] = "A"', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["a str"] = "A"', resp)).to.be.true;
+
+    expect(evaluateAccessExpr("obj['bool'] = true", resp)).to.be.true;
+    expect(evaluateAccessExpr("obj['a bool'] = true", resp)).to.be.true;
+    expect(evaluateAccessExpr("obj['num'] = 11", resp)).to.be.true;
+    expect(evaluateAccessExpr("obj['a num'] = 11", resp)).to.be.true;
+    expect(evaluateAccessExpr("obj['str'] = 'A'", resp)).to.be.true;
+    expect(evaluateAccessExpr("obj['a str'] = 'A'", resp)).to.be.true;
+
+    expect(evaluateAccessExpr('obj["other"] = NULL', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["a other"] = NULL', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["str"] = NULL', resp)).to.be.false;
+    expect(evaluateAccessExpr('obj["a str"] = NULL', resp)).to.be.false;
+
+    expect(evaluateAccessExpr('obj["bool"]', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["a bool"]', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["str"]', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["a str"]', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["num"]', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["a num"]', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj["other"]', resp)).to.be.false;
+    expect(evaluateAccessExpr('obj["a other"]', resp)).to.be.false;
+
+    expect(evaluateAccessExpr('NOT obj["bool"]', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj["a bool"]', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj["str"]', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj["a str"]', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj["num"]', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj["a num"]', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj["other"]', resp)).to.be.true;
+    expect(evaluateAccessExpr('NOT obj["a other"]', resp)).to.be.true;
+
+    expect(evaluateAccessExpr('obj2["bool"] = NULL', resp)).to.be.true;
   });
 
   it('should NOT evaluate nested expressions with wrong type', function() {

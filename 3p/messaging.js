@@ -30,8 +30,7 @@ export function nonSensitiveDataPostMessage(type, opt_object) {
   const object = opt_object || /** @type {JsonObject} */ ({});
   object['type'] = type;
   object['sentinel'] = window.context.sentinel;
-  window.parent./*OK*/postMessage(object,
-      window.context.location.origin);
+  window.parent./*OK*/ postMessage(object, window.context.location.origin);
 }
 
 /**
@@ -76,15 +75,18 @@ function startListening(win) {
   win.addEventListener('message', function(event) {
     // Cheap operations first, so we don't parse JSON unless we have to.
     const eventData = getData(event);
-    if (event.source != win.parent ||
-        event.origin != win.context.location.origin ||
-        typeof eventData != 'string' ||
-        eventData.indexOf('amp-') != 0) {
+    if (
+      event.source != win.parent ||
+      event.origin != win.context.location.origin ||
+      typeof eventData != 'string' ||
+      eventData.indexOf('amp-') != 0
+    ) {
       return;
     }
     // Parse JSON only once per message.
-    const data = /** @type {!JsonObject} */ (
-      parseJson(/**@type {string} */ (getData(event)).substr(4)));
+    const data = /** @type {!JsonObject} */ (parseJson(
+      /**@type {string} */ (getData(event)).substr(4)
+    ));
     if (win.context.sentinel && data['sentinel'] != win.context.sentinel) {
       return;
     }

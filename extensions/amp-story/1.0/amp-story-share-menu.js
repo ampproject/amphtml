@@ -21,6 +21,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/dom';
@@ -29,7 +30,6 @@ import {dev} from '../../../src/log';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {toggle} from '../../../src/style';
-
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
@@ -108,12 +108,13 @@ export class ShareMenu {
 
     this.isBuilt_ = true;
 
-    this.isSystemShareSupported_ =
-        this.shareWidget_.isSystemShareSupported(getAmpdoc(this.parentEl_));
+    this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported(
+      getAmpdoc(this.parentEl_)
+    );
 
-    this.isSystemShareSupported_ ?
-      this.buildForSystemSharing_() :
-      this.buildForFallbackSharing_();
+    this.isSystemShareSupported_
+      ? this.buildForSystemSharing_()
+      : this.buildForFallbackSharing_();
   }
 
   /**
@@ -155,9 +156,9 @@ export class ShareMenu {
 
     this.vsync_.run({
       measure: () => {
-        this.innerContainerEl_ =
-            this.element_
-                ./*OK*/querySelector('.i-amphtml-story-share-menu-container');
+        this.innerContainerEl_ = this.element_./*OK*/ querySelector(
+          '.i-amphtml-story-share-menu-container'
+        );
       },
       mutate: () => {
         this.parentEl_.appendChild(root);
@@ -172,9 +173,13 @@ export class ShareMenu {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
-      this.onUIStateUpdate_(uiState);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
 
     this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, isOpen => {
       this.onShareMenuStateUpdate_(isOpen);
@@ -183,8 +188,16 @@ export class ShareMenu {
     // Don't listen to click events if the system share is supported, since the
     // native layer handles all the UI interactions.
     if (!this.isSystemShareSupported_) {
-      this.element_.addEventListener(
-          'click', event => this.onShareMenuClick_(event));
+      this.element_.addEventListener('click', event =>
+        this.onShareMenuClick_(event)
+      );
+
+      this.win_.addEventListener('keyup', event => {
+        if (event.key == Keys.ESCAPE) {
+          event.preventDefault();
+          this.close_();
+        }
+      });
     }
   }
 
@@ -221,7 +234,7 @@ export class ShareMenu {
     const el = dev().assertElement(event.target);
 
     if (el.classList.contains('i-amphtml-story-share-menu-close-button')) {
-      return this.close_();
+      this.close_();
     }
 
     // Closes the menu if click happened outside of the menu main container.
@@ -237,9 +250,9 @@ export class ShareMenu {
    */
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
-      uiState !== UIType.MOBILE ?
-        this.element_.setAttribute('desktop', '') :
-        this.element_.removeAttribute('desktop');
+      uiState !== UIType.MOBILE
+        ? this.element_.setAttribute('desktop', '')
+        : this.element_.removeAttribute('desktop');
     });
   }
 

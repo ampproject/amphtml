@@ -15,10 +15,10 @@
  */
 
 /**
-* Changes the values of getMode().test, getMode().localDev to false
-* and getMode().localDev to true.
-* @param {Object} babelTypes
-*/
+ * Changes the values of getMode().test, getMode().localDev to false
+ * and getMode().localDev to true.
+ * @param {Object} babelTypes
+ */
 const {resolve, dirname} = require('path');
 module.exports = function({types: t}) {
   let getModeFound = false;
@@ -30,9 +30,11 @@ module.exports = function({types: t}) {
           return;
         }
         specifiers.forEach(specifier => {
-          if (specifier.imported.name === 'getMode') {
+          if (specifier.imported && specifier.imported.name === 'getMode') {
             const filepath = resolve(
-                dirname(state.file.opts.filename), source.value);
+              dirname(state.file.opts.filename),
+              source.value
+            );
             if (filepath.endsWith('/amphtml/src/mode')) {
               getModeFound = true;
             }
@@ -54,7 +56,7 @@ module.exports = function({types: t}) {
             path.replaceWith(t.booleanLiteral(true));
           }
         }
-  	  },
+      },
     },
   };
 };

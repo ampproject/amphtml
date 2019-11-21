@@ -16,21 +16,13 @@
 
 import {TaskQueue} from '../../src/service/task-queue';
 
-
 describe('TaskQueue', () => {
-
-  let sandbox;
   let clock;
   let queue;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
     queue = new TaskQueue();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should enqueue and dequeue', () => {
@@ -45,9 +37,11 @@ describe('TaskQueue', () => {
     expect(queue.getLastEnqueueTime()).to.equal(1000);
     expect(queue.getLastDequeueTime()).to.equal(0);
 
-    allowConsoleError(() => { expect(() => {
-      queue.enqueue({id: '1'});
-    }).to.throw(/Task already enqueued/); });
+    allowConsoleError(() => {
+      expect(() => {
+        queue.enqueue({id: '1'});
+      }).to.throw(/Task already enqueued/);
+    });
 
     queue.dequeue({id: '1'});
     expect(queue.getTaskById('1')).to.equal(null);

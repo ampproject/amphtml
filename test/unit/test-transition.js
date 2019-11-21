@@ -17,20 +17,9 @@
 import * as tr from '../../src/transition';
 
 describe('Transition', () => {
-
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('all', () => {
-    const func1 = sandbox.spy();
-    const func2 = sandbox.spy();
+    const func1 = window.sandbox.spy();
+    const func2 = window.sandbox.spy();
     const all = tr.all([func1, func2]);
 
     expect(func1).to.have.not.been.called;
@@ -118,8 +107,12 @@ describe('Transition', () => {
   it('setStyles', () => {
     const element = document.createElement('div');
     const func = tr.setStyles(element, {
-      width: tr.px(function(n) {return n * 100 + 1;}),
-      height: tr.px(function(n) {return n * 100 + 2;}),
+      width: tr.px(function(n) {
+        return n * 100 + 1;
+      }),
+      height: tr.px(function(n) {
+        return n * 100 + 2;
+      }),
     });
 
     func(0);
@@ -155,7 +148,7 @@ describe('Transition', () => {
     expect(func(1)).to.equal(-10);
   });
 
-  it('spring', () => {
+  it('springAds.js', () => {
     let func = tr.spring(2, 10, 12, 0.8);
     expect(func(0)).to.equal(2);
     expect(func(0.3)).to.be.closeTo(5.75, 1e-3);
@@ -190,7 +183,9 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translateX(9px)');
     expect(func(1)).to.equal('translateX(10px)');
 
-    func = tr.translateX(() => {return '101vw';});
+    func = tr.translateX(() => {
+      return '101vw';
+    });
     expect(func(0)).to.equal('translateX(101vw)');
   });
 
@@ -202,7 +197,14 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translate(9px,29px)');
     expect(func(1)).to.equal('translate(10px,30px)');
 
-    func = tr.translate(() => {return '101vw';}, () => {return '201em';});
+    func = tr.translate(
+      () => {
+        return '101vw';
+      },
+      () => {
+        return '201em';
+      }
+    );
     expect(func(0)).to.equal('translate(101vw,201em)');
   });
 
@@ -214,7 +216,9 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translate(9px)');
     expect(func(1)).to.equal('translate(10px)');
 
-    func = tr.translate(() => {return '101vw';});
+    func = tr.translate(() => {
+      return '101vw';
+    });
     expect(func(0)).to.equal('translate(101vw)');
   });
 });

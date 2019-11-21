@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
   EmbeddedComponentState,
@@ -26,12 +27,12 @@ import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {
-  embeddedComponentSelectors,
-} from './amp-story-embedded-component';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {hasTapAction, timeStrToMillis} from './utils';
-import {listenOnce} from '../../../src/event-helper';
+import {getAmpdoc} from '../../../src/service';
+import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
+import {interactiveElementsSelectors} from './amp-story-embedded-component';
+import {listen, listenOnce} from '../../../src/event-helper';
+import {toArray} from '../../../src/types';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -42,8 +43,17 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
-const EMBEDDED_COMPONENT_SELECTORS = Object.values(
-    embeddedComponentSelectors()).join(',');
+/**
+ * Protected edges of the screen in pixels. When tapped on these areas, we will
+ * always perform navigation. Even if a clickable element is there.
+ * @const {number}
+ * @private
+ */
+const PROTECTED_SCREEN_EDGE_PX = 48;
+
+const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
+  interactiveElementsSelectors()
+).join(',');
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -130,6 +140,14 @@ export class AdvancementConfig {
   }
 
   /**
+   * Returns whether the advancement configuration will automatically advance
+   * @return {boolean}
+   */
+  isAutoAdvance() {
+    return false;
+  }
+
+  /**
    * @return {boolean}
    * @protected
    */
@@ -177,95 +195,43 @@ export class AdvancementConfig {
   }
 
   /**
-   * Provides an AdvancementConfig object for the specified amp-story-page.
-   * @param {!./amp-story-page.AmpStoryPage|!./amp-story.AmpStory} element
-   * @return {!AdvancementConfig | !ManualAdvancement | !MultipleAdvancementConfig}
+   * Provides an AdvancementConfig object for the specified amp-story or
+   * amp-story-page.
+   * @param {!Window} win
+   * @param {!Element} element
+   * @return {!AdvancementConfig|!ManualAdvancement|!TimeBasedAdvancement|!MediaBasedAdvancement}
    */
-  static forElement(element) {
-    const rootEl = element.element;
-    const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
-    const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
-    const supportedAdvancementModes = [
-      ManualAdvancement.fromElement(win, rootEl),
-      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
-      MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
-    ].filter(x => x !== null);
-
-    if (supportedAdvancementModes.length === 0) {
-      return new AdvancementConfig();
+  static forElement(win, element) {
+    const manualAdvancement = ManualAdvancement.fromElement(win, element);
+    if (manualAdvancement) {
+      return manualAdvancement;
     }
 
-    if (supportedAdvancementModes.length === 1) {
-      return supportedAdvancementModes[0];
+    const autoAdvanceStr = element.getAttribute('auto-advance-after');
+
+    if (autoAdvanceStr) {
+      const timeBasedAdvancement = TimeBasedAdvancement.fromAutoAdvanceString(
+        autoAdvanceStr,
+        win,
+        element
+      );
+      if (timeBasedAdvancement) {
+        return timeBasedAdvancement;
+      }
+
+      const mediaBasedAdvancement = MediaBasedAdvancement.fromAutoAdvanceString(
+        autoAdvanceStr,
+        win,
+        element
+      );
+      if (mediaBasedAdvancement) {
+        return mediaBasedAdvancement;
+      }
     }
 
-    return new MultipleAdvancementConfig(supportedAdvancementModes);
+    return new AdvancementConfig();
   }
 }
-
-
-/**
- * An AdvancementConfig implementation that composes multiple other
- * AdvancementConfig implementations by simply delegating all of its calls to
- * an array of underlying advancement modes.
- */
-class MultipleAdvancementConfig extends AdvancementConfig {
-  /**
-   * @param {!Array<!AdvancementConfig>} advancementModes A list of
-   *     AdvancementConfigs to which all calls should be delegated.
-   */
-  constructor(advancementModes) {
-    super();
-
-    /** @private @const {!Array<!AdvancementConfig>} */
-    this.advancementModes_ = advancementModes;
-  }
-
-  /** @override */
-  addProgressListener(progressListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addProgressListener(progressListener);
-    });
-  }
-
-  /** @override */
-  addOnTapNavigationListener(onTapNavigationListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addOnTapNavigationListener(onTapNavigationListener);
-    });
-  }
-
-  /** @override */
-  addAdvanceListener(advanceListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addAdvanceListener(advanceListener);
-    });
-  }
-
-  /** @override */
-  addPreviousListener(previousListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addPreviousListener(previousListener);
-    });
-  }
-
-  /** @override */
-  start() {
-    super.start();
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.start();
-    });
-  }
-
-  /** @override */
-  stop(canResume = false) {
-    super.stop();
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.stop(canResume);
-    });
-  }
-}
-
 
 /**
  * Always provides a progress of 1.0.  Advances when the user taps the
@@ -296,8 +262,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-      this.storeService_ =
-        getStoreService(element.ownerDocument.defaultView);
+      this.storeService_ = getStoreService(element.ownerDocument.defaultView);
     }
 
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
@@ -305,16 +270,20 @@ class ManualAdvancement extends AdvancementConfig {
       // Width and navigation direction of each section depend on whether the
       // document is RTL or LTR.
       left: {
-        widthRatio: rtlState ?
-          NEXT_SCREEN_AREA_RATIO : PREVIOUS_SCREEN_AREA_RATIO,
-        direction: rtlState ?
-          TapNavigationDirection.NEXT : TapNavigationDirection.PREVIOUS,
+        widthRatio: rtlState
+          ? NEXT_SCREEN_AREA_RATIO
+          : PREVIOUS_SCREEN_AREA_RATIO,
+        direction: rtlState
+          ? TapNavigationDirection.NEXT
+          : TapNavigationDirection.PREVIOUS,
       },
       right: {
-        widthRatio: rtlState ?
-          PREVIOUS_SCREEN_AREA_RATIO : NEXT_SCREEN_AREA_RATIO,
-        direction: rtlState ?
-          TapNavigationDirection.PREVIOUS : TapNavigationDirection.NEXT,
+        widthRatio: rtlState
+          ? PREVIOUS_SCREEN_AREA_RATIO
+          : NEXT_SCREEN_AREA_RATIO,
+        direction: rtlState
+          ? TapNavigationDirection.PREVIOUS
+          : TapNavigationDirection.NEXT,
       },
     };
   }
@@ -329,13 +298,28 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   startListening_() {
-    this.element_
-        .addEventListener('touchstart', this.onTouchstart_.bind(this), true);
-    this.element_
-        .addEventListener('touchend', this.onTouchend_.bind(this), true);
-    this.element_
-        .addEventListener(
-            'click', this.maybePerformNavigation_.bind(this), true);
+    this.element_.addEventListener(
+      'touchstart',
+      this.onTouchstart_.bind(this),
+      true
+    );
+    this.element_.addEventListener(
+      'touchend',
+      this.onTouchend_.bind(this),
+      true
+    );
+    this.element_.addEventListener(
+      'click',
+      this.maybePerformNavigation_.bind(this),
+      true
+    );
+  }
+
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return false;
   }
 
   /**
@@ -374,17 +358,19 @@ class ManualAdvancement extends AdvancementConfig {
     // Cancels the navigation if user paused the story for over 500ms. Calling
     // preventDefault on the touchend event ensures the click/tap event won't
     // fire.
-    if ((Date.now() - this.touchstartTimestamp_) > HOLD_TOUCH_THRESHOLD_MS) {
+    if (Date.now() - this.touchstartTimestamp_ > HOLD_TOUCH_THRESHOLD_MS) {
       event.preventDefault();
     }
 
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
-    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-    /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE)).state !==
-        EmbeddedComponentState.EXPANDED) {
+    if (
+      !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
+      /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+        StateProperty.INTERACTIVE_COMPONENT_STATE
+      )).state !== EmbeddedComponentState.EXPANDED
+    ) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
@@ -398,9 +384,13 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isNavigationalClick_(event) {
-    return !closest(dev().assertElement(event.target), el => {
-      return hasTapAction(el);
-    }, /* opt_stopAt */ this.element_);
+    return !closest(
+      dev().assertElement(event.target),
+      el => {
+        return hasTapAction(el);
+      },
+      /* opt_stopAt */ this.element_
+    );
   }
 
   /**
@@ -411,14 +401,18 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isProtectedTarget_(event) {
-    return !!closest(dev().assertElement(event.target), el => {
-      const elementRole = el.getAttribute('role');
+    return !!closest(
+      dev().assertElement(event.target),
+      el => {
+        const elementRole = el.getAttribute('role');
 
-      if (elementRole) {
-        return !!TAPPABLE_ARIA_ROLES[elementRole.toLowerCase()];
-      }
-      return false;
-    }, /* opt_stopAt */ this.element_);
+        if (elementRole) {
+          return !!TAPPABLE_ARIA_ROLES[elementRole.toLowerCase()];
+        }
+        return false;
+      },
+      /* opt_stopAt */ this.element_
+    );
   }
 
   /**
@@ -432,20 +426,24 @@ class ManualAdvancement extends AdvancementConfig {
     let shouldHandleEvent = false;
     let tagName;
 
-    closest(dev().assertElement(event.target), el => {
-      tagName = el.tagName.toLowerCase();
-      if (tagName === 'amp-story-page-attachment') {
-        shouldHandleEvent = false;
-        return true;
-      }
+    closest(
+      dev().assertElement(event.target),
+      el => {
+        tagName = el.tagName.toLowerCase();
+        if (tagName === 'amp-story-page-attachment') {
+          shouldHandleEvent = false;
+          return true;
+        }
 
-      if (tagName === 'amp-story-page') {
-        shouldHandleEvent = true;
-        return true;
-      }
+        if (tagName === 'amp-story-page') {
+          shouldHandleEvent = true;
+          return true;
+        }
 
-      return false;
-    }, /* opt_stopAt */ this.element_);
+        return false;
+      },
+      /* opt_stopAt */ this.element_
+    );
 
     return shouldHandleEvent;
   }
@@ -454,24 +452,93 @@ class ManualAdvancement extends AdvancementConfig {
    * For an element to trigger a tooltip it has to be descendant of
    * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
    * @param {!Event} event
+   * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  canShowTooltip_(event) {
+  canShowTooltip_(event, pageRect) {
     let valid = true;
     let tagName;
+    const target = dev().assertElement(event.target);
 
-    return !!closest(dev().assertElement(event.target), el => {
-      tagName = el.tagName.toLowerCase();
+    if (this.isInScreenSideEdge_(event, pageRect)) {
+      return false;
+    }
 
-      if (tagName === 'amp-story-cta-layer' ||
-          tagName === 'amp-story-page-attachment') {
-        valid = false;
-        return false;
-      }
+    return !!closest(
+      target,
+      el => {
+        tagName = el.tagName.toLowerCase();
 
-      return tagName === 'amp-story-page' && valid;
-    }, /* opt_stopAt */ this.element_);
+        if (
+          tagName === 'amp-story-cta-layer' ||
+          tagName === 'amp-story-page-attachment'
+        ) {
+          valid = false;
+          return false;
+        }
+
+        return tagName === 'amp-story-page' && valid;
+      },
+      /* opt_stopAt */ this.element_
+    );
+  }
+
+  /**
+   * Checks if click was inside of one of the side edges of the screen.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isInScreenSideEdge_(event, pageRect) {
+    return (
+      event.clientX <= PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageRect.width - PROTECTED_SCREEN_EDGE_PX
+    );
+  }
+
+  /**
+   * Checks if click should be handled by the embedded component logic rather
+   * than by navigation.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isHandledByEmbeddedComponent_(event, pageRect) {
+    const target = dev().assertElement(event.target);
+    const stored = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+      StateProperty.INTERACTIVE_COMPONENT_STATE
+    ));
+    const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
+
+    return (
+      inExpandedMode ||
+      (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
+        this.canShowTooltip_(event, pageRect))
+    );
+  }
+
+  /**
+   * Check if click should be handled by the affiliate link logic.
+   * @param {!Element} target
+   * @private
+   * @return {boolean}
+   */
+  isHandledByAffiliateLink_(target) {
+    const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
+
+    // do not handle if clicking on expanded affiliate link
+    if (clickedOnLink && target.hasAttribute('expanded')) {
+      return false;
+    }
+
+    const expandedElement = this.storeService_.get(
+      StateProperty.AFFILIATE_LINK_STATE
+    );
+
+    return expandedElement != null || clickedOnLink;
   }
 
   /**
@@ -482,14 +549,14 @@ class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
+    const pageRect = this.element_.getLayoutBox();
 
-    if (this.canShowTooltip_(event) &&
-      matches(target, EMBEDDED_COMPONENT_SELECTORS)) {
-      // Clicked element triggers a tooltip, so we dispatch the corresponding
-      // event and skip navigation.
+    if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
+      event.stopPropagation();
       event.preventDefault();
-      const embedComponent = /** @type {InteractiveComponentDef} */
-        (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+        StateProperty.INTERACTIVE_COMPONENT_STATE
+      ));
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
         state: embedComponent.state || EmbeddedComponentState.FOCUSED,
@@ -499,10 +566,24 @@ class ManualAdvancement extends AdvancementConfig {
       return;
     }
 
-    if (!this.isRunning() ||
+    if (this.isHandledByAffiliateLink_(target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
+      if (clickedOnLink) {
+        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);
+      } else {
+        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
+      }
+      return;
+    }
+
+    if (
+      !this.isRunning() ||
       !this.isNavigationalClick_(event) ||
       this.isProtectedTarget_(event) ||
-      !this.shouldHandleEvent_(event)) {
+      !this.shouldHandleEvent_(event)
+    ) {
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
       return;
@@ -511,13 +592,13 @@ class ManualAdvancement extends AdvancementConfig {
     event.stopPropagation();
 
     this.storeService_.dispatch(
-        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
-
-    const pageRect = this.element_./*OK*/getBoundingClientRect();
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.MANUAL_ADVANCE
+    );
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
     // cases.
-    const offsetLeft = ('x' in pageRect) ? pageRect.x : pageRect.left;
+    const offsetLeft = 'x' in pageRect ? pageRect.x : pageRect.left;
 
     const page = {
       // Offset starting left of the page.
@@ -535,12 +616,13 @@ class ManualAdvancement extends AdvancementConfig {
    * individual section has been previously defined depending on the language
    * settings.
    * @param {!Object} page
+   * @return {number}
    * @private
    */
   getTapDirection_(page) {
     const {left, right} = this.sections_;
 
-    if (page.clickEventX <= page.offset + (left.widthRatio * page.width)) {
+    if (page.clickEventX <= page.offset + left.widthRatio * page.width) {
       return left.direction;
     }
 
@@ -550,15 +632,15 @@ class ManualAdvancement extends AdvancementConfig {
   /**
    * Gets an instance of ManualAdvancement based on the HTML tag of the element.
    * @param {!Window} win
-   * @param {!Element} rootEl
-   * @return {?AdvancementConfig} An AdvancementConfig, only if the rootEl is
+   * @param {!Element} element
+   * @return {?AdvancementConfig} An AdvancementConfig, only if the element is
    *                              an amp-story tag.
    */
-  static fromElement(win, rootEl) {
-    if (rootEl.tagName.toLowerCase() !== 'amp-story') {
+  static fromElement(win, element) {
+    if (element.tagName.toLowerCase() !== 'amp-story') {
       return null;
     }
-    return new ManualAdvancement(win, rootEl);
+    return new ManualAdvancement(win, element);
   }
 }
 
@@ -592,8 +674,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
     if (element.ownerDocument.defaultView) {
       /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-      this.storeService_ =
-        getStoreService(element.ownerDocument.defaultView);
+      this.storeService_ = getStoreService(element.ownerDocument.defaultView);
     }
   }
 
@@ -610,18 +691,22 @@ class TimeBasedAdvancement extends AdvancementConfig {
     super.start();
 
     this.storeService_.dispatch(
-        Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_TIME);
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.AUTO_ADVANCE_TIME
+    );
 
     if (this.remainingDelayMs_) {
       this.startTimeMs_ =
-          this.getCurrentTimestampMs_() -
-              (this.delayMs_ - this.remainingDelayMs_);
+        this.getCurrentTimestampMs_() -
+        (this.delayMs_ - this.remainingDelayMs_);
     } else {
       this.startTimeMs_ = this.getCurrentTimestampMs_();
     }
 
     this.timeoutId_ = this.timer_.delay(
-        () => this.onAdvance(), this.remainingDelayMs_ || this.delayMs_);
+      () => this.onAdvance(),
+      this.remainingDelayMs_ || this.delayMs_
+    );
 
     this.onProgressUpdate();
 
@@ -641,9 +726,16 @@ class TimeBasedAdvancement extends AdvancementConfig {
 
     // Store the remaining time if the advancement can be resume, ie: if it is
     // paused.
-    this.remainingDelayMs_ = canResume ?
-      this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_() :
-      null;
+    this.remainingDelayMs_ = canResume
+      ? this.startTimeMs_ + this.delayMs_ - this.getCurrentTimestampMs_()
+      : null;
+  }
+
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return true;
   }
 
   /** @override */
@@ -653,7 +745,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
     }
 
     const progress =
-        (this.getCurrentTimestampMs_() - this.startTimeMs_) / this.delayMs_;
+      (this.getCurrentTimestampMs_() - this.startTimeMs_) / this.delayMs_;
 
     return Math.min(Math.max(progress, 0), 1);
   }
@@ -664,12 +756,12 @@ class TimeBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
-   * @param {!Element} rootEl
+   * @param {!Element} element
    * @return {?AdvancementConfig} An AdvancementConfig, if time-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     if (!autoAdvanceStr) {
       return null;
     }
@@ -679,10 +771,9 @@ class TimeBasedAdvancement extends AdvancementConfig {
       return null;
     }
 
-    return new TimeBasedAdvancement(win, Number(delayMs), rootEl);
+    return new TimeBasedAdvancement(win, Number(delayMs), element);
   }
 }
-
 
 /**
  * Provides progress and advances pages based on the completion percentage of
@@ -698,33 +789,87 @@ class TimeBasedAdvancement extends AdvancementConfig {
 class MediaBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win
-   * @param {!Element} element
+   * @param {!Array<!Element>} elements
    */
-  constructor(win, element) {
+  constructor(win, elements) {
     super();
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!Element} */
-    this.element_ = element;
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
+    this.resources_ = Services.resourcesForDoc(getAmpdoc(win.document));
+
+    /** @private @const {!Array<!Element>} */
+    this.elements_ = elements;
+
+    /** @private {?Element} */
+    this.element_ = this.getFirstPlayableElement_();
 
     /** @private {?Element} */
     this.mediaElement_ = null;
 
-    /** @private {?UnlistenDef} */
+    /** @private {!Array<!UnlistenDef>} */
+    this.unlistenFns_ = [];
+
+    /** @protected {?UnlistenDef} */
     this.unlistenEndedFn_ = null;
 
-    /** @private {?UnlistenDef} */
+    /** @protected {?UnlistenDef} */
     this.unlistenTimeupdateFn_ = null;
 
     /** @private {?../../../src/video-interface.VideoInterface} */
     this.video_ = null;
 
-    if (element.ownerDocument.defaultView) {
-      /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-      this.storeService_ =
-        getStoreService(element.ownerDocument.defaultView);
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(win);
+
+    this.elements_.forEach(el => {
+      listen(el, VideoEvents.VISIBILITY, () => this.onVideoVisibilityChange_());
+    });
+  }
+
+  /**
+   * Returns the first playable element, or null. An element is considered
+   * playable if it's either visible, or a hidden AMP-AUDIO.
+   * @return {?Element}
+   * @private
+   */
+  getFirstPlayableElement_() {
+    if (this.elements_.length === 1) {
+      return this.elements_[0];
+    }
+
+    for (let i = 0; i < this.elements_.length; i++) {
+      const element = this.elements_[i];
+      const resource = this.resources_.getResourceForElement(element);
+      if (isMediaDisplayed(element, resource)) {
+        return element;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * On video visibility change, resets the media based advancement to rely on
+   * the newly visible video, if needed.
+   * @private
+   */
+  onVideoVisibilityChange_() {
+    const element = this.getFirstPlayableElement_();
+    if (element === this.element_) {
+      return;
+    }
+    this.element_ = element;
+    this.mediaElement_ = null;
+    this.video_ = null;
+    // If the page-advancement is running, reset the event listeners so the
+    // progress bar reflects the advancement of the new video. If not running,
+    // the next call to `start()` will set the listeners on the new element.
+    if (this.isRunning()) {
+      this.stop();
+      this.start();
     }
   }
 
@@ -749,8 +894,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
     if (this.element_ instanceof HTMLMediaElement) {
       return this.element_;
-    } else if (this.element_.hasAttribute('background-audio') &&
-        (tagName === 'amp-story' || tagName === 'amp-story-page')) {
+    } else if (
+      this.element_.hasAttribute('background-audio') &&
+      (tagName === 'amp-story' || tagName === 'amp-story-page')
+    ) {
       return this.element_.querySelector('.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
       return this.element_.querySelector('audio');
@@ -763,12 +910,23 @@ class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
+    // If no element is visible yet, keep isRunning true by stepping out after
+    // `super.start()`. When an element becomes visible, it will call `start()`
+    // again if isRunning is still true.
+    if (!this.element_) {
+      return;
+    }
+
     // Prevents race condition when checking for video interface classname.
-    (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
-        .then(() => this.startWhenBuilt_());
+    (this.element_.whenBuilt
+      ? this.element_.whenBuilt()
+      : Promise.resolve()
+    ).then(() => this.startWhenBuilt_());
 
     this.storeService_.dispatch(
-        Action.SET_ADVANCEMENT_MODE, AdvancementMode.AUTO_ADVANCE_MEDIA);
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.AUTO_ADVANCE_MEDIA
+    );
   }
 
   /** @private */
@@ -787,19 +945,25 @@ class MediaBasedAdvancement extends AdvancementConfig {
       return;
     }
 
-    user().error('AMP-STORY-PAGE',
-        `Element with ID ${this.element_.id} is not a media element ` +
-        'supported for automatic advancement.');
+    user().error(
+      'AMP-STORY-PAGE',
+      `Element with ID ${this.element_.id} is not a media element ` +
+        'supported for automatic advancement.'
+    );
   }
 
   /** @private */
   startHtmlMediaElement_() {
-    const mediaElement = dev().assertElement(this.mediaElement_,
-        'Media element was unspecified.');
-    this.unlistenEndedFn_ =
-        listenOnce(mediaElement, 'ended', () => this.onAdvance());
-    this.unlistenTimeupdateFn_ =
-        listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
+    const mediaElement = dev().assertElement(
+      this.mediaElement_,
+      'Media element was unspecified.'
+    );
+    this.unlistenFns_.push(
+      listenOnce(mediaElement, 'ended', () => this.onAdvance())
+    );
+    this.unlistenFns_.push(
+      listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate())
+    );
   }
 
   /** @private */
@@ -808,9 +972,11 @@ class MediaBasedAdvancement extends AdvancementConfig {
       this.video_ = video;
     });
 
-    this.unlistenEndedFn_ =
-        listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
-            {capture: true});
+    this.unlistenFns_.push(
+      listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
+        capture: true,
+      })
+    );
 
     this.onProgressUpdate();
 
@@ -823,14 +989,14 @@ class MediaBasedAdvancement extends AdvancementConfig {
   /** @override */
   stop() {
     super.stop();
+    this.unlistenFns_.forEach(fn => fn());
+  }
 
-    if (this.unlistenEndedFn_) {
-      this.unlistenEndedFn_();
-    }
-
-    if (this.unlistenTimeupdateFn_) {
-      this.unlistenTimeupdateFn_();
-    }
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return true;
   }
 
   /** @override */
@@ -856,22 +1022,29 @@ class MediaBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
-   * @param {!Element} rootEl
+   * @param {!Element} element
    * @return {?AdvancementConfig} An AdvancementConfig, if media-element-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     try {
-      const element = rootEl.querySelector(`#${
-        escapeCssSelectorIdent(autoAdvanceStr)
-      }`);
-
-      if (!element) {
+      const elements = element.querySelectorAll(
+        `[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          #${escapeCssSelectorIdent(autoAdvanceStr)}`
+      );
+      if (!elements.length) {
+        if (autoAdvanceStr) {
+          user().warn(
+            'AMP-STORY-PAGE',
+            `Element with ID ${element.id} has no media element ` +
+              'supported for automatic advancement.'
+          );
+        }
         return null;
       }
 
-      return new MediaBasedAdvancement(win, element);
+      return new MediaBasedAdvancement(win, toArray(elements));
     } catch (e) {
       return null;
     }

@@ -46,8 +46,8 @@ function medyanetAds(global, data) {
   f.setAttribute('allowfullscreen', 'true');
   f.setAttribute('scrolling', 'no');
   setStyles(f, {
-    border: '0 none transparent' ,
-    position: 'relative' ,
+    border: '0 none transparent',
+    position: 'relative',
   });
   f.onload = function() {
     window.context.renderStart();

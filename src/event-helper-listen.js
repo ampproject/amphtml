@@ -15,10 +15,10 @@
  */
 
 /**
-  * Whether addEventListener supports options or only takes capture as a boolean
-  * @type {boolean|undefined}
-  * @visibleForTesting
-  */
+ * Whether addEventListener supports options or only takes capture as a boolean
+ * @type {boolean|undefined}
+ * @visibleForTesting
+ */
 let optsSupported;
 
 /**
@@ -34,8 +34,12 @@ let optsSupported;
  * @param {Object=} opt_evtListenerOpts
  * @return {!UnlistenDef}
  */
-export function internalListenImplementation(element, eventType, listener,
-  opt_evtListenerOpts) {
+export function internalListenImplementation(
+  element,
+  eventType,
+  listener,
+  opt_evtListenerOpts
+) {
   let localElement = element;
   let localListener = listener;
   /**
@@ -47,8 +51,8 @@ export function internalListenImplementation(element, eventType, listener,
     try {
       return localListener(event);
     } catch (e) {
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(e);
       throw e;
     }
   };
@@ -58,16 +62,16 @@ export function internalListenImplementation(element, eventType, listener,
     capture = opt_evtListenerOpts.capture;
   }
   localElement.addEventListener(
-      eventType,
-      wrapped,
-      optsSupported ? opt_evtListenerOpts : capture
+    eventType,
+    wrapped,
+    optsSupported ? opt_evtListenerOpts : capture
   );
   return () => {
     if (localElement) {
       localElement.removeEventListener(
-          eventType,
-          wrapped,
-          optsSupported ? opt_evtListenerOpts : capture
+        eventType,
+        wrapped,
+        optsSupported ? opt_evtListenerOpts : capture
       );
     }
     // Ensure these are GC'd
@@ -106,8 +110,8 @@ export function detectEvtListenerOptsSupport() {
 }
 
 /**
-  * Resets the test for whether addEventListener supports options or not.
-  */
+ * Resets the test for whether addEventListener supports options or not.
+ */
 export function resetEvtListenerOptsSupportForTesting() {
   optsSupported = undefined;
 }

@@ -17,9 +17,7 @@
 import {checkAndFix} from '../../src/service/ie-media-bug';
 import {dev} from '../../src/log';
 
-
 describe('ie-media-bug', () => {
-  let sandbox;
   let clock;
   let windowApi, windowMock;
   let platform;
@@ -27,13 +25,12 @@ describe('ie-media-bug', () => {
   let devErrorStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
     platform = {
       isIe: () => false,
     };
-    platformMock = sandbox.mock(platform);
-    devErrorStub = sandbox.stub(dev(), 'error');
+    platformMock = window.sandbox.mock(platform);
+    devErrorStub = window.sandbox.stub(dev(), 'error');
 
     windowApi = {
       innerWidth: 320,
@@ -41,13 +38,12 @@ describe('ie-media-bug', () => {
       clearInterval: () => {},
       matchMedia: () => {},
     };
-    windowMock = sandbox.mock(windowApi);
+    windowMock = window.sandbox.mock(windowApi);
   });
 
   afterEach(() => {
     platformMock.verify();
     windowMock.verify();
-    sandbox.restore();
   });
 
   it('should bypass polling for non-IE browsers', () => {
@@ -61,10 +57,11 @@ describe('ie-media-bug', () => {
 
   it('should bypass polling when matchMedia is not broken', () => {
     platformMock.expects('isIe').returns(true);
-    windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
-        .returns({matches: true})
-        .once();
+    windowMock
+      .expects('matchMedia')
+      .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
+      .returns({matches: true})
+      .once();
     windowMock.expects('setInterval').never();
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.null;
@@ -75,54 +72,61 @@ describe('ie-media-bug', () => {
     platformMock.expects('isIe').returns(true);
 
     // Scheduling pass.
-    windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
-        .returns({matches: false})
-        .once();
+    windowMock
+      .expects('matchMedia')
+      .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
+      .returns({matches: false})
+      .once();
     const intervalId = 111;
     let intervalCallback;
-    windowMock.expects('setInterval')
-        .withExactArgs(
-            sinon.match(arg => {
-              intervalCallback = arg;
-              return true;
-            }),
-            10
-        )
-        .returns(intervalId)
-        .once();
+    windowMock
+      .expects('setInterval')
+      .withExactArgs(
+        window.sandbox.match(arg => {
+          intervalCallback = arg;
+          return true;
+        }),
+        10
+      )
+      .returns(intervalId)
+      .once();
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.not.null;
     expect(devErrorStub).to.have.not.been.called;
     expect(intervalCallback).to.exist;
     windowMock.verify();
-    windowMock./*OK*/restore();
+    windowMock./*OK*/ restore();
 
     // Second pass.
     clock.tick(10);
-    windowMock = sandbox.mock(windowApi);
-    windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
-        .returns({matches: false})
-        .once();
+    windowMock = window.sandbox.mock(windowApi);
+    windowMock
+      .expects('matchMedia')
+      .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
+      .returns({matches: false})
+      .once();
     windowMock.expects('clearInterval').never();
     intervalCallback();
     expect(devErrorStub).to.have.not.been.called;
     windowMock.verify();
-    windowMock./*OK*/restore();
+    windowMock./*OK*/ restore();
 
     // Third pass - succeed.
     clock.tick(10);
-    windowMock = sandbox.mock(windowApi);
-    windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
-        .returns({matches: true})
-        .once();
-    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
+    windowMock = window.sandbox.mock(windowApi);
+    windowMock
+      .expects('matchMedia')
+      .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
+      .returns({matches: true})
+      .once();
+    windowMock
+      .expects('clearInterval')
+      .withExactArgs(intervalId)
+      .once();
     intervalCallback();
     windowMock.verify();
-    windowMock./*OK*/restore();
+    windowMock./*OK*/ restore();
 
     return promise.then(() => {
       expect(devErrorStub).to.have.not.been.called;
@@ -133,23 +137,28 @@ describe('ie-media-bug', () => {
     platformMock.expects('isIe').returns(true);
 
     // Scheduling pass.
-    windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
-        .returns({matches: false})
-        .atLeast(2);
+    windowMock
+      .expects('matchMedia')
+      .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
+      .returns({matches: false})
+      .atLeast(2);
     const intervalId = 111;
     let intervalCallback;
-    windowMock.expects('setInterval')
-        .withExactArgs(
-            sinon.match(arg => {
-              intervalCallback = arg;
-              return true;
-            }),
-            10
-        )
-        .returns(intervalId)
-        .once();
-    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
+    windowMock
+      .expects('setInterval')
+      .withExactArgs(
+        window.sandbox.match(arg => {
+          intervalCallback = arg;
+          return true;
+        }),
+        10
+      )
+      .returns(intervalId)
+      .once();
+    windowMock
+      .expects('clearInterval')
+      .withExactArgs(intervalId)
+      .once();
 
     const promise = checkAndFix(windowApi, platform);
     expect(promise).to.be.not.null;
@@ -174,10 +183,11 @@ describe('ie-media-bug', () => {
   it('should tolerate matchMedia exceptions', () => {
     platformMock.expects('isIe').returns(true);
 
-    windowMock.expects('matchMedia')
-        .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
-        .throws(new Error('intentional'))
-        .once();
+    windowMock
+      .expects('matchMedia')
+      .withExactArgs('(min-width: 319px) AND (max-width: 321px)')
+      .throws(new Error('intentional'))
+      .once();
     windowMock.expects('setInterval').never();
 
     const promise = checkAndFix(windowApi, platform);

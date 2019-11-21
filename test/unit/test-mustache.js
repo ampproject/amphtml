@@ -16,9 +16,7 @@
 
 import mustache from '../../third_party/mustache/mustache';
 
-
 describe('Mustache', () => {
-
   let savedSanitizer;
 
   beforeEach(() => {
@@ -34,12 +32,14 @@ describe('Mustache', () => {
 
   it('should escape html', () => {
     expect(mustache.render('{{value}}', {value: '<b>abc</b>'})).to.equal(
-        '&lt;b&gt;abc&lt;&#x2F;b&gt;');
+      '&lt;b&gt;abc&lt;&#x2F;b&gt;'
+    );
   });
 
   it('should transform unescaped html', () => {
     expect(mustache.render('{{{value}}}', {value: '<b>abc</b>'})).to.equal(
-        '<B>ABC</B>');
+      '<B>ABC</B>'
+    );
   });
 
   it('should only expand own properties', () => {
@@ -64,17 +64,19 @@ describe('Mustache', () => {
         'x': [],
       },
     };
-    expect(mustache.render(
-        '{{#t}}{{x.pop}}X{{x.pop}}{{/t}}' +
-        '{{#t}}{{0}}Y{{1}}{{/t}}',
-        obj)).to.equal('X0Y1');
+    expect(
+      mustache.render(
+        '{{#t}}{{x.pop}}X{{x.pop}}{{/t}}{{#t}}{{0}}Y{{1}}{{/t}}',
+        obj
+      )
+    ).to.equal('X0Y1');
   });
 
   it('should NOT allow delimiter substituion', () => {
-    expect(mustache.render(
-        '{{value}}' +
-        '{{=<% %>=}}' +
-        '<% value %>',
-        {value: 'abc'})).to.equal('abc<% value %>');
+    expect(
+      mustache.render('{{value}}{{=<% %>=}}<% value %>', {
+        value: 'abc',
+      })
+    ).to.equal('abc<% value %>');
   });
 });

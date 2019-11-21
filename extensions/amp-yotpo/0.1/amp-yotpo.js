@@ -21,7 +21,6 @@ import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 export class AmpYotpo extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -43,23 +42,16 @@ export class AmpYotpo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(this.element.getAttribute('data-app-key'),
-        'The data-app-key attribute is required for <amp-yotpo> %s',
-        this.element);
-    userAssert(this.element.getAttribute('data-widget-type'),
-        'The data-widget-type attribute is required for <amp-yotpo> %s',
-        this.element);
-    const iframe = getIframe(this.win, this.element, 'yotpo');
-    this.applyFillContent(iframe);
-
-    const unlisten = listenFor(iframe, 'embed-size', data => {
-      this.attemptChangeHeight(data['height']).catch(() => {/* do nothing */ });
-    }, /* opt_is3P */true);
-    this.unlisteners_.push(unlisten);
-
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+    userAssert(
+      this.element.getAttribute('data-app-key'),
+      'The data-app-key attribute is required for <amp-yotpo> %s',
+      this.element
+    );
+    userAssert(
+      this.element.getAttribute('data-widget-type'),
+      'The data-widget-type attribute is required for <amp-yotpo> %s',
+      this.element
+    );
   }
 
   /** @override */
@@ -82,6 +74,28 @@ export class AmpYotpo extends AMP.BaseElement {
       this.iframe_ = null;
     }
     return true;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const iframe = getIframe(this.win, this.element, 'yotpo');
+    this.applyFillContent(iframe);
+
+    const unlisten = listenFor(
+      iframe,
+      'embed-size',
+      data => {
+        this.attemptChangeHeight(data['height']).catch(() => {
+          /* do nothing */
+        });
+      },
+      /* opt_is3P */ true
+    );
+    this.unlisteners_.push(unlisten);
+
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
 }
 

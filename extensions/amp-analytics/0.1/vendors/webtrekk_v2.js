@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const WEBTREKK_V2_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const WEBTREKK_V2_CONFIG = jsonLiteral({
   'vars': {
     'actionName': 'webtrekk_ignore',
     'contentId': '${title}',
@@ -23,22 +25,27 @@ export const WEBTREKK_V2_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'trackURL': 'https://${trackDomain}/${trackId}/wt',
-    'basePrefix': '?p=440,${contentId},1,' +
+    'basePrefix':
+      '?p=440,${contentId},1,' +
       '${screenWidth}x${screenHeight},${screenColorDepth},1,',
-    'baseSuffix': ',${documentReferrer},' +
+    'baseSuffix':
+      ',${documentReferrer},' +
       '${viewportWidth}x${viewportHeight},0' +
       '&tz=${timezone}&eid=${everId}&la=${browserLanguage}',
     'parameterPrefix': '${basePrefix}${timestamp}${baseSuffix}',
     'parameterSuffix': '&pu=${sourceUrl}&eor=1',
-    'pageview': '${trackURL}${parameterPrefix}&${extraUrlParams}' +
+    'pageview':
+      '${trackURL}${parameterPrefix}&${extraUrlParams}' +
       '&cp570=${pageLoadTime}${parameterSuffix}',
-    'event': '${trackURL}${parameterPrefix}&ct=${actionName}' +
+    'event':
+      '${trackURL}${parameterPrefix}&ct=${actionName}' +
       '&${extraUrlParams}${parameterSuffix}',
-    'scroll': '${trackURL}${parameterPrefix}&ct=${actionName}' +
+    'scroll':
+      '${trackURL}${parameterPrefix}&ct=${actionName}' +
       '&ck540=${verticalScrollBoundary}${parameterSuffix}',
-    'mediaPrefix': '${trackURL}${basePrefix}${baseSuffix}' +
-      '&mi=${mediaName}',
-    'mediaSuffix': '&mt1=${currentTime}&mt2=${duration}' +
+    'mediaPrefix': '${trackURL}${basePrefix}${baseSuffix}&mi=${mediaName}',
+    'mediaSuffix':
+      '&mt1=${currentTime}&mt2=${duration}' +
       '&${extraUrlParams}${parameterSuffix}&x=${playedTotal}',
     'mediaPlay': '${mediaPrefix}&mk=play${mediaSuffix}',
     'mediaPause': '${mediaPrefix}&mk=pause${mediaSuffix}',
@@ -61,3 +68,5 @@ export const WEBTREKK_V2_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {WEBTREKK_V2_CONFIG};

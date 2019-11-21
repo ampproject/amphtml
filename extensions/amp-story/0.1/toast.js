@@ -16,17 +16,14 @@
 import {Services} from '../../../src/services';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 
-
 /** @private @const {string} */
 const TOAST_CLASSNAME = 'i-amphtml-story-toast';
-
 
 /**
  * Should be higher than total animation time.
  * @private @const {number}
  */
 const TOAST_VISIBLE_TIME_MS = 2600;
-
 
 /**
  * UI notifications service, displaying a message to the user for a limited
@@ -38,8 +35,11 @@ export class Toast {
    * @param {!Node|string} childNodeOrText
    */
   static show(win, childNodeOrText) {
-    const toast = createElementWithAttributes(win.document, 'div',
-        /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME}));
+    const toast = createElementWithAttributes(
+      win.document,
+      'div',
+      /** @type {!JsonObject} */ ({'class': TOAST_CLASSNAME})
+    );
 
     if (typeof childNodeOrText == 'string') {
       toast.textContent = childNodeOrText;
@@ -49,7 +49,9 @@ export class Toast {
 
     win.document.body.appendChild(toast);
 
-    Services.timerFor(win)
-        .delay(() => removeElement(toast), TOAST_VISIBLE_TIME_MS);
+    Services.timerFor(win).delay(
+      () => removeElement(toast),
+      TOAST_VISIBLE_TIME_MS
+    );
   }
 }

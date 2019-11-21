@@ -24,9 +24,13 @@ export function mantisDisplay(global, data) {
   validateData(data, ['property', 'zone'], []);
 
   global.mantis = global.mantis || [];
-  global.mantis.push(['display', 'load', {
-    property: data['property'],
-  }]);
+  global.mantis.push([
+    'display',
+    'load',
+    {
+      property: data['property'],
+    },
+  ]);
 
   const d = global.document.createElement('div');
   d.setAttribute('data-mantis-zone', data['zone']);
@@ -43,11 +47,15 @@ export function mantisRecommend(global, data) {
   validateData(data, ['property'], ['css']);
 
   global.mantis = global.mantis || [];
-  global.mantis.push(['recommend', 'load', {
-    property: data['property'],
-    render: 'recommended',
-    css: data['css'],
-  }]);
+  global.mantis.push([
+    'recommend',
+    'load',
+    {
+      property: data['property'],
+      render: 'recommended',
+      css: data['css'],
+    },
+  ]);
 
   const d = global.document.createElement('div');
   d.setAttribute('id', 'recommended');

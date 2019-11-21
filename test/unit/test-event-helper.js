@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Observable} from '../../src/observable';
 import {
+  MEDIA_LOAD_FAILURE_SRC_PROPERTY,
   createCustomEvent,
   isLoaded,
   listen,
@@ -23,13 +23,13 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
+import {Observable} from '../../src/observable';
 import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
 } from '../../src/event-helper-listen';
 
 describe('EventHelper', () => {
-
   function getEvent(name, target) {
     const event = document.createEvent('Event');
     event.initEvent(name, true, true);
@@ -37,7 +37,6 @@ describe('EventHelper', () => {
     return event;
   }
 
-  let sandbox;
   let element;
   let loadObservable;
   let errorObservable;
@@ -45,7 +44,6 @@ describe('EventHelper', () => {
   let removeEventListenerStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {
@@ -57,8 +55,10 @@ describe('EventHelper', () => {
           loadObservable.add(callback);
         } else if (type == 'error') {
           errorObservable.add(callback);
+        } else if (type == 'loadedmetadata') {
+          loadObservable.add(callback);
         } else {
-          expect(type).to.equal('load or error');
+          expect(type).to.equal('load, loadedmetadata, or error');
         }
       },
       removeEventListener(type, callback) {
@@ -66,9 +66,14 @@ describe('EventHelper', () => {
           loadObservable.remove(callback);
         } else if (type == 'error') {
           errorObservable.remove(callback);
+        } else if (type == 'loadedmetadata') {
+          loadObservable.remove(callback);
         } else {
-          expect(type).to.equal('load or error');
+          expect(type).to.equal('load, loadedmetadata, or error');
         }
+      },
+      hasAttribute(attr) {
+        return !!this[attr];
       },
     };
   });
@@ -77,8 +82,6 @@ describe('EventHelper', () => {
     // Very important that all listeners are removed.
     expect(loadObservable.getHandlerCount()).to.equal(0);
     expect(errorObservable.getHandlerCount()).to.equal(0);
-
-    sandbox.restore();
   });
 
   it('listen', () => {
@@ -194,6 +197,27 @@ describe('EventHelper', () => {
     });
   });
 
+  it('loadPromise - media element already errored', () => {
+    element.tagName = 'VIDEO';
+    element.currentSrc = 'foo.com/video.mp4';
+    element[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = 'foo.com/video.mp4';
+    return loadPromise(element).catch(result => {
+      expect(result).to.equal(element);
+    });
+  });
+
+  it('loadPromise - media element errored but retries diffent src', () => {
+    element.tagName = 'VIDEO';
+    element.src = 'foo.com/video.mp4';
+    element.currentSrc = 'foo.com/video.mp4';
+    element[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = 'bar.com/other-video.mp4';
+    const promise = loadPromise(element).then(result => {
+      expect(result).to.equal(element);
+    });
+    loadObservable.fire(getEvent('loadedmetadata', element));
+    return promise;
+  });
+
   it('loadPromise - load event', () => {
     const promise = loadPromise(element).then(result => {
       expect(result).to.equal(element);
@@ -203,27 +227,61 @@ describe('EventHelper', () => {
   });
 
   it('loadPromise - error event', () => {
-    const promise = loadPromise(element).then(result => {
-      assert.fail('must never be here: ' + result);
-    }).then(() => {
-      throw new Error('Should not be reached.');
-    }, reason => {
-      expect(reason.message).to.include('Failed to load');
-    });
+    const promise = loadPromise(element)
+      .then(result => {
+        assert.fail('must never be here: ' + result);
+      })
+      .then(
+        () => {
+          throw new Error('Should not be reached.');
+        },
+        reason => {
+          expect(reason.message).to.include('Failed to load');
+        }
+      );
+    errorObservable.fire(getEvent('error', element));
+    return promise;
+  });
+
+  it('loadPromise - error event should mark media element as errored', () => {
+    element.tagName = 'VIDEO';
+    element.currentSrc = 'foo.com/video.mp4';
+    const promise = loadPromise(element)
+      .then(result => {
+        assert.fail('must never be here: ' + result);
+      })
+      .then(
+        () => {
+          throw new Error('Should not be reached.');
+        },
+        () => {
+          expect(element[MEDIA_LOAD_FAILURE_SRC_PROPERTY]).to.equal(
+            element.currentSrc
+          );
+        }
+      );
     errorObservable.fire(getEvent('error', element));
     return promise;
   });
 
   it('should polyfill CustomEvent constructor', () => {
-    const native = createCustomEvent(window, 'foo', {bar: 123},
-        {bubbles: true, cancelable: true});
+    const native = createCustomEvent(
+      window,
+      'foo',
+      {bar: 123},
+      {bubbles: true, cancelable: true}
+    );
     expect(native.type).to.equal('foo');
     expect(native.detail).to.deep.equal({bar: 123});
     expect(native.bubbles).to.be.true;
     expect(native.cancelable).to.be.true;
 
-    const polyfilled = createCustomEvent({document}, 'foo', {bar: 123},
-        {bubbles: true, cancelable: true});
+    const polyfilled = createCustomEvent(
+      {document},
+      'foo',
+      {bar: 123},
+      {bubbles: true, cancelable: true}
+    );
     expect(polyfilled.type).to.equal('foo');
     expect(polyfilled.detail).to.deep.equal({bar: 123});
     expect(polyfilled.bubbles).to.be.true;
@@ -235,7 +293,7 @@ describe('EventHelper', () => {
     expect(native.type).to.equal('foo');
     expect(native.detail).to.deep.equal({bar: 123});
 
-    const initCustomEventSpy = sandbox.spy();
+    const initCustomEventSpy = window.sandbox.spy();
     const win = {};
     win.CustomEvent = {};
     win.document = {};
@@ -258,12 +316,13 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that accepts options
-    addEventListenerStub = sandbox.stub(self, 'addEventListener').callsFake(
-        eventListenerStubAcceptOpts);
+    addEventListenerStub = window.sandbox
+      .stub(self, 'addEventListener')
+      .callsFake(eventListenerStubAcceptOpts);
     // Simulate a removeEventListener that accepts options
-    removeEventListenerStub =
-        sandbox.stub(self, 'removeEventListener').callsFake(
-            eventListenerStubAcceptOpts);
+    removeEventListenerStub = window.sandbox
+      .stub(self, 'removeEventListener')
+      .callsFake(eventListenerStubAcceptOpts);
     resetEvtListenerOptsSupportForTesting();
     expect(detectEvtListenerOptsSupport()).to.be.true;
     expect(addEventListenerStub.called).to.be.true;
@@ -289,12 +348,13 @@ describe('EventHelper', () => {
       }
     };
     // Simulate an addEventListener that does not accept options
-    addEventListenerStub = sandbox.stub(self, 'addEventListener').callsFake(
-        eventListenerStubRejectOpts);
+    addEventListenerStub = window.sandbox
+      .stub(self, 'addEventListener')
+      .callsFake(eventListenerStubRejectOpts);
     // Simulate a removeEventListener that does not accept options
-    removeEventListenerStub =
-        sandbox.stub(self, 'removeEventListener').callsFake(
-            eventListenerStubRejectOpts);
+    removeEventListenerStub = window.sandbox
+      .stub(self, 'removeEventListener')
+      .callsFake(eventListenerStubRejectOpts);
     resetEvtListenerOptsSupportForTesting();
     expect(detectEvtListenerOptsSupport()).to.be.false;
     expect(addEventListenerStub.called).to.be.true;
@@ -302,5 +362,4 @@ describe('EventHelper', () => {
     expect(detectEvtListenerOptsSupport()).to.be.false;
     expect(removeEventListenerStub.calledOnce).to.be.true;
   });
-
 });

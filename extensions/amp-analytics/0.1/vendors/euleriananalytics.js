@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-export const EULERIANANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const EULERIANANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'analyticsHost': '',
     'documentLocation': 'SOURCE_URL',
   },
   'requests': {
     'base': 'https://${analyticsHost}',
-    'basePrefix': '-/${random}?' +
+    'basePrefix':
+      '-/${random}?' +
       'euid-amp=${clientId(etuix)}&' +
       'url=${documentLocation}&',
-    'pageview': '${base}/col2/${basePrefix}' +
+    'pageview':
+      '${base}/col2/${basePrefix}' +
       'rf=${externalReferrer}&' +
       'urlp=${pagePath}&' +
       'ss=${screenWidth}x${screenHeight}&' +
       'sd=${screenColorDepth}',
-    'action': '${base}/action/${basePrefix}' +
+    'action':
+      '${base}/action/${basePrefix}' +
       'eact=${actionCode}&' +
       'actr=${actionRef}',
-    'user': '${base}/uparam/${basePrefix}' +
-      'euk${userParamKey}=${userParamVal}',
-    'contextflag': '${base}/cflag2/${basePrefix}' +
-      'ecf0k=${cflagKey}&ecf0v=${cflagVal}',
+    'user': '${base}/uparam/${basePrefix}euk${userParamKey}=${userParamVal}',
+    'contextflag':
+      '${base}/cflag2/${basePrefix}ecf0k=${cflagKey}&ecf0v=${cflagVal}',
   },
   'transport': {
     'beacon': false,
@@ -43,3 +47,5 @@ export const EULERIANANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {EULERIANANALYTICS_CONFIG};

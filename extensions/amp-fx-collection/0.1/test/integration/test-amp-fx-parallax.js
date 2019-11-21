@@ -16,7 +16,6 @@
 
 const config = describe.configure().ifChrome();
 config.run('amp-fx-collection', function() {
-
   const css = `
     .spacer {
       height: 100vh;
@@ -43,26 +42,30 @@ config.run('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration("amp-fx='parallax'", {
-    body: normalParallaxBody,
-    css,
-    extensions,
-  }, env => {
+  describes.integration(
+    "amp-fx='parallax'",
+    {
+      body: normalParallaxBody,
+      css,
+      extensions,
+    },
+    env => {
+      let win;
+      beforeEach(() => {
+        win = env.win;
+      });
 
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    it('runs parallax animation with normal parallax', () => {
-      expect(getTop(win)).to.equal(getViewportHeight(win));
-      win.scrollTo(0, 0.1 * getViewportHeight(win));
-      return Promise.resolve().then(timeout(2000))
+      it('runs parallax animation with normal parallax', () => {
+        expect(getTop(win)).to.equal(getViewportHeight(win));
+        win.scrollTo(0, 0.1 * getViewportHeight(win));
+        return Promise.resolve()
+          .then(timeout(2000))
           .then(() => {
             expect(getTop(win)).to.equal(0.9 * getViewportHeight(win));
           });
-    });
-  });
+      });
+    }
+  );
 
   const fastParallaxBody = `
     <div class="spacer"></div>
@@ -73,26 +76,30 @@ config.run('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration("amp-fx='parallax'", {
-    body: fastParallaxBody,
-    css,
-    extensions,
-  }, env => {
+  describes.integration(
+    "amp-fx='parallax'",
+    {
+      body: fastParallaxBody,
+      css,
+      extensions,
+    },
+    env => {
+      let win;
+      beforeEach(() => {
+        win = env.win;
+      });
 
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    it('runs parallax animation with fast parallax', () => {
-      expect(getTop(win)).to.equal(getViewportHeight(win));
-      win.scrollTo(0, 0.1 * getViewportHeight(win));
-      return Promise.resolve().then(timeout(2000))
+      it('runs parallax animation with fast parallax', () => {
+        expect(getTop(win)).to.equal(getViewportHeight(win));
+        win.scrollTo(0, 0.1 * getViewportHeight(win));
+        return Promise.resolve()
+          .then(timeout(2000))
           .then(() => {
             expect(getTop(win)).to.be.below(0.9 * getViewportHeight(win));
           });
-    });
-  });
+      });
+    }
+  );
 
   const slowParallaxBody = `
     <div class="spacer"></div>
@@ -103,26 +110,30 @@ config.run('amp-fx-collection', function() {
     <div class="spacer"></div>
   `;
 
-  describes.integration("amp-fx='parallax'", {
-    body: slowParallaxBody,
-    css,
-    extensions,
-  }, env => {
+  describes.integration(
+    "amp-fx='parallax'",
+    {
+      body: slowParallaxBody,
+      css,
+      extensions,
+    },
+    env => {
+      let win;
+      beforeEach(() => {
+        win = env.win;
+      });
 
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    it('runs parallax animation with slow parallax', () => {
-      expect(getTop(win)).to.equal(getViewportHeight(win));
-      win.scrollTo(0, 0.1 * getViewportHeight(win));
-      return Promise.resolve().then(timeout(2000))
+      it('runs parallax animation with slow parallax', () => {
+        expect(getTop(win)).to.equal(getViewportHeight(win));
+        win.scrollTo(0, 0.1 * getViewportHeight(win));
+        return Promise.resolve()
+          .then(timeout(2000))
           .then(() => {
             expect(getTop(win)).to.be.above(0.9 * getViewportHeight(win));
           });
-    });
-  });
+      });
+    }
+  );
 });
 
 function getTop(win) {

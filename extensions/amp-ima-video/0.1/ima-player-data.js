@@ -15,7 +15,6 @@
  */
 
 export class ImaPlayerData {
-
   /**
    * Create a new ImaPlayerData object.
    *

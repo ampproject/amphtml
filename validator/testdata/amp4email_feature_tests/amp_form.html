@@ -81,6 +81,15 @@
     <input name="googlesearch">
     <input type="submit" value="OK">
   </form>
+  <!-- Invalid: only absolute URL is allowed. -->
+  <form method="GET" action-xhr="endpoint">
+    <input name="googlesearch">
+    <input type="submit" value="OK">
+  </form>
+  <form method="POST" action-xhr="endpoint">
+    <input name="googlesearch">
+    <input type="submit" value="OK">
+  </form>
   <!-- Invalid: the action and target attributes are disallowed. -->
   <form method="GET"
     action="/components/amp-form/submit-form"
@@ -194,5 +203,11 @@
       <input type="submit" value="OK">
     </form>
   </template>
+  <!-- Invalid POST form with name. -->
+  <form method="post" name="post-form" action-xhr="https://example.com/subscribe">
+  </form>
+  <!-- Invalid GET form with name. -->
+  <form method="GET" name="get-form" action-xhr="https://someserver.com/endpoint">
+  </form>
 </body>
 </html>

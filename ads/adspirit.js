@@ -18,9 +18,9 @@ import {setStyles} from '../src/style';
 import {validateData} from '../3p/3p';
 
 /**
-  * @param {!Window} global
-  * @param {!Object} data
-  */
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function adspirit(global, data) {
   // TODO: check mandatory fields
   validateData(data, [], ['asmParams', 'asmHost']);

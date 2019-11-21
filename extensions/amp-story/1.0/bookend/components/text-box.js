@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {htmlFor} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
 import {userAssert} from '../../../../../src/log';
@@ -37,10 +41,14 @@ export class TextBoxComponent {
    * @override
    * */
   assertValidity(textboxJson) {
-    userAssert('text' in textboxJson && isArray(textboxJson['text']) &&
-      textboxJson['text'].length > 0, 'Textbox component must contain ' +
-      '`text` array and at least one element inside it, ' +
-      'skipping invalid.');
+    userAssert(
+      'text' in textboxJson &&
+        isArray(textboxJson['text']) &&
+        textboxJson['text'].length > 0,
+      'Textbox component must contain ' +
+        '`text` array and at least one element inside it, ' +
+        'skipping invalid.'
+    );
   }
 
   /**
@@ -53,14 +61,22 @@ export class TextBoxComponent {
   }
 
   /** @override */
-  buildElement(textboxData, doc) {
+  buildElement(textboxData, doc, data) {
     const html = htmlFor(doc);
-    const container =
-        html`
-        <div class="i-amphtml-story-bookend-textbox
-          i-amphtml-story-bookend-component"></div>`;
+    const container = html`
+      <div
+        class="i-amphtml-story-bookend-textbox
+          i-amphtml-story-bookend-component"
+      ></div>
+    `;
+    container[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+      position: data.position,
+      type: BOOKEND_COMPONENT_TYPES.TEXTBOX,
+    };
 
-    let textSeed = html`<h3 class="i-amphtml-story-bookend-text"></h3>`;
+    let textSeed = html`
+      <h3 class="i-amphtml-story-bookend-text"></h3>
+    `;
     textboxData['text'].forEach(currentLine => {
       const el = textSeed.cloneNode(/* deep */ true);
       el.textContent = currentLine;

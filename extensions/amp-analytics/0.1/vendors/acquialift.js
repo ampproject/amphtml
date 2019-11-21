@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const ACQUIALIFT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const ACQUIALIFT_CONFIG = jsonLiteral({
   'vars': {
     'decisionApiUrl': 'us-east-1-decisionapi.lift.acquia.com',
     'accountId': 'xxxxxxxx',
@@ -22,18 +24,18 @@ export const ACQUIALIFT_CONFIG = /** @type {!JsonObject} */ ({
   },
   'transport': {'beacon': true, 'xhrpost': true, 'image': false},
   'requests': {
-    'base': 'https://${decisionApiUrl}/capture?account_id=${accountId}&site_id=${siteId}',
-    'basicCapture': '${base}' +
+    'base':
+      'https://${decisionApiUrl}/capture?account_id=${accountId}&site_id=${siteId}',
+    'basicCapture':
+      '${base}' +
       '&ident=${clientId(tc_ptid)}' +
       '&identsrc=amp' +
       '&es=Amp' +
       '&url=${canonicalUrl}' +
       '&rurl=${documentReferrer}' +
       '&cttl=${title}',
-    'pageview': '${basicCapture}' +
-      '&en=Content View',
-    'click': '${basicCapture}' +
-      '&en=Click-Through',
+    'pageview': '${basicCapture}&en=Content View',
+    'click': '${basicCapture}&en=Click-Through',
   },
   'triggers': {
     'defaultPageview': {
@@ -42,3 +44,5 @@ export const ACQUIALIFT_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {ACQUIALIFT_CONFIG};
