@@ -318,7 +318,9 @@ function warnForConsoleError() {
   };
   self.allowConsoleError = function(func) {
     consoleErrorStub.reset();
-    consoleErrorStub.callsFake(() => {});
+    consoleErrorStub.callsFake(() => {
+      console.timeEnd('callErrorStub');
+    });
     const result = func();
     try {
       expect(consoleErrorStub).to.have.been.called;
@@ -377,7 +379,9 @@ function preventAsyncErrorThrows() {
     rethrowAsyncSandbox = sinon.createSandbox();
     rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
       const error = log.createErrorVargs.apply(null, args);
+      console.time('ampRreportError');
       self.__AMP_REPORT_ERROR(error);
+      console.timeEnd('ampRreportError');
       throw error;
     });
   };

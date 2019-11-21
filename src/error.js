@@ -148,6 +148,7 @@ export function reportErrorForWin(win, error, opt_associatedElement) {
  * @return {!Error}
  */
 export function reportError(error, opt_associatedElement) {
+  console.time('reportError');
   try {
     // Convert error to the expected type.
     let isValidError;
@@ -197,7 +198,10 @@ export function reportError(error, opt_associatedElement) {
         if (element) {
           output.call(console, error.message, element);
         } else if (!getMode().minified) {
+          console.time('consoleCall');
+          console.time('callErrorStub');
           output.call(console, error.stack);
+          console.timeEnd('consoleCall');
         } else {
           output.call(console, error.message);
         }
@@ -222,6 +226,7 @@ export function reportError(error, opt_associatedElement) {
       throw errorReportingError;
     });
   }
+  console.timeEnd('reportError');
   return /** @type {!Error} */ (error);
 }
 
