@@ -67,6 +67,14 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       );
     });
 
+    it('migrates promptIfUnknownForGeoGroup', () => {
+      const config = dict({
+        'consentInstanceId': 'ABC',
+        'checkConsentHref': 'https://response1',
+        'promptIfUnknownForGeoGroup': 'nafta',
+      });
+    });
+
     it('support deprecated config format', () => {
       appendConfigScriptElement(
         doc,
