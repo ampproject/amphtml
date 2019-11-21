@@ -104,7 +104,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.sandbox_ = '';
 
     /** @private {Function} */
-    this.unlisten_ = null;
+    this.unlistenPym_ = null;
 
     /**
      * The source of the iframe. May change to null for tracking iframes
@@ -474,7 +474,7 @@ export class AmpIframe extends AMP.BaseElement {
     );
 
     // Listen for resize messages sent by Pym.js.
-    this.unlisten_ = listen(
+    this.unlistenPym_ = listen(
       window,
       'message',
       this.listenForPymMessage_.bind(this)
@@ -568,9 +568,9 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
-    if (this.unlisten_) {
-      this.unlisten_();
-      this.unlisten_ = null;
+    if (this.unlistenPym_) {
+      this.unlistenPym_();
+      this.unlistenPym_ = null;
     }
     if (this.iframe_) {
       removeElement(this.iframe_);
