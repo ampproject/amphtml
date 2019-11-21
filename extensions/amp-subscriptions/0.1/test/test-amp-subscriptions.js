@@ -804,8 +804,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(setGrantStateStub).to.not.be.called;
     });
 
-    // TODO: Fix this test! It's silently failing.
-    it('should fallback if viewer provides auth but fails', function*() {
+    it('should fallback if viewer provides auth but fails', async () => {
       // Make sendMessageAwaitResponse() return a pending promise so we have
       // a chance to stub the platform store.
       let rejecter;
@@ -813,18 +812,23 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         rejecter = reject;
       });
       subscriptionService.start();
-      yield subscriptionService.initialize_();
+      await subscriptionService.initialize_();
       // Local platform store not created until initialization.
       const platformStore = subscriptionService.platformStore_;
-      env.sandbox.stub(platformStore, 'reportPlatformFailureAndFallback');
-      rejecter();
-      // Wait for sendMessageAwaitResponse() to be rejected.
-      yield sendMessageAwaitResponsePromise;
-      // reportPlatformFailureAndFallback() triggers the fallback entitlement.
-      expect(platformStore.reportPlatformFailureAndFallback).calledWith(
-        'local'
+      const stub = env.sandbox.stub(
+        platformStore,
+        'reportPlatformFailureAndFallback'
       );
-      expect(false).to.equal(true);
+      rejecter();
+
+      // Wait for sendMessageAwaitResponse() to be rejected.
+      let ticks = 4;
+      while (ticks--) {
+        await 'Event loop tick';
+      }
+
+      // reportPlatformFailureAndFallback() triggers the fallback entitlement.
+      expect(stub).to.be.calledWith('local');
     });
   });
 
