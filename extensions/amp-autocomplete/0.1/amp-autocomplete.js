@@ -250,10 +250,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       `${TAG} should provide a <template> or <script type="plain/text"> element.`
     );
     userAssert(
-      !this.isSsr || !this.element.hasAttribute('filter'),
+      !this.isSsr_ || !this.element.hasAttribute('filter'),
       `${TAG} does not support client-side filter when server-side render is possible`
     );
-    this.filter_ = this.isSsr
+    this.filter_ = this.isSsr_
       ? FilterType.NONE
       : userAssert(
           this.element.getAttribute('filter'),
