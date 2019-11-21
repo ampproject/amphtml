@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 /**
  * Test for {@link EOFToken}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class EOFTokenTest {

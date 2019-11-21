@@ -30,12 +30,16 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Test for {@link Canonicalizer}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class CanonicalizerTest {
@@ -131,12 +135,13 @@ public class CanonicalizerTest {
       tokens.add(new Token(SACParserCSS3Constants.IDENT, "square"));
       tokens.add(new Token(SACParserCSS3Constants.S, " "));
       tokens.add(new Token(SACParserCSS3Constants.FUNCTION, "and"));
+      tokens.add(new Token(SACParserCSS3Constants.EOF, ""));
       TokenStream tokenStream = new TokenStream(tokens);
       tokenStream.consume();
 
       List<com.steadystate.css.parser.Token> tokensEmpty = new LinkedList<>();
       Assert.assertTrue(Canonicalizer.consumeAComponentValue(tokenStream, tokensEmpty, 3));
-      Assert.assertEquals(tokensEmpty.size(), 7);
+      Assert.assertEquals(tokensEmpty.size(), 9);
 
       Assert.assertFalse(Canonicalizer.consumeAComponentValue(tokenStream, tokensEmpty, 100000));
     } catch (CssValidationException e) {

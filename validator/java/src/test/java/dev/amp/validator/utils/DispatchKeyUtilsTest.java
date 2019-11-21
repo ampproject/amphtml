@@ -45,7 +45,7 @@ public class DispatchKeyUtilsTest {
       "amp-image-lightbox", ""), "custom-element\u0000amp-image-lightbox\u0000true");
   }
 
-  @Test(expectedExceptions=AssertionError.class)
+  @Test(expectedExceptions = AssertionError.class)
   public void testMakeDispatchKeyNoneDispatch() {
     DispatchKeyUtils.makeDispatchKey(DispatchKeyType.NONE_DISPATCH, "custom-element",
       "amp-image-lightbox", "");

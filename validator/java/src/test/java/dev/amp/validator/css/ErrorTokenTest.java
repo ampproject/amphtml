@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Test for {@link ErrorToken}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class ErrorTokenTest {

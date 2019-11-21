@@ -37,7 +37,7 @@ import static org.mockito.Mockito.doAnswer;
 /**
  * Test for {@link QualifiedRule}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class QualifiedRuleTest {

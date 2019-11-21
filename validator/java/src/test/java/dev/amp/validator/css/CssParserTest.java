@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Test for {@link CssParser}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class CssParserTest {

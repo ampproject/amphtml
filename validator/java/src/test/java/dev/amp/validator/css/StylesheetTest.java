@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Test for {@link Stylesheet}
  *
- * @author gluo17
+ * @author GeorgeLuo
  */
 
 public class StylesheetTest {

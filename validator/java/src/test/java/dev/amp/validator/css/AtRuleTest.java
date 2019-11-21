@@ -34,33 +34,18 @@ import java.util.List;
 
 import static org.mockito.Mockito.doAnswer;
 
+/**
+ * Test for {@link AtRule}
+ *
+ * @author GeorgeLuo
+ */
+
 public class AtRuleTest {
 
   @BeforeClass
   public void init() {
     canonicalizer = Mockito.mock(Canonicalizer.class);
     atRule = new AtRule("@media");
-  }
-
-
-  @Test
-  public void testGetTokenType() {
-  }
-
-  @Test
-  public void testSetRules() {
-  }
-
-  @Test
-  public void testSetDeclarations() {
-  }
-
-  @Test
-  public void testGetName() {
-  }
-
-  @Test
-  public void testGetPrelude() {
   }
 
   @Test
