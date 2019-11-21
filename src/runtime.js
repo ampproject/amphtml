@@ -25,6 +25,8 @@ import {
 } from './log';
 import {MultidocManager} from './multidoc-manager';
 import {Services} from './services';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {config} from './config';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
@@ -176,8 +178,15 @@ function adoptShared(global, callback) {
   /**
    * Installs services for the given AMP document (used for
    * shadow documents and amp-next-page)
+   * @export
    */
   global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
+
+  /**
+   * Exports the combined (shared and doc) styles
+   * @export
+   */
+  global.AMP.combinedCss = ampDocCss + ampSharedCss;
 
   // Run specific setup for a single-doc or shadow-doc mode.
   const iniPromise = callback(global, extensions);
