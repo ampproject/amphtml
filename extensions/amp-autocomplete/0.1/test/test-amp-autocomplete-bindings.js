@@ -27,19 +27,16 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc, input, binding;
+    let win, doc, input;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       input = doc.createElement('input');
-      binding = createElementWithAttributes();
     });
 
-    function createElementWithAttributes(attributes) {
-      const element = doc.createElement('div');
-      element.setAttribute('layout', 'container');
-      element.setAttribute('filter', 'substring');
+    function createElementWithAttributes(doc, tag, attributes) {
+      const element = doc.createElement(tag);
       for (const key in attributes) {
         element.setAttribute(key, attributes[key]);
       }
@@ -58,6 +55,20 @@ describes.realWin(
     }
 
     describe('Single binding', () => {
+      let binding;
+
+      function createSingleElementWithAttributes(attr = {}) {
+        return createElementWithAttributes(
+          doc,
+          'div',
+          Object.assign(attr, {layout: 'container'})
+        );
+      }
+
+      beforeEach(() => {
+        binding = createSingleElementWithAttributes({filter: 'substring'});
+      });
+
       it('should always intend to autocomplete', () => {
         expect(binding.shouldAutocomplete(input)).to.be.true;
       });
@@ -81,18 +92,16 @@ describes.realWin(
       });
 
       it('should error when suggest first is present without prefix filter', () => {
-        binding = createElementWithAttributes({
+        binding = createSingleElementWithAttributes({
           'suggest-first': 'true',
         });
-        expect(() =>
-          createElementWithAttributes({
-            'suggest-first': 'true',
-          }).shouldSuggestFirst()
-        ).to.throw(/"suggest-first" requires "filter" type "prefix"/);
+        expect(() => binding.shouldSuggestFirst()).to.throw(
+          /"suggest-first" requires "filter" type "prefix"/
+        );
       });
 
       it('should not suggest first when attribute is not present', () => {
-        binding = createElementWithAttributes({
+        binding = createSingleElementWithAttributes({
           'suggest-first': 'true',
           'filter': 'prefix',
         });
@@ -132,7 +141,9 @@ describes.realWin(
       });
 
       it('should not prevent submission when "submit-on-enter" is true', () => {
-        binding = createElementWithAttributes({'submit-on-enter': 'true'});
+        binding = createElementWithAttributes(doc, 'div', {
+          'submit-on-enter': 'true',
+        });
         expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.false;
         expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
       });
@@ -142,8 +153,15 @@ describes.realWin(
       let pre, userInput, match, binding;
 
       function createInlineElementWithAttributes(attr = {}) {
-        attr['inline'] = ['@'];
-        return createElementWithAttributes(attr);
+        return createElementWithAttributes(
+          doc,
+          'div',
+          Object.assign(attr, {
+            layout: 'container',
+            filter: 'substring',
+            inline: '@',
+          })
+        );
       }
 
       beforeEach(() => {
@@ -176,7 +194,7 @@ describes.realWin(
         expect(binding.match_).to.equal(match);
 
         expect(binding.shouldAutocomplete(input)).to.be.false;
-        expect(binding.match_).to.equal(null);
+        expect(binding.match_).to.be.null;
       });
 
       it('should provide partial user input based on the stored match', () => {
@@ -208,14 +226,10 @@ describes.realWin(
       it('should not do anything to input value', () => {
         const initial = input.value;
         const selectionSpy = env.sandbox.spy(input, 'setSelectionRange');
-
         binding.resetInputOnWrapAround('', input);
         binding.resetInputOnWrapAround('asdf', input);
-
         binding.displayActiveItemInInput(input, 'apple', '');
-
         binding.removeSelectionHighlighting(input);
-
         expect(input.value).to.equal(initial);
         expect(selectionSpy).not.to.have.been.called;
       });
