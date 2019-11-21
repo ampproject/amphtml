@@ -119,7 +119,7 @@ describes.realWin(
       it('should display active item in input', () => {
         return getBindingStub().then(binding => {
           input.focus();
-          const selectionSpy = sandbox.spy(input, 'setSelectionRange');
+          const selectionSpy = env.sandbox.spy(input, 'setSelectionRange');
           expect(input.value).to.equal('');
 
           binding.displayActiveItemInInput(input, 'apple', '');
@@ -190,7 +190,7 @@ describes.realWin(
 
       it('should autocomplete based on found matches', () => {
         return getInlineBinding().then(binding => {
-          sandbox
+          env.sandbox
             .stub(binding, 'getClosestPriorMatch_')
             .onFirstCall()
             .returns(match)
@@ -245,7 +245,7 @@ describes.realWin(
       it('should not do anything to input value', () => {
         return getInlineBinding().then(binding => {
           const initial = input.value;
-          const selectionSpy = sandbox.spy(input, 'setSelectionRange');
+          const selectionSpy = env.sandbox.spy(input, 'setSelectionRange');
 
           binding.resetInputOnWrapAround('', input);
           binding.resetInputOnWrapAround('asdf', input);

@@ -410,10 +410,12 @@ describes.realWin(
         return element
           .layoutCallback()
           .then(() => {
-            renderSpy = sandbox.spy(impl, 'renderResults_');
-            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-            clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
-            sandbox.stub(impl.binding_, 'shouldAutocomplete').returns(false);
+            renderSpy = env.sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            clearAllItemsSpy = env.sandbox.spy(impl, 'clearAllItems_');
+            env.sandbox
+              .stub(impl.binding_, 'shouldAutocomplete')
+              .returns(false);
             return impl.inputHandler_();
           })
           .then(() => {
@@ -427,12 +429,12 @@ describes.realWin(
         return element
           .layoutCallback()
           .then(() => {
-            renderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
-            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-            remoteDataSpy = sandbox
+            renderSpy = env.sandbox.spy(impl, 'filterDataAndRenderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            remoteDataSpy = env.sandbox
               .stub(impl, 'getRemoteData_')
               .resolves(['abc']);
-            sandbox.stub(impl.binding_, 'shouldAutocomplete').returns(true);
+            env.sandbox.stub(impl.binding_, 'shouldAutocomplete').returns(true);
             expect(impl.isEmail_).to.be.false;
             return impl.inputHandler_();
           })
@@ -632,8 +634,8 @@ describes.realWin(
         return layoutAndSetSpies()
           .then(() => {
             impl.activeElement_ = impl.createElementFromItem_('abc');
-            sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
-            sandbox
+            env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
+            env.sandbox
               .stub(impl.binding_, 'shouldPreventFormSubmissionOnEnter')
               .returns(true);
             return impl.keyDownHandler_(event);
@@ -678,7 +680,7 @@ describes.realWin(
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
-      sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
+      env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
       const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
       return element
         .layoutCallback()
