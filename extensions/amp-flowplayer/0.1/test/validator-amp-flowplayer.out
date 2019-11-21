@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 |
@@ -31,8 +31,6 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-flowplayer layout="responsive" data-id="cad9d975-ccae-4757-88a3-a65ebb7419f8" data-pid="cad9d975-ccae-4757-88a3-a65ebb7419f8"></amp-flowplayer>
->>   ^~~~~~~~~
-amp-flowplayer/0.1/test/validator-amp-flowplayer.html:33:2 The mandatory attribute 'height' is missing in tag 'amp-flowplayer'. (see https://amp.dev/documentation/components/amp-flowplayer) [AMP_LAYOUT_PROBLEM]
+|    <amp-flowplayer width="160" height="90" layout="responsive" data-id="cad9d975-ccae-4757-88a3-a65ebb7419f8" data-pid="cad9d975-ccae-4757-88a3-a65ebb7419f8"></amp-flowplayer>
 |  </body>
 |  </html>
