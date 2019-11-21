@@ -52,6 +52,12 @@ window.addEventListener('message', function(event) {
             sentinel: sentinel,
             type: 'send-embed-state',
           }, '*');
+    } else if (event.data.type === 'requestPymjsHeight') {
+      var msg = [ 'pym', 'height', event.data.height ].join( 'xPYMx' );
+      getAmpWindow(sentinel)./*OK*/postMessage( msg, '*');
+    } else if (event.data.type === 'requestPymjsWidth') {
+      var msg = [ 'pym', 'width', event.data.height ].join( 'xPYMx' );
+      getAmpWindow(sentinel)./*OK*/postMessage( msg, '*');
     }
   }
 });
