@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
@@ -30,6 +36,7 @@ const TAG = 'amp-story-quiz';
 
 /**
  * Generates the template for the quiz
+ *
  * @param {!Element} element
  * @return {!Element}
  */
@@ -73,6 +80,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @const @private {!../../../src/service/action-impl.ActionService} */
+    this.actions_ = Services.actionServiceForDoc(this.element);
   }
 
   /** @override */
@@ -85,6 +95,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * Reacts to RTL state updates and triggers the UI for RTL.
+   *
    * @param {boolean} rtlState
    * @private
    */
@@ -111,6 +122,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /**
    * Finds the prompt and options content
    * and adds it to the quiz element.
+   *
    * @private
    */
   attachContent_() {
@@ -149,6 +161,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * Creates an option container with option content,
    * adds styling and answer choices,
    * and adds it to the quiz element.
+   *
    * @param {HTMLOptionElement} option
    * @param {number} index
    * @private
@@ -165,13 +178,22 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     const optionText = document.createElement('span');
     optionText.setAttribute('class', 'i-amp-story-quiz-option-text');
     optionText.textContent = option.textContent;
-    // const optionText = document.createTextNode(option.textContent);
     convertedOption.append(optionText);
 
     if (option.hasAttribute('correct')) {
       convertedOption.setAttribute('correct', 'correct');
     }
     option.remove();
+
+    convertedOption.setAttribute(
+      'id',
+      `${this.element.id}+${answerChoiceOptions[index]}`
+    );
+
+    convertedOption.setAttribute(
+      'on',
+      `tap:${this.element.id}.triggerInteraction`
+    );
 
     // Add the option to the quiz element
     this.quizEl_
@@ -181,9 +203,20 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * Attaches functions to each option to handle state transition.
+   *
    * @private
    */
   initializeListeners_() {
+    // Configure the response action
+    const actions = [
+      {tagOrTarget: 'AMP-STORY-QUIZ', method: 'triggerInteraction'},
+    ];
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+
+    this.registerAction('triggerInteraction', actionInvocation => {
+      this.handleOptionSelection_(actionInvocation.caller);
+    });
+
     // Add a listener for changes in the RTL state
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
@@ -193,9 +226,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    // Add a click listener to the element to handle option selection and navigation via tapping the prompt
+    // Add a click listener to the element to trigger the action via tapping the prompt
     this.quizEl_.addEventListener('click', e => {
-      const optionElement = closest(
+      if (this.hasReceivedResponse_) {
+        return;
+      }
+
+      const optionEl = closest(
         e.target,
         element => {
           return element.classList.contains('i-amp-story-quiz-option');
@@ -203,23 +240,22 @@ export class AmpStoryQuiz extends AMP.BaseElement {
         this.quizEl_
       );
 
-      if (optionElement) {
-        this.handleOptionClick_(optionElement);
-        this.hasReceivedResponse_ = true;
+      if (optionEl) {
+        this.actions_.trigger(optionEl, 'tap', e, ActionTrust.HIGH);
       }
     });
   }
 
   /**
-   * @param {!Element} p
+   * Triggers changes to quiz state on response interaction
+   *
+   * @param {!Element} optionEl
    * @private
    */
-  handleOptionClick_(p) {
-    if (this.hasReceivedResponse_) {
-      return;
-    }
-
-    p.classList.add('i-amp-story-quiz-option-selected');
+  handleOptionSelection_(optionEl) {
+    optionEl.classList.add('i-amp-story-quiz-option-selected');
     this.quizEl_.classList.add('i-amp-story-quiz-post-selection');
+
+    this.hasReceivedResponse_ = true;
   }
 }
