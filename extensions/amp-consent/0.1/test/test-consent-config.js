@@ -153,6 +153,38 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       );
     });
 
+    it.only('sets consentRequired when not given', () => {
+      const scriptElement = doc.createElement('script');
+      scriptElement.textContent = JSON.stringify(defaultConfig);
+      scriptElement.setAttribute('type', 'application/json');
+      element.appendChild(scriptElement);
+      expect(
+        new ConsentConfig(element).getConsentConfig()
+      ).to.eventually.deep.equal(
+        dict({
+          'consentInstanceId': 'ABC',
+          'checkConsentHref': 'https://response1',
+          'consentRequired': 'remote',
+        })
+      );
+
+      scriptElement.textContent = JSON.stringify(
+        dict({
+          'consentInstanceId': 'ABC',
+        })
+      );
+      scriptElement.setAttribute('type', 'application/json');
+      element.appendChild(scriptElement);
+      expect(
+        new ConsentConfig(element).getConsentConfig()
+      ).to.eventually.deep.equal(
+        dict({
+          'consentInstanceId': 'ABC',
+          'consentRequired': false,
+        })
+      );
+    });
+
     it('assert valid config', () => {
       const scriptTypeError =
         'amp-consent/consent-config: <script> child ' +
