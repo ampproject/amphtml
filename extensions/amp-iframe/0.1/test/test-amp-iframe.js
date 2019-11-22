@@ -80,6 +80,24 @@ describes.realWin(
         setTrackingIframeTimeoutForTesting(20);
       });
 
+      function stubUserAsserts() {
+        const errors = [];
+        env.sandbox.stub(user(), 'assert')
+          .callsFake((shouldBeTrueish, message) => {
+            if (!shouldBeTrueish) {
+              errors.push(message);
+            }
+            return shouldBeTrueish;
+          });
+        const replay = function() {
+          if (errors.length > 0) {
+            throw errors[0];
+          }
+        };
+        replay.errors = errors;
+        return replay;
+      }
+
       function waitForJsInIframe(opt_ranJs = 1, opt_timeout = 300) {
         return poll(
           'waiting for JS to run',
@@ -320,22 +338,15 @@ describes.realWin(
       });
 
       it('should deny http', async () => {
-        expectAsyncConsoleError(/Must start with https/, 1);
-        let ampIframe;
-        try {
-          ampIframe = createAmpIframe(env, {
-            src: 'http://google.com/fpp',
-            sandbox: 'allow-scripts',
-            width: 100,
-            height: 100,
-          });
-          ampIframe.firstAttachedCallback();
-          await waitForAmpIframeLayoutPromise(doc, ampIframe);
-        } catch (e) {
-          if (ampIframe) {
-            expect(ampIframe.querySelector('iframe')).to.be.null;
-          }
-        }
+        const asserts = stubUserAsserts();
+        const ampIframe = createAmpIframe(env, {
+          src: 'http://google.com/fpp',
+          sandbox: 'allow-scripts',
+          width: 100,
+          height: 100,
+        });
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(asserts).to.throw(/Must start with https/);
       });
 
       it('should allow data-uri', function*() {
@@ -388,19 +399,20 @@ describes.realWin(
         });
       });
 
-      it('should deny srcdoc with allow-same-origin', function*() {
+      it('should deny srcdoc with allow-same-origin', async () => {
+        const asserts = stubUserAsserts();
         const ampIframe = createAmpIframe(env, {
           width: 100,
           height: 100,
           sandbox: 'allow-same-origin',
-          srcdoc: '',
+          srcdoc: 'test',
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const iframe = ampIframe.querySelector('iframe');
-        expect(iframe).to.be.null;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(asserts).to.throw(/allow-same-origin.*srcdoc/);
       });
 
-      it('should deny data uri with allow-same-origin', function*() {
+      it('should deny data uri with allow-same-origin', async () => {
+        const asserts = stubUserAsserts();
         const ampIframe = createAmpIframe(env, {
           width: 100,
           height: 100,
@@ -410,12 +422,12 @@ describes.realWin(
             'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
             'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const iframe = ampIframe.querySelector('iframe');
-        expect(iframe).to.be.null;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
       });
 
-      it('should deny DATA uri with allow-same-origin', function*() {
+      it('should deny DATA uri with allow-same-origin', async () => {
+        const asserts = stubUserAsserts();
         const ampIframe = createAmpIframe(env, {
           width: 100,
           height: 100,
@@ -425,9 +437,8 @@ describes.realWin(
             'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
             'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const iframe = ampIframe.querySelector('iframe');
-        expect(iframe).to.be.null;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
       });
 
       it('should deny same origin', () => {
