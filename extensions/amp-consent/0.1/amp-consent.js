@@ -102,7 +102,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentId_ = null;
 
     /** @private {?string} */
-    this.matchedGeoGroups_ = null;
+    this.matchedGeoGroup_ = null;
   }
 
   /** @override */
@@ -120,23 +120,21 @@ export class AmpConsent extends AMP.BaseElement {
 
     const configManager = new ConsentConfig(this.element);
 
-    configManager.getConsentConfigPromise().then(validatedConfig => {
-      this.initialize_(validatedConfig, configManager);
+    return configManager.getConsentConfigPromise().then(validatedConfig => {
+      this.matchedGeoGroup_ = configManager.getMatchedGeoGroups();
+      this.initialize_(validatedConfig);
     });
   }
 
   /**
    *
    * @param {!JsonObject} validatedConfig
-   * @param {!ConsentConfig} configManager
    */
-  initialize_(validatedConfig, configManager) {
+  initialize_(validatedConfig) {
     this.consentConfig_ = validatedConfig;
 
     // ConsentConfig has verified that there's one and only one consent instance
     this.consentId_ = this.consentConfig_['consentInstanceId'];
-
-    this.matchedGeoGroups_ = configManager.getMatchedGeoGroups();
 
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ = new ConsentUI(
@@ -538,7 +536,7 @@ export class AmpConsent extends AMP.BaseElement {
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentString': storedInfo['consentString'],
           'isDirty': !!storedInfo['isDirty'],
-          'matchedGeoGroups': this.matchedGeoGroups_,
+          'matchedGeoGroups': this.matchedGeoGroup_,
         });
         if (this.consentConfig_['clientConfig']) {
           request['clientConfig'] = this.consentConfig_['clientConfig'];
