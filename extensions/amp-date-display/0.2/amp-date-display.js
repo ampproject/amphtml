@@ -15,11 +15,13 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {PreactBaseElement} from '../../../src/preact-base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {dev, userAssert} from '../../../src/log';
+import {getRootNode, removeChildren} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
+import {requireExternal} from '../../../src/module';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -69,61 +71,45 @@ let VariablesDef;
  }} */
 let EnhancedVariablesDef;
 
-export class AmpDateDisplay extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @const {function(!Element)} */
-    this.boundRendered_ = this.rendered_.bind(this);
-
-    /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win);
-  }
-
-  /** @override */
-  buildCallback() {
-    // Note: One of datetime, timestamp-ms, timestamp-seconds is required.
-    this.templates_
-      .findAndRenderTemplate(this.element, data)
-      .then(this.boundRendered_);
-  }
-
-  /**
-   * @param {!Element} element
-   * @private
-   */
-  rendered_(element) {
-    this.mutateElement(() => {
-      removeChildren(dev().assertElement(this.container_));
-      this.container_.appendChild(element);
-
-      const event = createCustomEvent(
-        this.win,
-        AmpEvents.DOM_UPDATE,
-        /* detail */ null,
-        {bubbles: true}
-      );
-      this.element.dispatchEvent(event);
-    });
-  }
-}
+const preact = requireExternal('preact');
 
 /**
  * @param {!JsonObject} props
  * @return {*} TODO
  */
 function AmpDateDisplayComponent(props) {
-  const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
   const ref = preact.useRef();
-  const slot = preact.cloneElement(props['children'], {
-    ref,
-  });
+  const slot = preact.cloneElement(props['children'], {ref});
+  const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
+  const {templates} = props.services;
+
+  preact.useEffect(() => {
+    const {host} = getRootNode(ref.current);
+    templates.findAndRenderTemplate(host, data).then(rendered => {
+      const win = host.defaultView;
+      removeChildren(dev().assertElement(host));
+      const container = document.createElement('div');
+      container.appendChild(rendered);
+      host.appendChild(container);
+
+      const event = createCustomEvent(
+        win,
+        AmpEvents.DOM_UPDATE,
+        /* detail */ null,
+        {bubbles: true}
+      );
+      host.dispatchEvent(event);
+    });
+  }, []);
   return preact.createElement('div', null, slot);
 }
 
-const AmpDateDisplayReact = ReactBaseElement(AmpDateDisplayComponent, {
+const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
   passthrough: true,
+
+  services: {
+    'templates': {type: 'window', fn: Services.templatesFor},
+  },
 
   /** @override */
   isLayoutSupported(layout) {
@@ -280,6 +266,6 @@ function getVariablesInUTC(date, locale) {
   };
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.2', AMP => {
   AMP.registerElement(TAG, AmpDateDisplay);
 });
