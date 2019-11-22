@@ -82,7 +82,8 @@ describes.realWin(
 
       function stubUserAsserts() {
         const errors = [];
-        env.sandbox.stub(user(), 'assert')
+        env.sandbox
+          .stub(user(), 'assert')
           .callsFake((shouldBeTrueish, message) => {
             if (!shouldBeTrueish) {
               errors.push(message);
