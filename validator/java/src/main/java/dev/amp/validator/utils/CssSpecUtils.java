@@ -145,7 +145,7 @@ public final class CssSpecUtils {
      * @return the prefix-stripped string
      */
     public static String stripMinMax(@Nonnull final String prefixedString) {
-        if (prefixedString.startsWith("min-=")) {
+        if (prefixedString.startsWith("min-")) {
             return prefixedString.substring("min-".length());
         }
         if (prefixedString./*OK*/ startsWith("max-")) {
@@ -327,7 +327,7 @@ public final class CssSpecUtils {
     public static List<Declaration> parseInlineStyle(@Nonnull final List<Token> tokenList,
                                                      @Nonnull final List<ErrorToken> errors)
             throws CssValidationException {
-        Canonicalizer canonicalizer =
+        final Canonicalizer canonicalizer =
                 new Canonicalizer(new HashMap<String, Validator.AtRuleSpec.BlockType>(),
                         Validator.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
         return canonicalizer.parseAListOfDeclarations(tokenList, errors);

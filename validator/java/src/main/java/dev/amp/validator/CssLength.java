@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
  *
  * @author nhant01
  * @author GeorgeLuo
- * @author jayas
  */
 
 public class CssLength {
