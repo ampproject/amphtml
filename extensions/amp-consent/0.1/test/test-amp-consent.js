@@ -54,7 +54,7 @@ describes.realWin(
         'https://response1/': '{"promptIfUnknown": true}',
         'https://response2/': '{}',
         'https://response3/': '{"promptIfUnknown": false}',
-        'https://geoOverride-check/': '{"consentRequired": false}',
+        'https://geo-override-check/': '{"consentRequired": false}',
         'http://www.origin.com/r/1': '{}',
       };
 
@@ -65,7 +65,6 @@ describes.realWin(
           expect(init.method).to.equal('POST');
           return Promise.resolve({
             json() {
-              console.log(jsonMockResponses[url]);
               return Promise.resolve(JSON.parse(jsonMockResponses[url]));
             },
           });
@@ -105,11 +104,10 @@ describes.realWin(
       describe('consent config', () => {
         let consentElement;
 
-        it('get consent/policy/postPromptUI config', async () => {
+        it.only('get consent/policy/postPromptUI config', async () => {
           const config = dict({
             'consentInstanceId': 'test',
             'checkConsentHref': '/override',
-            'consentRequired': true,
             'clientConfig': {
               'test': 'ABC',
             },
@@ -134,7 +132,7 @@ describes.realWin(
           expect(ampConsent.policyConfig_['_auto_reject']).to.be.ok;
         });
 
-        it.only('relative checkConsentHref is resolved', async () => {
+        it('relative checkConsentHref is resolved', async () => {
           const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
           consentElement = createConsentElement(
             doc,
@@ -196,13 +194,13 @@ describes.realWin(
         });
       });
 
-      it('send post request to server when consentRequired is remote', async () => {
+      it('sends post request to server when consentRequired is remote', async () => {
+        toggleExperiment(win, 'amp-consent-geo-override');
+
         const remoteConfig = {
-          'consents': {
-            'consentInstanceId': 'abc',
-            'consentRequired': 'remote',
-            'checkConsentHref': 'https://geoOverride-check/',
-          },
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://geo-override-check/',
         };
         consentElement = createConsentElement(doc, remoteConfig);
         doc.body.appendChild(consentElement);
