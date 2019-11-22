@@ -92,7 +92,7 @@ export class PooolVendor {
     this.itemID_ = this.pooolConfig_['itemID'] || '';
 
     /** @const {!Element} */
-    this.iframe_ = document.createElement('iframe');
+    this.iframe_ = this.ampdoc.win.document.createElement('iframe');
 
     this.initializeIframe_();
 
@@ -175,7 +175,7 @@ export class PooolVendor {
    * @private
    */
   renderPoool_() {
-    const pooolContainer = document.getElementById('poool');
+    const pooolContainer = this.ampdoc.getElementById('poool');
     const urlPromise = this.accessSource_.buildUrl(
       addParamsToUrl(
         this.iframeUrl_,
@@ -208,10 +208,16 @@ export class PooolVendor {
    * @private
    */
   onRelease_() {
-    const articlePreview = document.querySelector('[poool-access-preview]');
+    const articlePreview = this.ampdoc
+      .getRootNode()
+      .querySelector('[poool-access-preview]');
     articlePreview.setAttribute('amp-access-hide', '');
-    const articleContent = document.querySelector('[poool-access-content]');
+
+    const articleContent = this.ampdoc
+      .getRootNode()
+      .querySelector('[poool-access-content]');
     articleContent.removeAttribute('amp-access-hide');
+
     resetStyles(this.iframe_, ['transform']);
   }
 

@@ -1234,4 +1234,12 @@ export class AmpStoryEmbeddedComponent {
       {bubbles: true}
     );
   }
+
+  /**
+   * @visibleForTesting
+   * @return {?Element}
+   */
+  getShadowRootForTesting() {
+    return this.shadowRoot_;
+  }
 }

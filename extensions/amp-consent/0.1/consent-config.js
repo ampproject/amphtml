@@ -18,7 +18,7 @@ import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
-import {deepMerge} from '../../../src/utils/object';
+import {deepMerge, map} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
@@ -44,13 +44,14 @@ export class ConsentConfig {
 
     /** @private {?string} */
     this.matchedGeoGroups_ = null;
-    /** @private {?Promise<?JsonObject>} */
+
+    /** @private {?Promise<!JsonObject>} */
     this.configPromise_ = null;
   }
 
   /**
    * Read validate and return the config
-   * @return {!Promise<JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   getConsentConfigPromise() {
     if (!this.config_) {
@@ -123,7 +124,7 @@ export class ConsentConfig {
    *  "consentInstanceId": "ABC",
    *  "checkConsentHref": "https://fake.com"
    * }
-   * @return {!Promise<JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
@@ -162,42 +163,55 @@ export class ConsentConfig {
         }
       }
     }
-
-    return this.mergeGeoOverride_(config).then(() => config);
+    return this.mergeGeoOverride_(config).then(mergedConfig =>
+      this.validateMergedGeoOverride_(mergedConfig)
+    );
   }
 
   /**
-   * Merge correct geoOverride object into toplevel config, then
-   * validate.
-   * @param {JsonObject} config
-   * @return {!Promise}
+   * Merge correct geoOverride object into toplevel config.
+   * @param {!JsonObject} config
+   * @return {!Promise<!JsonObject>}
    */
   mergeGeoOverride_(config) {
-    if (config['geoOverride']) {
-      Services.geoForDocOrNull(this.element_).then(geoService => {
-        userAssert(geoService, 'requires <amp-geo> to use geoOverride');
-        const geoGroups = Object.keys(config['geoOverride']);
-        for (let i = 0; i < geoGroups.length; i++) {
-          if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-            config = /** @type {!JsonObject} */ (deepMerge(
-              config,
-              config['geoOverride'][geoGroups[i]],
-              1
-            ));
-            this.matchedGeoGroups_ = geoGroups[i];
-          }
-        }
-        delete config['geoOverride'];
-      });
+    if (!config['geoOverride']) {
+      return Promise.resolve(config);
     }
-    if (config['consentRequired'] === 'remote') {
+    return Services.geoForDocOrNull(this.element_).then(geoService => {
       userAssert(
-        config['checkConsentHref'],
-        'checkConsentHref must be specified if consentRequired is remote'
+        geoService,
+        '%s: requires <amp-geo> to use `geoOverride`',
+        TAG
       );
-      config['consentRequired'] = true;
+      const mergedConfig = map(config);
+
+      const geoGroups = Object.keys(config['geoOverride']);
+      // Stop at the first group that the geoService says we're in and then merge configs.
+      for (let i = 0; i < geoGroups.length; i++) {
+        if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+          deepMerge(mergedConfig, config['geoOverride'][geoGroups[i]], 1);
+          break;
+        }
+      }
+      delete mergedConfig['geoOverride'];
+      return mergedConfig;
+    });
+  }
+
+  /**
+   * Validate merged geoOverride
+   * @param {!JsonObject} mergedConfig
+   * @return {!JsonObject}
+   */
+  validateMergedGeoOverride_(mergedConfig) {
+    if (mergedConfig['consentRequired'] === 'remote') {
+      userAssert(
+        mergedConfig['checkConsentHref'],
+        '%s: `checkConsentHref` must be specified if `consentRequired` is remote',
+        TAG
+      );
     }
-    return Promise.resolve();
+    return mergedConfig;
   }
 
   /**
@@ -210,7 +224,7 @@ export class ConsentConfig {
     try {
       return getChildJsonConfig(this.element_);
     } catch (e) {
-      throw user(this.element_).createError('%s: %s', TAG, e);
+      throw user(this.element_).createError(TAG, e);
     }
   }
 

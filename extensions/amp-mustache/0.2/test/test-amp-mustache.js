@@ -28,18 +28,17 @@ describes.repeated(
     'with template[type=amp-mustache]': {templateType: 'template'},
   },
   (name, variant) => {
-    let sandbox;
     let viewerCanRenderTemplates = false;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
+      const getServiceForDocStub = window.sandbox.stub(
+        service,
+        'getServiceForDoc'
+      );
       getServiceForDocStub.returns({
         hasCapability: unused => viewerCanRenderTemplates,
       });
     });
-
-    afterEach(() => sandbox.restore());
 
     // This test suite runs twice. First by creating templates of type template
     // and then by creating templates encapsulated within script.
@@ -566,14 +565,14 @@ describes.repeated(
       });
 
       it('should not call mustache parsing', () => {
-        sandbox.spy(mustache, 'parse');
+        window.sandbox.spy(mustache, 'parse');
         template.compileCallback();
         expect(mustache.parse).to.have.not.been.called;
       });
 
       it('should not mustache render but still purify html', () => {
-        sandbox.spy(purifier, 'purifyHtml');
-        sandbox.spy(mustache, 'render');
+        window.sandbox.spy(purifier, 'purifyHtml');
+        window.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
         expect(mustache.render).to.have.not.been.called;
         expect(purifier.purifyHtml).to.have.been.called;

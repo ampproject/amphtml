@@ -93,9 +93,11 @@ describes.realWin(
       installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
 
       const resources = Services.resourcesForDoc(ampdoc);
-      sandbox.stub(resources, 'mutateElement').callsFake((element, mutator) => {
-        mutator();
-      });
+      env.sandbox
+        .stub(resources, 'mutateElement')
+        .callsFake((element, mutator) => {
+          mutator();
+        });
 
       unrelated = createElementWithAttributes(doc, 'div', {});
 
@@ -217,7 +219,7 @@ describes.realWin(
       let insertBeforeStub;
 
       beforeEach(() => {
-        insertBeforeStub = sandbox.stub(
+        insertBeforeStub = env.sandbox.stub(
           renderer.ampdoc_.getBody(),
           'insertBefore'
         );
