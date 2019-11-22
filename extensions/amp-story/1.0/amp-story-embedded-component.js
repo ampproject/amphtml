@@ -1015,7 +1015,7 @@ export class AmpStoryEmbeddedComponent {
     // When a window resize happens, we must reset the styles and prepare the
     // animation again.
     if (element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
-      elId = element.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
+      elId = parseInt(element.getAttribute(EMBED_ID_ATTRIBUTE_NAME), 10);
       const embedStyleEl = dev().assertElement(
         embedStyleEls[elId],
         `Failed to look up embed style element with ID ${elId}`
