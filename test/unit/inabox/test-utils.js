@@ -40,16 +40,16 @@ describes.realWin('inabox-utils', {}, env => {
     ampdoc = {win: env.win, getRootNode: () => ({})};
     iniLoadDeferred = new Deferred();
 
-    sandbox
+    env.sandbox
       .stub(IniLoad, 'whenContentIniLoad')
       .returns(iniLoadDeferred.promise);
-    sandbox
+    env.sandbox
       .stub(Services, 'viewportForDoc')
       .withArgs(ampdoc)
       .returns({getLayoutRect: () => ({})});
-    parentPostMessageStub = sandbox.stub();
-    dispatchEventStub = sandbox.stub();
-    initCustomEventStub = sandbox.stub();
+    parentPostMessageStub = env.sandbox.stub();
+    dispatchEventStub = env.sandbox.stub();
+    initCustomEventStub = env.sandbox.stub();
     env.win.parent = {postMessage: parentPostMessageStub};
     env.win.CustomEvent = (type, eventInit) => {
       initCustomEventStub(type, eventInit);

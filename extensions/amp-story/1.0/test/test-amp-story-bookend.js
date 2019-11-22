@@ -134,7 +134,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     storyElem.appendChild(bookendElem);
 
     requestService = new AmpStoryRequestService(win, storyElem);
-    sandbox.stub(Services, 'storyRequestService').returns(requestService);
+    env.sandbox.stub(Services, 'storyRequestService').returns(requestService);
 
     const localizationService = new LocalizationService(win);
     registerServiceBuilder(win, 'localization', () => localizationService);
@@ -146,8 +146,8 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     analyticsVariables = getVariableService(win);
 
     // Force sync mutateElement.
-    sandbox.stub(bookend, 'mutateElement').callsArg(0);
-    sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
+    env.sandbox.stub(bookend, 'mutateElement').callsArg(0);
+    env.sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
   });
 
   it('should build the users json', async () => {
@@ -212,7 +212,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
@@ -284,7 +284,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
@@ -318,7 +318,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -352,8 +352,8 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
-    const clickSpy = sandbox.spy();
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const clickSpy = env.sandbox.spy();
     doc.addEventListener('click', clickSpy);
 
     bookend.build();
@@ -393,8 +393,8 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
-    const analyticsSpy = sandbox.spy(analytics, 'triggerEvent');
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const analyticsSpy = env.sandbox.spy(analytics, 'triggerEvent');
 
     bookend.build();
     await bookend.loadConfigAndMaybeRenderBookend();
@@ -441,8 +441,8 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
-    const analyticsSpy = sandbox.spy(analytics, 'triggerEvent');
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const analyticsSpy = env.sandbox.spy(analytics, 'triggerEvent');
 
     bookend.build();
     await bookend.loadConfigAndMaybeRenderBookend();
@@ -485,7 +485,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -519,7 +519,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -559,7 +559,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -594,7 +594,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -636,7 +636,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -671,7 +671,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -713,7 +713,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -765,7 +765,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       'whatsapp',
     ];
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
@@ -792,7 +792,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
@@ -817,9 +817,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    const userWarnStub = sandbox.stub(user(), 'warn');
+    const userWarnStub = env.sandbox.stub(user(), 'warn');
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     await bookend.loadConfigAndMaybeRenderBookend();
@@ -1040,7 +1040,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     expectAsyncConsoleError(
@@ -1066,7 +1066,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       'components': [],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();

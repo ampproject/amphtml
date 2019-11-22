@@ -16,7 +16,9 @@
 
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {deepMerge, hasOwn} from '../../../src/utils/object';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
+import {Services} from '../../../src/services';
+import {deepMerge, map} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
@@ -40,19 +42,19 @@ export class ConsentConfig {
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
 
-    /** @private {?JsonObject} */
-    this.config_ = null;
+    /** @private {?Promise<!JsonObject>} */
+    this.configPromise_ = null;
   }
 
   /**
    * Read validate and return the config
-   * @return {!JsonObject}
+   * @return {!Promise<!JsonObject>}
    */
-  getConsentConfig() {
-    if (!this.config_) {
-      this.config_ = this.validateAndParseConfig_();
+  getConsentConfigPromise() {
+    if (!this.configPromise_) {
+      this.configPromise_ = this.validateAndParseConfig_();
     }
-    return this.config_;
+    return this.configPromise_;
   }
 
   /**
@@ -110,7 +112,7 @@ export class ConsentConfig {
    *  "consentInstanceId": "ABC",
    *  "checkConsentHref": "https://fake.com"
    * }
-   * @return {!JsonObject}
+   * @return {!Promise<!JsonObject>}
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
@@ -150,6 +152,7 @@ export class ConsentConfig {
       }
     }
 
+    // Migrate to geoOverride
     const group = config['promptIfUnknownForGeoGroup'];
     if (group) {
       config['consentRequired'] = false;
@@ -160,15 +163,60 @@ export class ConsentConfig {
       };
     }
 
-    if (config['checkConsentHref'] && !hasOwn(config, 'consentRequired')) {
-      config['consentRequired'] = 'remote';
-    } else if (!hasOwn(config, 'consentRequired')) {
-      config['consentRequired'] = false;
-    }
+    return this.mergeGeoOverride_(config).then(mergedConfig =>
+      this.validateMergedGeoOverride_(mergedConfig)
+    );
+  }
 
-    console.log(config);
-    // Then merge and validate config, taken care of in previous pr
-    return config;
+  /**
+   * Merge correct geoOverride object into toplevel config.
+   * @param {!JsonObject} config
+   * @return {!Promise<!JsonObject>}
+   */
+  mergeGeoOverride_(config) {
+    if (config['geoOverride']) {
+      return Services.geoForDocOrNull(this.element_).then(geoService => {
+        userAssert(
+          geoService,
+          '%s: requires <amp-geo> to use `geoOverride`',
+          TAG
+        );
+        const mergedConfig = map(config);
+
+        const geoGroups = Object.keys(config['geoOverride']);
+        // Stop at the first group that the geoService says we're in and then merge configs.
+        for (let i = 0; i < geoGroups.length; i++) {
+          if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+            deepMerge(mergedConfig, config['geoOverride'][geoGroups[i]], 1);
+            break;
+          }
+        }
+        delete mergedConfig['geoOverride'];
+        return mergedConfig;
+      });
+    }
+    return Promise.resolve(config);
+  }
+
+  /**
+   * Validate merged geoOverride
+   * @param {!JsonObject} mergedConfig
+   * @return {!JsonObject}
+   */
+  validateMergedGeoOverride_(mergedConfig) {
+    userAssert(
+      mergedConfig['consentRequired'],
+      '%s: No `consentRequired` found (or no `promptIfUnknownForGeo`)',
+      TAG
+    );
+    if (mergedConfig['consentRequired'] === 'remote') {
+      userAssert(
+        mergedConfig['checkConsentHref'],
+        '%s: `checkConsentHref` must be specified if `consentRequired` is remote',
+        TAG
+      );
+    }
+    return mergedConfig;
   }
 
   /**
@@ -181,7 +229,7 @@ export class ConsentConfig {
     try {
       return getChildJsonConfig(this.element_);
     } catch (e) {
-      throw user(this.element_).createError('%s: %s', TAG, e);
+      throw user(this.element_).createError(TAG, e);
     }
   }
 
