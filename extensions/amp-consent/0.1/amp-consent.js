@@ -47,7 +47,6 @@ import {toggle} from '../../../src/style';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
-const GEO_OVERRIDE_TAG = 'amp-consent-geo-override';
 
 /**
  * @enum {string}
@@ -116,14 +115,19 @@ export class AmpConsent extends AMP.BaseElement {
       'amp-consent should have an id'
     );
 
-    const expOn = isExperimentOn(this.win, 'amp-consent-geo-override');
-    if (expOn) {
-      dev().info(GEO_OVERRIDE_TAG, 'enabled');
-    }
-
     const config = new ConsentConfig(this.element);
 
-    this.consentConfig_ = config.getConsentConfig();
+    return config.getConsentConfigPromise().then(validatedConfig => {
+      this.initialize_(validatedConfig);
+    });
+  }
+
+  /**
+   *
+   * @param {!JsonObject} config
+   */
+  initialize_(config) {
+    this.consentConfig_ = config;
 
     // ConsentConfig has verified that there's one and only one consent instance
     this.consentId_ = this.consentConfig_['consentInstanceId'];
