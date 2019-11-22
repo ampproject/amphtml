@@ -805,7 +805,7 @@ where `page-id` refers to the unique id of an `amp-story-page`. You can also use
 
 `amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
 
-By using both branching features and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
+By using branching and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
 
 The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
 
