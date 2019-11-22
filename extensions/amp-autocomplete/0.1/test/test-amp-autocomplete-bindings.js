@@ -17,6 +17,7 @@
 import '../amp-autocomplete';
 import {AutocompleteBindingInline} from '../autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from '../autocomplete-binding-single';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -35,11 +36,12 @@ describes.realWin(
       input = doc.createElement('input');
     });
 
-    function createElementWithAttributes(doc, tag, attributes) {
-      const element = doc.createElement(tag);
-      for (const key in attributes) {
-        element.setAttribute(key, attributes[key]);
-      }
+    function getBindingStub(attributes) {
+      const element = createElementWithAttributes(
+        doc,
+        'div',
+        Object.assign(attributes, {layout: 'container'})
+      );
       element.appendChild(input);
 
       const form = doc.createElement('form');
@@ -57,16 +59,8 @@ describes.realWin(
     describe('Single binding', () => {
       let binding;
 
-      function createSingleElementWithAttributes(attr = {}) {
-        return createElementWithAttributes(
-          doc,
-          'div',
-          Object.assign(attr, {layout: 'container'})
-        );
-      }
-
       beforeEach(() => {
-        binding = createSingleElementWithAttributes({filter: 'substring'});
+        binding = getBindingStub({filter: 'substring'});
       });
 
       it('should always intend to autocomplete', () => {
@@ -92,7 +86,7 @@ describes.realWin(
       });
 
       it('should error when suggest first is present without prefix filter', () => {
-        binding = createSingleElementWithAttributes({
+        binding = getBindingStub({
           'suggest-first': 'true',
         });
         expect(() => binding.shouldSuggestFirst()).to.throw(
@@ -101,7 +95,7 @@ describes.realWin(
       });
 
       it('should not suggest first when attribute is not present', () => {
-        binding = createSingleElementWithAttributes({
+        binding = getBindingStub({
           'suggest-first': 'true',
           'filter': 'prefix',
         });
@@ -141,7 +135,7 @@ describes.realWin(
       });
 
       it('should not prevent submission when "submit-on-enter" is true', () => {
-        binding = createElementWithAttributes(doc, 'div', {
+        binding = getBindingStub({
           'submit-on-enter': 'true',
         });
         expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.false;
@@ -152,29 +146,20 @@ describes.realWin(
     describe('Inline binding', () => {
       let pre, userInput, match, binding;
 
-      function createInlineElementWithAttributes(attr = {}) {
-        return createElementWithAttributes(
-          doc,
-          'div',
-          Object.assign(attr, {
-            layout: 'container',
-            filter: 'substring',
-            inline: '@',
-          })
-        );
-      }
-
       beforeEach(() => {
         toggleExperiment(win, 'amp-autocomplete', true);
         pre = 'My friend is ';
         userInput = 'har';
         match = {0: '@' + userInput, index: pre.length};
-        binding = createInlineElementWithAttributes();
+        binding = getBindingStub({
+          filter: 'substring',
+          inline: '@',
+        });
       });
 
       it('should require experiment when "inline" is specified', () => {
         toggleExperiment(win, 'amp-autocomplete', false);
-        expect(() => createInlineElementWithAttributes()).to.throw(
+        expect(() => getBindingStub({inline: '@'})).to.throw(
           /Experiment amp-autocomplete is not turned on/
         );
       });
@@ -239,7 +224,8 @@ describes.realWin(
       });
 
       it('should suggest first if attribute is present', () => {
-        binding = createInlineElementWithAttributes({
+        binding = getBindingStub({
+          'inline': '@',
           'suggest-first': 'true',
         });
         expect(binding.shouldSuggestFirst()).to.be.true;
