@@ -145,7 +145,7 @@ describes.realWin(
         });
 
         it('relative checkConsentHref is resolved', async function() {
-          const fetchSpy = sandbox.spy(xhrServiceMock, 'fetchJson');
+          const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
           consentElement = createConsentElement(
             doc,
             dict({
@@ -158,7 +158,7 @@ describes.realWin(
           );
           const ampConsent = new AmpConsent(consentElement);
           doc.body.appendChild(consentElement);
-          const getUrlStub = sandbox.stub(ampdoc, 'getUrl');
+          const getUrlStub = env.sandbox.stub(ampdoc, 'getUrl');
           // return a cache Url to test origin source being used to resolve.
           getUrlStub.callsFake(() => {
             return 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0#h';
@@ -286,7 +286,7 @@ describes.realWin(
         consentElement = createConsentElement(doc, defaultConfig);
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
-        actionSpy = sandbox.stub(ampConsent, 'handleAction_');
+        actionSpy = env.sandbox.stub(ampConsent, 'handleAction_');
         ampConsent.enableInteractions_();
         ampIframe = document.createElement('amp-iframe');
         iframe = doc.createElement('iframe');
@@ -386,10 +386,10 @@ describes.realWin(
         consentElement.appendChild(postPromptUI);
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
-        sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
+        env.sandbox.stub(ampConsent.vsync_, 'mutate').callsFake(fn => {
           fn();
         });
-        sandbox.stub(ampConsent, 'mutateElement').callsFake(fn => {
+        env.sandbox.stub(ampConsent, 'mutateElement').callsFake(fn => {
           fn();
         });
       });
@@ -397,7 +397,7 @@ describes.realWin(
       it('update current displaying status', async function() {
         await ampConsent.buildCallback();
         await macroTask();
-        updateConsentInstanceStateSpy = sandbox.spy(
+        updateConsentInstanceStateSpy = env.sandbox.spy(
           ampConsent.consentStateManager_,
           'updateConsentInstanceState'
         );
@@ -415,7 +415,7 @@ describes.realWin(
       it('ignore action when no consent prompt is displaying', async function() {
         await ampConsent.buildCallback();
         await macroTask();
-        updateConsentInstanceStateSpy = sandbox.spy(
+        updateConsentInstanceStateSpy = env.sandbox.spy(
           ampConsent.consentStateManager_,
           'updateConsentInstanceState'
         );
