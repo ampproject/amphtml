@@ -48,7 +48,6 @@ describes.realWin(
       ampdoc = env.ampdoc;
       win = env.win;
       toggleExperiment(win, 'amp-consent-v2', true);
-      toggleExperiment(win, 'amp-consent-geo-override', true);
 
       storageValue = {};
       jsonMockResponses = {
@@ -65,6 +64,7 @@ describes.realWin(
           expect(init.method).to.equal('POST');
           return Promise.resolve({
             json() {
+              console.log(jsonMockResponses[url]);
               return Promise.resolve(JSON.parse(jsonMockResponses[url]));
             },
           });
@@ -104,19 +104,17 @@ describes.realWin(
       describe('consent config', () => {
         let consentElement;
 
-        it.only('get consent/policy/postPromptUI config', async () => {
-          consentElement = createConsentElement(
-            doc,
-            dict({
-              'consentInstanceId': 'test',
-              'checkConsentHref': '/override',
-              'consentRequired': true,
-              'clientConfig': {
-                'test': 'ABC',
-              },
-              'postPromptUI': 'test',
-            })
-          );
+        it('get consent/policy/postPromptUI config', async () => {
+          const config = dict({
+            'consentInstanceId': 'test',
+            'checkConsentHref': '/override',
+            'consentRequired': true,
+            'clientConfig': {
+              'test': 'ABC',
+            },
+            'postPromptUI': 'test',
+          });
+          consentElement = createConsentElement(doc, config);
           const postPromptUI = document.createElement('div');
           postPromptUI.setAttribute('id', 'test');
           consentElement.appendChild(postPromptUI);
@@ -126,28 +124,7 @@ describes.realWin(
 
           expect(ampConsent.postPromptUI_).to.not.be.null;
           expect(ampConsent.consentId_).to.equal('test');
-          console.log(ampConsent.consentConfig_);
-          console.log(
-            dict({
-              'consentInstanceId': 'test',
-              'checkConsentHref': '/override',
-              'consentRequired': true,
-              'postPromptUI': 'test',
-              'clientConfig': {
-                'test': 'ABC',
-              },
-            })
-          );
-          expect(ampConsent.consentConfig_).to.deep.equal(
-            dict({
-              'consentInstanceId': 'test',
-              'checkConsentHref': '/override',
-              'postPromptUI': 'test',
-              'clientConfig': {
-                'test': 'ABC',
-              },
-            })
-          );
+          expect(ampConsent.consentConfig_).to.deep.equal(config);
 
           expect(Object.keys(ampConsent.policyConfig_)).to.have.length(4);
           expect(ampConsent.policyConfig_['default']).to.be.ok;
@@ -156,16 +133,13 @@ describes.realWin(
           expect(ampConsent.policyConfig_['_auto_reject']).to.be.ok;
         });
 
-        it('relative checkConsentHref is resolved', async () => {
+        it.only('relative checkConsentHref is resolved', async () => {
           const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
           consentElement = createConsentElement(
             doc,
             dict({
-              'consents': {
-                'XYZ': {
-                  'checkConsentHref': '/r/1',
-                },
-              },
+              'checkConsentHref': '/r/1',
+              'consentInstanceId': 'XYZ',
             })
           );
           const ampConsent = new AmpConsent(consentElement);
