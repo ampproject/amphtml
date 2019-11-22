@@ -188,7 +188,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
 
       it('should return the original config if no geo matches', async () => {
         appendConfigScriptElement(doc, element, geoConfig);
-        sandbox.stub(Services, 'geoForDocOrNull').returns(
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup() {
               return false;
@@ -208,7 +208,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
 
       it('should work with single field override', async () => {
         appendConfigScriptElement(doc, element, geoConfig);
-        sandbox.stub(Services, 'geoForDocOrNull').returns(
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup(geoGroup) {
               if (geoGroup === 'nafta') {
@@ -229,7 +229,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
 
       it('should work with multiple fields override', async () => {
         appendConfigScriptElement(doc, element, geoConfig);
-        sandbox.stub(Services, 'geoForDocOrNull').returns(
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup(geoGroup) {
               if (geoGroup === 'waldo') {
@@ -259,7 +259,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           },
         };
         appendConfigScriptElement(doc, element, geoConfig);
-        sandbox.stub(Services, 'geoForDocOrNull').returns(
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
           Promise.resolve({
             isInCountryGroup(geoGroup) {
               if (geoGroup === 'geoGroupUnknown') {
@@ -299,7 +299,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         'amp-consent/consent-config: ' +
         '`checkConsentHref` must be specified if `consentRequired` is remote';
 
-      sandbox.stub(Services, 'geoForDocOrNull').returns(
+      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
         Promise.resolve({
           isInCountryGroup() {
             return false;
