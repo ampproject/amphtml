@@ -55,6 +55,7 @@ describes.realWin(
         'https://response2/': '{}',
         'https://response3/': '{"promptIfUnknown": false}',
         'https://geoOverride-check/': '{"consentRequired": false}',
+        'http://www.origin.com/r/1': '{}',
       };
 
       xhrServiceMock = {
