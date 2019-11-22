@@ -43,9 +43,9 @@ const TAG = 'amp-story-quiz';
 const buildQuizTemplate = element => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amp-story-quiz-container">
-      <div class="i-amp-story-quiz-prompt-container"></div>
-      <div class="i-amp-story-quiz-option-container"></div>
+    <div class="i-amphtml-story-quiz-container">
+      <div class="i-amphtml-story-quiz-prompt-container"></div>
+      <div class="i-amphtml-story-quiz-option-container"></div>
     </div>
   `;
 };
@@ -59,8 +59,8 @@ const buildQuizTemplate = element => {
 const buildOptionTemplate = option => {
   const html = htmlFor(option);
   return html`
-    <span class="i-amp-story-quiz-option">
-      <span class="i-amp-story-quiz-answer-choice"></span>
+    <span class="i-amphtml-story-quiz-option">
+      <span class="i-amphtml-story-quiz-answer-choice"></span>
     </span>
   `;
 };
@@ -72,17 +72,17 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @const @private {!../../../src/service/action-impl.ActionService} */
+    this.actions_ = Services.actionServiceForDoc(this.element);
+
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
 
-    /** @private {?ShadowRoot|HTMLDivElement} */
+    /** @private {?HTMLDivElement} */
     this.quizEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
-
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.element);
   }
 
   /** @override */
@@ -109,6 +109,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
+    // TODO(jackbsteinberg): This selection is temporary and may need to be revisited later
     return layout === 'flex-item';
   }
 
@@ -138,7 +139,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     const prompt = document.createElement(promptInput.tagName);
     prompt.textContent = promptInput.textContent;
-    prompt.classList.add('i-amp-story-quiz-prompt');
+    prompt.classList.add('i-amphtml-story-quiz-prompt');
     promptInput.remove();
 
     const options = toArray(this.element.querySelectorAll('option'));
@@ -147,7 +148,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
 
     this.quizEl_
-      .querySelector('.i-amp-story-quiz-prompt-container')
+      .querySelector('.i-amphtml-story-quiz-prompt-container')
       .appendChild(prompt);
 
     options.forEach((option, index) => this.configureOption_(option, index));
@@ -171,12 +172,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     // Fill in the answer choice
     convertedOption.querySelector(
-      '.i-amp-story-quiz-answer-choice'
+      '.i-amphtml-story-quiz-answer-choice'
     ).textContent = answerChoiceOptions[index];
 
     // Transfer the option information into a span then remove the option
     const optionText = document.createElement('span');
-    optionText.setAttribute('class', 'i-amp-story-quiz-option-text');
+    optionText.classList.add('i-amphtml-story-quiz-option-text');
     optionText.textContent = option.textContent;
     convertedOption.append(optionText);
 
@@ -185,19 +186,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
     option.remove();
 
-    convertedOption.setAttribute(
-      'id',
-      `${this.element.id}+${answerChoiceOptions[index]}`
-    );
-
-    convertedOption.setAttribute(
-      'on',
-      `tap:${this.element.id}.triggerInteraction`
-    );
+    convertedOption.setAttribute('on', `tap:${this.element.id}.respond`);
 
     // Add the option to the quiz element
     this.quizEl_
-      .querySelector('.i-amp-story-quiz-option-container')
+      .querySelector('.i-amphtml-story-quiz-option-container')
       .appendChild(convertedOption);
   }
 
@@ -208,12 +201,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   initializeListeners_() {
     // Configure the response action
-    const actions = [
-      {tagOrTarget: 'AMP-STORY-QUIZ', method: 'triggerInteraction'},
-    ];
+    const actions = [{tagOrTarget: 'AMP-STORY-QUIZ', method: 'respond'}];
     this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
 
-    this.registerAction('triggerInteraction', actionInvocation => {
+    this.registerAction('respond', actionInvocation => {
       this.handleOptionSelection_(actionInvocation.caller);
     });
 
@@ -227,23 +218,31 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     );
 
     // Add a click listener to the element to trigger the action via tapping the prompt
-    this.quizEl_.addEventListener('click', e => {
-      if (this.hasReceivedResponse_) {
-        return;
-      }
+    this.quizEl_.addEventListener('click', e => this.handleTap_(e));
+  }
 
-      const optionEl = closest(
-        e.target,
-        element => {
-          return element.classList.contains('i-amp-story-quiz-option');
-        },
-        this.quizEl_
-      );
+  /**
+   * Handles a tap event on the quiz element
+   *
+   * @param {Event} e
+   * @private
+   */
+  handleTap_(e) {
+    if (this.hasReceivedResponse_) {
+      return;
+    }
 
-      if (optionEl) {
-        this.actions_.trigger(optionEl, 'tap', e, ActionTrust.HIGH);
-      }
-    });
+    const optionEl = closest(
+      e.target,
+      element => {
+        return element.classList.contains('i-amphtml-story-quiz-option');
+      },
+      this.quizEl_
+    );
+
+    if (optionEl) {
+      this.actions_.trigger(optionEl, 'tap', e, ActionTrust.HIGH);
+    }
   }
 
   /**
@@ -253,8 +252,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleOptionSelection_(optionEl) {
-    optionEl.classList.add('i-amp-story-quiz-option-selected');
-    this.quizEl_.classList.add('i-amp-story-quiz-post-selection');
+    optionEl.classList.add('i-amphtml-story-quiz-option-selected');
+    this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
 
     this.hasReceivedResponse_ = true;
   }

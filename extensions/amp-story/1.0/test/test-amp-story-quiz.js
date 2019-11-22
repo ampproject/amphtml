@@ -81,40 +81,79 @@ describes.realWin(
       await ampStoryQuiz.layoutCallback();
 
       const quizContent = ampStoryQuiz.getQuizElement().children;
-      expect(quizContent[0]).to.have.class('i-amp-story-quiz-prompt-container');
-      expect(quizContent[1]).to.have.class('i-amp-story-quiz-option-container');
+      expect(quizContent[0]).to.have.class(
+        'i-amphtml-story-quiz-prompt-container'
+      );
+      expect(quizContent[1]).to.have.class(
+        'i-amphtml-story-quiz-option-container'
+      );
 
       // check prompt container structure
       expect(quizContent[0].children.length).to.equal(1);
       expect(
-        quizContent[0].querySelectorAll('.i-amp-story-quiz-prompt')
+        quizContent[0].querySelectorAll('.i-amphtml-story-quiz-prompt')
       ).to.have.length(1);
 
       // check option container structure
       expect(quizContent[1].childNodes.length).to.equal(4);
       expect(
-        quizContent[1].querySelectorAll('.i-amp-story-quiz-option')
+        quizContent[1].querySelectorAll('.i-amphtml-story-quiz-option')
       ).to.have.length(4);
     });
 
-    it('should throw an error with fewer than one prompt', async () => {
+    it('should throw an error with fewer than one prompt', () => {
       populateQuiz(win, ampStoryQuiz.element, 0);
       expect(ampStoryQuiz.buildCallback).to.throw();
     });
 
-    it('should throw an error with more than one prompt', async () => {
+    it('should throw an error with more than one prompt', () => {
       populateQuiz(win, ampStoryQuiz.element, 2);
       expect(ampStoryQuiz.buildCallback).to.throw();
     });
 
-    it('should throw an error with fewer than two options', async () => {
+    it('should throw an error with fewer than two options', () => {
       populateQuiz(win, ampStoryQuiz.element, 1, 1);
       expect(ampStoryQuiz.buildCallback).to.throw();
     });
 
-    it('should throw an error with more than four options', async () => {
+    it('should throw an error with more than four options', () => {
       populateQuiz(win, ampStoryQuiz.element, 1, 5);
       expect(ampStoryQuiz.buildCallback).to.throw();
+    });
+
+    it('should enter the post-interaction state on option click', async () => {
+      populateStandardQuizContent(win, ampStoryQuiz.element);
+      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+      const quizElement = ampStoryQuiz.getQuizElement();
+      const quizOption = quizElement.querySelector(
+        '.i-amphtml-story-quiz-option'
+      );
+
+      quizOption.click();
+
+      expect(quizElement).to.have.class('.i-amphtml-story-quiz-post-selection');
+      expect(quizOption).to.have.class('i-amphtml-story-quiz-option-selected');
+    });
+
+    it('should only record the first option response', async () => {
+      populateStandardQuizContent(win, ampStoryQuiz.element);
+      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+      const quizElement = ampStoryQuiz.getQuizElement();
+      const quizOptions = quizElement.querySelectorAll(
+        '.i-amphtml-story-quiz-option'
+      );
+
+      quizOptions[0].click();
+      quizOptions[1].click();
+
+      expect(quizOptions[0]).to.have.class(
+        'i-amphtml-story-quiz-option-selected'
+      );
+      expect(quizOptions[1]).to.not.have.class(
+        'i-amphtml-story-quiz-option-selected'
+      );
     });
   }
 );

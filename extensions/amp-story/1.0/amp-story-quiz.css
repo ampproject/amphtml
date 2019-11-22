@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
 
-.i-amp-story-quiz-container {
+.i-amphtml-story-quiz-container {
     align-self: start;
     --correct-color: #5BBA74 !important;
     --correct-color-shaded: #2D8E42 !important;
@@ -12,33 +12,42 @@
     border-radius: 32px !important;
 }
 
-.i-amp-story-quiz-prompt-container {
+.i-amphtml-story-quiz-prompt-container {
     display: flex !important;
     justify-items: center !important;
     padding: 20px !important;
     color: white !important;
 }
 
-.i-amp-story-quiz-prompt {
+.i-amphtml-story-quiz-prompt {
     margin: 0px !important;
+    overflow : hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 4 !important;
+    -webkit-box-orient: vertical !important;
+    visibility: visible !important;
 }
 
-h1.i-amp-story-quiz-prompt {
+h1.i-amphtml-story-quiz-prompt {
     font-size: 28px !important;
     line-height: 36px !important;
+    max-height: 144px !important;
 }
 
-h2.i-amp-story-quiz-prompt {
+h2.i-amphtml-story-quiz-prompt {
     font-size: 22px !important;
     line-height: 28px !important;
+    max-height: 112px !important;
 }
 
-h3.i-amp-story-quiz-prompt {
+h3.i-amphtml-story-quiz-prompt {
     font-size: 18px !important;
     line-height: 24px !important;
+    max-height: 96px !important;
 }
 
-.i-amp-story-quiz-option-container {
+.i-amphtml-story-quiz-option-container {
     display: flex !important;
     flex-direction: column;
     background-color: white !important;
@@ -46,7 +55,7 @@ h3.i-amp-story-quiz-prompt {
     padding: 8px 8px 0px 8px !important;
 }
 
-.i-amp-story-quiz-option {
+.i-amphtml-story-quiz-option {
     display: flex !important;
     justify-items: start !important;
     align-items: center !important;
@@ -56,14 +65,12 @@ h3.i-amp-story-quiz-prompt {
     margin-bottom: 8px !important;
     color: #5F6368 !important;
     border: solid 1px #DADCE0 !important;
-    /* TODO: Why won't this notation work? */
-    /* font: 16px/20px !important; */
     font-size: 16px !important;
     line-height: 20px !important;
 }
 
-/* Truncate text and add an ellipsis after 2 lines. */
-.i-amp-story-quiz-option-text {
+/* Truncate option text and add an ellipsis after 2 lines. */
+.i-amphtml-story-quiz-option-text {
     max-height: 40px !important;
     overflow : hidden !important;
     text-overflow: ellipsis !important;
@@ -73,12 +80,12 @@ h3.i-amp-story-quiz-prompt {
     visibility: visible !important;
 }
 
-.i-amp-story-quiz-post-selection .i-amp-story-quiz-option-selected {
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected {
     color: white !important;
     border: solid 1px transparent !important;
 }
 
-.i-amp-story-quiz-answer-choice {
+.i-amphtml-story-quiz-answer-choice {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -95,34 +102,34 @@ h3.i-amp-story-quiz-prompt {
     font-weight: bold !important;
 }
 
-[dir=rtl ] .i-amp-story-quiz-answer-choice {
+[dir=rtl ] .i-amphtml-story-quiz-answer-choice {
     margin-left: 16px !important;
     margin-right: 0px !important;
 }
 
-.i-amp-story-quiz-post-selection :not([correct]) > .i-amp-story-quiz-answer-choice {
+.i-amphtml-story-quiz-post-selection :not([correct]) > .i-amphtml-story-quiz-answer-choice {
     color: var(--incorrect-color) !important;
 }
 
-.i-amp-story-quiz-post-selection [correct] > .i-amp-story-quiz-answer-choice {
+.i-amphtml-story-quiz-post-selection [correct] > .i-amphtml-story-quiz-answer-choice {
     color: var(--correct-color) !important;
 }
 
-.i-amp-story-quiz-post-selection .i-amp-story-quiz-option-selected:not([correct]) {
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected:not([correct]) {
     background-color: var(--incorrect-color) !important;
 }
 
-.i-amp-story-quiz-post-selection .i-amp-story-quiz-option-selected[correct] {
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected[correct] {
     background-color: var(--correct-color) !important;
 }
 
-.i-amp-story-quiz-post-selection .i-amp-story-quiz-option-selected > .i-amp-story-quiz-answer-choice {
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected > .i-amphtml-story-quiz-answer-choice {
     border: solid 2px transparent !important;
 }
 
 /** TODO(jackbsteinberg): is font-size: 0; a11y friendly? */
 
-.i-amp-story-quiz-post-selection [correct] > .i-amp-story-quiz-answer-choice {
+.i-amphtml-story-quiz-post-selection [correct] > .i-amphtml-story-quiz-answer-choice {
     background-color: white !important;
     background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#5BBA74"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>') !important;
     background-repeat: no-repeat !important;
@@ -130,7 +137,7 @@ h3.i-amp-story-quiz-prompt {
     font-size: 0 !important;
 }
 
-.i-amp-story-quiz-post-selection :not([correct]) > .i-amp-story-quiz-answer-choice {
+.i-amphtml-story-quiz-post-selection :not([correct]) > .i-amphtml-story-quiz-answer-choice {
     background-color: white !important;
     background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#F34E4E"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
     background-repeat: no-repeat !important;
