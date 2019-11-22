@@ -330,7 +330,9 @@ export class AmpStoryEmbeddedComponent {
     );
 
     /** @type {!../../../src/service/history-impl.History} */
-    this.historyService_ = Services.historyForDoc(this.win_.document);
+    this.historyService_ = Services.historyForDoc(
+      getAmpdoc(this.win_.document)
+    );
 
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
