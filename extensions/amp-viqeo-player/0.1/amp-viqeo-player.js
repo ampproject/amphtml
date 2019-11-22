@@ -56,14 +56,20 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {?Object} */
-    this.viqeoPlayer_ = null;
-
     /** @private {boolean} */
     this.hasAutoplay_ = false;
 
     /** @private {string} */
     this.videoId_ = '';
+
+    /** @private {number} */
+    this.currentTime_ = 0;
+
+    /** @private {number} */
+    this.duration_ = 1;
+
+    /** @private {Array} */
+    this.playedRanges_ = [];
   }
 
   /**
@@ -174,6 +180,18 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       } else {
         this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
       }
+    } else if (action === 'end') {
+      this.element.dispatchCustomEvent(VideoEvents.ENDED);
+    } else if (action === 'startAdvert') {
+      this.element.dispatchCustomEvent(VideoEvents.AD_START);
+    } else if (action === 'endAdvert') {
+      this.elements.dispatchCustomEvent(VideoEvents.AD_END);
+    } else if (action === 'updateCurrentTime') {
+      this.currentTime_ = eventData['value'];
+    } else if (action === 'updateDuration') {
+      this.duration_ = eventData['value'];
+    } else if (action === 'updatePlayedRanges') {
+      this.playedRanges_ = eventData['value'];
     }
   }
 
@@ -301,24 +319,17 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    if (!this.viqeoPlayer_) {
-      return 0;
-    }
-    return this.viqeoPlayer_.getCurrentTime();
+    return this.currentTime_;
   }
 
   /** @override */
   getDuration() {
-    if (!this.viqeoPlayer_) {
-      return 1;
-    }
-    return this.viqeoPlayer_.getDuration();
+    return this.duration_;
   }
 
   /** @override */
   getPlayedRanges() {
-    // Not supported.
-    return [];
+    return this.playedRanges_;
   }
 
   /**

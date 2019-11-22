@@ -30,6 +30,15 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   VIQEO['subscribeTracking'](params => {
     viqeoPlayerInstance = params['player'];
   }, 'Player:added');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updateCurrentTime', viqeoPlayerInstance['getCurrentTime']());
+  }, 'Player:currentTimeUpdated');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updateDuration', viqeoPlayerInstance['getDuration']());
+  }, 'Player:updateFullDuration');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updatePlayedRanges', viqeoPlayerInstance['getPlayedRanges']());
+  }, 'Player:updatePlayedRanges')
   VIQEO['createPlayer']({
     videoId: data['videoid'],
     profileId: data['profileid'],
@@ -38,12 +47,14 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
 
   global.addEventListener('message', parseMessage, false);
 
-  subscribe('videoLoaded', 'ready');
-  subscribe('previewLoaded', 'ready');
-  subscribe('started', 'started');
+  subscribe('ready', 'ready');
   subscribe('paused', 'pause');
+  subscribe('started', 'play');
   subscribe('played', 'play');
   subscribe('replayed', 'play');
+  subscribe('ended', 'end');
+  subscribe('advStarted', 'startAdvert');
+  subscribe('advEnded', 'endAdvert');
   subscribeTracking({
     Mute: 'mute',
     Unmute: 'unmute',
