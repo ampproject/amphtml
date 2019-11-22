@@ -30,6 +30,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      toggleExperiment(win, 'amp-autocomplete', true); // for "query" case
     });
 
     function setupAutocomplete(
@@ -78,16 +79,7 @@ describes.realWin(
       return ampAutocomplete.build().then(() => ampAutocomplete);
     }
 
-    it('should require experiment when "query" is specified', () => {
-      return allowConsoleError(() => {
-        return expect(getAutocomplete({'query': 'q'})).to.be.rejectedWith(
-          /Experiment amp-autocomplete is not turned on/
-        );
-      });
-    });
-
     it('should build with "inline" and "query" when specified with experiment on', () => {
-      toggleExperiment(win, 'amp-autocomplete', true);
       return getAutocomplete({
         'filter': 'substring',
         'query': 'q',
