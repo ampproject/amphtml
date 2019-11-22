@@ -785,6 +785,52 @@ You can apply multiple entrance animations on one element (for example, an eleme
 If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
 {% endcall %}
 
+## Branching
+
+Branching enables the identification of individual story pages. Users can jump around within a story, start a story from somewhere other than the beginning, and share specific story pages. An example is a table of contents or multiple choice buttons.
+
+Fragment parameters in the URL supports this feature.
+
+### URL Fragment Parameter
+
+With branching, AMP Stories now supports URLs in the form of:
+
+```
+https://www.mydomain.com/good-story/#page=<page-id>
+```
+
+where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integration-with-sidebar-for-stories) for an example.
+
+## Integration with Sidebar for Stories
+
+`amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
+
+By using branching and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
+
+The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
+
+```html
+<amp-story id="story" standalone>
+  <amp-sidebar id="sidebar1" layout="nodisplay">
+    <ul>
+      <li><a href="#page=bacon-page"> Bacon page </a></li>
+      <li><a href="https://www.amp.dev"> External Link </a></li>
+    </ul>
+  </amp-sidebar>
+
+  <amp-story-page id="bacon-page">
+    <amp-story-grid-layer>
+      <p>Bacon, of course!</p>
+    </amp-story-grid-layer>
+  </amp-story-page>
+  ...
+</amp-story>
+```
+
+### Manipulating Navigation
+
+Branching allows navigation manipulation within a story. The story tracks navigation. If a user navigates from `page-1` to `page-5` and then `page-6`, navigating backwards will follow the exact path. The skipped pages are not exposed to the user when navigating backwards, it will follow `page-6`, to `page-5`, and ends back at `page-1`.
+
 ## Other components usable in AMP stories
 
 The following are other components usable in AMP stories that require some story-specific caveats.
