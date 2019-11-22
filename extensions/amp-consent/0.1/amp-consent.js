@@ -117,7 +117,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     const config = new ConsentConfig(this.element);
 
-    config.getConsentConfigPromise().then(validatedConfig => {
+    return config.getConsentConfigPromise().then(validatedConfig => {
       this.initialize_(validatedConfig);
     });
   }

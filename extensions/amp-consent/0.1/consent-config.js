@@ -16,9 +16,10 @@
 
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Deferred} from '../../../src/utils/promise';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
-import {deepMerge} from '../../../src/utils/object';
+import {deepMerge, map} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
@@ -42,13 +43,13 @@ export class ConsentConfig {
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
 
-    /** @private {?Promise<?JsonObject>} */
+    /** @private {?Promise<JsonObject>} */
     this.configPromise_ = null;
   }
 
   /**
    * Read validate and return the config
-   * @return {!Promise<JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   getConsentConfigPromise() {
     if (!this.configPromise_) {
@@ -112,7 +113,7 @@ export class ConsentConfig {
    *  "consentInstanceId": "ABC",
    *  "checkConsentHref": "https://fake.com"
    * }
-   * @return {!Promise<JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
@@ -158,39 +159,42 @@ export class ConsentConfig {
 
   /**
    * Merge correct geoOverride object into toplevel config.
-   * @param {?JsonObject} config
-   * @return {!Promise<?JsonObject>}
+   * @param {!JsonObject} config
+   * @return {!Promise<!JsonObject>}
    */
   mergeGeoOverride_(config) {
-    let mergedConfig = Object.assign({}, config);
-    if (mergedConfig['geoOverride']) {
+    const {promise, resolve} = new Deferred();
+
+    if (config['geoOverride']) {
       Services.geoForDocOrNull(this.element_).then(geoService => {
         userAssert(
           geoService,
           '%s: requires <amp-geo> to use `geoOverride`',
           TAG
         );
-        const geoGroups = Object.keys(mergedConfig['geoOverride']);
+        const mergedConfig = map(config);
+
+        const geoGroups = Object.keys(config['geoOverride']);
+        // Stop at the first group that the geoService says we're in and then merge configs.
         for (let i = 0; i < geoGroups.length; i++) {
           if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-            mergedConfig = /** @type {!JsonObject} */ (deepMerge(
-              mergedConfig,
-              mergedConfig['geoOverride'][geoGroups[i]],
-              1
-            ));
+            deepMerge(mergedConfig, config['geoOverride'][geoGroups[i]], 1);
             break;
           }
         }
         delete mergedConfig['geoOverride'];
+        resolve(mergedConfig);
       });
+    } else {
+      resolve(config);
     }
-    return Promise.resolve(mergedConfig);
+    return promise;
   }
 
   /**
    * Validate merged geoOverride
-   * @param {?JsonObject} mergedConfig
-   * @return {?JsonObject>}
+   * @param {!JsonObject} mergedConfig
+   * @return {!JsonObject}
    */
   validateMergedGeoOverride_(mergedConfig) {
     if (mergedConfig['consentRequired'] === 'remote') {
