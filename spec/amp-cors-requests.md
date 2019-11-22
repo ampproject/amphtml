@@ -145,12 +145,10 @@ For example, endpoints should allow requests from:
 - Google AMP Cache subdomain: `https://<publisher's domain>.cdn.ampproject.org` <br>(for example, `https://nytimes-com.cdn.ampproject.org`)
 - Cloudflare AMP Cache: `https://<publisher's domain>.amp.cloudflare.com`
 
-{% call callout('Read on', type='read') %}
-For information on AMP Cache URL formats, see these resources:
-
-- [Google AMP Cache Overview](https://developers.google.com/amp/cache/overview)
-- [Cloudflare AMP Cache](https://amp.cloudflare.com/)
-  {% endcall %}
+Read on: For information on AMP Cache URL formats, see these resources: <ul>
+    <li> [Google AMP Cache Overview](https://developers.google.com/amp/cache/overview)
+    <li> [Cloudflare AMP Cache](https://amp.cloudflare.com/)
+  </ul>
 
 #### 2) Allow same-origin requests
 
@@ -181,9 +179,7 @@ Although the W3 CORS spec allows the value of <code>\*</code> to be returned in 
 
 ### Processing state changing requests
 
-{% call callout('Important', type='caution') %}
-Perform these validation checks _before_ you process the request. This validation helps to provide protection against CSRF attacks, and avoids processing untrusted sources requests.
-{% endcall %}
+Important: Perform these validation checks _before_ you process the request. This validation helps to provide protection against CSRF attacks, and avoids processing untrusted sources requests.
 
 Before processing requests that could change the state of your system (for
 example, a user subscribes to or unsubscribes from a mailing list), check the
@@ -300,7 +296,7 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
 }
 ```
 
-**Note**: For a working code sample, see [amp-cors.js](https://github.com/ampproject/amphtml/blob/master/build-system/server/amp-cors.js).
+Note: For a working code sample, see [cors.js](https://github.com/ampproject/amp-toolbox/blob/master/packages/cors/lib/cors.js).
 
 ### Scenario 1: Get request from AMP page on same origin
 
@@ -367,7 +363,7 @@ typically for fonts, by respecting the origin’s `Access-Control-Allow-Origin` 
 When an AMP page was loading `https://example.com/some/font.ttf` from `@font-face src` attribute, AMP Cache will cache the font file and serve the resource as below with having the wild card `Access-Control-Allow-Origin`.
 
 - URL `https://example-com.cdn.ampproject.org/r/s/example.com/some/font.tff`
-- Access-Control-Allow-Origin: \*
+- `Access-Control-Allow-Origin: *`
 
 ### New behavior (October 2019 and after)
 
@@ -402,9 +398,7 @@ As an example, if you wanted to load /some/font.ttf in `https://example.com/amp.
   </noscript>
 </amp-img>
 
-[tip type="note]
-If your font file is okay to be accessible from any origin, you can respond with a wild card `Access-Control-Allow-Origin`, AMP cache will also echo that value meaning it will be responding with `Access-Control-Allow-Origin: *`. If you already have this setting, there is no need in changing anything.
-[/tip]
+Note: If your font file is okay to be accessible from any origin, you can respond with a wild card `Access-Control-Allow-Origin`, AMP cache will also echo that value meaning it will be responding with `Access-Control-Allow-Origin: *`. If you already have this setting, there is no need in changing anything.
 
 We are planning to make this change around mid October 2019 and would expect every AMP publishers using self-hosted fonts to check if it’s affected.
 
