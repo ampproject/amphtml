@@ -171,38 +171,6 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       );
     });
 
-    it.only('sets consentRequired when not given', () => {
-      const scriptElement = doc.createElement('script');
-      scriptElement.textContent = JSON.stringify(defaultConfig);
-      scriptElement.setAttribute('type', 'application/json');
-      element.appendChild(scriptElement);
-      expect(
-        new ConsentConfig(element).getConsentConfig()
-      ).to.eventually.deep.equal(
-        dict({
-          'consentInstanceId': 'ABC',
-          'checkConsentHref': 'https://response1',
-          'consentRequired': 'remote',
-        })
-      );
-
-      scriptElement.textContent = JSON.stringify(
-        dict({
-          'consentInstanceId': 'ABC',
-        })
-      );
-      scriptElement.setAttribute('type', 'application/json');
-      element.appendChild(scriptElement);
-      expect(
-        new ConsentConfig(element).getConsentConfig()
-      ).to.eventually.deep.equal(
-        dict({
-          'consentInstanceId': 'ABC',
-          'consentRequired': false,
-        })
-      );
-    });
-
     describe('geoOverride config', () => {
       let geoConfig;
       beforeEach(() => {
@@ -375,6 +343,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           new ConsentConfig(element).getConsentConfigPromise()
         ).to.throw(multiConsentError);
       });
+      await expect(
+        new ConsentConfig(element).getConsentConfigPromise()
+      ).to.be.rejectedWith(checkConsentHrefError);
 
       scriptElement.textContent = JSON.stringify({
         'consentInstanceId': 'abc',
