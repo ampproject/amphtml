@@ -460,7 +460,7 @@ describes.realWin(
             renderSpy = env.sandbox.spy(impl, 'renderResults_');
             toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
             updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
-            expect(impl.suggestFirst_).to.be.false;
+            expect(impl.shouldSuggestFirst_).to.be.false;
             return impl.inputHandler_();
           })
           .then(() => {
@@ -479,7 +479,7 @@ describes.realWin(
             renderSpy = env.sandbox.spy(impl, 'renderResults_');
             toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
             updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
-            impl.suggestFirst_ = true;
+            impl.shouldSuggestFirst_ = true;
             return impl.inputHandler_();
           })
           .then(() => {
@@ -702,7 +702,7 @@ describes.realWin(
         return element
           .layoutCallback()
           .then(() => {
-            impl.suggestFirst_ = true;
+            impl.shouldSuggestFirst_ = true;
             expect(impl.detectBackspace_).to.be.false;
             return impl.keyDownHandler_(event);
           })
@@ -715,7 +715,7 @@ describes.realWin(
         return element
           .layoutCallback()
           .then(() => {
-            expect(impl.suggestFirst_).to.be.false;
+            expect(impl.shouldSuggestFirst_).to.be.false;
             expect(impl.detectBackspace_).to.be.false;
             return impl.keyDownHandler_(event);
           })

@@ -111,10 +111,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = null;
 
     /**
-     * If the "suggest-first" attribute is present on <autocomplete>
-     * and the filter type is "prefix".
+     * If the "suggest-first" attribute is present on <autocomplete>.
      */
-    this.suggestFirst_ = false;
+    this.shouldSuggestFirst_ = false;
 
     /**
      * Whether or not the "Backspace" key has recently been fired.
@@ -307,7 +306,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = this.element.hasAttribute('max-entries')
       ? parseInt(this.element.getAttribute('max-entries'), 10)
       : null;
-    this.suggestFirst_ = this.binding_.shouldSuggestFirst();
+    this.shouldSuggestFirst_ = this.binding_.shouldSuggestFirst();
     this.highlightUserEntry_ = this.element.hasAttribute(
       'highlight-user-entry'
     );
@@ -590,7 +589,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   displaySuggestions_(isFirstInteraction) {
     this.toggleResults_(true);
-    if (this.suggestFirst_) {
+
+    // Detecting backspace enables "suggest-first" to respect user deletion.
+    if (this.shouldSuggestFirst_) {
       if (!this.detectBackspace_ || isFirstInteraction) {
         this.updateActiveItem_(1);
       }
@@ -1014,10 +1015,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     const activeIndex = mod(index, enabledElements.length);
     const newActiveElement = enabledElements[activeIndex];
+    const newValue = newActiveElement.getAttribute('data-value');
 
     this.binding_.displayActiveItemInInput(
       dev().assertElement(this.inputElement_),
-      newActiveElement.getAttribute('data-value'),
+      newValue,
       this.userInput_
     );
 
@@ -1176,7 +1178,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return Promise.resolve();
       case Keys.BACKSPACE:
-        this.detectBackspace_ = this.suggestFirst_;
+        this.detectBackspace_ = this.shouldSuggestFirst_;
         return Promise.resolve();
       default:
         return Promise.resolve();

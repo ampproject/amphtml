@@ -24,19 +24,28 @@ import {userAssert} from '../../../src/log';
  */
 export class AutocompleteBindingSingle {
   /**
-   * @param {!AMP.BaseElement} element
+   * @param {!AMP.BaseElement} ampElement
    */
   constructor({element}) {
     /** @private {!Element} */
     this.element_ = element;
 
     /**
-     * The Single implementation of autocomplete will highlight
-     * the diff between the user input and the active suggestion.
+     * The Single implementation of autocomplete should highlight
+     * the diff between the user input and the active suggestion
+     * when the attribute "suggest-first" is present.
      * See displayActiveItemInInput() for more.
      * @private {boolean}
      */
-    this.shouldHighlight_ = element.hasAttribute('suggest-first');
+    this.shouldSuggestFirst_ = element.hasAttribute('suggest-first');
+    const filter = element.getAttribute('filter');
+    userAssert(
+      !this.shouldSuggestFirst_ || filter === 'prefix',
+      '"suggest-first" requires "filter" type "prefix". ' +
+        ' Unexpected "filter" type: %s, %s',
+      filter,
+      this.element_
+    );
 
     /**
      * The Single implementation of autocomplete will allow form
@@ -84,21 +93,9 @@ export class AutocompleteBindingSingle {
     inputEl.value = userInput;
   }
 
-  /**
-   * Should only abide by "suggest-first" attribute if "filter" is "prefix".
-   * @return {boolean}
-   */
+  /** @return {boolean} */
   shouldSuggestFirst() {
-    const hasSuggestFirst = this.element_.hasAttribute('suggest-first');
-    const filter = this.element_.getAttribute('filter');
-    userAssert(
-      !hasSuggestFirst || filter === 'prefix',
-      '"suggest-first" requires "filter" type "prefix". ' +
-        ' Unexpected "filter" type: %s, %s',
-      filter,
-      this.element_
-    );
-    return hasSuggestFirst;
+    return this.shouldSuggestFirst_;
   }
 
   /**
@@ -122,7 +119,8 @@ export class AutocompleteBindingSingle {
   displayActiveItemInInput(inputEl, newValue, userInput) {
     inputEl.value = newValue;
 
-    if (this.shouldHighlight_) {
+    // Should highlight when "suggest-first" is present.
+    if (this.shouldSuggestFirst_) {
       inputEl.setSelectionRange(userInput.length, newValue.length);
     }
   }

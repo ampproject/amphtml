@@ -36,31 +36,22 @@ describes.realWin(
       input = doc.createElement('input');
     });
 
-    function getBindingStub(attributes) {
+    function stubAmpAutocomplete(attributes) {
       const element = createElementWithAttributes(
         doc,
         'div',
         Object.assign(attributes, {layout: 'container'})
       );
-      element.appendChild(input);
-
-      const form = doc.createElement('form');
-      form.appendChild(element);
-      doc.body.appendChild(form);
-
-      return element.hasAttribute('inline')
-        ? new AutocompleteBindingInline({element, win: env.win})
-        : new AutocompleteBindingSingle({
-            element,
-            win: env.win,
-          });
+      return {element, win: env.win};
     }
 
     describe('Single binding', () => {
       let binding;
+      const getBindingSingle = attributes =>
+        new AutocompleteBindingSingle(stubAmpAutocomplete(attributes));
 
       beforeEach(() => {
-        binding = getBindingStub({filter: 'substring'});
+        binding = getBindingSingle({filter: 'substring'});
       });
 
       it('should always intend to autocomplete', () => {
@@ -86,16 +77,13 @@ describes.realWin(
       });
 
       it('should error when suggest first is present without prefix filter', () => {
-        binding = getBindingStub({
-          'suggest-first': 'true',
-        });
-        expect(() => binding.shouldSuggestFirst()).to.throw(
+        expect(() => getBindingSingle({'suggest-first': 'true'})).to.throw(
           /"suggest-first" requires "filter" type "prefix"/
         );
       });
 
       it('should not suggest first when attribute is not present', () => {
-        binding = getBindingStub({
+        binding = getBindingSingle({
           'suggest-first': 'true',
           'filter': 'prefix',
         });
@@ -115,7 +103,7 @@ describes.realWin(
         expect(input.value).to.equal('apple');
         expect(selectionSpy).not.to.have.been.called;
 
-        binding.shouldHighlight_ = true;
+        binding.shouldSuggestFirst_ = true;
         binding.displayActiveItemInInput(input, 'apple', '');
         expect(input.value).to.equal('apple');
         expect(selectionSpy).to.have.been.calledWith(0, 5);
@@ -135,9 +123,7 @@ describes.realWin(
       });
 
       it('should not prevent submission when "submit-on-enter" is true', () => {
-        binding = getBindingStub({
-          'submit-on-enter': 'true',
-        });
+        binding = getBindingSingle({'submit-on-enter': 'true'});
         expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.false;
         expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
       });
@@ -145,23 +131,15 @@ describes.realWin(
 
     describe('Inline binding', () => {
       let pre, userInput, match, binding;
+      const getBindingInline = attributes =>
+        new AutocompleteBindingInline(stubAmpAutocomplete(attributes));
 
       beforeEach(() => {
         toggleExperiment(win, 'amp-autocomplete', true);
         pre = 'My friend is ';
         userInput = 'har';
         match = {0: '@' + userInput, index: pre.length};
-        binding = getBindingStub({
-          filter: 'substring',
-          inline: '@',
-        });
-      });
-
-      it('should require experiment when "inline" is specified', () => {
-        toggleExperiment(win, 'amp-autocomplete', false);
-        expect(() => getBindingStub({inline: '@'})).to.throw(
-          /Experiment amp-autocomplete is not turned on/
-        );
+        binding = getBindingInline({filter: 'substring', inline: '@'});
       });
 
       it('should not always autocomplete', () => {
@@ -224,10 +202,7 @@ describes.realWin(
       });
 
       it('should suggest first if attribute is present', () => {
-        binding = getBindingStub({
-          'inline': '@',
-          'suggest-first': 'true',
-        });
+        binding = getBindingInline({'inline': '@', 'suggest-first': 'true'});
         expect(binding.shouldSuggestFirst()).to.be.true;
       });
 
