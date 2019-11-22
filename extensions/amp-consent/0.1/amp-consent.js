@@ -439,22 +439,20 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise<boolean>}
    */
   getConsentRequiredPromise_() {
-    if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
+    if (!isExperimentOn(this.win, 'amp-consent-geo-override')) {
       return this.getConsentRequiredPromiseLegacy_();
     }
+    // True, false or remote
     let consentRequiredPromise = this.consentConfig_['consentRequired'];
     if (this.consentConfig_['consentRequired'] === 'remote') {
-      this.getConsentRemote_().then(consentInfo => {
-        const constentRequiredResponse = consentInfo['consentRequired'];
+      consentRequiredPromise = this.getConsentRemote_().then(consentInfo => {
+        const remoteResponse = consentInfo['consentRequired'];
 
         userAssert(
-          constentRequiredResponse === true ||
-            constentRequiredResponse === false,
+          remoteResponse === true || remoteResponse === false,
           'consentRequired from endpoint must be true or false'
         );
-
-        consentRequiredPromise =
-          constentRequiredResponse === true ? true : false;
+        return remoteResponse;
       });
     }
     return consentRequiredPromise.then(required => {
