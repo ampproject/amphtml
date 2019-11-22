@@ -64,6 +64,10 @@ The `story-bookend-enter` trigger is fired when the bookend is shown to the user
 
 The `story-bookend-exit` trigger is fired when the bookend is dismissed by the user.
 
+### Bookend click trigger (`"on": "story-bookend-click"`)
+
+The `story-bookend-click` trigger is fired when a user clicks a link inside the bookend. This trigger can be tracked with the accompanying variables: [`storyBookendComponentPosition`](#storyBookendComponentPosition), [`storyBookendComponentType`](#storyBookendComponentType), and [`storyBookendTargetHref`](#storyBookendTargetHref) listed below.
+
 ### Mute trigger (`"on": "story-audio-muted"`)
 
 The `story-audio-muted` trigger is fired when the user initiates an interaction to mute the audio for the current story.
@@ -103,6 +107,18 @@ The user's progress through the story, as a decimal in the range [0...1]. This r
 ### `storyIsMuted`
 
 A boolean representing whether the story was muted when the accompanying trigger was fired.
+
+### `storyBookendComponentPosition`
+
+A number representing the index of the bookend component that the user clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
+
+### `storyBookendComponentType`
+
+The type of component in the bookend that was clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
+
+### `storyBookendTargetHref`
+
+The url of the bookend component that was clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
 
 ### Additional Vars
 
