@@ -171,13 +171,13 @@ describes.realWin(
         return ampIframe;
       }
 
-      it('should render iframe', function*() {
+      it('should render iframe', async () => {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           width: 100,
           height: 100,
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
         const iframe = ampIframe.querySelector('iframe');
         expect(iframe.src).to.equal(iframeSrc + '#amp=1');
@@ -188,9 +188,7 @@ describes.realWin(
         expect(iframe.parentNode).to.equal(scrollWrapper);
         expect(impl.looksLikeTrackingIframe_()).to.be.false;
         expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
-        yield timer.promise(IFRAME_MESSAGE_TIMEOUT);
-        expect(ranJs).to.equal(0);
-        // TODO: remove. testing only.
+        await timer.promise(IFRAME_MESSAGE_TIMEOUT);
         expect(ranJs).to.equal(0);
       });
 
@@ -270,7 +268,7 @@ describes.realWin(
         });
       });
 
-      it('should not render at the top', function*() {
+      it('should not render at the top', async () => {
         expectAsyncConsoleError(/position/);
         const ampIframe = createAmpIframe(
           env,
@@ -283,8 +281,8 @@ describes.realWin(
           599,
           1000
         );
-        yield whenUpgradedToCustomElement(ampIframe);
-        yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
+        await whenUpgradedToCustomElement(ampIframe);
+        await ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
       });
 
       it('should respect translations', function*() {
@@ -321,15 +319,23 @@ describes.realWin(
         expect(ampIframe.querySelector('iframe')).to.not.be.null;
       });
 
-      it('should deny http', function*() {
-        const ampIframe = createAmpIframe(env, {
-          src: 'http://google.com/fpp',
-          sandbox: 'allow-scripts',
-          width: 100,
-          height: 100,
-        });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        expect(ampIframe.querySelector('iframe')).to.be.null;
+      it('should deny http', async () => {
+        expectAsyncConsoleError(/Must start with https/, 1);
+        let ampIframe;
+        try {
+          ampIframe = createAmpIframe(env, {
+            src: 'http://google.com/fpp',
+            sandbox: 'allow-scripts',
+            width: 100,
+            height: 100,
+          });
+          ampIframe.firstAttachedCallback();
+          await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        } catch (e) {
+          if (ampIframe) {
+            expect(ampIframe.querySelector('iframe')).to.be.null;
+          }
+        }
       });
 
       it('should allow data-uri', function*() {
