@@ -47,7 +47,6 @@ import {toggle} from '../../../src/style';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
 const TAG = 'amp-consent';
-// const GEO_OVERRIDE_TAG = 'amp-consent-geo-override';
 
 /**
  * @enum {string}

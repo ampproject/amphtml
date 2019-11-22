@@ -174,28 +174,28 @@ export class ConsentConfig {
    * @return {!Promise<!JsonObject>}
    */
   mergeGeoOverride_(config) {
-    if (config['geoOverride']) {
-      return Services.geoForDocOrNull(this.element_).then(geoService => {
-        userAssert(
-          geoService,
-          '%s: requires <amp-geo> to use `geoOverride`',
-          TAG
-        );
-        const mergedConfig = map(config);
-
-        const geoGroups = Object.keys(config['geoOverride']);
-        // Stop at the first group that the geoService says we're in and then merge configs.
-        for (let i = 0; i < geoGroups.length; i++) {
-          if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-            deepMerge(mergedConfig, config['geoOverride'][geoGroups[i]], 1);
-            break;
-          }
-        }
-        delete mergedConfig['geoOverride'];
-        return mergedConfig;
-      });
+    if (!config['geoOverride']) {
+      return Promise.resolve(config);
     }
-    return Promise.resolve(config);
+    return Services.geoForDocOrNull(this.element_).then(geoService => {
+      userAssert(
+        geoService,
+        '%s: requires <amp-geo> to use `geoOverride`',
+        TAG
+      );
+      const mergedConfig = map(config);
+
+      const geoGroups = Object.keys(config['geoOverride']);
+      // Stop at the first group that the geoService says we're in and then merge configs.
+      for (let i = 0; i < geoGroups.length; i++) {
+        if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
+          deepMerge(mergedConfig, config['geoOverride'][geoGroups[i]], 1);
+          break;
+        }
+      }
+      delete mergedConfig['geoOverride'];
+      return mergedConfig;
+    });
   }
 
   /**
