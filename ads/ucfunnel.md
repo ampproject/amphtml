@@ -32,4 +32,7 @@ limitations under the License.
 ### Required Ad Parameters
 
 - `data-site-id` - unique publisher identifier, supplied by ucfunnel.
+
+### Optional parameters
+
 - `data-schain` - supply chain info.
