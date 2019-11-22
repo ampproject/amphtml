@@ -124,6 +124,7 @@ tags: {  # <amp-story-page>
       protocol: "https"
     }
   }
+  attrs: { name: "next-page-no-ad" }
   attr_lists: "mandatory-id-attr"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
