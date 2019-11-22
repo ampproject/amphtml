@@ -787,15 +787,9 @@ If a composed animation is supposed to start after the end of a separate element
 
 ## Branching
 
-Stories support fragment paramenters in the url. By utilizing this, you can create stories that start from somewhere other than the beginning, share specific pages of stories, or even allow users to jump around within a story. An example is a table of contents.
+Branching enables the identification of individual story pages. Users can jump around within a story, start a story from somewhere other than the beginning, and share specific story pages. An example is a table of contents or multiple choice buttons.
 
-### Manipulating Navigation
-
-The feature allows you to manipulate navigation within a story. When using it, navigation throughout the story from a 'branch-off point' will follow the path that a user takes. If a user navigates from `page-1` to `page-5` and then `page-6`, navigating backwards will follow this exact path (`page-6` to `page-5` and finally `page-1`). The other pages will not be exposed to the user.
-
-### Sharing Options
-
-Specific pages within a story are shareable through URLs.
+Fragment parameters in the URL supports this feature.
 
 ### URL Fragment Parameter
 
@@ -807,21 +801,13 @@ https://www.mydomain.com/good-story/#page=<page-id>
 
 where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integration-with-sidebar-for-stories) for an example.
 
-### Sharing a Specific Story Page
-
-With the branching feature, users will have the option to share the story from the page they are currently seeing. If a user selects the option to share from the page they are currently seeing, the URL generated will be in the form described above.
-
-[tip type="important"]
-**Important**, this may expose the `amp-story-page` ids to the user.
-[/tip]
-
 ## Integration with Sidebar for Stories
 
-The use of `amp-sidebar` is supported for use within `amp-story`. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for information on limitations and caveats.
+`amp-story` supports the use of `amp-sidebar` with a few limitations and caveats. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for more details.
 
 By using both branching features and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of URL fragment parameter.
 
-An example follows. We add an `amp-sidebar` that has in it both a table of contents and out-links to other links of interest.
+The following example demonstrates a table of contents inside of an `amp-sidebar`. The table of contents has a link to a specific story page, and and out-link to a different website.
 
 ```html
 <amp-story id="story" standalone>
@@ -840,6 +826,10 @@ An example follows. We add an `amp-sidebar` that has in it both a table of conte
   ...
 </amp-story>
 ```
+
+### Manipulating Navigation
+
+Branching allows navigation manipulation within a story. The story tracks navigation. If a user navigates from `page-1` to `page-5` and then `page-6`, navigating backwards will follow the exact path. The skipped pages are not exposed to the user when navigating backwards, it will follow `page-6`, to `page-5`, and ends back at `page-1`.
 
 ## Other components usable in AMP stories
 
