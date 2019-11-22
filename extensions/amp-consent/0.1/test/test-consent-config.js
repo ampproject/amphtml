@@ -54,6 +54,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         dict({
           'consentInstanceId': 'ABC',
           'checkConsentHref': 'https://response1',
+          'consentRequired': 'remote',
         })
       );
     });
@@ -69,19 +70,12 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/get-consent-v1',
           'promptUISrc': '/test/manual/diy-consent.html',
+          'consentRequired': 'remote',
         })
       );
     });
 
-    // it('migrates promptIfUnknownForGeoGroup', () => {
-    //   const config = dict({
-    //     'consentInstanceId': 'ABC',
-    //     'checkConsentHref': 'https://response1',
-    //     'promptIfUnknownForGeoGroup': 'nafta',
-    //   });
-    // });
-
-    it('support deprecated config format', () => {
+    it('converts deprecated format to new format', () => {
       appendConfigScriptElement(
         doc,
         element,
@@ -104,6 +98,13 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'postPromptUI': 'test',
         })
       );
+      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+        Promise.resolve({
+          isInCountryGroup() {
+            return false;
+          },
+        })
+      );
       const consentConfig = new ConsentConfig(element);
       return expect(
         consentConfig.getConsentConfigPromise()
@@ -115,6 +116,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'clientConfig': {
             'test': 'ABC',
           },
+          'consentRequired': false,
           'uiConfig': {
             'overlay': true,
           },
@@ -123,7 +125,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       );
     });
 
-    it('merge inline config w/ cmp config', () => {
+    it('merge inline config w/ cmp config', async () => {
       appendConfigScriptElement(
         doc,
         element,
@@ -145,14 +147,20 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'postPromptUI': 'test',
         })
       );
+      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+        Promise.resolve({
+          isInCountryGroup() {
+            return false;
+          },
+        })
+      );
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
-      return expect(
-        consentConfig.getConsentConfigPromise()
-      ).to.eventually.deep.equal(
+      expect(await consentConfig.getConsentConfigPromise()).to.deep.equal(
         dict({
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/override',
+          'consentRequired': false,
           'promptUISrc': '/test/manual/diy-consent.html',
           'promptIfUnknownForGeoGroup': 'eea',
           'postPromptUI': 'test',
@@ -343,9 +351,6 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           new ConsentConfig(element).getConsentConfigPromise()
         ).to.throw(multiConsentError);
       });
-      await expect(
-        new ConsentConfig(element).getConsentConfigPromise()
-      ).to.be.rejectedWith(checkConsentHrefError);
 
       scriptElement.textContent = JSON.stringify({
         'consentInstanceId': 'abc',
@@ -381,23 +386,24 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       ).to.throw(multiScriptError);
     });
 
-    it('remove not supported policy', () => {
+    it('remove not supported policy', async () => {
       toggleExperiment(win, 'multi-consent', false);
       appendConfigScriptElement(
         doc,
         element,
         dict({
           'consentInstanceId': 'ABC',
+          'checkConsentHref': 'example.com/',
           'policy': {
             'ABC': undefined,
           },
         })
       );
       const consentConfig = new ConsentConfig(element);
-      return expect(
-        consentConfig.getConsentConfigPromise()
-      ).to.eventually.deep.equal({
+      expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
         'consentInstanceId': 'ABC',
+        'checkConsentHref': 'example.com/',
+        'consentRequired': 'remote',
         'policy': {},
       });
     });

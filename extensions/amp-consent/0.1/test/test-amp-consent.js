@@ -108,6 +108,7 @@ describes.realWin(
           const config = dict({
             'consentInstanceId': 'test',
             'checkConsentHref': '/override',
+            'consentRequired': true,
             'clientConfig': {
               'test': 'ABC',
             },
@@ -201,21 +202,7 @@ describes.realWin(
         toggleExperiment(win, 'amp-consent-geo-override');
       });
 
-      it('will not query server if consentRequired is not remote', async () => {
-        const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
-        const config = {
-          'consentInstanceId': 'abc',
-          'consentRequired': true,
-          'checkConsentHref': 'https://geo-override-check/',
-        };
-        ampConsent = getAmpConsent(doc, config);
-        await ampConsent.buildCallback();
-        await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
-        expect(fetchSpy).to.not.be.called;
-      });
-
-      it.only('sends post request to server when consentRequired is remote', async () => {
+      it('sends post request to server when consentRequired is remote', async () => {
         const remoteConfig = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -248,9 +235,7 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown', 'testGroup'];
         await ampConsent.buildCallback();
-        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
-          expect(isRequired).to.be.true;
-        });
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
       });
 
       it('not in geo group', async () => {
@@ -258,9 +243,7 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown'];
         await ampConsent.buildCallback();
-        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
-          expect(isRequired).to.be.false;
-        });
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
       });
 
       it('geo override promptIfUnknown', async () => {
@@ -279,9 +262,7 @@ describes.realWin(
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         await ampConsent.buildCallback();
-        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
-          expect(isRequired).to.be.false;
-        });
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
       });
     });
 
