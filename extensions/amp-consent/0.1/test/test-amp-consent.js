@@ -48,12 +48,14 @@ describes.realWin(
       ampdoc = env.ampdoc;
       win = env.win;
       toggleExperiment(win, 'amp-consent-v2', true);
+      toggleExperiment(win, 'amp-consent-geo-override', true);
 
       storageValue = {};
       jsonMockResponses = {
         'https://response1/': '{"promptIfUnknown": true}',
         'https://response2/': '{}',
         'https://response3/': '{"promptIfUnknown": false}',
+        'https://geoOverride-check/': '{"consentRequired": false}',
       };
 
       xhrServiceMock = {
@@ -102,15 +104,13 @@ describes.realWin(
       describe('consent config', () => {
         let consentElement;
 
-        it('get consent/policy/postPromptUI config', async () => {
+        it.only('get consent/policy/postPromptUI config', async () => {
           consentElement = createConsentElement(
             doc,
             dict({
-              'consents': {
-                'test': {
-                  'checkConsentHref': '/override',
-                },
-              },
+              'consentInstanceId': 'test',
+              'checkConsentHref': '/override',
+              'consentRequired': true,
               'clientConfig': {
                 'test': 'ABC',
               },
@@ -126,6 +126,18 @@ describes.realWin(
 
           expect(ampConsent.postPromptUI_).to.not.be.null;
           expect(ampConsent.consentId_).to.equal('test');
+          console.log(ampConsent.consentConfig_);
+          console.log(
+            dict({
+              'consentInstanceId': 'test',
+              'checkConsentHref': '/override',
+              'consentRequired': true,
+              'postPromptUI': 'test',
+              'clientConfig': {
+                'test': 'ABC',
+              },
+            })
+          );
           expect(ampConsent.consentConfig_).to.deep.equal(
             dict({
               'consentInstanceId': 'test',
@@ -206,6 +218,24 @@ describes.realWin(
         await macroTask();
         return ampConsent.getConsentRequiredPromise_().then(isRequired => {
           expect(isRequired).to.be.true;
+        });
+      });
+
+      it('send post request to server when consentRequired is remote', async () => {
+        const remoteConfig = {
+          'consents': {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://geoOverride-check/',
+          },
+        };
+        consentElement = createConsentElement(doc, remoteConfig);
+        doc.body.appendChild(consentElement);
+        ampConsent = new AmpConsent(consentElement);
+        await ampConsent.buildCallback();
+        await macroTask();
+        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
+          expect(isRequired).to.be.false;
         });
       });
     });
