@@ -234,7 +234,8 @@ function buildStringStyleFromEl(target, embedData) {
 }
 
 /**
- * Builds string used in the <style> element for tweets.
+ * Builds string used in the <style> element for tweets. We ignore the height
+ * as its non-deterministic.
  * @param {!EmbedDataDef} embedData
  * @return {string}
  */
