@@ -144,7 +144,7 @@ describes.realWin(
           expect(ampConsent.policyConfig_['_auto_reject']).to.be.ok;
         });
 
-        it('relative checkConsentHref is resolved', async function() {
+        it('relative checkConsentHref is resolved', async () => {
           const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
           consentElement = createConsentElement(
             doc,
@@ -190,7 +190,7 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
       });
 
-      it('send post request to server', async function() {
+      it('send post request to server', async () => {
         await ampConsent.buildCallback();
         await macroTask();
         expect(requestBody).to.deep.equal({
@@ -201,7 +201,7 @@ describes.realWin(
         });
       });
 
-      it('read promptIfUnknown from server response', async function() {
+      it('read promptIfUnknown from server response', async () => {
         await ampConsent.buildCallback();
         await macroTask();
         return ampConsent.getConsentRequiredPromise_().then(isRequired => {
@@ -225,7 +225,7 @@ describes.realWin(
         consentElement = createConsentElement(doc, defaultConfig);
       });
 
-      it('in geo group', async function() {
+      it('in geo group', async () => {
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown', 'testGroup'];
@@ -235,7 +235,7 @@ describes.realWin(
         });
       });
 
-      it('not in geo group', async function() {
+      it('not in geo group', async () => {
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown'];
@@ -245,7 +245,7 @@ describes.realWin(
         });
       });
 
-      it('geo override promptIfUnknown', async function() {
+      it('geo override promptIfUnknown', async () => {
         ISOCountryGroups = ['unknown'];
         consentElement = createConsentElement(
           doc,
@@ -394,7 +394,7 @@ describes.realWin(
         });
       });
 
-      it('update current displaying status', async function() {
+      it('update current displaying status', async () => {
         await ampConsent.buildCallback();
         await macroTask();
         updateConsentInstanceStateSpy = env.sandbox.spy(
@@ -412,7 +412,7 @@ describes.realWin(
         expect(ampConsent.isPromptUIOn_).to.be.false;
       });
 
-      it('ignore action when no consent prompt is displaying', async function() {
+      it('ignore action when no consent prompt is displaying', async () => {
         await ampConsent.buildCallback();
         await macroTask();
         updateConsentInstanceStateSpy = env.sandbox.spy(
@@ -430,7 +430,7 @@ describes.realWin(
       });
 
       describe('schedule display', () => {
-        it('should check for pending consent UI', async function() {
+        it('should check for pending consent UI', async () => {
           await ampConsent.buildCallback();
           await macroTask();
           expect(ampConsent.notificationUiManager_.queueSize_).to.equal(1);
@@ -453,7 +453,7 @@ describes.realWin(
           postPromptUI = doc.getElementById('test');
         });
 
-        it('handle postPromptUI', async function() {
+        it('handle postPromptUI', async () => {
           storageValue = {
             'amp-consent:ABC': true,
           };
@@ -505,7 +505,7 @@ describes.realWin(
             ampConsent = new AmpConsent(consentElement);
           });
 
-          it('hide postPromptUI', async function() {
+          it('hide postPromptUI', async () => {
             await ampConsent.buildCallback();
             ampConsent.element.classList.remove('i-amphtml-notbuilt');
             await macroTask();
@@ -514,7 +514,7 @@ describes.realWin(
             expect(postPromptUI).to.have.display('none');
           });
 
-          it('show postPromptUI', async function() {
+          it('show postPromptUI', async () => {
             storageValue = {
               'amp-consent:ABC': true,
             };
