@@ -16,7 +16,6 @@
 
 import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Deferred} from '../../../src/utils/promise';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {deepMerge, map} from '../../../src/utils/object';
@@ -43,7 +42,7 @@ export class ConsentConfig {
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
 
-    /** @private {?Promise<JsonObject>} */
+    /** @private {?Promise<!JsonObject>} */
     this.configPromise_ = null;
   }
 
@@ -163,10 +162,8 @@ export class ConsentConfig {
    * @return {!Promise<!JsonObject>}
    */
   mergeGeoOverride_(config) {
-    const {promise, resolve} = new Deferred();
-
     if (config['geoOverride']) {
-      Services.geoForDocOrNull(this.element_).then(geoService => {
+      return Services.geoForDocOrNull(this.element_).then(geoService => {
         userAssert(
           geoService,
           '%s: requires <amp-geo> to use `geoOverride`',
@@ -183,12 +180,10 @@ export class ConsentConfig {
           }
         }
         delete mergedConfig['geoOverride'];
-        resolve(mergedConfig);
+        return mergedConfig;
       });
-    } else {
-      resolve(config);
     }
-    return promise;
+    return Promise.resolve(config);
   }
 
   /**
