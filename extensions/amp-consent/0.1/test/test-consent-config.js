@@ -371,7 +371,6 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     });
 
     it('remove not supported policy', () => {
-      toggleExperiment(win, 'multi-consent', false);
       appendConfigScriptElement(
         doc,
         element,

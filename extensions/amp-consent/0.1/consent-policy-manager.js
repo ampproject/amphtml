@@ -80,16 +80,6 @@ export class ConsentPolicyManager {
   }
 
   /**
-   * Is Multi-consent experiment enabled?
-   *
-   * @param {!Window} win
-   * @return {boolean}
-   */
-  static isMultiSupported(win) {
-    return isExperimentOn(win, 'multi-consent');
-  }
-
-  /**
    *
    * @param {string} consentInstanceId
    */
