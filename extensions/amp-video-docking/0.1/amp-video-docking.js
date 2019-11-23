@@ -536,6 +536,10 @@ export class VideoDocking {
       this.dismissOnTap_();
     });
 
+    listen(container, VideoDockingEvents.SCROLL_BACK, () => {
+      this.scrollBack_();
+    });
+
     this.addDragListeners_(container);
     this.addDragListeners_(overlay);
 
@@ -1100,6 +1104,8 @@ export class VideoDocking {
 
     const {element} = video;
 
+    const controls = this.getControls_();
+
     const internalElement = getInternalVideoElementFor(element);
     const shadowLayer = this.getShadowLayer_();
     const {overlay} = this.getControls_();
@@ -1116,6 +1122,7 @@ export class VideoDocking {
       );
 
       placeholderIcon.classList.toggle('amp-rtl', isPlacementRtl);
+      controls.container.classList.toggle('amp-rtl', isPlacementRtl);
     }
 
     // Setting explicit dimensions is needed to match the video's aspect
@@ -1953,6 +1960,22 @@ export class VideoDocking {
       return;
     }
     removeElement(el);
+  }
+
+  /**
+   * Scrolls the document back to the video's inline position.
+   * @private
+   */
+  scrollBack_() {
+    if (!this.currentlyDocked_) {
+      return;
+    }
+    // Don't set curve or duration, rely on Viewport service to determine best
+    // transition time depending on scroll Δ.
+    this.viewport_.animateScrollIntoView(
+      this.getDockedVideo_().element,
+      'center'
+    );
   }
 }
 
