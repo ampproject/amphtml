@@ -456,7 +456,7 @@ export class Controls {
    * @param {number} height
    */
   positionOnVsync(scale, x, y, width, height) {
-    this.area_ = layoutRectLtwh(x, y, width, height);
+    this.area_ = layoutRectLtwh(x, y, width * scale, height * scale);
 
     const {container} = this;
     const halfScale = scale / 2;
