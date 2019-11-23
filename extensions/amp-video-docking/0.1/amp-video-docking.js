@@ -1104,8 +1104,6 @@ export class VideoDocking {
 
     const {element} = video;
 
-    const controls = this.getControls_();
-
     const internalElement = getInternalVideoElementFor(element);
     const shadowLayer = this.getShadowLayer_();
     const {overlay} = this.getControls_();
@@ -1122,7 +1120,7 @@ export class VideoDocking {
       );
 
       placeholderIcon.classList.toggle('amp-rtl', isPlacementRtl);
-      controls.container.classList.toggle('amp-rtl', isPlacementRtl);
+      this.getControls_().container.classList.toggle('amp-rtl', isPlacementRtl);
     }
 
     // Setting explicit dimensions is needed to match the video's aspect
