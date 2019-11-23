@@ -80,6 +80,25 @@ describes.realWin(
         setTrackingIframeTimeoutForTesting(20);
       });
 
+      function stubUserAsserts() {
+        const errors = [];
+        env.sandbox
+          .stub(user(), 'assert')
+          .callsFake((shouldBeTrueish, message) => {
+            if (!shouldBeTrueish) {
+              errors.push(message);
+            }
+            return shouldBeTrueish;
+          });
+        const replay = function() {
+          if (errors.length > 0) {
+            throw errors[0];
+          }
+        };
+        replay.errors = errors;
+        return replay;
+      }
+
       function waitForJsInIframe(opt_ranJs = 1, opt_timeout = 300) {
         return poll(
           'waiting for JS to run',
@@ -171,13 +190,13 @@ describes.realWin(
         return ampIframe;
       }
 
-      it('should render iframe', function*() {
+      it('should render iframe', async () => {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
           width: 100,
           height: 100,
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
         const impl = ampIframe.implementation_;
         const iframe = ampIframe.querySelector('iframe');
         expect(iframe.src).to.equal(iframeSrc + '#amp=1');
@@ -188,7 +207,7 @@ describes.realWin(
         expect(iframe.parentNode).to.equal(scrollWrapper);
         expect(impl.looksLikeTrackingIframe_()).to.be.false;
         expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
-        yield timer.promise(IFRAME_MESSAGE_TIMEOUT);
+        await timer.promise(IFRAME_MESSAGE_TIMEOUT);
         expect(ranJs).to.equal(0);
       });
 
@@ -268,7 +287,7 @@ describes.realWin(
         });
       });
 
-      it('should not render at the top', function*() {
+      it('should not render at the top', async () => {
         expectAsyncConsoleError(/position/);
         const ampIframe = createAmpIframe(
           env,
@@ -281,8 +300,8 @@ describes.realWin(
           599,
           1000
         );
-        yield whenUpgradedToCustomElement(ampIframe);
-        yield ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
+        await whenUpgradedToCustomElement(ampIframe);
+        await ampIframe.signals().whenSignal(CommonSignals.LOAD_START);
       });
 
       it('should respect translations', function*() {
@@ -319,15 +338,16 @@ describes.realWin(
         expect(ampIframe.querySelector('iframe')).to.not.be.null;
       });
 
-      it('should deny http', function*() {
+      it('should deny http', async () => {
+        const asserts = stubUserAsserts();
         const ampIframe = createAmpIframe(env, {
           src: 'http://google.com/fpp',
           sandbox: 'allow-scripts',
           width: 100,
           height: 100,
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        expect(ampIframe.querySelector('iframe')).to.be.null;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(asserts).to.throw(/Must start with https/);
       });
 
       it('should allow data-uri', function*() {
@@ -380,19 +400,20 @@ describes.realWin(
         });
       });
 
-      it('should deny srcdoc with allow-same-origin', function*() {
+      it('should deny srcdoc with allow-same-origin', async () => {
+        const asserts = stubUserAsserts();
         const ampIframe = createAmpIframe(env, {
           width: 100,
           height: 100,
           sandbox: 'allow-same-origin',
-          srcdoc: '',
+          srcdoc: 'test',
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const iframe = ampIframe.querySelector('iframe');
-        expect(iframe).to.be.null;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(asserts).to.throw(/allow-same-origin.*srcdoc/);
       });
 
-      it('should deny data uri with allow-same-origin', function*() {
+      it('should deny data uri with allow-same-origin', async () => {
+        const asserts = stubUserAsserts();
         const ampIframe = createAmpIframe(env, {
           width: 100,
           height: 100,
@@ -402,12 +423,12 @@ describes.realWin(
             'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
             'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const iframe = ampIframe.querySelector('iframe');
-        expect(iframe).to.be.null;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
       });
 
-      it('should deny DATA uri with allow-same-origin', function*() {
+      it('should deny DATA uri with allow-same-origin', async () => {
+        const asserts = stubUserAsserts();
         const ampIframe = createAmpIframe(env, {
           width: 100,
           height: 100,
@@ -417,9 +438,8 @@ describes.realWin(
             'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
             'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
         });
-        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const iframe = ampIframe.querySelector('iframe');
-        expect(iframe).to.be.null;
+        await waitForAmpIframeLayoutPromise(doc, ampIframe);
+        expect(asserts).to.throw(/amp-iframe-origin-policy.md/);
       });
 
       it('should deny same origin', () => {
