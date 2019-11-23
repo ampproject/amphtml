@@ -116,19 +116,6 @@ describes.realWin(
       });
     });
 
-    describe('decryptDocumentContent_', () => {
-      it('should decrypt the content correctly', () => {
-        cryptoHandler = new CryptoHandler(ampdoc);
-        return cryptoHandler
-          .decryptDocumentContent_(encryptedContent, decryptedDocKey)
-          .then(actualContent => {
-            expect(actualContent.replace(/&#39;/g, "'")).to.equal(
-              decryptedContent
-            );
-          });
-      });
-    });
-
     describe('tryToDecryptDocument', () => {
       // eslint-disable-next-line max-len
       it('should replace the encrypted content with decrypted content in multiple sections', () => {
