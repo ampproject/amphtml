@@ -506,9 +506,9 @@ export class Controls {
    * @public
    */
   hide(opt_respectSticky, opt_immediately) {
-    const ampVideoDockedControlShown = 'amp-video-docked-controls-shown';
+    const ampVideoDockedControlsShown = 'amp-video-docked-controls-shown';
     const {container, overlay} = this;
-    if (!container.classList.contains(ampVideoDockedControlShown)) {
+    if (!container.classList.contains(ampVideoDockedControlsShown)) {
       return;
     }
     if (opt_respectSticky && this.isSticky_) {
@@ -519,7 +519,7 @@ export class Controls {
       toggle(overlay, false);
     }
     overlay.classList.remove('amp-video-docked-controls-bg');
-    container.classList.remove(ampVideoDockedControlShown);
+    container.classList.remove(ampVideoDockedControlsShown);
   }
 
   /** @private */
