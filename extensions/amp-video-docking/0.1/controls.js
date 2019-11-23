@@ -44,7 +44,7 @@ import {
  * e.g. `PLAYBACK: 'playback'` gets `amp-video-docked-set-playback`
  * @enum {string}
  */
-const ControlsSet = {
+const ControlSet = {
   // Playback buttons like play/pause, mute and fullscreen.
   PLAYBACK: 'playback',
 
@@ -201,7 +201,7 @@ export class Controls {
     this.dismissContainer_ = assertRef('dismissContainer');
 
     /** @private @const {!NodeList} */
-    this.controlsSets_ = this.container.querySelectorAll(
+    this.controlSets_ = this.container.querySelectorAll(
       '.amp-video-docked-main-button-group'
     );
 
@@ -263,14 +263,14 @@ export class Controls {
 
   /**
    * Sets displayed controls set.
-   * @param {ControlsSet} setName
+   * @param {ControlSet} setName
    * @private
    */
-  useControlsSet_(setName) {
+  useControlSet_(setName) {
     const activeClassname = `amp-video-docked-set-${setName}`;
 
-    iterateCursor(this.controlsSets_, controlsSet => {
-      toggle(controlsSet, controlsSet.classList.contains(activeClassname));
+    iterateCursor(this.controlSets_, controlSet => {
+      toggle(controlSet, controlSet.classList.contains(activeClassname));
     });
   }
 
@@ -324,11 +324,11 @@ export class Controls {
       listen(element, VideoEvents.UNMUTED, () => this.onUnmute_()),
 
       listen(element, VideoEvents.AD_START, () =>
-        this.useControlsSet_(ControlsSet.SCROLL_BACK)
+        this.useControlSet_(ControlSet.SCROLL_BACK)
       ),
 
       listen(element, VideoEvents.AD_END, () =>
-        this.useControlsSet_(ControlsSet.PLAYBACK)
+        this.useControlSet_(ControlSet.PLAYBACK)
       )
     );
   }
@@ -506,9 +506,9 @@ export class Controls {
    * @public
    */
   hide(opt_respectSticky, opt_immediately) {
-    const ampVideoDockedControlsShown = 'amp-video-docked-controls-shown';
+    const ampVideoDockedControlShown = 'amp-video-docked-controls-shown';
     const {container, overlay} = this;
-    if (!container.classList.contains(ampVideoDockedControlsShown)) {
+    if (!container.classList.contains(ampVideoDockedControlShown)) {
       return;
     }
     if (opt_respectSticky && this.isSticky_) {
@@ -519,7 +519,7 @@ export class Controls {
       toggle(overlay, false);
     }
     overlay.classList.remove('amp-video-docked-controls-bg');
-    container.classList.remove(ampVideoDockedControlsShown);
+    container.classList.remove(ampVideoDockedControlShown);
   }
 
   /** @private */
