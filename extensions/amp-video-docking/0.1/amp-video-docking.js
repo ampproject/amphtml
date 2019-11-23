@@ -1962,10 +1962,7 @@ export class VideoDocking {
     removeElement(el);
   }
 
-  /**
-   * Scrolls the document back to the video's inline position.
-   * @private
-   */
+  /** @private */
   scrollBack_() {
     if (!this.currentlyDocked_) {
       return;
