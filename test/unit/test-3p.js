@@ -126,6 +126,17 @@ describe('3p', () => {
       });
     });
 
+    it('should allow mandatory fields to have 0 as a value', () => {
+      validateData(
+        {
+          width: 0,
+          height: 0,
+          type: 'cats',
+        },
+        ['height', 'width']
+      );
+    });
+
     it('should check mandatory fields with alternative options', () => {
       validateData(
         {

@@ -232,7 +232,8 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
       allowedFields = allowedFields.concat(field);
     } else {
       userAssert(
-        data[field],
+        // Allow zero values for height, width etc.
+        data[field] != null,
         'Missing attribute for %s: %s.',
         data.type,
         field
