@@ -166,7 +166,7 @@ displayed at a time depending on the state of the video:
 - The **playback** set is displayed on most scenarios and contains play/pause,
   mute/unmute and fullscreen buttons.
 
-- The **scroll return** set only contains a button to scroll the document back
+- The **scroll back** set only contains a button to scroll the document back
   to the video's inline position. This is displayed during ad playback in order
   to allow user interaction.
 
@@ -204,14 +204,16 @@ Represents the `unmute` button.
 
 Represents the `fullscreen` button.
 
-#### `.amp-docked-video-scroll-return`
+#### `.amp-docked-video-scroll-back`
 
-Represents a button to go back to scroll the document back to the video's inline
-position during ad playback.
+Represents a button to scroll the document back to the video's inline position
+during ad playback to allow user interaction.
 
-This button is different from the others in that the `amp-small`/`amp-large`
-classnames on the `.amp-docked-video-controls` container do not affect its
-dimensions.
+This button is different from the other control buttons in that the
+`amp-small`/`amp-large` classnames on the `.amp-docked-video-controls` container
+do not affect it. Because it's the only button in its set it's also larger,
+measuring 64 by 64 pixels. Other control buttons are sized at
+40 by 40 pixels.
 
 #### `.amp-video-docked-placeholder-background`
 
