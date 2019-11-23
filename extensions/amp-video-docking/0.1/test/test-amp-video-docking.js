@@ -482,45 +482,39 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
           expectedIconX: -width + iconWidth + iconMargin * 2,
         },
       ].forEach(({relativeX, relativeXTextual, expectedIconX}) => {
-        it(
-          'translates placeholder icon horizontally for ' +
-            `posX=${relativeXTextual} in threshold for .${className}`,
-          async () => {
-            stubControls();
-            enableComputedStyle(video.element);
+        it(`translates placeholder icon horizontally for posX=${relativeXTextual} in threshold for .${className}`, async () => {
+          stubControls();
+          enableComputedStyle(video.element);
 
-            const expectedTransformMatrix = transformMatrix(
-              expectedIconX,
-              /* y */ 0,
-              /* scale */ 1
-            );
+          const expectedTransformMatrix = transformMatrix(
+            expectedIconX,
+            /* y */ 0,
+            /* scale */ 1
+          );
 
-            const x = 30;
-            const y = 60;
-            const scale = 0.5;
-            const transitionDurationMs = 0;
+          const x = 30;
+          const y = 60;
+          const scale = 0.5;
+          const transitionDurationMs = 0;
 
-            placeElementLtwh(video, 0, 0, width, 200);
+          placeElementLtwh(video, 0, 0, width, 200);
 
-            await docking.placeAt_(
-              video,
-              x,
-              y,
-              scale,
-              step,
-              transitionDurationMs,
-              relativeX
-            );
+          await docking.placeAt_(
+            video,
+            x,
+            y,
+            scale,
+            step,
+            transitionDurationMs,
+            relativeX
+          );
 
-            const computedStyle = getComputedStyle(
-              videoLayerElement('.amp-video-docked-placeholder-icon')
-            );
+          const computedStyle = getComputedStyle(
+            videoLayerElement('.amp-video-docked-placeholder-icon')
+          );
 
-            expect(computedStyle['transform']).to.equal(
-              expectedTransformMatrix
-            );
-          }
-        );
+          expect(computedStyle['transform']).to.equal(expectedTransformMatrix);
+        });
       });
     });
 
