@@ -32,17 +32,21 @@
   margin: -20px 0 0 -60px;
 }
 
+.amp-large > .amp-video-docked-main-button-group {
+  margin-left: -70px;
+}
+
+.amp-large > .amp-video-docked-main-button-group >
+    .amp-video-docked-button-group {
+  margin-right: 10px;
+}
+
 /* large/small breakpoints shouldn't affect this set, so we specify for both. */
 .amp-large > .amp-video-docked-set-scroll-back,
 .amp-small > .amp-video-docked-set-scroll-back {
   /* Container is dynamically centered at corner. Offset by -50% in horizontal
   axis to properly center (holds a single 64px wide button). */
   margin-left: -32px;
-}
-
-.amp-large > .amp-video-docked-set-scroll-back >
-    .amp-video-docked-button-group {
-  margin-right: 10px;
 }
 
 .amp-large > .amp-video-docked-set-scroll-back >
