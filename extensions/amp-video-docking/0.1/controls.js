@@ -40,8 +40,8 @@ import {
  * A single controls set can be displayed at a time on the controls layer.
  *
  * These map to their displayable classname portion in the format
- * `amp-video-docked-set-${NAME}`
- * e.g. `PLAYBACK: 'playback'` gets `amp-video-docked-set-playback`
+ * `amp-video-docked-control-set-${NAME}`
+ * e.g. `PLAYBACK: 'playback'` gets `amp-video-docked-control-set-playback`
  * @enum {string}
  */
 const ControlSet = {
@@ -98,7 +98,7 @@ const renderControls = html =>
     <div class="amp-video-docked-controls" hidden>
       <div
         class="amp-video-docked-main-button-group
-               amp-video-docked-set-playback"
+               amp-video-docked-control-set-playback"
       >
         <div class="amp-video-docked-button-group">
           <div
@@ -134,7 +134,7 @@ const renderControls = html =>
       </div>
       <div
         class="amp-video-docked-main-button-group
-               amp-video-docked-set-scroll-back"
+               amp-video-docked-control-set-scroll-back"
         hidden
       >
         <div class="amp-video-docked-button-group">
@@ -267,7 +267,7 @@ export class Controls {
    * @private
    */
   useControlSet_(setName) {
-    const activeClassname = `amp-video-docked-set-${setName}`;
+    const activeClassname = `amp-video-docked-control-set-${setName}`;
 
     iterateCursor(this.controlSets_, controlSet => {
       toggle(controlSet, controlSet.classList.contains(activeClassname));

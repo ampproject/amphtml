@@ -42,14 +42,14 @@
 }
 
 /* large/small breakpoints shouldn't affect this set, so we specify for both. */
-.amp-large > .amp-video-docked-set-scroll-back,
-.amp-small > .amp-video-docked-set-scroll-back {
+.amp-large > .amp-video-docked-control-set-scroll-back,
+.amp-small > .amp-video-docked-control-set-scroll-back {
   /* Container is dynamically centered at corner. Offset by -50% in horizontal
   axis to properly center (holds a single 64px wide button). */
   margin-left: -32px;
 }
 
-.amp-large > .amp-video-docked-set-scroll-back >
+.amp-large > .amp-video-docked-control-set-scroll-back >
     .amp-video-docked-button-group {
   /* Reset margin since this set only holds one button. */
   margin-right: 0;
@@ -153,8 +153,8 @@
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M-4-4h48v48H-4z'/%3E%3Cpath d='M36 0c2.2 0 4 1.8 4 4v24c0 2.2-1.8 4-4 4H12c-2.2 0-4-1.8-4-4V4c0-2.2 1.8-4 4-4h24zM16 11.868l12.618 12.618 2.829-2.828L18.789 9H27V5H12v15h4v-8.132zM4 8H0v28c0 2.2 1.8 4 4 4h28v-4H4V8z' fill='%23000' fill-rule='nonzero'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-.amp-video-docked-set-scroll-back > .amp-video-docked-button-group,
-.amp-video-docked-set-scroll-back > .amp-video-docked-button-group > div[role=button] {
+.amp-video-docked-control-set-scroll-back > .amp-video-docked-button-group,
+.amp-video-docked-control-set-scroll-back > .amp-video-docked-button-group > div[role=button] {
   min-width: 64px;
   height: 64px;
 }
