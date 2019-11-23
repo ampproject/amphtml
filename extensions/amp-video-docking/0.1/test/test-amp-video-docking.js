@@ -527,20 +527,20 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
     [
       {
         relativeX: RelativeX.RIGHT,
-        relativeXTextual: 'right',
+        directionTextual: 'left to right',
         placeholderIconHasAmpRtl: false,
       },
       {
         relativeX: RelativeX.LEFT,
-        relativeXTextual: 'left',
+        directionTextual: 'right to left',
         placeholderIconHasAmpRtl: true,
       },
-    ].forEach(({relativeX, relativeXTextual, placeholderIconHasAmpRtl}) => {
+    ].forEach(({relativeX, directionTextual, placeholderIconHasAmpRtl}) => {
       const setsOrUnsets = placeholderIconHasAmpRtl ? 'sets' : 'unsets';
 
       it(
-        `${setsOrUnsets} RTL classname on icon transitioning to ` +
-          relativeXTextual,
+        `${setsOrUnsets} amp-rtl classname on icon and controls layer when ` +
+          `docking from ${directionTextual}`,
         async () => {
           const controls = stubControls();
           enableComputedStyle(video.element);
