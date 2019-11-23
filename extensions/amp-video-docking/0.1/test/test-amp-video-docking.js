@@ -528,15 +528,15 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       {
         relativeX: RelativeX.RIGHT,
         directionTextual: 'left to right',
-        placeholderIconHasAmpRtl: false,
+        hasAmpRtl: false,
       },
       {
         relativeX: RelativeX.LEFT,
         directionTextual: 'right to left',
-        placeholderIconHasAmpRtl: true,
+        hasAmpRtl: true,
       },
-    ].forEach(({relativeX, directionTextual, placeholderIconHasAmpRtl}) => {
-      const setsOrUnsets = placeholderIconHasAmpRtl ? 'sets' : 'unsets';
+    ].forEach(({relativeX, directionTextual, hasAmpRtl}) => {
+      const setsOrUnsets = hasAmpRtl ? 'sets' : 'unsets';
 
       it(
         `${setsOrUnsets} amp-rtl classname on icon and controls layer when ` +
@@ -565,10 +565,10 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
             videoLayerElement(
               '.amp-video-docked-placeholder-icon'
             ).classList.contains('amp-rtl')
-          ).to.equal(placeholderIconHasAmpRtl);
+          ).to.equal(hasAmpRtl);
 
           expect(controls.container.classList.contains('amp-rtl')).to.equal(
-            placeholderIconHasAmpRtl
+            hasAmpRtl
           );
         }
       );
