@@ -98,8 +98,7 @@ const renderControls = html =>
     <div class="amp-video-docked-controls" hidden>
       <div
         class="amp-video-docked-main-button-group
-               amp-video-docked-set-playback
-               i-amphtml-video-docked-set"
+               amp-video-docked-set-playback"
       >
         <div class="amp-video-docked-button-group">
           <div
@@ -135,8 +134,7 @@ const renderControls = html =>
       </div>
       <div
         class="amp-video-docked-main-button-group
-               amp-video-docked-set-scroll-back
-               i-amphtml-video-docked-set"
+               amp-video-docked-set-scroll-back"
         hidden
       >
         <div class="amp-video-docked-button-group">
@@ -204,7 +202,7 @@ export class Controls {
 
     /** @private @const {!NodeList} */
     this.controlsSets_ = this.container.querySelectorAll(
-      '.i-amphtml-video-docked-set'
+      '.amp-video-docked-main-button-group'
     );
 
     /** @private {boolean} */
