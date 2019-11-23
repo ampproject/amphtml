@@ -1965,8 +1965,8 @@ export class VideoDocking {
     if (!this.currentlyDocked_) {
       return;
     }
-    // Don't set curve or duration, rely on Viewport service to determine best
-    // transition time depending on scroll Δ.
+    // Don't set duration or curve.
+    // Rely on Viewport service to determine timing based on scroll Δ.
     this.viewport_.animateScrollIntoView(
       this.getDockedVideo_().element,
       'center'
