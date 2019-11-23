@@ -215,6 +215,13 @@ do not affect it. Because it's the only button in its set it's also larger,
 measuring 64 by 64 pixels. Other control buttons are sized at
 40 by 40 pixels.
 
+The icon for this button (set through the `background-image` CSS property)
+changes depending on the relative direction of the docked area. When the video
+docks from left-to-right, the `.amp-docked-video-controls` gets no additional
+classnames, but it will get the `amp-rtl` classname when the video docks in the
+opposite direction. This allows this button to be drawn with an arrow pointing
+in the right direction.
+
 #### `.amp-video-docked-placeholder-background`
 
 Represents a container for placeholder elements placed on the empty component area.
