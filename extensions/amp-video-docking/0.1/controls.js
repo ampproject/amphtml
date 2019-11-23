@@ -140,7 +140,7 @@ const renderControls = html =>
         <div class="amp-video-docked-button-group">
           <div
             role="button"
-            ref="scrollReturnButton"
+            ref="scrollBackButton"
             class="amp-video-docked-scroll-back"
           ></div>
         </div>
@@ -195,7 +195,7 @@ export class Controls {
     this.fullscreenButton_ = assertRef('fullscreenButton');
 
     /** @private @const {!Element} */
-    this.scrollReturnButton_ = assertRef('scrollReturnButton');
+    this.scrollBackButton_ = assertRef('scrollBackButton');
 
     /** @private @const {!Element} */
     this.dismissContainer_ = assertRef('dismissContainer');
@@ -310,7 +310,7 @@ export class Controls {
         video.fullscreenEnter();
       }),
 
-      this.listenWhenEnabled_(this.scrollReturnButton_, click, () => {
+      this.listenWhenEnabled_(this.scrollBackButton_, click, () => {
         this.dispatch_(VideoDockingEvents.SCROLL_BACK);
       }),
 
