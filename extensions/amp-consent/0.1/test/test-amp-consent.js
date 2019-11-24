@@ -189,19 +189,7 @@ describes.realWin(
         });
       });
 
-      it.only('send post request to server with no matched group', async () => {
-        await ampConsent.buildCallback();
-        await macroTask();
-        expect(requestBody).to.deep.equal({
-          'consentInstanceId': 'ABC',
-          'consentStateValue': 'unknown',
-          'consentString': undefined,
-          'isDirty': false,
-          'matchedGeoGroup': null,
-        });
-      });
-
-      it.only('send post request to server with no matched group', async () => {
+      it('send post request to server with no matched group', async () => {
         await ampConsent.buildCallback();
         await macroTask();
         expect(requestBody).to.deep.equal({
@@ -252,6 +240,29 @@ describes.realWin(
         await ampConsent.buildCallback();
         await macroTask();
         expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+      });
+
+      it('send post request to server with matched group', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'geoOverride': {
+            'nafta': {
+              'checkConsentHref': 'https://geo-override-check2/',
+              'consentRequired': true,
+            },
+          },
+        };
+        ISOCountryGroups = ['nafta'];
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'abc',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': 'nafta',
+        });
       });
 
       it('fallsback to true with invalide remote reponse', async () => {
