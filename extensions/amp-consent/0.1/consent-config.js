@@ -43,7 +43,7 @@ export class ConsentConfig {
     this.win_ = toWin(element.ownerDocument.defaultView);
 
     /** @private {?string} */
-    this.matchedGeoGroups_ = null;
+    this.matchedGeoGroup_ = null;
 
     /** @private {?Promise<!JsonObject>} */
     this.configPromise_ = null;
@@ -54,7 +54,7 @@ export class ConsentConfig {
    * @return {!Promise<!JsonObject>}
    */
   getConsentConfigPromise() {
-    if (!this.config_) {
+    if (!this.configPromise_) {
       this.configPromise_ = this.validateAndParseConfig_();
     }
     return this.configPromise_;
@@ -66,7 +66,7 @@ export class ConsentConfig {
    * @return {?string}
    */
   getMatchedGeoGroups() {
-    return this.matchedGeoGroups_;
+    return this.matchedGeoGroup_;
   }
 
   /**
@@ -190,6 +190,7 @@ export class ConsentConfig {
       for (let i = 0; i < geoGroups.length; i++) {
         if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
           deepMerge(mergedConfig, config['geoOverride'][geoGroups[i]], 1);
+          this.matchedGeoGroup_ = geoGroups[i];
           break;
         }
       }
