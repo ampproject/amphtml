@@ -55,7 +55,9 @@ describes.realWin(
         'https://response2/': '{}',
         'https://response3/': '{"promptIfUnknown": false}',
         'https://geo-override-check/': '{"consentRequired": false}',
+        'https://geo-override-check2/': '{"consentRequired": true}',
         'http://www.origin.com/r/1': '{}',
+        'https://invalid.response.com/': '{"consentRequired": 3}',
       };
 
       xhrServiceMock = {
@@ -212,6 +214,32 @@ describes.realWin(
         await ampConsent.buildCallback();
         await macroTask();
         expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
+      });
+
+      it('resolves consentRequired to remote response with old format', async () => {
+        const remoteConfig = {
+          'consents': {
+            'oldConsent': {
+              'checkConsentHref': 'https://geo-override-check2/',
+            },
+          },
+        };
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+      });
+
+      it('fallsback to true with invalide remote reponse', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://invalid.response.com/',
+        };
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
       });
     });
 

@@ -75,7 +75,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       );
     });
 
-    it('converts deprecated format to new format', () => {
+    it('converts deprecated format to new format', async () => {
       appendConfigScriptElement(
         doc,
         element,
@@ -106,9 +106,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         })
       );
       const consentConfig = new ConsentConfig(element);
-      return expect(
-        consentConfig.getConsentConfigPromise()
-      ).to.eventually.deep.equal(
+      expect(await consentConfig.getConsentConfigPromise()).to.deep.equal(
         dict({
           'consentInstanceId': 'ABC',
           'promptIfUnknownForGeoGroup': 'eea',
@@ -117,6 +115,54 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
             'test': 'ABC',
           },
           'consentRequired': false,
+          'uiConfig': {
+            'overlay': true,
+          },
+          'postPromptUI': 'test',
+        })
+      );
+    });
+
+    it('converts deprecated format to with consentRequired true', async () => {
+      appendConfigScriptElement(
+        doc,
+        element,
+        dict({
+          'consents': {
+            'ABC': {
+              'promptIfUnknownForGeoGroup': 'eea',
+              'checkConsentHref': '/href',
+              'clientConfig': {
+                'test': 'error',
+              },
+            },
+          },
+          'clientConfig': {
+            'test': 'ABC',
+          },
+          'uiConfig': {
+            'overlay': true,
+          },
+          'postPromptUI': 'test',
+        })
+      );
+      env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+        Promise.resolve({
+          isInCountryGroup() {
+            return GEO_IN_GROUP.IN;
+          },
+        })
+      );
+      const consentConfig = new ConsentConfig(element);
+      expect(await consentConfig.getConsentConfigPromise()).to.deep.equal(
+        dict({
+          'consentInstanceId': 'ABC',
+          'promptIfUnknownForGeoGroup': 'eea',
+          'checkConsentHref': '/href',
+          'clientConfig': {
+            'test': 'ABC',
+          },
+          'consentRequired': true,
           'uiConfig': {
             'overlay': true,
           },
@@ -291,6 +337,44 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'consentInstanceId': 'abc',
           'checkConsentHref': 'https://example.com/check-consent',
           'consentRequired': true,
+        });
+      });
+
+      it('should have remote consentRequired if checkConsentHref', async () => {
+        geoConfig = {
+          'consentInstanceId': 'abc',
+          'checkConsentHref': 'https://example.com/check-consent',
+        };
+        appendConfigScriptElement(doc, element, geoConfig);
+        const consentConfig = new ConsentConfig(element);
+        expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
+          'consentInstanceId': 'abc',
+          'checkConsentHref': 'https://example.com/check-consent',
+          'consentRequired': 'remote',
+        });
+      });
+
+      it('should convert promptIfUnknownForGeoGroup', async () => {
+        geoConfig = {
+          'consentInstanceId': 'abc',
+          'promptIfUnknownForGeoGroup': 'na',
+        };
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            isInCountryGroup(geoGroup) {
+              if (geoGroup === 'na') {
+                return GEO_IN_GROUP.IN;
+              }
+              return GEO_IN_GROUP.NOT_IN;
+            },
+          })
+        );
+        appendConfigScriptElement(doc, element, geoConfig);
+        const consentConfig = new ConsentConfig(element);
+        expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
+          'consentInstanceId': 'abc',
+          'consentRequired': true,
+          'promptIfUnknownForGeoGroup': 'na',
         });
       });
     });

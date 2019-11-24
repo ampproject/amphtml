@@ -210,10 +210,9 @@ export class ConsentConfig {
    * @return {!JsonObject}
    */
   validateMergedGeoOverride_(mergedConfig) {
-    // TODO(micajuineho): remove `promptForGeoGroupUnknown`, after migration
     userAssert(
       mergedConfig['consentRequired'] !== undefined,
-      '`consentRequired` or `promptForGeoGroupUnknown` is required',
+      '`consentRequired` is required',
       TAG
     );
     if (mergedConfig['consentRequired'] === 'remote') {
