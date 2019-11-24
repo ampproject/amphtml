@@ -163,6 +163,24 @@ export class ConsentConfig {
         }
       }
     }
+
+    // TODO(micajuineho): delete promptIfUnknownForGeoGroup, once we migrate fully
+    // Migrate to geoOverride
+    const group = config['promptIfUnknownForGeoGroup'];
+    if (typeof group === 'string') {
+      config['consentRequired'] = false;
+      config['geoOverride'] = {
+        [group]: {
+          'consentRequired': true,
+        },
+      };
+    } else if (
+      config['consentRequired'] === undefined &&
+      config['checkConsentHref']
+    ) {
+      config['consentRequired'] = 'remote';
+    }
+
     return this.mergeGeoOverride_(config).then(mergedConfig =>
       this.validateMergedGeoOverride_(mergedConfig)
     );
@@ -205,6 +223,11 @@ export class ConsentConfig {
    * @return {!JsonObject}
    */
   validateMergedGeoOverride_(mergedConfig) {
+    userAssert(
+      mergedConfig['consentRequired'] !== undefined,
+      '`consentRequired` is required',
+      TAG
+    );
     if (mergedConfig['consentRequired'] === 'remote') {
       userAssert(
         mergedConfig['checkConsentHref'],
