@@ -201,6 +201,30 @@ describes.realWin(
         });
       });
 
+      it.only('send post request to server with no matched group', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'ABC',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': null,
+        });
+      });
+
+      it.only('send post request to server with no matched group', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'ABC',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': null,
+        });
+      });
+
       it('read promptIfUnknown from server response', async () => {
         await ampConsent.buildCallback();
         await macroTask();
