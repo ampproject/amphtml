@@ -416,30 +416,19 @@ export class AmpConsent extends AMP.BaseElement {
     this.passSharedData_();
     this.maybeSetDirtyBit_();
 
-    this.consentStateManager_.getLastConsentInstanceInfo().then(storedInfo => {
-      if (
-        isExperimentOn(this.win, 'amp-consent-geo-override') &&
-        hasStoredValue(storedInfo)
-      ) {
-        // TODO next pr, make CORS request for syncing purposes
-        this.handlePostPromptUI_();
+    this.getConsentRequiredPromise_()
+      .then(isConsentRequired => {
+        return this.initPromptUI_(isConsentRequired);
+      })
+      .then(isPostPromptUIRequired => {
+        if (isPostPromptUIRequired) {
+          this.handlePostPromptUI_();
+        }
         this.consentPolicyManager_.enableTimeout();
-        return;
-      }
-      this.getConsentRequiredPromise_()
-        .then(isConsentRequired => {
-          return this.initPromptUI_(isConsentRequired);
-        })
-        .then(isPostPromptUIRequired => {
-          if (isPostPromptUIRequired) {
-            this.handlePostPromptUI_();
-          }
-          this.consentPolicyManager_.enableTimeout();
-        })
-        .catch(unusedError => {
-          // TODO: Handle errors
-        });
-    });
+      })
+      .catch(unusedError => {
+        // TODO: Handle errors
+      });
 
     this.enableInteractions_();
   }
@@ -453,14 +442,20 @@ export class AmpConsent extends AMP.BaseElement {
     if (!isExperimentOn(this.win, 'amp-consent-geo-override')) {
       return this.getConsentRequiredPromiseLegacy_();
     }
-    if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
-      return Promise.resolve(this.consentConfig_['consentRequired']);
-    } else {
-      return this.getConsentRemote_().then(consentInfo => {
-        const remoteResponse = consentInfo['consentRequired'];
-        return typeof remoteResponse === 'boolean' ? remoteResponse : true;
+    return this.consentStateManager_
+      .getLastConsentInstanceInfo()
+      .then(storedInfo => {
+        if (hasStoredValue(storedInfo)) {
+          return Promise.resolve(false);
+        }
+        if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
+          return Promise.resolve(this.consentConfig_['consentRequired']);
+        }
+        return this.getConsentRemote_().then(consentInfo => {
+          const remoteResponse = consentInfo['consentRequired'];
+          return typeof remoteResponse === 'boolean' ? remoteResponse : true;
+        });
       });
-    }
   }
 
   /**

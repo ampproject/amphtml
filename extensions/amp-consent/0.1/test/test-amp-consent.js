@@ -220,6 +220,7 @@ describes.realWin(
         await ampConsent.buildCallback();
         await macroTask();
         expect(localStorageSpy).to.be.calledBefore(fetchSpy);
+        expect(fetchSpy).to.be.calledOnce;
         expect(
           (await ampConsent.consentStateManager_.getConsentInstanceInfo())[
             'consentState'
@@ -228,7 +229,7 @@ describes.realWin(
         expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
       });
 
-      it('gives precedence to local storage', async () => {
+      it('respects exisitng local storage decision', async () => {
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -238,14 +239,9 @@ describes.realWin(
           'amp-consent:abc': true,
         };
         ampConsent = getAmpConsent(doc, config);
-        const consentRequiredSpy = env.sandbox.spy(
-          ampConsent,
-          'getConsentRequiredPromise_'
-        );
 
         await ampConsent.buildCallback();
         await macroTask();
-        expect(consentRequiredSpy).to.not.be.called;
         expect(
           (await ampConsent.consentStateManager_.getConsentInstanceInfo())[
             'consentState'
@@ -610,10 +606,9 @@ describes.realWin(
           });
 
           it('shows postPromptUI with local storage decision', async () => {
-            const promptUiSpy = env.sandbox.spy(ampConsent, 'initPromptUI_');
-            const consentRequiredSpy = env.sandbox.spy(
+            const scheduleDisplaySpy = env.sandbox.spy(
               ampConsent,
-              'getConsentRequiredPromise_'
+              'scheduleDisplay_'
             );
 
             storageValue = {
@@ -628,8 +623,7 @@ describes.realWin(
                 'consentState'
               ]
             ).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
-            expect(consentRequiredSpy).to.not.be.called;
-            expect(promptUiSpy).to.not.be.called;
+            expect(scheduleDisplaySpy).to.not.be.called;
             expect(postPromptUI).to.not.be.null;
             expect(postPromptUI).to.not.have.display('none');
           });
