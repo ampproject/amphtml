@@ -413,6 +413,7 @@ export class AmpConsent extends AMP.BaseElement {
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
+    this.syncConsentStringAndStateValue_();
     this.passSharedData_();
     this.maybeSetDirtyBit_();
 
@@ -516,6 +517,21 @@ export class AmpConsent extends AMP.BaseElement {
     responsePromise.then(response => {
       if (response && !!response['forcePromptOnNext']) {
         this.consentStateManager_.setDirtyBit();
+      }
+    });
+  }
+
+  /**
+   * Sync consent string and consent state value to local storage.
+   */
+  syncConsentStringAndStateValue_() {
+    const responsePromise = this.getConsentRemote_();
+    responsePromise.then(response => {
+      if (response && !!response['forcePromptOnNext']) {
+        // Need to sync without the race condition of localStorage decision
+        // changing
+        // Could also call this after we know that promp ui will show
+        // this.consentStateManager_.setDirtyBit();
       }
     });
   }
