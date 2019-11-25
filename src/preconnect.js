@@ -21,9 +21,9 @@
 
 import {Services} from './services';
 import {dev} from './log';
-import {getService, registerServiceBuilder} from './service';
 import {htmlFor} from './static-template';
 import {parseUrlDeprecated} from './url';
+import {registerServiceBuilder} from './service';
 import {startsWith} from './string';
 import {toWin} from './types';
 import {whenDocumentComplete} from './document-ready';
@@ -375,14 +375,40 @@ export class Preconnect {
 }
 
 /**
+ * @param {!BaseElement} baseElement
+ * @param {string} url
+ * @param {boolean=} opt_alsoConnecting
+ */
+export function preconnectUrl(baseElement, url, opt_alsoConnecting) {
+  const preconnect = Services.preconnectFor(baseElement.win);
+  preconnect.url(baseElement.getAmpDoc(), url, opt_alsoConnecting);
+}
+
+/**
+ * @param {!BaseElement} baseElement
+ * @param {string} url
+ * @param {string=} opt_preloadAs
+ */
+export function preconnectPreload(baseElement, url, opt_preloadAs) {
+  const preconnect = Services.preconnectFor(baseElement.win);
+  preconnect.preload(baseElement.getAmpDoc(), url, opt_preloadAs);
+}
+
+/**
  * @param {!Element} element
  * @return {!Preconnect}
  */
 export function preconnectForElement(element) {
-  const serviceHolder = toWin(element.ownerDocument.defaultView);
-  registerServiceBuilder(serviceHolder, 'preconnect', PreconnectService);
-  const preconnectService = getService(serviceHolder, 'preconnect');
+  const window = toWin(element.ownerDocument.defaultView);
+  const preconnectService = Services.preconnectFor(window);
   return new Preconnect(preconnectService, element);
+}
+
+/**
+ * @param {!Window} window
+ */
+export function installPreconnectService(window) {
+  registerServiceBuilder(window, 'preconnect', PreconnectService);
 }
 
 /**
@@ -395,7 +421,7 @@ export function preconnectForElement(element) {
 export function preconnectToOrigin(document) {
   return whenDocumentComplete(document).then(() => {
     const element = document.documentElement;
-    const preconnect = preconnectForElement(element);
+    const preconnect = Services.preconnectFor(document.defaultView);
     const info = Services.documentInfoForDoc(element);
     preconnect.url(info.sourceUrl);
     preconnect.url(info.canonicalUrl);
