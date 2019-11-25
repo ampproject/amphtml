@@ -62,7 +62,7 @@ class AmpMegaphone extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    const ampdoc = ampdoc;
+    const ampdoc = this.getAmpDoc();
     // Pre-connects to the iframe source itself
     preconnect.url(ampdoc, this.baseUrl_, opt_onLayout);
     // Pre-connects to the megaphone static documents server (serves CSS and JS)
