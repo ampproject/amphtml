@@ -71,7 +71,7 @@ export function setPreconnectFeaturesForTesting(features) {
   preconnectFeatures = features;
 }
 
-class PreconnectService {
+export class PreconnectService {
   /**
    * @param {!Window} win
    */
@@ -334,10 +334,13 @@ export function installPreconnectService(window) {
  */
 export function preconnectToOrigin(document) {
   return whenDocumentComplete(document).then(() => {
-    const element = document.documentElement;
-    const preconnect = Services.preconnectFor(document.defaultView);
-    const info = Services.documentInfoForDoc(element);
-    preconnect.url(info.sourceUrl);
-    preconnect.url(info.canonicalUrl);
+    const win = document.defaultView;
+    if (win) {
+      const preconnect = Services.preconnectFor(win);
+      const info = Services.documentInfoForDoc(document.documentElement);
+      const ampdoc = Services.ampdoc(document);
+      preconnect.url(ampdoc, info.sourceUrl);
+      preconnect.url(ampdoc, info.canonicalUrl);
+    }
   });
 }

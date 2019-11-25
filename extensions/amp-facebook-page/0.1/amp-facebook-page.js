@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';

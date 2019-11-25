@@ -55,11 +55,7 @@ class AmpFacebookLike extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
-    preconnect.url(
-      this.getAmpDoc(),
-      'https://facebook.com',
-      opt_onLayout
-    );
+    preconnect.url(this.getAmpDoc(), 'https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
     preconnect.preload(
       this.getAmpDoc(),

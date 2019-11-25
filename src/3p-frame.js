@@ -191,7 +191,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} win
- * @param {../service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!./preconnect.PreconnectService} preconnect
  * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  */
@@ -204,7 +204,7 @@ export function preloadBootstrap(win, ampdoc, preconnect, opt_disallowCustom) {
   const scriptUrl = getMode().localDev
     ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
     : `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
-  preconnect.preload(scriptUrl, 'script');
+  preconnect.preload(ampdoc, scriptUrl, 'script');
 }
 
 /**

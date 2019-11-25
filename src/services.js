@@ -400,7 +400,7 @@ export class Services {
 
   /**
    * @param {!Window} window
-   * @return {!./preconnect.Preconnect}
+   * @return {!./preconnect.PreconnectService}
    */
   static preconnectFor(window) {
     return getService(window, 'preconnect');
