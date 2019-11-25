@@ -31,9 +31,9 @@ class AmpVine extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // the Vine iframe
-    this.preconnect.url('https://vine.co', onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://vine.co', onLayout);
     // Vine assets loaded in the iframe
-    this.preconnect.url('https://v.cdn.vine.co', onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://v.cdn.vine.co', onLayout);
   }
 
   /** @override */

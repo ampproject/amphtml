@@ -40,7 +40,7 @@ class AmpKaltura extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://cdnapisec.kaltura.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cdnapisec.kaltura.com', opt_onLayout);
   }
 
   /** @override */

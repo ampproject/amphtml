@@ -129,7 +129,7 @@ export class AmpBysideContent extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     if (this.origin_) {
-      this.preconnect.url(this.origin_, onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), this.origin_, onLayout);
     }
   }
 

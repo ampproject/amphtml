@@ -45,7 +45,7 @@ class AmpSoundcloud extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://api.soundcloud.com/', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://api.soundcloud.com/', opt_onLayout);
   }
 
   /** @override */

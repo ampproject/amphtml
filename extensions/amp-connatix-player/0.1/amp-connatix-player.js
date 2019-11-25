@@ -111,7 +111,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // Serves the player assets
-    this.preconnect.url(this.iframeDomain_, onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), this.iframeDomain_, onLayout);
   }
 
   /** @override */

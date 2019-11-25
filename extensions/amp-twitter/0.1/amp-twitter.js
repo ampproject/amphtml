@@ -52,10 +52,10 @@ class AmpTwitter extends AMP.BaseElement {
       'script'
     );
     // This domain serves the actual tweets as JSONP.
-    this.preconnect.url('https://syndication.twitter.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://syndication.twitter.com', opt_onLayout);
     // All images
-    this.preconnect.url('https://pbs.twimg.com', opt_onLayout);
-    this.preconnect.url('https://cdn.syndication.twimg.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://pbs.twimg.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cdn.syndication.twimg.com', opt_onLayout);
   }
 
   /** @override */

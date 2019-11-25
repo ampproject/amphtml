@@ -61,11 +61,11 @@ class AmpMegaphone extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     // Pre-connects to the iframe source itself
-    this.preconnect.url(this.baseUrl_, opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), this.baseUrl_, opt_onLayout);
     // Pre-connects to the megaphone static documents server (serves CSS and JS)
-    this.preconnect.url('https://assets.megaphone.fm', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://assets.megaphone.fm', opt_onLayout);
     // Pre-connects to the image assets server (for UI elements and playlist cover art)
-    this.preconnect.url('https://megaphone.imgix.net', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://megaphone.imgix.net', opt_onLayout);
   }
 
   /** @override */

@@ -375,26 +375,6 @@ export class Preconnect {
 }
 
 /**
- * @param {!BaseElement} baseElement
- * @param {string} url
- * @param {boolean=} opt_alsoConnecting
- */
-export function preconnectUrl(baseElement, url, opt_alsoConnecting) {
-  const preconnect = Services.preconnectFor(baseElement.win);
-  preconnect.url(baseElement.getAmpDoc(), url, opt_alsoConnecting);
-}
-
-/**
- * @param {!BaseElement} baseElement
- * @param {string} url
- * @param {string=} opt_preloadAs
- */
-export function preconnectPreload(baseElement, url, opt_preloadAs) {
-  const preconnect = Services.preconnectFor(baseElement.win);
-  preconnect.preload(baseElement.getAmpDoc(), url, opt_preloadAs);
-}
-
-/**
  * @param {!Element} element
  * @return {!Preconnect}
  */

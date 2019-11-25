@@ -114,7 +114,7 @@ export class AmpImg extends BaseElement {
     // `src` url if it exists or the first srcset url.
     const src = this.element.getAttribute('src');
     if (src) {
-      this.preconnect.url(src, onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), src, onLayout);
     } else {
       const srcset = this.element.getAttribute('srcset');
       if (!srcset) {
@@ -124,7 +124,7 @@ export class AmpImg extends BaseElement {
       const srcseturl = /\S+/.exec(srcset);
       // Connect to the first url if it exists
       if (srcseturl) {
-        this.preconnect.url(srcseturl[0], onLayout);
+        Services.preconnectFor(this.win).url(this.getAmpDoc(), srcseturl[0], onLayout);
       }
     }
   }

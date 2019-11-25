@@ -243,10 +243,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       });
     }
     if (typeof this.config.preconnect == 'string') {
-      this.preconnect.url(this.config.preconnect, opt_onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
       this.config.preconnect.forEach(p => {
-        this.preconnect.url(p, opt_onLayout);
+        Services.preconnectFor(this.win).url(this.getAmpDoc(), p, opt_onLayout);
       });
     }
     // If fully qualified src for ad script is specified we preconnect to it.
@@ -254,7 +254,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (src) {
       // We only preconnect to the src because we cannot know whether the URL
       // will have caching headers set.
-      this.preconnect.url(src);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), src);
     }
   }
 

@@ -59,15 +59,15 @@ export class Amp3dGltf extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url(
+    Services.preconnectFor(this.win).url(this.getAmpDoc(),
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
       opt_onLayout
     );
-    this.preconnect.url(
+    Services.preconnectFor(this.win).url(this.getAmpDoc(),
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/loaders/GLTFLoader.js',
       opt_onLayout
     );
-    this.preconnect.url(
+    Services.preconnectFor(this.win).url(this.getAmpDoc(),
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/controls/OrbitControls.js',
       opt_onLayout
     );

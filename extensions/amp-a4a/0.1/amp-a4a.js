@@ -498,7 +498,7 @@ export class AmpA4A extends AMP.BaseElement {
     // matches amp-ad loader predicate such that A4A impl does not load.
     if (preconnect) {
       preconnect.forEach(p => {
-        this.preconnect.url(p, /*opt_preloadAs*/ true);
+        Services.preconnectFor(this.win).url(this.getAmpDoc(), p, /*opt_preloadAs*/ true);
       });
     }
   }

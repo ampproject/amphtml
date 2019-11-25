@@ -75,10 +75,10 @@ class AmpInstagram extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     // See
     // https://instagram.com/developer/embedding/?hl=en
-    this.preconnect.url('https://www.instagram.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.instagram.com', opt_onLayout);
     // Host instagram used for image serving. While the host name is
     // funky this appears to be stable in the post-domain sharding era.
-    this.preconnect.url(
+    Services.preconnectFor(this.win).url(this.getAmpDoc(),
       'https://instagram.fsnc1-1.fna.fbcdn.net',
       opt_onLayout
     );

@@ -46,7 +46,7 @@ export class AmpGist extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://gist.github.com/', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://gist.github.com/', opt_onLayout);
   }
 
   /** @override */

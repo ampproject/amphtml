@@ -34,7 +34,7 @@ export class AmpMathml extends AMP.BaseElement {
    *
    */
   preconnectCallback() {
-    this.preconnect.url('https://cdnjs.cloudflare.com');
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cdnjs.cloudflare.com');
   }
 
   /**

@@ -53,9 +53,9 @@ class AmpJWPlayer extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // Host that serves player configuration and content redirects
-    this.preconnect.url('https://content.jwplatform.com', onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://content.jwplatform.com', onLayout);
     // CDN which hosts jwplayer assets
-    this.preconnect.url('https://ssl.p.jwpcdn.com', onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://ssl.p.jwpcdn.com', onLayout);
   }
 
   /** @override */

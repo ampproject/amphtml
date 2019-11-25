@@ -63,7 +63,7 @@ class AmpPinterest extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // preconnect to widget APIpinMedia
-    this.preconnect.url('https://widgets.pinterest.com', onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://widgets.pinterest.com', onLayout);
   }
 
   /** @override */

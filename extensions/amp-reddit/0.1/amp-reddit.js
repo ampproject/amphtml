@@ -28,18 +28,18 @@ class AmpReddit extends AMP.BaseElement {
     // Required urls and scripts are different for comments and posts.
     if (this.element.getAttribute('data-embedtype') === 'comment') {
       // The domain for static comment permalinks.
-      this.preconnect.url('https://www.redditmedia.com', onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.redditmedia.com', onLayout);
       // The domain for JS and CSS used in rendering embeds.
-      this.preconnect.url('https://www.redditstatic.com', onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.redditstatic.com', onLayout);
       this.preconnect.preload(
         'https://www.redditstatic.com/comment-embed.js',
         'script'
       );
     } else {
       // Posts don't use the static domain.
-      this.preconnect.url('https://www.reddit.com', onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.reddit.com', onLayout);
       // Posts defer to the embedly API.
-      this.preconnect.url('https://cdn.embedly.com', onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cdn.embedly.com', onLayout);
       this.preconnect.preload(
         'https://embed.redditmedia.com/widgets/platform.js',
         'script'

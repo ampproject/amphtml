@@ -44,7 +44,7 @@ class AmpO2Player extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.domain_, onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), this.domain_, onLayout);
   }
 
   /** @override */

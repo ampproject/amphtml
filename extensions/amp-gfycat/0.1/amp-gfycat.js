@@ -54,11 +54,11 @@ class AmpGfycat extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     // Gfycat iframe
-    this.preconnect.url('https://gfycat.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://gfycat.com', opt_onLayout);
 
     // Iframe video and poster urls
-    this.preconnect.url('https://giant.gfycat.com', opt_onLayout);
-    this.preconnect.url('https://thumbs.gfycat.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://giant.gfycat.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://thumbs.gfycat.com', opt_onLayout);
   }
 
   /** @override */

@@ -115,6 +115,6 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://cdn.embedly.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cdn.embedly.com', opt_onLayout);
   }
 }

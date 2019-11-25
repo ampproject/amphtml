@@ -89,7 +89,7 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    this.preconnect.url('https://players.brightcove.net');
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://players.brightcove.net');
   }
 
   /** @override */
