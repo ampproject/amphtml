@@ -233,9 +233,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleOptionSelection_(optionEl) {
-    optionEl.classList.add('i-amphtml-story-quiz-option-selected');
-    this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+    this.mutateElement(() => {
+      optionEl.classList.add('i-amphtml-story-quiz-option-selected');
+      this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
 
-    this.hasReceivedResponse_ = true;
+      this.hasReceivedResponse_ = true;
+    });
   }
 }

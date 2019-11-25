@@ -127,7 +127,7 @@ h3.i-amphtml-story-quiz-prompt {
     border: solid 2px transparent !important;
 }
 
-/** TODO(jackbsteinberg): is font-size: 0; a11y friendly? */
+/** TODO(jackbsteinberg): Use a more a11y-friendly approach than font-size: 0px; */
 
 .i-amphtml-story-quiz-post-selection [correct] > .i-amphtml-story-quiz-answer-choice {
     background-color: white !important;
