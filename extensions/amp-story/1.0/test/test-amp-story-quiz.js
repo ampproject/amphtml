@@ -79,6 +79,8 @@ describes.realWin(
 
       win.document.body.appendChild(storyEl);
       ampStoryQuiz = new AmpStoryQuiz(ampStoryQuizEl);
+
+      env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake(fn => fn());
     });
 
     it('should take the html and reformat it', async () => {
