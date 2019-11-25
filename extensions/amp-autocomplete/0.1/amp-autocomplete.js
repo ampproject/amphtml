@@ -176,7 +176,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.ssrTemplateHelper_ = null;
 
     /**
-     * Whether server-side rendering is supported.
+     * Whether server-side rendering is required.
      * @private {boolean}
      */
     this.isSsr_ = false;
@@ -372,6 +372,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return [];
       });
     }
+  }
+
+  /**
+   * @visibleForTesting
+   * @return {?../../../src/ssr-template-helper.SsrTemplateHelper}
+   */
+  getSsrTemplateHelper() {
+    return this.ssrTemplateHelper_;
   }
 
   /**
