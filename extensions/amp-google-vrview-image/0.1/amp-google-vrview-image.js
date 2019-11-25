@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -72,7 +73,10 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
   preconnectCallback() {
     if (this.src_) {
       Services.preconnectFor(this.win).preload(this.getAmpDoc(), this.src_);
-      Services.preconnectFor(this.win).preload(this.getAmpDoc(), this.imageSrc_);
+      Services.preconnectFor(this.win).preload(
+        this.getAmpDoc(),
+        this.imageSrc_
+      );
     }
   }
 

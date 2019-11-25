@@ -27,6 +27,7 @@
  * </amp-megaphone>
  */
 
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getData, listen} from '../../../src/event-helper';
@@ -61,11 +62,23 @@ class AmpMegaphone extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     // Pre-connects to the iframe source itself
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), this.baseUrl_, opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.baseUrl_,
+      opt_onLayout
+    );
     // Pre-connects to the megaphone static documents server (serves CSS and JS)
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://assets.megaphone.fm', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://assets.megaphone.fm',
+      opt_onLayout
+    );
     // Pre-connects to the image assets server (for UI elements and playlist cover art)
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://megaphone.imgix.net', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://megaphone.imgix.net',
+      opt_onLayout
+    );
   }
 
   /** @override */

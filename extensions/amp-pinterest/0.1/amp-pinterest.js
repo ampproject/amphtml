@@ -37,8 +37,8 @@
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
 import {FollowButton} from './follow-button';
 import {SaveButton} from './save-button';
-
 import {PinWidget} from './pin-widget';
+import {Services} from '../../../src/services';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user, userAssert} from '../../../src/log';
@@ -63,7 +63,11 @@ class AmpPinterest extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // preconnect to widget APIpinMedia
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://widgets.pinterest.com', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://widgets.pinterest.com',
+      onLayout
+    );
   }
 
   /** @override */

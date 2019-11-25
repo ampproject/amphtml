@@ -64,7 +64,11 @@ class AmpWistiaPlayer extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // video player and video metadata
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://fast.wistia.net', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://fast.wistia.net',
+      onLayout
+    );
   }
 
   /** @override */

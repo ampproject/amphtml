@@ -133,7 +133,8 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    const {element, preconnect} = this;
+    const {element} = this;
+    const preconnect = Services.preconnectFor(this.win);
     preconnect.preload(
       'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
       'script'

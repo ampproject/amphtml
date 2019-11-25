@@ -15,6 +15,7 @@
  */
 
 import {MessageType} from '../../../src/3p-frame-messaging';
+import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -45,17 +46,27 @@ class AmpTwitter extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.getAmpDoc(), this.preconnect);
+    const preconnect = Services.preconnectFor(this.win);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
     // Hosts the script that renders tweets.
-    Services.preconnectFor(this.win).preload(this.getAmpDoc(),
+    preconnect.preload(
+      this.getAmpDoc(),
       'https://platform.twitter.com/widgets.js',
       'script'
     );
     // This domain serves the actual tweets as JSONP.
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://syndication.twitter.com', opt_onLayout);
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://syndication.twitter.com',
+      opt_onLayout
+    );
     // All images
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://pbs.twimg.com', opt_onLayout);
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cdn.syndication.twimg.com', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://pbs.twimg.com', opt_onLayout);
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://cdn.syndication.twimg.com',
+      opt_onLayout
+    );
   }
 
   /** @override */

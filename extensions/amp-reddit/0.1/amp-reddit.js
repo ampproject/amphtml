@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
@@ -25,28 +26,35 @@ class AmpReddit extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
+    const preconnect = Services.preconnectFor(this.win);
     // Required urls and scripts are different for comments and posts.
     if (this.element.getAttribute('data-embedtype') === 'comment') {
       // The domain for static comment permalinks.
-      Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.redditmedia.com', onLayout);
+      preconnect.url(this.getAmpDoc(), 'https://www.redditmedia.com', onLayout);
       // The domain for JS and CSS used in rendering embeds.
-      Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.redditstatic.com', onLayout);
-      Services.preconnectFor(this.win).preload(this.getAmpDoc(),
+      preconnect.url(
+        this.getAmpDoc(),
+        'https://www.redditstatic.com',
+        onLayout
+      );
+      preconnect.preload(
+        this.getAmpDoc(),
         'https://www.redditstatic.com/comment-embed.js',
         'script'
       );
     } else {
       // Posts don't use the static domain.
-      Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.reddit.com', onLayout);
+      preconnect.url(this.getAmpDoc(), 'https://www.reddit.com', onLayout);
       // Posts defer to the embedly API.
-      Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cdn.embedly.com', onLayout);
-      Services.preconnectFor(this.win).preload(this.getAmpDoc(),
+      preconnect.url(this.getAmpDoc(), 'https://cdn.embedly.com', onLayout);
+      preconnect.preload(
+        this.getAmpDoc(),
         'https://embed.redditmedia.com/widgets/platform.js',
         'script'
       );
     }
 
-    preloadBootstrap(this.win, this.getAmpDoc(), this.preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */

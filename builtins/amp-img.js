@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
+import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
@@ -124,7 +125,11 @@ export class AmpImg extends BaseElement {
       const srcseturl = /\S+/.exec(srcset);
       // Connect to the first url if it exists
       if (srcseturl) {
-        Services.preconnectFor(this.win).url(this.getAmpDoc(), srcseturl[0], onLayout);
+        Services.preconnectFor(this.win).url(
+          this.getAmpDoc(),
+          srcseturl[0],
+          onLayout
+        );
       }
     }
   }

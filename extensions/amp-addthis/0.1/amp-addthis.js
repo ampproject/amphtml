@@ -245,13 +245,37 @@ class AmpAddThis extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), ORIGIN, opt_onLayout);
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), API_SERVER, opt_onLayout);
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), COOKIELESS_API_SERVER, opt_onLayout);
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), SHARECOUNTER_SERVER, opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      ORIGIN,
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      API_SERVER,
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      COOKIELESS_API_SERVER,
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      SHARECOUNTER_SERVER,
+      opt_onLayout
+    );
     // Images, etc.:
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cache.addthiscdn.com', opt_onLayout);
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://su.addthis.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cache.addthiscdn.com',
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://su.addthis.com',
+      opt_onLayout
+    );
   }
 
   /** @override */

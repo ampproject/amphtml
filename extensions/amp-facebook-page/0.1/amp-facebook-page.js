@@ -54,13 +54,15 @@ class AmpFacebookPage extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://facebook.com', opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), 'https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
-    Services.preconnectFor(this.win).preload(this.getAmpDoc(),
+    preconnect.preload(
+      this.getAmpDoc(),
       'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
       'script'
     );
-    preloadBootstrap(this.win, this.getAmpDoc(), this.preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
