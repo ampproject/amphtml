@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
+import {decryptAesGcm} from '../../../third_party/subscriptions-project/aes_gcm';
 import {iterateCursor} from '../../../src/dom';
 import {padStart} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
-import {decryptAesGcm} from '../../../third_party/subscriptions-project/aes_gcm';
-
-// Length of IV in AES-GCM encoded content.
-const AES_GCM_IV_LENGTH = 12;
 
 export class CryptoHandler {
   /**
