@@ -42,6 +42,7 @@ describes.realWin(
     let requestBody;
     let ISOCountryGroups;
     let xhrServiceMock;
+    let storageMock;
 
     beforeEach(() => {
       doc = env.win.document;
@@ -73,6 +74,16 @@ describes.realWin(
         },
       };
 
+      storageMock = {
+        get: name => {
+          return Promise.resolve(storageValue[name]);
+        },
+        set: (name, value) => {
+          storageValue[name] = value;
+          return Promise.resolve();
+        },
+      };
+
       resetServiceForTesting(win, 'xhr');
       registerServiceBuilder(win, 'xhr', function() {
         return xhrServiceMock;
@@ -90,15 +101,7 @@ describes.realWin(
 
       resetServiceForTesting(win, 'storage');
       registerServiceBuilder(win, 'storage', function() {
-        return Promise.resolve({
-          get: name => {
-            return Promise.resolve(storageValue[name]);
-          },
-          set: (name, value) => {
-            storageValue[name] = value;
-            return Promise.resolve();
-          },
-        });
+        return Promise.resolve(storageMock);
       });
     });
 
@@ -202,6 +205,43 @@ describes.realWin(
       let ampConsent;
       beforeEach(() => {
         toggleExperiment(win, 'amp-consent-geo-override');
+      });
+
+      it('checks local storage before making sever request', async () => {
+        const config = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://geo-override-check2/',
+        };
+        const localStorageSpy = env.sandbox.spy(storageMock, 'get');
+        const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetch');
+
+        ampConsent = getAmpConsent(doc, config);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(localStorageSpy).to.be.calledBefore(fetchSpy);
+      });
+
+      it('gives precedence to local storage', async () => {
+        const config = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://geo-override-check2/',
+        };
+        storageValue = {
+          'amp-consent:abc': true,
+        };
+        const localStorageSpy = env.sandbox.spy(storageMock, 'get');
+        // const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetch');
+
+        ampConsent = getAmpConsent(doc, config);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(localStorageSpy).to.be.calledOnce;
+        // expect(fetchSpy).to.be.calledOnce;
+        expect(
+          await ampConsent.consentStateManager_.getConsentInstanceInfo()
+        ).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
       });
 
       it('sends post request to server when consentRequired is remote', async () => {
@@ -419,6 +459,30 @@ describes.realWin(
         env.sandbox.stub(ampConsent, 'mutateElement').callsFake(fn => {
           fn();
         });
+      });
+
+      it('does not show promptUI if local storage has decision', async () => {
+        const config = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://geo-override-check2/',
+          'promptUI': '123',
+        };
+        storageValue = {
+          'amp-consent:abc': true,
+        };
+        const localStorageSpy = env.sandbox.spy(storageMock, 'get');
+        // const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetch');
+
+        ampConsent = getAmpConsent(doc, config);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(localStorageSpy).to.be.calledOnce;
+        // expect(fetchSpy).to.be.calledOnce;
+        expect(
+          await ampConsent.consentStateManager_.getConsentInstanceInfo()
+        ).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
+        expect(ampConsent.isPromptUIOn_).to.be.false;
       });
 
       it('update current displaying status', async () => {

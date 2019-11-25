@@ -418,7 +418,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.consentStateManager_.getLastConsentInstanceInfo().then(storedInfo => {
       if (hasStoredValue(storedInfo)) {
-        // TODO next task, make CORS request for syncing purposes, but don't show UI
+        // TODO next pr, make CORS request for syncing purposes
         return;
       }
       this.getConsentRequiredPromise_()
