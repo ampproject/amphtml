@@ -445,15 +445,13 @@ export class AmpConsent extends AMP.BaseElement {
   getConsentRequiredPromise_() {
     if (!isExperimentOn(this.win, 'amp-consent-geo-override')) {
       return this.getConsentRequiredPromiseLegacy_();
-    }
-    if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
+    } else if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
       return Promise.resolve(this.consentConfig_['consentRequired']);
-    } else {
-      return this.getConsentRemote_().then(consentInfo => {
-        const remoteResponse = consentInfo['consentRequired'];
-        return typeof remoteResponse === 'boolean' ? remoteResponse : true;
-      });
     }
+    return this.getConsentRemote_().then(consentInfo => {
+      const remoteResponse = consentInfo['consentRequired'];
+      return typeof remoteResponse === 'boolean' ? remoteResponse : true;
+    });
   }
 
   /**
