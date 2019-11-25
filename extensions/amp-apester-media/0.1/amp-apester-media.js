@@ -103,21 +103,10 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    Services.preconnectFor(this.win).url(
-      this.getAmpDoc(),
-      this.displayBaseUrl_,
-      onLayout
-    );
-    Services.preconnectFor(this.win).url(
-      this.getAmpDoc(),
-      this.rendererBaseUrl_,
-      onLayout
-    );
-    Services.preconnectFor(this.win).url(
-      this.getAmpDoc(),
-      this.staticContent_,
-      onLayout
-    );
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), this.displayBaseUrl_, onLayout);
+    preconnect.url(this.getAmpDoc(), this.rendererBaseUrl_, onLayout);
+    preconnect.url(this.getAmpDoc(), this.staticContent_, onLayout);
   }
 
   /** @override */

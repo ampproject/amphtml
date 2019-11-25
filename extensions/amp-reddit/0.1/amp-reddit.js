@@ -27,34 +27,31 @@ class AmpReddit extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
     // Required urls and scripts are different for comments and posts.
     if (this.element.getAttribute('data-embedtype') === 'comment') {
       // The domain for static comment permalinks.
-      preconnect.url(this.getAmpDoc(), 'https://www.redditmedia.com', onLayout);
+      preconnect.url(ampdoc, 'https://www.redditmedia.com', onLayout);
       // The domain for JS and CSS used in rendering embeds.
-      preconnect.url(
-        this.getAmpDoc(),
-        'https://www.redditstatic.com',
-        onLayout
-      );
+      preconnect.url(ampdoc, 'https://www.redditstatic.com', onLayout);
       preconnect.preload(
-        this.getAmpDoc(),
+        ampdoc,
         'https://www.redditstatic.com/comment-embed.js',
         'script'
       );
     } else {
       // Posts don't use the static domain.
-      preconnect.url(this.getAmpDoc(), 'https://www.reddit.com', onLayout);
+      preconnect.url(ampdoc, 'https://www.reddit.com', onLayout);
       // Posts defer to the embedly API.
-      preconnect.url(this.getAmpDoc(), 'https://cdn.embedly.com', onLayout);
+      preconnect.url(ampdoc, 'https://cdn.embedly.com', onLayout);
       preconnect.preload(
-        this.getAmpDoc(),
+        ampdoc,
         'https://embed.redditmedia.com/widgets/platform.js',
         'script'
       );
     }
 
-    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preloadBootstrap(this.win, ampdoc, preconnect);
   }
 
   /** @override */
