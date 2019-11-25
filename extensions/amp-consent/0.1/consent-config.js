@@ -42,6 +42,9 @@ export class ConsentConfig {
     /** @private {!Window} */
     this.win_ = toWin(element.ownerDocument.defaultView);
 
+    /** @private {?string} */
+    this.matchedGeoGroup_ = null;
+
     /** @private {?Promise<!JsonObject>} */
     this.configPromise_ = null;
   }
@@ -55,6 +58,15 @@ export class ConsentConfig {
       this.configPromise_ = this.validateAndParseConfig_();
     }
     return this.configPromise_;
+  }
+
+  /**
+   * Returns the matched geoGroup. Call after getConsentConfigPromise
+   * has resolved.
+   * @return {?string}
+   */
+  getMatchedGeoGroup() {
+    return this.matchedGeoGroup_;
   }
 
   /**
@@ -190,12 +202,12 @@ export class ConsentConfig {
         TAG
       );
       const mergedConfig = map(config);
-
       const geoGroups = Object.keys(config['geoOverride']);
       // Stop at the first group that the geoService says we're in and then merge configs.
       for (let i = 0; i < geoGroups.length; i++) {
         if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
           deepMerge(mergedConfig, config['geoOverride'][geoGroups[i]], 1);
+          this.matchedGeoGroup_ = geoGroups[i];
           break;
         }
       }
