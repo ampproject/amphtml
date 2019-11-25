@@ -76,7 +76,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
       this.renderer_ === 'svg'
         ? 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin_light.min.js'
         : 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js';
-    preloadBootstrap(this.win, this.preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), this.preconnect);
     Services.preconnectFor(this.win).url(this.getAmpDoc(), scriptToLoad, opt_onLayout);
   }
 

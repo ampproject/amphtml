@@ -46,7 +46,7 @@ class AmpReddit extends AMP.BaseElement {
       );
     }
 
-    preloadBootstrap(this.win, this.preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), this.preconnect);
   }
 
   /** @override */

@@ -410,9 +410,10 @@ describe
 
     it('should prefetch bootstrap frame and JS', () => {
       window.__AMP_MODE = {localDev: true};
-      preloadBootstrap(window, preconnect);
+      const ampdoc = Services.ampdoc(window.document);
+      preloadBootstrap(window, ampdoc, preconnect);
       // Wait for visible promise.
-      return Services.ampdoc(window.document)
+      return ampdoc
         .whenFirstVisible()
         .then(() => {
           const fetches = document.querySelectorAll('link[rel=preload]');
@@ -431,9 +432,10 @@ describe
     it('should prefetch default bootstrap frame if custom disabled', () => {
       window.__AMP_MODE = {localDev: true};
       addCustomBootstrap('http://localhost:9876/boot/remote.html');
-      preloadBootstrap(window, preconnect, true);
+      const ampdoc = Services.ampdoc(window.document);
+      preloadBootstrap(window, ampdoc, preconnect, true);
       // Wait for visible promise.
-      return Services.ampdoc(window.document)
+      return ampdoc
         .whenFirstVisible()
         .then(() => {
           expect(

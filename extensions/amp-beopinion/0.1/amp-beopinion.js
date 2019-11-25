@@ -36,7 +36,7 @@ class AmpBeOpinion extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), this.preconnect);
     // Hosts the script that renders widgets.
     Services.preconnectFor(this.win).preload(this.getAmpDoc(), 'https://widget.beopinion.com/sdk.js', 'script');
     Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://s.beopinion.com', opt_onLayout);

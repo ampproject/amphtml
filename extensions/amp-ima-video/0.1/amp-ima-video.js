@@ -149,7 +149,7 @@ class AmpImaVideo extends AMP.BaseElement {
       preconnect.url(this.preconnectTrack_);
     }
     preconnect.url(element.getAttribute('data-tag'));
-    preloadBootstrap(this.win, preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */

@@ -64,7 +64,7 @@ class AmpFacebook extends AMP.BaseElement {
       'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
       'script'
     );
-    preloadBootstrap(this.win, this.preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), this.preconnect);
   }
 
   /** @override */
