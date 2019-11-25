@@ -69,7 +69,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
 
-    /** @private {?HTMLDivElement} */
+    /** @private {?Element} */
     this.quizEl_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -131,7 +131,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     const prompt = document.createElement(promptInput.tagName);
     prompt.textContent = promptInput.textContent;
     prompt.classList.add('i-amphtml-story-quiz-prompt');
-    promptInput.remove();
+    this.element.removeChild(promptInput);
 
     const options = toArray(this.element.querySelectorAll('option'));
     if (options.length < 2 || options.length > 4) {
@@ -154,12 +154,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * adds styling and answer choices,
    * and adds it to the quiz element.
    *
-   * @param {HTMLOptionElement} option
+   * @param {Element} option
    * @param {number} index
    * @private
    */
   configureOption_(option, index) {
-    const convertedOption = buildOptionTemplate(option);
+    const convertedOption = buildOptionTemplate(dev().assertElement(option));
 
     // Fill in the answer choice
     convertedOption.querySelector(
@@ -170,12 +170,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     const optionText = document.createElement('span');
     optionText.classList.add('i-amphtml-story-quiz-option-text');
     optionText.textContent = option.textContent;
-    convertedOption.append(optionText);
+    convertedOption.appendChild(optionText);
 
     if (option.hasAttribute('correct')) {
       convertedOption.setAttribute('correct', 'correct');
     }
-    option.remove();
+    this.element.removeChild(option);
 
     // Add the option to the quiz element
     this.quizEl_
@@ -214,7 +214,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
 
     const optionEl = closest(
-      e.target,
+      dev().assertElement(e.target),
       element => {
         return element.classList.contains('i-amphtml-story-quiz-option');
       },
