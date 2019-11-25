@@ -121,7 +121,7 @@ export class AmpConsent extends AMP.BaseElement {
     const configManager = new ConsentConfig(this.element);
 
     return configManager.getConsentConfigPromise().then(validatedConfig => {
-      this.matchedGeoGroup_ = configManager.getMatchedGeoGroups();
+      this.matchedGeoGroup_ = configManager.getMatchedGeoGroup();
       this.initialize_(validatedConfig);
     });
   }
@@ -445,7 +445,8 @@ export class AmpConsent extends AMP.BaseElement {
   getConsentRequiredPromise_() {
     if (!isExperimentOn(this.win, 'amp-consent-geo-override')) {
       return this.getConsentRequiredPromiseLegacy_();
-    } else if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
+    }
+    if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
       return Promise.resolve(this.consentConfig_['consentRequired']);
     }
     return this.getConsentRemote_().then(consentInfo => {

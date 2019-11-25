@@ -65,7 +65,7 @@ export class ConsentConfig {
    * has resolved.
    * @return {?string}
    */
-  getMatchedGeoGroups() {
+  getMatchedGeoGroup() {
     return this.matchedGeoGroup_;
   }
 
