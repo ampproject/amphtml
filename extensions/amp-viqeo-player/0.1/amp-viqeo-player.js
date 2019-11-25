@@ -68,7 +68,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {number} */
     this.duration_ = 1;
 
-    /** @private {Array} */
+    /** @private {Array<(Array<number>|null)} */
     this.playedRanges_ = [];
   }
 
@@ -185,7 +185,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     } else if (action === 'startAdvert') {
       this.element.dispatchCustomEvent(VideoEvents.AD_START);
     } else if (action === 'endAdvert') {
-      this.elements.dispatchCustomEvent(VideoEvents.AD_END);
+      this.element.dispatchCustomEvent(VideoEvents.AD_END);
     } else if (action === 'updateCurrentTime') {
       this.currentTime_ = eventData['value'];
     } else if (action === 'updateDuration') {
