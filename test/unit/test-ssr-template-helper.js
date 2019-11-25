@@ -25,7 +25,6 @@ describes.fakeWin(
   env => {
     let ampdoc;
     let hasCapabilityStub;
-    let sandbox;
     let ssrTemplateHelper;
     const sourceComponent = 'amp-list';
     let maybeFindTemplateStub;
@@ -35,12 +34,11 @@ describes.fakeWin(
 
     beforeEach(() => {
       ampdoc = env.ampdoc;
-      sandbox = sinon.sandbox;
       win = env.win;
       templates = Services.templatesFor(win);
       viewer = Services.viewerForDoc(ampdoc);
-      hasCapabilityStub = sandbox.stub(viewer, 'hasCapability');
-      maybeFindTemplateStub = sandbox.stub(templates, 'maybeFindTemplate');
+      hasCapabilityStub = env.sandbox.stub(viewer, 'hasCapability');
+      maybeFindTemplateStub = env.sandbox.stub(templates, 'maybeFindTemplate');
       ssrTemplateHelper = new SsrTemplateHelper(
         sourceComponent,
         viewer,
@@ -52,7 +50,6 @@ describes.fakeWin(
       win.document.documentElement.removeAttribute(
         'allow-viewer-render-template'
       );
-      sandbox.restore();
     });
 
     describe('isSupported', () => {
@@ -84,7 +81,7 @@ describes.fakeWin(
       );
     });
 
-    describe('fetchAndRenderTemplate', () => {
+    describe('ssr', () => {
       it('should build payload', () => {
         const request = {
           'xhrUrl': 'https://www.abracadabra.org/some-json',
@@ -96,13 +93,13 @@ describes.fakeWin(
             'ampCors': true,
           },
         };
-        const sendMessage = sandbox.spy(viewer, 'sendMessageAwaitResponse');
+        const sendMessage = env.sandbox.spy(viewer, 'sendMessageAwaitResponse');
         maybeFindTemplateStub.returns(null);
         const templates = {
           successTemplate: {'innerHTML': '<div>much success</div>'},
           errorTemplate: {'innerHTML': '<div>try again</div>'},
         };
-        ssrTemplateHelper.fetchAndRenderTemplate({}, request, templates, {
+        ssrTemplateHelper.ssr({}, request, templates, {
           attr: 'test',
         });
         expect(sendMessage).calledWith('viewerRenderTemplate', {
@@ -142,23 +139,23 @@ describes.fakeWin(
           true
         );
         hasCapabilityStub.withArgs('viewerRenderTemplate').returns(true);
-        findAndSetHtmlForTemplate = sandbox.stub(
+        findAndSetHtmlForTemplate = env.sandbox.stub(
           templates,
           'findAndSetHtmlForTemplate'
         );
-        findAndRenderTemplate = sandbox.stub(
+        findAndRenderTemplate = env.sandbox.stub(
           templates,
           'findAndRenderTemplate'
         );
-        findAndRenderTemplateArray = sandbox.stub(
+        findAndRenderTemplateArray = env.sandbox.stub(
           templates,
           'findAndRenderTemplateArray'
         );
       });
 
-      describe('renderTemplate', () => {
+      describe('applySsrOrCsrTemplate', () => {
         it('should set html template', () => {
-          ssrTemplateHelper.renderTemplate(
+          ssrTemplateHelper.applySsrOrCsrTemplate(
             {},
             {html: '<div>some template</div>'}
           );
@@ -171,14 +168,14 @@ describes.fakeWin(
         it('should throw error if html template is not defined', () => {
           allowConsoleError(() => {
             expect(() => {
-              ssrTemplateHelper.renderTemplate({}, {html: null});
+              ssrTemplateHelper.applySsrOrCsrTemplate({}, {html: null});
             }).to.throw(/Server side html response must be defined/);
           });
         });
 
         it('should render template ', () => {
           hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-          ssrTemplateHelper.renderTemplate(
+          ssrTemplateHelper.applySsrOrCsrTemplate(
             {},
             {data: '<div>some template</div>'}
           );
@@ -190,7 +187,7 @@ describes.fakeWin(
 
         it('should set template array ', () => {
           hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-          ssrTemplateHelper.renderTemplate({}, [
+          ssrTemplateHelper.applySsrOrCsrTemplate({}, [
             {data: '<div>some template</div>'},
           ]);
           expect(findAndRenderTemplateArray).to.have.been.calledWith({}, [

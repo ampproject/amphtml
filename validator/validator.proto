@@ -424,7 +424,7 @@ message ExtensionSpec {
   optional ExtensionType extension_type = 8 [default = CUSTOM_ELEMENT];
 
   // For older tags, we did not originally require that the tag only be included
-  // once, so those tags are grandfathered in for multiple inclusion in the file
+  // once, so those tags are exempted from the multiple inclusion ban.
   optional bool deprecated_allow_duplicates = 6 [default = false];
 
   // TagSpec.requires_extension will be set to the new extension's name on one
@@ -439,15 +439,15 @@ message ExtensionSpec {
   //
   // The second requirement (extension requires usage) has a few exceptions:
   //   1) For older extensions, implemented before these tagspec rules, we
-  //      do not want to introduce a breaking change, so we grandfather these
-  //      extensions to not require usage. New extensions must use ERROR.
+  //      do not want to introduce a breaking change, so we exempt these
+  //      extensions from the usage requirement. New extensions must use ERROR.
   //   2) Some extensions, such as `amp-dynamic-css-classes`, do not have any
   //      associated tag in the document indicating usage. These extensions do
   //      not trigger warnings or errors.
   enum ExtensionUsageRequirement {
     ERROR = 1;
-    // Exception for grandfathered extensions. #1 above.
-    GRANDFATHERED = 2;
+    // Exception for exempted extensions. #1 above.
+    EXEMPTED = 2;
     // Exception for extensions with no usage-indicating tag. #2 above.
     NONE = 3;
   }
@@ -685,6 +685,16 @@ message ValidatorRules {
   // reserved 2, 5, 11, 12, 14;
 }
 
+// This feature was removed in October 2019, however there are still
+// some callers that expect an ErrorCategory to be set. Do not rely
+// on this in new code.
+// TODO(#25188): Remove ErrorCategory completely.
+message ErrorCategory {
+  enum Code {
+    UNKNOWN = 0;
+  }
+}
+
 // We record validation errors in a structured form, so that they can be
 // worked with in code - e.g., to provide translated messages.
 // In the Javascript implementation (validator.js), you may find
@@ -822,6 +832,8 @@ message ValidationError {
   optional int32 col = 3;
   optional string spec_url = 5;
   repeated string params = 7;
+  // This field is deprecated. Do not use.
+  optional ErrorCategory.Code category = 8;
 
   // Used only in JavaScript, if an error is emitted for a specific HTML tag and
   // if that HTML tag has an attribute named data-amp-report-test, this string
@@ -831,7 +843,7 @@ message ValidationError {
   optional string data_amp_report_test_value = 9;
 
   // Deprecated fields, do not reuse.
-  // reserved 4, 8;
+  // reserved 4;
 }
 
 // Used in the verbose validator to select between multiple generated error

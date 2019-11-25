@@ -186,6 +186,8 @@ exports.rules = [
         'extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config.js',
       'ads/_a4a-config.js->' +
         'extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config.js',
+      'ads/_a4a-config.js->' +
+        'extensions/amp-ad-network-mytarget-impl/0.1/mytarget-a4a-config.js',
     ],
   },
   // Rules for extensions and main src.
@@ -212,6 +214,7 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-mytarget-impl/0.1/amp-ad-network-mytarget-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // And a few mrore things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
@@ -251,6 +254,7 @@ exports.rules = [
 
       // Amp geo in group enum
       'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
+      'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
 
       // AMP Story
@@ -260,9 +264,10 @@ exports.rules = [
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/events.js',
       // TODO(#24080) Remove this when story ads have full ad network support.
-      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-ad-exit/0.1/config.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-ad-exit/0.1/config.js',
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/utils.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -391,6 +396,8 @@ exports.rules = [
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
         'src/service/origin-experiments-impl.js',
       'extensions/amp-script/0.1/amp-script.js->' +
+        'src/service/origin-experiments-impl.js',
+      'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +

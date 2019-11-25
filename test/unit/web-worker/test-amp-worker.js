@@ -24,7 +24,6 @@ import {getMode} from '../../../src/mode';
 import {installXhrService} from '../../../src/service/xhr-impl';
 
 describe('invokeWebWorker', () => {
-  let sandbox;
   let fakeWin;
 
   let ampWorker;
@@ -34,12 +33,11 @@ describe('invokeWebWorker', () => {
   let workerReadyPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    sandbox.stub(Services, 'ampdocServiceFor').returns({
+    window.sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
 
-    postMessageStub = sandbox.stub();
+    postMessageStub = window.sandbox.stub();
 
     fakeWorker = {};
     fakeWorker.postMessage = postMessageStub;
@@ -47,14 +45,14 @@ describe('invokeWebWorker', () => {
     // Fake Worker constructor just returns our `fakeWorker` instance.
     fakeWin = {
       Worker: () => fakeWorker,
-      Blob: sandbox.stub(),
-      URL: {createObjectURL: sandbox.stub()},
+      Blob: window.sandbox.stub(),
+      URL: {createObjectURL: window.sandbox.stub()},
       location: window.location,
     };
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    fetchTextCallStub = sandbox
+    fetchTextCallStub = window.sandbox
       .stub(Services.xhrFor(fakeWin), 'fetchText')
       .callsFake(() =>
         Promise.resolve({
@@ -66,10 +64,6 @@ describe('invokeWebWorker', () => {
 
     ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should check if Worker is supported', () => {
@@ -87,7 +81,7 @@ describe('invokeWebWorker', () => {
     return workerReadyPromise.then(() => {
       expect(postMessageStub).to.have.been.calledWithMatch({
         method: 'foo',
-        args: sinon.match(['bar', 123]),
+        args: window.sandbox.match(['bar', 123]),
         id: 0,
       });
 
@@ -199,7 +193,7 @@ describe('invokeWebWorker', () => {
   });
 
   it('should log error when unexpected message is received', () => {
-    const errorStub = sandbox.stub(dev(), 'error');
+    const errorStub = window.sandbox.stub(dev(), 'error');
 
     invokeWebWorker(fakeWin, 'foo');
 

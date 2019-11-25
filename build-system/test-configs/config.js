@@ -156,7 +156,18 @@ const prettifyGlobs = [
   '.vscode/settings.json',
   '**/*.json',
   '**/OWNERS',
+  '**/*.md',
+  '!.github/ISSUE_TEMPLATE/**',
   '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
+];
+
+/**
+ * List of markdown files that may be checked by `gulp check-links` (using
+ * markdown-link-check).
+ */
+const linkCheckGlobs = [
+  '**/*.md',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
 ];
 
 /**
@@ -200,6 +211,7 @@ module.exports = {
   e2eTestPaths,
   integrationTestPaths,
   jisonPaths,
+  linkCheckGlobs,
   lintGlobs,
   presubmitGlobs,
   prettifyGlobs,

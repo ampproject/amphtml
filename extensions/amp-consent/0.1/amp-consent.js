@@ -117,7 +117,17 @@ export class AmpConsent extends AMP.BaseElement {
 
     const config = new ConsentConfig(this.element);
 
-    this.consentConfig_ = config.getConsentConfig();
+    return config.getConsentConfigPromise().then(validatedConfig => {
+      this.initialize_(validatedConfig);
+    });
+  }
+
+  /**
+   *
+   * @param {!JsonObject} config
+   */
+  initialize_(config) {
+    this.consentConfig_ = config;
 
     // ConsentConfig has verified that there's one and only one consent instance
     this.consentId_ = this.consentConfig_['consentInstanceId'];

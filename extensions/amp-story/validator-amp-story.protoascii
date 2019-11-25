@@ -124,6 +124,7 @@ tags: {  # <amp-story-page>
       protocol: "https"
     }
   }
+  attrs: { name: "next-page-no-ad" }
   attr_lists: "mandatory-id-attr"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
@@ -604,6 +605,7 @@ descendant_tag_list: {
   tag: "SMALL"
   tag: "SOLIDCOLOR"
   tag: "SPAN"
+  tag: "STOP"
   tag: "STRONG"
   tag: "SUB"
   tag: "SUP"
@@ -733,6 +735,7 @@ descendant_tag_list: {
   tag: "SOLIDCOLOR"
   tag: "SOURCE"
   tag: "SPAN"
+  tag: "STOP"
   tag: "STRONG"
   tag: "SUB"
   tag: "SUP"
@@ -938,6 +941,7 @@ descendant_tag_list {
   tag: "SOLIDCOLOR"
   tag: "SOURCE"
   tag: "SPAN"
+  tag: "STOP"
   tag: "STRONG"
   tag: "SUB"
   tag: "SUP"

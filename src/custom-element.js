@@ -564,7 +564,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        startupChunk(self.document, () => {
+        startupChunk(this.getAmpDoc(), () => {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
             dev().error(TAG, 'preconnect without ownerDocument');
@@ -615,7 +615,8 @@ function createBaseCustomElementClass(win) {
           this.toggleLoading(true);
         } else if (
           layoutBox.top < PREPARE_LOADING_THRESHOLD &&
-          layoutBox.top >= 0
+          layoutBox.top >= 0 &&
+          !this.loadingContainer_
         ) {
           // Few top elements will also be pre-initialized with a loading
           // element.

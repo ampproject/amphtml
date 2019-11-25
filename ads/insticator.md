@@ -20,14 +20,14 @@ Our embed serves content and ads that align with your audience. It reflects your
 
 ## Example of Insticator's Embed implementation
 
-
 ```html
 <amp-embed
   width="auto"
   height="850"
   type="insticator"
   data-site-id="SITE-ID"
-  data-embed-id="EMBED-ID">
+  data-embed-id="EMBED-ID"
+>
 </amp-embed>
 ```
 

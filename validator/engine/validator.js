@@ -35,6 +35,7 @@ goog.require('amp.validator.AttrSpec');
 goog.require('amp.validator.CdataSpec');
 goog.require('amp.validator.CssDeclaration');
 goog.require('amp.validator.CssSpec');
+goog.require('amp.validator.ErrorCategory');
 goog.require('amp.validator.ExtensionSpec');
 goog.require('amp.validator.PropertySpecList');
 goog.require('amp.validator.ReferencePoint');
@@ -72,6 +73,11 @@ goog.require('parse_url.URL');
 
 /**
  * Sorts and eliminates duplicates in |arrayValue|. Modifies the input in place.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!Array<T>} arrayValue
  * @template T
  * @export
@@ -92,6 +98,11 @@ function sortAndUniquify(arrayValue) {
 /**
  * Computes the difference set |left| - |right|, assuming |left| and
  * |right| are sorted and uniquified.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!Array<T>} left
  * @param {!Array<T>} right
  * @return {!Array<T>} Computed difference of left - right.
@@ -535,6 +546,42 @@ class ParsedAttrSpecs {
   }
 }
 
+/** @enum {string} */
+const RecordValidated = {
+  ALWAYS: 'ALWAYS',
+  NEVER: 'NEVER',
+  IF_PASSING: 'IF_PASSING'
+};
+
+/**
+ * We only track (that is, add them to Context.RecordTagspecValidated) validated
+ * tagspecs as necessary. That is, if it's needed for document scope validation:
+ * - Mandatory tags
+ * - Unique tags
+ * - Tags (identified by their TagSpecName() that are required by other tags.
+ * @param {!amp.validator.TagSpec} tag
+ * @param {number} tagSpecId
+ * @param {!Array<boolean>} tagSpecIdsToTrack
+ * @return {!RecordValidated}
+ */
+function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
+  // Always update from TagSpec if the tag is passing. If it's failing we
+  // typically want to update from the best match as it can satisfy
+  // requirements which otherwise can confuse the user later. The exception is
+  // tagspecs which introduce requirements but satisfy none, such as unique.
+  // https://github.com/ampproject/amphtml/issues/24359
+
+  // Mandatory and tagSpecIdsToTrack only satisfy requirements, making the
+  // output less verbose even if the tag is failing.
+  if (tag.mandatory || tagSpecIdsToTrack.hasOwnProperty(tagSpecId))
+    return RecordValidated.ALWAYS;
+  // Unique and similar can introduce requirements, ie: there cannot be another
+  // such tag. We don't want to introduce requirements for failing tags.
+  if (tag.unique || tag.requires.length > 0 || tag.uniqueWarning)
+    return RecordValidated.IF_PASSING;
+  return RecordValidated.NEVER;
+}
+
 /**
  * This wrapper class provides access to a TagSpec and a tag id
  * which is unique within its context, the ParsedValidatorRules.
@@ -543,7 +590,7 @@ class ParsedAttrSpecs {
 class ParsedTagSpec {
   /**
    * @param {!ParsedAttrSpecs} parsedAttrSpecs
-   * @param {boolean} shouldRecordTagspecValidated
+   * @param {!RecordValidated} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {number} id
    */
@@ -574,7 +621,7 @@ class ParsedTagSpec {
      */
     this.isTypeJson_ = false;
     /**
-     * @type {boolean}
+     * @type {!RecordValidated}
      * @private
      */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
@@ -816,7 +863,7 @@ class ParsedTagSpec {
    * Context.recordTagspecValidated_ if it was validated
    * successfullly. For performance, this is only done for tags that are
    * mandatory, unique, or possibly required by some other tag.
-   * @return {boolean}
+   * @return {!RecordValidated}
    */
   shouldRecordTagspecValidated() {
     return this.shouldRecordTagspecValidated_;
@@ -2184,7 +2231,7 @@ class ExtensionsContext {
      */
     this.extensionsLoaded_ = Object.create(null);
 
-    // AMP-AD is grandfathered in to not require the respective extension
+    // AMP-AD is exempted to not require the respective extension
     // javascript file for historical reasons. We still need to mark that
     // the extension is used if we see the tags.
     this.extensionsLoaded_['amp-ad'] = true;
@@ -2308,7 +2355,7 @@ class ExtensionsContext {
       this.extensionsLoaded_[extensionName] = true;
       switch (extensionSpec.requiresUsage) {
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement
-            .GRANDFATHERED: // Fallthrough intended:
+            .EXEMPTED: // Fallthrough intended:
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement.NONE:
           // This extension does not have usage demonstrated by a tag, for
           // example: amp-dynamic-css-classes
@@ -2515,6 +2562,9 @@ class Context {
   updateFromTagResult_(result) {
     if (result.bestMatchTagSpec === null) {return;}
     const parsedTagSpec = result.bestMatchTagSpec;
+    const isPassing =
+        (result.validationResult.status ===
+         amp.validator.ValidationResult.Status.PASS);
 
     this.extensions_.updateFromTagResult(result);
     // If this requires an extension and we are still in the document head,
@@ -2530,7 +2580,7 @@ class Context {
     // the document.
     this.satisfyConditionsFromTagSpec_(parsedTagSpec);
     this.satisfyMandatoryAlternativesFromTagSpec_(parsedTagSpec);
-    this.recordValidatedFromTagSpec_(parsedTagSpec);
+    this.recordValidatedFromTagSpec_(isPassing, parsedTagSpec);
 
     const {validationResult} = result;
     for (const provision of validationResult.valueSetProvisions)
@@ -2546,8 +2596,7 @@ class Context {
       errors.push(requirement.errorIfUnsatisfied);
     }
 
-    if (result.validationResult.status ===
-        amp.validator.ValidationResult.Status.PASS) {
+    if (isPassing) {
       // If the tag spec didn't match, we don't know that the tag actually
       // contained a URL, so no need to complain about it.
       this.markUrlSeenFromMatchingTagSpec_(parsedTagSpec);
@@ -2665,12 +2714,17 @@ class Context {
 
   /**
    * Records that this document contains a tag matching a particular tag spec.
+   * @param {boolean} isPassing
    * @param {!ParsedTagSpec} parsedTagSpec
    * @private
    */
-  recordValidatedFromTagSpec_(parsedTagSpec) {
-    if (parsedTagSpec.shouldRecordTagspecValidated())
+  recordValidatedFromTagSpec_(isPassing, parsedTagSpec) {
+    const recordValidated = parsedTagSpec.shouldRecordTagspecValidated();
+    if (recordValidated == RecordValidated.ALWAYS) {
       this.tagspecsValidated_[parsedTagSpec.id()] = true;
+    } else if (isPassing && (recordValidated == RecordValidated.IF_PASSING)) {
+      this.tagspecsValidated_[parsedTagSpec.id()] = true;
+    }
   }
 
   /**
@@ -3470,29 +3524,15 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
   } else if (
-    height.isSet && width.isSet &&
-    (sizesAttr !== undefined || heightsAttr !== undefined)) {
+      height.isSet && width.isSet &&
+      ((sizesAttr !== undefined && sizesAttr !== '') ||
+       (heightsAttr !== undefined && heightsAttr !== ''))) {
     return amp.validator.AmpLayout.Layout.RESPONSIVE;
   } else {
     return amp.validator.AmpLayout.Layout.FIXED;
   }
 }
 
-/**
- * We only track (that is, add them to Context.RecordTagspecValidated) validated
- * tagspecs as necessary. That is, if it's needed for document scope validation:
- * - Mandatory tags
- * - Unique tags
- * - Tags (identified by their TagSpecName() that are required by other tags.
- * @param {!amp.validator.TagSpec} tag
- * @param {number} tagSpecId
- * @param {!Array<boolean>} tagSpecIdsToTrack
- * @return {boolean}
- */
-function shouldRecordTagspecValidated(tag, tagSpecId, tagSpecIdsToTrack) {
-  return tag.mandatory || tag.unique || tag.requires.length > 0 ||
-      tagSpecIdsToTrack.hasOwnProperty(tagSpecId) || tag.uniqueWarning;
-}
 
 /**
  *  DispatchKey represents a tuple of either 1-3 strings:
@@ -6028,6 +6068,11 @@ amp.validator.ValidationHandler =
 /**
  * Convenience function which informs caller if given ValidationError is
  * severity warning.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!amp.validator.ValidationError} error
  * @return {boolean}
  * @export
@@ -6038,6 +6083,11 @@ amp.validator.isSeverityWarning = function(error) {
 
 /**
  * Validates a document input as a string.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {string} inputDocContents
  * @param {string=} opt_htmlFormat the allowed format. Defaults to 'AMP'.
  * @return {!amp.validator.ValidationResult} Validation Result (status and
@@ -6176,6 +6226,11 @@ function applyFormat(format, error) {
 
 /**
  * Renders the error message for a single error.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!amp.validator.ValidationError} error
  * @return {string}
  * @export
@@ -6215,6 +6270,11 @@ function errorLine(filenameOrUrl, error) {
  * Renders the validation results into an array of human readable strings.
  * Careful when modifying this - it's called from
  * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
  * @param {!Object} validationResult
  * @param {string} filename to use in rendering error messages.
  * @return {!Array<string>}
@@ -6238,3 +6298,38 @@ amp.validator.renderValidationResult = function(validationResult, filename) {
 function isAuthorStylesheet(param) {
   return goog.string./*OK*/ startsWith(param, 'style amp-custom');
 }
+
+/**
+ * This function was removed in October 2019. Older versions of the nodejs
+ * amphtml-validator library still call this function, so this stub is left
+ * in place for now so as not to break them. TODO(#25188): Delete this function
+ * after most usage had moved to a newer version of the amphtml-validator lib.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
+ * @param {!amp.validator.ValidationError} error
+ * @return {!amp.validator.ErrorCategory.Code}
+ * @export
+ */
+amp.validator.categorizeError = function(error) {
+  return amp.validator.ErrorCategory.Code.UNKNOWN;
+};
+
+/**
+ * Convenience function which calls |CategorizeError| for each error
+ * in |result| and sets its category field accordingly.
+ *
+ * WARNING: This is exported; interface changes may break downstream users like
+ * https://www.npmjs.com/package/amphtml-validator and
+ * https://validator.amp.dev/.
+ *
+ * @param {!amp.validator.ValidationResult} result
+ * @export
+ */
+amp.validator.annotateWithErrorCategories = function(result) {
+  for (const error of result.errors) {
+    error.category = amp.validator.categorizeError(error);
+  }
+};

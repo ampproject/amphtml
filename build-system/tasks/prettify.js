@@ -23,37 +23,27 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const globby = require('globby');
+const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const path = require('path');
 const prettier = require('gulp-prettier');
-const {getFilesChanged, logOnSameLine} = require('../common/utils');
+const tempy = require('tempy');
+const {exec} = require('../common/exec');
+const {getFilesToCheck, logOnSameLine} = require('../common/utils');
 const {green, cyan, red, yellow} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
 const {prettifyGlobs} = require('../test-configs/config');
 
 const rootDir = path.dirname(path.dirname(__dirname));
+const tempDir = tempy.directory();
+const prettierCmd = 'node_modules/.bin/prettier';
 
 // Message header printed by gulp-prettier before the list of files with errors.
 // See https://github.com/bhargavrpatel/gulp-prettier/blob/master/index.js#L90
 const header =
   'Code style issues found in the following file(s). Forgot to run Prettier?';
-
-/**
- * Logs the list of files that will be checked.
- *
- * @param {!Array<string>} files
- */
-function logFiles(files) {
-  if (!isTravisBuild()) {
-    log(green('INFO: ') + 'Prettifying the following files:');
-    files.forEach(file => {
-      log(cyan(file));
-    });
-  }
-}
 
 /**
  * Checks files for formatting (and optionally fixes them) with Prettier.
@@ -62,22 +52,27 @@ function logFiles(files) {
  */
 function prettify() {
   maybeUpdatePackages();
-  let filesToCheck;
-  if (argv.files) {
-    filesToCheck = globby.sync(argv.files.split(','));
-    logFiles(filesToCheck);
-  } else if (argv.local_changes) {
-    filesToCheck = getFilesChanged(prettifyGlobs);
-    if (filesToCheck.length == 0) {
-      log(green('INFO: ') + 'No prettifiable files in this PR');
-      return Promise.resolve();
-    } else {
-      logFiles(filesToCheck);
-    }
-  } else {
-    filesToCheck = globby.sync(prettifyGlobs, {dot: true});
+  const filesToCheck = getFilesToCheck(prettifyGlobs, {dot: true});
+  if (filesToCheck.length == 0) {
+    return Promise.resolve();
   }
   return runPrettify(filesToCheck);
+}
+
+/**
+ * Prints an error message with recommended fixes (in diff form) for a file with
+ * formatting errors.
+ *
+ * @param {string} file
+ */
+function printErrorWithSuggestedFixes(file) {
+  console.log('\n');
+  log(`Suggested fixes for ${cyan(file)}:`);
+  const fixedFile = `${tempDir}/${file}`;
+  fs.ensureDirSync(path.dirname(fixedFile));
+  exec(`${prettierCmd} ${file} > ${fixedFile}`);
+  const diffCmd = `git -c color.ui=always diff -U0 ${file} ${fixedFile} | tail -n +5`;
+  exec(diffCmd);
 }
 
 /**
@@ -106,17 +101,22 @@ function runPrettify(filesToCheck) {
     const printFixMessages = () => {
       log(
         yellow('NOTE 1:'),
-        'You may be able to automatically fix some errors by running',
+        "If you are using GitHub's web-UI to edit files,",
+        'copy the suggested fixes printed above into your PR.'
+      );
+      log(
+        yellow('NOTE 2:'),
+        'If you are using the git command-line workflow, run',
         cyan('gulp prettify --local_changes --fix'),
         'from your local branch.'
       );
       log(
-        yellow('NOTE 2:'),
+        yellow('NOTE 3:'),
         'Since this is a destructive operation (that edits your files',
         'in-place), make sure you commit before running the command.'
       );
       log(
-        yellow('NOTE 3:'),
+        yellow('NOTE 4:'),
         'For more information, read',
         cyan(
           'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style\n'
@@ -131,14 +131,16 @@ function runPrettify(filesToCheck) {
           .trim()
           .split('\n');
         const reason = 'Found formatting errors in one or more files';
-        logOnSameLine(red('ERROR: ') + reason + ':');
+        logOnSameLine(red('ERROR: ') + reason);
         filesWithErrors.forEach(file => {
-          log(cyan(file));
+          printErrorWithSuggestedFixes(file);
         });
         printFixMessages();
         rejectWithReason(reason);
       } else {
-        const reason = 'Found an unrecoverable error';
+        const reason =
+          'Found an unrecoverable error in ' +
+          cyan(path.relative(rootDir, error.fileName));
         logOnSameLine(red('ERROR: ') + reason + ':');
         log(error.message);
         rejectWithReason(reason);

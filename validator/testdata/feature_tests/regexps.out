@@ -147,7 +147,7 @@ feature_tests/regexps.html:111:2 The attribute 'name' in tag 'meta name= and con
 |    -->
 |    <style amp-custom>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:117:2 The tag 'style amp-custom' appears more than once in the document. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
+feature_tests/regexps.html:117:2 The text inside tag 'style amp-custom' contains 'CSS i-amphtml- name prefix', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
 |      .comic-amp-font-loaded .comic-amp {
 |        font-family: 'Comic AMP', serif, sans-serif;
 |      }

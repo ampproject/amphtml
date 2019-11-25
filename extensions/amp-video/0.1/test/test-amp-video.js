@@ -19,6 +19,7 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {listenOncePromise} from '../../../../src/event-helper';
+import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -77,7 +78,7 @@ describes.realWin(
         width: 160,
         height: 90,
       });
-      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      const preloadSpy = env.sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
       preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
@@ -97,7 +98,7 @@ describes.realWin(
         'crossorigin': '',
         'disableremoteplayback': '',
       });
-      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      const preloadSpy = env.sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
       preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
@@ -134,7 +135,7 @@ describes.realWin(
         },
         sources
       );
-      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      const preloadSpy = env.sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
       preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
@@ -174,7 +175,7 @@ describes.realWin(
         },
         tracks
       );
-      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      const preloadSpy = env.sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
       preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
@@ -209,7 +210,7 @@ describes.realWin(
           const v = doc.querySelector('amp-video');
           // preconnectCallback could get called again after this test is done, and
           // trigger an other "start with https://" error that would crash mocha.
-          sandbox.stub(v.implementation_, 'preconnectCallback');
+          env.sandbox.stub(v.implementation_, 'preconnectCallback');
           throw e;
         })
       ).to.be.rejectedWith(/start with/);
@@ -390,7 +391,7 @@ describes.realWin(
       });
       const impl = v.implementation_;
       const video = v.querySelector('video');
-      sandbox.spy(video, 'pause');
+      env.sandbox.spy(video, 'pause');
       impl.pauseCallback();
       expect(video.pause.called).to.be.true;
     });
@@ -405,8 +406,8 @@ describes.realWin(
         null,
         function(element) {
           const impl = element.implementation_;
-          sandbox.stub(impl, 'isVideoSupported_').returns(false);
-          sandbox.spy(impl, 'toggleFallback');
+          env.sandbox.stub(impl, 'isVideoSupported_').returns(false);
+          env.sandbox.spy(impl, 'toggleFallback');
         }
       );
       const impl = v.implementation_;
@@ -416,7 +417,7 @@ describes.realWin(
 
     it('play() should not log promise rejections', async () => {
       const playPromise = Promise.reject('The play() request was interrupted');
-      const catchSpy = sandbox.spy(playPromise, 'catch');
+      const catchSpy = env.sandbox.spy(playPromise, 'catch');
       await getVideo(
         {
           src: 'video.mp4',
@@ -426,7 +427,7 @@ describes.realWin(
         null,
         function(element) {
           const impl = element.implementation_;
-          sandbox.stub(impl.video_, 'play').returns(playPromise);
+          env.sandbox.stub(impl.video_, 'play').returns(playPromise);
           impl.play();
         }
       );
@@ -482,6 +483,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'cover',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectFit).to.equal('cover');
@@ -491,6 +493,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-fit': 'foo 80%',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectFit).to.be.empty;
@@ -500,6 +503,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-position': '20% 80%',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectPosition).to.equal('20% 80%');
@@ -509,6 +513,7 @@ describes.realWin(
       const v = await getVideo({
         src: 'video.mp4',
         'object-position': 'url("example.com")',
+        layout: 'responsive',
       });
       const video = v.querySelector('video');
       expect(video.style.objectPosition).to.be.empty;
@@ -571,7 +576,7 @@ describes.realWin(
           img.setAttribute('placeholder', '');
           v.getPlaceholder = () => img;
         } else {
-          v.getPlaceholder = sandbox.stub();
+          v.getPlaceholder = env.sandbox.stub();
         }
         if (addBlurClass) {
           img.classList.add('i-amphtml-blurry-placeholder');
@@ -581,7 +586,7 @@ describes.realWin(
         v.appendChild(img);
         v.build();
         const impl = v.implementation_;
-        impl.togglePlaceholder = sandbox.stub();
+        impl.togglePlaceholder = env.sandbox.stub();
         return impl;
       }
 
@@ -653,8 +658,11 @@ describes.realWin(
 
       beforeEach(() => {
         visibilityStubs = {
-          getVisibilityState: sandbox.stub(env.ampdoc, 'getVisibilityState'),
-          whenFirstVisible: sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+          getVisibilityState: env.sandbox.stub(
+            env.ampdoc,
+            'getVisibilityState'
+          ),
+          whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
         };
         visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
         visiblePromise = new Promise(resolve => {
@@ -791,6 +799,105 @@ describes.realWin(
               }
             );
           });
+        });
+      });
+
+      describe('should prerender poster image', () => {
+        it('with just cached src', () => {
+          return new Promise(resolve => {
+            getVideo(
+              {
+                src: 'https://example.com/video.mp4',
+                poster: 'https://example.com/poster.jpg',
+                width: 160,
+                height: 90,
+              },
+              null,
+              element => {
+                expect(element.implementation_.prerenderAllowed()).to.be.true;
+                resolve();
+              }
+            );
+          });
+        });
+      });
+
+      describe('should preconnect to the first cached source', () => {
+        let fakePreconnect;
+
+        beforeEach(() => {
+          fakePreconnect = {url: () => {}};
+          registerServiceBuilder(win, 'preconnect', () => fakePreconnect);
+        });
+
+        it('no cached source', async () => {
+          const preloadStub = window.sandbox.stub(fakePreconnect, 'url');
+
+          await getVideo({
+            src: 'https://example.com/video.mp4',
+            poster: 'https://example.com/poster.jpg',
+            width: 160,
+            height: 90,
+          });
+
+          expect(preloadStub).to.not.have.been.called;
+        });
+
+        it('cached source', async () => {
+          const preloadStub = window.sandbox.stub(fakePreconnect, 'url');
+
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+
+          await getVideo(
+            {
+              poster: 'https://example.com/poster.jpg',
+              width: 160,
+              height: 90,
+            },
+            [cachedSource]
+          );
+
+          expect(preloadStub).to.have.been.calledOnce;
+          expect(preloadStub.getCall(0).args[1]).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+        });
+
+        it('mixed sources', async () => {
+          const preloadStub = window.sandbox.stub(fakePreconnect, 'url');
+
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute(
+            'src',
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
+          cachedSource.setAttribute(
+            'amp-orig-src',
+            'https://example.com/video.mp4'
+          );
+          await getVideo(
+            {
+              poster: 'https://example.com/poster.jpg',
+              width: 160,
+              height: 90,
+            },
+            [source, cachedSource]
+          );
+          expect(preloadStub).to.have.been.calledOnce;
+          expect(preloadStub.getCall(0).args[1]).to.equal(
+            'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+          );
         });
       });
 
