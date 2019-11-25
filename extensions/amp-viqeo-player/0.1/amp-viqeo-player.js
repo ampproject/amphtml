@@ -68,7 +68,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {number} */
     this.duration_ = 1;
 
-    /** @private {Array<(Array<number>|null)} */
+    /** @private {Array} */
     this.playedRanges_ = [];
   }
 
@@ -329,7 +329,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   getPlayedRanges() {
-    return this.playedRanges_;
+    return /** @type {!Array<!Array<number>>} */ (this.playedRanges_);
   }
 
   /**
