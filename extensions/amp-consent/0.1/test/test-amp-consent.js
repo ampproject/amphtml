@@ -186,6 +186,19 @@ describes.realWin(
           'consentStateValue': 'unknown',
           'consentString': undefined,
           'isDirty': false,
+          'matchedGeoGroup': null,
+        });
+      });
+
+      it('send post request to server with no matched group', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'ABC',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': null,
         });
       });
 
@@ -228,6 +241,57 @@ describes.realWin(
         await ampConsent.buildCallback();
         await macroTask();
         expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+      });
+
+      it('send post request to server with matched group', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'geoOverride': {
+            'nafta': {
+              'checkConsentHref': 'https://geo-override-check2/',
+              'consentRequired': true,
+            },
+          },
+        };
+        ISOCountryGroups = ['nafta'];
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'abc',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': 'nafta',
+        });
+      });
+
+      it('only geoOverrides the first matched group', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'geoOverride': {
+            'na': {
+              'checkConsentHref': 'https://geo-override-check2/',
+              'consentRequired': true,
+            },
+            'eea': {
+              'consentRequired': false,
+            },
+          },
+        };
+        ISOCountryGroups = ['na', 'eea'];
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(ampConsent.matchedGeoGroup_).to.equal('na');
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'abc',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': 'na',
+        });
       });
 
       it('fallsback to true with invalide remote reponse', async () => {
