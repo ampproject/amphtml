@@ -416,19 +416,25 @@ export class AmpConsent extends AMP.BaseElement {
     this.passSharedData_();
     this.maybeSetDirtyBit_();
 
-    this.getConsentRequiredPromise_()
-      .then(isConsentRequired => {
-        return this.initPromptUI_(isConsentRequired);
-      })
-      .then(isPostPromptUIRequired => {
-        if (isPostPromptUIRequired) {
-          this.handlePostPromptUI_();
-        }
-        this.consentPolicyManager_.enableTimeout();
-      })
-      .catch(unusedError => {
-        // TODO: Handle errors
-      });
+    this.consentStateManager_.getLastConsentInstanceInfo().then(storedInfo => {
+      if (hasStoredValue(storedInfo)) {
+        // TODO next task, make CORS request for syncing purposes, but don't show UI
+        return;
+      }
+      this.getConsentRequiredPromise_()
+        .then(isConsentRequired => {
+          return this.initPromptUI_(isConsentRequired);
+        })
+        .then(isPostPromptUIRequired => {
+          if (isPostPromptUIRequired) {
+            this.handlePostPromptUI_();
+          }
+          this.consentPolicyManager_.enableTimeout();
+        })
+        .catch(unusedError => {
+          // TODO: Handle errors
+        });
+    });
 
     this.enableInteractions_();
   }
