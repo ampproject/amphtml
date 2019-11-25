@@ -21,7 +21,7 @@
 
 package dev.amp.validator.css;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -48,7 +48,7 @@ public class CssParserTest {
 
       Assert.assertEquals(cssParser.getErrors().size(), 1);
       Assert.assertEquals(cssParser.getErrors().get(0).getCode(),
-        Validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH);
+        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH);
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -65,9 +65,9 @@ public class CssParserTest {
 
       Assert.assertEquals(cssParser.getErrors().size(), 2);
       Assert.assertEquals(cssParser.getErrors().get(0).getCode(),
-        Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING);
+        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING);
       Assert.assertEquals(cssParser.getErrors().get(1).getCode(),
-        Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING);
+        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING);
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -84,7 +84,7 @@ public class CssParserTest {
 
       Assert.assertEquals(cssParser.getErrors().size(), 1);
       Assert.assertEquals(cssParser.getErrors().get(0).getCode(),
-        Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT);
+        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT);
 
     } catch (IOException e) {
       e.printStackTrace();

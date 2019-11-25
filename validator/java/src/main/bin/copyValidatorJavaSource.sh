@@ -12,10 +12,10 @@ then
 fi
 
 BAZEL_BIN_DIR=$BASE_DIR/bazel-bin
-AMP_VALIDATOR_GENERATED_DIR=$BASE_DIR/"src/main/java/amp/validator"
+AMP_VALIDATOR_GENERATED_DIR=$BASE_DIR/"src/main/java/dev/amp/validator"
 
 cd $BAZEL_BIN_DIR
 jar xvf amphtml_validator_proto_lib-speed-src.jar
 
 echo "Copying Validator.java from ${BAZEL_BIN_DIR}/amp/validator"
-cp $BAZEL_BIN_DIR/amp/validator/Validator.java $AMP_VALIDATOR_GENERATED_DIR/.
+cp $BAZEL_BIN_DIR/dev/amp/validator/ValidatorProtos.java $AMP_VALIDATOR_GENERATED_DIR/.

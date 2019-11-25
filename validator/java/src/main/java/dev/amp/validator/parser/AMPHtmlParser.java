@@ -21,7 +21,7 @@
 
 package dev.amp.validator.parser;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import dev.amp.validator.AMPValidatorManager;
 import dev.amp.validator.AMPHtmlHandler;
 import dev.amp.validator.ExitCondition;
@@ -66,8 +66,8 @@ public class AMPHtmlParser {
      * @param condition exit condition.
      * @return returns a validation object.
      */
-    public Validator.ValidationResult parse(@Nonnull final String inputHtml,
-                                            @Nonnull final Validator.HtmlFormat.Code htmlFormat,
+    public ValidatorProtos.ValidationResult parse(@Nonnull final String inputHtml,
+                                            @Nonnull final ValidatorProtos.HtmlFormat.Code htmlFormat,
                                             @Nonnull final ExitCondition condition) {
         return parse(inputHtml, htmlFormat, condition, 0);
     }
@@ -81,8 +81,8 @@ public class AMPHtmlParser {
      * @param maxNodes max nodes.
      * @return returns a validation object.
      */
-    public Validator.ValidationResult parse(@Nonnull final String inputHtml,
-                                            @Nonnull final Validator.HtmlFormat.Code htmlFormat,
+    public ValidatorProtos.ValidationResult parse(@Nonnull final String inputHtml,
+                                            @Nonnull final ValidatorProtos.HtmlFormat.Code htmlFormat,
                                             @Nonnull final ExitCondition condition,
                                             final int maxNodes) {
         final Parser parser = new Parser();
@@ -93,13 +93,13 @@ public class AMPHtmlParser {
             parser.setFeature(Parser.DEFAULT_ATTRIBUTES_FEATURE, false);
             parser.parse(new InputSource(new StringReader(inputHtml)));
         } catch (IOException | SAXException ex) {
-            final Validator.ValidationResult.Builder result = handler.validationResult();
+            final ValidatorProtos.ValidationResult.Builder result = handler.validationResult();
             if (result.getErrorsCount() == 0) {
-                result.setStatus(Validator.ValidationResult.Status.FAIL);
+                result.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
-                Validator.ValidationError.Builder error = Validator.ValidationError.newBuilder();
-                error.setSeverity(Validator.ValidationError.Severity.ERROR);
-                error.setCode(Validator.ValidationError.Code.UNKNOWN_CODE);
+                ValidatorProtos.ValidationError.Builder error = ValidatorProtos.ValidationError.newBuilder();
+                error.setSeverity(ValidatorProtos.ValidationError.Severity.ERROR);
+                error.setCode(ValidatorProtos.ValidationError.Code.UNKNOWN_CODE);
                 final String message =
                         (ex.getMessage() != null ? ex.getMessage() : "Unable to parse input HTML document");
                 error.addParams(message);

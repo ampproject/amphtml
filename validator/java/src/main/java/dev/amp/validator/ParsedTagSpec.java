@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.exception.TagValidationException;
 import com.google.protobuf.ProtocolStringList;
 import dev.amp.validator.utils.AttributeSpecUtils;
@@ -53,7 +52,7 @@ public class ParsedTagSpec {
      */
     public ParsedTagSpec(@Nonnull final ParsedAttrSpecs parsedAttrSpecs,
                          @Nonnull final RecordValidated shouldRecordTagsValidated,
-                         @Nonnull final Validator.TagSpec tagSpec, final int id) {
+                         @Nonnull final ValidatorProtos.TagSpec tagSpec, final int id) {
         this.spec = tagSpec;
         this.id = id;
         this.referencePoints = new ParsedReferencePoints(tagSpec);
@@ -105,7 +104,7 @@ public class ParsedTagSpec {
      *
      * @return returns the TagSpec.
      */
-    public Validator.TagSpec getSpec() {
+    public ValidatorProtos.TagSpec getSpec() {
         return spec;
     }
 
@@ -268,7 +267,7 @@ public class ParsedTagSpec {
      * Returns the implicit attr specs.
      * @return returns the implicit attr specs.
      */
-    public List<Validator.AttrSpec> getImplicitAttrspecs() {
+    public List<ValidatorProtos.AttrSpec> getImplicitAttrspecs() {
         return this.implicitAttrspecs;
     }
 
@@ -276,7 +275,7 @@ public class ParsedTagSpec {
      * Returns the map of attrs by name.
      * @return returns the map of attrs by name.
      */
-    public Map<String, Validator.AttrSpec> getAttrsByName() {
+    public Map<String, ValidatorProtos.AttrSpec> getAttrsByName() {
         return this.attrsByName;
     }
 
@@ -300,18 +299,18 @@ public class ParsedTagSpec {
      * Returns the set of mandatoryAttrs.
      * @return returns the set of mandatoryAttrs.
      */
-    public Set<Validator.AttrSpec> getMandatoryAttrIds() {
+    public Set<ValidatorProtos.AttrSpec> getMandatoryAttrIds() {
         return this.mandatoryAttrs;
     }
-    
+
     /**
      * Merges the list of attrs into attrsByName, avoiding to merge in attrs
      * with names that are already in attrsByName.
      * @param attrs the list of attr specs.
      * @param parsedAttrSpecs the ParsedAttrSpec object.
      */
-    private void mergeAttrs(final List<Validator.AttrSpec> attrs, final ParsedAttrSpecs parsedAttrSpecs) {
-        for (Validator.AttrSpec attrSpec : attrs) {
+    private void mergeAttrs(final List<ValidatorProtos.AttrSpec> attrs, final ParsedAttrSpecs parsedAttrSpecs) {
+        for (ValidatorProtos.AttrSpec attrSpec : attrs) {
             final String name = attrSpec.getName();
             if (attrsByName.containsKey(name)) {
                 continue;
@@ -356,10 +355,10 @@ public class ParsedTagSpec {
 
     private void populateAttrSpec(@Nonnull final String name, @Nonnull final String value,
                                   @Nonnull final ParsedAttrSpecs parsedAttrSpecs,
-                                  @Nonnull final Validator.AttrSpec attrSpec) {
+                                  @Nonnull final ValidatorProtos.AttrSpec attrSpec) {
         final ParsedAttrSpec attr = parsedAttrSpecs.getParsedAttrSpec(name, value, attrSpec);
         if (attr != null) {
-            final Validator.AttrSpec spec = attr.getSpec();
+            final ValidatorProtos.AttrSpec spec = attr.getSpec();
             if (spec.hasMandatory()) {
                 this.mandatoryAttrs.add(spec);
             }
@@ -397,7 +396,7 @@ public class ParsedTagSpec {
     /**
      * The TagSpec.
      */
-    private Validator.TagSpec spec;
+    private ValidatorProtos.TagSpec spec;
 
     /**
      * A unique tag id.
@@ -432,12 +431,12 @@ public class ParsedTagSpec {
     /**
      * ParsedAttributes keyed by name.
      */
-    private Map<String, Validator.AttrSpec> attrsByName;
+    private Map<String, ValidatorProtos.AttrSpec> attrsByName;
 
     /**
      * Attributes that are mandatory for this tag to legally validate.
      */
-    private Set<Validator.AttrSpec> mandatoryAttrs;
+    private Set<ValidatorProtos.AttrSpec> mandatoryAttrs;
 
     /**
      * A list of mandatory one ofs.
@@ -452,7 +451,7 @@ public class ParsedTagSpec {
     /**
      * A list of implicit attr specs.
      */
-    private List<Validator.AttrSpec> implicitAttrspecs;
+    private List<ValidatorProtos.AttrSpec> implicitAttrspecs;
 
     /**
      * Flag to indicate whether it contains an url.

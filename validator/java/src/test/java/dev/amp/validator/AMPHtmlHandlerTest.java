@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -56,12 +55,12 @@ public class AMPHtmlHandlerTest {
     @Test
     public void testStartDocument() throws SAXException {
         final AMPHtmlHandler handler = new AMPHtmlHandler(ampValidatorManager,
-                Validator.HtmlFormat.Code.AMP4EMAIL, ExitCondition.FULL_PARSING,
+                ValidatorProtos.HtmlFormat.Code.AMP4EMAIL, ExitCondition.FULL_PARSING,
                 MAX_NODES_ALLOWED);
 
         handler.startDocument();
 
-        Assert.assertEquals(handler.validationResult().getStatus(), Validator.ValidationResult.Status.UNKNOWN);
+        Assert.assertEquals(handler.validationResult().getStatus(), ValidatorProtos.ValidationResult.Status.UNKNOWN);
     }
 
     /**
@@ -70,7 +69,7 @@ public class AMPHtmlHandlerTest {
     @Test
     public void testStartElement() throws SAXException {
         final AMPHtmlHandler handler = new AMPHtmlHandler(ampValidatorManager,
-                Validator.HtmlFormat.Code.AMP4EMAIL, ExitCondition.FULL_PARSING,
+                ValidatorProtos.HtmlFormat.Code.AMP4EMAIL, ExitCondition.FULL_PARSING,
                 MAX_NODES_ALLOWED);
 
         final String uri = "";

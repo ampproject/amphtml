@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -35,13 +34,13 @@ public class ParsedReferencePointsTest {
 
     @Test
     public void testGettersSetters() {
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
 
-        final Validator.ReferencePoint.Builder refPointBuilder1 = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder1 = ValidatorProtos.ReferencePoint.newBuilder();
         refPointBuilder1.setTagSpecName("AMP-NEXT-PAGE > [separator]");
         refPointBuilder1.setUnique(true);
 
-        final Validator.ReferencePoint.Builder refPointBuilder2 = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder2 = ValidatorProtos.ReferencePoint.newBuilder();
         refPointBuilder2.setTagSpecName("amp-next-page extension .json configuration");
         refPointBuilder2.setUnique(false);
 

@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.utils.TagSpecUtils;
 import org.xml.sax.Locator;
@@ -64,7 +63,7 @@ public class TagStack {
     public boolean isStyleAmpCustomChild() throws TagValidationException {
         return (this.parentStackEntry().getTagSpec() != null)
                 && (this.parentStackEntry().getTagSpec().getSpec().getNamedId()
-                == Validator.TagSpec.NamedId.STYLE_AMP_CUSTOM);
+                == ValidatorProtos.TagSpec.NamedId.STYLE_AMP_CUSTOM);
     }
 
     /**
@@ -185,7 +184,7 @@ public class TagStack {
      */
     public void matchChildTagName(@Nonnull final ParsedHtmlTag encounteredTag,
                                   @Nonnull final Context context,
-                                  @Nonnull final Validator.ValidationResult.Builder result)
+                                  @Nonnull final ValidatorProtos.ValidationResult.Builder result)
             throws TagValidationException {
         final ChildTagMatcher matcher = this.parentStackEntry().getChildTagMatcher();
         if (matcher != null) {
@@ -231,8 +230,8 @@ public class TagStack {
      * @throws TagValidationException the TagValidationException.
      * @return returns true if the current tag has an ancestor which set the given marker.
      */
-    public boolean hasAncestorMarker(@Nonnull final Validator.AncestorMarker.Marker query) throws TagValidationException {
-        if (query == Validator.AncestorMarker.Marker.UNKNOWN) {
+    public boolean hasAncestorMarker(@Nonnull final ValidatorProtos.AncestorMarker.Marker query) throws TagValidationException {
+        if (query == ValidatorProtos.AncestorMarker.Marker.UNKNOWN) {
             throw new TagValidationException("Ancestor marker is unknown");
         }
         // Skip the first element, which is "$ROOT".
@@ -240,11 +239,11 @@ public class TagStack {
             if (this.stack.get(i).getTagSpec() == null) {
                 continue;
             }
-            final Validator.TagSpec spec = this.stack.get(i).getTagSpec().getSpec();
+            final ValidatorProtos.TagSpec spec = this.stack.get(i).getTagSpec().getSpec();
             if (!spec.hasMarkDescendants()) {
                 continue;
             }
-            for (final Validator.AncestorMarker.Marker marker : spec.getMarkDescendants().getMarkerList()) {
+            for (final ValidatorProtos.AncestorMarker.Marker marker : spec.getMarkDescendants().getMarkerList()) {
                 if (marker == query) {
                     return true;
                 }
@@ -275,7 +274,7 @@ public class TagStack {
      * @param result the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
-    public void exitTag(@Nonnull final Context context, @Nonnull final Validator.ValidationResult.Builder result)
+    public void exitTag(@Nonnull final Context context, @Nonnull final ValidatorProtos.ValidationResult.Builder result)
             throws TagValidationException {
         if (this.stack.size() <= 0) {
             throw new TagValidationException("Exiting an empty tag stack.");
@@ -317,7 +316,7 @@ public class TagStack {
         // The following only add new constraints, not new allowances, so
         // only add the constraints if the validation passed.
         if (result.getValidationResult().getStatus()
-                == amp.validator.Validator.ValidationResult.Status.PASS) {
+                == ValidatorProtos.ValidationResult.Status.PASS) {
             this.setChildTagMatcher(parsedTagSpec.childTagMatcher());
             this.setCdataMatcher(parsedTagSpec.cdataMatcher(lineCol));
             this.setDescendantConstraintList(parsedTagSpec, parsedRules);
@@ -354,9 +353,9 @@ public class TagStack {
 
         // The following only add new constraints, not new allowances, so
         // only add the constraints if the validation passed.
-        if (tagResult.getValidationResult().getStatus() == Validator.ValidationResult.Status.PASS) {
+        if (tagResult.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
             final ParsedTagSpec parsedTagSpec = tagResult.getBestMatchTagSpec();
-            final Validator.TagSpec tagSpec = parsedTagSpec.getSpec();
+            final ValidatorProtos.TagSpec tagSpec = parsedTagSpec.getSpec();
             // Record that this tag must not have any siblings.
             if (tagSpec.getSiblingsDisallowed()) {
                 this.tellParentNoSiblingsAllowed(tagSpec.getTagName(), lineCol);
@@ -510,7 +509,7 @@ public class TagStack {
         }
 
         List<String> allowedDescendantsForThisTag = new ArrayList<>();
-        for (final Validator.DescendantTagList descendantTagList : parsedRules.getDescendantTagLists()) {
+        for (final ValidatorProtos.DescendantTagList descendantTagList : parsedRules.getDescendantTagLists()) {
             // Get the list matching this tag's descendant tag name.
             if (parsedTagSpec.getSpec().getDescendantTagList().equals(descendantTagList.getName())) {
                 for (final String tag : descendantTagList.getTagList()) {

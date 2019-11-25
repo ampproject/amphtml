@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.utils.TagSpecUtils;
 
 import javax.annotation.Nonnull;
@@ -53,13 +52,13 @@ public class UrlErrorInAttrAdapter implements UrlErrorAdapter {
      */
     @Override
     public void missingUrl(@Nonnull final Context context,
-                           @Nonnull final Validator.TagSpec tagSpec,
-                           @Nonnull final  Validator.ValidationResult.Builder result) {
+                           @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                           @Nonnull final  ValidatorProtos.ValidationResult.Builder result) {
         final List<String> params = new ArrayList<>();
         params.add(this.attrName);
         params.add(TagSpecUtils.getTagSpecName(tagSpec));
         context.addError(
-                Validator.ValidationError.Code.MISSING_URL,
+                ValidatorProtos.ValidationError.Code.MISSING_URL,
                 context.getLineCol(),
                 /* params */params,
                 TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -77,14 +76,14 @@ public class UrlErrorInAttrAdapter implements UrlErrorAdapter {
     @Override
     public void invalidUrl(@Nonnull final Context context,
                            @Nonnull final String url,
-                           @Nonnull final Validator.TagSpec tagSpec,
-                           @Nonnull final  Validator.ValidationResult.Builder result) {
+                           @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                           @Nonnull final  ValidatorProtos.ValidationResult.Builder result) {
         final List<String> params = new ArrayList<>();
         params.add(this.attrName);
         params.add(TagSpecUtils.getTagSpecName(tagSpec));
         params.add(url);
         context.addError(
-                Validator.ValidationError.Code.INVALID_URL,
+                ValidatorProtos.ValidationError.Code.INVALID_URL,
                 context.getLineCol(),
                 /* params */params,
                 TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -102,14 +101,14 @@ public class UrlErrorInAttrAdapter implements UrlErrorAdapter {
     @Override
     public void invalidUrlProtocol(@Nonnull final Context context,
                        @Nonnull final String protocol,
-                       @Nonnull final Validator.TagSpec tagSpec,
-                       @Nonnull final  Validator.ValidationResult.Builder result) {
+                       @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                       @Nonnull final  ValidatorProtos.ValidationResult.Builder result) {
         final List<String> params = new ArrayList<>();
         params.add(this.attrName);
         params.add(TagSpecUtils.getTagSpecName(tagSpec));
         params.add(protocol);
         context.addError(
-                Validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+                ValidatorProtos.ValidationError.Code.INVALID_URL_PROTOCOL,
                 context.getLineCol(),
                 /* params */params,
                 TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -127,14 +126,14 @@ public class UrlErrorInAttrAdapter implements UrlErrorAdapter {
     @Override
     public void disallowedRelativeUrl(@Nonnull final Context context,
                           @Nonnull final String url,
-                          @Nonnull final Validator.TagSpec tagSpec,
-                          @Nonnull final  Validator.ValidationResult.Builder result) {
+                          @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                          @Nonnull final  ValidatorProtos.ValidationResult.Builder result) {
         final List<String> params = new ArrayList<>();
         params.add(this.attrName);
         params.add(TagSpecUtils.getTagSpecName(tagSpec));
         params.add(url);
         context.addError(
-                Validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
+                ValidatorProtos.ValidationError.Code.DISALLOWED_RELATIVE_URL,
                 context.getLineCol(),
                 /* params */params,
                 TagSpecUtils.getTagSpecUrl(tagSpec),

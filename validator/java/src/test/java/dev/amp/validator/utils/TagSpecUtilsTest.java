@@ -21,7 +21,7 @@
 package dev.amp.validator.utils;
 
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import dev.amp.validator.Context;
@@ -56,39 +56,39 @@ public class TagSpecUtilsTest {
 
     @Test
     public void testGetTagSpecUrl() {
-        final Validator.TagSpec.Builder tagSpecBuilder1 = Validator.TagSpec.newBuilder().setSpecUrl("url1");
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder1 = ValidatorProtos.TagSpec.newBuilder().setSpecUrl("url1");
 
 
         Assert.assertEquals(TagSpecUtils.getTagSpecUrl(tagSpecBuilder1.build()), "url1");
 
-        final Validator.TagSpec.Builder tagSpecBuilder2 = Validator.TagSpec.newBuilder()
-                .setExtensionSpec(Validator.ExtensionSpec.newBuilder()
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder2 = ValidatorProtos.TagSpec.newBuilder()
+                .setExtensionSpec(ValidatorProtos.ExtensionSpec.newBuilder()
                         .setName("extSpec2")
                         .build());
 
         Assert.assertEquals(TagSpecUtils.getTagSpecUrl(tagSpecBuilder2.build()), "https://amp.dev/documentation/components/extSpec2");
 
-        final Validator.TagSpec.Builder tagSpecBuilder3 = Validator.TagSpec.newBuilder().addRequiresExtension("ext3");
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder3 = ValidatorProtos.TagSpec.newBuilder().addRequiresExtension("ext3");
 
         Assert.assertEquals(TagSpecUtils.getTagSpecUrl(tagSpecBuilder3.build()), "https://amp.dev/documentation/components/ext3");
 
-        Assert.assertEquals(TagSpecUtils.getTagSpecUrl(Validator.TagSpec.getDefaultInstance()), "");
+        Assert.assertEquals(TagSpecUtils.getTagSpecUrl(ValidatorProtos.TagSpec.getDefaultInstance()), "");
     }
 
     @Test
     public void testGetTagSpecName() {
-        final Validator.TagSpec.Builder tagSpecBuilder1 = Validator.TagSpec.newBuilder().setSpecName("spec1");
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder1 = ValidatorProtos.TagSpec.newBuilder().setSpecName("spec1");
 
         Assert.assertEquals(TagSpecUtils.getTagSpecName(tagSpecBuilder1.build()), "spec1");
 
-        final Validator.TagSpec.Builder tagSpecBuilder2 = Validator.TagSpec.newBuilder().setTagName("TAG1");
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder2 = ValidatorProtos.TagSpec.newBuilder().setTagName("TAG1");
 
         Assert.assertEquals(TagSpecUtils.getTagSpecName(tagSpecBuilder2.build()), "tag1");
     }
 
     @Test
     public void testShouldRecordTagspecValidated() {
-        final Validator.TagSpec.Builder tagSpecBuilder1 = Validator.TagSpec.newBuilder().setMandatory(true);
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder1 = ValidatorProtos.TagSpec.newBuilder().setMandatory(true);
 
         Assert.assertEquals(TagSpecUtils.shouldRecordTagspecValidated(tagSpecBuilder1.build(), 2, ImmutableMap.of(2, true)),
                 RecordValidated.ALWAYS);
@@ -97,25 +97,25 @@ public class TagSpecUtilsTest {
                 RecordValidated.ALWAYS);
 
 
-        Assert.assertEquals(TagSpecUtils.shouldRecordTagspecValidated(Validator.TagSpec
+        Assert.assertEquals(TagSpecUtils.shouldRecordTagspecValidated(ValidatorProtos.TagSpec
                         .getDefaultInstance(), 2, ImmutableMap.of(2, true)), RecordValidated.ALWAYS);
 
-        final Validator.TagSpec.Builder tagSpecBuilder2 = Validator.TagSpec.newBuilder().setUnique(true);
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder2 = ValidatorProtos.TagSpec.newBuilder().setUnique(true);
 
         Assert.assertEquals(TagSpecUtils.shouldRecordTagspecValidated(tagSpecBuilder2.build(), 3, ImmutableMap.of(2, true)),
                 RecordValidated.IF_PASSING);
 
-        final Validator.TagSpec.Builder tagSpecBuilder3 = Validator.TagSpec.newBuilder().addRequires("req3");
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder3 = ValidatorProtos.TagSpec.newBuilder().addRequires("req3");
 
         Assert.assertEquals(TagSpecUtils.shouldRecordTagspecValidated(tagSpecBuilder3.build(), 3, ImmutableMap.of(2, true)),
                 RecordValidated.IF_PASSING);
 
-        final Validator.TagSpec.Builder tagSpecBuilder4 = Validator.TagSpec.newBuilder().setUniqueWarning(true);
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder4 = ValidatorProtos.TagSpec.newBuilder().setUniqueWarning(true);
 
         Assert.assertEquals(TagSpecUtils.shouldRecordTagspecValidated(tagSpecBuilder4.build(), 3, ImmutableMap.of(2, true)),
                 RecordValidated.IF_PASSING);
 
-        Assert.assertEquals(TagSpecUtils.shouldRecordTagspecValidated(Validator.TagSpec.getDefaultInstance(),
+        Assert.assertEquals(TagSpecUtils.shouldRecordTagspecValidated(ValidatorProtos.TagSpec.getDefaultInstance(),
                 3, ImmutableMap.of(2, true)), RecordValidated.NEVER);
     }
 
@@ -136,20 +136,20 @@ public class TagSpecUtilsTest {
         Mockito.when(mockDispatch.hasDispatchKeys()).thenReturn(true);
 
         final ParsedTagSpec mockParsedTagSpec1 = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockParsedTagSpec1.getSpec()).thenReturn(Validator.TagSpec.getDefaultInstance());
+        Mockito.when(mockParsedTagSpec1.getSpec()).thenReturn(ValidatorProtos.TagSpec.getDefaultInstance());
         Mockito.when(mockParsedTagSpec1.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(true);
         Mockito.when(mockRules.getByTagSpecId(0)).thenReturn(mockParsedTagSpec1);
         Mockito.when(mockRules.getByTagSpecId(2)).thenReturn(mockParsedTagSpec1);
 
         final ParsedTagSpec mockParsedTagSpec2 = Mockito.mock(ParsedTagSpec.class);
         Mockito.when(mockParsedTagSpec2.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(false);
-        Mockito.when(mockParsedTagSpec2.getSpec()).thenReturn(Validator.TagSpec.getDefaultInstance());
+        Mockito.when(mockParsedTagSpec2.getSpec()).thenReturn(ValidatorProtos.TagSpec.getDefaultInstance());
         Mockito.when(mockRules.getByTagSpecId(1)).thenReturn(mockParsedTagSpec2);
 
         Mockito.when(mockRules.dispatchForTagName(Mockito.anyString())).thenReturn(mockDispatch);
 
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final ParsedHtmlTag encounteredTag = Mockito.mock(ParsedHtmlTag.class);
@@ -171,7 +171,7 @@ public class TagSpecUtilsTest {
         final ParsedTagSpec bestMatchReferencePoint = Mockito.mock(ParsedTagSpec.class);
 
         final ValidateTagResult res = TagSpecUtils.validateTag(mockContext, encounteredTag, bestMatchReferencePoint);
-        Assert.assertEquals(res.getValidationResult().getStatus(), Validator.ValidationResult.Status.PASS);
+        Assert.assertEquals(res.getValidationResult().getStatus(), ValidatorProtos.ValidationResult.Status.PASS);
         Assert.assertEquals(res.getValidationResult().getErrorsCount(), 0);
     }
 
@@ -196,7 +196,7 @@ public class TagSpecUtilsTest {
         final ParsedTagSpec bestMatchReferencePoint = Mockito.mock(ParsedTagSpec.class);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         final ValidateTagResult res = TagSpecUtils.validateTag(mockContext, encounteredTag, bestMatchReferencePoint);
 
@@ -204,14 +204,14 @@ public class TagSpecUtilsTest {
                 Mockito.any(Locator.class),
                 listCaptor.capture(),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.DISALLOWED_TAG);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.DISALLOWED_TAG);
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.size(), 1);
         Assert.assertEquals(params.get(0), "font");
 
-        Assert.assertEquals(res.getValidationResult().getStatus(), Validator.ValidationResult.Status.UNKNOWN);
+        Assert.assertEquals(res.getValidationResult().getStatus(), ValidatorProtos.ValidationResult.Status.UNKNOWN);
     }
 
     @Test
@@ -231,20 +231,20 @@ public class TagSpecUtilsTest {
         Mockito.when(mockDispatch.hasDispatchKeys()).thenReturn(true);
 
         final ParsedTagSpec mockParsedTagSpec1 = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockParsedTagSpec1.getSpec()).thenReturn(Validator.TagSpec.getDefaultInstance());
+        Mockito.when(mockParsedTagSpec1.getSpec()).thenReturn(ValidatorProtos.TagSpec.getDefaultInstance());
         Mockito.when(mockParsedTagSpec1.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(false);
         Mockito.when(mockRules.getByTagSpecId(0)).thenReturn(mockParsedTagSpec1);
         Mockito.when(mockRules.getByTagSpecId(2)).thenReturn(mockParsedTagSpec1);
 
         final ParsedTagSpec mockParsedTagSpec2 = Mockito.mock(ParsedTagSpec.class);
         Mockito.when(mockParsedTagSpec2.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(false);
-        Mockito.when(mockParsedTagSpec2.getSpec()).thenReturn(Validator.TagSpec.getDefaultInstance());
+        Mockito.when(mockParsedTagSpec2.getSpec()).thenReturn(ValidatorProtos.TagSpec.getDefaultInstance());
         Mockito.when(mockRules.getByTagSpecId(1)).thenReturn(mockParsedTagSpec2);
 
         Mockito.when(mockRules.dispatchForTagName(Mockito.anyString())).thenReturn(mockDispatch);
 
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final ParsedHtmlTag encounteredTag = Mockito.mock(ParsedHtmlTag.class);
@@ -266,7 +266,7 @@ public class TagSpecUtilsTest {
         final ParsedTagSpec bestMatchReferencePoint = Mockito.mock(ParsedTagSpec.class);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         final ValidateTagResult res = TagSpecUtils.validateTag(mockContext, encounteredTag, bestMatchReferencePoint);
 
@@ -274,13 +274,13 @@ public class TagSpecUtilsTest {
                 Mockito.any(Locator.class),
                 listCaptor.capture(),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.DISALLOWED_SCRIPT_TAG);
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.size(), 0);
 
-        Assert.assertEquals(res.getValidationResult().getStatus(), Validator.ValidationResult.Status.UNKNOWN);
+        Assert.assertEquals(res.getValidationResult().getStatus(), ValidatorProtos.ValidationResult.Status.UNKNOWN);
         Assert.assertEquals(res.getValidationResult().getErrorsCount(), 0);
     }
 
@@ -301,20 +301,20 @@ public class TagSpecUtilsTest {
         Mockito.when(mockDispatch.hasDispatchKeys()).thenReturn(true);
 
         final ParsedTagSpec mockParsedTagSpec1 = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockParsedTagSpec1.getSpec()).thenReturn(Validator.TagSpec.getDefaultInstance());
+        Mockito.when(mockParsedTagSpec1.getSpec()).thenReturn(ValidatorProtos.TagSpec.getDefaultInstance());
         Mockito.when(mockParsedTagSpec1.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(false);
         Mockito.when(mockRules.getByTagSpecId(0)).thenReturn(mockParsedTagSpec1);
         Mockito.when(mockRules.getByTagSpecId(2)).thenReturn(mockParsedTagSpec1);
 
         final ParsedTagSpec mockParsedTagSpec2 = Mockito.mock(ParsedTagSpec.class);
         Mockito.when(mockParsedTagSpec2.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(false);
-        Mockito.when(mockParsedTagSpec2.getSpec()).thenReturn(Validator.TagSpec.getDefaultInstance());
+        Mockito.when(mockParsedTagSpec2.getSpec()).thenReturn(ValidatorProtos.TagSpec.getDefaultInstance());
         Mockito.when(mockRules.getByTagSpecId(1)).thenReturn(mockParsedTagSpec2);
 
         Mockito.when(mockRules.dispatchForTagName(Mockito.anyString())).thenReturn(mockDispatch);
 
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final ParsedHtmlTag encounteredTag = Mockito.mock(ParsedHtmlTag.class);
@@ -337,7 +337,7 @@ public class TagSpecUtilsTest {
         final ParsedTagSpec bestMatchReferencePoint = Mockito.mock(ParsedTagSpec.class);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         final ValidateTagResult res = TagSpecUtils.validateTag(mockContext, encounteredTag, bestMatchReferencePoint);
 
@@ -345,14 +345,14 @@ public class TagSpecUtilsTest {
                 Mockito.any(Locator.class),
                 listCaptor.capture(),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.GENERAL_DISALLOWED_TAG);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.GENERAL_DISALLOWED_TAG);
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.size(), 1);
         Assert.assertEquals(params.get(0), "html");
 
-        Assert.assertEquals(res.getValidationResult().getStatus(), Validator.ValidationResult.Status.UNKNOWN);
+        Assert.assertEquals(res.getValidationResult().getStatus(), ValidatorProtos.ValidationResult.Status.UNKNOWN);
         Assert.assertEquals(res.getValidationResult().getErrorsCount(), 0);
     }
 
@@ -373,20 +373,20 @@ public class TagSpecUtilsTest {
         Mockito.when(mockDispatch.hasDispatchKeys()).thenReturn(false);
 
         final ParsedTagSpec mockParsedTagSpec1 = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockParsedTagSpec1.getSpec()).thenReturn(Validator.TagSpec.getDefaultInstance());
+        Mockito.when(mockParsedTagSpec1.getSpec()).thenReturn(ValidatorProtos.TagSpec.getDefaultInstance());
         Mockito.when(mockParsedTagSpec1.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(true);
         Mockito.when(mockRules.getByTagSpecId(0)).thenReturn(mockParsedTagSpec1);
         Mockito.when(mockRules.getByTagSpecId(2)).thenReturn(mockParsedTagSpec1);
 
         final ParsedTagSpec mockParsedTagSpec2 = Mockito.mock(ParsedTagSpec.class);
         Mockito.when(mockParsedTagSpec2.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(true);
-        Mockito.when(mockParsedTagSpec2.getSpec()).thenReturn(Validator.TagSpec.getDefaultInstance());
+        Mockito.when(mockParsedTagSpec2.getSpec()).thenReturn(ValidatorProtos.TagSpec.getDefaultInstance());
         Mockito.when(mockRules.getByTagSpecId(1)).thenReturn(mockParsedTagSpec2);
 
         Mockito.when(mockRules.dispatchForTagName(Mockito.anyString())).thenReturn(mockDispatch);
 
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final ParsedHtmlTag encounteredTag = Mockito.mock(ParsedHtmlTag.class);
@@ -409,7 +409,7 @@ public class TagSpecUtilsTest {
 
         final ValidateTagResult res = TagSpecUtils.validateTag(mockContext, encounteredTag, bestMatchReferencePoint);
 
-        Assert.assertEquals(res.getValidationResult().getStatus(), Validator.ValidationResult.Status.PASS);
+        Assert.assertEquals(res.getValidationResult().getStatus(), ValidatorProtos.ValidationResult.Status.PASS);
         Assert.assertEquals(res.getValidationResult().getErrorsCount(), 0);
     }
 }

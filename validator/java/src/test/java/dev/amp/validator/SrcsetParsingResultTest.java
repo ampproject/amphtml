@@ -21,12 +21,10 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
-
 
 /**
  * Tests for {@link SrcsetParsingResult}
@@ -42,9 +40,9 @@ public class SrcsetParsingResultTest {
         srcsetParsingResult.setSuccess(true);
         Assert.assertTrue(srcsetParsingResult.isSuccess());
 
-        Assert.assertEquals(srcsetParsingResult.getErrorCode(), Validator.ValidationError.Code.UNKNOWN_CODE);
-        srcsetParsingResult.setErrorCode(Validator.ValidationError.Code.INVALID_ATTR_VALUE);
-        Assert.assertEquals(srcsetParsingResult.getErrorCode(), Validator.ValidationError.Code.INVALID_ATTR_VALUE);
+        Assert.assertEquals(srcsetParsingResult.getErrorCode(), ValidatorProtos.ValidationError.Code.UNKNOWN_CODE);
+        srcsetParsingResult.setErrorCode(ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE);
+        Assert.assertEquals(srcsetParsingResult.getErrorCode(), ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE);
 
         Assert.assertEquals(srcsetParsingResult.getSrcsetImages().size(), 0);
         Assert.assertEquals(srcsetParsingResult.getSrcsetImagesSize(), 0);

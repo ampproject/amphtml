@@ -22,7 +22,7 @@
 
 package dev.amp.validator.css;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -44,7 +44,7 @@ public class ErrorToken extends Token {
      * @param optParams the optParams to set
      * @throws CssValidationException Css Validation Exception
      */
-    public ErrorToken(final Validator.ValidationError.Code optCode,
+    public ErrorToken(final ValidatorProtos.ValidationError.Code optCode,
                       final List<String> optParams) throws CssValidationException {
         super();
         if (optCode == null) {
@@ -71,7 +71,7 @@ public class ErrorToken extends Token {
      * Getter for error code
      * @return error code
      */
-    public Validator.ValidationError.Code getCode() {
+    public ValidatorProtos.ValidationError.Code getCode() {
         return this.code;
     }
 
@@ -86,7 +86,7 @@ public class ErrorToken extends Token {
 
     /** Validation error code. */
     @Nonnull
-    private final Validator.ValidationError.Code code;
+    private final ValidatorProtos.ValidationError.Code code;
 
     /** List of params. */
     @Nonnull

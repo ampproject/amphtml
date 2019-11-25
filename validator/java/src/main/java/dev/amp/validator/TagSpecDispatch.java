@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.utils.DispatchKeyUtils;
 
 import javax.annotation.Nonnull;
@@ -86,7 +85,7 @@ public class TagSpecDispatch {
 
         // Try first to find a key with the given parent.
         final String dispatchKey = DispatchKeyUtils.makeDispatchKey(
-               Validator.AttrSpec.DispatchKeyType.NAME_VALUE_PARENT_DISPATCH,
+               ValidatorProtos.AttrSpec.DispatchKeyType.NAME_VALUE_PARENT_DISPATCH,
                 attrName, attrValue, mandatoryParent);
         final List<Integer> match = this.tagSpecsByDispatch.get(dispatchKey);
         if (match != null) {
@@ -95,7 +94,7 @@ public class TagSpecDispatch {
 
         // Try next to find a key that allows any parent.
         final String noParentKey = DispatchKeyUtils.makeDispatchKey(
-                Validator.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH, attrName,
+                ValidatorProtos.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH, attrName,
                 attrValue, "");
         final List<Integer> noParentMatch = this.tagSpecsByDispatch.get(noParentKey);
         if (noParentMatch != null) {
@@ -104,7 +103,7 @@ public class TagSpecDispatch {
 
         // Try last to find a key that matches just this attribute name.
         final String noValueKey = DispatchKeyUtils.makeDispatchKey(
-                Validator.AttrSpec.DispatchKeyType.NAME_DISPATCH, attrName, "", "");
+                ValidatorProtos.AttrSpec.DispatchKeyType.NAME_DISPATCH, attrName, "", "");
         final List<Integer> noValueMatch = this.tagSpecsByDispatch.get(noValueKey);
         if (noValueMatch != null) {
             tagSpecIds.addAll(noValueMatch);

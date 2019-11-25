@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.utils.TagSpecUtils;
 import org.xml.sax.Locator;
 
@@ -64,8 +63,8 @@ public class ExtensionsContext {
      * head for tags requiring an extension which was not found.
      * @return returns a list of errors found while processing head
      */
-    public List<Validator.ValidationError> missingExtensionErrors() {
-        final List<Validator.ValidationError> out = new ArrayList<>();
+    public List<ValidatorProtos.ValidationError> missingExtensionErrors() {
+        final List<ValidatorProtos.ValidationError> out = new ArrayList<>();
         for (final ExtensionMissingError err : this.extensionMissingErrors) {
             if (!this.isExtensionLoaded(err.getMissingExtension())) {
                 out.add(err.getMaybeError());
@@ -116,11 +115,11 @@ public class ExtensionsContext {
         }
 
         final ParsedTagSpec parsedTagSpec = result.getBestMatchTagSpec();
-        final Validator.TagSpec tagSpec = parsedTagSpec.getSpec();
+        final ValidatorProtos.TagSpec tagSpec = parsedTagSpec.getSpec();
 
         // Keep track of which extensions are loaded.
         if (tagSpec.hasExtensionSpec()) {
-            final Validator.ExtensionSpec extensionSpec = tagSpec.getExtensionSpec();
+            final ValidatorProtos.ExtensionSpec extensionSpec = tagSpec.getExtensionSpec();
             // This is an always present field if extension spec is set.
             final String extensionName = extensionSpec.getName();
 
@@ -168,12 +167,12 @@ public class ExtensionsContext {
      */
     public void recordFutureErrorsIfMissing(@Nonnull final ParsedTagSpec parsedTagSpec,
                                             @Nonnull final Locator lineCol) {
-        final Validator.TagSpec tagSpec = parsedTagSpec.getSpec();
+        final ValidatorProtos.TagSpec tagSpec = parsedTagSpec.getSpec();
         for (final String requiredExtension : tagSpec.getRequiresExtensionList()) {
             if (!this.isExtensionLoaded(requiredExtension)) {
-                final Validator.ValidationError.Builder error = Validator.ValidationError.newBuilder();
-                error.setSeverity(Validator.ValidationError.Severity.ERROR);
-                error.setCode(Validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION);
+                final ValidatorProtos.ValidationError.Builder error = ValidatorProtos.ValidationError.newBuilder();
+                error.setSeverity(ValidatorProtos.ValidationError.Severity.ERROR);
+                error.setCode(ValidatorProtos.ValidationError.Code.MISSING_REQUIRED_EXTENSION);
                 final List<String> params = new ArrayList<>();
                 params.add(TagSpecUtils.getTagSpecName(tagSpec));
                 params.add(requiredExtension);

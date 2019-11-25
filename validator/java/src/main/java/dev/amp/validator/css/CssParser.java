@@ -21,7 +21,7 @@
 
 package dev.amp.validator.css;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.SACParserCSS3;
 import com.steadystate.css.parser.CssCharStream;
 import com.steadystate.css.parser.ParseException;
@@ -88,7 +88,7 @@ public final class CssParser extends SACParserCSS3 {
                 final List<String> params = new ArrayList<>();
                 params.add("style");
                 this.errors.add((ErrorToken) copyPosTo(ex.currentToken.next, new ErrorToken(
-                        Validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
                         params)));
             }
 
@@ -99,7 +99,7 @@ public final class CssParser extends SACParserCSS3 {
                 final List<String> params = new ArrayList<>();
                 params.add("style");
                 this.errors.add((ErrorToken) copyPosTo(ex.currentToken.next, new ErrorToken(
-                        Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
                         params)));
             }
         } catch (CssValidationException e) {
@@ -116,7 +116,7 @@ public final class CssParser extends SACParserCSS3 {
 
             try {
                 this.errors.add((ErrorToken) copyPosTo(this.token, new ErrorToken(
-                        Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT,
                         params)));
                 ((ListableTokenManager) (this.token_source)).getParsedTokens().add(new EOFToken());
             } catch (CssValidationException e) {

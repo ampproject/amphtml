@@ -21,7 +21,7 @@
 
 package dev.amp.validator.css;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -39,35 +39,35 @@ public class CssParsingConfigTest {
 
   @BeforeTest
   public void init() {
-    defaultSpec = Validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
+    defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
     atRuleSpec = new HashMap<>();
 
-    atRuleSpec.put("$DEFAULT", Validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-    atRuleSpec.put("media", Validator.AtRuleSpec.BlockType.PARSE_AS_RULES);
-    atRuleSpec.put("page", Validator.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
+    atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
   }
 
   @Test
   public void testComputeCssParsingConfig() {
-    final Validator.CssSpec.Builder cssSpecBuilder = Validator.CssSpec.newBuilder();
+    final ValidatorProtos.CssSpec.Builder cssSpecBuilder = ValidatorProtos.CssSpec.newBuilder();
 
-    final Validator.AtRuleSpec.Builder atRuleSpecBuilder1 = Validator.AtRuleSpec.newBuilder();
-    atRuleSpecBuilder1.setType(Validator.AtRuleSpec.BlockType.PARSE_AS_RULES);
+    final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder1 = ValidatorProtos.AtRuleSpec.newBuilder();
+    atRuleSpecBuilder1.setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
     atRuleSpecBuilder1.setName("media");
 
-    final Validator.AtRuleSpec.Builder atRuleSpecBuilder2 = Validator.AtRuleSpec.newBuilder();
-    atRuleSpecBuilder2.setType(Validator.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder2 = ValidatorProtos.AtRuleSpec.newBuilder();
+    atRuleSpecBuilder2.setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
     atRuleSpecBuilder2.setName("page");
 
-    final Validator.AtRuleSpec.Builder atRuleSpecBuilder3 = Validator.AtRuleSpec.newBuilder();
-    atRuleSpecBuilder3.setType(Validator.AtRuleSpec.BlockType.PARSE_AS_ERROR);
+    final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder3 = ValidatorProtos.AtRuleSpec.newBuilder();
+    atRuleSpecBuilder3.setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR);
     atRuleSpecBuilder3.setName("$DEFAULT");
 
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder1.build());
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder2.build());
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder3.build());
 
-    final Validator.CssSpec cssSpec = cssSpecBuilder.build();
+    final ValidatorProtos.CssSpec cssSpec = cssSpecBuilder.build();
     try {
       final CssParsingConfig cssParsingConfig = CssParsingConfig.computeCssParsingConfig(cssSpec);
       Assert.assertEquals(cssParsingConfig.getAtRuleSpec().size(), 3);
@@ -78,6 +78,6 @@ public class CssParsingConfigTest {
     }
   }
 
-  private Map<String, Validator.AtRuleSpec.BlockType> atRuleSpec;
-  private Validator.AtRuleSpec.BlockType defaultSpec;
+  private Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec;
+  private ValidatorProtos.AtRuleSpec.BlockType defaultSpec;
 }

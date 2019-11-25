@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.testng.Assert;
@@ -45,14 +44,14 @@ public class UrlErrorInAttrAdapterTest {
         final Context mockContext = Mockito.mock(Context.class);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages");
         tagSpecBuilder.setSpecName("spec1");
 
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         urlErrorInAttrAdapter.missingUrl(mockContext, tagSpec, resultBuilder);
         Mockito.verify(mockContext, Mockito.times(1))
@@ -60,12 +59,12 @@ public class UrlErrorInAttrAdapterTest {
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "attr");
         Assert.assertEquals(params.get(1), "spec1");
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.MISSING_URL);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.MISSING_URL);
 
     }
 
@@ -78,14 +77,14 @@ public class UrlErrorInAttrAdapterTest {
 
         final String url = "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages";
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages");
         tagSpecBuilder.setSpecName("spec1");
 
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         urlErrorInAttrAdapter.invalidUrl(mockContext, url, tagSpec, resultBuilder);
 
@@ -94,13 +93,13 @@ public class UrlErrorInAttrAdapterTest {
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "attr");
         Assert.assertEquals(params.get(1), "spec1");
         Assert.assertEquals(params.get(2), url);
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.INVALID_URL);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.INVALID_URL);
 
     }
 
@@ -113,14 +112,14 @@ public class UrlErrorInAttrAdapterTest {
 
         final String protocol = "http";
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages");
         tagSpecBuilder.setSpecName("spec1");
 
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         urlErrorInAttrAdapter.invalidUrlProtocol(mockContext, protocol, tagSpec, resultBuilder);
 
@@ -129,13 +128,13 @@ public class UrlErrorInAttrAdapterTest {
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "attr");
         Assert.assertEquals(params.get(1), "spec1");
         Assert.assertEquals(params.get(2), protocol);
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.INVALID_URL_PROTOCOL);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.INVALID_URL_PROTOCOL);
 
     }
 
@@ -148,14 +147,14 @@ public class UrlErrorInAttrAdapterTest {
 
         final String url = "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages";
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages");
         tagSpecBuilder.setSpecName("spec1");
 
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         urlErrorInAttrAdapter.disallowedRelativeUrl(mockContext, url, tagSpec, resultBuilder);
 
@@ -164,13 +163,13 @@ public class UrlErrorInAttrAdapterTest {
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "attr");
         Assert.assertEquals(params.get(1), "spec1");
         Assert.assertEquals(params.get(2), url);
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.DISALLOWED_RELATIVE_URL);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.DISALLOWED_RELATIVE_URL);
 
     }
 }

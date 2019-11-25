@@ -21,7 +21,7 @@
 
 package dev.amp.validator.css;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
 
 import javax.annotation.Nonnull;
@@ -49,8 +49,8 @@ public class Canonicalizer {
      * @param atRuleSpec  the AtRule Spec to validate against
      * @param defaultSpec the block type to process as
      */
-    public Canonicalizer(@Nonnull final Map<String, Validator.AtRuleSpec.BlockType> atRuleSpec,
-                         @Nonnull final Validator.AtRuleSpec.BlockType defaultSpec) {
+    public Canonicalizer(@Nonnull final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec,
+                         @Nonnull final ValidatorProtos.AtRuleSpec.BlockType defaultSpec) {
         this.atRuleSpec = atRuleSpec;
         this.defaultAtRuleSpec = defaultSpec;
     }
@@ -145,7 +145,7 @@ public class Canonicalizer {
                 final List<String> params = new ArrayList<>();
                 params.add("style");
                 errors.add((ErrorToken) CssTokenUtil.copyPosTo(tokenStream.current(), new ErrorToken(
-                        Validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED, params)));
+                        ValidatorProtos.ValidationError.Code.CSS_EXCESSIVELY_NESTED, params)));
             }
         }
 
@@ -180,7 +180,7 @@ public class Canonicalizer {
                 params.add("style");
                 params.add(atRule.getName());
                 errors.add((ErrorToken) CssTokenUtil.copyPosTo(atRule, new ErrorToken(
-                        Validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE, params)));
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE, params)));
             } else if (current == TokenType.IDENT) {
                 this.parseADeclaration(tokenStream, decls, errors);
             } else {
@@ -188,7 +188,7 @@ public class Canonicalizer {
                 params.add("style");
 
                 errors.add((ErrorToken) CssTokenUtil.copyPosTo(tokenStream.current(), new ErrorToken(
-                        Validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION,
                         params)));
                 tokenStream.reconsume();
                 while (!(CssTokenUtil.getTokenType(tokenStream.next()) == TokenType.SEMICOLON
@@ -198,7 +198,7 @@ public class Canonicalizer {
                     if (!consumeAComponentValue(tokenStream, dummyTokenList, /*depth*/0)) {
 
                         errors.add((ErrorToken) CssTokenUtil.copyPosTo(tokenStream.current(), new ErrorToken(
-                                Validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+                                ValidatorProtos.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
                                 params)));
                     }
                 }
@@ -237,7 +237,7 @@ public class Canonicalizer {
             params.add("style");
 
             errors.add((ErrorToken) CssTokenUtil.copyPosTo(startToken, new ErrorToken(
-                    Validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION,
+                    ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION,
                     params)));
             tokenStream.reconsume();
             while (
@@ -256,7 +256,7 @@ public class Canonicalizer {
                 params.add("style");
 
                 errors.add((ErrorToken) CssTokenUtil.copyPosTo(startToken, new ErrorToken(
-                        Validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
+                        ValidatorProtos.ValidationError.Code.CSS_EXCESSIVELY_NESTED,
                         params)));
             }
             decl.getValue().add(CssTokenUtil.copyPosTo(tokenStream.next(), new EOFToken()));
@@ -289,8 +289,8 @@ public class Canonicalizer {
      * @param atRule
      * @return the block type of an atRule
      */
-    private Validator.AtRuleSpec.BlockType blockTypeFor(@Nonnull final AtRule atRule) {
-        final Validator.AtRuleSpec.BlockType maybeBlockType = this.atRuleSpec.get(stripVendorPrefix(atRule.getName()));
+    private ValidatorProtos.AtRuleSpec.BlockType blockTypeFor(@Nonnull final AtRule atRule) {
+        final ValidatorProtos.AtRuleSpec.BlockType maybeBlockType = this.atRuleSpec.get(stripVendorPrefix(atRule.getName()));
         if (maybeBlockType != null) {
             return maybeBlockType;
         } else {
@@ -315,7 +315,7 @@ public class Canonicalizer {
             final List<String> params = new ArrayList<>();
             params.add("style");
             errors.add((ErrorToken) CssTokenUtil.copyPosTo(tokenStream.current(), new ErrorToken(
-                    Validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED, params)));
+                    ValidatorProtos.ValidationError.Code.CSS_EXCESSIVELY_NESTED, params)));
         }
 
         // A simple block always has a start token (e.g. '{') and
@@ -476,7 +476,7 @@ public class Canonicalizer {
                 final List<String> params = new ArrayList<>();
                 params.add("style");
                 errors.add((ErrorToken) CssTokenUtil.copyPosTo(rule, new ErrorToken(
-                        Validator.ValidationError.Code.CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE, params)));
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE, params)));
                 return;
             }
             if (current == TokenType.OPEN_CURLY) {
@@ -496,15 +496,15 @@ public class Canonicalizer {
                 final List<String> params = new ArrayList<>();
                 params.add("style");
                 errors.add((ErrorToken) CssTokenUtil.copyPosTo(tokenStream.current(),
-                        new ErrorToken(Validator.ValidationError.Code.CSS_EXCESSIVELY_NESTED, params)));
+                        new ErrorToken(ValidatorProtos.ValidationError.Code.CSS_EXCESSIVELY_NESTED, params)));
             }
         }
     }
 
     @Nonnull
-    private final Map<String, Validator.AtRuleSpec.BlockType> atRuleSpec;
+    private final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec;
 
     @Nonnull
-    private final Validator.AtRuleSpec.BlockType defaultAtRuleSpec;
+    private final ValidatorProtos.AtRuleSpec.BlockType defaultAtRuleSpec;
 
 }

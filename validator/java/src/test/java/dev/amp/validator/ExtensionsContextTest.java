@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -36,7 +35,7 @@ public class ExtensionsContextTest {
         final ExtensionsContext extContext = new ExtensionsContext();
 
         final ParsedTagSpec mockParsedTagSpec = Mockito.mock(ParsedTagSpec.class);
-        final Validator.TagSpec tagSpec = Validator.TagSpec.newBuilder().addRequiresExtension("amp-form").
+        final ValidatorProtos.TagSpec tagSpec = ValidatorProtos.TagSpec.newBuilder().addRequiresExtension("amp-form").
                 setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup").
                 setSpecName("test_parent").build();
         Mockito.when(mockParsedTagSpec.getSpec()).thenReturn(tagSpec);
@@ -64,11 +63,11 @@ public class ExtensionsContextTest {
         };
 
         extContext.recordFutureErrorsIfMissing(mockParsedTagSpec, locator);
-        final List<Validator.ValidationError> errors = extContext.missingExtensionErrors();
+        final List<ValidatorProtos.ValidationError> errors = extContext.missingExtensionErrors();
 
         Assert.assertEquals(errors.size(), 1);
-        Assert.assertEquals(errors.get(0).getCode(), Validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION);
-        Assert.assertEquals(errors.get(0).getSeverity(), Validator.ValidationError.Severity.ERROR);
+        Assert.assertEquals(errors.get(0).getCode(), ValidatorProtos.ValidationError.Code.MISSING_REQUIRED_EXTENSION);
+        Assert.assertEquals(errors.get(0).getSeverity(), ValidatorProtos.ValidationError.Severity.ERROR);
         Assert.assertEquals(errors.get(0).getLine(), 23);
         Assert.assertEquals(errors.get(0).getCol(), 45);
         Assert.assertEquals(errors.get(0).getSpecUrl(), "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup");
@@ -96,9 +95,9 @@ public class ExtensionsContextTest {
         ValidateTagResult mockTagResult = Mockito.mock(ValidateTagResult.class);
 
         final ParsedTagSpec mockParsedTagSpec = Mockito.mock(ParsedTagSpec.class);
-        final Validator.TagSpec tagSpec = Validator.TagSpec.newBuilder()
-                .setExtensionSpec(Validator.ExtensionSpec.newBuilder().setName("amp-date-picker")
-                        .setRequiresUsage(Validator.ExtensionSpec.ExtensionUsageRequirement.GRANDFATHERED).build())
+        final ValidatorProtos.TagSpec tagSpec = ValidatorProtos.TagSpec.newBuilder()
+                .setExtensionSpec(ValidatorProtos.ExtensionSpec.newBuilder().setName("amp-date-picker")
+                        .setRequiresUsage(ValidatorProtos.ExtensionSpec.ExtensionUsageRequirement.GRANDFATHERED).build())
                 .addRequiresExtension("amp-form")
                 .setSpecName("test_parent").build();
 
@@ -120,9 +119,9 @@ public class ExtensionsContextTest {
         ValidateTagResult mockTagResult = Mockito.mock(ValidateTagResult.class);
 
         final ParsedTagSpec mockParsedTagSpec = Mockito.mock(ParsedTagSpec.class);
-        final Validator.TagSpec tagSpec = Validator.TagSpec.newBuilder()
-                .setExtensionSpec(Validator.ExtensionSpec.newBuilder().setName("amp-date-picker")
-                        .setRequiresUsage(Validator.ExtensionSpec.ExtensionUsageRequirement.ERROR).build())
+        final ValidatorProtos.TagSpec tagSpec = ValidatorProtos.TagSpec.newBuilder()
+                .setExtensionSpec(ValidatorProtos.ExtensionSpec.newBuilder().setName("amp-date-picker")
+                        .setRequiresUsage(ValidatorProtos.ExtensionSpec.ExtensionUsageRequirement.ERROR).build())
                 .addRequiresExtension("amp-form")
                 .setSpecName("test_parent").build();
 

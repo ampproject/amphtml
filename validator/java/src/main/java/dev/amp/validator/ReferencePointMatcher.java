@@ -21,8 +21,6 @@
 
 package dev.amp.validator;
 
-
-import amp.validator.Validator;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.exception.ValidatorException;
@@ -83,29 +81,29 @@ public class ReferencePointMatcher {
     public ValidateTagResult validateTag(@Nonnull final ParsedHtmlTag tag, @Nonnull final Context context)
             throws TagValidationException, ValidatorException, IOException, CssValidationException {
         // Look for a matching reference point, if we find one, record and exit.
-        Validator.ValidationResult.Builder resultForBestAttempt = Validator.ValidationResult.newBuilder();
-        resultForBestAttempt.setStatus(Validator.ValidationResult.Status.UNKNOWN);
-        for (Validator.ReferencePoint p : this.parsedReferencePoints.iterate()) {
+        ValidatorProtos.ValidationResult.Builder resultForBestAttempt = ValidatorProtos.ValidationResult.newBuilder();
+        resultForBestAttempt.setStatus(ValidatorProtos.ValidationResult.Status.UNKNOWN);
+        for (ValidatorProtos.ReferencePoint p : this.parsedReferencePoints.iterate()) {
             final ParsedTagSpec parsedTagSpec = context.getRules().getByTagSpecId(p.getTagSpecName());
             // Skip TagSpecs that aren't used for these type identifiers.
             if (!parsedTagSpec.isUsedForTypeIdentifiers(context.getTypeIdentifiers())) {
                 continue;
             }
-            Validator.ValidationResult.Builder resultForAttempt =
+            ValidatorProtos.ValidationResult.Builder resultForAttempt =
                     TagSpecUtils.validateTagAgainstSpec(
                     parsedTagSpec, /*bestMatchReferencePoint=*/null, context, tag);
 
             if (context.getRules().betterValidationResultThan(resultForAttempt, resultForBestAttempt)) {
                 resultForBestAttempt = resultForAttempt;
             }
-            if (resultForBestAttempt.getStatus() == Validator.ValidationResult.Status.PASS) {
+            if (resultForBestAttempt.getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
                 ValidateTagResult validateTagResult = new ValidateTagResult(resultForBestAttempt, parsedTagSpec);
                 return  validateTagResult;
             }
         }
 
         // This check cannot fail as a successful validation above exits early.
-        if (resultForBestAttempt.getStatus() != Validator.ValidationResult.Status.FAIL) {
+        if (resultForBestAttempt.getStatus() != ValidatorProtos.ValidationResult.Status.FAIL) {
             throw new ValidatorException("Successful validation should have exited earlier");
         }
 
@@ -118,7 +116,7 @@ public class ReferencePointMatcher {
             params.add(this.parsedValidatorRules.getReferencePointName(
                     this.parsedReferencePoints.iterate().get(0)));
             context.addError(
-                    Validator.ValidationError.Code
+                    ValidatorProtos.ValidationError.Code
                             .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR,
                     context.getLineCol(),
                     params,
@@ -129,16 +127,16 @@ public class ReferencePointMatcher {
         // General case: more than one reference point defined. Emit a plural
         // message with the acceptable reference points listed.
         final List<String> acceptable = new ArrayList<>();
-        for (final Validator.ReferencePoint p : this.parsedReferencePoints.iterate()) {
+        for (final ValidatorProtos.ReferencePoint p : this.parsedReferencePoints.iterate()) {
             acceptable.add(this.parsedValidatorRules.getReferencePointName(p));
         }
-        final Validator.ValidationResult.Builder resultForMultipleAttempts = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder resultForMultipleAttempts = ValidatorProtos.ValidationResult.newBuilder();
         final List<String> params = new ArrayList<>();
         params.add(tag.lowerName());
         params.add(this.parsedReferencePoints.parentTagSpecName());
         params.add(String.join(", ", acceptable));
         context.addError(
-                Validator.ValidationError.Code
+                ValidatorProtos.ValidationError.Code
                         .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT,
                 context.getLineCol(),
                 params,
@@ -157,7 +155,7 @@ public class ReferencePointMatcher {
      * @param result the ValidationResult.
      * @throws TagValidationException the TagValidationException.
      */
-    public void exitParentTag(@Nonnull final Context context, @Nonnull final Validator.ValidationResult.Builder result)
+    public void exitParentTag(@Nonnull final Context context, @Nonnull final ValidatorProtos.ValidationResult.Builder result)
             throws TagValidationException {
         final Map<Integer, Integer> referencePointByCount = new HashMap<>();
         for (final int r : this.referencePointsMatched) {
@@ -169,7 +167,7 @@ public class ReferencePointMatcher {
             referencePointByCount.put(r, count);
         }
 
-        for (final Validator.ReferencePoint p : this.parsedReferencePoints.iterate()) {
+        for (final ValidatorProtos.ReferencePoint p : this.parsedReferencePoints.iterate()) {
             int refPointTagSpecId = this.parsedValidatorRules.getTagSpecIdByReferencePointTagSpecName(p.getTagSpecName());
             if (p.hasMandatory()
                     && !referencePointByCount.containsKey(refPointTagSpecId)) {
@@ -177,7 +175,7 @@ public class ReferencePointMatcher {
                 params.add(this.parsedValidatorRules.getReferencePointName(p));
                 params.add(this.parsedReferencePoints.parentTagSpecName());
                 context.addError(
-                        Validator.ValidationError.Code.MANDATORY_REFERENCE_POINT_MISSING,
+                        ValidatorProtos.ValidationError.Code.MANDATORY_REFERENCE_POINT_MISSING,
                         this.getLineCol(),
                         params,
                         this.parsedReferencePoints.parentSpecUrl(),
@@ -191,7 +189,7 @@ public class ReferencePointMatcher {
                 params.add(this.parsedValidatorRules.getReferencePointName(p));
                 params.add(this.parsedReferencePoints.parentTagSpecName());
                 context.addError(
-                        Validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT,
+                        ValidatorProtos.ValidationError.Code.DUPLICATE_REFERENCE_POINT,
                         this.getLineCol(),
                         params,
                         this.parsedReferencePoints.parentSpecUrl(),

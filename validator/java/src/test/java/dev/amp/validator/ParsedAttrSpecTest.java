@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import com.google.common.collect.ImmutableList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -35,20 +34,20 @@ public class ParsedAttrSpecTest {
 
     @Test
     public void testGettersSetters() {
-        final Validator.AttrSpec.Builder attrSpecBuilder = Validator.AttrSpec.newBuilder();
-        attrSpecBuilder.addCssDeclaration(Validator.CssDeclaration.newBuilder().setName("content")
+        final ValidatorProtos.AttrSpec.Builder attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
+        attrSpecBuilder.addCssDeclaration(ValidatorProtos.CssDeclaration.newBuilder().setName("content")
                 .addValueCasei("fill").build());
 
-        final Validator.UrlSpec valueUrl = Validator.UrlSpec.newBuilder().addProtocol("https").build();
+        final ValidatorProtos.UrlSpec valueUrl = ValidatorProtos.UrlSpec.newBuilder().addProtocol("https").build();
         attrSpecBuilder.setValueUrl(valueUrl);
 
-        final Validator.PropertySpecList.Builder propBuilder = Validator.PropertySpecList.newBuilder();
-        propBuilder.addProperties(Validator.PropertySpec.newBuilder().setMandatory(true).setName("height").setValue("40").build());
+        final ValidatorProtos.PropertySpecList.Builder propBuilder = ValidatorProtos.PropertySpecList.newBuilder();
+        propBuilder.addProperties(ValidatorProtos.PropertySpec.newBuilder().setMandatory(true).setName("height").setValue("40").build());
 
         attrSpecBuilder.setValueProperties(propBuilder.build());
         attrSpecBuilder.addEnabledBy("transformation");
 
-        final Validator.AttrSpec attrSpec = attrSpecBuilder.build();
+        final ValidatorProtos.AttrSpec attrSpec = attrSpecBuilder.build();
         final ParsedAttrSpec parsedAttrSpec = new ParsedAttrSpec(attrSpec, "content");
 
         Assert.assertEquals(parsedAttrSpec.getAttrName(), "content");

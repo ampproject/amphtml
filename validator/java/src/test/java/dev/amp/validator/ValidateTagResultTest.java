@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -35,14 +34,14 @@ public class ValidateTagResultTest {
 
     @Test
     public void testGettersSetters() {
-        final Validator.ValidationResult.Builder validationResult = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder validationResult = ValidatorProtos.ValidationResult.newBuilder();
         final ParsedTagSpec mockParsedTagSpec = Mockito.mock(ParsedTagSpec.class);
 
         final ValidateTagResult validateTagResult = new ValidateTagResult(validationResult, mockParsedTagSpec);
         Assert.assertEquals(validateTagResult.getBestMatchTagSpec(), mockParsedTagSpec);
         Assert.assertEquals(validateTagResult.getValidationResult(), validationResult);
 
-        final Validator.ValidationResult.Builder validationResult2 = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder validationResult2 = ValidatorProtos.ValidationResult.newBuilder();
         final ParsedTagSpec mockParsedTagSpec2 = Mockito.mock(ParsedTagSpec.class);
 
         validateTagResult.setBestMatchTagSpec(mockParsedTagSpec2);

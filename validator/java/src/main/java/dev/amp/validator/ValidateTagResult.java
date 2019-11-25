@@ -21,8 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
-
 import javax.annotation.Nonnull;
 
 /**
@@ -38,7 +36,7 @@ public class ValidateTagResult {
      * @param validationResult validation result.
      * @param parsedTagSpec parsed tag spec.
      */
-    public ValidateTagResult(@Nonnull final Validator.ValidationResult.Builder validationResult,
+    public ValidateTagResult(@Nonnull final ValidatorProtos.ValidationResult.Builder validationResult,
                              final ParsedTagSpec parsedTagSpec) {
         this.validationResult = validationResult;
         this.bestMatchTagSpec = parsedTagSpec;
@@ -64,7 +62,7 @@ public class ValidateTagResult {
      * Getting the validation result.
      * @return returns the validation result.
      */
-    public Validator.ValidationResult.Builder getValidationResult() {
+    public ValidatorProtos.ValidationResult.Builder getValidationResult() {
         return validationResult;
     }
 
@@ -72,14 +70,14 @@ public class ValidateTagResult {
      * Setting the validation result.
      * @param validationResult validation result.
      */
-    public void setValidationResult(@Nonnull final Validator.ValidationResult.Builder validationResult) {
+    public void setValidationResult(@Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
         this.validationResult = validationResult;
     }
 
     /**
      * Validation result.
      */
-    private Validator.ValidationResult.Builder validationResult;
+    private ValidatorProtos.ValidationResult.Builder validationResult;
 
     /**
      * Best match tag spec.

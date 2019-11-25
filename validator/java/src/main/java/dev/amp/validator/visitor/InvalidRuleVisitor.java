@@ -21,7 +21,7 @@
 
 package dev.amp.validator.visitor;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import dev.amp.validator.css.AtRule;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.css.Declaration;
@@ -52,9 +52,9 @@ public class InvalidRuleVisitor implements RuleVisitor {
      * @param context provides global information related to html validation.
      * @param result  the validation result to populate.
      */
-    public InvalidRuleVisitor(@Nonnull final Validator.TagSpec tagSpec, @Nonnull final Validator.CssSpec cssSpec,
+    public InvalidRuleVisitor(@Nonnull final ValidatorProtos.TagSpec tagSpec, @Nonnull final ValidatorProtos.CssSpec cssSpec,
                               @Nonnull final Context context,
-                              @Nonnull final Validator.ValidationResult.Builder result) {
+                              @Nonnull final ValidatorProtos.ValidationResult.Builder result) {
         super();
         this.tagSpec = tagSpec;
         this.cssSpec = cssSpec;
@@ -74,7 +74,7 @@ public class InvalidRuleVisitor implements RuleVisitor {
             params.add(getTagSpecName(this.tagSpec));
             params.add(atRule.getName());
             this.context.addError(
-                    Validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+                    ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
                     context.getLineCol().getLineNumber() + atRule.getLine(),
                     context.getLineCol().getColumnNumber() + atRule.getCol(),
                     params,
@@ -91,22 +91,22 @@ public class InvalidRuleVisitor implements RuleVisitor {
      * @return true iff rule is valid
      * @throws CssValidationException Css Validation Exception
      */
-    public boolean isAtRuleValid(@Nonnull final Validator.CssSpec cssSpec,
+    public boolean isAtRuleValid(@Nonnull final ValidatorProtos.CssSpec cssSpec,
                                  @Nonnull final String atRuleName) throws CssValidationException {
         String defaultType = "";
 
-        for (final Validator.AtRuleSpec atRuleSpec : cssSpec.getAtRuleSpecList()) {
+        for (final ValidatorProtos.AtRuleSpec atRuleSpec : cssSpec.getAtRuleSpecList()) {
             if (atRuleSpec.getName().equals("$DEFAULT")) {
                 defaultType = atRuleSpec.getType().toString();
             } else if (atRuleSpec.getName().equals(stripVendorPrefix(atRuleName))) {
-                return atRuleSpec.getType() != Validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
+                return atRuleSpec.getType() != ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR;
             }
         }
 
         if (defaultType.equals("")) {
             throw new CssValidationException("Default type not defined");
         }
-        return !defaultType.equals(Validator.AtRuleSpec.BlockType.PARSE_AS_ERROR.toString());
+        return !defaultType.equals(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR.toString());
     }
 
     /**
@@ -124,7 +124,7 @@ public class InvalidRuleVisitor implements RuleVisitor {
                 params.add(declaration.getName());
 
                 this.context.addError(
-                        Validator.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
                         context.getLineCol().getLineNumber() + declaration.getLine(),
                         context.getLineCol().getColumnNumber() + declaration.getCol(),
                         params,
@@ -139,7 +139,7 @@ public class InvalidRuleVisitor implements RuleVisitor {
                 allowedDeclarationsString(this.cssSpec);
 
                 this.context.addError(
-                        Validator.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY,
                         context.getLineCol().getLineNumber() + declaration.getLine(),
                         context.getLineCol().getColumnNumber() + declaration.getCol(),
                         params,
@@ -150,14 +150,14 @@ public class InvalidRuleVisitor implements RuleVisitor {
     }
 
     /** Tag spec. */
-    private final Validator.TagSpec tagSpec;
+    private final ValidatorProtos.TagSpec tagSpec;
 
     /** Css spec. */
-    private final Validator.CssSpec cssSpec;
+    private final ValidatorProtos.CssSpec cssSpec;
 
     /** Context. */
     private final Context context;
 
     /** Result builder. */
-    private final Validator.ValidationResult.Builder result;
+    private final ValidatorProtos.ValidationResult.Builder result;
 }

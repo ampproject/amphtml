@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.testng.Assert;
@@ -45,14 +44,14 @@ public class UrlErrorInStylesheetAdapterTest {
         final Context mockContext = Mockito.mock(Context.class);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages");
         tagSpecBuilder.setSpecName("spec1");
 
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         urlErrorInStylesheetAdapter.missingUrl(mockContext, tagSpec, resultBuilder);
         Mockito.verify(mockContext, Mockito.times(1))
@@ -61,11 +60,11 @@ public class UrlErrorInStylesheetAdapterTest {
                         Mockito.anyInt(),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "spec1");
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.CSS_SYNTAX_MISSING_URL);
 
     }
 
@@ -76,17 +75,17 @@ public class UrlErrorInStylesheetAdapterTest {
         final String url = "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages";
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         final UrlErrorInStylesheetAdapter urlErrorInStylesheetAdapter = new UrlErrorInStylesheetAdapter(lineNumber, colNumber);
         final Context mockContext = Mockito.mock(Context.class);
 
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages");
         tagSpecBuilder.setSpecName("spec1");
 
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         urlErrorInStylesheetAdapter.invalidUrl(mockContext, url, tagSpec, resultBuilder);
         Mockito.verify(mockContext, Mockito.times(1))
@@ -95,12 +94,12 @@ public class UrlErrorInStylesheetAdapterTest {
                         Mockito.anyInt(),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "spec1");
         Assert.assertEquals(params.get(1), url);
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_URL);
 
     }
 
@@ -111,17 +110,17 @@ public class UrlErrorInStylesheetAdapterTest {
         final String protocol = "https";
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         final UrlErrorInStylesheetAdapter urlErrorInStylesheetAdapter = new UrlErrorInStylesheetAdapter(lineNumber, colNumber);
         final Context mockContext = Mockito.mock(Context.class);
 
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages");
         tagSpecBuilder.setSpecName("spec1");
 
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         urlErrorInStylesheetAdapter.invalidUrlProtocol(mockContext, protocol, tagSpec, resultBuilder);
         Mockito.verify(mockContext, Mockito.times(1))
@@ -130,12 +129,12 @@ public class UrlErrorInStylesheetAdapterTest {
                         Mockito.anyInt(),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "spec1");
         Assert.assertEquals(params.get(1), protocol);
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL);
 
     }
 
@@ -146,17 +145,17 @@ public class UrlErrorInStylesheetAdapterTest {
         final String url = "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages";
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         final UrlErrorInStylesheetAdapter urlErrorInStylesheetAdapter = new UrlErrorInStylesheetAdapter(lineNumber, colNumber);
         final Context mockContext = Mockito.mock(Context.class);
 
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecUrl("https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages");
         tagSpecBuilder.setSpecName("spec1");
 
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         urlErrorInStylesheetAdapter.disallowedRelativeUrl(mockContext, url, tagSpec, resultBuilder);
         Mockito.verify(mockContext, Mockito.times(1))
@@ -165,12 +164,12 @@ public class UrlErrorInStylesheetAdapterTest {
                         Mockito.anyInt(),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "spec1");
         Assert.assertEquals(params.get(1), url);
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL);
 
     }
 }

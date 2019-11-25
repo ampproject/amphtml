@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.utils.TagSpecUtils;
 
 import javax.annotation.Nonnull;
@@ -56,12 +55,12 @@ public class UrlErrorInStylesheetAdapter implements UrlErrorAdapter {
      */
     @Override
     public void missingUrl(@Nonnull final Context context,
-                           @Nonnull final Validator.TagSpec tagSpec,
-                           @Nonnull final  Validator.ValidationResult.Builder result) {
+                           @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                           @Nonnull final  ValidatorProtos.ValidationResult.Builder result) {
         final List<String> params = new ArrayList<>();
         params.add(TagSpecUtils.getTagSpecName(tagSpec));
         context.addError(
-                Validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL,
+                ValidatorProtos.ValidationError.Code.CSS_SYNTAX_MISSING_URL,
                 lineNumber,
                 columnNumber,
                 /* params */params,
@@ -80,13 +79,13 @@ public class UrlErrorInStylesheetAdapter implements UrlErrorAdapter {
     @Override
     public void invalidUrl(@Nonnull final Context context,
                            @Nonnull final String url,
-                           @Nonnull final Validator.TagSpec tagSpec,
-                           @Nonnull final  Validator.ValidationResult.Builder result) {
+                           @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                           @Nonnull final  ValidatorProtos.ValidationResult.Builder result) {
         final List<String> params = new ArrayList<>();
         params.add(TagSpecUtils.getTagSpecName(tagSpec));
         params.add(url);
         context.addError(
-                Validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL,
+                ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_URL,
                 lineNumber,
                 columnNumber,
                 /* params */params,
@@ -105,13 +104,13 @@ public class UrlErrorInStylesheetAdapter implements UrlErrorAdapter {
     @Override
     public void invalidUrlProtocol(@Nonnull final Context context,
                                    @Nonnull final String protocol,
-                                   @Nonnull final Validator.TagSpec tagSpec,
-                                   @Nonnull final  Validator.ValidationResult.Builder result) {
+                                   @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                                   @Nonnull final  ValidatorProtos.ValidationResult.Builder result) {
         final List<String> params = new ArrayList<>();
         params.add(TagSpecUtils.getTagSpecName(tagSpec));
         params.add(protocol);
         context.addError(
-                Validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL,
+                ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL,
                 lineNumber,
                 columnNumber,
                 /* params */params,
@@ -130,13 +129,13 @@ public class UrlErrorInStylesheetAdapter implements UrlErrorAdapter {
     @Override
     public void disallowedRelativeUrl(@Nonnull final Context context,
                                       @Nonnull final String url,
-                                      @Nonnull final Validator.TagSpec tagSpec,
-                                      @Nonnull final  Validator.ValidationResult.Builder result) {
+                                      @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                                      @Nonnull final  ValidatorProtos.ValidationResult.Builder result) {
         final List<String> params = new ArrayList<>();
         params.add(TagSpecUtils.getTagSpecName(tagSpec));
         params.add(url);
         context.addError(
-                Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL,
+                ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL,
                 lineNumber,
                 columnNumber,
                 /* params */params,

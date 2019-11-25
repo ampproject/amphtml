@@ -21,7 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
 import dev.amp.validator.visitor.Amp4AdsVisitor;
 import dev.amp.validator.visitor.KeyframesVisitor;
@@ -76,8 +76,8 @@ public final class CssSpecUtils {
      * @throws CssValidationException css validation exception
      */
     public static Stylesheet parseAStylesheet(@Nonnull final List<Token> tokenList,
-                                              @Nonnull final Map<String, Validator.AtRuleSpec.BlockType> atRuleSpec,
-                                              @Nonnull final Validator.AtRuleSpec.BlockType defaultSpec,
+                                              @Nonnull final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec,
+                                              @Nonnull final ValidatorProtos.AtRuleSpec.BlockType defaultSpec,
                                               @Nonnull final List<ErrorToken> errors) throws CssValidationException {
         final Canonicalizer canonicalizer = new Canonicalizer(atRuleSpec, defaultSpec);
         final Stylesheet stylesheet = new Stylesheet();
@@ -198,7 +198,7 @@ public final class CssSpecUtils {
      * @param declarationName the declaration to query for in the css spec.
      * @return true iff the declaration is found in scc spec's allowed declarations
      */
-    public static boolean isDeclarationValid(@Nonnull final Validator.CssSpec cssSpec, @Nonnull final String declarationName) {
+    public static boolean isDeclarationValid(@Nonnull final ValidatorProtos.CssSpec cssSpec, @Nonnull final String declarationName) {
         if (cssSpec.getDeclarationList().size() == 0) {
             return true;
         }
@@ -211,7 +211,7 @@ public final class CssSpecUtils {
      * @param cssSpec of interest
      * @return a string representation of allowed declarations
      */
-    public static String allowedDeclarationsString(@Nonnull final Validator.CssSpec cssSpec) {
+    public static String allowedDeclarationsString(@Nonnull final ValidatorProtos.CssSpec cssSpec) {
         if (cssSpec.getDeclarationList().size() > MAX_NUM_ALLOWED_DECLARATIONS) {
             return "";
         }
@@ -328,8 +328,8 @@ public final class CssSpecUtils {
                                                      @Nonnull final List<ErrorToken> errors)
             throws CssValidationException {
         final Canonicalizer canonicalizer =
-                new Canonicalizer(new HashMap<String, Validator.AtRuleSpec.BlockType>(),
-                        Validator.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+                new Canonicalizer(new HashMap<String, ValidatorProtos.AtRuleSpec.BlockType>(),
+                        ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
         return canonicalizer.parseAListOfDeclarations(tokenList, errors);
     }
 

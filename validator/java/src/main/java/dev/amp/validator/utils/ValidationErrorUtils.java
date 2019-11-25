@@ -21,7 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import org.xml.sax.Locator;
 
 import javax.annotation.Nonnull;
@@ -51,9 +51,9 @@ public final class ValidationErrorUtils {
      * @param specUrl a link (URL) to the amphtml spec.
      * @return returns the ValidationError instance.
      */
-    public static Validator.ValidationError populateError(
-            @Nonnull final Validator.ValidationError.Severity severity,
-            @Nonnull final  Validator.ValidationError.Code validationErrorCode,
+    public static ValidatorProtos.ValidationError populateError(
+            @Nonnull final ValidatorProtos.ValidationError.Severity severity,
+            @Nonnull final  ValidatorProtos.ValidationError.Code validationErrorCode,
             @Nonnull final Locator lineCol, @Nonnull final List<String> params, @Nonnull final String specUrl) {
         return populateError(severity, validationErrorCode,
                 lineCol.getLineNumber(), lineCol.getColumnNumber(), params, specUrl);
@@ -70,12 +70,12 @@ public final class ValidationErrorUtils {
      * @param specUrl a link (URL) to the amphtml spec.
      * @return returns the ValidationError instance.
      */
-    public static Validator.ValidationError populateError(
-            @Nonnull final Validator.ValidationError.Severity severity,
-            @Nonnull final  Validator.ValidationError.Code validationErrorCode,
+    public static ValidatorProtos.ValidationError populateError(
+            @Nonnull final ValidatorProtos.ValidationError.Severity severity,
+            @Nonnull final  ValidatorProtos.ValidationError.Code validationErrorCode,
             final int line, final int column, @Nonnull final List<String> params,
             @Nonnull final String specUrl) {
-        final Validator.ValidationError.Builder error = Validator.ValidationError.newBuilder();
+        final ValidatorProtos.ValidationError.Builder error = ValidatorProtos.ValidationError.newBuilder();
         error.setSeverity(severity);
         error.setCode(validationErrorCode);
         error.addAllParams(params);

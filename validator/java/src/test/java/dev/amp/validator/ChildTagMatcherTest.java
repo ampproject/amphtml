@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.exception.TagValidationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -40,41 +39,41 @@ public class ChildTagMatcherTest {
 
     @Test(expectedExceptions = TagValidationException.class)
     public void testConstructorError() throws TagValidationException {
-        new ChildTagMatcher(Validator.TagSpec.newBuilder().build());
+        new ChildTagMatcher(ValidatorProtos.TagSpec.newBuilder().build());
     }
 
     @Test
     public void testMatchChildTagNameNoError() throws TagValidationException {
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
 
         final ParsedHtmlTag parsedHtmlTag = Mockito.mock(ParsedHtmlTag.class);
         Mockito.when(parsedHtmlTag.upperName()).thenReturn("CHILDNOTONEOF");
         Mockito.when(parsedHtmlTag.lowerName()).thenReturn("childnotoneof");
 
-        final Validator.ChildTagSpec.Builder childSpecBuilder = Validator.ChildTagSpec.newBuilder();
+        final ValidatorProtos.ChildTagSpec.Builder childSpecBuilder = ValidatorProtos.ChildTagSpec.newBuilder();
         tagSpecBuilder.setChildTags(childSpecBuilder.build());
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
 
         final ChildTagMatcher childTagMatcher = new ChildTagMatcher(tagSpec);
 
         final Context mockContext = Mockito.mock(Context.class);
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
 
         childTagMatcher.matchChildTagName(parsedHtmlTag, mockContext, resultBuilder);
 
         Mockito.verify(mockContext, Mockito.times(0))
-                .addError(Mockito.any(Validator.ValidationError.Code.class),
+                .addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                         Mockito.any(Locator.class),
                         Mockito.anyListOf(String.class),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
     }
 
     @Test
     public void testMatchChildTagName() throws TagValidationException {
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
-        final Validator.ChildTagSpec.Builder childSpecBuilder = Validator.ChildTagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
+        final ValidatorProtos.ChildTagSpec.Builder childSpecBuilder = ValidatorProtos.ChildTagSpec.newBuilder();
         childSpecBuilder.addChildTagNameOneof("CHILDONEOF");
 
         final ParsedHtmlTag parsedHtmlTag = Mockito.mock(ParsedHtmlTag.class);
@@ -83,15 +82,15 @@ public class ChildTagMatcherTest {
 
         tagSpecBuilder.setChildTags(childSpecBuilder.build());
         tagSpecBuilder.setSpecName("spec1");
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
 
         final ChildTagMatcher childTagMatcher = new ChildTagMatcher(tagSpec);
 
         final Context mockContext = Mockito.mock(Context.class);
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         childTagMatcher.matchChildTagName(parsedHtmlTag, mockContext, resultBuilder);
 
@@ -100,20 +99,20 @@ public class ChildTagMatcherTest {
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "childnotoneof");
         Assert.assertEquals(params.get(1), "spec1");
         Assert.assertEquals(params.get(2), "['childoneof']");
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME);
     }
 
     @Test
     public void testMatchChildTagFirstChildTag() throws TagValidationException {
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
-        final Validator.ChildTagSpec.Builder childSpecBuilder = Validator.ChildTagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
+        final ValidatorProtos.ChildTagSpec.Builder childSpecBuilder = ValidatorProtos.ChildTagSpec.newBuilder();
         childSpecBuilder.addChildTagNameOneof("CHILDONEOF");
         childSpecBuilder.addFirstChildTagNameOneof("FIRSTCHILDONEOF");
 
@@ -123,7 +122,7 @@ public class ChildTagMatcherTest {
 
         tagSpecBuilder.setChildTags(childSpecBuilder.build());
         tagSpecBuilder.setSpecName("spec1");
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
 
         final ChildTagMatcher childTagMatcher = new ChildTagMatcher(tagSpec);
 
@@ -132,10 +131,10 @@ public class ChildTagMatcherTest {
         Mockito.when(mockTagStack.parentChildCount()).thenReturn(0);
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
 
         childTagMatcher.matchChildTagName(parsedHtmlTag, mockContext, resultBuilder);
@@ -145,26 +144,26 @@ public class ChildTagMatcherTest {
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "childoneof");
         Assert.assertEquals(params.get(1), "spec1");
         Assert.assertEquals(params.get(2), "['firstchildoneof']");
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME);
     }
 
     @Test
     public void testExitTagSuccess() throws TagValidationException {
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
-        final Validator.ChildTagSpec.Builder childSpecBuilder = Validator.ChildTagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
+        final ValidatorProtos.ChildTagSpec.Builder childSpecBuilder = ValidatorProtos.ChildTagSpec.newBuilder();
         childSpecBuilder.addChildTagNameOneof("CHILDONEOF");
         childSpecBuilder.addFirstChildTagNameOneof("FIRSTCHILDONEOF");
 
         tagSpecBuilder.setChildTags(childSpecBuilder.setMandatoryNumChildTags(1).setMandatoryMinNumChildTags(1).build());
         tagSpecBuilder.setSpecName("spec1");
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
 
         final ChildTagMatcher childTagMatcher = new ChildTagMatcher(tagSpec);
 
@@ -173,28 +172,28 @@ public class ChildTagMatcherTest {
         Mockito.when(mockTagStack.parentChildCount()).thenReturn(1);
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         childTagMatcher.exitTag(mockContext, resultBuilder);
 
         Mockito.verify(mockContext, Mockito.times(0))
-                .addError(Mockito.any(Validator.ValidationError.Code.class),
+                .addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                         Mockito.any(Locator.class),
                         Mockito.anyListOf(String.class),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
     }
 
     @Test
     public void testExitTagExpectedChildTags() throws TagValidationException {
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
-        final Validator.ChildTagSpec.Builder childSpecBuilder = Validator.ChildTagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
+        final ValidatorProtos.ChildTagSpec.Builder childSpecBuilder = ValidatorProtos.ChildTagSpec.newBuilder();
         childSpecBuilder.addChildTagNameOneof("CHILDONEOF");
         childSpecBuilder.addFirstChildTagNameOneof("FIRSTCHILDONEOF");
 
         tagSpecBuilder.setChildTags(childSpecBuilder.setMandatoryNumChildTags(1).build());
         tagSpecBuilder.setSpecName("spec1");
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
 
         final ChildTagMatcher childTagMatcher = new ChildTagMatcher(tagSpec);
 
@@ -203,10 +202,10 @@ public class ChildTagMatcherTest {
         Mockito.when(mockTagStack.parentChildCount()).thenReturn(0);
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         childTagMatcher.exitTag(mockContext, resultBuilder);
 
@@ -215,26 +214,26 @@ public class ChildTagMatcherTest {
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "spec1");
         Assert.assertEquals(params.get(1), "1");
         Assert.assertEquals(params.get(2), "0");
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS);
     }
 
     @Test
     public void testExitTagExpectedMinChildTags() throws TagValidationException {
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
-        final Validator.ChildTagSpec.Builder childSpecBuilder = Validator.ChildTagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
+        final ValidatorProtos.ChildTagSpec.Builder childSpecBuilder = ValidatorProtos.ChildTagSpec.newBuilder();
         childSpecBuilder.addChildTagNameOneof("CHILDONEOF");
         childSpecBuilder.addFirstChildTagNameOneof("FIRSTCHILDONEOF");
 
         tagSpecBuilder.setChildTags(childSpecBuilder.setMandatoryMinNumChildTags(1).build());
         tagSpecBuilder.setSpecName("spec1");
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
 
         final ChildTagMatcher childTagMatcher = new ChildTagMatcher(tagSpec);
 
@@ -243,10 +242,10 @@ public class ChildTagMatcherTest {
         Mockito.when(mockTagStack.parentChildCount()).thenReturn(0);
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
-        final Validator.ValidationResult.Builder resultBuilder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder resultBuilder = ValidatorProtos.ValidationResult.newBuilder();
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         childTagMatcher.exitTag(mockContext, resultBuilder);
 
@@ -255,14 +254,14 @@ public class ChildTagMatcherTest {
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.get(0), "spec1");
         Assert.assertEquals(params.get(1), "1");
         Assert.assertEquals(params.get(2), "0");
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.INCORRECT_MIN_NUM_CHILD_TAGS);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.INCORRECT_MIN_NUM_CHILD_TAGS);
     }
 
 }

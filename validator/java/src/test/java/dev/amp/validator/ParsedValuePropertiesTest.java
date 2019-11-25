@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -29,9 +28,9 @@ public class ParsedValuePropertiesTest {
 
     @Test
     public void testGetters() {
-        final Validator.PropertySpecList.Builder specListBuilder = Validator.PropertySpecList.newBuilder();
-        specListBuilder.addProperties(Validator.PropertySpec.newBuilder().setName("prop1").setMandatory(true).build());
-        specListBuilder.addProperties(Validator.PropertySpec.newBuilder().setName("prop2").build());
+        final ValidatorProtos.PropertySpecList.Builder specListBuilder = ValidatorProtos.PropertySpecList.newBuilder();
+        specListBuilder.addProperties(ValidatorProtos.PropertySpec.newBuilder().setName("prop1").setMandatory(true).build());
+        specListBuilder.addProperties(ValidatorProtos.PropertySpec.newBuilder().setName("prop2").build());
 
         final ParsedValueProperties parsedValueProperties = new ParsedValueProperties(specListBuilder.build());
 

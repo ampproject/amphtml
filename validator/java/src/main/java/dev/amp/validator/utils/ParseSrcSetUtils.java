@@ -21,7 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import dev.amp.validator.SrcsetParsingResult;
 import dev.amp.validator.SrcsetSourceDef;
 
@@ -98,7 +98,7 @@ public final class ParseSrcSetUtils {
             }
             // Duplicate width or pixel density in srcset.
             if (seenWidthOrPixelDensity.contains(widthOrPixelDensity)) {
-                result.setErrorCode(Validator.ValidationError.Code.DUPLICATE_DIMENSION);
+                result.setErrorCode(ValidatorProtos.ValidationError.Code.DUPLICATE_DIMENSION);
                 return result;
             }
             seenWidthOrPixelDensity.add(widthOrPixelDensity);
@@ -106,14 +106,14 @@ public final class ParseSrcSetUtils {
 
             // More srcset, comma expected as separator for image candidates.
             if (comma == null) {
-                result.setErrorCode(Validator.ValidationError.Code.INVALID_ATTR_VALUE);
+                result.setErrorCode(ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE);
                 return result;
             }
         }
 
         // Must have at least one image candidate.
         if (result.getSrcsetImagesSize() == 0) {
-            result.setErrorCode(Validator.ValidationError.Code.INVALID_ATTR_VALUE);
+            result.setErrorCode(ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE);
             return result;
         }
         result.setSuccess(true);

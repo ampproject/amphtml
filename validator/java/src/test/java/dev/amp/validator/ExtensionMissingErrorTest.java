@@ -21,8 +21,6 @@
 
 package dev.amp.validator;
 
-
-import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -36,9 +34,9 @@ public class ExtensionMissingErrorTest {
     @Test
     public void testConstructor() {
         final ExtensionMissingError error = new ExtensionMissingError("ext_missing",
-                Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE).build());
+                ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE).build());
 
         Assert.assertEquals(error.getMissingExtension(), "ext_missing");
-        Assert.assertEquals(error.getMaybeError().getCode(), Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE);
+        Assert.assertEquals(error.getMaybeError().getCode(), ValidatorProtos.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE);
     }
 }
