@@ -214,33 +214,42 @@ describes.realWin(
           'checkConsentHref': 'https://geo-override-check2/',
         };
         const localStorageSpy = env.sandbox.spy(storageMock, 'get');
-        const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetch');
+        const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
 
         ampConsent = getAmpConsent(doc, config);
         await ampConsent.buildCallback();
         await macroTask();
         expect(localStorageSpy).to.be.calledBefore(fetchSpy);
+        expect(
+          (await ampConsent.consentStateManager_.getConsentInstanceInfo())[
+            'consentState'
+          ]
+        ).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
       });
 
       it('gives precedence to local storage', async () => {
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
-          'checkConsentHref': 'https://geo-override-check2/',
+          'checkConsentHref': 'https://geo-override-false/',
         };
         storageValue = {
           'amp-consent:abc': true,
         };
-        const localStorageSpy = env.sandbox.spy(storageMock, 'get');
-        // const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetch');
-
         ampConsent = getAmpConsent(doc, config);
+        const consentRequiredSpy = env.sandbox.spy(
+          ampConsent,
+          'getConsentRequiredPromise_'
+        );
+
         await ampConsent.buildCallback();
         await macroTask();
-        expect(localStorageSpy).to.be.calledOnce;
-        // expect(fetchSpy).to.be.calledOnce;
+        expect(consentRequiredSpy).to.not.be.called;
         expect(
-          await ampConsent.consentStateManager_.getConsentInstanceInfo()
+          (await ampConsent.consentStateManager_.getConsentInstanceInfo())[
+            'consentState'
+          ]
         ).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
       });
 
@@ -462,6 +471,7 @@ describes.realWin(
       });
 
       it('does not show promptUI if local storage has decision', async () => {
+        toggleExperiment(win, 'amp-consent-geo-override');
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -471,16 +481,14 @@ describes.realWin(
         storageValue = {
           'amp-consent:abc': true,
         };
-        const localStorageSpy = env.sandbox.spy(storageMock, 'get');
-        // const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetch');
 
         ampConsent = getAmpConsent(doc, config);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(localStorageSpy).to.be.calledOnce;
-        // expect(fetchSpy).to.be.calledOnce;
         expect(
-          await ampConsent.consentStateManager_.getConsentInstanceInfo()
+          (await ampConsent.consentStateManager_.getConsentInstanceInfo())[
+            'consentState'
+          ]
         ).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(ampConsent.isPromptUIOn_).to.be.false;
       });
@@ -574,6 +582,57 @@ describes.realWin(
           // And the postPrompt to be hidden.
           await macroTask();
           expect(postPromptUI).to.have.display('none');
+        });
+
+        describe('hide/show postPromptUI with local storage', () => {
+          beforeEach(() => {
+            toggleExperiment(win, 'amp-consent-geo-override');
+            defaultConfig = dict({
+              'consentInstanceId': 'ABC',
+              'consentRequired': true,
+              'postPromptUI': 'test2',
+            });
+            consentElement = createConsentElement(doc, defaultConfig);
+            postPromptUI = doc.createElement('div');
+            postPromptUI.setAttribute('id', 'test2');
+            consentElement.appendChild(postPromptUI);
+            doc.body.appendChild(consentElement);
+            ampConsent = new AmpConsent(consentElement);
+          });
+
+          it('hide postPromptUI', async () => {
+            await ampConsent.buildCallback();
+            ampConsent.element.classList.remove('i-amphtml-notbuilt');
+            await macroTask();
+
+            expect(postPromptUI).to.not.be.null;
+            expect(postPromptUI).to.have.display('none');
+          });
+
+          it('shows postPromptUI with local storage decision', async () => {
+            const promptUiSpy = env.sandbox.spy(ampConsent, 'initPromptUI_');
+            const consentRequiredSpy = env.sandbox.spy(
+              ampConsent,
+              'getConsentRequiredPromise_'
+            );
+
+            storageValue = {
+              'amp-consent:ABC': true,
+            };
+            await ampConsent.buildCallback();
+            ampConsent.element.classList.remove('i-amphtml-notbuilt');
+            await macroTask();
+
+            expect(
+              (await ampConsent.consentStateManager_.getConsentInstanceInfo())[
+                'consentState'
+              ]
+            ).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
+            expect(consentRequiredSpy).to.not.be.called;
+            expect(promptUiSpy).to.not.be.called;
+            expect(postPromptUI).to.not.be.null;
+            expect(postPromptUI).to.not.have.display('none');
+          });
         });
 
         describe('hide/show postPromptUI', () => {

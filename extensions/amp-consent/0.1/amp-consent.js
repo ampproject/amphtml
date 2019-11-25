@@ -417,8 +417,13 @@ export class AmpConsent extends AMP.BaseElement {
     this.maybeSetDirtyBit_();
 
     this.consentStateManager_.getLastConsentInstanceInfo().then(storedInfo => {
-      if (hasStoredValue(storedInfo)) {
+      if (
+        isExperimentOn(this.win, 'amp-consent-geo-override') &&
+        hasStoredValue(storedInfo)
+      ) {
         // TODO next pr, make CORS request for syncing purposes
+        this.handlePostPromptUI_();
+        this.consentPolicyManager_.enableTimeout();
         return;
       }
       this.getConsentRequiredPromise_()
