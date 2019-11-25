@@ -186,7 +186,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
     option.remove();
 
-    convertedOption.setAttribute('on', `tap:${this.element.id}.respond`);
+    // convertedOption.setAttribute('on', `tap:${this.element.id}.respond`);
 
     // Add the option to the quiz element
     this.quizEl_
@@ -241,7 +241,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     );
 
     if (optionEl) {
-      this.actions_.trigger(optionEl, 'tap', e, ActionTrust.HIGH);
+      // this.actions_.trigger(optionEl, 'tap', e, ActionTrust.HIGH);
+      this.handleOptionSelection_(optionEl);
     }
   }
 

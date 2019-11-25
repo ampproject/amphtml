@@ -15,6 +15,8 @@
  */
 
 import {AmpStoryQuiz} from '../amp-story-quiz';
+import {AmpStoryStoreService} from '../amp-story-store-service';
+import {registerServiceBuilder} from '../../../../src/service';
 
 /**
  * Populates the quiz with some number of prompts and some number of options
@@ -36,6 +38,8 @@ const populateQuiz = (win, quizElement, numPrompts = 1, numOptions = 4) => {
   for (let i = 0; i < numOptions; i++) {
     quizElement.appendChild(option.cloneNode());
   }
+
+  quizElement.setAttribute('id', 'quizId');
 };
 
 /**
@@ -49,22 +53,31 @@ const populateStandardQuizContent = (win, quizElement) => {
 };
 
 describes.realWin(
-  'amp-story-cta-layer',
+  'amp-story-quiz',
   {
-    amp: {
-      runtimeOn: true,
-      extensions: ['amp-story:1.0'],
-    },
+    amp: true,
   },
   env => {
     let win;
     let ampStoryQuiz;
+    let storyEl;
 
     beforeEach(() => {
       win = env.win;
       const ampStoryQuizEl = win.document.createElement('amp-story-quiz');
+      ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
 
-      win.document.body.appendChild(ampStoryQuizEl);
+      const storeService = new AmpStoryStoreService(win);
+      registerServiceBuilder(win, 'story-store', () => storeService);
+
+      storyEl = win.document.createElement('amp-story');
+      const storyPage = win.document.createElement('amp-story-page');
+      const gridLayer = win.document.createElement('amp-story-grid-layer');
+      gridLayer.appendChild(ampStoryQuizEl);
+      storyPage.appendChild(gridLayer);
+      storyEl.appendChild(storyPage);
+
+      win.document.body.appendChild(storyEl);
       ampStoryQuiz = new AmpStoryQuiz(ampStoryQuizEl);
     });
 
@@ -132,7 +145,7 @@ describes.realWin(
 
       quizOption.click();
 
-      expect(quizElement).to.have.class('.i-amphtml-story-quiz-post-selection');
+      expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');
       expect(quizOption).to.have.class('i-amphtml-story-quiz-option-selected');
     });
 
