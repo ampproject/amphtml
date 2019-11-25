@@ -43,6 +43,7 @@ import {CLICKY_CONFIG} from './vendors/clicky';
 import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
 import {COMSCORE_CONFIG} from './vendors/comscore';
 import {CXENSE_CONFIG} from './vendors/cxense';
+import {DEEPBI_CONFIG} from './vendors/deepbi';
 import {DYNATRACE_CONFIG} from './vendors/dynatrace';
 import {EPICA_CONFIG} from './vendors/epica';
 import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics';
@@ -110,6 +111,8 @@ const DEFAULT_CONFIG = jsonLiteral({
     'ampdocHostname': 'AMPDOC_HOSTNAME',
     'ampdocUrl': 'AMPDOC_URL',
     'ampGeo': 'AMP_GEO',
+    'ampUserLocation': 'AMP_USER_LOCATION',
+    'ampUserLocationPoll': 'AMP_USER_LOCATION_POLL',
     'ampState': 'AMP_STATE',
     'ampVersion': 'AMP_VERSION',
     'ancestorOrigin': 'ANCESTOR_ORIGIN',
@@ -199,6 +202,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'colanalytics': includeJsonLiteral(COLANALYTICS_CONFIG),
       'comscore': includeJsonLiteral(COMSCORE_CONFIG),
       'cxense': includeJsonLiteral(CXENSE_CONFIG),
+      'deepbi': includeJsonLiteral(DEEPBI_CONFIG),
       'dynatrace': includeJsonLiteral(DYNATRACE_CONFIG),
       'epica': includeJsonLiteral(EPICA_CONFIG),
       'euleriananalytics': includeJsonLiteral(EULERIANANALYTICS_CONFIG),
