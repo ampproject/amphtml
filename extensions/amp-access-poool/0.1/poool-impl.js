@@ -215,17 +215,21 @@ export class PooolVendor {
       .getRootNode()
       .querySelector('[poool-access-preview]');
 
-    this.resources_.mutateElement(articlePreview, () => {
-      articlePreview.setAttribute('amp-access-hide', '');
-    });
+    if (articlePreview) {
+      this.resources_.mutateElement(articlePreview, () => {
+        articlePreview.setAttribute('amp-access-hide', '');
+      });
+    }
 
     const articleContent = this.ampdoc
       .getRootNode()
       .querySelector('[poool-access-content]');
 
-    this.resources_.mutateElement(articleContent, () => {
-      articleContent.removeAttribute('amp-access-hide');
-    });
+    if (articleContent) {
+      this.resources_.mutateElement(articleContent, () => {
+        articleContent.removeAttribute('amp-access-hide');
+      });
+    }
 
     resetStyles(this.iframe_, ['transform']);
   }
