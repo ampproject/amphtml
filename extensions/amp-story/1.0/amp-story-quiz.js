@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  Action,
-  StateProperty,
-  getStoreService,
-} from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
-import {Services} from '../../../src/services';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
@@ -71,9 +65,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
-
-    /** @const @private {!../../../src/service/action-impl.ActionService} */
-    this.actions_ = Services.actionServiceForDoc(this.element);
 
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
@@ -186,8 +177,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
     option.remove();
 
-    // convertedOption.setAttribute('on', `tap:${this.element.id}.respond`);
-
     // Add the option to the quiz element
     this.quizEl_
       .querySelector('.i-amphtml-story-quiz-option-container')
@@ -200,14 +189,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    // Configure the response action
-    const actions = [{tagOrTarget: 'AMP-STORY-QUIZ', method: 'respond'}];
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
-
-    this.registerAction('respond', actionInvocation => {
-      this.handleOptionSelection_(actionInvocation.caller);
-    });
-
     // Add a listener for changes in the RTL state
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
@@ -217,7 +198,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    // Add a click listener to the element to trigger the action via tapping the prompt
+    // Add a click listener to the element to trigger the class change via tapping the prompt
     this.quizEl_.addEventListener('click', e => this.handleTap_(e));
   }
 
@@ -241,7 +222,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     );
 
     if (optionEl) {
-      // this.actions_.trigger(optionEl, 'tap', e, ActionTrust.HIGH);
       this.handleOptionSelection_(optionEl);
     }
   }
