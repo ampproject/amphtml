@@ -573,10 +573,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
           elements.forEach(child => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
-            } else {
-              userAssert(
-                child.hasAttribute('data-value'),
-                `${TAG} requires a "data-value" or "data-disabled" attribute in the template.`
+            } else if (!child.hasAttribute('data-value')) {
+              user().warn(
+                TAG,
+                'Expected a "data-value" or "data-disabled" attribute on the rendered template item. %s',
+                child
               );
             }
             child.classList.add('i-amphtml-autocomplete-item');
