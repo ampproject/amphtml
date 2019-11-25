@@ -446,14 +446,14 @@ export class AmpConsent extends AMP.BaseElement {
       .getLastConsentInstanceInfo()
       .then(storedInfo => {
         if (hasStoredValue(storedInfo)) {
-          return Promise.resolve(false);
+          return Promise.resolve(true);
         }
         if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
           return Promise.resolve(this.consentConfig_['consentRequired']);
         }
         return this.getConsentRemote_().then(consentInfo => {
           const remoteResponse = consentInfo['consentRequired'];
-          return typeof remoteResponse === 'boolean' ? remoteResponse : true;
+          return !!remoteResponse;
         });
       });
   }
