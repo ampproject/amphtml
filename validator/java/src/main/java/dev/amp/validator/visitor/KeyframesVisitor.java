@@ -21,7 +21,7 @@
 
 package dev.amp.validator.visitor;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import dev.amp.validator.css.CssTokenUtil;
 import dev.amp.validator.css.QualifiedRule;
 import dev.amp.validator.css.Token;
@@ -66,7 +66,7 @@ public class KeyframesVisitor implements RuleVisitor {
             params.add(qualifiedRule.ruleName());
             this.errors.add(createErrorTokenAt(
                     qualifiedRule,
-                    Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME,
+                    ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME,
                     params));
             return;
         }
@@ -78,7 +78,7 @@ public class KeyframesVisitor implements RuleVisitor {
         params.add(qualifiedRule.ruleName());
         this.errors.add(createErrorTokenAt(
                 qualifiedRule,
-                Validator.ValidationError.Code.CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS,
+                ValidatorProtos.ValidationError.Code.CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS,
                 params));
     }
 
@@ -93,7 +93,7 @@ public class KeyframesVisitor implements RuleVisitor {
      * @throws CssValidationException Css Validation Error
      */
     public static ErrorToken createErrorTokenAt(@Nonnull final Token positionToken,
-                                                @Nonnull final Validator.ValidationError.Code code,
+                                                @Nonnull final ValidatorProtos.ValidationError.Code code,
                                                 @Nonnull final List<String> params) throws CssValidationException {
         ErrorToken token = new ErrorToken(code, params);
         CssTokenUtil.copyPosTo(positionToken, token);
@@ -118,7 +118,7 @@ public class KeyframesVisitor implements RuleVisitor {
                     params.add("style");
                     this.errors.add(createErrorTokenAt(
                             atRule,
-                            Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME,
+                            ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME,
                             params));
                 }
                 this.parentIsKeyframesAtRule = true;

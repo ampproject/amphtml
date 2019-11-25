@@ -21,7 +21,7 @@
 
 package dev.amp.validator.css;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -44,10 +44,10 @@ public class ErrorTokenTest {
       params.add(param);
 
       final ErrorToken errorToken
-        = new ErrorToken(Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING, params);
+        = new ErrorToken(ValidatorProtos.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING, params);
 
       Assert.assertEquals(errorToken.getParams(), params);
-      Assert.assertEquals(errorToken.getCode(), Validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING);
+      Assert.assertEquals(errorToken.getCode(), ValidatorProtos.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING);
 
       Assert.assertEquals(errorToken.getTokenType(), TokenType.ERROR);
 

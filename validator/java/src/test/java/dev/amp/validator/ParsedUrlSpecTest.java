@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,11 +33,11 @@ public class ParsedUrlSpecTest {
 
     @Test
     public void testGetterSetters() {
-        final Validator.UrlSpec.Builder specBuilder = Validator.UrlSpec.newBuilder();
+        final ValidatorProtos.UrlSpec.Builder specBuilder = ValidatorProtos.UrlSpec.newBuilder();
         specBuilder.addProtocol("http");
         specBuilder.addProtocol("https");
 
-        final Validator.UrlSpec spec = specBuilder.build();
+        final ValidatorProtos.UrlSpec spec = specBuilder.build();
         final ParsedUrlSpec parsedSpec = new ParsedUrlSpec(spec);
 
         Assert.assertEquals(parsedSpec.getSpec(), spec);

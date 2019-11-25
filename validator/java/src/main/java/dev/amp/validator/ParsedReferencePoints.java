@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.utils.TagSpecUtils;
 
 import javax.annotation.Nonnull;
@@ -40,7 +39,7 @@ public class ParsedReferencePoints {
      * Constructor.
      * @param parentTagSpec the parent TagSpec.
      */
-    public ParsedReferencePoints(@Nonnull final Validator.TagSpec parentTagSpec) {
+    public ParsedReferencePoints(@Nonnull final ValidatorProtos.TagSpec parentTagSpec) {
         this.parentTagSpec = parentTagSpec;
     }
 
@@ -49,7 +48,7 @@ public class ParsedReferencePoints {
      *
      * @return returns the reference points list.
      */
-    public List<Validator.ReferencePoint> iterate() {
+    public List<ValidatorProtos.ReferencePoint> iterate() {
         return this.parentTagSpec.getReferencePointsList();
     }
 
@@ -100,5 +99,5 @@ public class ParsedReferencePoints {
      * The parent TagSpec.
      */
     @Nonnull
-    private Validator.TagSpec parentTagSpec;
+    private ValidatorProtos.TagSpec parentTagSpec;
 }

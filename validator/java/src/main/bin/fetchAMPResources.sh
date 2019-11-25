@@ -3,8 +3,8 @@
 #
 # This is a pre hook script which executes before compiling the codes.
 #
-# 1. Concatenate all protoascii files into a single file, validator-all.protoascii, under /src/main/resources directory.
-# 2. Soft link validator.proto under src/proto directory.
+# Concatenate all protoascii files into a single file, validator-all.protoascii,
+# under /src/main/resources directory.
 #
 
 # Fall back to bazel build working directory if not using Maven
@@ -38,9 +38,6 @@ else
         echo $i;
         cat $i >> ${AMP_RESOURCES_DIR}/${AMP_VALIDATOR_PROTOASCII};
     done
-
-    echo "Copying proto file"
-    cp ../${AMP_VALIDATOR_PROTO} ${AMP_VALIDATOR_PROTO_DIR}
 
     popd
 fi

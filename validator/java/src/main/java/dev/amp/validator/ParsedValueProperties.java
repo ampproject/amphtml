@@ -21,8 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
-
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,11 +40,11 @@ public class ParsedValueProperties {
      * Constructor.
      * @param spec property spec list.
      */
-    public ParsedValueProperties(@Nonnull final Validator.PropertySpecList spec) {
+    public ParsedValueProperties(@Nonnull final ValidatorProtos.PropertySpecList spec) {
         this.valuePropertyByName = new HashMap<>();
         this.mandatoryValuePropertyNames = new ArrayList<>();
 
-        for (final Validator.PropertySpec propertySpec : spec.getPropertiesList()) {
+        for (final ValidatorProtos.PropertySpec propertySpec : spec.getPropertiesList()) {
             this.valuePropertyByName.put(propertySpec.getName(), propertySpec);
             if (propertySpec.hasMandatory()) {
                 this.mandatoryValuePropertyNames.add(propertySpec.getName());
@@ -60,7 +58,7 @@ public class ParsedValueProperties {
      * @return returns a map of PropertySpec.
      */
     @Nonnull
-    public Map<String, Validator.PropertySpec> getValuePropertyByName() {
+    public Map<String, ValidatorProtos.PropertySpec> getValuePropertyByName() {
         return this.valuePropertyByName;
     }
 
@@ -84,7 +82,7 @@ public class ParsedValueProperties {
      * PropertySpec map.
      */
     @Nonnull
-    private Map<String, Validator.PropertySpec> valuePropertyByName;
+    private Map<String, ValidatorProtos.PropertySpec> valuePropertyByName;
 
     /**
      * A list of mandatory property names.

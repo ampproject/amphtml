@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.utils.TagSpecUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +45,7 @@ public class ChildTagMatcher {
      * @param parentSpec parent tag spec.
      * @throws TagValidationException child tag expected to be null.
      */
-    public ChildTagMatcher(@Nonnull final Validator.TagSpec parentSpec)
+    public ChildTagMatcher(@Nonnull final ValidatorProtos.TagSpec parentSpec)
             throws TagValidationException {
         this.parentSpec = parentSpec;
         if (!parentSpec.hasChildTags()) {
@@ -63,9 +62,9 @@ public class ChildTagMatcher {
      */
     public void matchChildTagName(@Nonnull final ParsedHtmlTag encounteredTag,
                                   @Nonnull final Context context,
-                                  @Nonnull final Validator.ValidationResult.Builder result)
+                                  @Nonnull final ValidatorProtos.ValidationResult.Builder result)
             throws TagValidationException {
-        final Validator.ChildTagSpec childTags = parentSpec.getChildTags();
+        final ValidatorProtos.ChildTagSpec childTags = parentSpec.getChildTags();
         // Enforce child_tag_name_oneof: If at least one tag name is specified,
         // then the child tags of the parent tag must have one of the provided
         // tag names.
@@ -80,7 +79,7 @@ public class ChildTagMatcher {
                 params.add(TagSpecUtils.getTagSpecName(this.parentSpec));
                 params.add(allowedNames.toLowerCase());
                 context.addError(
-                        Validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
+                        ValidatorProtos.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(this.parentSpec),
@@ -100,7 +99,7 @@ public class ChildTagMatcher {
                 params.add(TagSpecUtils.getTagSpecName(this.parentSpec));
                 params.add(allowedNames.toLowerCase());
                 context.addError(
-                        Validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME,
+                        ValidatorProtos.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(this.parentSpec),
@@ -115,7 +114,7 @@ public class ChildTagMatcher {
      * @param result validation result.
      * @throws TagValidationException the TagValidationException.
      */
-    public void exitTag(@Nonnull final Context context, @Nonnull final Validator.ValidationResult.Builder result) throws TagValidationException {
+    public void exitTag(@Nonnull final Context context, @Nonnull final ValidatorProtos.ValidationResult.Builder result) throws TagValidationException {
         final int expectedNumChildTags =
                 this.parentSpec.getChildTags().getMandatoryNumChildTags();
         List<String> params;
@@ -126,7 +125,7 @@ public class ChildTagMatcher {
             params.add(String.valueOf(expectedNumChildTags));
             params.add(String.valueOf(context.getTagStack().parentChildCount()));
             context.addError(
-                    Validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
+                    ValidatorProtos.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(this.parentSpec),
@@ -143,7 +142,7 @@ public class ChildTagMatcher {
             params.add(String.valueOf(expectedMinNumChildTags));
             params.add(String.valueOf(context.getTagStack().parentChildCount()));
             context.addError(
-                    Validator.ValidationError.Code.INCORRECT_MIN_NUM_CHILD_TAGS,
+                    ValidatorProtos.ValidationError.Code.INCORRECT_MIN_NUM_CHILD_TAGS,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(this.parentSpec),
@@ -154,5 +153,5 @@ public class ChildTagMatcher {
 
     /** Parent tag spec. */
     @Nonnull
-    private Validator.TagSpec parentSpec;
+    private ValidatorProtos.TagSpec parentSpec;
 }

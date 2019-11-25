@@ -1,6 +1,6 @@
 package dev.amp.validator.visitor;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
 import dev.amp.validator.css.AtRule;
 import dev.amp.validator.css.ErrorToken;
@@ -102,7 +102,7 @@ public class UrlFunctionVisitor implements RuleVisitor {
                     List<String> params = new ArrayList<>();
                     params.add("style");
                     this.errors.add((ErrorToken) copyPosTo(token, new ErrorToken(
-                            Validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, params)));
+                            ValidatorProtos.ValidationError.Code.CSS_SYNTAX_BAD_URL, params)));
                     return;
                 }
                 parsedUrl.setAtRuleScope(this.atRuleScope);

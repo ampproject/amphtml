@@ -22,7 +22,7 @@
 
 package dev.amp.validator.visitor;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
 import dev.amp.validator.css.AtRule;
 import dev.amp.validator.css.ErrorToken;
@@ -77,7 +77,7 @@ public class MediaQueryVisitor implements RuleVisitor {
             final List<String> params = new ArrayList<>();
             params.add("style");
             this.errors.add((ErrorToken) copyPosTo(atRule,
-                    new ErrorToken(Validator.ValidationError.Code.CSS_SYNTAX_MALFORMED_MEDIA_QUERY,
+                    new ErrorToken(ValidatorProtos.ValidationError.Code.CSS_SYNTAX_MALFORMED_MEDIA_QUERY,
                     params)));
         }
     }

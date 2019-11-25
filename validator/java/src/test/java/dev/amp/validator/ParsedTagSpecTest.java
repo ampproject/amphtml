@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import com.google.common.collect.ImmutableList;
 import dev.amp.validator.exception.TagValidationException;
 import org.testng.Assert;
@@ -49,51 +48,51 @@ public class ParsedTagSpecTest {
 
         final ParsedAttrSpecs parsedAttrSpecs = mock(ParsedAttrSpecs.class);
         final RecordValidated shouldRecordTagsValidated = RecordValidated.NEVER;
-        final Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+        final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         final int id = 23;
 
-        tagSpecBuilder.setAmpLayout(Validator.AmpLayout.newBuilder()
-                .addSupportedLayouts(Validator.AmpLayout.Layout.INTRINSIC).build());
+        tagSpecBuilder.setAmpLayout(ValidatorProtos.AmpLayout.newBuilder()
+                .addSupportedLayouts(ValidatorProtos.AmpLayout.Layout.INTRINSIC).build());
 
 
-        final Validator.AttrSpec.Builder attrSpecBuilder = Validator.AttrSpec.newBuilder();
+        final ValidatorProtos.AttrSpec.Builder attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
         attrSpecBuilder.setName("content");
 
-        final Validator.AttrSpec.Builder attrSpecBuilder2 = Validator.AttrSpec.newBuilder();
+        final ValidatorProtos.AttrSpec.Builder attrSpecBuilder2 = ValidatorProtos.AttrSpec.newBuilder();
         attrSpecBuilder2.setName("content");
 
         when(parsedAttrSpecs.getAmpLayoutAttrs()).thenReturn(ImmutableList.of(attrSpecBuilder.build(), attrSpecBuilder2.build()));
 
-        final Validator.AttrSpec.Builder attrSpecBuilder3 = Validator.AttrSpec.newBuilder();
+        final ValidatorProtos.AttrSpec.Builder attrSpecBuilder3 = ValidatorProtos.AttrSpec.newBuilder();
         attrSpecBuilder3.setName("height");
         attrSpecBuilder3.addValueCasei("_top");
         tagSpecBuilder.addAttrs(attrSpecBuilder3.build());
 
-        final Validator.CdataSpec.Builder cDataBuilder = Validator.CdataSpec.newBuilder();
-        cDataBuilder.addBlacklistedCdataRegex(Validator.BlackListedCDataRegex.newBuilder().setRegex("4").build());
-        final Validator.CdataSpec cDataSpec = cDataBuilder.build();
+        final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
+        cDataBuilder.addBlacklistedCdataRegex(ValidatorProtos.BlackListedCDataRegex.newBuilder().setRegex("4").build());
+        final ValidatorProtos.CdataSpec cDataSpec = cDataBuilder.build();
 
         tagSpecBuilder.setCdata(cDataSpec);
 
-        final Validator.AttrSpec.Builder attrSpecBuilder4 = Validator.AttrSpec.newBuilder();
+        final ValidatorProtos.AttrSpec.Builder attrSpecBuilder4 = ValidatorProtos.AttrSpec.newBuilder();
         when(parsedAttrSpecs.getGlobalAttrs()).thenReturn(ImmutableList.of(attrSpecBuilder4.build()));
 
         final ParsedAttrSpec parsedHeightSpec = mock(ParsedAttrSpec.class);
-        final Validator.AttrSpec.Builder heightSpec = Validator.AttrSpec.newBuilder();
+        final ValidatorProtos.AttrSpec.Builder heightSpec = ValidatorProtos.AttrSpec.newBuilder();
         heightSpec.setMandatory(true);
         heightSpec.setMandatoryOneof("data-momentid");
         heightSpec.setMandatoryAnyof("src");
         heightSpec.addAlternativeNames("ht");
         heightSpec.setImplicit(true);
-        heightSpec.setValueUrl(Validator.UrlSpec.newBuilder().addProtocol("http").build());
+        heightSpec.setValueUrl(ValidatorProtos.UrlSpec.newBuilder().addProtocol("http").build());
         heightSpec.addRequiresExtension("amp-form");
 
         when(parsedHeightSpec.getSpec()).thenReturn(heightSpec.build());
 
-        when(parsedAttrSpecs.getParsedAttrSpec(anyString(), anyString(), any(Validator.AttrSpec.class))).thenReturn(parsedHeightSpec);
+        when(parsedAttrSpecs.getParsedAttrSpec(anyString(), anyString(), any(ValidatorProtos.AttrSpec.class))).thenReturn(parsedHeightSpec);
 
-        tagSpecBuilder.setChildTags(Validator.ChildTagSpec.newBuilder().setMandatoryMinNumChildTags(1).build());
-        final Validator.TagSpec tagSpec = tagSpecBuilder.build();
+        tagSpecBuilder.setChildTags(ValidatorProtos.ChildTagSpec.newBuilder().setMandatoryMinNumChildTags(1).build());
+        final ValidatorProtos.TagSpec tagSpec = tagSpecBuilder.build();
 
         final ParsedTagSpec parsedTagSpec = new ParsedTagSpec(parsedAttrSpecs, shouldRecordTagsValidated,
                 tagSpec, id);

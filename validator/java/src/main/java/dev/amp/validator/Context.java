@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.utils.TagSpecUtils;
 import dev.amp.validator.utils.ValidationErrorUtils;
@@ -102,7 +101,7 @@ public class Context {
 
         final ParsedTagSpec parsedTagSpec = result.getBestMatchTagSpec();
         final boolean isPassing =
-                (result.getValidationResult().getStatus() == Validator.ValidationResult.Status.PASS);
+                (result.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.PASS);
 
         this.extensions.updateFromTagResult(result);
         // If this requires an extension and we are still in the document head,
@@ -120,17 +119,17 @@ public class Context {
         this.satisfyMandatoryAlternativesFromTagSpec(parsedTagSpec);
         this.recordValidatedFromTagSpec(isPassing, parsedTagSpec);
 
-        final Validator.ValidationResult.Builder validationResult = result.getValidationResult();
-        for (final Validator.ValueSetProvision provision : validationResult.getValueSetProvisionsList()) {
+        final ValidatorProtos.ValidationResult.Builder validationResult = result.getValidationResult();
+        for (final ValidatorProtos.ValueSetProvision provision : validationResult.getValueSetProvisionsList()) {
             this.valueSetsProvided.add(this.keyFromValueSetProvision(provision));
         }
-        for (final Validator.ValueSetRequirement requirement : validationResult.getValueSetRequirementsList()) {
+        for (final ValidatorProtos.ValueSetRequirement requirement : validationResult.getValueSetRequirementsList()) {
             if (!requirement.hasProvision()) {
                 continue;
             }
 
             final String key = this.keyFromValueSetProvision(requirement.getProvision());
-            List<Validator.ValidationError> errors = this.valueSetsRequired.get(key);
+            List<ValidatorProtos.ValidationError> errors = this.valueSetsRequired.get(key);
             if (errors == null) {
                 errors = new ArrayList<>();
                 this.valueSetsRequired.put(key, errors);
@@ -170,7 +169,7 @@ public class Context {
      * computed by getValueSetProvisionKey().
      * @return the map of value sets required.
      */
-    public Map<String, List<Validator.ValidationError>> valueSetsRequired() {
+    public Map<String, List<ValidatorProtos.ValidationError>> valueSetsRequired() {
         return this.valueSetsRequired;
     }
 
@@ -204,7 +203,7 @@ public class Context {
      * @param parsedTagSpec parsed tag spec.
      */
     public void satisfyMandatoryAlternativesFromTagSpec(@Nonnull final ParsedTagSpec parsedTagSpec) {
-        final Validator.TagSpec tagSpec = parsedTagSpec.getSpec();
+        final ValidatorProtos.TagSpec tagSpec = parsedTagSpec.getSpec();
         if (tagSpec.hasMandatoryAlternatives()) {
             this.mandatoryAlternativesSatisfied.add(tagSpec.getMandatoryAlternatives());
         }
@@ -227,7 +226,7 @@ public class Context {
             return;
         }
 
-        Map<String, Validator.AttrSpec> attrsByName = parsedTagSpec.getAttrsByName();
+        Map<String, ValidatorProtos.AttrSpec> attrsByName = parsedTagSpec.getAttrsByName();
         final ExtensionsContext extensionsCtx = this.extensions;
         for (int i = 0; i < encounteredTag.attrs().getLength(); i++) {
             String attrName = encounteredTag.attrs().getLocalName(i);
@@ -236,7 +235,7 @@ public class Context {
                 attrValue = "";
             }
             if (attrsByName.containsKey(attrName)) {
-                final Validator.AttrSpec attrSpec = attrsByName.get(attrName);
+                final ValidatorProtos.AttrSpec attrSpec = attrsByName.get(attrName);
                 if (attrSpec == null) {
                     continue;
                 }
@@ -254,11 +253,11 @@ public class Context {
      * @param error a ValidationError object.
      * @param validationResult a ValidationResult object.
      */
-    public void addBuiltError(@Nonnull final Validator.ValidationError error,
-                              @Nonnull final Validator.ValidationResult.Builder validationResult) {
+    public void addBuiltError(@Nonnull final ValidatorProtos.ValidationError error,
+                              @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
         // If any of the errors amount to more than a WARNING, validation fails.
-        if (error.getSeverity() != Validator.ValidationError.Severity.WARNING) {
-            validationResult.setStatus(Validator.ValidationResult.Status.FAIL);
+        if (error.getSeverity() != ValidatorProtos.ValidationError.Severity.WARNING) {
+            validationResult.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
         }
         validationResult.addErrors(error);
     }
@@ -271,10 +270,10 @@ public class Context {
      * @param specUrl a link (URL) to the amphtml spec
      * @param validationResult a ValidationResult object.
      */
-    public void addError(@Nonnull final Validator.ValidationError.Code validationErrorCode,
+    public void addError(@Nonnull final ValidatorProtos.ValidationError.Code validationErrorCode,
                          @Nonnull final Locator lineCol,
                          final List<String> params, final String specUrl,
-                         @Nonnull final Validator.ValidationResult.Builder validationResult) {
+                         @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
         addError(validationErrorCode, lineCol.getLineNumber(),
                 lineCol.getColumnNumber(), params, specUrl, validationResult);
     }
@@ -288,18 +287,18 @@ public class Context {
      * @param specUrl a link (URL) to the amphtml spec
      * @param validationResult a ValidationResult object.
      */
-    public void addError(@Nonnull final Validator.ValidationError.Code validationErrorCode,
+    public void addError(@Nonnull final ValidatorProtos.ValidationError.Code validationErrorCode,
                          final int line,
                          final int column,
                          final List<String> params, final String specUrl,
-                         @Nonnull final Validator.ValidationResult.Builder validationResult) {
+                         @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
         this.addBuiltError(
                 ValidationErrorUtils.populateError(
-                        Validator.ValidationError.Severity.ERROR,
+                        ValidatorProtos.ValidationError.Severity.ERROR,
                         validationErrorCode,
                         line, column, params, specUrl),
                 validationResult);
-        validationResult.setStatus(Validator.ValidationResult.Status.FAIL);
+        validationResult.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
     }
 
     /**
@@ -310,13 +309,13 @@ public class Context {
      * @param specUrl a link (URL) to the amphtml spec
      * @param validationResult a ValidationResult object.
      */
-    public void addWarning(@Nonnull final Validator.ValidationError.Code validationErrorCode,
+    public void addWarning(@Nonnull final ValidatorProtos.ValidationError.Code validationErrorCode,
                            @Nonnull final Locator lineCol,
                            final List<String> params, final String specUrl,
-                           @Nonnull final Validator.ValidationResult.Builder validationResult) {
+                           @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
         this.addBuiltError(
                 ValidationErrorUtils.populateError(
-                        Validator.ValidationError.Severity.WARNING, validationErrorCode,
+                        ValidatorProtos.ValidationError.Severity.WARNING, validationErrorCode,
                         lineCol, params, specUrl),
                 validationResult);
     }
@@ -479,7 +478,7 @@ public class Context {
      * @param provision a ValueSetProvision.
      * @return A key for valueSetsProvided and valueSetsRequired.
      */
-    private String keyFromValueSetProvision(@Nonnull final Validator.ValueSetProvision provision) {
+    private String keyFromValueSetProvision(@Nonnull final ValidatorProtos.ValueSetProvision provision) {
         return (provision.hasSet() ? provision.getSet() : "")
                 + ">"
                 + (provision.hasValue() ? provision.getValue() : "");
@@ -533,7 +532,7 @@ public class Context {
     /**
      * All the value set requirements so far.
      */
-    private Map<String, List<Validator.ValidationError>> valueSetsRequired;
+    private Map<String, List<ValidatorProtos.ValidationError>> valueSetsRequired;
 
     /**
      * Set of conditions that we've satisfied.
@@ -543,7 +542,7 @@ public class Context {
     /**
      * First tag spec seen (matched) which contains an URL.
      */
-    private Validator.TagSpec firstUrlSeenTag = null;
+    private ValidatorProtos.TagSpec firstUrlSeenTag = null;
 
     /**
      * Extension-specific context.

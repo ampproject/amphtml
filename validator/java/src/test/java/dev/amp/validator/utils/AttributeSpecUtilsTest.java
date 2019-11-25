@@ -21,7 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import dev.amp.validator.Context;
 import dev.amp.validator.ParsedAttrSpec;
 import dev.amp.validator.ParsedAttrSpecs;
@@ -86,18 +86,18 @@ public class AttributeSpecUtilsTest {
 
     // IMPLIED_LAYOUT_INVALID
 
-    final Validator.AmpLayout.Builder ampLayoutBuilder = Validator.AmpLayout.newBuilder();
+    final ValidatorProtos.AmpLayout.Builder ampLayoutBuilder = ValidatorProtos.AmpLayout.newBuilder();
 
-    Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+    ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
 
     tagSpecBuilder.setAmpLayout(ampLayoutBuilder.build());
 
-    Validator.AttrSpec.Builder attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    ValidatorProtos.AttrSpec.Builder attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
     attrSpecBuilder.setDeprecation("deprecationString");
-    List<Validator.AttrSpec> attrSpecs = new ArrayList<>();
+    List<ValidatorProtos.AttrSpec> attrSpecs = new ArrayList<>();
     attrSpecs.add(attrSpecBuilder.build());
 
-    Map<String, Validator.AttrSpec> attrsByName = new HashMap<>();
+    Map<String, ValidatorProtos.AttrSpec> attrsByName = new HashMap<>();
     attrsByName.put("HTML", attrSpecBuilder.build());
 
     ParsedTagSpec parsedTagSpec = Mockito.mock(ParsedTagSpec.class);
@@ -134,7 +134,7 @@ public class AttributeSpecUtilsTest {
     Mockito.when(encounteredTag.upperName()).thenReturn("HTML");
     Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
 
-    Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+    ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
 
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
@@ -143,29 +143,29 @@ public class AttributeSpecUtilsTest {
     }
 
     ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-    ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
-    ArgumentCaptor<Validator.ValidationError.Code> warningCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+    ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
+    ArgumentCaptor<ValidatorProtos.ValidationError.Code> warningCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
     Mockito.verify(context, Mockito.times(1)).addError(errorCodeCapture.capture(),
       Mockito.any(Locator.class),
       listCaptor.capture(),
       Mockito.anyString(),
-      Mockito.any(Validator.ValidationResult.Builder.class));
+      Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
     Mockito.verify(context, Mockito.times(1)).addWarning(warningCodeCapture.capture(),
       Mockito.any(Locator.class),
       listCaptor.capture(),
       Mockito.anyString(),
-      Mockito.any(Validator.ValidationResult.Builder.class));
+      Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
 
-    Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID);
-    Assert.assertEquals(warningCodeCapture.getValue(), Validator.ValidationError.Code.DEPRECATED_ATTR);
+    Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.IMPLIED_LAYOUT_INVALID);
+    Assert.assertEquals(warningCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.DEPRECATED_ATTR);
 
     // DISALLOWED_ATTR
 
-    tagSpecBuilder = Validator.TagSpec.newBuilder();
+    tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
 
-    attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
 //    attrSpecBuilder.setDeprecation("deprecationString");
     attrSpecs = new ArrayList<>();
     attrSpecs.add(attrSpecBuilder.build());
@@ -205,7 +205,7 @@ public class AttributeSpecUtilsTest {
     Mockito.when(encounteredTag.upperName()).thenReturn("HTML");
     Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
 
-    result = Validator.ValidationResult.newBuilder();
+    result = ValidatorProtos.ValidationResult.newBuilder();
 
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
@@ -214,20 +214,20 @@ public class AttributeSpecUtilsTest {
     }
 
     listCaptor = ArgumentCaptor.forClass(List.class);
-    errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+    errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
     Mockito.verify(context, Mockito.times(1)).addError(errorCodeCapture.capture(),
       Mockito.any(Locator.class),
       listCaptor.capture(),
       Mockito.anyString(),
-      Mockito.any(Validator.ValidationResult.Builder.class));
+      Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-    Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.DISALLOWED_ATTR);
+    Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR);
 
     // INVALID_ATTR_VALUE
 
-    tagSpecBuilder = Validator.TagSpec.newBuilder();
+    tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
 
-    attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
     attrSpecBuilder.setBlacklistedValueRegex("");
     attrSpecs = new ArrayList<>();
     attrSpecs.add(attrSpecBuilder.build());
@@ -268,7 +268,7 @@ public class AttributeSpecUtilsTest {
     Mockito.when(encounteredTag.upperName()).thenReturn("HTML");
     Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
 
-    result = Validator.ValidationResult.newBuilder();
+    result = ValidatorProtos.ValidationResult.newBuilder();
 
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
@@ -277,21 +277,21 @@ public class AttributeSpecUtilsTest {
     }
 
     listCaptor = ArgumentCaptor.forClass(List.class);
-    errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+    errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
     Mockito.verify(context, Mockito.times(1)).addError(errorCodeCapture.capture(),
       Mockito.any(Locator.class),
       listCaptor.capture(),
       Mockito.anyString(),
-      Mockito.any(Validator.ValidationResult.Builder.class));
+      Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-    Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.INVALID_ATTR_VALUE);
+    Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE);
 
     // BASE_TAG_MUST_PRECEED_ALL_URLS
 
-    tagSpecBuilder = Validator.TagSpec.newBuilder();
+    tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
     tagSpecBuilder.setTagName("BASE");
 
-    attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
     attrSpecs = new ArrayList<>();
     attrSpecs.add(attrSpecBuilder.build());
 
@@ -334,7 +334,7 @@ public class AttributeSpecUtilsTest {
     Mockito.when(encounteredTag.upperName()).thenReturn("BASE");
     Mockito.when(encounteredTag.attrs()).thenReturn(attributes);
 
-    result = Validator.ValidationResult.newBuilder();
+    result = ValidatorProtos.ValidationResult.newBuilder();
 
     try {
       AttributeSpecUtils.validateAttributes(parsedTagSpec, bestMatchReferencePoint, context, encounteredTag, result);
@@ -343,14 +343,14 @@ public class AttributeSpecUtilsTest {
     }
 
     listCaptor = ArgumentCaptor.forClass(List.class);
-    errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+    errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
     Mockito.verify(context, Mockito.times(1)).addError(errorCodeCapture.capture(),
       Mockito.any(Locator.class),
       listCaptor.capture(),
       Mockito.anyString(),
-      Mockito.any(Validator.ValidationResult.Builder.class));
+      Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-    Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS);
+    Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS);
   }
 
   @Test

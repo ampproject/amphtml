@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.mockito.Mockito;
@@ -42,10 +41,10 @@ public class ParsedAttrSpecsTest {
     public void testGettersSetters() {
         final AMPValidatorManager validationManager = Mockito.mock(AMPValidatorManager.class);
 
-        final Validator.AttrSpec.Builder attrSpecBuilder = Validator.AttrSpec.newBuilder();
+        final ValidatorProtos.AttrSpec.Builder attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
         attrSpecBuilder.addEnabledBy("transformation");
 
-        final Validator.AttrSpec attrSpec = attrSpecBuilder.build();
+        final ValidatorProtos.AttrSpec attrSpec = attrSpecBuilder.build();
 
         final ParsedAttrSpecs parsedAttrSpecs = new ParsedAttrSpecs(validationManager);
 
@@ -59,17 +58,17 @@ public class ParsedAttrSpecsTest {
 
         Assert.assertEquals(parsedAttrSpecs.getAttrListByName("content").size(), 0);
 
-        final Map<String, Validator.AttrList> attrListMap = ImmutableMap.of("content", Validator.AttrList.newBuilder()
-                .addAttrs(Validator.AttrSpec.newBuilder().setName("color").build()).build());
+        final Map<String, ValidatorProtos.AttrList> attrListMap = ImmutableMap.of("content", ValidatorProtos.AttrList.newBuilder()
+                .addAttrs(ValidatorProtos.AttrSpec.newBuilder().setName("color").build()).build());
         Mockito.when(validationManager.getAttrListMap()).thenReturn(attrListMap);
 
         Assert.assertEquals(parsedAttrSpecs.getAttrListByName("content").size(), 1);
 
-        Mockito.when(validationManager.getGlobalAttrs()).thenReturn(ImmutableList.of(Validator.AttrSpec.newBuilder().setName("itemprop").build()));
+        Mockito.when(validationManager.getGlobalAttrs()).thenReturn(ImmutableList.of(ValidatorProtos.AttrSpec.newBuilder().setName("itemprop").build()));
         Assert.assertEquals(parsedAttrSpecs.getGlobalAttrs().size(), 1);
         Assert.assertEquals(parsedAttrSpecs.getGlobalAttrs().get(0).getName(), "itemprop");
 
-        Mockito.when(validationManager.getAmpLayoutAttrs()).thenReturn(ImmutableList.of(Validator.AttrSpec.newBuilder().setName("NODISPLAY").build()));
+        Mockito.when(validationManager.getAmpLayoutAttrs()).thenReturn(ImmutableList.of(ValidatorProtos.AttrSpec.newBuilder().setName("NODISPLAY").build()));
         Assert.assertEquals(parsedAttrSpecs.getAmpLayoutAttrs().size(), 1);
         Assert.assertEquals(parsedAttrSpecs.getAmpLayoutAttrs().get(0).getName(), "NODISPLAY");
 

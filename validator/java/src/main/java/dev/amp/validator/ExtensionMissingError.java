@@ -21,8 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
-
 import javax.annotation.Nonnull;
 
 /**
@@ -39,7 +37,7 @@ public class ExtensionMissingError {
      * @param validationError  validation error.
      */
     public ExtensionMissingError(@Nonnull final String missingExtension,
-                                 @Nonnull final Validator.ValidationError validationError) {
+                                 @Nonnull final ValidatorProtos.ValidationError validationError) {
         this.maybeError = validationError;
         this.missingExtension = missingExtension;
     }
@@ -57,7 +55,7 @@ public class ExtensionMissingError {
      * Returns the ValidationError of ExtensionMissingError.
      *  @return ValidationError basis of ExtensionMissingError.
      */
-    public Validator.ValidationError getMaybeError() {
+    public ValidatorProtos.ValidationError getMaybeError() {
         return maybeError;
     }
 
@@ -65,5 +63,5 @@ public class ExtensionMissingError {
     private String missingExtension;
 
     /** Validation error. */
-    private Validator.ValidationError maybeError;
+    private ValidatorProtos.ValidationError maybeError;
 }

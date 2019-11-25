@@ -21,8 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
-
 import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,7 +39,7 @@ public class ParsedUrlSpec {
      *
      * @param urlSpec the UrlSpec.
      */
-    public ParsedUrlSpec(@Nonnull final Validator.UrlSpec urlSpec) {
+    public ParsedUrlSpec(@Nonnull final ValidatorProtos.UrlSpec urlSpec) {
         this.spec = urlSpec;
         this.allowedProtocols = new HashSet<>();
         if (this.spec != null) {
@@ -56,7 +54,7 @@ public class ParsedUrlSpec {
      *
      * @return returns the UrlSpec.
      */
-    public Validator.UrlSpec getSpec() {
+    public ValidatorProtos.UrlSpec getSpec() {
         return this.spec;
     }
 
@@ -81,7 +79,7 @@ public class ParsedUrlSpec {
      * The UrlSpec.
      */
     @Nonnull
-    private Validator.UrlSpec spec;
+    private ValidatorProtos.UrlSpec spec;
 
     /**
      * A set of allowed protocols.

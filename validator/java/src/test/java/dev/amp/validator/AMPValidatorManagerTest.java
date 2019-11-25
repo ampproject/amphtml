@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -52,10 +51,10 @@ public class AMPValidatorManagerTest {
      */
     @Test
     public void testHasTagSpec() {
-        boolean hasTag = ampValidatorManager.hasTagSpec(Validator.HtmlFormat.Code.AMP4EMAIL, "H");
+        boolean hasTag = ampValidatorManager.hasTagSpec(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL, "H");
         Assert.assertFalse(hasTag, "AMP4EMAIL html format should not contain H tag");
 
-        hasTag = ampValidatorManager.hasTagSpec(Validator.HtmlFormat.Code.AMP4EMAIL, "A");
+        hasTag = ampValidatorManager.hasTagSpec(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL, "A");
         Assert.assertTrue(hasTag, "AMP4EMAIL html format should contain A tag");
     }
 
@@ -64,10 +63,10 @@ public class AMPValidatorManagerTest {
      */
     @Test
     public void testGetTagSpec() {
-        List<Validator.TagSpec> tagSpec = ampValidatorManager.getTagSpec(Validator.HtmlFormat.Code.AMP4EMAIL, "H");
+        List<ValidatorProtos.TagSpec> tagSpec = ampValidatorManager.getTagSpec(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL, "H");
         Assert.assertNull(tagSpec, "AMP4EMAIL html format should not contain H tag");
 
-        tagSpec = ampValidatorManager.getTagSpec(Validator.HtmlFormat.Code.AMP4EMAIL, "STYLE");
+        tagSpec = ampValidatorManager.getTagSpec(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL, "STYLE");
         Assert.assertNotNull(tagSpec, "AMP4EMAIL html format should contain STYLE tag");
         Assert.assertEquals(tagSpec.size(), 3, "AMP4EMAIL htmlformat contains STYLE tag with size 2");
     }

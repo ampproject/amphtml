@@ -21,7 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import dev.amp.validator.RecordValidated;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.Context;
@@ -67,7 +67,7 @@ public final class TagSpecUtils {
      * @param tagSpec TagSpec instance from the validator.protoscii file.
      * @return returns the tag spec URL.
      */
-    public static String getTagSpecUrl(@Nonnull final Validator.TagSpec tagSpec) {
+    public static String getTagSpecUrl(@Nonnull final ValidatorProtos.TagSpec tagSpec) {
         // Handle a ParsedTagSpec as well as a tag spec.
         // TODO(gregable): This is a bit hacky, we should improve on this approach
         // in the future.
@@ -96,7 +96,7 @@ public final class TagSpecUtils {
      * @param tagSpec TagSpec instance from the validator.protoscii file.
      * @return return the tag spec name.
      */
-    public static String getTagSpecName(@Nonnull final Validator.TagSpec tagSpec) {
+    public static String getTagSpecName(@Nonnull final ValidatorProtos.TagSpec tagSpec) {
         return (tagSpec.hasSpecName()) ? tagSpec.getSpecName() : tagSpec.getTagName().toLowerCase();
     }
 
@@ -111,7 +111,7 @@ public final class TagSpecUtils {
      * @param tagSpecIdsToTrack a map of tag spec id to boolean.
      * @return returns a record validated enum value.
      */
-    public static RecordValidated shouldRecordTagspecValidated(@Nonnull final Validator.TagSpec tag, final int tagSpecId,
+    public static RecordValidated shouldRecordTagspecValidated(@Nonnull final ValidatorProtos.TagSpec tag, final int tagSpecId,
                                                                @Nonnull final Map<Object, Boolean> tagSpecIdsToTrack) {
         // Always update from TagSpec if the tag is passing. If it's failing we
         // typically want to update from the best match as it can satisfy
@@ -171,7 +171,7 @@ public final class TagSpecUtils {
         // "foo", set a disallowed tag error.
         if (tagSpecDispatch == null
                 || (!tagSpecDispatch.hasDispatchKeys() && filteredTagSpecs.size() == 0)) {
-            Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+            ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
             String specUrl = "";
             // Special case the spec_url for font tags to be slightly more useful.
             if (encounteredTag.upperName().equals("FONT")) {
@@ -180,7 +180,7 @@ public final class TagSpecUtils {
             final List<String> params = new ArrayList<>();
             params.add(encounteredTag.lowerName());
             context.addError(
-                    Validator.ValidationError.Code.DISALLOWED_TAG,
+                    ValidatorProtos.ValidationError.Code.DISALLOWED_TAG,
                     context.getLineCol(),
                     params,
                     specUrl,
@@ -209,9 +209,9 @@ public final class TagSpecUtils {
                         // match dispatch keys in a case-insensitive manner and then
                         // validate using whatever the tagspec requests.
                         value.toLowerCase(), context.getTagStack().parentTagName());
-                Validator.ValidationResult.Builder validationResult = Validator.ValidationResult.newBuilder();
+                ValidatorProtos.ValidationResult.Builder validationResult = ValidatorProtos.ValidationResult.newBuilder();
                 ValidateTagResult ret = new ValidateTagResult(validationResult, null);
-                validationResult.setStatus(Validator.ValidationResult.Status.UNKNOWN);
+                validationResult.setStatus(ValidatorProtos.ValidationResult.Status.UNKNOWN);
                 for (Integer tagSpecId : tagSpecIds) {
                     final ParsedTagSpec parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
                     // Skip TagSpecs that aren't used for these type identifiers.
@@ -219,20 +219,20 @@ public final class TagSpecUtils {
                             context.getTypeIdentifiers())) {
                         continue;
                     }
-                    final Validator.ValidationResult.Builder resultForAttempt = TagSpecUtils.validateTagAgainstSpec(
+                    final ValidatorProtos.ValidationResult.Builder resultForAttempt = TagSpecUtils.validateTagAgainstSpec(
                             parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
                     if (context.getRules().betterValidationResultThan(
                             resultForAttempt, ret.getValidationResult())) {
                         ret.setBestMatchTagSpec(parsedTagSpec);
                         ret.setValidationResult(resultForAttempt);
                         // Exit early on success
-                        if (ret.getValidationResult().getStatus() == Validator.ValidationResult.Status.PASS) {
+                        if (ret.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
                             return ret;
                         }
                     }
                 }
 
-                if (ret.getValidationResult().getStatus() != Validator.ValidationResult.Status.UNKNOWN) {
+                if (ret.getValidationResult().getStatus() != ValidatorProtos.ValidationResult.Status.UNKNOWN) {
                     return ret;
                 }
             }
@@ -242,11 +242,11 @@ public final class TagSpecUtils {
         // which gives an error that reads "tag foo is disallowed except in
         // specific forms".
         if (filteredTagSpecs.size() == 0) {
-            final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+            final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
             if (encounteredTag.upperName().equals("SCRIPT")) {
                 // Special case for <script> tags to produce better error messages.
                 context.addError(
-                        Validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
+                        ValidatorProtos.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
                         context.getLineCol(),
                         new ArrayList<>(),
                         context.getRules().getScriptSpecUrl(),
@@ -255,7 +255,7 @@ public final class TagSpecUtils {
                 final List<String> params = new ArrayList<>();
                 params.add(encounteredTag.lowerName());
                 context.addError(
-                        Validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
+                        ValidatorProtos.ValidationError.Code.GENERAL_DISALLOWED_TAG,
                         context.getLineCol(),
                         params,
                         /* specUrl */ "",
@@ -268,17 +268,17 @@ public final class TagSpecUtils {
         // return errors from a single tagspec, not all of them. We keep around
         // the 'best' attempt until we have found a matching TagSpec or have
         // tried them all.
-        Validator.ValidationResult.Builder resultForBestAttempt = Validator.ValidationResult.newBuilder();
-        resultForBestAttempt.setStatus(Validator.ValidationResult.Status.UNKNOWN);
+        ValidatorProtos.ValidationResult.Builder resultForBestAttempt = ValidatorProtos.ValidationResult.newBuilder();
+        resultForBestAttempt.setStatus(ValidatorProtos.ValidationResult.Status.UNKNOWN);
         ParsedTagSpec bestMatchTagSpec = null;
         for (final ParsedTagSpec parsedTagSpec : filteredTagSpecs) {
-            final Validator.ValidationResult.Builder resultForAttempt = TagSpecUtils.validateTagAgainstSpec(
+            final ValidatorProtos.ValidationResult.Builder resultForAttempt = TagSpecUtils.validateTagAgainstSpec(
                     parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
             if (context.getRules().betterValidationResultThan(resultForAttempt, resultForBestAttempt)) {
                 resultForBestAttempt = resultForAttempt;
                 bestMatchTagSpec = parsedTagSpec;
                 // Exit early
-                if (resultForBestAttempt.getStatus() == Validator.ValidationResult.Status.PASS) {
+                if (resultForBestAttempt.getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
                     return new ValidateTagResult(resultForBestAttempt, bestMatchTagSpec);
                 }
             }
@@ -299,14 +299,14 @@ public final class TagSpecUtils {
      * @throws CssValidationException Css validation exception.
      * @return returns the validation result.
      */
-    public static Validator.ValidationResult.Builder validateTagAgainstSpec(
+    public static ValidatorProtos.ValidationResult.Builder validateTagAgainstSpec(
             @Nonnull final ParsedTagSpec parsedTagSpec,
             final ParsedTagSpec bestMatchReferencePoint,
             @Nonnull final Context context,
             @Nonnull final ParsedHtmlTag encounteredTag)
             throws TagValidationException, IOException, CssValidationException {
-        final Validator.ValidationResult.Builder resultForAttempt = Validator.ValidationResult.newBuilder();
-        resultForAttempt.setStatus(Validator.ValidationResult.Status.PASS);
+        final ValidatorProtos.ValidationResult.Builder resultForAttempt = ValidatorProtos.ValidationResult.newBuilder();
+        resultForAttempt.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
         validateParentTag(parsedTagSpec, context, resultForAttempt);
         validateAncestorTags(parsedTagSpec, context, resultForAttempt);
         // Some parent tag specs also define allowed child tag names for the first
@@ -318,14 +318,14 @@ public final class TagSpecUtils {
         // Only validate attributes if we haven't yet found any errors. The
         // Parent/Ancestor errors are informative without adding additional errors
         // about attributes.
-        if (resultForAttempt.getStatus() == Validator.ValidationResult.Status.PASS) {
+        if (resultForAttempt.getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
             AttributeSpecUtils.validateAttributes(
                     parsedTagSpec, bestMatchReferencePoint, context, encounteredTag,
                     resultForAttempt);
         }
 
         // Only validate that this is a valid descendant if it's not already invalid.
-        if (resultForAttempt.getStatus() == Validator.ValidationResult.Status.PASS) {
+        if (resultForAttempt.getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
             validateDescendantTags(
                     encounteredTag, parsedTagSpec, context, resultForAttempt);
         }
@@ -341,19 +341,19 @@ public final class TagSpecUtils {
 
         // Only validate uniqueness if we haven't yet found any errors, as it's
         // likely that this is not the correct tagspec if we have.
-        if (resultForAttempt.getStatus() == Validator.ValidationResult.Status.PASS) {
+        if (resultForAttempt.getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
             validateUniqueness(parsedTagSpec, context, resultForAttempt);
         }
 
         // Append some warnings, only if no errors.
-        if (resultForAttempt.getStatus() == Validator.ValidationResult.Status.PASS) {
-            final Validator.TagSpec tagSpec = parsedTagSpec.getSpec();
+        if (resultForAttempt.getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
+            final ValidatorProtos.TagSpec tagSpec = parsedTagSpec.getSpec();
             List<String> params = new ArrayList<>();
             if (tagSpec.hasDeprecation()) {
                 params.add(TagSpecUtils.getTagSpecName(tagSpec));
                 params.add(tagSpec.getDeprecation());
                 context.addWarning(
-                        Validator.ValidationError.Code.DEPRECATED_TAG,
+                        ValidatorProtos.ValidationError.Code.DEPRECATED_TAG,
                         context.getLineCol(),
                         params,
                         tagSpec.getDeprecationUrl(),
@@ -364,7 +364,7 @@ public final class TagSpecUtils {
                 params.clear();
                 params.add(TagSpecUtils.getTagSpecName(tagSpec));
                 context.addWarning(
-                        Validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
+                        ValidatorProtos.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -384,9 +384,9 @@ public final class TagSpecUtils {
      */
     public static void validateParentTag(@Nonnull final ParsedTagSpec parsedTagSpec,
                                          @Nonnull final Context context,
-                                         @Nonnull final Validator.ValidationResult.Builder validationResult)
+                                         @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
                     throws TagValidationException {
-        final Validator.TagSpec spec = parsedTagSpec.getSpec();
+        final ValidatorProtos.TagSpec spec = parsedTagSpec.getSpec();
         if (spec.hasMandatoryParent()
                 && !spec.getMandatoryParent().equals(context.getTagStack().parentTagName())) {
             // Output a parent/child error using CSS Child Selector syntax which is
@@ -396,7 +396,7 @@ public final class TagSpecUtils {
             params.add(context.getTagStack().parentTagName().toLowerCase());
             params.add(spec.getMandatoryParent().toLowerCase());
             context.addError(
-                    Validator.ValidationError.Code.WRONG_PARENT_TAG,
+                    ValidatorProtos.ValidationError.Code.WRONG_PARENT_TAG,
                     context.getLineCol(),
                     params,
                     getTagSpecUrl(spec),
@@ -412,8 +412,8 @@ public final class TagSpecUtils {
      */
     public static void validateAncestorTags(@Nonnull final ParsedTagSpec parsedTagSpec,
                                             @Nonnull final Context context,
-                                            @Nonnull final Validator.ValidationResult.Builder validationResult) {
-        final Validator.TagSpec spec = parsedTagSpec.getSpec();
+                                            @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
+        final ValidatorProtos.TagSpec spec = parsedTagSpec.getSpec();
         if (spec.hasMandatoryAncestor()) {
             final String mandatoryAncestor = /** @type {string} */ spec.getMandatoryAncestor();
             if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
@@ -423,7 +423,7 @@ public final class TagSpecUtils {
                     params.add(mandatoryAncestor.toLowerCase());
                     params.add(spec.getMandatoryAncestorSuggestedAlternative().toLowerCase());
                     context.addError(
-                            Validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT,
+                            ValidatorProtos.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT,
                             context.getLineCol(),
                             params,
                             getTagSpecUrl(spec),
@@ -433,7 +433,7 @@ public final class TagSpecUtils {
                     params.add(getTagSpecName(spec));
                     params.add(mandatoryAncestor.toLowerCase());
                     context.addError(
-                            Validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
+                            ValidatorProtos.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
                             context.getLineCol(),
                             params,
                             getTagSpecUrl(spec),
@@ -448,7 +448,7 @@ public final class TagSpecUtils {
                 params.add(getTagSpecName(spec));
                 params.add(disallowedAncestor.toLowerCase());
                 context.addError(
-                        Validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
+                        ValidatorProtos.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
                         context.getLineCol(),
                         params,
                         getTagSpecUrl(spec),
@@ -462,16 +462,16 @@ public final class TagSpecUtils {
      * @param layout layout.
      * @return amp.validator.AmpLayout.Layout.
      */
-    public static Validator.AmpLayout.Layout parseLayout(final String layout) {
+    public static ValidatorProtos.AmpLayout.Layout parseLayout(final String layout) {
         if (layout == null) {
-            return Validator.AmpLayout.Layout.UNKNOWN;
+            return ValidatorProtos.AmpLayout.Layout.UNKNOWN;
         }
 
         final String normLayout = layout.toUpperCase().replace('-', '_');
-        if (Validator.AmpLayout.Layout.getDescriptor().findValueByName(normLayout) == null) {
-            return Validator.AmpLayout.Layout.UNKNOWN;
+        if (ValidatorProtos.AmpLayout.Layout.getDescriptor().findValueByName(normLayout) == null) {
+            return ValidatorProtos.AmpLayout.Layout.UNKNOWN;
         }
-        return Validator.AmpLayout.Layout.valueOf(normLayout);
+        return ValidatorProtos.AmpLayout.Layout.valueOf(normLayout);
     }
 
     /**
@@ -482,12 +482,12 @@ public final class TagSpecUtils {
      * @param inputHeight css length input height.
      * @return returns the css length instance.
      */
-    public static CssLength calculateHeight(@Nonnull final Validator.AmpLayout spec,
-                                                      @Nonnull final Validator.AmpLayout.Layout inputLayout,
+    public static CssLength calculateHeight(@Nonnull final ValidatorProtos.AmpLayout spec,
+                                                      @Nonnull final ValidatorProtos.AmpLayout.Layout inputLayout,
                                                       @Nonnull final CssLength inputHeight) {
-        if ((inputLayout == Validator.AmpLayout.Layout.UNKNOWN
-                || inputLayout == Validator.AmpLayout.Layout.FIXED
-                || inputLayout == Validator.AmpLayout.Layout.FIXED_HEIGHT)
+        if ((inputLayout == ValidatorProtos.AmpLayout.Layout.UNKNOWN
+                || inputLayout == ValidatorProtos.AmpLayout.Layout.FIXED
+                || inputLayout == ValidatorProtos.AmpLayout.Layout.FIXED_HEIGHT)
                 && !inputHeight.isSet() && spec.hasDefinesDefaultHeight()) {
             return new CssLength(
                     "1px", /* allowAuto */ false, /* allowFluid */ false);
@@ -508,23 +508,23 @@ public final class TagSpecUtils {
      * @param heightsAttr heights attribute.
      * @return return the layout depends on the width/height.
      */
-    public static Validator.AmpLayout.Layout calculateLayout(@Nonnull final Validator.AmpLayout.Layout inputLayout,
+    public static ValidatorProtos.AmpLayout.Layout calculateLayout(@Nonnull final ValidatorProtos.AmpLayout.Layout inputLayout,
                                                              @Nonnull final CssLength width,
                                                              @Nonnull final CssLength height,
                                                              final String sizesAttr,
                                                              final String heightsAttr) {
-        if (inputLayout != Validator.AmpLayout.Layout.UNKNOWN) {
+        if (inputLayout != ValidatorProtos.AmpLayout.Layout.UNKNOWN) {
             return inputLayout;
         } else if (!width.isSet() && !height.isSet()) {
-            return Validator.AmpLayout.Layout.CONTAINER;
+            return ValidatorProtos.AmpLayout.Layout.CONTAINER;
         } else if ((height.isSet() && height.isFluid()) || (width.isSet() && width.isFluid())) {
-            return Validator.AmpLayout.Layout.FLUID;
+            return ValidatorProtos.AmpLayout.Layout.FLUID;
         } else if (height.isSet() && (!width.isSet() || width.isAuto())) {
-            return Validator.AmpLayout.Layout.FIXED_HEIGHT;
+            return ValidatorProtos.AmpLayout.Layout.FIXED_HEIGHT;
         } else if (height.isSet() && width.isSet() && (sizesAttr != null || heightsAttr != null)) {
-            return Validator.AmpLayout.Layout.RESPONSIVE;
+            return ValidatorProtos.AmpLayout.Layout.RESPONSIVE;
         } else {
-            return Validator.AmpLayout.Layout.FIXED;
+            return ValidatorProtos.AmpLayout.Layout.FIXED;
         }
     }
 
@@ -542,15 +542,15 @@ public final class TagSpecUtils {
      * @param result validation result.
      */
     public static void validateSsrLayout(
-            @Nonnull final Validator.TagSpec spec,
+            @Nonnull final ValidatorProtos.TagSpec spec,
             @Nonnull final ParsedHtmlTag encounteredTag,
-            @Nonnull final Validator.AmpLayout.Layout inputLayout,
+            @Nonnull final ValidatorProtos.AmpLayout.Layout inputLayout,
             @Nonnull final CssLength inputWidth,
             @Nonnull final CssLength inputHeight,
             final String sizesAttr,
             final String heightsAttr,
             @Nonnull final Context context,
-            @Nonnull final Validator.ValidationResult.Builder result) {
+            @Nonnull final ValidatorProtos.ValidationResult.Builder result) {
         // Only applies to transformed AMP and custom elements (<amp-...>).
         if (!context.isTransformed()
                 || !encounteredTag.lowerName().startsWith("amp-")) {
@@ -562,7 +562,7 @@ public final class TagSpecUtils {
                 calculateWidthForTag(inputLayout, inputWidth, encounteredTag.upperName());
         final CssLength height = calculateHeightForTag(
                 inputLayout, inputHeight, encounteredTag.upperName());
-        final Validator.AmpLayout.Layout layout =
+        final ValidatorProtos.AmpLayout.Layout layout =
                 calculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
 
         final HashMap<String, String> attrsByKey = encounteredTag.attrsByKey();
@@ -586,7 +586,7 @@ public final class TagSpecUtils {
                     params.add(getTagSpecName(spec));
                     params.add(classAttr);
                     context.addError(
-                            Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                            ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                             context.getLineCol(),
                             params,
                             getTagSpecUrl(spec),
@@ -607,7 +607,7 @@ public final class TagSpecUtils {
                 params.add(layoutName.toUpperCase());
                 params.add(layoutName);
                 context.addError(
-                        Validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+                        ValidatorProtos.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
                         context.getLineCol(),
                         params,
                         getTagSpecUrl(spec),
@@ -620,22 +620,22 @@ public final class TagSpecUtils {
      * @param layout AMP layout.
      * @return returns true if layout size is matched.
      */
-    public static boolean isLayoutSizeDefined(@Nonnull final Validator.AmpLayout.Layout layout) {
+    public static boolean isLayoutSizeDefined(@Nonnull final ValidatorProtos.AmpLayout.Layout layout) {
         return (
-                layout == Validator.AmpLayout.Layout.FILL
-                        || layout == Validator.AmpLayout.Layout.FIXED
-                        || layout == Validator.AmpLayout.Layout.FIXED_HEIGHT
-                        || layout == Validator.AmpLayout.Layout.FLEX_ITEM
-                        || layout == Validator.AmpLayout.Layout.FLUID
-                        || layout == Validator.AmpLayout.Layout.INTRINSIC
-                        || layout == Validator.AmpLayout.Layout.RESPONSIVE);
+                layout == ValidatorProtos.AmpLayout.Layout.FILL
+                        || layout == ValidatorProtos.AmpLayout.Layout.FIXED
+                        || layout == ValidatorProtos.AmpLayout.Layout.FIXED_HEIGHT
+                        || layout == ValidatorProtos.AmpLayout.Layout.FLEX_ITEM
+                        || layout == ValidatorProtos.AmpLayout.Layout.FLUID
+                        || layout == ValidatorProtos.AmpLayout.Layout.INTRINSIC
+                        || layout == ValidatorProtos.AmpLayout.Layout.RESPONSIVE);
     }
 
     /**
      * @param layout AMP layout.
      * @return returns the layout class.
      */
-    public static String getLayoutClass(@Nonnull final Validator.AmpLayout.Layout layout) {
+    public static String getLayoutClass(@Nonnull final ValidatorProtos.AmpLayout.Layout layout) {
         return "i-amphtml-layout-" + layout.name();
     }
 
@@ -655,11 +655,11 @@ public final class TagSpecUtils {
      * @param tagName the tag name.
      * @return returns the css length instance.
      */
-    public static CssLength calculateWidthForTag(@Nonnull final Validator.AmpLayout.Layout inputLayout,
+    public static CssLength calculateWidthForTag(@Nonnull final ValidatorProtos.AmpLayout.Layout inputLayout,
                                                            @Nonnull final CssLength inputWidth,
                                                            @Nonnull final String tagName) {
-        if ((inputLayout == Validator.AmpLayout.Layout.UNKNOWN
-                || inputLayout == Validator.AmpLayout.Layout.FIXED)
+        if ((inputLayout == ValidatorProtos.AmpLayout.Layout.UNKNOWN
+                || inputLayout == ValidatorProtos.AmpLayout.Layout.FIXED)
                 && !inputWidth.isSet()) {
             if (tagName.equals("AMP-ANALYTICS") || tagName.equals("AMP-PIXEL")) {
                 return new CssLength(
@@ -682,12 +682,12 @@ public final class TagSpecUtils {
      * @param tagName the tag name.
      * @return returns the css length instance.
      */
-    public static CssLength calculateHeightForTag(@Nonnull final Validator.AmpLayout.Layout inputLayout,
+    public static CssLength calculateHeightForTag(@Nonnull final ValidatorProtos.AmpLayout.Layout inputLayout,
                                                   @Nonnull final CssLength inputHeight,
                                                   @Nonnull final String tagName) {
-        if ((inputLayout == Validator.AmpLayout.Layout.UNKNOWN
-                || inputLayout == Validator.AmpLayout.Layout.FIXED
-                || inputLayout == Validator.AmpLayout.Layout.FIXED_HEIGHT)
+        if ((inputLayout == ValidatorProtos.AmpLayout.Layout.UNKNOWN
+                || inputLayout == ValidatorProtos.AmpLayout.Layout.FIXED
+                || inputLayout == ValidatorProtos.AmpLayout.Layout.FIXED_HEIGHT)
                 && !inputHeight.isSet()) {
             if (tagName.equals("AMP-ANALYTICS") || tagName.equals("AMP-PIXEL")) {
                 return new CssLength(
@@ -712,11 +712,11 @@ public final class TagSpecUtils {
      * @param inputWidth input width.
      * @return return the css length instance.
      */
-    public static CssLength calculateWidth(@Nonnull final Validator.AmpLayout spec,
-                                                     @Nonnull final Validator.AmpLayout.Layout inputLayout,
+    public static CssLength calculateWidth(@Nonnull final ValidatorProtos.AmpLayout spec,
+                                                     @Nonnull final ValidatorProtos.AmpLayout.Layout inputLayout,
                                                      @Nonnull final CssLength inputWidth) {
-        if ((inputLayout == Validator.AmpLayout.Layout.UNKNOWN
-                || inputLayout == Validator.AmpLayout.Layout.FIXED)
+        if ((inputLayout == ValidatorProtos.AmpLayout.Layout.UNKNOWN
+                || inputLayout == ValidatorProtos.AmpLayout.Layout.FIXED)
                 && !inputWidth.isSet() && spec.hasDefinesDefaultWidth()) {
             return new CssLength(
                     "1px", /* allowAuto */ false, /* allowFluid */ false);
@@ -735,7 +735,7 @@ public final class TagSpecUtils {
     public static void validateDescendantTags(
             @Nonnull final ParsedHtmlTag encounteredTag, @Nonnull final ParsedTagSpec parsedTagSpec,
             @Nonnull final Context context,
-            @Nonnull final Validator.ValidationResult.Builder validationResult) {
+            @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
         final TagStack tagStack = context.getTagStack();
 
         for (DescendantConstraints allowedDescendantsList : tagStack.allowedDescendantsList()) {
@@ -746,7 +746,7 @@ public final class TagSpecUtils {
                 params.add(encounteredTag.lowerName());
                 params.add(allowedDescendantsList.getTagName().toLowerCase());
                 context.addError(
-                        Validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
+                        ValidatorProtos.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(parsedTagSpec.getSpec()),
@@ -765,9 +765,9 @@ public final class TagSpecUtils {
      */
     public static void validateNoSiblingsAllowedTags(
             @Nonnull final ParsedTagSpec parsedTagSpec, @Nonnull final Context context,
-            @Nonnull final Validator.ValidationResult.Builder validationResult)
+            @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
             throws TagValidationException {
-        final Validator.TagSpec spec = parsedTagSpec.getSpec();
+        final ValidatorProtos.TagSpec spec = parsedTagSpec.getSpec();
         final TagStack tagStack = context.getTagStack();
 
         if (spec.hasSiblingsDisallowed() && tagStack.parentChildCount() > 0) {
@@ -775,7 +775,7 @@ public final class TagSpecUtils {
             params.add(spec.getTagName().toLowerCase());
             params.add(tagStack.parentTagName().toLowerCase());
             context.addError(
-                    Validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
+                    ValidatorProtos.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
                     context.getLineCol(),
                     params,
                     getTagSpecUrl(spec),
@@ -787,7 +787,7 @@ public final class TagSpecUtils {
             params.add(tagStack.parentOnlyChildTagName().toLowerCase());
             params.add(tagStack.parentTagName().toLowerCase());
             context.addError(
-                    Validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
+                    ValidatorProtos.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
                     tagStack.parentOnlyChildErrorLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -802,7 +802,7 @@ public final class TagSpecUtils {
      * @throws TagValidationException the TagValidationException.
      */
     public static void validateLastChildTags(@Nonnull final Context context,
-                             @Nonnull final Validator.ValidationResult.Builder validationResult)
+                             @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
                             throws TagValidationException {
         final TagStack tagStack = context.getTagStack();
 
@@ -811,7 +811,7 @@ public final class TagSpecUtils {
             params.add(tagStack.parentLastChildTagName().toLowerCase());
             params.add(tagStack.parentTagName().toLowerCase());
             context.addError(
-                    Validator.ValidationError.Code.MANDATORY_LAST_CHILD_TAG,
+                    ValidatorProtos.ValidationError.Code.MANDATORY_LAST_CHILD_TAG,
                     tagStack.parentLastChildErrorLineCol(),
                     params,
                     tagStack.parentLastChildUrl(),
@@ -828,8 +828,8 @@ public final class TagSpecUtils {
      */
     public static void validateRequiredExtensions(@Nonnull final ParsedTagSpec parsedTagSpec,
                                       @Nonnull final Context context,
-                                      @Nonnull final Validator.ValidationResult.Builder validationResult) {
-        final Validator.TagSpec tagSpec = parsedTagSpec.getSpec();
+                                      @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
+        final ValidatorProtos.TagSpec tagSpec = parsedTagSpec.getSpec();
         final ExtensionsContext extensionsCtx = context.getExtensions();
         for (final String requiredExtension : tagSpec.getRequiresExtensionList()) {
             if (!extensionsCtx.isExtensionLoaded(requiredExtension)) {
@@ -837,7 +837,7 @@ public final class TagSpecUtils {
                 params.add(getTagSpecName(parsedTagSpec.getSpec()));
                 params.add(requiredExtension);
                 context.addError(
-                        Validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION,
+                        ValidatorProtos.ValidationError.Code.MISSING_REQUIRED_EXTENSION,
                         context.getLineCol(),
                         params,
                         getTagSpecUrl(parsedTagSpec.getSpec()),
@@ -855,14 +855,14 @@ public final class TagSpecUtils {
      */
     public static void validateUniqueness(@Nonnull final ParsedTagSpec parsedTagSpec,
                                           @Nonnull final Context context,
-                                          @Nonnull final Validator.ValidationResult.Builder validationResult) {
-        final Validator.TagSpec tagSpec = parsedTagSpec.getSpec();
+                                          @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
+        final ValidatorProtos.TagSpec tagSpec = parsedTagSpec.getSpec();
         if (tagSpec.hasUnique()
                 && context.getTagspecsValidated().containsKey(parsedTagSpec.id())) {
             final List<String> params = new ArrayList<>();
             params.add(getTagSpecName(tagSpec));
             context.addError(
-                    Validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+                    ValidatorProtos.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
                     context.getLineCol(),
                     params,
                     getTagSpecUrl(parsedTagSpec.getSpec()),

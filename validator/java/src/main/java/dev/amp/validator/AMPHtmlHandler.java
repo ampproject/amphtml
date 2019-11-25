@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.ExitOnFirstErrorException;
 import dev.amp.validator.exception.MaxParseNodesException;
@@ -60,13 +59,13 @@ public class AMPHtmlHandler extends DefaultHandler {
      * @param maxNodesAllowed  max nodes allowed.
      */
     public AMPHtmlHandler(@Nonnull final AMPValidatorManager validatorManager,
-                          @Nonnull final Validator.HtmlFormat.Code htmlFormat, @Nonnull final ExitCondition condition,
+                          @Nonnull final ValidatorProtos.HtmlFormat.Code htmlFormat, @Nonnull final ExitCondition condition,
                           final int maxNodesAllowed) {
         this.validatorManager = validatorManager;
         this.exitCondition = condition;
         this.maxNodesAllowed = maxNodesAllowed;
         this.htmlFormat = htmlFormat;
-        this.validationResult = Validator.ValidationResult.newBuilder();
+        this.validationResult = ValidatorProtos.ValidationResult.newBuilder();
         context = new Context(new ParsedValidatorRules(htmlFormat, validatorManager));
     }
 
@@ -77,7 +76,7 @@ public class AMPHtmlHandler extends DefaultHandler {
      */
     @Override
     public void startDocument() throws SAXException {
-        validationResult.setStatus(Validator.ValidationResult.Status.UNKNOWN);
+        validationResult.setStatus(ValidatorProtos.ValidationResult.Status.UNKNOWN);
     }
 
     /**
@@ -89,11 +88,11 @@ public class AMPHtmlHandler extends DefaultHandler {
     public void endDocument() throws SAXException {
         try {
             context.getRules().maybeEmitGlobalTagValidationErrors(context, validationResult);
-            if (validationResult.getStatus() == Validator.ValidationResult.Status.UNKNOWN) {
-                validationResult.setStatus(Validator.ValidationResult.Status.PASS);
+            if (validationResult.getStatus() == ValidatorProtos.ValidationResult.Status.UNKNOWN) {
+                validationResult.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
             }
             if (validationResult.getErrorsCount() > 0) {
-                validationResult.setStatus(Validator.ValidationResult.Status.FAIL);
+                validationResult.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
             }
         } catch (TagValidationException tve) {
             /** ignore */
@@ -138,7 +137,7 @@ public class AMPHtmlHandler extends DefaultHandler {
             params.add(encounteredTag.lowerName());
             params.add(maybeDuplicateAttrName);
             this.context.addWarning(
-                    Validator.ValidationError.Code.DUPLICATE_ATTRIBUTE,
+                    ValidatorProtos.ValidationError.Code.DUPLICATE_ATTRIBUTE,
                     this.context.getLineCol(),
                     params,
                     /* specUrl */ "",
@@ -156,7 +155,7 @@ public class AMPHtmlHandler extends DefaultHandler {
         if (styleAttr != null) {
             int styleLen = ByteUtils.byteLength(styleAttr);
             this.context.addInlineStyleByteSize(styleLen);
-            for (Validator.CssLengthSpec cssLengthSpec : this.context.getRules().getCssLengthSpec()) {
+            for (ValidatorProtos.CssLengthSpec cssLengthSpec : this.context.getRules().getCssLengthSpec()) {
                 if (cssLengthSpec.getMaxBytesPerInlineStyle() != -1
                         && styleLen > cssLengthSpec.getMaxBytesPerInlineStyle()) {
 
@@ -166,7 +165,7 @@ public class AMPHtmlHandler extends DefaultHandler {
                     params.add(Integer.toString(cssLengthSpec.getMaxBytesPerInlineStyle()));
 
                     this.context.addError(
-                            Validator.ValidationError.Code.INLINE_STYLE_TOO_LONG,
+                            ValidatorProtos.ValidationError.Code.INLINE_STYLE_TOO_LONG,
                             this.context.getLineCol(), params,
                             cssLengthSpec.getSpecUrl(), this.validationResult);
                     //TODO - tagchowder doesn't seem to maintain duplicate attributes.
@@ -177,8 +176,8 @@ public class AMPHtmlHandler extends DefaultHandler {
 
         try {
             ValidateTagResult resultForReferencePoint =
-                    new ValidateTagResult(Validator.ValidationResult.newBuilder(), null);
-            resultForReferencePoint.getValidationResult().setStatus(Validator.ValidationResult.Status.UNKNOWN);
+                    new ValidateTagResult(ValidatorProtos.ValidationResult.newBuilder(), null);
+            resultForReferencePoint.getValidationResult().setStatus(ValidatorProtos.ValidationResult.Status.UNKNOWN);
 
             final ReferencePointMatcher referencePointMatcher = context.getTagStack().parentReferencePointMatcher();
             if (referencePointMatcher != null) {
@@ -188,7 +187,7 @@ public class AMPHtmlHandler extends DefaultHandler {
             final ValidateTagResult resultForTag =
                     TagSpecUtils.validateTag(context, encounteredTag, resultForReferencePoint.getBestMatchTagSpec());
             if (referencePointMatcher != null
-                    && (resultForTag.getValidationResult().getStatus() == Validator.ValidationResult.Status.PASS)) {
+                    && (resultForTag.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.PASS)) {
                 this.validationResult.mergeFrom(resultForReferencePoint.getValidationResult().build());
             }
 
@@ -259,7 +258,7 @@ public class AMPHtmlHandler extends DefaultHandler {
      *
      * @return returns the validation result.
      */
-    public Validator.ValidationResult.Builder validationResult() {
+    public ValidatorProtos.ValidationResult.Builder validationResult() {
         return validationResult;
     }
 
@@ -269,7 +268,7 @@ public class AMPHtmlHandler extends DefaultHandler {
      */
     public void emitMissingExtensionErrors() {
         final ExtensionsContext extensionsCtx = this.context.getExtensions();
-        for (Validator.ValidationError error : extensionsCtx.missingExtensionErrors()) {
+        for (ValidatorProtos.ValidationError error : extensionsCtx.missingExtensionErrors()) {
             this.context.addBuiltError(error, this.validationResult);
         }
     }
@@ -285,7 +284,7 @@ public class AMPHtmlHandler extends DefaultHandler {
      */
     private void checkForReferencePointCollision(
             final ParsedTagSpec refPointSpec, final ParsedTagSpec tagSpec,
-            @Nonnull final Validator.ValidationResult.Builder validationResult) {
+            @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
         if (refPointSpec == null || !refPointSpec.hasReferencePoints()) {
             return;
         }
@@ -298,7 +297,7 @@ public class AMPHtmlHandler extends DefaultHandler {
         params.add(TagSpecUtils.getTagSpecName(tagSpec.getSpec()));
         params.add(refPointSpec.getReferencePoints().parentTagSpecName());
         context.addError(
-                Validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
+                ValidatorProtos.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
                 context.getLineCol(),
                 params,
                 refPointSpec.getReferencePoints().parentSpecUrl(),
@@ -321,7 +320,7 @@ public class AMPHtmlHandler extends DefaultHandler {
             } catch (JSONException e) {
                 List<String> params = new ArrayList<>();
                 this.context.addWarning(
-                        Validator.ValidationError.Code.INVALID_JSON_CDATA,
+                        ValidatorProtos.ValidationError.Code.INVALID_JSON_CDATA,
                         this.context.getLineCol(),
                         params, "",
                         this.validationResult);
@@ -376,13 +375,13 @@ public class AMPHtmlHandler extends DefaultHandler {
      * ValidationResult object.
      */
     @Nonnull
-    private Validator.ValidationResult.Builder validationResult;
+    private ValidatorProtos.ValidationResult.Builder validationResult;
 
     /**
      * HtmlFormat used to validate against.
      */
     @Nonnull
-    private final Validator.HtmlFormat.Code htmlFormat;
+    private final ValidatorProtos.HtmlFormat.Code htmlFormat;
 
     /**
      * Context object capturing session variables of the current validation.

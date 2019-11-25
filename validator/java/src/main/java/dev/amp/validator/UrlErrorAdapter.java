@@ -21,8 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
-
 /**
  * An url error adaptor interface.
  *
@@ -38,8 +36,8 @@ public interface UrlErrorAdapter {
      * @param tagSpec tag spec.
      * @param result validation result.
      */
-    void missingUrl(Context context, Validator.TagSpec tagSpec,
-                           Validator.ValidationResult.Builder result);
+    void missingUrl(Context context, ValidatorProtos.TagSpec tagSpec,
+                           ValidatorProtos.ValidationResult.Builder result);
 
     /**
      * Adding invalid url validation error.
@@ -49,8 +47,8 @@ public interface UrlErrorAdapter {
      * @param tagSpec tag spec.
      * @param result validation result.
      */
-    void invalidUrl(Context context, String url, Validator.TagSpec tagSpec,
-                           Validator.ValidationResult.Builder result);
+    void invalidUrl(Context context, String url, ValidatorProtos.TagSpec tagSpec,
+                           ValidatorProtos.ValidationResult.Builder result);
 
     /**
      * Adding invalid url protocol error.
@@ -60,8 +58,8 @@ public interface UrlErrorAdapter {
      * @param tagSpec tag spec.
      * @param result validation result.
      */
-    void invalidUrlProtocol(Context context, String protocol, Validator.TagSpec tagSpec,
-                           Validator.ValidationResult.Builder result);
+    void invalidUrlProtocol(Context context, String protocol, ValidatorProtos.TagSpec tagSpec,
+                           ValidatorProtos.ValidationResult.Builder result);
 
     /**
      * Adding disallowed relative url error.
@@ -71,6 +69,6 @@ public interface UrlErrorAdapter {
      * @param tagSpec tag spec.
      * @param result validation result.
      */
-    void disallowedRelativeUrl(Context context, String url, Validator.TagSpec tagSpec,
-                           Validator.ValidationResult.Builder result);
+    void disallowedRelativeUrl(Context context, String url, ValidatorProtos.TagSpec tagSpec,
+                           ValidatorProtos.ValidationResult.Builder result);
 }

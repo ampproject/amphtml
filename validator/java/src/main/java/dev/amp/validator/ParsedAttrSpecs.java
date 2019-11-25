@@ -21,8 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
-
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,7 +61,7 @@ public class ParsedAttrSpecs {
      */
     public ParsedAttrSpec getParsedAttrSpec(@Nonnull final String name,
                                             @Nonnull final String value,
-                                            @Nonnull final Validator.AttrSpec attrSpec) {
+                                            @Nonnull final ValidatorProtos.AttrSpec attrSpec) {
         final String key = name + value;
         if (this.parsedAttrSpecs.containsKey(key)) {
             return parsedAttrSpecs.get(key);
@@ -81,8 +79,8 @@ public class ParsedAttrSpecs {
      * @param name the attr list name.
      * @return returns the attr list.
      */
-    public List<Validator.AttrSpec> getAttrListByName(@Nonnull final String name) {
-        Validator.AttrList attrList = validatorManager.getAttrListMap().get(name);
+    public List<ValidatorProtos.AttrSpec> getAttrListByName(@Nonnull final String name) {
+        ValidatorProtos.AttrList attrList = validatorManager.getAttrListMap().get(name);
         if (attrList != null) {
             return attrList.getAttrsList();
         }
@@ -95,7 +93,7 @@ public class ParsedAttrSpecs {
      *
      * @return returns the global attr list.
      */
-    public List<Validator.AttrSpec> getGlobalAttrs() {
+    public List<ValidatorProtos.AttrSpec> getGlobalAttrs() {
         return validatorManager.getGlobalAttrs();
     }
 
@@ -104,7 +102,7 @@ public class ParsedAttrSpecs {
      *
      * @return returns the AmpLayout attr list.
      */
-    public List<Validator.AttrSpec> getAmpLayoutAttrs() {
+    public List<ValidatorProtos.AttrSpec> getAmpLayoutAttrs() {
         return validatorManager.getAmpLayoutAttrs();
     }
 

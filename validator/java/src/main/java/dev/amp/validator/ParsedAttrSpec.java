@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.utils.AttributeSpecUtils;
 
 import javax.annotation.Nonnull;
@@ -43,14 +42,14 @@ public class ParsedAttrSpec {
      * @param attrSpec the AttrSpec.
      * @param attrName attr name.
      */
-    public ParsedAttrSpec(@Nonnull final Validator.AttrSpec attrSpec, final String attrName) {
+    public ParsedAttrSpec(@Nonnull final ValidatorProtos.AttrSpec attrSpec, final String attrName) {
         this.spec = attrSpec;
         this.attrName = attrName;
         this.valueUrlSpec = null;
         this.valueProperties = null;
         this.cssDeclarationByName = new HashMap<>();
 
-        for (final Validator.CssDeclaration cssDeclaration : attrSpec.getCssDeclarationList()) {
+        for (final ValidatorProtos.CssDeclaration cssDeclaration : attrSpec.getCssDeclarationList()) {
             if (cssDeclaration.getName() != null) {
                 this.cssDeclarationByName.put(cssDeclaration.getName(), cssDeclaration);
             }
@@ -69,7 +68,7 @@ public class ParsedAttrSpec {
      * Returns the AttrSpec.
      * @return returns this AttrSpec.
      */
-    public Validator.AttrSpec getSpec() {
+    public ValidatorProtos.AttrSpec getSpec() {
         return this.spec;
     }
 
@@ -104,7 +103,7 @@ public class ParsedAttrSpec {
      * Returns the CssDeclaration map.
      * @return returns the CssDeclaration map.
      */
-    public Map<String, Validator.CssDeclaration> getCssDeclarationByName() {
+    public Map<String, ValidatorProtos.CssDeclaration> getCssDeclarationByName() {
         return this.cssDeclarationByName;
     }
 
@@ -134,7 +133,7 @@ public class ParsedAttrSpec {
     /**
      * AttributeSpec instance.
      */
-    private Validator.AttrSpec spec;
+    private ValidatorProtos.AttrSpec spec;
 
     /**
      * Globally unique attribute rule name.
@@ -154,5 +153,5 @@ public class ParsedAttrSpec {
     /**
      * CssDeclaration map.
      */
-    private Map<String, Validator.CssDeclaration> cssDeclarationByName;
+    private Map<String, ValidatorProtos.CssDeclaration> cssDeclarationByName;
 }

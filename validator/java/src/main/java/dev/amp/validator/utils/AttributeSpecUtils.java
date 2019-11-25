@@ -21,7 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
 import dev.amp.validator.css.CssParser;
 import dev.amp.validator.css.CssValidationException;
@@ -129,9 +129,9 @@ public final class AttributeSpecUtils {
                                           @Nonnull final ParsedTagSpec bestMatchReferencePoint,
                                           @Nonnull final Context context,
                                           @Nonnull final  ParsedHtmlTag encounteredTag,
-                                          @Nonnull final Validator.ValidationResult.Builder result)
+                                          @Nonnull final ValidatorProtos.ValidationResult.Builder result)
             throws TagValidationException, IOException, CssValidationException {
-        final Validator.TagSpec spec = parsedTagSpec.getSpec();
+        final ValidatorProtos.TagSpec spec = parsedTagSpec.getSpec();
         if (spec.hasAmpLayout()) {
             validateLayout(parsedTagSpec, context, encounteredTag, result);
         }
@@ -143,19 +143,19 @@ public final class AttributeSpecUtils {
         final List<String> mandatoryAttrsSeen = new ArrayList<>();
         final List<String> mandatoryOneofsSeen = new ArrayList<>();
         final List<String> mandatoryAnyofsSeen = new ArrayList<>();
-        final List<Validator.AttrSpec> triggersToCheck = new ArrayList<>();
+        final List<ValidatorProtos.AttrSpec> triggersToCheck = new ArrayList<>();
 
         /**
          * If a tag has implicit attributes, we then add these attributes as
          * validated. E.g. tag 'a' has implicit attributes 'role' and 'tabindex'.
          */
         final Set<String> attrspecsValidated = new HashSet<>();
-        for (final Validator.AttrSpec implicit : parsedTagSpec.getImplicitAttrspecs()) {
+        for (final ValidatorProtos.AttrSpec implicit : parsedTagSpec.getImplicitAttrspecs()) {
             attrspecsValidated.add(implicit.getName());
         }
         // Our html parser delivers attributes as an array of alternating keys and
         // values. We skip over this array 2 at a time to iterate over the keys.
-        final Map<String, Validator.AttrSpec> attrsByName = parsedTagSpec.getAttrsByName();
+        final Map<String, ValidatorProtos.AttrSpec> attrsByName = parsedTagSpec.getAttrsByName();
         for (int i = 0; i < encounteredTag.attrs().getLength(); i++) {
             final String name = encounteredTag.attrs().getLocalName(i);
             String value = encounteredTag.attrs().getValue(i);
@@ -200,12 +200,12 @@ public final class AttributeSpecUtils {
                     continue;
                 }
                 validateAttrNotFoundInSpec(parsedTagSpec, context, name, result);
-                if (result.getStatus() == Validator.ValidationResult.Status.FAIL) {
+                if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
                     continue;
                 }
                 if (hasTemplateAncestor) {
                     validateAttrValueBelowTemplateTag(parsedTagSpec, context, name, value, result);
-                    if (result.getStatus() == Validator.ValidationResult.Status.FAIL) {
+                    if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
                         continue;
                     }
                 }
@@ -213,12 +213,12 @@ public final class AttributeSpecUtils {
             }
             if (hasTemplateAncestor) {
                 validateAttrValueBelowTemplateTag(parsedTagSpec, context, name, value, result);
-                if (result.getStatus() == Validator.ValidationResult.Status.FAIL) {
+                if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
                     continue;
                 }
             }
 
-            final Validator.AttrSpec attrSpec = attrsByName.get(name);
+            final ValidatorProtos.AttrSpec attrSpec = attrsByName.get(name);
             if (attrSpec.getValueCount() < 0) {
                 attrspecsValidated.add(attrSpec.getName());
                 continue;
@@ -233,7 +233,7 @@ public final class AttributeSpecUtils {
                 params.add(name);
                 params.add(TagSpecUtils.getTagSpecName(spec));
                 context.addError(
-                        Validator.ValidationError.Code.DISALLOWED_ATTR,
+                        ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(spec),
@@ -246,7 +246,7 @@ public final class AttributeSpecUtils {
                 params.add(TagSpecUtils.getTagSpecName(spec));
                 params.add(attrSpec.getDeprecation());
                 context.addWarning(
-                        Validator.ValidationError.Code.DEPRECATED_ATTR,
+                        ValidatorProtos.ValidationError.Code.DEPRECATED_ATTR,
                         context.getLineCol(),
                         params,
                         attrSpec.getDeprecationUrl(),
@@ -264,7 +264,7 @@ public final class AttributeSpecUtils {
             if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(value)) {
                 validateNonTemplateAttrValueAgainstSpec(
                         parsedAttrSpec, context, name, value, spec, result);
-                if (result.getStatus() == Validator.ValidationResult.Status.FAIL) {
+                if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
                     continue;
                 }
             }
@@ -279,7 +279,7 @@ public final class AttributeSpecUtils {
                     params.add(TagSpecUtils.getTagSpecName(spec));
                     params.add(value);
                     context.addError(
-                            Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                            ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                             context.getLineCol(),
                             params,
                             TagSpecUtils.getTagSpecUrl(spec),
@@ -297,7 +297,7 @@ public final class AttributeSpecUtils {
                 params = new ArrayList<>();
                 params.add(context.firstSeenUrlTagName());
                 context.addError(
-                        Validator.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS,
+                        ValidatorProtos.ValidationError.Code.BASE_TAG_MUST_PRECEED_ALL_URLS,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(spec),
@@ -314,7 +314,7 @@ public final class AttributeSpecUtils {
                     params.add(TagSpecUtils.getTagSpecName(spec));
                     params.add(mandatoryOneof);
                     context.addError(
-                            Validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+                            ValidatorProtos.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
                             context.getLineCol(),
                             params,
                             TagSpecUtils.getTagSpecUrl(spec),
@@ -325,9 +325,9 @@ public final class AttributeSpecUtils {
                 mandatoryOneofsSeen.add(mandatoryOneof);
             }
             if (attrSpec.hasRequiresAncestor()) {
-                final List<Validator.AncestorMarker.Marker> markers = attrSpec.getRequiresAncestor().getMarkerList();
+                final List<ValidatorProtos.AncestorMarker.Marker> markers = attrSpec.getRequiresAncestor().getMarkerList();
                 boolean matchesMarker = false;
-                for (final Validator.AncestorMarker.Marker marker : markers) {
+                for (final ValidatorProtos.AncestorMarker.Marker marker : markers) {
                     if (context.getTagStack().hasAncestorMarker(marker)) {
                         matchesMarker = true;
                         break;
@@ -338,7 +338,7 @@ public final class AttributeSpecUtils {
                     params.add(name);
                     params.add(TagSpecUtils.getTagSpecName(spec));
                     context.addError(
-                            Validator.ValidationError.Code.DISALLOWED_ATTR,
+                            ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR,
                             context.getLineCol(),
                             params,
                             TagSpecUtils.getTagSpecUrl(spec),
@@ -357,7 +357,7 @@ public final class AttributeSpecUtils {
             if (!attrSpec.hasTrigger()) {
                 continue;
             }
-            final Validator.AttrTriggerSpec trigger = attrSpec.getTrigger();
+            final ValidatorProtos.AttrTriggerSpec trigger = attrSpec.getTrigger();
             if (trigger != null) {
                 final boolean hasIfValueRegex = trigger.hasIfValueRegex();
                 Pattern ifValueRegexPattern = null;
@@ -370,7 +370,7 @@ public final class AttributeSpecUtils {
                 }
             }
         }
-        if (result.getStatus() == Validator.ValidationResult.Status.FAIL) {
+        if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
             return;
         }
         // The "exactly 1" part of mandatory_oneof: If none of the
@@ -381,7 +381,7 @@ public final class AttributeSpecUtils {
                 params.add(TagSpecUtils.getTagSpecName(spec));
                 params.add(mandatoryOneof);
                 context.addError(
-                        Validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
+                        ValidatorProtos.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(spec),
@@ -396,26 +396,26 @@ public final class AttributeSpecUtils {
                 params.add(TagSpecUtils.getTagSpecName(spec));
                 params.add(mandatoryAnyof);
                 context.addError(
-                        Validator.ValidationError.Code.MANDATORY_ANYOF_ATTR_MISSING,
+                        ValidatorProtos.ValidationError.Code.MANDATORY_ANYOF_ATTR_MISSING,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(spec),
                         result);
             }
         }
-        for (final Validator.AttrSpec attrSpec : triggersToCheck) {
+        for (final ValidatorProtos.AttrSpec attrSpec : triggersToCheck) {
             for (final String alsoRequiresAttr : attrSpec.getTrigger().getAlsoRequiresAttrList()) {
                 if (!(attrsByName.containsKey(alsoRequiresAttr))) {
                     continue;
                 }
-                Validator.AttrSpec attrId = attrsByName.get(alsoRequiresAttr);
+                ValidatorProtos.AttrSpec attrId = attrsByName.get(alsoRequiresAttr);
                 if (!attrspecsValidated.contains(attrId.getName())) {
                     List<String> params = new ArrayList<>();
                     params.add(attrId.getName());
                     params.add(TagSpecUtils.getTagSpecName(spec));
                     params.add(attrSpec.getName());
                     context.addError(
-                            Validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING,
+                            ValidatorProtos.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING,
                             context.getLineCol(),
                             params,
                             TagSpecUtils.getTagSpecUrl(spec),
@@ -424,7 +424,7 @@ public final class AttributeSpecUtils {
             }
         }
         final List<String> missingAttrs = new ArrayList<>();
-        for (final Validator.AttrSpec mandatory : parsedTagSpec.getMandatoryAttrIds()) {
+        for (final ValidatorProtos.AttrSpec mandatory : parsedTagSpec.getMandatoryAttrIds()) {
             if (!mandatoryAttrsSeen.contains(mandatory.getName())) {
                 missingAttrs.add(mandatory.getName());
             }
@@ -436,7 +436,7 @@ public final class AttributeSpecUtils {
             params.add(missingAttr);
             params.add(TagSpecUtils.getTagSpecName(spec));
             context.addError(
-                    Validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+                    ValidatorProtos.ValidationError.Code.MANDATORY_ATTR_MISSING,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -448,7 +448,7 @@ public final class AttributeSpecUtils {
             params.add("src");
             params.add(TagSpecUtils.getTagSpecName(spec));
             context.addError(
-                    Validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+                    ValidatorProtos.ValidationError.Code.MANDATORY_ATTR_MISSING,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -467,8 +467,8 @@ public final class AttributeSpecUtils {
     public static void validateAttrRequiredExtensions(
             @Nonnull final ParsedAttrSpec parsedAttrSpec,
             @Nonnull final Context context,
-            @Nonnull final Validator.ValidationResult.Builder validationResult) {
-        final Validator.AttrSpec attrSpec = parsedAttrSpec.getSpec();
+            @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) {
+        final ValidatorProtos.AttrSpec attrSpec = parsedAttrSpec.getSpec();
         final ExtensionsContext extensionsCtx = context.getExtensions();
         for (String requiredExtension : attrSpec.getRequiresExtensionList()) {
             if (!extensionsCtx.isExtensionLoaded(requiredExtension)) {
@@ -476,7 +476,7 @@ public final class AttributeSpecUtils {
                 params.add(attrSpec.getName());
                 params.add(requiredExtension);
                 context.addError(
-                        Validator.ValidationError.Code.ATTR_MISSING_REQUIRED_EXTENSION,
+                        ValidatorProtos.ValidationError.Code.ATTR_MISSING_REQUIRED_EXTENSION,
                         context.getLineCol(),
                         params,
                         "",
@@ -503,7 +503,7 @@ public final class AttributeSpecUtils {
             @Nonnull final String tagSpecName,
             @Nonnull final String attrName,
             @Nonnull final String attrValue,
-            @Nonnull final Validator.ValidationResult.Builder validationResult) throws IOException,
+            @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) throws IOException,
             CssValidationException {
         final List<ErrorToken> cssErrors = new ArrayList<>();
         final CssParser cssParser = new CssParser(attrValue,
@@ -531,7 +531,7 @@ public final class AttributeSpecUtils {
             return;
         }
 
-        final Map<String, Validator.CssDeclaration> cssDeclarationByName = parsedAttrSpec.getCssDeclarationByName();
+        final Map<String, ValidatorProtos.CssDeclaration> cssDeclarationByName = parsedAttrSpec.getCssDeclarationByName();
 
         for (final Declaration declaration : declarations) {
             final String declarationName =
@@ -543,13 +543,13 @@ public final class AttributeSpecUtils {
                 params.add(attrName);
                 params.add(tagSpecName);
                 context.addError(
-                        Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+                        ValidatorProtos.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
                         context.getLineCol(),
                         params,
                         context.getRules().getStylesSpecUrl(),
                         validationResult);
             } else {
-                final Validator.CssDeclaration cssDeclaration = cssDeclarationByName.get(declarationName);
+                final ValidatorProtos.CssDeclaration cssDeclaration = cssDeclarationByName.get(declarationName);
                 if (cssDeclaration.getValueCaseiList().size() > 0) {
                     boolean hasValidValue = false;
                     final String firstIdent = declaration.firstIdent();
@@ -566,7 +566,7 @@ public final class AttributeSpecUtils {
                         params.add(declaration.getName());
                         params.add(firstIdent);
                         context.addError(
-                                Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                                ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
                                 context.getLineCol(),
                                 params,
                                 context.getRules().getStylesSpecUrl(),
@@ -607,22 +607,22 @@ public final class AttributeSpecUtils {
             @Nonnull final Context context,
             @Nonnull final String attrName,
             @Nonnull final String attrValue,
-            @Nonnull final Validator.TagSpec tagSpec,
-            @Nonnull final Validator.ValidationResult.Builder result) {
+            @Nonnull final ValidatorProtos.TagSpec tagSpec,
+            @Nonnull final ValidatorProtos.ValidationResult.Builder result) {
         // The value, value_regex, value_url, and value_properties fields are treated
         // like a oneof, but we're not using oneof because it's a feature that was
         // added after protobuf 2.5.0 (which our open-source version uses).
         // begin oneof {
-        final Validator.AttrSpec spec = parsedAttrSpec.getSpec();
+        final ValidatorProtos.AttrSpec spec = parsedAttrSpec.getSpec();
         if (spec.hasAddValueToSet()) {
-            Validator.ValueSetProvision.Builder provision = Validator.ValueSetProvision.newBuilder();
+            ValidatorProtos.ValueSetProvision.Builder provision = ValidatorProtos.ValueSetProvision.newBuilder();
             provision.setSet(spec.getAddValueToSet());
             provision.setValue(attrValue);
             result.addValueSetProvisions(provision);
         }
         if (spec.hasValueOneofSet()) {
-            Validator.ValueSetRequirement.Builder requirement = Validator.ValueSetRequirement.newBuilder();
-            Validator.ValueSetProvision.Builder provision = Validator.ValueSetProvision.newBuilder();
+            ValidatorProtos.ValueSetRequirement.Builder requirement = ValidatorProtos.ValueSetRequirement.newBuilder();
+            ValidatorProtos.ValueSetProvision.Builder provision = ValidatorProtos.ValueSetProvision.newBuilder();
             provision.setSet(spec.getValueOneofSet());
             provision.setValue(attrValue);
             requirement.setProvision(provision);
@@ -632,8 +632,8 @@ public final class AttributeSpecUtils {
             params.add(TagSpecUtils.getTagSpecName(tagSpec));
             requirement.setErrorIfUnsatisfied(
                     ValidationErrorUtils.populateError(
-                            Validator.ValidationError.Severity.ERROR,
-                            Validator.ValidationError.Code.VALUE_SET_MISMATCH,
+                            ValidatorProtos.ValidationError.Severity.ERROR,
+                            ValidatorProtos.ValidationError.Code.VALUE_SET_MISMATCH,
                             context.getLineCol(),
                             params,
                             TagSpecUtils.getTagSpecUrl(tagSpec)));
@@ -650,7 +650,7 @@ public final class AttributeSpecUtils {
             params.add(TagSpecUtils.getTagSpecName(tagSpec));
             params.add(attrValue);
             context.addError(
-                    Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -667,7 +667,7 @@ public final class AttributeSpecUtils {
             params.add(TagSpecUtils.getTagSpecName(tagSpec));
             params.add(attrValue);
             context.addError(
-                    Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -683,7 +683,7 @@ public final class AttributeSpecUtils {
                 params.add(TagSpecUtils.getTagSpecName(tagSpec));
                 params.add(attrValue);
                 context.addError(
-                        Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                        ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -716,8 +716,8 @@ public final class AttributeSpecUtils {
                                                    @Nonnull final Context context,
                                                    @Nonnull final String attrName,
                                                    @Nonnull final String attrValue,
-                                                   @Nonnull final Validator.TagSpec tagSpec,
-                                                   @Nonnull final Validator.ValidationResult.Builder result) {
+                                                   @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                                                   @Nonnull final ValidatorProtos.ValidationResult.Builder result) {
         final String[] segments = attrValue.split("[,;]");
         final Map<String, String> properties = new HashMap<>();
         for (final String segment : segments) {
@@ -731,7 +731,7 @@ public final class AttributeSpecUtils {
         final Set<String> names = properties.keySet();
         for (final String name : names) {
             final String value = properties.get(name);
-            final Map<String, Validator.PropertySpec> valuePropertyByName =
+            final Map<String, ValidatorProtos.PropertySpec> valuePropertyByName =
                     parsedValueProperties.getValuePropertyByName();
             if (!(valuePropertyByName.containsKey(name))) {
                 final List<String> params = new ArrayList<>();
@@ -739,14 +739,14 @@ public final class AttributeSpecUtils {
                 params.add(attrName);
                 params.add(TagSpecUtils.getTagSpecName(tagSpec));
                 context.addError(
-                        Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+                        ValidatorProtos.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(tagSpec),
                         result);
                 continue;
             }
-            final Validator.PropertySpec propertySpec = valuePropertyByName.get(name);
+            final ValidatorProtos.PropertySpec propertySpec = valuePropertyByName.get(name);
             final List<String> params;
             if (propertySpec.hasValue()) {
                 if (!propertySpec.getValue().equals(value.toLowerCase())) {
@@ -756,7 +756,7 @@ public final class AttributeSpecUtils {
                     params.add(TagSpecUtils.getTagSpecName(tagSpec));
                     params.add(value);
                     context.addError(
-                            Validator.ValidationError.Code.INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
+                            ValidatorProtos.ValidationError.Code.INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
                             context.getLineCol(),
                             params,
                             TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -776,7 +776,7 @@ public final class AttributeSpecUtils {
                     params.add(TagSpecUtils.getTagSpecName(tagSpec));
                     params.add(value);
                     context.addError(
-                            Validator.ValidationError.Code.INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
+                            ValidatorProtos.ValidationError.Code.INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
                             context.getLineCol(),
                             params,
                             TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -796,7 +796,7 @@ public final class AttributeSpecUtils {
             params.add(attrName);
             params.add(TagSpecUtils.getTagSpecName(tagSpec));
             context.addError(
-                    Validator.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -818,8 +818,8 @@ public final class AttributeSpecUtils {
                                             @Nonnull final Context context,
                                             @Nonnull final String attrName,
                                             @Nonnull final String attrValue,
-                                            @Nonnull final Validator.TagSpec tagSpec,
-                                            @Nonnull final Validator.ValidationResult.Builder result) {
+                                            @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                                            @Nonnull final ValidatorProtos.ValidationResult.Builder result) {
         final Set<String> maybeUris = new TreeSet<>();
 
         if (!attrName.equals("srcset")) {
@@ -830,7 +830,7 @@ public final class AttributeSpecUtils {
                 params.add(attrName);
                 params.add(TagSpecUtils.getTagSpecName(tagSpec));
                 context.addError(
-                        Validator.ValidationError.Code.MISSING_URL,
+                        ValidatorProtos.ValidationError.Code.MISSING_URL,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -845,7 +845,7 @@ public final class AttributeSpecUtils {
                 final List<String> params = new ArrayList<>();
                 params.add(attrName);
                 params.add(TagSpecUtils.getTagSpecName(tagSpec));
-                if (parseResult.getErrorCode() == Validator.ValidationError.Code.DUPLICATE_DIMENSION) {
+                if (parseResult.getErrorCode() == ValidatorProtos.ValidationError.Code.DUPLICATE_DIMENSION) {
                     context.addError(
                             parseResult.getErrorCode(),
                             context.getLineCol(),
@@ -872,7 +872,7 @@ public final class AttributeSpecUtils {
             params.add(attrName);
             params.add(TagSpecUtils.getTagSpecName(tagSpec));
             context.addError(
-                    Validator.ValidationError.Code.MISSING_URL,
+                    ValidatorProtos.ValidationError.Code.MISSING_URL,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -885,7 +885,7 @@ public final class AttributeSpecUtils {
             validateUrlAndProtocol(
                     parsedAttrSpec.getValueUrlSpec(), adapter, context, unescapedMaybeUri,
                     tagSpec, result);
-            if (result.getStatus() == Validator.ValidationResult.Status.FAIL) {
+            if (result.getStatus() == ValidatorProtos.ValidationResult.Status.FAIL) {
                 return;
             }
         }
@@ -903,9 +903,9 @@ public final class AttributeSpecUtils {
                                               @Nonnull final UrlErrorAdapter adapter,
                                               @Nonnull final Context context,
                                               @Nonnull final String urlStr,
-                                              @Nonnull final Validator.TagSpec tagSpec,
-                                              @Nonnull final Validator.ValidationResult.Builder result) {
-        final Validator.UrlSpec spec = parsedUrlSpec.getSpec();
+                                              @Nonnull final ValidatorProtos.TagSpec tagSpec,
+                                              @Nonnull final ValidatorProtos.ValidationResult.Builder result) {
+        final ValidatorProtos.UrlSpec spec = parsedUrlSpec.getSpec();
         if (ONLY_WHITESPACE_PATTERN.matcher(urlStr).matches() && (!spec.hasAllowEmpty())) {
             adapter.missingUrl(context, tagSpec, result);
             return;
@@ -958,10 +958,10 @@ public final class AttributeSpecUtils {
     public static void validateLayout(@Nonnull final ParsedTagSpec parsedTagSpec,
                                       @Nonnull final Context context,
                                       @Nonnull final ParsedHtmlTag encounteredTag,
-                                      @Nonnull final Validator.ValidationResult.Builder result)
+                                      @Nonnull final ValidatorProtos.ValidationResult.Builder result)
             throws TagValidationException {
 
-        final Validator.TagSpec spec = parsedTagSpec.getSpec();
+        final ValidatorProtos.TagSpec spec = parsedTagSpec.getSpec();
         if (!spec.hasAmpLayout()) {
             throw new TagValidationException("Expecting AMP Layout null");
         }
@@ -986,15 +986,15 @@ public final class AttributeSpecUtils {
         }
 
         // Parse the input layout attributes which we found for this tag.
-        final Validator.AmpLayout.Layout inputLayout = TagSpecUtils.parseLayout(layoutAttr);
+        final ValidatorProtos.AmpLayout.Layout inputLayout = TagSpecUtils.parseLayout(layoutAttr);
         if (layoutAttr != null
-                && inputLayout == Validator.AmpLayout.Layout.UNKNOWN) {
+                && inputLayout == ValidatorProtos.AmpLayout.Layout.UNKNOWN) {
             List<String> params = new ArrayList<>();
             params.add("layout");
             params.add(TagSpecUtils.getTagSpecName(spec));
             params.add(layoutAttr);
             context.addError(
-                    Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -1003,14 +1003,14 @@ public final class AttributeSpecUtils {
         }
         final CssLength inputWidth = new CssLength(
                 widthAttr, /* allowAuto */ true,
-                /* allowFluid */ inputLayout.equals(Validator.AmpLayout.Layout.FLUID));
+                /* allowFluid */ inputLayout.equals(ValidatorProtos.AmpLayout.Layout.FLUID));
         if (!inputWidth.isValid()) {
             List<String> params = new ArrayList<>();
             params.add("width");
             params.add(TagSpecUtils.getTagSpecName(spec));
             params.add(widthAttr);
             context.addError(
-                    Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -1019,14 +1019,14 @@ public final class AttributeSpecUtils {
         }
         final CssLength inputHeight = new CssLength(
                 heightAttr, /* allowAuto */ true,
-                /* allowFluid */ inputLayout == Validator.AmpLayout.Layout.FLUID);
+                /* allowFluid */ inputLayout == ValidatorProtos.AmpLayout.Layout.FLUID);
         if (!inputHeight.isValid()) {
             List<String> params = new ArrayList<>();
             params.add("height");
             params.add(TagSpecUtils.getTagSpecName(spec));
             params.add(heightAttr);
             context.addError(
-                    Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -1037,7 +1037,7 @@ public final class AttributeSpecUtils {
         // Now calculate the effective layout attributes.
         final CssLength width = TagSpecUtils.calculateWidth(spec.getAmpLayout(), inputLayout, inputWidth);
         final CssLength height = TagSpecUtils.calculateHeight(spec.getAmpLayout(), inputLayout, inputHeight);
-        final Validator.AmpLayout.Layout layout =
+        final ValidatorProtos.AmpLayout.Layout layout =
                 TagSpecUtils.calculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
 
         // Validate for transformed AMP the server-side rendering layout.
@@ -1046,13 +1046,13 @@ public final class AttributeSpecUtils {
                 heightsAttr, context, result);
 
         // Only FLEX_ITEM allows for height to be set to auto.
-        if (height.isAuto() && layout != Validator.AmpLayout.Layout.FLEX_ITEM) {
+        if (height.isAuto() && layout != ValidatorProtos.AmpLayout.Layout.FLEX_ITEM) {
             List<String> params = new ArrayList<>();
             params.add("height");
             params.add(TagSpecUtils.getTagSpecName(spec));
             params.add(heightAttr);
             context.addError(
-                    Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -1062,10 +1062,10 @@ public final class AttributeSpecUtils {
 
         // Does the tag support the computed layout?
         if (spec.getAmpLayout().getSupportedLayoutsList().indexOf(layout) == -1) {
-            final Validator.ValidationError.Code code =
+            final ValidatorProtos.ValidationError.Code code =
                     (layoutAttr == null)
-                            ? Validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID
-                            : Validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
+                            ? ValidatorProtos.ValidationError.Code.IMPLIED_LAYOUT_INVALID
+                            : ValidatorProtos.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
             // Special case. If no layout related attributes were provided, this implies
             // the CONTAINER layout. However, telling the user that the implied layout
             // is unsupported for this tag is confusing if all they need is to provide
@@ -1073,14 +1073,14 @@ public final class AttributeSpecUtils {
             // an AMP-IMG without specifying dimensions. In this case, we emit a
             // less correct, but simpler error message that could be more useful to
             // the average user.
-            if (code == Validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID
-                    && layout == Validator.AmpLayout.Layout.CONTAINER
+            if (code == ValidatorProtos.ValidationError.Code.IMPLIED_LAYOUT_INVALID
+                    && layout == ValidatorProtos.AmpLayout.Layout.CONTAINER
                     && spec.getAmpLayout().getSupportedLayoutsList().indexOf(
-                    Validator.AmpLayout.Layout.RESPONSIVE) != -1) {
+                    ValidatorProtos.AmpLayout.Layout.RESPONSIVE) != -1) {
                 List<String> params = new ArrayList<>();
                 params.add(TagSpecUtils.getTagSpecName(spec));
                 context.addError(
-                        Validator.ValidationError.Code.MISSING_LAYOUT_ATTRIBUTES,
+                        ValidatorProtos.ValidationError.Code.MISSING_LAYOUT_ATTRIBUTES,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(spec),
@@ -1099,23 +1099,23 @@ public final class AttributeSpecUtils {
             return;
         }
         // FIXED, FIXED_HEIGHT, INTRINSIC, RESPONSIVE must have height set.
-        if ((layout == Validator.AmpLayout.Layout.FIXED
-                || layout == Validator.AmpLayout.Layout.FIXED_HEIGHT
-                || layout == Validator.AmpLayout.Layout.INTRINSIC
-                || layout == Validator.AmpLayout.Layout.RESPONSIVE)
+        if ((layout == ValidatorProtos.AmpLayout.Layout.FIXED
+                || layout == ValidatorProtos.AmpLayout.Layout.FIXED_HEIGHT
+                || layout == ValidatorProtos.AmpLayout.Layout.INTRINSIC
+                || layout == ValidatorProtos.AmpLayout.Layout.RESPONSIVE)
                 && !height.isSet()) {
             List<String> params = new ArrayList<>();
             params.add("height");
             params.add(TagSpecUtils.getTagSpecName(spec));
             context.addError(
-                    Validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+                    ValidatorProtos.ValidationError.Code.MANDATORY_ATTR_MISSING,
                     context.getLineCol(),
                     params, TagSpecUtils.getTagSpecUrl(spec),
                     result);
             return;
         }
         // For FIXED_HEIGHT if width is set it must be auto.
-        if (layout == Validator.AmpLayout.Layout.FIXED_HEIGHT
+        if (layout == ValidatorProtos.AmpLayout.Layout.FIXED_HEIGHT
                 && width.isSet()
                 && !width.isAuto()) {
             List<String> params = new ArrayList<>();
@@ -1125,7 +1125,7 @@ public final class AttributeSpecUtils {
             params.add("FIXED_HEIGHT");
             params.add("auto");
             context.addError(
-                    Validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+                    ValidatorProtos.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -1133,15 +1133,15 @@ public final class AttributeSpecUtils {
             return;
         }
         // FIXED, INTRINSIC, RESPONSIVE must have width set and not be auto.
-        if (layout == Validator.AmpLayout.Layout.FIXED
-                || layout == Validator.AmpLayout.Layout.INTRINSIC
-                || layout == Validator.AmpLayout.Layout.RESPONSIVE) {
+        if (layout == ValidatorProtos.AmpLayout.Layout.FIXED
+                || layout == ValidatorProtos.AmpLayout.Layout.INTRINSIC
+                || layout == ValidatorProtos.AmpLayout.Layout.RESPONSIVE) {
             if (!width.isSet()) {
                 List<String> params = new ArrayList<>();
                 params.add("width");
                 params.add(TagSpecUtils.getTagSpecName(spec));
                 context.addError(
-                        Validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+                        ValidatorProtos.ValidationError.Code.MANDATORY_ATTR_MISSING,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(spec),
@@ -1153,7 +1153,7 @@ public final class AttributeSpecUtils {
                 params.add(TagSpecUtils.getTagSpecName(spec));
                 params.add("auto");
                 context.addError(
-                        Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                        ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(spec),
@@ -1162,15 +1162,15 @@ public final class AttributeSpecUtils {
             }
         }
         // INTRINSIC, RESPONSIVE must have same units for height and width.
-        if ((layout == Validator.AmpLayout.Layout.INTRINSIC
-                || layout == Validator.AmpLayout.Layout.RESPONSIVE)
+        if ((layout == ValidatorProtos.AmpLayout.Layout.INTRINSIC
+                || layout == ValidatorProtos.AmpLayout.Layout.RESPONSIVE)
                 && !(width.getUnit().equals(height.getUnit()))) {
             List<String> params = new ArrayList<>();
             params.add(TagSpecUtils.getTagSpecName(spec));
             params.add(width.getUnit());
             params.add(height.getUnit());
             context.addError(
-                    Validator.ValidationError.Code.INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
+                    ValidatorProtos.ValidationError.Code.INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(spec),
@@ -1178,15 +1178,15 @@ public final class AttributeSpecUtils {
             return;
         }
         // RESPONSIVE only allows heights attribute.
-        if (heightsAttr != null && layout != Validator.AmpLayout.Layout.RESPONSIVE) {
+        if (heightsAttr != null && layout != ValidatorProtos.AmpLayout.Layout.RESPONSIVE) {
             List<String> params = new ArrayList<>();
             params.add("height");
             params.add(TagSpecUtils.getTagSpecName(spec));
             params.add(layout.toString());
-            final Validator.ValidationError.Code code =
+            final ValidatorProtos.ValidationError.Code code =
                     (layoutAttr == null)
-                            ? Validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT
-                            : Validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
+                            ? ValidatorProtos.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT
+                            : ValidatorProtos.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
             context.addError(code, context.getLineCol(), params, TagSpecUtils.getTagSpecUrl(spec), result);
             return;
         }
@@ -1207,17 +1207,17 @@ public final class AttributeSpecUtils {
      * @return returns value indicates whether or not the provided attribute is explained by validation function.
      * @throws TagValidationException the tag validation exception.
      */
-    public static boolean validateAttributeInExtension(@Nonnull final Validator.TagSpec tagSpec,
+    public static boolean validateAttributeInExtension(@Nonnull final ValidatorProtos.TagSpec tagSpec,
                                                        @Nonnull final Context context,
                                                        @Nonnull final String attrName,
                                                        @Nonnull final String attrValue,
-                                                       @Nonnull final Validator.ValidationResult.Builder result)
+                                                       @Nonnull final ValidatorProtos.ValidationResult.Builder result)
             throws TagValidationException {
         if (!tagSpec.hasExtensionSpec()) {
             throw new TagValidationException("Expecting extension spec not null");
         }
 
-        final Validator.ExtensionSpec extensionSpec = tagSpec.getExtensionSpec();
+        final ValidatorProtos.ExtensionSpec extensionSpec = tagSpec.getExtensionSpec();
         // TagSpecs with extensions will only be evaluated if their dispatch_key
         // matches, which is based on this custom-element/custom-template/host-service
         // field attribute value. The dispatch key matching is case-insensitive for
@@ -1251,7 +1251,7 @@ public final class AttributeSpecUtils {
                     params.add(extensionSpec.getName());
                     params.add(encounteredVersion);
                     context.addWarning(
-                            Validator.ValidationError.Code.WARNING_EXTENSION_DEPRECATED_VERSION,
+                            ValidatorProtos.ValidationError.Code.WARNING_EXTENSION_DEPRECATED_VERSION,
                             context.getLineCol(),
                             params,
                             TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -1275,7 +1275,7 @@ public final class AttributeSpecUtils {
             params.add(TagSpecUtils.getTagSpecName(tagSpec));
             params.add(attrValue);
             context.addError(
-                    Validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(tagSpec),
@@ -1292,7 +1292,7 @@ public final class AttributeSpecUtils {
      * @param extensionSpec extensionSpec
      * @return returns the name of the attribute where you find the name of this sort of extension.
      */
-    public static String getExtensionNameAttribute(@Nonnull final Validator.ExtensionSpec extensionSpec) {
+    public static String getExtensionNameAttribute(@Nonnull final ValidatorProtos.ExtensionSpec extensionSpec) {
         switch (extensionSpec.getExtensionType()) {
             case CUSTOM_TEMPLATE:
                 return "custom-template";
@@ -1315,7 +1315,7 @@ public final class AttributeSpecUtils {
      */
     public static void validateAttrNotFoundInSpec(@Nonnull final ParsedTagSpec parsedTagSpec,
                                                   @Nonnull final Context context, @Nonnull final String attrName,
-                                                  @Nonnull final Validator.ValidationResult.Builder result) {
+                                                  @Nonnull final ValidatorProtos.ValidationResult.Builder result) {
         // For now, we just skip data- attributes in the validator, because
         // our schema doesn't capture which ones would be ok or not. E.g.
         // in practice, some type of ad or perhaps other custom elements require
@@ -1338,7 +1338,7 @@ public final class AttributeSpecUtils {
             params.add(attrName);
             params.add(TagSpecUtils.getTagSpecName(parsedTagSpec.getSpec()));
             context.addError(
-                    Validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
+                    ValidatorProtos.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
                     context.getLineCol(),
                     params,
                     context.getRules().getTemplateSpecUrl(), result);
@@ -1347,7 +1347,7 @@ public final class AttributeSpecUtils {
             params.add(attrName);
             params.add(TagSpecUtils.getTagSpecName(parsedTagSpec.getSpec()));
             context.addError(
-                    Validator.ValidationError.Code.DISALLOWED_ATTR,
+                    ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR,
                     context.getLineCol(),
                     params,
                     TagSpecUtils.getTagSpecUrl(parsedTagSpec.getSpec()),
@@ -1367,27 +1367,27 @@ public final class AttributeSpecUtils {
     public static void validateAttrValueBelowTemplateTag(@Nonnull final ParsedTagSpec parsedTagSpec,
                                                          @Nonnull final Context context,
                                                          @Nonnull final String attrName, @Nonnull final String attrValue,
-                                                         @Nonnull final Validator.ValidationResult.Builder result) {
+                                                         @Nonnull final ValidatorProtos.ValidationResult.Builder result) {
         if (attrValueHasUnescapedTemplateSyntax(attrValue)) {
-            final Validator.TagSpec spec = parsedTagSpec.getSpec();
+            final ValidatorProtos.TagSpec spec = parsedTagSpec.getSpec();
             List<String> params = new ArrayList<>();
             params.add(attrName);
             params.add(TagSpecUtils.getTagSpecName(spec));
             params.add(attrValue);
             context.addError(
-                    Validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     context.getRules().getTemplateSpecUrl(),
                     result);
         } else if (attrValueHasPartialsTemplateSyntax(attrValue)) {
-            final Validator.TagSpec spec = parsedTagSpec.getSpec();
+            final ValidatorProtos.TagSpec spec = parsedTagSpec.getSpec();
             List<String> params = new ArrayList<>();
             params.add(attrName);
             params.add(TagSpecUtils.getTagSpecName(spec));
             params.add(attrValue);
             context.addError(
-                    Validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
+                    ValidatorProtos.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
                     context.getLineCol(),
                     params,
                     context.getRules().getTemplateSpecUrl(),

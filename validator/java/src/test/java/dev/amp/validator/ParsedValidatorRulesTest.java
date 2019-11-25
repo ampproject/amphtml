@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -48,15 +47,15 @@ public class ParsedValidatorRulesTest {
 
     @BeforeMethod
     public void init() {
-        htmlFormatCode = Validator.HtmlFormat.Code.AMP4EMAIL;
+        htmlFormatCode = ValidatorProtos.HtmlFormat.Code.AMP4EMAIL;
 
         mockValidationManager = Mockito.mock(AMPValidatorManager.class);
         Mockito.when(mockValidationManager.getDispatchKeyByTagSpecId(3)).thenReturn("NAME_VALUE_DISPATCH");
 
-        rulesBuilder = Validator.ValidatorRules.newBuilder();
-        rulesBuilder.addTags(Validator.TagSpec.newBuilder()
-                .addHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
-                .setExtensionSpec(Validator.ExtensionSpec.newBuilder()
+        rulesBuilder = ValidatorProtos.ValidatorRules.newBuilder();
+        rulesBuilder.addTags(ValidatorProtos.TagSpec.newBuilder()
+                .addHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL)
+                .setExtensionSpec(ValidatorProtos.ExtensionSpec.newBuilder()
                         .setDeprecatedAllowDuplicates(true).setName("amp-lightbox-gallery").addVersion("1.0").build())
                 .addAlsoRequiresTagWarning("amp-ad extension .js script")
                 .setSpecName("SCRIPT")
@@ -66,78 +65,78 @@ public class ParsedValidatorRulesTest {
                 .setMandatory(true)
                 .build());
         // different html format
-        rulesBuilder.addTags(Validator.TagSpec.newBuilder()
+        rulesBuilder.addTags(ValidatorProtos.TagSpec.newBuilder()
                 .setTagName("AMP-STICKY-AD")
-                .setExtensionSpec(Validator.ExtensionSpec.newBuilder()
+                .setExtensionSpec(ValidatorProtos.ExtensionSpec.newBuilder()
                         .setName("amp-inputmask")
                         .build())
-                .addHtmlFormat(Validator.HtmlFormat.Code.AMP)
+                .addHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP)
                 .build());
-        rulesBuilder.addTags(Validator.TagSpec.newBuilder()
-                .addHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
+        rulesBuilder.addTags(ValidatorProtos.TagSpec.newBuilder()
+                .addHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL)
                 .setMandatoryAlternatives("alternatives")
                 .setSpecName("AMP-CAROUSEL lightbox")
                 .build());
-        rulesBuilder.addTags(Validator.TagSpec.newBuilder()
-                .addHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
+        rulesBuilder.addTags(ValidatorProtos.TagSpec.newBuilder()
+                .addHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL)
                 .setMandatory(true)
                 .addDisabledBy("transformed")
                 .setSpecName("amp-consent [type]")
                 .setMandatoryAlternatives("not-alternatives")
                 .build());
-        rulesBuilder.addTags(Validator.TagSpec.newBuilder()
+        rulesBuilder.addTags(ValidatorProtos.TagSpec.newBuilder()
                 .setTagName("$REFERENCE_POINT")
                 .setSpecName("AMP-SELECTOR option")
-                .addHtmlFormat(Validator.HtmlFormat.Code.AMP)
+                .addHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP)
                 .build());
-        rulesBuilder.addTags(Validator.TagSpec.newBuilder()
-                .addHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
+        rulesBuilder.addTags(ValidatorProtos.TagSpec.newBuilder()
+                .addHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL)
                 .setSpecName("amp-ad extension .js script")
                 .setTagName("amp-ad extension .js script")
                 .build());
 
-        rulesBuilder.addErrorFormats(Validator.ErrorFormat.newBuilder()
-                .setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING)
+        rulesBuilder.addErrorFormats(ValidatorProtos.ErrorFormat.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING)
                 .setFormat("The mandatory tag '%1' is missing or incorrect.")
                 .build());
-        rulesBuilder.addErrorFormats(Validator.ErrorFormat.newBuilder()
-                .setCode(Validator.ValidationError.Code.DISALLOWED_TAG)
+        rulesBuilder.addErrorFormats(ValidatorProtos.ErrorFormat.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG)
                 .setFormat("The tag '%1' is disallowed.")
                 .build());
-        rulesBuilder.addErrorFormats(Validator.ErrorFormat.newBuilder()
-                .setCode(Validator.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE)
+        rulesBuilder.addErrorFormats(ValidatorProtos.ErrorFormat.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE)
                 .setFormat("The property '%1' is missing from attribute '%2' in tag '%3'.")
                 .build());
-        rulesBuilder.addErrorFormats(Validator.ErrorFormat.newBuilder()
-                .setCode(Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE)
+        rulesBuilder.addErrorFormats(ValidatorProtos.ErrorFormat.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE)
                 .setFormat("SS syntax error in tag '%1' - the property '%2' is set to the disallowed value '%3'. Allowed values: %4.")
                 .build());
 
-        rulesBuilder.addErrorSpecificity(Validator.ErrorSpecificity.newBuilder()
-                .setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING)
+        rulesBuilder.addErrorSpecificity(ValidatorProtos.ErrorSpecificity.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING)
                 .setSpecificity(0)
                 .build());
-        rulesBuilder.addErrorSpecificity(Validator.ErrorSpecificity.newBuilder()
-                .setCode(Validator.ValidationError.Code.DISALLOWED_TAG)
+        rulesBuilder.addErrorSpecificity(ValidatorProtos.ErrorSpecificity.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG)
                 .setSpecificity(0)
                 .build());
-        rulesBuilder.addErrorSpecificity(Validator.ErrorSpecificity.newBuilder()
-                .setCode(Validator.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE)
+        rulesBuilder.addErrorSpecificity(ValidatorProtos.ErrorSpecificity.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE)
                 .setSpecificity(33)
                 .build());
-        rulesBuilder.addErrorSpecificity(Validator.ErrorSpecificity.newBuilder()
-                .setCode(Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE)
+        rulesBuilder.addErrorSpecificity(ValidatorProtos.ErrorSpecificity.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE)
                 .setSpecificity(0)
                 .build());
         rulesBuilder.setStylesSpecUrl(STYLES_SPEC_URL);
         rulesBuilder.setScriptSpecUrl(SCRIPT_SPEC_URL);
         rulesBuilder.setTemplateSpecUrl(TEMPLATE_SPEC_URL);
-        rulesBuilder.addCssLengthSpec(Validator.CssLengthSpec.newBuilder()
-                .setHtmlFormat(Validator.HtmlFormat.Code.AMP4EMAIL)
+        rulesBuilder.addCssLengthSpec(ValidatorProtos.CssLengthSpec.newBuilder()
+                .setHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP4EMAIL)
                 .setMaxBytes(MAX_BYTES)
                 .build());
-        rulesBuilder.addCssLengthSpec(Validator.CssLengthSpec.newBuilder()
-                .setHtmlFormat(Validator.HtmlFormat.Code.AMP)
+        rulesBuilder.addCssLengthSpec(ValidatorProtos.CssLengthSpec.newBuilder()
+                .setHtmlFormat(ValidatorProtos.HtmlFormat.Code.AMP)
                 .build());
 
         Mockito.when(mockValidationManager.getRules()).thenReturn(rulesBuilder);
@@ -145,23 +144,23 @@ public class ParsedValidatorRulesTest {
 
     @Test
     public void testRegex() {
-        final Validator.HtmlFormat.Code htmlFormatCode = Validator.HtmlFormat.Code.AMP4EMAIL;
+        final ValidatorProtos.HtmlFormat.Code htmlFormatCode = ValidatorProtos.HtmlFormat.Code.AMP4EMAIL;
         final AMPValidatorManager mockValidationManager = Mockito.mock(AMPValidatorManager.class);
         Mockito.when(mockValidationManager.getDispatchKeyByTagSpecId(0)).thenReturn("NAME_VALUE_DISPATCH");
         Mockito.when(mockValidationManager.getDispatchKeyByTagSpecId(1)).thenReturn(null);
 
-        final Validator.ValidatorRules.Builder rulesBuilder = Validator.ValidatorRules.newBuilder();
-        rulesBuilder.addTags(Validator.TagSpec.newBuilder()
-                .setExtensionSpec(Validator.ExtensionSpec.newBuilder()
+        final ValidatorProtos.ValidatorRules.Builder rulesBuilder = ValidatorProtos.ValidatorRules.newBuilder();
+        rulesBuilder.addTags(ValidatorProtos.TagSpec.newBuilder()
+                .setExtensionSpec(ValidatorProtos.ExtensionSpec.newBuilder()
                         .setDeprecatedAllowDuplicates(true).setName("amp-lightbox-gallery").addVersion("1.0").build())
                 .setSpecName("SCRIPT")
                 .build());
-        rulesBuilder.addErrorFormats(Validator.ErrorFormat.newBuilder()
-                .setCode(Validator.ValidationError.Code.DISALLOWED_TAG)
+        rulesBuilder.addErrorFormats(ValidatorProtos.ErrorFormat.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG)
                 .setFormat("The tag '%1' is disallowed.")
                 .build());
-        rulesBuilder.addErrorSpecificity(Validator.ErrorSpecificity.newBuilder()
-                .setCode(Validator.ValidationError.Code.DISALLOWED_TAG)
+        rulesBuilder.addErrorSpecificity(ValidatorProtos.ErrorSpecificity.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG)
                 .setSpecificity(8)
                 .build());
         Mockito.when(mockValidationManager.getRules()).thenReturn(rulesBuilder);
@@ -195,7 +194,7 @@ public class ParsedValidatorRulesTest {
 
         Mockito.when(mockValidationManager.getTagSpecIdByReferencePointTagSpecName(Mockito.anyString())).thenReturn(4);
 
-        String refPointName = rules.getReferencePointName(Validator.ReferencePoint.newBuilder().setTagSpecName("AMP-CAROUSEL lightbox").build());
+        String refPointName = rules.getReferencePointName(ValidatorProtos.ReferencePoint.newBuilder().setTagSpecName("AMP-CAROUSEL lightbox").build());
 
         Assert.assertEquals(refPointName, "AMP-SELECTOR option");
 
@@ -223,84 +222,84 @@ public class ParsedValidatorRulesTest {
     public void testBetterValidationResultThan() throws ValidatorException {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
-        Validator.ValidationResult.Builder resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.PASS);
+        ValidatorProtos.ValidationResult.Builder resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
 
-        Validator.ValidationResult.Builder resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-
-        Assert.assertTrue(rules.betterValidationResultThan(resultA, resultB));
-
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
+        ValidatorProtos.ValidationResult.Builder resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
         Assert.assertTrue(rules.betterValidationResultThan(resultA, resultB));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
+
+        Assert.assertTrue(rules.betterValidationResultThan(resultA, resultB));
+
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
 
         Assert.assertFalse(rules.betterValidationResultThan(resultA, resultB));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE).build());
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
 
         Assert.assertTrue(rules.betterValidationResultThan(resultA, resultB));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE).build());
 
         Assert.assertFalse(rules.betterValidationResultThan(resultA, resultB));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE).build());
 
 
         Assert.assertTrue(rules.betterValidationResultThan(resultA, resultB));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE).build());
 
 
         Assert.assertFalse(rules.betterValidationResultThan(resultA, resultB));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
 
 
         Assert.assertFalse(rules.betterValidationResultThan(resultA, resultB));
@@ -322,7 +321,7 @@ public class ParsedValidatorRulesTest {
 
         final Context mockContext = Mockito.mock(Context.class);
 
-        final Validator.ValidationResult.Builder validationResult = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder validationResult = ValidatorProtos.ValidationResult.newBuilder();
         validationResult.addTypeIdentifier("transformed");
 
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
@@ -330,16 +329,16 @@ public class ParsedValidatorRulesTest {
         rules.validateTypeIdentifiers(mockAttrs, formatIdentifiers, mockContext, validationResult);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         Mockito.verify(mockContext, Mockito.times(2)).addError(errorCodeCapture.capture(),
                 Mockito.any(Locator.class),
                 listCaptor.capture(),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        Assert.assertEquals(errorCodeCapture.getAllValues().get(0), Validator.ValidationError.Code.DEV_MODE_ONLY);
-        Assert.assertEquals(errorCodeCapture.getAllValues().get(1), Validator.ValidationError.Code.DISALLOWED_ATTR);
+        Assert.assertEquals(errorCodeCapture.getAllValues().get(0), ValidatorProtos.ValidationError.Code.DEV_MODE_ONLY);
+        Assert.assertEquals(errorCodeCapture.getAllValues().get(1), ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR);
 
         final List<List> params = listCaptor.getAllValues();
         Assert.assertEquals(params.size(), 2);
@@ -363,7 +362,7 @@ public class ParsedValidatorRulesTest {
 
         final Context mockContext = Mockito.mock(Context.class);
 
-        final Validator.ValidationResult.Builder validationResult = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder validationResult = ValidatorProtos.ValidationResult.newBuilder();
         validationResult.addTypeIdentifier("transformed");
 
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
@@ -371,16 +370,16 @@ public class ParsedValidatorRulesTest {
         rules.validateTypeIdentifiers(mockAttrs, formatIdentifiers, mockContext, validationResult);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         Mockito.verify(mockContext, Mockito.times(2)).addError(errorCodeCapture.capture(),
                 Mockito.any(Locator.class),
                 listCaptor.capture(),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        Assert.assertEquals(errorCodeCapture.getAllValues().get(0), Validator.ValidationError.Code.INVALID_ATTR_VALUE);
-        Assert.assertEquals(errorCodeCapture.getAllValues().get(1), Validator.ValidationError.Code.MANDATORY_ATTR_MISSING);
+        Assert.assertEquals(errorCodeCapture.getAllValues().get(0), ValidatorProtos.ValidationError.Code.INVALID_ATTR_VALUE);
+        Assert.assertEquals(errorCodeCapture.getAllValues().get(1), ValidatorProtos.ValidationError.Code.MANDATORY_ATTR_MISSING);
 
         final List<List> params = listCaptor.getAllValues();
         Assert.assertEquals(params.size(), 2);
@@ -397,7 +396,7 @@ public class ParsedValidatorRulesTest {
 
     @Test
     public void testValidateHtmlTag() {
-        Validator.HtmlFormat.Code testHtmlFormatCode = Validator.HtmlFormat.Code.AMP4EMAIL;
+        ValidatorProtos.HtmlFormat.Code testHtmlFormatCode = ValidatorProtos.HtmlFormat.Code.AMP4EMAIL;
         ParsedValidatorRules rules = new ParsedValidatorRules(testHtmlFormatCode, mockValidationManager);
 
         final ParsedHtmlTag mockParsedHtmlTag = Mockito.mock(ParsedHtmlTag.class);
@@ -408,59 +407,59 @@ public class ParsedValidatorRulesTest {
 
         Context mockContext = Mockito.mock(Context.class);
 
-        final Validator.ValidationResult.Builder validationResult = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder validationResult = ValidatorProtos.ValidationResult.newBuilder();
 
         rules.validateHtmlTag(mockParsedHtmlTag, mockContext, validationResult);
 
-        Mockito.verify(mockContext, Mockito.times(1)).addError(Mockito.any(Validator.ValidationError.Code.class),
+        Mockito.verify(mockContext, Mockito.times(1)).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
 
 
-        testHtmlFormatCode = Validator.HtmlFormat.Code.AMP4ADS;
+        testHtmlFormatCode = ValidatorProtos.HtmlFormat.Code.AMP4ADS;
         mockContext = Mockito.mock(Context.class);
 
         rules = new ParsedValidatorRules(testHtmlFormatCode, mockValidationManager);
         rules.validateHtmlTag(mockParsedHtmlTag, mockContext, validationResult);
 
-        Mockito.verify(mockContext, Mockito.times(1)).addError(Mockito.any(Validator.ValidationError.Code.class),
+        Mockito.verify(mockContext, Mockito.times(1)).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        testHtmlFormatCode = Validator.HtmlFormat.Code.AMP4EMAIL;
+        testHtmlFormatCode = ValidatorProtos.HtmlFormat.Code.AMP4EMAIL;
         mockContext = Mockito.mock(Context.class);
 
         rules = new ParsedValidatorRules(testHtmlFormatCode, mockValidationManager);
         rules.validateHtmlTag(mockParsedHtmlTag, mockContext, validationResult);
 
-        Mockito.verify(mockContext, Mockito.times(1)).addError(Mockito.any(Validator.ValidationError.Code.class),
+        Mockito.verify(mockContext, Mockito.times(1)).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        testHtmlFormatCode = Validator.HtmlFormat.Code.ACTIONS;
+        testHtmlFormatCode = ValidatorProtos.HtmlFormat.Code.ACTIONS;
         mockContext = Mockito.mock(Context.class);
 
         rules = new ParsedValidatorRules(testHtmlFormatCode, mockValidationManager);
         rules.validateHtmlTag(mockParsedHtmlTag, mockContext, validationResult);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         Mockito.verify(mockContext, Mockito.times(2))
                 .addError(errorCodeCapture.capture(),
                     Mockito.any(Locator.class),
                     listCaptor.capture(),
                     Mockito.anyString(),
-                    Mockito.any(Validator.ValidationResult.Builder.class));
+                    Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        Assert.assertEquals(errorCodeCapture.getAllValues().get(1), Validator.ValidationError.Code.MANDATORY_ATTR_MISSING);
+        Assert.assertEquals(errorCodeCapture.getAllValues().get(1), ValidatorProtos.ValidationError.Code.MANDATORY_ATTR_MISSING);
         Assert.assertEquals(listCaptor.getAllValues().get(1).size(), 2);
         Assert.assertEquals(listCaptor.getAllValues().get(1).get(0), "actions");
         Assert.assertEquals(listCaptor.getAllValues().get(1).get(1), "html");
@@ -470,14 +469,14 @@ public class ParsedValidatorRulesTest {
     public void testSpecificity() throws ValidatorException {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
-        Assert.assertEquals(rules.specificity(Validator.ValidationError.Code.DISALLOWED_TAG), 0);
+        Assert.assertEquals(rules.specificity(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG), 0);
 
         Assert.assertEquals(rules.maxSpecificity(ImmutableList.of(
-                Validator.ValidationError.newBuilder()
-                        .setCode(Validator.ValidationError.Code.DISALLOWED_TAG)
+                ValidatorProtos.ValidationError.newBuilder()
+                        .setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG)
                         .build(),
-                Validator.ValidationError.newBuilder()
-                        .setCode(Validator.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE)
+                ValidatorProtos.ValidationError.newBuilder()
+                        .setCode(ValidatorProtos.ValidationError.Code.MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE)
                         .build())), 33);
 
     }
@@ -486,38 +485,38 @@ public class ParsedValidatorRulesTest {
     public void testIsErrorSubset() {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
-        Validator.ValidationResult.Builder resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.PASS);
+        ValidatorProtos.ValidationResult.Builder resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
 
-        Validator.ValidationResult.Builder resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
+        ValidatorProtos.ValidationResult.Builder resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
 
         Assert.assertFalse(rules.isErrorSubset(resultA.getErrorsList(), resultB.getErrorsList()));
 
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
 
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultB.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultB.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
 
         Assert.assertTrue(rules.isErrorSubset(resultA.getErrorsList(), resultB.getErrorsList()));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.MANDATORY_TAG_MISSING).build());
-        resultA.addErrors(Validator.ValidationError.newBuilder().setCode(Validator.ValidationError.Code.DISALLOWED_TAG).build());
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING).build());
+        resultA.addErrors(ValidatorProtos.ValidationError.newBuilder().setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG).build());
 
     }
 
@@ -525,43 +524,43 @@ public class ParsedValidatorRulesTest {
     public void testBetterValidationStatusThan() throws ValidatorException {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
-        Validator.ValidationResult.Builder resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.PASS);
+        ValidatorProtos.ValidationResult.Builder resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
 
-        Validator.ValidationResult.Builder resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.PASS);
-
-        Assert.assertFalse(rules.betterValidationStatusThan(resultA.getStatus(), resultB.getStatus()));
-
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.PASS);
-
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
-
-        Assert.assertTrue(rules.betterValidationStatusThan(resultA.getStatus(), resultB.getStatus()));
-
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
-
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.PASS);
+        ValidatorProtos.ValidationResult.Builder resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
 
         Assert.assertFalse(rules.betterValidationStatusThan(resultA.getStatus(), resultB.getStatus()));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.FAIL);
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
 
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.UNKNOWN);
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
         Assert.assertTrue(rules.betterValidationStatusThan(resultA.getStatus(), resultB.getStatus()));
 
-        resultA = Validator.ValidationResult.newBuilder();
-        resultA.setStatus(Validator.ValidationResult.Status.UNKNOWN);
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
-        resultB = Validator.ValidationResult.newBuilder();
-        resultB.setStatus(Validator.ValidationResult.Status.FAIL);
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
+
+        Assert.assertFalse(rules.betterValidationStatusThan(resultA.getStatus(), resultB.getStatus()));
+
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
+
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.UNKNOWN);
+
+        Assert.assertTrue(rules.betterValidationStatusThan(resultA.getStatus(), resultB.getStatus()));
+
+        resultA = ValidatorProtos.ValidationResult.newBuilder();
+        resultA.setStatus(ValidatorProtos.ValidationResult.Status.UNKNOWN);
+
+        resultB = ValidatorProtos.ValidationResult.newBuilder();
+        resultB.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
         rules.betterValidationStatusThan(resultA.getStatus(), resultB.getStatus());
     }
@@ -586,7 +585,7 @@ public class ParsedValidatorRulesTest {
     public void testCssLengthSpec() {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
-        Assert.assertEquals(rules.getCssLengthSpec().get(0).getHtmlFormat(), Validator.HtmlFormat.Code.AMP4EMAIL);
+        Assert.assertEquals(rules.getCssLengthSpec().get(0).getHtmlFormat(), ValidatorProtos.HtmlFormat.Code.AMP4EMAIL);
     }
 
     @Test
@@ -594,7 +593,7 @@ public class ParsedValidatorRulesTest {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
         Mockito.when(mockValidationManager.getDescendantTagLists())
-                .thenReturn(Collections.singletonList(Validator.DescendantTagList.newBuilder()
+                .thenReturn(Collections.singletonList(ValidatorProtos.DescendantTagList.newBuilder()
                         .addTag("tag1")
                         .build()));
 
@@ -617,19 +616,19 @@ public class ParsedValidatorRulesTest {
 
         final Context mockContext = Mockito.mock(Context.class);
         Mockito.when(mockContext.valueSetsProvided()).thenReturn(ImmutableSet.of("a", "b"));
-        final Validator.ValidationError mismatchError = Validator.ValidationError.newBuilder()
-                .setCode(Validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE)
+        final ValidatorProtos.ValidationError mismatchError = ValidatorProtos.ValidationError.newBuilder()
+                .setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE)
                 .build();
         Mockito.when(mockContext.valueSetsRequired())
-                .thenReturn(ImmutableMap.of("a", ImmutableList.of(Validator.ValidationError.newBuilder()
-                                .setCode(Validator.ValidationError.Code.DISALLOWED_TAG)
+                .thenReturn(ImmutableMap.of("a", ImmutableList.of(ValidatorProtos.ValidationError.newBuilder()
+                                .setCode(ValidatorProtos.ValidationError.Code.DISALLOWED_TAG)
                                 .build()),
-                "b", ImmutableList.of(Validator.ValidationError.newBuilder()
-                                .setCode(Validator.ValidationError.Code.EXTENSION_UNUSED)
+                "b", ImmutableList.of(ValidatorProtos.ValidationError.newBuilder()
+                                .setCode(ValidatorProtos.ValidationError.Code.EXTENSION_UNUSED)
                                 .build()),
                         "c", ImmutableList.of(mismatchError)));
 
-        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
 
         rules.maybeEmitValueSetMismatchErrors(mockContext, result);
         Mockito.verify(mockContext, Mockito.times(1)).addBuiltError(mismatchError, result);
@@ -644,21 +643,21 @@ public class ParsedValidatorRulesTest {
         Mockito.when(mockContext.getInlineStyleByteSize()).thenReturn(MAX_BYTES);
         Mockito.when(mockContext.getStyleAmpCustomByteSize()).thenReturn(MAX_BYTES);
 
-        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
 
         rules.maybeEmitCssLengthSpecErrors(mockContext, result);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         Mockito.verify(mockContext, Mockito.times(1))
                 .addError(errorCodeCapture.capture(),
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.STYLESHEET_AND_INLINE_STYLE_TOO_LONG);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.STYLESHEET_AND_INLINE_STYLE_TOO_LONG);
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.size(), 2);
         Assert.assertEquals(params.get(0), "2000");
@@ -670,11 +669,11 @@ public class ParsedValidatorRulesTest {
         rules.maybeEmitCssLengthSpecErrors(mockContext, result);
 
         Mockito.verify(mockContext, Mockito.times(0))
-                .addError(Mockito.any(Validator.ValidationError.Code.class),
+                .addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                         Mockito.any(Locator.class),
                         Mockito.anyListOf(String.class),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
     }
 
@@ -686,22 +685,22 @@ public class ParsedValidatorRulesTest {
 
         Mockito.when(mockContext.getMandatoryAlternativesSatisfied()).thenReturn(ImmutableList.of("alternatives"));
 
-        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
 
         rules.maybeEmitMandatoryAlternativesSatisfiedErrors(mockContext, result);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         Mockito.verify(mockContext, Mockito.times(1))
                 .addError(errorCodeCapture.capture(),
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.MANDATORY_TAG_MISSING);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING);
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.size(), 1);
         Assert.assertEquals(params.get(0), "not-alternatives");
@@ -715,22 +714,22 @@ public class ParsedValidatorRulesTest {
         Context mockContext = Mockito.mock(Context.class);
         Mockito.when(mockContext.getTypeIdentifiers()).thenReturn(ImmutableList.of("transformed"));
 
-        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
 
         rules.maybeEmitMandatoryTagValidationErrors(mockContext, result);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         Mockito.verify(mockContext, Mockito.times(1))
                 .addError(errorCodeCapture.capture(),
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
 
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.MANDATORY_TAG_MISSING);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.MANDATORY_TAG_MISSING);
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.size(), 1);
         Assert.assertEquals(params.get(0), "SCRIPT");
@@ -756,35 +755,35 @@ public class ParsedValidatorRulesTest {
 
         Mockito.when(mockContext.getExtensions()).thenReturn(mockExtContext);
 
-        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
 
         rules.maybeEmitAlsoRequiresTagValidationErrors(mockContext, result);
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         Mockito.verify(mockContext, Mockito.times(3))
                 .addError(errorCodeCapture.capture(),
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         Mockito.verify(mockContext, Mockito.times(1))
                 .addWarning(errorCodeCapture.capture(),
                         Mockito.any(Locator.class),
                         listCaptor.capture(),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
-        final List<Validator.ValidationError.Code> errorCodes = errorCodeCapture.getAllValues();
+        final List<ValidatorProtos.ValidationError.Code> errorCodes = errorCodeCapture.getAllValues();
         final List<List> params = listCaptor.getAllValues();
 
         Assert.assertEquals(errorCodes.size(), 4);
-        Assert.assertEquals(errorCodes.get(0), Validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING);
-        Assert.assertEquals(errorCodes.get(1), Validator.ValidationError.Code.TAG_EXCLUDED_BY_TAG);
-        Assert.assertEquals(errorCodes.get(2), Validator.ValidationError.Code.EXTENSION_UNUSED);
-        Assert.assertEquals(errorCodes.get(3), Validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING);
+        Assert.assertEquals(errorCodes.get(0), ValidatorProtos.ValidationError.Code.TAG_REQUIRED_BY_MISSING);
+        Assert.assertEquals(errorCodes.get(1), ValidatorProtos.ValidationError.Code.TAG_EXCLUDED_BY_TAG);
+        Assert.assertEquals(errorCodes.get(2), ValidatorProtos.ValidationError.Code.EXTENSION_UNUSED);
+        Assert.assertEquals(errorCodes.get(3), ValidatorProtos.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING);
 
         Assert.assertEquals(params.size(), 4);
         Assert.assertEquals(params.get(0).size(), 2);
@@ -807,7 +806,7 @@ public class ParsedValidatorRulesTest {
     public void testmMybeEmitGlobalTagValidationErrors() throws TagValidationException {
         final ParsedValidatorRules rules = new ParsedValidatorRules(htmlFormatCode, mockValidationManager);
 
-        final Validator.ValidationResult.Builder result = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder result = ValidatorProtos.ValidationResult.newBuilder();
         Context mockContext = Mockito.mock(Context.class);
         final ExtensionsContext mockExtContext = Mockito.mock(ExtensionsContext.class);
         Mockito.when(mockExtContext.unusedExtensionsRequired()).thenReturn(ImmutableList.of("unused_ext_1"));
@@ -816,18 +815,18 @@ public class ParsedValidatorRulesTest {
         rules.maybeEmitGlobalTagValidationErrors(mockContext, result);
 
         Mockito.verify(mockContext, Mockito.times(5))
-                .addError(Mockito.any(Validator.ValidationError.Code.class),
+                .addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                         Mockito.any(Locator.class),
                         Mockito.anyListOf(String.class),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         Mockito.verify(mockContext, Mockito.times(0))
-                .addWarning(Mockito.any(Validator.ValidationError.Code.class),
+                .addWarning(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                         Mockito.any(Locator.class),
                         Mockito.anyListOf(String.class),
                         Mockito.anyString(),
-                        Mockito.any(Validator.ValidationResult.Builder.class));
+                        Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
     }
 
@@ -839,9 +838,9 @@ public class ParsedValidatorRulesTest {
         Assert.assertNotNull(rules.getParsedAttrSpecs());
     }
 
-    private Validator.ValidatorRules.Builder rulesBuilder;
+    private ValidatorProtos.ValidatorRules.Builder rulesBuilder;
 
-    private Validator.HtmlFormat.Code htmlFormatCode;
+    private ValidatorProtos.HtmlFormat.Code htmlFormatCode;
 
     private AMPValidatorManager mockValidationManager;
 

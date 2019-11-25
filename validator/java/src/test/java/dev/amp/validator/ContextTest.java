@@ -21,10 +21,6 @@
 
 package dev.amp.validator;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import amp.validator.Validator;
 import dev.amp.validator.exception.TagValidationException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -32,6 +28,9 @@ import org.testng.annotations.Test;
 import org.xml.sax.Locator;
 
 import java.util.Collections;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for {@link Context}
@@ -55,7 +54,7 @@ public class ContextTest {
      */
     @Test
     public void testUpdateFromTagResultsAncestorNoHead() throws TagValidationException {
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
         final ParsedHtmlTag htmlTag = mock(ParsedHtmlTag.class);
         when(htmlTag.upperName()).thenReturn(UPPER_NAME);
@@ -63,13 +62,13 @@ public class ContextTest {
         final ValidateTagResult mockReferencePointResult = mock(ValidateTagResult.class);
 
         final ValidateTagResult mockTagResult = mock(ValidateTagResult.class);
-        final Validator.ValidationResult.Builder validationBuilder = Validator.ValidationResult.newBuilder();
-        validationBuilder.setStatus(Validator.ValidationResult.Status.PASS);
+        final ValidatorProtos.ValidationResult.Builder validationBuilder = ValidatorProtos.ValidationResult.newBuilder();
+        validationBuilder.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
 
         when(mockTagResult.getValidationResult()).thenReturn(validationBuilder);
 
         final ParsedTagSpec tagSpec = mock(ParsedTagSpec.class);
-        final Validator.TagSpec tagSpecMock = mockValidatorRules.getByTagSpecId("test_satisfies").getSpec();
+        final ValidatorProtos.TagSpec tagSpecMock = mockValidatorRules.getByTagSpecId("test_satisfies").getSpec();
         when(tagSpec.getSpec()).thenReturn(tagSpecMock);
         when(mockTagResult.getBestMatchTagSpec()).thenReturn(tagSpec);
 
@@ -93,11 +92,11 @@ public class ContextTest {
      */
     @Test
     public void testSatisfyMandatoryAlternativesFromTagSpec() throws TagValidationException {
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
 
         final ParsedTagSpec tagSpec = mock(ParsedTagSpec.class);
-        final Validator.TagSpec tagSpecMock = mockValidatorRules.getByTagSpecId("test_satisfies").getSpec();
+        final ValidatorProtos.TagSpec tagSpecMock = mockValidatorRules.getByTagSpecId("test_satisfies").getSpec();
         when(tagSpec.getSpec()).thenReturn(tagSpecMock);
 
         context.satisfyMandatoryAlternativesFromTagSpec(tagSpec);
@@ -111,24 +110,24 @@ public class ContextTest {
      */
     @Test
     public void testAddBuiltError() {
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
 
-        final Validator.ValidationResult.Builder builder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder builder = ValidatorProtos.ValidationResult.newBuilder();
 
-        final Validator.ValidationError.Builder error = Validator.ValidationError.newBuilder();
-        error.setCode(Validator.ValidationError.Code.EXTENSION_UNUSED);
-        error.setSeverity(Validator.ValidationError.Severity.WARNING);
+        final ValidatorProtos.ValidationError.Builder error = ValidatorProtos.ValidationError.newBuilder();
+        error.setCode(ValidatorProtos.ValidationError.Code.EXTENSION_UNUSED);
+        error.setSeverity(ValidatorProtos.ValidationError.Severity.WARNING);
 
         context.addBuiltError(error.build(), builder);
 
-        Assert.assertEquals(builder.getStatus(), Validator.ValidationResult.Status.UNKNOWN);
+        Assert.assertEquals(builder.getStatus(), ValidatorProtos.ValidationResult.Status.UNKNOWN);
         Assert.assertEquals(builder.getErrorsList().size(), 1);
 
-        error.setSeverity(Validator.ValidationError.Severity.ERROR);
+        error.setSeverity(ValidatorProtos.ValidationError.Severity.ERROR);
 
         context.addBuiltError(error.build(), builder);
-        Assert.assertEquals(builder.getStatus(), Validator.ValidationResult.Status.FAIL);
+        Assert.assertEquals(builder.getStatus(), ValidatorProtos.ValidationResult.Status.FAIL);
         Assert.assertEquals(builder.getErrorsList().size(), 2);
     }
 
@@ -138,11 +137,11 @@ public class ContextTest {
     @Test
     public void testAddError() {
         final String mockSpecUrl = "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links";
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
-        final Validator.ValidationResult.Builder builder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder builder = ValidatorProtos.ValidationResult.newBuilder();
 
-        context.addError(Validator.ValidationError.Code.DISALLOWED_ATTR,
+        context.addError(ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR,
                 new Locator() {
                     @Override
                     public String getPublicId() {
@@ -168,11 +167,11 @@ public class ContextTest {
                 mockSpecUrl,
                 builder);
 
-        Assert.assertEquals(builder.getStatus(), Validator.ValidationResult.Status.FAIL);
+        Assert.assertEquals(builder.getStatus(), ValidatorProtos.ValidationResult.Status.FAIL);
         Assert.assertEquals(builder.getErrorsList().size(), 1);
         Assert.assertEquals(builder.getErrorsList().get(0).getLine(), 23);
         Assert.assertEquals(builder.getErrorsList().get(0).getCol(), 2);
-        Assert.assertEquals(builder.getErrorsList().get(0).getCode(), Validator.ValidationError.Code.DISALLOWED_ATTR);
+        Assert.assertEquals(builder.getErrorsList().get(0).getCode(), ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR);
         Assert.assertEquals(builder.getErrorsList().get(0).getSpecUrl(), mockSpecUrl);
     }
 
@@ -182,20 +181,20 @@ public class ContextTest {
     @Test
     public void testAddError1() {
         final String mockSpecUrl = "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links";
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
-        final Validator.ValidationResult.Builder builder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder builder = ValidatorProtos.ValidationResult.newBuilder();
 
-        context.addError(Validator.ValidationError.Code.DISALLOWED_ATTR,
+        context.addError(ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR,
                 23, 2, Collections.emptyList(),
                 mockSpecUrl,
                 builder);
 
-        Assert.assertEquals(builder.getStatus(), Validator.ValidationResult.Status.FAIL);
+        Assert.assertEquals(builder.getStatus(), ValidatorProtos.ValidationResult.Status.FAIL);
         Assert.assertEquals(builder.getErrorsList().size(), 1);
         Assert.assertEquals(builder.getErrorsList().get(0).getLine(), 23);
         Assert.assertEquals(builder.getErrorsList().get(0).getCol(), 2);
-        Assert.assertEquals(builder.getErrorsList().get(0).getCode(), Validator.ValidationError.Code.DISALLOWED_ATTR);
+        Assert.assertEquals(builder.getErrorsList().get(0).getCode(), ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR);
         Assert.assertEquals(builder.getErrorsList().get(0).getSpecUrl(), mockSpecUrl);
     }
 
@@ -205,11 +204,11 @@ public class ContextTest {
     @Test
     public void testAddWarning() {
         final String mockSpecUrl = "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links";
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
-        final Validator.ValidationResult.Builder builder = Validator.ValidationResult.newBuilder();
+        final ValidatorProtos.ValidationResult.Builder builder = ValidatorProtos.ValidationResult.newBuilder();
 
-        context.addWarning(Validator.ValidationError.Code.DISALLOWED_ATTR,
+        context.addWarning(ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR,
                 new Locator() {
                     @Override
                     public String getPublicId() {
@@ -235,11 +234,11 @@ public class ContextTest {
                 mockSpecUrl,
                 builder);
 
-        Assert.assertEquals(builder.getStatus(), Validator.ValidationResult.Status.UNKNOWN);
+        Assert.assertEquals(builder.getStatus(), ValidatorProtos.ValidationResult.Status.UNKNOWN);
         Assert.assertEquals(builder.getErrorsList().size(), 1);
         Assert.assertEquals(builder.getErrorsList().get(0).getLine(), 23);
         Assert.assertEquals(builder.getErrorsList().get(0).getCol(), 2);
-        Assert.assertEquals(builder.getErrorsList().get(0).getCode(), Validator.ValidationError.Code.DISALLOWED_ATTR);
+        Assert.assertEquals(builder.getErrorsList().get(0).getCode(), ValidatorProtos.ValidationError.Code.DISALLOWED_ATTR);
         Assert.assertEquals(builder.getErrorsList().get(0).getSpecUrl(), mockSpecUrl);
     }
 
@@ -248,7 +247,7 @@ public class ContextTest {
      */
     @Test
     public void testLineCol() {
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
 
         context.setLineCol(new Locator() {
@@ -285,7 +284,7 @@ public class ContextTest {
      */
     @Test
     public void testSettersGetters() {
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
         context.recordTypeIdentifier("type_id");
         context.recordTypeIdentifier("transformed");
@@ -305,7 +304,7 @@ public class ContextTest {
      */
     @Test
     public void testByteSizeComputations() {
-        mockValidatorRules = new ParsedValidatorRules(Validator.HtmlFormat.Code.AMP, ampValidatorManager);
+        mockValidatorRules = new ParsedValidatorRules(ValidatorProtos.HtmlFormat.Code.AMP, ampValidatorManager);
         final Context context = new Context(mockValidatorRules);
 
         context.addInlineStyleByteSize(40);

@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.exception.TagValidationException;
 import dev.amp.validator.utils.DispatchKeyUtils;
 
@@ -73,19 +72,19 @@ public class AMPValidatorManager {
         this.builder = ampValidatorLoader.load(filePath);
         this.combinedBlacklistedCdataRegexMap = new HashMap<>();
 
-        final List<Validator.TagSpec> tagSpecs = builder.getTagsList();
+        final List<ValidatorProtos.TagSpec> tagSpecs = builder.getTagsList();
 
         int tagSpecId = 0;
-        for (Validator.TagSpec tagSpec : tagSpecs) {
-            final List<Validator.HtmlFormat.Code> htmlFormats = tagSpec.getHtmlFormatList();
-            for (final Validator.HtmlFormat.Code htmlFormat : htmlFormats) {
-                Map<String, List<Validator.TagSpec>> tagSpecMap = tagSpecMapByHtmlFormat.get(htmlFormat);
+        for (ValidatorProtos.TagSpec tagSpec : tagSpecs) {
+            final List<ValidatorProtos.HtmlFormat.Code> htmlFormats = tagSpec.getHtmlFormatList();
+            for (final ValidatorProtos.HtmlFormat.Code htmlFormat : htmlFormats) {
+                Map<String, List<ValidatorProtos.TagSpec>> tagSpecMap = tagSpecMapByHtmlFormat.get(htmlFormat);
                 if (tagSpecMap == null) {
                     tagSpecMap = new HashMap<>();
                     tagSpecMap.put(tagSpec.getTagName(), new ArrayList<>());
                     tagSpecMapByHtmlFormat.put(htmlFormat, tagSpecMap);
                 }
-                List<Validator.TagSpec> tagSpecList = tagSpecMap.get(tagSpec.getTagName());
+                List<ValidatorProtos.TagSpec> tagSpecList = tagSpecMap.get(tagSpec.getTagName());
                 if (tagSpecList == null) {
                     tagSpecList = new ArrayList<>();
                 }
@@ -98,11 +97,11 @@ public class AMPValidatorManager {
                 dispatchKeyByTagSpecId.put(tagSpecId, dispatchKey);
             }
 
-            final List<amp.validator.Validator.BlackListedCDataRegex> blackListedCDataRegexList =
+            final List<ValidatorProtos.BlackListedCDataRegex> blackListedCDataRegexList =
                     tagSpec.getCdata().getBlacklistedCdataRegexList();
             if (blackListedCDataRegexList != null) {
                 final List<String> combined = new ArrayList<>();
-                for (final Validator.BlackListedCDataRegex blackListedCDataRegex : blackListedCDataRegexList) {
+                for (final ValidatorProtos.BlackListedCDataRegex blackListedCDataRegex : blackListedCDataRegexList) {
                     combined.add(blackListedCDataRegex.getRegex());
                 }
 
@@ -118,8 +117,8 @@ public class AMPValidatorManager {
 
 
         /** Populating the lookup for attribute list by name. */
-        List<Validator.AttrList> attrListsList = builder.getAttrListsList();
-        for (Validator.AttrList attrList : attrListsList) {
+        List<ValidatorProtos.AttrList> attrListsList = builder.getAttrListsList();
+        for (ValidatorProtos.AttrList attrList : attrListsList) {
             attrListMap.put(attrList.getName(), attrList);
         }
     }
@@ -130,8 +129,8 @@ public class AMPValidatorManager {
      * @param name tag spec name.
      * @return returns true if tag spec name exists.
      */
-    public boolean hasTagSpec(@Nonnull final Validator.HtmlFormat.Code htmlFormat, @Nonnull final String name) {
-        Map<String, List<Validator.TagSpec>> tagSpecMap = tagSpecMapByHtmlFormat.get(htmlFormat);
+    public boolean hasTagSpec(@Nonnull final ValidatorProtos.HtmlFormat.Code htmlFormat, @Nonnull final String name) {
+        Map<String, List<ValidatorProtos.TagSpec>> tagSpecMap = tagSpecMapByHtmlFormat.get(htmlFormat);
         return tagSpecMap != null ? tagSpecMap.containsKey(name) : false;
     }
 
@@ -141,8 +140,8 @@ public class AMPValidatorManager {
      * @param name tag spec name.
      * @return returns a list of TagSpect given a tag name.
      */
-    public List<Validator.TagSpec> getTagSpec(@Nonnull final Validator.HtmlFormat.Code htmlFormat, @Nonnull final String name) {
-         Map<String, List<Validator.TagSpec>> tagSpecMap = tagSpecMapByHtmlFormat.get(htmlFormat);
+    public List<ValidatorProtos.TagSpec> getTagSpec(@Nonnull final ValidatorProtos.HtmlFormat.Code htmlFormat, @Nonnull final String name) {
+         Map<String, List<ValidatorProtos.TagSpec>> tagSpecMap = tagSpecMapByHtmlFormat.get(htmlFormat);
          return tagSpecMap != null ? tagSpecMap.get(name) : null;
     }
 
@@ -151,7 +150,7 @@ public class AMPValidatorManager {
      * @param name attribute list name.
      * @return returns a list of AttrList given an attribute spec name.
      */
-    public Validator.AttrList getAttrList(@Nonnull final String name) {
+    public ValidatorProtos.AttrList getAttrList(@Nonnull final String name) {
         return attrListMap.get(name);
     }
 
@@ -161,9 +160,9 @@ public class AMPValidatorManager {
      * @param tagName a tag name.
      * @return returns a list of TagSpec given a tag name.
      */
-    public List<Validator.TagSpec> getListTagSpecByName(@Nonnull final Validator.HtmlFormat.Code htmlFormat,
+    public List<ValidatorProtos.TagSpec> getListTagSpecByName(@Nonnull final ValidatorProtos.HtmlFormat.Code htmlFormat,
                                                         @Nonnull final String tagName) {
-        Map<String, List<Validator.TagSpec>> tagMap = tagSpecMapByHtmlFormat.get(htmlFormat);
+        Map<String, List<ValidatorProtos.TagSpec>> tagMap = tagSpecMapByHtmlFormat.get(htmlFormat);
         return (tagMap != null ? tagMap.get(tagName) : null);
     }
 
@@ -172,7 +171,7 @@ public class AMPValidatorManager {
      *
      * @return returns the validation rules.
      */
-    public Validator.ValidatorRules.Builder getRules() {
+    public ValidatorProtos.ValidatorRules.Builder getRules() {
         return this.builder;
     }
 
@@ -180,8 +179,8 @@ public class AMPValidatorManager {
      * Returns the $GLOBAL_ATTRS attr spec list.
      * @return returns the $GLOBAL_ATTRS attr spec list.
      */
-    public List<Validator.AttrSpec> getGlobalAttrs() {
-        for (Validator.AttrList attrList : builder.getAttrListsList()) {
+    public List<ValidatorProtos.AttrSpec> getGlobalAttrs() {
+        for (ValidatorProtos.AttrList attrList : builder.getAttrListsList()) {
             if (attrList.getName().equals("$GLOBAL_ATTRS")) {
                 return attrList.getAttrsList();
             }
@@ -194,8 +193,8 @@ public class AMPValidatorManager {
      * Returns the $AMP_LAYOUT_ATTRS attr spec list.
      * @return returns the $AMP_LAYOUT_ATTRS attr spec list.
      */
-    public List<Validator.AttrSpec> getAmpLayoutAttrs() {
-        for (Validator.AttrList attrList : builder.getAttrListsList()) {
+    public List<ValidatorProtos.AttrSpec> getAmpLayoutAttrs() {
+        for (ValidatorProtos.AttrList attrList : builder.getAttrListsList()) {
             if (attrList.getName().equals("$AMP_LAYOUT_ATTRS")) {
                 return attrList.getAttrsList();
             }
@@ -208,7 +207,7 @@ public class AMPValidatorManager {
      * Returns the descendant tag lists.
      * @return returns the descendant tag lists.
      */
-    public List<Validator.DescendantTagList> getDescendantTagLists() {
+    public List<ValidatorProtos.DescendantTagList> getDescendantTagLists() {
         return this.builder.getDescendantTagListList();
     }
 
@@ -229,7 +228,7 @@ public class AMPValidatorManager {
      */
     public int getTagSpecIdByReferencePointTagSpecName(@Nonnull final String specName) throws TagValidationException {
         int index = 0;
-        for (Validator.TagSpec tagSpec : builder.getTagsList()) {
+        for (ValidatorProtos.TagSpec tagSpec : builder.getTagsList()) {
             if (tagSpec.getTagName().equals("$REFERENCE_POINT")) {
                 if (tagSpec.getSpecName().equals(specName)) {
                     return index;
@@ -261,7 +260,7 @@ public class AMPValidatorManager {
      * Returns the attr list map.
      * @return returns the attr list map.
      */
-    public Map<String, Validator.AttrList> getAttrListMap() {
+    public Map<String, ValidatorProtos.AttrList> getAttrListMap() {
         return attrListMap;
     }
 
@@ -276,15 +275,15 @@ public class AMPValidatorManager {
 
     /** Validator builder rules. */
     @Nonnull
-    private Validator.ValidatorRules.Builder builder = null;
+    private ValidatorProtos.ValidatorRules.Builder builder = null;
 
     /** TagSpec lookup (tag_name) by name. */
     @Nonnull
-    private final Map<Validator.HtmlFormat.Code, Map<String, List<Validator.TagSpec>>> tagSpecMapByHtmlFormat = new HashMap<>();
+    private final Map<ValidatorProtos.HtmlFormat.Code, Map<String, List<ValidatorProtos.TagSpec>>> tagSpecMapByHtmlFormat = new HashMap<>();
 
     /** Attribute list (attr_list) lookup by name. */
     @Nonnull
-    private final Map<String, Validator.AttrList> attrListMap = new HashMap<>();
+    private final Map<String, ValidatorProtos.AttrList> attrListMap = new HashMap<>();
 
     /**
      * The map of dispatch key by tag spec id.

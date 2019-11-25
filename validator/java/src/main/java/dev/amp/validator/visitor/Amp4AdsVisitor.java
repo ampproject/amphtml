@@ -21,7 +21,7 @@
 
 package dev.amp.validator.visitor;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.Token;
 import dev.amp.validator.css.AtRule;
 import dev.amp.validator.css.ErrorToken;
@@ -78,7 +78,7 @@ public class Amp4AdsVisitor implements RuleVisitor {
             params.add(ident);
             this.errors.add(createParseErrorTokenAt(
                     declaration,
-                    Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+                    ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
                     params));
         }
     }
@@ -107,7 +107,7 @@ public class Amp4AdsVisitor implements RuleVisitor {
                     params.add("[\'opacity\', \'transform\']");
                     this.errors.add(createParseErrorTokenAt(
                             decl,
-                            Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
+                            ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
                             params));
                 }
             }
@@ -124,7 +124,7 @@ public class Amp4AdsVisitor implements RuleVisitor {
 
                 this.errors.add(createParseErrorTokenAt(
                         decl,
-                        Validator.ValidationError.Code.CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
                         params));
             }
         }
@@ -186,7 +186,7 @@ public class Amp4AdsVisitor implements RuleVisitor {
      * @throws CssValidationException Css Validation Exception
      */
     public static ErrorToken createParseErrorTokenAt(@Nonnull final Token positionToken,
-                                                     @Nonnull final Validator.ValidationError.Code code,
+                                                     @Nonnull final ValidatorProtos.ValidationError.Code code,
                                                      @Nonnull final List<String> params) throws CssValidationException {
         ErrorToken token = new ErrorToken(code, params);
         copyPosTo(positionToken, token);

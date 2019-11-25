@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import com.google.common.collect.ImmutableList;
 import dev.amp.validator.css.CssValidationException;
 import dev.amp.validator.exception.TagValidationException;
@@ -81,7 +80,7 @@ public class ReferencePointMatcherTest {
 
         final ParsedValidatorRules mockRules = Mockito.mock(ParsedValidatorRules.class);
         final ParsedTagSpec mockTagSpec = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockTagSpec.getSpec()).thenReturn(Validator.TagSpec.newBuilder().build());
+        Mockito.when(mockTagSpec.getSpec()).thenReturn(ValidatorProtos.TagSpec.newBuilder().build());
 
         Mockito.when(mockTagSpec.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(true);
 
@@ -124,9 +123,9 @@ public class ReferencePointMatcherTest {
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.build();
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint));
 
@@ -140,7 +139,7 @@ public class ReferencePointMatcherTest {
 
         final ParsedValidatorRules mockRules = Mockito.mock(ParsedValidatorRules.class);
         final ParsedTagSpec mockTagSpec = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockTagSpec.getSpec()).thenReturn(Validator.TagSpec.newBuilder().build());
+        Mockito.when(mockTagSpec.getSpec()).thenReturn(ValidatorProtos.TagSpec.newBuilder().build());
 
         Mockito.when(mockTagSpec.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(true);
 
@@ -178,16 +177,16 @@ public class ReferencePointMatcherTest {
         final Context mockContext = Mockito.mock(Context.class);
 
         Mockito.when(mockRules.getByTagSpecId(Mockito.anyString())).thenReturn(mockTagSpec);
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.build();
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint));
 
@@ -195,7 +194,7 @@ public class ReferencePointMatcherTest {
         final ReferencePointMatcher refPointMatcher = new ReferencePointMatcher(mockRules, mockPoints, locator);
         final ValidateTagResult validateTagResult = refPointMatcher.validateTag(mockHtmlTag, mockContext);
 
-        Assert.assertEquals(validateTagResult.getValidationResult().getStatus(), Validator.ValidationResult.Status.PASS);
+        Assert.assertEquals(validateTagResult.getValidationResult().getStatus(), ValidatorProtos.ValidationResult.Status.PASS);
         Assert.assertEquals(validateTagResult.getBestMatchTagSpec(), mockTagSpec);
 
         refPointMatcher.cleanup();
@@ -206,7 +205,7 @@ public class ReferencePointMatcherTest {
 
         final ParsedValidatorRules mockRules = Mockito.mock(ParsedValidatorRules.class);
         final ParsedTagSpec mockTagSpec = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockTagSpec.getSpec()).thenReturn(Validator.TagSpec.newBuilder().setMandatoryParent("HEAD").build());
+        Mockito.when(mockTagSpec.getSpec()).thenReturn(ValidatorProtos.TagSpec.newBuilder().setMandatoryParent("HEAD").build());
 
         Mockito.when(mockTagSpec.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(true);
 
@@ -246,20 +245,20 @@ public class ReferencePointMatcherTest {
             public Void answer(final InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
 
-                Validator.ValidationResult.Builder validationResult = (Validator.ValidationResult.Builder) args[4];
-                validationResult.setStatus(Validator.ValidationResult.Status.FAIL);
+                ValidatorProtos.ValidationResult.Builder validationResult = (ValidatorProtos.ValidationResult.Builder) args[4];
+                validationResult.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
                 return null;
             }
-        }).when(mockContext).addError(Mockito.any(Validator.ValidationError.Code.class),
+        }).when(mockContext).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                                     Mockito.any(Locator.class),
                                     Mockito.anyListOf(String.class),
                                     Mockito.anyString(),
-                                    Mockito.any(Validator.ValidationResult.Builder.class));
+                                    Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         Mockito.when(mockRules.getByTagSpecId(Mockito.anyString())).thenReturn(mockTagSpec);
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
@@ -267,9 +266,9 @@ public class ReferencePointMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.build();
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint));
         Mockito.when(mockPoints.size()).thenReturn(1);
@@ -277,14 +276,14 @@ public class ReferencePointMatcherTest {
         final ReferencePointMatcher refPointMatcher = new ReferencePointMatcher(mockRules, mockPoints, locator);
         final ValidateTagResult validateTagResult = refPointMatcher.validateTag(mockHtmlTag, mockContext);
 
-        Assert.assertEquals(validateTagResult.getValidationResult().getStatus(), Validator.ValidationResult.Status.FAIL);
+        Assert.assertEquals(validateTagResult.getValidationResult().getStatus(), ValidatorProtos.ValidationResult.Status.FAIL);
         Assert.assertNull(validateTagResult.getBestMatchTagSpec());
 
-        Mockito.verify(mockContext, Mockito.times(2)).addError(Mockito.any(Validator.ValidationError.Code.class),
+        Mockito.verify(mockContext, Mockito.times(2)).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         refPointMatcher.cleanup();
     }
@@ -294,7 +293,7 @@ public class ReferencePointMatcherTest {
 
         final ParsedValidatorRules mockRules = Mockito.mock(ParsedValidatorRules.class);
         final ParsedTagSpec mockTagSpec = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockTagSpec.getSpec()).thenReturn(Validator.TagSpec.newBuilder().setMandatoryParent("HEAD").build());
+        Mockito.when(mockTagSpec.getSpec()).thenReturn(ValidatorProtos.TagSpec.newBuilder().setMandatoryParent("HEAD").build());
 
         Mockito.when(mockTagSpec.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(true);
 
@@ -334,20 +333,20 @@ public class ReferencePointMatcherTest {
             public Void answer(final InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
 
-                Validator.ValidationResult.Builder validationResult = (Validator.ValidationResult.Builder) args[4];
-                validationResult.setStatus(Validator.ValidationResult.Status.FAIL);
+                ValidatorProtos.ValidationResult.Builder validationResult = (ValidatorProtos.ValidationResult.Builder) args[4];
+                validationResult.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
                 return null;
             }
-        }).when(mockContext).addError(Mockito.any(Validator.ValidationError.Code.class),
+        }).when(mockContext).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         Mockito.when(mockRules.getByTagSpecId(Mockito.anyString())).thenReturn(mockTagSpec);
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
@@ -355,13 +354,13 @@ public class ReferencePointMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.build();
 
-        final Validator.ReferencePoint.Builder refPointBuilder2 = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder2 = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint2 = refPointBuilder2.build();
+        final ValidatorProtos.ReferencePoint refPoint2 = refPointBuilder2.build();
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint, refPoint2));
         Mockito.when(mockPoints.size()).thenReturn(2);
@@ -371,14 +370,14 @@ public class ReferencePointMatcherTest {
 
         final ValidateTagResult validateTagResult = refPointMatcher.validateTag(mockHtmlTag, mockContext);
 
-        Assert.assertEquals(validateTagResult.getValidationResult().getStatus(), Validator.ValidationResult.Status.FAIL);
+        Assert.assertEquals(validateTagResult.getValidationResult().getStatus(), ValidatorProtos.ValidationResult.Status.FAIL);
         Assert.assertNull(validateTagResult.getBestMatchTagSpec());
 
-        Mockito.verify(mockContext, Mockito.times(3)).addError(Mockito.any(Validator.ValidationError.Code.class),
+        Mockito.verify(mockContext, Mockito.times(3)).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         refPointMatcher.cleanup();
 
@@ -391,7 +390,7 @@ public class ReferencePointMatcherTest {
 
         final ParsedValidatorRules mockRules = Mockito.mock(ParsedValidatorRules.class);
         final ParsedTagSpec mockTagSpec = Mockito.mock(ParsedTagSpec.class);
-        Mockito.when(mockTagSpec.getSpec()).thenReturn(Validator.TagSpec.newBuilder().setMandatoryParent("HEAD").build());
+        Mockito.when(mockTagSpec.getSpec()).thenReturn(ValidatorProtos.TagSpec.newBuilder().setMandatoryParent("HEAD").build());
 
         Mockito.when(mockTagSpec.isUsedForTypeIdentifiers(Mockito.anyListOf(String.class))).thenReturn(false);
 
@@ -431,20 +430,20 @@ public class ReferencePointMatcherTest {
             public Void answer(final InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
 
-                Validator.ValidationResult.Builder validationResult = (Validator.ValidationResult.Builder) args[4];
-                validationResult.setStatus(Validator.ValidationResult.Status.FAIL);
+                ValidatorProtos.ValidationResult.Builder validationResult = (ValidatorProtos.ValidationResult.Builder) args[4];
+                validationResult.setStatus(ValidatorProtos.ValidationResult.Status.FAIL);
 
                 return null;
             }
-        }).when(mockContext).addError(Mockito.any(Validator.ValidationError.Code.class),
+        }).when(mockContext).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         Mockito.when(mockRules.getByTagSpecId(Mockito.anyString())).thenReturn(mockTagSpec);
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
@@ -452,9 +451,9 @@ public class ReferencePointMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.build();
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint));
         Mockito.when(mockPoints.size()).thenReturn(1);
@@ -505,28 +504,28 @@ public class ReferencePointMatcherTest {
         final Context mockContext = Mockito.mock(Context.class);
 
         Mockito.when(mockRules.getByTagSpecId(Mockito.anyString())).thenReturn(mockTagSpec);
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
-        Mockito.when(mockRules.getReferencePointName(Mockito.any(Validator.ReferencePoint.class))).thenReturn("refPoint1");
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.getReferencePointName(Mockito.any(ValidatorProtos.ReferencePoint.class))).thenReturn("refPoint1");
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
         Mockito.when(mockTagStack.parentTagName()).thenReturn("BODY");
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.setMandatory(true).build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.setMandatory(true).build();
         Mockito.when(mockRules.getTagSpecIdByReferencePointTagSpecName(Mockito.anyString())).thenReturn(8);
 
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint));
         Mockito.when(mockPoints.size()).thenReturn(2);
         Mockito.when(mockPoints.parentTagSpecName()).thenReturn("parent1");
-        Validator.ValidationResult.Builder builder = Validator.ValidationResult.newBuilder();
+        ValidatorProtos.ValidationResult.Builder builder = ValidatorProtos.ValidationResult.newBuilder();
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         final ReferencePointMatcher refPointMatcher = new ReferencePointMatcher(mockRules, mockPoints, locator);
 
@@ -542,13 +541,13 @@ public class ReferencePointMatcherTest {
                 Mockito.any(Locator.class),
                 listCaptor.capture(),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.size(), 2);
         Assert.assertEquals(params.get(0), "refPoint1");
         Assert.assertEquals(params.get(1), "parent1");
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.MANDATORY_REFERENCE_POINT_MISSING);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.MANDATORY_REFERENCE_POINT_MISSING);
 
         refPointMatcher.cleanup();
     }
@@ -595,28 +594,28 @@ public class ReferencePointMatcherTest {
         final Context mockContext = Mockito.mock(Context.class);
 
         Mockito.when(mockRules.getByTagSpecId(Mockito.anyString())).thenReturn(mockTagSpec);
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
-        Mockito.when(mockRules.getReferencePointName(Mockito.any(Validator.ReferencePoint.class))).thenReturn("refPoint1");
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.getReferencePointName(Mockito.any(ValidatorProtos.ReferencePoint.class))).thenReturn("refPoint1");
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
         Mockito.when(mockTagStack.parentTagName()).thenReturn("BODY");
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.setUnique(true).build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.setUnique(true).build();
         Mockito.when(mockRules.getTagSpecIdByReferencePointTagSpecName(Mockito.anyString())).thenReturn(10);
 
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint));
         Mockito.when(mockPoints.size()).thenReturn(2);
         Mockito.when(mockPoints.parentTagSpecName()).thenReturn("parent1");
-        Validator.ValidationResult.Builder builder = Validator.ValidationResult.newBuilder();
+        ValidatorProtos.ValidationResult.Builder builder = ValidatorProtos.ValidationResult.newBuilder();
 
         ArgumentCaptor<List> listCaptor = ArgumentCaptor.forClass(List.class);
-        ArgumentCaptor<Validator.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(Validator.ValidationError.Code.class);
+        ArgumentCaptor<ValidatorProtos.ValidationError.Code> errorCodeCapture = ArgumentCaptor.forClass(ValidatorProtos.ValidationError.Code.class);
 
         final ReferencePointMatcher refPointMatcher = new ReferencePointMatcher(mockRules, mockPoints, locator);
 
@@ -632,13 +631,13 @@ public class ReferencePointMatcherTest {
                 Mockito.any(Locator.class),
                 listCaptor.capture(),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         final List<String> params = listCaptor.getValue();
         Assert.assertEquals(params.size(), 2);
         Assert.assertEquals(params.get(0), "refPoint1");
         Assert.assertEquals(params.get(1), "parent1");
-        Assert.assertEquals(errorCodeCapture.getValue(), Validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.DUPLICATE_REFERENCE_POINT);
 
         refPointMatcher.cleanup();
     }
@@ -685,8 +684,8 @@ public class ReferencePointMatcherTest {
         final Context mockContext = Mockito.mock(Context.class);
 
         Mockito.when(mockRules.getByTagSpecId(Mockito.anyString())).thenReturn(mockTagSpec);
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
@@ -694,20 +693,20 @@ public class ReferencePointMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.setMandatory(true).build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.setMandatory(true).build();
 
-        final Validator.ReferencePoint.Builder refPointBuilder2 = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder2 = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint2 = refPointBuilder2.setUnique(true).build();
+        final ValidatorProtos.ReferencePoint refPoint2 = refPointBuilder2.setUnique(true).build();
         Mockito.when(mockRules.getTagSpecIdByReferencePointTagSpecName(Mockito.anyString())).thenReturn(8).thenReturn(10);
 
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint, refPoint2));
         Mockito.when(mockPoints.size()).thenReturn(2);
 
-        Validator.ValidationResult.Builder builder = Validator.ValidationResult.newBuilder();
+        ValidatorProtos.ValidationResult.Builder builder = ValidatorProtos.ValidationResult.newBuilder();
 
         final ReferencePointMatcher refPointMatcher = new ReferencePointMatcher(mockRules, mockPoints, locator);
 
@@ -719,11 +718,11 @@ public class ReferencePointMatcherTest {
 
         refPointMatcher.exitParentTag(mockContext, builder);
 
-        Mockito.verify(mockContext, Mockito.times(2)).addError(Mockito.any(Validator.ValidationError.Code.class),
+        Mockito.verify(mockContext, Mockito.times(2)).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         refPointMatcher.cleanup();
     }
@@ -770,8 +769,8 @@ public class ReferencePointMatcherTest {
         final Context mockContext = Mockito.mock(Context.class);
 
         Mockito.when(mockRules.getByTagSpecId(Mockito.anyString())).thenReturn(mockTagSpec);
-        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(Validator.ValidationResult.Builder.class),
-                Mockito.any(Validator.ValidationResult.Builder.class))).thenReturn(true);
+        Mockito.when(mockRules.betterValidationResultThan(Mockito.any(ValidatorProtos.ValidationResult.Builder.class),
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class))).thenReturn(true);
         Mockito.when(mockContext.getRules()).thenReturn(mockRules);
 
         final TagStack mockTagStack = Mockito.mock(TagStack.class);
@@ -779,20 +778,20 @@ public class ReferencePointMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
 
-        final Validator.ReferencePoint.Builder refPointBuilder = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint = refPointBuilder.build();
+        final ValidatorProtos.ReferencePoint refPoint = refPointBuilder.build();
 
-        final Validator.ReferencePoint.Builder refPointBuilder2 = Validator.ReferencePoint.newBuilder();
+        final ValidatorProtos.ReferencePoint.Builder refPointBuilder2 = ValidatorProtos.ReferencePoint.newBuilder();
 
-        final Validator.ReferencePoint refPoint2 = refPointBuilder2.build();
+        final ValidatorProtos.ReferencePoint refPoint2 = refPointBuilder2.build();
         Mockito.when(mockRules.getTagSpecIdByReferencePointTagSpecName(Mockito.anyString())).thenReturn(8).thenReturn(10);
 
 
         Mockito.when(mockPoints.iterate()).thenReturn(ImmutableList.of(refPoint, refPoint2));
         Mockito.when(mockPoints.size()).thenReturn(2);
 
-        Validator.ValidationResult.Builder builder = Validator.ValidationResult.newBuilder();
+        ValidatorProtos.ValidationResult.Builder builder = ValidatorProtos.ValidationResult.newBuilder();
 
         final ReferencePointMatcher refPointMatcher = new ReferencePointMatcher(mockRules, mockPoints, locator);
 
@@ -804,11 +803,11 @@ public class ReferencePointMatcherTest {
 
         refPointMatcher.exitParentTag(mockContext, builder);
 
-        Mockito.verify(mockContext, Mockito.times(0)).addError(Mockito.any(Validator.ValidationError.Code.class),
+        Mockito.verify(mockContext, Mockito.times(0)).addError(Mockito.any(ValidatorProtos.ValidationError.Code.class),
                 Mockito.any(Locator.class),
                 Mockito.anyListOf(String.class),
                 Mockito.anyString(),
-                Mockito.any(Validator.ValidationResult.Builder.class));
+                Mockito.any(ValidatorProtos.ValidationResult.Builder.class));
 
         refPointMatcher.cleanup();
     }

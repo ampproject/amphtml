@@ -21,7 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.SACParserCSS3Constants;
 import com.steadystate.css.parser.Token;
 import dev.amp.validator.css.AtRule;
@@ -65,12 +65,12 @@ public class CssSpecUtilsTest {
     tokens.add(new Token(1, "\n"));
     tokens.add(new Token(0, ""));
 
-    final Map<String, Validator.AtRuleSpec.BlockType> atRuleSpec = new HashMap<>();
-    atRuleSpec.put("$DEFAULT", Validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-    atRuleSpec.put("media", Validator.AtRuleSpec.BlockType.PARSE_AS_RULES);
-    atRuleSpec.put("page", Validator.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec = new HashMap<>();
+    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
+    atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
 
-    final Validator.AtRuleSpec.BlockType defaultSpec = Validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
+    final ValidatorProtos.AtRuleSpec.BlockType defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
     final List<ErrorToken> errors = new ArrayList<>();
 
     try {
@@ -111,12 +111,12 @@ public class CssSpecUtilsTest {
     tokens.add(new Token(0, ""));
 
 
-    final Map<String, Validator.AtRuleSpec.BlockType> atRuleSpec = new HashMap<>();
-    atRuleSpec.put("$DEFAULT", Validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-    atRuleSpec.put("media", Validator.AtRuleSpec.BlockType.PARSE_AS_RULES);
-    atRuleSpec.put("page", Validator.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    final Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec = new HashMap<>();
+    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
+    atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
 
-    final Validator.AtRuleSpec.BlockType defaultSpec = Validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
+    final ValidatorProtos.AtRuleSpec.BlockType defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
     final List<ErrorToken> errors = new ArrayList<>();
     final List<ParsedCssUrl> parsedUrls = new ArrayList<>();
 
@@ -162,14 +162,14 @@ public class CssSpecUtilsTest {
 
   @Test
   public void testIsDeclarationValid() {
-    final Validator.CssSpec.Builder cssSpecBuilder = Validator.CssSpec.newBuilder();
+    final ValidatorProtos.CssSpec.Builder cssSpecBuilder = ValidatorProtos.CssSpec.newBuilder();
     cssSpecBuilder.addDeclaration("testName");
     Assert.assertTrue(CssSpecUtils.isDeclarationValid(cssSpecBuilder.build(), "testName"));
   }
 
   @Test
   public void testAllowedDeclarationsString() {
-    final Validator.CssSpec.Builder cssSpecBuilder = Validator.CssSpec.newBuilder();
+    final ValidatorProtos.CssSpec.Builder cssSpecBuilder = ValidatorProtos.CssSpec.newBuilder();
     cssSpecBuilder.addDeclaration("testName1");
     cssSpecBuilder.addDeclaration("testName2");
     Assert.assertEquals(CssSpecUtils.allowedDeclarationsString(cssSpecBuilder.build()),

@@ -21,12 +21,12 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import org.testng.Assert;
 import org.testng.TestException;
 import org.testng.annotations.Test;
 
-import static amp.validator.Validator.AttrSpec.DispatchKeyType;
+import static dev.amp.validator.ValidatorProtos.AttrSpec.DispatchKeyType;
 
 /**
  * Test for {@link DispatchKeyUtils}
@@ -55,32 +55,32 @@ public class DispatchKeyUtilsTest {
 
   @Test
   public void testGetDispatchKeyForTagSpecOrNone() {
-    Validator.AttrSpec.Builder attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    ValidatorProtos.AttrSpec.Builder attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
     attrSpecBuilder.setDispatchKey(DispatchKeyType.NAME_DISPATCH);
     attrSpecBuilder.setName("someAttr");
 
-    Validator.TagSpec.Builder tagSpecBuilder = Validator.TagSpec.newBuilder();
+    ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
     tagSpecBuilder.addAttrs(attrSpecBuilder.build());
 
     Assert.assertEquals(DispatchKeyUtils.getDispatchKeyForTagSpecOrNone(tagSpecBuilder.build()), "someAttr");
 
-    attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
     attrSpecBuilder.setDispatchKey(DispatchKeyType.NAME_VALUE_DISPATCH);
     attrSpecBuilder.setName("someAttr");
     attrSpecBuilder.addValueCasei("someValue");
 
-    tagSpecBuilder = Validator.TagSpec.newBuilder();
+    tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
     tagSpecBuilder.addAttrs(attrSpecBuilder.build());
 
     Assert.assertEquals(DispatchKeyUtils.getDispatchKeyForTagSpecOrNone(tagSpecBuilder.build()),
       "someAttr\u0000someValue");
 
-    attrSpecBuilder = Validator.AttrSpec.newBuilder();
+    attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
     attrSpecBuilder.setDispatchKey(DispatchKeyType.NAME_VALUE_PARENT_DISPATCH);
     attrSpecBuilder.setName("someAttr");
     attrSpecBuilder.addValueCasei("someValue");
 
-    tagSpecBuilder = Validator.TagSpec.newBuilder();
+    tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
     tagSpecBuilder.addAttrs(attrSpecBuilder.build());
     tagSpecBuilder.setMandatoryParent("mandatoryParent");
 

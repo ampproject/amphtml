@@ -21,7 +21,7 @@
 
 package dev.amp.validator.css;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 import com.steadystate.css.parser.SACParserCSS3Constants;
 import com.steadystate.css.parser.Token;
 import org.testng.Assert;
@@ -46,12 +46,12 @@ public class CanonicalizerTest {
 
   @BeforeSuite
   public void init() {
-    defaultSpec = Validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
+    defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
     atRuleSpec = new HashMap<>();
 
-    atRuleSpec.put("$DEFAULT", Validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-    atRuleSpec.put("media", Validator.AtRuleSpec.BlockType.PARSE_AS_RULES);
-    atRuleSpec.put("page", Validator.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
+    atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
   }
 
   @BeforeTest
@@ -95,7 +95,7 @@ public class CanonicalizerTest {
       List<Declaration> declarations = canonicalizer.parseAListOfDeclarations(tokenList, errors);
       Assert.assertEquals(declarations.size(), 0);
       Assert.assertEquals(errors.size(), 1);
-      Assert.assertEquals(errors.get(0).getCode(), Validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE);
+      Assert.assertEquals(errors.get(0).getCode(), ValidatorProtos.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE);
 
     } catch (CssValidationException | IOException e) {
       e.printStackTrace();
@@ -179,8 +179,8 @@ public class CanonicalizerTest {
     }
   }
 
-  private Validator.AtRuleSpec.BlockType defaultSpec;
-  private Map<String, Validator.AtRuleSpec.BlockType> atRuleSpec;
+  private ValidatorProtos.AtRuleSpec.BlockType defaultSpec;
+  private Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec;
   private Canonicalizer canonicalizer;
   private List<com.steadystate.css.parser.Token> tokenList;
   private CssParser cssParser;

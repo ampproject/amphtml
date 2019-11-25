@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import dev.amp.validator.exception.TagValidationException;
 import com.steadystate.css.parser.Token;
 
@@ -85,9 +84,9 @@ public class CdataMatcher {
      * @throws IOException            IO exception.
      */
     public void match(@Nonnull final String cdata, @Nonnull final Context context,
-                      @Nonnull final Validator.ValidationResult.Builder validationResult)
+                      @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult)
             throws TagValidationException, CssValidationException, IOException {
-        final Validator.CdataSpec cdataSpec = this.getTagSpec().getCdata();
+        final ValidatorProtos.CdataSpec cdataSpec = this.getTagSpec().getCdata();
         if (cdataSpec == null) {
             return;
         }
@@ -99,7 +98,7 @@ public class CdataMatcher {
             params.add(String.valueOf(cdata.length()));
             params.add(String.valueOf(cdataSpec.getMaxBytes()));
             context.addError(
-                    Validator.ValidationError.Code.STYLESHEET_TOO_LONG,
+                    ValidatorProtos.ValidationError.Code.STYLESHEET_TOO_LONG,
                     context.getLineCol(),
                     params,
                     cdataSpec.getMaxBytesSpecUrl(),
@@ -120,7 +119,7 @@ public class CdataMatcher {
         if (cdataSpec.hasMandatoryCdata()) {
             if (!cdataSpec.getMandatoryCdata().equals(cdata)) {
                 context.addError(
-                        Validator.ValidationError.Code.MANDATORY_CDATA_MISSING_OR_INCORRECT,
+                        ValidatorProtos.ValidationError.Code.MANDATORY_CDATA_MISSING_OR_INCORRECT,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(this.getTagSpec()),
@@ -134,7 +133,7 @@ public class CdataMatcher {
                     .getFullMatchRegex(this.getTagSpec().getCdata().getCdataRegex())
                     .matcher(cdata).matches()) {
                 context.addError(
-                        Validator.ValidationError.Code.MANDATORY_CDATA_MISSING_OR_INCORRECT,
+                        ValidatorProtos.ValidationError.Code.MANDATORY_CDATA_MISSING_OR_INCORRECT,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(this.getTagSpec()),
@@ -146,7 +145,7 @@ public class CdataMatcher {
         } else if (cdataSpec.getWhitespaceOnly()) {
             if (!(WHITE_SPACE_CHARACTER_PATTERN.matcher(cdata).matches())) {
                 context.addError(
-                        Validator.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED,
+                        ValidatorProtos.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED,
                         context.getLineCol(),
                         params,
                         TagSpecUtils.getTagSpecUrl(this.getTagSpec()),
@@ -180,12 +179,12 @@ public class CdataMatcher {
             return;
         }
 
-        for (Validator.BlackListedCDataRegex blacklist : cdataSpec.getBlacklistedCdataRegexList()) {
+        for (ValidatorProtos.BlackListedCDataRegex blacklist : cdataSpec.getBlacklistedCdataRegexList()) {
             final Pattern p = Pattern.compile(blacklist.getRegex(), Pattern.CASE_INSENSITIVE);
             if (p.matcher(cdata).find()) {
                 params.add(blacklist.getErrorMessage());
                 context.addError(
-                        Validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+                        ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
                         context.getLineCol(),
                         /* params */
                         params,
@@ -210,9 +209,9 @@ public class CdataMatcher {
      * @throws CssValidationException css validation exception.
      * @throws IOException            IO validation exception.
      */
-    public int matchCss(@Nonnull final String cdata, @Nonnull final Validator.CssSpec cssSpec,
+    public int matchCss(@Nonnull final String cdata, @Nonnull final ValidatorProtos.CssSpec cssSpec,
                         @Nonnull final Context context,
-                        @Nonnull final Validator.ValidationResult.Builder validationResult) throws CssValidationException,
+                        @Nonnull final ValidatorProtos.ValidationResult.Builder validationResult) throws CssValidationException,
             IOException {
         final List<ErrorToken> cssErrors = new ArrayList<>();
         final List<ErrorToken> cssWarnings = new ArrayList<>();
@@ -231,12 +230,12 @@ public class CdataMatcher {
         final List<ParsedCssUrl> parsedUrls = new ArrayList<>();
         CssSpecUtils.extractUrls(stylesheet, parsedUrls, cssErrors);
         // Similarly we extract query types and features from @media rules.
-        for (final Validator.AtRuleSpec atRuleSpec : cssSpec.getAtRuleSpecList()) {
+        for (final ValidatorProtos.AtRuleSpec atRuleSpec : cssSpec.getAtRuleSpecList()) {
             if (atRuleSpec.hasMediaQuerySpec()) {
                 if (!atRuleSpec.getName().equals("media")) {
                     throw new CssValidationException("atRuleSpec name is not 'media'");
                 }
-                Validator.MediaQuerySpec mediaQuerySpec = atRuleSpec.getMediaQuerySpec();
+                ValidatorProtos.MediaQuerySpec mediaQuerySpec = atRuleSpec.getMediaQuerySpec();
                 List<ErrorToken> errorBuffer = mediaQuerySpec.getIssuesAsError() ? cssErrors : cssWarnings;
                 this.matchMediaQuery(stylesheet, mediaQuerySpec, errorBuffer);
                 // There will be at most @media atRuleSpec
@@ -312,7 +311,7 @@ public class CdataMatcher {
      * @private
      */
     private void matchMediaQuery(@Nonnull final Stylesheet stylesheet,
-                                 @Nonnull final Validator.MediaQuerySpec spec,
+                                 @Nonnull final ValidatorProtos.MediaQuerySpec spec,
                                  @Nonnull final List<ErrorToken> errorBuffer) throws CssValidationException {
         List<Token> seenMediaTypes = new ArrayList<>();
         List<Token> seenMediaFeatures = new ArrayList<>();
@@ -325,7 +324,7 @@ public class CdataMatcher {
                 params.add("");
                 params.add(token.toString());
                 final ErrorToken errorToken = new ErrorToken(
-                        Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_MEDIA_TYPE,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_MEDIA_TYPE,
                         params);
                 copyPosTo(token, errorToken);
                 errorBuffer.add(errorToken);
@@ -340,7 +339,7 @@ public class CdataMatcher {
                 params.add("");
                 params.add(token.toString());
                 ErrorToken errorToken = new ErrorToken(
-                        Validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE,
+                        ValidatorProtos.ValidationError.Code.CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE,
                         params);
                 copyPosTo(token, errorToken);
                 errorBuffer.add(errorToken);
@@ -358,7 +357,7 @@ public class CdataMatcher {
     /**
      * @return tagspec of the CdataMatcher
      */
-    public Validator.TagSpec getTagSpec() {
+    public ValidatorProtos.TagSpec getTagSpec() {
         return parsedTagSpec.getSpec();
     }
 

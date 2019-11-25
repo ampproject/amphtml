@@ -1,7 +1,5 @@
 package dev.amp.validator;
 
-import amp.validator.Validator;
-
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,7 @@ public class SrcsetParsingResult {
     /** Default constructor. */
     public SrcsetParsingResult() {
         this.success = false;
-        this.errorCode = Validator.ValidationError.Code.UNKNOWN_CODE;
+        this.errorCode = ValidatorProtos.ValidationError.Code.UNKNOWN_CODE;
         this.srcsetImages = new ArrayList<>();
     }
 
@@ -41,7 +39,7 @@ public class SrcsetParsingResult {
      * Returns the error code.
      * @return returns the error code.
      */
-    public Validator.ValidationError.Code getErrorCode() {
+    public ValidatorProtos.ValidationError.Code getErrorCode() {
         return errorCode;
     }
 
@@ -49,7 +47,7 @@ public class SrcsetParsingResult {
      * Setting the error code.
      * @param errorCode the error code.
      */
-    public void setErrorCode(@Nonnull final Validator.ValidationError.Code errorCode) {
+    public void setErrorCode(@Nonnull final ValidatorProtos.ValidationError.Code errorCode) {
         this.errorCode = errorCode;
     }
 
@@ -89,7 +87,7 @@ public class SrcsetParsingResult {
     private boolean success;
 
     /** Error code. */
-    private Validator.ValidationError.Code errorCode;
+    private ValidatorProtos.ValidationError.Code errorCode;
 
     /** List of srcset images. */
     private List<SrcsetSourceDef> srcsetImages;

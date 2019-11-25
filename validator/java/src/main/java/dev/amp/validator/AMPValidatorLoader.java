@@ -21,7 +21,6 @@
 
 package dev.amp.validator;
 
-import amp.validator.Validator;
 import com.google.protobuf.TextFormat;
 
 import javax.annotation.Nonnull;
@@ -48,7 +47,7 @@ public final class AMPValidatorLoader {
      * according to to RFC2396 and cannot be converted to a URI.
      * @return a Builder instance
      */
-    public Validator.ValidatorRules.Builder load(final String filePath) throws IOException, URISyntaxException {
+    public ValidatorProtos.ValidatorRules.Builder load(final String filePath) throws IOException, URISyntaxException {
         final InputStream is;
 
         final ClassLoader classLoader = getClass().getClassLoader();
@@ -61,7 +60,7 @@ public final class AMPValidatorLoader {
             is = classLoader.getResourceAsStream(filePath);
         }
 
-        final Validator.ValidatorRules.Builder builder;
+        final ValidatorProtos.ValidatorRules.Builder builder;
         try {
             final StringBuilder protoAsciiRules = new StringBuilder();
             protoAsciiRules.append(getFileContent(is));
@@ -70,7 +69,7 @@ public final class AMPValidatorLoader {
                     .setAllowUnknownFields(true)
                     .setAllowUnknownExtensions(true)
                     .build();
-            builder = Validator.ValidatorRules.newBuilder();
+            builder = ValidatorProtos.ValidatorRules.newBuilder();
             parser.merge(protoAsciiRules.toString(), builder);
         } finally {
             if (is != null) {

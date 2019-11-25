@@ -21,7 +21,7 @@
 
 package dev.amp.validator.utils;
 
-import amp.validator.Validator;
+import dev.amp.validator.ValidatorProtos;
 
 import javax.annotation.Nonnull;
 
@@ -56,7 +56,7 @@ public final class DispatchKeyUtils {
      * @return returns dispatch key.
      */
     public static String makeDispatchKey(
-            @Nonnull final Validator.AttrSpec.DispatchKeyType dispatchKeyType,
+            @Nonnull final ValidatorProtos.AttrSpec.DispatchKeyType dispatchKeyType,
             @Nonnull final String attrName, @Nonnull final String attrValue,
             @Nonnull final String mandatoryParent) {
         switch (dispatchKeyType) {
@@ -78,11 +78,11 @@ public final class DispatchKeyUtils {
      * @param tagSpec a tag spec.
      * @return a dispatch key.
      */
-    public static String getDispatchKeyForTagSpecOrNone(@Nonnull final Validator.TagSpec tagSpec)  {
-        for (Validator.AttrSpec attr : tagSpec.getAttrsList()) {
-            if (attr.getDispatchKey() != Validator.AttrSpec.DispatchKeyType.NONE_DISPATCH) {
+    public static String getDispatchKeyForTagSpecOrNone(@Nonnull final ValidatorProtos.TagSpec tagSpec)  {
+        for (ValidatorProtos.AttrSpec attr : tagSpec.getAttrsList()) {
+            if (attr.getDispatchKey() != ValidatorProtos.AttrSpec.DispatchKeyType.NONE_DISPATCH) {
                 final boolean mandatoryParent = tagSpec.hasMandatoryParent();
-                if (attr.getDispatchKey() == Validator.AttrSpec.DispatchKeyType.NAME_DISPATCH) {
+                if (attr.getDispatchKey() == ValidatorProtos.AttrSpec.DispatchKeyType.NAME_DISPATCH) {
                     return attr.getName();
                 }
 
@@ -97,11 +97,11 @@ public final class DispatchKeyUtils {
                     return null;
                 }
 
-                if (attr.getDispatchKey() == Validator.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH) {
+                if (attr.getDispatchKey() == ValidatorProtos.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH) {
                     return attr.getName() + "\0" + attrValue;
                 }
 
-                if (attr.getDispatchKey() == Validator.AttrSpec.DispatchKeyType.NAME_VALUE_PARENT_DISPATCH) {
+                if (attr.getDispatchKey() == ValidatorProtos.AttrSpec.DispatchKeyType.NAME_VALUE_PARENT_DISPATCH) {
                     return attr.getName() + "\0" + attrValue + "\0" + (mandatoryParent ? mandatoryParent : "");
                 }
             }
