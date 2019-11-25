@@ -71,8 +71,8 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
   /** @override */
   preconnectCallback() {
     if (this.src_) {
-      this.preconnect.preload(this.src_);
-      this.preconnect.preload(this.imageSrc_);
+      Services.preconnectFor(this.win).preload(this.getAmpDoc(), this.src_);
+      Services.preconnectFor(this.win).preload(this.getAmpDoc(), this.imageSrc_);
     }
   }
 

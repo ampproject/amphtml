@@ -31,7 +31,7 @@ class AmpReddit extends AMP.BaseElement {
       Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.redditmedia.com', onLayout);
       // The domain for JS and CSS used in rendering embeds.
       Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.redditstatic.com', onLayout);
-      this.preconnect.preload(
+      Services.preconnectFor(this.win).preload(this.getAmpDoc(),
         'https://www.redditstatic.com/comment-embed.js',
         'script'
       );
@@ -40,7 +40,7 @@ class AmpReddit extends AMP.BaseElement {
       Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://www.reddit.com', onLayout);
       // Posts defer to the embedly API.
       Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://cdn.embedly.com', onLayout);
-      this.preconnect.preload(
+      Services.preconnectFor(this.win).preload(this.getAmpDoc(),
         'https://embed.redditmedia.com/widgets/platform.js',
         'script'
       );

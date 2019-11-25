@@ -60,7 +60,7 @@ class AmpFacebook extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     Services.preconnectFor(this.win).url(this.getAmpDoc(), 'https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.preload(
+    Services.preconnectFor(this.win).preload(this.getAmpDoc(),
       'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
       'script'
     );

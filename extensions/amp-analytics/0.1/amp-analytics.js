@@ -392,7 +392,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @visibleForTesting
    */
   preload(url, opt_preloadAs) {
-    this.preconnect.preload(url, opt_preloadAs);
+    Services.preconnectFor(this.win).preload(this.getAmpDoc(), url, opt_preloadAs);
   }
 
   /**

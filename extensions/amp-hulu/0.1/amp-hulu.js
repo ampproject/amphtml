@@ -32,7 +32,7 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    this.preconnect.preload(this.getVideoIframeSrc_());
+    Services.preconnectFor(this.win).preload(this.getAmpDoc(), this.getVideoIframeSrc_());
   }
 
   /** @override */
