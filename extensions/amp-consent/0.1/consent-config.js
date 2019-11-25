@@ -202,7 +202,6 @@ export class ConsentConfig {
         TAG
       );
       const mergedConfig = map(config);
-
       const geoGroups = Object.keys(config['geoOverride']);
       // Stop at the first group that the geoService says we're in and then merge configs.
       for (let i = 0; i < geoGroups.length; i++) {
