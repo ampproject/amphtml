@@ -682,6 +682,26 @@ describes.sandboxed('Extensions', {}, () => {
       expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
     });
 
+    it('should support "latest" version scripts', () => {
+      const list = document.createElement('script');
+      list.setAttribute('custom-element', 'amp-list');
+      list.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-list-latest.js'
+      );
+      win.document.head.appendChild(list);
+
+      extensions.reloadExtension('amp-list');
+
+      expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+        'amp-list'
+      );
+      expect(extensions.preloadExtension).to.be.calledWith(
+        'amp-list',
+        'latest'
+      );
+    });
+
     it('should support [custom-template] scripts', () => {
       const mustache = document.createElement('script');
       mustache.setAttribute('custom-template', 'amp-mustache');
@@ -763,7 +783,7 @@ describes.sandboxed('Extensions', {}, () => {
         expect(win.customElements.elements['amp-mustache']).to.be.undefined;
       });
 
-      it('should insert extension script and not colide with prefixes', () => {
+      it('should insert extension script and not collide with prefixes', () => {
         // First add an extension with the same suffix.
         extensions.preloadExtension('amp-test-suffix');
         expect(
