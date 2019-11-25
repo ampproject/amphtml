@@ -769,18 +769,11 @@ app.post('/get-consent-no-prompt/', (req, res) => {
 
 app.post('/check-consent', (req, res) => {
   cors.assertCors(req, res, ['POST']);
-  if (req.query.mode === 'not-required') {
-    res.json({
-      consentRequired: false,
-    });
-    return;
-  }
-  if (req.query.mode === 'always-expire') {
-    res.json({
-      'consentRequired': true,
-      'expireCache': true,
-    });
-  }
+  res.json({
+    'consentRequired': req.query.consentRequired === 'true',
+    'consentStateValue': req.query.consentStateValue,
+    'expireCache': req.query.expireCache === 'true',
+  });
 });
 
 // Proxy with local JS.
