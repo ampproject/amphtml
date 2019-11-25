@@ -115,7 +115,7 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    installVideoManagerForDoc(ampdoc);
+    installVideoManagerForDoc(this.getAmpDoc());
   }
 
   /** @override */
