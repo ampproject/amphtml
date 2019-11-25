@@ -1236,12 +1236,16 @@ describes.realWin(
 
     describe('#preconnect', () => {
       it('should preload nameframe', () => {
-        const preloadSpy = env.sandbox.spy(Preconnect.prototype, 'preload');
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.spy(preconnect, 'preload');
         expect(impl.getPreconnectUrls()).to.deep.equal([
           'https://googleads.g.doubleclick.net',
         ]);
-        expect(preloadSpy).to.be.calledOnce;
-        expect(preloadSpy.args[0]).to.match(/nameframe/);
+        expect(preconnect.preload).to.be.calledOnce;
+        expect(preconnect.preload).to.be.calledWithMatch(
+          env.sandbox.match.object,
+          /nameframe/
+        );
       });
     });
 
