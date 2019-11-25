@@ -342,6 +342,9 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {?Element} */
     this.buttonRight_ = null;
+
+    /** @private {number} */
+    this.historyId_ = -1;
   }
 
   /**
@@ -411,7 +414,11 @@ export class AmpStoryEmbeddedComponent {
         this.onFocusedStateUpdate_(null);
         this.scheduleEmbedToPause_(component.element);
         this.toggleExpandedView_(component.element);
-        this.historyService_.push(() => this.close_());
+        this.historyService_
+          .push(() => this.close_())
+          .then(historyId => {
+            this.historyId_ = historyId;
+          });
         break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
@@ -493,7 +500,12 @@ export class AmpStoryEmbeddedComponent {
       (target && matches(target, '.i-amphtml-expanded-view-close-button')) ||
       forceClose
     ) {
-      this.historyService_.goBack();
+      if (this.historyId_ !== -1) {
+        this.historyService_.goBack();
+      } else {
+        // Used for visual diff testing viewer.
+        this.close_();
+      }
     }
   }
 
