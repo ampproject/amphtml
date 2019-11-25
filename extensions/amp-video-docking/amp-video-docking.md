@@ -217,10 +217,10 @@ measuring 64 by 64 pixels. Other control buttons are sized at
 
 The icon for this button (set through the `background-image` CSS property)
 changes depending on the relative direction of the docked area. When the video
-docks from left-to-right, the `.amp-docked-video-controls` gets no additional
-classnames, but it will get the `amp-rtl` classname when the video docks in the
-opposite direction. This allows this button to be drawn with an arrow pointing
-in the right direction.
+docks from left-to-right, the `.amp-docked-video-controls` container gets no
+additional classnames, but it will get the `amp-rtl` classname when the video
+docks in the opposite direction. This allows the button to be drawn with an
+arrow pointing in the correct direction.
 
 #### `.amp-video-docked-placeholder-background`
 
