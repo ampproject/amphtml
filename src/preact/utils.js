@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../module';
+import {useEffect} from 'preact/hooks';
 
 /**
  * @param {function} callback
  */
 export function useMountEffect(callback) {
-  const preact = requireExternal('preact');
-  preact.useEffect(callback, [
+  useEffect(callback, [
     /* mount-only effect*/
   ]);
 }

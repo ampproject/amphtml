@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Fragment, createElement, render} from 'preact';
 import {Slot, createSlot} from './preact/slot.js';
 import {dict} from './utils/object';
 import {matches} from './dom';
-import {requireExternal} from './module';
 import {withAmpContext} from './preact/context.js';
 
 /**
@@ -50,8 +50,6 @@ export let AmpElementOptions;
  * @return {function}
  */
 export function PreactBaseElement(Component, opts = {}) {
-  const preact = requireExternal('preact');
-
   return class extends AMP.BaseElement {
     /** @param {!AmpElement} element */
     constructor(element) {
@@ -137,7 +135,7 @@ export function PreactBaseElement(Component, opts = {}) {
       }
 
       if (this.container_) {
-        preact.render(preact.Fragment, this.container_);
+        render(Fragment, this.container_);
       }
     }
 
@@ -154,17 +152,22 @@ export function PreactBaseElement(Component, opts = {}) {
         }
       }
 
-      const props = collectProps(this.element, opts);
+      const props = collectProps(
+        this.element,
+        opts,
+        this.win,
+        this.getAmpDoc()
+      );
 
       // While this "creates" a new element, diffing will not create a second
       // instance of Component. Instead, the existing one already rendered into
       // this element will be reused.
-      const cv = preact.createElement(Component, props);
+      const cv = createElement(Component, props);
 
       const context = getContextFromDom(this.element, this.context_);
-      const v = preact.createElement(withAmpContext, context, cv);
+      const v = createElement(withAmpContext, context, cv);
 
-      preact.render(v, this.container_);
+      render(v, this.container_);
     }
   };
 }
@@ -172,11 +175,12 @@ export function PreactBaseElement(Component, opts = {}) {
 /**
  * @param {!AmpElement} element
  * @param {!AmpElementOptions} opts
+ * @param {!Window} win
+ * @param {!Ampdoc} ampdoc
  * @return {!Object}
  */
-function collectProps(element, opts) {
+function collectProps(element, opts, win, ampdoc) {
   const props = dict({});
-  const preact = requireExternal('preact');
 
   // Class.
   if (opts.className) {
@@ -211,7 +215,7 @@ function collectProps(element, opts) {
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
   if (opts.passthrough) {
-    props.children = [preact.createElement(Slot)];
+    props.children = [createElement(Slot)];
   } else if (opts.children) {
     const children = [];
     const nodes = element.getRealChildNodes();
@@ -246,6 +250,14 @@ function collectProps(element, opts) {
     }
     props.children = children;
   }
+
+  const services = {};
+  const requestedServices = opts.services || {};
+  for (const service in requestedServices) {
+    const getter = requestedServices[service];
+    services[service] = getter(win, ampdoc);
+  }
+  props.services = services;
 
   return props;
 }

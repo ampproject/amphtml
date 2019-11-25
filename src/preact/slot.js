@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpContext} from './context';
-import {requireExternal} from '../module';
+import {createElement} from 'preact';
+import {getAmpContext} from './context';
 import {toArray} from '../types';
+import {useContext, useEffect, useRef} from 'preact/hooks';
 import {useMountEffect} from './utils';
 
 /**
@@ -26,11 +27,9 @@ import {useMountEffect} from './utils';
  * @return {!ReactElement}
  */
 export function createSlot(element, name, props) {
-  const preact = requireExternal('preact');
-
   element.setAttribute('slot', name);
   const slotProps = Object.assign({name}, props || {});
-  return preact.createElement(Slot, slotProps);
+  return createElement(Slot, slotProps);
 }
 
 /**
@@ -40,12 +39,10 @@ export function createSlot(element, name, props) {
  * @return {*}
  */
 export function Slot(props) {
-  const preact = requireExternal('preact');
-
-  const context = preact.useContext(AmpContext);
-  const ref = preact.useRef();
+  const context = useContext(getAmpContext());
+  const ref = useRef();
   const slotProps = Object.assign({}, props, {ref});
-  preact.useEffect(() => {
+  useEffect(() => {
     const slot = ref.current;
     const assignedElements = getAssignedElements(props, slot);
     slot.__assignedElements = assignedElements;
@@ -153,7 +150,7 @@ export function Slot(props) {
     };
   });
 
-  return preact.createElement('slot', slotProps);
+  return createElement('slot', slotProps);
 }
 
 /**

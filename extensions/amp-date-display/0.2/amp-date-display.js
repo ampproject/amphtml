@@ -17,11 +17,12 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {PreactBaseElement} from '../../../src/preact-base-element';
 import {Services} from '../../../src/services';
+import {cloneElement, createElement} from 'preact';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {getRootNode, removeChildren} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {requireExternal} from '../../../src/module';
+import {removeChildren, rootNodeFor} from '../../../src/dom';
+import {useLayoutEffect, useRef} from 'preact/hooks';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -71,52 +72,6 @@ let VariablesDef;
  }} */
 let EnhancedVariablesDef;
 
-const preact = requireExternal('preact');
-
-/**
- * @param {!JsonObject} props
- * @return {*} TODO
- */
-function AmpDateDisplayComponent(props) {
-  const ref = preact.useRef();
-  const slot = preact.cloneElement(props['children'], {ref});
-  const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
-  const {templates} = props.services;
-
-  preact.useEffect(() => {
-    const {host} = getRootNode(ref.current);
-    templates.findAndRenderTemplate(host, data).then(rendered => {
-      const win = host.defaultView;
-      removeChildren(dev().assertElement(host));
-      const container = document.createElement('div');
-      container.appendChild(rendered);
-      host.appendChild(container);
-
-      const event = createCustomEvent(
-        win,
-        AmpEvents.DOM_UPDATE,
-        /* detail */ null,
-        {bubbles: true}
-      );
-      host.dispatchEvent(event);
-    });
-  }, []);
-  return preact.createElement('div', null, slot);
-}
-
-const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
-  passthrough: true,
-
-  services: {
-    'templates': {type: 'window', fn: Services.templatesFor},
-  },
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  },
-});
-
 /**
  * @param {!JsonObject} props
  * @return {!EnhancedVariablesDef}
@@ -125,9 +80,8 @@ function getDataForTemplate(props) {
   const {
     'displayIn': displayIn = '',
     'locale': locale = DEFAULT_LOCALE,
+    'offsetSeconds': offsetSeconds = DEFAULT_OFFSET_SECONDS,
   } = props;
-  const offsetSeconds =
-    Number(props['offsetSeconds']) || DEFAULT_OFFSET_SECONDS;
 
   const epoch = getEpoch(props);
   const offset = offsetSeconds * 1000;
@@ -144,12 +98,13 @@ function getDataForTemplate(props) {
 /**
  * @param {!JsonObject} props
  * @return {number|undefined}
- * @private
  */
 function getEpoch(props) {
-  const datetime = props['datetime'] || '';
-  const timestampMiliseconds = Number(props['timestampMiliseconds']);
-  const timestampSeconds = Number(props['timestampSeconds']);
+  const {
+    'datetime': datetime = '',
+    'timestampMilliseconds': timestampMilliseconds = 0,
+    'timestampSeconds': timestampSeconds = 0,
+  } = props;
 
   let epoch;
   if (datetime.toLowerCase() === 'now') {
@@ -157,8 +112,8 @@ function getEpoch(props) {
   } else if (datetime) {
     epoch = Date.parse(datetime);
     userAssert(!isNaN(epoch), 'Invalid date: %s', datetime);
-  } else if (timestampMiliseconds) {
-    epoch = timestampMiliseconds;
+  } else if (timestampMilliseconds) {
+    epoch = timestampMilliseconds;
   } else if (timestampSeconds) {
     epoch = timestampSeconds * 1000;
   }
@@ -174,7 +129,6 @@ function getEpoch(props) {
 /**
  * @param {number} input
  * @return {string}
- * @private
  */
 function padStart(input) {
   if (input > 9) {
@@ -187,7 +141,6 @@ function padStart(input) {
 /**
  * @param {!VariablesDef} data
  * @return {!EnhancedVariablesDef}
- * @private
  */
 function enhanceBasicVariables(data) {
   const hour12 = data.hour % 12 || 12;
@@ -210,7 +163,6 @@ function enhanceBasicVariables(data) {
  * @param {!Date} date
  * @param {string} locale
  * @return {!VariablesDef}
- * @private
  */
 function getVariablesInLocal(date, locale) {
   return {
@@ -236,7 +188,6 @@ function getVariablesInLocal(date, locale) {
  * @param {!Date} date
  * @param {string} locale
  * @return {!VariablesDef}
- * @private
  */
 function getVariablesInUTC(date, locale) {
   return {
@@ -265,6 +216,59 @@ function getVariablesInUTC(date, locale) {
     iso: date.toISOString(),
   };
 }
+
+/**
+ * @param {!JsonObject} props
+ * @return {*} TODO
+ */
+function AmpDateDisplayComponent(props) {
+  const ref = useRef();
+  const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
+  const {templates} = props.services;
+
+  useLayoutEffect(() => {
+    const {host} = rootNodeFor(ref.current);
+    templates.findAndRenderTemplate(host, data).then(rendered => {
+      const win = host.ownerDocument.defaultView;
+      removeChildren(dev().assertElement(host));
+      const container = document.createElement('div');
+      container.appendChild(rendered);
+      host.appendChild(container);
+
+      const event = createCustomEvent(
+        win,
+        AmpEvents.DOM_UPDATE,
+        /* detail */ null,
+        {bubbles: true}
+      );
+      host.dispatchEvent(event);
+    });
+  }, []);
+  return createElement('div', {ref}, props['children']);
+}
+
+const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
+  passthrough: true,
+
+  services: {
+    'templates': win => Services.templatesFor(win),
+  },
+
+  attrs: {
+    'display-in': {prop: 'displayIn'},
+    'offset-seconds': {prop: 'offsetSeconds', type: 'number'},
+    'locale': {prop: 'locale'},
+    'datetime': {prop: 'datetime'},
+    'timestamp-ms': {prop: 'timestampMilliseconds', type: 'number'},
+    'timestamp-seconds': {prop: 'timestampSeconds', type: 'number'},
+    'template': {prop: 'displayIn'},
+  },
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  },
+});
 
 AMP.extension(TAG, '0.2', AMP => {
   AMP.registerElement(TAG, AmpDateDisplay);

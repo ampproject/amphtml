@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../module';
-
-let AmpContext;
+import {createContext, createElement} from 'preact';
+import {useContext} from 'preact/hooks';
 
 /**
  * The external context given to React components to control whether they can
@@ -30,12 +29,11 @@ let AmpContext;
  * @return {*}
  */
 export function getAmpContext() {
-  if (AmpContext) {
-    return AmpContext;
+  if (self.__AMP_CONTEXT) {
+    return self.__AMP_CONTEXT;
   }
 
-  const preact = requireExternal('preact');
-  return (AmpContext = preact.createContext({
+  return (self.__AMP_CONTEXT = createContext({
     renderable: true,
     playable: true,
   }));
@@ -48,14 +46,13 @@ export function getAmpContext() {
  * @return {*}
  */
 export function withAmpContext(props) {
-  const preact = requireExternal('preact');
-  const parent = preact.useContext(AmpContext);
+  const parent = useContext(getAmpContext());
   const current = {
     renderable: parent.renderable && props.renderable,
     playable: parent.playable && props.playable,
   };
 
-  return preact.createElement(
+  return createElement(
     getAmpContext().Provider,
     Object.assign({}, props, {value: current})
   );
