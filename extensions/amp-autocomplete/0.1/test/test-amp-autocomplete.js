@@ -66,37 +66,33 @@ describes.realWin(
     }
 
     describe('mutatedAttributesCallback_()', () => {
-      let remoteDataSpy;
-      let filterAndRenderSpy;
+      let remoteDataSpy, autocompleteSpy;
 
       beforeEach(() => {
         remoteDataSpy = env.sandbox
           .stub(impl, 'getRemoteData_')
           .resolves(['a', 'b', 'c']);
-        filterAndRenderSpy = env.sandbox.spy(
-          impl,
-          'filterDataAndRenderResults_'
-        );
+        autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
       });
 
       it('should resolve when param is {}', () => {
         return impl.mutatedAttributesCallback({}).then(() => {
           expect(remoteDataSpy).not.to.have.been.called;
-          expect(filterAndRenderSpy).not.to.have.been.called;
+          expect(autocompleteSpy).not.to.have.been.called;
         });
       });
 
       it('should resolve when src is undefined', () => {
         return impl.mutatedAttributesCallback({'src': undefined}).then(() => {
           expect(remoteDataSpy).not.to.have.been.called;
-          expect(filterAndRenderSpy).not.to.have.been.called;
+          expect(autocompleteSpy).not.to.have.been.called;
         });
       });
 
       it('should resolve when src is null', () => {
         return impl.mutatedAttributesCallback({'src': null}).then(() => {
           expect(remoteDataSpy).not.to.have.been.called;
-          expect(filterAndRenderSpy).not.to.have.been.called;
+          expect(autocompleteSpy).not.to.have.been.called;
         });
       });
 
@@ -106,8 +102,8 @@ describes.realWin(
           .then(() => {
             expect(remoteDataSpy).to.have.been.calledOnce;
             expect(impl.sourceData_).to.have.ordered.members(['a', 'b', 'c']);
-            expect(filterAndRenderSpy).to.have.been.calledOnce;
-            expect(filterAndRenderSpy).to.have.been.calledWith(
+            expect(autocompleteSpy).to.have.been.calledOnce;
+            expect(autocompleteSpy).to.have.been.calledWith(
               ['a', 'b', 'c'],
               ''
             );
@@ -120,8 +116,8 @@ describes.realWin(
           .then(() => {
             expect(remoteDataSpy).not.to.have.been.called;
             expect(impl.sourceData_).to.have.ordered.members(['a', 'b', 'c']);
-            expect(filterAndRenderSpy).to.have.been.calledOnce;
-            expect(filterAndRenderSpy).to.have.been.calledWith(
+            expect(autocompleteSpy).to.have.been.calledOnce;
+            expect(autocompleteSpy).to.have.been.calledWith(
               ['a', 'b', 'c'],
               ''
             );
@@ -134,8 +130,8 @@ describes.realWin(
           .then(() => {
             expect(remoteDataSpy).not.to.have.been.called;
             expect(impl.sourceData_).to.be.an('array').that.is.empty;
-            expect(filterAndRenderSpy).to.have.been.calledOnce;
-            expect(filterAndRenderSpy).to.have.been.calledWith([], '');
+            expect(autocompleteSpy).to.have.been.calledOnce;
+            expect(autocompleteSpy).to.have.been.calledWith([], '');
           });
       });
     });
@@ -189,7 +185,7 @@ describes.realWin(
       expect(element.innerHTML).to.equal('hello');
     });
 
-    describe('filterDataAndRenderResults_()', () => {
+    describe('autocomplete_()', () => {
       let clearAllItemsSpy;
       let renderSpy;
       let filterDataSpy;
@@ -204,7 +200,7 @@ describes.realWin(
 
       it('should only clear if input < minChars_', () => {
         impl.minChars_ = 3;
-        return impl.filterDataAndRenderResults_([], 'ap').then(() => {
+        return impl.autocomplete_([], 'ap').then(() => {
           expect(clearAllItemsSpy).to.have.been.calledOnce;
           expect(filterDataSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
@@ -212,7 +208,7 @@ describes.realWin(
       });
 
       it('should only clear if data is null', () => {
-        return impl.filterDataAndRenderResults_(null, 'ap').then(() => {
+        return impl.autocomplete_(null, 'ap').then(() => {
           expect(clearAllItemsSpy).to.have.been.calledOnce;
           expect(filterDataSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
@@ -220,7 +216,7 @@ describes.realWin(
       });
 
       it('should only clear if data is []', () => {
-        return impl.filterDataAndRenderResults_([], 'ap').then(() => {
+        return impl.autocomplete_([], 'ap').then(() => {
           expect(clearAllItemsSpy).to.have.been.calledOnce;
           expect(filterDataSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
@@ -229,21 +225,13 @@ describes.realWin(
 
       it('should pass on valid arguments', () => {
         impl.minChars_ = 2;
-        return impl
-          .filterDataAndRenderResults_(impl.sourceData_, 'ap')
-          .then(() => {
-            expect(clearAllItemsSpy).to.have.been.calledOnce;
-            expect(filterDataSpy).to.have.been.calledWith(
-              impl.sourceData_,
-              'ap'
-            );
-            expect(renderSpy).to.have.been.calledWith(
-              ['apple'],
-              impl.container_
-            );
-            expect(impl.container_.children).to.have.length(1);
-            expect(impl.container_.children[0].innerText).to.equal('apple');
-          });
+        return impl.autocomplete_(impl.sourceData_, 'ap').then(() => {
+          expect(clearAllItemsSpy).to.have.been.calledOnce;
+          expect(filterDataSpy).to.have.been.calledWith(impl.sourceData_, 'ap');
+          expect(renderSpy).to.have.been.calledWith(['apple'], impl.container_);
+          expect(impl.container_.children).to.have.length(1);
+          expect(impl.container_.children[0].innerText).to.equal('apple');
+        });
       });
     });
 
@@ -530,20 +518,17 @@ describes.realWin(
       });
 
       it('should display results if not already on Down arrow', () => {
-        let filterAndRenderSpy, toggleResultsSpy;
+        let autocompleteSpy, toggleResultsSpy;
         return element
           .layoutCallback()
           .then(() => {
-            filterAndRenderSpy = env.sandbox.spy(
-              impl,
-              'filterDataAndRenderResults_'
-            );
+            autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
             toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
             return impl.keyDownHandler_(event);
           })
           .then(() => {
             expect(eventPreventSpy).to.have.been.calledOnce;
-            expect(filterAndRenderSpy).to.have.been.calledOnce;
+            expect(autocompleteSpy).to.have.been.calledOnce;
             expect(toggleResultsSpy).to.have.been.calledWith(true);
             expect(displayInputSpy).not.to.have.been.called;
             expect(updateActiveSpy).not.to.have.been.called;

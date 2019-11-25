@@ -422,7 +422,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.selectHandler_(e);
     });
 
-    return this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+    return this.autocomplete_(this.sourceData_, this.userInput_);
   }
 
   /** @override */
@@ -435,7 +435,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return this.getRemoteData_().then(
         remoteData => {
           this.sourceData_ = remoteData || [];
-          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.autocomplete_(this.sourceData_, this.userInput_);
         },
         e => {
           this.displayFallback_(e);
@@ -444,10 +444,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     if (typeof src === 'object') {
       this.sourceData_ = src['items'] || [];
-      return this.filterDataAndRenderResults_(
-        this.sourceData_,
-        this.userInput_
-      );
+      return this.autocomplete_(this.sourceData_, this.userInput_);
     }
     user().error(TAG, 'Unexpected "src" type: ' + src);
   }
@@ -502,7 +499,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.userInput_.length === 0 && this.inputElement_.value.length === 1;
     this.userInput_ = this.inputElement_.value;
     return this.mutateElement(() => {
-      this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+      this.autocomplete_(this.sourceData_, this.userInput_);
       this.toggleResults_(true);
       if (this.suggestFirst_) {
         if (!this.detectBackspace_ || firstEntry) {
@@ -528,27 +525,47 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Filter the source data according to the given opt_input and render it in
-   * the results container_.
-   * @param {?Array<!JsonObject|string>} sourceData
-   * @param {string=} opt_input
+   * Display autocomplete suggestions and render it in the results container_.
+   * When client side rendering, filter the source data according to the given opt_input.
+   * @param {?Array<!JsonObject|string>} data
+   * @param {string} opt_input
    * @return {!Promise}
    * @private
    */
-  filterDataAndRenderResults_(sourceData, opt_input = '') {
+  autocomplete_(data, opt_input = '') {
     this.clearAllItems_();
-    if (
-      opt_input.length < this.minChars_ ||
-      !sourceData ||
-      !(sourceData.length || hasOwn(sourceData, 'html'))
-    ) {
+    if (opt_input.length < this.minChars_ || !data) {
+      return Promise.resolve();
+    } else if (this.isSsr_) {
+      return hasOwn(data, 'html')
+        ? this.renderResults_(
+            data,
+            dev().assertElement(this.container_),
+            opt_input
+          )
+        : Promise.resolve();
+    } else {
+      return this.filterDataAndRenderResults_(data, opt_input);
+    }
+  }
+
+  /**
+   * Client-side filter the source data according to the given opt_input
+   * and render it in the results container_.
+   * @param {?Array<!JsonObject|string>} sourceData
+   * @param {string} input
+   * @return {!Promise}
+   * @private
+   */
+  filterDataAndRenderResults_(sourceData, input) {
+    if (!sourceData.length) {
       return Promise.resolve();
     }
-    const filteredData = this.filterData_(sourceData, opt_input);
+    const filteredData = this.filterData_(sourceData, input);
     return this.renderResults_(
       filteredData,
       dev().assertElement(this.container_),
-      opt_input
+      input
     );
   }
 
@@ -787,7 +804,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       () => {
         if (!display) {
           this.userInput_ = this.inputElement_.value;
-          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.autocomplete_(this.sourceData_, this.userInput_);
           this.resetActiveElement_();
         }
         this.setResultDisplayDirection_(renderAbove);
@@ -809,7 +826,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.getRemoteData_().then(
       remoteData => {
         this.sourceData_ = remoteData;
-        this.filterDataAndRenderResults_(this.sourceData_);
+        this.autocomplete_(this.sourceData_);
       },
       e => {
         this.displayFallback_(e);
@@ -1040,7 +1057,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           return this.updateActiveItem_(1);
         }
         return this.mutateElement(() => {
-          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.autocomplete_(this.sourceData_, this.userInput_);
           this.toggleResults_(true);
         });
       case Keys.UP_ARROW:
