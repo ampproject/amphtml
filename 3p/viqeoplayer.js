@@ -31,14 +31,12 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
     viqeoPlayerInstance = params['player'];
   }, 'Player:added');
   VIQEO['subscribeTracking'](() => {
+    sendMessage('updatePlayedRanges', viqeoPlayerInstance['getPlayedRanges']());
     sendMessage('updateCurrentTime', viqeoPlayerInstance['getCurrentTime']());
   }, 'Player:currentTimeUpdated');
   VIQEO['subscribeTracking'](() => {
     sendMessage('updateDuration', viqeoPlayerInstance['getDuration']());
-  }, 'Player:updateFullDuration');
-  VIQEO['subscribeTracking'](() => {
-    sendMessage('updatePlayedRanges', viqeoPlayerInstance['getPlayedRanges']());
-  }, 'Player:updatePlayedRanges')
+  }, 'Player:durationUpdated');
   VIQEO['createPlayer']({
     videoId: data['videoid'],
     profileId: data['profileid'],
