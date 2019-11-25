@@ -256,7 +256,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
       this.filter_ = FilterType.NONE;
     } else {
-      userAssert(
+      this.filter_ = userAssert(
         this.element.getAttribute('filter'),
         `${TAG} requires "filter" attribute.`
       );
