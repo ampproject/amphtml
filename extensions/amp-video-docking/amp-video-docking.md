@@ -211,9 +211,9 @@ during ad playback to allow user interaction.
 
 This button is different from the other control buttons in that the
 `amp-small`/`amp-large` classnames on the `.amp-docked-video-controls` container
-do not affect it. Because it's the only button in its set it's also larger,
-measuring 64 by 64 pixels. Other control buttons are sized at
-40 by 40 pixels.
+do not affect it. Because it's the only button in its set, it's also larger than
+the others, at 64 by 64 pixels. Other control buttons are sized at 40 by 40
+pixels.
 
 The icon for this button (set through the `background-image` CSS property)
 changes depending on the relative direction of the docked area. When the video
