@@ -83,7 +83,7 @@ describes.fakeWin(
     });
 
     describe('ssr', () => {
-      it('should build payload', () => {
+      it('should build payload', async () => {
         const request = {
           'xhrUrl': 'https://www.abracadabra.org/some-json',
           'fetchOpt': {
@@ -94,15 +94,16 @@ describes.fakeWin(
             'ampCors': true,
           },
         };
-        const sendMessage = env.sandbox.spy(viewer, 'sendMessageAwaitResponse');
+        const sendMessage = env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({}));
         maybeFindTemplateStub.returns(null);
         const templates = {
           successTemplate: {'innerHTML': '<div>much success</div>'},
           errorTemplate: {'innerHTML': '<div>try again</div>'},
         };
-        ssrTemplateHelper.ssr({}, request, templates, {
-          attr: 'test',
-        });
+        await ssrTemplateHelper.ssr({}, request, templates, {attr: 'test'});
+
         expect(sendMessage).calledWith('viewerRenderTemplate', {
           'ampComponent': {
             'type': 'amp-list',
@@ -183,7 +184,7 @@ describes.fakeWin(
 
         it('should throw if trying to ssr from an untrusted viewer', () => {
           viewer.isTrustedViewer = () => Promise.resolve(false);
-          const errorMsg = /May only ssr from trusted viewers/;
+          const errorMsg = /Refused to apply SSR in untrusted viewer/;
           expectAsyncConsoleError(errorMsg);
 
           ssrTemplateHelper
