@@ -234,10 +234,10 @@ describes.sandboxed('UrlReplacements', {}, env => {
           const variables = Object.keys(
             replacements.getVariableSource().replacements_
           );
-          // Restrict the number of replacement params to globalVaraibleSource
+          // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(72);
+          expect(variables.length).to.equal(70);
         });
       });
 

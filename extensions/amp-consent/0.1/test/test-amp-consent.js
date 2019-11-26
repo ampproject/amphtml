@@ -54,6 +54,10 @@ describes.realWin(
         'https://response1/': '{"promptIfUnknown": true}',
         'https://response2/': '{}',
         'https://response3/': '{"promptIfUnknown": false}',
+        'https://geo-override-check/': '{"consentRequired": false}',
+        'https://geo-override-check2/': '{"consentRequired": true}',
+        'http://www.origin.com/r/1': '{}',
+        'https://invalid.response.com/': '{"consentRequired": 3}',
       };
 
       xhrServiceMock = {
@@ -102,40 +106,27 @@ describes.realWin(
       describe('consent config', () => {
         let consentElement;
 
-        it('get consent/policy/postPromptUI config', () => {
-          consentElement = createConsentElement(
-            doc,
-            dict({
-              'consents': {
-                'test': {
-                  'checkConsentHref': '/override',
-                },
-              },
-              'clientConfig': {
-                'test': 'ABC',
-              },
-              'postPromptUI': 'test',
-            })
-          );
+        it('get consent/policy/postPromptUI config', async () => {
+          const config = dict({
+            'consentInstanceId': 'test',
+            'checkConsentHref': '/override',
+            'consentRequired': true,
+            'clientConfig': {
+              'test': 'ABC',
+            },
+            'postPromptUI': 'test',
+          });
+          consentElement = createConsentElement(doc, config);
           const postPromptUI = document.createElement('div');
           postPromptUI.setAttribute('id', 'test');
           consentElement.appendChild(postPromptUI);
           doc.body.appendChild(consentElement);
           const ampConsent = new AmpConsent(consentElement);
-          ampConsent.buildCallback();
+          await ampConsent.buildCallback();
 
           expect(ampConsent.postPromptUI_).to.not.be.null;
           expect(ampConsent.consentId_).to.equal('test');
-          expect(ampConsent.consentConfig_).to.deep.equal(
-            dict({
-              'consentInstanceId': 'test',
-              'checkConsentHref': '/override',
-              'postPromptUI': 'test',
-              'clientConfig': {
-                'test': 'ABC',
-              },
-            })
-          );
+          expect(ampConsent.consentConfig_).to.deep.equal(config);
 
           expect(Object.keys(ampConsent.policyConfig_)).to.have.length(4);
           expect(ampConsent.policyConfig_['default']).to.be.ok;
@@ -144,16 +135,13 @@ describes.realWin(
           expect(ampConsent.policyConfig_['_auto_reject']).to.be.ok;
         });
 
-        it('relative checkConsentHref is resolved', function*() {
+        it('relative checkConsentHref is resolved', async () => {
           const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
           consentElement = createConsentElement(
             doc,
             dict({
-              'consents': {
-                'XYZ': {
-                  'checkConsentHref': '/r/1',
-                },
-              },
+              'checkConsentHref': '/r/1',
+              'consentInstanceId': 'XYZ',
             })
           );
           const ampConsent = new AmpConsent(consentElement);
@@ -163,8 +151,9 @@ describes.realWin(
           getUrlStub.callsFake(() => {
             return 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0#h';
           });
-          ampConsent.buildCallback();
-          yield macroTask();
+          await ampConsent.buildCallback();
+
+          await macroTask();
           expect(fetchSpy).to.be.calledOnce;
           expect(win.testLocation.origin).not.to.be.empty;
           expect(fetchSpy).to.be.calledWith('http://www.origin.com/r/1');
@@ -189,23 +178,132 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
       });
 
-      it('send post request to server', function*() {
-        ampConsent.buildCallback();
-        yield macroTask();
+      it('send post request to server', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
         expect(requestBody).to.deep.equal({
           'consentInstanceId': 'ABC',
           'consentStateValue': 'unknown',
           'consentString': undefined,
           'isDirty': false,
+          'matchedGeoGroup': null,
         });
       });
 
-      it('read promptIfUnknown from server response', function*() {
-        ampConsent.buildCallback();
-        yield macroTask();
+      it('send post request to server with no matched group', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'ABC',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': null,
+        });
+      });
+
+      it('read promptIfUnknown from server response', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
         return ampConsent.getConsentRequiredPromise_().then(isRequired => {
           expect(isRequired).to.be.true;
         });
+      });
+    });
+
+    describe('geo-override server communication', () => {
+      let ampConsent;
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-consent-geo-override');
+      });
+
+      it('sends post request to server when consentRequired is remote', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://geo-override-check/',
+        };
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
+      });
+
+      it('resolves consentRequired to remote response with old format', async () => {
+        const remoteConfig = {
+          'consents': {
+            'oldConsent': {
+              'checkConsentHref': 'https://geo-override-check2/',
+            },
+          },
+        };
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+      });
+
+      it('send post request to server with matched group', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'geoOverride': {
+            'nafta': {
+              'checkConsentHref': 'https://geo-override-check2/',
+              'consentRequired': true,
+            },
+          },
+        };
+        ISOCountryGroups = ['nafta'];
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'abc',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': 'nafta',
+        });
+      });
+
+      it('only geoOverrides the first matched group', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'geoOverride': {
+            'na': {
+              'checkConsentHref': 'https://geo-override-check2/',
+              'consentRequired': true,
+            },
+            'eea': {
+              'consentRequired': false,
+            },
+          },
+        };
+        ISOCountryGroups = ['na', 'eea'];
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(ampConsent.matchedGeoGroup_).to.equal('na');
+        expect(requestBody).to.deep.equal({
+          'consentInstanceId': 'abc',
+          'consentStateValue': 'unknown',
+          'consentString': undefined,
+          'isDirty': false,
+          'matchedGeoGroup': 'na',
+        });
+      });
+
+      it('fallsback to true with invalide remote reponse', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://invalid.response.com/',
+        };
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
       });
     });
 
@@ -224,27 +322,23 @@ describes.realWin(
         consentElement = createConsentElement(doc, defaultConfig);
       });
 
-      it('in geo group', function*() {
+      it('in geo group', async () => {
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown', 'testGroup'];
-        ampConsent.buildCallback();
-        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
-          expect(isRequired).to.be.true;
-        });
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
       });
 
-      it('not in geo group', function*() {
+      it('not in geo group', async () => {
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown'];
-        ampConsent.buildCallback();
-        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
-          expect(isRequired).to.be.false;
-        });
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
       });
 
-      it('geo override promptIfUnknown', function*() {
+      it('geo override promptIfUnknown', async () => {
         ISOCountryGroups = ['unknown'];
         consentElement = createConsentElement(
           doc,
@@ -259,10 +353,8 @@ describes.realWin(
         );
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
-        ampConsent.buildCallback();
-        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
-          expect(isRequired).to.be.false;
-        });
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
       });
     });
 
@@ -393,50 +485,50 @@ describes.realWin(
         });
       });
 
-      it('update current displaying status', function*() {
-        ampConsent.buildCallback();
-        yield macroTask();
+      it('update current displaying status', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
         updateConsentInstanceStateSpy = env.sandbox.spy(
           ampConsent.consentStateManager_,
           'updateConsentInstanceState'
         );
-        yield macroTask();
+        await macroTask();
         expect(ampConsent.isPromptUIOn_).to.be.true;
-        yield macroTask();
+        await macroTask();
         ampConsent.handleAction_(ACTION_TYPE.ACCEPT);
         expect(updateConsentInstanceStateSpy).to.be.calledWith(
           CONSENT_ITEM_STATE.ACCEPTED
         );
-        yield macroTask();
+        await macroTask();
         expect(ampConsent.isPromptUIOn_).to.be.false;
       });
 
-      it('ignore action when no consent prompt is displaying', function*() {
-        ampConsent.buildCallback();
-        yield macroTask();
+      it('ignore action when no consent prompt is displaying', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
         updateConsentInstanceStateSpy = env.sandbox.spy(
           ampConsent.consentStateManager_,
           'updateConsentInstanceState'
         );
         ampConsent.handleAction_(ACTION_TYPE.DISMISS);
-        yield macroTask();
+        await macroTask();
         expect(updateConsentInstanceStateSpy).to.be.calledOnce;
         updateConsentInstanceStateSpy.resetHistory();
         expect(ampConsent.isPromptUIOn_).to.be.false;
         ampConsent.handleAction_(ACTION_TYPE.DISMISS);
-        yield macroTask();
+        await macroTask();
         expect(updateConsentInstanceStateSpy).to.not.be.called;
       });
 
       describe('schedule display', () => {
-        it('should check for pending consent UI', function*() {
-          ampConsent.buildCallback();
-          yield macroTask();
+        it('should check for pending consent UI', async () => {
+          await ampConsent.buildCallback();
+          await macroTask();
           expect(ampConsent.notificationUiManager_.queueSize_).to.equal(1);
           ampConsent.scheduleDisplay_();
           expect(ampConsent.notificationUiManager_.queueSize_).to.equal(1);
           ampConsent.hide_();
-          yield macroTask();
+          await macroTask();
           expect(ampConsent.notificationUiManager_.queueSize_).to.equal(0);
           ampConsent.scheduleDisplay_();
           ampConsent.scheduleDisplay_();
@@ -452,14 +544,14 @@ describes.realWin(
           postPromptUI = doc.getElementById('test');
         });
 
-        it('handle postPromptUI', function*() {
+        it('handle postPromptUI', async () => {
           storageValue = {
             'amp-consent:ABC': true,
           };
 
           // Build the amp consent, and check that everything is
           // initialized correctly
-          ampConsent.buildCallback();
+          await ampConsent.buildCallback();
           ampConsent.element.classList.remove('i-amphtml-notbuilt');
           expect(ampConsent.postPromptUI_).to.not.be.null;
           expect(ampConsent.element).to.have.display('none');
@@ -467,7 +559,7 @@ describes.realWin(
 
           // Wait for all modifications to the element to be applied.
           // Then make more assertions.
-          yield macroTask();
+          await macroTask();
           expect(ampConsent.element).to.not.have.display('none');
           expect(ampConsent.element.classList.contains('amp-active')).to.be
             .true;
@@ -480,7 +572,7 @@ describes.realWin(
 
           // Wait for the element to be displayed,
           // And the postPrompt to be hidden.
-          yield macroTask();
+          await macroTask();
           expect(postPromptUI).to.have.display('none');
         });
 
@@ -504,22 +596,22 @@ describes.realWin(
             ampConsent = new AmpConsent(consentElement);
           });
 
-          it('hide postPromptUI', function*() {
-            ampConsent.buildCallback();
+          it('hide postPromptUI', async () => {
+            await ampConsent.buildCallback();
             ampConsent.element.classList.remove('i-amphtml-notbuilt');
-            yield macroTask();
+            await macroTask();
 
             expect(postPromptUI).to.not.be.null;
             expect(postPromptUI).to.have.display('none');
           });
 
-          it('show postPromptUI', function*() {
+          it('show postPromptUI', async () => {
             storageValue = {
               'amp-consent:ABC': true,
             };
-            ampConsent.buildCallback();
+            await ampConsent.buildCallback();
             ampConsent.element.classList.remove('i-amphtml-notbuilt');
-            yield macroTask();
+            await macroTask();
 
             expect(postPromptUI).to.not.be.null;
             expect(postPromptUI).to.not.have.display('none');
@@ -549,4 +641,17 @@ export function createConsentElement(doc, config, opt_type) {
   scriptElement.textContent = JSON.stringify(config);
   consentElement.appendChild(scriptElement);
   return consentElement;
+}
+
+/**
+ * Create an <amp-consent> element and return AmpConsent object.
+ * @param {Document} doc
+ * @param {!JsonObject} config
+ * @param {string=} opt_type
+ * @return {Element}
+ */
+export function getAmpConsent(doc, config) {
+  const consentElement = createConsentElement(doc, config);
+  doc.body.appendChild(consentElement);
+  return new AmpConsent(consentElement);
 }
