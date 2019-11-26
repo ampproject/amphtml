@@ -301,12 +301,9 @@ _Example_: Displays a prompt user interface
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
     {
-      "consents": {
-        "my-consent": {
-          "checkConsentHref": "https://foo.com/api/show-consent",
-          "promptUI": "consent-ui"
-        }
-      }
+      "consentInstanceId": "my-consent",
+      "checkConsentHref": "https://foo.com/api/show-consent",
+      "promptUI": "consent-ui"
     }
   </script>
   <div id="consent-ui">
