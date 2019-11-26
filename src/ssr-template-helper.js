@@ -85,7 +85,7 @@ export class SsrTemplateHelper {
       .then(trusted => {
         userAssert(
           trusted,
-          'Refused to apply SSR in untrusted viewer: ',
+          'Refused to attempt SSR in untrusted viewer: ',
           element
         );
       })

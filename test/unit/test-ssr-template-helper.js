@@ -83,6 +83,20 @@ describes.fakeWin(
     });
 
     describe('ssr', () => {
+      it('Should refuse to SSR with an untrusted viewer', async () => {
+        viewer.isTrustedViewer = () => Promise.resolve(false);
+        const errorMsg = /Refused to attempt SSR in untrusted viewer: /;
+        expectAsyncConsoleError(errorMsg);
+
+        return ssrTemplateHelper.ssr({}, {}, {})
+        .then(
+          () => Promise.reject(),
+          err => {
+            expect(err).match(errorMsg);
+          }
+        );
+      });
+
       it('should build payload', async () => {
         const request = {
           'xhrUrl': 'https://www.abracadabra.org/some-json',
