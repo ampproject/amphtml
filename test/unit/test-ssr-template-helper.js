@@ -88,8 +88,7 @@ describes.fakeWin(
         const errorMsg = /Refused to attempt SSR in untrusted viewer: /;
         expectAsyncConsoleError(errorMsg);
 
-        return ssrTemplateHelper.ssr({}, {}, {})
-        .then(
+        return ssrTemplateHelper.ssr({}, {}, {}).then(
           () => Promise.reject(),
           err => {
             expect(err).match(errorMsg);
