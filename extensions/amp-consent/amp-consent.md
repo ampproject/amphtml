@@ -555,7 +555,7 @@ Example:
 
 Use the `<amp-consent>` component which allows configuring a custom UI with `Accept`, `Reject` and `Dismiss` states. It is up to each amp-component vendor how they interpret these states, so please read your vendor's documentation carefully.
 
-Note that you must configure either the [`promptIfUnknownForGeoGroup`](#promptifunknownforgeogroup) attribute or the checkConsentHref request.
+To collect consent from all users, you put `consentRequired: true` in the config of `<amp-consent>`.
 
 ##### How can I stop showing all of my content to users from the EEA?
 
@@ -563,29 +563,27 @@ You could consider hiding all your content for EEA users by implementing [`<amp-
 
 ##### How can I target consent for only EEA users?
 
-Use [`<amp-geo>`](https://amp.dev/documentation/components/amp-geo) to configure a country group and hook up the country group to `promptIfUnknownForGeoGroup` attribute in `<amp-consent>`. If the user accesses the AMP page from a country that's configured in the list, the appropriate consent UI will be invoked.
+Use [`<amp-geo>`](https://amp.dev/documentation/components/amp-geo) to configure a country group and hook up the country group to `geoOverride` attribute in `<amp-consent>`. If the user accesses the AMP page from a country that's configured in the list, the appropriate consent UI will be invoked.
 
 ##### Can I make the consent UI blocking?
 
 Yes. The UI is not prescriptive. If you do end up providing a non-blocking version of the UI, dismissing the UI will lead to a `dismiss` state. It is up to each vendor (ads & analytics) how they would process `accept`, `reject` and `dismiss`.
 
-##### What is `checkConsentHref`? And why is it mandatory?
+##### What is `checkConsentHref`? And is it mandatory?
 
-Note that [`checkConsentHref`](#checkconsenthref) is not mandatory if you configure the [`promptIfUnknownForGeoGroup`](#promptifunknownforgeogroup) attribute.
+Note that [`checkConsentHref`](#checkconsenthref) is not mandatory if you collect consent and store consent completely at client side.
 
-`checkConsentHref` gives you, the publisher, the ability to know if a consent must be shown to the user. For example, by using this call, you may determine the user's geo-location on the server-side, allowing you to suppress the consent. You can also instead use `<amp-geo>` and `promptIfUnknownForGeoGroup` to achieve the same result without any server-side setup.
+`checkConsentHref` gives you, the publisher, the ability to know if a consent must be shown to the user. For example, by using this call, you may determine the user's geo-location on the server-side, allowing you to suppress the consent. You can also instead use `<amp-geo>` and `geoOverride` to achieve the same result without any server-side setup.
 
 You may also choose to suppress the consent if you detect that the user doesn't need consent because they accepted consent on a different property or for alternate reasons.
 
-##### What is `promptIfUnknown`?
+##### What is `consentRequired`?
 
-`promptIfUnknown` is a response key set on the `checkConsentHref` request, which is made on every pageview.
-
-Responses to `promptIfUnknown` can have a boolean value. A value of `true` shows the consent; a value of `false` does not show the consent.
+`consentRequired` is used to determine if consent is required for the user. It can be specified in the config of `<amp-consent>` for different geo regions, it can also be retrieved from the `checkConsentHref` endpoint.
 
 ##### I also manage consent on non-AMP pages, how can I reconcile the two?
 
-You can configure `checkConsentHref` to call your own server-side endpoint to detect consent state for the user and reconcile how you want AMP to behave with a response on `promptIfUnknown`.
+You can configure `checkConsentHref` to call your own server-side endpoint to detect consent state for the user and reconcile how you want AMP to behave with a response on `consentRequired`.
 
 ##### How can I send additional information to an ad network/analytics provider?
 
