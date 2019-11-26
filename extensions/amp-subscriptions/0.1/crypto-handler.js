@@ -65,7 +65,7 @@ export class CryptoHandler {
 
   /**
    * Gets encrypted document key in Base64 URL format.
-   * Returns `null` if the wasn't found.
+   * Returns `null` if the key wasn't found.
    * @param {string} serviceId Who you want to decrypt the key.
    *                           For example: 'google.com'
    * @return {?string}
