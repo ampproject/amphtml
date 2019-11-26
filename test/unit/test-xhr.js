@@ -1142,4 +1142,45 @@ describe
         });
       });
     });
+
+    describe('#xssiJson', () => {
+      let xhr;
+      beforeEach(() => {
+        xhr = xhrServiceForTesting(polyfillWin);
+        setupMockXhr();
+      });
+
+      it('should call response.json() if prefix is either missing or the empty string', () => {
+        xhrCreated.then(mock => mock.respond(200, [], '{a: 1}'));
+        const response = {
+          json: () => Promise.resolve(),
+          text: () => Promise.reject(new Error('should not be called')),
+        };
+
+        return Promise.all([
+          xhr.xssiJson(response),
+          xhr.xssiJson(response, ''),
+        ]);
+      });
+
+      it('should not strip characters if the prefix is not present', () => {
+        xhrCreated.then(mock => mock.respond(200, [], '{"a": 1}'));
+        return xhr
+          .fetchJson('/abc')
+          .then(res => xhr.xssiJson(res, 'while(1)'))
+          .then(json => {
+            expect(json).to.be.deep.equal({a: 1});
+          });
+      });
+
+      it('should strip prefix from the response text if prefix is present', () => {
+        xhrCreated.then(mock => mock.respond(200, [], 'while(1){"a": 1}'));
+        return xhr
+          .fetchJson('/abc')
+          .then(res => xhr.xssiJson(res, 'while(1)'))
+          .then(json => {
+            expect(json).to.be.deep.equal({a: 1});
+          });
+      });
+    });
   });
