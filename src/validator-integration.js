@@ -62,9 +62,10 @@ function loadScript(doc, url) {
   const script = doc.createElement('script');
   script.src = url;
 
-  // Propagate the nonce to generated script tags.
-  if (doc.currentScript.hasAttribute('nonce')) {
-    script.setAttribute('nonce', doc.currentScript.getAttribute('nonce'));
+  // Propagate nonce to all generated script tags.
+  const currentScript = doc.querySelector('script[nonce]');
+  if (currentScript) {
+    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
   }
 
   const promise = loadPromise(script).then(
