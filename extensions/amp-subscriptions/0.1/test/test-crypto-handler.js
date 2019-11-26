@@ -44,15 +44,14 @@ describes.realWin(
     // eslint-disable-next-line max-len
     const decryptedContent =
       "\n              This is section is top secret.\n              You should only be able to read this if you have the correct permissions.\n              If you don't have the correct permissions, you shouldn't be able to read this section at all.\n            ";
-    // eslint-disable-next-line max-len
-    const encryptedKey =
-      "ENCRYPT({'AccessRequirements': ['googleAccessRequirements:123'], 'Key':'mSfq5tRx5omXoOX20Oqq8g=='})";
+    const encryptedKeyBase64 = 'Oik/+==';
+    const encryptedKeyBase64Url = 'Oik_-';
     const decryptedDocKey = 'mSfq5tRx5omXoOX20Oqq8g==';
     const decryptedDocKeyHash =
       'a2de5c3d4947d3af3e9357b224220855591fa5ebecfbfcaa8a5dd8361f1c08da';
     const encryptedKeys = {
-      'local': encryptedKey,
-      'google.com': encryptedKey,
+      'local': encryptedKeyBase64,
+      'google.com': encryptedKeyBase64,
     };
 
     beforeEach(() => {
@@ -111,7 +110,7 @@ describes.realWin(
       it('should return expected value to a matching key', () => {
         cryptoHandler = new CryptoHandler(ampdoc);
         return expect(cryptoHandler.getEncryptedDocumentKey('local')).to.equal(
-          encryptedKey
+          encryptedKeyBase64Url
         );
       });
     });

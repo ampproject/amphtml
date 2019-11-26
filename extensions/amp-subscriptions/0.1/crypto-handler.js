@@ -64,6 +64,8 @@ export class CryptoHandler {
   }
 
   /**
+   * Gets encrypted document key in Base64 URL format.
+   * Returns `null` if the wasn't found.
    * @param {string} serviceId Who you want to decrypt the key.
    *                           For example: 'google.com'
    * @return {?string}
@@ -71,10 +73,16 @@ export class CryptoHandler {
   getEncryptedDocumentKey(serviceId) {
     // Doing this for testing.
     const encryptedKeys = this.getEncryptedKeys();
-    if (!encryptedKeys) {
+    const key = encryptedKeys && encryptedKeys[serviceId];
+    if (key) {
+      // Convert key to Base64 URL format.
+      return key
+        .replace(/[+]/g, '-')
+        .replace(/[/]/g, '_')
+        .replace(/[=]/g, '');
+    } else {
       return null;
     }
-    return encryptedKeys[serviceId] || null;
   }
 
   /**
