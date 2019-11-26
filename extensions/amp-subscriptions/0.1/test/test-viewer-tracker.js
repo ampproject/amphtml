@@ -29,15 +29,15 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
   });
 
   describe('scheduleView', () => {
-    it('should call `reportWhenViewed_`, if viewer is visible', () => {
+    it('should call `reportWhenViewed_`, if viewer is visible', async () => {
       const whenViewedStub = env.sandbox.stub(viewTracker, 'reportWhenViewed_');
       env.sandbox.stub(ampdoc, 'isVisible').returns(true);
-      return viewTracker.scheduleView(2000).then(() => {
-        expect(whenViewedStub).to.be.calledOnce;
-      });
+
+      await viewTracker.scheduleView(2000);
+      expect(whenViewedStub).to.be.calledOnce;
     });
 
-    it('should call `reportWhenViewed_`, when viewer gets visible', () => {
+    it('should call `reportWhenViewed_`, when viewer gets visible', async () => {
       let visibleState = false;
       const whenViewedStub = env.sandbox.stub(viewTracker, 'reportWhenViewed_');
       const visibilityChangedStub = env.sandbox.stub(
@@ -50,18 +50,17 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
 
       const viewPromise = viewTracker.scheduleView(2000);
 
-      return ampdoc.whenReady().then(() => {
-        expect(visibilitySandbox).to.be.calledOnce;
-        expect(visibilityChangedStub).to.be.calledOnce;
-        expect(whenViewedStub).to.not.be.called;
-        const callback = visibilityChangedStub.getCall(0).args[0];
-        expect(callback).to.be.instanceOf(Function);
-        visibleState = true;
-        callback();
-        return viewPromise.then(() => {
-          expect(whenViewedStub).to.be.called;
-        });
-      });
+      await ampdoc.whenReady();
+      expect(visibilitySandbox).to.be.calledOnce;
+      expect(visibilityChangedStub).to.be.calledOnce;
+      expect(whenViewedStub).to.not.be.called;
+      const callback = visibilityChangedStub.getCall(0).args[0];
+      expect(callback).to.be.instanceOf(Function);
+      visibleState = true;
+      callback();
+
+      await viewPromise;
+      expect(whenViewedStub).to.be.called;
     });
   });
 
@@ -76,23 +75,23 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
   });
 
   describe('whenViewed_', () => {
-    it('should register "viewed" signal after timeout', () => {
+    it('should register "viewed" signal after timeout', async () => {
       const viewPromise = viewTracker.whenViewed_(1000);
       clock.tick(1001);
-      return viewPromise;
+      await viewPromise;
     });
 
-    it('should register "viewed" signal after scroll', () => {
+    it('should register "viewed" signal after scroll', async () => {
       const scrolled = new Observable();
       viewTracker.viewport_ = {
         onScroll: callback => scrolled.add(callback),
       };
       const viewPromise = viewTracker.whenViewed_(2000);
       scrolled.fire();
-      return viewPromise;
+      await viewPromise;
     });
 
-    it('should register "viewed" signal after click', () => {
+    it('should register "viewed" signal after click', async () => {
       const viewPromise = viewTracker.whenViewed_(2000);
       let clickEvent;
       if (document.createEvent) {
@@ -104,7 +103,7 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
       }
       const node = ampdoc.getRootNode();
       node.body.dispatchEvent(clickEvent);
-      return viewPromise;
+      await viewPromise;
     });
   });
 });

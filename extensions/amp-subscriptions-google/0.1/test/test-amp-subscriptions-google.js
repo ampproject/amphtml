@@ -316,7 +316,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       .once();
     serviceAdapterMock.expects('delegateActionToLocal').never();
     callback(callbacks.loginRequest)({linkRequested: true});
-    await 'Promises...';
+    await 'Event loop tick';
     expect(methods.linkAccount).to.be.calledOnce.calledWithExactly({
       ampReaderId: 'ari1',
     });
@@ -590,7 +590,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       .once();
     const executeStub = platform.runtime_.linkAccount;
     platform.executeAction(Action.LOGIN);
-    await 'Promises...';
+    await 'Event loop tick';
     expect(executeStub).to.be.calledWith();
   });
 
