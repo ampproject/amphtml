@@ -92,7 +92,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.isPromptUIOn_ = false;
 
     /** @private {boolean} */
-    this.shouldServerSync_ = true;
+    this.consentStateChangedViaPromptUI_ = false;
 
     /** @private {boolean} */
     this.consentUIPending_ = false;
@@ -458,13 +458,8 @@ export class AmpConsent extends AMP.BaseElement {
           return Promise.resolve(this.consentConfig_['consentRequired']);
         }
         return this.getConsentRemote_().then(consentInfo => {
-          const remoteResponse = consentInfo['consentRequired'];
-          const consentStateValue = convertValueToState(
-            consentInfo['consentStateValue']
-          );
-          return (
-            !!remoteResponse && consentStateValue === CONSENT_ITEM_STATE.UNKNOWN
-          );
+          const consentRequired = consentInfo['consentRequired'];
+          return !!consentRequired;
         });
       });
   }
@@ -540,7 +535,7 @@ export class AmpConsent extends AMP.BaseElement {
       // Only sync with local storage if promptUI is not shown.
       if (
         response &&
-        this.shouldServerSync_ &&
+        !this.consentStateChangedViaPromptUI_ &&
         isExperimentOn(this.win, 'amp-consent-geo-override')
       ) {
         this.consentStateManager_.updateConsentInstanceState(
@@ -636,7 +631,7 @@ export class AmpConsent extends AMP.BaseElement {
         return false;
       }
       // Prompt
-      this.shouldServerSync_ = true;
+      this.consentStateChangedViaPromptUI_ = true;
       this.scheduleDisplay_(false);
       return true;
       // TODO(@zhouyx):
