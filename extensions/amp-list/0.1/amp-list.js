@@ -1242,6 +1242,7 @@ export class AmpList extends AMP.BaseElement {
       urlReplacement: this.getPolicy_(),
       refresh,
       token,
+      stripPrefix: this.element.getAttribute('strip-prefix') || undefined,
     });
   }
 

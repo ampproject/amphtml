@@ -24,6 +24,7 @@ describe('batchFetchJsonFor', () => {
   // Service fakes.
   let urlReplacements;
   let batchedXhr;
+  let xhr;
   // Function stubs.
   let fetchJson;
   // Mutable return variables.
@@ -54,6 +55,10 @@ describe('batchFetchJsonFor', () => {
         json: () => Promise.resolve(data),
       })
     );
+
+    xhr = {xssiJson: () => Promise.resolve(data)};
+    window.sandbox.stub(Services, 'xhrFor').returns(xhr);
+
     batchedXhr = {fetchJson};
     window.sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
   });
