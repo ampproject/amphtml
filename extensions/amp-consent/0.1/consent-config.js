@@ -130,28 +130,6 @@ export class ConsentConfig {
       1
     ));
 
-    userAssert(
-      config['consentInstanceId'],
-      '%s: consentInstanceId to store consent info is required',
-      TAG
-    );
-
-    if (config['policy']) {
-      // Only respect 'default' consent policy;
-      const keys = Object.keys(config['policy']);
-      // TODO (@zhouyx): Validate waitFor value
-      for (let i = 0; i < keys.length; i++) {
-        if (keys[i] != 'default') {
-          user().warn(
-            TAG,
-            'policy %s is currently not supported and will be ignored',
-            keys[i]
-          );
-          delete config['policy'][keys[i]];
-        }
-      }
-    }
-
     // TODO(micajuineho): delete promptIfUnknownForGeoGroup, once we migrate fully
     // Migrate to geoOverride
     const group = config['promptIfUnknownForGeoGroup'];
@@ -211,6 +189,11 @@ export class ConsentConfig {
    */
   validateMergedGeoOverride_(mergedConfig) {
     userAssert(
+      mergedConfig['consentInstanceId'],
+      '%s: consentInstanceId to store consent info is required',
+      TAG
+    );
+    userAssert(
       mergedConfig['consentRequired'] !== undefined,
       '`consentRequired` is required',
       TAG
@@ -221,6 +204,22 @@ export class ConsentConfig {
         '%s: `checkConsentHref` must be specified if `consentRequired` is remote',
         TAG
       );
+    }
+
+    if (mergedConfig['policy']) {
+      // Only respect 'default' consent policy;
+      const keys = Object.keys(mergedConfig['policy']);
+      // TODO (@zhouyx): Validate waitFor value
+      for (let i = 0; i < keys.length; i++) {
+        if (keys[i] != 'default') {
+          user().warn(
+            TAG,
+            'policy %s is currently not supported and will be ignored',
+            keys[i]
+          );
+          delete mergedConfig['policy'][keys[i]];
+        }
+      }
     }
     return mergedConfig;
   }
