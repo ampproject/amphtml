@@ -230,8 +230,8 @@ export class Platform {
 
 /**
  * @param {!Window} window
- * @return {*} TODO(#23582): Specify return type
+ * @return {undefined}
  */
 export function installPlatformService(window) {
-  return registerServiceBuilder(window, 'platform', Platform);
+  registerServiceBuilder(window, 'platform', Platform);
 }
