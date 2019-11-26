@@ -23,6 +23,7 @@ import {
 describes.realWin('amp-apester-media-monetization', {}, env => {
   let win, doc;
   let baseElement;
+  let resources;
   let docInfo;
   const queryAmpAdBladeSelector = myDoc =>
     myDoc.querySelector('amp-ad[type=blade]');
@@ -34,6 +35,12 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     doc = win.document;
 
     baseElement = doc.createElement('amp-apester-media');
+
+    resources = {
+      attemptChangeSize: () => env.sandbox.stub(),
+    };
+
+    baseElement.getResources = () => resources;
 
     doc.body.appendChild(baseElement);
     docInfo = {

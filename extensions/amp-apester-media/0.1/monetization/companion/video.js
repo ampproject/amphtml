@@ -16,9 +16,8 @@
 
 import {Services} from '../../../../../src/services';
 const ALLOWED_AD_PROVIDER = 'sr';
-import {MARGIN_AD_HEIGHT} from '../monetization-utils';
+import {createElementWithAttributes} from '../../../../../src/dom';
 import {getValueForExpr} from '../../../../../src/json';
-import {setStyles} from '../../../../../src/style';
 
 /**
  * @param {!JsonObject} media
@@ -92,28 +91,29 @@ function constructCompanionSrElement(
 ) {
   const size = getCompanionVideoAdSize(apesterElement);
 
-  const ampBladeAd = apesterElement.ownerDocument.createElement('amp-ad');
-  ampBladeAd.setAttribute('type', 'blade');
-  ampBladeAd.setAttribute('data-blade_player_type', 'bladex');
-  ampBladeAd.setAttribute('servingDomain', 'ssr.streamrail.net');
-  ampBladeAd.setAttribute('height', 0);
-  ampBladeAd.setAttribute('width', size.width);
-  ampBladeAd.setAttribute('layout', 'responsive');
-  ampBladeAd.setAttribute('data-blade_macros', JSON.stringify(macros));
-  ampBladeAd.setAttribute('data-blade_player_id', videoTag);
-  ampBladeAd.setAttribute('data-blade_api_key', '5857d2ee263dc90002000001');
-  ampBladeAd.classList.add('amp-apester-companion');
+  const ampBladeAd = createElementWithAttributes(
+    apesterElement.ownerDocument,
+    'amp-ad',
+    {
+      'width': size.width,
+      'height': `${0}`,
+      'type': 'blade',
+      'layout': 'responsive',
+      'data-blade_player_type': 'bladex',
+      'servingDomain': 'ssr.streamrail.net',
+      'data-blade_macros': JSON.stringify(macros),
+      'data-blade_player_id': videoTag,
+      'data-blade_api_key': '5857d2ee263dc90002000001',
+    }
+  );
 
-  setStyles(ampBladeAd, {
-    margin: `${MARGIN_AD_HEIGHT}px auto`,
-    backgroundColor: 'green',
-  });
+  ampBladeAd.classList.add('amp-apester-companion');
 
   const relativeElement =
     position === 'below' ? apesterElement.nextSibling : apesterElement;
   apesterElement.parentNode.insertBefore(ampBladeAd, relativeElement);
 
-  ampBladeAd.getResources().attemptChangeSize(ampBladeAd, 250);
+  apesterElement.getResources().attemptChangeSize(ampBladeAd, size.height);
 }
 
 /**

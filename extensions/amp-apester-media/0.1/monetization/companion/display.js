@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {MARGIN_AD_HEIGHT} from '../monetization-utils';
 import {createElementWithAttributes} from '../../../../../src/dom';
 import {getValueForExpr} from '../../../../../src/json';
-import {setStyle} from '../../../../../src/style';
 const ALLOWED_AD_PROVIDER = 'gdt';
 
 /**
@@ -40,7 +38,6 @@ export function handleCompanionDisplay(media, apesterElement) {
     const slot = settings['slot'];
     const defaultBannerSizes = [[300, 250]];
     const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
-    // const size = {width: 300, height: 250};
     constructCompanionDisplayAd(slot, bannerSizes, apesterElement);
   }
 }
@@ -53,21 +50,27 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @return {ampAd}
  */
 function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
+  const biggestAdSize = bannerSizes.reduce((max, arr) => {
+    max[0] = Math.max(max[0], arr[0]);
+    max[1] = Math.max(max[1], arr[1]);
+    return max;
+  });
+
+  const multiSizeData = bannerSizes.map(arr => arr.join('x')).join();
   const ampAd = createElementWithAttributes(
     apesterElement.ownerDocument,
     'amp-ad',
     {
-      'width': `300`,
+      'width': `${biggestAdSize[0]}`,
       'height': `${0}`,
       'type': 'doubleclick',
       'layout': 'fixed',
       'data-slot': `${slot}`,
-      'data-multi-size': '300x250',
+      'data-multi-size': multiSizeData,
     }
   );
-  setStyle(ampAd, 'margin', `${MARGIN_AD_HEIGHT}px auto`);
   ampAd.classList.add('amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
-  ampAd.getResources().attemptChangeSize(ampAd, 250);
+  apesterElement.getResources().attemptChangeSize(ampAd, biggestAdSize[1]);
   return ampAd;
 }
