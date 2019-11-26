@@ -31,6 +31,7 @@
   "fix-inconsistent-responsive-height-selection": 0,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
+  "swg-gpay-api": 0.1,
   "swg-gpay-native": 1,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
