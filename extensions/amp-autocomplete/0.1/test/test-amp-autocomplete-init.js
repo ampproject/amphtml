@@ -15,6 +15,7 @@
  */
 
 import '../amp-autocomplete';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-autocomplete init',
@@ -29,6 +30,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      toggleExperiment(win, 'amp-autocomplete', true); // for "query" case
     });
 
     function setupAutocomplete(
@@ -76,6 +78,16 @@ describes.realWin(
       doc.body.appendChild(form);
       return ampAutocomplete.build().then(() => ampAutocomplete);
     }
+
+    it('should build with "inline" and "query" when specified with experiment on', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+        'query': 'q',
+      }).then(ampAutocomplete => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.queryKey_).to.equal('q');
+      });
+    });
 
     it('should layout', () => {
       let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
@@ -175,7 +187,7 @@ describes.realWin(
     it('should require filter attribute', () => {
       return allowConsoleError(() => {
         return expect(getAutocomplete({})).to.be.rejectedWith(
-          'amp-autocomplete requires "filter" attribute.​​​'
+          /requires "filter" attribute/
         );
       });
     });
