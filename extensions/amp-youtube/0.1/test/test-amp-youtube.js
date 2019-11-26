@@ -155,7 +155,7 @@ describes.realWin(
         expect(iframe.src).to.contain('loop=1');
       });
 
-      it.only('should preload the final url', async () => {
+      it('should preload the final url', async () => {
         const yt = await getYt({
           'autoplay': '',
           'data-videoid': datasource,
