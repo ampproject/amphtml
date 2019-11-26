@@ -19,9 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="directadvert"
-    data-block-id="1953045">
+<amp-ad width="300" height="250" type="directadvert" data-block-id="1953045">
 </amp-ad>
 ```
 

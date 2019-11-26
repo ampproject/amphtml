@@ -40,13 +40,16 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      historyGetFragmentStub = sandbox.stub(History.prototype, 'getFragment');
-      historyUpdateFragmentStub = sandbox.stub(
+      historyGetFragmentStub = env.sandbox.stub(
+        History.prototype,
+        'getFragment'
+      );
+      historyUpdateFragmentStub = env.sandbox.stub(
         History.prototype,
         'updateFragment'
       );
-      xhrStub = sandbox.stub(Xhr.prototype, 'fetchJson');
-      randomBytesStub = sandbox.stub(bytes, 'getCryptoRandomBytesArray');
+      xhrStub = env.sandbox.stub(Xhr.prototype, 'fetchJson');
+      randomBytesStub = env.sandbox.stub(bytes, 'getCryptoRandomBytesArray');
       toggleExperiment(win, 'amp-share-tracking', true);
     });
 
@@ -192,7 +195,7 @@ describes.fakeWin(
         'is provided and fallback to Math.random generation',
       () => {
         historyGetFragmentStub.onFirstCall().returns(Promise.resolve(''));
-        sandbox.stub(Math, 'random').returns(0.123456789123456789);
+        env.sandbox.stub(Math, 'random').returns(0.123456789123456789);
         randomBytesStub.onFirstCall().returns(null);
         const ampShareTracking = getAmpShareTracking();
         return Services.shareTrackingForOrNull(ampShareTracking.win).then(

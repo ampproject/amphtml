@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Allows publishers to easily integrate with the LaterPay micropayments platform.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,6 +23,7 @@ limitations under the License.
 -->
 
 # amp-access-laterpay
+
 Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
 
 <table>
@@ -50,7 +52,7 @@ Allows publishers to easily integrate with the <a href="https://www.laterpay.net
 
 ## Behavior
 
-<a href="https://laterpay.net">LaterPay</a> is a micropayment platform that allows users to buy any online content with just two clicks, and get immediate access – without upfront registration, personal data, or payment. Users only pay, once their purchases have reached a total of $5 or 5€ across websites. Content providers can sell individual items or time passes, which allow flatrate access or time limited access to content.
+<a href="https://laterpay.net">LaterPay</a> is a micropayment platform that allows users to buy any online content with just two clicks, and get immediate access – without upfront registration, personal data, or payment. Users only pay, once their purchases have reached a total of \$5 or 5€ across websites. Content providers can sell individual items or time passes, which allow flatrate access or time limited access to content.
 
 If you're integrating LaterPay via the [Connector Script integration](https://docs.laterpay.net/connector/) you won't be able to use that integration on AMP pages. `amp-access-laterpay` is analogous to Connector Script, providing a similar set of features, but built for AMP pages.
 
@@ -182,7 +184,9 @@ The structure created for the dialog looks as follows:
           <input name="purchaseOption" type="radio" />
           <div class="amp-access-laterpay-metadata">
             <span class="amp-access-laterpay-title">Purchase option title</span>
-            <p class="amp-access-laterpay-description">Purchase option description</p>
+            <p class="amp-access-laterpay-description">
+              Purchase option description
+            </p>
           </div>
         </label>
         <p class="amp-access-laterpay-price-container">
@@ -200,7 +204,9 @@ The structure created for the dialog looks as follows:
       Optional, appears if footer locale message is defined.
     </p>
   </div>
-  <p class="amp-access-laterpay-badge">Powered by <a href="https://laterpay.net" target="_blank">LaterPay</a></p>
+  <p class="amp-access-laterpay-badge">
+    Powered by <a href="https://laterpay.net" target="_blank">LaterPay</a>
+  </p>
 </div>
 ```
 
@@ -305,11 +311,15 @@ When using it with LaterPay and an existing paywall integration, the necessary c
 
 Where as the content access markup could end up looking like this:
 
-
 ```html
-<section amp-access="NOT error AND NOT laterpay.access AND NOT publishername.access" amp-access-hide>
+<section
+  amp-access="NOT error AND NOT laterpay.access AND NOT publishername.access"
+  amp-access-hide
+>
   <p>
-    <a on="tap:amp-access.login-publishername">Login here to access your PublisherName subscription.</a>
+    <a on="tap:amp-access.login-publishername"
+      >Login here to access your PublisherName subscription.</a
+    >
   </p>
 
   <div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div>
@@ -328,10 +338,10 @@ You can find a more complete example at https://ampexample.laterpay.net/dual-amp
 
 ## Related Documentation
 
-* [AMP Access](https://amp.dev/documentation/components/amp-access)
-* [LaterPay](https://www.laterpay.net)
-* [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
-* [LaterPay Connector](https://connectormwi.laterpay.net/docs/index.html) - Similar to AMP Access LaterPay but for non AMP pages.
+- [AMP Access](https://amp.dev/documentation/components/amp-access)
+- [LaterPay](https://www.laterpay.net)
+- [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
+- [LaterPay Connector](https://connectormwi.laterpay.net/docs/index.html) - Similar to AMP Access LaterPay but for non AMP pages.
 
 ## Validation
 

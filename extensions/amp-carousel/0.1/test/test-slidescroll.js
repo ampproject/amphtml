@@ -125,7 +125,7 @@ describes.realWin(
     it('should go to the correct slide on button click', () => {
       return getAmpSlideScroll().then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
-        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
         impl.goCallback(1);
         expect(showSlideSpy).to.have.been.calledWith(1);
@@ -145,15 +145,15 @@ describes.realWin(
       return getAmpSlideScroll().then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
-        const updateInViewportSpy = sandbox.spy(owners, 'updateInViewport');
-        const scheduleLayoutSpy = sandbox.spy(owners, 'scheduleLayout');
-        const schedulePreloadSpy = sandbox.spy(owners, 'schedulePreload');
-        const hideRestOfTheSlidesSpy = sandbox.spy(
+        const updateInViewportSpy = env.sandbox.spy(owners, 'updateInViewport');
+        const scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
+        const schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
+        const hideRestOfTheSlidesSpy = env.sandbox.spy(
           impl,
           'hideRestOfTheSlides_'
         );
-        const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
-        const analyticsEventSpy = sandbox.spy(impl, 'analyticsEvent_');
+        const setControlsStateSpy = env.sandbox.spy(impl, 'setControlsState');
+        const analyticsEventSpy = env.sandbox.spy(impl, 'analyticsEvent_');
 
         expect(impl.showSlide_(-1)).to.be.false;
         expect(updateInViewportSpy).to.not.have.been.called;
@@ -329,8 +329,8 @@ describes.realWin(
       return getAmpSlideScroll().then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
-        const schedulePauseSpy = sandbox.spy(owners, 'schedulePause');
-        const hideRestOfTheSlidesSpy = sandbox.spy(
+        const schedulePauseSpy = env.sandbox.spy(owners, 'schedulePause');
+        const hideRestOfTheSlidesSpy = env.sandbox.spy(
           impl,
           'hideRestOfTheSlides_'
         );
@@ -452,7 +452,7 @@ describes.realWin(
     it('should update to the right slide on scroll', () => {
       return getAmpSlideScroll().then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
-        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
         impl.vsync_ = {
           mutatePromise: cb => {
@@ -525,7 +525,10 @@ describes.realWin(
     it('should custom snap to the correct slide', () => {
       return getAmpSlideScroll().then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
-        const animateScrollLeftSpy = sandbox.spy(impl, 'animateScrollLeft_');
+        const animateScrollLeftSpy = env.sandbox.spy(
+          impl,
+          'animateScrollLeft_'
+        );
 
         impl.customSnap_(0);
         expect(animateScrollLeftSpy).to.have.been.calledWith(0, 0);
@@ -590,7 +593,10 @@ describes.realWin(
     it('should custom snap to the correct slide - special case', () => {
       return getAmpSlideScroll(null, 2).then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
-        const animateScrollLeftSpy = sandbox.spy(impl, 'animateScrollLeft_');
+        const animateScrollLeftSpy = env.sandbox.spy(
+          impl,
+          'animateScrollLeft_'
+        );
 
         impl.customSnap_(0, 1);
         expect(animateScrollLeftSpy).to.have.been.calledWith(0, 400);
@@ -605,7 +611,7 @@ describes.realWin(
     it('should handle custom elastic scroll', () => {
       return getAmpSlideScroll().then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
-        const customSnapSpy = sandbox
+        const customSnapSpy = env.sandbox
           .stub(impl, 'customSnap_')
           .callsFake(() => {
             return {
@@ -634,7 +640,7 @@ describes.realWin(
     it('should handle layout measures (orientation changes)', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
       const impl = ampSlideScroll.implementation_;
-      const getLayoutWidthStub = sandbox.stub(impl, 'getLayoutWidth');
+      const getLayoutWidthStub = env.sandbox.stub(impl, 'getLayoutWidth');
 
       getLayoutWidthStub.returns(200);
       impl.onLayoutMeasure();
@@ -661,7 +667,7 @@ describes.realWin(
       return getAmpSlideScroll().then(ampSlideScroll => {
         const impl = ampSlideScroll.implementation_;
         const owners = Services.ownersForDoc(impl.element);
-        const scheduleLayoutSpy_ = sandbox.spy(owners, 'scheduleLayout');
+        const scheduleLayoutSpy_ = env.sandbox.spy(owners, 'scheduleLayout');
         impl.slideIndex_ = null;
         impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
@@ -679,14 +685,6 @@ describes.realWin(
     });
 
     describe('Looping', () => {
-      beforeEach(() => {
-        sandbox = sinon.sandbox;
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-      });
-
       it('should create container and wrappers and show initial slides', () => {
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
@@ -704,14 +702,17 @@ describes.realWin(
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
           const owners = Services.ownersForDoc(impl.element);
-          const updateInViewportSpy = sandbox.spy(owners, 'updateInViewport');
-          const scheduleLayoutSpy = sandbox.spy(owners, 'scheduleLayout');
-          const schedulePreloadSpy = sandbox.spy(owners, 'schedulePreload');
-          const hideRestOfTheSlidesSpy = sandbox.spy(
+          const updateInViewportSpy = env.sandbox.spy(
+            owners,
+            'updateInViewport'
+          );
+          const scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
+          const schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
+          const hideRestOfTheSlidesSpy = env.sandbox.spy(
             impl,
             'hideRestOfTheSlides_'
           );
-          const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
+          const setControlsStateSpy = env.sandbox.spy(impl, 'setControlsState');
 
           expect(impl.slides_[4].getAttribute('aria-hidden')).to.equal('true');
           expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
@@ -853,14 +854,17 @@ describes.realWin(
         return getAmpSlideScroll(true, 2).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
           const owners = Services.ownersForDoc(impl.element);
-          const updateInViewportSpy = sandbox.spy(owners, 'updateInViewport');
-          const scheduleLayoutSpy = sandbox.spy(owners, 'scheduleLayout');
-          const schedulePreloadSpy = sandbox.spy(owners, 'schedulePreload');
-          const hideRestOfTheSlidesSpy = sandbox.spy(
+          const updateInViewportSpy = env.sandbox.spy(
+            owners,
+            'updateInViewport'
+          );
+          const scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
+          const schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
+          const hideRestOfTheSlidesSpy = env.sandbox.spy(
             impl,
             'hideRestOfTheSlides_'
           );
-          const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
+          const setControlsStateSpy = env.sandbox.spy(impl, 'setControlsState');
 
           expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
           expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
@@ -942,7 +946,7 @@ describes.realWin(
         return getAmpSlideScroll(false, 3, true, true, 0).then(
           ampSlideScroll => {
             const impl = ampSlideScroll.implementation_;
-            const setupAutoplaySpy = sandbox.spy(impl, 'setupAutoplay_');
+            const setupAutoplaySpy = env.sandbox.spy(impl, 'setupAutoplay_');
             expect(setupAutoplaySpy).to.not.have.been.called;
           }
         );
@@ -952,7 +956,7 @@ describes.realWin(
         return getAmpSlideScroll(false, 3, true, true, 2).then(
           ampSlideScroll => {
             const impl = ampSlideScroll.implementation_;
-            const removeAutoplaySpy = sandbox.spy(impl, 'removeAutoplay');
+            const removeAutoplaySpy = env.sandbox.spy(impl, 'removeAutoplay');
             impl.showSlide_(1);
             impl.showSlide_(2);
             expect(impl.loopsMade_).to.equal(1);
@@ -971,8 +975,8 @@ describes.realWin(
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
           const owners = Services.ownersForDoc(impl.element);
-          const schedulePauseSpy = sandbox.spy(owners, 'schedulePause');
-          const hideRestOfTheSlidesSpy = sandbox.spy(
+          const schedulePauseSpy = env.sandbox.spy(owners, 'schedulePause');
+          const hideRestOfTheSlidesSpy = env.sandbox.spy(
             impl,
             'hideRestOfTheSlides_'
           );
@@ -1122,7 +1126,7 @@ describes.realWin(
       it('should update to the right slide on scroll', () => {
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
-          const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+          const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
           impl.vsync_ = {
             mutate: cb => {
@@ -1198,7 +1202,10 @@ describes.realWin(
       it('should custom snap to the correct slide', () => {
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
-          const animateScrollLeftSpy = sandbox.spy(impl, 'animateScrollLeft_');
+          const animateScrollLeftSpy = env.sandbox.spy(
+            impl,
+            'animateScrollLeft_'
+          );
 
           impl.customSnap_(0);
           expect(animateScrollLeftSpy).to.have.been.calledWith(0, 0);
@@ -1225,7 +1232,7 @@ describes.realWin(
       it('should go to the correct slide on button click', () => {
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
-          const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+          const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
           impl.goCallback(-1);
           expect(showSlideSpy).to.have.been.calledWith(4);
@@ -1247,7 +1254,7 @@ describes.realWin(
           expectAsyncConsoleError(/Invalid \[slide\] value:/, 1);
 
           const impl = ampSlideScroll.implementation_;
-          const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+          const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
           impl.mutatedAttributesCallback({slide: 2});
           expect(showSlideSpy).to.have.been.calledWith(2);
@@ -1265,20 +1272,20 @@ describes.realWin(
       it('should trigger `slideChange` action when user changes slides', () => {
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
-          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+          const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
           impl.goCallback(-1, /* animate */ false);
           expect(triggerSpy).to.have.been.calledWith(
             ampSlideScroll,
             'slideChange',
-            /* CustomEvent */ sinon.match.has('detail', {index: 4})
+            /* CustomEvent */ env.sandbox.match.has('detail', {index: 4})
           );
 
           impl.goCallback(1, /* animate */ false);
           expect(triggerSpy).to.have.been.calledWith(
             ampSlideScroll,
             'slideChange',
-            /* CustomEvent */ sinon.match.has('detail', {index: 0})
+            /* CustomEvent */ env.sandbox.match.has('detail', {index: 0})
           );
         });
       });
@@ -1288,7 +1295,7 @@ describes.realWin(
           expectAsyncConsoleError(/Invalid \[slide\] value:/, 4);
 
           const impl = ampSlideScroll.implementation_;
-          const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+          const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
           const satisfiesTrust = () => true;
 
           let args = {'index': '123'};
@@ -1325,7 +1332,7 @@ describes.realWin(
           doc.body.appendChild(ampSlideScroll);
           return ampSlideScroll.build().then(() => {
             const impl = ampSlideScroll.implementation_;
-            const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+            const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
             const satisfiesTrust = () => true;
 
             const args = {'index': '3'};
@@ -1350,7 +1357,7 @@ describes.realWin(
           doc.body.appendChild(ampSlideScroll);
           return ampSlideScroll.build().then(() => {
             const impl = ampSlideScroll.implementation_;
-            const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+            const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
             const satisfiesTrust = () => true;
 
             // Test that showSlide_ due to goToSlide(index=1) is not called before

@@ -154,9 +154,11 @@ function maybeInitializeExtensions(
 /**
  * Process the command line arguments --noextensions, --extensions, and
  * --extensions_from and return a list of the referenced extensions.
+ *
+ * @param {boolean=} preBuild
  * @return {!Array<string>}
  */
-function getExtensionsToBuild() {
+function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
@@ -175,7 +177,9 @@ function getExtensionsToBuild() {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
-  if (!argv.noextensions && !argv.extensions && !argv.extensions_from) {
+  if (
+    !(preBuild || argv.noextensions || argv.extensions || argv.extensions_from)
+  ) {
     const allExtensions = [];
     for (const extension in extensions) {
       allExtensions.push(extensions[extension].name);
@@ -218,14 +222,10 @@ function parseExtensionFlags(preBuild = false) {
     green('.');
 
   if (preBuild) {
-    if (argv.extensions || argv.extensions_from) {
-      log(
-        green('Pre-building extension(s):'),
-        cyan(getExtensionsToBuild().join(', '))
-      );
-    } else {
-      log(green('Not pre-building any AMP extensions.'));
-    }
+    log(
+      green('Pre-building extension(s):'),
+      cyan(getExtensionsToBuild(preBuild).join(', '))
+    );
     log(extensionsMessage);
     log(inaboxSetMessage);
     log(extensionsFromMessage);

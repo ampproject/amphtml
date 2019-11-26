@@ -168,6 +168,8 @@
       "loading_complete_selectors": [".login-section"]
     },
     {
+      // TODO(wg-analytics, #25105) fix flaky test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-consent/amp-consent.amp.html",
       "name": "amp-consent",
       "interactive_tests": "examples/visual-tests/amp-consent/amp-consent.js"
@@ -745,6 +747,18 @@
       ],
       "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
       "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu.amp.html",
+      "name": "amp-mega-menu: basic usage",
+      "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],
+      "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu-with-list.amp.html",
+      "name": "amp-mega-menu: template render",
+      "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],
+      "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
     },
   ]
 }

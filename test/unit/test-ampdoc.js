@@ -31,7 +31,7 @@ import {
 import {Signals} from '../../src/utils/signals';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {setParentWindow} from '../../src/service';
-import {toggleExperiment} from '../../src/experiments';
+import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 
 describes.sandboxed('AmpDocService', {}, () => {
   afterEach(() => {
@@ -55,18 +55,18 @@ describes.sandboxed('AmpDocService', {}, () => {
     });
 
     it('should read params from window name and fragment', () => {
-      win.name = '__AMP__viewportType=natural&other=one';
+      win.name = '__AMP__param1=value1&other=one';
       win.location.hash = '#paddingTop=17&other=two';
       const ampdoc = new AmpDocService(win, true).getSingleDoc();
 
       // Fragment parameters take precedence.
-      expect(ampdoc.getParam('viewportType')).to.equal('natural');
+      expect(ampdoc.getParam('param1')).to.equal('value1');
       expect(ampdoc.getParam('other')).to.equal('two');
       expect(ampdoc.getParam('paddingTop')).to.equal('17');
     });
 
     it('should ignore window name and fragment with explicit params', () => {
-      win.name = '__AMP__viewportType=natural&other=one';
+      win.name = '__AMP__param1=value1&other=one';
       win.location.hash = '#paddingTop=17&other=two';
       const ampdoc = new AmpDocService(win, true, {
         'other': 'zero',
@@ -74,7 +74,7 @@ describes.sandboxed('AmpDocService', {}, () => {
 
       // Fragment parameters take precedence.
       expect(ampdoc.getParam('other')).to.equal('three');
-      expect(ampdoc.getParam('viewportType')).to.be.null;
+      expect(ampdoc.getParam('param1')).to.be.null;
       expect(ampdoc.getParam('paddingTop')).to.be.null;
     });
   });
@@ -320,7 +320,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     let host, shadowRoot, content;
 
     beforeEach(() => {
-      toggleExperiment(window, 'ampdoc-fie', true);
+      toggleAmpdocFieForTesting(window, true);
       service = new AmpDocService(window, /* isSingleDoc */ true);
       content = document.createElement('amp-img');
       host = document.createElement('div');
@@ -337,7 +337,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     });
 
     afterEach(() => {
-      toggleExperiment(window, 'ampdoc-fie', false);
+      toggleAmpdocFieForTesting(window, false);
       if (host.parentNode) {
         host.parentNode.removeChild(host);
       }
@@ -470,7 +470,7 @@ describes.sandboxed('AmpDocService', {}, () => {
   });
 });
 
-describes.sandboxed('AmpDoc.visibilityState', {}, () => {
+describes.sandboxed('AmpDoc.visibilityState', {}, env => {
   const EMBED_URL = 'https://example.com/embed';
   let clock;
   let win, doc;
@@ -478,22 +478,22 @@ describes.sandboxed('AmpDoc.visibilityState', {}, () => {
   let top, embedSameWindow, embedOtherWindow, embedChild;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
 
     doc = {
       body: null,
       visibilityState: 'visible',
-      addEventListener: sandbox.spy(),
-      removeEventListener: sandbox.spy(),
+      addEventListener: env.sandbox.spy(),
+      removeEventListener: env.sandbox.spy(),
     };
     win = {document: doc};
 
     childDoc = {
       body: null,
       visibilityState: 'visible',
-      addEventListener: sandbox.spy(),
-      removeEventListener: sandbox.spy(),
+      addEventListener: env.sandbox.spy(),
+      removeEventListener: env.sandbox.spy(),
     };
     childWin = {document: childDoc};
 
@@ -846,7 +846,7 @@ describes.sandboxed('AmpDoc.visibilityState', {}, () => {
   });
 });
 
-describes.sandboxed('AmpDocSingle', {}, () => {
+describes.sandboxed('AmpDocSingle', {}, env => {
   let ampdoc;
 
   beforeEach(() => {
@@ -895,17 +895,17 @@ describes.sandboxed('AmpDocSingle', {}, () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {
+    env.sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {
       return new Promise(resolve => {
         bodyCallback = resolve;
       });
     });
     let ready = false;
-    sandbox.stub(docready, 'isDocumentReady').callsFake(() => {
+    env.sandbox.stub(docready, 'isDocumentReady').callsFake(() => {
       return ready;
     });
     let readyCallback;
-    sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
+    env.sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
       return new Promise(resolve => {
         readyCallback = resolve;
       });

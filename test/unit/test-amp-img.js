@@ -16,6 +16,7 @@
 
 import {AmpImg, installImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
+import {BrowserController} from '../../testing/test-helper';
 import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
@@ -23,41 +24,35 @@ import {createIframePromise} from '../../testing/iframe';
 import {toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
-  let sandbox;
   let screenWidth;
   let windowWidth;
-  let iframe;
+  let fixture;
 
   const SRCSET_STRING = `/examples/img/hero@1x.jpg 641w,
                         /examples/img/hero@2x.jpg 1282w`;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     screenWidth = 320;
     windowWidth = 320;
-    sandbox.stub(BaseElement.prototype, 'isInViewport').returns(true);
-    sandbox.stub(BaseElement.prototype, 'getViewport').callsFake(() => {
+    window.sandbox.stub(BaseElement.prototype, 'isInViewport').returns(true);
+    window.sandbox.stub(BaseElement.prototype, 'getViewport').callsFake(() => {
       return {
         getWidth: () => windowWidth,
       };
     });
 
     return createIframePromise().then(iframeFixture => {
-      iframe = iframeFixture;
+      fixture = iframeFixture;
     });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function getImg(attributes, children) {
-    installImg(iframe.win);
-    Object.defineProperty(iframe.win.screen, 'width', {
+    installImg(fixture.win);
+    Object.defineProperty(fixture.win.screen, 'width', {
       get: () => screenWidth,
     });
 
-    const img = iframe.doc.createElement('amp-img');
+    const img = fixture.doc.createElement('amp-img');
     for (const key in attributes) {
       img.setAttribute(key, attributes[key]);
     }
@@ -67,7 +62,7 @@ describe('amp-img', () => {
         img.appendChild(children[key]);
       }
     }
-    return Promise.resolve(iframe.addElement(img));
+    return Promise.resolve(fixture.addElement(img));
   }
 
   it('should load an img with more attributes', () => {
@@ -114,7 +109,7 @@ describe('amp-img', () => {
       height: 200,
     }).then(ampImg => {
       const impl = ampImg.implementation_;
-      sandbox.stub(impl.preconnect, 'url');
+      window.sandbox.stub(impl.preconnect, 'url');
       impl.preconnectCallback(true);
       const preconnecturl = impl.preconnect.url;
       expect(preconnecturl.called).to.be.true;
@@ -144,7 +139,7 @@ describe('amp-img', () => {
       height: 200,
     }).then(ampImg => {
       const impl = ampImg.implementation_;
-      sandbox.stub(impl.preconnect, 'url');
+      window.sandbox.stub(impl.preconnect, 'url');
       impl.preconnectCallback(true);
       expect(impl.preconnect.url.called).to.be.true;
       expect(impl.preconnect.url).to.have.been.calledWith(
@@ -202,16 +197,16 @@ describe('amp-img', () => {
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
       el.getResources = () => Services.resourcesForDoc(document);
-      el.getPlaceholder = sandbox.stub();
+      el.getPlaceholder = window.sandbox.stub();
       impl = new AmpImg(el);
       impl.createdCallback();
-      sandbox.stub(impl, 'getLayoutWidth').returns(100);
+      window.sandbox.stub(impl, 'getLayoutWidth').returns(100);
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
-      toggleFallbackSpy = sandbox.spy(el, 'toggleFallback');
-      togglePlaceholderSpy = sandbox.spy(el, 'togglePlaceholder');
-      errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
-      toggleSpy = sandbox.spy(impl, 'toggleFallback');
+      toggleFallbackSpy = window.sandbox.spy(el, 'toggleFallback');
+      togglePlaceholderSpy = window.sandbox.spy(el, 'togglePlaceholder');
+      errorSpy = window.sandbox.spy(impl, 'onImgLoadingError_');
+      toggleSpy = window.sandbox.spy(impl, 'toggleFallback');
 
       impl.getVsync = function() {
         return {
@@ -291,7 +286,7 @@ describe('amp-img', () => {
         expect(impl.img_).to.have.class('i-amphtml-ghost');
 
         // On load, remove fallback
-        const loadEvent = createCustomEvent(iframe.win, 'load');
+        const loadEvent = createCustomEvent(fixture.win, 'load');
         impl.img_.dispatchEvent(loadEvent);
 
         expect(errorSpy).to.be.calledOnce;
@@ -302,7 +297,7 @@ describe('amp-img', () => {
         expect(impl.img_).to.not.have.class('i-amphtml-ghost');
 
         // On further error, do not bring back the fallback image
-        const errorEvent = createCustomEvent(iframe.win, 'error');
+        const errorEvent = createCustomEvent(fixture.win, 'error');
         impl.img_.dispatchEvent(errorEvent);
 
         expect(errorSpy).to.be.calledTwice;
@@ -360,7 +355,7 @@ describe('amp-img', () => {
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
 
-    el.getPlaceholder = sandbox.stub();
+    el.getPlaceholder = window.sandbox.stub();
     const impl = new AmpImg(el);
     impl.getAmpDoc = function() {
       return window.AMP.ampdoc;
@@ -377,6 +372,8 @@ describe('amp-img', () => {
   it('should propagate the object-fit attribute', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-fit': 'cover',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -387,6 +384,8 @@ describe('amp-img', () => {
   it('should not propagate the object-fit attribute if invalid', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-fit': 'foo 80%',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -397,6 +396,8 @@ describe('amp-img', () => {
   it('should propagate the object-position attribute', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-position': '20% 80%',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
@@ -407,11 +408,24 @@ describe('amp-img', () => {
   it('should not propagate the object-position attribute if invalid', () => {
     return getImg({
       src: '/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
       'object-position': 'url("example.com")',
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
       expect(img.style.objectPosition).to.be.empty;
     });
+  });
+
+  it('should not error on unlayoutCallback before layoutCallback', () => {
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+    el.setAttribute('noprerender', '');
+    const impl = new AmpImg(el);
+    impl.buildCallback();
+    impl.unlayoutCallback();
   });
 
   describe('blurred image placeholder', () => {
@@ -435,7 +449,7 @@ describe('amp-img', () => {
         img.setAttribute('placeholder', '');
         el.getPlaceholder = () => img;
       } else {
-        el.getPlaceholder = sandbox.stub();
+        el.getPlaceholder = window.sandbox.stub();
       }
       if (addBlurClass) {
         img.classList.add('i-amphtml-blurry-placeholder');
@@ -443,8 +457,8 @@ describe('amp-img', () => {
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       const impl = new AmpImg(el);
-      sandbox.stub(impl, 'getLayoutWidth').returns(200);
-      impl.togglePlaceholder = sandbox.stub();
+      window.sandbox.stub(impl, 'getLayoutWidth').returns(200);
+      impl.togglePlaceholder = window.sandbox.stub();
       return impl;
     }
 
@@ -493,11 +507,11 @@ describe('amp-img', () => {
         el.setAttribute(key, attributes[key]);
       }
       el.getResources = () => Services.resourcesForDoc(document);
-      el.getPlaceholder = sandbox.stub();
+      el.getPlaceholder = window.sandbox.stub();
       const impl = new AmpImg(el);
       impl.createdCallback();
-      sandbox.stub(impl, 'getLayoutWidth').returns(layoutWidth);
-      sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
+      window.sandbox.stub(impl, 'getLayoutWidth').returns(layoutWidth);
+      window.sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
 
@@ -665,4 +679,129 @@ describe('amp-img', () => {
       );
     });
   });
+
+  // Firefox misbehaves on Windows for this test because getBoundingClientRect
+  // returns 0x0 for width and height. Strangely Firefox on MacOS will return
+  // reasonable values for getBoundingClientRect if we add an explicit wait
+  // for laid out attributes via waitForElementLayout. If we change the test to
+  // test for client or offset values, Safari yields 0px measurements.
+  // For details, see: https://github.com/ampproject/amphtml/pull/24574
+  describe
+    .configure()
+    .skipFirefox()
+    .run('layout intrinsic', () => {
+      let browser;
+      beforeEach(() => {
+        fixture.iframe.height = 800;
+        fixture.iframe.width = 800;
+        browser = new BrowserController(fixture.win);
+      });
+      it('should not exceed given width and height even if image\
+      natural size is larger', () => {
+        let ampImg;
+        return getImg({
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 100,
+          height: 100,
+          layout: 'intrinsic',
+        })
+          .then(image => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.getBoundingClientRect()).to.include({
+              width: 100,
+              height: 100,
+            });
+            const img = ampImg.querySelector('img');
+            expect(img.getBoundingClientRect()).to.include({
+              width: 100,
+              height: 100,
+            });
+          });
+      });
+
+      it('should reach given width and height even if image\
+      natural size is smaller', () => {
+        let ampImg;
+        return getImg({
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
+        })
+          .then(image => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.getBoundingClientRect()).to.include({
+              width: 800,
+              height: 600,
+            });
+            const img = ampImg.querySelector('img');
+            expect(img.getBoundingClientRect()).to.include({
+              width: 800,
+              height: 600,
+            });
+          });
+      });
+
+      it('expands a parent div with no explicit dimensions', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        // inline-block to force width and height to size of children
+        // font-size 0 to get rid of the 4px added by inline-block for whitespace
+        parentDiv.setAttribute('style', 'display: inline-block; font-size: 0;');
+        return getImg({
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 600,
+          height: 400,
+          layout: 'intrinsic',
+        })
+          .then(image => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.getBoundingClientRect()).to.include({
+              width: 600,
+              height: 400,
+            });
+            const parentDiv = fixture.doc.getElementById('parent');
+            expect(parentDiv.getBoundingClientRect()).to.include({
+              width: 600,
+              height: 400,
+            });
+          });
+      });
+
+      it('is bounded by explicit dimensions of a parent container', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+        return getImg({
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
+        })
+          .then(image => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.getBoundingClientRect()).to.include({
+              width: 80,
+              height: 60,
+            });
+            const parentDiv = fixture.doc.getElementById('parent');
+            expect(parentDiv.getBoundingClientRect()).to.include({
+              width: 80,
+              height: 80,
+            });
+          });
+      });
+    });
 });

@@ -106,7 +106,8 @@ function isPatched(win) {
  * @param {!Error} error
  */
 function rethrowAsync(error) {
-  new /*OK*/ Promise(() => {
+  setTimeout(() => {
+    self.__AMP_REPORT_ERROR(error);
     throw error;
   });
 }
@@ -228,11 +229,6 @@ class Registry {
     this.win_ = win;
 
     /**
-     * @private @const
-     */
-    this.doc_ = win.document;
-
-    /**
      * @type {!Object<string, !CustomElementDef>}
      * @private
      * @const
@@ -260,12 +256,11 @@ class Registry {
     this.mutationObserver_ = null;
 
     /**
-     * All the observed DOM trees, including shadow trees. This is cleared out
-     * when the mutation observer is created.
+     * All the observed DOM trees, including shadow trees.
      *
      * @private @const {!Array<!Node>}
      */
-    this.observed_ = [win.document];
+    this.roots_ = [win.document];
   }
 
   /**
@@ -346,7 +341,9 @@ class Registry {
     };
 
     this.observe_(name);
-    this.upgrade(this.doc_, name);
+    this.roots_.forEach(tree => {
+      this.upgrade(tree, name);
+    });
   }
 
   /**
@@ -510,10 +507,12 @@ class Registry {
     });
     this.mutationObserver_ = mo;
 
-    this.observed_.forEach(tree => {
+    // I would love to not have to hold onto all of the roots, since it's a
+    // memory leak. Unfortunately, there's no way to iterate a list and hold
+    // onto its contents weakly.
+    this.roots_.forEach(tree => {
       mo.observe(tree, TRACK_SUBTREE);
     });
-    this.observed_.length = 0;
 
     installPatches(this.win_, this);
   }
@@ -524,10 +523,9 @@ class Registry {
    * @param {!Node} tree
    */
   observe(tree) {
+    this.roots_.push(tree);
     if (this.mutationObserver_) {
       this.mutationObserver_.observe(tree, TRACK_SUBTREE);
-    } else {
-      this.observed_.push(tree);
     }
   }
 
@@ -672,13 +670,27 @@ function installPatches(win, registry) {
   // Patch the innerHTML setter to immediately upgrade custom elements.
   // Note, this could technically fire connectedCallbacks if this node was
   // connected, but we leave that to the Mutation Observer.
-  const innerHTMLDesc = Object.getOwnPropertyDescriptor(elProto, 'innerHTML');
+  let innerHTMLProto = elProto;
+  let innerHTMLDesc = Object.getOwnPropertyDescriptor(
+    innerHTMLProto,
+    'innerHTML'
+  );
+  if (!innerHTMLDesc) {
+    // Sigh... IE11 puts innerHTML desciptor on HTMLElement. But, we've
+    // replaced HTMLElement with a polyfill wrapper, so have to get its proto.
+    innerHTMLProto =
+      /** @type {!Object} */ (win.HTMLElement.prototype.__proto__);
+    innerHTMLDesc = Object.getOwnPropertyDescriptor(
+      innerHTMLProto,
+      'innerHTML'
+    );
+  }
   const innerHTMLSetter = innerHTMLDesc.set;
   innerHTMLDesc.set = function(html) {
     innerHTMLSetter.call(this, html);
     registry.upgrade(this);
   };
-  Object.defineProperty(elProto, 'innerHTML', innerHTMLDesc);
+  Object.defineProperty(innerHTMLProto, 'innerHTML', innerHTMLDesc);
 }
 
 /**
@@ -781,6 +793,16 @@ function polyfill(win) {
 
   // Expose the polyfilled HTMLElement constructor for everyone to extend from.
   win.HTMLElement = HTMLElementPolyfill;
+
+  // When we transpile `super` in Custom Element subclasses, we change it to
+  // `superClass.call(this)` (where `superClass` is `HTMLElementPolyfill`).
+  // That `.call` value is inherited from `Function.prototype`.
+  // But, IE11's native HTMLElement hierarchy doesn't extend from Function!
+  // And because `HTMLElementPolyfill` extends from `HTMLElement`, it doesn't
+  // have a `.call`! So we need to manually install it.
+  if (!HTMLElementPolyfill.call) {
+    HTMLElementPolyfill.call = win.Function.call;
+  }
 }
 
 /**
@@ -852,29 +874,35 @@ function subClass(Object, superClass, subClass) {
 export function install(win, opt_ctor) {
   // Don't install in no-DOM environments e.g. worker.
   const shouldInstall = win.document;
-  if (!shouldInstall || isPatched(win)) {
+  const hasCE = hasCustomElements(win);
+  if (!shouldInstall || (hasCE && isPatched(win))) {
     return;
   }
 
   let install = true;
   let installWrapper = false;
 
-  if (opt_ctor && hasCustomElements(win)) {
+  if (opt_ctor && hasCE) {
     // If ctor is constructable without new, it's a function. That means it was
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.
     try {
-      const {Object, Reflect} = win;
+      const {Object, Reflect, Function} = win;
 
       // "Construct" ctor using ES5 idioms
       const instance = Object.create(opt_ctor.prototype);
-      opt_ctor.call(instance);
 
-      // If that succeeded, we're in a transpiled environment
+      // This will throw an error unless we're in a transpiled environemnt.
+      // Native classes must be called as `new Ctor`, not `Ctor.call(instance)`.
+      // We use `Function.call.call` because Closure is too smart for regular
+      // `Ctor.call`.
+      Function.call.call(opt_ctor, instance);
+
+      // If that didn't throw, we're transpiled.
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
       installWrapper = !!(Reflect && Reflect.construct);
     } catch (e) {
-      // The ctor threw when we constructed is via ES5, so it's a real class.
+      // The ctor threw when we constructed it via ES5, so it's a real class.
       // We're ok to not install the polyfill.
       install = false;
     }

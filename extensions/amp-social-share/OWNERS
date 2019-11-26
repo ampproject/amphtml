@@ -5,10 +5,10 @@
   rules: [
     {
       owners: [
-        { name: 'ampproject/wg-ui-and-a11y' },
-        { name: 'ithinkihaveacat' },
-        { name: 'ryancopley' }
-      ]
-    }
-  ]
+        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'ithinkihaveacat'},
+        {name: 'ryancopley'},
+      ],
+    },
+  ],
 }

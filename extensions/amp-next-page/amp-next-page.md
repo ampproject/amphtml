@@ -6,6 +6,7 @@ teaser:
   text: Dynamically loads more documents recommended for the user.
 experimental: true
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -63,6 +64,7 @@ document, providing an infinite-scroll type experience.
 
 Pages should be specified in a JSON config loaded from a remote URL listed in
 the element `src`, or inlined as a `script` element child.
+
 ```html
 <amp-next-page src="https://example.com/next-page-config.json"></amp-next-page>
 <!-- Or -->
@@ -83,10 +85,10 @@ example, at the end of a news article or recipe, but before the footer or
 other content repeated across articles.
 
 The component will render a total maximum of three documents on screen in a
-component will render a maximum of three documents (total) on screen at one	single instance. This limit may be changed or removed in the future.
+component will render a maximum of three documents (total) on screen at one single instance. This limit may be changed or removed in the future.
 
 [tip type="important"]
-**Important**	[`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`.
+**Important** [`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`.
 Measuring pageviews is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md).
 [/tip]
 
@@ -108,12 +110,12 @@ classes:
 ### Separator
 
 A separator is rendered between each loaded document. By default this is
-rendered as a full-width hairline. It can be customised by styling the `
-.amp-next-page-default-separator` class.
+rendered as a full-width hairline. It can be customised by styling the `.amp-next-page-default-separator` class.
 
 Alternatively, you can specify a custom separator containing arbitrary HTML
 content as a child of the `amp-next-page` component by using the `separator`
 attribute.
+
 ```html
 <amp-next-page src="https://example.com/config.json">
   <div separator>
@@ -148,6 +150,7 @@ selectors will be set to `display: none` in all child documents.
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>src</strong></td>
@@ -167,18 +170,18 @@ The <code>src</code> attribute is required unless a config has been specified in
 The configuration defines the documents recommended by `amp-next-page` to
 the user as a JSON object.
 
-| Key                | Value |
-| ------------------ | ----- |
-| `pages` (required) | Ordered array of one or more page objects |
+| Key                | Value                                                             |
+| ------------------ | ----------------------------------------------------------------- |
+| `pages` (required) | Ordered array of one or more page objects                         |
 | `hideSelectors`    | Optional array of string CSS selectors to hide in child documents |
 
 Each page object should have the following format:
 
-| Key                   | Value |
-| --------------------- | ----- |
+| Key                   | Value                                                                                                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ampUrl` (required)   | String URL of the page. Must be on the same origin as the current document. URLs will automatically be rewritten to point to the Google AMP cache when required. |
-| `title` (required)    | String title of the page, will be used when rendering the recommendation box |
-| `imageUrl` (required) | String URL of the image to display in the recommendation box |
+| `title` (required)    | String title of the page, will be used when rendering the recommendation box                                                                                     |
+| `imageUrl` (required) | String URL of the image to display in the recommendation box                                                                                                     |
 
 ### Example configuration
 
@@ -199,10 +202,7 @@ read, and hides the header and footer elements from each child document.
       "ampUrl": "https://example.com/article2.amp.html"
     }
   ],
-  "hideSelectors": [
-    ".header",
-    ".footer"
-  ]
+  "hideSelectors": [".header", ".footer"]
 }
 ```
 
@@ -212,9 +212,11 @@ The `amp-next-page` src allows all standard URL variable substitutions. See
 the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 For example:
+
 ```html
 <amp-next-page src="https://foo.com/config.json?RANDOM"></amp-next-page>
 ```
+
 may make a request to something like
 `https://foo.com/config.json?0.8390278471201` where the RANDOM value is
 randomly generated upon each impression.

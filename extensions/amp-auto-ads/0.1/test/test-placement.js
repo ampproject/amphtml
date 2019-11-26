@@ -17,9 +17,14 @@
 import '../../../amp-ad/0.1/amp-ad';
 import * as Utils from '../utils';
 import {AdTracker} from '../ad-tracker';
-import {PlacementState, getPlacementsFromConfigObj} from '../placement';
+import {
+  NO_OP_EXP,
+  PlacementState,
+  getPlacementsFromConfigObj,
+} from '../placement';
 import {RESPONSIVE_SIZING_EXP} from '../amp-auto-ads';
 import {Services} from '../../../../src/services';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 describes.realWin(
@@ -49,9 +54,55 @@ describes.realWin(
       doc.body.appendChild(container);
       // Stub whenBuilt to resolve immediately to handle upgrade for AdSense
       // to FF impl.
-      sinon
+      env.sandbox
         .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
+    });
+
+    describe('noOpExperiment', () => {
+      it('should set the correct ID on the ad element', () => {
+        forceExperimentBranch(
+          ampdoc.win,
+          NO_OP_EXP.branch,
+          NO_OP_EXP.experiment
+        );
+
+        const anchor = doc.createElement('div');
+        anchor.id = 'anId';
+        container.appendChild(anchor);
+
+        const placements = getPlacementsFromConfigObj(ampdoc, {
+          placements: [
+            {
+              anchor: {
+                selector: 'DIV#anId',
+              },
+              pos: 2,
+              type: 1,
+            },
+          ],
+        });
+        expect(placements).to.have.lengthOf(1);
+
+        const attributes = {
+          'type': '_ping_',
+        };
+
+        const sizing = {};
+
+        const adTracker = new AdTracker([], {
+          initialMinSpacing: 0,
+          subsequentMinSpacing: [],
+          maxAdCount: 10,
+        });
+
+        const result = placements[0].placeAd(attributes, sizing, adTracker);
+        env.flushVsync();
+        return result.then(() => {
+          const adElement = anchor.firstChild;
+          expect(isInExperiment(adElement, NO_OP_EXP.experiment)).to.be.true;
+        });
+      });
     });
 
     describe('getAdElement', () => {
@@ -414,7 +465,7 @@ describes.realWin(
         });
 
         const resources = Services.resourcesForDoc(anchor);
-        sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
           return Promise.reject();
         });
 
@@ -617,10 +668,10 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
-        sandbox.stub(resource.viewport_, 'getWidth').callsFake(() => 2000);
+        env.sandbox.stub(resource.viewport_, 'getWidth').callsFake(() => 2000);
 
         const placements = getPlacementsFromConfigObj(
           ampdoc,
@@ -635,7 +686,7 @@ describes.realWin(
               },
             ],
           },
-          RESPONSIVE_SIZING_EXP.experiment
+          RESPONSIVE_SIZING_EXP.control
         );
         expect(placements).to.have.lengthOf(1);
 
@@ -665,8 +716,8 @@ describes.realWin(
             expect(adElement.style.marginLeft).to.equal('');
             expect(adElement.style.marginRight).to.equal('');
             expect(placementState).to.equal(PlacementState.RESIZE_FAILED);
-            expect(isInExperiment(adElement, RESPONSIVE_SIZING_EXP.experiment))
-              .to.be.true;
+            expect(isInExperiment(adElement, RESPONSIVE_SIZING_EXP.control)).to
+              .be.true;
           });
       });
 
@@ -676,27 +727,31 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
-        sandbox.stub(win, 'getComputedStyle').callsFake(() => {
+        env.sandbox.stub(win, 'getComputedStyle').callsFake(() => {
           return {direction: 'ltr'};
         });
-        sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
+        env.sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
           return Promise.resolve({left: 20});
         });
 
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
               },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
+            ],
+          },
+          RESPONSIVE_SIZING_EXP.holdback
+        );
         expect(placements).to.have.lengthOf(1);
 
         const attributes = {
@@ -713,12 +768,9 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
-              anchor.firstChild,
-              150,
-              300,
-              {left: -20}
-            );
+            expect(
+              resource.attemptChangeSize
+            ).to.have.been.calledWith(anchor.firstChild, 150, 300, {left: -20});
             expect(placementState).to.equal(PlacementState.PLACED);
           });
       });
@@ -729,27 +781,31 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
-        sandbox.stub(win, 'getComputedStyle').callsFake(() => {
+        env.sandbox.stub(win, 'getComputedStyle').callsFake(() => {
           return {direction: 'rtl'};
         });
-        sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
+        env.sandbox.stub(Utils, 'getElementLayoutBox').callsFake(() => {
           return Promise.resolve({left: 20});
         });
 
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
               },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
+            ],
+          },
+          RESPONSIVE_SIZING_EXP.holdback
+        );
         expect(placements).to.have.lengthOf(1);
 
         const attributes = {
@@ -766,12 +822,9 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker, true)
           .then(placementState => {
-            expect(resource.attemptChangeSize).to.have.been.calledWith(
-              anchor.firstChild,
-              150,
-              300,
-              {right: 20}
-            );
+            expect(
+              resource.attemptChangeSize
+            ).to.have.been.calledWith(anchor.firstChild, 150, 300, {right: 20});
             expect(placementState).to.equal(PlacementState.PLACED);
           });
       });
@@ -782,7 +835,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.resolve();
         });
 
@@ -828,21 +881,25 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.reject(new Error('Resize failed'));
         });
 
-        const placements = getPlacementsFromConfigObj(ampdoc, {
-          placements: [
-            {
-              anchor: {
-                selector: 'DIV#anId',
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          {
+            placements: [
+              {
+                anchor: {
+                  selector: 'DIV#anId',
+                },
+                pos: 2,
+                type: 1,
               },
-              pos: 2,
-              type: 1,
-            },
-          ],
-        });
+            ],
+          },
+          RESPONSIVE_SIZING_EXP.holdback
+        );
         expect(placements).to.have.lengthOf(1);
 
         const attributes = {
@@ -875,7 +932,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const resource = Services.resourcesForDoc(anchor);
-        sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
           return Promise.reject(new Error('Resize failed'));
         });
 

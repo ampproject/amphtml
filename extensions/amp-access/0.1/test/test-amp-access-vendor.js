@@ -82,7 +82,7 @@ describes.realWin('AccessVendorAdapter', {amp: true}, env => {
     beforeEach(() => {
       adapter = new AccessVendorAdapter(ampdoc, validConfig);
       vendor = new AccessVendor();
-      vendorMock = sandbox.mock(vendor);
+      vendorMock = env.sandbox.mock(vendor);
       adapter.registerVendor(vendor);
     });
 

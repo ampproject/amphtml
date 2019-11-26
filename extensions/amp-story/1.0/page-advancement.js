@@ -430,7 +430,10 @@ class ManualAdvancement extends AdvancementConfig {
       dev().assertElement(event.target),
       el => {
         tagName = el.tagName.toLowerCase();
-        if (tagName === 'amp-story-page-attachment') {
+        if (
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-quiz'
+        ) {
           shouldHandleEvent = false;
           return true;
         }
@@ -552,6 +555,7 @@ class ManualAdvancement extends AdvancementConfig {
     const pageRect = this.element_.getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
+      event.stopPropagation();
       event.preventDefault();
       const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE

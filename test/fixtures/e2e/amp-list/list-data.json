@@ -1,19 +1,19 @@
 {
- "items": [
-   {
-     "name": "Subaru"
-   },
-   {
-     "name": "Mitsubishi"
-   },
-   {
-     "name": "Tesla"
-   },
-   {
-     "name": "Honda"
-   },
-   {
-     "name": "Toyota"
-   }
- ]
+  "items": [
+    {
+      "name": "Subaru"
+    },
+    {
+      "name": "Mitsubishi"
+    },
+    {
+      "name": "Tesla"
+    },
+    {
+      "name": "Honda"
+    },
+    {
+      "name": "Toyota"
+    }
+  ]
 }

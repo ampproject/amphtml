@@ -22,15 +22,19 @@
 
 'use strict';
 
-const deglob = require('globs-to-files');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
 const log = require('fancy-log');
-const path = require('path');
+const request = require('request');
+const utils = require('bluebird');
 const {cyan, red, green} = require('ansi-colors');
+const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {isTravisBuild} = require('../common/travis');
 
-const rootDir = path.dirname(path.dirname(__dirname));
+const requestPost = utils.promisify(request.post);
+
+const OWNERS_SYNTAX_CHECK_URI =
+  'http://ampproject-owners-bot.appspot.com/v0/syntax';
 
 /**
  * Checks OWNERS files for correctness using the owners bot API.
@@ -38,18 +42,20 @@ const rootDir = path.dirname(path.dirname(__dirname));
  * so that all OWNERS files can be checked / fixed.
  */
 async function checkOwners() {
-  const filesToCheck = deglob.sync(['**/OWNERS']);
-  filesToCheck.forEach(file => {
-    const relativePath = path.relative(rootDir, file);
-    checkFile(relativePath);
-  });
+  if (!usesFilesOrLocalChanges('check-owners')) {
+    return;
+  }
+  const filesToCheck = getFilesToCheck('**/OWNERS');
+  for (const file of filesToCheck) {
+    await checkFile(file);
+  }
 }
 
 /**
  * Checks a single OWNERS file using the owners bot API.
  * @param {string} file
  */
-function checkFile(file) {
+async function checkFile(file) {
   if (!file.endsWith('OWNERS')) {
     log(red('ERROR:'), cyan(file), 'is not an', cyan('OWNERS'), 'file.');
     process.exitCode = 1;
@@ -69,6 +75,43 @@ function checkFile(file) {
     log(red('FAILURE:'), 'Found errors in', cyan(file));
     process.exitCode = 1;
   }
+
+  try {
+    const response = await requestPost({
+      uri: OWNERS_SYNTAX_CHECK_URI,
+      json: true,
+      body: {path: file, contents},
+    });
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      log(red('ERROR:'), 'Could not reach the owners syntax check API');
+      throw new Error(
+        `${response.statusCode} ${response.statusMessage}: ` + response.body
+      );
+    }
+
+    const {requestErrors, fileErrors, rules} = response.body;
+
+    if (requestErrors) {
+      requestErrors.forEach(err => log(red(err)));
+      throw new Error('Could not reach the owners syntax check API');
+    } else if (fileErrors && fileErrors.length) {
+      fileErrors.forEach(err => log(red(err)));
+      throw new Error(`Errors encountered parsing "${file}"`);
+    }
+
+    log(
+      green('SUCCESS:'),
+      'Parsed',
+      cyan(file),
+      'successfully; produced',
+      cyan(rules.length),
+      'rules.'
+    );
+  } catch (error) {
+    log(red('FAILURE:'), error);
+    process.exitCode = 1;
+  }
 }
 
 module.exports = {
@@ -78,4 +121,5 @@ module.exports = {
 checkOwners.description = 'Checks all OWNERS files in the repo for correctness';
 checkOwners.flags = {
   'files': '  Checks only the specified OWNERS files',
+  'local_changes': '  Checks just the OWNERS files changed in the local branch',
 };
