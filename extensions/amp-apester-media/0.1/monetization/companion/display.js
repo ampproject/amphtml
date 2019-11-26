@@ -17,6 +17,7 @@
 import {createElementWithAttributes} from '../../../../../src/dom';
 import {getValueForExpr} from '../../../../../src/json';
 const ALLOWED_AD_PROVIDER = 'gdt';
+import {dict} from '../../../../../src/utils/object';
 
 /**
  * @param {!JsonObject} media
@@ -24,21 +25,29 @@ const ALLOWED_AD_PROVIDER = 'gdt';
  */
 export function handleCompanionDisplay(media, apesterElement) {
   const companionOptions = getValueForExpr(
-    media,
+    /**@type {!JsonObject}*/ (media),
     'campaignData.companionOptions'
   );
-  const enabledDisplayAd = getValueForExpr(companionOptions, 'enabled');
-  const settings = getValueForExpr(companionOptions, 'settings');
+  if (companionOptions) {
+    const enabledDisplayAd = getValueForExpr(
+      /**@type {!JsonObject}*/ (companionOptions),
+      'enabled'
+    );
+    const settings = getValueForExpr(
+      /**@type {!JsonObject}*/ (companionOptions),
+      'settings'
+    );
 
-  if (
-    enabledDisplayAd &&
-    settings &&
-    settings['bannerAdProvider'] === ALLOWED_AD_PROVIDER
-  ) {
-    const slot = settings['slot'];
-    const defaultBannerSizes = [[300, 250]];
-    const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
-    constructCompanionDisplayAd(slot, bannerSizes, apesterElement);
+    if (
+      enabledDisplayAd &&
+      settings &&
+      settings['bannerAdProvider'] === ALLOWED_AD_PROVIDER
+    ) {
+      const slot = settings['slot'];
+      const defaultBannerSizes = [[300, 250]];
+      const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
+      constructCompanionDisplayAd(slot, bannerSizes, apesterElement);
+    }
   }
 }
 
@@ -46,7 +55,7 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @param {string} slot
  * @param {Array} bannerSizes
  * @param {AmpElement} apesterElement
- * @return {ampAd}
+ * @return {Element}
  */
 function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
   const biggestAdSize = bannerSizes.reduce((max, arr) => {
@@ -57,16 +66,16 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
 
   const multiSizeData = bannerSizes.map(arr => arr.join('x')).join();
   const ampAd = createElementWithAttributes(
-    apesterElement.ownerDocument,
+    /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    {
+    dict({
       'width': `${biggestAdSize[0]}`,
-      'height': `${0}`,
+      'height': '0',
       'type': 'doubleclick',
       'layout': 'fixed',
       'data-slot': `${slot}`,
       'data-multi-size': multiSizeData,
-    }
+    })
   );
   ampAd.classList.add('amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);

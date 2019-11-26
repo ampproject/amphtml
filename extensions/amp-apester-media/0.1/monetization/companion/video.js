@@ -17,6 +17,7 @@
 import {Services} from '../../../../../src/services';
 const ALLOWED_AD_PROVIDER = 'sr';
 import {createElementWithAttributes} from '../../../../../src/dom';
+import {dict} from '../../../../../src/utils/object';
 import {getValueForExpr} from '../../../../../src/json';
 
 /**
@@ -26,14 +27,16 @@ import {getValueForExpr} from '../../../../../src/json';
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
   const companionCampaignOptions = getValueForExpr(
-    media,
+    /**@type {!JsonObject}*/ (media),
     'campaignData.companionCampaignOptions'
   );
   const videoSettings = getValueForExpr(
-    media,
+    /**@type {!JsonObject}*/ (media),
     'campaignData.companionOptions.video'
   );
-  const position = getCompanionPosition(videoSettings);
+  const position = getCompanionPosition(
+    /**@type {!JsonObject}*/ (videoSettings)
+  );
 
   if (
     !companionCampaignOptions ||
@@ -90,13 +93,12 @@ function constructCompanionSrElement(
   apesterElement
 ) {
   const size = getCompanionVideoAdSize(apesterElement);
-
   const ampBladeAd = createElementWithAttributes(
-    apesterElement.ownerDocument,
+    /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    {
+    dict({
       'width': size.width,
-      'height': `${0}`,
+      'height': '0',
       'type': 'blade',
       'layout': 'responsive',
       'data-blade_player_type': 'bladex',
@@ -104,7 +106,7 @@ function constructCompanionSrElement(
       'data-blade_macros': JSON.stringify(macros),
       'data-blade_player_id': videoTag,
       'data-blade_api_key': '5857d2ee263dc90002000001',
-    }
+    })
   );
 
   ampBladeAd.classList.add('amp-apester-companion');
