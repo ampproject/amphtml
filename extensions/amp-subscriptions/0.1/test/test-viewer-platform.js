@@ -94,27 +94,31 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   });
 
   describe('getEntitlements', () => {
-    it('should call verify() with authorization and decryptedDocKey', () => {
+    it('should call verify() with authorization and decryptedDocKey', async () => {
       const entitlement = {};
       const verifyAuthTokenStub = env.sandbox
         .stub(viewerPlatform, 'verifyAuthToken_')
         .callsFake(() => Promise.resolve(entitlement));
-      return viewerPlatform.getEntitlements().then(() => {
-        expect(verifyAuthTokenStub).to.be.calledWith(
-          fakeAuthToken['authorization'],
-          fakeAuthToken['decryptedDocumentKey']
-        );
-      });
+
+      await viewerPlatform.getEntitlements();
+      expect(verifyAuthTokenStub).to.be.calledWith(
+        fakeAuthToken['authorization'],
+        fakeAuthToken['decryptedDocumentKey']
+      );
     });
 
-    it('should send auth rejection message for rejected verification', () => {
+    it('should send auth rejection message for rejected verification', async () => {
       const reason = 'Payload is expired';
       env.sandbox
         .stub(viewerPlatform, 'verifyAuthToken_')
         .callsFake(() => Promise.reject(new Error(reason)));
-      return viewerPlatform.getEntitlements().catch(() => {
+
+      try {
+        await viewerPlatform.getEntitlements();
+        throw new Error('must have failed');
+      } catch (e) {
         expect(sendAuthTokenStub).to.be.calledWith(reason);
-      });
+      }
     });
   });
 
@@ -133,106 +137,105 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     const entitlement = Entitlement.parseFromJson(entitlementData);
     entitlement.service = 'local';
 
-    it('should reject promise for expired payload', () => {
-      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
-        return {
-          'aud': getWinOrigin(win),
-          'exp': Date.now() / 1000 - 10,
-          'entitlements': [entitlementData],
-        };
-      });
-      return viewerPlatform.verifyAuthToken_('faketoken').catch(reason => {
+    it('should reject promise for expired payload', async () => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
+        'aud': getWinOrigin(win),
+        'exp': Date.now() / 1000 - 10,
+        'entitlements': [entitlementData],
+      }));
+
+      try {
+        await viewerPlatform.verifyAuthToken_('faketoken');
+        throw new Error('must have failed');
+      } catch (reason) {
         expect(reason.message).to.be.equal('Payload is expired​​​');
-      });
+      }
     });
 
-    it('should reject promise for audience mismatch', () => {
-      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
-        return {
-          'aud': 'random origin',
-          'exp': Math.floor(Date.now() / 1000) + 5 * 60,
-          'entitlements': [entitlementData],
-        };
-      });
-      return viewerPlatform.verifyAuthToken_('faketoken').catch(reason => {
+    it('should reject promise for audience mismatch', async () => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
+        'aud': 'random origin',
+        'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+        'entitlements': [entitlementData],
+      }));
+
+      try {
+        await viewerPlatform.verifyAuthToken_('faketoken');
+        throw new Error('must have failed');
+      } catch (reason) {
         expect(reason.message).to.be.equals(
           'The mismatching "aud" field: random origin​​​'
         );
-      });
+      }
     });
 
-    it('should resolve promise with entitlement', () => {
-      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
-        return {
-          'aud': getWinOrigin(win),
-          'exp': Math.floor(Date.now() / 1000) + 5 * 60,
-          'entitlements': [entitlementData],
-        };
-      });
-      return viewerPlatform
-        .verifyAuthToken_('faketoken')
-        .then(resolvedEntitlement => {
-          expect(resolvedEntitlement).to.be.not.undefined;
-          expect(resolvedEntitlement.service).to.equal(entitlementData.service);
-          expect(resolvedEntitlement.source).to.equal('viewer');
-          expect(resolvedEntitlement.granted).to.be.equal(
-            entitlementData.products.indexOf(currentProductId) !== -1
-          );
-          expect(resolvedEntitlement.grantReason).to.be.equal(
-            GrantReason.SUBSCRIBER
-          );
-          // raw should be the data which was resolved via
-          // sendMessageAwaitResponse.
-          expect(resolvedEntitlement.raw).to.equal('faketoken');
-          expect(resolvedEntitlement.decryptedDocumentKey).to.be.undefined;
-        });
+    it('should resolve promise with entitlement', async () => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
+        'aud': getWinOrigin(win),
+        'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+        'entitlements': [entitlementData],
+      }));
+
+      const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
+        'faketoken'
+      );
+      expect(resolvedEntitlement).to.be.not.undefined;
+      expect(resolvedEntitlement.service).to.equal(entitlementData.service);
+      expect(resolvedEntitlement.source).to.equal('viewer');
+      expect(resolvedEntitlement.granted).to.be.equal(
+        entitlementData.products.indexOf(currentProductId) !== -1
+      );
+      expect(resolvedEntitlement.grantReason).to.be.equal(
+        GrantReason.SUBSCRIBER
+      );
+      // raw should be the data which was resolved via
+      // sendMessageAwaitResponse.
+      expect(resolvedEntitlement.raw).to.equal('faketoken');
+      expect(resolvedEntitlement.decryptedDocumentKey).to.be.undefined;
     });
 
-    it('should resolve promise with entitlement and decryptedDocKey', () => {
-      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
-        return {
-          'aud': getWinOrigin(win),
-          'exp': Math.floor(Date.now() / 1000) + 5 * 60,
-          'entitlements': [entitlementData],
-        };
-      });
-      return viewerPlatform
-        .verifyAuthToken_('faketoken', 'decryptedDocumentKey')
-        .then(resolvedEntitlement => {
-          expect(resolvedEntitlement.decryptedDocumentKey).to.equal(
-            'decryptedDocumentKey'
-          );
-        });
+    it('should resolve promise with entitlement and decryptedDocKey', async () => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
+        'aud': getWinOrigin(win),
+        'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+        'entitlements': [entitlementData],
+      }));
+
+      const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
+        'faketoken',
+        'decryptedDocumentKey'
+      );
+      expect(resolvedEntitlement.decryptedDocumentKey).to.equal(
+        'decryptedDocumentKey'
+      );
     });
 
     it(
       'should resolve granted entitlement, with metering in data if ' +
         'viewer only sends metering',
-      () => {
-        env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => {
-          return {
-            'aud': getWinOrigin(win),
-            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
-            'metering': {
-              left: 3,
-            },
-          };
+      async () => {
+        env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
+          'aud': getWinOrigin(win),
+          'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+          'metering': {
+            left: 3,
+          },
+        }));
+
+        const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
+          'faketoken'
+        );
+        expect(resolvedEntitlement).to.be.not.undefined;
+        expect(resolvedEntitlement.service).to.equal('local');
+        expect(resolvedEntitlement.granted).to.be.equal(true);
+        expect(resolvedEntitlement.grantReason).to.be.equal(
+          GrantReason.METERING
+        );
+        // raw should be the data which was resolved via
+        // sendMessageAwaitResponse.
+        expect(resolvedEntitlement.data).to.deep.equal({
+          left: 3,
         });
-        return viewerPlatform
-          .verifyAuthToken_('faketoken')
-          .then(resolvedEntitlement => {
-            expect(resolvedEntitlement).to.be.not.undefined;
-            expect(resolvedEntitlement.service).to.equal('local');
-            expect(resolvedEntitlement.granted).to.be.equal(true);
-            expect(resolvedEntitlement.grantReason).to.be.equal(
-              GrantReason.METERING
-            );
-            // raw should be the data which was resolved via
-            // sendMessageAwaitResponse.
-            expect(resolvedEntitlement.data).to.deep.equal({
-              left: 3,
-            });
-          });
       }
     );
   });
@@ -246,6 +249,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       viewerPlatform.getServiceId();
       expect(proxyStub).to.be.called;
     });
+
     it('should delegate isPingbackEnabled', () => {
       const proxyStub = env.sandbox.stub(
         viewerPlatform.platform_,
@@ -254,11 +258,13 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       viewerPlatform.isPingbackEnabled();
       expect(proxyStub).to.be.called;
     });
+
     it('should delegate pingback', () => {
       const proxyStub = env.sandbox.stub(viewerPlatform.platform_, 'pingback');
       viewerPlatform.pingback();
       expect(proxyStub).to.be.called;
     });
+
     it('should delegate getSupportedScoreFactor', () => {
       const proxyStub = env.sandbox.stub(
         viewerPlatform.platform_,

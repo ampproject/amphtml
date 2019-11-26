@@ -86,9 +86,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       .callsFake(() => Promise.resolve('reader1'));
     getEncryptedDocumentKeyStub = env.sandbox
       .stub(serviceAdapter, 'getEncryptedDocumentKey')
-      .callsFake(() => {
-        return null;
-      });
+      .callsFake(() => null);
     localSubscriptionPlatform = localSubscriptionPlatformFactory(
       ampdoc,
       serviceConfig.services[0],
@@ -132,19 +130,19 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     expect(localSubscriptionPlatform.isPrerenderSafe()).to.be.false;
   });
 
-  it('should fetch the entitlements on getEntitlements', () => {
+  it('should fetch the entitlements on getEntitlements', async () => {
     const fetchStub = env.sandbox
       .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
       .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    return localSubscriptionPlatform.getEntitlements().then(ent => {
-      expect(fetchStub).to.be.calledOnce;
-      expect(fetchStub.getCall(0).args[0]).to.be.equals(authUrl);
-      expect(fetchStub.getCall(0).args[1].credentials).to.be.equals('include');
-      expect(ent).to.be.instanceof(Entitlement);
-    });
+
+    const ent = await localSubscriptionPlatform.getEntitlements();
+    expect(fetchStub).to.be.calledOnce;
+    expect(fetchStub.getCall(0).args[0]).to.be.equals(authUrl);
+    expect(fetchStub.getCall(0).args[1].credentials).to.be.equals('include');
+    expect(ent).to.be.instanceof(Entitlement);
   });
 
-  it('should buildUrl before fetchingAuth', () => {
+  it('should buildUrl before fetchingAuth', async () => {
     const builtUrl = 'builtUrl';
     const urlBuildingStub = env.sandbox
       .stub(localSubscriptionPlatform.urlBuilder_, 'buildUrl')
@@ -152,44 +150,42 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     const fetchStub = env.sandbox
       .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
       .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    return localSubscriptionPlatform.getEntitlements().then(() => {
-      expect(urlBuildingStub).to.be.calledWith(configAuthUrl, false);
-      expect(fetchStub).to.be.calledWith(builtUrl, {credentials: 'include'});
-    });
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(urlBuildingStub).to.be.calledWith(configAuthUrl, false);
+    expect(fetchStub).to.be.calledWith(builtUrl, {credentials: 'include'});
   });
 
-  it('should call getEncryptedDocumentKey with local', () => {
+  it('should call getEncryptedDocumentKey with local', async () => {
     env.sandbox
       .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
       .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    return localSubscriptionPlatform.getEntitlements().then(() => {
-      expect(getEncryptedDocumentKeyStub).to.be.calledWith('local');
-    });
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(getEncryptedDocumentKeyStub).to.be.calledWith('local');
   });
 
-  it('should add encryptedDocumentKey parameter to url', () => {
+  it('should add encryptedDocumentKey parameter to url', async () => {
     const fetchStub = env.sandbox
       .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
       .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    getEncryptedDocumentKeyStub.callsFake(() => {
-      return 'encryptedDocumentKey';
-    });
-    return localSubscriptionPlatform.getEntitlements().then(() => {
-      return expect(fetchStub).to.be.calledWith(
-        'https://lipsum.com/login/authorize?rid=reader1&crypt=encryptedDocumentKey'
-      );
-    });
+    getEncryptedDocumentKeyStub.callsFake(() => 'encryptedDocumentKey');
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(fetchStub).to.be.calledWith(
+      'https://lipsum.com/login/authorize?rid=reader1&crypt=encryptedDocumentKey'
+    );
   });
 
-  it('should not add encryptedDocumentKey parameter to url', () => {
+  it('should not add encryptedDocumentKey parameter to url', async () => {
     const fetchStub = env.sandbox
       .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
       .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    return localSubscriptionPlatform.getEntitlements().then(() => {
-      return expect(fetchStub).to.be.calledWith(
-        'https://lipsum.com/login/authorize?rid=reader1'
-      );
-    });
+
+    await localSubscriptionPlatform.getEntitlements();
+    expect(fetchStub).to.be.calledWith(
+      'https://lipsum.com/login/authorize?rid=reader1'
+    );
   });
 
   describe('validateActionMap', () => {
@@ -353,7 +349,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   });
 
   describe('executeAction', () => {
-    it('should call executeAction on actions_', () => {
+    it('should call executeAction on actions_', async () => {
       const actionString = 'action';
       const executeStub = env.sandbox
         .stub(localSubscriptionPlatform.actions_, 'execute')
@@ -361,14 +357,14 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
       const resetStub = env.sandbox.stub(serviceAdapter, 'resetPlatforms');
       localSubscriptionPlatform.executeAction(actionString);
       expect(executeStub).to.be.calledWith(actionString);
-      return executeStub().then(() => {
-        expect(resetStub).to.be.calledOnce;
-      });
+
+      await executeStub();
+      expect(resetStub).to.be.calledOnce;
     });
   });
 
   describe('render', () => {
-    it("should call renderer's render method", () => {
+    it("should call renderer's render method", async () => {
       const renderStub = env.sandbox.stub(
         localSubscriptionPlatform.renderer_,
         'render'
@@ -378,13 +374,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         .callsFake(() => Promise.resolve({foo: 'bar'}));
       localSubscriptionPlatform.activate(entitlement);
       expect(stateSub).to.be.calledOnce;
-      return Promise.resolve().then(() => {
-        expect(renderStub).to.be.calledOnce;
-      });
+      await 'Event loop tick';
+      expect(renderStub).to.be.calledOnce;
     });
 
-    it('should build renderState', () => {
-      return expect(
+    it('should build renderState', async () => {
+      await expect(
         localSubscriptionPlatform.createRenderState_(entitlement)
       ).to.eventually.deep.equal({
         'source': 'sample-source',
@@ -416,32 +411,31 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   });
 
   describe('pingback', () => {
-    it('should call `sendSignal` to the pingback signal', () => {
-      const sendSignalStub = env.sandbox.stub(
-        localSubscriptionPlatform.xhr_,
-        'sendSignal'
-      );
-      return localSubscriptionPlatform.pingback(entitlement).then(() => {
-        expect(sendSignalStub).to.be.calledOnce;
-        expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
-        expect(sendSignalStub.getCall(0).args[1].body).to.equal(
-          JSON.stringify(entitlement.jsonForPingback())
-        );
-      });
-    });
-    it('pingback should handle multiple entitlements ', () => {
+    it('should call `sendSignal` to the pingback signal', async () => {
       const sendSignalStub = env.sandbox.stub(
         localSubscriptionPlatform.xhr_,
         'sendSignal'
       );
 
-      return localSubscriptionPlatform.pingback([entitlement]).then(() => {
-        expect(sendSignalStub).to.be.calledOnce;
-        expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
-        expect(sendSignalStub.getCall(0).args[1].body).to.equal(
-          JSON.stringify([entitlement.jsonForPingback()])
-        );
-      });
+      await localSubscriptionPlatform.pingback(entitlement);
+      expect(sendSignalStub).to.be.calledOnce;
+      expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
+      expect(sendSignalStub.getCall(0).args[1].body).to.equal(
+        JSON.stringify(entitlement.jsonForPingback())
+      );
+    });
+    it('pingback should handle multiple entitlements ', async () => {
+      const sendSignalStub = env.sandbox.stub(
+        localSubscriptionPlatform.xhr_,
+        'sendSignal'
+      );
+
+      await localSubscriptionPlatform.pingback([entitlement]);
+      expect(sendSignalStub).to.be.calledOnce;
+      expect(sendSignalStub.getCall(0).args[0]).to.be.equal(pingbackUrl);
+      expect(sendSignalStub.getCall(0).args[1].body).to.equal(
+        JSON.stringify([entitlement.jsonForPingback()])
+      );
     });
   });
 });

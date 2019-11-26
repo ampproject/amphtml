@@ -108,29 +108,23 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       });
     }
 
-    it('should display actions and action-sections', () => {
-      return renderer.render({loggedIn: true}).then(() => {
-        displayed([actions1]);
-      });
+    it('should display actions and action-sections', async () => {
+      await renderer.render({loggedIn: true});
+      displayed([actions1]);
     });
 
-    it('should display actions and action-sections', () => {
-      return renderer.render({subscribed: true}).then(() => {
-        displayed([actions2]);
-        expect(delegateUIStub).to.be.called;
-      });
+    it('should display actions and action-sections', async () => {
+      await renderer.render({subscribed: true});
+      displayed([actions2]);
+      expect(delegateUIStub).to.be.called;
     });
 
-    it('should hide sections on reset', () => {
-      return renderer
-        .render({subscribed: true})
-        .then(() => {
-          displayed([actions2]);
-          return renderer.reset();
-        })
-        .then(() => {
-          displayed([]);
-        });
+    it('should hide sections on reset', async () => {
+      await renderer.render({subscribed: true});
+      displayed([actions2]);
+
+      await renderer.reset();
+      displayed([]);
     });
   });
 
@@ -174,7 +168,7 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
       dialogMock.verify();
     });
 
-    it('should render an element', () => {
+    it('should render an element', async () => {
       templatesMock.expects('renderTemplate').never();
       let content;
       dialogMock
@@ -187,16 +181,16 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
           true
         )
         .once();
-      return renderer.renderDialog_({value: 'A'}).then(() => {
-        expect(content.id).to.equal('dialog1');
-        expect(content.textContent).to.equal('dialog1');
-        expect(content).to.not.equal(dialog1);
-        expect(content).to.not.have.attribute('subscriptions-dialog');
-        expect(content).to.not.have.attribute('subscriptions-display');
-      });
+
+      await renderer.renderDialog_({value: 'A'});
+      expect(content.id).to.equal('dialog1');
+      expect(content.textContent).to.equal('dialog1');
+      expect(content).to.not.equal(dialog1);
+      expect(content).to.not.have.attribute('subscriptions-dialog');
+      expect(content).to.not.have.attribute('subscriptions-display');
     });
 
-    it('should render a template', () => {
+    it('should render a template', async () => {
       const rendered = createElementWithAttributes(doc, 'div', {});
       const data = {value: 'B'};
       templatesMock
@@ -215,20 +209,20 @@ describes.realWin('local-subscriptions-rendering', {amp: true}, env => {
           true
         )
         .once();
-      return renderer.renderDialog_(data).then(() => {
-        expect(content).to.equal(rendered);
-      });
+
+      await renderer.renderDialog_(data);
+      expect(content).to.equal(rendered);
     });
 
-    it('should ignore rendering if nothing found', () => {
+    it('should ignore rendering if nothing found', async () => {
       templatesMock.expects('renderTemplate').never();
       dialogMock.expects('open').never();
-      return renderer.render({value: 'C'});
+      await renderer.render({value: 'C'});
     });
 
-    it('should hide the dialog on reset', () => {
+    it('should hide the dialog on reset', async () => {
       dialogMock.expects('close').once();
-      return renderer.reset();
+      await renderer.reset();
     });
   });
 });

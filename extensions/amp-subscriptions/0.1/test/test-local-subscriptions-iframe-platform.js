@@ -198,7 +198,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       expect(connectStub).to.be.calledOnce;
     });
 
-    it('should resolve vars', () => {
+    it('should resolve vars', async () => {
       builderMock
         .expects('collectUrlVars')
         .withExactArgs('VAR1&VAR2', false)
@@ -223,13 +223,9 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       const promise = localSubscriptionPlatform.connect();
       localSubscriptionPlatform.handleCommand_('connect');
 
-      return promise.then(() => {
-        expect(sendStub).to.be.calledOnce;
-        expect(sendStub).to.be.calledWithExactly(
-          'start',
-          expectedConfigWithVars
-        );
-      });
+      await promise;
+      expect(sendStub).to.be.calledOnce;
+      expect(sendStub).to.be.calledWithExactly('start', expectedConfigWithVars);
     });
   });
 
@@ -250,9 +246,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       messengerMock.verify();
     });
 
-    it('should connect', () => {
-      return localSubscriptionPlatform.connectedPromise_;
-    });
+    it('should connect', () => localSubscriptionPlatform.connectedPromise_);
 
     describe('getEntitlements', () => {
       beforeEach(() => {
@@ -265,7 +259,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
         localSubscriptionPlatform.handleCommand_('connect');
       });
 
-      it('should return entitlement', () => {
+      it('should return entitlement', async () => {
         messengerMock
           .expects('sendCommandRsvp')
           .withExactArgs('authorize', {})
@@ -276,12 +270,12 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
             })
           )
           .once();
-        return localSubscriptionPlatform.getEntitlements().then(result => {
-          expect(result).to.be.instanceof(Entitlement);
-          expect(result.granted).to.be.true;
-          expect(result.grantReason).to.equal('SUBSCRIBER');
-          expect(result.source).to.equal('local-iframe');
-        });
+
+        const result = await localSubscriptionPlatform.getEntitlements();
+        expect(result).to.be.instanceof(Entitlement);
+        expect(result.granted).to.be.true;
+        expect(result.grantReason).to.equal('SUBSCRIBER');
+        expect(result.source).to.equal('local-iframe');
       });
     });
 
@@ -296,13 +290,14 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
         localSubscriptionPlatform.handleCommand_('connect');
       });
 
-      it('should send pingback', () => {
+      it('should send pingback', async () => {
         messengerMock
           .expects('sendCommandRsvp')
           .withExactArgs('pingback', {entitlement: {}})
           .returns(Promise.resolve())
           .once();
-        return localSubscriptionPlatform.pingback({});
+
+        await localSubscriptionPlatform.pingback({});
       });
     });
   });
