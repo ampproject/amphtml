@@ -780,6 +780,10 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.SIDEBAR_STATE, sidebarState => {
       this.onSidebarStateUpdate_(sidebarState);
+      this.analyticsService_.triggerEvent(
+        sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+        this.sidebar_
+      );
     });
 
     this.storeService_.subscribe(
