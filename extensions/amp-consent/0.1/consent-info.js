@@ -242,7 +242,7 @@ export function constructConsentInfo(
  * @param {*} value
  * @return {!CONSENT_ITEM_STATE}
  */
-function convertValueToState(value) {
+export function convertValueToState(value) {
   if (value === true || value === 1) {
     return CONSENT_ITEM_STATE.ACCEPTED;
   } else if (value === false || value === 0) {

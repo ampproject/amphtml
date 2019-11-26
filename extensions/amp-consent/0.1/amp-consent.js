@@ -16,6 +16,7 @@
 
 import {
   CONSENT_ITEM_STATE,
+  convertValueToState,
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
@@ -87,7 +88,11 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?function()} */
     this.dialogResolver_ = null;
 
+    /** @private {boolean} */
     this.isPromptUIOn_ = false;
+
+    /** @private {boolean} */
+    this.shouldServerSync_ = true;
 
     /** @private {boolean} */
     this.consentUIPending_ = false;
@@ -413,9 +418,9 @@ export class AmpConsent extends AMP.BaseElement {
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
-    this.syncConsentStringAndStateValue_();
     this.passSharedData_();
     this.maybeSetDirtyBit_();
+    this.syncConsentStringAndStateValue_();
 
     this.getConsentRequiredPromise_()
       .then(isConsentRequired => {
@@ -454,7 +459,12 @@ export class AmpConsent extends AMP.BaseElement {
         }
         return this.getConsentRemote_().then(consentInfo => {
           const remoteResponse = consentInfo['consentRequired'];
-          return typeof remoteResponse === 'boolean' ? remoteResponse : true;
+          const consentStateValue = convertValueToState(
+            consentInfo['consentStateValue']
+          );
+          return (
+            !!remoteResponse && consentStateValue === CONSENT_ITEM_STATE.UNKNOWN
+          );
         });
       });
   }
@@ -527,11 +537,16 @@ export class AmpConsent extends AMP.BaseElement {
   syncConsentStringAndStateValue_() {
     const responsePromise = this.getConsentRemote_();
     responsePromise.then(response => {
-      if (response && !!response['forcePromptOnNext']) {
-        // Need to sync without the race condition of localStorage decision
-        // changing
-        // Could also call this after we know that promp ui will show
-        // this.consentStateManager_.setDirtyBit();
+      // Only sync with local storage if promptUI is not shown.
+      if (
+        response &&
+        this.shouldServerSync_ &&
+        isExperimentOn(this.win, 'amp-consent-geo-override')
+      ) {
+        this.consentStateManager_.updateConsentInstanceState(
+          convertValueToState(response['consentStateValue']),
+          response['consentString']
+        );
       }
     });
   }
@@ -621,6 +636,7 @@ export class AmpConsent extends AMP.BaseElement {
         return false;
       }
       // Prompt
+      this.shouldServerSync_ = true;
       this.scheduleDisplay_(false);
       return true;
       // TODO(@zhouyx):
