@@ -44,6 +44,9 @@ describes.realWin(
     // eslint-disable-next-line max-len
     const decryptedContent =
       "\n              This is section is top secret.\n              You should only be able to read this if you have the correct permissions.\n              If you don't have the correct permissions, you shouldn't be able to read this section at all.\n            ";
+    // This is just an example Base 64 string that contains the "/" and "+" characters,
+    // both of which need to be translated when converting to the Base 64 URL format.
+    // This string does not represent an actual key.
     const encryptedKeyBase64 = 'Oik/+==';
     const encryptedKeyBase64Url = 'Oik_-';
     const decryptedDocKey = 'mSfq5tRx5omXoOX20Oqq8g==';
@@ -109,7 +112,7 @@ describes.realWin(
 
       it('should return expected value to a matching key', () => {
         cryptoHandler = new CryptoHandler(ampdoc);
-        return expect(cryptoHandler.getEncryptedDocumentKey('local')).to.equal(
+        expect(cryptoHandler.getEncryptedDocumentKey('local')).to.equal(
           encryptedKeyBase64Url
         );
       });
