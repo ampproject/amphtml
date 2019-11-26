@@ -74,7 +74,7 @@ const EnvironmentBehaviorMap = {
       );
       const doc = await controller.getDocumentElement();
       const rect = await controller.getElementRect(shadowHost);
-      await controller.scrollTo(doc, {left: rect.left, top: rect.top});
+      await controller./*OK*/ scrollTo(doc, {left: rect.left, top: rect.top});
       await controller.switchToShadow(shadowHost);
     },
 
