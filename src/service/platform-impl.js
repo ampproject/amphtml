@@ -230,7 +230,6 @@ export class Platform {
 
 /**
  * @param {!Window} window
- * @return {undefined}
  */
 export function installPlatformService(window) {
   registerServiceBuilder(window, 'platform', Platform);
