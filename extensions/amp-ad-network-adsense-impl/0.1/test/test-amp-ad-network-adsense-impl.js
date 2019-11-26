@@ -30,7 +30,6 @@ import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Preconnect} from '../../../../src/preconnect';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
