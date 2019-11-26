@@ -247,6 +247,9 @@ describes.repeated(
               env.sandbox
                 .stub(ampForm.ssrTemplateHelper_, 'isSupported')
                 .returns(true);
+              env.sandbox
+                .stub(ampForm.viewer_, 'isTrustedViewer')
+                .returns(Promise.resolve(true));
 
               return ampForm;
             });
