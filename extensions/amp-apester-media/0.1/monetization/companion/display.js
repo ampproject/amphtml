@@ -58,27 +58,32 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @return {Element}
  */
 function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
-  const biggestAdSize = bannerSizes.reduce((max, arr) => {
-    max[0] = Math.max(max[0], arr[0]);
-    max[1] = Math.max(max[1], arr[1]);
-    return max;
-  });
+  const defaultSize = bannerSizes[0];
+  const biggestAdSize = bannerSizes.reduce(
+    (maxSize, size) => {
+      maxSize.width = Math.max(maxSize.width, size[0]);
+      maxSize.height = Math.max(maxSize.height, size[1]);
+      return maxSize;
+    },
+    {width: defaultSize[0], height: defaultSize[1]}
+  );
 
-  const multiSizeData = bannerSizes.map(arr => arr.join('x')).join();
+  const multiSizeData = bannerSizes.map(size => size.join('x')).join();
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
     dict({
-      'width': `${biggestAdSize[0]}`,
+      'width': `${biggestAdSize.width}`,
       'height': '0',
       'type': 'doubleclick',
       'layout': 'fixed',
       'data-slot': `${slot}`,
+      'data-multi-size-validation': 'false',
       'data-multi-size': multiSizeData,
     })
   );
   ampAd.classList.add('amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
-  apesterElement.getResources().attemptChangeSize(ampAd, biggestAdSize[1]);
+  apesterElement.getResources().attemptChangeSize(ampAd, biggestAdSize.height);
   return ampAd;
 }
