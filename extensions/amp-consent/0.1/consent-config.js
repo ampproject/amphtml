@@ -223,7 +223,9 @@ export class ConsentConfig {
    */
   validateMergedGeoOverride_(mergedConfig) {
     userAssert(
-      mergedConfig['consentRequired'] !== undefined,
+      mergedConfig['consentRequired'] === true ||
+        mergedConfig['consentRequired'] === false ||
+        mergedConfig['consentRequired'] === 'remote',
       '`consentRequired` is required',
       TAG
     );

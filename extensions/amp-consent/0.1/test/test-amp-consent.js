@@ -217,7 +217,7 @@ describes.realWin(
     describe('geo-override server communication', () => {
       let ampConsent;
       beforeEach(() => {
-        toggleExperiment(win, 'amp-consent-geo-override');
+        toggleExperiment(win, 'amp-consent-geo-override', true);
       });
 
       it('checks local storage before making sever request', async () => {
@@ -531,7 +531,7 @@ describes.realWin(
       });
 
       it('does not show promptUI if local storage has decision', async () => {
-        toggleExperiment(win, 'amp-consent-geo-override');
+        toggleExperiment(win, 'amp-consent-geo-override', true);
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -646,7 +646,7 @@ describes.realWin(
 
         describe('hide/show postPromptUI with local storage', () => {
           beforeEach(() => {
-            toggleExperiment(win, 'amp-consent-geo-override');
+            toggleExperiment(win, 'amp-consent-geo-override', true);
             defaultConfig = dict({
               'consentInstanceId': 'ABC',
               'consentRequired': true,
@@ -660,12 +660,8 @@ describes.realWin(
             ampConsent = new AmpConsent(consentElement);
           });
 
-          it('hide postPromptUI', async () => {
+          it('hides postPromptUI with no local storage decision', async () => {
             await ampConsent.buildCallback();
-            ampConsent.element.classList.remove('i-amphtml-notbuilt');
-            await macroTask();
-
-            expect(postPromptUI).to.not.be.null;
             expect(postPromptUI).to.have.display('none');
           });
 
@@ -680,6 +676,7 @@ describes.realWin(
             };
             await ampConsent.buildCallback();
             ampConsent.element.classList.remove('i-amphtml-notbuilt');
+            // Wait for all modifications to the element to be applied.
             await macroTask();
 
             expect(
@@ -713,7 +710,7 @@ describes.realWin(
             ampConsent = new AmpConsent(consentElement);
           });
 
-          it('hide postPromptUI', async () => {
+          it('hide postPromptUI with no local storage', async () => {
             await ampConsent.buildCallback();
             ampConsent.element.classList.remove('i-amphtml-notbuilt');
             await macroTask();
