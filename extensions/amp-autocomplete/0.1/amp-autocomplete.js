@@ -33,6 +33,7 @@ import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isArray, isEnumValue, toArray} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
+import {once} from '../../../src/utils/function';
 import {
   setupAMPCors,
   setupInput,
@@ -171,9 +172,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.hasTemplate_ = false;
 
     /**
-     * @private {?../../../src/ssr-template-helper.SsrTemplateHelper}
+     * @const {function():!../../../src/ssr-template-helper.SsrTemplateHelper}
      */
-    this.ssrTemplateHelper_ = null;
+    this.getSsrTemplateHelper = once(
+      () =>
+        new SsrTemplateHelper(
+          TAG,
+          Services.viewerForDoc(this.element),
+          this.templates_
+        )
+    );
 
     /**
      * Whether server-side rendering is required.
@@ -195,12 +203,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.viewport_ = Services.viewportForDoc(this.element);
-    const viewer = Services.viewerForDoc(this.element);
-    this.ssrTemplateHelper_ = new SsrTemplateHelper(
-      TAG,
-      viewer,
-      this.templates_
-    );
 
     const jsonScript = this.element.querySelector(
       'script[type="application/json"]'
@@ -240,7 +242,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // When SSR is supported, it is required.
-    this.isSsr_ = this.ssrTemplateHelper_.isSupported();
+    this.isSsr_ = this.getSsrTemplateHelper().isSupported();
     this.hasTemplate_ = this.templates_.hasTemplate(
       this.element,
       'template, script[template]'
@@ -352,7 +354,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             'items': itemsExpr,
           },
         });
-        return this.ssrTemplateHelper_.ssr(
+        return this.getSsrTemplateHelper().ssr(
           this.element,
           request,
           /* opt_templates */ null,
@@ -372,14 +374,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return [];
       });
     }
-  }
-
-  /**
-   * @visibleForTesting
-   * @return {?../../../src/ssr-template-helper.SsrTemplateHelper}
-   */
-  getSsrTemplateHelper() {
-    return this.ssrTemplateHelper_;
   }
 
   /**
@@ -589,7 +583,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let renderPromise = Promise.resolve();
     this.resetActiveElement_();
     if (this.hasTemplate_) {
-      renderPromise = this.ssrTemplateHelper_
+      renderPromise = this.getSsrTemplateHelper()
         .applySsrOrCsrTemplate(this.element, filteredData)
         .then(rendered => {
           const elements = isArray(rendered)

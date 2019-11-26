@@ -16,6 +16,8 @@
 
 import '../amp-autocomplete';
 import {Keys} from '../../../../src/utils/key-codes';
+import {SsrTemplateHelper} from '../../../../src/ssr-template-helper';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin(
@@ -31,11 +33,19 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      return buildAmpAutocomplete().then(ampAutocomplete => {
+        element = ampAutocomplete;
+        impl = ampAutocomplete.implementation_;
+      });
+    });
 
+    function buildAmpAutocomplete(wantSsr) {
       const form = doc.createElement('form');
-      const ampAutocomplete = doc.createElement('amp-autocomplete');
-      ampAutocomplete.setAttribute('layout', 'container');
-      ampAutocomplete.setAttribute('filter', 'substring');
+      const ampAutocomplete = createElementWithAttributes(
+        doc,
+        'amp-autocomplete',
+        {layout: 'container', filter: 'substring'}
+      );
 
       const input = win.document.createElement('input');
       input.setAttribute('type', 'text');
@@ -48,11 +58,20 @@ describes.realWin(
 
       form.appendChild(ampAutocomplete);
       doc.body.appendChild(form);
+
+      if (wantSsr) {
+        ampAutocomplete.removeAttribute('filter');
+        const template = doc.createElement('template');
+        ampAutocomplete.appendChild(template);
+      }
+
+      SsrTemplateHelper.prototype.isSupported = env.sandbox
+        .stub()
+        .returns(wantSsr);
       return ampAutocomplete.build().then(() => {
-        element = ampAutocomplete;
-        impl = element.implementation_;
+        return ampAutocomplete;
       });
-    });
+    }
 
     function getRenderedSuggestions() {
       const html = htmlFor(doc);
@@ -237,29 +256,31 @@ describes.realWin(
 
     describe('getRemoteData_()', () => {
       it('should proxy XHR to viewer', async () => {
-        impl.isSsr_ = true;
+        element = await buildAmpAutocomplete(true);
+        impl = element.implementation_;
         impl.element.setAttribute('src', '');
-        const html =
-          '<div> <div>apple</div> <div>mango</div> <div>pear</div> </div>';
-        env.sandbox
-          .stub(impl.ssrTemplateHelper_, 'ssr')
-          .returns(Promise.resolve({html}));
+        const rendered = getRenderedSuggestions();
+        const ssrSpy = env.sandbox
+          .stub(impl.getSsrTemplateHelper(), 'ssr')
+          .returns(Promise.resolve({rendered}));
         await impl.getRemoteData_();
-        expect(impl.ssrTemplateHelper_.ssr).to.be.calledOnce;
+        expect(ssrSpy).to.be.calledOnce;
       });
     });
 
     describe('renderResults()', () => {
       it('should delegate template rendering to viewer', async () => {
-        impl.hasTemplate_ = true;
+        element = await buildAmpAutocomplete(true);
+        impl = element.implementation_;
         const data = ['apple', 'mango', 'pear'];
         env.sandbox
-          .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
+          .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
           .returns(Promise.resolve(getRenderedSuggestions()));
         await impl.renderResults_(data, impl.container_);
-        expect(impl.ssrTemplateHelper_.applySsrOrCsrTemplate).to.be.calledOnce;
+        expect(impl.getSsrTemplateHelper().applySsrOrCsrTemplate).to.be
+          .calledOnce;
         expect(
-          impl.ssrTemplateHelper_.applySsrOrCsrTemplate
+          impl.getSsrTemplateHelper().applySsrOrCsrTemplate
         ).to.have.been.calledWith(impl.element, data);
         expect(impl.container_.children[0].getAttribute('data-value')).to.equal(
           data[0]
@@ -288,9 +309,10 @@ describes.realWin(
           {value: 'mango'},
           {value: 'pear'},
         ];
-        impl.hasTemplate_ = true;
+        element = await buildAmpAutocomplete(true);
+        impl = element.implementation_;
         const renderTemplateSpy = env.sandbox
-          .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
+          .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
           .returns(Promise.resolve(getRenderedSuggestions()));
         await impl.renderResults_(sourceData, impl.container_);
         expect(impl.container_.children).to.have.length(3);
@@ -908,13 +930,14 @@ describes.realWin(
     });
 
     it('should not return disabled items from getEnabledItems_()', async () => {
-      impl.hasTemplate_ = true;
+      element = await buildAmpAutocomplete(true);
+      impl = element.implementation_;
       const sourceData = ['apple', 'mango', 'pear'];
       const rendered = getRenderedSuggestions();
       rendered.children[2].removeAttribute('data-value', '');
       rendered.children[2].setAttribute('data-disabled', '');
       env.sandbox
-        .stub(impl.ssrTemplateHelper_, 'applySsrOrCsrTemplate')
+        .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(rendered));
 
       await impl.renderResults_(sourceData, impl.container_);
