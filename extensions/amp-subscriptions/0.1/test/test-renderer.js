@@ -225,25 +225,24 @@ describes.realWin(
         );
       });
 
-      it("shouldn't add a progress bar if loading section is found", () => {
-        return renderer.addLoadingBar().then(() => {
-          expect(insertBeforeStub).to.not.be.called;
-        });
+      it("shouldn't add a progress bar if loading section is found", async () => {
+        await renderer.addLoadingBar();
+        expect(insertBeforeStub).to.not.be.called;
       });
 
-      it('should add a progress bar if no loading section is found', () => {
+      it('should add a progress bar if no loading section is found', async () => {
         loading1.remove();
         loading2.remove();
-        return renderer.addLoadingBar().then(() => {
-          expect(insertBeforeStub).to.be.called;
-          const element = insertBeforeStub.getCall(0).args[0];
-          expect(element.tagName).to.be.equal('DIV');
-          expect(element.className).to.be.equal('i-amphtml-subs-progress');
-          expect(insertBeforeStub.getCall(0).args[1]).to.be.null;
-        });
+
+        await renderer.addLoadingBar();
+        expect(insertBeforeStub).to.be.called;
+        const element = insertBeforeStub.getCall(0).args[0];
+        expect(element.tagName).to.be.equal('DIV');
+        expect(element.className).to.be.equal('i-amphtml-subs-progress');
+        expect(insertBeforeStub.getCall(0).args[1]).to.be.null;
       });
 
-      it('should add a progress bar before footer', () => {
+      it('should add a progress bar before footer', async () => {
         loading1.remove();
         loading2.remove();
         const fakeFooter = createElementWithAttributes(doc, 'footer', {});
@@ -252,13 +251,13 @@ describes.realWin(
         renderer.ampdoc_.getBody().appendChild(fakeFooterContainer);
         const footer = createElementWithAttributes(doc, 'footer', {});
         renderer.ampdoc_.getBody().appendChild(footer);
-        return renderer.addLoadingBar().then(() => {
-          expect(insertBeforeStub).to.be.called;
-          const element = insertBeforeStub.getCall(0).args[0];
-          expect(element.tagName).to.be.equal('DIV');
-          expect(element.className).to.be.equal('i-amphtml-subs-progress');
-          expect(insertBeforeStub.getCall(0).args[1]).to.equal(footer);
-        });
+
+        await renderer.addLoadingBar();
+        expect(insertBeforeStub).to.be.called;
+        const element = insertBeforeStub.getCall(0).args[0];
+        expect(element.tagName).to.be.equal('DIV');
+        expect(element.className).to.be.equal('i-amphtml-subs-progress');
+        expect(insertBeforeStub.getCall(0).args[1]).to.equal(footer);
       });
     });
   }
