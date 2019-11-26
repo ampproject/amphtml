@@ -640,6 +640,22 @@ export class AmpConsent extends AMP.BaseElement {
       });
     });
   }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @visibleForTesting
+   */
+  getConsentRequiredPromiseForTesting() {
+    return this.getConsentRequiredPromise_();
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  getIsPromptUiOnForTesting() {
+    return this.isPromptUIOn_;
+  }
 }
 
 AMP.extension('amp-consent', '0.1', AMP => {

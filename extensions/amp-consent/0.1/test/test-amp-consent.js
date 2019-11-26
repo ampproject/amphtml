@@ -208,9 +208,11 @@ describes.realWin(
       it('read promptIfUnknown from server response', async () => {
         await ampConsent.buildCallback();
         await macroTask();
-        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
-          expect(isRequired).to.be.true;
-        });
+        return ampConsent
+          .getConsentRequiredPromiseForTesting()
+          .then(isRequired => {
+            expect(isRequired).to.be.true;
+          });
       });
     });
 
@@ -239,7 +241,8 @@ describes.realWin(
             'consentState'
           ]
         ).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
       });
 
       it('respects exisitng local storage decision', async () => {
@@ -271,7 +274,8 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
       });
 
       it('resolves consentRequired to remote response with old format', async () => {
@@ -285,7 +289,8 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
       });
 
       it('send post request to server with matched group', async () => {
@@ -328,7 +333,8 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
         expect(ampConsent.matchedGeoGroup_).to.equal('na');
         expect(requestBody).to.deep.equal({
           'consentInstanceId': 'abc',
@@ -348,7 +354,8 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
       });
     });
 
@@ -372,7 +379,8 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown', 'testGroup'];
         await ampConsent.buildCallback();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
       });
 
       it('not in geo group', async () => {
@@ -380,7 +388,8 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown'];
         await ampConsent.buildCallback();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
       });
 
       it('geo override promptIfUnknown', async () => {
@@ -399,7 +408,8 @@ describes.realWin(
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         await ampConsent.buildCallback();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
       });
     });
 
@@ -550,7 +560,7 @@ describes.realWin(
             'consentState'
           ]
         ).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
-        expect(ampConsent.isPromptUIOn_).to.be.false;
+        expect(ampConsent.getIsPromptUiOnForTesting()).to.be.false;
       });
 
       it('update current displaying status', async () => {
@@ -666,11 +676,6 @@ describes.realWin(
           });
 
           it('shows postPromptUI with local storage decision', async () => {
-            const scheduleDisplaySpy = env.sandbox.spy(
-              ampConsent,
-              'scheduleDisplay_'
-            );
-
             storageValue = {
               'amp-consent:ABC': true,
             };
@@ -684,7 +689,6 @@ describes.realWin(
                 'consentState'
               ]
             ).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
-            expect(scheduleDisplaySpy).to.not.be.called;
             expect(postPromptUI).to.not.be.null;
             expect(postPromptUI).to.not.have.display('none');
           });
