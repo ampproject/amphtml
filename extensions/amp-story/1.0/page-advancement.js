@@ -416,6 +416,28 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * @param {Event} event
+   * @param {Element} pageEl
+   * @return {boolean}
+   * @private
+   */
+  isWithinInteractiveArea_(event, pageEl) {
+    const pageRect = this.element_.getLayoutBox();
+    let bottomBuffer = 0;
+
+    // Set bottom buffers according to UX design
+    if (pageEl.querySelector('amp-story-page-attachment')) {
+      bottomBuffer = 104;
+    }
+
+    if (pageEl.querySelector('amp-story-cta-layer')) {
+      bottomBuffer = pageRect.height * 0.2;
+    }
+
+    return event.clientY <= pageRect.height - bottomBuffer;
+  }
+
+  /**
    * Checks if the event should be handled by ManualAdvancement, or should
    * follow its capture phase.
    * @param {!Event} event
@@ -424,18 +446,34 @@ class ManualAdvancement extends AdvancementConfig {
    */
   shouldHandleEvent_(event) {
     let shouldHandleEvent = false;
+    let interactiveElementDetected = false;
     let tagName;
 
     closest(
       dev().assertElement(event.target),
       el => {
         tagName = el.tagName.toLowerCase();
-        if (
-          tagName === 'amp-story-page-attachment' ||
-          tagName === 'amp-story-quiz'
-        ) {
+        if (tagName === 'amp-story-page-attachment') {
           shouldHandleEvent = false;
           return true;
+        }
+
+        if (
+          tagName === 'amp-story-quiz' &&
+          !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
+        ) {
+          interactiveElementDetected = true;
+          shouldHandleEvent = false;
+        }
+
+        // If the click came from a quiz, check if it was within the interaction boundary
+        if (interactiveElementDetected && tagName === 'amp-story-page') {
+          const withinInteractiveArea = this.isWithinInteractiveArea_(
+            event,
+            el
+          );
+          shouldHandleEvent = !withinInteractiveArea;
+          return !withinInteractiveArea;
         }
 
         if (tagName === 'amp-story-page') {

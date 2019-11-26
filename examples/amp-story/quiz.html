@@ -69,6 +69,47 @@
           </amp-story-quiz>
         </amp-story-grid-layer>
       </amp-story-page>
+      <amp-story-page id="quiz-question-3">
+        <amp-story-grid-layer template="fill">
+            <amp-img src="https://i.pinimg.com/originals/8d/b1/e9/8db1e9b7cc3ee52b13cabe3a53c62f05.jpg"
+            width="720" height="1280"
+            layout="responsive">
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <style>
+            #cat-question-cute {
+              position: absolute;
+              top: 600px;
+              left: 100px;
+              width: 40px;
+              height: 20px;
+            }
+          </style>
+          <amp-story-quiz
+            id='cat-question-cute'
+            layout="flex-item">
+            <h2>Are cats cute?</h2>
+            <option correct>Yes</option>
+            <option>No</option>
+          </amp-story-quiz>
+          <amp-story-page-attachment layout="nodisplay" theme="dark">
+              <h1>Amazing title</h1>
+              <p>Bacon ipsum dolor cat cat cat.</p>
+              <amp-youtube
+                  id="myLiveChannel"
+                  data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
+                  width="358"
+                  height="204"
+                  layout="responsive">
+                <amp-img
+                    src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+                    placeholder
+                    layout="fill">
+                </amp-img>
+              </amp-youtube>
+            </amp-story-page-attachment>
+        </amp-story-grid-layer>
+      </amp-story-page>
   </amp-story>
 </body>
 </html>
