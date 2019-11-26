@@ -320,12 +320,14 @@ amp-autocomplete {
   display: inline-block !important;
 }
 
-amp-autocomplete > input {
-  padding: .5rem; /* default-ui-space-large */
-  border: 1px solid rgba(0,0,0,.33) /* default-ui-med-gray */
+amp-autocomplete > input,
+amp-autocomplete > textarea {
+  padding: 0.5rem; /* default-ui-space-large */
+  border: 1px solid rgba(0, 0, 0, 0.33); /* default-ui-med-gray */
 }
 
 amp-autocomplete > input,
+amp-autocomplete > textarea,
 .i-amphtml-autocomplete-results {
   font-size: 1rem; /* default-ui-font-size */
   line-height: 1.5rem; /* default-ui-space-large */
