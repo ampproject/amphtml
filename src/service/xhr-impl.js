@@ -23,10 +23,12 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../utils/xhr-utils';
+import {dev, user} from '../log';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {user} from '../log';
+import {parseJson} from '../json';
+import {startsWith} from '../string';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -145,6 +147,30 @@ export class Xhr {
    */
   fetchText(input, opt_init) {
     return this.fetch(input, setupInit(opt_init, 'text/plain'));
+  }
+
+  /**
+   * A subsitute for the standard response.json(), which may optionally strip a prefix before calling JSON.parse().
+   *
+   * @param {!Response} res fetch response to convert to json.
+   * @param {string|undefined} prefix to strip away.
+   * @return {Promise<*>}
+   */
+  xssiJson(res, prefix) {
+    if (!prefix) {
+      return res.json();
+    }
+
+    return res.text().then(txt => {
+      if (!startsWith(txt, dev().assertString(prefix))) {
+        user().warn(
+          'XHR',
+          `Failed to strip missing prefix "${prefix}" in fetch response.`
+        );
+        return parseJson(txt);
+      }
+      return parseJson(txt.slice(prefix.length));
+    });
   }
 
   /**
