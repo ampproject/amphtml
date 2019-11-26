@@ -44,8 +44,7 @@ export function handleCompanionDisplay(media, apesterElement) {
 
 /**
  * @param {string} slot
- * @param {{width: number, height:number}} size
- * @param bannerSizes
+ * @param {Array} bannerSizes
  * @param {AmpElement} apesterElement
  * @return {ampAd}
  */
