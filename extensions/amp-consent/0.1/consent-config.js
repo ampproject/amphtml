@@ -19,7 +19,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {deepMerge, map} from '../../../src/utils/object';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
@@ -77,6 +77,12 @@ export class ConsentConfig {
       // New format, return
       return config;
     }
+
+    dev().warn(
+      TAG,
+      'Using `consents` is an outdated format. Newer features may not be supported.'
+    );
+
     // Assert single consent instance
     const keys = Object.keys(consentsConfigDepr);
 
