@@ -19,7 +19,7 @@
 
 import * as eventHelper from '../../src/event-helper';
 import * as mode from '../../src/mode';
-import {maybeValidate} from '../../src/validator-integration';
+import {maybeValidate, loadScript} from '../../src/validator-integration';
 
 describes.fakeWin('validator-integration', {}, env => {
   let loadScriptStub;
@@ -50,6 +50,19 @@ describes.fakeWin('validator-integration', {}, env => {
       loadScriptStub.returns(Promise.resolve());
       maybeValidate(win);
       expect(loadScriptStub).to.have.been.called;
+    });
+
+    it('should propagate pre-existing nonces', () => {
+      const scriptEl = win.document.createElement('script');
+      scriptEl.nonce = '123';
+      win.document.head.append(scriptEl);
+      loadScriptStub.returns(Promise.resolve());
+
+      loadScript(win.document, 'http://example.com');
+
+      expect(loadScriptStub).calledWith(
+        env.sandbox.match(el => el.nonce === '123')
+      );
     });
   });
 });

@@ -575,7 +575,7 @@ export class Extensions {
     // Propagate nonce to all generated script tags.
     const currentScript = this.win.document.querySelector('script[nonce]');
     if (currentScript) {
-      scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
+      scriptElement.nonce = currentScript.nonce;
     }
 
     // Allow error information to be collected
