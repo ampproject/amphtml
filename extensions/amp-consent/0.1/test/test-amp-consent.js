@@ -222,6 +222,10 @@ describes.realWin(
         toggleExperiment(win, 'amp-consent-geo-override', true);
       });
 
+      afterEach(() => {
+        toggleExperiment(win, 'amp-consent-geo-override', false);
+      });
+
       it('checks local storage before making sever request', async () => {
         const config = {
           'consentInstanceId': 'abc',
@@ -540,6 +544,10 @@ describes.realWin(
         });
       });
 
+      afterEach(() => {
+        toggleExperiment(win, 'amp-consent-geo-override', false);
+      });
+
       it('does not show promptUI if local storage has decision', async () => {
         toggleExperiment(win, 'amp-consent-geo-override', true);
         const config = {
@@ -668,6 +676,10 @@ describes.realWin(
             consentElement.appendChild(postPromptUI);
             doc.body.appendChild(consentElement);
             ampConsent = new AmpConsent(consentElement);
+          });
+
+          afterEach(() => {
+            toggleExperiment(win, 'amp-consent-geo-override', false);
           });
 
           it('hides postPromptUI with no local storage decision', async () => {

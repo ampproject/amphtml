@@ -222,14 +222,13 @@ export class ConsentConfig {
    * @return {!JsonObject}
    */
   validateMergedGeoOverride_(mergedConfig) {
+    const consentRequired = mergedConfig['consentRequired'];
     userAssert(
-      mergedConfig['consentRequired'] === true ||
-        mergedConfig['consentRequired'] === false ||
-        mergedConfig['consentRequired'] === 'remote',
+      typeof consentRequired === 'boolean' || consentRequired === 'remote',
       '`consentRequired` is required',
       TAG
     );
-    if (mergedConfig['consentRequired'] === 'remote') {
+    if (consentRequired === 'remote') {
       userAssert(
         mergedConfig['checkConsentHref'],
         '%s: `checkConsentHref` must be specified if `consentRequired` is remote',
