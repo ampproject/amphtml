@@ -295,9 +295,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     );
 
     this.transport_.maybeInitIframeTransport(
-      this.getAmpDoc().win,
+      this.win,
       this.element,
-      this.preconnect
+      Services.preconnectFor(this.win)
     );
 
     const promises = [];
@@ -392,7 +392,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @visibleForTesting
    */
   preload(url, opt_preloadAs) {
-    this.preconnect.preload(url, opt_preloadAs);
+    Services.preconnectFor(this.win).preload(
+      this.getAmpDoc(),
+      url,
+      opt_preloadAs
+    );
   }
 
   /**
@@ -540,7 +544,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           requests[k] = new RequestHandler(
             this.element,
             request,
-            this.preconnect,
+            Services.preconnectFor(this.win),
             this.transport_,
             this.isSandbox_
           );

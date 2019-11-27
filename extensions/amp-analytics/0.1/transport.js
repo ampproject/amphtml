@@ -148,14 +148,18 @@ export class Transport {
    *
    * @param {!Window} win
    * @param {!Element} element
-   * @param {(!../../../src/preconnect.Preconnect)=} opt_preconnect
+   * @param {(!../../../src/preconnect.PreconnectService)=} opt_preconnect
    */
   maybeInitIframeTransport(win, element, opt_preconnect) {
     if (!this.options_['iframe'] || this.iframeTransport_) {
       return;
     }
     if (opt_preconnect) {
-      opt_preconnect.preload(getIframeTransportScriptUrl(win), 'script');
+      opt_preconnect.preload(
+        Services.ampdoc(element),
+        getIframeTransportScriptUrl(win),
+        'script'
+      );
     }
 
     const type = element.getAttribute('type');

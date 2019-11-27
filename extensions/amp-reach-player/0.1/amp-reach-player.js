@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 class AmpReachPlayer extends AMP.BaseElement {
@@ -30,7 +31,11 @@ class AmpReachPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://player-cdn.beachfrontmedia.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://player-cdn.beachfrontmedia.com',
+      opt_onLayout
+    );
   }
 
   /** @override */

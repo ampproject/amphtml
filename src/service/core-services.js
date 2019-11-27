@@ -30,6 +30,7 @@ import {installLayout} from '../../builtins/amp-layout';
 import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installPlatformService} from './platform-impl';
+import {installPreconnectService} from '../preconnect';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
@@ -67,6 +68,7 @@ export function installRuntimeServices(global) {
   installVsyncService(global);
   installXhrService(global);
   installInputService(global);
+  installPreconnectService(global);
 }
 
 /**

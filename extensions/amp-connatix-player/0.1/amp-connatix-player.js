@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
@@ -111,7 +112,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // Serves the player assets
-    this.preconnect.url(this.iframeDomain_, onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.iframeDomain_,
+      onLayout
+    );
   }
 
   /** @override */

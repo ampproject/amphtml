@@ -27,6 +27,7 @@
  * </code>
  */
 
+import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -53,7 +54,11 @@ export class AmpDriveViewer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://docs.google.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://docs.google.com',
+      opt_onLayout
+    );
   }
 
   /** @override */

@@ -28,6 +28,7 @@ import {
   LayoutPriority,
   isLayoutSizeDefined,
 } from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle} from '../../../src/style';
@@ -233,20 +234,26 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(this.win, this.preconnect, this.config.remoteHTMLDisabled);
+    preloadBootstrap(
+      this.win,
+      this.getAmpDoc(),
+      preconnect,
+      this.config.remoteHTMLDisabled
+    );
     if (typeof this.config.prefetch == 'string') {
-      this.preconnect.preload(this.config.prefetch, 'script');
+      preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
       this.config.prefetch.forEach(p => {
-        this.preconnect.preload(p, 'script');
+        preconnect.preload(this.getAmpDoc(), p, 'script');
       });
     }
     if (typeof this.config.preconnect == 'string') {
-      this.preconnect.url(this.config.preconnect, opt_onLayout);
+      preconnect.url(this.getAmpDoc(), this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
       this.config.preconnect.forEach(p => {
-        this.preconnect.url(p, opt_onLayout);
+        preconnect.url(this.getAmpDoc(), p, opt_onLayout);
       });
     }
     // If fully qualified src for ad script is specified we preconnect to it.
@@ -254,7 +261,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (src) {
       // We only preconnect to the src because we cannot know whether the URL
       // will have caching headers set.
-      this.preconnect.url(src);
+      preconnect.url(this.getAmpDoc(), src);
     }
   }
 

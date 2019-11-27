@@ -30,7 +30,6 @@ import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Preconnect} from '../../../../src/preconnect';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -1236,12 +1235,16 @@ describes.realWin(
 
     describe('#preconnect', () => {
       it('should preload nameframe', () => {
-        const preloadSpy = env.sandbox.spy(Preconnect.prototype, 'preload');
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.spy(preconnect, 'preload');
         expect(impl.getPreconnectUrls()).to.deep.equal([
           'https://googleads.g.doubleclick.net',
         ]);
-        expect(preloadSpy).to.be.calledOnce;
-        expect(preloadSpy.args[0]).to.match(/nameframe/);
+        expect(preconnect.preload).to.be.calledOnce;
+        expect(preconnect.preload).to.be.calledWithMatch(
+          env.sandbox.match.object,
+          /nameframe/
+        );
       });
     });
 

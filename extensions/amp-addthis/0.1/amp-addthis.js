@@ -245,13 +245,15 @@ class AmpAddThis extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(ORIGIN, opt_onLayout);
-    this.preconnect.url(API_SERVER, opt_onLayout);
-    this.preconnect.url(COOKIELESS_API_SERVER, opt_onLayout);
-    this.preconnect.url(SHARECOUNTER_SERVER, opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
+    preconnect.url(ampdoc, ORIGIN, opt_onLayout);
+    preconnect.url(ampdoc, API_SERVER, opt_onLayout);
+    preconnect.url(ampdoc, COOKIELESS_API_SERVER, opt_onLayout);
+    preconnect.url(ampdoc, SHARECOUNTER_SERVER, opt_onLayout);
     // Images, etc.:
-    this.preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
-    this.preconnect.url('https://su.addthis.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://cache.addthiscdn.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://su.addthis.com', opt_onLayout);
   }
 
   /** @override */

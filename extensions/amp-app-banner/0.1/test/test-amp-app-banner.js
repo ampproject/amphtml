@@ -159,12 +159,14 @@ describes.realWin(
     function testSuiteIos() {
       it('should preconnect to app store', () => {
         return getAppBanner({iosMeta}).then(banner => {
+          const preconnect = Services.preconnectFor(win);
+          env.sandbox.stub(preconnect, 'url');
+
           const impl = banner.implementation_;
-          env.sandbox.stub(impl.preconnect, 'url');
           impl.preconnectCallback(true);
-          expect(impl.preconnect.url.called).to.be.true;
-          expect(impl.preconnect.url).to.be.calledOnce;
-          expect(impl.preconnect.url).to.have.been.calledWith(
+          expect(preconnect.url).to.be.calledOnce;
+          expect(preconnect.url).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://itunes.apple.com'
           );
         });
@@ -242,18 +244,21 @@ describes.realWin(
     function testSuiteAndroid() {
       it('should preconnect to play store and preload manifest', () => {
         return getAppBanner({androidManifest}).then(banner => {
+          const preconnect = Services.preconnectFor(win);
+          env.sandbox.stub(preconnect, 'url');
+          env.sandbox.stub(preconnect, 'preload');
+
           const impl = banner.implementation_;
-          env.sandbox.stub(impl.preconnect, 'url');
-          env.sandbox.stub(impl.preconnect, 'preload');
           impl.preconnectCallback(true);
-          expect(impl.preconnect.url.called).to.be.true;
-          expect(impl.preconnect.url).to.have.been.calledOnce;
-          expect(impl.preconnect.url).to.have.been.calledWith(
+          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://play.google.com'
           );
-          expect(impl.preconnect.preload.called).to.be.true;
-          expect(impl.preconnect.preload).to.be.calledOnce;
-          expect(impl.preconnect.preload).to.have.been.calledWith(
+
+          expect(preconnect.preload).to.be.calledOnce;
+          expect(preconnect.preload).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://example.com/manifest.json'
           );
         });
@@ -261,18 +266,20 @@ describes.realWin(
 
       it('should preconnect to play store and preload origin-manifest', () => {
         return getAppBanner({originManifest: androidManifest}).then(banner => {
+          const preconnect = Services.preconnectFor(win);
+          env.sandbox.stub(preconnect, 'url');
+          env.sandbox.stub(preconnect, 'preload');
+
           const impl = banner.implementation_;
-          env.sandbox.stub(impl.preconnect, 'url');
-          env.sandbox.stub(impl.preconnect, 'preload');
           impl.preconnectCallback(true);
-          expect(impl.preconnect.url.called).to.be.true;
-          expect(impl.preconnect.url).to.have.been.calledOnce;
-          expect(impl.preconnect.url).to.have.been.calledWith(
+          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://play.google.com'
           );
-          expect(impl.preconnect.preload.called).to.be.true;
-          expect(impl.preconnect.preload).to.be.calledOnce;
-          expect(impl.preconnect.preload).to.have.been.calledWith(
+          expect(preconnect.preload).to.be.calledOnce;
+          expect(preconnect.preload).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://example.com/manifest.json'
           );
         });

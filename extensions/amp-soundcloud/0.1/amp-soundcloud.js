@@ -27,6 +27,7 @@
  * </amp-soundcloud>
  */
 
+import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
@@ -45,7 +46,11 @@ class AmpSoundcloud extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://api.soundcloud.com/', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://api.soundcloud.com/',
+      opt_onLayout
+    );
   }
 
   /** @override */

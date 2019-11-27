@@ -68,7 +68,11 @@ export class AmpVk extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://vk.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://vk.com',
+      opt_onLayout
+    );
   }
 
   /**

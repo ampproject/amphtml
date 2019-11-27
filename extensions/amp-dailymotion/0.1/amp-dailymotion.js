@@ -112,9 +112,17 @@ class AmpDailymotion extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://www.dailymotion.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.dailymotion.com',
+      opt_onLayout
+    );
     // Host that Dailymotion uses to serve JS needed by player.
-    this.preconnect.url('https://static1.dmcdn.net', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://static1.dmcdn.net',
+      opt_onLayout
+    );
   }
 
   /**

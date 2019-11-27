@@ -83,10 +83,10 @@ class AmpMowplayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const {preconnect} = this;
-    preconnect.url(this.getVideoIframeSrc_());
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), this.getVideoIframeSrc_());
     // Host that mowplayer uses to serve JS needed by player.
-    preconnect.url('https://mowplayer.com', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://mowplayer.com', opt_onLayout);
   }
 
   /** @override */

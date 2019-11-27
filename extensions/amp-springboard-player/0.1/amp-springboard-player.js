@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
@@ -46,8 +47,16 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://cms.springboardplatform.com', opt_onLayout);
-    this.preconnect.url('https://www.springboardplatform.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cms.springboardplatform.com',
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.springboardplatform.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
