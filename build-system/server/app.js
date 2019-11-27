@@ -33,6 +33,7 @@ const path = require('path');
 const request = require('request');
 const upload = require('multer')();
 const pc = process;
+const autocompleteEmailData = require('./autocomplete-test-data');
 const runVideoTestBench = require('./app-video-testbench');
 const {
   recaptchaFrameRequestHandler,
@@ -50,7 +51,6 @@ app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
-app.use('/user-location/', require('./routes/user-location'));
 app.use('/test', require('./routes/test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
@@ -409,6 +409,19 @@ app.use('/form/autocomplete/query', (req, res) => {
 
 app.use('/form/autocomplete/error', (req, res) => {
   res(500);
+});
+
+app.use('/form/mention/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: autocompleteEmailData});
+    return;
+  }
+  const lowerCaseQuery = query.toLowerCase().trim();
+  const filtered = autocompleteEmailData.filter(l =>
+    l.toLowerCase().startsWith(lowerCaseQuery)
+  );
+  res.json({items: filtered});
 });
 
 app.use('/form/verify-search-json/post', (req, res) => {

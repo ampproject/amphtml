@@ -170,7 +170,7 @@ describes.sandboxed('Extension Location', {}, () => {
   });
 
   describe('get correct URL parts', () => {
-    it('unversioned urls', () => {
+    it('non-RTV urls', () => {
       const urlParts = parseExtensionUrl(
         'https://cdn.ampproject.org/v0/amp-ad-1.0.js'
       );
@@ -178,12 +178,20 @@ describes.sandboxed('Extension Location', {}, () => {
       expect(urlParts.extensionVersion).to.equal('1.0');
     });
 
-    it('versioned urls', () => {
+    it('RTV urls', () => {
       const urlParts = parseExtensionUrl(
         'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js'
       );
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('0.1');
+    });
+
+    it('extensions with "latest" version', () => {
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-latest.js'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('latest');
     });
   });
 });

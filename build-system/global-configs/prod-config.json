@@ -14,6 +14,7 @@
   "amp-action-macro": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
+  "amp-auto-ads-no-op-experiment": 0.05,
   "amp-consent-v2": 1,
   "amp-mega-menu": 1,
   "amp-nested-menu": 1,
@@ -30,12 +31,14 @@
   "fix-inconsistent-responsive-height-selection": 0,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
-  "swg-gpay-native": 1,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
+  "layoutbox-invalidate-on-scroll": 0.05,
   "macro-after-long-task": 0,
   "pump-early-frame": 1,
   "remove-viewer-query-params-on-navigate": 1,
+  "swg-gpay-api": 0.1,
+  "swg-gpay-native": 1,
   "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
   "version-locking": 1
 }

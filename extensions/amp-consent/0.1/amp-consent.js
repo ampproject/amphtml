@@ -100,6 +100,9 @@ export class AmpConsent extends AMP.BaseElement {
 
     /** @private {?string} */
     this.consentId_ = null;
+
+    /** @private {?string} */
+    this.matchedGeoGroup_ = null;
   }
 
   /** @override */
@@ -115,9 +118,20 @@ export class AmpConsent extends AMP.BaseElement {
       'amp-consent should have an id'
     );
 
-    const config = new ConsentConfig(this.element);
+    const configManager = new ConsentConfig(this.element);
 
-    this.consentConfig_ = config.getConsentConfig();
+    return configManager.getConsentConfigPromise().then(validatedConfig => {
+      this.matchedGeoGroup_ = configManager.getMatchedGeoGroup();
+      this.initialize_(validatedConfig);
+    });
+  }
+
+  /**
+   *
+   * @param {!JsonObject} validatedConfig
+   */
+  initialize_(validatedConfig) {
+    this.consentConfig_ = validatedConfig;
 
     // ConsentConfig has verified that there's one and only one consent instance
     this.consentId_ = this.consentConfig_['consentInstanceId'];
@@ -429,11 +443,24 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {!Promise<boolean>}
    */
   getConsentRequiredPromise_() {
-    userAssert(
-      this.consentConfig_['checkConsentHref'] ||
-        this.consentConfig_['promptIfUnknownForGeoGroup'],
-      'neither checkConsentHref nor promptIfUnknownForGeoGroup is defined'
-    );
+    if (!isExperimentOn(this.win, 'amp-consent-geo-override')) {
+      return this.getConsentRequiredPromiseLegacy_();
+    }
+    if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
+      return Promise.resolve(this.consentConfig_['consentRequired']);
+    }
+    return this.getConsentRemote_().then(consentInfo => {
+      const remoteResponse = consentInfo['consentRequired'];
+      return typeof remoteResponse === 'boolean' ? remoteResponse : true;
+    });
+  }
+
+  /**
+   * Returns a promise that resolve when amp-consent knows
+   * if the consent is required.
+   * @return {!Promise<boolean>}
+   */
+  getConsentRequiredPromiseLegacy_() {
     let consentRequiredPromise = null;
     if (this.consentConfig_['promptIfUnknownForGeoGroup']) {
       const geoGroup = this.consentConfig_['promptIfUnknownForGeoGroup'];
@@ -522,6 +549,7 @@ export class AmpConsent extends AMP.BaseElement {
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentString': storedInfo['consentString'],
           'isDirty': !!storedInfo['isDirty'],
+          'matchedGeoGroup': this.matchedGeoGroup_,
         });
         if (this.consentConfig_['clientConfig']) {
           request['clientConfig'] = this.consentConfig_['clientConfig'];

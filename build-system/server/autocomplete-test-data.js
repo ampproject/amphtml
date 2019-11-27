@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-/**
- * The spec does not expose this enum, so we define it here.
- * This is 1-indexed corresponding with the spec.
- * @enum {number}
- */
-export const PositionError = {
-  PERMISSION_DENIED: 1,
-  POSITION_UNAVAILABLE: 2,
-  TIMEOUT: 3,
-  PLATFORM_UNSUPPORTED: 4,
-};
+const mentionEmails = [
+  'harrypotter@hogwarts.edu',
+  'albusdumbledore@hogwarts.edu',
+  'voldemort@deatheater.org',
+  'severussnape@hogwarts.edu',
+  'siriusblack@hogwarts.edu',
+  'hermionegranger@hogwarts.edu',
+  'ronweasley@hogwarts.edu',
+  'dracomalfoy@hogwarts.edu',
+  'nevillelongbottom@hogwarts.edu',
+  'rubeushagrid@hogwarts.edu',
+  'dobby@hogwarts.edu',
+  'bellatrixlestrange@deatheater.org',
+  'minervamcgonagall@hogwarts.edu',
+];
+
+module.exports = mentionEmails;

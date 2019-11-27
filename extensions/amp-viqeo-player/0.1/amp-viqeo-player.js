@@ -77,8 +77,16 @@ class AmpViqeoPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://api.viqeo.tv', opt_onLayout);
-    this.preconnect.url('https://cdn.viqeo.tv', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://api.viqeo.tv',
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cdn.viqeo.tv',
+      opt_onLayout
+    );
   }
 
   /**
