@@ -42,7 +42,7 @@ Note not all experiments allow document level opt-in. For a full list of white l
 Note that document opt-in can be overridden by user opt-out.
 
 ```javascript
-AMP.toggleExperiment('experiment', false);
+AMP.toggleExperiment('my-experiment', false);
 ```
 
 ### Enable automatically for invalid documents (demos and automated tests)
