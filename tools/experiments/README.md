@@ -20,7 +20,7 @@ Experiment opt-ins are saved to `localStorage` and only enables the experiment o
 For content served from non-CDN domains, experiments can be toggled in the devtools console using:
 
 ```javascript
-AMP.toggleExperiment('experiment');
+AMP.toggleExperiment('my-experiment');
 ```
 
 ## Enable an experiment for a particular document
@@ -43,6 +43,20 @@ Note that document opt-in can be overridden by user opt-out.
 
 ```javascript
 AMP.toggleExperiment('experiment', false);
+```
+
+#### Enable an experiment for invalid documents (demos and automated tests)
+
+Before an experiment is toggled on for production or its flag is completely removed, it's useful to have it turned on by default for manual testing pages or for automated test fixtures (e.g. HTML document fixtures for integration and visual tests). **This makes the document invalid**, but enables the experimental runtime features that are required for a specific document.
+
+To prevent race conditions caused from loading the runtime script and running an inline script to toggle the experiment, you'll have to include an `AMP.push` callback in your document's `<head>`:
+
+```html
+<script>
+  (self.AMP = self.AMP || []).push(function(AMP) {
+    AMP.toggleExperiment('my-experiment', true);
+  });
+</script>
 ```
 
 ## Adding a new experiment
