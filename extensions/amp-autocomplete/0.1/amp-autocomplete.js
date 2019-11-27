@@ -37,12 +37,12 @@ import {isArray, isEnumValue, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
+import {removeChildren, tryFocus} from '../../../src/dom';
 import {
   setupAMPCors,
   setupInput,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
-import {removeChildren, tryFocus} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
