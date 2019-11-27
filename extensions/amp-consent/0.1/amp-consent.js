@@ -396,6 +396,8 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
+    this.consentStateChangedViaPromptUI_ = true;
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
@@ -542,43 +544,36 @@ export class AmpConsent extends AMP.BaseElement {
   syncConsentStringAndStateValue_() {
     this.getConsentRemote_().then(response => {
       // Decision from promptUI takes precedence over response
-      if (response && !this.consentStateChangedViaPromptUI_) {
-        this.consentStateManager_
-          .getLastConsentInstanceInfo()
-          .then(storedInfo => {
-            const consentRequired = response['consentRequired'];
-            const consentState = convertValueToState(
-              response['consentStateValue']
-            );
-            // Local storage empty, consent required, and state is not unknown,
-            // then use the state given.
-            if (
-              !!consentRequired &&
-              consentState !== CONSENT_ITEM_STATE.UNKNOWN
-            ) {
-              this.updateCacheIfNotNull_(storedInfo, response);
-            }
-          });
+      if (
+        response &&
+        !this.consentStateChangedViaPromptUI_ &&
+        !!response['consentRequired']
+      ) {
+        this.updateCacheIfNotNull_(
+          response['consentStateValue'],
+          response['consentString']
+        );
       }
     });
   }
 
   /**
-   * Sync cache is the value is not null. Defaults to storedValue.
-   * @param {./consent-info.ConsentInfoDef} storedInfo
-   * @param {?JsonObject} response
+   * Fetch stored data, and sync with server if appropriate.
+   * @param {string} responseStateValue
+   * @param {string} responseConsentString
    */
-  updateCacheIfNotNull_(storedInfo, response) {
-    const responseStateValue = response['consentStateValue'];
-    const stateValue =
-      responseStateValue !== null
-        ? convertValueToState(responseStateValue)
-        : storedInfo.consentState;
-    const consentString = response['consentString'] || storedInfo.consentString;
-    this.consentStateManager_.updateConsentInstanceState(
-      stateValue,
-      consentString
-    );
+  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+    this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
+      const consentStateValue =
+        responseStateValue !== null
+          ? convertValueToState(responseStateValue)
+          : storedInfo.consentState;
+      const consentString = responseConsentString || storedInfo.consentString;
+      this.consentStateManager_.updateConsentInstanceState(
+        consentStateValue,
+        consentString
+      );
+    });
   }
 
   /**
@@ -667,7 +662,6 @@ export class AmpConsent extends AMP.BaseElement {
         return false;
       }
       // Prompt
-      this.consentStateChangedViaPromptUI_ = true;
       this.scheduleDisplay_(false);
       return true;
       // TODO(@zhouyx):
