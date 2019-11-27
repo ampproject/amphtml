@@ -69,7 +69,7 @@ describes.realWin('Platform store', {}, env => {
     expect(platformStore.serviceIds_).to.be.equal(serviceIds);
   });
 
-  it('should resolve entitlement', () => {
+  it('should resolve entitlement', async () => {
     // Request entitlement promise even before it's resolved.
     const p = platformStore.getEntitlementPromiseFor('service2');
 
@@ -91,7 +91,7 @@ describes.realWin('Platform store', {}, env => {
       })
     );
     expect(platformStore.getEntitlementPromiseFor('service2')).to.equal(p);
-    return expect(p).to.eventually.equal(ent);
+    await expect(p).to.eventually.equal(ent);
   });
 
   it('should call onChange callbacks on every resolve', () => {
@@ -249,7 +249,7 @@ describes.realWin('Platform store', {}, env => {
     it(
       'should call selectApplicablePlatform_ if areAllPlatformsResolved_ ' +
         'is true',
-      () => {
+      async () => {
         const fakeResult = [entitlementsForService1, entitlementsForService2];
         const getAllPlatformsStub = env.sandbox
           .stub(platformStore, 'getAllPlatformsEntitlements')
@@ -257,10 +257,10 @@ describes.realWin('Platform store', {}, env => {
         const selectApplicablePlatformStub = env.sandbox
           .stub(platformStore, 'selectApplicablePlatform_')
           .callsFake(() => Promise.resolve());
-        return platformStore.selectPlatform(true).then(() => {
-          expect(getAllPlatformsStub).to.be.calledOnce;
-          expect(selectApplicablePlatformStub).to.be.calledOnce;
-        });
+
+        await platformStore.selectPlatform(true);
+        expect(getAllPlatformsStub).to.be.calledOnce;
+        expect(selectApplicablePlatformStub).to.be.calledOnce;
       }
     );
   });
@@ -534,7 +534,7 @@ describes.realWin('Platform store', {}, env => {
         anotherPlatform.getServiceId()
       );
     });
-    it('getScoreFactorStates should return promised score', () => {
+    it('getScoreFactorStates should return promised score', async () => {
       env.sandbox
         .stub(localPlatform, 'getSupportedScoreFactor')
         .callsFake(factor => fakeGetSupportedScoreFactor(factor, {}));
@@ -564,7 +564,8 @@ describes.realWin('Platform store', {}, env => {
           service: 'another',
         })
       );
-      return expect(
+
+      await expect(
         platformStore.getScoreFactorStates()
       ).to.eventually.deep.equal({
         local: {
@@ -655,7 +656,7 @@ describes.realWin('Platform store', {}, env => {
     it(
       'should not interfere with selectPlatform flow if using fallback, ' +
         'when reason is SUBSCRIBER',
-      () => {
+      async () => {
         const platform = new SubscriptionPlatform();
         const anotherPlatform = new SubscriptionPlatform();
         env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
@@ -673,20 +674,20 @@ describes.realWin('Platform store', {}, env => {
           serviceIds[0],
           entitlementsForService1
         );
-        return platformStore.selectPlatform().then(platform => {
-          expect(platformStore.entitlements_['local']).deep.equals(
-            fallbackEntitlement
-          );
-          // falbackEntitlement has Reason as SUBSCRIBER so it should win
-          expect(platform.getServiceId()).to.equal('local');
-        });
+
+        const selectedPlatform = await platformStore.selectPlatform();
+        expect(platformStore.entitlements_['local']).deep.equals(
+          fallbackEntitlement
+        );
+        // falbackEntitlement has Reason as SUBSCRIBER so it should win
+        expect(selectedPlatform.getServiceId()).to.equal('local');
       }
     );
 
     it(
       'should not interfere with selectPlatform flow if using fallback, ' +
         'when reason is not SUBSCRIBER',
-      () => {
+      async () => {
         const platform = new SubscriptionPlatform();
         const anotherPlatform = new SubscriptionPlatform();
         env.sandbox.stub(platform, 'getServiceId').callsFake(() => 'local');
@@ -705,13 +706,13 @@ describes.realWin('Platform store', {}, env => {
           serviceIds[0],
           entitlementsForService1
         );
-        return platformStore.selectPlatform().then(platform => {
-          expect(platformStore.entitlements_['local']).deep.equals(
-            fallbackEntitlement
-          );
-          // falbackEntitlement has Reason as SUBSCRIBER so it should win
-          expect(platform.getServiceId()).to.equal(serviceIds[0]);
-        });
+
+        const selectedPlatform = await platformStore.selectPlatform();
+        expect(platformStore.entitlements_['local']).deep.equals(
+          fallbackEntitlement
+        );
+        // falbackEntitlement has Reason as SUBSCRIBER so it should win
+        expect(selectedPlatform.getServiceId()).to.equal(serviceIds[0]);
       }
     );
   });
@@ -746,46 +747,41 @@ describes.realWin('Platform store', {}, env => {
       granted: false,
     });
 
-    it('should resolve with existing entitlement with subscriptions', () => {
+    it('should resolve with existing entitlement with subscriptions', async () => {
       platformStore.grantStatusEntitlement_ = subscribedEntitlement;
-      return platformStore.getGrantEntitlement().then(entitlement => {
-        expect(entitlement).to.equal(subscribedEntitlement);
-      });
+      const entitlement = await platformStore.getGrantEntitlement();
+      expect(entitlement).to.equal(subscribedEntitlement);
     });
 
-    it('should resolve with first entitlement with subscriptions', () => {
+    it('should resolve with first entitlement with subscriptions', async () => {
       platformStore.resolveEntitlement('service1', subscribedEntitlement);
-      return platformStore.getGrantEntitlement().then(entitlement => {
-        expect(entitlement).to.equal(subscribedEntitlement);
-      });
+      const entitlement = await platformStore.getGrantEntitlement();
+      expect(entitlement).to.equal(subscribedEntitlement);
     });
 
     it(
       'should resolve with metered entitlement when no ' +
         'platform is subscribed',
-      () => {
+      async () => {
         platformStore.resolveEntitlement('service1', noEntitlement);
         platformStore.resolveEntitlement('service2', meteringEntitlement);
-        return platformStore.getGrantEntitlement().then(entitlement => {
-          expect(entitlement).to.equal(meteringEntitlement);
-        });
+        const entitlement = await platformStore.getGrantEntitlement();
+        expect(entitlement).to.equal(meteringEntitlement);
       }
     );
 
-    it('should override metering with subscription', () => {
+    it('should override metering with subscription', async () => {
       platformStore.resolveEntitlement('service1', meteringEntitlement);
       platformStore.resolveEntitlement('service2', subscribedEntitlement);
-      return platformStore.getGrantEntitlement().then(entitlement => {
-        expect(entitlement).to.equal(subscribedEntitlement);
-      });
+      const entitlement = await platformStore.getGrantEntitlement();
+      expect(entitlement).to.equal(subscribedEntitlement);
     });
 
-    it('should resolve to null if nothing matched', () => {
+    it('should resolve to null if nothing matched', async () => {
       platformStore.resolveEntitlement('service1', noEntitlement);
       platformStore.resolveEntitlement('service2', noEntitlement);
-      return platformStore.getGrantEntitlement().then(entitlement => {
-        expect(entitlement).to.be.null;
-      });
+      const entitlement = await platformStore.getGrantEntitlement();
+      expect(entitlement).to.be.null;
     });
   });
 
@@ -857,22 +853,29 @@ describes.realWin('Platform store', {}, env => {
       'should return a promise resolving the requested platform ' +
         'if it is already registered',
       () => {
+        let serviceId;
+
         platformStore.resolvePlatform('local', localPlatform);
         platformStore.onPlatformResolves('local', platform => {
-          expect(platform.getServiceId()).to.be.equal('local');
+          serviceId = platform.getServiceId();
         });
+
+        expect(serviceId).to.be.equal('local');
       }
     );
 
     it(
       'should return a promise resolving when the requested platform ' +
         'gets registered',
-      done => {
+      () => {
+        let serviceId;
+
         platformStore.onPlatformResolves('local', platform => {
-          expect(platform.getServiceId()).to.be.equal('local');
-          done();
+          serviceId = platform.getServiceId();
         });
         platformStore.resolvePlatform('local', localPlatform);
+
+        expect(serviceId).to.be.equal('local');
       }
     );
   });

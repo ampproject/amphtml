@@ -366,11 +366,11 @@ describes.realWin(
       // Remaining filters should error
       impl.filter_ = 'custom';
       expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-        'Filter not yet supported: custom'
+        /Filter not yet supported:/
       );
       impl.filter_ = 'invalid';
       expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-        'Unexpected filter: invalid'
+        /Unexpected filter:/
       );
     });
 
@@ -445,18 +445,68 @@ describes.realWin(
     });
 
     it('should show and hide results on toggle', () => {
-      expect(impl.resultsShowing_()).to.be.false;
+      expect(impl.areResultsDisplayed_()).to.be.false;
       return impl.renderResults_(['apple'], impl.container_).then(() => {
-        expect(impl.resultsShowing_()).to.be.false;
+        expect(impl.areResultsDisplayed_()).to.be.false;
         impl.toggleResults_(true);
-        expect(impl.resultsShowing_()).to.be.true;
+        expect(impl.areResultsDisplayed_()).to.be.true;
         impl.toggleResults_(false);
-        expect(impl.resultsShowing_()).to.be.false;
+        expect(impl.areResultsDisplayed_()).to.be.false;
       });
     });
 
     describe('inputHandler_() on input', () => {
-      let renderSpy, toggleResultsSpy, updateActiveSpy;
+      let renderSpy,
+        toggleResultsSpy,
+        updateActiveSpy,
+        clearAllItemsSpy,
+        remoteDataSpy;
+
+      it('should only clear items if binding should not autocomplete', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            renderSpy = env.sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            clearAllItemsSpy = env.sandbox.spy(impl, 'clearAllItems_');
+            env.sandbox
+              .stub(impl.binding_, 'shouldAutocomplete')
+              .returns(false);
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(clearAllItemsSpy).to.have.been.calledOnce;
+            expect(renderSpy).not.to.have.been.called;
+            expect(toggleResultsSpy).not.to.have.been.called;
+          });
+      });
+
+      it('should only fetch data when autocompleting for email', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            renderSpy = env.sandbox.spy(impl, 'filterDataAndRenderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            remoteDataSpy = env.sandbox
+              .stub(impl, 'getRemoteData_')
+              .resolves(['abc']);
+            env.sandbox.stub(impl.binding_, 'shouldAutocomplete').returns(true);
+            expect(impl.isEmail_).to.be.false;
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(remoteDataSpy).not.to.have.been.called;
+            expect(renderSpy).to.have.been.calledOnce;
+            expect(toggleResultsSpy).to.have.been.calledOnce;
+            impl.isEmail_ = true;
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(remoteDataSpy).to.have.been.calledOnce;
+            expect(renderSpy).to.have.been.calledTwice;
+            expect(toggleResultsSpy).to.have.been.calledTwice;
+          });
+      });
 
       it('should record and respond to input', () => {
         return element
@@ -466,7 +516,7 @@ describes.realWin(
             renderSpy = env.sandbox.spy(impl, 'renderResults_');
             toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
             updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
-            expect(impl.suggestFirst_).to.be.false;
+            expect(impl.shouldSuggestFirst_).to.be.false;
             return impl.inputHandler_();
           })
           .then(() => {
@@ -485,7 +535,7 @@ describes.realWin(
             renderSpy = env.sandbox.spy(impl, 'renderResults_');
             toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
             updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
-            impl.suggestFirst_ = true;
+            impl.shouldSuggestFirst_ = true;
             return impl.inputHandler_();
           })
           .then(() => {
@@ -509,7 +559,7 @@ describes.realWin(
 
       it('should updateActiveItem_ when results showing on Down arrow', () => {
         env.sandbox
-          .stub(impl, 'resultsShowing_')
+          .stub(impl, 'areResultsDisplayed_')
           .onFirstCall()
           .returns(true);
         return element
@@ -526,7 +576,7 @@ describes.realWin(
       });
 
       it('should displayUserInput_ when looping on Down arrow', () => {
-        env.sandbox.stub(impl, 'resultsShowing_').returns(true);
+        env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
         return element
           .layoutCallback()
           .then(() => {
@@ -621,7 +671,7 @@ describes.realWin(
         return layoutAndSetSpies()
           .then(() => {
             impl.activeElement_ = impl.createElementFromItem_('abc');
-            env.sandbox.stub(impl, 'resultsShowing_').returns(true);
+            env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -630,77 +680,30 @@ describes.realWin(
             expect(clearAllSpy).to.have.been.calledOnce;
             expect(resetSpy).to.have.been.calledOnce;
             expect(eventPreventSpy).to.have.been.calledOnce;
-            expect(impl.submitOnEnter_).to.be.false;
           });
       });
 
-      it('should call event.preventDefault when submitOnEnter_ is true', () => {
+      it('should call event.preventDefault based on binding', () => {
         return layoutAndSetSpies()
           .then(() => {
-            impl.submitOnEnter_ = true;
             impl.activeElement_ = impl.createElementFromItem_('abc');
+            env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
+            env.sandbox
+              .stub(impl.binding_, 'shouldPreventFormSubmissionOnEnter')
+              .returns(true);
             return impl.keyDownHandler_(event);
           })
           .then(() => {
-            expect(impl.inputElement_.value).to.equal('abc');
             expect(selectItemSpy).to.have.been.calledOnce;
             expect(clearAllSpy).to.have.been.calledOnce;
             expect(resetSpy).to.have.been.calledOnce;
-            expect(eventPreventSpy).not.to.have.been.called;
-            expect(impl.submitOnEnter_).to.be.true;
+            expect(eventPreventSpy).to.have.been.called;
           });
       });
     });
 
-    it('should call keyDownHandler_() on Enter not event.preventDefault', () => {
-      const event = {
-        key: Keys.ENTER,
-        preventDefault: () => {},
-        target: {textContent: 'hello'},
-      };
-      let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
-      return element
-        .layoutCallback()
-        .then(() => {
-          eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
-          selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
-          resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
-          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
-          env.sandbox.stub(impl, 'resultsShowing_').returns(true);
-          return impl.keyDownHandler_(event);
-        })
-        .then(() => {
-          expect(impl.inputElement_.value).to.equal('');
-          expect(selectItemSpy).not.to.have.been.called;
-          expect(clearAllSpy).not.to.have.been.called;
-          expect(resetSpy).not.to.have.been.called;
-          expect(eventPreventSpy).to.have.been.calledOnce;
-          impl.activeElement_ = impl.createElementFromItem_('abc');
-          return impl.keyDownHandler_(event);
-        })
-        .then(() => {
-          expect(impl.inputElement_.value).to.equal('abc');
-          expect(selectItemSpy).to.have.been.calledOnce;
-          expect(clearAllSpy).to.have.been.calledOnce;
-          expect(resetSpy).to.have.been.calledOnce;
-          expect(eventPreventSpy).to.have.been.calledTwice;
-          expect(impl.submitOnEnter_).to.be.false;
-          impl.submitOnEnter_ = true;
-          impl.activeElement_ = impl.createElementFromItem_('abc');
-          return impl.keyDownHandler_(event);
-        })
-        .then(() => {
-          expect(impl.inputElement_.value).to.equal('abc');
-          expect(selectItemSpy).to.have.been.calledTwice;
-          expect(clearAllSpy).to.have.been.calledTwice;
-          expect(resetSpy).to.have.been.calledTwice;
-          expect(eventPreventSpy).to.have.been.calledTwice;
-          expect(impl.submitOnEnter_).to.be.true;
-        });
-    });
-
     it('should call keyDownHandler_() on Esc', () => {
-      const event = {key: Keys.ESCAPE};
+      const event = {key: Keys.ESCAPE, preventDefault: () => {}};
       const displayInputSpy = env.sandbox.spy(impl, 'displayUserInput_');
       const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
       const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
@@ -714,22 +717,24 @@ describes.realWin(
           expect(impl.container_.children).to.have.length(3);
           expect(resetSpy).to.have.been.calledOnce;
           impl.toggleResults_(true);
-          expect(impl.resultsShowing_()).to.be.true;
+          expect(impl.areResultsDisplayed_()).to.be.true;
           return impl.keyDownHandler_(event);
         })
         .then(() => {
           expect(displayInputSpy).to.have.been.calledOnce;
           expect(resetSpy).to.have.been.calledTwice;
           expect(toggleResultsSpy).to.have.been.calledWith(false);
-          expect(impl.resultsShowing_()).to.be.false;
+          expect(impl.areResultsDisplayed_()).to.be.false;
         });
     });
 
     it('should call keyDownHandler_() on Tab', () => {
-      const event = {key: Keys.TAB};
+      const event = {key: Keys.TAB, preventDefault: () => {}};
+      const eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
+      env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
       const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
       return element
         .layoutCallback()
@@ -739,6 +744,7 @@ describes.realWin(
         .then(() => {
           expect(impl.userInput_).to.equal(impl.inputElement_.value);
           expect(fireEventSpy).to.have.been.calledWith(impl.userInput_);
+          expect(eventPreventSpy).to.have.been.calledOnce;
         });
     });
 
@@ -749,7 +755,7 @@ describes.realWin(
         return element
           .layoutCallback()
           .then(() => {
-            impl.suggestFirst_ = true;
+            impl.shouldSuggestFirst_ = true;
             expect(impl.detectBackspace_).to.be.false;
             return impl.keyDownHandler_(event);
           })
@@ -762,7 +768,7 @@ describes.realWin(
         return element
           .layoutCallback()
           .then(() => {
-            expect(impl.suggestFirst_).to.be.false;
+            expect(impl.shouldSuggestFirst_).to.be.false;
             expect(impl.detectBackspace_).to.be.false;
             return impl.keyDownHandler_(event);
           })
@@ -988,6 +994,17 @@ describes.realWin(
             expect(toggleFallbackSpy).to.have.been.calledWith(true);
           });
         });
+      });
+    });
+
+    it('should generate expected src values from "query" attribute', () => {
+      return element.layoutCallback().then(() => {
+        impl.queryKey_ = 'q';
+        impl.srcBase_ = 'https://www.data.com/';
+        expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
+        expect(impl.generateSrc_('abc')).to.equal(
+          'https://www.data.com/?q=abc'
+        );
       });
     });
   }
