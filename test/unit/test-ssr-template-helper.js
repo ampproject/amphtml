@@ -197,7 +197,7 @@ describes.fakeWin(
 
         it('should throw if trying to ssr from an untrusted viewer', () => {
           viewer.isTrustedViewer = () => Promise.resolve(false);
-          const errorMsg = /Refused to apply SSR in untrusted viewer/;
+          const errorMsg = /Refused to attempt SSR in untrusted viewer: /;
           expectAsyncConsoleError(errorMsg);
 
           ssrTemplateHelper

@@ -65,6 +65,22 @@ export class SsrTemplateHelper {
   }
 
   /**
+   * Asserts that the viewer is from a trusted origin.
+   *
+   * @param {!Element} element
+   * @return {!Promise}
+   */
+  assertTrustedViewer(element) {
+    return this.viewer_.isTrustedViewer().then(trusted => {
+      userAssert(
+        trusted,
+        'Refused to attempt SSR in untrusted viewer: ',
+        element
+      );
+    });
+  }
+
+  /**
    * Proxies xhr and template rendering to the viewer.
    * Returns the renderable response, for use with applySsrOrCsrTemplate.
    * @param {!Element} element
@@ -80,26 +96,17 @@ export class SsrTemplateHelper {
     if (!opt_templates) {
       mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
-    return this.viewer_
-      .isTrustedViewer()
-      .then(trusted => {
-        userAssert(
-          trusted,
-          'Refused to attempt SSR in untrusted viewer: ',
-          element
-        );
-      })
-      .then(() => {
-        return this.viewer_.sendMessageAwaitResponse(
-          'viewerRenderTemplate',
-          this.buildPayload_(
-            request,
-            mustacheTemplate,
-            opt_templates,
-            opt_attributes
-          )
-        );
-      });
+    return this.assertTrustedViewer().then(() => {
+      return this.viewer_.sendMessageAwaitResponse(
+        'viewerRenderTemplate',
+        this.buildPayload_(
+          request,
+          mustacheTemplate,
+          opt_templates,
+          opt_attributes
+        )
+      );
+    });
   }
 
   /**
@@ -116,12 +123,7 @@ export class SsrTemplateHelper {
         typeof data['html'] === 'string',
         'Server side html response must be defined'
       );
-      renderTemplatePromise = this.viewer_.isTrustedViewer().then(trusted => {
-        userAssert(
-          trusted,
-          'Refused to apply SSR in untrusted viewer: ',
-          element
-        );
+      renderTemplatePromise = this.assertTrustedViewer(element).then(() => {
         return this.templates_.findAndSetHtmlForTemplate(
           element,
           /** @type {string} */ (data['html'])
