@@ -294,6 +294,22 @@ The `items` array will be truncated to `max-items` entries if the returned value
 Causes `<amp-list>` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.
 
+##### strip-prefix (optional)
+
+Causes `<amp-list>` to strip a prefix from a given endpoint's JSON before parsing. This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+
+For example, lets say we had an API that returned this response:
+
+```
+)]}{ 'a': 'value' }
+```
+
+We could instruct `amp-list` to remove the security prefix like so:
+
+```html
+<amp-list strip-prefix=")]}" src="/some-api.json"></amp-list>
+```
+
 ##### reset-on-refresh (optional)
 
 Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
