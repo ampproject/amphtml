@@ -39,7 +39,7 @@ Document can choose to opt in a certain experiments. To do that, simply put a me
 
 By doing so, the specified experiments will be enabled for all visitors of the document.
 
-Note that **only some experiments** allow document level opt-in. For a full list of allowed experiments, please see `allow-doc-opt-in` attribute in [the `prod-config.json` file.](../../build-system/global-configs/prod-config.json)
+Note: **only some experiments** allow document level opt-in. For a full list of allowed experiments, please see `allow-doc-opt-in` attribute in [the `prod-config.json` file.](../../build-system/global-configs/prod-config.json)
 
 The document opt-in can also be overridden by user opt-out:
 
