@@ -527,12 +527,7 @@ export class AmpConsent extends AMP.BaseElement {
   maybeSetDirtyBit_() {
     const responsePromise = this.getConsentRemote_();
     responsePromise.then(response => {
-      if (
-        response &&
-        (!!response['forcePromptOnNext'] ||
-          (isExperimentOn(this.win, 'amp-consent-geo-override') &&
-            !!response['expireCache']))
-      ) {
+      if (response && !!response['forcePromptOnNext']) {
         this.consentStateManager_.setDirtyBit();
       }
     });
@@ -544,36 +539,44 @@ export class AmpConsent extends AMP.BaseElement {
   syncConsentStringAndStateValue_() {
     this.getConsentRemote_().then(response => {
       // Decision from promptUI takes precedence over response
-      if (
-        response &&
-        !this.consentStateChangedViaPromptUI_ &&
-        !!response['consentRequired']
-      ) {
-        this.updateCacheIfNotNull_(
-          response['consentStateValue'],
-          response['consentString']
-        );
+      if (response && !this.consentStateChangedViaPromptUI_) {
+        this.updateCacheIfNotNull_(response);
       }
     });
   }
 
   /**
    * Fetch stored data, and sync with server if appropriate.
-   * @param {string} responseStateValue
-   * @param {string} responseConsentString
+   * @param {!JsonObject} response
    */
-  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
-    this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
-      const consentStateValue =
-        responseStateValue !== null
-          ? convertValueToState(responseStateValue)
-          : storedInfo.consentState;
-      const consentString = responseConsentString || storedInfo.consentString;
+  updateCacheIfNotNull_(response) {
+    const responseStateValue = response['consentStateValue'];
+    const responseConsentString = response['consentString'];
+
+    if (!!response['expireCache']) {
       this.consentStateManager_.updateConsentInstanceState(
-        consentStateValue,
-        consentString
+        CONSENT_ITEM_STATE.UNKNOWN,
+        undefined,
+        true
       );
-    });
+    }
+    if (
+      responseStateValue !== null &&
+      responseConsentString !== null &&
+      !!response['consentRequired']
+    ) {
+      this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
+        const consentStateValue =
+          responseStateValue !== null
+            ? convertValueToState(responseStateValue)
+            : storedInfo.consentState;
+        const consentString = responseConsentString || storedInfo.consentString;
+        this.consentStateManager_.updateConsentInstanceState(
+          consentStateValue,
+          consentString
+        );
+      });
+    }
   }
 
   /**

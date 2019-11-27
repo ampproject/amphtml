@@ -375,8 +375,6 @@ describes.realWin(
               '{"consentRequired": true, "consentStateValue": 0, "consentString": "mystring"}',
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": 2}',
-            'https://server-test-4/':
-              '{"consentRequired": true, "consentStateValue": 1, "consentString": "newstring"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -549,6 +547,111 @@ describes.realWin(
           expect(stateManagerInfo).to.deep.equal({
             'consentState': 2,
             'consentString': 'mystring',
+            'isDirty': undefined,
+          });
+        });
+      });
+
+      describe('expire cache', () => {
+        beforeEach(() => {
+          jsonMockResponses = {
+            'https://expire-cache/':
+              '{"expireCache": true,"consentRequired": true, "consentStateValue": null, "consentString": null}',
+            'https://expire-cache-2/':
+              '{"expireCache": true,"consentRequired": true, "consentStateValue": 1, "consentString": "myconsentstring"}',
+            'https://expire-cache-3/':
+              '{"expireCache": true,"consentRequired": false, "consentStateValue": null, "consentString": null}',
+          };
+        });
+
+        it('should clear the cache and expect a value', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://expire-cache/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'mystring',
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('unknown');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 5,
+            'consentString': undefined,
+            'isDirty': undefined,
+          });
+        });
+
+        it('should clear the cache and use provided response', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://expire-cache-2/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'mystring',
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+          expect(stateValue).to.equal('accepted');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 1,
+            'consentString': 'myconsentstring',
+            'isDirty': undefined,
+          });
+        });
+
+        it('should clear the cache and not require value', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://expire-cache-3/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'mystring',
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('unknown');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 5,
+            'consentString': undefined,
             'isDirty': undefined,
           });
         });
