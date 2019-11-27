@@ -424,7 +424,9 @@ export class AmpConsent extends AMP.BaseElement {
   init_() {
     this.passSharedData_();
     this.maybeSetDirtyBit_();
-    this.syncConsentStringAndStateValue_();
+    if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
+      this.syncConsentStringAndStateValue_();
+    }
 
     this.getConsentRequiredPromise_()
       .then(isConsentRequired => {
@@ -461,18 +463,18 @@ export class AmpConsent extends AMP.BaseElement {
         if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
           return Promise.resolve(this.consentConfig_['consentRequired']);
         }
-        return this.getConsentRemote_().then(consentInfo => {
-          const consentRequired = consentInfo['consentRequired'];
+        return this.getConsentRemote_().then(consentResponse => {
+          const consentRequired = consentResponse['consentRequired'];
           const consentState = convertValueToState(
-            consentInfo['consentStateValue']
+            consentResponse['consentStateValue']
           );
-          // Local storage empty, consent required, and not state is not unknow,
+          // Local storage empty, consent required, and state is not unknown,
           // then use the state given.
           if (
             !!consentRequired &&
             consentState !== CONSENT_ITEM_STATE.UNKNOWN
           ) {
-            this.updateCacheIfNotNull_(storedInfo, consentInfo);
+            this.updateCacheIfNotNull_(storedInfo, consentResponse);
           }
           return !!consentRequired;
         });
@@ -545,13 +547,11 @@ export class AmpConsent extends AMP.BaseElement {
    * Sync consent string and consent state value to local storage.
    */
   syncConsentStringAndStateValue_() {
-    const responsePromise = this.getConsentRemote_();
-    responsePromise.then(response => {
+    this.getConsentRemote_().then(response => {
       if (
         response &&
         typeof this.consentConfig_['consentRequired'] === 'boolean' &&
-        !this.consentStateChangedViaPromptUI_ &&
-        isExperimentOn(this.win, 'amp-consent-geo-override')
+        !this.consentStateChangedViaPromptUI_
       ) {
         this.consentStateManager_
           .getLastConsentInstanceInfo()
@@ -568,16 +568,12 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {?JsonObject} response
    */
   updateCacheIfNotNull_(storedInfo, response) {
+    const responseStateValue = response['consentStateValue'];
     const stateValue =
-      response['consentStateValue'] !== null &&
-      response['consentStateValue'] !== undefined
-        ? convertValueToState(response['consentStateValue'])
-        : storedInfo['consentState'];
-    const consentString =
-      response['consentString'] !== null &&
-      response['consentString'] !== undefined
-        ? response['consentString']
-        : storedInfo['consentString'];
+      responseStateValue !== null
+        ? convertValueToState(responseStateValue)
+        : storedInfo.consentState;
+    const consentString = response['consentString'] || storedInfo.consentString;
     this.consentStateManager_.updateConsentInstanceState(
       stateValue,
       consentString
