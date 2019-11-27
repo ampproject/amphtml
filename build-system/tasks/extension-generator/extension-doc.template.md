@@ -114,7 +114,7 @@ What is allowed, what isn't.
 
 ## Attributes
 
-### attribute-name
+### `attribute-name`
 
 Description of attribute. Use cases for this attribute.
 
@@ -127,13 +127,13 @@ Here, I write what `optional-attribute-name` will do to `${name}`.
 
 ## Actions (optional)
 
-### action-name
+### `action-name`
 
 Description of action. Use cases of `action-name`. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
 
 ## Events (optional)
 
-### event-name
+### `event-name`
 
 Description of event. Use cases of event-name. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
 
