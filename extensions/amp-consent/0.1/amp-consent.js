@@ -534,18 +534,20 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Sync remote response as long as we are not prompting.
+   * Clear cache for server side decision and then sync.
    */
   syncRemoteResponse_() {
     this.getConsentRemote_().then(response => {
-      // Decision from promptUI takes precedence over response
-      if (response && !this.consentStateChangedViaPromptUI_) {
+      if (response) {
         this.clearCache_(response['expireCache']);
-        this.updateCacheIfNotNull_(
-          response['consentStateValue'],
-          response['consentString'],
-          response['consentRequired']
-        );
+        // Decision from promptUI takes precedence over consent decision from response
+        if (!this.consentStateChangedViaPromptUI_) {
+          this.updateCacheIfNotNull_(
+            response['consentStateValue'],
+            response['consentString'],
+            response['consentRequired']
+          );
+        }
       }
     });
   }
