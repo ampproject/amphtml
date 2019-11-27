@@ -446,13 +446,20 @@ export class AmpConsent extends AMP.BaseElement {
     if (!isExperimentOn(this.win, 'amp-consent-geo-override')) {
       return this.getConsentRequiredPromiseLegacy_();
     }
-    if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
-      return Promise.resolve(this.consentConfig_['consentRequired']);
-    }
-    return this.getConsentRemote_().then(consentInfo => {
-      const remoteResponse = consentInfo['consentRequired'];
-      return typeof remoteResponse === 'boolean' ? remoteResponse : true;
-    });
+    return this.consentStateManager_
+      .getLastConsentInstanceInfo()
+      .then(storedInfo => {
+        if (hasStoredValue(storedInfo)) {
+          return Promise.resolve(true);
+        }
+        const consentRequired = this.consentConfig_['consentRequired'];
+        if (typeof consentRequired === 'boolean') {
+          return Promise.resolve(consentRequired);
+        }
+        return this.getConsentRemote_().then(consentInfo => {
+          return !!consentInfo['consentRequired'];
+        });
+      });
   }
 
   /**
@@ -632,6 +639,22 @@ export class AmpConsent extends AMP.BaseElement {
         this.postPromptUI_.hide();
       });
     });
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @visibleForTesting
+   */
+  getConsentRequiredPromiseForTesting() {
+    return this.getConsentRequiredPromise_();
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  getIsPromptUiOnForTesting() {
+    return this.isPromptUIOn_;
   }
 }
 
