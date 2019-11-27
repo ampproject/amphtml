@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
@@ -32,7 +33,10 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    this.preconnect.preload(this.getVideoIframeSrc_());
+    Services.preconnectFor(this.win).preload(
+      this.getAmpDoc(),
+      this.getVideoIframeSrc_()
+    );
   }
 
   /** @override */
