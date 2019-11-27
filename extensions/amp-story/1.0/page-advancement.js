@@ -463,18 +463,18 @@ class ManualAdvancement extends AdvancementConfig {
       dev().assertElement(event.target),
       el => {
         tagName = el.tagName.toLowerCase();
-        if (tagName === 'amp-story-page-attachment') {
-          shouldHandleEvent = false;
-          return true;
-        }
 
-        if (tagName === 'amp-story-quiz') {
-          interactiveElementDetected = true;
+        if (el.classList.contains('i-amphtml-story-handle-tap-manually')) {
           shouldHandleEvent = false;
+
+          if (tagName === 'amp-story-page-attachment') {
+            return true;
+          }
+          interactiveElementDetected = true;
         }
 
         // If the click came from an interactive element,
-        // check whether it's inside the safe interactivity area
+        // check whether it's inside the interactive area
         if (interactiveElementDetected && tagName === 'amp-story-page') {
           const withinInteractiveArea = this.isWithinInteractiveArea_(
             event,

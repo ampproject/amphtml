@@ -118,6 +118,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   attachContent_() {
+    // Add manual tap handler class to prevent advancement on tap
+    this.element.classList.add('i-amphtml-story-handle-tap-manually');
+
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const promptInput = this.element.children[0];
     // First child must be heading h1-h3
