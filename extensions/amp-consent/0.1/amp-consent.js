@@ -464,19 +464,7 @@ export class AmpConsent extends AMP.BaseElement {
           return Promise.resolve(this.consentConfig_['consentRequired']);
         }
         return this.getConsentRemote_().then(consentResponse => {
-          const consentRequired = consentResponse['consentRequired'];
-          const consentState = convertValueToState(
-            consentResponse['consentStateValue']
-          );
-          // Local storage empty, consent required, and state is not unknown,
-          // then use the state given.
-          if (
-            !!consentRequired &&
-            consentState !== CONSENT_ITEM_STATE.UNKNOWN
-          ) {
-            this.updateCacheIfNotNull_(storedInfo, consentResponse);
-          }
-          return !!consentRequired;
+          return !!consentResponse['consentRequired'];
         });
       });
   }
@@ -548,15 +536,23 @@ export class AmpConsent extends AMP.BaseElement {
    */
   syncConsentStringAndStateValue_() {
     this.getConsentRemote_().then(response => {
-      if (
-        response &&
-        typeof this.consentConfig_['consentRequired'] === 'boolean' &&
-        !this.consentStateChangedViaPromptUI_
-      ) {
+      // Decision from promptUI takes precedence over response
+      if (response && !this.consentStateChangedViaPromptUI_) {
         this.consentStateManager_
           .getLastConsentInstanceInfo()
           .then(storedInfo => {
-            this.updateCacheIfNotNull_(storedInfo, response);
+            const consentRequired = response['consentRequired'];
+            const consentState = convertValueToState(
+              response['consentStateValue']
+            );
+            // Local storage empty, consent required, and state is not unknown,
+            // then use the state given.
+            if (
+              !!consentRequired &&
+              consentState !== CONSENT_ITEM_STATE.UNKNOWN
+            ) {
+              this.updateCacheIfNotNull_(storedInfo, response);
+            }
           });
       }
     });
