@@ -30,7 +30,7 @@ export class RequestHandler {
   /**
    * @param {!Element} element
    * @param {!JsonObject} request
-   * @param {!../../../src/preconnect.Preconnect} preconnect
+   * @param {!../../../src/preconnect.PreconnectService} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
@@ -80,7 +80,7 @@ export class RequestHandler {
     /** @private {!Array<!Promise<!BatchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
 
-    /** @private {!../../../src/preconnect.Preconnect} */
+    /** @private {!../../../src/preconnect.PreconnectService} */
     this.preconnect_ = preconnect;
 
     /** @private {./transport.Transport} */
@@ -249,7 +249,7 @@ export class RequestHandler {
       : baseUrlTemplatePromise;
 
     preconnectPromise.then(preUrl => {
-      this.preconnect_.url(preUrl, true);
+      this.preconnect_.url(this.ampdoc_, preUrl, true);
     });
 
     Promise.all([
