@@ -51,6 +51,12 @@ const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
  */
 const PROTECTED_SCREEN_EDGE_PX = 48;
 
+/** @private @const {number} */
+const PAGE_ATTACHMENT_SAFETY_AREA_PX = 104;
+
+/** @private @const {number} */
+const CTA_SAFETY_AREA_PERCENTAGE = 0.2;
+
 const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
   interactiveElementsSelectors()
 ).join(',');
@@ -423,18 +429,22 @@ class ManualAdvancement extends AdvancementConfig {
    */
   isWithinInteractiveArea_(event, pageEl) {
     const pageRect = this.element_.getLayoutBox();
-    let bottomBuffer = 0;
 
-    // Set bottom buffers according to UX design
+    if (this.isInScreenSideEdge_(event, pageRect)) {
+      return false;
+    }
+
     if (pageEl.querySelector('amp-story-page-attachment')) {
-      bottomBuffer = 104;
+      return event.clientY <= pageRect.height - PAGE_ATTACHMENT_SAFETY_AREA_PX;
     }
 
     if (pageEl.querySelector('amp-story-cta-layer')) {
-      bottomBuffer = pageRect.height * 0.2;
+      return (
+        event.clientY <= pageRect.height * (1 - CTA_SAFETY_AREA_PERCENTAGE)
+      );
     }
 
-    return event.clientY <= pageRect.height - bottomBuffer;
+    return true;
   }
 
   /**
@@ -458,22 +468,20 @@ class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
-        if (
-          tagName === 'amp-story-quiz' &&
-          !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
-        ) {
+        if (tagName === 'amp-story-quiz') {
           interactiveElementDetected = true;
           shouldHandleEvent = false;
         }
 
-        // If the click came from a quiz, check if it was within the interaction boundary
+        // If the click came from an interactive element,
+        // check whether it's inside the safe interactivity area
         if (interactiveElementDetected && tagName === 'amp-story-page') {
           const withinInteractiveArea = this.isWithinInteractiveArea_(
             event,
             el
           );
           shouldHandleEvent = !withinInteractiveArea;
-          return !withinInteractiveArea;
+          return withinInteractiveArea;
         }
 
         if (tagName === 'amp-story-page') {
