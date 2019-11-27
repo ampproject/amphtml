@@ -245,11 +245,11 @@ describes.realWin(
         await macroTask();
         expect(localStorageSpy).to.be.calledBefore(fetchSpy);
         expect(fetchSpy).to.be.calledOnce;
-        const consentInstanceInfo = await ampConsent.consentStateManager_.getConsentInstanceInfo();
+        const instanceInfo = await ampConsent
+          .getConsentStateManagerForTesting()
+          .getConsentInstanceInfo();
 
-        expect(consentInstanceInfo['consentState']).to.equal(
-          CONSENT_ITEM_STATE.UNKNOWN
-        );
+        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
         expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
           .true;
       });
@@ -267,10 +267,10 @@ describes.realWin(
 
         await ampConsent.buildCallback();
         await macroTask();
-        const consentInstanceInfo = await ampConsent.consentStateManager_.getConsentInstanceInfo();
-        expect(consentInstanceInfo['consentState']).to.equal(
-          CONSENT_ITEM_STATE.REJECTED
-        );
+        const instanceInfo = await ampConsent
+          .getConsentStateManagerForTesting()
+          .getConsentInstanceInfo();
+        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.REJECTED);
       });
 
       it('sends post request to server when consentRequired is remote', async () => {
@@ -755,11 +755,11 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, config);
         await ampConsent.buildCallback();
         await macroTask();
-        const consentInstanceInfo = await ampConsent.consentStateManager_.getConsentInstanceInfo();
+        const instanceInfo = await ampConsent
+          .getConsentStateManagerForTesting()
+          .getConsentInstanceInfo();
 
-        expect(consentInstanceInfo['consentState']).to.equal(
-          CONSENT_ITEM_STATE.ACCEPTED
-        );
+        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(ampConsent.isPromptUIOn_).to.be.false;
       });
 
@@ -874,12 +874,8 @@ describes.realWin(
             toggleExperiment(win, 'amp-consent-geo-override', false);
           });
 
-          it('hide postPromptUI', async () => {
+          it('hides postPromptUI with no local storage decision', async () => {
             await ampConsent.buildCallback();
-            ampConsent.element.classList.remove('i-amphtml-notbuilt');
-            await macroTask();
-
-            expect(postPromptUI).to.not.be.null;
             expect(postPromptUI).to.have.display('none');
           });
 
@@ -895,9 +891,11 @@ describes.realWin(
             await ampConsent.buildCallback();
             ampConsent.element.classList.remove('i-amphtml-notbuilt');
             await macroTask();
-            const consentInstanceInfo = await ampConsent.consentStateManager_.getConsentInstanceInfo();
+            const instanceInfo = await ampConsent
+              .getConsentStateManagerForTesting()
+              .getConsentInstanceInfo();
 
-            expect(consentInstanceInfo['consentState']).to.equal(
+            expect(instanceInfo.consentState).to.equal(
               CONSENT_ITEM_STATE.ACCEPTED
             );
             expect(scheduleDisplaySpy).to.not.be.called;
@@ -926,7 +924,7 @@ describes.realWin(
             ampConsent = new AmpConsent(consentElement);
           });
 
-          it('hide postPromptUI', async () => {
+          it('hide postPromptUI with no local storage', async () => {
             await ampConsent.buildCallback();
             ampConsent.element.classList.remove('i-amphtml-notbuilt');
             await macroTask();

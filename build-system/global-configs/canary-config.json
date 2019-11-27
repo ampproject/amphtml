@@ -36,7 +36,7 @@
   "swg-gpay-native": 1,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 1,
-  "layoutbox-invalidate-on-scroll": 1,
+  "layoutbox-invalidate-on-scroll": 0.05,
   "macro-after-long-task": 1,
   "pump-early-frame": 1,
   "remove-viewer-query-params-on-navigate": 1,

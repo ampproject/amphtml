@@ -133,23 +133,25 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    const {element, preconnect} = this;
+    const {element} = this;
+    const preconnect = Services.preconnectFor(this.win);
     preconnect.preload(
+      this.getAmpDoc(),
       'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
       'script'
     );
     const source = element.getAttribute('data-src');
     if (source) {
-      preconnect.url(source);
+      preconnect.url(this.getAmpDoc(), source);
     }
     if (this.preconnectSource_) {
-      preconnect.url(this.preconnectSource_);
+      preconnect.url(this.getAmpDoc(), this.preconnectSource_);
     }
     if (this.preconnectTrack_) {
-      preconnect.url(this.preconnectTrack_);
+      preconnect.url(this.getAmpDoc(), this.preconnectTrack_);
     }
-    preconnect.url(element.getAttribute('data-tag'));
-    preloadBootstrap(this.win, preconnect);
+    preconnect.url(this.getAmpDoc(), element.getAttribute('data-tag'));
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */

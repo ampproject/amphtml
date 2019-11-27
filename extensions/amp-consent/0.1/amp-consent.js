@@ -458,7 +458,7 @@ export class AmpConsent extends AMP.BaseElement {
       .getConsentInstanceInfo()
       .then(storedInfo => {
         if (hasStoredValue(storedInfo)) {
-          return Promise.resolve(false);
+          return Promise.resolve(true);
         }
         if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
           return Promise.resolve(this.consentConfig_['consentRequired']);
@@ -708,6 +708,14 @@ export class AmpConsent extends AMP.BaseElement {
    */
   getConsentRequiredPromiseForTesting() {
     return this.getConsentRequiredPromise_();
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  getIsPromptUiOnForTesting() {
+    return this.isPromptUIOn_;
   }
 }
 
