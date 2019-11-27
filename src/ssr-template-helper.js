@@ -96,7 +96,7 @@ export class SsrTemplateHelper {
     if (!opt_templates) {
       mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
-    return this.assertTrustedViewer().then(() => {
+    return this.assertTrustedViewer(element).then(() => {
       return this.viewer_.sendMessageAwaitResponse(
         'viewerRenderTemplate',
         this.buildPayload_(
