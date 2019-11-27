@@ -112,6 +112,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
+    this.playerReadyResolver_(this.iframe_);
   }
 
   /** @override */
@@ -164,7 +165,6 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     const action = eventData['action'];
     if (action === 'ready') {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      this.playerReadyResolver_(this.iframe_);
     } else if (action === 'play') {
       this.element.dispatchCustomEvent(VideoEvents.PLAYING);
     } else if (action === 'pause') {
