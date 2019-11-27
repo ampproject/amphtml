@@ -525,7 +525,12 @@ export class AmpConsent extends AMP.BaseElement {
   maybeSetDirtyBit_() {
     const responsePromise = this.getConsentRemote_();
     responsePromise.then(response => {
-      if (response && !!response['forcePromptOnNext']) {
+      if (
+        response &&
+        (!!response['forcePromptOnNext'] ||
+          (isExperimentOn(this.win, 'amp-consent-geo-override') &&
+            !!response['expireCache']))
+      ) {
         this.consentStateManager_.setDirtyBit();
       }
     });
