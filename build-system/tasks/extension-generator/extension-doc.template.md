@@ -65,12 +65,12 @@ limitations under the License.
 
 Below is an example for websites.
 
-[example preview="inline" playground="true" imports="amp-component-name"]
+[example preview="inline" playground="true" imports="${name}"]
 
 ```html
-<amp-component-name required-attribute>
+<${name} required-attribute>
   I am a hello world inline executable code sample for websites!
-</amp-component-name>
+</${name}>
 ```
 
 [/example][/filter]
@@ -84,12 +84,12 @@ Below is an example for websites.
 
 Below is an example for ads.
 
-[example preview=“inline” playground=“true” imports="amp-component-name"]
+[example preview=“inline” playground=“true” imports="${name}"]
 
 ```html
-<amp-component-name required-attribute>
+<${name} required-attribute>
   I am a hello world inline executable code sample for ads!
-</amp-component-name>
+</${name}>
 ```
 
 [/example][/filter]
@@ -103,9 +103,9 @@ One to three paragraph explaining the component usage. List important functional
 What to do if they want behavior. How to work around it.
 
 ```html
-<amp-component-name required-attribute>
+<${name} required-attribute>
   Code sample of behavior or behavior workaround.
-</amp-component-name>
+</${name}>
 ```
 
 ### Behavior restrictions
@@ -114,43 +114,49 @@ What is allowed, what isn't.
 
 ## Attributes
 
-### attribute-name
+### `attribute-name`
 
 Description of attribute. Use cases for this attribute.
 
-- `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-component-name`.
-- `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-component-name`.
+- `attribute-value-option-one` (default): `attribute-option-one-value` does this to `${name}`.
+- `attribute-value-option-two`: `attribute-option-two-value` does this to `${name}`.
 
 ### `optional-attribute-name` (optional)
 
-Here, I write what `optional-attribute-name` will do to `amp-component-name`.
+Here, I write what `optional-attribute-name` will do to `${name}`.
 
 ## Actions (optional)
 
-### action-name
+### `action-name`
 
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-component-name` needs to be identified with an `id` to work.
+Description of action. Use cases of `action-name`. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
 
 ## Events (optional)
 
-### event-name
+### `event-name`
 
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-component-name` needs to be identified with an `id` to work.
+Description of event. Use cases of event-name. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
 
 [example preview=”top-frame” playground=”true”]
 
 ```html
 <head>
-     <amp-component-name script tag>
+  <script
+    custom-element="${name}"
+    async
+    src="https://cdn.ampproject.org/v0/${name}-latest.js"
+  ></script>
 </head>
 <body>
-     <amp-component-name required-attribute
-       on="event-name: my-button.show">
-          Hello World!
-     </amp-component-name>
-     <button id="my-button" hidden>
-         Here I am!
-    </button>
+  <${name}
+    required-attribute
+    on="event-name: my-button.show"
+  >
+    Hello World!
+  </${name}>
+  <button id="my-button" hidden>
+    Here I am!
+  </button>
 </body>
 ```
 
@@ -170,7 +176,7 @@ Explain analytics.
 
 ## Accessibility (optional)
 
-Accessibility information related to `amp-component-name`.
+Accessibility information related to `${name}`.
 
 ## Validation
 
