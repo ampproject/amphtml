@@ -61,6 +61,7 @@ describes.realWin(
 
       if (wantSsr) {
         ampAutocomplete.removeAttribute('filter');
+        ampAutocomplete.setAttribute('src', 'example.json');
         const template = doc.createElement('template');
         ampAutocomplete.appendChild(template);
       }
@@ -481,31 +482,24 @@ describes.realWin(
           });
       });
 
-      it('should only fetch data when autocompleting for email', () => {
-        return element
-          .layoutCallback()
-          .then(() => {
-            renderSpy = env.sandbox.spy(impl, 'filterDataAndRenderResults_');
-            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
-            remoteDataSpy = env.sandbox
-              .stub(impl, 'getRemoteData_')
-              .resolves(['abc']);
-            env.sandbox.stub(impl.binding_, 'shouldAutocomplete').returns(true);
-            expect(impl.isEmail_).to.be.false;
-            return impl.inputHandler_();
-          })
-          .then(() => {
-            expect(remoteDataSpy).not.to.have.been.called;
-            expect(renderSpy).to.have.been.calledOnce;
-            expect(toggleResultsSpy).to.have.been.calledOnce;
-            impl.isEmail_ = true;
-            return impl.inputHandler_();
-          })
-          .then(() => {
-            expect(remoteDataSpy).to.have.been.calledOnce;
-            expect(renderSpy).to.have.been.calledTwice;
-            expect(toggleResultsSpy).to.have.been.calledTwice;
-          });
+      it('should only fetch data when autocompleting for SSR', async () => {
+        element = await buildAmpAutocomplete(true);
+        impl = element.implementation_;
+        await impl.layoutCallback();
+        const autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
+        toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+        remoteDataSpy = env.sandbox
+          .stub(impl, 'getRemoteData_')
+          .resolves(['abc']);
+        env.sandbox.stub(impl.binding_, 'shouldAutocomplete').returns(true);
+        await impl.inputHandler_();
+        expect(remoteDataSpy).to.have.been.calledOnce;
+        expect(autocompleteSpy).to.have.been.calledOnce;
+        expect(toggleResultsSpy).to.have.been.calledOnce;
+        await impl.inputHandler_();
+        expect(remoteDataSpy).to.have.been.calledTwice;
+        expect(autocompleteSpy).to.have.been.calledTwice;
+        expect(toggleResultsSpy).to.have.been.calledTwice;
       });
 
       it('should record and respond to input', () => {
