@@ -125,7 +125,6 @@ AMP expects the response to be a JSON object like the following:
 ```html
 { 
   "consentRequired": {boolean}                  // Whether consent is required from the user. 
-                                                // Previously named `promptIfUnknown`.
   "consentStateValue": {?enum} [default: null], // (new) The latest consent state known by the server
                                                 // Takes value of ["accepted", "rejected", "unknown"].
                                                 // The value will be ignored if "consentRequired: false".
