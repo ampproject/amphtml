@@ -79,8 +79,16 @@ class AmpBridPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://services.brid.tv', opt_onLayout);
-    this.preconnect.url('https://cdn.brid.tv', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://services.brid.tv',
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cdn.brid.tv',
+      opt_onLayout
+    );
   }
 
   /** @override */

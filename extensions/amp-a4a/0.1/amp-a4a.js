@@ -498,7 +498,11 @@ export class AmpA4A extends AMP.BaseElement {
     // matches amp-ad loader predicate such that A4A impl does not load.
     if (preconnect) {
       preconnect.forEach(p => {
-        this.preconnect.url(p, /*opt_preloadAs*/ true);
+        Services.preconnectFor(this.win).url(
+          this.getAmpDoc(),
+          p,
+          /*opt_preloadAs*/ true
+        );
       });
     }
   }
@@ -758,7 +762,8 @@ export class AmpA4A extends AMP.BaseElement {
         if (
           this.experimentalNonAmpCreativeRenderMethod_ == XORIGIN_MODE.NAMEFRAME
         ) {
-          this.preconnect.preload(
+          Services.preconnectFor(this.win).preload(
+            this.getAmpDoc(),
             getDefaultBootstrapBaseUrl(this.win, 'nameframe')
           );
         }
@@ -770,7 +775,10 @@ export class AmpA4A extends AMP.BaseElement {
           safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION
         ) {
           this.safeframeVersion = safeframeVersionHeader;
-          this.preconnect.preload(this.getSafeframePath());
+          Services.preconnectFor(this.win).preload(
+            this.getAmpDoc(),
+            this.getSafeframePath()
+          );
         }
         // Note: Resolving a .then inside a .then because we need to capture
         // two fields of fetchResponse, one of which is, itself, a promise,
@@ -856,13 +864,15 @@ export class AmpA4A extends AMP.BaseElement {
         );
         // Preload any fonts.
         (creativeMetaDataDef.customStylesheets || []).forEach(font =>
-          this.preconnect.preload(font.href)
+          Services.preconnectFor(this.win).preload(this.getAmpDoc(), font.href)
         );
 
         const urls = Services.urlForDoc(this.element);
         // Preload any AMP images.
         (creativeMetaDataDef.images || []).forEach(
-          image => urls.isSecure(image) && this.preconnect.preload(image)
+          image =>
+            urls.isSecure(image) &&
+            Services.preconnectFor(this.win).preload(this.getAmpDoc(), image)
         );
         return creativeMetaDataDef;
       })

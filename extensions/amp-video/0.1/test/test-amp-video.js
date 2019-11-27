@@ -19,7 +19,6 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {registerServiceBuilder} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -72,15 +71,28 @@ describes.realWin(
       }
     }
 
+    it('should preconnect', async () => {
+      const v = await getVideo({
+        src: 'video.mp4',
+        width: 160,
+        height: 90,
+      });
+      const preconnect = Services.preconnectFor(win);
+      env.sandbox.spy(preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      expect(preconnect.url).to.have.been.calledWithExactly(
+        env.sandbox.match.object, // AmpDoc
+        'video.mp4',
+        undefined
+      );
+    });
+
     it('should load a video', async () => {
       const v = await getVideo({
         src: 'video.mp4',
         width: 160,
         height: 90,
       });
-      const preloadSpy = env.sandbox.spy(v.implementation_.preconnect, 'url');
-      v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('src')).to.equal('video.mp4');
@@ -98,9 +110,6 @@ describes.realWin(
         'crossorigin': '',
         'disableremoteplayback': '',
       });
-      const preloadSpy = env.sandbox.spy(v.implementation_.preconnect, 'url');
-      v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
@@ -135,9 +144,6 @@ describes.realWin(
         },
         sources
       );
-      const preloadSpy = env.sandbox.spy(v.implementation_.preconnect, 'url');
-      v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);
@@ -175,9 +181,6 @@ describes.realWin(
         },
         tracks
       );
-      const preloadSpy = env.sandbox.spy(v.implementation_.preconnect, 'url');
-      v.implementation_.preconnectCallback();
-      preloadSpy.should.have.been.calledWithExactly('video.mp4', undefined);
       const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(tracktypes.length);
@@ -823,16 +826,14 @@ describes.realWin(
       });
 
       describe('should preconnect to the first cached source', () => {
-        let fakePreconnect;
+        let preconnect;
 
         beforeEach(() => {
-          fakePreconnect = {url: () => {}};
-          registerServiceBuilder(win, 'preconnect', () => fakePreconnect);
+          preconnect = {url: env.sandbox.stub()};
+          env.sandbox.stub(Services, 'preconnectFor').returns(preconnect);
         });
 
         it('no cached source', async () => {
-          const preloadStub = window.sandbox.stub(fakePreconnect, 'url');
-
           await getVideo({
             src: 'https://example.com/video.mp4',
             poster: 'https://example.com/poster.jpg',
@@ -840,12 +841,10 @@ describes.realWin(
             height: 90,
           });
 
-          expect(preloadStub).to.not.have.been.called;
+          expect(preconnect.url).to.not.have.been.called;
         });
 
         it('cached source', async () => {
-          const preloadStub = window.sandbox.stub(fakePreconnect, 'url');
-
           const cachedSource = doc.createElement('source');
           cachedSource.setAttribute(
             'src',
@@ -865,15 +864,14 @@ describes.realWin(
             [cachedSource]
           );
 
-          expect(preloadStub).to.have.been.calledOnce;
-          expect(preloadStub.getCall(0).args[1]).to.equal(
+          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url.getCall(0)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://example-com.cdn.ampproject.org/m/s/video.mp4'
           );
         });
 
         it('mixed sources', async () => {
-          const preloadStub = window.sandbox.stub(fakePreconnect, 'url');
-
           const source = doc.createElement('source');
           source.setAttribute('src', 'video.mp4');
 
@@ -894,8 +892,9 @@ describes.realWin(
             },
             [source, cachedSource]
           );
-          expect(preloadStub).to.have.been.calledOnce;
-          expect(preloadStub.getCall(0).args[1]).to.equal(
+          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url.getCall(0)).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://example-com.cdn.ampproject.org/m/s/video.mp4'
           );
         });

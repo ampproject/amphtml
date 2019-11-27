@@ -89,7 +89,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @override
    */
   preconnectCallback() {
-    this.preconnect.url(this.iframeSrcUrl_);
+    Services.preconnectFor(this.win).url(this.getAmpDoc(), this.iframeSrcUrl_);
   }
 
   /** @override */

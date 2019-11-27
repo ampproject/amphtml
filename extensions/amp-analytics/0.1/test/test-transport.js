@@ -21,6 +21,7 @@ import {
 } from '../../../../testing/test-helper';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
@@ -44,6 +45,9 @@ describes.realWin(
       openXhrStub = env.sandbox.stub();
       sendXhrStub = env.sandbox.stub();
       sendBeaconStub = env.sandbox.stub();
+
+      // Needed for PreconnectService.
+      installDocService(win, true);
     });
 
     it('prefers beacon over xhrpost and image', () => {

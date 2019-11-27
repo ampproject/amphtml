@@ -216,6 +216,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(preconnectSpy).to.be.calledWith(
+          env.sandbox.match.object, // AmpDoc
           'r2?cid=CLIENT_ID(scope)&var=expanded'
         );
       });

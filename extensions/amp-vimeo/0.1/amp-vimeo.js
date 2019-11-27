@@ -99,12 +99,13 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback(onLayout = false) {
-    const {preconnect} = this;
-    preconnect.url('https://player.vimeo.com', onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
+    preconnect.url(ampdoc, 'https://player.vimeo.com', onLayout);
     // Host that Vimeo uses to serve poster frames needed by player.
-    preconnect.url('https://i.vimeocdn.com', onLayout);
+    preconnect.url(ampdoc, 'https://i.vimeocdn.com', onLayout);
     // Host that Vimeo uses to serve JS, CSS and other assets needed.
-    preconnect.url('https://f.vimeocdn.com', onLayout);
+    preconnect.url(ampdoc, 'https://f.vimeocdn.com', onLayout);
   }
 
   /** @override */

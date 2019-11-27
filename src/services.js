@@ -399,6 +399,14 @@ export class Services {
   }
 
   /**
+   * @param {!Window} window
+   * @return {!./preconnect.PreconnectService}
+   */
+  static preconnectFor(window) {
+    return getService(window, 'preconnect');
+  }
+
+  /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/resources-interface.ResourcesInterface}
    */

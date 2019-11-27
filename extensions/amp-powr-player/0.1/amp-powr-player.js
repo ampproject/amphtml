@@ -87,7 +87,10 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    this.preconnect.url('https://player.powr.com');
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://player.powr.com'
+    );
   }
 
   /** @override */

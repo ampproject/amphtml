@@ -162,12 +162,14 @@ describes.realWin(
           'data-param-playsinline': '0',
         });
         const {src} = yt.querySelector('iframe');
-        const preloadSpy = env.sandbox.spy(
-          yt.implementation_.preconnect,
-          'url'
-        );
+
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.spy(preconnect, 'url');
         yt.implementation_.preconnectCallback();
-        preloadSpy.should.have.been.calledWithExactly(src);
+        expect(preconnect.url).to.have.been.calledWith(
+          env.sandbox.match.object, // AmpDoc
+          src
+        );
       });
 
       it('should forward certain events from youtube to the amp element', async () => {

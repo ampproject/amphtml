@@ -65,7 +65,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.getVideoIframeSrc_(), opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.getVideoIframeSrc_(),
+      opt_onLayout
+    );
   }
 
   /** @override */
