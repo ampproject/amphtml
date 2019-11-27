@@ -427,7 +427,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.passSharedData_();
     this.maybeSetDirtyBit_();
     if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
-      this.syncConsentStringAndStateValue_();
+      this.syncRemoteResponse_();
     }
 
     this.getConsentRequiredPromise_()
@@ -534,36 +534,51 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Sync consent string and consent state value to local storage.
+   * Sync remote response as long as we are not prompting.
    */
-  syncConsentStringAndStateValue_() {
+  syncRemoteResponse_() {
     this.getConsentRemote_().then(response => {
       // Decision from promptUI takes precedence over response
       if (response && !this.consentStateChangedViaPromptUI_) {
-        this.updateCacheIfNotNull_(response);
+        this.clearCache_(response['expireCache']);
+        this.updateCacheIfNotNull_(
+          response['consentStateValue'],
+          response['consentString'],
+          response['consentRequired']
+        );
       }
     });
   }
 
   /**
    * Fetch stored data, and sync with server if appropriate.
-   * @param {!JsonObject} response
+   * @param {boolean=} expireCache
    */
-  updateCacheIfNotNull_(response) {
-    const responseStateValue = response['consentStateValue'];
-    const responseConsentString = response['consentString'];
-
-    if (!!response['expireCache']) {
+  clearCache_(expireCache) {
+    if (!!expireCache) {
       this.consentStateManager_.updateConsentInstanceState(
         CONSENT_ITEM_STATE.UNKNOWN,
         undefined,
         true
       );
     }
+  }
+
+  /**
+   * Sync with local storage if consentRequired is true.
+   * @param {string=} responseStateValue
+   * @param {string=} responseConsentString
+   * @param {boolean=} consentRequired
+   */
+  updateCacheIfNotNull_(
+    responseStateValue,
+    responseConsentString,
+    consentRequired
+  ) {
     if (
       responseStateValue !== null &&
       responseConsentString !== null &&
-      !!response['consentRequired']
+      !!consentRequired
     ) {
       this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
         const consentStateValue =
