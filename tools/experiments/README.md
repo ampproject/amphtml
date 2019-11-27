@@ -45,7 +45,7 @@ Note that document opt-in can be overridden by user opt-out.
 AMP.toggleExperiment('experiment', false);
 ```
 
-#### Enable an experiment for invalid documents (demos and automated tests)
+### Enable automatically for invalid documents (demos and automated tests)
 
 Before an experiment is toggled on for production or its flag is completely removed, it's useful to have it turned on by default for manual testing pages or for automated test fixtures (e.g. HTML document fixtures for integration and visual tests). **This makes the document invalid**, but enables the experimental runtime features that are required for a specific document.
 
