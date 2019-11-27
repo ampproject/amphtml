@@ -321,6 +321,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
+
+    return Promise.resolve();
   }
 
   /**

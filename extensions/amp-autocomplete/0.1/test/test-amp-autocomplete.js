@@ -15,8 +15,8 @@
  */
 
 import '../amp-autocomplete';
+import {AmpAutocomplete} from '../amp-autocomplete';
 import {Keys} from '../../../../src/utils/key-codes';
-import {SsrTemplateHelper} from '../../../../src/ssr-template-helper';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {htmlFor} from '../../../../src/static-template';
 
@@ -28,48 +28,47 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc, element, impl;
+    let win, doc, impl;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       return buildAmpAutocomplete().then(ampAutocomplete => {
-        element = ampAutocomplete;
-        impl = ampAutocomplete.implementation_;
+        impl = ampAutocomplete;
       });
     });
 
     function buildAmpAutocomplete(wantSsr) {
       const form = doc.createElement('form');
-      const ampAutocomplete = createElementWithAttributes(
-        doc,
-        'amp-autocomplete',
-        {layout: 'container', filter: 'substring'}
-      );
+      const element = createElementWithAttributes(doc, 'amp-autocomplete', {
+        layout: 'container',
+        filter: 'substring',
+      });
 
       const input = win.document.createElement('input');
       input.setAttribute('type', 'text');
-      ampAutocomplete.appendChild(input);
+      element.appendChild(input);
 
       const script = win.document.createElement('script');
       script.setAttribute('type', 'application/json');
       script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
-      ampAutocomplete.appendChild(script);
+      element.appendChild(script);
 
-      form.appendChild(ampAutocomplete);
+      form.appendChild(element);
       doc.body.appendChild(form);
 
       if (wantSsr) {
-        ampAutocomplete.removeAttribute('filter');
-        ampAutocomplete.setAttribute('src', 'example.json');
+        element.removeAttribute('filter');
+        element.setAttribute('src', 'example.json');
         const template = doc.createElement('template');
-        ampAutocomplete.appendChild(template);
+        element.appendChild(template);
       }
 
-      SsrTemplateHelper.prototype.isSupported = env.sandbox
-        .stub()
-        .returns(wantSsr);
-      return ampAutocomplete.build().then(() => {
+      const ampAutocomplete = new AmpAutocomplete(element);
+      const ssrTemplateHelper = ampAutocomplete.getSsrTemplateHelper();
+      env.sandbox.stub(ssrTemplateHelper, 'isSupported').returns(wantSsr);
+
+      return ampAutocomplete.buildCallback().then(() => {
         return ampAutocomplete;
       });
     }
@@ -257,8 +256,7 @@ describes.realWin(
 
     describe('getRemoteData_()', () => {
       it('should proxy XHR to viewer', async () => {
-        element = await buildAmpAutocomplete(true);
-        impl = element.implementation_;
+        impl = await buildAmpAutocomplete(true);
         impl.element.setAttribute('src', '');
         const rendered = getRenderedSuggestions();
         const ssrSpy = env.sandbox
@@ -271,8 +269,7 @@ describes.realWin(
 
     describe('renderResults()', () => {
       it('should delegate template rendering to viewer', async () => {
-        element = await buildAmpAutocomplete(true);
-        impl = element.implementation_;
+        impl = await buildAmpAutocomplete(true);
         const data = ['apple', 'mango', 'pear'];
         env.sandbox
           .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
@@ -310,8 +307,7 @@ describes.realWin(
           {value: 'mango'},
           {value: 'pear'},
         ];
-        element = await buildAmpAutocomplete(true);
-        impl = element.implementation_;
+        impl = await buildAmpAutocomplete(true);
         const renderTemplateSpy = env.sandbox
           .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
           .returns(Promise.resolve(getRenderedSuggestions()));
@@ -464,7 +460,7 @@ describes.realWin(
         remoteDataSpy;
 
       it('should only clear items if binding should not autocomplete', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             renderSpy = env.sandbox.spy(impl, 'renderResults_');
@@ -483,8 +479,7 @@ describes.realWin(
       });
 
       it('should only fetch data when autocompleting for SSR', async () => {
-        element = await buildAmpAutocomplete(true);
-        impl = element.implementation_;
+        impl = await buildAmpAutocomplete(true);
         await impl.layoutCallback();
         const autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
         toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
@@ -503,7 +498,7 @@ describes.realWin(
       });
 
       it('should record and respond to input', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             impl.inputElement_.value = 'a';
@@ -522,7 +517,7 @@ describes.realWin(
       });
 
       it('should suggest first item when present', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             impl.inputElement_.value = 'a';
@@ -556,7 +551,7 @@ describes.realWin(
           .stub(impl, 'areResultsDisplayed_')
           .onFirstCall()
           .returns(true);
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             impl.activeIndex_ = 0;
@@ -571,7 +566,7 @@ describes.realWin(
 
       it('should displayUserInput_ when looping on Down arrow', () => {
         env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             return impl.keyDownHandler_(event);
@@ -585,7 +580,7 @@ describes.realWin(
 
       it('should display results if not already on Down arrow', () => {
         let autocompleteSpy, toggleResultsSpy;
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
@@ -602,7 +597,7 @@ describes.realWin(
       });
 
       it('should updateActiveItem_ on Up arrow', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             event.key = Keys.UP_ARROW;
@@ -616,7 +611,7 @@ describes.realWin(
       });
 
       it('should displayUserInput_ when looping on Up arrow', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             event.key = Keys.UP_ARROW;
@@ -639,7 +634,7 @@ describes.realWin(
       };
       let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
       function layoutAndSetSpies() {
-        return element.layoutCallback().then(() => {
+        return impl.layoutCallback().then(() => {
           eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
           selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
           resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
@@ -701,7 +696,7 @@ describes.realWin(
       const displayInputSpy = env.sandbox.spy(impl, 'displayUserInput_');
       const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
       const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
-      return element
+      return impl
         .layoutCallback()
         .then(() => {
           impl.userInput_ = 'a';
@@ -730,7 +725,7 @@ describes.realWin(
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
       env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
       const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
-      return element
+      return impl
         .layoutCallback()
         .then(() => {
           return impl.keyDownHandler_(event);
@@ -746,7 +741,7 @@ describes.realWin(
       const event = {key: Keys.BACKSPACE};
 
       it('should set flag to true when suggest-first is present', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             impl.shouldSuggestFirst_ = true;
@@ -759,7 +754,7 @@ describes.realWin(
       });
 
       it('should not set flag when suggest-first is absent', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             expect(impl.shouldSuggestFirst_).to.be.false;
@@ -774,7 +769,7 @@ describes.realWin(
 
     it('should call keyDownHandler_() and fallthrough on any other key', () => {
       const event = {key: Keys.LEFT_ARROW};
-      return element.layoutCallback().then(() => {
+      return impl.layoutCallback().then(() => {
         return expect(impl.keyDownHandler_(event)).to.be.fulfilled;
       });
     });
@@ -782,7 +777,7 @@ describes.realWin(
     it('should call toggleResultsHandler_()', () => {
       const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
       const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
-      return element
+      return impl
         .layoutCallback()
         .then(() => {
           return impl.toggleResultsHandler_(true);
@@ -807,7 +802,7 @@ describes.realWin(
       const getItemSpy = env.sandbox.spy(impl, 'getItemElement_');
       const selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
       let mockEl = doc.createElement('div');
-      return element
+      return impl
         .layoutCallback()
         .then(() => {
           impl.toggleResults_(true);
@@ -832,7 +827,7 @@ describes.realWin(
       const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
       const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
       const mockEl = doc.createElement('div');
-      return element.layoutCallback().then(() => {
+      return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
         mockEl.setAttribute('data-value', 'test');
         impl.selectItem_(mockEl);
@@ -844,7 +839,7 @@ describes.realWin(
 
     it('should support marking active items', () => {
       let resetSpy;
-      return element
+      return impl
         .layoutCallback()
         .then(() => {
           expect(impl.activeElement_).to.be.null;
@@ -930,8 +925,7 @@ describes.realWin(
     });
 
     it('should not return disabled items from getEnabledItems_()', async () => {
-      element = await buildAmpAutocomplete(true);
-      impl = element.implementation_;
+      impl = await buildAmpAutocomplete(true);
       const sourceData = ['apple', 'mango', 'pear'];
       const rendered = getRenderedSuggestions();
       rendered.children[2].removeAttribute('data-value', '');
@@ -963,7 +957,7 @@ describes.realWin(
       });
 
       it('should throw error when fallback is not provided', () => {
-        return element.layoutCallback().catch(e => {
+        return impl.layoutCallback().catch(e => {
           expect(getDataSpy).to.have.been.calledOnce;
           expect(fallbackSpy).to.have.been.calledWith(e);
           expect(toggleFallbackSpy).not.to.have.been.called;
@@ -972,7 +966,7 @@ describes.realWin(
 
       it('should not display fallback before user interaction', () => {
         env.sandbox.stub(impl, 'getFallback').returns(true);
-        return element.layoutCallback().then(() => {
+        return impl.layoutCallback().then(() => {
           expect(getDataSpy).not.to.have.been.called;
           expect(fallbackSpy).not.to.have.been.called;
           expect(toggleFallbackSpy).not.to.have.been.called;
@@ -981,7 +975,7 @@ describes.realWin(
 
       it('should display fallback after user interaction if provided', () => {
         env.sandbox.stub(impl, 'getFallback').returns(true);
-        return element.layoutCallback().then(() => {
+        return impl.layoutCallback().then(() => {
           impl.checkFirstInteractionAndMaybeFetchData_().then(() => {
             expect(getDataSpy).to.have.been.calledOnce;
             expect(fallbackSpy).to.have.been.calledWith('Error for test');
@@ -992,7 +986,7 @@ describes.realWin(
     });
 
     it('should generate expected src values from "query" attribute', () => {
-      return element.layoutCallback().then(() => {
+      return impl.layoutCallback().then(() => {
         impl.queryKey_ = 'q';
         impl.srcBase_ = 'https://www.data.com/';
         expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
