@@ -245,6 +245,8 @@ export class Scanner {
   static getCandidates(root) {
     const selector = candidateSelector('amp-img');
     const candidates = toArray(root.querySelectorAll(selector));
+    // TODO(alanorozco): DOM mutations should be wrapped in mutate contexts.
+    // Alternatively, use in-memory "visited" marker instead of attribute.
     candidates.forEach(markAsVisited);
     return candidates;
   }
