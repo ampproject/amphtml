@@ -49,9 +49,11 @@ AMP.toggleExperiment('my-experiment', false);
 
 ### Enable automatically for invalid documents (demos and automated tests)
 
-Before an experiment is toggled on for production or its flag is completely removed, it's useful to have it turned on by default for manual testing pages or for automated test fixtures (e.g. HTML document fixtures for integration and visual tests). This works for **every experiment**, but also **makes the document invalid**, but enables the experimental runtime features that are required for a specific document.
+Before an experiment is toggled on for production or its flag is completely removed, it's useful to have it turned on by default for manual testing pages or for automated test fixtures (e.g. HTML document fixtures for integration and visual tests). 
 
-To prevent race conditions caused from loading the runtime script and running an inline script to toggle the experiment, you'll have to include an `AMP.push` callback in your document's `<head>`:
+This enables the experimental runtime features that are required for a specific document and works for **every experiment**, but also **causes the document to become invalid**.
+
+To prevent race conditions caused from loading the runtime and an inline script to toggle the experiment, you'll have to include an `AMP.push` callback in your document's `<head>`:
 
 ```html
 <script>
