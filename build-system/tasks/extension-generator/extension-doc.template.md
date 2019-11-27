@@ -142,7 +142,7 @@ Description of event. Use cases of event-name. Include all the nuances, such as:
 ```html
 <head>
   <script
-    custom-element="${name}
+    custom-element="${name}"
     async
     src="https://cdn.ampproject.org/v0/${name}-latest.js"
   ></script>
