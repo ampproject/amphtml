@@ -689,7 +689,11 @@ function installPatches(win, registry) {
     innerHTMLSetter.call(this, html);
     registry.upgrade(this);
   };
-  Object.defineProperty(innerHTMLProto, 'innerHTML', innerHTMLDesc);
+  Object.defineProperty(
+    /** @type {!Object} */ (innerHTMLProto),
+    'innerHTML',
+    innerHTMLDesc
+  );
 }
 
 /**
