@@ -290,23 +290,6 @@ class AmpApesterMedia extends AMP.BaseElement {
     return overflow;
   }
 
-  /**
-   * @param {JsonObject} publisher
-   */
-  report3rdPartyPixel_(publisher) {
-    if (publisher && publisher['trackingPixel']) {
-      const affiliateId = publisher['trackingPixel']['affiliateId'];
-      const publisherId = publisher['publisherId'];
-      if (affiliateId) {
-        const eventName = 'interactionLoaded';
-        const builder = new CustomEventReporterBuilder(this.element);
-        builder.track(eventName, generatePixelURL(publisherId, affiliateId));
-        const reporter = builder.build();
-        reporter.trigger(eventName);
-      }
-    }
-  }
-
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -359,7 +342,6 @@ class AmpApesterMedia extends AMP.BaseElement {
                   }
                 }
                 this.togglePlaceholder(false);
-                this.report3rdPartyPixel_(media['publisher']);
                 this.ready_ = true;
                 let height = 0;
                 if (media && media['data'] && media['data']['size']) {
