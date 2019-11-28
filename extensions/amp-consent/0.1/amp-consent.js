@@ -16,6 +16,7 @@
 
 import {
   CONSENT_ITEM_STATE,
+  convertValueToState,
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
@@ -87,7 +88,11 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?function()} */
     this.dialogResolver_ = null;
 
+    /** @private {boolean} */
     this.isPromptUIOn_ = false;
+
+    /** @private {boolean} */
+    this.consentStateChangedViaPromptUI_ = false;
 
     /** @private {boolean} */
     this.consentUIPending_ = false;
@@ -391,6 +396,8 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
+    this.consentStateChangedViaPromptUI_ = true;
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
@@ -419,6 +426,9 @@ export class AmpConsent extends AMP.BaseElement {
   init_() {
     this.passSharedData_();
     this.maybeSetDirtyBit_();
+    if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
+      this.syncRemoteConsentState_();
+    }
 
     this.getConsentRequiredPromise_()
       .then(isConsentRequired => {
@@ -447,7 +457,7 @@ export class AmpConsent extends AMP.BaseElement {
       return this.getConsentRequiredPromiseLegacy_();
     }
     return this.consentStateManager_
-      .getLastConsentInstanceInfo()
+      .getConsentInstanceInfo()
       .then(storedInfo => {
         if (hasStoredValue(storedInfo)) {
           return Promise.resolve(true);
@@ -456,8 +466,8 @@ export class AmpConsent extends AMP.BaseElement {
         if (typeof consentRequired === 'boolean') {
           return Promise.resolve(consentRequired);
         }
-        return this.getConsentRemote_().then(consentInfo => {
-          return !!consentInfo['consentRequired'];
+        return this.getConsentRemote_().then(consentResponse => {
+          return !!consentResponse['consentRequired'];
         });
       });
   }
@@ -522,6 +532,51 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.setDirtyBit();
       }
     });
+  }
+
+  /**
+   * Clear cache for server side decision and then sync.
+   */
+  syncRemoteConsentState_() {
+    this.getConsentRemote_().then(response => {
+      if (!response) {
+        return;
+      }
+      const expireCache = response['expireCache'];
+      if (expireCache) {
+        this.consentStateManager_.setDirtyBit();
+        // Decision from promptUI takes precedence over consent decision from response
+      } else if (
+        !!response['consentRequired'] &&
+        !this.consentStateChangedViaPromptUI_
+      ) {
+        this.updateCacheIfNotNull_(
+          response['consentStateValue'],
+          response['consentString']
+        );
+      }
+    });
+  }
+
+  /**
+   * Sync with local storage if consentRequired is true.
+   * @param {string=} responseStateValue
+   * @param {string=} responseConsentString
+   */
+  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+    if (responseStateValue !== null || responseConsentString !== null) {
+      this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
+        const consentStateValue =
+          responseStateValue !== null
+            ? convertValueToState(responseStateValue)
+            : storedInfo.consentState;
+        const consentString = responseConsentString || storedInfo.consentString;
+        this.consentStateManager_.updateConsentInstanceState(
+          consentStateValue,
+          consentString
+        );
+      });
+    }
   }
 
   /**
@@ -639,6 +694,14 @@ export class AmpConsent extends AMP.BaseElement {
         this.postPromptUI_.hide();
       });
     });
+  }
+
+  /**
+   * @return {?ConsentStateManager}
+   * @visibleForTesting
+   */
+  getConsentStateManagerForTesting() {
+    return this.consentStateManager_;
   }
 
   /**
