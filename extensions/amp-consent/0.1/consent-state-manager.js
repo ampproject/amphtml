@@ -97,8 +97,7 @@ export class ConsentStateManager {
       dev().error(TAG, 'instance not registered');
       return;
     }
-
-    this.instance_.update(state, consentStr);
+    this.instance_.update(state, consentStr, false);
 
     if (this.consentChangeHandler_) {
       this.consentChangeHandler_(constructConsentInfo(state, consentStr));
@@ -193,6 +192,15 @@ export class ConsentStateManager {
       this.consentReadyResolver_ = deferred.resolve;
     }
     return this.consentReadyPromise_;
+  }
+
+  /**
+   * Get last consent instance stored.
+   * @visibleForTesting
+   * @return {?ConsentInfoDef}
+   */
+  getSavedInstanceForTesting() {
+    return this.instance_.savedConsentInfo_;
   }
 }
 

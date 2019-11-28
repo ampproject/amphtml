@@ -26,7 +26,7 @@ import {isEnumValue, isObject} from '../../../src/types';
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
-const STORAGE_KEY = {
+export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
   IS_DIRTY: 'd',
@@ -242,7 +242,7 @@ export function constructConsentInfo(
  * @param {*} value
  * @return {!CONSENT_ITEM_STATE}
  */
-function convertValueToState(value) {
+export function convertValueToState(value) {
   if (value === true || value === 1) {
     return CONSENT_ITEM_STATE.ACCEPTED;
   } else if (value === false || value === 0) {
