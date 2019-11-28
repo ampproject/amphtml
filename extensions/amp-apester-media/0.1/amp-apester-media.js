@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
@@ -22,7 +21,6 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   extractTags,
-  generatePixelURL,
   getPlatform,
   registerEvent,
   setFullscreenOff,
