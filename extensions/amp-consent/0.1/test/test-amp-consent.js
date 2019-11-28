@@ -564,7 +564,7 @@ describes.realWin(
           };
         });
 
-        it('should clear the cache and expect a value', async () => {
+        it('should set dirty bit', async () => {
           const inlineConfig = {
             'consentInstanceId': 'abc',
             'consentRequired': 'remote',
@@ -582,77 +582,16 @@ describes.realWin(
           await macroTask();
           const stateManagerInfo = await ampConsent
             .getConsentStateManagerForTesting()
-            .getConsentInstanceInfo();
+            .getSavedInstanceForTesting();
           const stateValue = getConsentStateValue(
             stateManagerInfo.consentState
           );
 
-          expect(stateValue).to.equal('unknown');
+          expect(stateValue).to.equal('rejected');
           expect(stateManagerInfo).to.deep.equal({
-            'consentState': 5,
-            'consentString': undefined,
-            'isDirty': undefined,
-          });
-        });
-
-        it('should clear the cache and use provided response', async () => {
-          const inlineConfig = {
-            'consentInstanceId': 'abc',
-            'consentRequired': 'remote',
-            'checkConsentHref': 'https://expire-cache-2/',
-          };
-          // 0 represents 'rejected' in storage
-          storageValue = {
-            'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'mystring',
-            },
-          };
-          ampConsent = getAmpConsent(doc, inlineConfig);
-          await ampConsent.buildCallback();
-          await macroTask();
-          const stateManagerInfo = await ampConsent
-            .getConsentStateManagerForTesting()
-            .getConsentInstanceInfo();
-          const stateValue = getConsentStateValue(
-            stateManagerInfo.consentState
-          );
-          expect(stateValue).to.equal('accepted');
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': 1,
-            'consentString': 'myconsentstring',
-            'isDirty': undefined,
-          });
-        });
-
-        it('should clear the cache and not require value', async () => {
-          const inlineConfig = {
-            'consentInstanceId': 'abc',
-            'consentRequired': 'remote',
-            'checkConsentHref': 'https://expire-cache-3/',
-          };
-          // 0 represents 'rejected' in storage
-          storageValue = {
-            'amp-consent:abc': {
-              [STORAGE_KEY.STATE]: 0,
-              [STORAGE_KEY.STRING]: 'mystring',
-            },
-          };
-          ampConsent = getAmpConsent(doc, inlineConfig);
-          await ampConsent.buildCallback();
-          await macroTask();
-          const stateManagerInfo = await ampConsent
-            .getConsentStateManagerForTesting()
-            .getConsentInstanceInfo();
-          const stateValue = getConsentStateValue(
-            stateManagerInfo.consentState
-          );
-
-          expect(stateValue).to.equal('unknown');
-          expect(stateManagerInfo).to.deep.equal({
-            'consentState': 5,
-            'consentString': undefined,
-            'isDirty': undefined,
+            'consentState': 2,
+            'consentString': 'mystring',
+            'isDirty': true,
           });
         });
       });

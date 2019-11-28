@@ -427,7 +427,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.passSharedData_();
     this.maybeSetDirtyBit_();
     if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
-      this.syncRemoteResponse_();
+      this.syncRemoteConsentState_();
     }
 
     this.getConsentRequiredPromise_()
@@ -462,8 +462,9 @@ export class AmpConsent extends AMP.BaseElement {
         if (hasStoredValue(storedInfo)) {
           return Promise.resolve(true);
         }
-        if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
-          return Promise.resolve(this.consentConfig_['consentRequired']);
+        const consentRequired = this.consentConfig_['consentRequired'];
+        if (typeof consentRequired === 'boolean') {
+          return Promise.resolve(consentRequired);
         }
         return this.getConsentRemote_().then(consentResponse => {
           return !!consentResponse['consentRequired'];
@@ -536,52 +537,34 @@ export class AmpConsent extends AMP.BaseElement {
   /**
    * Clear cache for server side decision and then sync.
    */
-  syncRemoteResponse_() {
+  syncRemoteConsentState_() {
     this.getConsentRemote_().then(response => {
-      if (response) {
-        this.clearCache_(response['expireCache']);
+      if (!response) {
+        return;
+      }
+      const expireCache = response['expireCache'];
+      if (expireCache) {
+        this.consentStateManager_.setDirtyBit();
         // Decision from promptUI takes precedence over consent decision from response
-        if (!this.consentStateChangedViaPromptUI_) {
-          this.updateCacheIfNotNull_(
-            response['consentStateValue'],
-            response['consentString'],
-            response['consentRequired']
-          );
-        }
+      } else if (
+        !!response['consentRequired'] &&
+        !this.consentStateChangedViaPromptUI_
+      ) {
+        this.updateCacheIfNotNull_(
+          response['consentStateValue'],
+          response['consentString']
+        );
       }
     });
-  }
-
-  /**
-   * Fetch stored data, and sync with server if appropriate.
-   * @param {boolean=} expireCache
-   */
-  clearCache_(expireCache) {
-    if (!!expireCache) {
-      this.consentStateManager_.updateConsentInstanceState(
-        CONSENT_ITEM_STATE.UNKNOWN,
-        undefined,
-        true
-      );
-    }
   }
 
   /**
    * Sync with local storage if consentRequired is true.
    * @param {string=} responseStateValue
    * @param {string=} responseConsentString
-   * @param {boolean=} consentRequired
    */
-  updateCacheIfNotNull_(
-    responseStateValue,
-    responseConsentString,
-    consentRequired
-  ) {
-    if (
-      responseStateValue !== null &&
-      responseConsentString !== null &&
-      !!consentRequired
-    ) {
+  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+    if (responseStateValue !== null || responseConsentString !== null) {
       this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
         const consentStateValue =
           responseStateValue !== null

@@ -91,14 +91,13 @@ export class ConsentStateManager {
    * Update consent instance state
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
-   * @param {boolean=} foreceUpdate
    */
-  updateConsentInstanceState(state, consentStr, foreceUpdate) {
+  updateConsentInstanceState(state, consentStr) {
     if (!this.instance_) {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, false, foreceUpdate);
+    this.instance_.update(state, consentStr, false);
 
     if (this.consentChangeHandler_) {
       this.consentChangeHandler_(constructConsentInfo(state, consentStr));
@@ -194,6 +193,15 @@ export class ConsentStateManager {
     }
     return this.consentReadyPromise_;
   }
+
+  /**
+   * Get last consent instance stored.
+   * @visibleForTesting
+   * @return {?ConsentInfoDef}
+   */
+  getSavedInstanceForTesting() {
+    return this.instance_.savedConsentInfo_;
+  }
 }
 
 /**
@@ -268,18 +276,13 @@ export class ConsentInstance {
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
    * @param {boolean=} opt_systemUpdate
-   * @param {boolean=} opt_forceClear
    */
-  update(state, consentString, opt_systemUpdate, opt_forceClear) {
+  update(state, consentString, opt_systemUpdate) {
     const localState =
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const localConsentStr =
       this.localConsentInfo_ && this.localConsentInfo_['consentString'];
-    const calculatedState = recalculateConsentStateValue(
-      state,
-      localState,
-      opt_forceClear
-    );
+    const calculatedState = recalculateConsentStateValue(state, localState);
 
     if (state === CONSENT_ITEM_STATE.DISMISSED) {
       // If state is dismissed, use the old consent string.

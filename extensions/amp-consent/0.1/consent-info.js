@@ -103,19 +103,11 @@ export function hasDirtyBit(consentInfo) {
  * Return the new consent state value based on stored state and new state
  * @param {!CONSENT_ITEM_STATE} newState
  * @param {!CONSENT_ITEM_STATE} previousState
- * @param {boolean=} forceUpdate
  * @return {!CONSENT_ITEM_STATE}
  */
-export function recalculateConsentStateValue(
-  newState,
-  previousState,
-  forceUpdate
-) {
+export function recalculateConsentStateValue(newState, previousState) {
   if (!isEnumValue(CONSENT_ITEM_STATE, newState)) {
     newState = CONSENT_ITEM_STATE.UNKNOWN;
-  }
-  if (!!forceUpdate) {
-    return newState;
   }
   if (
     newState == CONSENT_ITEM_STATE.DISMISSED ||
