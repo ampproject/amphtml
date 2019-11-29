@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-import {validateData, loadScript} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adservsolutions(global, data) {
-  validateData(data,[],['client','zid']);
-  (function(w,d,o,g,r,z){
-    w[r]=w[r]||function(){(w[r+'l']=w[r+'l']||[]).push(arguments)};
-    function e(b,w,r){if(w[r+'h']=b.pop()){
-      loadScript(global,'https://cdn.'+w[r+'h']+'/libs/b.js',function(){},function(){e(g,w,r)});
-    }}if(!w.ABN){e(g,w,r)};w[r]('c',{id:z+'&o=a'})
-  })(global,global.document,'script',[data.client],'ABNS',data.zid);
+  validateData(data, [], ['client', 'zid']);
+  (function(w, d, o, g, r, z) {
+    w[r] =
+      w[r] ||
+      function() {
+        (w[r + 'l'] = w[r + 'l'] || []).push(arguments);
+      };
+    if (!w.ABN) {
+      (function(g, w, r) {
+        if ((w[r + 'h'] = g.pop())) {
+          writeScript(w, 'https://cdn.' + w[r + 'h'] + '/libs/b.js');
+        }
+      })(g, w, r);
+    }
+    w[r]('c', {id: z + '&o=a'});
+  })(global, global.document, 'script', [data.client], 'ABNS', data.zid);
 }
