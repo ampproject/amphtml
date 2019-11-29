@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -28,14 +28,13 @@ export function adservsolutions(global, data) {
       function() {
         (w[r + 'l'] = w[r + 'l'] || []).push(arguments);
       };
-    w[r + 'h'] = g.pop();
-    loadScript(
-      w,
-      'https://cdn.' + w[r + 'h'] + '/libs/b.js',
-      function() {},
-      function() {
-        w[r]('c', {id: z + '&o=a'});
-      }
-    );
+    if (!w.ABN) {
+      (function(g, w, r) {
+        if ((w[r + 'h'] = g.pop())) {
+          writeScript(w, 'https://cdn.' + w[r + 'h'] + '/libs/b.js');
+        }
+      })(g, w, r);
+    }
+    w[r]('c', {id: z + '&o=a'});
   })(global, global.document, 'script', [data.client], 'ABNS', data.zid);
 }
