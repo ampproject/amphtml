@@ -30,10 +30,10 @@
     "web-animations-js": "2.3.1"
   },
   "devDependencies": {
-    "@babel/core": "7.7.2",
-    "@babel/helper-plugin-test-runner": "7.1.0",
-    "@babel/plugin-proposal-class-properties": "7.7.0",
-    "@babel/preset-env": "7.7.1",
+    "@babel/core": "7.7.4",
+    "@babel/helper-plugin-test-runner": "7.7.4",
+    "@babel/plugin-proposal-class-properties": "7.7.4",
+    "@babel/preset-env": "7.7.4",
     "@jridgewell/resorcery": "0.0.3",
     "acorn-globals": "4.3.4",
     "amphtml-validator": "1.0.29",
