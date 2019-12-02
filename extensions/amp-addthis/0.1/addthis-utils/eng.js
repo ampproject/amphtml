@@ -26,7 +26,8 @@ import {pixelDrop} from './pixel';
  * @param {{monitors: *, loc: Location, ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc, pubId: string}} params
  * @return {{al: (string|undefined), amp: number, dc: number, dp: string, dt: string, fp: string, ict: string, ivh: number, pct: number, pfm: number, ph: number, pub: string, sh: number, sid: string}}
  */
-const getEngData = ({monitors, loc, ampDoc, pubId}) => {
+const getEngData = params => {
+  const {monitors, loc, ampDoc, pubId} = params;
   const {
     dwellMonitor,
     scrollMonitor,

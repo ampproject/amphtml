@@ -234,7 +234,8 @@ export function setModalAsClosed(element) {
   devAssert(topModalElement === element);
 
   // Put aria-hidden back to how it was before the call.
-  hiddenElementInfos.forEach(({element, prevValue}) => {
+  hiddenElementInfos.forEach(hiddenElementInfo => {
+    const {element, prevValue} = hiddenElementInfo;
     restoreAttributeValue(element, 'aria-hidden', prevValue);
   });
   // Re-hide any internal elements that should be hidden.

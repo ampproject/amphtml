@@ -152,7 +152,8 @@ export function getRGBFromCssColorValue(cssValue) {
  * @param  {!Object<string, number>} rgb  ie: {r: 0, g: 0, b: 0}
  * @return {string} '#fff' or '#000'
  */
-export function getTextColorForRGB({r, g, b}) {
+export function getTextColorForRGB(rgb) {
+  const {r, g, b} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
   const getLinearRGBValue = x => {

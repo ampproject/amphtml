@@ -38,7 +38,8 @@ export class CarouselAccessibility {
    *   stoppable: !StoppableDef,
    * }} config
    */
-  constructor({win, element, scrollContainer, runMutate, stoppable}) {
+  constructor(config) {
+    const {win, element, scrollContainer, runMutate, stoppable} = config;
     /** @protected @const */
     this.win_ = win;
 

@@ -29,7 +29,8 @@ const minimist = require('minimist');
 const {isTravisBuild} = require('./build-system/common/travis');
 const argv = minimist(process.argv.slice(2));
 
-const isDist = argv._.includes('dist');
+const isClosureCompiler =
+  argv._.includes('dist') || argv._.includes('check-types');
 const {esm} = argv;
 const noModuleTarget = {
   'browsers': isTravisBuild()
@@ -40,9 +41,9 @@ const noModuleTarget = {
 // eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
   api.cache(true);
-  // `dist` builds do not use any of the default settings below until its
+  // Closure Compiler builds do not use any of the default settings below until its
   // an esm build. (Both Multipass and Singlepass)
-  if (isDist && !esm) {
+  if (isClosureCompiler && !esm) {
     return {};
   }
   return {
@@ -57,7 +58,7 @@ module.exports = function(api) {
         : [
             '@babel/preset-env',
             {
-              'modules': isDist ? false : 'commonjs',
+              'modules': isClosureCompiler ? false : 'commonjs',
               'loose': true,
               'targets': noModuleTarget,
             },

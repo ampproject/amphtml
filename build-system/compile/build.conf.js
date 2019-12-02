@@ -27,7 +27,6 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
-  getJsonConfigurationPlugin(),
   getReplacePlugin(),
 ];
 
@@ -119,7 +118,7 @@ function getJsonConfigurationPlugin() {
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
-function plugins({isEsmBuild, isForTesting, isSinglePass}) {
+function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
   const applied = [...defaultPlugins];
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
@@ -134,7 +133,14 @@ function plugins({isEsmBuild, isForTesting, isSinglePass}) {
   if (isEsmBuild) {
     applied.push(['filter-imports', {imports: esmRemovedImports}]);
   }
-  if (!isForTesting) {
+  if (isChecktypes) {
+    applied.push(localPlugin('transform-simple-object-destructure'));
+  } else {
+    // This triggers some conformance errors such as `use tryParseJson` during
+    // type check phase so we omit it from the default plugins.
+    applied.push(getJsonConfigurationPlugin());
+  }
+  if (!(isForTesting || isChecktypes)) {
     applied.push(
       localPlugin('amp-mode-transformer'),
       localPlugin('is_dev-constant-transformer')

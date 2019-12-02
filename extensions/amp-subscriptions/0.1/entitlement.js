@@ -48,15 +48,16 @@ export class Entitlement {
    * @param {?JsonObject} [input.dataObject]
    * @param {?string} [input.decryptedDocumentKey]
    */
-  constructor({
-    source,
-    raw = '',
-    service,
-    granted = false,
-    grantReason = '',
-    dataObject,
-    decryptedDocumentKey,
-  }) {
+  constructor(input) {
+    const {
+      source,
+      raw = '',
+      service,
+      granted = false,
+      grantReason = '',
+      dataObject,
+      decryptedDocumentKey,
+    } = input;
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */

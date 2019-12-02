@@ -1625,7 +1625,8 @@ export class AmpStory extends AMP.BaseElement {
           el.removeAttribute(Attributes.DESKTOP_POSITION);
         });
 
-        list.forEach(({page, position}) => {
+        list.forEach(entry => {
+          const {page, position} = entry;
           page.element.setAttribute(Attributes.DESKTOP_POSITION, position);
         });
       }

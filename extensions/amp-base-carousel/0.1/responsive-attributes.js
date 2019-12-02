@@ -173,7 +173,8 @@ export class ResponsiveAttributes {
    * @private
    */
   setOnchange_(mediaQueryListsAndValues, fn) {
-    mediaQueryListsAndValues.forEach(({mediaQueryList}) => {
+    mediaQueryListsAndValues.forEach(mediaQueryDef => {
+      const {mediaQueryList} = mediaQueryDef;
       mediaQueryList.onchange = fn;
     });
   }

@@ -157,7 +157,8 @@ export class SwipeToDismiss {
    *   overlay: !Element,
    * }} config
    */
-  startSwipe({swipeElement, hiddenElement, mask, overlay}) {
+  startSwipe(config) {
+    const {swipeElement, hiddenElement, mask, overlay} = config;
     this.swipeElement_ = swipeElement;
     this.hiddenElement_ = hiddenElement;
     this.mask_ = mask;

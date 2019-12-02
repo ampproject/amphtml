@@ -284,7 +284,8 @@ export class Tracking {
     let numberAffiliateLinks = 0;
     const urls = dict({});
 
-    anchorReplacementList.forEach(({replacementUrl, anchor}) => {
+    anchorReplacementList.forEach(anchorReplacement => {
+      const {replacementUrl, anchor} = anchorReplacement;
       const isExcluded = isExcludedAnchorUrl(anchor, this.skimOptions_);
       const isAffiliate = Boolean(replacementUrl);
       // Do not track na-links since the backend doesn't use them.

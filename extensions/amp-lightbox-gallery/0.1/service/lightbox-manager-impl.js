@@ -150,7 +150,8 @@ export class LightboxManager {
     });
 
     // Process elements where the `lightbox` attr is dynamically set.
-    root.addEventListener(AutoLightboxEvents.NEWLY_SET, ({target}) => {
+    root.addEventListener(AutoLightboxEvents.NEWLY_SET, e => {
+      const {target} = e;
       this.processLightboxElement_(dev().assertElement(target));
     });
 

@@ -49,7 +49,10 @@ export function fetchDocument(win, input, opt_init) {
           .text()
           .then(body => new DOMParser().parseFromString(body, 'text/html'));
       }
-      return xhrRequest(input, init).then(({xhr}) => xhr.responseXML);
+      return xhrRequest(input, init).then(resp => {
+        const {xhr} = resp;
+        return xhr.responseXML;
+      });
     }
   );
 }
