@@ -464,12 +464,13 @@ class ManualAdvancement extends AdvancementConfig {
       el => {
         tagName = el.tagName.toLowerCase();
 
-        if (el.classList.contains('i-amphtml-story-handle-tap-manually')) {
+        if (tagName === 'amp-story-page-attachment') {
           shouldHandleEvent = false;
+          return true;
+        }
 
-          if (tagName === 'amp-story-page-attachment') {
-            return true;
-          }
+        if (tagName == 'amp-story-quiz') {
+          shouldHandleEvent = false;
           interactiveElementDetected = true;
         }
 

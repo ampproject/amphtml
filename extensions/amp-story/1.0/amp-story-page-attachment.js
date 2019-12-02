@@ -79,9 +79,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.element.classList.add(DARK_THEME_CLASS);
     }
 
-    // Add manual tap handler class to prevent advancement on tap
-    this.element.classList.add('i-amphtml-story-handle-tap-manually');
-
     const templateEl = this.element.querySelector(
       '.i-amphtml-story-draggable-drawer'
     );
