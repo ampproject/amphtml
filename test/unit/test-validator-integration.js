@@ -19,7 +19,7 @@
 
 import * as eventHelper from '../../src/event-helper';
 import * as mode from '../../src/mode';
-import {maybeValidate, loadScript} from '../../src/validator-integration';
+import {loadScript, maybeValidate} from '../../src/validator-integration';
 
 describes.fakeWin('validator-integration', {}, env => {
   let loadScriptStub;
