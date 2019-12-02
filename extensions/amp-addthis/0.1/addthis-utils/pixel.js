@@ -54,7 +54,8 @@ const groupPixelsByTime = pixelList => {
       }));
     })
     .reduce((a, b) => a.concat(b), []) // flatten
-    .reduce((currentDelayMap, {delay, pixels}) => {
+    .reduce((currentDelayMap, curDelay) => {
+      const {delay, pixels} = curDelay;
       if (!currentDelayMap[delay]) {
         currentDelayMap[delay] = [];
       }
@@ -87,7 +88,8 @@ const getIframeName = url =>
     .host.split('.')
     .concat(pixelatorFrameTitle.toLowerCase().replace(/\s/, '_'));
 
-const iframeDrop = (url, ampDoc, {name, title}) => {
+const iframeDrop = (url, ampDoc, data) => {
+  const {name, title} = data;
   const doc = ampDoc.win.document;
   const iframe = createElementWithAttributes(
     doc,
@@ -127,19 +129,14 @@ const dropPixelatorPixel = (url, ampDoc) => {
 
 /**
  * Requests groups of pixels at specified delays
- * @param  {Array<{
- * delay: number,
- * id: string,
- * url: string
- * }>} pixels
- * @param  {{
- * sid: string,
- * ampDoc: *
- * }} options
+ * @param  {Array<{delay: number, id: string,url: string}>} pixels
+ * @param  {{sid: string, ampDoc: *}} options
  */
-const dropPixelGroups = (pixels, {sid, ampDoc}) => {
+const dropPixelGroups = (pixels, options) => {
+  const {sid, ampDoc} = options;
   const pixelGroups = groupPixelsByTime(pixels);
-  pixelGroups.forEach(({delay, pixels}) => {
+  pixelGroups.forEach(pixelGroup => {
+    const {delay, pixels} = pixelGroup;
     setTimeout(() => {
       const pids = pixels.map(pixel => {
         dropPixelatorPixel(pixel.url, ampDoc);

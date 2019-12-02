@@ -316,7 +316,8 @@ export class PlatformStore {
       this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
-      this.onChange(({entitlement}) => {
+      this.onChange(e => {
+        const {entitlement} = e;
         if (entitlement.granted) {
           this.grantStatusPromise_.resolve(true);
         } else if (this.areAllPlatformsResolved_()) {

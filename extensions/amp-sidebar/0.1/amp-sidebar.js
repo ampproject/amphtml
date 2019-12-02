@@ -548,7 +548,8 @@ export class AmpSidebar extends AMP.BaseElement {
       /* shouldNotPreventDefault */ false,
       /* shouldStopPropagation */ true
     );
-    gestures.onGesture(SwipeXRecognizer, ({data}) => {
+    gestures.onGesture(SwipeXRecognizer, e => {
+      const {data} = e;
       this.handleSwipe_(data);
     });
   }

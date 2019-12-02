@@ -345,7 +345,7 @@ function compile(
       delete compilerOptions.define;
     }
 
-    if (!argv.single_pass && !options.typeCheckOnly) {
+    if (!argv.single_pass) {
       compilerOptions.js_module_root.push(SRC_TEMP_DIR);
     }
 
@@ -365,9 +365,13 @@ function compile(
       }
     });
 
+    const gulpSrcs = !argv.single_pass ? convertPathsToTmpRoot(srcs) : srcs;
+    const gulpBase = !argv.single_pass ? SRC_TEMP_DIR : '.';
+
     if (options.typeCheckOnly) {
       return gulp
-        .src(srcs, {base: '.'})
+        .src(gulpSrcs, {base: gulpBase})
+        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
           handleTypeCheckError();
@@ -376,8 +380,6 @@ function compile(
         .pipe(nop())
         .on('end', resolve);
     } else {
-      const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
-      const gulpBase = argv.single_pass ? '.' : SRC_TEMP_DIR;
       timeInfo.startTime = Date.now();
       return gulp
         .src(gulpSrcs, {base: gulpBase})

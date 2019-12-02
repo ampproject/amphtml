@@ -151,7 +151,8 @@ export class Carousel {
    *   runMutate: function(function()),
    * }} config
    */
-  constructor({win, element, scrollContainer, runMutate}) {
+  constructor(config) {
+    const {win, element, scrollContainer, runMutate} = config;
     /** @private @const */
     this.win_ = win;
 
@@ -1230,7 +1231,8 @@ export class Carousel {
    * }} options
    * @private
    */
-  scrollSlideIntoView_(slide, {smoothScroll}) {
+  scrollSlideIntoView_(slide, options) {
+    const {smoothScroll} = options;
     const runner = smoothScroll ? (el, cb) => cb() : runDisablingSmoothScroll;
     runner(this.scrollContainer_, () => {
       scrollContainerToElement(

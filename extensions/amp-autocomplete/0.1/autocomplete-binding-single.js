@@ -26,7 +26,8 @@ export class AutocompleteBindingSingle {
   /**
    * @param {!AMP.BaseElement} ampElement
    */
-  constructor({element}) {
+  constructor(ampElement) {
+    const {element} = ampElement;
     /** @private {!Element} */
     this.element_ = element;
 

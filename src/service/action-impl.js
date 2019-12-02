@@ -517,7 +517,10 @@ export class ActionService {
     if (!action) {
       return false;
     }
-    return action.actionInfos.some(({target}) => !!this.getActionNode_(target));
+    return action.actionInfos.some(action => {
+      const {target} = action;
+      return !!this.getActionNode_(target);
+    });
   }
 
   /**
@@ -539,7 +542,8 @@ export class ActionService {
     if (!action) {
       return false;
     }
-    return action.actionInfos.some(({target}) => {
+    return action.actionInfos.some(actionInfo => {
+      const {target} = actionInfo;
       return this.getActionNode_(target) == targetElement;
     });
   }
@@ -599,7 +603,8 @@ export class ActionService {
     // to complete. `currentPromise` is the i'th promise in the chain.
     /** @type {?Promise} */
     let currentPromise = null;
-    action.actionInfos.forEach(({target, args, method, str}) => {
+    action.actionInfos.forEach(actionInfo => {
+      const {target, args, method, str} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);

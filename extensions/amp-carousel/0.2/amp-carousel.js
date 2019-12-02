@@ -45,7 +45,8 @@ class AmpCarousel extends AMP.BaseElement {
   setupActions_() {
     this.registerAction(
       'goToSlide',
-      ({args, trust}) => {
+      actionInvocation => {
+        const {args, trust} = actionInvocation;
         this.carousel_.goToSlide(args['index'] || 0, {
           actionSource: this.getActionSource_(trust),
         });
@@ -54,7 +55,8 @@ class AmpCarousel extends AMP.BaseElement {
     );
     this.registerAction(
       'toggleAutoplay',
-      ({args}) => {
+      actionInvocation => {
+        const {args} = actionInvocation;
         // args will be `null` if not present, so we cannot use a default value above
         const toggle = args ? args['toggleOn'] : undefined;
         this.toggleAutoplay_(toggle);

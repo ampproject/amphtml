@@ -394,7 +394,8 @@ export class AmpForm {
     //  Form verification is not supported when SSRing templates is enabled.
     if (!this.ssrTemplateHelper_.isSupported()) {
       this.form_.addEventListener('change', e => {
-        this.verifier_.onCommit().then(({updatedElements, errors}) => {
+        this.verifier_.onCommit().then(updatedErrors => {
+          const {updatedElements, errors} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.

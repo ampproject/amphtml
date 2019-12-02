@@ -337,7 +337,8 @@ export class StandardActions {
    * @return {?Promise}
    * @private Visible to tests only.
    */
-  handleShow_({node}) {
+  handleShow_(invocation) {
+    const {node} = invocation;
     const target = dev().assertElement(node);
     const ownerWindow = toWin(target.ownerDocument.defaultView);
 
