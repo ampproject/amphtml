@@ -409,7 +409,8 @@ class AmpAddThis extends AMP.BaseElement {
    * @param {*} [input.pubId]
    * @memberof AmpAddThis
    */
-  setupListeners_({ampDoc, loc, pubId}) {
+  setupListeners_(input) {
+    const {ampDoc, loc, pubId} = input;
     // Send "engagement" analytics on page hide.
     listen(ampDoc.win, 'pagehide', () =>
       callEng({
