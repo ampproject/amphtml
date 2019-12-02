@@ -771,7 +771,7 @@ app.post('/check-consent', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   res.json({
     'consentRequired': req.query.consentRequired === 'true',
-    'consentStateValue': parseInt(req.query.consentStateValue, 10),
+    'consentStateValue': req.query.consentStateValue,
     'expireCache': req.query.expireCache === 'true',
   });
 });
