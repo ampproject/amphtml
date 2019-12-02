@@ -85,6 +85,7 @@ exports.rules = [
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
+      'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
