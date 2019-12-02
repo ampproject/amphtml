@@ -117,9 +117,9 @@ describes.realWin(
     });
 
     describe('decryptDocumentContent', () => {
-      it('should decrypt the content correctly', () => {
+      it('should decrypt the content correctly', async () => {
         cryptoHandler = new CryptoHandler(ampdoc);
-        return decryptAesGcm(decryptedDocKey, encryptedContent).then(
+        return await decryptAesGcm(decryptedDocKey, encryptedContent).then(
           actualContent => {
             expect(actualContent.replace(/&#39;/g, "'")).to.equal(
               decryptedContent
