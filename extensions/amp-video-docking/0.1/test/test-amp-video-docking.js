@@ -533,25 +533,18 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const setsOrUnsets = hasAmpRtl ? 'sets' : 'unsets';
 
       it(
-        `${setsOrUnsets} amp-rtl classname on icon and controls layer when ` +
-          `docking from ${directionTextual}`,
+        `${setsOrUnsets} amp-rtl classname on icon when docking from ` +
+          directionTextual,
         async () => {
-          const controls = stubControls();
+          stubControls();
           enableComputedStyle(video.element);
 
-          const x = 30;
-          const y = 60;
-          const scale = 0.5;
-          const step = 1;
-          const transitionDurationMs = 0;
-
           await docking.placeAt_(
-            video,
-            x,
-            y,
-            scale,
-            step,
-            transitionDurationMs,
+            /* x, irrelevant */ 30,
+            /* y, irrelevant */ 60,
+            /* scale, irrelevant */ 0.5,
+            /* step, irrelevant */ 1,
+            /* transitionDurationMs, irrelevant */ 0,
             relativeX
           );
 
@@ -560,6 +553,24 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
               '.amp-video-docked-placeholder-icon'
             ).classList.contains('amp-rtl')
           ).to.equal(hasAmpRtl);
+        }
+      );
+
+      it(
+        `${setsOrUnsets} amp-rtl classname on controls layer when docking ` +
+          `from ${directionTextual}`,
+        async () => {
+          const controls = stubControls();
+          enableComputedStyle(video.element);
+
+          await docking.placeAt_(
+            /* x, irrelevant */ 30,
+            /* y, irrelevant */ 60,
+            /* scale, irrelevant */ 0.5,
+            /* step, irrelevant */ 1,
+            /* transitionDurationMs, irrelevant */ 0,
+            relativeX
+          );
 
           expect(controls.container.classList.contains('amp-rtl')).to.equal(
             hasAmpRtl
