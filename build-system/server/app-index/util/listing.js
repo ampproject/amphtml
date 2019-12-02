@@ -15,9 +15,10 @@
  */
 'use strict';
 
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const promisifyAll = require('util-promisifyall');
 const {join, normalize, sep} = require('path');
+
+const fs = promisifyAll(require('fs'));
 
 function isMaliciousPath(path, rootPath) {
   return (path + sep).substr(0, rootPath.length) !== rootPath;

@@ -22,14 +22,13 @@
 const app = require('express')();
 const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
-const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
-const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const path = require('path');
+const promisifyAll = require('util-promisifyall');
 const request = require('request');
 const upload = require('multer')();
 const pc = process;
@@ -42,6 +41,8 @@ const {
 const {getServeMode} = require('./app-utils');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls, isRtvMode} = require('./app-utils');
+
+const fs = promisifyAll(require('fs'));
 
 const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();

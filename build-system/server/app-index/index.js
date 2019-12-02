@@ -17,9 +17,8 @@
 
 const api = require('./api/api');
 const basepathMappings = require('./basepath-mappings');
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
 const path = require('path');
+const promisifyAll = require('util-promisifyall');
 const {
   getListing,
   isMainPageFromUrl,
@@ -28,6 +27,8 @@ const {
 const {getServeMode} = require('../app-utils');
 const {join} = require('path');
 const {renderTemplate} = require('./template');
+
+const fs = promisifyAll(require('fs'));
 
 // Sitting on /build-system/server/app-index, so we go back thrice for the repo root.
 const root = path.join(__dirname, '../../../');

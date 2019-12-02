@@ -16,11 +16,12 @@
 /* eslint-disable */
 'use strict';
 
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const promisifyAll = require('util-promisifyall');
 const {JSDOM} = require('jsdom');
 const {replaceUrls} = require('./app-utils');
 const {getServeMode} = require('./app-utils');
+
+const fs = promisifyAll(require('fs'));
 
 const sourceFile = 'test/manual/amp-video.amp.html';
 

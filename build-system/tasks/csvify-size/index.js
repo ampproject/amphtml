@@ -15,12 +15,14 @@
  */
 'use strict';
 
-const BBPromise = require('bluebird');
 const childProcess = require('child_process');
-const exec = BBPromise.promisify(childProcess.exec);
 const colors = require('ansi-colors');
-const fs = BBPromise.promisifyAll(require('fs'));
 const log = require('fancy-log');
+const promisifyAll = require('util-promisifyall');
+const util = require('util');
+
+const fs = promisifyAll(require('fs'));
+const exec = util.promisify(childProcess.exec);
 
 const prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 

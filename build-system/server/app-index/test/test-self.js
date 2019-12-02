@@ -15,16 +15,16 @@
  */
 
 const amphtmlValidator = require('amphtml-validator');
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const promisifyAll = require('util-promisifyall');
 const path = require('path');
 const {expect} = require('chai');
-
 const {
   expectValidAmphtml,
   getBoundAttr,
   parseHtmlChunk,
 } = require('./helpers');
+
+const fs = promisifyAll(require('fs'));
 
 describe('devdash', () => {
 
