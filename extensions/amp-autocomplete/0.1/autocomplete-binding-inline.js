@@ -33,7 +33,8 @@ export class AutocompleteBindingInline {
    * For use when "inline_" is true.
    * @param {!AMP.BaseElement} ampElement
    */
-  constructor({element, win}) {
+  constructor(ampElement) {
+    const {element, win} = ampElement;
     /** @private {!Element} */
     this.element_ = element;
     this.win_ = win;
