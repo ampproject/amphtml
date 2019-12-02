@@ -542,8 +542,7 @@ export class ActionService {
     if (!action) {
       return false;
     }
-    return action.actionInfos.some(action => {
-      const {target} = action;
+    return action.actionInfos.some(({target}) => {
       return this.getActionNode_(target) == targetElement;
     });
   }
@@ -603,8 +602,8 @@ export class ActionService {
     // to complete. `currentPromise` is the i'th promise in the chain.
     /** @type {?Promise} */
     let currentPromise = null;
-    action.actionInfos.forEach(action => {
-      const {target, args, method, str} = action;
+    action.actionInfos.forEach(actionInfo => {
+      const {target, args, method, str} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);
