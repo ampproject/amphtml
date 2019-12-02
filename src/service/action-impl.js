@@ -542,7 +542,8 @@ export class ActionService {
     if (!action) {
       return false;
     }
-    return action.actionInfos.some(({target}) => {
+    return action.actionInfos.some(actionInfo => {
+      const {target} = actionInfo;
       return this.getActionNode_(target) == targetElement;
     });
   }
