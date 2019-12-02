@@ -2830,15 +2830,6 @@ babel-plugin-transform-strict-mode@^6.24.1:
     babel-runtime "^6.22.0"
     babel-types "^6.24.1"
 
-babel-polyfill@^6.26.0:
-  version "6.26.0"
-  resolved "https://registry.yarnpkg.com/babel-polyfill/-/babel-polyfill-6.26.0.tgz#379937abc67d7895970adc621f284cd966cf2153"
-  integrity sha1-N5k3q8Z9eJWXCtxiHyhM2WbPIVM=
-  dependencies:
-    babel-runtime "^6.26.0"
-    core-js "^2.5.0"
-    regenerator-runtime "^0.10.5"
-
 babel-preset-jest@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/babel-preset-jest/-/babel-preset-jest-24.9.0.tgz#192b521e2217fb1d1f67cf73f70c336650ad3cdc"
@@ -4346,10 +4337,15 @@ core-js@^1.0.0:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
   integrity sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
 
-core-js@^2.0.0, core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.5, core-js@^2.6.9:
+core-js@^2.0.0, core-js@^2.4.0, core-js@^2.6.5:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
+
+core-js@^3.0.0:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.4.1.tgz#76dd6828412900ab27c8ce0b22e6114d7ce21b18"
+  integrity sha512-KX/dnuY/J8FtEwbnrzmAjUYgLqtk+cxM86hfG60LGiW3MmltIc2yAmDgBgEkfm0blZhUrdr1Zd84J2Y14mLxzg==
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -6138,16 +6134,17 @@ fbjs@^0.8.4:
     setimmediate "^1.0.5"
     ua-parser-js "^0.7.18"
 
-fetch-mock@7.7.3:
-  version "7.7.3"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.7.3.tgz#6a3f94cfed6e423ab7f5464912982030da605335"
-  integrity sha512-I4OkK90JFQnjH8/n3HDtWxH/I6D1wrxoAM2ri+nb444jpuH3RTcgvXx2el+G20KO873W727/66T7QhOvFxNHPg==
+fetch-mock@8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-8.0.0.tgz#b0f5c9d639f9f01d1e312597f60ad34a9866aa71"
+  integrity sha512-ll7ld9acY6GJehNmX5dHbbmCPeKIqifx6dd/B1bhFGKSkC+2tgOFJdzxIfHWhxBt6i957KEqXlvUZDCQncEqYQ==
   dependencies:
-    babel-polyfill "^6.26.0"
-    core-js "^2.6.9"
+    babel-runtime "^6.26.0"
+    core-js "^3.0.0"
     glob-to-regexp "^0.4.0"
     lodash.isequal "^4.5.0"
     path-to-regexp "^2.2.1"
+    querystring "^0.2.0"
     whatwg-url "^6.5.0"
 
 figures@^2.0.0:
@@ -11827,7 +11824,7 @@ querystring-es3@~0.2.0:
   resolved "https://registry.yarnpkg.com/querystring-es3/-/querystring-es3-0.2.1.tgz#9ec61f79049875707d69414596fd907a4d711e73"
   integrity sha1-nsYfeQSYdXB9aUFFlv2Qek1xHnM=
 
-querystring@0.2.0:
+querystring@0.2.0, querystring@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.2.0.tgz#b209849203bb25df820da756e747005878521620"
   integrity sha1-sgmEkgO7Jd+CDadW50cAWHhSFiA=
@@ -12180,11 +12177,6 @@ regenerate@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/regenerate/-/regenerate-1.4.0.tgz#4a856ec4b56e4077c557589cae85e7a4c8869a11"
   integrity sha512-1G6jJVDWrt0rK99kBjvEtziZNCICAuvIPkSiUFIQxVP06RCVpq3dmDo2oi6ABpYaDYaTRr67BEhL8r1wgEZZKg==
-
-regenerator-runtime@^0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.10.5.tgz#336c3efc1220adcedda2c9fab67b5a7955a33658"
-  integrity sha1-M2w+/BIgrc7dosn6tntaeVWjNlg=
 
 regenerator-runtime@^0.11.0:
   version "0.11.1"
