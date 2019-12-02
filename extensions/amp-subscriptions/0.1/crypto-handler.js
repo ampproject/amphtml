@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import {base64DecodeToBytes} from '../../../src/utils/base64';
+import {decryptAesGcm} from '../../../third_party/subscriptions-project/aes_gcm';
 import {iterateCursor} from '../../../src/dom';
 import {padStart} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
-
-// Length of IV in AES-GCM encoded content.
-const AES_GCM_IV_LENGTH = 12;
+import {utf8Encode} from '../../../src/utils/bytes';
 
 export class CryptoHandler {
   /**
@@ -114,9 +111,9 @@ export class CryptoHandler {
       const promises = [];
       iterateCursor(encryptedSections, encryptedSection => {
         promises.push(
-          this.decryptDocumentContent_(
-            encryptedSection.textContent,
-            decryptedDocumentKey
+          decryptAesGcm(
+            decryptedDocumentKey,
+            encryptedSection.textContent
           ).then(decryptedContent => {
             encryptedSection./*OK*/ outerHTML = decryptedContent;
           })
@@ -125,57 +122,5 @@ export class CryptoHandler {
       return Promise.all(promises);
     });
     return this.decryptionPromise_;
-  }
-
-  /**
-   * @private
-   * @param {string} encryptedContent
-   * @param {string} decryptedDocumentKey
-   * @return {Promise<string>}
-   */
-  decryptDocumentContent_(encryptedContent, decryptedDocumentKey) {
-    // 1. Trim and remove all whitespaces (e.g. line breaks).
-    encryptedContent = encryptedContent.replace(/\s+/g, '');
-
-    // 2. Un-base64 the encrypted content. This way we get the actual encrypted
-    //    bytes.
-    const encryptedBytes = base64DecodeToBytes(encryptedContent);
-    const iv = encryptedBytes.slice(0, AES_GCM_IV_LENGTH);
-    const content = encryptedBytes.slice(AES_GCM_IV_LENGTH);
-
-    // 3. Get document Key in the correct format.
-    return this.stringToCryptoKey_(decryptedDocumentKey).then(function(
-      formattedDocKey
-    ) {
-      // 4. Decrypt.
-      return crypto.subtle
-        .decrypt(
-          {
-            name: 'AES-GCM',
-            iv,
-          },
-          formattedDocKey,
-          content
-        )
-        .then(function(buffer) {
-          // 5. Decryption gives us raw bytes and we need to turn them into text.
-          return utf8Decode(new Uint8Array(buffer));
-        });
-    });
-  }
-
-  /**
-   * @private
-   * @param {string} decryptedDocumentKey
-   * @return {!Promise<!webCrypto.CryptoKey>}
-   */
-  stringToCryptoKey_(decryptedDocumentKey) {
-    // 1. Un-base64 the encrypted content. This way we get the key bytes.
-    const documentKeyBytes = base64DecodeToBytes(decryptedDocumentKey);
-
-    // 2. Convert bytes to CryptoKey format.
-    return crypto.subtle.importKey('raw', documentKeyBytes, 'AES-GCM', true, [
-      'decrypt',
-    ]);
   }
 }
