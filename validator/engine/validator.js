@@ -4096,7 +4096,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
         getTagSpecUrl(spec), result);
     return;
   }
-  // Height attribute is only allowed for RESPONSIVE layout.
+  // heights attribute is only allowed for RESPONSIVE layout.
   if (heightsAttr !== undefined &&
       layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
     const code = layoutAttr === undefined ?
