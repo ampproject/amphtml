@@ -254,7 +254,7 @@ export function convertValueToState(value) {
 /**
  * Helper function to convert response enum value to CONSENT_ITEM_STATE value
  * @param {*} value
- * @return {!CONSENT_ITEM_STATE}
+ * @return {?CONSENT_ITEM_STATE}
  */
 export function convertEnumValueToState(value) {
   if (value === 'accepted') {
@@ -262,7 +262,7 @@ export function convertEnumValueToState(value) {
   } else if (value === 'rejected') {
     return CONSENT_ITEM_STATE.REJECTED;
   }
-  return CONSENT_ITEM_STATE.UNKNOWN;
+  return null;
 }
 
 /**
