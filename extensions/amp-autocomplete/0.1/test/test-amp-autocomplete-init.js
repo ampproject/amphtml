@@ -90,7 +90,7 @@ describes.realWin(
     });
 
     it('should layout', () => {
-      let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
+      let impl, autocompleteSpy, clearAllSpy, filterSpy, renderSpy;
       return getAutocomplete({
         'filter': 'substring',
       })
@@ -101,10 +101,7 @@ describes.realWin(
           expect(impl.inputElement_).not.to.be.null;
           expect(impl.container_).not.to.be.null;
           expect(impl.filter_).to.equal('substring');
-          filterAndRenderSpy = env.sandbox.spy(
-            impl,
-            'filterDataAndRenderResults_'
-          );
+          autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
           clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
           filterSpy = env.sandbox.spy(impl, 'filterData_');
           renderSpy = env.sandbox.spy(impl, 'renderResults_');
@@ -112,7 +109,7 @@ describes.realWin(
         })
         .then(() => {
           expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
-          expect(filterAndRenderSpy).to.have.been.calledOnce;
+          expect(autocompleteSpy).to.have.been.calledOnce;
           expect(clearAllSpy).to.have.been.calledOnce;
           expect(filterSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
@@ -151,7 +148,7 @@ describes.realWin(
     });
 
     it('should not render remote data before first user interaction', () => {
-      let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
+      let impl, autocompleteSpy, clearAllSpy, filterSpy, renderSpy;
       return getAutocomplete(
         {
           'filter': 'substring',
@@ -166,10 +163,7 @@ describes.realWin(
           expect(impl.inputElement_).not.to.be.null;
           expect(impl.container_).not.to.be.null;
           expect(impl.filter_).to.equal('substring');
-          filterAndRenderSpy = env.sandbox.spy(
-            impl,
-            'filterDataAndRenderResults_'
-          );
+          autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
           clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
           filterSpy = env.sandbox.spy(impl, 'filterData_');
           renderSpy = env.sandbox.spy(impl, 'renderResults_');
@@ -177,7 +171,7 @@ describes.realWin(
         })
         .then(() => {
           expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
-          expect(filterAndRenderSpy).to.have.been.calledOnce;
+          expect(autocompleteSpy).to.have.been.calledOnce;
           expect(clearAllSpy).to.have.been.calledOnce;
           expect(filterSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
