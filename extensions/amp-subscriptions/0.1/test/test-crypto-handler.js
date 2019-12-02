@@ -15,6 +15,7 @@
  */
 
 import {CryptoHandler} from '../crypto-handler';
+import {decryptAesGcm} from '../../../../third_party/subscriptions-project/aes_gcm';
 
 describes.realWin(
   'crypto handler',
@@ -112,6 +113,19 @@ describes.realWin(
         cryptoHandler = new CryptoHandler(ampdoc);
         return expect(cryptoHandler.getEncryptedDocumentKey('local')).to.equal(
           encryptedKey
+        );
+      });
+    });
+
+    describe('decryptDocumentContent', () => {
+      it('should decrypt the content correctly', () => {
+        cryptoHandler = new CryptoHandler(ampdoc);
+        return decryptAesGcm(decryptedDocKey, encryptedContent).then(
+          actualContent => {
+            expect(actualContent.replace(/&#39;/g, "'")).to.equal(
+              decryptedContent
+            );
+          }
         );
       });
     });
