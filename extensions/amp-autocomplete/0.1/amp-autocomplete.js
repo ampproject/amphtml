@@ -22,20 +22,27 @@ import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
+  requestForBatchFetch,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
+import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
-import {isAmp4Email} from '../../../src/format';
-import {isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
+import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
+import {
+  setupAMPCors,
+  setupInput,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
 import {toggle} from '../../../src/style';
 import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
@@ -68,17 +75,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?Array<!JsonObject|string>}
      */
     this.sourceData_ = null;
-
-    /**
-     * Whether the data is statically provided via <script> tags.
-     * Otherwise it is dynamic and should be regularly fetched.
-     */
-    this.staticSrc_ = false;
-
-    /**
-     * Whether the autocomplete is being rendered in an AMP for Email context.
-     */
-    this.isEmail_ = false;
 
     /**
      * The reference to the <input> or <textarea> provided as a child.
@@ -184,10 +180,28 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.templates_ = Services.templatesFor(this.win);
 
     /**
-     * The reference to the <template> tag provided as a child.
-     * @private {?Element}
+     * Whether a <template> or <script type="text/plain"> tag is present.
+     * @private {boolean}
      */
-    this.templateElement_ = null;
+    this.hasTemplate_ = false;
+
+    /**
+     * @const {function():!../../../src/ssr-template-helper.SsrTemplateHelper}
+     */
+    this.getSsrTemplateHelper = once(
+      () =>
+        new SsrTemplateHelper(
+          TAG,
+          Services.viewerForDoc(this.element),
+          this.templates_
+        )
+    );
+
+    /**
+     * Whether server-side rendering is required.
+     * @private {boolean}
+     */
+    this.isSsr_ = false;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
@@ -230,7 +244,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     );
     if (jsonScript) {
       this.sourceData_ = this.getInlineData_(jsonScript);
-      this.staticSrc_ = true;
     } else if (!this.element.hasAttribute('src')) {
       user().warn(
         TAG,
@@ -238,29 +251,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
           'a URL specified in "src".'
       );
     }
-
-    const doc = this.element.ownerDocument;
-    this.isEmail_ = doc && isAmp4Email(doc);
-    userAssert(
-      !this.isEmail_ || !this.staticSrc_,
-      '%s requires data to be provided via "src" attribute for AMP for Email context. %s',
-      TAG,
-      this.element
-    );
-    this.filter_ = this.isEmail_
-      ? FilterType.NONE // client side filtering disabled for email
-      : userAssert(
-          this.element.getAttribute('filter'),
-          '%s requires "filter" attribute. %s',
-          TAG,
-          this.element
-        );
-    userAssert(
-      isEnumValue(FilterType, this.filter_),
-      'Unexpected filter: %s. %s',
-      this.filter_,
-      this.element
-    );
 
     this.inputElement_.setAttribute('dir', 'auto');
     this.inputElement_.setAttribute('aria-autocomplete', 'both');
@@ -278,25 +268,41 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
 
-    if (
-      this.templates_.hasTemplate(this.element, 'template, script[template]')
-    ) {
-      this.templateElement_ = this.templates_.findTemplate(
-        this.element,
-        'template, script[template]'
+    // When SSR is supported, it is required.
+    this.isSsr_ = this.getSsrTemplateHelper().isSupported();
+    this.hasTemplate_ = this.templates_.hasTemplate(
+      this.element,
+      'template, script[template]'
+    );
+    if (this.isSsr_) {
+      userAssert(
+        this.srcBase_,
+        '%s requires data to be provided via "src" attribute for server-side rendering. %s',
+        TAG,
+        this.element
       );
-      // Dummy render to verify existence of "data-value" attribute.
-      this.templates_
-        .renderTemplate(this.templateElement_, /** @type {!JsonObject} */ ({}))
-        .then(renderedEl => {
-          userAssert(
-            renderedEl.hasAttribute('data-value') ||
-              renderedEl.hasAttribute('data-disabled'),
-            '%s requires a "data-value" or "data-disabled" attribute. %s',
-            TAG,
-            this.element
-          );
-        });
+      userAssert(
+        this.hasTemplate_,
+        `${TAG} should provide a <template> or <script type="plain/text"> element.`
+      );
+      userAssert(
+        !this.element.hasAttribute('filter'),
+        `${TAG} does not support client-side filter when server-side render is required.`
+      );
+      this.filter_ = FilterType.NONE;
+    } else {
+      this.filter_ = userAssert(
+        this.element.getAttribute('filter'),
+        '%s requires "filter" attribute. %s',
+        TAG,
+        this.element
+      );
+      userAssert(
+        isEnumValue(FilterType, this.filter_),
+        'Unexpected filter: %s. %s',
+        this.filter_,
+        this.element
+      );
     }
 
     // Read configuration attributes
@@ -315,6 +321,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
+
+    return Promise.resolve();
   }
 
   /**
@@ -378,17 +386,45 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const policy = UrlReplacementPolicy.ALL;
     const itemsExpr = this.element.getAttribute('items') || 'items';
     this.maybeSetSrcFromInput_();
-    return batchFetchJsonFor(ampdoc, this.element, {
-      expr: itemsExpr,
-      urlReplacement: policy,
-    }).catch(() => {
-      user().warn(
-        TAG,
-        'Expected key "%s" in data but found nothing. Rendering empty results.',
-        itemsExpr
-      );
-      return [];
-    });
+    if (this.isSsr_) {
+      return requestForBatchFetch(
+        this.element,
+        policy,
+        /* refresh */ false
+      ).then(request => {
+        request.xhrUrl = setupInput(this.win, request.xhrUrl, request.fetchOpt);
+        request.fetchOpt = setupAMPCors(
+          this.win,
+          request.xhrUrl,
+          request.fetchOpt
+        );
+        setupJsonFetchInit(request.fetchOpt);
+
+        const attributes = dict({
+          'ampAutocompleteAttributes': {
+            'items': itemsExpr,
+          },
+        });
+        return this.getSsrTemplateHelper().ssr(
+          this.element,
+          request,
+          /* opt_templates */ null,
+          attributes
+        );
+      });
+    } else {
+      return batchFetchJsonFor(ampdoc, this.element, {
+        expr: itemsExpr,
+        urlReplacement: policy,
+      }).catch(() => {
+        user().warn(
+          TAG,
+          'Expected key "%s" in data but found nothing. Rendering empty results.',
+          itemsExpr
+        );
+        return [];
+      });
+    }
   }
 
   /**
@@ -464,7 +500,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.selectHandler_(e);
     });
 
-    return this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+    return this.autocomplete_(this.sourceData_, this.userInput_);
   }
 
   /** @override */
@@ -477,7 +513,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return this.getRemoteData_().then(
         remoteData => {
           this.sourceData_ = remoteData || [];
-          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.autocomplete_(this.sourceData_, this.userInput_);
         },
         e => {
           this.displayFallback_(e);
@@ -486,10 +522,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     if (typeof src === 'object') {
       this.sourceData_ = src['items'] || [];
-      return this.filterDataAndRenderResults_(
-        this.sourceData_,
-        this.userInput_
-      );
+      return this.autocomplete_(this.sourceData_, this.userInput_);
     }
     user().error(TAG, 'Unexpected "src" type: ' + src);
   }
@@ -564,18 +597,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
     );
 
     // Fetch if autocomplete data is dynamic.
-    // Required when email context or otherwise reslies on a query key.
+    // Required when server-side rendering or otherwise relies on a query key.
     const maybeFetch =
-      this.isEmail_ || this.queryKey_
+      this.isSsr_ || this.queryKey_
         ? this.getRemoteData_()
         : Promise.resolve(this.sourceData_);
     return maybeFetch.then(data => {
       this.sourceData_ = data;
       return this.mutateElement(() => {
-        this.filterDataAndRenderResults_(
-          this.sourceData_,
-          this.userInput_
-        ).then(() => {
+        this.autocomplete_(this.sourceData_, this.userInput_).then(() => {
           this.displaySuggestions_(isFirstInteraction);
         });
       });
@@ -613,16 +643,40 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Filter the source data according to the given input and render it in
-   * the results container_.
+   * Display autocomplete suggestions and render it in the results container_.
+   * When client side rendering, filter the source data according to the given opt_input.
+   * @param {?Array<!JsonObject|string>} data
+   * @param {string} opt_input
+   * @return {!Promise}
+   * @private
+   */
+  autocomplete_(data, opt_input = '') {
+    this.clearAllItems_();
+    if (opt_input.length < this.minChars_ || !data) {
+      return Promise.resolve();
+    } else if (this.isSsr_) {
+      return hasOwn(data, 'html')
+        ? this.renderResults_(
+            data,
+            dev().assertElement(this.container_),
+            opt_input
+          )
+        : Promise.resolve();
+    } else {
+      return this.filterDataAndRenderResults_(data, opt_input);
+    }
+  }
+
+  /**
+   * Client-side filter the source data according to the given opt_input
+   * and render it in the results container_.
    * @param {?Array<!JsonObject|string>} sourceData
    * @param {string} input
    * @return {!Promise}
    * @private
    */
-  filterDataAndRenderResults_(sourceData, input = '') {
-    this.clearAllItems_();
-    if (input.length < this.minChars_ || !sourceData || !sourceData.length) {
+  filterDataAndRenderResults_(sourceData, input) {
+    if (!sourceData.length) {
       return Promise.resolve();
     }
     const filteredData = this.filterData_(sourceData, input);
@@ -644,13 +698,22 @@ export class AmpAutocomplete extends AMP.BaseElement {
   renderResults_(filteredData, container, input) {
     let renderPromise = Promise.resolve();
     this.resetActiveElement_();
-    if (this.templateElement_) {
-      renderPromise = this.templates_
-        .renderTemplateArray(this.templateElement_, filteredData)
-        .then(renderedChildren => {
-          renderedChildren.map(child => {
+    if (this.hasTemplate_) {
+      renderPromise = this.getSsrTemplateHelper()
+        .applySsrOrCsrTemplate(this.element, filteredData)
+        .then(rendered => {
+          const elements = isArray(rendered)
+            ? rendered
+            : toArray(rendered.children);
+          elements.forEach(child => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
+            } else if (!child.hasAttribute('data-value')) {
+              user().warn(
+                TAG,
+                'Expected a "data-value" or "data-disabled" attribute on the rendered template item. %s',
+                child
+              );
             }
             child.classList.add('i-amphtml-autocomplete-item');
             child.setAttribute('role', 'option');
@@ -868,7 +931,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       () => {
         if (!display) {
           this.userInput_ = this.inputElement_.value;
-          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.autocomplete_(this.sourceData_, this.userInput_);
           this.resetActiveElement_();
         }
         this.setResultDisplayDirection_(renderAbove);
@@ -890,7 +953,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.getRemoteData_().then(
       remoteData => {
         this.sourceData_ = remoteData;
-        this.filterDataAndRenderResults_(this.sourceData_);
+        this.autocomplete_(this.sourceData_);
       },
       e => {
         this.displayFallback_(e);
@@ -1135,7 +1198,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           return this.updateActiveItem_(1);
         }
         return this.mutateElement(() => {
-          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.autocomplete_(this.sourceData_, this.userInput_);
           this.toggleResults_(true);
         });
       case Keys.UP_ARROW:
