@@ -371,21 +371,24 @@ class AmpCarousel extends AMP.BaseElement {
   initializeActions_() {
     this.registerAction(
       'prev',
-      ({trust}) => {
+      actionInvocation => {
+        const {trust} = actionInvocation;
         this.carousel_.prev(this.getActionSource_(trust));
       },
       ActionTrust.LOW
     );
     this.registerAction(
       'next',
-      ({trust}) => {
+      actionInvocation => {
+        const {trust} = actionInvocation;
         this.carousel_.next(this.getActionSource_(trust));
       },
       ActionTrust.LOW
     );
     this.registerAction(
       'goToSlide',
-      ({args, trust}) => {
+      actionInvocation => {
+        const {args, trust} = actionInvocation;
         this.carousel_.goToSlide(args['index'] || -1, {
           actionSource: this.getActionSource_(trust),
         });
