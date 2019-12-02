@@ -137,7 +137,8 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
           'pastor',
         ];
 
-        for (const event of events) {
+        for (let i = 0; i < events.length; i++) {
+          const event = events[i];
           integration.postEvent(event);
           expect(postToParent.withArgs(env.sandbox.match({event}))).to.have.been
             .calledOnce;
