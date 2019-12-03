@@ -445,10 +445,16 @@
   "upscore": {
     "host": "https://hit-pool.upscore.com/amp?",
     "basePrefix": "u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_",
-    "initialHit": "author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_",
+    "initialHit": "author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_canonical_url_&agent=_user_agent_&location=_amp_geo_&c_keys=!customKeys&c_values=!customValues",
     "finalbeat": "https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=final",
     "heartbeat": "https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&type=pulse",
-    "pageview": "https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_ampdoc_url_&agent=_user_agent_&location=_amp_geo_&type=init"
+    "pageview": "https://hit-pool.upscore.com/amp?u_id=_client_id_&hit_id=_page_view_id_&scTop=_scroll_top_&scHeight=_scroll_height_&vHeight=_viewport_height_&domain=!domain&load=_dom_interactive_time_&timespent=_total_engaged_time_&author=!author&creator=!creator&o_id=!object_id&o_type=!object_type&pubdate=!pubdate&ref=_document_referrer_&section=!section&url=_canonical_url_&agent=_user_agent_&location=_amp_geo_&c_keys=!customKeys&c_values=!customValues&type=init",
+    "videoBase": "https://hit-pool.upscore.com/amp?url=_canonical_url_&video_id=!video_id",
+    "videoTime": "ct=!currentTime&d=!duration",
+    "video-play": "https://hit-pool.upscore.com/amp?url=_canonical_url_&video_id=!video_id&e=video_start&ct=!currentTime&d=!duration&video_name=!video_name&video_thumb=!video_thumbnail",
+    "video-pause": "https://hit-pool.upscore.com/amp?url=_canonical_url_&video_id=!video_id&e=video_pause&ct=!currentTime&d=!duration",
+    "video-stop": "https://hit-pool.upscore.com/amp?url=_canonical_url_&video_id=!video_id&e=video_stop&ct=!currentTime&d=!duration",
+    "video-info": "https://hit-pool.upscore.com/amp?url=_canonical_url_&video_id=!video_id&e=video_position&ct=!currentTime&d=!duration"
   },
   "vponanalytics": {
     "host": "<ignore for test>",

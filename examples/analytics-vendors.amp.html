@@ -1540,13 +1540,39 @@ For complete documentation and additional examples please see: https://marketing
       "author":"john suran",
       "creator":"john suran",
       "domain":"clientDomain",
-      "pubdate":"2015-01-01 00:00:00"
+      "pubdate":"2015-01-01 00:00:00",
+      "customKeys": ["source","user_status"],
+      "customValues": ["digital team","0"]
     },
     "triggers": {
-      "event": {
-        "on": "click",
-        "selector": "#test1",
-        "request": "finalbeat"
+      "videoPlays": {
+        "on": "video-play",
+        "selector": "#myVideo",
+        "request": "video-play",
+        "vars" : {
+          "video_id" : "myVideo",
+          "video_name" : "test test test",
+          "video_thumbnail" : "poster_test"
+        }
+      },
+      "videoPauses": {
+        "on": "video-pause",
+        "selector": "#myVideo",
+        "request": "video-pause"
+      },
+      "videoSecondsPlayed": {
+        "on": "video-seconds-played",
+        "selector": "#myVideo",
+        "videoSpec": {
+          "exclude-autoplay": false,
+          "interval": 10
+        },
+        "request": "video-info"
+      },
+      "videoEnded": {
+        "on": "video-ended",
+        "selector": "#myVideo",
+        "request": "video-stop"
       }
     }
   }
